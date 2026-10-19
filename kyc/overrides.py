@@ -578,6 +578,15 @@ OFFICIAL_ISSUES_NOT_A_LIST = {
     "L000575": ("2026-10-18", "https://www.lankford.senate.gov/issues/",
                 "each title is split over two headings: 'Protecting' over 'Life, Liberty & "
                 "Our Families', 'Bringing Down' over 'High Costs in Our Nation'"),
+    # Read 2026-10-18 for the review of PR #106: the index lists the House
+    # template's stock categories, each twice, beside categories that are
+    # labels for constituent mail rather than positions - "PRO CHOICE",
+    # "Pro Life", "PRO AG", "REDUCE TROOPS IN MIDDLE EAST PRO" - and one page
+    # under two names ("11 Ideals for TX-11", "TX-11 Ideals"). As a platform
+    # it would read as though a member who lists "Pro Life" held both views.
+    "P000048": ("2026-10-18", "https://pfluger.house.gov/issues/",
+                "mail categories ('PRO CHOICE', 'Pro Life', 'REDUCE TROOPS IN MIDDLE EAST PRO') "
+                "listed among the stock categories, each of those twice"),
 }
 
 # The 2026 Senate seats are no longer typed here. A surname table matched

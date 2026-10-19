@@ -163,6 +163,18 @@
       KYC.escapeHtml(label) + "</a>";
   }
 
+  /** True when `url` is the home page of the site at `website` (no path),
+   *  which a link must call the website, never "their issues page". */
+  function siteHome(url, website) {
+    function home(u) {
+      var m = /^https?:\/\/(?:www\.)?([^\/?#]+)(\/[^?#]*)?/i.exec(String(u || ""));
+      return m ? { host: m[1].toLowerCase(), path: (m[2] || "/").replace(/\/+$/, "") } : null;
+    }
+    var a = home(url);
+    var b = home(website);
+    return !!a && a.path === "" && (!b || a.host === b.host);
+  }
+
   /** Platform text arrives as prose, a comma list, or a Python-style list
    *  literal - or, for a filed candidate, as the headings of their campaign's
    *  issues page, joined with "; " by kyc/enrich.py. Whatever the shape,
@@ -222,10 +234,16 @@
         html += '<p class="note-box">' + KYC.escapeHtml(text) + "</p>";
       }
       if (fromOfficial) {
+        // A list read from the home page's own issue links is what that
+        // page features, which may not be every issue (Hoyer's showed five
+        // of nine): said as that, and the link names the page it is.
         html += '<p class="field-credit">' + KYC.sourceBadge(item, "platforms").trim() +
-          " The issues their official website lists" +
+          (item.platformFeatured ? " The issues their official website’s home page features"
+            : " The issues their official website lists") +
           (item.platformRead ? ", as read on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
-          (item.officialIssuesUrl ? ": " + outLink(item.officialIssuesUrl, "read them there") : "") +
+          (item.officialIssuesUrl ? ": " + outLink(item.officialIssuesUrl,
+            siteHome(item.officialIssuesUrl, item.website) ? "their official website" : "read them there")
+            : "") +
           "</p>";
       } else if (fromSite) {
         html += '<p class="field-credit">' + KYC.sourceBadge(item, "platforms").trim() +
@@ -245,7 +263,8 @@
         // never called empty (rule 86).
         html += '<p class="field-credit">Read' +
           (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
-          ": " + outLink(item.officialIssuesUrl, "their issues page") + "</p>";
+          ": " + outLink(item.officialIssuesUrl, siteHome(item.officialIssuesUrl, item.website)
+            ? "their official website" : "their issues page") + "</p>";
       }
     }
 

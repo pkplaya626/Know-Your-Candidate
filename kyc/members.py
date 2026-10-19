@@ -192,13 +192,18 @@ def anchors(markup):
     return parser.links
 
 
-_BREAK = re.compile(r"<br\b[^>]*>", re.I)
+# "<br>", "<br/>" and the malformed "</br>" alike: Senator Hoeven's heading
+# is "Sponsored &amp;</br>Co-Sponsored Legislation", which an end tag cut
+# to "Sponsored &".
+_BREAK = re.compile(r"</?\s*br\b[^>]*>", re.I)
 
 
 def parse(markup):
     """:func:`kyc.enrich.parse_page`, with each link labelled as
     :func:`anchors` reads it. A line break is a space: Senator Whitehouse's
-    headings are "Honoring<br>Veterans", which read as "HonoringVeterans"."""
+    headings are "Honoring<br>Veterans", which read as "HonoringVeterans",
+    and Senator Curtis's "AI, Social Media, <br>and youth Safety" as its
+    first line alone."""
     markup = _BREAK.sub(" ", markup or "")
     page = enrich.parse_page(markup)
     page.links = anchors(markup)
@@ -258,10 +263,70 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           r"application\s+form|bills?\s+i\S*\s+(?:co-?)?sponsored|"
                           r"sponsored\s*/\s*co-?sponsored|\d{4}\s+in\s+review|annual\s+report|"
                           r"year\s+report|request\s+disclosures?|constituent\s+services|"
-                          r"community\s+projects)\b|"
+                          r"community\s+projects|"
+                          # Services and notices filed among the issues
+                          # (reviews of PR #106, 2026-10-18): Boebert's
+                          # "Mobile Office Hours", Pingree's "Grant
+                          # Opportunities", Malliotakis's 2020 "Paycheck
+                          # Protection Program Portal Opening", Norcross's
+                          # "FY27 Appropriations Requests" and "Government
+                          # Shutdown Resources", Gillibrand's "Know More
+                          # About the Senator", Mfume's "Community issues
+                          # and events".
+                          r"office\s+hours|grant\s+opportunities|portal|"
+                          r"appropriations\s+requests?|cpf\s+requests?|authorization\s+requests?|"
+                          r"know\s+more\s+about|shutdown\s+information|"
+                          r"tele(?:phone)?-?\s*town\s*halls?|"
+                          r"about\s+(?:the\s+)?(?:senator|congressman|congresswoman|"
+                          r"representative|member|delegate|commissioner)|"
+                          r"(?:shutdown|covid(?:-19)?|coronavirus|disaster)\s+resources)\b|"
+                          r"\bcommunity\b.*\bevents$|"
+                          # A help page after a storm, and the district as
+                          # a page of its own ("9th District").
+                          r"^(?:hurricanes?|storms?|floods?|wildfires?|derailment)\b.*\bresources\b|"
+                          r"^(?:local\s+)?resources(?:\s+for\b.*)?$|"
+                          r"^(?:the\s+)?(?:\d+(?:st|nd|rd|th)\s+)?district$|"
                           r"\boffices?$|\bupdates?$|current\s+legislation|^covid\b.*\bresources$|"
-                          r"^(?:legislation|cpf(?:\s+requests?)?|grants?)$",
+                          # The House template's stock category "Congress",
+                          # whose page is "news and information related to
+                          # Congress": not an issue a member chose.
+                          r"^(?:legislation|cpf(?:\s+requests?)?|grants?|congress)$",
                           re.I)
+# A line cut short: "Sponsored &", "AI, Social Media,".
+_CUT = re.compile(r"[&,;/(]\s*$|\b(?:and|or)\s*$", re.I)
+# A title's possessive names its holder: Scott Peters's "President's
+# Administration" is about a person, as "Trump's" would be.
+_TITLE_POSSESSIVE = re.compile(r"\b(?:president|vice\s+president|speaker|governor|senator|"
+                               r"congress(?:man|woman))\s*(?:'|’)s?(?![a-z])", re.I)
+# The House template's stock issue categories, each over the blurb "Learn
+# about news and information related to ...": a site that lists these and
+# nothing of its own has not chosen a platform (figures.house.gov/issues,
+# 2026-10-18).
+STOCK_CATEGORIES = frozenset(("congress", "economy", "education", "energy", "health", "veterans"))
+
+
+def stock_list(items):
+    """True when *items* are only the House template's stock categories."""
+    return bool(items) and all(" ".join(i.split()).lower() in STOCK_CATEGORIES for i in items)
+
+
+def same_issue(text):
+    """A key under which two spellings of one item meet: Hoeven's "Jobs,
+    Economy, and Fiscal Responsibility" and "Jobs, Economy, Fiscal
+    Responsibility" are one issue."""
+    words = re.findall(r"[a-z0-9]+", enrich.fold(text or ""))
+    return " ".join(w for w in words if w not in ("and", "the", "of", "amp"))
+
+
+def dedupe(items):
+    """*items* with each issue once, in the first spelling given."""
+    out, seen = [], set()
+    for item in items:
+        key = same_issue(item)
+        if key and key not in seen:
+            seen.add(key)
+            out.append(item)
+    return out
 _TITLES = r"(?:president|vice\s+president|senator|sen|rep|representative|congressman|" \
           r"congresswoman|speaker|leader|governor|gov|secretary)\.?"
 
@@ -312,6 +377,8 @@ def names_someone(text, own, others):
     if (surname and surname in words) or (first and re.search(
             r"(?<![a-z])" + re.escape(first) + r"\s*'?s\b", enrich.fold(text))):
         return True
+    if _TITLE_POSSESSIVE.search(text):
+        return True
     for full in others.get("full", ()):
         if full and re.search(r"(?<![a-z0-9])" + re.escape(full) + r"(?![a-z0-9])", seen):
             return True
@@ -341,7 +408,7 @@ def furniture(text):
     label of the list, a funding-request page, a constituent service - not
     an issue."""
     text = _clean(text)
-    return bool(_LIST_LABEL.match(text) or _NOT_A_TOPIC.search(text))
+    return bool(_LIST_LABEL.match(text) or _NOT_A_TOPIC.search(text) or _CUT.search(text))
 
 
 def topic(text, own, others):
@@ -351,7 +418,8 @@ def topic(text, own, others):
     short = len(text) == 2 and text.isalpha() and text.isupper()     # "AI"
     if not (3 <= len(text) <= 60 or short) or len(text.split()) > 8:
         return ""
-    if "{" in text or "}" in text or text.endswith(("?", "!")) or enrich._DANGLING.search(text):
+    if ("{" in text or "}" in text or text.endswith(("?", "!")) or enrich._DANGLING.search(text)
+            or _CUT.search(text)):
         return ""
     if _LIST_LABEL.match(text) or _NOT_A_TOPIC.search(text) or enrich._NOT_AN_ISSUE.search(text):
         return ""
@@ -531,6 +599,14 @@ def menu_issues(markup, base, website, own, others):
     """The issues a site's own "Issues" menu lists, one item per page it
     links, in the menu's words: Senator Boozman's site has no issues index
     to read, and lists its nine issues under that menu."""
+    return menu_read(markup, base, website, own, others)[0]
+
+
+def menu_read(markup, base, website, own, others):
+    """``(items, index)``: :func:`menu_issues`'s items, and the address of
+    the menu's own index page when its link leads to one (an ``/issues``
+    path), else None - Lynch's "Issues" links its first issue,
+    /civil-rights, which is not the list."""
     def is_index(href, label):
         last = urllib.parse.urlsplit(urllib.parse.urljoin(base, href or "")).path
         last = last.rstrip("/").rsplit("/", 1)[-1]
@@ -549,13 +625,16 @@ def menu_issues(markup, base, website, own, others):
                 continue
             key = target.rstrip("/").lower()
             item = topic(text, own, others)
-            if key in targets or not item or item.lower() in (i.lower() for i in items):
+            if key in targets or not item or same_issue(item) in map(same_issue, items):
                 continue
             targets.add(key)
             items.append(item)
         if len(items) >= 3:
-            return items[:MAX_ISSUES]
-    return []
+            index = urllib.parse.urljoin(base, href or "").split("#")[0] if href else ""
+            last = urllib.parse.urlsplit(index).path.rstrip("/").rsplit("/", 1)[-1]
+            at = index if index and own_host(index, website) and _INDEX_PATH.match(last) else None
+            return items[:MAX_ISSUES], at
+    return [], None
 
 
 def listed_issues(page, index_url, own, others):
@@ -600,7 +679,7 @@ def listed_issues(page, index_url, own, others):
         items = []
         for key in order:
             item = by_target[key]
-            if item and item.lower() not in (i.lower() for i in items):
+            if item and same_issue(item) not in map(same_issue, items):
                 items.append(item)
         if len(items) >= 3:
             return items[:MAX_ISSUES]
@@ -639,7 +718,7 @@ def page_issues(page, index_url, home, own, others):
             continue
         seen.add(target)
         item = topic(text, own, others)
-        if item and item.lower() not in (i.lower() for i in items):
+        if item and same_issue(item) not in map(same_issue, items):
             items.append(item)
     return items[:MAX_ISSUES] if 3 <= len(items) <= MAX_ISSUES else []
 
@@ -652,8 +731,8 @@ def heading_issues(page, own, others, home=None):
     headings, as every page of their sites does."""
     rivals = sorted(others.get("surnames", ()))
     framed = {" ".join(t.split()).lower() for _, t in (home.headings if home else ())}
-    items = [i for i in enrich.issue_headings(page, own, rivals=rivals, limit=MAX_ISSUES)
-             if topic(i, own, others) and " ".join(i.split()).lower() not in framed]
+    items = dedupe([i for i in enrich.issue_headings(page, own, rivals=rivals, limit=MAX_ISSUES)
+                    if topic(i, own, others) and " ".join(i.split()).lower() not in framed])
     return items if len(items) >= 3 else []
 
 
@@ -672,9 +751,18 @@ _CONTACT_NOT = re.compile(r"\b(?:information|info|tracing|lenses?|sign\s*up|news
 _CONTACT_PATH = re.compile(r"^(?:contact(?:-[\w-]+)?|email-me|write-to-[\w-]+|e-?mail|get-in-touch)$",
                            re.I)
 _FORM = re.compile(r"<form\b([^>]*)>(.*?)</form\s*>", re.I | re.S)
-_FIELD = re.compile(r"<textarea\b|<(?:input|select)\b[^>]*\b(?:name|id)\s*=\s*[\"'][^\"']*"
-                    r"(?:zip|postal|address|email|message|subject|first|last|phone|topic)", re.I)
+_INPUT = re.compile(r"<(?:input|select)\b([^>]*)>", re.I)
+_ATTR = re.compile(r"\b(type|name|id)\s*=\s*[\"']([^\"']*)[\"']", re.I)
+# A field that only a message, or the address check before one, asks for.
+# A name, an email and a phone alone are what a newsletter sign-up asks:
+# Aguilar's /contact/ held only "first-name-footer", "last-name-footer" and
+# "email-footer" under "Newsletter Sign Up", and Mfume's /contact/offices
+# only webform_225, his newsletter (reviews of PR #106, 2026-10-18).
+_MESSAGE_FIELD = re.compile(r"zip|postal|message|subject|topic|comment|inquiry", re.I)
 _NOT_A_MESSAGE = re.compile(r"\bsearch\b|signup|sign-up|newsletter|subscribe", re.I)
+_SIGN_UP_WORDS = re.compile(r"newsletter|sign\s*-?\s*up|subscribe|e-?mail\s+updates|"
+                            r"get\s+(?:regular\s+)?updates|receive\s+(?:\w+\s+)?updates", re.I)
+_NEWSLETTER_ID = re.compile(r"newsletter[\w-]*?\"?\s*:\s*\"([\w-]+)\"", re.I)
 _FORM_FRAME = re.compile(r"<iframe\b[^>]*\bsrc\s*=\s*[\"']([^\"']+)[\"']", re.I)
 _LOST = re.compile(r"page\s+not\s+found|\b404\b|no\s+longer\s+available", re.I)
 
@@ -702,15 +790,33 @@ def contact_links(page, base, website):
 
 
 def holds_form(markup, url, website):
-    """True when the page holds a form to write to the office: a form that
-    is not a site search or a newsletter sign-up and asks for a message, an
-    address, a ZIP code or an email - or a frame of the office's own forms
-    host (``crankforms.house.gov``)."""
+    """True when the page holds a form to write to the office: a form with a
+    box for the message (a ``<textarea>``), or one that is not a site search
+    or a newsletter sign-up - by its attributes, its words, or the id the
+    page's settings give its newsletter - and asks for a message, a subject,
+    a ZIP code or a street address (the House's address check comes before
+    the message); or a frame of the office's own forms host
+    (``crankforms.house.gov``) or of the House's shared mail form."""
+    newsletters = {re.sub(r"[_-]", "", n).lower()
+                   for n in _NEWSLETTER_ID.findall(markup or "") if "form" in n.lower()}
     for attrs, body in _FORM.findall(markup or ""):
         if _NOT_A_MESSAGE.search(attrs):
             continue
-        if _FIELD.search(body):
+        form_id = re.sub(r"[_-]", "", attrs).lower()
+        if any(n and n in form_id for n in newsletters):
+            continue
+        if re.search(r"<textarea\b", body, re.I):
             return True
+        if _SIGN_UP_WORDS.search(re.sub(r"<[^>]+>", " ", body)):
+            continue
+        for field in _INPUT.findall(body):
+            found = {k.lower(): v for k, v in _ATTR.findall(field)}
+            if found.get("type", "").lower() in ("hidden", "submit", "button"):
+                continue
+            label = f"{found.get('name', '')} {found.get('id', '')}"
+            if _MESSAGE_FIELD.search(label) or (
+                    re.search(r"address", label, re.I) and not re.search(r"e-?mail", label, re.I)):
+                return True
     for src in _FORM_FRAME.findall(markup or ""):
         target = urllib.parse.urljoin(url, src)
         if own_host(target, website) and "form" in enrich.host_of(target) + target.lower():
@@ -795,7 +901,8 @@ def read_site(profile, others, pause=PAUSE, render=chrome_dom, fetch=_markup_of,
         time.sleep(pause)
         final2, status2, issues, how2, _ = get(link, pause, render)
         if not how2:
-            inconclusive = inconclusive or status2 is None or status2 in (401, 403, 429)                 or (status2 or 0) >= 500
+            inconclusive = (inconclusive or status2 is None or status2 in (401, 403, 429)
+                            or (status2 or 0) >= 500)
             continue
         if not own_host(final2, website):
             continue
@@ -807,9 +914,12 @@ def read_site(profile, others, pause=PAUSE, render=chrome_dom, fetch=_markup_of,
     if not record.get("issues"):
         # No index to read, or one that links nothing: the site's own
         # "Issues" menu, then an index page's headings.
-        items = menu_issues(markup, final, website, name, others)
+        # The link is the menu's own index page where it has one, else the
+        # page the menu is on - never the first page an "Issues" link led
+        # to, which for Lynch was one issue's page.
+        items, at = menu_read(markup, final, website, name, others)
         if items:
-            record.update(issues=items, issuesUrl=pages[0][0] if pages else final, how="menu")
+            record.update(issues=items, issuesUrl=at or final, how="menu")
     if not record.get("issues"):
         for where, shown in pages:
             items = page_issues(shown, where, page, name, others)
@@ -823,9 +933,28 @@ def read_site(profile, others, pause=PAUSE, render=chrome_dom, fetch=_markup_of,
                 record.update(issues=items, issuesUrl=where, how="headings")
                 break
     if not record.get("issues") and not pages:
-        # No issues index at all, but the home page links its own issue
-        # pages (Hoyer's "Issues" section is an anchor on the home page over
-        # /issues/federal-employees, /issues/environment ...): those links.
+        # The home page links no issues index, but the site may have one
+        # all the same: Hoyer's "Issues" is an anchor on his home page, over
+        # five of the nine issues his /issues page lists, and Figures's
+        # template page is linked from nowhere. Only a list of issue pages
+        # read from such a page counts - never its headings, since a page
+        # nobody links may be anything - and a page that is the home page
+        # again (a soft 200) is not one.
+        for path in ("/issues", "/priorities"):
+            time.sleep(pause)
+            final2, _, shown, how2, _ = get(urllib.parse.urljoin(final, path), pause, None)
+            if (not how2 or not own_host(final2, website)
+                    or not urllib.parse.urlsplit(final2).path.strip("/")
+                    or shown.body[:3000] == page.body[:3000]):
+                continue
+            items = listed_issues(shown, final2, name, others)
+            if items:
+                record.update(issues=items, issuesUrl=final2, how="index", unlinked=True)
+                break
+    if not record.get("issues") and not pages:
+        # No issues page at all, but the home page links issue pages of its
+        # own: those links, which are what the home page features and may
+        # not be the whole list, and the page says so (platformFeatured).
         items = home_issues(page, final, name, others)
         if items:
             record.update(issues=items, issuesUrl=final, how="home")
@@ -934,7 +1063,11 @@ def read_articles(profiles, log=print, fetch=enrich.fetch_articles):
 GOVINFO = "https://api.govinfo.gov"
 DIRECTORY_SOURCE = "congressional-directory"
 _ENTRY_END = re.compile(r"\n[ \t]*Congressional Office[ \t]*\n[ \t]*(https?://\S+)")
-_LABEL = re.compile(r"(?:^|;\s+)([a-z][a-z ]+?):\s+")
+# A label opens each section after "; ". The Directory's own four also open
+# one after a bare space: Sam Graves's and Mitch McConnell's entries print no
+# semicolon before "election history:", which ran into their careers.
+_KNOWN_LABELS = r"education|professional\s+history|military\s+service|election\s+history"
+_LABEL = re.compile(r"(?:(?:^|;\s+)([a-z][a-z ]+?)|\s(" + _KNOWN_LABELS + r")):\s+")
 
 
 def directory_entries(text):
@@ -963,9 +1096,9 @@ def directory_entries(text):
         fields, marks = {}, list(_LABEL.finditer(joined))
         for i, mark in enumerate(marks):
             end = marks[i + 1].start() if i + 1 < len(marks) else len(joined)
-            value = joined[mark.end():end].strip().rstrip(".").strip()
+            value = joined[mark.end():end].strip().rstrip(";.").strip()
             if value:
-                fields[mark.group(1).strip()] = value
+                fields[" ".join((mark.group(1) or mark.group(2)).split())] = value
         out.append((match.group(1).rstrip(".,"), name, fields))
     return out
 
@@ -999,31 +1132,64 @@ def printed_as(name, printed):
     return any(w in seen for w in rest)
 
 
-def match_directory(profiles, entries):
-    """``({bioguide: entry}, [problem])``: each entry joined to the member
-    whose official site congress-legislators lists at the same address, and
-    kept only when the entry's name carries that member's surname too."""
+def match_directory(profiles, entries, resolve=None):
+    """``({bioguide: entry}, [problem], {absent, unclaimed})``: each entry
+    joined to the member whose official site congress-legislators lists at
+    the same address, and kept only when the entry's name carries that
+    member's surname too.
+
+    An address the Directory prints that is no member's is opened with
+    *resolve* (``url -> final url``), and joined where it leads to a
+    member's listed site: the Directory prints dingell.house.gov, which
+    leads to the debbiedingell.house.gov congress-legislators lists, and
+    gregmurphy.house.gov leads to murphy.house.gov (2026-10-18). Never by
+    the name (rule 17). ``absent`` lists the members with no entry and
+    ``unclaimed`` the entries joined to no one, for the build to report."""
     by_host = collections.defaultdict(list)
     for site, name, fields in entries:
         by_host[enrich.host_of(site)].append((site, name, fields))
     out, problems_found = {}, []
-    for profile in profiles:
-        if not is_member(profile) or not profile.get("website"):
-            continue
+    seated = [p for p in profiles if is_member(p) and p.get("website")]
+    hosts = {enrich.host_of(p["website"]) for p in seated}
+    if resolve:
+        for host in [h for h in by_host if h not in hosts]:
+            for site, name, fields in by_host[host]:
+                final = resolve(site)
+                led = enrich.host_of(final) if final else ""
+                if led and led != host and led in hosts:
+                    by_host[led].append((site, name, fields, final))
+    claimed = set()
+    for profile in seated:
         found = by_host.get(enrich.host_of(profile["website"])) or []
         if len(found) != 1:
             if len(found) > 1:
                 problems_found.append(f"{profile['id']}: {len(found)} entries at {profile['website']}")
             continue
-        site, name, fields = found[0]
+        site, name, fields = found[0][:3]
         if not printed_as(profile["name"], name):
             problems_found.append(f"{profile['id']} ({profile['name']}): the entry at {site} "
                                   f"is printed as {name}")
             continue
+        claimed.add(site)
         facts = directory_facts(fields)
         if facts:
             out[profile["id"]] = dict(facts, site=site, printedAs=name)
-    return out, problems_found
+            if len(found[0]) > 3:
+                out[profile["id"]]["leadsTo"] = found[0][3]
+    report = {
+        "absent": sorted(f"{p['id']} ({p['name']})" for p in seated
+                         if p["id"] not in out and not any(p["id"] in x for x in problems_found)),
+        "unclaimed": sorted(f"{site} ({name})" for site, name, _ in entries if site not in claimed),
+    }
+    return out, problems_found, report
+
+
+def directory_site_is(listed, website):
+    """True when a Directory entry is about the member at *website*: printed
+    at that address, or at one that led to it when it was read."""
+    host = enrich.host_of(website)
+    return bool(host) and host in (enrich.host_of(listed.get("site")),
+                                   enrich.host_of(listed.get("leadsTo")))
 
 
 def read_directory(congress, key, log=print, get=None):
@@ -1129,9 +1295,15 @@ def refresh(profiles, root=".", executive=None, today=None, limit=None, sites=Tr
         edition, text = directory(congress, key, log=log)
         entries = directory_entries(text)
         if edition and len(entries) >= 400:
-            matched, issues = match_directory(members, entries)
+            def resolve(url):
+                time.sleep(pause)
+                final, status, _ = enrich.fetch(url)
+                return final if status == 200 else None
+
+            matched, issues, report = match_directory(members, entries, resolve=resolve)
             cache["directory"] = {"edition": edition, "read": stamp, "entries": len(entries),
-                                  "byId": matched, "unmatched": issues}
+                                  "byId": matched, "unmatched": issues,
+                                  "absent": report["absent"], "unclaimed": report["unclaimed"]}
             log(f"  members: {len(matched)} of {len(members)} members in the Congressional "
                 f"Directory ({edition}, {len(entries)} entries)")
         elif edition:
@@ -1211,7 +1383,7 @@ def apply_cache(profiles, cache):
             profile["districtOfficesRead"] = offices_read
             counts["offices"] += 1
         listed = directory.get(bioguide) or {}
-        if listed and enrich.host_of(listed.get("site")) == enrich.host_of(profile.get("website")):
+        if listed and directory_site_is(listed, profile.get("website")):
             # The Congressional Directory first: Congress's own printed
             # record, compiled from each member's office.
             if listed.get("education") and fill_field(profile, "education", listed["education"],
@@ -1237,14 +1409,23 @@ def apply_cache(profiles, cache):
         # What the furniture filter now refuses is dropped from a cached read
         # too, so a filter added after a read reaches the page without
         # waiting 27 days for the site to be read again.
-        issues = [i for i in site.get("issues") or [] if not furniture(i)]
+        issues = dedupe(i for i in site.get("issues") or [] if not furniture(i))
         withheld = OFFICIAL_ISSUES_NOT_A_LIST.get(bioguide)
         if withheld and withheld[1] == site.get("issuesUrl"):
             issues = []             # read as a list, and not one (overrides)
+        if stock_list(issues):
+            # The House template's stock categories and nothing of the
+            # member's own: the page is there, and is linked, as it is for
+            # every member whose site carries it.
+            issues = []
+            counts["platform_stock"] += 1
         listed = len(issues) >= 3
         if listed and fill_field(profile, "platforms", "; ".join(issues), SITE_SOURCE):
             profile["officialIssuesUrl"] = site["issuesUrl"]
             profile["platformRead"] = site.get("read")
+            if site.get("how") == "home":
+                # What the home page features, not an issues page's list.
+                profile["platformFeatured"] = True
             counts["platform"] += 1
         elif (site.get("verdict") == "none" or (site.get("verdict") == "listed" and not listed)) \
                 and profile.get("quality", {}).get("platforms"):
@@ -1301,6 +1482,17 @@ def problems(profiles, cache):
         out.append(("warn", "members-override-stale",
                     f"{len(stale)} entries in overrides.OFFICIAL_ISSUES_NOT_A_LIST no longer "
                     "match the page read; check the site and drop or update them", stale))
+    directory = cache.get("directory") or {}
+    seated_ids = {p["id"] for p in seated}
+    absent = [a for a in directory.get("absent") or [] if a.split(" ", 1)[0] in seated_ids]
+    if absent or directory.get("unclaimed"):
+        out.append(("warn", "members-directory-unjoined",
+                    f"{len(absent)} seated members have no entry joined from the Congressional "
+                    f"Directory ({directory.get('edition')}), and "
+                    f"{len(directory.get('unclaimed') or [])} of its entries joined no member; "
+                    "their education and careers come from the article, if at all",
+                    [f"no entry: {a}" for a in absent]
+                    + [f"no member: {u}" for u in directory.get("unclaimed") or []]))
     refused = [f"{b}: {e.get('requested')} -> {e.get('title')}"
                for b, e in sorted((cache.get("articles") or {}).items()) if e.get("refused")]
     if refused:

@@ -607,6 +607,10 @@ def _members(args):
             return 2
     else:
         ids = set(args.id) if args.id else None
+        if args.all:
+            # Every site again, however recent its last read: after a change
+            # to the reader, so no member is read by the old rules.
+            ids = {p["id"] for p in profiles if members.is_member(p)}
         cache = members.refresh(profiles, root=args.root, executive=federal.load_cache(args.root),
                                 limit=args.limit, sites=not args.no_sites, ids=ids,
                                 congress=snapshot_congress(snapshot) if snapshot else None,
@@ -2173,6 +2177,8 @@ def build_parser():
                      help="read at most N official sites this run")
     mem.add_argument("--id", action="append", default=None,
                      help="read this member's official site again (a bioguide id; repeatable)")
+    mem.add_argument("--all", action="store_true",
+                     help="read every member's official site again, however recent the last read")
     mem.add_argument("--no-sites", action="store_true",
                      help="read the district offices and articles only")
 

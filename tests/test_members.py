@@ -89,13 +89,59 @@ class TestTheDirectory(unittest.TestCase):
                                    website="https://mariodiazbalart.house.gov"),
                   member(id="P000621", name="Nellie Pou", website="https://pou.house.gov"),
                   member(id="X000001", name="Nobody Listed", website="https://nobody.house.gov")]
-        found, problems = members.match_directory(people, entries)
+        found, problems, report = members.match_directory(people, entries)
         self.assertEqual(set(found), {"L000560", "D000600"})
         self.assertEqual(found["D000600"]["education"], "University of South Florida")
         self.assertNotIn("careers", found["D000600"])
         # The address is Pou's and the paragraph is someone else's: nothing taken.
         self.assertEqual(len(problems), 1)
         self.assertIn("P000621", problems[0])
+        # Who joined nothing is reported, not silently left without careers.
+        self.assertEqual(report["absent"], ["X000001 (Nobody Listed)"])
+        self.assertEqual(report["unclaimed"], ["https://pou.house.gov (SOMEONE ELSE)"])
+
+    def test_a_label_the_directory_prints_without_its_semicolon(self):
+        # Sam Graves's entry runs "... 1994-2000 election history: elected
+        # to the 107th Congress ..." with no "; " before the label, and the
+        # election record ran into his careers.
+        text = ("SAM GRAVES, Republican, of Tarkio, MO; born in Tarkio, November 7, 1963;\r\n"
+                "education: B.S., University of Missouri, Columbia, MO, 1986;\r\n"
+                "professional history: farmer; member, Missouri House of Representatives, \r\n"
+                "1992-93; member, Missouri State Senate, 1994-2000 election history: elected \r\n"
+                "to the 107th Congress on November 7, 2000; reelected to each succeeding \r\n"
+                "Congress.\r\n\r\n                          Congressional Office\r\n"
+                "                        https://graves.house.gov\r\n")
+        _, _, fields = members.directory_entries(text)[0]
+        facts = members.directory_facts(fields)
+        self.assertEqual(facts["careers"], "farmer; member, Missouri House of Representatives, "
+                                           "1992-93; member, Missouri State Senate, 1994-2000")
+        self.assertTrue(fields["election history"].startswith("elected to the 107th Congress"))
+
+    def test_an_address_that_leads_to_the_members_site_joins(self):
+        # The Directory prints dingell.house.gov, which leads to the
+        # debbiedingell.house.gov congress-legislators lists (2026-10-18).
+        text = ("DEBBIE DINGELL, Democrat, of Dearborn, MI; born in Detroit, MI; education: "
+                "B.S., Georgetown University; professional history: president, General Motors "
+                "Foundation; election history: elected.\r\n\r\n"
+                "                          Congressional Office\r\n"
+                "                        https://dingell.house.gov\r\n")
+        entries = members.directory_entries(text)
+        dingell = member(id="D000624", name="Debbie Dingell",
+                         website="https://debbiedingell.house.gov")
+        found, _, report = members.match_directory([dingell], entries)
+        self.assertEqual(found, {})
+        self.assertEqual(report["absent"], ["D000624 (Debbie Dingell)"])
+        found, _, report = members.match_directory(
+            [dingell], entries, resolve=lambda url: "https://debbiedingell.house.gov/")
+        self.assertEqual(found["D000624"]["careers"], "president, General Motors Foundation")
+        self.assertEqual(found["D000624"]["leadsTo"], "https://debbiedingell.house.gov/")
+        self.assertEqual(report, {"absent": [], "unclaimed": []})
+        members.apply_cache([dingell], {"directory": {"byId": found}})
+        self.assertEqual(dingell["fieldSources"]["previous_professions"], "congressional-directory")
+        # An address that leads somewhere else joins no one.
+        found, _, _ = members.match_directory(
+            [dingell], entries, resolve=lambda url: "https://example.com/")
+        self.assertEqual(found, {})
 
     def test_a_spanish_form_name_is_printed_with_its_first_family_name(self):
         self.assertTrue(members.printed_as("Pablo José Hernández Rivera", "PABLO JOSE HERNANDEZ"))
@@ -274,8 +320,8 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
             self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), text, text)
 
     def test_a_home_page_that_links_its_issue_pages(self):
-        # Hoyer's site has no issues index: its "Issues" link is an anchor
-        # on the home page, over its own /issues/... pages.
+        # The home page's own links to its /issues/... pages, read when the
+        # site has no issues page at all.
         markup = ('<a href="/#issues-front">Issues</a>'
                   '<a href="/issues/federal-employees">Federal Employees</a>'
                   '<a href="/issues/jobs-economy">Jobs &amp; the Economy</a>'
@@ -284,6 +330,75 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
         self.assertEqual(members.home_issues(members.parse(markup), "https://hoyer.house.gov",
                                              "Steny Hoyer", OTHERS),
                          ["Federal Employees", "Jobs & the Economy", "Environment"])
+
+    def test_the_sites_furniture_cut_lines_and_titles(self):
+        # Reviews of PR #106 (2026-10-18), each from a built profile.
+        for text in ("Sponsored &", "AI, Social Media,", "Know More About the Senator",
+                     "Mobile Office Hours", "Grant Opportunities", "Community issues and events",
+                     "Paycheck Protection Program Portal Opening", "Government Shutdown Resources",
+                     "FY27 Appropriations Requests", "Past Appropriations Requests", "Congress",
+                     "About the Congresswoman", "Important Government Shutdown Information",
+                     "Telephone Townhall Questions & Answers", "Local Resources",
+                     "FY2027 MILITARY CONSTRUCTION AUTHORIZATION REQUESTS",
+                     "Hurricanes Laura, Delta and Zeta Resources", "Resources for Homeowners",
+                     "9th District", "District"):
+            self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), "", text)
+            self.assertTrue(members.furniture(text), text)
+        self.assertEqual(members.topic("President's Administration", "Rick Larsen", OTHERS), "")
+        for text in ("LGBTQ+ Equality", "Economic Opportunity", "Natural Resources",
+                     "Jobs, Economy, and Fiscal Responsibility", "Congressional Reform",
+                     "Disaster Recovery"):
+            self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), text, text)
+
+    def test_a_line_break_inside_a_heading_is_a_space(self):
+        # Hoeven's "Sponsored &amp;</br>Co-Sponsored Legislation" (a
+        # malformed end tag) and Curtis's "AI, Social Media, <br>and youth
+        # Safety" were each cut at the break.
+        page = members.parse('<h5 class="elementor-heading-title">Sponsored &amp;</br>'
+                             'Co-Sponsored Legislation</h5><h3>AI, Social Media, <br>and youth '
+                             'Safety</h3><h3>Veterans<br/>Affairs</h3>')
+        self.assertEqual([t for _, t in page.headings],
+                         ["Sponsored & Co-Sponsored Legislation",
+                          "AI, Social Media, and youth Safety", "Veterans Affairs"])
+        self.assertEqual(members.topic("Sponsored & Co-Sponsored Legislation", "John Hoeven",
+                                       OTHERS), "")
+
+    def test_one_issue_spelled_twice_is_listed_once(self):
+        self.assertEqual(members.dedupe(["Jobs, Economy, and Fiscal Responsibility", "Agriculture",
+                                         "Jobs, Economy, Fiscal Responsibility",
+                                         "Energy & Environment", "Energy and Environment"]),
+                         ["Jobs, Economy, and Fiscal Responsibility", "Agriculture",
+                          "Energy & Environment"])
+
+    def test_the_templates_stock_categories_are_not_a_platform(self):
+        # figures.house.gov/issues, as the House template ships it: six
+        # categories, each over "Learn about news and information related
+        # to ...".
+        stock = "".join(
+            f'<div class="issue"><a href="/issues/{s.lower()}"><h2>{s}</h2></a><p>Learn about news '
+            f'and information related to {s}.</p></div>'
+            for s in ("Congress", "Economy", "Education", "Energy", "Health", "Veterans"))
+        items = members.listed_issues(members.parse(stock), "https://figures.house.gov/issues",
+                                      "Shomari Figures", OTHERS)
+        self.assertEqual(items, ["Economy", "Education", "Energy", "Health", "Veterans"])
+        self.assertTrue(members.stock_list(items))
+        self.assertFalse(members.stock_list(items + ["Immigration"]))
+        self.assertFalse(members.stock_list([]))
+
+    def test_a_menus_link_is_its_index_or_the_page_its_on(self):
+        site = "https://lynch.house.gov"
+        # Lynch's "Issues" links its first issue, not a list of them.
+        menu = ('<ul><li><a href="/civil-rights">Issues</a><ul>'
+                '<li><a href="/civil-rights">Civil Rights</a></li>'
+                '<li><a href="/economy">Economy</a></li>'
+                '<li><a href="/education">Education</a></li>'
+                '<li><a href="/veterans">Veterans</a></li></ul></li></ul>')
+        items, at = members.menu_read(menu, site + "/", site, "Stephen Lynch", OTHERS)
+        self.assertEqual(items, ["Civil Rights", "Economy", "Education", "Veterans"])
+        self.assertIsNone(at)
+        items, at = members.menu_read(BOOZMAN, "https://www.boozman.senate.gov/public/",
+                                      "https://www.boozman.senate.gov/public", "John Boozman", OTHERS)
+        self.assertEqual(at, "https://www.boozman.senate.gov/public/index.cfm/issues")
 
     def test_a_former_president_is_someone_else_too(self):
         others = members.people_named([], {"president": {"name": "Donald J. Trump"},
@@ -331,6 +446,40 @@ class TestTheContactPage(unittest.TestCase):
         self.assertTrue(members.holds_form(
             '<iframe\n title="Get In Touch"\n src="https://iqconnect.house.gov/iqextranet/'
             'EForm.aspx?__cid=SC06JC&amp;__fid=100020&amp;iframe=Y">', site + "/get-in-touch/", site))
+
+    def test_a_newsletter_form_is_not_a_way_to_write(self):
+        site = "https://aguilar.house.gov"
+        # Aguilar's /contact/ (2026-10-18): its only form, a newsletter
+        # sign-up whose attributes never say so.
+        aguilar = ('<h3>Newsletter Sign Up</h3><p>Receive email newsletter updates.</p>'
+                   '<form class="wpcf7-form init" action="/contact/#wpcf7-f1-o1">'
+                   '<p>Sign up to receive updates</p>'
+                   '<input type="hidden" name="_wpcf7" value="1">'
+                   '<input type="text" name="first-name-footer"><input type="text" '
+                   'name="last-name-footer"><input type="email" name="email-footer">'
+                   '<input type="submit" value="Submit"></form>')
+        self.assertFalse(members.holds_form(aguilar, site + "/contact/", site))
+        # Mfume's /contact/offices: webform_225, which the page's settings
+        # name as its newsletter; the form's own words say nothing.
+        mfume = ('<script>var drupalSettings = {"newsletter_webform_id":"webform_225"};</script>'
+                 '<form class="webform-submission-form" id="webform-submission-webform-225-add-form">'
+                 '<input name="first_name"><input name="last_name"><input name="email">'
+                 '<input name="zip_code"></form>')
+        self.assertFalse(members.holds_form(mfume, "https://mfume.house.gov/contact/offices",
+                                            "https://mfume.house.gov"))
+        # A name and an email alone are a sign-up whatever the form says.
+        self.assertFalse(members.holds_form(
+            '<form><input name="first"><input name="last"><input name="email_address"></form>',
+            site + "/contact/", site))
+        # A message form that offers the newsletter too is a message form.
+        self.assertTrue(members.holds_form(
+            '<form><input name="email"><textarea name="msg"></textarea>'
+            '<label><input type="checkbox" name="optin"> Subscribe to my newsletter</label></form>',
+            site + "/contact/", site))
+        # The address check before the message.
+        self.assertTrue(members.holds_form(
+            '<form id="address-verify"><input name="street_address"><input name="city">'
+            '<input name="zip5"></form>', site + "/contact/", site))
 
     def test_a_contact_link_is_found_by_the_words_a_site_uses(self):
         site = "https://hoyer.house.gov"
@@ -398,6 +547,45 @@ class TestAReadThatIsTurnedAway(unittest.TestCase):
         tried = []
         members.get("https://x.house.gov/issues", pause=0, render=lambda url: tried.append(url))
         self.assertEqual(tried, [])
+
+    def serve(self, pages):
+        enrich.fetch = lambda url, hops=2: pages.get(url.rstrip("/"), (url, 404, ""))
+
+    HOME = ("<title>Congressman Steny Hoyer</title><p>" + "Steny Hoyer serves Maryland. " * 20
+            + '</p><a href="/#issues-front">Issues</a>'
+            '<a href="/issues/federal-employees">Federal Employees</a>'
+            '<a href="/issues/jobs-economy">Jobs &amp; the Economy</a>'
+            '<a href="/issues/environment">Environment</a>')
+
+    def test_an_issues_page_the_home_page_does_not_link_is_read(self):
+        # Hoyer's /issues lists more than the five his home page features.
+        site = "https://hoyer.house.gov"
+        index = ("<title>Issues | Steny Hoyer</title><p>" + "Issues. " * 60 + "</p>" + "".join(
+            f'<a href="/issues/{s}">{t}</a>' for s, t in (
+                ("federal-employees", "Federal Employees"), ("budget", "Budget & Fiscal "
+                 "Responsibility"), ("education", "Education"), ("environment", "Environment"),
+                ("transportation", "Transportation and Infrastructure"))))
+        self.serve({site: (site, 200, self.HOME), site + "/issues": (site + "/issues", 200, index)})
+        record = members.read_site(member(id="H000874", name="Steny Hoyer", website=site), OTHERS,
+                                   pause=0, render=None, fetch=lambda url: (url, 404, ""))
+        self.assertEqual(record["how"], "index")
+        self.assertEqual(record["issuesUrl"], site + "/issues")
+        self.assertEqual(len(record["issues"]), 5)
+        # No issues page at all: the home page's links, said to be what it
+        # features.
+        self.serve({site: (site, 200, self.HOME)})
+        record = members.read_site(member(id="H000874", name="Steny Hoyer", website=site), OTHERS,
+                                   pause=0, render=None, fetch=lambda url: (url, 404, ""))
+        self.assertEqual((record["how"], record["issuesUrl"]), ("home", site))
+        hoyer = member(id="H000874", name="Steny Hoyer", website=site)
+        members.apply_cache([hoyer], {"sites": {"H000874": record}})
+        self.assertTrue(hoyer["platformFeatured"])
+        # A soft 200 that serves the home page again is not an issues page.
+        self.serve({site: (site, 200, self.HOME), site + "/issues": (site + "/issues", 200,
+                                                                     self.HOME)})
+        record = members.read_site(member(id="H000874", name="Steny Hoyer", website=site), OTHERS,
+                                   pause=0, render=None, fetch=lambda url: (url, 404, ""))
+        self.assertEqual(record["how"], "home")
 
     def test_an_inconclusive_read_keeps_the_last_good_one(self):
         old = {"url": "https://x.house.gov", "verdict": "listed", "issues": ["A", "B", "C"],
@@ -481,6 +669,28 @@ class TestApplied(unittest.TestCase):
         self.assertEqual(larsen["quality"]["platforms"], "see_site")
         self.assertEqual(larsen["officialIssuesUrl"], "https://larsen.house.gov/issues/")
         self.assertNotIn("platforms", larsen.get("fieldSources", {}))
+
+    def test_the_stock_categories_and_two_spellings_from_a_cached_read(self):
+        # Seventeen members' cached lists were the House template's six
+        # stock categories; Figures's identical page read "not listed".
+        # Both now link the page.
+        for issues in (["Congress", "Economy", "Education", "Energy", "Health", "Veterans"],
+                       ["Congress", "Economy", "Education", "Energy", "Health", "Veterans",
+                        "FY 2027 CPF Requests"]):
+            larsen = member()
+            sites = {"L000560": dict(self.CACHE["sites"]["L000560"], issues=issues)}
+            members.apply_cache([larsen], dict(self.CACHE, sites=sites))
+            self.assertEqual(larsen["quality"]["platforms"], "see_site")
+            self.assertEqual(larsen["officialIssuesUrl"], "https://larsen.house.gov/issues/")
+        # A member who added issues of their own lists them, without "Congress".
+        larsen = member()
+        sites = {"L000560": dict(self.CACHE["sites"]["L000560"], issues=[
+            "Congress", "Economy", "Energy", "Health", "National Security", "Veterans",
+            "Jobs, Economy, and Fiscal Responsibility", "Jobs, Economy, Fiscal Responsibility"])}
+        members.apply_cache([larsen], dict(self.CACHE, sites=sites))
+        self.assertEqual(larsen["platforms"], "Economy; Energy; Health; National Security; "
+                                              "Veterans; Jobs, Economy, and Fiscal Responsibility")
+        self.assertNotIn("platformFeatured", larsen)
 
     def test_a_page_recorded_as_no_list_is_linked_instead(self):
         from kyc import overrides
