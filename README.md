@@ -2628,6 +2628,37 @@ the reader's state's files are fetched for a ZIP code
 (`data/lookup/index.js`: each ZIP prefix's states, and every file's
 versioned address, rule 76).
 
+### Your ballot
+
+`ballot.html` (`assets/kyc-ballot.js`, rule 92) answers a different question
+from the one above: not who represents a reader, but who is on their
+November ballot. It is in the navigation under the election, and reached from
+the lookup's answer (**See everything on your ballot**, carrying the ZIP code),
+each state's voting block and the home page's hero. A ZIP code or a location
+is looked up on the device exactly as above, and the page lists, one card per
+contest:
+
+| Contest | From | Shown |
+| --- | --- | --- |
+| U.S. Senate, regular then special | the 2026 race record | the race's badges and people as the state page's race section draws them: the same split, order, status words and counts (`KYC.cards.racePeople`, rule 73), nominees with no profile named, each person opening their profile |
+| U.S. House (or the Delegate, the Resident Commissioner) | the ZIP area's districts on the 2026 map | the same, one card per district with its share of the ZIP area's land where there are several, and the location offered for an exact answer |
+| Governor, lieutenant governor, attorney general, secretary of state | `ballot2026` and the election office's list (rule 91) | the office's mark, its holder line and its listed candidates, write-ins apart, as the state page shows them; the offices not on this ballot with their record's words |
+| State senate and house | the lookup's legislative districts, `legislature.seats_up` | whether each district's seat is on the ballot, in the legislature page's words; its candidates are not listed here |
+
+Then what the site does not list (ballot measures, local and judicial
+contests, the legislature's candidates), with the state's own sample ballot
+where its election office links one, and, at the top, the state's key dates
+as its voting block gives them, a date said passed on the reader's own day.
+D.C. and the territories are in their own words; Puerto Rico's record says no
+election is held there on November 3, and the page says so.
+
+The address keeps a ZIP code (`ballot.html#/?zip=30303`), so a copied link
+shows the same list, and never a location. From the day after Election Day
+the page says the election has been held, shows the results the site has for
+Congress and links the state's official results for everything else; it names
+no state winner. **Print or save this list** prints the list without the
+site's controls, in the light theme's colours whatever theme is on screen.
+
 ### Find my district
 
 A district page with more than one seat has a **Find my district** button.

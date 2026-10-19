@@ -310,10 +310,19 @@
     return out.join(" ");
   }
 
+  /** The election office's own line that no election is held on November
+   *  3 there (voting_dates, "noElection"), or null. */
+  function noElection(code) {
+    return KYC.findRep ? KYC.findRep.noElection(code) : null;
+  }
+
   /** The way from a state's voting block to the reader's whole ballot
    *  (ballot.html), which needs their ZIP code or location to name their
    *  districts. */
-  function ballotEntry() {
+  function ballotEntry(code) {
+    // A place whose own record says it holds no election on November 3
+    // (Puerto Rico) has no ballot to see.
+    if (noElection(code)) return "";
     var past = KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election";
     return '<p class="vote-ballot"><a class="btn" data-ballot-entry href="' +
       KYC.escapeAttr(KYC.siteRoot() + "ballot.html") + '">' + KYC.icon("vote") +
@@ -337,7 +346,7 @@
       '<h2 class="state-heading" id="votingHead">' + KYC.icon("vote") + " Voting in " +
         KYC.escapeHtml(place) + "</h2>" +
       (info ? registrationLead(info, place) + calendarStrip(info) : "") +
-      ballotEntry() +
+      ballotEntry(code) +
       '<p class="state-links">' + VOTING.filter(function (v) { return links[v[0]]; }).map(function (v) {
         var label = labels[v[0]] || v[1];
         // Never offered as open once it has closed (STATEGOV-11): the
@@ -769,7 +778,10 @@
     // whose commission holds no general election in 2026) is not told its
     // ballot "may also hold" more: what else it holds is not recorded here
     // (rule 19).
-    var words = !anything
+    var none = noElection(code);
+    var words = none
+      ? esc(none.t) + ", as its election office's own record says (the key dates above link it)."
+      : !anything
       ? "Nothing this site covers is on " + esc(KYC.possessive(placeName(code))) + " " +
         cycleYear() + " ballot. Whether any other contest is, this site does not record."
       : code === "DC" ? dcContests()
@@ -791,6 +803,8 @@
    *  for Congress and the state's own for the rest (it reads no state
    *  results and names no state winner). */
   function whenLine(code) {
+    var none = noElection(code);
+    if (none) return '<p class="ballot-when">' + esc(none.t) + ".</p>";
     if (!held()) {
       return '<p class="ballot-when">Election Day is ' +
         esc(KYC.dateWords(KYC.electionStatus(cycleYear()).iso)) + ".</p>";
@@ -817,13 +831,16 @@
     // The order said as what it is: this site's, which a printed ballot
     // may not follow.
     // Whether anything this site covers is on this ballot at all.
+    var offices = KYC.stategov && KYC.stategov.ballotOf(code);
+    var statewideUp = !!offices && OFFICES.some(function (k) {
+      return offices.offices[k] && offices.offices[k].up;
+    });
     var anything = KYC.findRep.senateRaces(code).length > 0 || legislature.length > 0 ||
       ctx.race.some(function (part) {
         return KYC.findRep.houseRace(code, Array.isArray(part) ? part[0] : part);
-      }) ||
-      statewide.some(function (card) { return card.indexOf("ballot-off") === -1; });
+      }) || statewideUp;
     var order = ["Congress"];
-    if (statewide.length) order.push(wide(code).toLowerCase() + " offices");
+    if (statewideUp) order.push(wide(code).toLowerCase() + " offices");
     if (legislature.length) order.push("the state legislature");
     return '<article class="ballot-state" data-state="' + KYC.escapeAttr(code) + '">' +
       '<h2 class="ballot-place">' + ctx.head + "</h2>" +
@@ -1041,6 +1058,28 @@
       if (t.closest("[data-ballot-locate]")) { locate(); return; }
       var person = t.closest("button[data-id]");
       if (person) KYC.profile.open(person.getAttribute("data-id"));
+    });
+    // Paper is white: printed in a dark theme, the list's light text came
+    // out white on white. The light theme's colours for the print only,
+    // the reader's own choice put back after it (and never saved).
+    // The page's declared scheme goes with it: "only dark" left the paper's
+    // canvas dark under light text.
+    var html = doc.documentElement;
+    var scheme = doc.querySelector('meta[name="color-scheme"]');
+    var theme = null, declared = null;
+    global.addEventListener("beforeprint", function () {
+      theme = html.getAttribute("data-theme");
+      html.setAttribute("data-theme", "light");
+      if (scheme) {
+        declared = scheme.getAttribute("content");
+        scheme.setAttribute("content", "only light");
+      }
+    });
+    global.addEventListener("afterprint", function () {
+      if (theme === null) html.removeAttribute("data-theme");
+      else html.setAttribute("data-theme", theme);
+      if (scheme && declared !== null) scheme.setAttribute("content", declared);
+      theme = declared = null;
     });
     KYC.router.onChange(route);
     route();

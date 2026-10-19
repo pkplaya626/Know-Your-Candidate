@@ -717,14 +717,22 @@
     return { now: redrawn && KYC.recordPhase() ? "next" : "cd", race: redrawn ? "next" : "cd" };
   }
 
+  /** The election office's own line that no election is held there on
+   *  November 3 (kyc/voting_dates.py, "noElection": Puerto Rico), or null.
+   *  Such a place has no ballot to show. */
+  function noElection(code) {
+    var mine = (((KYC.meta().voting || {})._dates || {}).states || {})[code];
+    return ((mine && mine.lines) || []).filter(function (l) { return l.k === "none"; })[0] || null;
+  }
+
   /** The way from this answer to the reader's whole ballot (kyc-ballot.js),
    *  which is not this answer: who represents a reader is not who is on
    *  their ballot (rule 27). The address carries a ZIP code the reader
    *  typed, never a location (rule 92); from a location the ballot page
    *  asks for it again. Only where the page lists Congress: the legislature
    *  and county pages' answers send the reader to the state page first. */
-  function ballotLink(zip5) {
-    if (!people().length) return "";
+  function ballotLink(zip5, code) {
+    if (!people().length || noElection(code)) return "";
     var past = KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election";
     return ' <a class="btn" data-findrep-ballot href="' + KYC.escapeAttr(KYC.siteRoot() + "ballot.html" +
       (zip5 ? "#/?zip=" + zip5 : "")) + '">' + KYC.icon("vote") +
@@ -737,7 +745,7 @@
       '<p class="findrep-place">' + head + "</p>" +
       '<dl class="findrep-list">' + rows.join("") + "</dl>" +
       (notes.length ? '<p class="findrep-note">' + notes.join(" ") + "</p>" : "") +
-      '<p class="findrep-actions">' + voteLink(code) + ballotLink(zip5) + "</p>" +
+      '<p class="findrep-actions">' + voteLink(code) + ballotLink(zip5, code) + "</p>" +
       "</div>";
   }
 
@@ -1147,6 +1155,7 @@
     voteLink: voteLink,
     canLocate: canLocate,
     remember: remember,
+    noElection: noElection,
   };
 
   KYC.ready(function () {

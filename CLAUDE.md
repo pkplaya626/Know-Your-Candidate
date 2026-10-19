@@ -81,6 +81,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/judiciary/*.js (one federal court's judges, and the judges' search)
                                              data/votes/*.js    (each chamber's roll calls, loaded by the profile dialog on demand)
                                              about.html, 404.html (generated: the site's frame, kyc/pages.py)
+                                             ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
@@ -105,6 +106,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-official.js
                                              assets/kyc-federal.js
                                              assets/kyc-findrep.js
+                                             assets/kyc-ballot.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
@@ -1763,6 +1765,36 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `overrides.STATEWIDE_NAME_FORMS` entry, or the line says "not
     checked". After Election Day the block is in the past tense and links
     the state's results; this site names no state winner.
+
+92. **"Who is on my ballot" is its own question, answered from the views
+    that already answer its parts, and an address keeps a ZIP code, never
+    a location.** A reader asked who was on her ballot and the site had
+    only "who represents me": a state page listing the races for Congress
+    and saying the governor was elected without naming anyone running,
+    and no link from the lookup's answer to any of it (audit 2026-10-17,
+    VISUALS-26, RACES-16, PERSONA-08). `ballot.html` (`kyc-ballot.js`)
+    lists every contest the site can name for one ZIP code or location:
+    the Senate races, the House race on the 2026 map (a ZIP area across
+    district lines gives one card per district with its share, and offers
+    the location, rule 85), the statewide offices on the ballot with the
+    election office's list (rule 91), and whether the reader's legislative
+    seats are up. Nothing in it is drawn twice: a race's people are split,
+    ordered, badged and counted by `KYC.cards` as on the state page
+    (`racePeople`, rules 12 and 73), an office by `KYC.stategov`, a seat by
+    the words the legislature page says it in, and the state page's voting
+    block and its key dates live in the same module. It never names who
+    holds a seat (rule 27) beyond a race's own words, and what it does not
+    hold - legislative candidates, ballot measures, local contests - is
+    "not listed here", with the state's own sample ballot where one is
+    linked; a seat whose district the record cannot name is said to be
+    unknown, never "not up" (rule 19). A place with no election that day
+    (Puerto Rico's record says so) is told that, not "may also hold". The
+    address is `#/?zip=`, so a copied link shows the same list, and a
+    location is never put in it: a shared link would carry the reader's
+    whereabouts. From the day after the election it says the election was
+    held and links the state's results, and names no state winner. It
+    prints in the light theme's colours whatever the reader chose: printed
+    from the dark theme, its light text came out white on white paper.
 
 ## District maps
 
