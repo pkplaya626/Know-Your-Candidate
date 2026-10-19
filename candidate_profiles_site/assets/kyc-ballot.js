@@ -570,9 +570,14 @@
     return questionScope(code) + " questions";
   }
 
+  /** The past tense says there were questions, so only a record that lists
+   *  some takes it: under "that were on the ballot", "No statewide question
+   *  was on it" and "not found" contradicted their own heading (PR #120
+   *  review). */
   function measuresHeading(code) {
-    return measuresName(code) + (held() ? " that were on the Nov 3, 2026 ballot"
-      : " on the Nov 3, 2026 ballot");
+    var rec = measuresOf(code);
+    return measuresName(code) + (held() && rec && rec.has === true
+      ? " that were on the Nov 3, 2026 ballot" : " on the Nov 3, 2026 ballot");
   }
 
   /** The official text, paragraph by paragraph, folded after its first
@@ -589,8 +594,9 @@
         'aria-expanded="false" aria-controls="' + KYC.escapeAttr(id) + '">Read the whole text</button>' : "");
   }
 
+  // After the election the heading and the lead carry the tense; each item
+  // does not repeat it (California's fourteen did).
   function measureItem(code, m, i, level, read) {
-    var past = held();
     var kind = [m.kind, m.origin ? "Put on the ballot by " + m.origin
       : "Who put it on the ballot is not recorded here"].filter(Boolean).join(". ");
     var notes = [];
@@ -604,33 +610,52 @@
         (m.title ? ' <span class="measure-title">' + esc(m.title) + "</span>" : "") +
       "</h" + level + ">" +
       '<p class="measure-kind">' + esc(kind) + ".</p>" +
-      (past ? '<p class="measure-when">Was on the Nov 3, 2026 ballot.</p>' : "") +
       measureText(code, m, i) +
       (notes.length ? '<p class="measure-note">' + esc(notes.join(" ")) + "</p>" : "") +
       '<p class="measure-links">' + links.join(" &middot; ") + "</p>" +
       "</li>";
   }
 
-  /** What a "none" rests on, in the record's words, with its source. */
+  /** What a "none" rests on, in the record's words, with its source. A
+   *  ballot is named as the one read - often one county's - never "the
+   *  official sample ballots" as though every one had been (PR #120
+   *  review); a statewide question is printed on every ballot, which is
+   *  what makes one enough. */
   function noneLine(code, rec) {
     var scope = questionScope(code).toLowerCase();
-    var src = rec.list ? link(rec.list.url, rec.list.title) + ", read " +
-      esc(KYC.dateWords(rec.read)) : "";
+    var read = esc(KYC.dateWords(rec.read));
+    var src = rec.list ? link(rec.list.url, rec.list.title) + ", read " + read : "";
     var basis = (rec.none || {}).from;
     var words = (rec.none || {}).words;
     if (basis === "statement") {
       return "The " + esc(rec.by) + " says: “" + esc(words) + "” (" + src + ").";
     }
-    if (basis === "call") {
-      return "The proclamation calling the election orders it only “" + esc(words) + "” (" +
-        src + ").";
-    }
     if (basis === "list") {
       return "The " + esc(rec.by) + "'s list of the questions on its ballots holds none that " +
         "is " + scope + ": " + src + ". A " + scope + " question would be on every ballot.";
     }
-    return "The official sample ballots print none: " + src + ". A " + scope + " question would " +
-      "be printed on every ballot.";
+    return "This site read " + (rec.list ? link(rec.list.url, rec.list.title) : "the official " +
+      "sample ballot") + " on " + read + ", and it prints no " + scope + " question. A " + scope +
+      " question would be printed on every ballot.";
+  }
+
+  /** Where the questions not listed here are: the sample ballot the
+   *  election office links, or its pages. "A county's, a city's or a school
+   *  district's" is a state's: the District and the territories hold
+   *  neither counties nor such questions, and are told only where the
+   *  whole ballot is (rule 75). */
+  function localLine(code, others) {
+    var sample = sampleLink(code);
+    var whole = sample ? "The election office's sample ballot shows every question on it: " +
+      sample + "." : "";
+    if (questionScope(code) !== "Statewide") {
+      return whole ? '<p class="measures-local">' + whole + "</p>" : "";
+    }
+    return '<p class="measures-local">' + (others ? "Other local" : "Local") + " questions - a " +
+      "county's, a city's or a school district's - are not listed here." + (whole ? " " + whole
+        : " The election office's own pages are under " + '<a href="' +
+          KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
+          esc(placeName(code)) + "</a>.") + "</p>";
   }
 
   /** The statewide questions of *code*, as HTML: the lead, the list, and
@@ -641,13 +666,21 @@
     if (!rec || noElection(code)) return "";
     var level = (opts && opts.level) || 4;
     var past = held();
-    var place = placeName(code);
     var scope = questionScope(code).toLowerCase();
-    var sample = sampleLink(code);
     var results = resultsLink(code);
     var out = [];
+    // A question on every ballot that each municipality decides for itself
+    // (New Hampshire's HB 1300 question) is listed apart and is not counted
+    // as a statewide one (PR #120 review).
+    var local = [];
+    var measures = [];
     if (rec.has === true) {
-      var n = rec.measures.length;
+      rec.measures.forEach(function (m, i) {
+        (m.local ? local : measures).push({ m: m, i: i });
+      });
+    }
+    if (rec.has === true) {
+      var n = measures.length;
       out.push('<p class="measures-lead">' + (n === 1 ? "One " + scope + " question " +
         (past ? "was" : "is") : n + " " + scope + " questions " + (past ? "were" : "are")) +
         " on the Nov 3, 2026 ballot, as the " + esc(rec.by) + " lists " + (n === 1 ? "it" : "them") +
@@ -659,9 +692,21 @@
       out.push('<p class="measures-words">Each is quoted in its official words. This site does ' +
         "not say what a yes or a no vote does; where the official text says so, it is quoted." +
         (rec.textNote ? " " + esc(rec.textNote) : "") + "</p>");
-      out.push('<ol class="measures">' + rec.measures.map(function (m, i) {
-        return measureItem(code, m, i, level, rec.read);
+      out.push('<ol class="measures">' + measures.map(function (x) {
+        return measureItem(code, x.m, x.i, level, rec.read);
       }).join("") + "</ol>");
+      if (local.length) {
+        out.push('<p class="measures-lead measures-apart">' + (local.length === 1
+          ? "One more question " + (past ? "was" : "is") + " on every ballot, but " +
+            (past ? "was" : "is") + " not one " + scope + " decision"
+          : local.length + " more questions " + (past ? "were" : "are") + " on every ballot, " +
+            "but " + (past ? "were" : "are") + " not " + scope + " decisions") +
+          ": each town or city " + (past ? "voted" : "votes") + " on it for itself, and its " +
+          "own ballot names the place.</p>");
+        out.push('<ol class="measures measures-local-list">' + local.map(function (x) {
+          return measureItem(code, x.m, x.i, level, rec.read);
+        }).join("") + "</ol>");
+      }
     } else if (rec.has === false) {
       out.push('<p class="measures-lead">No ' + scope + " question " + (past ? "was" : "is") +
         " on the Nov 3, 2026 ballot.</p>");
@@ -676,12 +721,7 @@
       out.push('<p class="measures-results">This site does not read the results of ballot ' +
         "questions" + (results ? ": " + results : "") + ".</p>");
     }
-    out.push('<p class="measures-local">Local questions - a county\'s, a city\'s or a school ' +
-      "district's - are not listed here" + (sample
-        ? ". The election office links a sample ballot, every question on it: " + sample + "."
-        : "; the election office's own pages are under " + '<a href="' +
-          KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' + esc(place) +
-          "</a>.") + "</p>");
+    out.push(localLine(code, local.length > 0));
     return out.join("");
   }
 
@@ -1153,7 +1193,11 @@
     var order = ["Congress"];
     if (statewideUp) order.push(wide(code).toLowerCase() + " offices");
     if (legislature.anyUp) order.push("the state legislature");
+    // The note names every card the list shows: where there are no
+    // questions, or no list was found, the last card still says so (PR #120
+    // review).
     if (asked) order.push("the " + measuresName(code).toLowerCase());
+    else if (questions) order.push("a note on " + measuresName(code).toLowerCase());
     var past = held();
     // A place that holds no election on November 3 has no ballot to speak
     // of, before the day or after it.

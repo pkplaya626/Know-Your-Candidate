@@ -271,7 +271,9 @@ def _build(args):
                           history=lineage,
                           voting_dates=voting_dates_mod.load(args.root),
                           statewide=statewide_mod.load(args.root),
-                          measures=measures_mod.load(args.root))
+                          # {} when the cache is missing, so validate's
+                          # error says so under --check too (PR #120 review).
+                          measures=measures_mod.load(args.root) or {})
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -448,7 +450,8 @@ def _build(args):
             m_path, m_size = emit.write_measures(measures, args.root)
             print(f"[ok] wrote {m_path} ({m_size / 1024:.0f} KB)")
         m_stats = measures_mod.stats(measures_cache)
-        print(f"[ok] ballot measures: {m_stats['measures']} in {m_stats['with']} jurisdictions; "
+        print(f"[ok] ballot measures: {m_stats['measures']} in {m_stats['with']} jurisdictions "
+              f"(and {m_stats['local']} on every ballot, decided locally); "
               f"{m_stats['none']} with none; {m_stats['unknown']} with no official list found")
     else:
         print(f"[error] {measures_mod.CACHE_PATH} is missing or breaks its rules; "

@@ -19,9 +19,11 @@ Each jurisdiction says one of three things:
   it on the ballot, its source's address and words, and the official voter
   guide's page for it where there is one;
 - false: no statewide question, credited to the document that shows it -
-  an office's sentence saying so, the proclamation calling the election,
-  or the official ballots, which print none - quoted (``noneFrom``,
-  ``noneWords``);
+  an office's sentence saying so, an office's list of its ballots'
+  questions, or the official ballots, which print none - quoted
+  (``noneFrom``, ``noneWords``). A proclamation calling the election for
+  offices is not one: it would not name a constitutional amendment
+  election, which that election's own resolution sets (Texas, PR #120);
 - null: no official source says either way (American Samoa, Maine,
   Pennsylvania, Puerto Rico), and the page says this site has not found an
   official list, with the election office's own site (``office``), never
@@ -62,15 +64,20 @@ KINDS = {
 # their own words (``originWords``); None is "not recorded here".
 ORIGINS = ("legislature", "citizens", "constitution", "commission", None)
 # What a "none" rests on: an office's sentence that there is none, the
-# proclamation calling the election for offices only, the official ballots
-# (which would print a statewide question on every one), or an office's
-# list of the questions on its ballots.
-NONE_FROM = ("statement", "call", "ballots", "list")
+# official ballots (which would print a statewide question on every one), or
+# an office's list of the questions on its ballots.
+NONE_FROM = ("statement", "ballots", "list")
 
 RECORD_KEYS = frozenset({"hasMeasures", "by", "read", "listSource", "voterGuide", "office",
                          "noneFrom", "noneWords", "textNote", "measures", "notes", "verified"})
 MEASURE_KEYS = frozenset({"designation", "title", "question", "kind", "origin", "voterGuide",
-                          "source", "kindWords", "originWords", "textNote"})
+                          "source", "kindWords", "originWords", "textNote", "local"})
+
+# A shown title is the document's own name. The researchers' asides ("linked
+# as ... from https://...", "Spanish edition: ...", "described as ...") were
+# rendered as link text (PR #120 review); they belong in ``notes``.
+_NOT_A_TITLE = re.compile(r"https?:|www\.|\blinked\b|\bdescribed as\b|\bedition:|\bquery:|"
+                          r"\bpages?\s+\d", re.I)
 
 _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 _ISO_IN_TEXT = re.compile(r"\b(\d{4}-\d{2}-\d{2})\b")
@@ -133,6 +140,10 @@ def _source_problems(where, code, source, *, quoted=True, titled=False):
         out.append(f"{where}: its source is not quoted")
     if titled and not str(source.get("title") or "").strip():
         out.append(f"{where}: its source has no title")
+    for key in ("title", "name"):
+        if _NOT_A_TITLE.search(str(source.get(key) or "")):
+            out.append(f"{where}: its {key} carries a note or an address, not the document's "
+                       f"own name: {source[key]!r}")
     for day in _ISO_IN_TEXT.findall(str(source.get("pageUpdated") or "")):
         if not PUBLISHED_EARLIEST <= day <= READ_LATEST:
             out.append(f"{where}: its page's date {day} is outside the cycle")
@@ -200,17 +211,22 @@ def record_problems(code, record):
             out.append(f"{code}: no statewide question, but not said on what ('noneFrom' is "
                        f"{basis!r})")
         words = record.get("noneWords")
-        if basis in ("statement", "call"):
+        if basis == "statement":
             quote = str((record.get("listSource") or {}).get("quote") or "")
             if not words:
                 out.append(f"{code}: a {basis} with no words quoted ('noneWords')")
             elif str(words) not in quote:
                 out.append(f"{code}: 'noneWords' is not in its source's quote")
         elif words:
-            out.append(f"{code}: 'noneWords' is shown only for a statement or a call")
+            out.append(f"{code}: 'noneWords' is shown only for a statement")
         return out
     if not measures:
         out.append(f"{code}: hasMeasures is true, and no measure is listed")
+    elif all(isinstance(m, dict) and m.get("local") for m in measures):
+        # A question each municipality decides for itself is not a statewide
+        # one; with no other, the jurisdiction has none (``hasMeasures``
+        # false, with what shows it).
+        out.append(f"{code}: hasMeasures is true, and every measure listed is decided locally")
     for key in ("noneFrom", "noneWords", "office"):
         if key in record:
             out.append(f"{code}: '{key}' is for a jurisdiction without measures")
@@ -238,6 +254,16 @@ def measure_problems(code, i, m, guide):
         out.append(f"{where}: no designation")
     if not str(m.get("question") or "").strip():
         out.append(f"{where}: no official text ('question')")
+    if "local" in m:
+        # On every ballot, decided by each municipality for itself (New
+        # Hampshire's HB 1300 question): its text names the place, the page
+        # lists it apart from the statewide questions, and says how each
+        # ballot words it.
+        if m["local"] is not True:
+            out.append(f"{where}: 'local' is true or absent, not {m['local']!r}")
+        elif not str(m.get("textNote") or "").strip():
+            out.append(f"{where}: a locally decided question says how each ballot words it "
+                       "('textNote')")
     if m.get("title") is not None and not str(m["title"]).strip():
         out.append(f"{where}: an empty title (null where the state prints none)")
     kind = m.get("kind")
@@ -309,6 +335,8 @@ def _measure(code, m):
         out["guide"] = m["voterGuide"]
     if m.get("textNote"):
         out["note"] = m["textNote"]
+    if m.get("local"):
+        out["local"] = True
     return out
 
 
@@ -345,7 +373,10 @@ def for_page(data):
 def stats(data):
     records = (data or {}).get("jurisdictions") or {}
     return {
-        "measures": sum(len(r.get("measures") or []) for r in records.values()),
+        "measures": sum(1 for r in records.values() for m in r.get("measures") or []
+                        if not m.get("local")),
+        "local": sum(1 for r in records.values() for m in r.get("measures") or []
+                     if m.get("local")),
         "with": sum(1 for r in records.values() if r.get("hasMeasures") is True),
         "none": sum(1 for r in records.values() if r.get("hasMeasures") is False),
         "unknown": sum(1 for r in records.values() if r.get("hasMeasures") is None),

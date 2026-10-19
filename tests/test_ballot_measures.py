@@ -220,6 +220,106 @@ class TestThePageWords(unittest.TestCase):
             ballot_measures.for_page(data)
 
 
+class TestTheReview(unittest.TestCase):
+    """What the PR #120 review found."""
+
+    def test_a_shown_title_is_the_documents_own_name(self):
+        # The researchers' asides were rendered as link text: "(...; linked
+        # as '...' from https://www.michigan.gov/sos/elections)".
+        for title in ("Ballot questions (Bureau; linked from https://www.michigan.gov/sos)",
+                      "Voter Pamphlet; Spanish edition: archive.voteidaho.gov/x.pdf",
+                      "Vermont Voter Guide (described as 'voting instructions')",
+                      "Database (Division of Elections), query: Year 2026",
+                      "2026 Voter Guide, pages 73-74: amendments"):
+            rec = record()
+            rec["listSource"] = dict(rec["listSource"], title=title)
+            self.assertTrue(any("not the document's own name" in p for p in problems_of("CA", rec)),
+                            title)
+            guide = record(voterGuide={"url": "https://voterguide.sos.ca.gov/", "title": title})
+            self.assertTrue(any("not the document's own name" in p
+                                for p in problems_of("CA", guide)), title)
+        self.assertEqual(problems_of("CA", record()), [])
+
+    def test_no_title_on_the_page_carries_a_note_or_an_address(self):
+        page = ballot_measures.for_page(ballot_measures.load(ROOT))
+        for code, rec in page.items():
+            for key in ("list", "guide"):
+                if rec.get(key):
+                    self.assertNotRegex(rec[key]["title"], r"https?:|\blinked\b|described as",
+                                        f"{code} {key}")
+            if rec.get("office"):
+                self.assertNotRegex(rec["office"]["name"], r"https?:|\blinked\b", code)
+
+    def test_a_proclamation_for_offices_is_not_a_none(self):
+        # It would not name a constitutional amendment election, which that
+        # election's own resolution sets: Texas's "none" rested on one.
+        call = none_record(noneFrom="call",
+                           noneWords="There are no statewide questions.")
+        self.assertTrue(any("not said on what" in p for p in problems_of("IL", call)))
+        tx = ballot_measures.load(ROOT)["jurisdictions"]["TX"]
+        self.assertEqual(tx["noneFrom"], "ballots")
+        self.assertNotIn("noneWords", tx)
+
+    def test_a_question_decided_locally_says_how_each_ballot_words_it(self):
+        local = measure(designation="Question 2", local=True,
+                        textNote="Each town's ballot names the town.")
+        self.assertEqual(problems_of("CA", record(measures=[measure(), local])), [])
+        unnoted = dict(local)
+        unnoted.pop("textNote")
+        self.assertTrue(problems_of("CA", record(measures=[measure(), unnoted])))
+        self.assertTrue(problems_of("CA", record(measures=[measure(), dict(local, local="yes")])))
+        self.assertTrue(ballot_measures._measure("CA", local)["local"])
+        self.assertNotIn("local", ballot_measures._measure("CA", measure()))
+
+    def test_only_local_questions_are_no_statewide_ones(self):
+        local = measure(local=True, textNote="Each town's ballot names the town.")
+        self.assertTrue(any("decided locally" in p
+                            for p in problems_of("CA", record(measures=[local]))))
+
+    def test_new_hampshires_hb_1300_question_is_marked_local(self):
+        # Each town or city votes on it for itself: not one statewide
+        # decision, and not counted as one.
+        nh = ballot_measures.load(ROOT)["jurisdictions"]["NH"]["measures"]
+        self.assertEqual([bool(m.get("local")) for m in nh], [False, True])
+        self.assertIsNone(nh[0]["title"])
+        stats = ballot_measures.stats(ballot_measures.load(ROOT))
+        self.assertGreaterEqual(stats["local"], 1)
+
+    def test_a_missing_cache_is_an_error_under_check_too(self):
+        import inspect
+        from kyc import cli, validate
+        self.assertIsNone(ballot_measures.load(os.path.join(ROOT, "no-such-root")))
+        issues = validate.check_ballot_measures({})
+        self.assertEqual([(i.level, i.code) for i in issues],
+                         [("error", "ballot-measures-missing")])
+        # cli hands validate {} for a missing cache, never None, which
+        # validate.run would skip.
+        self.assertIn("measures=measures_mod.load(args.root) or {}", inspect.getsource(cli._build))
+
+
+class TestTheSourcesAreNamed(unittest.TestCase):
+    """A state page that shows the questions names where they come from, in
+    its footer and on the About page (PR #120 review)."""
+
+    def read(self, page):
+        with open(os.path.join(ROOT, "candidate_profiles_site", page), encoding="utf-8") as fh:
+            return fh.read()
+
+    def test_a_state_page_footer_names_the_questions_source(self):
+        self.assertIn("statewide\n                    questions from the election office's own list",
+                      self.read("states/ca.html"))
+        self.assertIn("District-wide\n", self.read("states/dc.html"))
+        self.assertIn("territory-wide\n", self.read("states/gu.html"))
+        # Puerto Rico holds no election that day, and its page lists none.
+        self.assertNotIn("questions from the election office", self.read("states/pr.html"))
+
+    def test_the_about_page_lists_them(self):
+        about = self.read("about.html")
+        self.assertIn("Statewide ballot questions", about)
+        self.assertIn("Each election office's own list, voter guide or official sample ballots",
+                      about)
+
+
 class TestThePagesLoadThem(unittest.TestCase):
     def test_state_pages_and_your_ballot_load_the_questions(self):
         self.assertIn("../data/measures.js", pages._state_scripts("CA"))

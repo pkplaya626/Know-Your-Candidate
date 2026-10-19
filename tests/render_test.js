@@ -169,11 +169,24 @@ async function testMeasures() {
   suite("state pages — none, not found, the District and the territories", () => {
     const sec = (p) => p.D.getElementById("measures");
     const t = (p) => (sec(p) || { textContent: "" }).textContent;
-    check("Texas: none, with the quoted words of the document that shows it",
+    // A "none" on a ballot names the ballot read, never "the official
+    // sample ballots" as though every county's had been (PR #120 review).
+    check("Texas: none, credited to the ballot that was read, by name",
       /No statewide question is on the Nov 3, 2026 ballot\./.test(t(tx)) &&
-      t(tx).indexOf("“" + tx.window.kycMeasures.TX.none.words + "”") !== -1 &&
+      tx.window.kycMeasures.TX.none.from === "ballots" &&
+      t(tx).indexOf("This site read " + tx.window.kycMeasures.TX.list.title + " on Oct. 19, 2026, and it " +
+        "prints no statewide question.") !== -1 &&
+      !/sample ballots print none|orders it only/.test(t(tx)) &&
       !!sec(tx).querySelector('a[href="' + tx.window.kycMeasures.TX.list.url + '"]') &&
       !sec(tx).querySelector("li.measure"), t(tx).slice(0, 300));
+    check("no list's or guide's link text is a note or an address",
+      [tx, me, dc, mp, gu].every((p) => [...(sec(p) || p.D.createElement("i")).querySelectorAll("a")].every((a) =>
+        !/https?:|\blinked\b|described as/.test(a.textContent))));
+    // The District and the territories hold no county's or school
+    // district's question; a state's words are not theirs (rule 75).
+    check("the District and the territories are not told of counties' questions",
+      [dc, mp, gu].every((p) => !/a county's, a city's or a school district's/.test(t(p))) &&
+      /a county's, a city's or a school district's/.test(t(tx)));
     check("Maine: not found, never 'none', and the election office's own site",
       /has not found an official list of statewide questions/.test(t(me)) && /does not say there are none/.test(t(me)) &&
       !/No statewide question is/.test(t(me)) &&
@@ -188,8 +201,37 @@ async function testMeasures() {
     check("a place with no election that day lists no questions", !sec(pr));
   });
 
+  /* New Hampshire's HB 1300 question is on every ballot, but each town or
+   * city decides it for itself: it is listed apart and not counted as a
+   * statewide question (PR #120 review). */
+  const nh = await buildPage("states/nh.html");
+  await settle(50);
+  suite("states/nh.html — a question each town decides for itself is not a statewide one", () => {
+    const { window, D } = nh;
+    const section = D.getElementById("measures");
+    const text = section ? section.textContent : "";
+    const rec = window.kycMeasures.NH;
+    const local = rec.measures.filter((m) => m.local);
+    const statewide = rec.measures.filter((m) => !m.local);
+    check("the record marks one question as decided locally", local.length > 0 && statewide.length > 0);
+    check("the lead counts only the statewide ones", statewide.length === 1
+      ? /One statewide question is on the Nov 3, 2026 ballot/.test(text)
+      : new RegExp(statewide.length + " statewide questions are on").test(text), text.slice(0, 200));
+    check("the statewide list holds only those", !!section &&
+      section.querySelectorAll("ol.measures:not(.measures-local-list) > li.measure").length === statewide.length);
+    check("the local one is listed apart, and says each town or city votes on it for itself",
+      !!section && section.querySelectorAll("ol.measures-local-list > li.measure").length === local.length &&
+      /not one statewide decision: each town or city votes on it for itself/.test(text) &&
+      /Other local questions/.test(text));
+    check("its kind line does not repeat its designation", !!section &&
+      [...section.querySelectorAll("li.measure")].every((li) =>
+        li.querySelector(".measure-kind").textContent.indexOf(
+          li.querySelector(".measure-name").firstChild.textContent.trim()) === -1));
+  });
+
   const caAfter = await buildPage("states/ca.html", { now: "2026-11-05T09:00:00" });
   const txAfter = await buildPage("states/tx.html", { now: "2026-11-05T09:00:00" });
+  const meAfter = await buildPage("states/me.html", { now: "2026-11-05T09:00:00" });
   await settle(50);
   suite("state pages after Election Day — the questions in the past tense, no result of our own", () => {
     const section = caAfter.D.getElementById("measures");
@@ -198,13 +240,22 @@ async function testMeasures() {
     check("the heading and the lead are in the past tense",
       /questions that were on the Nov 3, 2026 ballot/.test(section.querySelector("h2").textContent) &&
       /questions were on the Nov 3, 2026 ballot/.test(text));
-    check("each 'Was on the Nov 3, 2026 ballot'", [...section.querySelectorAll("li.measure")].every((li) =>
-      /Was on the Nov 3, 2026 ballot/.test(li.textContent)));
+    check("no measure repeats the tense the heading and the lead carry",
+      [...section.querySelectorAll("li.measure")].every((li) => !/Was on the Nov 3, 2026 ballot/.test(li.textContent)));
     check("the state's own results, and no result said here", /does not read the results of ballot questions/.test(text) &&
       (!results || !!section.querySelector('.measures-results a[href="' + results + '"]')) &&
       !/\b(passed|failed|approved|rejected)\b/i.test(section.querySelector(".measures-results").textContent));
     check("a 'none' is in the past tense too", /No statewide question was on the Nov 3, 2026 ballot/.test(
       txAfter.D.getElementById("measures").textContent));
+    // "...that were on the ballot" says there were some: never over a
+    // "none" or a "not found" (PR #120 review, rule 19).
+    check("over a 'none' or a 'not found', the heading does not say there were questions",
+      [txAfter, meAfter].every((p) => p.D.querySelector("#measures h2").textContent ===
+        "Statewide questions on the Nov 3, 2026 ballot"),
+      [txAfter, meAfter].map((p) => p.D.querySelector("#measures h2").textContent).join(" | "));
+    check("'not found' is in the past tense, and still never 'none'",
+      /did not find an official list/.test(meAfter.D.getElementById("measures").textContent) &&
+      !/No statewide question/.test(meAfter.D.getElementById("measures").textContent));
   });
 
   /* Your ballot: a card after the state offices, the same list. */
@@ -240,8 +291,13 @@ async function testMeasures() {
     check("Maine: not found, never none", !!card(meBallot) &&
       /has not found an official list/.test(card(meBallot).textContent) &&
       !/No statewide question is/.test(card(meBallot).textContent));
-    check("after the day, in the past tense", !!card(caBallotAfter) &&
-      [...card(caBallotAfter).querySelectorAll("li.measure")].every((li) => /Was on the Nov 3, 2026 ballot/.test(li.textContent)));
+    // The order note names every card the list shows (PR #120 review).
+    check("the order note names the card even where it says none or not found",
+      [txBallot, meBallot].every((b) => /then a note on statewide questions\./.test(
+        (b.out.querySelector(".ballot-note") || { textContent: "" }).textContent)));
+    check("after the day, in the past tense, said once", !!card(caBallotAfter) &&
+      /questions were on the Nov 3, 2026 ballot/.test(card(caBallotAfter).textContent) &&
+      [...card(caBallotAfter).querySelectorAll("li.measure")].every((li) => !/Was on the Nov 3, 2026 ballot/.test(li.textContent)));
   });
 }
 

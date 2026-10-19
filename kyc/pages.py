@@ -286,6 +286,26 @@ _CONGRESS_SOURCES = """\
                     in a primary, withdrawn, or left off a certified list - stay on record
                     and are shown under each race.</p>"""
 
+_PHOTO_CREDIT_END = "a Wikimedia Commons file with its author and licence.</p>"
+
+
+def _state_sources(code, questions=True):
+    """A state's page lists its statewide questions too (rule 95), so its
+    footer names where they come from, as Your ballot's does (PR #120
+    review), in the place's own word for them (rule 75). A place with no
+    election that day lists none (*questions* False)."""
+    if not questions:
+        return _CONGRESS_SOURCES
+    scope = ("District-wide" if code == "DC" else
+             "territory-wide" if code in TERRITORIES else "statewide")
+    out = _CONGRESS_SOURCES.replace(
+        _PHOTO_CREDIT_END,
+        f"a Wikimedia Commons file with its author and licence; the {scope}\n"
+        "                    questions from the election office's own list, voter guide or official\n"
+        "                    sample ballots, each with its official text and source, read by hand.</p>", 1)
+    assert out != _CONGRESS_SOURCES
+    return out
+
 
 # ------------------------------------------------------- the site's frame
 
@@ -704,6 +724,8 @@ def render_state(code, host, summary=None):
         nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
         main=_state_main(),
+        # Puerto Rico's seat has no 2026 race, and no election that day.
+        footer=_state_sources(code, not (code in TERRITORIES and info.get("houseTerm"))),
         scripts=_scripts(_state_scripts(code)),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code))],
     )
@@ -1982,6 +2004,11 @@ DATASETS = (
     ("Voting information", '<a href="https://www.nass.org/can-I-vote">NASS Can I Vote</a>',
      "Each state's official pages to register, find a polling place and vote", "refresh",
      "voting"),
+    # Rule 95: a hand-edited cache, each list dated on the page that shows it.
+    ("Statewide ballot questions",
+     "Each election office's own list, voter guide or official sample ballots",
+     "The statewide questions on the Nov 3, 2026 ballot, in their official words",
+     "hand", None),
     ("President, Vice President and Cabinet",
      "The White House, each office's own page, the Senate's roll calls",
      "Who holds each office, and since when", "refresh", "executive"),
@@ -2020,6 +2047,7 @@ _WHEN_READ = {
     "manual": "By hand, from time to time",
     "guide": "Checked by hand; each page gives its date",
     "curated": "When a change is needed; each change is a public commit",
+    "hand": "By hand, and again by a second reader",
 }
 
 # What the "Last read" column says for a dataset with no single read date:
@@ -2030,6 +2058,7 @@ _NO_READ_DATE = {
     "Market prices and polling averages": "Each price gives the day it was read",
     "Members' biographies": "In the repository's history",
     "Editorial decisions": "Each decision gives its date",
+    "Statewide ballot questions": "Each state's page gives the day its list was read",
 }
 
 

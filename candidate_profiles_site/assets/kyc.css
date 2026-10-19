@@ -3198,7 +3198,6 @@ html.has-zip .ballot-result { min-height: 100vh; }
 .measure-name { margin: 0; font-size: var(--t-md); font-weight: 700; overflow-wrap: anywhere; }
 .measure-title { display: block; margin-top: 2px; font-weight: 600; color: var(--text-muted); }
 .measure-kind,
-.measure-when,
 .measure-note,
 .measure-links { margin: 0; font-size: var(--t-sm); max-width: 70ch; }
 .measure-note { color: var(--text-muted); }
