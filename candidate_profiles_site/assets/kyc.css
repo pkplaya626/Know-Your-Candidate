@@ -1475,6 +1475,67 @@ a.badge-link {
 }
 .intro-pick .select { width: auto; min-width: 12rem; max-width: 20rem; }
 
+/* "Find who represents you" (kyc-findrep.js): a ZIP code or a location,
+ * and one answer for every level - on the home page, the state pages and
+ * the legislature and county pages. */
+.findrep { display: grid; gap: var(--s-2); }
+.intro .findrep {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.findrep-title {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-lg);
+}
+.findrep-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+}
+.findrep-label { font-size: var(--t-md); font-weight: 600; }
+.findrep-form .findrep-zip { width: 8.5rem; flex: none; }
+.findrep-vote { margin-left: auto; }
+.findrep-result { display: grid; gap: var(--s-3); }
+.findrep-answer { display: grid; gap: var(--s-2); }
+.findrep-place { font-weight: 700; }
+.findrep-list { display: grid; gap: var(--s-2); margin: 0; }
+.findrep-row {
+  display: grid;
+  grid-template-columns: minmax(8rem, 13rem) 1fr;
+  gap: var(--s-1) var(--s-3);
+  font-size: var(--t-md);
+}
+.findrep-row dt { color: var(--text-muted); font-size: var(--t-sm); font-weight: 600; }
+.findrep-row dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.findrep-item + .findrep-item { margin-top: var(--s-1); }
+.findrep-item .findrep-note { margin: var(--s-1) 0 0; }
+.findrep-share {
+  display: inline-block;
+  min-width: 3.4em;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.findrep-status { color: var(--text-muted); font-size: var(--t-xs); }
+.findrep-note { color: var(--text-muted); font-size: var(--t-sm); max-width: 70ch; }
+.findrep-actions { margin: 0; }
+.findrep-sources summary { cursor: pointer; color: var(--text-muted); font-size: var(--t-sm); }
+.findrep-sources p { color: var(--text-muted); font-size: var(--t-xs); margin-top: var(--s-1); }
+@media (max-width: 600px) {
+  .findrep-row { grid-template-columns: 1fr; gap: 0; }
+  .findrep-vote { margin-left: 0; }
+}
+/* In the map page's sidebar the panel is one narrow column. */
+.sidebar .findrep-title { font-size: var(--t-md); }
+.sidebar .findrep-row { grid-template-columns: 1fr; gap: 0; }
+.sidebar .findrep-vote { margin-left: 0; }
+.findrep-crosses { color: var(--text); font-weight: 600; }
+.empty-zip { margin-top: var(--s-2); }
+
 .results-bar {
   display: flex;
   align-items: baseline;
@@ -4177,6 +4238,12 @@ button.local-county-link {
 /* Find my district: one button above the district tools, its answer under it. */
 .districts-locate { margin: 0 0 var(--s-3); }
 .districts-locate .state-note { margin-top: var(--s-2); }
+.districts-locate .locate-people { margin-top: var(--s-2); }
+/* The reader's own point, where Find my district placed it: on every view
+ * of both maps, over every line. A shape, not words (rule 46). */
+.reader-pin { pointer-events: none; }
+.reader-pin-halo { fill: var(--surface-0); }
+.reader-pin-dot { fill: var(--accent); }
 
 /* The federal government: federal/index.html and courts/<id>.html
    (kyc-federal.js). Tables are the guide's (.guide-table, a card per row on
