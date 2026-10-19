@@ -5,7 +5,7 @@
  * by kyc/districts.py, which also measured how much of each new district's
  * land came from each old one. Everything said about a person - who holds a
  * seat, who is running where, who is on the November ballot - comes from
- * profiles.js, the same records the grid and the state pages render, so this
+ * its state's people file, the same records the grid and the state pages render, so this
  * page cannot disagree with them about anyone.
  *
  * Each district is drawn once, into one hidden <defs>, and every view - the
@@ -34,8 +34,8 @@
   var KYC = global.KYC;
   var code = doc.body.getAttribute("data-state") || "";
   var state = (global.kycDistricts || {})[code] || null;
-  var data = global.legislatorsData || [];
-  var races = global.kycRaces || [];
+  var data = KYC.people();
+  var races = KYC.races();
 
   /* Text is sized for the width a map is actually drawn at, measured after
    * the first render. It used to be sized for 620px and left to scale with
@@ -1482,8 +1482,8 @@
       return;
     }
     if (!data.length) {
-      app.innerHTML = '<p class="results-bar">Profile data did not load. Run: ' +
-        "python build_profile_site.py</p>";
+      app.innerHTML = '<p class="results-bar">' + KYC.escapeHtml(KYC.peopleProblem() ||
+        "Profile data did not load. Run: python build_profile_site.py") + "</p>";
       return;
     }
     KYC.profile.ensure();

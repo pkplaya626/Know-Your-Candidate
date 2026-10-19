@@ -20,7 +20,7 @@ Python 3.9+ and the standard library. Nothing to install.
 
 | Command | What it does |
 |---|---|
-| `python build_profile_site.py` | Build `data/profiles.js`, `data/geo.js` and `data/districts/*.js` |
+| `python build_profile_site.py` | Build `data/people/*.js`, `data/geo.js` and `data/districts/*.js` |
 | `… build --check` | Validate only; write nothing |
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2726 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3005 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -86,7 +86,7 @@ the other refresh commands listed above. `build` and
 ```text
 Cleaned_House.csv                        ─┐
 Cleaned_Senate.csv                       ─┤
-Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js ─┬─> index.html
+Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/people/*.js ─┬─> index.html
 Completed_Primary_Candidates_2026.csv    ─┤          data/geo.js       ─┤   (grid + races)
 Late_Primary_Candidates_2026.csv         ─┘          portraits.json     └─> map.html
 us_atlas_states_topo.json                ──> kyc/geo.py                     (partisan map)
@@ -98,8 +98,22 @@ congress_snapshot.json                   ──> kyc/legislators.py
 
 The CSVs and the state atlas at the repo root are the source of truth.
 Everything under `candidate_profiles_site/data/` is **generated** — never edit
-`profiles.js` or `geo.js` by hand. They are committed so the site serves
+`people/*.js` or `geo.js` by hand. They are committed so the site serves
 straight from GitHub Pages with no build step.
+
+The profiles are written in the files each page needs (CLAUDE.md rule 94):
+
+| File | Holds | Loaded by |
+|------|-------|-----------|
+| `data/people/meta.js` | `kycBuildMeta`: the build's figures, its signature, each chamber's left-right scores (`chamberScores`) | every page with people, `ballot.html`, and the guide's Congress page |
+| `data/people/index.js` | every profile without the fields in `emit.INDEX_LEAVES_OUT` (but a member's district offices where their card's "Contact office" calls one, `emit.INDEX_KEEPS_FOR_THE_CARD`), and every race | `index.html`, `map.html`, `states/index.html`; elsewhere on demand |
+| `data/people/<st>.js` | one state's profiles whole, and its races | `states/<st>.html`, `districts/<st>.html`; on `ballot.html`, the states an answer is in, before it is drawn; elsewhere on demand (`KYC.loadPeople`) |
+
+Each people file assigns `window.kycPeopleFile`, which `assets/kyc.js` takes
+into `window.legislatorsData` and `window.kycRaces` (`KYC.people()`,
+`KYC.races()`) as it arrives, filling the index's records in place. Every
+file names its build (`build`), and a file from another build than the
+page's `kycBuildMeta.signature` is refused and said on the page.
 
 Both pages load their data with `<script src>` rather than `fetch()`, so
 opening the HTML directly off disk still works (`file://` blocks `fetch`, not
@@ -232,8 +246,8 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   its footer out of reach. "Data built" is the reader's own calendar day of
   the build (`KYC.localDay`), never a UTC date in their future.
 - **The header's tag names the section** (`pages.brand_sub`, from the
-  navigation's own names, rule 75); only a page that loads `profiles.js` says
-  which Congress.
+  navigation's own names, rule 75); only a page that loads the build's figures
+  (`data/people/meta.js`) says which Congress.
 - `404.html`, which GitHub Pages serves for any missing address at any depth
   (so its URLs start at the root), with the search and every section;
   `districts/index.html` ("District maps", linked from each district page)
@@ -1303,7 +1317,7 @@ in another committee entirely. Showing their last cycle's figures instead
 would be worse than either: a member's 2024 receipts on a page about the 2026
 midterms reads as current money.
 
-`profiles.js` carries a `quality` map per profile listing only the fields that
+Each profile carries a `quality` map listing only the fields that
 are *not* real data. About **11% of surfaced fields** fall into one of those
 categories — that is the honest picture, and the page shows it as such. Absent
 values are excluded from search, so "not disclosed" does not match everyone.
@@ -1404,7 +1418,7 @@ clause 7; Rule III, clause 3(a)).
 
 The build writes `data/votes/house.js` and `data/votes/senate.js`, each
 rewritten only when its content signature changes. They are not in
-`profiles.js`: every page that opens a profile names them, with their version
+the people files: every page that opens a profile names them, with their version
 stamps, in an inert `<template id="onDemandData">`, and the dialog loads a
 chamber's file the first time one of its members is opened (`KYC.loadData`).
 While it loads the panel says so, and if it fails, that it failed.
@@ -1552,7 +1566,7 @@ November ballot, and the people the primary removed folded under each race.
 The same profile dialog opens from every card.
 
 The pages carry nothing but the state code; `assets/kyc-state.js` renders
-them from the same `profiles.js` the grid and map load, so a state page can
+them from its own state's people file, of the same build the grid and map load, so a state page can
 never disagree with the grid about who represents a district. They are
 generated, so `verify` regenerates them in memory and fails when a page on
 disk is not what the template would write.
@@ -1633,8 +1647,10 @@ here in a different way:
   BIA's directory, with a disputed leadership said in words and the
   directory's asterisks dropped; a caucus's own style for its minority lead
   (`overrides.COMMITTEE_TITLES`, "Co-Chair") with the evidence.
-- **Only the page that shows people loads them.** The Congress page loads
-  `profiles.js` like a state page; the others load only `kyc.js` and
+- **No guide page loads profiles.** The Congress page's committee leads and
+  chamber leaders are written in by the build (`pages.committees_html`,
+  `leaders_html`), each a link to the profile on the grid; it loads only the
+  build's figures for its sidebar. The others load only `kyc.js` and
   `kyc-guide.js`, and carry their "Jump to" list in the HTML.
 
 Every page links to the guide from its sidebar, and the guide links back into
@@ -2505,7 +2521,7 @@ petition, and the courts kept the 2022 map in place; its page says so.
   on a touch screen, compares up to three.
   The choice is in the address (`#/?d=3,6`).
 - **A close-up of the picked districts.** It shows county lines, towns, and
-  captions naming who holds the seat or is running in it, from `profiles.js`.
+  captions naming who holds the seat or is running in it, from the state's people file.
   On a redrawn state the other map's lines are dashed.
 - **Party colours.** Each district is drawn in the party of the member who
   holds it, or as vacant. A redrawn state's new map is left plain: nobody
@@ -2525,7 +2541,7 @@ fitted to it. California uses EPSG:3310's parameters, and Alaska's Aleutians
 are unwrapped across the antimeridian. So the page loads no mapping library,
 and a share of the drawing is a share of the ground. `data/districts/<st>.js`
 holds only geometry, one file per state; everything said about a person comes
-from `profiles.js`.
+from the state's people file.
 
 The build fails loudly when:
 
@@ -2585,7 +2601,7 @@ names, each linked:
   Bureau calls them (`lookup.TERRITORY_AREAS`); none for D.C. and Guam, each
   its own county-equivalent.
 
-The legislature and county pages load no `profiles.js`, so the state's name,
+The legislature and county pages load no people files, so the state's name,
 its district map and its own lookup come from the lookup index
 (`lookup.place_info`), and members of Congress are linked on the state page.
 
@@ -2627,6 +2643,37 @@ with a neighbour's whose edge is near. Only the states whose box holds the point
 the reader's state's files are fetched for a ZIP code
 (`data/lookup/index.js`: each ZIP prefix's states, and every file's
 versioned address, rule 76).
+
+### Your ballot
+
+`ballot.html` (`assets/kyc-ballot.js`, rule 92) answers a different question
+from the one above: not who represents a reader, but who is on their
+November ballot. It is in the navigation under the election, and reached from
+the lookup's answer (**See everything on your ballot**, carrying the ZIP code),
+each state's voting block and the home page's hero. A ZIP code or a location
+is looked up on the device exactly as above, and the page lists, one card per
+contest:
+
+| Contest | From | Shown |
+| --- | --- | --- |
+| U.S. Senate, regular then special | the 2026 race record | the race's badges and people as the state page's race section draws them: the same split, order, status words and counts (`KYC.cards.racePeople`, rule 73), nominees with no profile named, each person opening their profile. Under the race, only whom the lookup's answer lists (`KYC.stillRunning`); a filer whose ballot status is not known after the primary is named apart, and a holder off the ballot is named with their own status |
+| U.S. House (or the Delegate, the Resident Commissioner) | the ZIP area's districts on the 2026 map | the same, one card per district with its share of the ZIP area's land where there are several, and the location offered for an exact answer |
+| Governor, lieutenant governor, attorney general, secretary of state | `ballot2026` and the election office's list (rule 91) | the office's mark, its holder line (naming the holder as the holder) and its listed candidates, write-ins apart, as the state page shows them; the offices not on this ballot with their record's words |
+| State senate and house | the lookup's legislative districts, `legislature.seats_up`, `legislature.district_seats` | whether each district's seat is on the ballot, in the legislature page's words and in the words its count of seats gives ("this seat", "this district's seats", "one of this district's seats"); where this site's record names no district, that is said on the row; its candidates are not listed here; a chamber with no seat in reach up is drawn as off the ballot |
+
+Then what the site does not list (ballot measures, local and judicial
+contests, the legislature's candidates), with the state's own sample ballot
+where its election office links one, and, at the top, the state's key dates
+as its voting block gives them, a date said passed on the reader's own day.
+D.C. and the territories are in their own words; Puerto Rico's record says no
+election is held there on November 3, and the page says so.
+
+The address keeps a ZIP code (`ballot.html#/?zip=30303`), so a copied link
+shows the same list, and never a location. From the day after Election Day
+the page says the election has been held, shows the results the site has for
+Congress and links the state's official results for everything else; it names
+no state winner. **Print or save this list** prints the list without the
+site's controls, in the light theme's colours whatever theme is on screen.
 
 ### Find my district
 
@@ -2695,6 +2742,7 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `disclosureUrl`, `disclosureSource` | The member's latest annual financial disclosure: `house-clerk` (a PDF from the Clerk's annual index) or `senate-efd` (a report in the Senate's eFD system) | Members with a filing on record |
 | `committeeList`, `committeesSource` | `committee-membership-current`, with rank and title (`data/committees.json`); a titled seat also carries `side` (`majority` or `minority`), because a title alone cannot say which - "Vice Chairman" leads the minority on Senate Ethics and Intelligence | Sitting members |
 | `leadership` | The party and chamber posts congress-legislators' `leadership_roles` lists for the member's bioguide id in the Congress the snapshot is of (Speaker, floor leaders, whips, conference officers; never the previous Congress's open-ended posts), in the chamber's words where `overrides.LEADERSHIP_TITLES` says so; shown on the profile and the guide's Congress page while they sit | Sitting members who hold one |
+| `pay` | `{amount, post?}`: the annual salary the law sets for the member's post, from `kyc/pay.py`'s table read from the Congressional Research Service's RL30064 (Table 1) and the Senate's salaries page, dated; `post` only where a leadership post (Speaker, President pro tempore, a floor leader) sets a higher rate. The year, the sources and the one sentence the page says of the rates' history (`stood`, the report's "unchanged since 2009") are `kycBuildMeta.pay`; a sitting member's filing for another seat shows the member's line, credited to their record; the profile shows the line only in that year, and nobody has one while the membership is of another Congress than the table's | Sitting members, in the table's Congress |
 | `fecCandidateId` | Links the FEC's own candidate page | Everyone the FEC knows |
 | `rosterFecId` | The curated roster's `FEC Candidate ID` column; the finance lookup takes it as the person's authoritative id, and `validate` checks its office and state against the profile | Curated candidates |
 | `otherFecIds` | The same person's other FEC registrations (one committee's money reported under several ids, or a curated pair in `overrides.SAME_PERSON_FILINGS`); a link shared under any of them opens this profile | People registered more than once |
@@ -2792,7 +2840,7 @@ the build timestamp excluded, and `verify` compares it against a rebuild:
 
 ```
 [error] the committed site data is out of date:
-  - candidate_profiles_site/data/profiles.js is stale
+  - candidate_profiles_site/data/people/meta.js is stale
        committed fb5d549512d1f75b...
        rebuilt   3c49b99d632c308b...
 

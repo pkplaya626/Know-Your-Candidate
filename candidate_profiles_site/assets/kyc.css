@@ -1149,6 +1149,42 @@ a.badge-link {
   color: var(--text-muted);
 }
 
+/* A sitting member's way to reach their office (GRID-16), beside the card's
+ * button and not inside it: a link cannot sit inside a button. */
+.card-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.card-contact {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-height: 32px;
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .card-contact:hover { background: var(--surface-1); border-color: var(--border-strong); }
+}
+.race-held .card-contact { margin-left: var(--s-1); vertical-align: middle; }
+@media (max-width: 600px) {
+  /* Under the row's words, not its portrait. */
+  #stateContent .card-cell .card-contact { margin-left: calc(52px + var(--s-3)); }
+}
+@media (max-width: 560px) {
+  /* A district box's rows have a 64px portrait (the .district-fact rule). */
+  .district-fact .card-cell .card-contact { margin-left: calc(64px + var(--s-3)); }
+}
+
 /* Public offices held (KYC.officesHeld): newest first, the years beside the
  * office, the place under it. */
 .held-list {
@@ -1926,6 +1962,13 @@ a.badge-link {
   border: 1px solid var(--border);
 }
 
+/* In the dialog's place while a person's record loads (rule 94). */
+.modal-waiting {
+  margin: 0;
+  padding: var(--s-6) var(--s-5);
+  padding-right: calc(var(--s-6) + 44px);
+  color: var(--text-muted);
+}
 .modal-header {
   display: flex;
   align-items: center;
@@ -2187,6 +2230,8 @@ a.badge-link {
 }
 .campaign-quote footer { margin-top: var(--s-1); }
 .field-credit { margin: var(--s-2) 0 0; }
+/* A credit under a field's own words (what the job pays) is a line of its own. */
+.field-value > .field-credit { display: block; }
 .field-credit .badge { margin-right: var(--s-1); }
 
 .note-box {
@@ -3057,6 +3102,99 @@ a.badge-link {
 }
 .state-section .race { margin-bottom: var(--s-4); }
 
+/* Your ballot (kyc-ballot.js, rule 92): one card per contest, in a column a
+ * phone stacks as it is; the way to it from the home page, the lookup's
+ * answer and each state's voting block. */
+.intro-ballot,
+.vote-ballot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+}
+.vote-ballot { margin: var(--s-3) 0; }
+.ballot-page { max-width: 60rem; }
+.ballot-ask {
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.ballot-result { display: grid; gap: var(--s-5); }
+/* A ZIP code in the address: the answer's room held from first paint
+ * (kyc.js marks it), so the footer does not jump when it is drawn. */
+html.has-zip .ballot-result[hidden] { display: grid !important; }
+html.has-zip .ballot-result { min-height: 100vh; }
+/* A share in a sentence flows with it; the column width is the lookup
+ * list's. */
+.ballot-share .findrep-share { display: inline; min-width: 0; }
+.ballot-state { display: grid; gap: var(--s-4); }
+.ballot-place { margin: 0; font-size: var(--t-xl); font-weight: 700; overflow-wrap: anywhere; }
+.ballot-when { margin: 0; font-weight: 600; }
+.ballot-after { color: var(--text); max-width: 70ch; }
+.ballot-section { display: grid; gap: var(--s-2); }
+.ballot-heading { margin: 0; font-size: var(--t-lg); font-weight: 700; }
+.ballot-note { margin: 0; font-size: var(--t-sm); color: var(--text-muted); max-width: 70ch; }
+.ballot-caveat { color: var(--text); }
+.ballot-list { display: grid; gap: var(--s-3); margin: 0; padding: 0; list-style: none; }
+.ballot-contest {
+  display: grid;
+  gap: var(--s-2);
+  min-width: 0;
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.ballot-contest.ballot-off { background: transparent; border-style: dashed; }
+.ballot-office { margin: 0; font-size: var(--t-md); font-weight: 700; }
+.ballot-seat { margin-left: var(--s-1); font-weight: 600; color: var(--text-muted); }
+.ballot-badges { display: flex; flex-wrap: wrap; gap: var(--s-1); margin: 0; }
+.ballot-people { display: grid; gap: var(--s-1); margin: 0; padding: 0; list-style: none; }
+.ballot-person {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-1) var(--s-2);
+  overflow-wrap: anywhere;
+}
+.ballot-person .link-button { font-weight: 600; text-align: left; }
+.ballot-share { margin: 0; font-size: var(--t-sm); }
+.ballot-seat-row { display: grid; gap: 2px; }
+.ballot-seat-row .leg-ballot { margin: 0; font-size: var(--t-sm); }
+.ballot-seat-name { margin: 0; }
+.ballot-district { font-weight: 600; }
+.ballot-offlist { margin: 0; padding-left: var(--s-5); font-size: var(--t-sm); }
+.ballot-offlist li + li { margin-top: var(--s-1); }
+.ballot-more { margin: 0; font-size: var(--t-sm); }
+.ballot-actions { margin: 0; }
+.ballot-state > .ballot-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); }
+.ballot-print-row { margin: 0; }
+.ballot-contest .gov-candidates { margin-top: 0; }
+@media (max-width: 999px) {
+  .ballot-contest { padding: var(--s-3); }
+}
+
+/* Print or save the list: the reader's ballot and its sources, without
+ * the site's controls. The layout's scrolling column becomes the page. */
+@media print {
+  body[data-page="ballot"] .app-body,
+  body[data-page="ballot"] .app-main,
+  body[data-page="ballot"] .content { display: block; height: auto; overflow: visible; }
+  .ballot-ask,
+  .ballot-print-row,
+  .ballot-actions,
+  .ballot-more,
+  .ballot-page .state-hero .districts-lede,
+  .vote-cal,
+  [data-ballot-locate],
+  .site-footer .footer-meta { display: none !important; }
+  .ballot-contest { break-inside: avoid; border-color: currentColor; background: none; }
+  .ballot-page .link-button { color: inherit; text-decoration: none; }
+  .ballot-state + .ballot-state { break-before: page; }
+}
+
 .state-list { display: grid; gap: var(--s-2); }
 .state-row {
   display: grid;
@@ -3768,6 +3906,134 @@ a.badge-link {
 }
 .guide-flow-options span { color: var(--text-muted); }
 
+/* How a bill becomes law (VISUALS-31): every word in an HTML box (rule 46).
+ * Narrow - a phone, or a browser without container queries - it is a
+ * numbered list of stages on one line, the House's steps, then the
+ * Senate's, read top to bottom. Wide, the two chambers' tracks stand side
+ * by side and meet above the president, and kyc-guide.js draws the
+ * connectors as one SVG path of lines under the boxes (.billflow-lines). */
+.guide-billflow {
+  position: relative;
+  margin: 0 0 var(--s-5);
+  container-type: inline-size;
+}
+.billflow-lines {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.billflow-lines path { fill: none; stroke: var(--border-strong); stroke-width: 2; }
+.billflow {
+  position: relative;
+  counter-reset: billflow;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.billflow ol,
+.billflow ul { margin: 0; padding: 0; list-style: none; }
+.billflow-stage {
+  counter-increment: billflow;
+  position: relative;
+  margin: 0 0 var(--s-3) var(--s-6);
+}
+/* The two chambers are one stage, in either order: numbered 1 and 2 they
+ * read as the House first, which the text says is not so. */
+.billflow-track + .billflow-track { counter-increment: none; }
+.billflow-stage::before {
+  content: counter(billflow);
+  position: absolute;
+  z-index: 1;
+  left: calc(-1 * var(--s-6));
+  top: var(--s-2);
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: 700;
+  font-size: var(--t-xs);
+  line-height: 1.6rem;
+  text-align: center;
+}
+/* The connector, narrow: one line through every stage's number. */
+.billflow::before {
+  content: "";
+  position: absolute;
+  left: calc(0.8rem - 1px);
+  top: calc(var(--s-2) + 0.8rem);
+  bottom: var(--s-6);
+  border-left: 2px solid var(--border-strong);
+}
+.billflow-head {
+  margin: 0 0 var(--s-2);
+  padding-top: var(--s-2);
+  font-weight: 700;
+  font-size: var(--t-md);
+}
+.billflow-steps,
+.billflow-ends { display: grid; gap: var(--s-2); }
+.billflow-end { display: grid; gap: var(--s-2); align-content: start; }
+.billflow-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.billflow-box > span { color: var(--text-muted); }
+.billflow-joined .billflow-box,
+.billflow-box[data-node="president"] { border-top: 3px solid var(--accent); }
+.billflow-then { border-style: dashed; border-color: var(--border-strong); }
+.billflow-result {
+  align-self: flex-start;
+  margin-top: var(--s-1);
+  padding: 2px var(--s-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--t-xs);
+}
+.billflow-result[data-result="not-law"] { border-style: dashed; border-color: var(--border-strong); }
+@container (min-width: 44rem) {
+  .billflow-lines { display: block; }
+  .billflow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s-6);
+    row-gap: var(--s-6);
+  }
+  .billflow::before,
+  .billflow-stage::before { content: none; }
+  .billflow-stage { margin: 0; }
+  .billflow-joined,
+  .billflow-president,
+  .billflow-answers { grid-column: 1 / -1; }
+  .billflow-joined .billflow-box,
+  .billflow-president .billflow-box { width: min(100%, 34rem); margin: 0 auto; }
+  .billflow-track .billflow-head { text-align: center; }
+  /* A label on the line from the president down to the answers. */
+  .billflow-answers .billflow-head {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto var(--s-5);
+    padding: var(--s-1) var(--s-3);
+    background: var(--surface-0);
+    font-size: var(--t-sm);
+    text-align: center;
+  }
+  .billflow-steps { gap: var(--s-5); }
+  .billflow-ends { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+  .billflow-end { gap: var(--s-5); }
+}
+
 /* Who checks whom: a box per branch, its checks on the others inside. */
 .guide-checks { margin: 0 0 var(--s-5); }
 .guide-checks-row {
@@ -3946,6 +4212,7 @@ a.badge-link {
   color: var(--text);
   font: inherit;
   text-align: left;
+  text-decoration: none;
   cursor: pointer;
 }
 .guide-person .name { color: var(--accent); font-weight: 600; }

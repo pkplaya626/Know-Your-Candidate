@@ -175,11 +175,16 @@ class TestGuidePages(unittest.TestCase):
     def test_only_a_page_with_people_loads_the_profiles(self):
         for page in PAGES:
             html = government.render(page["slug"], "example.org", ["TX"])
-            loads = "../data/profiles.js" in emit.script_sources(html)
+            loaded = emit.script_sources(html)
+            loads = "../data/people/meta.js" in loaded
             self.assertEqual(loads, bool(page.get("people")), page["slug"])
             # Such a page shows the chambers' balance, as a state page does;
             # the others have no build metadata to fill it from.
             self.assertEqual('id="senateBalance"' in html, loads, page["slug"])
+            # Its members are written in by the build: no guide page loads
+            # anyone's profile, neither the index nor a state's (rule 94).
+            self.assertEqual([src for src in loaded if "data/people/" in src and
+                              not src.endswith("people/meta.js")], [], page["slug"])
 
     def test_a_page_without_people_carries_its_own_jump_list(self):
         html = government.render("index", "example.org", ["TX", "AK", "DC"])
@@ -225,6 +230,114 @@ class TestGuidePages(unittest.TestCase):
             self.assertEqual(results[page], (True, "ok"), page)
 
 
+class TestCongressPageNamesItsMembers(unittest.TestCase):
+    """Who chairs each committee and who leads each chamber, written into
+    the guide's Congress page by the build from the profiles: the page loads
+    no profile data (rule 94). It drew them on the page from all 6.7 MB of
+    profiles.js."""
+
+    COMMITTEES = {"HSAG": {"name": "House Committee on Agriculture", "chamber": "house",
+                           "url": "https://agriculture.house.gov/"},
+                  "SSFI": {"name": "Senate Committee on Finance", "chamber": "senate"},
+                  "SCNC": {"name": "Senate Caucus on International Narcotics Control",
+                           "chamber": "senate"},
+                  "HSAG01": {"name": "Subcommittee", "parent": "HSAG"}}
+
+    def person(self, pid, chamber, party, seats=(), **extra):
+        base = {"id": pid, "name": f"Member {pid}", "chamber": chamber, "party": party,
+                "state": "TX", "isCandidate": False,
+                "committeeList": [dict(zip(("code", "title", "side"), s)) for s in seats]}
+        base.update(extra)
+        return base
+
+    def people(self):
+        return [
+            self.person("H1", "House", "Republican", [("HSAG", "Chairman", "majority"),
+                                                      ("HSAG01", "Chair", "majority")]),
+            self.person("H2", "House", "Democrat", [("HSAG", "Ranking Member", "minority")],
+                        leadership=["House Minority Leader"]),
+            self.person("S1", "Senate", "Republican", [("SSFI", "Chairman", "majority"),
+                                                       ("SCNC", "Chairman", "majority")],
+                        leadership=["Senate Majority Leader"]),
+            self.person("S2", "Senate", "Democrat", [("SCNC", "Co-Chair", "minority")]),
+            self.person("C1", "House", "Democrat", [("HSAG", "Chairman", "majority")],
+                        isCandidate=True),
+        ]
+
+    def test_each_committee_has_its_chair_and_minority_lead(self):
+        html = pages.committees_html(self.people(), self.COMMITTEES)
+        self.assertIn('href="../index.html#/profile/H1"', html)
+        self.assertIn('href="../index.html#/profile/H2"', html)
+        # A candidate holds no seat; a subcommittee is not listed.
+        self.assertNotIn("profile/C1", html)
+        self.assertNotIn(">Subcommittee<", html)
+        # A caucus is listed apart, and its minority lead is its Co-Chair.
+        self.assertIn("Caucuses and commissions", html)
+        self.assertIn("Co-Chair", html)
+        # A committee whose roster titles no minority member says so.
+        self.assertIn("No minority lead named in the rosters", html)
+        self.assertIn("no member of the minority a leading title", html)
+
+    def test_one_chamber_pending_the_other_listed(self):
+        people = self.people()
+        for p in people:
+            if p["chamber"] == "Senate":
+                p["committeeList"] = []
+                p["committeesPending"] = 120
+        html = pages.committees_html(people, self.COMMITTEES)
+        self.assertIn("House committees", html)
+        self.assertIn("Senate committee assignments for the 120th Congress have not been "
+                      "published yet", html)
+        self.assertNotIn("profile/S1", html)
+
+    def test_the_leaders_from_their_posts_or_said_not_recorded(self):
+        html = pages.leaders_html(self.people(), "senate", 119)
+        self.assertIn('href="../index.html#/profile/S1"', html)
+        self.assertIn("Senate Majority Leader", html)
+        none = pages.leaders_html([dict(p, leadership=[]) for p in self.people()], "senate", 119)
+        self.assertNotIn("guide-person", none)
+        self.assertIn("lists nobody in a Senate leadership post for the 119th Congress yet", none)
+        self.assertIn('href="https://www.senate.gov/senators/leadership.htm"', none)
+
+    def test_names_are_text_not_markup(self):
+        people = self.people()
+        people[0]["name"] = "<script>alert(1)</script>"
+        self.assertNotIn("<script>", pages.committees_html(people, self.COMMITTEES))
+
+    def test_the_page_carries_them_and_nothing_fills_them_later(self):
+        html = government.render("congress", "example.org", ["TX"],
+                                 members=(self.people(), {"committees": self.COMMITTEES,
+                                                          "congress": 119}))
+        for key in ("committees", "leaders-senate", "leaders-house"):
+            self.assertIn(f'data-built-from="{key}"', html)
+            self.assertNotIn(f'data-live="{key}"', html)
+        self.assertIn('href="../index.html#/profile/S1"', html)
+        # Without the profiles the page says what it holds, as before.
+        self.assertIn('data-live="committees"', government.render("congress", "example.org", ["TX"]))
+
+    @unittest.skipUnless(__import__("shutil").which("node"), "needs Node")
+    def test_the_party_mark_is_the_one_the_pages_draw(self):
+        # pages.party_key is KYC.partyKey for the page the build writes
+        # (rule 12): run the page's own function on the same people.
+        import json
+        import subprocess
+
+        with open(os.path.join(SITE, "assets", "kyc.js"), encoding="utf-8") as f:
+            js = f.read()
+        body = re.search(r"\n  function partyKey\(item\) \{\n.*?\n  \}\n", js, re.S)
+        self.assertIsNotNone(body, "KYC.partyKey moved: point this test and pages.party_key at it")
+        people = [None, {}, {"party": ""}, {"party": "Democratic"}, {"party": "Democrat"},
+                  {"party": "Democratic-Farmer-Labor"}, {"party": "Democratic/Working Families"},
+                  {"party": "Republican"}, {"party": "republican"}, {"party": "Independent"},
+                  {"party": "Libertarian"}, {"party": "Vacant"},
+                  {"party": "Republican", "status": "Vacant"}, {"party": None}]
+        script = body.group(0) + "\nprocess.stdout.write(JSON.stringify(" + json.dumps(people) + \
+            ".map(partyKey)));\n"
+        out = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=60)
+        self.assertEqual(out.returncode, 0, out.stderr)
+        self.assertEqual(json.loads(out.stdout), [pages.party_key(p) for p in people])
+
+
 class TestDatedText(unittest.TestCase):
     """Static prose about a dated event reads as still to come long after it
     (rule 48). From each revisit date a page lists, validate warns until the
@@ -255,6 +368,10 @@ class TestNoCongressIsTyped(unittest.TestCase):
     PATTERN = re.compile(r"[^.<>]*\b\d+(?:st|nd|rd|th) Congress[^.<>]*")
 
     def found(self, text):
+        # A block the build writes from the data (rule 94: the Congress
+        # page's leaders and committee leads) names the data's Congress,
+        # as a page printing kycBuildMeta.congress does: its line goes.
+        text = re.sub(r'(<div class="guide-live guide-built"[^>]*>\n)[^\n]*', r"\1", text)
         return [m.group(0).strip() for m in self.PATTERN.finditer(text)
                 if "artographic" not in m.group(0)]
 
@@ -458,19 +575,80 @@ class TestNewSections(unittest.TestCase):
                 self.assertTrue(have[sid]["sources"], f"{slug}#{sid}")
 
     def test_the_bill_flow_is_page_text(self):
+        # VISUALS-31: drawn as the two chambers' tracks meeting, every word in
+        # an HTML box; the only SVG is an empty one kyc-guide.js draws lines in.
         html = government.render("congress", "example.org")
-        flow = html[html.index('<figure class="guide-flow">'):]
+        flow = html[html.index('<figure class="guide-billflow" data-billflow>'):]
         flow = flow[:flow.index("</figure>")]
-        self.assertNotIn("<svg", flow)
-        for step in ("Committee", "On the Senate floor", "three-fifths", "pocket", "Override"):
+        svgs = re.findall(r"<svg[^>]*>(.*?)</svg>", flow, re.S)
+        self.assertEqual(svgs, [""])
+        self.assertIn('<svg class="billflow-lines" aria-hidden="true"', flow)
+        for step in ("Committee", "On the Senate floor", "three-fifths", "pocket", "Override",
+                     "Sundays excepted", "Rules Committee", "unanimous"):
             self.assertIn(step, flow)
-        # One chamber's floor, then the other chamber: never the House floor
-        # and the Senate floor as two steps followed by "the other chamber",
-        # which reads as a third passage.
-        titles = re.findall(r'<li class="guide-flow-step"><strong>(.*?)</strong>', flow)
-        self.assertNotIn("On the House floor", titles)
-        self.assertEqual(titles.index("The other chamber"),
-                         titles.index("On the floor of its chamber") + 1)
+        tracks = re.findall(r'<p class="billflow-head">(In the (?:House|Senate))</p>', flow)
+        self.assertEqual(tracks, ["In the House", "In the Senate"])
+        # Each track is its own chamber's three steps; neither is followed by
+        # a step "the other chamber", which read as a third passage.
+        for t in (0, 1):
+            nodes = re.findall(rf'data-node="t{t}-(\d)"><strong>(.*?)</strong>', flow)
+            self.assertEqual([title for _n, title in nodes][:2], ["Introduced", "Committee"])
+            self.assertEqual(len(nodes), 3)
+        self.assertNotIn("The other chamber", flow)
+        # They meet at one text, then the president, then each answer's result.
+        order = [flow.index(f'data-node="{n}"') for n in ("t1-2", "joined", "president", "end-0")]
+        self.assertEqual(order, sorted(order))
+        results = re.findall(r'data-node="(end-\d(?:-then)?)">.*?'
+                             r'(?:data-result="([a-z-]+)">(.*?)</em>|</div>)', flow)
+        self.assertEqual([(n, k) for n, k, _w in results],
+                         [("end-0", "law"), ("end-1", "law"), ("end-2", "not-law"), ("end-3", ""),
+                          ("end-3-then", "law")])
+        self.assertIn("two-thirds of the other", flow)
+
+    def test_the_bill_flow_on_a_phone_puts_neither_chamber_first(self):
+        # Narrow, the stages are numbered top to bottom: the two tracks share
+        # a number (1 and 2 read as House first), and the caption holds in
+        # both layouts (it said "drawn side by side" under a vertical list).
+        html = government.render("congress", "example.org")
+        flow = html[html.index('<figure class="guide-billflow" data-billflow>'):]
+        caption = re.search(r"<figcaption>(.*?)</figcaption>", flow, re.S).group(1)
+        self.assertIn("in either order", caption)
+        self.assertNotIn("side by side", caption)
+        with open(os.path.join(SITE, "assets", "kyc.css"), encoding="utf-8") as handle:
+            css = handle.read()
+        self.assertRegex(css, r"\.billflow-track \+ \.billflow-track \{ counter-increment: none; \}")
+
+    def test_a_bill_result_names_one_of_two_outcomes(self):
+        spec = {"tracks": [("A", [("x", "y")]), ("B", [("x", "y")])], "joined": ("j", ""),
+                "president": ("p", ""), "answers": "a",
+                "ends": [("Signs it", "", ("It is law", "enacted"))]}
+        with self.assertRaises(ValueError):
+            government._billflow(spec, "congress", "")
+
+    def test_the_congress_page_was_checked_when_its_bill_flow_was_drawn(self):
+        page = next(p for p in PAGES if p["slug"] == "congress")
+        sections = {s["id"]: s for s in page["sections"]}
+        for sid in ("lawmaking", "reaching"):
+            self.assertGreaterEqual(sections[sid].get("reviewed", page.get(
+                "reviewed", government.REVIEWED)), "2026-10-19", sid)
+
+    def test_a_section_read_again_alone_says_its_own_day(self):
+        # Only the bill flow and the contact paragraph were read again on
+        # 2026-10-19: the page's date stays the rest's, and those two say
+        # theirs beside their sources (a page-wide date claimed every
+        # section had been).
+        page = next(p for p in PAGES if p["slug"] == "congress")
+        html = government.render("congress", "example.org")
+        own = [s for s in page["sections"] if s.get("reviewed")]
+        self.assertTrue(own)
+        for section in own:
+            block = html.split(f'id="{section["id"]}"', 1)[1].split("</section>", 1)[0]
+            self.assertIn(f'Sources, checked on <time datetime="{section["reviewed"]}"', block)
+        others = [s for s in page["sections"] if not s.get("reviewed")]
+        block = html.split(f'id="{others[0]["id"]}"', 1)[1].split("</section>", 1)[0]
+        self.assertIn("<span>Sources:</span>", block)
+        self.assertIn("unless it gives its own day.", html)
+        self.assertIn(f'<time datetime="{page.get("reviewed", government.REVIEWED)}"', html)
 
     def test_every_redrawn_state_is_listed_from_the_table(self):
         from kyc import districts

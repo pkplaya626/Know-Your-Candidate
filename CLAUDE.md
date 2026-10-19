@@ -59,7 +59,9 @@ data/seat_history.json      ──┤   (each seat's last election: the Clerk's 
 data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
-                                             data/profiles.js   (profiles, races, build meta)
+                                             data/people/meta.js (the build's figures and signature)
+                                             data/people/index.js (everyone's cards and search fields, every race)
+                                             data/people/*.js   (one state's whole records and races; rule 94)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
@@ -81,6 +83,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/judiciary/*.js (one federal court's judges, and the judges' search)
                                              data/votes/*.js    (each chamber's roll calls, loaded by the profile dialog on demand)
                                              about.html, 404.html (generated: the site's frame, kyc/pages.py)
+                                             ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
@@ -105,13 +108,14 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-official.js
                                              assets/kyc-federal.js
                                              assets/kyc-findrep.js
+                                             assets/kyc-ballot.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
   `congress_snapshot.json` are vendored inputs: refreshed by a command, never
   hand-edited. So is `district_maps/`, written by `tools/fetch_district_maps.py`
   from Census boundaries and each redrawn state's own enacted-plan file.
-- Everything in `data/` is **generated**. Never edit `profiles.js`, `geo.js`,
+- Everything in `data/` is **generated**. Never edit `people/*.js`, `geo.js`,
   `odds.js` or `districts/*.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
@@ -187,8 +191,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1931 tests, no dependencies
-npm install && npm test                       # 2726 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1977 tests, no dependencies
+npm install && npm test                       # 3005 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -459,7 +463,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 
 34. **Fifty-seven near-identical pages are generated, not maintained.** The
     state pages come from one template and carry nothing but a state code;
-    `assets/kyc-state.js` renders them from the same `profiles.js` as the
+    `assets/kyc-state.js` renders them from the same build's people files as the
     grid. A hand-edited copy per state would drift the first time one was
     touched, and a state page that disagreed with the grid about who holds
     a district would look entirely normal.
@@ -1202,7 +1206,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     navigation, its title and the links to it. The tag beside the site's
     name is the section's (`pages.brand_sub`, from the navigation's labels):
     "U.S. Congress" stood over 219 pages about counties, courts and the
-    guide, and only a page that loads profiles.js names the Congress. Where a city's name join
+    guide, and only a page that loads the build's figures names the Congress. Where a city's name join
     cannot work, a place is joined to a government only through the
     listing's own id (`overrides.PLACE_GOVERNMENTS`, with its evidence) or
     the government `county_areas` names, never to a town it replaced.
@@ -1448,7 +1452,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     no caveat: each legislature file says how far its lines may stray
     (`lineErrorKm`, `legislature.line_error_km`, from the tool's own
     `statelegs.map_tolerance_m`), the margin there is wider by it, and the
-    answer gives both margins. The panel is on pages without profiles.js
+    answer gives both margins. The panel is on pages without people files
     too, where it read "OH Senate" and sent "How to vote" to a `#voting`
     the page did not have, which its router read as clearing the reader's
     selection: a state's name, district map and own lookup come from the
@@ -1660,7 +1664,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     anything (rule 8). Nothing is chosen: no "key votes", which would be an
     editorial list. The votes are in `data/votes/<chamber>.js`, loaded on
     demand from the stamped URLs every profile page names in its
-    `onDemandData` template (rule 76), never in `profiles.js`.
+    `onDemandData` template (rule 76), never in the people files.
 
 90. **A past result belongs to the lines it was fought on, is read from
     the official count, and is checked before it is shown; money is
@@ -1771,6 +1775,97 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     checked". After Election Day the block is in the past tense and links
     the state's results; this site names no state winner.
 
+92. **"Who is on my ballot" is its own question, answered from the views
+    that already answer its parts, and an address keeps a ZIP code, never
+    a location.** A reader asked who was on her ballot and the site had
+    only "who represents me": a state page listing the races for Congress
+    and saying the governor was elected without naming anyone running,
+    and no link from the lookup's answer to any of it (audit 2026-10-17,
+    VISUALS-26, RACES-16, PERSONA-08). `ballot.html` (`kyc-ballot.js`)
+    lists every contest the site can name for one ZIP code or location:
+    the Senate races, the House race on the 2026 map (a ZIP area across
+    district lines gives one card per district with its share, and offers
+    the location, rule 85), the statewide offices on the ballot with the
+    election office's list (rule 91), and whether the reader's legislative
+    seats are up. Nothing in it is drawn twice: a race's people are split,
+    ordered, badged and counted by `KYC.cards` as on the state page
+    (`racePeople`, rules 12 and 73), an office by `KYC.stategov`, a seat by
+    the words the legislature page says it in, and the state page's voting
+    block and its key dates live in the same module. It never names who
+    holds a seat (rule 27) beyond a race's own words, and what it does not
+    hold - legislative candidates, ballot measures, local contests - is
+    "not listed here", with the state's own sample ballot where one is
+    linked; a seat whose district the record cannot name is said to be
+    unknown, never "not up" (rule 19). A place with no election that day
+    (Puerto Rico's record says so) is told that, not "may also hold". The
+    address is `#/?zip=`, so a copied link shows the same list, and a
+    location is never put in it: a shared link would carry the reader's
+    whereabouts. From the day after the election it says the election was
+    held and links the state's results, and names no state winner. It
+    prints in the light theme's colours whatever the reader chose: printed
+    from the dark theme, its light text came out white on white paper.
+    Its review found the shared split was not enough. "On your ballot"
+    lists only whom the lookup's answer lists (`KYC.stillRunning`): IL-4's
+    card counted five on the ballot over seven names, two of them filers
+    the results do not settle (rule 74), who are now named apart; a holder
+    off the ballot is named with their own status (rule 61), never among
+    those who "lost the primary, withdrew, or were not on the primary
+    ballot". A statewide holder line says who the holder is, since no
+    holder block stands above it. "Not known" is this site's gap, not the
+    state's: North Dakota's House and West Virginia's Senate records name
+    their districts (`legislature.seats_up`), and a district's seats take
+    the words their count gives (`districtSeats`: Arizona's House elects
+    two a district, never "this seat").
+
+94. **A page loads the people it shows, and one build of them.** Every
+    grid, map, state and district page loaded all of `profiles.js` - 6.7 MB,
+    874 KB gzipped - to show one state: Wyoming's page carried 2,589
+    profiles to draw 15, and a throttled phone waited 6.5 to 7 seconds for
+    the first card (TECH-02, RACES-25). The build now writes
+    `data/people/meta.js` (the build's figures, `kycBuildMeta`),
+    `data/people/index.js` (everyone's card and search fields, every race)
+    for the grid, the map and the directory of states, and
+    `data/people/<st>.js` (a state's whole records and its races) for its own
+    state and district pages. What the index leaves out is a list,
+    `emit.INDEX_LEAVES_OUT`: fields only the dialog or a race's money and
+    comparison folds show, and fields no page reads; a new field is in the
+    index until it is named there. `testPeopleSplit` draws a sample of the
+    grid's, the map's and the state pages' views from the index and from
+    everyone's whole records and fails where they differ, and
+    `TestTheIndexDrawsNothingItLeavesOut` reads every module those pages
+    load and fails on a read of a left-out field, or of a kyc.js helper that
+    reads one, outside the folds that wait for the state's file. A card's
+    one-line office (`politicalHistory`) is a card field, and so is its way
+    to a sitting member's office (`contactForm`, `phone`): landed beside the
+    split, the "Contact office" action read four fields the index left out
+    and would have vanished from every card on the grid and the map with
+    nothing failing. A member's district offices stay the dialog's but on
+    the record of one whose card calls a district office, which carries them
+    whole (`emit.INDEX_KEEPS_FOR_THE_CARD`). A card's record is
+    never shown as a person's whole record: the dialog, a race's money and
+    its comparison load the state's file first (`KYC.loadPeople`, one
+    promise per file, named stamped in `onDemandData`), say so while they
+    load and say so when it fails, because a field missing from a card reads
+    as "No data" about a real person. A ZIP code or a link to someone of
+    another state loads that state's file, or the index to find them. Your
+    ballot (`ballot.html`, rule 92) loads the build's figures and no one's
+    records: each answer loads the files of the states it is in before it
+    is drawn (`KYC.findRep.peopleFor`), and one that did not load is named,
+    never drawn as a ballot with nobody on it. A
+    file is taken in as it is assigned (`kycPeopleFile`, kyc.js), filling
+    the index's record, never replacing it, and refused when it names
+    another build than the page's figures, which the page then says (rule
+    34): a tab opened before a deploy reads that the site was updated since
+    it was opened, not that it was loading. A link to an id nobody here
+    has says so in the dialog, on every page alike. A state's file must hold everyone its races and people point at,
+    or the build stops (`emit.split_problems`). A figure about the whole
+    chamber is the build's, not a page's sum: the dialog's left-right ticks
+    are `chamberScores`, counted from every profile, since a state page
+    holding one delegation drew a senator among their own state's members
+    as though it were the Senate. The guide's Congress page names its
+    members from the build (`pages.committees_html`, `leaders_html`) and
+    loads no profile data.
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from
@@ -1839,7 +1934,7 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
   visible on a page.
 - When changing profile fields, update the field tables in `README.md`.
 - Builds must stay reproducible under `SOURCE_DATE_EPOCH`, for `geo.js` as
-  well as `profiles.js`.
+  well as the people files.
 - Do not hard-code a total that the data determines. A test asserting `472`
   races carried a comment reading "435 + 6 + 35", which is 476; nobody had
   reconciled the two, and the number moved the moment a vacant seat was

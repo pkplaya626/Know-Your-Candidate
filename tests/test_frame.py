@@ -111,7 +111,7 @@ class TestSectionTags(unittest.TestCase):
 
     def test_the_congress_tag_only_where_profiles_load(self):
         html = pages.render_state("TX", "example.org")
-        self.assertIn("data/profiles.js", html)
+        self.assertIn("data/people/meta.js", html)
         self.assertEqual(self.tag(html)[0], " data-congress")
 
     def test_the_section_names_are_the_navigations(self):
@@ -290,6 +290,19 @@ class TestReviewOfTheFrame(unittest.TestCase):
 
     def test_the_navigation_leads_to_the_courts_index(self):
         self.assertIn('href="../courts/index.html" data-nav="courts"', pages.nav_html("../"))
+
+    def test_the_navigation_opens_with_the_home_pages_lookup(self):
+        # PERSONA-04: "who represents me" had no way in from the drawer.
+        entries = [entry for _h, group in pages.nav_groups() for entry in group]
+        key, path, _icon, label = entries[0]
+        self.assertEqual((key, path), ("findrep", "index.html#findrep"))
+        page, anchor = path.split("#")
+        home = read("candidate_profiles_site", page)
+        # The fragment names the panel the page holds, and the link is named
+        # as the panel's own heading (kyc-findrep.js) names it (rule 75).
+        self.assertIn(f'id="{anchor}" data-findrep>', home)
+        self.assertIn(f'" {label}</h2>', read("candidate_profiles_site", "assets", "kyc-findrep.js"))
+        self.assertIn('href="../index.html#findrep" data-nav="findrep"', pages.nav_html("../"))
 
     def test_a_district_directory_row_does_not_repeat_the_states_name(self):
         html = pages.render_districts_index("example.org", {"states": {"TX": {"house": 38}}})

@@ -39,6 +39,44 @@ function siteResources(served, refuse) {
   };
 }
 
+/* What a people file assigns (rule 94), read as the page would run it. */
+function readPeopleFile(file) {
+  const sandbox = { window: {} };
+  require("vm").runInNewContext(fs.readFileSync(file, "utf8"), sandbox);
+  return sandbox.window.kycPeopleFile || sandbox.window.kycBuildMeta;
+}
+
+/* Everyone's whole record, from every state's file, keyed by id: what a
+ * check compares a page against where the page itself holds less. */
+let everyoneCache = null;
+function everyone() {
+  if (!everyoneCache) {
+    everyoneCache = new Map();
+    peopleStates().forEach((code) => {
+      readPeopleFile(path.join(SITE, "data", "people", code + ".js")).people
+        .forEach((p) => everyoneCache.set(p.id, p));
+    });
+  }
+  return everyoneCache;
+}
+
+/* The profile id a link to it names: "../index.html#/profile/S000148". */
+function profileHref(a) {
+  const m = /#\/profile\/([^&?]+)$/.exec(a.getAttribute("href") || "");
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+/* Every race, from the index of everyone (rule 94). */
+function allRaces() {
+  return readPeopleFile(path.join(SITE, "data", "people", "index.js")).races;
+}
+
+/* Every state's people file (rule 94), by its lower-case code. */
+function peopleStates() {
+  return fs.readdirSync(path.join(SITE, "data", "people"))
+    .filter((name) => /^[a-z]{2}\.js$/.test(name)).map((name) => name.slice(0, 2)).sort();
+}
+
 /* Until *test* holds, or *ms* pass: a lookup answers after its files load. */
 async function until(test, ms) {
   const end = Date.now() + (ms || 5000);
@@ -117,18 +155,22 @@ function oldCongressSits(window) {
   return meta.congress < (meta.election.year - 1786) / 2;
 }
 
-/* Run *hooks* once the profile data has loaded: profiles.js assigns
- * kycBuildMeta last, after legislatorsData and kycRaces. */
-function onData(window, hooks) {
+/* Run *hooks* once the profile data has loaded, before any page module
+ * reads it: kyc.js takes each people file in as it is assigned and fires
+ * "kyc:people" (rule 94). Once the page's first *files* are in - its own
+ * state's, or the index and every state's file inlined after it - every
+ * hook runs; each file loaded after them (a state's, when one of its
+ * people is opened) runs the idempotent ones again (*again*: the rewind,
+ * the phase), so what it adds is seen as it stood then too. */
+function onData(window, hooks, again, files) {
   if (!hooks.length) return;
-  let meta;
-  Object.defineProperty(window, "kycBuildMeta", {
-    configurable: true,
-    get() { return meta; },
-    set(value) {
-      meta = value;
-      if (window.legislatorsData && window.kycRaces) hooks.forEach((hook) => hook(window, meta));
-    },
+  let seen = 0;
+  window.document.addEventListener("kyc:people", () => {
+    seen += 1;
+    if (seen < files) return;
+    const meta = window.kycBuildMeta;
+    (seen === files ? hooks : hooks.filter((hook) => again.indexOf(hook) !== -1))
+      .forEach((hook) => hook(window, meta));
   });
 }
 
@@ -150,6 +192,7 @@ function buildPage(page, opts) {
     return `<!--inert-${inert.length - 1}-->`;
   });
   const sources = [...html.matchAll(/<script[^>]*\bsrc="([^"]+)"[^>]*><\/script>/g)];
+  let inlined = false;
   for (const [tag, src] of sources) {
     // Relative to the page: the state pages sit one directory down.
     // Without the version stamp a local asset's URL carries (kyc/assets.py).
@@ -160,7 +203,28 @@ function buildPage(page, opts) {
       html = html.replace(tag, () => "");
       continue;
     }
-    html = html.replace(tag, () => "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>");
+    let body = "<script>\n" + fs.readFileSync(file, "utf8") + "\n</script>";
+    // A page that loads the index of everyone (rule 94) holds each state's
+    // full records only once one of its people is opened. Most suites ask
+    // the data for a person's every field and open their profile at once,
+    // as they did when one file held everyone: for them every state's file
+    // follows the index, as loaded, before any page module reads it.
+    // opts.people "index" builds the page as it ships, the index alone,
+    // and the suites that prove the index enough say so (testPeopleSplit).
+    // A state's page ships with its own state's file; opts.people "all"
+    // puts everyone after it, to show the page draws the same without.
+    const plain = src.split("?")[0];
+    const index = /(^|\/)data\/people\/index\.js$/.test(plain);
+    const own = /(^|\/)data\/people\/([a-z]{2})\.js$/.exec(plain);
+    if ((index && opts.people !== "index") || (own && opts.people === "all")) {
+      const folder = path.dirname(file);
+      inlined = true;
+      const more = own ? ["index"].concat(peopleStates().filter((c) => c !== own[2])) : peopleStates();
+      more.forEach((code) => {
+        body += "\n<script>\n" + fs.readFileSync(path.join(folder, code + ".js"), "utf8") + "\n</script>";
+      });
+    }
+    html = html.replace(tag, () => body);
   }
   html = html.replace(/<!--inert-(\d+)-->/g, (m, i) => inert[Number(i)]);
 
@@ -189,8 +253,10 @@ function buildPage(page, opts) {
       });
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
       // opts.written: the data as a later refresh would write it, before the rewind.
-      onData(window, [opts.written, opts.now === undefined ? rewindToCampaign : null,
-        opts.now === null ? null : phaseAt(opts.now || CAMPAIGN_NOW), opts.data].filter(Boolean));
+      const rewind = opts.now === undefined ? rewindToCampaign : null;
+      const phase = opts.now === null ? null : phaseAt(opts.now || CAMPAIGN_NOW);
+      onData(window, [opts.written, rewind, phase, opts.data].filter(Boolean), [rewind, phase],
+        inlined ? 1 + peopleStates().length : 1);
       if (opts.setup) opts.setup(window);
     },
   });
@@ -3067,8 +3133,33 @@ async function testStates() {
   await new Promise((r) => setTimeout(r, 200));
   suite("states/tx.html — search (after debounce)", () => {
     const cards = [...D.querySelectorAll("#stateContent .card")];
-    check("no card matches nonsense", cards.every((c) => c.hidden), `${cards.filter((c) => !c.hidden).length} shown`);
+    const shown = (n) => !n.closest("[hidden]");
+    check("no card matches nonsense", cards.every((c) => !shown(c)), `${cards.filter(shown).length} shown`);
+    // A sitting member's card sits in a cell with its contact link (GRID-16):
+    // hiding the card alone left rows of "Contact office" with no name.
+    // (A race's "Held by" line names its holder beside the link, and the
+    // search never hid it.)
+    const contacts = [...D.querySelectorAll("#stateContent .card-cell > .card-contact")];
+    check("nor is a member's contact link left without its card",
+      contacts.every((a) => !shown(a)),
+      `${contacts.filter(shown).length} shown`);
   });
+  const input = D.getElementById("stateSearch");
+  const one = [...D.querySelectorAll("#stateContent .card-cell > .card[data-id]")][0];
+  const target = one && window.KYC.byId(one.getAttribute("data-id"));
+  input.value = target ? target.name : "";
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
+  suite("states/tx.html — search finds a member with their contact link", () => {
+    const cell = one && one.parentNode;
+    // Texas's delegation has offices on record; a membership read before
+    // any is recorded has no cell to look at.
+    check("the member's card and its contact link show together",
+      !one || (!cell.closest("[hidden]") && !!cell.querySelector(".card-contact")));
+  });
+  input.value = "";
+  input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  await new Promise((r) => setTimeout(r, 200));
 
   const index = await testShared("states/index.html");
   suite("states/index.html — the directory of states", () => {
@@ -3116,17 +3207,17 @@ const settle = (ms) => new Promise((r) => setTimeout(r, ms || 150));
  * of legislatures and of local governments, and Know Your Government's
  * links to what it explains. */
 async function testNavigation() {
-  const GROUPS = ["Elections 2026", "Federal", "State", "Local", "Learn"];
+  const GROUPS = ["Start here", "Elections 2026", "Federal", "State", "Local", "Learn"];
   const grid = await buildPage("index.html");
   await settle(50);
   suite("the sidebar, by level of government", () => {
     const { D, window } = grid;
     const heads = [...D.querySelectorAll(".site-nav .nav-group")].map((h) => h.textContent.trim());
-    check("five groups, from elections to learning", JSON.stringify(heads) === JSON.stringify(GROUPS),
-      heads.join(" | "));
+    check("six groups, from finding who represents you to learning",
+      JSON.stringify(heads) === JSON.stringify(GROUPS), heads.join(" | "));
     const keys = [...D.querySelectorAll(".site-nav [data-nav]")].map((a) => a.getAttribute("data-nav"));
-    check("ten places to go, About & sources last", keys.join(",") ===
-      "candidates,races,congress,executive,courts,states,legislatures,local,guide,about",
+    check("twelve places to go, the lookup first and About & sources last", keys.join(",") ===
+      "findrep,candidates,ballot,races,congress,executive,courts,states,legislatures,local,guide,about",
       keys.join(","));
     check("the grid is Candidates",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "candidates");
@@ -4386,9 +4477,11 @@ async function testBallotCounts() {
       strip.length > 0 && stripSum === heads, `${strip.join(" + ")} vs ${heads}`);
     const national = window.kycBuildMeta.election.challengersOnBallot;
     // A race with no primary whose ballot has not been read counts its
-    // filers as filed, not on the ballot (summary.ballot_known).
+    // filers as filed, not on the ballot (summary.ballot_known). Every
+    // state's races, from the index of everyone: this page holds its own
+    // state's (rule 94).
     const known = (r) => !("primaryDate" in r && !r.primaryDate && r.settled === false);
-    const all = races.filter(known).reduce((n, r) => n + (r.candidateCount || 0) +
+    const all = allRaces().filter(known).reduce((n, r) => n + (r.candidateCount || 0) +
       ((r.results || {}).otherNominees || []).length, 0);
     check("and the national figure is every race's, added up", national === all, `${national} vs ${all}`);
   });
@@ -5249,8 +5342,10 @@ async function testRedistricting() {
     check("a member running in a redrawn district gets a link to both districts",
       !!note && note.getAttribute("href") === expectLink, note && note.getAttribute("href"));
     grid.window.KYC.profile.close();
-    const iowan = people.find((p) => !p.isCandidate && p.state === "IA" && /House/.test(p.chamber) &&
-      !p.contestRaceId && races.some((r) => r.id === p.raceId));
+    // From the grid, which holds everyone: the California page holds its
+    // own state's people only (rule 94).
+    const iowan = grid.window.legislatorsData.find((p) => !p.isCandidate && p.state === "IA" &&
+      /House/.test(p.chamber) && !p.contestRaceId && grid.window.kycRaces.some((r) => r.id === p.raceId));
     grid.window.KYC.profile.open(iowan.id);
     const plain = grid.D.querySelector("#profileModalRace .race-redrawn a");
     check("a race in a state whose map did not change links to its one map",
@@ -6193,6 +6288,292 @@ async function testDrawerBack() {
   });
 }
 
+/* The drawer's "Find who represents you" (PERSONA-04): every page's, to
+ * the home page's panel. On the home page itself the link is caught: the
+ * grid's router would read "#findrep" as a view and clear the filters. */
+async function testFindRepNav() {
+  const arrived = await buildPage("index.html", { hash: "#findrep" });
+  await settle(300);
+  const home = await buildPage("index.html", { hash: "#/?party=Republican" });
+  await settle(300);
+  const { window, D } = home;
+  const sentinel = D.createElement("i");
+  sentinel.id = "findrepSentinel";
+  D.getElementById("results").appendChild(sentinel);
+  D.querySelector(".sidebar-toggle").click();
+  const opened = D.body.classList.contains("sidebar-open");
+  const link = D.querySelector('.site-nav a[data-nav="findrep"]');
+  const click = new window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+  link.dispatchEvent(click);
+  await settle(500);
+  const about = await buildPage("about.html");
+  const state = await buildPage("states/oh.html");
+  suite("the drawer's Find who represents you (PERSONA-04)", () => {
+    check("no page errors", arrived.errors.length === 0 && home.errors.length === 0,
+      arrived.errors.concat(home.errors).join(" | "));
+    check("it opens the list, first, on every page: the home page's panel",
+      about.D.querySelector(".site-nav a[data-nav]").getAttribute("href") === "index.html#findrep" &&
+        state.D.querySelector(".site-nav a[data-nav]").getAttribute("href") === "../index.html#findrep" &&
+        /Find who represents you/.test(link.textContent));
+    check("named as the panel is (rule 75)", link.textContent.trim() ===
+      arrived.D.querySelector("[data-findrep] .findrep-title").textContent.trim());
+    check("arriving from another page puts the reader in the ZIP code field",
+      !!arrived.D.activeElement && arrived.D.activeElement.classList.contains("findrep-zip"),
+      arrived.D.activeElement && arrived.D.activeElement.outerHTML.slice(0, 80));
+    check("and drops the fragment, so the grid does not read it as a view",
+      /^(#\/)?$/.test(arrived.window.location.hash), arrived.window.location.hash);
+    check("on the home page the link is caught, not followed", opened && click.defaultPrevented);
+    check("the drawer closes", !D.body.classList.contains("sidebar-open"));
+    check("the reader's filters and grid stay as they were",
+      /party=Republican/.test(window.location.hash) && !!D.getElementById("findrepSentinel"),
+      window.location.hash);
+    check("and the ZIP code field has the focus",
+      !!D.activeElement && D.activeElement.classList.contains("findrep-zip"),
+      D.activeElement && D.activeElement.outerHTML.slice(0, 80));
+  });
+
+  // A page whose own panel answers as the home page's does - it holds
+  // profiles - keeps the reader there (PR #118 review): a state page's
+  // panel, and the map's, which sits in the drawer itself.
+  const follow = async (page) => {
+    await until(() => !!page.D.querySelector("[data-findrep][data-findrep-ready]"), 6000);
+    const toggle = page.D.querySelector(".sidebar-toggle");
+    if (toggle) toggle.click();
+    const a = page.D.querySelector('.site-nav a[data-nav="findrep"]');
+    const ev = new page.window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+    // Whether the page caught it, read after its own listener (on the
+    // document); then nothing is followed, which jsdom cannot do.
+    let caught = null;
+    page.window.addEventListener("click", (e) => { caught = e.defaultPrevented; e.preventDefault(); },
+      { once: true });
+    a.dispatchEvent(ev);
+    await settle(500);
+    const active = page.D.activeElement;
+    return { caught, open: page.D.body.classList.contains("sidebar-open"),
+      inPanel: !!active && active.classList.contains("findrep-zip") && !!active.closest("[data-findrep]") };
+  };
+  const onState = await follow(state);
+  const map = await buildPage("map.html");
+  const onMap = await follow(map);
+  const leg = await buildPage("legislature/oh.html");
+  const onLeg = await follow(leg);
+  suite("the drawer's Find who represents you, on a page with its own panel (PR #118 review)", () => {
+    check("no page errors", state.errors.length === 0 && map.errors.length === 0 && leg.errors.length === 0,
+      state.errors.concat(map.errors, leg.errors).join(" | "));
+    check("a state page's link brings its own panel into view, the ZIP code field focused",
+      onState.caught && !onState.open && onState.inPanel, JSON.stringify(onState));
+    check("the map's brings the panel in its drawer into view, and leaves the drawer open",
+      onMap.caught && onMap.open && onMap.inPanel, JSON.stringify(onMap));
+    check("a legislature page's panel names no member of Congress: the link goes home",
+      onLeg.caught === false, JSON.stringify(onLeg));
+  });
+
+  // One ZIP code's shares add up as its land does, on the panel and the
+  // ballot page alike; a third party is named, never "I" (PR #118 review).
+  const F = home.window.KYC.findRep;
+  suite("the answer's shares and party words (PR #118 review)", () => {
+    check("shares of one ZIP code's land add up to 100%, largest remainder first",
+      F.pcts([0.335, 0.335, 0.33]).join() === "34%,33%,33%" && F.pcts([0.9151, 0.0849]).join() === "92%,8%" &&
+        F.pcts([0.4, 0.3, 0.3]).join() === "40%,30%,30%", F.pcts([0.335, 0.335, 0.33]).join());
+    check("a sliver is under 1%, and a share short of the whole is never 100%",
+      F.pcts([0.996, 0.004]).join() === "99%,under 1%", F.pcts([0.996, 0.004]).join());
+    check("D, R and I as before, and a third party by its own name",
+      F.partyLetter({ party: "Democrat" }) === "D" && F.partyLetter({ party: "Republican" }) === "R" &&
+        F.partyLetter({ party: "Independent" }) === "I" &&
+        F.partyLetter({ party: "Libertarian" }) === "Libertarian" &&
+        F.partyLetter({ party: "Green" }) === "Green" && F.partyLetter({ party: "" }) === "");
+  });
+}
+
+/* GRID-16: a sitting member's card, and a race their seat is in, say how
+ * to reach their office; nobody else's does (rule 27). */
+async function testContactActions() {
+  const page = await buildPage("index.html", { hash: "#/?view=race&state=OH" });
+  await settle(300);
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const seated = people.filter((p) => KYC.seated(p));
+  const others = people.filter((p) => !KYC.seated(p));
+  const html = (p) => {
+    const box = D.createElement("div");
+    box.innerHTML = KYC.cards.card(p);
+    return box;
+  };
+  const wrong = [];
+  seated.forEach((p) => {
+    const a = html(p).querySelector(".card-cell > a.card-contact");
+    const want = p.contactForm || (p.phone ? "tel:" + String(p.phone).replace(/[^\d+]/g, "") : null);
+    if (!want ? !!a : !a || a.getAttribute("href") !== want) wrong.push(p.id);
+  });
+  const leaked = others.filter((p) => html(p).querySelector(".card-contact")).map((p) => p.id);
+  const sample = seated.find((p) => p.contactForm) || seated[0];
+  const link = sample && html(sample).querySelector("a.card-contact");
+  const phoneOnly = Object.assign({}, sample, { contactForm: null, phone: "202-555-0100" });
+  const call = html(phoneOnly).querySelector("a.card-contact");
+  const campaign = Object.assign({}, sample, { contactForm: null, phone: null, districtOffices: null,
+    campaignSite: "https://example.org/" });
+  suite("index.html — a way to reach a member's office, on the card (GRID-16)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("every sitting member's card carries their office's contact form, else its phone",
+      seated.length > 0 && wrong.length === 0, wrong.slice(0, 5).join(", "));
+    check("beside the card's button, never inside it (a link in a button is not operable)",
+      !!link && !link.closest("button") && !!link.parentNode.querySelector("button.card[data-id]"));
+    check("a form opens safely in a new tab and is named for whose office it is",
+      !!link && link.getAttribute("target") === "_blank" && /noopener/.test(link.getAttribute("rel")) &&
+        link.getAttribute("aria-label") === "Contact " + sample.name + "’s office" &&
+        /official website|congress-legislators/.test(link.getAttribute("title")));
+    check("a phone is a call to the Washington office, with the number in its title",
+      !!call && call.getAttribute("href") === "tel:2025550100" && /Washington: 202-555-0100/.test(
+        call.getAttribute("title")) && call.textContent.trim() === "Call office");
+    check("a campaign site is never offered as the office's contact",
+      !html(campaign).querySelector(".card-contact"));
+    check("no challenger's or former member's card carries one (rule 27)", leaked.length === 0,
+      leaked.slice(0, 5).join(", "));
+    const raced = [...D.querySelectorAll("section.race .card-cell > a.card-contact")];
+    check("the race view's cards carry it too", raced.length > 0);
+  });
+  if (!oldCongressSits(window)) return;
+  // A holder running for another seat is a line above the race, not a card.
+  const moved = seated.find((p) => p.contestRaceId && p.heldRaceId &&
+    p.contestRaceId !== p.heldRaceId && p.contestLabel);
+  const race = moved && window.kycRaces.find((r) => r.id === moved.heldRaceId);
+  if (!race) return;
+  const box = D.createElement("div");
+  box.innerHTML = KYC.cards.raceSection(race, people.filter((p) =>
+    (race.incumbentIds || []).indexOf(p.id) !== -1 || p.contestRaceId === race.id));
+  const held = box.querySelector(".race-held");
+  suite("index.html — a race whose holder runs elsewhere still says how to reach them (GRID-16)", () => {
+    check("the Held by line carries the holder's office contact",
+      !!held && !!held.querySelector("a.card-contact"), held ? held.innerHTML.slice(0, 200) : moved.id);
+  });
+}
+
+/* PROFILES-25: what the job pays, on a sitting member's profile, as the
+ * law sets it for their post (kyc/pay.py), with its source. */
+async function testPayLine() {
+  const page = await buildPage("index.html");
+  await settle(300);
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const meta = window.kycBuildMeta.pay;
+  const people = window.legislatorsData;
+  const open = (p) => {
+    window.location.hash = "#/profile/" + encodeURIComponent(p.id);
+    window.dispatchEvent(new window.HashChangeEvent("hashchange"));
+    const field = D.getElementById("profileModalPayField");
+    return { hidden: !field || field.hidden, text: field ? field.textContent : "",
+             html: field ? field.innerHTML : "" };
+  };
+  const plain = people.find((p) => KYC.seated(p) && p.pay && !p.pay.post);
+  const leader = people.find((p) => KYC.seated(p) && p.pay && p.pay.post);
+  const memberOf = (p) => {
+    const m = p.isCandidate && p.incumbentId ? KYC.byId(p.incumbentId) : null;
+    return m && m.id !== p.id && KYC.seated(m) ? m : null;
+  };
+  const challenger = people.find((p) => p.isCandidate && !memberOf(p));
+  // A sitting member's filing for another seat is the same person (PROFILES-03).
+  const running = people.find((p) => memberOf(p) && memberOf(p).pay);
+  const former = people.find((p) => p.formerMember);
+  suite("index.html — what the job pays (PROFILES-25)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    if (!meta) {
+      // Another Congress than the table's: nobody has a figure (kyc/pay.py).
+      check("no member carries a figure without the table's year",
+        people.every((p) => !p.pay), "");
+      return;
+    }
+    check("every sitting member has a figure, and nobody else",
+      people.every((p) => !!p.pay === (KYC.seated(p) && !p.isCandidate)));
+    const a = plain && open(plain);
+    check("a member's profile says the salary the law sets, for the year, with its source",
+      !!a && !a.hidden && a.text.indexOf("$" + meta.member.toLocaleString("en-US") + " a year in " +
+        meta.year) !== -1 && /the law sets for a member of Congress/.test(a.text) &&
+        a.html.indexOf(meta.sources[0].url) !== -1 && /read on/.test(a.text), a && a.text);
+    check("what it says of the rates' history is the table's sentence, from the report",
+      !!a && !!meta.stood && a.text.indexOf(meta.stood) !== -1 && !/denied/.test(a.text), a && a.text);
+    const b = leader && open(leader);
+    // "Other members are paid $174,000" was wrong on a leader's profile:
+    // the other leaders are paid more too.
+    check("a post paid more says the post's rate, by the post's name, and whose rate is a member's",
+      !b || (!b.hidden && b.text.indexOf("$" + leader.pay.amount.toLocaleString("en-US")) !== -1 &&
+        b.text.indexOf(leader.pay.post) !== -1 && !/Other members/.test(b.text) &&
+        b.text.indexOf("A member who is not the Speaker, the President pro tempore or a majority " +
+          "or minority leader is paid $" + meta.member.toLocaleString("en-US")) !== -1), b && b.text);
+    const c = running && open(running);
+    check("a sitting member's filing for another seat shows the member's pay, credited to their record",
+      !running || (!c.hidden && c.text.indexOf("$" + memberOf(running).pay.amount
+        .toLocaleString("en-US")) !== -1 && /record as the member for/.test(c.text)),
+      running ? running.id + ": " + c.text : "");
+    check("a challenger's profile names no salary (rule 27)", !challenger || open(challenger).hidden);
+    check("nor a former member's", !former || open(former).hidden);
+  });
+  // Read in a later year than the table's: no figure, rather than a stale one.
+  const later = await buildPage("index.html", { now: "2027-02-01T12:00:00Z" });
+  await settle(300);
+  const sitting = later.window.legislatorsData.find((p) => later.window.KYC.seated(p) && p.pay);
+  suite("index.html — what the job pays, read in a later year", () => {
+    later.window.location.hash = "#/profile/" + (sitting ? sitting.id : "");
+    later.window.dispatchEvent(new later.window.HashChangeEvent("hashchange"));
+    const field = later.D.getElementById("profileModalPayField");
+    check("the line is not shown once the reader's year is past the table's",
+      !sitting || !field || field.hidden);
+  });
+}
+
+/* VISUALS-31: how a bill becomes law, as two chambers' tracks meeting. The
+ * words are page text; the lines are one SVG path with no text (rule 46),
+ * drawn from where the boxes fall. jsdom lays nothing out, so the boxes are
+ * given a wide figure's places and the stylesheet's "lines shown". */
+async function testBillFlow() {
+  const page = await buildPage("government/congress.html");
+  await settle(100);
+  const { window, D, errors } = page;
+  const figure = D.querySelector("[data-billflow]");
+  const svg = figure && figure.querySelector("svg.billflow-lines");
+  // A wide layout: the tracks side by side, each box 60px tall with 30px gaps.
+  const place = {};
+  const at = (x, y, w) => ({ left: x, right: x + w, top: y, bottom: y + 60, width: w, height: 60 });
+  [0, 1].forEach((t) => [0, 1, 2].forEach((s) => { place[`t${t}-${s}`] = at(t * 500, s * 90, 450); }));
+  place.joined = at(250, 300, 450);
+  place.president = at(250, 390, 450);
+  [0, 1, 2, 3].forEach((e) => { place[`end-${e}`] = at(e * 240, 500, 220); });
+  place["end-3-then"] = at(720, 590, 220);
+  [...figure.querySelectorAll("[data-node]")].forEach((n) => {
+    n.getBoundingClientRect = () => place[n.getAttribute("data-node")];
+  });
+  figure.getBoundingClientRect = () => at(0, 0, 950);
+  const real = window.getComputedStyle;
+  window.getComputedStyle = (el, ...rest) => (el === svg ? { display: "block" } : real(el, ...rest));
+  window.KYC.guide.initBillFlow();
+  window.getComputedStyle = real;
+  const d = (svg.querySelector("path") || { getAttribute: () => "" }).getAttribute("d");
+  suite("government/congress.html — how a bill becomes law, drawn (VISUALS-31)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the House's and the Senate's steps, as page text",
+      [...figure.querySelectorAll(".billflow-track .billflow-head")].map((h) => h.textContent)
+        .join("|") === "In the House|In the Senate" &&
+        figure.querySelectorAll('.billflow-track [data-node]').length === 6);
+    check("meeting at one text, then the president and four answers, the veto's override under it",
+      !!figure.querySelector('[data-node="joined"]') && !!figure.querySelector('[data-node="president"]') &&
+        figure.querySelectorAll(".billflow-end").length === 4 &&
+        !!figure.querySelector('.billflow-end:last-child [data-node="end-3-then"]'));
+    check("each answer says what it makes of the bill, in words",
+      [...figure.querySelectorAll(".billflow-result")].map((r) => r.textContent).join("|") ===
+        "It is law|It is law, as if signed|It is not law|It is law");
+    check("the lines are SVG with no text in it (rule 46), hidden from assistive technology",
+      !!svg && svg.getAttribute("aria-hidden") === "true" && !svg.querySelector("text") &&
+        svg.querySelectorAll("*").length === 1);
+    // 4 steps within the tracks, 2 into the joined box, 1 to the president,
+    // 4 to the answers, 1 to the override: 12 lines, each with an arrowhead.
+    check("one path: a line and an arrowhead for each of the 12 links", (d.match(/M/g) || []).length === 24, d);
+    check("a track meets the joined box inside its edge",
+      d.indexOf("M225 240V270H262V299") !== -1 && d.indexOf("M725 240V270H688V299") !== -1, d);
+    check("the president fans out to each answer's top",
+      [110, 350, 590, 830].every((x) => d.indexOf("H" + x + "V499") !== -1), d);
+  });
+}
+
 async function testAndroidBack() {
   // A phone's layout: the queries a phone matches.
   const phone = (window) => {
@@ -6511,7 +6892,7 @@ async function testGuide() {
     const page = `government/${slug}.html`;
     const { window, D, errors, sources } = await buildPage(page);
     const KYC = window.KYC;
-    const people = sources.includes("../data/profiles.js");
+    const people = sources.includes("../data/people/meta.js");
     suite(`${page} — load and wiring`, () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
       check("shared module present", !!KYC);
@@ -6546,8 +6927,13 @@ async function testGuide() {
         D.querySelector('.nav-sub[aria-current="page"]').getAttribute("href") === `${slug}.html`);
       check("the Views list leads to the guide",
         !!D.querySelector('.nav-link[href="../government/index.html"]'));
-      check("only a page with people loads them, and only it shows Congress's balance",
+      check("only a page that names members loads the build's figures, and only it shows Congress's balance",
         people === !!D.getElementById("senateBalance"));
+      // Its members are written into it by the build (rule 94): the page
+      // loads no profile data, neither the index of everyone nor a state's.
+      check("no guide page loads profile data",
+        !sources.some((src) => /data\/(profiles|people\/(?!meta)[a-z]+)\.js/.test(src)),
+        sources.filter((src) => /data\/people|profiles/.test(src)).join(", "));
       if (!people) {
         const jump = D.getElementById("stateJump");
         check("the jump list is written into the page, and wired",
@@ -6560,25 +6946,29 @@ async function testGuide() {
 
     if (slug !== "congress") continue;
 
+    // Written into the page by the build (kyc/pages.py leaders_html,
+    // committees_html): checked against every state's people file, since the
+    // page itself holds no profiles (rule 94).
+    const all = everyone();
+    const linked = (a) => all.get(profileHref(a));
     suite(`${page} — who leads each chamber, from the data`, () => {
-      // Who leads each chamber, from each member's leadership posts.
-      const leaders = D.querySelector('.guide-live[data-live="leaders-house"]');
-      const speaker = window.legislatorsData.find((p) => KYC.seated(p) &&
+      const leaders = D.querySelector('.guide-built[data-built-from="leaders-house"]');
+      const speaker = [...all.values()].find((p) => KYC.seated(p) &&
         (p.leadership || []).includes("Speaker of the House"));
+      const firstHouse = leaders && leaders.querySelector(".guide-person");
       check("the House's leaders are named from the data, the Speaker first",
-        !speaker || (leaders.querySelector(".guide-person") &&
-          leaders.querySelector(".guide-person").getAttribute("data-id") === speaker.id &&
-          /Speaker of the House/.test(leaders.querySelector(".guide-person").textContent)),
-        leaders.textContent.slice(0, 120));
-      const houseTitles = [...leaders.querySelectorAll(".guide-person")].map((b) => b.textContent);
+        !!leaders && (!speaker || (firstHouse && profileHref(firstHouse) === speaker.id &&
+          /Speaker of the House/.test(firstHouse.textContent))),
+        leaders ? leaders.textContent.slice(0, 120) : "no block");
+      const houseTitles = leaders ? [...leaders.querySelectorAll(".guide-person")].map((b) => b.textContent) : [];
       const lead = houseTitles.findIndex((t) => /(^|\s)House Minority Leader$/.test(t.trim()) && !/Assistant/.test(t));
       const assistant = houseTitles.findIndex((t) => /Assistant House Minority Leader/.test(t));
       check("the Minority Leader comes before the Assistant Minority Leader",
         lead === -1 || assistant === -1 || lead < assistant, `${lead} ${assistant}`);
-      const senateLeads = [...D.querySelectorAll('.guide-live[data-live="leaders-senate"] .guide-person')];
+      const senateLeads = [...D.querySelectorAll('.guide-built[data-built-from="leaders-senate"] .guide-person')];
       check("every name in the Senate's list is a sitting senator holding that post",
         senateLeads.every((b) => {
-          const p = KYC.byId(b.getAttribute("data-id"));
+          const p = linked(b);
           return p && KYC.seated(p) && /Senate/.test(p.chamber || "") &&
             (p.leadership || []).some((t) => b.textContent.includes(t));
         }), `${senateLeads.length} senators`);
@@ -6586,50 +6976,41 @@ async function testGuide() {
       // then nobody is shown holding one, and the list says so rather than
       // naming the last Congress's leaders (legislators.held_posts).
       for (const ch of ["house", "senate"]) {
-        const box = D.querySelector(`.guide-live[data-live="leaders-${ch}"]`);
-        const any = window.legislatorsData.some((p) => KYC.seated(p) &&
+        const box = D.querySelector(`.guide-built[data-built-from="leaders-${ch}"]`);
+        const any = [...all.values()].some((p) => KYC.seated(p) &&
           (ch === "senate") === /Senate/.test(p.chamber || "") && (p.leadership || []).length);
         check(`the ${ch === "senate" ? "Senate" : "House"} list names its leaders, or says this Congress's are not recorded yet`,
-          any ? box.querySelectorAll(".guide-person").length > 0
-            : /lists nobody in a \w+ leadership post for the \d+(st|nd|rd|th) Congress yet/.test(box.textContent),
-          box.textContent.slice(0, 160));
+          !!box && (any ? box.querySelectorAll(".guide-person").length > 0
+            : /lists nobody in a \w+ leadership post for the \d+(st|nd|rd|th) Congress yet/.test(box.textContent)),
+          box ? box.textContent.slice(0, 160) : "no block");
       }
-      {
-        const saved = window.legislatorsData.map((p) => p.leadership);
-        window.legislatorsData.forEach((p) => { delete p.leadership; });
-        const box = D.createElement("div");
-        window.KYC.guide.live["leaders-senate"](box);
-        window.legislatorsData.forEach((p, i) => { if (saved[i]) p.leadership = saved[i]; });
-        check("with no post recorded for the sitting Congress, the list names nobody and says so",
-          !box.querySelector(".guide-person") &&
-            new RegExp(`for the ${KYC.ordinal(window.kycBuildMeta.congress)} Congress yet`).test(box.textContent) &&
-            !!box.querySelector('a[href="https://www.senate.gov/senators/leadership.htm"]'),
-          box.textContent);
-      }
+      check("no block is left to fill on the page", !D.querySelector(
+        '.guide-live[data-live="committees"], .guide-live[data-live^="leaders-"]'));
     });
 
     suite(`${page} — who leads each committee, from the data`, () => {
-      const live = D.querySelector('.guide-live[data-live="committees"]');
+      const live = D.querySelector('.guide-built[data-built-from="committees"]');
       const table = KYC.meta().committees || {};
       // What the page should list, worked out here from the profiles.
       const expected = new Set();
-      window.legislatorsData.forEach((p) => {
+      all.forEach((p) => {
         if (p.isCandidate) return;
         (p.committeeList || []).forEach((seat) => {
           if (seat.title && table[seat.code] && !table[seat.code].parent) expected.add(seat.code);
         });
       });
-      const rows = [...live.querySelectorAll("tbody tr")];
-      if (!expected.size && window.legislatorsData.some((p) => p.committeesPending)) {
+      const rows = live ? [...live.querySelectorAll("tbody tr")] : [];
+      if (!expected.size && [...all.values()].some((p) => p.committeesPending)) {
         // A new Congress before its rosters are published.
         check("says the new Congress's committees are not published yet",
-          /have not been published yet/.test(live.textContent), live.textContent);
+          !!live && /have not been published yet/.test(live.textContent), live && live.textContent);
         return;
       }
       check("a row for every full committee with a titled seat", rows.length === expected.size,
         `${rows.length} rows, ${expected.size} committees`);
       check("House, Senate and joint committees each have a table",
-        live.querySelectorAll("table").length >= 3);
+        !!live && live.querySelectorAll("table").length >= 3);
+      if (!live) return;
       // The Senate's narcotics caucus is not a Senate committee, and its
       // minority lead is its Co-Chair, not a second Chairman.
       const caucus = rows.find((r) => /Caucus on International Narcotics Control/.test(r.textContent));
@@ -6645,7 +7026,7 @@ async function testGuide() {
       const people = [...live.querySelectorAll(".guide-person")];
       check("every name is a sitting member who holds a titled seat on that committee",
         people.length > 80 && people.every((b) => {
-          const p = KYC.byId(b.getAttribute("data-id"));
+          const p = linked(b);
           const name = b.closest("tr").querySelector("th").textContent.trim();
           const code = Object.keys(table).find((c) => table[c].name === name);
           return p && !p.isCandidate &&
@@ -6653,7 +7034,7 @@ async function testGuide() {
         }), `${people.length} names`);
       check("a chair is on the majority's side and a minority lead on the minority's",
         people.every((b) => {
-          const p = KYC.byId(b.getAttribute("data-id"));
+          const p = linked(b);
           const name = b.closest("tr").querySelector("th").textContent.trim();
           const code = Object.keys(table).find((c) => table[c].name === name);
           const seat = p.committeeList.find((s) => s.code === code);
@@ -6680,12 +7061,9 @@ async function testGuide() {
           const has = !!note && note.classList.contains("committees-unnamed");
           return n ? has && /no member of the minority a leading title/.test(note.textContent) : !has;
         }));
-      const first = people[0];
-      first.click();
-      check("a name opens the shared profile dialog",
-        !D.getElementById("profileModal").hidden &&
-        D.getElementById("profileModalName").textContent === KYC.byId(first.getAttribute("data-id")).name);
-      KYC.profile.close();
+      check("each name is a link to that member's profile on the grid",
+        people.every((b) => b.tagName === "A" &&
+          /^\.\.\/index\.html#\/profile\//.test(b.getAttribute("href")) && !!linked(b)));
     });
   }
 
@@ -8753,8 +9131,11 @@ async function testSearchAndFilters() {
     D.querySelector('#sortPanel [data-sort="age-desc"]').click();
     const first = D.querySelector("#results .card");
     check("an age sort prints the age", /Age \d+/.test(first.textContent), first.textContent);
-    // The cards come a window at a time: draw them all.
-    while (D.getElementById("gridMore")) D.getElementById("gridMore").click();
+    // The cards come a window at a time: draw them all. Bounded: a click
+    // that draws nothing (a card that throws) leaves the button in place,
+    // and an unbounded loop would spin until the job is killed.
+    for (let i = 0; D.getElementById("gridMore") && i < 1000; i++) D.getElementById("gridMore").click();
+    check("every window of cards draws", !D.getElementById("gridMore"));
     const divider = D.querySelector("#results .grid-divider");
     const unknown = cards().some((p) => KYC.ageOf(p) === null);
     check("and says where the unknown ages start", !unknown ||
@@ -9077,7 +9458,7 @@ async function testSearchAndFilters() {
   suite("search — the officials' data comes on demand", () => {
     // The officials' files; the votes' are the profile dialog's (testVotes).
     const srcs = [...template.content.querySelectorAll("script")].map((s) => s.getAttribute("src"))
-      .filter((s) => !/^data\/votes\//.test(s));
+      .filter((s) => !/^data\/(votes|people)\//.test(s));
     check("the page names each file with its version", srcs.length === 3 &&
       srcs.every((s) => /^data\/[a-z/]+\.js\?v=[0-9a-f]{10}$/.test(s)), srcs.join(" "));
     const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
@@ -9182,10 +9563,7 @@ function departFlorida(w) {
  * because they won elsewhere - never because they are "running for" the
  * seat they now hold. Hypothetical, made from a member running today. */
 function senateWinnerState() {
-  const line = fs.readFileSync(path.join(SITE, "data", "profiles.js"), "utf8").split("\n")
-    .find((l) => l.indexOf("window.legislatorsData = ") === 0);
-  const people = JSON.parse(line.slice("window.legislatorsData = ".length, -1));
-  const mover = people.find((p) => !p.isCandidate && !p.formerMember && p.chamber === "House" &&
+  const mover = [...everyone().values()].find((p) => !p.isCandidate && !p.formerMember && p.chamber === "House" &&
     /^S-/.test(p.contestRaceId || ""));
   return mover && mover.state;
 }
@@ -9245,26 +9623,9 @@ function senatePending(w) {
 }
 
 async function testCommitteesPending() {
-  const guide = await buildPage("government/congress.html", { data: senatePending });
-  await settle(50);
-  // The House's rosters must be out for one chamber to be out before the
-  // other: in a new Congress before either is, the guide's own check covers it.
-  if (guide.window.legislatorsData.some((p) => p.chamber === "House" && p.committeesPending)) return;
-  suite("government/congress.html — one chamber's committee rosters out, not the other's", () => {
-    const { window, D, errors } = guide;
-    check("no page errors", errors.length === 0, errors.join(" | "));
-    const live = D.querySelector('.guide-live[data-live="committees"]');
-    const text = live ? live.textContent : "";
-    check("the House's leads are listed", !!live && /House committees/.test(text) &&
-      live.querySelectorAll("table").length >= 1, text.slice(0, 200));
-    check("the Senate's are said to be pending, for the data's Congress",
-      /Senate committee assignments for the 120th Congress have not been published yet/
-        .test(text), text.slice(0, 300));
-    check("no senator is named as a committee lead",
-      [...live.querySelectorAll(".guide-person")].every((b) =>
-        window.KYC.byId(b.getAttribute("data-id")).chamber !== "Senate"));
-  });
-
+  // The guide's half - the House's leads listed, the Senate's said to be
+  // pending - is written by the build, and tested there
+  // (tests/test_guide.py, committees_html).
   const grid = await buildPage("index.html", { data: senatePending });
   await settle(50);
   suite("index.html — a senator whose committees are not yet published", () => {
@@ -10512,14 +10873,14 @@ async function testFrame() {
       check("the sidebar says how fresh the page is and links About & sources, out of the " +
         "grid's endless scroll", !!side && !!side.querySelector('a[href$="about.html"]'),
         side && side.textContent.replace(/\s+/g, " "));
-      const congress = /<script src="(\.\.\/)?data\/profiles\.js/.test(raw);
+      const congress = /<script src="(\.\.\/)?data\/people\/meta\.js/.test(raw);
       const tag = D.querySelector(".brand-sub");
       const want = TAGS.find(([prefix]) => page.indexOf(prefix) === 0);
       if (want) {
         check(`the header names the section: ${want[1]}`, !!tag && tag.textContent.trim() === want[1] &&
           !tag.hasAttribute("data-congress"), tag && tag.textContent);
       }
-      check("data-congress only where profiles.js loads", !tag || !tag.hasAttribute("data-congress") ||
+      check("data-congress only where the build's figures load", !tag || !tag.hasAttribute("data-congress") ||
         congress, tag && tag.outerHTML);
       if (congress && !/^government\//.test(page)) {
         check("the sidebar's build date, in words", !!side && WORD_DATE.test(side.textContent),
@@ -10812,7 +11173,7 @@ async function testVotes() {
       house.rolls.length > 100 && Object.keys(house.members).length > 400 &&
         senate.rolls.length > 100 && Object.keys(senate.members).length >= 100,
       `${house.rolls.length} House, ${senate.rolls.length} Senate roll calls`);
-    check("profiles.js does not carry them", !window.legislatorsData.some((p) => p.votes));
+    check("the people files do not carry them", !window.legislatorsData.some((p) => p.votes));
     KYC.profile.open(member.id);
     const entry = house.members[member.id];
     const rows = [...D.querySelectorAll("#profileModalVoteList .vote-row")];
@@ -11016,10 +11377,18 @@ async function testVotes() {
   const state = await buildPage("states/oh.html", { setup: loadVotes });
   await settle(80);
   suite("profile — votes on a state page", () => {
-    const srcs = [...state.D.getElementById("onDemandData").content.querySelectorAll("script")]
+    const named = [...state.D.getElementById("onDemandData").content.querySelectorAll("script")]
       .map((s) => s.getAttribute("src"));
+    const srcs = named.filter((s) => /\/votes\//.test(s));
     check("named from one folder down", srcs.length === 2 && srcs.every((s) => /^\.\.\/data\/votes\//.test(s)),
       srcs.join(" "));
+    // So are the people files it does not load (rule 94): the index of
+    // everyone and every other state's, never its own.
+    const people = named.filter((s) => /\/people\//.test(s));
+    check("and the people files it may want, from one folder down, never its own",
+      people.length === peopleStates().length && people.every((s) => /^\.\.\/data\/people\/[a-z]+\.js\?v=/.test(s)) &&
+        !people.some((s) => /\/oh\.js/.test(s)) && people.some((s) => /\/index\.js/.test(s)),
+      people.length + " named");
     const ohio = state.window.legislatorsData.find((p) => p.state === "OH" && !p.isCandidate &&
       state.window.KYC.seated(p) && has(state.window.kycVotesHouse, p));
     state.window.KYC.profile.open(ohio.id);
@@ -11110,7 +11479,8 @@ async function testRaceMoney() {
    * NJ-11, GA-13, GA-14), and every "Last time" becomes 2026's own from the
    * day after Election Day (PR #110 review; rule 63). */
   suite("the seat's last election: specials since, and the day after", () => {
-    const all = window.kycRaces;
+    // Every state's races: the North Carolina page holds its own (rule 94).
+    const all = allRaces();
     const specials = all.filter((r) => r.lastElection && r.lastElection.seatedSince &&
       r.lastElection.seatedSince.how === "special-election");
     const campaign = new window.Date(2026, 9, 20);
@@ -11282,7 +11652,12 @@ async function testRaceMoney() {
     check("the comparison scrolls inside its box", /\.compare-scroll\s*\{[^}]*overflow-x:\s*auto/.test(css));
   });
 
+  // Every person's: on the grid, which holds them all (rule 94).
+  const whole = await buildPage("index.html");
   suite("outside spending under a member's other candidacy", () => {
+    const window = whole.window;
+    const D = whole.D;
+    const KYC = window.KYC;
     const people = window.legislatorsData;
     const others = people.filter((p) => p.outsideSpendingOther);
     check("the campaign of a member running for the other chamber carries it (while they run)",
@@ -11717,12 +12092,951 @@ async function testCharts() {
   }
 }
 
+/* ============================================================ Your ballot */
+
+/* ballot.html (kyc-ballot.js, rule 92): every contest on one reader's
+ * ballot, from a ZIP code in the address or a location. */
+async function ballotFor(hash, opts) {
+  const built = await buildPage("ballot.html", Object.assign({ hash }, opts || {}));
+  const out = built.D.getElementById("ballotResult");
+  await until(() => out && !out.hidden && !/Looking up|Finding your location/.test(out.textContent), 8000);
+  return Object.assign(built, { out, text: out ? out.textContent : "" });
+}
+
+/** A contest's card by its heading's first words. */
+function contestsOf(out) {
+  return [...out.querySelectorAll(".ballot-contest")].map((li) => ({
+    li,
+    office: li.querySelector(".ballot-office").firstChild.textContent.trim(),
+    seat: (li.querySelector(".ballot-seat") || { textContent: "" }).textContent.trim(),
+  }));
+}
+
+const badgeWords = (el) => [...el.querySelectorAll(".badge")].map((b) => b.textContent.trim());
+
+async function testBallot() {
+  // A redrawn state's ZIP code that touches two districts on the 2026 map:
+  // Frisco, Texas (75036), in TX-26 and TX-4.
+  // A browser that can share a location, so the page offers it.
+  const tx = await ballotFor("#/?zip=75036", { setup: at(0, 0, 1) });
+  const txState = await buildPage("states/tx.html");
+  await settle(50);
+  suite("Your ballot: a ZIP code across two House districts in a redrawn state", () => {
+    const { window, out, errors } = tx;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the page asked the lookup itself, from the ZIP code in its address",
+      /Your ballot: ZIP 75036, Texas/.test(tx.text), tx.text.slice(0, 200));
+    check("its address carries the ZIP code, and nothing else", window.location.hash === "#/?zip=75036",
+      window.location.hash);
+    const entry = window.kycLookup.TX.zips["75036"];
+    const shares = (entry.next || []).filter((p) => p[1] < window.kycLookupIndex.whole);
+    const cards = contestsOf(out);
+    const house = cards.filter((c) => c.office === "U.S. House");
+    check("one House card per district the ZIP area reaches on the 2026 map",
+      house.length === entry.next.length && entry.next.length > 1,
+      house.map((c) => c.seat).join(" | "));
+    check("each with its share of the ZIP area's land", house.every((c) =>
+      /of ZIP 75036.s land is in this district/.test(c.li.textContent)) && shares.length > 1);
+    check("each named on the 2026 map", house.every((c) => /on the 2026 map/.test(c.seat)) ||
+      window.KYC.recordPhase());
+    check("the caveat, and the way to an exact answer: the reader's location",
+      /crosses district lines/.test(tx.text) &&
+      !!out.querySelector(".ballot-state [data-ballot-locate]"));
+    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature)/)[1]);
+    const rank = { federal: 0, statewide: 1, legislature: 2 };
+    check("in ballot order: Congress, statewide offices, the legislature",
+      order.every((k, i) => !i || rank[order[i - 1]] <= rank[k]) && order[0] === "federal" &&
+      order.indexOf("statewide") !== -1 && order.indexOf("legislature") !== -1, order.join(","));
+    check("the Senate first among them", cards[0].office === "U.S. Senate");
+    // The same people, order, words and count as the state page's race
+    // sections (rules 12 and 73): each race card against its section.
+    const D2 = txState.D;
+    const differ = [];
+    cards.filter((c) => c.li.id && /^contest-[SH]-/.test(c.li.id)).forEach((c) => {
+      const id = c.li.id.replace(/^contest-/, "");
+      const section = D2.getElementById("race-" + id);
+      if (!section) return differ.push(id + ": no section");
+      // The ballot lists those on it first and those whose ballot status
+      // is not known apart (PR #115 review), each in the section's order.
+      const theirCards = [...section.querySelectorAll(":scope > .card-grid .card")];
+      const theirs = theirCards.map((n) => n.querySelector(".card-name").textContent);
+      const listed = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person .link-button")]
+        .map((n) => n.textContent);
+      const unsure = [...c.li.querySelectorAll(".ballot-unsure .ballot-person .link-button")].map((n) => n.textContent);
+      const ours = listed.concat(unsure);
+      const expect = theirs.filter((n) => listed.includes(n)).concat(theirs.filter((n) => unsure.includes(n)));
+      if (JSON.stringify(expect) !== JSON.stringify(ours) || ours.length !== theirs.length) {
+        differ.push(id + ": " + ours + " / " + theirs);
+      }
+      const head = section.querySelector(".race-head");
+      if (JSON.stringify(badgeWords(head)) !== JSON.stringify(badgeWords(c.li.querySelector(".ballot-badges")))) {
+        differ.push(id + " badges: " + badgeWords(c.li.querySelector(".ballot-badges")) + " / " + badgeWords(head));
+      }
+      const statusOf = {};
+      theirCards.forEach((n) => { statusOf[n.querySelector(".card-name").textContent] = badgeWords(n).join("+"); });
+      const theirStatus = ours.map((n) => statusOf[n]);
+      const ourStatus = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person, .ballot-unsure .ballot-person")]
+        .map((n) => badgeWords(n).join("+"));
+      if (JSON.stringify(theirStatus) !== JSON.stringify(ourStatus)) differ.push(id + " status: " + ourStatus + " / " + theirStatus);
+    });
+    check("each race lists the race section's people, in its order, with its status words and counts",
+      differ.length === 0, differ.join(" || "));
+    check("each person opens their profile here", (() => {
+      const b = out.querySelector(".ballot-person .link-button");
+      if (!b) return false;
+      b.click();
+      return window.location.hash === "#/profile/" + encodeURIComponent(b.getAttribute("data-id"));
+    })());
+    const leg = cards.filter((c) => /ballot-legislature/.test(c.li.className));
+    check("the state legislature: each chamber's district, and whether its seat is up, from the record",
+      leg.length === 2 && leg.every((c) => c.li.querySelector(".leg-ballot")), leg.map((c) => c.office).join(" | "));
+    const senate = leg[0].li;
+    const sid = senate.querySelector(".ballot-district").getAttribute("href").match(/d=([^&]+)$/)[1];
+    const leg2 = Object.values(window.kycLegislature || {})[0];
+    check("a seat the record says is not up is said so, never guessed",
+      !leg2 || leg2.chambers.upper.districts[decodeURIComponent(sid)].up !== false ||
+      /not up for regular election in 2026/.test(senate.textContent), senate.textContent.slice(0, 200));
+    check("legislative candidates are not listed here, and said so",
+      /candidates for (this seat|these seats) are not listed here/.test(tx.text));
+    check("ballot measures and local contests: not listed here",
+      /Also on your ballot, not listed here/.test(tx.text) && /ballot measures/.test(tx.text));
+    check("the key dates, passed ones said passed on the reader's day",
+      !!out.querySelector(".ballot-dates .vote-dates") && /Passed/.test(out.querySelector(".ballot-dates").textContent));
+    check("and the way to how to vote in Texas", !!out.querySelector('.ballot-dates a[href$="states/tx.html#voting"]'));
+  });
+
+  // Georgia: a Senate race and an open governor's seat with its listed
+  // candidates; a ZIP code typed into the page.
+  const ga = await buildPage("ballot.html");
+  const slot = ga.D.getElementById("ballotAsk");
+  slot.querySelector("#ballotZip").value = "30009";
+  slot.querySelector("form").dispatchEvent(new ga.window.Event("submit", { bubbles: true, cancelable: true }));
+  const gaOut = ga.D.getElementById("ballotResult");
+  await until(() => !/Looking up/.test(gaOut.textContent) && gaOut.querySelector(".ballot-state"), 8000);
+  suite("Your ballot: Georgia, a Senate race and an open governor's seat", () => {
+    const { window } = ga;
+    const cards = contestsOf(gaOut);
+    check("a typed ZIP code is written into the address, for a copied link", window.location.hash === "#/?zip=30009",
+      window.location.hash);
+    check("the U.S. Senate race", cards.some((c) => c.office === "U.S. Senate" && c.li.querySelector(".ballot-person")));
+    const gov = cards.find((c) => c.office === "Governor");
+    const listed = window.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates;
+    check("the governor's office, marked on the ballot from the state's record",
+      !!gov && /This office is on the Nov 3, 2026 ballot/.test(gov.li.textContent));
+    check("with every candidate the election office lists, printed names first and write-ins apart",
+      !!gov && gov.li.querySelectorAll(".gov-candidate-list:not(.gov-writein-list) li").length ===
+        listed.filter((p) => !p.writeIn).length &&
+        gov.li.querySelectorAll(".gov-writein-list li").length === listed.filter((p) => p.writeIn).length);
+    check("credited to the list as the document it is, and dated (rule 91), never 'Certified by'",
+      !!gov && /Source: .*\(read /.test(gov.li.textContent) && !/Certified by/.test(gov.li.textContent));
+    check("no statewide candidate is linked to a profile (rule 25)",
+      !!gov && !gov.li.querySelector(".gov-candidates [data-id]"));
+    check("Georgia's every statewide office on the ballot has its card",
+      ["Governor", "Lieutenant governor", "Attorney general", "Secretary of state"].every((o) =>
+        cards.some((c) => c.office === o)));
+    check("the reader's state is remembered", window.KYC.rememberedState() === "GA");
+    check("print: one button, and it prints", (() => {
+      let printed = 0;
+      window.print = () => { printed += 1; };
+      const b = gaOut.querySelector("[data-ballot-print]");
+      if (!b) return false;
+      b.click();
+      return printed === 1 && /Print or save this list/.test(b.textContent);
+    })());
+    check("printed in the light theme's colours, the reader's own put back after", (() => {
+      const root = window.document.documentElement;
+      const meta = window.document.querySelector('meta[name="color-scheme"]');
+      root.setAttribute("data-theme", "dark");
+      meta.setAttribute("content", "only dark");
+      window.dispatchEvent(new window.Event("beforeprint"));
+      const during = [root.getAttribute("data-theme"), meta.getAttribute("content")].join();
+      window.dispatchEvent(new window.Event("afterprint"));
+      return during === "light,only light" && root.getAttribute("data-theme") === "dark" &&
+        meta.getAttribute("content") === "only dark";
+    })());
+  });
+
+  suite("Your ballot: the print stylesheet keeps the list and drops the controls", () => {
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const blocks = [...css.matchAll(/@media print\s*\{([\s\S]*?)\n\}/g)].map((m) => m[1]);
+    const ballot = blocks.find((b) => /\.ballot-ask/.test(b)) || "";
+    check("the ZIP form, the print button and the page's controls are hidden in print",
+      /\.ballot-ask,[\s\S]*\.ballot-print-row,[\s\S]*display: none/.test(ballot));
+    check("a contest is never split across pages", /\.ballot-contest \{ break-inside: avoid/.test(ballot));
+    check("the scrolling column becomes the page", /overflow: visible/.test(ballot));
+    check("the list itself is not hidden", !/\.ballot-list|\.ballot-contest,|\.ballot-state,/.test(
+      (ballot.match(/([^{}]*)\{ display: none/) || [""])[0]));
+  });
+
+  // Kentucky elects no statewide officer in 2026.
+  const ky = await ballotFor("#/?zip=40202");
+  suite("Your ballot: a state with no statewide office on the ballot", () => {
+    const cards = contestsOf(ky.out);
+    const none = cards.find((c) => /^No statewide office this site covers is on this ballot/.test(c.office));
+    check("said in one card, each office with its record's mark", !!none &&
+      none.li.querySelectorAll(".ballot-offlist li .gov-ballot-mark").length >= 4,
+      cards.map((c) => c.office).join(" | "));
+    check("and no candidates for an office not on it", !ky.out.querySelector(".gov-candidates"));
+    check("the order line names no statewide offices", !/then statewide offices/.test(ky.text));
+  });
+
+  const dc = await ballotFor("#/?zip=20001");
+  suite("Your ballot: the District of Columbia in its own words", () => {
+    check("no page errors", dc.errors.length === 0, dc.errors.join(" | "));
+    const cards = contestsOf(dc.out);
+    check("its Delegate's race", cards.some((c) => /Delegate to the U.S. House/.test(c.office)),
+      cards.map((c) => c.office).join(" | "));
+    check("no statewide office, no state legislature", !/statewide|state legislature/i.test(
+      [...dc.out.querySelectorAll(".ballot-office, .ballot-heading")].map((h) => h.textContent).join(" ")));
+    check("the District's own contests, not listed here", /the District's own contests/.test(dc.text));
+    check("'the District of Columbia' in a sentence (rule 75)", /Key dates in the District of Columbia/.test(dc.text));
+  });
+
+  const gu = await ballotFor("#/?zip=96910");
+  const pr = await ballotFor("#/?zip=00601");
+  suite("Your ballot: a territory in its own words", () => {
+    const cards = contestsOf(gu.out);
+    check("Guam's Delegate race and its own offices", cards.some((c) => /Delegate/.test(c.office)) &&
+      cards.some((c) => c.office === "Governor"), cards.map((c) => c.office).join(" | "));
+    check("never 'statewide' of a territory", !/statewide/i.test(gu.text), (gu.text.match(/.{40}statewide.{40}/i) || [""])[0]);
+    check("territorial offices, in the order line", /then territorial offices/.test(gu.text));
+    check("Puerto Rico: no election on November 3, in its election office's words",
+      /No election is held in Puerto Rico on November 3, 2026/.test(pr.text) && !/Election Day is/.test(pr.text));
+    check("and its Resident Commissioner's seat not on this ballot, with its term",
+      /Resident Commissioner to the U\.S\. House/.test(pr.text) && /next in \d{4}/.test(pr.text));
+    check("never 'may also hold' where no election is held", !/may also hold/.test(pr.text));
+  });
+
+  const pobox = await ballotFor("#/?zip=30003");
+  suite("Your ballot: a ZIP code with no ZIP area", () => {
+    check("said so, with the way on", /not one of the Census Bureau's ZIP Code Tabulation Areas/.test(pobox.text));
+    check("and no ballot is guessed", !pobox.out.querySelector(".ballot-state"));
+  });
+
+  // A location: answered, and never written into the address (rule 92).
+  const here = await buildPage("ballot.html", { hash: "#/?zip=30009", setup: at(33.749, -84.388, 0, 30) });
+  const hereOut = here.D.getElementById("ballotResult");
+  await until(() => hereOut.querySelector(".ballot-state"), 8000);
+  here.D.querySelector("#ballotAsk [data-ballot-locate]").click();
+  await until(() => /your location/.test(hereOut.textContent) && !/Finding/.test(hereOut.textContent), 8000);
+  suite("Your ballot: from a location", () => {
+    check("the location's ballot", /Your ballot: your location, Georgia/.test(hereOut.textContent),
+      hereOut.textContent.slice(0, 160));
+    check("the address keeps no ZIP code and no coordinate", here.window.location.hash === "#/" &&
+      !/33\.7|84\.3/.test(here.window.location.href), here.window.location.href);
+  });
+
+  // The day after the election: an election held, the federal results the
+  // site has, the state's own results for the rest, no state winner named.
+  const after = await ballotFor("#/?zip=30009", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: after Election Day", () => {
+    check("it says the election has been held", /election has been held/.test(after.text));
+    check("and links the state's own results for state offices",
+      /does not read state or local results and names no winner/.test(after.text) &&
+      !!after.out.querySelector('.ballot-after a[target="_blank"]'));
+    const gov = contestsOf(after.out).find((c) => c.office === "Governor");
+    check("a statewide office's candidates in the past tense, no winner named",
+      !!gov && /Candidates who were on the Nov 3, 2026 ballot/.test(gov.li.textContent) &&
+      !/Won by|Elected/.test(gov.li.textContent));
+    check("the page's own words in the past tense", /What was on the ballot/.test(after.text));
+    check("every federal race says its result or that none has been read",
+      contestsOf(after.out).filter((c) => /ballot-federal/.test(c.li.className) && !/ballot-off/.test(c.li.className))
+        .every((c) => /Won by|Going to a runoff|Awaiting result/.test(c.li.querySelector(".ballot-badges").textContent)));
+  });
+
+  // PR #115 review: every race's card, in every state, lists under "On your
+  // ballot" only the people the lookup's answer lists (KYC.stillRunning);
+  // a filer whose ballot status is not known after the primary is named
+  // apart, and a holder off the ballot by their own status, never among
+  // those who "lost the primary, withdrew, or were not on the primary
+  // ballot".
+  suite("Your ballot: every race lists only who is on it, the rest apart", () => {
+    const { window } = tx;
+    const KYC = window.KYC;
+    const D = window.document;
+    const bad = [], holders = [], unsureSeen = [], lookup = [];
+    const codes = [...new Set(window.kycRaces.map((r) => r.state))];
+    codes.forEach((code) => {
+      const districts = window.kycRaces.filter((r) => r.state === code && r.chamber === "House")
+        .map((r) => r.district);
+      const box = D.createElement("div");
+      box.innerHTML = KYC.ballot.stateBallot(code, { head: code, race: districts, upper: [], lower: [], notes: [] });
+      box.querySelectorAll(".ballot-contest[id^='contest-']").forEach((li) => {
+        const race = window.kycRaces.find((r) => "contest-" + r.id === li.id);
+        if (!race) return;
+        li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person [data-id]").forEach((b) => {
+          const p = KYC.byId(b.getAttribute("data-id"));
+          if (!p || !KYC.stillRunning(race, p)) bad.push(race.id + ": " + b.textContent);
+        });
+        li.querySelectorAll(".ballot-unsure .ballot-person [data-id]").forEach((b) => {
+          unsureSeen.push(race.id);
+          const p = KYC.byId(b.getAttribute("data-id"));
+          if (!p || KYC.stillRunning(race, p) || KYC.offBallot(p.raceStatus)) bad.push(race.id + " (apart): " + b.textContent);
+        });
+        // A holder off this ballot, not running elsewhere, is named with
+        // their status.
+        race.incumbentIds.map(KYC.byId).filter(Boolean).forEach((p) => {
+          if (p.isCandidate || !KYC.offBallot(p.raceStatus)) return;
+          if (p.contestRaceId && p.contestRaceId !== race.id && p.contestLabel) return;
+          const line = li.querySelector('.ballot-holder [data-id="' + p.id + '"]');
+          if (!line || !line.parentNode.querySelector(".badge")) holders.push(race.id + ": " + p.name);
+        });
+        // The count of people out never counts a holder named above it.
+        const outLine = (li.textContent.match(/\d+( other)? (?:person|people) no longer in this race/) || [""])[0];
+        if (outLine && li.querySelector(".ballot-holder") && !/ other /.test(outLine)) {
+          bad.push(race.id + ": holder counted among those out");
+        }
+        // The same people as the lookup's answer for this race.
+        const ids = [...li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person [data-id]")]
+          .map((b) => b.getAttribute("data-id")).sort();
+        const theirs = KYC.findRep.running(race).map((p) => p.id).sort();
+        if (JSON.stringify(ids) !== JSON.stringify(theirs)) lookup.push(race.id + ": " + ids + " / " + theirs);
+      });
+    });
+    check("each person under 'On your ballot' is on it, by the lookup's own test", bad.length === 0,
+      bad.slice(0, 8).join(" | "));
+    check("each seat's holder off the ballot is named with their own status", holders.length === 0,
+      holders.slice(0, 8).join(" | "));
+    // Asked while the campaign's Congress sits (rule 68): from January 3 a
+    // re-seated member's seat is their new term's, which the lookup reads
+    // and the race record does not.
+    check("each race lists the same people as the lookup's answer for it",
+      lookup.length === 0 || !oldCongressSits(window), lookup.slice(0, 6).join(" | "));
+    check("(a filer whose status is not known exists to test with, or none does)",
+      unsureSeen.length > 0 || !oldCongressSits(window));
+  });
+
+  // PR #115 review: West Virginia's Senate and North Dakota's House name
+  // the districts up; Virginia's legislature is not up at all.
+  const nd = await ballotFor("#/?zip=58501");
+  const wv = await ballotFor("#/?zip=25301");
+  const va = await ballotFor("#/?zip=23219");
+  const az = await ballotFor("#/?zip=85004");
+  const mt = await ballotFor("#/?zip=59601");
+  suite("Your ballot: each legislative seat, in the record's words", () => {
+    const legOf = (b) => contestsOf(b.out).filter((c) => /ballot-legislature/.test(c.li.className));
+    const ndHouse = legOf(nd).find((c) => /House/.test(c.office));
+    check("North Dakota's House: whether the seat is up, never 'not known'",
+      !!ndHouse && !/not known here/.test(ndHouse.li.textContent) &&
+      /(on the Nov 3, 2026 ballot|no regular election in 2026|not up for regular election)/.test(ndHouse.li.textContent),
+      ndHouse && ndHouse.li.textContent.slice(0, 300));
+    const wvSenate = legOf(wv).find((c) => /Senate/.test(c.office));
+    check("West Virginia's Senate: one of each district's seats is up",
+      !!wvSenate && /One of this district's seats is on the Nov 3, 2026 ballot|special election/.test(wvSenate.li.textContent) &&
+      !/not known here/.test(wvSenate.li.textContent), wvSenate && wvSenate.li.textContent.slice(0, 300));
+    const azHouse = legOf(az).find((c) => /House/.test(c.office));
+    check("Arizona's House, two members a district: 'this district's seats', never 'this seat'",
+      !!azHouse && /This district's seats are on the Nov 3, 2026 ballot/.test(azHouse.li.textContent) &&
+      !/This seat is/.test(azHouse.li.textContent), azHouse && azHouse.li.textContent.slice(0, 300));
+    const mtSenate = legOf(mt).find((c) => /Senate/.test(c.office));
+    check("Montana's Senate: not known on each row, the chamber's count said once, the gap this site's",
+      !!mtSenate && [...mtSenate.li.querySelectorAll(".ballot-seat-row")].every((r) =>
+        /is not known here/.test(r.textContent) && !/seats are on the Nov 3/.test(r.textContent)) &&
+        (mtSenate.li.textContent.match(/of the 50 seats are on the Nov 3, 2026 ballot/g) || []).length === 1 &&
+        /This site's record of the 2026 ballot gives how many/.test(mtSenate.li.textContent) &&
+        !/The state's record gives how many/.test(mtSenate.li.textContent) && !/\( |\s\)/.test(mtSenate.li.textContent),
+      mtSenate && mtSenate.li.textContent.slice(0, 400));
+    const vaLeg = legOf(va);
+    check("Virginia's legislature, not up: drawn as off this ballot, and out of the order line",
+      vaLeg.length > 0 && vaLeg.every((c) => /ballot-off/.test(c.li.className)) &&
+      !/then the state legislature/.test(va.text), va.text.match(/Congress first[^.]*\./));
+    check("a chamber with a seat up is a contest, not drawn as off it",
+      legOf(az).every((c) => !/ballot-off/.test(c.li.className)) && /then the state legislature/.test(az.text));
+  });
+
+  suite("Your ballot: a statewide office's holder is named as the holder", () => {
+    const { window } = az;
+    const sg = window.KYC.stategov;
+    const states = window.kycStateGov.states;
+    const missed = [];
+    let seen = 0;
+    Object.keys(states).forEach((code) => {
+      ["governor", "lt", "ag", "sos"].forEach((k) => {
+        const item = sg.ballotOf(code) && sg.ballotOf(code).offices[k];
+        const status = item && item.up && item.holderStatus;
+        if (!status || !status.holder || status.text.indexOf(status.holder) === -1) return;
+        seen += 1;
+        const line = sg.openSeat(code, k, { role: true });
+        if (!/[Tt]he holder, /.test(line) || /Open seat: The/.test(line)) missed.push(code + " " + k + ": " + line);
+      });
+    });
+    check("on the ballot page, every holder line says who the holder is", seen > 0 && missed.length === 0,
+      missed.slice(0, 4).join(" | "));
+    const gov = contestsOf(az.out).find((c) => c.office === "Governor");
+    const st = states.AZ.ballot2026.offices.governor.holderStatus;
+    check("Arizona's governor card", !gov || !st || !st.holder ||
+      gov.li.textContent.indexOf("he holder, " + st.holder + ",") !== -1, gov && gov.li.textContent.slice(0, 300));
+  });
+
+  suite("Your ballot: the answer's room is held, and let go when it is drawn", () => {
+    check("kyc.js marks an address with a ZIP code before first paint",
+      /classList\.add\("has-zip"\)/.test(fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8")));
+    check("the stylesheet holds the room", /html\.has-zip \.ballot-result \{ min-height/.test(
+      fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")));
+    check("and the drawn answer lets it go", !az.window.document.documentElement.classList.contains("has-zip"));
+    check("the ways to an exact answer on a row of their own, out of the sentence",
+      !!tx.out.querySelector(".ballot-state > .ballot-actions [data-ballot-locate]") &&
+      !tx.out.querySelector(".findrep-note [data-ballot-locate]"));
+  });
+
+  const guam = gu;
+  suite("Your ballot: Guam's sample ballot, said once", () => {
+    check("never 'links no sample ballot' over a list that is one",
+      !/This site links no sample ballot/.test(guam.text) &&
+      (!/sample ballot/.test((contestsOf(guam.out).find((c) => c.office === "Governor") || { li: { textContent: "" } }).li.textContent) ||
+        /the candidate lists above cite/.test(guam.text)), (guam.text.match(/.{60}no sample ballot.{80}/) || [""])[0]);
+  });
+
+  const azAfter = await ballotFor("#/?zip=85004", { now: "2026-11-05T12:00:00" });
+  const prAfter = await ballotFor("#/?zip=00601", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: after Election Day, every line in the past tense", () => {
+    check("'Who was on the ballot for this seat is', never '... are'",
+      /Who was on the ballot for (this seat|these seats|this district) is not listed here/.test(azAfter.text) &&
+      !/Who was on the ballot for [a-z' ]+ are not listed/.test(azAfter.text), (azAfter.text.match(/Who was on.{60}/) || [""])[0]);
+    check("the unlisted contests in the past tense",
+      /Also on the ballot, not listed here/.test(azAfter.text) && /may also have held/.test(azAfter.text) &&
+      !/may also hold/.test(azAfter.text) && !/Also on your ballot/.test(azAfter.text));
+    check("the order line in the past tense", /may have listed them in another order/.test(azAfter.text));
+    check("Puerto Rico keeps its no-election line under a neutral heading",
+      /Puerto Rico in 2026/.test(prAfter.text) && !/Key dates in Puerto Rico/.test(prAfter.text) &&
+      (prAfter.out.querySelector(".ballot-dates").textContent.match(/No election is held in Puerto Rico/) || []).length === 1 &&
+      !/What was on the ballot/.test(prAfter.text) && /The offices this site covers/.test(prAfter.text),
+      prAfter.text.slice(0, 300));
+  });
+
+  // The ways in: the lookup's answer, each state's voting block, the home page.
+  const home = await askZip("index.html", "30009");
+  const gaPage = await buildPage("states/ga.html");
+  const prPage = await buildPage("states/pr.html");
+  const prAnswer = await askZip("index.html", "00601");
+  await settle(50);
+  suite("Your ballot: the ways to it", () => {
+    const link = home.out.querySelector("a[data-findrep-ballot]");
+    check("the lookup's answer: 'See everything on your ballot', carrying the ZIP code only",
+      !!link && /ballot\.html#\/\?zip=30009$/.test(link.getAttribute("href")) &&
+      /See everything on your ballot/.test(link.textContent), link && link.getAttribute("href"));
+    check("the home page's hero", !!home.D.querySelector('.intro a[data-ballot-entry][href="ballot.html"]'));
+    check("each state's voting block", !!gaPage.D.querySelector('#voting a[data-ballot-entry][href$="ballot.html"]'));
+    check("but not where no election is held", !prPage.D.querySelector("#voting a[data-ballot-entry]") &&
+      !!prAnswer.out.querySelector(".findrep-answer") && !prAnswer.out.querySelector("a[data-findrep-ballot]"));
+    check("the navigation", !!home.D.querySelector('.site-nav a[data-nav="ballot"][href="ballot.html"]'));
+  });
+}
+
+/* ========================================================== people split */
+
+/* The profiles are split by what each page needs (rule 94): the grid and
+ * the map load data/people/index.js, everyone's card and search fields; a
+ * state's and a district's page load data/people/<st>.js, that state's
+ * whole records; any page loads another state's file, or the index, only
+ * when it wants one of its people. Every other suite builds the grid and
+ * the map with every state's file after the index, as one file held them
+ * all before; these build the pages as they ship and prove the index is
+ * enough: each view draws the same from it as from everyone's whole
+ * records, and whatever needs more loads it, says so while it loads, and
+ * says so when it fails. */
+
+/* The markup a reader sees in *ids*, one string, for comparing two pages. */
+function shown(D, ids) {
+  return ids.map((id) => {
+    const el = D.getElementById(id);
+    return id + ":" + (el ? (el.hidden ? "[hidden]" : "") + el.innerHTML.replace(/\s+/g, " ") : "-");
+  }).join("\n");
+}
+
+/* Where two strings first differ, with some of each, for a failing check. */
+function firstDifference(a, b) {
+  if (a === b) return a.length + " characters";
+  let i = 0;
+  while (i < a.length && a[i] === b[i]) i += 1;
+  return `at ${i}: "${a.slice(Math.max(0, i - 80), i + 120)}" vs "${b.slice(Math.max(0, i - 80), i + 120)}"`;
+}
+
+/* Visit each of *routes* on both pages and compare what *ids* show. */
+async function sameOnBoth(full, slim, routes, ids, wait) {
+  const out = [];
+  for (const route of routes) {
+    full.window.location.hash = route;
+    slim.window.location.hash = route;
+    await settle(wait || 150);
+    if (/q=\d{5}/.test(route)) {
+      const done = (b) => !/Looking up/.test((b.D.getElementById("findrep") || {}).textContent || "");
+      await until(() => done(full) && done(slim), 8000);
+    }
+    const a = shown(full.D, ids);
+    const b = shown(slim.D, ids);
+    out.push({ route, same: a === b, why: a === b ? "" : firstDifference(a, b), size: a.length });
+  }
+  return out;
+}
+
+function servedPeople(built) {
+  return built.served.filter((s) => /\/data\/people\//.test(s)).map((s) => s.split("?")[0]);
+}
+
+async function testPeopleSplit() {
+  const all = everyone();
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const index = readPeopleFile(path.join(SITE, "data", "people", "index.js"));
+
+  suite("people files — one build, split by state (rule 94)", () => {
+    const files = peopleStates().map((c) => readPeopleFile(path.join(SITE, "data", "people", c + ".js")));
+    check("every file names the build the figures are of", index.build === meta.signature &&
+      files.every((f) => f.build === meta.signature), meta.signature.slice(0, 12));
+    check("the index holds everyone, once, and every race",
+      index.people.length === all.size && new Set(index.people.map((p) => p.id)).size === all.size &&
+        index.races.length === files.reduce((n, f) => n + f.races.length, 0),
+      `${index.people.length} people, ${index.races.length} races`);
+    check("each state's file holds its own people and races and no one else's",
+      files.every((f) => f.people.every((p) => p.state === f.state) && f.races.every((r) => r.state === f.state)));
+    check("an index record is the whole record's fields, with the same values",
+      index.people.every((p) => Object.keys(p).every((k) =>
+        JSON.stringify(p[k]) === JSON.stringify(all.get(p.id)[k]))));
+    check("the index leaves out what only the dialog and a race's folds show",
+      index.people.every((p) => !("districtOffices" in p) && !("committeeList" in p) &&
+        !("receipts" in p) && !("fundingBreakdown" in p)) &&
+        [...all.values()].some((p) => "receipts" in p || "committeeList" in p || "districtOffices" in p));
+  });
+
+  // Every view of the grid, from the index and from everyone's records.
+  {
+    const full = await buildPage("index.html");
+    const slim = await buildPage("index.html", { people: "index" });
+    await settle(100);
+    suite("index.html as it ships — the index of everyone, no state's file", () => {
+      check("no page errors", slim.errors.length === 0, slim.errors.join(" | "));
+      check("it loads the build's figures and the index, and no state's file",
+        slim.sources.some((s) => /data\/people\/meta\.js$/.test(s)) &&
+          slim.sources.some((s) => /data\/people\/index\.js$/.test(s)) &&
+          servedPeople(slim).length === 0, servedPeople(slim).join(" "));
+      check("every person is a card's record, not a whole one",
+        slim.window.legislatorsData.length === all.size &&
+          slim.window.legislatorsData.every((p) => !slim.window.KYC.isFull(p)));
+      check("the globals keep their shape: legislatorsData, kycRaces, kycBuildMeta",
+        Array.isArray(slim.window.legislatorsData) && Array.isArray(slim.window.kycRaces) &&
+          slim.window.kycRaces.length === index.races.length && !!slim.window.kycBuildMeta.signature);
+    });
+    const routes = ["#/", "#/?sort=name", "#/?sort=age-desc", "#/?sort=age-asc", "#/?sort=senate26",
+      "#/?sort=close-kalshi", "#/?sort=close-polymarket", "#/?view=race", "#/?view=senate",
+      "#/?eliminated=show", "#/?chamber=Senate", "#/?party=Democrat", "#/?party=Independent",
+      "#/?role=candidate", "#/?role=member&state=TX", "#/?election=senateUp26", "#/?election=notSeeking",
+      "#/?election=unchallenged", "#/?state=CA&view=race", "#/?q=nurse", "#/?q=veteran",
+      "#/?q=speaker", "#/?q=pelo", "#/?q=texas", "#/?q=j.d.", "#/?q=warren", "#/?q=vance",
+      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show"];
+    const ids = ["results", "resultsLabel", "officialResults", "activeFilters", "findrep", "noResults"];
+    const compared = await sameOnBoth(full, slim, routes, ids, 200);
+    suite("index.html — every view the same from the index as from everyone's whole records", () => {
+      compared.forEach((c) => check(`${c.route} draws the same`, c.same && c.size > 200, c.why || c.size));
+      check("still no state's file loaded", servedPeople(slim).length === 0, servedPeople(slim).join(" "));
+    });
+
+    // A race's money and its ballot side by side are the state's file's:
+    // loaded when the fold opens, said while it loads, then the same.
+    slim.window.location.hash = "#/?state=GA&view=race";
+    full.window.location.hash = "#/?state=GA&view=race";
+    await settle(200);
+    const fold = (b) => b.D.querySelector('#results .race-money[data-fold]');
+    const compare = (b) => b.D.querySelector('#results .race-compare[data-fold]');
+    const before = servedPeople(slim).length;
+    openFold(slim.window, fold(slim));
+    const loading = fold(slim).querySelector(".fold-body").textContent;
+    openFold(full.window, fold(full));
+    await until(() => !!fold(slim).querySelector(".money-row"), 5000);
+    openFold(slim.window, compare(slim));
+    openFold(full.window, compare(full));
+    await until(() => !!compare(slim).querySelector(".compare-table"), 5000);
+    suite("index.html — a race's money and comparison load the state's records when opened", () => {
+      check("it says it is loading, and draws nothing from the cards meanwhile",
+        /Loading Georgia/.test(loading) && !/No data/.test(loading), loading);
+      check("it loads that state's file, and only it",
+        servedPeople(slim).slice(before).join() === "/data/people/ga.js", servedPeople(slim).join(" "));
+      check("then the money is what the whole records show",
+        fold(slim).innerHTML === fold(full).innerHTML, firstDifference(fold(full).innerHTML, fold(slim).innerHTML));
+      check("and the ballot side by side too",
+        compare(slim).innerHTML === compare(full).innerHTML,
+        firstDifference(compare(full).innerHTML, compare(slim).innerHTML));
+      check("Georgia's people are whole now, no one else's",
+        slim.window.legislatorsData.every((p) => slim.window.KYC.isFull(p) === (p.state === "GA")));
+    });
+
+    // A card opens the dialog over a loading line, never over the card's
+    // fields: "No data" about a real person would be false.
+    slim.window.location.hash = "#/?state=CA";
+    await settle(150);
+    const card = slim.D.querySelector('#results .card[data-id]');
+    const person = card && all.get(card.getAttribute("data-id"));
+    card.click();
+    const waiting = slim.D.getElementById("profileModalWaiting");
+    const waitText = waiting ? waiting.textContent : "";
+    const headerHidden = slim.D.querySelector("#profileModal .modal-header").hidden;
+    await until(() => slim.D.getElementById("profileModalWaiting").hidden, 5000);
+    suite("index.html — a card's profile loads its state's records first", () => {
+      check("a loading line names the person, the dialog's parts hidden",
+        !!person && new RegExp("Loading " + person.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).test(waitText) &&
+          headerHidden, waitText);
+      check("then the whole profile, with what only the state's file holds",
+        slim.D.getElementById("profileModalName").textContent === person.name &&
+          !slim.D.querySelector("#profileModal .modal-header").hidden &&
+          slim.D.getElementById("profileModalReceipts").textContent.trim() !== "",
+        slim.D.getElementById("profileModalReceipts").textContent);
+      check("from California's file", servedPeople(slim).indexOf("/data/people/ca.js") !== -1,
+        servedPeople(slim).join(" "));
+      check("no page errors", slim.errors.length === 0, slim.errors.join(" | "));
+    });
+    slim.window.KYC.profile.close();
+    full.window.close();
+    slim.window.close();
+  }
+
+  // The directory of states counts every state's races from the index.
+  {
+    const full = await buildPage("states/index.html");
+    const slim = await buildPage("states/index.html", { people: "index" });
+    await settle(100);
+    suite("states/index.html — the same from the index as from everyone's records", () => {
+      const a = shown(full.D, ["stateContent"]);
+      const b = shown(slim.D, ["stateContent"]);
+      check("every state's row and the picker", a === b && a.length > 2000, firstDifference(a, b));
+      check("no page errors", slim.errors.length === 0, slim.errors.join(" | "));
+    });
+    full.window.close();
+    slim.window.close();
+  }
+
+  // Every mode of the map, and a state's panel in each.
+  {
+    const full = await buildPage("map.html");
+    const slim = await buildPage("map.html", { people: "index" });
+    await settle(100);
+    const routes = ["#/?mode=senate", "#/?mode=house", "#/?mode=house&layout=tiles", "#/?mode=senate2026",
+      "#/?mode=governor", "#/?mode=governor2026", "#/?mode=trifecta", "#/?mode=legislature",
+      "#/?mode=lt", "#/?mode=sos", "#/?mode=ag", "#/?state=TX&mode=house", "#/?state=CA&mode=senate2026",
+      "#/?state=AK&mode=senate", "#/?state=GA&mode=senate2026", "#/?state=PR&mode=house",
+      "#/?state=NY&mode=house&layout=tiles", "#/?state=OH&mode=senate2026", "#/?state=MN&mode=governor2026"];
+    const ids = ["usMap", "mapTiles", "mapLegend", "mapBalance", "panelState", "panelCounts", "panelMode",
+      "panelStateLink", "delegation"];
+    const compared = await sameOnBoth(full, slim, routes, ids, 150);
+    suite("map.html — every mode the same from the index as from everyone's whole records", () => {
+      check("no page errors", slim.errors.length === 0, slim.errors.join(" | "));
+      compared.forEach((c) => check(`${c.route} draws the same`, c.same && c.size > 500, c.why || c.size));
+      check("and no state's file loaded for it", servedPeople(slim).length === 0, servedPeople(slim).join(" "));
+    });
+    full.window.close();
+    slim.window.close();
+  }
+
+  // A state's and a district's page draw the same with everyone as with
+  // their own state's file: nothing on them is another state's.
+  for (const page of ["states/ca.html", "states/wy.html", "states/dc.html", "states/as.html",
+    "districts/tx.html", "districts/dc.html", "districts/nc.html"]) {
+    const own = await buildPage(page);
+    const everyoneHere = await buildPage(page, { people: "all" });
+    await settle(150);
+    const ids = ["stateContent", "districtsApp", "senateBalance", "houseBalance", "senateSeatsUp",
+      "challengerCount", "yourState"];
+    const a = shown(everyoneHere.D, ids);
+    const b = shown(own.D, ids);
+    suite(`${page} — its own state's file is all it needs`, () => {
+      check("no page errors", own.errors.length === 0, own.errors.join(" | "));
+      check("it loads the build's figures and its own state's file, not the index",
+        own.sources.some((s) => /data\/people\/meta\.js$/.test(s)) &&
+          own.sources.filter((s) => /data\/people\//.test(s)).length === 2 &&
+          !own.sources.some((s) => /data\/people\/index\.js$/.test(s)), own.sources.join(" "));
+      check("and draws the same as with everyone's records", a === b && a.length > 1000, firstDifference(a, b));
+    });
+    own.window.close();
+    everyoneHere.window.close();
+  }
+
+  // Deep links: on the grid, on the map and on a state page of another
+  // state; to a merged FEC id (rule 25) and to a departed member (rule 67).
+  const californian = [...all.values()].find((p) => p.state === "CA" && !p.isCandidate &&
+    !p.formerMember && /House/.test(p.chamber) && p.committeeList && p.committeeList.length) ||
+    [...all.values()].find((p) => p.state === "CA" && !p.isCandidate && !p.formerMember);
+  const merged = [...all.values()].find((p) => (p.otherFecIds || []).length);
+  for (const page of ["index.html", "map.html", "states/wy.html"]) {
+    const built = await buildPage(page, { people: "index", hash: "#/profile/" + californian.id });
+    const loading = built.D.getElementById("profileModalWaiting");
+    await until(() => built.D.getElementById("profileModalWaiting") &&
+      built.D.getElementById("profileModalWaiting").hidden &&
+      built.D.getElementById("profileModalName").textContent === californian.name, 6000);
+    suite(`${page}#/profile/ — a Californian's profile from a link`, () => {
+      check("no page errors", built.errors.length === 0, built.errors.join(" | "));
+      check("the dialog opens on the person", !built.D.getElementById("profileModal").hidden &&
+        built.D.getElementById("profileModalName").textContent === californian.name,
+        built.D.getElementById("profileModalName").textContent);
+      check("held whole, with what only their state's file holds",
+        built.window.KYC.isFull(built.window.KYC.byId(californian.id)) &&
+          (!(californian.committeeList || []).length || californian.committeeList.some((seat) =>
+            built.D.getElementById("profileModalCommittees").innerHTML.indexOf(seat.code) !== -1 ||
+            built.D.getElementById("profileModalCommittees").textContent.length > 20)),
+        built.D.getElementById("profileModalCommittees").textContent.slice(0, 80));
+      const wanted = page === "states/wy.html" ? ["/data/people/index.js", "/data/people/ca.js"]
+        : ["/data/people/ca.js"];
+      check("loading only what it needs: " + wanted.join(", "),
+        servedPeople(built).join() === wanted.join(), servedPeople(built).join(" "));
+      check("the address keeps the profile", built.window.location.hash === "#/profile/" + californian.id);
+    });
+    built.window.close();
+  }
+  if (merged) {
+    const alias = "FEC_" + merged.otherFecIds[0];
+    for (const page of ["index.html", "map.html", "states/as.html"]) {
+      const built = await buildPage(page, { people: "index", hash: "#/profile/" + alias });
+      await until(() => built.D.getElementById("profileModalName") &&
+        built.D.getElementById("profileModalName").textContent === merged.name &&
+        built.D.getElementById("profileModalWaiting").hidden, 6000);
+      suite(`${page}#/profile/${alias} — a link under a folded FEC id (rule 25)`, () => {
+        check("no page errors", built.errors.length === 0, built.errors.join(" | "));
+        check("opens the person it was folded into", built.D.getElementById("profileModalName").textContent === merged.name,
+          built.D.getElementById("profileModalName").textContent);
+        check("and the address moves to their current id",
+          built.window.location.hash === "#/profile/" + encodeURIComponent(merged.id), built.window.location.hash);
+      });
+      built.window.close();
+    }
+  }
+  {
+    // A record incumbent who has left keeps the member shape and a
+    // profile (rule 67): the index and their state's file both carry it.
+    const leaving = [...all.values()].find((p) => p.formerMember) ||
+      [...all.values()].find((p) => !p.isCandidate && p.state === "OH" && /House/.test(p.chamber));
+    const departed = (w) => {
+      w.legislatorsData.forEach((p) => {
+        if (p.id === leaving.id && !p.formerMember) {
+          p.formerMember = { left: "2026-12-08", via: "legislators-historical", congress: 119 };
+        }
+      });
+    };
+    const built = await buildPage("index.html", { people: "index", hash: "#/profile/" + leaving.id,
+      data: departed });
+    await until(() => built.D.getElementById("profileModalWaiting") &&
+      built.D.getElementById("profileModalWaiting").hidden &&
+      built.D.getElementById("profileModalName").textContent === leaving.name, 6000);
+    suite("index.html#/profile/ — a member who has left (rule 67)", () => {
+      check("no page errors", built.errors.length === 0, built.errors.join(" | "));
+      check("opens their profile, said as a former member's",
+        built.D.getElementById("profileModalName").textContent === leaving.name &&
+          /Represented \(until /.test(built.D.getElementById("profileModalRegionLabel").textContent),
+        built.D.getElementById("profileModalRegionLabel").textContent);
+      check("not counted among those who sit", !built.window.KYC.seated(built.window.KYC.byId(leaving.id)));
+    });
+    built.window.close();
+  }
+  // Nobody by that id (a stale or mistyped shared link): every page says
+  // the same sentence. The grid used to drop it silently, the map to open
+  // nothing under the address, and a state page to say this.
+  for (const page of ["index.html", "map.html"]) {
+    const built = await buildPage(page, { people: "index", hash: "#/profile/X_NOBODY" });
+    await until(() => /No profile on this site has the id/.test(
+      (built.D.getElementById("profileModalWaiting") || {}).textContent || ""), 6000);
+    const modal = built.D.getElementById("profileModal");
+    const line = built.D.getElementById("profileModalWaiting");
+    suite(page + "#/profile/ — an id nobody has", () => {
+      check("says no profile has it", !!modal && !modal.hidden && !!line && !line.hidden &&
+        /No profile on this site has the id X_NOBODY\./.test(line.textContent),
+        line ? line.textContent : "no dialog");
+      check("names no one in the dialog's heading", !!modal &&
+        built.D.getElementById("profileModalName").textContent === "Profile");
+      check("no state's file loaded for it", servedPeople(built).length === 0, servedPeople(built).join(" "));
+      if (page === "index.html") {
+        check("the grid drawn under it", built.D.querySelectorAll("#grid .card, .card").length > 0);
+      }
+    });
+    // Closing it leaves the address for the page itself.
+    built.window.KYC.profile.close();
+    await settle(30);
+    suite(page + "#/profile/ — closing the not-found line", () => {
+      check("the address no longer names the id", !/X_NOBODY/.test(built.window.location.hash),
+        built.window.location.hash);
+    });
+    built.window.close();
+  }
+  {
+    // A member who left during this Congress has no profile; a link to
+    // their id says whose it is and who holds the seat now (PR #118 review).
+    const probe = await buildPage("index.html", { people: "index" });
+    const gone = ((probe.window.KYC.meta() || {}).departed || []).find((r) => r.holder);
+    probe.window.close();
+    if (gone) {
+      const built = await buildPage("index.html", { people: "index", hash: "#/profile/" + gone.id });
+      await until(() => /No profile on this site has the id/.test(
+        (built.D.getElementById("profileModalWaiting") || {}).textContent || ""), 6000);
+      const line = built.D.getElementById("profileModalWaiting");
+      const to = line.querySelector("button[data-goto]");
+      suite("index.html#/profile/ — a member who left during this Congress", () => {
+        check("names them and when the term ended",
+          line.textContent.indexOf("It is the id of " + gone.name + ", who left the") !== -1 &&
+            /congress-legislators ends the term on/.test(line.textContent), line.textContent);
+        check("and opens the seat's holder now",
+          !!to && to.getAttribute("data-goto") === gone.holder.id && to.textContent === gone.holder.name);
+      });
+      built.window.close();
+    }
+  }
+  {
+    // On a state page an unknown id is looked for in the index first.
+    const built = await buildPage("states/wy.html", { people: "index", hash: "#/profile/X_NOBODY" });
+    await until(() => /No profile on this site has the id/.test(
+      (built.D.getElementById("profileModalWaiting") || {}).textContent || ""), 6000);
+    suite("states/wy.html#/profile/ — an id nobody has", () => {
+      check("says no profile has it, after looking in the index",
+        /No profile on this site has the id X_NOBODY/.test(built.D.getElementById("profileModalWaiting").textContent) &&
+          servedPeople(built).join() === "/data/people/index.js", servedPeople(built).join(" "));
+    });
+    built.window.close();
+  }
+
+  // A file that fails to load is said, and nothing is drawn from a card.
+  {
+    const built = await buildPage("index.html", { people: "index", refuse: /\/data\/people\/ca\.js$/,
+      hash: "#/profile/" + californian.id });
+    await until(() => /did not load/.test((built.D.getElementById("profileModalWaiting") || {}).textContent || ""), 6000);
+    const text = built.D.getElementById("profileModalWaiting").textContent;
+    suite("index.html — a state's file that fails to load", () => {
+      check("the dialog says the profile did not load, by name", new RegExp(californian.name.replace(
+        /[.*+?^${}()|[\]\\]/g, "\\$&") + ".s profile did not load").test(text), text);
+      check("and shows none of the card's fields as the person's",
+        built.D.querySelector("#profileModal .modal-body").hidden &&
+          built.D.querySelector("#profileModal .modal-header").hidden);
+    });
+    built.window.location.hash = "#/?state=CA&view=race";
+    await settle(200);
+    const money = built.D.querySelector("#results .race-money[data-fold]");
+    openFold(built.window, money);
+    await until(() => /did not load/.test(money.textContent), 5000);
+    suite("index.html — a race's money when its state's file fails", () => {
+      check("says the figures did not load, and how to retry",
+        /did not load\. Close this and open it again to retry/.test(money.textContent), money.textContent);
+      check("no money rows drawn from the cards", !money.querySelector(".money-row"));
+    });
+    built.window.close();
+  }
+
+  // A file from another build than the page's figures is refused (rule 34).
+  {
+    const built = await buildPage("index.html", { people: "index" });
+    await settle(80);
+    const KYC = built.window.KYC;
+    const before = built.window.legislatorsData.length;
+    built.window.kycPeopleFile = { build: "0".repeat(64), state: "CA",
+      people: [{ id: "X_STALE", name: "Stale Person", state: "CA" }], races: [] };
+    suite("a people file from another build", () => {
+      check("is refused: nothing it holds reaches the page",
+        built.window.legislatorsData.length === before && !KYC.byId("X_STALE"));
+      check("and the page says why, for a page opened before the update",
+        /updated since this page was opened\. Reload the page/.test(KYC.peopleProblem()),
+        KYC.peopleProblem());
+    });
+    built.window.close();
+  }
+
+  // "Find who represents me" on a state page, for a ZIP code in another
+  // state: that state's people are loaded first.
+  {
+    const wy = await askZip("states/wy.html", "80202");
+    suite("states/wy.html — a ZIP code in Colorado", () => {
+      check("no page errors", wy.errors.length === 0, wy.errors.join(" | "));
+      const reps = [...all.values()].filter((p) => p.state === "CO" && wy.window.KYC.seated(p) &&
+        /Senate/.test(p.chamber));
+      check("names Colorado's senators, from Colorado's file",
+        reps.length === 2 && reps.every((p) => wy.text.indexOf(p.name) !== -1) &&
+          servedPeople(wy).indexOf("/data/people/co.js") !== -1, wy.text.slice(0, 200));
+    });
+    const failed = await askZip("states/wy.html", "80202", { refuse: /\/data\/people\/co\.js$/ });
+    suite("states/wy.html — a ZIP code in Colorado when its file fails", () => {
+      check("says Colorado's members did not load, names nobody",
+        /members of Congress for Colorado did not load/.test(failed.text) &&
+          !failed.out.querySelector(".findrep-row"), failed.text);
+    });
+    wy.window.close();
+    failed.window.close();
+  }
+
+  // Your ballot (rule 92) holds no one's records until an answer needs
+  // them: the build's figures, then the files of the states the answer is
+  // in, before it is drawn. testBallot compares each of its contests with
+  // the state page's section, drawn from the same file.
+  {
+    const ga = await ballotFor("#/?zip=30009");
+    suite("ballot.html — a ZIP code loads its own state's people, and no one else's", () => {
+      check("no page errors", ga.errors.length === 0, ga.errors.join(" | "));
+      check("loads Georgia's file, and neither the index nor another state's",
+        servedPeople(ga).join(" ") === "/data/people/ga.js", servedPeople(ga).join(" "));
+      check("draws Georgia's contests and the people in them",
+        ga.out.querySelectorAll(".ballot-contest").length > 2 && !!ga.out.querySelector(".ballot-person"),
+        ga.text.slice(0, 200));
+    });
+    // Frisco, Texas: a ZIP code across two districts of one state loads
+    // that state alone.
+    const crossing = await ballotFor("#/?zip=75036");
+    suite("ballot.html — a ZIP code in Texas", () => {
+      check("loads Texas's file only", servedPeople(crossing).join(" ") === "/data/people/tx.js",
+        servedPeople(crossing).join(" "));
+    });
+    const failed = await ballotFor("#/?zip=30009", { refuse: /\/data\/people\/ga\.js$/ });
+    suite("ballot.html — a ZIP code whose state's file fails", () => {
+      check("says Georgia's races did not load, and draws no contest",
+        /races and candidates for Georgia did not load/.test(failed.text) &&
+          !failed.out.querySelector(".ballot-contest"), failed.text);
+    });
+    // A profile linked from the page opens whole, from its state's file.
+    const linked = await buildPage("ballot.html", { hash: "#/profile/" + [...all.values()]
+      .find((p) => p.state === "WY" && p.chamber.indexOf("Senate") !== -1).id });
+    await until(() => linked.D.getElementById("profileModalWaiting") &&
+      linked.D.getElementById("profileModalWaiting").hidden &&
+      /\S/.test(linked.D.getElementById("profileModalName").textContent), 6000);
+    suite("ballot.html — a profile's address", () => {
+      const id = linked.window.KYC.router.read().id;
+      check("opens the person whole, from the index and their state's file",
+        linked.window.KYC.isFull(linked.window.KYC.byId(id)) &&
+          servedPeople(linked).indexOf("/data/people/wy.js") !== -1, servedPeople(linked).join(" "));
+    });
+    [ga, crossing, failed, linked].forEach((b) => b.window.close());
+  }
+
+  // The federal pages link members to the grid: every one opens there.
+  {
+    // The guide's Congress page writes its links in; the federal page draws
+    // the line of succession's from data/federal.js (kyc-federal.js).
+    const raw = fs.readFileSync(path.join(SITE, "government", "congress.html"), "utf8");
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "federal.js"), "utf8"), sandbox);
+    const succession = ((sandbox.window.kycFederal || {}).succession || [])
+      .filter((p) => p.kind === "member").map((p) => p.id);
+    const ids = [...new Set(succession.concat(
+      [...raw.matchAll(/index\.html#\/profile\/([A-Za-z0-9_]+)/g)].map((m) => m[1])))];
+    suite("links from the federal and guide pages to members", () => {
+      // While the old Congress sits its leaders and committee leads are
+      // named; a new Congress's come days or weeks after it sits (rule 68).
+      const sits = meta.congress < (meta.election.year - 1786) / 2;
+      check("each names a profile the index holds", (!sits || ids.length > 20) && ids.every((id) => all.has(id) ||
+        index.people.some((p) => (p.otherFecIds || []).some((o) => "FEC_" + o === id))),
+        ids.filter((id) => !all.has(id)).join(" ") || ids.length);
+    });
+    if (ids.length) {
+      const target = all.get(succession[0] || ids[0]);
+      const built = await buildPage("index.html", { people: "index", hash: "#/profile/" + target.id });
+      await until(() => built.D.getElementById("profileModalName") &&
+        built.D.getElementById("profileModalName").textContent === target.name &&
+        built.D.getElementById("profileModalWaiting").hidden, 6000);
+      suite("a federal page's member link opens on the grid", () => {
+        check("the profile opens, whole", built.D.getElementById("profileModalName").textContent === target.name &&
+          built.window.KYC.isFull(built.window.KYC.byId(target.id)), target.name);
+      });
+      built.window.close();
+    }
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
+  if (!only || only === "split") await testPeopleSplit();
   if (!only || only === "index.html" || only === "votes") await testVotes();
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "charts") await testCharts();
   if (!only || only === "guide") await testGuide();
+  if (!only || only === "guide") await testBillFlow();
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "counties") await testCounties();
@@ -11754,6 +13068,10 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
+  if (!only || only === "ballot" || only === "findrep") await testBallot();
+  if (!only || only === "findrep") await testFindRepNav();
+  if (!only || only === "index.html") await testContactActions();
+  if (!only || only === "index.html") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();

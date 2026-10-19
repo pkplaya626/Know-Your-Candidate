@@ -27,7 +27,7 @@
  * more coarsely, so their margin is wider by what that file records
  * (``lineErrorKm``, kyc/legislature.py), and the answer gives both margins.
  *
- * The pages without profiles.js (the legislature and county pages) still
+ * The pages without people files (the legislature and county pages) still
  * name each state, link its district map and its own lookup: those words
  * come from the lookup index (``states``, kyc/lookup.place_info), never
  * KYC.meta(), which is empty there.
@@ -213,7 +213,7 @@
   }
 
   /** "Ohio", never "OH": the legislature and county pages load no
-   *  profiles.js, so KYC.stateName would give the code there. */
+   *  people files, so KYC.stateName would give the code there. */
   function nameOf(code) {
     return placeOf(code).name || KYC.stateName(code);
   }
@@ -419,7 +419,34 @@
   /* ========================================================== the people */
 
   function people() {
-    return global.legislatorsData || [];
+    return KYC.people();
+  }
+
+  /** A promise that the page holds the people of each state in *codes*,
+   *  where it holds people at all: a state page holds its own state's only
+   *  (rule 94), and an answer in another state - a ZIP code across the
+   *  line, a reader's location - loads that state's file first. Resolves to
+   *  the codes whose file did not load, which the answer must not be drawn
+   *  without: "no members" from a failed download is a silent error. The
+   *  ballot page holds no one until an answer needs them, and names every
+   *  people file on demand: it loads the answer's states as well. */
+  function peopleFor(codes) {
+    if (!people().length && !KYC.canLoadPeople("people/index.js")) return Promise.resolve([]);
+    var wanted = (codes || []).filter(function (c, i, all) {
+      return c && all.indexOf(c) === i && !KYC.peopleHeld(c);
+    });
+    return Promise.all(wanted.map(function (c) {
+      return KYC.loadPeople(c).then(function (ok) { return ok ? null : c; });
+    })).then(function (failed) { return failed.filter(Boolean); });
+  }
+
+  /** Why an answer is not drawn: the page's data is of another build, or
+   *  *failed*'s files did not load. *what* names what is missing ("The
+   *  members of Congress", the ballot page's "The races and candidates"). */
+  function peopleFailed(failed, what) {
+    return '<p class="findrep-note">' + KYC.escapeHtml(KYC.peopleProblem() ||
+      (what || "The members of Congress") + " for " + failed.map(nameOf).join(" and ") +
+      " did not load. Check your connection and try again.") + "</p>";
   }
 
   function stateInfo(code) {
@@ -445,7 +472,7 @@
   }
 
   function races() {
-    return global.kycRaces || [];
+    return KYC.races();
   }
 
   function houseRace(code, n) {
@@ -469,9 +496,7 @@
       if (!p || seen[p.id]) return false;
       seen[p.id] = true;
       if (!p.isCandidate && (p.contestRaceId || p.raceId) !== race.id) return false;
-      var status = p.isCandidate ? p.raceStatus : KYC.contestStatus(p);
-      if (race.settled) return KYC.onNovemberBallot(status) || status === "advanced";
-      return !KYC.offBallot(status);
+      return KYC.stillRunning(race, p);
     }).sort(function (a, b) {
       // Members first, then the race's own order (by surname, TRUST-15).
       return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||
@@ -479,9 +504,19 @@
     });
   }
 
+  /** A person's party, in brackets after the name: D and R, I for an
+   *  independent, and any other party by its own name. The colour bucket
+   *  (KYC.partyKey) folds every third party into "i", and the answer
+   *  called the Libertarian Ted Brown "(I)" beside a ballot page that
+   *  names him Libertarian (PR #118 review). */
   function partyLetter(p) {
     var key = KYC.partyKey(p);
-    return key === "d" ? "D" : key === "r" ? "R" : key === "i" ? "I" : "";
+    if (key === "d") return "D";
+    if (key === "r") return "R";
+    if (key !== "i") return "";
+    var party = String((p && p.party) || "").trim();
+    if (!party || party === "Other") return "";
+    return party === "Independent" ? "I" : party;
   }
 
   /** A person's name, linked to their profile on this page. */
@@ -499,9 +534,29 @@
   }
 
   function pct(share) {
-    var whole = Math.round(share * 100);
+    return pctWords(Math.round(share * 100), share);
+  }
+
+  function pctWords(whole, share) {
     if (whole >= 100 && share < 1) whole = 99;
     return whole < 1 ? "under 1%" : whole + "%";
+  }
+
+  /** The shares of one ZIP area's land, *shares*, as whole percentages
+   *  that add up to what the shares do (largest remainder): rounded one by
+   *  one, 91.5% and 8.5% read "92%" and "9%" of one ZIP code (PR #118
+   *  review). The ballot page writes its shares with this too. */
+  function pcts(shares) {
+    var raw = shares.map(function (s) { return Math.max(0, Number(s) || 0) * 100; });
+    var target = Math.round(raw.reduce(function (a, b) { return a + b; }, 0));
+    var whole = raw.map(Math.floor);
+    var left = target - whole.reduce(function (a, b) { return a + b; }, 0);
+    raw.map(function (r, i) { return i; }).sort(function (a, b) {
+      return (raw[b] - whole[b]) - (raw[a] - whole[a]) || a - b;
+    }).forEach(function (i) {
+      if (left > 0) { whole[i] += 1; left -= 1; }
+    });
+    return whole.map(function (w, i) { return pctWords(w, shares[i]); });
   }
 
   function districtsPage(code, now, next) {
@@ -534,10 +589,11 @@
    *  *one(id)*'s words, with the share where there is more than one. */
   function each(parts, one) {
     var shares = parts.length > 1 && Array.isArray(parts[0]) && typeof parts[0][1] === "number";
-    return parts.map(function (p) {
+    var words = shares ? pcts(parts.map(function (p) { return p[1]; })) : [];
+    return parts.map(function (p, i) {
       var id = Array.isArray(p) ? p[0] : p;
       return '<div class="findrep-item">' +
-        (shares ? '<span class="findrep-share">' + pct(p[1]) + "</span> " : "") + one(id) + "</div>";
+        (shares ? '<span class="findrep-share">' + words[i] + "</span> " : "") + one(id) + "</div>";
     }).join("");
   }
 
@@ -717,12 +773,35 @@
     return { now: redrawn && KYC.recordPhase() ? "next" : "cd", race: redrawn ? "next" : "cd" };
   }
 
-  function answer(head, code, rows, notes) {
+  /** Whether the election office's own record says no election is held
+   *  there on November 3 (kyc/voting_dates.py, "noElection": Puerto Rico),
+   *  from the lookup index, as every page has it (lookup.place_info). Such
+   *  a place has no ballot to show. */
+  function noElection(code) {
+    return !!placeOf(code).noElection;
+  }
+
+  /** The way from this answer to the reader's whole ballot (kyc-ballot.js),
+   *  which is not this answer: who represents a reader is not who is on
+   *  their ballot (rule 27). The address carries a ZIP code the reader
+   *  typed, never a location (rule 92); from a location the ballot page
+   *  asks for it again. Only where the page lists Congress: the legislature
+   *  and county pages' answers send the reader to the state page first. */
+  function ballotLink(zip5, code) {
+    if (!people().length || noElection(code)) return "";
+    var past = KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election";
+    return ' <a class="btn" data-findrep-ballot href="' + KYC.escapeAttr(KYC.siteRoot() + "ballot.html" +
+      (zip5 ? "#/?zip=" + zip5 : "")) + '">' + KYC.icon("ballot") +
+      (past ? " See what was on your ballot" : " See everything on your ballot") +
+      (zip5 ? "" : " (use your location again there)") + "</a>";
+  }
+
+  function answer(head, code, rows, notes, zip5) {
     return '<div class="findrep-answer">' +
       '<p class="findrep-place">' + head + "</p>" +
       '<dl class="findrep-list">' + rows.join("") + "</dl>" +
       (notes.length ? '<p class="findrep-note">' + notes.join(" ") + "</p>" : "") +
-      '<p class="findrep-actions">' + voteLink(code) + "</p>" +
+      '<p class="findrep-actions">' + voteLink(code) + ballotLink(zip5, code) + "</p>" +
       "</div>";
   }
 
@@ -734,50 +813,71 @@
 
   /** "Ohio's House map was redrawn for 2026 ...", only where the answer
    *  shows the House rows it explains: the legislature and county pages
-   *  show none (they load no profiles.js). */
+   *  show none (they load no people files). */
   function redrawnNote(code, data) {
     if (!data.next || KYC.recordPhase() || !people().length) return "";
     return KYC.escapeHtml(KYC.possessive(placeWords(code))) + " House map was redrawn for 2026: " +
       "the representative is the one elected on the old map, the race is on the new one.";
   }
 
+  /** What a ZIP code that is no ZIP area is told, here and on the ballot
+   *  page (one sentence, rule 12). */
+  function noZipArea(code5) {
+    return '<p class="findrep-note">' + KYC.escapeHtml(code5) + " is not one of the Census " +
+      "Bureau's ZIP Code Tabulation Areas. A ZIP code used only for post office boxes, or by " +
+      "a single building or business, has no area of its own, and nor does one created " +
+      "since 2020. Try the ZIP code of your home, or use your location.</p>";
+  }
+
+  /** "ZIP 42223 crosses a state line: ...", said before either state's
+   *  answer: a reader reading only the first would take its state for
+   *  theirs. *what* names the answers below ("answer", "ballot"). */
+  function crossesNote(code5, found, what) {
+    return '<p class="findrep-note findrep-crosses">ZIP ' + KYC.escapeHtml(code5) +
+      " crosses a state line: " + list(found.map(function (f) {
+        return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(placeWords(f.code));
+      })) + ". Each state's " + (what || "answer") + " is below, and every share in them is of " +
+      "the whole ZIP area. Use your location to know which is yours.</p>";
+  }
+
+  /** One state's parts of a ZIP area (an entry of ``zip()``'s list), by
+   *  level: ``{now, race, upper, lower, county}``, each ``[[id, share]]``
+   *  largest first, or ``[id]`` where WHOLE of the land is in one. The
+   *  answer and the ballot page pick them alike (rule 12). */
+  function zipParts(f) {
+    var e = f.entry, w = whole(), key = plans(f.data);
+    function pick(parts) {
+      parts = (parts || []).slice().sort(shareSort);
+      return parts.length && parts[0][1] >= w ? [parts[0][0]] : parts;
+    }
+    return { now: pick(e[key.now]), race: pick(e[key.race]), upper: pick(e.su),
+             lower: pick(e.sl), county: pick(e.co) };
+  }
+
   /** The answer for a ZIP code, from ``zip()``'s list. */
   function zipAnswer(code5, found) {
-    if (!found.length) {
-      return '<p class="findrep-note">' + KYC.escapeHtml(code5) + " is not one of the Census " +
-        "Bureau's ZIP Code Tabulation Areas. A ZIP code used only for post office boxes, or by " +
-        "a single building or business, has no area of its own, and nor does one created " +
-        "since 2020. Try the ZIP code of your home, or use your location.</p>";
-    }
+    if (!found.length) return noZipArea(code5);
     var out = [];
     var split = false;
     var crosses = found.length > 1;
-    if (crosses) {
-      // Said first, before either state's answer: a reader reading only
-      // the first would take its state for theirs.
-      out.push('<p class="findrep-note findrep-crosses">ZIP ' + KYC.escapeHtml(code5) +
-        " crosses a state line: " + list(found.map(function (f) {
-          return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(placeWords(f.code));
-        })) + ". Each state's answer is below, and every share in them is of the whole ZIP " +
-        "area. Use your location to know which is yours.</p>");
-    }
+    if (crosses) out.push(crossesNote(code5, found));
     found.forEach(function (f) {
-      var e = f.entry, data = f.data, code = f.code, w = whole();
-      var key = plans(data);
+      var data = f.data, code = f.code;
+      var parts = zipParts(f);
       // *shown* is false for a level this page does not list (Congress,
       // on a page with no profiles): its split is not this answer's to
       // speak of (PR #104 review).
-      function pick(parts, shown) {
-        parts = (parts || []).slice().sort(shareSort);
-        if (parts.length && parts[0][1] >= w) return [parts[0][0]];
-        if (parts.length > 1 && shown !== false) split = true;
-        return parts;
+      function pick(list, shown) {
+        if (list.length > 1 && shown !== false) split = true;
+        return list;
       }
+      var e = f.entry;
       var federal = people().length > 0;
-      var now = pick(e[key.now], federal), next = pick(e[key.race], federal);
+      var now = pick(parts.now, federal), next = pick(parts.race, federal);
       var rows = federalRows(code, now, next, code5)
-        .concat(legislatureRows(code, f.leg, { upper: pick(e.su), lower: pick(e.sl) }, f.legFailed))
-        .concat(countyRows(code, data, pick(e.co)));
+        .concat(legislatureRows(code, f.leg, { upper: pick(parts.upper), lower: pick(parts.lower) },
+          f.legFailed))
+        .concat(countyRows(code, data, pick(parts.county)));
       var head = "ZIP " + KYC.escapeHtml(code5) + ", " + KYC.escapeHtml(nameOf(code)) +
         (crosses ? " (" + pct(landIn(e)) + " of its land)" : "");
       var notes = [];
@@ -785,7 +885,7 @@
       if (redrawn) notes.push(redrawn);
       var map = districtsPage(code, ids(now), ids(next));
       if (map) notes.push(mapLink(map));
-      out.push(answer(head, code, rows, notes) + sourcesNote(data));
+      out.push(answer(head, code, rows, notes, code5) + sourcesNote(data));
     });
     // Every state the ZIP reaches has its own lookup to check with, where
     // the site holds one; "your state's own lookup" was said in American
@@ -972,8 +1072,16 @@
       }
       show('<p class="findrep-note">Looking up ' + KYC.escapeHtml(m[1]) + "&hellip;</p>");
       zip(m[1]).then(function (found) {
-        show(zipAnswer(m[1], found));
-        remember(found.length === 1 ? found[0].code : "");
+        return peopleFor(found.map(function (f) { return f.code; })).then(function (failed) {
+          return { found: found, failed: failed };
+        });
+      }).then(function (got) {
+        if (got.failed.length) {
+          show(peopleFailed(got.failed));
+          return;
+        }
+        show(zipAnswer(m[1], got.found));
+        remember(got.found.length === 1 ? got.found[0].code : "");
       }, function () {
         show('<p class="findrep-note">The ZIP code lookup did not load. Check your connection ' +
           "and try again.</p>");
@@ -993,8 +1101,16 @@
             return;
           }
           where(pos.coords.longitude, pos.coords.latitude, acc).then(function (hit) {
-            show(pointAnswer(hit, acc));
-            remember(hit.code || "");
+            return peopleFor([hit.code]).then(function (failed) {
+              return { hit: hit, failed: failed };
+            });
+          }).then(function (got) {
+            if (got.failed.length) {
+              show(peopleFailed(got.failed));
+              return;
+            }
+            show(pointAnswer(got.hit, acc));
+            remember(got.hit.code || "");
           }, function () {
             show('<p class="findrep-note">The lookup did not load. Check your connection and ' +
               "try again.</p>");
@@ -1068,6 +1184,51 @@
     Array.prototype.forEach.call((root || doc).querySelectorAll("[data-findrep]"), mount);
   }
 
+  /* The drawer's "Find who represents you" (pages.nav_groups, PERSONA-04)
+   * is index.html#findrep. Read before any page module runs: the grid's
+   * router reads a bare "#findrep" as a view of no filters. */
+  var arrived = global.location.hash === "#findrep";
+
+  /** The page's own address, "index.html" and "/" alike. */
+  function pathOf(path) {
+    return String(path || "").replace(/\/index\.html$/, "/");
+  }
+
+  /* Followed on the page that holds the panel, the link would be a
+   * navigation the grid's router reads as a view, clearing the reader's
+   * filters and redrawing the grid. It is caught: the drawer closes and
+   * the panel is brought into view with the ZIP code field focused.
+   *
+   * So it is on any page whose panel answers what the home page's does -
+   * one that holds profiles and so names Congress (the map, a state page): the
+   * link took a state page's reader away from the panel on it, and on the
+   * map, where the panel sits in the drawer itself, listed it twice with
+   * two behaviours (PR #118 review). There the drawer stays open and its
+   * panel is brought into view. A legislature or county page's panel
+   * names no member of Congress, so the link still goes home. */
+  function catchNavLink(event) {
+    var a = event.target && event.target.closest && event.target.closest('a[data-nav="findrep"]');
+    if (!a || event.defaultPrevented || event.button || event.metaKey || event.ctrlKey ||
+        event.shiftKey || event.altKey) return;
+    var slot = doc.querySelector("[data-findrep][data-findrep-ready]");
+    if (!slot) return;
+    if (pathOf(a.pathname) !== pathOf(global.location.pathname) && !people().length) return;
+    event.preventDefault();
+    if (slot.closest && slot.closest(".sidebar")) reveal();
+    else KYC.closeDrawer(reveal);
+  }
+
+  /* Arrived from another page's drawer: the panel, and the fragment
+   * dropped, so closing a profile later does not jump the reader back. */
+  function arrive() {
+    if (!arrived || !reveal()) return;
+    arrived = false;
+    if (global.history && global.history.replaceState) {
+      global.history.replaceState(global.history.state, "",
+        global.location.pathname + global.location.search);
+    }
+  }
+
   KYC.place = {
     project: project,
     pathRings: pathRings,
@@ -1080,6 +1241,7 @@
     NEAR_KM: NEAR_KM,
     MAX_NEAR: MAX_NEAR,
     ROUGH_KM: ROUGH_KM,
+    PRIVACY: PRIVACY,
     mount: mount,
     ask: ask,
     reveal: reveal,
@@ -1092,7 +1254,42 @@
     officialLookup: officialLookup,
     zipAnswer: zipAnswer,
     pointAnswer: pointAnswer,
+    // The pieces the ballot page (kyc-ballot.js) answers with, so a ZIP
+    // code or a point is placed, and its doubts said, as here (rule 12).
+    noZipArea: noZipArea,
+    crossesNote: crossesNote,
+    zipParts: zipParts,
+    pointNotes: pointNotes,
+    plans: plans,
+    reach: reach,
+    pct: pct,
+    pcts: pcts,
+    partyLetter: partyLetter,
+    landIn: landIn,
+    houseRace: houseRace,
+    senateRaces: senateRaces,
+    districtName: districtName,
+    nameOf: nameOf,
+    placeWords: placeWords,
+    voteLink: voteLink,
+    canLocate: canLocate,
+    remember: remember,
+    noElection: noElection,
+    // The people of the answer's states, loaded before it is drawn (rule 94).
+    peopleFor: peopleFor,
+    peopleFailed: peopleFailed,
   };
 
-  KYC.ready(function () { mountAll(doc); });
+  KYC.ready(function () {
+    mountAll(doc);
+    // The home page's way to the ballot page is typed into its template;
+    // from the day after the election it speaks of a ballot that was.
+    if (KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election") {
+      Array.prototype.forEach.call(doc.querySelectorAll("a[data-ballot-entry]"), function (a) {
+        a.innerHTML = KYC.icon("ballot") + " See what was on your ballot";
+      });
+    }
+    arrive();
+    doc.addEventListener("click", catchNavLink);
+  });
 })(window);

@@ -130,16 +130,34 @@ class TestSummaryAgainstRealData(unittest.TestCase):
                          len(self.races))
 
 
+def read_people(path):
+    """What a people file assigns (rule 94): its one global's value."""
+    with open(path, encoding="utf-8") as handle:
+        for line in handle:
+            for name in ("window.kycPeopleFile = ", "window.kycBuildMeta = "):
+                if line.startswith(name):
+                    # _json escapes "<!--" as "<\!--", which JavaScript reads
+                    # as "<!--" and JSON does not read at all.
+                    return json.loads(line[len(name):].rstrip().rstrip(";")
+                                      .replace("<\\!--", "<!--"))
+    return None
+
+
 class TestEmit(unittest.TestCase):
     def test_writes_the_globals_the_pages_read(self):
         with tempfile.TemporaryDirectory() as tmp:
-            emit.write_profiles([member()], {"total": 1}, root=tmp,
-                                races=[], summary={"senate": {}})
+            emit.write_people([member()], {"total": 1}, root=tmp,
+                              races=[], summary={"senate": {}})
             with open(os.path.join(tmp, emit.DATA_FILE), encoding="utf-8") as f:
-                text = f.read()
-        for global_name in ("window.legislatorsData", "window.kycRaces",
-                            "window.kycBuildMeta"):
-            self.assertIn(global_name, text)
+                meta = f.read()
+            with open(os.path.join(tmp, emit.PEOPLE_INDEX_FILE), encoding="utf-8") as f:
+                index = f.read()
+            with open(emit.people_file("TX", tmp), encoding="utf-8") as f:
+                texas = f.read()
+        self.assertIn("window.kycBuildMeta = ", meta)
+        # kyc.js takes each people file in as it is assigned (KYC.people).
+        self.assertIn("window.kycPeopleFile = ", index)
+        self.assertIn("window.kycPeopleFile = ", texas)
 
     def test_geo_file_assigns_its_own_global(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -152,11 +170,16 @@ class TestEmit(unittest.TestCase):
         # A roster field containing "</script>" would end the tag early and
         # break the page for everyone.
         with tempfile.TemporaryDirectory() as tmp:
-            emit.write_profiles([member(name="</script><script>alert(1)</script>")],
-                                {"total": 1}, root=tmp)
-            with open(os.path.join(tmp, emit.DATA_FILE), encoding="utf-8") as f:
-                text = f.read()
-        self.assertNotIn("</script>", text)
+            emit.write_people([member(name="</script><script>alert(1)</script> <!--")],
+                              {"total": 1}, root=tmp)
+            texts = []
+            for name in os.listdir(os.path.join(tmp, emit.PEOPLE_DIR)):
+                with open(os.path.join(tmp, emit.PEOPLE_DIR, name), encoding="utf-8") as f:
+                    texts.append(f.read())
+        self.assertEqual(len(texts), len(emit.people_codes()) + 2)
+        for text in texts:
+            self.assertNotIn("</script>", text)
+            self.assertNotIn("<!--", text)
 
     def test_source_date_epoch_makes_the_build_reproducible(self):
         previous = os.environ.get("SOURCE_DATE_EPOCH")
@@ -173,10 +196,360 @@ class TestEmit(unittest.TestCase):
         # An interrupted in-place write once truncated a 900 KB page to one
         # character, so the file is renamed into place rather than opened.
         with tempfile.TemporaryDirectory() as tmp:
-            path, size = emit.write_profiles([member()], {}, root=tmp)
-            self.assertTrue(os.path.exists(path))
-            self.assertFalse(os.path.exists(path + ".tmp"))
-            self.assertGreater(size, 0)
+            written = emit.write_people([member()], {}, root=tmp)
+            self.assertEqual(len(written), len(emit.people_codes()) + 2)
+            for path, size in written:
+                self.assertTrue(os.path.exists(path))
+                self.assertFalse(os.path.exists(path + ".tmp"))
+                self.assertGreater(size, 0)
+            self.assertEqual([n for n in os.listdir(os.path.join(tmp, emit.PEOPLE_DIR))
+                              if n.endswith(".tmp")], [])
+
+
+class TestPeopleFiles(unittest.TestCase):
+    """The profiles in the files each page needs (rule 94): profiles.js held
+    all 2,589, 6.7 MB, and the grid, the map and every state and district
+    page loaded it to show one state."""
+
+    def people(self):
+        texan = member(id="T000001", state="TX", receipts="$10.00", financeSource="FEC",
+                       committeeList=[{"code": "SSFI", "title": "Chairman"}],
+                       districtOffices=[{"city": "Austin"}], education="B.A.",
+                       raceId="S-TX-2026")
+        rival = member(id="FEC_S6TX00001", state="TX", isCandidate=True,
+                       raceId="S-TX-2026", fundingBreakdown={"individuals": 1})
+        californian = member(id="C000001", state="CA", officeLabel="Senate \u2022 CA",
+                             raceId="S-CA-2026", website="https://example.org")
+        races = [{"id": "S-TX-2026", "state": "TX", "chamber": "Senate",
+                  "incumbentIds": ["T000001"], "candidateIds": ["FEC_S6TX00001"]},
+                 {"id": "S-CA-2026", "state": "CA", "chamber": "Senate",
+                  "incumbentIds": ["C000001"], "candidateIds": []}]
+        return [texan, rival, californian], races
+
+    def test_the_index_is_everyone_without_what_only_the_dialog_shows(self):
+        profiles, races = self.people()
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_people(profiles, {}, root=tmp, races=races, summary={"x": 1})
+            index = read_people(os.path.join(tmp, emit.PEOPLE_INDEX_FILE))
+            texas = read_people(emit.people_file("TX", tmp))
+            wyoming = read_people(emit.people_file("WY", tmp))
+        self.assertTrue(index["index"])
+        self.assertEqual([p["id"] for p in index["people"]], [p["id"] for p in profiles])
+        self.assertEqual([r["id"] for r in index["races"]], ["S-TX-2026", "S-CA-2026"])
+        for record in index["people"]:
+            self.assertEqual(set(record) & emit.INDEX_LEAVES_OUT, set(), record["id"])
+        # What a card and the search read stays: the search's own fields.
+        self.assertEqual(index["people"][0]["education"], "B.A.")
+        # A state's file holds its people whole, and its races, no one else's.
+        self.assertEqual(texas["people"], profiles[:2])
+        self.assertEqual([r["id"] for r in texas["races"]], ["S-TX-2026"])
+        # A state with nobody filed still has its file, so every page can
+        # name every state's (rule 76).
+        self.assertEqual((wyoming["people"], wyoming["races"]), ([], []))
+
+    def test_a_cards_way_to_the_office_is_in_the_index(self):
+        """PR #114 put a "Contact office" action on sitting members' cards
+        (kyc-cards.js contactOf), and #116's index left out every field it
+        reads: every card on the grid and the map would have lost it, and
+        nothing would have failed."""
+        offices = [{"city": "Austin"}, {"city": "Waco", "phone": "254-555-0100"}]
+        form = member(id="F1", contactForm="https://example.house.gov/contact",
+                      contactFormVia="official-site", contactFormChecked="2026-10-10",
+                      phone="202-225-0000", districtOffices=offices)
+        phone = member(id="P1", phone="202-225-0001", districtOffices=offices)
+        neither = member(id="N1", contactForm="mailto:x@example.org", districtOffices=offices)
+        no_phone_anywhere = member(id="Z1", districtOffices=[{"city": "Austin"}])
+        record = emit.index_record(form)
+        for key in ("contactForm", "contactFormVia", "contactFormChecked", "phone"):
+            self.assertEqual(record[key], form[key])
+        # The district offices are the dialog's, but on the record of a
+        # member reached only through one, whole.
+        self.assertNotIn("districtOffices", record)
+        self.assertNotIn("districtOffices", emit.index_record(phone))
+        self.assertEqual(emit.index_record(neither)["districtOffices"], offices)
+        self.assertNotIn("districtOffices", emit.index_record(no_phone_anywhere))
+
+    def test_every_file_names_one_build(self):
+        profiles, races = self.people()
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_people(profiles, {}, root=tmp, races=races, summary={"x": 1})
+            build = emit.read_signature(tmp)
+            files = [read_people(os.path.join(tmp, emit.PEOPLE_INDEX_FILE))] + [
+                read_people(emit.people_file(code, tmp)) for code in emit.people_codes()]
+        self.assertEqual(build, emit.data_signature(profiles, races, {"x": 1}))
+        self.assertEqual({f["build"] for f in files}, {build})
+
+    def test_an_unchanged_file_is_left_alone(self):
+        profiles, races = self.people()
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_people(profiles, {}, root=tmp, races=races)
+            again = emit.write_people(profiles, {}, root=tmp, races=races)
+            # Only the build's figures, which carry the build time.
+            self.assertEqual([os.path.basename(p) for p, _ in again], ["meta.js"])
+            self.assertEqual(emit.check_people(profiles, races, None, tmp), [])
+            profiles[2]["name"] = "Renamed"
+            rewritten = emit.write_people(profiles, {}, root=tmp, races=races)
+        # A change anywhere is a new build, which every file names.
+        self.assertEqual(len(rewritten), len(emit.people_codes()) + 2)
+
+    def test_what_no_build_writes_is_not_left_to_be_served(self):
+        profiles, races = self.people()
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, emit.PEOPLE_DIR))
+            stray = os.path.join(tmp, emit.PEOPLE_DIR, "zz.js")
+            legacy = os.path.join(tmp, emit.LEGACY_PROFILES_FILE)
+            for path in (stray, legacy):
+                with open(path, "w", encoding="utf-8") as handle:
+                    handle.write("window.legislatorsData = [];\n")
+            problems = dict(emit.check_people(profiles, races, None, tmp))
+            self.assertIn(stray, problems)
+            self.assertIn(legacy, problems)
+            emit.write_people(profiles, {}, root=tmp, races=races)
+            self.assertFalse(os.path.exists(stray))
+            self.assertFalse(os.path.exists(legacy))
+            self.assertEqual(emit.check_people(profiles, races, None, tmp), [])
+
+    def test_verify_finds_a_state_file_from_another_build(self):
+        profiles, races = self.people()
+        with tempfile.TemporaryDirectory() as tmp:
+            emit.write_people(profiles, {}, root=tmp, races=races)
+            path = emit.people_file("CA", tmp)
+            os.remove(path)
+            self.assertEqual(emit.check_people(profiles, races, None, tmp),
+                             [(path, "missing or carries no signature")])
+            emit.write_people(profiles, {}, root=tmp, races=races)
+            profiles[0]["education"] = "M.A."
+            stale = {os.path.basename(p) for p, why in emit.check_people(profiles, races, None, tmp)
+                     if why == "stale"}
+        self.assertEqual(stale, {"index.js"} | {f"{c.lower()}.js" for c in emit.people_codes()})
+
+    def test_someone_filed_under_another_states_race_stops_the_split(self):
+        profiles, races = self.people()
+        profiles[2]["contestRaceId"] = "S-TX-2026"
+        problems = emit.split_problems(profiles, races)
+        self.assertTrue(any("C000001" in p and "S-TX-2026" in p for p in problems), problems)
+        races[0]["candidateIds"].append("C000001")
+        self.assertTrue(any("race S-TX-2026 lists C000001" in p for p in emit.split_problems(profiles, races)))
+        with tempfile.TemporaryDirectory() as tmp, self.assertRaises(emit.PeopleSplitError):
+            emit.write_people(profiles, {}, root=tmp, races=races)
+        profiles[2]["state"] = "ZZ"
+        self.assertTrue(any("'ZZ'" in p for p in emit.split_problems(profiles, races)))
+
+    def test_the_committed_files_are_one_build_and_everyone(self):
+        meta = read_people(os.path.join(ROOT, emit.PEOPLE_META_FILE))
+        index = read_people(os.path.join(ROOT, emit.PEOPLE_INDEX_FILE))
+        states = [read_people(emit.people_file(c, ROOT)) for c in emit.people_codes()]
+        self.assertEqual({index["build"]} | {f["build"] for f in states}, {meta["signature"]})
+        whole = {p["id"]: p for f in states for p in f["people"]}
+        self.assertEqual([p["id"] for p in index["people"]],
+                         [p["id"] for p in index["people"] if p["id"] in whole])
+        self.assertEqual(len(whole), len(index["people"]))
+        self.assertEqual(sum(len(f["races"]) for f in states), len(index["races"]))
+        for record in index["people"]:
+            self.assertEqual(record, emit.index_record(whole[record["id"]]))
+        self.assertFalse(os.path.exists(os.path.join(ROOT, emit.LEGACY_PROFILES_FILE)))
+
+    def test_a_state_page_loading_everyone_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            site = os.path.join(tmp, emit.SITE_DIR)
+            os.makedirs(os.path.join(site, "states"))
+            os.makedirs(os.path.join(site, "data", "people"))
+            os.makedirs(os.path.join(site, "assets"))
+            for name in ("assets/kyc.js", "data/people/meta.js", "data/people/index.js",
+                         "assets/kyc-profile.js", "assets/kyc-state.js"):
+                with open(os.path.join(site, *name.split("/")), "w"):
+                    pass
+            with open(os.path.join(site, "states", "tx.html"), "w", encoding="utf-8") as f:
+                f.write('<script src="../assets/kyc.js"></script>'
+                        '<script src="../data/people/meta.js"></script>'
+                        '<script src="../data/people/index.js"></script>'
+                        '<script src="../assets/kyc-profile.js"></script>'
+                        '<script src="../assets/kyc-state.js"></script>')
+            result = {p: (ok, note) for p, ok, note in emit.check_pages(tmp)}
+        ok, note = result["states/tx.html"]
+        self.assertFalse(ok)
+        self.assertIn("../data/people/tx.js", note)
+        # And a page that opens profiles names every people file it does not
+        # load, to load when wanted.
+        self.assertIn("onDemandData template does not name", note)
+        self.assertIn("../data/people/ca.js", note)
+
+
+def _js_functions(text):
+    """``{name: body}`` for each top-level function of a page module (two
+    spaces in, inside its wrapper), strings and comments blanked so a word
+    in prose or a URL ("en.wikipedia.org") is not read as a field."""
+    import re
+
+    text = re.sub(r"/\*.*?\*/", lambda m: "\n" * m.group(0).count("\n"), text, flags=re.S)
+    text = re.sub(r'"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'', '""', text)
+    text = re.sub(r"//[^\n]*", "", text)
+    out, name = {}, None
+    for line in text.split("\n"):
+        m = re.match(r"  function (\w+)\(", line)
+        if m:
+            name = m.group(1)
+        if name:
+            out[name] = out.get(name, "") + line + "\n"
+    return out
+
+
+def index_field_reads(modules, kyc_text, leaves_out, fold_drawn, fold_entries, safe_helpers):
+    """Where a module that draws from the index (rule 94) reads a field the
+    index leaves out, outside the race folds that load the state's file
+    first: ``[(module, function, what)]``. *modules* is ``{name: text}``;
+    kyc.js's helpers that read such a field (and those that call them) count
+    as reads wherever another module calls them."""
+    import re
+
+    fields = "|".join(sorted(leaves_out))
+    read = re.compile(r"\b\w+\.(%s)\b" % fields)
+    kyc = _js_functions(kyc_text)
+    readers = {n for n, body in kyc.items() if read.search(body)} - set(safe_helpers)
+    while True:
+        more = {n for n, body in kyc.items() if n not in readers and n not in safe_helpers
+                and any(re.search(r"(?<![\w.])%s\(" % r, body) for r in readers)}
+        if not more:
+            break
+        readers |= more
+    exported = dict(re.findall(r"^    (\w+): (\w+),?$", kyc_text, re.M))
+    via_kyc = {key for key, fn in exported.items() if fn in readers}
+    out = []
+    for module, text in modules.items():
+        allowed = set(fold_drawn.get(module, ())) | set(fold_entries.get(module, ()))
+        functions = _js_functions(text)
+        for fn, body in functions.items():
+            if fn in allowed:
+                continue
+            for m in read.finditer(body):
+                out.append((module, fn, m.group(0)))
+            for key in via_kyc:
+                if re.search(r"\bKYC\.%s\(" % key, body):
+                    out.append((module, fn, "KYC." + key))
+            # A fold's own helpers are reached only from a fold.
+            for helper in set(fold_drawn.get(module, ())) - set(fold_entries.get(module, ())):
+                if re.search(r"(?<![\w.])%s\(" % helper, body):
+                    out.append((module, fn, helper + "()"))
+        for entry in fold_entries.get(module, ()):
+            if not re.search(r"(?<![\w.])fold\(", functions.get(entry, "")):
+                out.append((module, entry, "does not draw through fold()"))
+        for other in modules:
+            if other == module:
+                continue
+            for helper in set(fold_drawn.get(module, ())) - set(fold_entries.get(module, ())):
+                if re.search(r"\bKYC\.cards\.%s\(" % helper, modules[other]):
+                    out.append((other, "?", "KYC.cards." + helper))
+    return out
+
+
+class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
+    """Rule 94: a page holding only the index draws every card, filter and
+    map from it, so a view that read a field the index leaves out would say
+    "No data" about a real person and fail nothing. testPeopleSplit compares
+    a sample of views; this reads every module those pages load."""
+
+    PAGES = ("index.html", "map.html", os.path.join("states", "index.html"))
+    # The dialog opens a record only once its state's file is in
+    # (openWhenLoaded); the state-government panels draw offices, never a
+    # profile.
+    EXEMPT = {"kyc-profile.js", "kyc-stategov.js"}
+    # The race folds (kyc-cards.js fold()) draw their body only once
+    # KYC.peopleFull says the race's state is whole.
+    FOLD_DRAWN = {"kyc-cards.js": ("moneyBlock", "moneyRow", "outsideLine", "outsideOtherLine",
+                                   "compareTable", "compareCell", "platformFrom")}
+    FOLD_ENTRIES = {"kyc-cards.js": ("moneyBlock", "compareBlock")}
+    # Reads a history record's own `wikipedia`, not the profile's.
+    SAFE_HELPERS = ("officesHeld",)
+    # A field the index carries, whole, on every record whose card reads it
+    # (emit.INDEX_KEEPS_FOR_THE_CARD), read only where the card reads it:
+    # a sitting member's way to reach their office (PR #114).
+    CARD_KEEPS = {("kyc-cards.js", "contactOf"): tuple(emit.INDEX_KEEPS_FOR_THE_CARD)}
+
+    def modules(self):
+        import re
+
+        site = os.path.join(ROOT, "candidate_profiles_site")
+        names = set()
+        for page in self.PAGES:
+            with open(os.path.join(site, page), encoding="utf-8") as f:
+                html = f.read()
+            self.assertIn("data/people/index.js", html, page)
+            names |= set(re.findall(r'<script src="(?:\.\./)?assets/(kyc[\w-]*\.js)', html))
+        texts = {}
+        for name in sorted(names):
+            with open(os.path.join(site, "assets", name), encoding="utf-8") as f:
+                texts[name] = f.read()
+        return texts
+
+    def check(self, modules):
+        found = index_field_reads(
+            {n: t for n, t in modules.items() if n not in self.EXEMPT and n != "kyc.js"},
+            modules["kyc.js"], emit.INDEX_LEAVES_OUT, self.FOLD_DRAWN, self.FOLD_ENTRIES,
+            self.SAFE_HELPERS)
+        return [(m, f, what) for m, f, what in found
+                if what.split(".")[-1] not in self.CARD_KEEPS.get((m, f), ())]
+
+    def test_no_view_drawn_from_the_index_reads_what_it_leaves_out(self):
+        self.assertEqual(self.check(self.modules()), [])
+
+    def test_the_exempt_modules_are_what_they_say(self):
+        modules = self.modules()
+        self.assertIn("openWhenLoaded", modules["kyc-profile.js"])
+        stategov = modules.get("kyc-stategov.js", "")
+        for api in ("KYC.people(", "KYC.byId(", "legislatorsData", "kycRaces"):
+            self.assertNotIn(api, stategov)
+
+    def test_the_guard_finds_a_card_reading_money(self):
+        modules = self.modules()
+        modules["kyc-cards.js"] += ("\n  function card2(item) {\n"
+                                    "    return item.receipts + KYC.moneyAmount(item, 'x') +"
+                                    " moneyRow(item) + item.districtOffices;\n  }\n")
+        modules["kyc-map.js"] += "\n  function x(p) { return KYC.cards.compareCell(p); }\n"
+        found = {(m, f, what) for m, f, what in self.check(modules)}
+        self.assertIn(("kyc-cards.js", "card2", "item.receipts"), found)
+        self.assertIn(("kyc-cards.js", "card2", "KYC.moneyAmount"), found)
+        self.assertIn(("kyc-cards.js", "card2", "moneyRow()"), found)
+        # The offices the index keeps for contactOf are read there only.
+        self.assertIn(("kyc-cards.js", "card2", "item.districtOffices"), found)
+        self.assertIn(("kyc-map.js", "?", "KYC.cards.compareCell"), found)
+
+
+class TestChamberScores(unittest.TestCase):
+    """The ticks beside a member's own left-right score are every sitting
+    member of the chamber's, counted by the build: a state page holds its
+    own state's people only (rule 94)."""
+
+    def test_read_as_the_dialog_reads_them(self):
+        from kyc import voteview
+        text = voteview.describe(0.53, 119)
+        self.assertEqual(voteview.read_described(text), (0.53, "119th Congress"))
+        self.assertEqual(voteview.read_described("DW-NOMINATE: -0.21"), (-0.21, ""))
+        self.assertIsNone(voteview.read_described("Not scored"))
+        self.assertIsNone(voteview.read_described(None))
+
+    def test_each_chamber_and_congress_apart_and_only_who_sits(self):
+        from kyc import voteview
+        people = [
+            member(id="S1", voting_alignment=voteview.describe(0.5, 119)),
+            member(id="S2", voting_alignment=voteview.describe(-0.4, 119)),
+            member(id="S3", voting_alignment=voteview.describe(0.1, 118)),
+            member(id="H1", chamber="House", voting_alignment=voteview.describe(0.2, 119)),
+            member(id="C1", isCandidate=True, voting_alignment=voteview.describe(0.9, 119)),
+            member(id="F1", formerMember={"left": "2026-12-08"},
+                   voting_alignment=voteview.describe(0.8, 119)),
+            member(id="N1"),
+        ]
+        self.assertEqual(voteview.chamber_scores(people), {
+            "House": {"119th Congress": [0.2]},
+            "Senate": {"118th Congress": [0.1], "119th Congress": [-0.4, 0.5]},
+        })
+
+    def test_the_build_figures_carry_them(self):
+        meta = read_people(os.path.join(ROOT, emit.PEOPLE_META_FILE))
+        scores = meta["chamberScores"]
+        senate = sum(len(v) for v in scores.get("Senate", {}).values())
+        self.assertGreater(senate, 90)
+        self.assertLessEqual(senate, 100)
 
 
 class TestAssetVersions(unittest.TestCase):
@@ -328,7 +701,7 @@ class TestDataSignature(unittest.TestCase):
 
     def test_written_file_records_its_signature(self):
         with tempfile.TemporaryDirectory() as tmp:
-            emit.write_profiles([member()], {}, root=tmp, races=[], summary={"x": 1})
+            emit.write_people([member()], {}, root=tmp, races=[], summary={"x": 1})
             recorded = emit.read_signature(tmp)
         self.assertEqual(recorded, emit.data_signature([member()], [], {"x": 1}))
 
@@ -370,7 +743,8 @@ class TestPageWiring(unittest.TestCase):
                 f.write('<script src="assets/kyc.js"></script>')
             result = dict((p, (ok, note)) for p, ok, note in emit.check_pages(tmp))
         self.assertFalse(result["index.html"][0])
-        self.assertIn("data/profiles.js", result["index.html"][1])
+        self.assertIn("data/people/index.js", result["index.html"][1])
+        self.assertIn("data/people/meta.js", result["index.html"][1])
 
     def test_loading_the_page_module_before_its_data_is_reported(self):
         # The modules read their globals as they initialise, so the wrong
@@ -379,20 +753,83 @@ class TestPageWiring(unittest.TestCase):
             page_dir = os.path.join(tmp, emit.SITE_DIR)
             os.makedirs(os.path.join(page_dir, "assets"))
             os.makedirs(os.path.join(page_dir, "data"))
+            os.makedirs(os.path.join(page_dir, "data", "people"))
             for name in ("assets/kyc.js", "assets/kyc-profile.js",
-                         "assets/kyc-directory.js", "data/profiles.js"):
+                         "assets/kyc-directory.js", "data/people/index.js"):
                 with open(os.path.join(page_dir, *name.split("/")), "w"):
                     pass
             with open(os.path.join(page_dir, "index.html"), "w", encoding="utf-8") as f:
                 f.write(
                     '<script src="assets/kyc.js"></script>'
                     '<script src="assets/kyc-directory.js"></script>'
-                    '<script src="data/profiles.js"></script>'
+                    '<script src="data/people/index.js"></script>'
                     '<script src="assets/kyc-profile.js"></script>'
                 )
             result = dict((p, (ok, note)) for p, ok, note in emit.check_pages(tmp))
         self.assertFalse(result["index.html"][0])
         self.assertIn("out of order", result["index.html"][1])
+
+
+class TestBallotPage(unittest.TestCase):
+    """Your ballot (rule 92): a generated page, in the navigation and the
+    sitemap, loading its data before the module that draws it."""
+
+    def setUp(self):
+        from kyc import pages
+        self.pages = pages
+        self.html = pages.render_ballot_page("example.org")
+
+    def test_it_is_in_the_navigation_beside_the_candidates(self):
+        keys = [k for _h, entries in self.pages.nav_groups() for k, *_rest in entries]
+        # "Start here" (PERSONA-04, #114) opens the list with the lookup.
+        self.assertEqual(keys[:4], ["findrep", "candidates", "ballot", "races"])
+        self.assertIn('href="ballot.html" data-nav="ballot" aria-current="page"', self.html)
+
+    def test_it_loads_its_data_then_the_modules_in_order(self):
+        loaded = emit.script_sources(self.html)
+        wanted = [s for s in emit.BALLOT_PAGE_REQUIREMENTS if s != "assets/kyc.js"]
+        self.assertEqual([s.split("?")[0] for s in loaded if s.split("?")[0] in wanted], wanted)
+        # It opens profiles, so it names the votes the dialog loads.
+        self.assertIn('id="onDemandData"', self.html)
+
+    def test_the_election_day_and_cycle_are_the_cycles_never_typed(self):
+        from kyc.cycle import CYCLE, general_election_day
+        day = general_election_day(CYCLE)
+        self.assertIn(f"{day.strftime('%B')} {day.day}, {day.year}", self.html)
+        self.assertIn(f"Elections {CYCLE}", self.html)
+
+    def test_who_represents_you_is_another_question(self):
+        # Rule 27: the page says it answers who is on the ballot, and sends
+        # "who represents me" to the lookup.
+        self.assertIn('href="index.html#findrep"', self.html)
+        self.assertIn("Who represents you now is another question", self.html)
+
+    def test_the_sitemap_lists_it(self):
+        self.assertIn("<loc>https://example.org/ballot.html</loc>",
+                      self.pages.sitemap("example.org", ["TX"]))
+
+    def test_the_shipped_page_is_current(self):
+        with open(os.path.join(ROOT, emit.BALLOT_FILE), encoding="utf-8") as handle:
+            self.assertIn('data-page="ballot"', handle.read())
+
+    def test_every_way_to_it_says_the_same_words_under_its_own_icon(self):
+        # The home page's hero and each state's voting block described one
+        # link two ways, under the "How to vote" icon (PR #118 review).
+        import re
+        site = os.path.join(ROOT, emit.SITE_DIR)
+        with open(os.path.join(site, "index.html"), encoding="utf-8") as handle:
+            index = handle.read()
+        with open(os.path.join(site, "assets", "kyc-ballot.js"), encoding="utf-8") as handle:
+            script = handle.read()
+        hero = re.search(r'<p class="intro-ballot">(.*?)</p>', index, re.S).group(1)
+        note = re.search(r'<span class="field-note">(.*?)</span>', hero, re.S).group(1)
+        words = re.search(r'var ENTRY_WORDS = ((?:"[^"]*"\s*\+?\s*)+);', script).group(1)
+        words = "".join(re.findall(r'"([^"]*)"', words))
+        self.assertEqual(" ".join(note.split()), words)
+        self.assertIn('<use href="#i-ballot"/>', hero)
+        self.assertIn('KYC.icon("ballot")', script)
+        self.assertIn('href="ballot.html" data-nav="ballot">\n                <svg class="icon" '
+                      'aria-hidden="true"><use href="#i-ballot"/>', index)
 
 
 class TestStatePages(unittest.TestCase):
@@ -406,7 +843,11 @@ class TestStatePages(unittest.TestCase):
         self.assertIn('data-root="../"', html)
         self.assertIn("<title>Texas — Know Your Candidate</title>", html)
         self.assertIn('rel="canonical" href="https://example.org/states/tx.html"', html)
-        self.assertIn('src="../data/profiles.js"', html)
+        # Its own state's people, not everyone's (rule 94).
+        self.assertIn('src="../data/people/tx.js"', html)
+        self.assertNotIn("../data/people/index.js", emit.script_sources(html))
+        # ...which it names, with every other state's, to load when wanted.
+        self.assertIn("../data/people/index.js", emit.on_demand_sources(html))
         self.assertIn("40 seats", html)
         self.assertNotIn("$title", html)          # every placeholder filled
 
@@ -430,6 +871,7 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(locs, [
             "<loc>https://example.org/</loc>",
             "<loc>https://example.org/map.html</loc>",
+            "<loc>https://example.org/ballot.html</loc>",
             "<loc>https://example.org/about.html</loc>",
             "<loc>https://example.org/states/index.html</loc>",
             "<loc>https://example.org/states/ak.html</loc>",
@@ -452,7 +894,7 @@ class TestStatePages(unittest.TestCase):
             self.assertEqual([r for r in relative
                               if not r.startswith(("districts/", "government/", "legislature/",
                                                     "counties/", "courts/", "federal/"))],
-                             ["404.html", "about.html", "redistricting/ca.html",
+                             ["404.html", "about.html", "ballot.html", "redistricting/ca.html",
                               "site.webmanifest", "states/ak.html", "states/index.html",
                               "states/tx.html"])
             # A district map for every state and territory, whatever the
@@ -524,7 +966,8 @@ class TestStatePages(unittest.TestCase):
         from kyc import pages
         html = pages.render_state("TX", "example.org", {"states": {}})
         self.assertIn('<div id="stateContent" class="state-page" data-guide-name="', html)
-        self.assertEqual(emit.script_sources(html), list(emit.STATE_PAGE_REQUIREMENTS))
+        self.assertEqual(emit.script_sources(html),
+                         [src.replace("{code}", "tx") for src in emit.STATE_PAGE_REQUIREMENTS])
         self.assertIn("with its author and licence.</p>\n                <p><strong>Who counts", html)
 
     def test_the_sitemap_lists_the_district_maps_last(self):

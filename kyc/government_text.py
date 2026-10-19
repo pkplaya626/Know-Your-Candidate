@@ -19,6 +19,9 @@ Blocks: ("p", text) ("note", text) ("h3", text[, id]) ("ul", [text, ...])
         ("chart", {top, items: [(title, text)], caption}) ("cards", [(title,
         target, text), ...]) ("live", key, fallback text) ("guide-cards",)
         ("flow", {steps: [(title, text[, [(title, text)]])], caption})
+        ("billflow", {tracks: [(heading, [(title, text)])] x 2, joined: (title,
+        text), president: (title, text), answers, ends: [(title, text, (result
+        words, "law" | "not-law") | None[, (title, text, result)])], caption})
         ("checks", {branches: [(branch, [(on, how)])], caption})
         ("ladder", {columns: [(heading, [(court, text)])], paths, caption})
         ("timeline", {items: [(iso date, label, title, [text | (status, words)])],
@@ -684,6 +687,11 @@ INDEX = {
 
 CONGRESS = {
     "slug": "congress",
+    # The page as a whole is the guide's REVIEWED. Two sections were read
+    # again on 2026-10-19 and carry that day themselves: the bill's path,
+    # drawn as two chambers' tracks (VISUALS-31; Article I, Section 7, the
+    # House's legislative process page, the Senate's glossary and cloture
+    # page), and the contact paragraph, revised for the cards' contact links.
     # Not "Congress": the site's navigation has that entry, for its members.
     "people": True,
     "title": "How Congress works",
@@ -724,45 +732,69 @@ CONGRESS = {
         {
             "id": "lawmaking",
             "heading": "How a bill becomes law",
+            "reviewed": "2026-10-19",
             "blocks": [
                 ("p", "A bill can start in either chamber, except that a bill for raising "
-                      "revenue must start in the House (Article I, Section 7). One that becomes "
-                      "law passes these steps:"),
-                ("flow", {
-                    "steps": [
-                        ("Introduced", "A representative or a senator introduces it."),
-                        ("Committee", "It is referred to a committee, which can hold hearings "
-                         "and mark it up: debate, amend and rewrite it. A bill the committee "
-                         "does not report usually goes no further."),
-                        ("On the floor of its chamber", "In the House, for most major bills "
-                         "the Rules Committee proposes a special rule, setting the terms of "
-                         "debate and which amendments may be offered, which the House adopts "
-                         "before taking up the bill; the bill then passes by a simple majority. "
-                         "On the Senate floor, debate has no time limit unless the Senate sets "
-                         "one, so opponents can hold a bill up by debating it at length or by "
-                         "other delays: a filibuster. Ending debate, called cloture, takes "
-                         "three-fifths of the senators duly chosen and sworn, 60 when every seat "
-                         "is filled. Most business moves instead by unanimous consent: an "
-                         "agreement setting aside the rules to speed things up, which any one "
-                         "senator can block by objecting."),
-                        ("The other chamber", "The bill then goes to the other chamber, through "
-                         "its own committee and its own floor in the same way."),
-                        ("The same words", "Both chambers must pass identical text. Where their "
-                         "versions differ, a conference committee of members of both may work "
-                         "out a compromise, which then goes back to each for a vote."),
-                        ("The president", "Has ten days, Sundays excepted, to act on the bill.", [
-                            ("Signs it", "It becomes law."),
-                            ("Does nothing", "It becomes law after ten days, unless Congress has "
-                             "adjourned and so prevented its return. Then it does not: a pocket "
-                             "veto, which Congress cannot override."),
-                            ("Vetoes it", "It goes back to the chamber where it started, with "
-                             "the president's objections."),
+                      "revenue must start in the House (Article I, Section 7). It passes one "
+                      "chamber and then the other, and becomes law only once both have passed "
+                      "it in the same words and the president has signed it, let it stand or "
+                      "been overridden:"),
+                # Drawn as two tracks meeting (VISUALS-31): every word is page
+                # text, the connectors an SVG of lines (government._billflow).
+                ("billflow", {
+                    "tracks": [
+                        ("In the House", [
+                            ("Introduced", "A representative introduces it, or it arrives "
+                             "having passed the Senate."),
+                            ("Committee", "It is referred to a committee, which can hold "
+                             "hearings and mark it up: debate, amend and rewrite it. A bill the "
+                             "committee does not report usually goes no further."),
+                            ("On the House floor", "For most major bills the Rules Committee "
+                             "proposes a special rule, setting the terms of debate and which "
+                             "amendments may be offered, which the House adopts before taking "
+                             "up the bill. The bill passes by a simple majority."),
                         ]),
-                        ("Override", "A vetoed bill becomes law if two-thirds of each chamber "
-                         "pass it again."),
+                        ("In the Senate", [
+                            ("Introduced", "A senator introduces it, or it arrives having "
+                             "passed the House."),
+                            ("Committee", "It is generally referred to the committee with "
+                             "jurisdiction over most of its subject, which can hold hearings and "
+                             "mark it up. A bill the committee does not report usually goes no "
+                             "further."),
+                            ("On the Senate floor", "Debate has no time limit unless the Senate "
+                             "sets one, so opponents can hold a bill up by debating it at length "
+                             "or by other delays: a filibuster. Ending debate, called cloture, "
+                             "takes three-fifths of the senators duly chosen and sworn, 60 when "
+                             "every seat is filled. Most business moves instead by unanimous "
+                             "consent: an agreement setting aside the rules to speed things up, "
+                             "which any one senator can block by objecting. The bill passes by a "
+                             "simple majority."),
+                        ]),
+                    ],
+                    "joined": ("Both chambers pass the same text", "The second chamber may "
+                               "amend what the first passed. Where their versions differ, a "
+                               "conference committee of members of both may work out a "
+                               "compromise, which goes back to each for a vote. Only a bill both "
+                               "have passed in the same words goes to the president."),
+                    "president": ("The president", "Has ten days, Sundays excepted, from when "
+                                  "the bill is presented, to act on it."),
+                    "answers": "What the president's answer makes of it",
+                    "ends": [
+                        ("Signs it", "Approves the bill and signs it.", ("It is law", "law")),
+                        ("Does not sign or return it", "Ten days pass, Sundays excepted, while "
+                         "Congress can receive it back.", ("It is law, as if signed", "law")),
+                        ("Does not sign it, and Congress adjourns", "Congress's adjournment "
+                         "prevents its return within the ten days: a pocket veto, which "
+                         "Congress cannot override.", ("It is not law", "not-law")),
+                        ("Vetoes it", "Returns it, with the president's objections, to the "
+                         "chamber where it started.", None,
+                         ("Override", "Two-thirds of that chamber, and then two-thirds of the "
+                          "other, vote to pass it again. Short of that in either, it is not "
+                          "law.", ("It is law", "law"))),
                     ],
                     "caption": ("The path Article I, Section 7 sets, through each chamber's "
-                                "rules."),
+                                "rules. A bill passes one chamber and then the other, in either "
+                                "order."),
                 }),
                 ("h3", "The exception: budget reconciliation"),
                 ("p", "One kind of bill cannot be filibustered. Under the Congressional Budget "
@@ -975,16 +1007,20 @@ CONGRESS = {
         {
             "id": "reaching",
             "heading": "Reaching your members",
+            "reviewed": "2026-10-19",
             "blocks": [
                 ("p", "Everyone in a state has one representative, for the district they live "
                       "in, and two senators. The District of Columbia and each territory elect "
                       "one delegate, or Puerto Rico's resident commissioner, and no senators. "
-                      "[Find yours by state](site:states/index.html) or on [the partisan "
+                      "[Find who represents you](site:index.html#findrep) by ZIP code or "
+                      "location, [by state](site:states/index.html) or on [the partisan "
                       "map](site:map.html): each member's profile here gives their office's "
                       "phone number and address and their official website, as the "
-                      "congress-legislators project records them, and a contact form where that "
-                      "record lists one. For senators it mostly does; for representatives it "
-                      "rarely does, and a representative's form is on their own website. The "
+                      "congress-legislators project records them, and a contact form: the one "
+                      "that record lists, which for senators it mostly does, or else the "
+                      "contact page their official website links, opened and seen to hold a "
+                      "form. Each sitting member's card links the same form or, where there is "
+                      "none, the phone number of one of their offices. The "
                       "[House](https://www.house.gov/representatives/find-your-representative) "
                       "and the [Senate](https://www.senate.gov/senators/senators-contact.htm) "
                       "list their members too."),

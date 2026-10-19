@@ -169,14 +169,62 @@
       KYC.escapeHtml((row.current ? "" : "Former ") + row.office) + "</span>";
   }
 
+  /** How to reach a sitting member's office, or null (GRID-16): the
+   *  contact form their record or their official website gives (the
+   *  dialog's "Contact form", checked as kyc/members.py reads it), else the
+   *  Washington office's phone, else a district or state office's. Only a
+   *  member who sits now (KYC.seated): a challenger's campaign form is not
+   *  "contact your representative" (rule 27), and a former member's office
+   *  is closed. Never a campaign site. */
+  function contactOf(item) {
+    if (!item || !KYC.seated(item)) return null;
+    var who = item.name + "’s office";
+    if (item.contactForm && /^https?:\/\//i.test(item.contactForm)) {
+      return { href: item.contactForm, external: true, label: "Contact office",
+        title: "Write to " + who + ": " + (item.contactFormVia === "official-site"
+          ? "the contact page their official website links" +
+            (item.contactFormChecked ? ", checked on " + KYC.dateWords(item.contactFormChecked) : "")
+          : "the contact form congress-legislators records for them") };
+    }
+    var tel = function (phone, where) {
+      return { href: "tel:" + String(phone).replace(/[^\d+]/g, ""), label: "Call office",
+        title: "Call " + who + " in " + where + ": " + phone };
+    };
+    if (item.phone) return tel(item.phone, "Washington");
+    var home = (item.districtOffices || []).filter(function (o) { return o && o.phone; })[0];
+    return home ? tel(home.phone, home.city || "the " +
+      (/Senate/.test(item.chamber) ? "state" : "district")) : null;
+  }
+
+  /** The contact link itself, beside a card or in a line of a race. */
+  function contactLink(item, cls) {
+    var c = contactOf(item);
+    if (!c) return "";
+    return '<a class="' + (cls || "card-contact") + '" href="' + KYC.escapeAttr(c.href) + '"' +
+      (c.external ? ' target="_blank" rel="noopener noreferrer"' : "") +
+      ' title="' + KYC.escapeAttr(c.title) + '" aria-label="' +
+      KYC.escapeAttr(c.label.replace(/ office$/, "") + " " + item.name + "’s office") + '">' +
+      // One look for both forms of the action, and not the dialog's
+      // "Copy link" arrow: an envelope for a form, a handset for a call.
+      KYC.icon(c.external ? "mail" : "phone", "icon-sm") + KYC.escapeHtml(c.label) + "</a>";
+  }
+
   /* Every interpolation is escaped. The previous version put item.name,
    * item.party and the office label straight into innerHTML and carried an
    * onclick with the id interpolated into it; one delegated listener reads
    * data-id instead. */
   /* *opts.note* is a line the view adds under the card's facts: an age
-   * under an age sort, where a search matched (kyc-directory.js). */
+   * under an age sort, where a search matched (kyc-directory.js). A sitting
+   * member's card carries a way to reach their office beside it, outside
+   * the button: a link cannot sit inside one. */
   function card(item, opts) {
-    var note = opts && opts.note;
+    var note = opts && typeof opts === "object" ? opts.note : "";
+    var contact = contactLink(item);
+    var html = cardButton(item, note);
+    return contact ? '<div class="card-cell">' + html + contact + "</div>" : html;
+  }
+
+  function cardButton(item, note) {
     // No portrait (rule 24 guesses none): a disc with the person's
     // initials, not a 150x190 grey silhouette (VISUALS-16).
     var photo = KYC.hasPortrait(item)
@@ -498,9 +546,12 @@
           "new district map")
       : line.past ? "ran for " + seat + " and is not on its November ballot"
       : "is running for " + seat;
+    // They still hold the seat, so the race says how to reach their office
+    // as their card would (GRID-16).
+    var contact = contactLink(p, "card-contact race-held-contact");
     return '<p class="race-held">Held by <button type="button" class="link-button" data-id="' +
       KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>, who " +
-      KYC.escapeHtml(what) + ".</p>";
+      KYC.escapeHtml(what) + "." + (contact ? " " + contact : "") + "</p>";
   }
 
   /* The people the primary removed, folded under the race. With
@@ -517,12 +568,25 @@
     grid.innerHTML = people.map(function (p) { return card(p); }).join("");
   }
 
-  function raceSection(race, people, opts) {
-    opts = opts || {};
+  /** A race's people as every view that lists the race splits them: the
+   *  seat's holder running elsewhere (*moved*, one line above the race),
+   *  the people still in it (*running*) and those no longer in it (*out*),
+   *  each in the pipeline's order; *people* is everyone but the moved. The
+   *  race sections and the Your ballot page split them here, so the two
+   *  list the same people (rules 12 and 73). */
+  function racePeople(race, people) {
     var moved = people.filter(function (p) { return elsewhere(race, p); });
     people = people.filter(function (p) { return moved.indexOf(p) === -1; });
-    var running = people.filter(function (p) { return !offBallot(p); });
-    var out = people.filter(offBallot);
+    return { moved: moved, people: people,
+             running: people.filter(function (p) { return !offBallot(p); }),
+             out: people.filter(offBallot) };
+  }
+
+  function raceSection(race, people, opts) {
+    opts = opts || {};
+    var split = racePeople(race, people);
+    var moved = split.moved, running = split.running, out = split.out;
+    people = split.people;
     var body = moved.map(heldByLine).join("") +
       '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
@@ -752,7 +816,7 @@
     var shown = ballotPeople(race, people);
     if (!shown.length) return "";
     return fold("race-money", "Money in the race", opts, (opts.scope || "race") + ":money:" + race.id,
-      function () {
+      race.state, function () {
         var max = 0;
         shown.forEach(function (p) {
           MONEY.forEach(function (spec) {
@@ -777,23 +841,51 @@
   /* A race's fold: drawn now when it opens on arrival, else when the reader
    * opens it (fillFold). The grid's races view holds 475 races, and drawn
    * at once their money and last results nearly doubled its markup, which
-   * GRID-14 had cut to 2.5 MB. */
+   * GRID-14 had cut to 2.5 MB.
+   *
+   * A fold about the race's people (*state*, the race's) needs their whole
+   * records: the grid and the map hold everyone's card only, and the money
+   * and the ballot side by side are in the state's own file (rule 94),
+   * loaded when the fold opens. Never drawn from the cards, where every
+   * figure would read "No data". */
   var lazyFolds = {};
 
-  function fold(cls, summary, opts, key, body) {
-    var eager = opts.open || !opts.lazy;
-    if (!eager) lazyFolds[key] = body;
-    return '<details class="' + cls + '"' + (opts.open ? " open" : "") +
+  function fold(cls, summary, opts, key, state, body) {
+    var ready = !state || KYC.peopleFull(state);
+    var eager = ready && (opts.open || !opts.lazy);
+    if (!eager) lazyFolds[key] = { body: body, state: ready ? null : state };
+    return '<details class="' + cls + '"' + (eager && opts.open ? " open" : "") +
       (eager ? "" : ' data-fold="' + KYC.escapeAttr(key) + '"') + "><summary>" +
       KYC.escapeHtml(summary) + '</summary><div class="fold-body">' + (eager ? body() : "") +
       "</div></details>";
   }
 
   function fillFold(details) {
-    var body = lazyFolds[details.getAttribute("data-fold")];
+    var entry = lazyFolds[details.getAttribute("data-fold")];
     var target = details.querySelector(".fold-body");
-    if (!body || !target || target.childElementCount) return;
-    target.innerHTML = body();
+    if (!entry || !target || target.childElementCount) return;
+    if (!entry.state || KYC.peopleFull(entry.state)) {
+      target.innerHTML = entry.body();
+      return;
+    }
+    target.innerHTML = '<p class="race-note" role="status">Loading ' +
+      KYC.escapeHtml(KYC.stateName(entry.state)) + "&rsquo;s campaigns&hellip;</p>";
+    KYC.loadPeople(entry.state).then(function (ok) {
+      if (ok) {
+        target.innerHTML = entry.body();
+        return;
+      }
+      // Said, and asked again the next time the fold opens.
+      target.innerHTML = '<p class="race-note kyc-absent" role="status">' +
+        KYC.escapeHtml(KYC.peopleProblem() || "The campaigns\u2019 figures did not load. " +
+          "Close this and open it again to retry.") + "</p>";
+      var again = function () {
+        if (details.open) return;
+        details.removeEventListener("toggle", again);
+        target.innerHTML = "";
+      };
+      details.addEventListener("toggle", again);
+    });
   }
 
   /* ------------------------------------------------ compare the ballot */
@@ -930,7 +1022,7 @@
     if (ballotPeople(race, people).length < 2) return "";
     // Always drawn when opened: a table per race is markup no one asked for.
     return fold("race-compare", "Compare the ballot", { lazy: true },
-      (opts.scope || "race") + ":compare:" + race.id,
+      (opts.scope || "race") + ":compare:" + race.id, race.state,
       function () { return compareTable(race, people, opts.attr, opts.self); });
   }
 
@@ -1072,7 +1164,7 @@
     var last = race && race.lastElection;
     if (!last) return "";
     return fold("race-last", lastTimeSummary(race, last, opts.now), opts,
-      (opts.scope || "race") + ":last:" + race.id,
+      (opts.scope || "race") + ":last:" + race.id, null,
       function () { return lastTimeBody(race, last); });
   }
 
@@ -1091,8 +1183,11 @@
     raceBadge: raceBadge,
     statusBadge: statusBadge,
     card: card,
+    contactOf: contactOf,
     raceBadges: raceBadges,
     raceSection: raceSection,
+    racePeople: racePeople,
+    heldByLine: heldByLine,
     fillOut: fillOut,
     legend: legend,
   };

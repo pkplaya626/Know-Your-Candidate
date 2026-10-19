@@ -5,7 +5,7 @@ are not: fifty-six near-identical documents would drift the moment one of
 them was edited by hand, so they are written by the build from one template
 here, and every state's page is identical except for the facts about that
 state. The content itself is rendered on the client by ``assets/kyc-state.js``
-from the same ``profiles.js`` the other pages load, so a state page can never
+from its own state's people file, of the same build the other pages load, so a state page can never
 disagree with the grid about who represents a district.
 
 The pages live one directory down (``states/tx.html``), so every asset and
@@ -14,6 +14,7 @@ off disk also works when served, and the render tests exercise both.
 """
 
 import html
+import re
 import string
 
 from .courts import STALE_DAYS as COURT_STALE_DAYS
@@ -136,6 +137,10 @@ $scripts
 </html>
 """)
 
+# The Your ballot page (kyc-ballot.js, rule 92), at the site's root.
+BALLOT_PATH = "ballot.html"
+
+
 # The site's navigation, by level of government. One table: every generated
 # page renders it, and emit.check_nav holds the two hand-maintained pages,
 # index.html and map.html, to it. Each entry is (key, path from the site's
@@ -145,8 +150,18 @@ def nav_groups():
     from .cycle import CYCLE
 
     return (
+        # "Who represents me" had no way in from the drawer: the lookup is
+        # the home page's first panel, and nothing on any other page said it
+        # existed (PERSONA-04). On the home page the link is caught and the
+        # panel revealed without a navigation (kyc-findrep.js), since the
+        # grid's router would read "#findrep" as a view and clear the
+        # reader's filters; from any other page it opens the home page there.
+        ("Start here", (
+            ("findrep", "index.html#findrep", "pin", "Find who represents you"),
+        )),
         (f"Elections {CYCLE}", (
             ("candidates", "index.html", "user", "Candidates"),
+            ("ballot", BALLOT_PATH, "ballot", "Your ballot"),
             ("races", "map.html", "map", "Races & partisan map"),
         )),
         ("Federal", (
@@ -221,7 +236,7 @@ _SITE_SEARCH = """\
     </form>
 """
 
-# The sidebar of every page that loads profiles.js: the chambers' balance,
+# The sidebar of every page that loads the build's figures: the chambers' balance,
 # the state's own delegation on its pages, and the election.
 _CONGRESS_SIDEBAR = """
         <div class="sidebar-section">
@@ -325,7 +340,7 @@ _SECTION_TAGS = {"executive": "Federal government"}
 
 def brand_sub(nav_current=None, congress=False):
     """The tag beside the site's name: which part of the site this is. A
-    page that loads profiles.js names the Congress its data is of
+    page that loads the build's figures names the Congress its data is of
     (``data-congress``, filled by kyc.js); every other page names its
     section as the navigation does (rule 75), never "U.S. Congress" over a
     county, a court or the guide."""
@@ -335,7 +350,7 @@ def brand_sub(nav_current=None, congress=False):
     return f'<span class="brand-sub">{_e(name)}</span>' if name else ""
 
 
-# The build's date in a footer, filled from profiles.js by kyc.js.
+# The build's date in a footer, filled from data/people/meta.js by kyc.js.
 BUILD_STAMP = 'Data built <time id="buildStamp">&mdash;</time>. '
 
 
@@ -366,7 +381,7 @@ def footer_meta(root="", when="", page=None):
 def built_line(root="../", built=None):
     """The sidebar's line saying how fresh the page's data is, with the way
     to its sources: a grid of a thousand cards pushes the footer out of
-    reach (TRUST-04). *built* is "stamp" where the page loads profiles.js
+    reach (TRUST-04). *built* is "stamp" where the page loads the build's figures
     (kyc.js fills it), a date, or None for a page with no data."""
     if built == "stamp":
         when = 'Data built <time data-built>&mdash;</time> &middot; '
@@ -477,7 +492,8 @@ def render_page(**fields):
     fields["jump_label"] = "Jump to a state or territory" if whole else "Jump to a state"
     return _PAGE.substitute(search=search, **fields)
 
-# The state pages render everything from profiles.js on the client. The
+# The state pages render everything on the client, from the build's
+# figures and their own state's people file (rule 94). The
 # guide page's name rides on the container, so the button the page draws to
 # it is called what the guide calls itself (rule 75), never retyped.
 _STATE_MAIN = string.Template("""\
@@ -489,8 +505,12 @@ _STATE_MAIN = string.Template("""\
 def _state_main():
     return _STATE_MAIN.substitute(guide=_e(_guide_name("states")))
 
+# "{people}" is the page's people file: its own state's ("ca.js"), or, on
+# the directory of states, the index of everyone ("index.js"), whose races
+# it counts.
 _STATE_SCRIPTS = (
-    "../data/profiles.js",
+    "../data/people/meta.js",
+    "../data/people/{people}",
     "../data/odds.js",
     "../data/stategov.js",
     "../data/lookup/index.js",
@@ -499,11 +519,13 @@ _STATE_SCRIPTS = (
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",
 )
 
 _DISTRICT_SCRIPTS = (
-    "../data/profiles.js",
+    "../data/people/meta.js",
+    "../data/people/{code}.js",
     "../data/odds.js",
     "../data/districts/{code}.js",
     "../data/lookup/index.js",
@@ -530,21 +552,28 @@ def _e(text):
 _PROFILE_DIALOG = "assets/kyc-profile.js"
 
 
+def _state_scripts(code=None):
+    """A state page's scripts, or the directory of states' (*code* None)."""
+    people = f"{code.lower()}.js" if code else "index.js"
+    return tuple(src.replace("{people}", people) for src in _STATE_SCRIPTS)
+
+
 def _scripts(sources):
     """The page's script tags. A page that opens the profile dialog also
-    names, inert, the vote files the dialog loads when a member is opened
-    (KYC.loadData), so the build stamps their versions with the rest
-    (rule 76) and the page loads them only when wanted."""
-    from .emit import VOTES_FILES
+    names, inert, the files it loads only when wanted (KYC.loadData): the
+    vote files the dialog loads when a member is opened, and the people
+    files it does not load (rule 94), so the build stamps their versions
+    with the rest (rule 76)."""
+    from .emit import VOTES_FILES, people_on_demand
 
     tags = "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
     dialog = [src for src in sources if src.endswith(_PROFILE_DIALOG)]
     if not dialog:
         return tags
     prefix = dialog[0][:-len(_PROFILE_DIALOG)]
-    lazy = "\n".join(f'<script src="{_e(prefix)}data/{_e(VOTES_FILES[chamber])}"></script>'
-                     for chamber in sorted(VOTES_FILES))
-    return ("<!-- Loaded only when a member's profile is opened (KYC.loadData). -->\n"
+    names = [VOTES_FILES[chamber] for chamber in sorted(VOTES_FILES)] + people_on_demand(sources)
+    lazy = "\n".join(f'<script src="{_e(prefix)}data/{_e(name)}"></script>' for name in names)
+    return ("<!-- Loaded only when wanted (KYC.loadData, KYC.loadPeople). -->\n"
             f'<template id="onDemandData">\n{lazy}\n</template>\n' + tags)
 
 
@@ -671,7 +700,7 @@ def render_state(code, host, summary=None):
         nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
         main=_state_main(),
-        scripts=_scripts(_STATE_SCRIPTS),
+        scripts=_scripts(_state_scripts(code)),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code))],
     )
 
@@ -692,8 +721,235 @@ def render_states_index(host):
         nav_current="states",
         main=_state_main(),
         crumbs=[_HOME, (section_name("states"), "states/index.html")],
-        scripts=_scripts(_STATE_SCRIPTS),
+        scripts=_scripts(_state_scripts()),
     )
+
+
+# ------------------------------------------------- the guide's Congress page
+
+# Who chairs each committee and who leads its minority, and who holds each
+# chamber's leadership posts: written into the guide's Congress page here,
+# from the build's own profiles, so the page loads no profile data (rule
+# 94). Each name links to the person's profile on the grid. They were drawn
+# on the page by assets/kyc-guide.js, from all 6.7 MB of profiles.js.
+
+# A majority's lead is titled Chair, Chairman, Chairwoman or Cochairman.
+_CHAIR = re.compile(r"^(co-?)?chair(man|woman)?$", re.I)
+_COMMITTEE_GROUPS = (
+    ("house", "House committees", "committee", "committees"),
+    ("senate", "Senate committees", "committee", "committees"),
+    ("joint", "Joint committees", "committee", "committees"),
+    # Not committees, so the note under them does not call them that.
+    ("other", "Caucuses and commissions", "body", "bodies"),
+)
+_UNNAMED_LEAD = {"Chair": "No chair named in the rosters",
+                 "Minority lead": "No minority lead named in the rosters"}
+
+
+def party_key(person):
+    """"d", "r", "i" or "vacant", as ``KYC.partyKey`` reads a profile: the
+    same test for the pages the build writes (rule 12). test_guide runs the
+    page's function beside this one, so change both together."""
+    if not person:
+        return "i"
+    if person.get("party") == "Vacant" or person.get("status") == "Vacant":
+        return "vacant"
+    if "Democrat" in str(person.get("party")):
+        return "d"
+    return "r" if person.get("party") == "Republican" else "i"
+
+
+def _committee_group(info):
+    """A caucus or a commission on the rosters is not a committee of either
+    chamber: the Senate's narcotics caucus was counted among its committees."""
+    return "other" if re.search(r"\b(Caucus|Commission)\b", info.get("name") or "") else info.get("chamber")
+
+
+def _minority_rank(title):
+    """The minority's lead: its ranking member - or, where a committee gives
+    the minority the vice chair (Senate Ethics, Intelligence, Indian
+    Affairs), its vice chair. Lower is better; ex officio seats never."""
+    if re.search("ranking", title, re.I):
+        return 0
+    if re.match("vice", title, re.I):
+        return 1
+    return 2 if _CHAIR.match(title) else -1
+
+
+def committee_leads(profiles, committees):
+    """``{code: {"info", "majority": [(person, title)], "minority": [...]}}``
+    for every full committee with a titled seat, from the sitting members'
+    lists. A minority lead is found by the seat's side, not its title
+    (rule 48)."""
+    from .record import seated
+
+    out = {}
+    for person in profiles:
+        if not seated(person):
+            continue
+        for seat in person.get("committeeList") or []:
+            info = (committees or {}).get(seat.get("code"))
+            title = seat.get("title")
+            if not title or not info or info.get("parent"):
+                continue
+            row = out.setdefault(seat["code"], {"info": info, "majority": [], "minority": []})
+            if seat.get("side") == "minority":
+                rank = _minority_rank(title)
+                if rank >= 0:
+                    row["minority"].append((person, title, rank))
+            elif _CHAIR.match(title):
+                row["majority"].append((person, title, 0))
+    for row in out.values():
+        if row["minority"]:
+            best = min(rank for _p, _t, rank in row["minority"])
+            row["minority"] = [lead for lead in row["minority"] if lead[2] == best]
+    return out
+
+
+def _sort_name(name):
+    """"House Committee on the Budget" sorts under B."""
+    name = re.sub(r"^(United States )?(House|Senate) ", "", str(name))
+    return re.sub(r"^((Joint|Permanent|Select|Special) )*(Committee|Caucus|Subcommittee)"
+                  r"( of Congress)? (on|to) (the )?", "", name, flags=re.I)
+
+
+def _guide_person(person, title, standard):
+    """A name in the guide: a link to the person's profile on the grid."""
+    key = party_key(person)
+    extra = (f' <span class="guide-person-title">{_e(title)}</span>'
+             if title and not standard.match(title) else "")
+    return (f'<a class="guide-person" href="../index.html#/profile/{_e(person["id"])}">'
+            f'<span class="name">{_e(person["name"])}</span> '
+            f'<span class="guide-person-seat"><span class="party-{_e(key)}">'
+            f'{_e("" if key == "vacant" else key.upper())}</span>'
+            f'<span class="faint">-{_e(person["state"])}</span></span>{extra}</a>')
+
+
+def _lead_cell(leads, standard, label):
+    if not leads:
+        return (f'<td data-label="{_e(label)}"><span class="faint lead-unnamed">'
+                f'{_e(_UNNAMED_LEAD.get(label, "Not named in the rosters"))}</span></td>')
+    return (f'<td data-label="{_e(label)}">'
+            + "<br>".join(_guide_person(p, t, standard) for p, t, _r in leads) + "</td>")
+
+
+def _pending_in(profiles, chamber):
+    """A seated member of *chamber* whose committees are not yet published:
+    a new Congress's rosters come some weeks after it sits (rule 68)."""
+    from .record import seated
+
+    for p in profiles:
+        if seated(p) and p.get("committeesPending") and \
+                (chamber == "senate") == ("Senate" in str(p.get("chamber") or "")):
+            return p
+    return None
+
+
+def _pending_text(member, what):
+    from .cycle import ordinal
+
+    return _e(f"{what} assignments for the {ordinal(int(member['committeesPending']))} "
+              "Congress have not been published yet")
+
+
+def committees_html(profiles, committees):
+    """The guide's table of each committee's chair and minority lead."""
+    leads = committee_leads(profiles, committees)
+    if not leads:
+        pending = _pending_in(profiles, "house") or _pending_in(profiles, "senate")
+        if pending:
+            return (f'<p class="results-bar" role="status">{_pending_text(pending, "Committee")}'
+                    "; each committee's leaders will be listed here once they are.</p>")
+        return ('<p class="results-bar" role="status">The committee rosters were not read, '
+                "so this list is empty. Each member's profile lists their committees.</p>")
+    out = []
+    for group, heading, one, many in _COMMITTEE_GROUPS:
+        rows = sorted((row for row in leads.values() if _committee_group(row["info"]) == group),
+                      key=lambda row: _sort_name(row["info"].get("name")).casefold())
+        if not rows:
+            # One chamber's rosters can be out before the other's.
+            waiting = group in ("house", "senate") and _pending_in(profiles, group)
+            if waiting:
+                out.append(f'<h3 class="guide-subheading">{_e(heading)}</h3>'
+                           f'<p class="results-bar" role="status">'
+                           f'{_pending_text(waiting, group.capitalize() + " committee")}.</p>')
+            continue
+        # Counted from the rosters, so the note cannot outlive them.
+        unnamed = sum(1 for row in rows if not row["minority"])
+        note = ""
+        if unnamed:
+            if unnamed == len(rows):
+                lead = (f"This {one}’s roster gives" if unnamed == 1
+                        else f"Each of these {many}’ rosters gives")
+            else:
+                lead = (f"One of these {many}’ rosters gives" if unnamed == 1
+                        else f"{unnamed} of these {many}’ rosters give")
+            note = (f'<p class="faint committees-unnamed" data-chamber="{_e(group)}">{lead}'
+                    " no member of the minority a leading title, so no minority lead is shown for "
+                    f'{"it" if unnamed == 1 else "them"}.</p>')
+        body = []
+        for row in rows:
+            name = _e(row["info"].get("name"))
+            url = row["info"].get("url")
+            cell = (f'<a href="{_e(url)}" target="_blank" rel="noopener noreferrer">{name}</a>'
+                    if url else name)
+            body.append(f'<tr><th scope="row">{cell}</th>'
+                        + _lead_cell(row["majority"], re.compile(r"^chair(man|woman)?$", re.I),
+                                     "Chair")
+                        + _lead_cell(row["minority"], re.compile(r"^ranking member$", re.I),
+                                     "Minority lead") + "</tr>")
+        out.append(f'<h3 class="guide-subheading">{_e(heading)} <span class="faint">{len(rows)}'
+                   f"</span></h3>{note}"
+                   '<div class="guide-table-wrap"><table class="guide-table guide-committees">'
+                   '<thead><tr><th scope="col">Committee</th><th scope="col">Chair</th>'
+                   '<th scope="col">Minority lead</th></tr></thead><tbody>'
+                   + "".join(body) + "</tbody></table></div>")
+    return "".join(out)
+
+
+# The principal posts first, in the order the page explains them; a party's
+# other posts (conference chairs, policy committees) after.
+_LEAD_ORDER = (r"^Speaker", r"^President Pro Tempore", r"^(House |Senate )?Majority Leader$",
+               r"^(House |Senate )?Minority Leader$", r"^(House |Senate )?Majority Whip$",
+               r"^(House |Senate )?Minority Whip$")
+
+
+def _lead_rank(title):
+    for i, pattern in enumerate(_LEAD_ORDER):
+        if re.search(pattern, title):
+            return i
+    return len(_LEAD_ORDER)
+
+
+def leaders_html(profiles, chamber, congress=None):
+    """Who holds each of *chamber*'s ("senate", "house") leadership posts,
+    from the posts congress-legislators records for each sitting member's
+    bioguide id (``profile.leadership``, rule 68)."""
+    from .cycle import ordinal
+    from .record import seated
+
+    rows = []
+    for person in profiles:
+        if not seated(person) or (chamber == "senate") != ("Senate" in str(person.get("chamber") or "")):
+            continue
+        for title in person.get("leadership") or []:
+            rows.append((_lead_rank(title), title, person))
+    if not rows:
+        # A new Congress's posts reach the record days after it sits, and the
+        # previous Congress's are never shown in their place.
+        own = ('<a href="https://www.senate.gov/senators/leadership.htm">the Senate&#8217;s own list</a>'
+               if chamber == "senate" else
+               '<a href="https://www.house.gov/leadership">the House&#8217;s own list</a>')
+        which = f"{ordinal(int(congress))} Congress" if congress else "sitting Congress"
+        return ('<p class="faint guide-pending">The congress-legislators record lists nobody in a '
+                f'{"Senate" if chamber == "senate" else "House"} leadership post for the '
+                f"{_e(which)} yet. Until it does, see {own}.</p>")
+    rows.sort(key=lambda row: (row[0], row[1].casefold()))
+    return ('<ul class="guide-holders guide-leaders">'
+            + "".join(f"<li>{_guide_person(p, t, re.compile('^$'))}</li>" for _r, t, p in rows)
+            + "</ul>"
+            '<p class="faint">From the congress-legislators project&#8217;s record of each '
+            "member&#8217;s leadership posts.</p>")
 
 
 def render_legislatures_index(host, dates=None):
@@ -987,7 +1243,7 @@ def render_district_page(code, host, summary=None):
 
     The introduction is static, so the page says what it is without
     JavaScript; the maps and every claim about a person are rendered by
-    ``assets/kyc-districts.js`` from the state's map file and profiles.js.
+    ``assets/kyc-districts.js`` from the state's map file and its people file.
     """
     from .districts import REDRAWN, page_path as district_path
     from .government_maps import STATES
@@ -1156,7 +1412,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
         "../data/legislature/{code}.js", "../data/lookup/index.js", "../assets/kyc-regionmap.js",
-        "../assets/kyc-findrep.js", "../assets/kyc-legislature.js")]
+        "../assets/kyc-findrep.js", "../assets/kyc-ballot.js", "../assets/kyc-legislature.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(f"{title}: every district and member"),
@@ -2023,6 +2279,102 @@ def render_404(host, codes=()):
     )
 
 
+# The Your ballot page: what it loads, data before code (rule 14). It opens
+# profiles in the dialog, and names the vote files that dialog loads.
+# The build's figures and no one's records: an answer loads its state's
+# people file before it is drawn (rule 94), named on demand by _scripts.
+_BALLOT_SCRIPTS = (
+    "data/people/meta.js",
+    "data/odds.js",
+    "data/stategov.js",
+    "data/lookup/index.js",
+    "assets/kyc-odds.js",
+    "assets/kyc-cards.js",
+    "assets/kyc-profile.js",
+    "assets/kyc-stategov.js",
+    "assets/kyc-findrep.js",
+    "assets/kyc-ballot.js",
+)
+
+_BALLOT_SIDEBAR = """
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                $year midterms
+            </h2>
+            <time id="electionCountdown" class="badge badge-warn countdown"></time>
+            <a class="sidebar-link learn-link" href="government/elections.html">How elections work</a>
+        </div>
+"""
+
+_BALLOT_SOURCES = """\
+                <p><strong>Sources:</strong> the races for Congress and everyone in them as the
+                    rest of this site lists them: the candidate field from the Federal Election
+                    Commission, primary results from each state's Wikipedia election page, and the
+                    November ballot from the certified list of candidates its election office
+                    publishes, where this site reads one, each race crediting its own; the
+                    statewide offices on the ballot from each state's constitution, statutes and
+                    election pages, and their candidates from the election office's own list,
+                    each list named and dated where it is shown; the districts a ZIP code or a
+                    location falls in from the Census Bureau's boundaries and ZIP Code
+                    Tabulation Areas; the key dates from each election office's own pages.</p>
+                <p><strong>Not listed here:</strong> the candidates for the state legislature,
+                    ballot measures, and judicial and local contests. Where a state's election
+                    office links a sample ballot, the page links it.</p>"""
+
+
+def render_ballot_page(host):
+    """ballot.html, Your ballot (rule 92): every contest on one reader's
+    ballot that the site can name, from a ZIP code or a location looked up
+    on the device. The page is drawn by ``assets/kyc-ballot.js``; the
+    address carries a ZIP code (``#/?zip=``), never a location."""
+    from .cycle import CYCLE, general_election_day
+
+    path = BALLOT_PATH
+    canonical = f"https://{host}/{path}" if host else path
+    name = section_name("ballot")
+    day = general_election_day(CYCLE)
+    when = f"{day.strftime('%B')} {day.day}, {day.year}"
+    main = "\n".join([
+        '            <div id="ballotPage" class="state-page ballot-page">',
+        '                <header class="state-hero">',
+        f'                    <p class="state-kicker">Elections {CYCLE}</p>',
+        f'                    <h1 class="state-title">{_e(name)}</h1>',
+        '                    <p class="districts-lede" data-ballot-lede>Every contest on your',
+        f'                        {_e(when)} ballot that this site can name, from your ZIP code or',
+        "                        your location: the races for Congress and who is in them, the",
+        "                        statewide offices and their candidates, and whether your seats in the",
+        "                        state legislature are up. Who represents you now is another question:",
+        '                        <a href="index.html#findrep">find who represents you</a>.</p>',
+        "                </header>",
+        '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',
+        '                <div class="ballot-result" id="ballotResult" role="status" aria-live="polite" hidden></div>',
+        "                <noscript><p>This page looks your ZIP code up in your browser, and needs",
+        "                    JavaScript to do it, as the rest of this site does.</p></noscript>",
+        "            </div>",
+    ])
+    return render_page(
+        title=_e(f"{name} — Know Your Candidate"),
+        og_title=_e(f"{name}: every contest on your {CYCLE} ballot"),
+        description=_e(f"Every contest on your {when} ballot that this site can name, from "
+                       "your ZIP code or location: Congress, statewide offices and their "
+                       "candidates, and your state legislative seats."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="ballot",
+        root="",
+        search="",
+        sidebar=string.Template(_BALLOT_SIDEBAR).substitute(year=CYCLE),
+        nav_current="ballot",
+        main=main,
+        footer=_BALLOT_SOURCES,
+        built="stamp",
+        crumbs=[_HOME, (name, path)],
+        scripts=_scripts(_BALLOT_SCRIPTS),
+    )
+
+
 # The name of districts/index.html, wherever it is shown or linked.
 DISTRICTS_INDEX_NAME = "District maps"
 
@@ -2228,6 +2580,7 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
 
     url("", "1.0")
     url("map.html", "0.8")
+    url(BALLOT_PATH, "0.8")
     url("about.html", "0.4", "monthly")
     url("states/index.html", "0.8")
     for code in sorted(codes):

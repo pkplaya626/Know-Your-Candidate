@@ -57,13 +57,17 @@ jobs:
       - name: A rebuild is byte-for-byte reproducible
         env:
           SOURCE_DATE_EPOCH: "1000000000"
+        # The people files are rewritten only when their content changes, so
+        # each build here starts without them: both write every one.
         run: |
+          rm -rf candidate_profiles_site/data/people
           python build_profile_site.py > /dev/null
-          cp candidate_profiles_site/data/profiles.js "$RUNNER_TEMP/profiles.1.js"
+          cp -r candidate_profiles_site/data/people "$RUNNER_TEMP/people.1"
           cp candidate_profiles_site/data/geo.js "$RUNNER_TEMP/geo.1.js"
           cp -r candidate_profiles_site/data/districts "$RUNNER_TEMP/districts.1"
+          rm -rf candidate_profiles_site/data/people
           python build_profile_site.py > /dev/null
-          cmp "$RUNNER_TEMP/profiles.1.js" candidate_profiles_site/data/profiles.js
+          diff -r "$RUNNER_TEMP/people.1" candidate_profiles_site/data/people
           cmp "$RUNNER_TEMP/geo.1.js" candidate_profiles_site/data/geo.js
           diff -r "$RUNNER_TEMP/districts.1" candidate_profiles_site/data/districts
           echo "ok: two builds at the same epoch are identical"
@@ -83,7 +87,7 @@ jobs:
 
       - name: Every shipped script parses
         run: |
-          for f in candidate_profiles_site/assets/*.js candidate_profiles_site/data/*.js candidate_profiles_site/data/districts/*.js; do
+          for f in candidate_profiles_site/assets/*.js candidate_profiles_site/data/*.js candidate_profiles_site/data/people/*.js candidate_profiles_site/data/districts/*.js; do
             node --check "$f" || exit 1
           done
 
@@ -179,9 +183,17 @@ jobs:
           COPY="$RUNNER_TEMP/rehearsal/$SCENARIO"
           if [ -d "$COPY" ]; then cd "$COPY" && python -m unittest discover tests; fi
 
+      # Each step has a bound. #114's January job once sat in this step for
+      # 50 minutes, until it was stopped, and its log was lost with it; two
+      # reruns of the same commit finished the page checks in four minutes.
+      # A stall now fails in its own step, named, within minutes.
+      - name: Install jsdom
+        timeout-minutes: 10
+        run: npm install --no-fund --no-audit
+
       - name: Page checks on the rehearsed data
+        timeout-minutes: 20
         run: |
-          npm install --no-fund --no-audit
           COPY="$RUNNER_TEMP/rehearsal/$SCENARIO"
           if [ -d "$COPY" ]; then
             cd "$COPY" && NODE_PATH="$GITHUB_WORKSPACE/node_modules" node tests/render_test.js

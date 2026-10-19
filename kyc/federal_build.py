@@ -15,7 +15,7 @@ An official's id is never a profile's: ``fjc-<nid>`` for a judge (the
 FJC's own id), ``x-<name>`` for an executive officer. The latter is an
 address, keyed on the person, never on the office, so a link shared to one
 Secretary never opens the next one; it is never matched against anything.
-Nobody here is in ``profiles.js``: these people are not members of Congress
+Nobody here is in the people files (``data/people/``): these people are not members of Congress
 and are never counted as such (rules 16 and 27).
 """
 
