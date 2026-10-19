@@ -174,8 +174,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1772 tests, no dependencies
-npm install && npm test                       # 2378 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1788 tests, no dependencies
+npm install && npm test                       # 2399 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1505,16 +1505,31 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     jurisdiction's own election office's - a county's only where the state
     publishes none that can be read, by an evidenced
     `overrides.STATEWIDE_LISTS_ELSEWHERE` entry - quoted and dated, and
-    exactly the offices `kyc/ballot2026.py` puts on the ballot; a list that
-    is not a certified statewide one says why on the page. Names and
-    parties as the list prints them (rule 77), write-ins apart, listed by
-    surname and said to be; no portrait, money or platform, never a
-    profile (rule 27), never joined to one by a name (rule 25). The holder
-    line is read from the list for the roster's holder at build time,
-    never copied from the research: "not on the certified list" where no
-    one on it carries their surname, "on the certified list" (never
-    "running for re-election") only where the list's marked holder carries
-    their surname and given name. A namesake settles nothing: the first
+    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list is
+    named as the document it is ("the Clark County Registrar of Voters’
+    notice of general election"), never "Certified by" a body: the first
+    page credited a county's sample ballot and a commission's voter guide
+    as certified by them. "Certified" is said only where the document's
+    own words say so (`certifiedQuote`) and the state's own office
+    published it; a county's or commission's list says why the state's
+    was not used (`notStateList`). Names are the list's, written first
+    name first, in ordinary capitals and without a ballot title (rule 77:
+    "Lombardo, Joseph", "JOSH SHAPIRO", "Governor Sarah Huckabee
+    Sanders"), the list's form kept beside them; a party the list
+    abbreviates is spelled out from its key or statute
+    (`statewide.PARTY_CODES`), and an unexplained code fails the build.
+    Write-ins apart, listed by surname and said to be; no portrait, money
+    or platform, never a profile (rule 27), never joined to one by a name
+    (rule 25): a sitting member a list names is a build warning
+    (`statewide-member-unnoted`) until an evidenced
+    `OTHER_OFFICE_NOMINEES` entry says so on their profile - Amy
+    Klobuchar was on Minnesota's governor ballot while hers said nothing.
+    The holder line is read from the list for the roster's holder at build
+    time, never copied from the research: "not among the candidates for
+    this office" where no one on it carries their surname (a hyphen and a
+    space one spelling), "among the candidates" (never "running for
+    re-election") only where the list's marked holder carries their
+    surname and given name, each naming the list. A namesake settles nothing: the first
     read called Governor Bill Lee absent from a list printing "Eddie Lee
     Murphy" only because a person had looked, so a namesake is recorded
     with why (`namesakes`), and a short form the list does not print
