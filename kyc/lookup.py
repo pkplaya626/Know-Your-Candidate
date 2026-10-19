@@ -11,7 +11,7 @@ reach, each state's box, and the versioned address of every file the lookup
 loads (rule 76), the state legislature files among them.
 
 Everything here is geography and a pure function of the vendored files; who
-holds a seat comes from profiles.js and the legislature files, so a roster
+holds a seat comes from the people files and the legislature files, so a roster
 refresh never changes a lookup file.
 
 A ZIP code is not a place. The Census Bureau maps ZIP codes as ZIP Code
@@ -243,7 +243,7 @@ def build(root=".", codes=None, local=None, legislatures=None, district_maps=Non
 
 def place_info(codes, voting=None):
     """``{code: {name, place?, alone?, map?, check?}}``: what the answer
-    says of each state on any page, profiles.js loaded or not - the
+    says of each state on any page, people files loaded or not - the
     legislature and county pages load none (PR #104 review): its name, its
     name in a sentence (``place``, where that differs), whether another
     state meets it across a land line (``alone`` where none does), its
@@ -268,6 +268,12 @@ def place_info(codes, voting=None):
         check = links.get("status") or links.get("polling")
         if check:
             entry["check"] = check
+        # The election office's own record that no election is held there
+        # on November 3 (voting_dates "noElection": Puerto Rico): the answer
+        # offers no ballot to see (rule 92).
+        dated = (((voting or {}).get("_dates") or {}).get("states") or {}).get(code) or {}
+        if any(line.get("k") == "none" for line in dated.get("lines") or ()):
+            entry["noElection"] = True
         out[code] = entry
     return out
 

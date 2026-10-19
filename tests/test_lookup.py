@@ -231,6 +231,19 @@ class TestIndex(unittest.TestCase):
         self.assertNotIn("alone", states["DC"])
         self.assertNotIn("alone", states["OH"])
 
+    def test_a_place_holding_no_election_is_marked_from_its_own_record(self):
+        # Puerto Rico's commission holds no general election in 2026: the
+        # answer offers no ballot to see there (rule 92), from the election
+        # office's own record and nothing else.
+        payloads = {code: {"zips": {}, "box": [0, 0, 1, 1]} for code in ("PR", "OH")}
+        voting = {"_dates": {"states": {
+            "PR": {"lines": [{"k": "none", "t": "No election is held in Puerto Rico"}]},
+            "OH": {"lines": [{"k": "register", "t": "Register"}]}}}}
+        states = lookup.index(payloads, {}, voting)["states"]
+        self.assertTrue(states["PR"]["noElection"])
+        self.assertNotIn("noElection", states["OH"])
+        self.assertNotIn("noElection", lookup.index(payloads, {}, {})["states"]["PR"])
+
     def test_the_page_reads_the_states_words_from_the_index(self):
         with open(os.path.join(ROOT, emit.SITE_DIR, "assets", "kyc-findrep.js"),
                   encoding="utf-8") as handle:

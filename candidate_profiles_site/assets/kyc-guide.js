@@ -1,11 +1,12 @@
 /* Know Your Candidate - Know Your Government, the guide.
  *
  * The guide's words are written into each page by kyc/government.py, with
- * the sources each section was checked against. This module adds only what
- * comes from the site's data, so nothing about a person is ever typed into
- * the guide: on the Congress page, who chairs each committee today and who
- * leads its minority, from the same committee rosters as each member's
- * profile, with each name opening that profile.
+ * the sources each section was checked against. Who chairs each committee
+ * and who leads each chamber is written in by the build too, from the
+ * profiles (kyc/pages.py committees_html, leaders_html), so the Congress
+ * page loads no profile data (rule 94). This module adds what comes from the
+ * federal government's data - the executive, the Cabinet, the justices -
+ * the guide's maps, and the timeline's marks for the reader's own day.
  *
  * A block it fills is marked <div class="guide-live" data-live="...">, and
  * says what it is without JavaScript.
@@ -15,175 +16,6 @@
 
   var doc = global.document;
   var KYC = global.KYC;
-
-  /* ----------------------------------------------------------- committees */
-
-  // A majority's lead is titled Chair, Chairman, Chairwoman or Cochairman.
-  var CHAIR = /^(co-?)?chair(man|woman)?$/i;
-  var CHAMBERS = [
-    ["house", "House committees", "committee", "committees"],
-    ["senate", "Senate committees", "committee", "committees"],
-    ["joint", "Joint committees", "committee", "committees"],
-    // Not committees, so the note under them does not call them that.
-    ["other", "Caucuses and commissions", "body", "bodies"],
-  ];
-
-  /* A caucus or a commission on the rosters is not a committee of either
-   * chamber: the Senate's narcotics caucus was counted among its
-   * committees. Listed apart, by the name the rosters give it. */
-  function groupOf(info) {
-    return /\b(Caucus|Commission)\b/.test(info.name || "") ? "other" : info.chamber;
-  }
-
-  /** The minority's lead: its ranking member - or, where a committee gives
-   *  the minority the vice chair (Senate Ethics, Intelligence, Indian
-   *  Affairs), its vice chair. Lower is better; ex officio seats never. */
-  function minorityRank(title) {
-    if (/ranking/i.test(title)) return 0;
-    if (/^vice/i.test(title)) return 1;
-    if (CHAIR.test(title)) return 2;
-    return -1;
-  }
-
-  /** ``{code: {code, info, majority: [], minority: []}}`` for every full
-   *  committee with a titled seat, built from the sitting members' lists. */
-  function committeeLeads() {
-    var table = KYC.meta().committees || {};
-    var out = {};
-    (global.legislatorsData || []).forEach(function (person) {
-      if (!KYC.seated(person)) return;
-      (person.committeeList || []).forEach(function (seat) {
-        var info = table[seat.code];
-        if (!seat.title || !info || info.parent) return;
-        var row = out[seat.code] ||
-          (out[seat.code] = { code: seat.code, info: info, majority: [], minority: [] });
-        var lead = { person: person, title: seat.title };
-        if (seat.side === "minority") {
-          lead.rank = minorityRank(seat.title);
-          if (lead.rank >= 0) row.minority.push(lead);
-        } else if (CHAIR.test(seat.title)) {
-          row.majority.push(lead);
-        }
-      });
-    });
-    Object.keys(out).forEach(function (code) {
-      var row = out[code];
-      var best = Math.min.apply(null, row.minority.map(function (l) { return l.rank; }));
-      row.minority = row.minority.filter(function (l) { return l.rank === best; });
-    });
-    return out;
-  }
-
-  /** "House Committee on the Budget" sorts under B. */
-  function sortName(name) {
-    return String(name)
-      .replace(/^(United States )?(House|Senate) /, "")
-      .replace(/^((Joint|Permanent|Select|Special) )*(Committee|Caucus|Subcommittee)( of Congress)? (on|to) (the )?/i, "");
-  }
-
-  function personButton(lead, standard) {
-    var p = lead.person;
-    var key = KYC.partyKey(p);
-    var extra = lead.title && !standard.test(lead.title)
-      ? ' <span class="guide-person-title">' + KYC.escapeHtml(lead.title) + "</span>" : "";
-    // "R-PA" is kept on one line: a wrap after the hyphen left "PA" alone.
-    return '<button type="button" class="guide-person" data-id="' + KYC.escapeAttr(p.id) + '">' +
-      '<span class="name">' + KYC.escapeHtml(p.name) + "</span> " +
-      '<span class="guide-person-seat"><span class="party-' + KYC.escapeAttr(key) + '">' +
-      KYC.escapeHtml(key === "vacant" ? "" : key.toUpperCase()) + "</span>" +
-      '<span class="faint">-' + KYC.escapeHtml(p.state) + "</span></span>" + extra + "</button>";
-  }
-
-  /** A lead the rosters do not name reads as that, a claim about the
-   *  rosters: "None recorded" read as though the minority had no leader or
-   *  the data were broken (most joint committees title only majority
-   *  members, one from each chamber). */
-  var UNNAMED = { "Chair": "No chair named in the rosters",
-    "Minority lead": "No minority lead named in the rosters" };
-
-  function leadCell(leads, standard, label) {
-    if (!leads.length) {
-      return '<td data-label="' + KYC.escapeAttr(label) + '"><span class="faint lead-unnamed">' +
-        KYC.escapeHtml(UNNAMED[label] || "Not named in the rosters") + "</span></td>";
-    }
-    return '<td data-label="' + KYC.escapeAttr(label) + '">' +
-      leads.map(function (l) { return personButton(l, standard); }).join("<br>") + "</td>";
-  }
-
-  /** A seated member of *chamber* whose committees are not yet published:
-   *  a new Congress's rosters come some weeks after it sits, a chamber at a
-   *  time, and its members' profiles say so too (committeesPending). */
-  function pendingIn(chamber) {
-    return (global.legislatorsData || []).filter(function (p) {
-      return KYC.seated(p) && p.committeesPending &&
-        (chamber === "senate") === /Senate/.test(p.chamber || "");
-    })[0];
-  }
-
-  function pendingText(member, what) {
-    return KYC.escapeHtml(what + " assignments for the " +
-      KYC.ordinal(member.committeesPending) + " Congress have not been published yet");
-  }
-
-  function renderCommittees(target) {
-    var leads = committeeLeads();
-    var codes = Object.keys(leads);
-    if (!codes.length) {
-      var pending = pendingIn("house") || pendingIn("senate");
-      target.innerHTML = pending
-        ? '<p class="results-bar" role="status">' + pendingText(pending, "Committee") +
-          "; each committee's leaders will be listed here once they are.</p>"
-        : '<p class="results-bar" role="status">The committee rosters did ' +
-          "not load, so this list is empty. Each member's profile lists their committees.</p>";
-      return;
-    }
-    var html = "";
-    CHAMBERS.forEach(function (chamber) {
-      var rows = codes.map(function (c) { return leads[c]; }).filter(function (row) {
-        return groupOf(row.info) === chamber[0];
-      }).sort(function (a, b) {
-        return sortName(a.info.name).localeCompare(sortName(b.info.name));
-      });
-      if (!rows.length) {
-        // One chamber's rosters can be out before the other's.
-        var waiting = (chamber[0] === "house" || chamber[0] === "senate") && pendingIn(chamber[0]);
-        if (waiting) {
-          html += '<h3 class="guide-subheading">' + KYC.escapeHtml(chamber[1]) + "</h3>" +
-            '<p class="results-bar" role="status">' +
-            pendingText(waiting, chamber[0] === "house" ? "House committee" : "Senate committee") +
-            ".</p>";
-        }
-        return;
-      }
-      // Counted from the rosters, so the note cannot outlive them.
-      var unnamed = rows.filter(function (row) { return !row.minority.length; }).length;
-      html += '<h3 class="guide-subheading">' + KYC.escapeHtml(chamber[1]) +
-        ' <span class="faint">' + rows.length + "</span></h3>" +
-        (unnamed ? '<p class="faint committees-unnamed" data-chamber="' + KYC.escapeAttr(chamber[0]) +
-          '">' + (unnamed === rows.length
-            ? (unnamed === 1 ? "This " + chamber[2] + "’s roster gives"
-              : "Each of these " + chamber[3] + "’ rosters gives")
-            : unnamed === 1 ? "One of these " + chamber[3] + "’ rosters gives"
-            : unnamed + " of these " + chamber[3] + "’ rosters give") +
-          " no member of the minority a leading title, so no minority lead is shown for " +
-          (unnamed === 1 ? "it" : "them") + ".</p>" : "") +
-        '<div class="guide-table-wrap"><table class="guide-table guide-committees">' +
-        '<thead><tr><th scope="col">Committee</th><th scope="col">Chair</th>' +
-        '<th scope="col">Minority lead</th></tr></thead><tbody>' +
-        rows.map(function (row) {
-          var name = KYC.escapeHtml(row.info.name);
-          return "<tr><th scope=\"row\">" +
-            (row.info.url
-              ? '<a href="' + KYC.escapeAttr(row.info.url) +
-                '" target="_blank" rel="noopener noreferrer">' + name + "</a>"
-              : name) + "</th>" +
-            leadCell(row.majority, /^chair(man|woman)?$/i, "Chair") +
-            leadCell(row.minority, /^ranking member$/i, "Minority lead") + "</tr>";
-        }).join("") +
-        "</tbody></table></div>";
-    });
-    target.innerHTML = html;
-  }
 
   /* ----------------------------------------------------------------- maps */
 
@@ -518,57 +350,6 @@
     }).join("") + "</ul>" + asOfNote((d.asOf || {}).judiciary);
   }
 
-  /* ------------------------------------------------------ chamber leaders */
-
-  /* Who holds each leadership post the page explains, from the posts
-   * congress-legislators records for each sitting member's bioguide id
-   * (profile.leadership): the Speaker and the floor leaders were defined
-   * and never named. The principal posts first, in the order the page
-   * explains them; a party's other posts (conference chairs, policy
-   * committees) after. */
-  var LEAD_ORDER = [/^Speaker/, /^President Pro Tempore/, /^(House |Senate )?Majority Leader$/,
-    /^(House |Senate )?Minority Leader$/, /^(House |Senate )?Majority Whip$/,
-    /^(House |Senate )?Minority Whip$/];
-
-  function leadRank(title) {
-    for (var i = 0; i < LEAD_ORDER.length; i++) if (LEAD_ORDER[i].test(title)) return i;
-    return LEAD_ORDER.length;
-  }
-
-  function renderLeaders(target, chamber) {
-    var rows = [];
-    (global.legislatorsData || []).forEach(function (person) {
-      if (!KYC.seated(person)) return;
-      if ((chamber === "senate") !== /Senate/.test(person.chamber || "")) return;
-      (person.leadership || []).forEach(function (title) {
-        rows.push({ person: person, title: title, rank: leadRank(title) });
-      });
-    });
-    if (!(global.legislatorsData || []).length) return;  // the fallback stays: each chamber's own list
-    if (!rows.length) {
-      // A new Congress's posts reach the record days after it sits, and the
-      // previous Congress's are never shown in their place
-      // (legislators.held_posts): say so, and where to look meanwhile.
-      var info = global.kycBuildMeta || {};
-      var own = chamber === "senate"
-        ? '<a href="https://www.senate.gov/senators/leadership.htm">the Senate&#8217;s own list</a>'
-        : '<a href="https://www.house.gov/leadership">the House&#8217;s own list</a>';
-      target.innerHTML = '<p class="faint guide-pending">The congress-legislators record lists nobody in a ' +
-        (chamber === "senate" ? "Senate" : "House") + " leadership post for the " +
-        (info.congress ? KYC.escapeHtml(KYC.ordinal(info.congress)) + " Congress" : "sitting Congress") +
-        " yet. Until it does, see " + own + ".</p>";
-      return;
-    }
-    rows.sort(function (a, b) {
-      return a.rank - b.rank || a.title.localeCompare(b.title);
-    });
-    target.innerHTML = '<ul class="guide-holders guide-leaders">' + rows.map(function (row) {
-      return "<li>" + personButton({ person: row.person, title: row.title }, /^$/) + "</li>";
-    }).join("") + "</ul>" +
-      '<p class="faint">From the congress-legislators project&#8217;s record of each member&#8217;s ' +
-      "leadership posts.</p>";
-  }
-
   /* ------------------------------------------------- the reader's voting */
 
   /* "Your state's official voting pages" sent every reader to the states'
@@ -650,17 +431,99 @@
     });
   }
 
-  var LIVE = { committees: renderCommittees, executive: renderExecutive, cabinet: renderCabinet,
-               justices: renderJustices,
-               "leaders-senate": function (t) { renderLeaders(t, "senate"); },
-               "leaders-house": function (t) { renderLeaders(t, "house"); } };
-  KYC.guide = { live: LIVE, initTimeline: initTimeline };
+  /* --------------------------------------------------------- bill's path */
 
-  function applyRoute(route) {
-    if (!KYC.profile) return;
-    if (route.view === "profile" && KYC.profile.open(route.id, { fromRoute: true })) return;
-    if (KYC.profile.isOpen()) KYC.profile.close();
+  /* How a bill becomes law (VISUALS-31, kyc/government.py _billflow): the
+   * boxes are page text; this draws only the lines between them, as one
+   * SVG path under the boxes, from where each box falls. Only where the
+   * stylesheet shows the lines (a wide figure); on a phone the stages are
+   * a numbered list and nothing is drawn. Redrawn when the figure's size
+   * changes, at most once a frame. */
+  var BILL_LINKS = function (figure) {
+    var pairs = [];
+    var node = function (id) { return figure.querySelector('[data-node="' + id + '"]'); };
+    [0, 1].forEach(function (t) {
+      var steps = figure.querySelectorAll('[data-node^="t' + t + '-"]');
+      for (var s = 1; s < steps.length; s++) pairs.push([steps[s - 1], steps[s]]);
+      if (steps.length) pairs.push([steps[steps.length - 1], node("joined")]);
+    });
+    pairs.push([node("joined"), node("president")]);
+    Array.prototype.forEach.call(figure.querySelectorAll('[data-node^="end-"]'), function (end) {
+      var id = end.getAttribute("data-node");
+      pairs.push(/-then$/.test(id) ? [node(id.replace(/-then$/, "")), end] : [node("president"), end]);
+    });
+    return pairs.filter(function (p) { return p[0] && p[1]; });
+  };
+
+  /** The path's data for *figure*: an elbow from the bottom of each box to
+   *  the top of the next, with an arrowhead, in the figure's own pixels. */
+  function billPath(figure) {
+    var origin = figure.getBoundingClientRect();
+    var r = function (el) {
+      var b = el.getBoundingClientRect();
+      return { left: b.left - origin.left, right: b.right - origin.left,
+               top: b.top - origin.top, bottom: b.bottom - origin.top };
+    };
+    var round = function (n) { return Math.round(n * 10) / 10; };
+    return BILL_LINKS(figure).map(function (pair) {
+      var a = r(pair[0]), b = r(pair[1]);
+      var ax = (a.left + a.right) / 2;
+      // Into the target where it lies under the source, else its nearest
+      // edge: the two tracks meet the joined box at its ends.
+      var bx = Math.min(Math.max(ax, b.left + 12), b.right - 12);
+      // Fanning out to narrower boxes (the president's answers), each line
+      // ends at its box's middle.
+      if (b.right - b.left < a.right - a.left - 1) bx = (b.left + b.right) / 2;
+      var ay = a.bottom, by = b.top;
+      if (by <= ay) return "";
+      var d = "M" + round(ax) + " " + round(ay);
+      if (Math.abs(ax - bx) > 0.5) {
+        var mid = round((ay + by) / 2);
+        d += "V" + mid + "H" + round(bx);
+      }
+      d += "V" + round(by - 1);
+      return d + "M" + round(bx - 5) + " " + round(by - 7) + "L" + round(bx) + " " +
+        round(by - 1) + "L" + round(bx + 5) + " " + round(by - 7);
+    }).join("");
   }
+
+  function initBillFlow() {
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-billflow]"), function (figure) {
+      var svg = figure.querySelector(".billflow-lines");
+      if (!svg) return;
+      var pending = false;
+      var draw = function () {
+        pending = false;
+        var shown = global.getComputedStyle && global.getComputedStyle(svg).display !== "none";
+        var path = svg.querySelector("path");
+        if (!shown) {
+          if (path) path.setAttribute("d", "");
+          return;
+        }
+        if (!path) {
+          path = doc.createElementNS("http://www.w3.org/2000/svg", "path");
+          svg.appendChild(path);
+        }
+        var box = figure.getBoundingClientRect();
+        svg.setAttribute("viewBox", "0 0 " + Math.round(box.width) + " " + Math.round(box.height));
+        svg.setAttribute("width", String(Math.round(box.width)));
+        svg.setAttribute("height", String(Math.round(box.height)));
+        path.setAttribute("d", billPath(figure));
+      };
+      var later = function () {
+        if (pending) return;
+        pending = true;
+        (global.requestAnimationFrame || global.setTimeout)(draw);
+      };
+      draw();
+      if (global.ResizeObserver) new global.ResizeObserver(later).observe(figure);
+      else global.addEventListener("resize", later);
+    });
+  }
+
+  var LIVE = { executive: renderExecutive, cabinet: renderCabinet, justices: renderJustices };
+  KYC.guide = { live: LIVE, initTimeline: initTimeline, initBillFlow: initBillFlow,
+               billPath: billPath };
 
   /* One part of the page failing must not stop the rest (rule 76). */
   function safely(fn) {
@@ -671,22 +534,11 @@
     safely(initMap);
     safely(initVoting);
     safely(function () { initTimeline(); });
+    safely(initBillFlow);
     var blocks = doc.querySelectorAll(".guide-live[data-live]");
     Array.prototype.forEach.call(blocks, function (block) {
       var fill = LIVE[block.getAttribute("data-live")];
       if (fill) fill(block);
     });
-
-    // A page with people on it opens their profiles in the shared dialog,
-    // from one delegated listener (rule 13), and answers #/profile/ links.
-    if (KYC.profile && global.legislatorsData) {
-      KYC.profile.ensure();
-      doc.getElementById("guideContent").addEventListener("click", function (event) {
-        var person = event.target.closest("[data-id]");
-        if (person) KYC.profile.open(person.getAttribute("data-id"));
-      });
-      KYC.router.onChange(function () { applyRoute(KYC.router.read()); });
-      applyRoute(KYC.router.read());
-    }
   });
 })(window);

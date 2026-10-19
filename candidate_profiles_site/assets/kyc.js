@@ -22,6 +22,9 @@
   var ICONS = {
     menu: "M3 6h18M3 12h18M3 18h18",
     vote: "M9 12l2 2 4-4M3 7l9-4 9 4v10l-9 4-9-4z",
+    // A ballot sheet, one row marked: "Your ballot" and the ways to it,
+    // beside "How to vote", which the site's own mark (vote) draws.
+    ballot: "M5 3h14v18H5zM8 8.5l1.3 1.3L12 7M14 8.5h2M8 14h3v3H8zM14 15.5h2",
     search: "M11 11m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-4.5-4.5",
     "search-x": "M11 11m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-4.5-4.5M9 9l4 4M13 9l-4 4",
     grid: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
@@ -43,7 +46,10 @@
     columns: "M4 4h16v16H4zM12 4v16",
     link: "M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1",
     share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4",
+    mail: "M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 7l9 6 9-6",
+    phone: "M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z",
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
+    print: "M6 9V3h12v6M6 17H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z",
     sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
     landmark: "M3 9l9-5 9 5zM6 11v6M10 11v6M14 11v6M18 11v6M4 17h16M3 20h18",
     scale: "M12 3v18M7 21h10M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2M2 16l3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1zM16 16l3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1z",
@@ -191,6 +197,115 @@
     "fill='%23888888'%3E%3Ccircle cx='50' cy='36' r='19'/%3E" +
     "%3Cpath d='M18,86 C18,60 82,60 82,86 Z'/%3E%3C/svg%3E";
 
+  /* ============================================================== people */
+
+  /* One build's profiles, races and figures come in several files (rule
+   * 94): data/people/meta.js, the build's figures (kycBuildMeta), on every
+   * page with people; data/people/index.js, everyone's card and search
+   * fields and every race, on the grid and the map; data/people/<st>.js, a
+   * state's full records and its races, on its own state's pages and
+   * wherever one of its people is opened (KYC.loadPeople). One 6.7 MB
+   * profiles.js held all of it, and every page loaded all of it.
+   *
+   * Each people file assigns window.kycPeopleFile; this takes each in as it
+   * is assigned, into the two arrays every view reads - window.legislatorsData
+   * and window.kycRaces, through KYC.people() and KYC.races() - so they keep
+   * their shape whichever files a page holds. A record is filled in, never
+   * replaced: the index's record of a person is the same object once their
+   * state's file arrives, with the rest of its fields added. A file from
+   * another build than the page's figures is refused, and the page says so
+   * (rule 34: a page reads one build). Each file taken in fires "kyc:people"
+   * on the document. */
+  var fullStates = {};     // code -> true once the state's own file is in
+  var indexIn = false;     // whether the index of everyone is in
+  var partial = {};        // id -> true for a record the index holds in part
+  var refusedPeople = [];  // the files refused, as the index or a state code
+  var lastPeopleFile;
+
+  function takePeople(file) {
+    lastPeopleFile = file;
+    if (!file || !file.people || !file.races) return;
+    var what = file.index ? "index" : String(file.state || "");
+    var build = (global.kycBuildMeta || {}).signature;
+    if (build && file.build !== build) {
+      if (refusedPeople.indexOf(what) === -1) refusedPeople.push(what);
+      return;
+    }
+    if (file.index ? indexIn : fullStates[what]) return;
+    var list = global.legislatorsData || (global.legislatorsData = []);
+    var raceList = global.kycRaces || (global.kycRaces = []);
+    var held = {};
+    list.forEach(function (p) { held[p.id] = p; });
+    file.people.forEach(function (p) {
+      var known = held[p.id];
+      if (!known) {
+        list.push(p);
+        held[p.id] = p;
+        if (file.index) partial[p.id] = true;
+        return;
+      }
+      if (!file.index) {
+        Object.keys(p).forEach(function (key) { if (!(key in known)) known[key] = p[key]; });
+        delete partial[p.id];
+      }
+    });
+    var heldRace = {};
+    raceList.forEach(function (r) { heldRace[r.id] = true; });
+    file.races.forEach(function (r) { if (!heldRace[r.id]) raceList.push(r); });
+    if (file.index) indexIn = true;
+    else fullStates[what] = true;
+    // What was built from the arrays is built again from them.
+    profileIndex = null;
+    racePositions = null;
+    if (doc && typeof global.CustomEvent === "function") {
+      doc.dispatchEvent(new global.CustomEvent("kyc:people", { detail: { file: what } }));
+    }
+  }
+
+  try {
+    Object.defineProperty(global, "kycPeopleFile", {
+      configurable: true,
+      get: function () { return lastPeopleFile; },
+      set: takePeople,
+    });
+  } catch (e) { /* a page without the property cannot hold people files */ }
+
+  /** Every profile the page holds: the array every view reads. */
+  function people() {
+    return global.legislatorsData || (global.legislatorsData = []);
+  }
+
+  /** Every race the page holds. */
+  function races() {
+    return global.kycRaces || (global.kycRaces = []);
+  }
+
+  /** Whether *item* is held whole, every field the dialog shows: false for
+   *  a card the index holds until its state's file is in. */
+  function isFull(item) {
+    return !!item && !partial[item.id];
+  }
+
+  /** Whether every record of *code* the page holds is whole. */
+  function peopleFull(code) {
+    return !!fullStates[String(code || "").toUpperCase()] || !indexIn;
+  }
+
+  /** Whether the page holds *code*'s people at all: everyone's cards (the
+   *  index) or the state's own file. */
+  function peopleHeld(code) {
+    return indexIn || !!fullStates[String(code || "").toUpperCase()];
+  }
+
+  /** Why the page holds fewer people than it should, in a sentence for the
+   *  page, or "": a file from another build than the page's own. */
+  function peopleProblem() {
+    return refusedPeople.length
+      ? "This site's data has been updated since this page was opened. Reload the page " +
+        "to see the current version."
+      : "";
+  }
+
   var profileIndex = null;
 
   /** Profiles keyed by id. Built once; the grid, the map and every deep link
@@ -198,7 +313,7 @@
   function byId(id) {
     if (profileIndex === null) {
       profileIndex = new Map();
-      var data = global.legislatorsData || [];
+      var data = people();
       data.forEach(function (item) {
         profileIndex.set(item.id, item);
       });
@@ -609,7 +724,7 @@
    * yet" over a dialog with no status (PROFILES-06). */
   function noPrimaryRace(raceId) {
     var race = null;
-    (global.kycRaces || []).some(function (r) {
+    races().some(function (r) {
       if (r.id === raceId) { race = r; return true; }
       return false;
     });
@@ -735,7 +850,7 @@
   function racePosition(item) {
     if (racePositions === null) {
       racePositions = {};
-      (global.kycRaces || []).forEach(function (race) {
+      races().forEach(function (race) {
         race.incumbentIds.concat(race.candidateIds).forEach(function (id, i) {
           if (racePositions[race.id + " " + id] === undefined) racePositions[race.id + " " + id] = i;
         });
@@ -838,6 +953,19 @@
   /** True when *status* means on the November ballot, counted or not. */
   function onNovemberBallot(status) {
     return !!NOVEMBER[status];
+  }
+
+  /** Whether *p* is among the people still in *race* as the lookup's answer
+   *  and the Your ballot page list them: once the primary has settled the
+   *  race, only those on the November ballot or through to it; before it,
+   *  anyone the primary has not removed. A filer the results do not settle
+   *  after the primary (ballotUnknown) is not counted on the ballot (rule
+   *  74), so neither view lists them as on it (PR #115 review: IL-4's card
+   *  counted 5 on the ballot over 7 names). */
+  function stillRunning(race, p) {
+    var status = p.isCandidate ? p.raceStatus : contestStatus(p);
+    if (race && race.settled) return onNovemberBallot(status) || status === "advanced";
+    return !offBallot(status);
   }
 
   /* Portraits are resolved and checked at build time, so this runtime chain
@@ -1740,7 +1868,9 @@
   /* ============================================================== helpers */
 
   /** The party bucket a profile displays as. One definition; the pages each
-   *  had their own and they disagreed about Democratic-Farmer Labor. */
+   *  had their own and they disagreed about Democratic-Farmer Labor. The
+   *  pages the build writes use kyc/pages.py party_key, the same test in
+   *  Python; test_guide runs this one beside it, so change both together. */
   function partyKey(item) {
     if (!item) return "i";
     if (item.party === "Vacant" || item.status === "Vacant") return "vacant";
@@ -2071,8 +2201,7 @@
    *  answers its "1" too), or none. */
   function placeRaces(place) {
     if (!place || place.district === undefined) return [];
-    var races = global.kycRaces || [];
-    var house = races.filter(function (r) {
+    var house = races().filter(function (r) {
       return r.chamber === "House" && (place.any || r.state === place.state);
     });
     var exact = house.filter(function (r) { return Number(r.district) === place.district; });
@@ -2242,19 +2371,24 @@
    * assigns: one already there (a page that loads it anyway, a test) is
    * used as it is. */
   var demanded = {};
+
+  /** The stamped address the page names for data/<file>, or null. */
+  function onDemandSrc(file) {
+    var holder = doc.getElementById("onDemandData");
+    if (!holder || !holder.content) return null;
+    var tag = Array.prototype.filter.call(holder.content.querySelectorAll("script[src]"),
+      function (s) {
+        return s.getAttribute("src").split("?")[0].replace(/^(\.\.\/)+/, "") === "data/" + file;
+      })[0];
+    return tag ? tag.getAttribute("src") : null;
+  }
+
   function loadData(file, name, done) {
     if (global[name] !== undefined) { done(true); return; }
     var waiting = demanded[file];
     if (waiting) { waiting.push(done); return; }
-    var holder = doc.getElementById("onDemandData");
-    var tag = null;
-    if (holder && holder.content) {
-      tag = Array.prototype.filter.call(holder.content.querySelectorAll("script[src]"),
-        function (s) {
-          return s.getAttribute("src").split("?")[0].replace(/^(\.\.\/)+/, "") === "data/" + file;
-        })[0];
-    }
-    if (!tag) { done(false); return; }
+    var src = onDemandSrc(file);
+    if (!src) { done(false); return; }
     demanded[file] = [done];
     var script = doc.createElement("script");
     var finish = function (ok) {
@@ -2265,8 +2399,79 @@
     };
     script.onload = function () { finish(true); };
     script.onerror = function () { finish(false); };
-    script.src = tag.getAttribute("src");
+    script.src = src;
     doc.head.appendChild(script);
+  }
+
+  /* The people files (rule 94), each loaded once, one promise per file: it
+   * resolves true once the file's people are in, false when it failed to
+   * load or was refused (peopleProblem), and a failed file can be asked
+   * for again. */
+  var peopleLoads = {};
+  function loadPeopleFile(file, ready) {
+    if (ready()) return Promise.resolve(true);
+    if (peopleLoads[file]) return peopleLoads[file];
+    var src = onDemandSrc(file);
+    if (!src) return Promise.resolve(false);
+    var promise = new Promise(function (resolve) {
+      var script = doc.createElement("script");
+      script.onload = function () { resolve(ready()); };
+      script.onerror = function () {
+        if (script.parentNode) script.parentNode.removeChild(script);
+        resolve(false);
+      };
+      script.src = src;
+      doc.head.appendChild(script);
+    }).then(function (ok) {
+      if (!ok) delete peopleLoads[file];
+      return ok;
+    });
+    peopleLoads[file] = promise;
+    return promise;
+  }
+
+  /** A promise of whether *code*'s full records are in: at once where the
+   *  page holds them, else once data/people/<st>.js has loaded. A page that
+   *  names no such file - its people were given it whole - holds what it
+   *  holds. */
+  function loadPeople(code) {
+    code = String(code || "").toUpperCase();
+    var file = "people/" + code.toLowerCase() + ".js";
+    if (!fullStates[code] && !indexIn && !onDemandSrc(file)) {
+      return Promise.resolve(people().some(function (p) { return p.state === code; }));
+    }
+    return loadPeopleFile(file, function () { return !!fullStates[code]; });
+  }
+
+  /** A promise of whether everyone's cards are in (data/people/index.js):
+   *  where a page holds one state's people, it finds anyone else's state. */
+  function loadIndex() {
+    return loadPeopleFile("people/index.js", function () { return indexIn; });
+  }
+
+  /** A promise of the person *id* names (an FEC id they were merged from
+   *  among them), held whole; null where no profile has that id. Rejects
+   *  when a file it needed did not load. */
+  function loadPerson(id) {
+    var item = byId(id);
+    if (item && isFull(item)) return Promise.resolve(item);
+    var found = item ? Promise.resolve(true) : indexIn ? Promise.resolve(false) : loadIndex();
+    return found.then(function (ok) {
+      var person = byId(id);
+      if (!person) {
+        if (!item && !indexIn && !ok && onDemandSrc("people/index.js")) {
+          throw new Error("the index of profiles did not load");
+        }
+        return null;
+      }
+      return loadPeople(person.state).then(function (whole) {
+        var again = byId(id);
+        if (!whole || !isFull(again)) {
+          throw new Error(KYC.stateName(person.state) + "'s profiles did not load");
+        }
+        return again;
+      });
+    });
   }
 
   function debounce(fn, wait) {
@@ -2508,6 +2713,33 @@
     });
   }
 
+  /* The drawer's close, once initShell has wired it. */
+  var drawerClose = null;
+
+  /** Close the drawer on a narrow screen, if it is open, then run *then*.
+   *  Closing steps back off the history entry the drawer pushed, and a
+   *  browser restores that entry's scroll position as it does: anything
+   *  that scrolls the page (a link caught to reveal a panel on this page)
+   *  waits for that step, or the restore undoes it. */
+  function closeDrawer(then) {
+    var open = !!(doc.body && doc.body.classList.contains("sidebar-open"));
+    var stepping = open && !!(history.state && history.state.kycDrawer);
+    if (stepping && then) {
+      var done = false;
+      var run = function () {
+        if (done) return;
+        done = true;
+        global.removeEventListener("popstate", run);
+        global.setTimeout(then, 0);
+      };
+      global.addEventListener("popstate", run);
+      // A browser that never reports the step still gets there.
+      global.setTimeout(run, 400);
+    }
+    if (open && drawerClose) drawerClose();
+    if (!stepping && then) then();
+  }
+
   function initShell() {
     if (doc.body && !doc.getElementById("kyc-sprite")) {
       var holder = doc.createElement("div");
@@ -2535,6 +2767,7 @@
             (sidebar && sidebar.contains(doc.activeElement))) toggle.focus();
       }
     };
+    drawerClose = closeSidebar;
     if (toggle) {
       toggle.addEventListener("click", function () {
         if (doc.body.classList.contains("sidebar-open")) return closeSidebar();
@@ -2623,15 +2856,15 @@
       // sit in the DOM of a page nobody searches.
       search.addEventListener("focus", function build() {
         search.removeEventListener("focus", build);
-        var people = global.legislatorsData || [];
-        if (!people.length || doc.getElementById("kycNames")) return;
+        var everyone = people();
+        if (!everyone.length || doc.getElementById("kycNames")) return;
         var list = doc.createElement("datalist");
         list.id = "kycNames";
         // Each option's value is the display name; a member's aliases ride in
         // its label, which browsers show beside it and match typing against,
         // so "Jim Clyburn" offers "James Clyburn".
         var names = {};
-        people.forEach(function (p) {
+        everyone.forEach(function (p) {
           if (p.raceStatus && p.isCandidate && !NOVEMBER[p.raceStatus] &&
               p.raceStatus !== "advanced") return;  // off-ballot filers would swamp the list
           var known = names[p.name] || (names[p.name] = []);
@@ -2717,6 +2950,18 @@
   /* Applied before first paint so the page never flashes the wrong theme. */
   initTheme();
   ready(initShell);
+
+  /* An address that carries a ZIP code (the Your ballot page's
+   * "#/?zip=30303") will draw an answer once the data has loaded: marked
+   * now, before first paint, so the page holds the answer's room and the
+   * footer does not jump down under the reader when it comes (PR #115
+   * review: a layout shift of 0.15-0.28 on a throttled phone). The page's
+   * module takes the mark off when its answer is drawn. */
+  try {
+    if (/[?&]zip=\d{5}\b/.test(String(global.location.hash || "")) && doc.documentElement) {
+      doc.documentElement.classList.add("has-zip");
+    }
+  } catch (e) { /* no location: nothing to hold */ }
 
   /* ---------------------------------------------------------- offices held */
 
@@ -2975,6 +3220,7 @@
     reportUrl: reportUrl,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,
+    stillRunning: stillRunning,
     meta: meta,
     recordPhase: recordPhase,
     portraitSrc: portraitSrc,
@@ -2992,6 +3238,7 @@
     // behaviour
     createModal: createModal,
     createMenu: createMenu,
+    closeDrawer: closeDrawer,
     router: router,
     electionStatus: electionStatus,
     ageOf: ageOf,
@@ -3006,6 +3253,17 @@
     nameScore: nameScore,
     stateNamed: stateNamed,
     loadData: loadData,
+    people: people,
+    races: races,
+    isFull: isFull,
+    peopleFull: peopleFull,
+    peopleHeld: peopleHeld,
+    peopleProblem: peopleProblem,
+    loadPeople: loadPeople,
+    loadIndex: loadIndex,
+    loadPerson: loadPerson,
+    indexHeld: function () { return indexIn; },
+    canLoadPeople: function (file) { return !!onDemandSrc(file); },
     raceStatusLegend: raceStatusLegend,
     foldText: foldText,
     searchIndex: searchIndex,
@@ -3170,7 +3428,7 @@
 
   function seatedBySeat() {
     var out = {};
-    (global.legislatorsData || []).forEach(function (p) {
+    KYC.people().forEach(function (p) {
       if (!KYC.seated(p) || String(p.chamber).indexOf("House") === -1) return;
       if (p.districtNum === null || p.districtNum === undefined) return;
       out[p.state + "-" + p.districtNum] = p;
@@ -3287,7 +3545,7 @@
     var states = KYC.meta().states || {};
     if (!grid) return "";
     var senate = {};
-    (global.kycRaces || []).forEach(function (r) {
+    KYC.races().forEach(function (r) {
       if (r.chamber === "Senate") senate[r.state] = true;
     });
     var verb = past() ? "was" : "is";

@@ -9,7 +9,7 @@ their words in ``government_text``.
 The words are static and say so: every section cites the sources it was
 checked against, and the footer gives the date they were checked. Anything
 that is a fact about the people the site covers - who chairs a committee -
-is not typed here; the page renders it from profiles.js (``assets/kyc-guide.js``).
+is not typed here; the build writes it from the profiles (``pages.committees_html``).
 
 The build refuses a guide with a link to a page, section or state that does
 not exist, or a section citing a source the guide does not list: a primer
@@ -28,18 +28,19 @@ FOLDER = "government"
 SITE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                     "candidate_profiles_site")
 
-# What each guide page loads. Most need only the shared module; a page that
-# shows people loads them the way a state page does, so a name opens the
-# same profile dialog.
+# What each guide page loads. Most need only the shared module. A page that
+# names members of Congress has them written into it by the build (the
+# committee leads and the chambers' leaders, kyc/pages.py), each a link to
+# the person's profile on the grid, and loads only the build's figures for
+# its sidebar: no profile data (rule 94).
 _PLAIN_SCRIPTS = ("../assets/kyc-guide.js",)
 _PEOPLE_SCRIPTS = (
-    "../data/profiles.js",
-    "../data/odds.js",
-    "../assets/kyc-odds.js",
-    "../assets/kyc-cards.js",
-    "../assets/kyc-profile.js",
+    "../data/people/meta.js",
     "../assets/kyc-guide.js",
 )
+# The blocks written from the profiles, by the key the guide's text gives
+# them: ("live", key, what the page says without them).
+PRERENDERED = ("committees", "leaders-senate", "leaders-house")
 # A page with a map draws it the way the partisan map is drawn: the state
 # shapes, then what the guide says about each state, then the shared map.
 _MAP_SCRIPTS = (
@@ -172,7 +173,9 @@ _GENERATED = {"legislature/index.html", "counties/index.html"}
 # The sections a site page's script draws, which a link may name: the
 # federal hub's (assets/kyc-federal.js; tests/test_guide.py holds the two
 # to each other).
-SITE_ANCHORS = {"federal/index.html": ("executive", "cabinet", "changes", "supreme-court", "courts")}
+# The home page's "Find who represents you" panel is in its markup.
+SITE_ANCHORS = {"federal/index.html": ("executive", "cabinet", "changes", "supreme-court", "courts"),
+                "index.html": ("findrep",)}
 
 
 #   voting:                the reader's state's voting section (VOTING)
@@ -291,6 +294,66 @@ def _flow(spec, here, pad):
                              f'<span>{inline(text, here)}</span></li>')
             lines.append(f"{pad}            </ul>")
         lines.append(f"{pad}        </li>")
+    lines.append(f"{pad}    </ol>")
+    if spec.get("caption"):
+        lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
+    return lines + [f"{pad}</figure>"]
+
+
+BILLFLOW_RESULTS = ("law", "not-law")
+
+
+def _billflow(spec, here, pad):
+    """How a bill becomes law, as a diagram (VISUALS-31): the House's and
+    the Senate's steps side by side, meeting where both pass the same text,
+    then the president and what each answer makes of the bill.
+
+    Every word is page text in an HTML box (rule 46). The connectors are
+    an SVG of lines alone, drawn by kyc-guide.js from where the boxes fall
+    on a wide screen; on a phone, or with no script, the stages are a
+    numbered list read top to bottom (kyc.css .guide-billflow)."""
+    def box(node, title, text, result=None, cls=""):
+        words = f'<strong>{inline(title, here)}</strong>'
+        if text:
+            words += f'<span>{inline(text, here)}</span>'
+        if result:
+            said, kind = result
+            if kind not in BILLFLOW_RESULTS:
+                raise ValueError(f"{here}: a bill's result is one of {BILLFLOW_RESULTS}: {kind!r}")
+            words += (f'<em class="billflow-result" data-result="{_e(kind)}">'
+                      f'{inline(said, here)}</em>')
+        return f'<div class="billflow-box{cls}" data-node="{_e(node)}">{words}</div>'
+
+    tracks = spec["tracks"]
+    if len(tracks) != 2:
+        raise ValueError(f"{here}: a bill's flow has the two chambers' tracks")
+    lines = [f'{pad}<figure class="guide-billflow" data-billflow>',
+             f'{pad}    <svg class="billflow-lines" aria-hidden="true" focusable="false"></svg>',
+             f'{pad}    <ol class="billflow">']
+    for t, (heading, steps) in enumerate(tracks):
+        lines.append(f'{pad}        <li class="billflow-stage billflow-track" data-track="{t}">'
+                     f'<p class="billflow-head">{inline(heading, here)}</p>')
+        lines.append(f'{pad}            <ol class="billflow-steps">')
+        for s, (title, text) in enumerate(steps):
+            lines.append(f'{pad}                <li>{box(f"t{t}-{s}", title, text)}</li>')
+        lines.append(f"{pad}            </ol>")
+        lines.append(f"{pad}        </li>")
+    for node, key in (("joined", "joined"), ("president", "president")):
+        title, text = spec[key]
+        lines.append(f'{pad}        <li class="billflow-stage billflow-{node}">'
+                     f'{box(node, title, text)}</li>')
+    lines.append(f'{pad}        <li class="billflow-stage billflow-answers">'
+                 f'<p class="billflow-head">{inline(spec["answers"], here)}</p>')
+    lines.append(f'{pad}            <ul class="billflow-ends">')
+    for e, end in enumerate(spec["ends"]):
+        title, text, result = end[0], end[1], end[2]
+        cell = box(f"end-{e}", title, text, result)
+        if len(end) > 3 and end[3]:
+            o_title, o_text, o_result = end[3]
+            cell += box(f"end-{e}-then", o_title, o_text, o_result, " billflow-then")
+        lines.append(f'{pad}                <li class="billflow-end">{cell}</li>')
+    lines.append(f"{pad}            </ul>")
+    lines.append(f"{pad}        </li>")
     lines.append(f"{pad}    </ol>")
     if spec.get("caption"):
         lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
@@ -440,6 +503,8 @@ def _block(block, here, pad, level=3):
         return [f'{pad}<h{level} class="guide-subheading"{anchor}>{inline(block[1], here)}</h{level}>']
     if kind == "flow":
         return _flow(block[1], here, pad)
+    if kind == "billflow":
+        return _billflow(block[1], here, pad)
     if kind == "checks":
         return _checks(block[1], here, pad)
     if kind == "ladder":
@@ -540,8 +605,7 @@ def _main(page):
         lines.extend(_after(here, sid, pad + "    "))
         if not section.get("sources"):
             raise ValueError(f"{here}#{sid}: a section with no sources")
-        lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
-                     f'{_sources(section["sources"], here)}</p>')
+        lines.append(_sources_line(section, here, pad + "    "))
         lines.append(f"{pad}</section>")
     lines.extend(_pager(here))
     lines.append("            </article>")
@@ -596,8 +660,7 @@ def _section_lines(section, here, pad, collapsed, first=False):
     for block in section["blocks"]:
         lines.extend(_block(block, here, pad + "    ", level=4 if collapsed else 3))
     lines.extend(_after(here, sid, pad + "    ", level=4 if collapsed else 3))
-    lines.append(f'{pad}    <p class="guide-sources"><span>Sources:</span> '
-                 f'{_sources(section["sources"], here)}</p>')
+    lines.append(_sources_line(section, here, pad + "    "))
     if collapsed:
         lines.append(f"{pad}</details>")
     return lines
@@ -681,13 +744,26 @@ def _map_main(page, modes, footer):
     return "\n".join(lines)
 
 
+def _sources_line(section, here, pad):
+    """A section's sources, and the day they were read when it is not the
+    page's: a section re-read alone (VISUALS-31's bill flow) carries its own
+    ``reviewed``, so the page's date never claims the rest was read again."""
+    own = section.get("reviewed")
+    label = (f"Sources, checked on {pages.time_html(own)}:" if own else "Sources:")
+    return (f'{pad}<p class="guide-sources"><span>{label}</span> '
+            f'{_sources(section["sources"], here)}</p>')
+
+
 def _footer(page):
-    # A page checked on another day than the rest of the guide says so.
+    # A page checked on another day than the rest of the guide says so, and
+    # a section checked on another day than its page says so where it is.
     reviewed = page.get("reviewed", REVIEWED)
+    own = any(s.get("reviewed") for s in page.get("sections") or ())
     return "\n".join([
         "                <p><strong>About this guide:</strong> a plain-language summary of how",
         "                    American government is organized. Each section lists the sources",
-        f"                    it was checked against, on {pages.time_html(reviewed)}.",
+        f"                    it was checked against, on {pages.time_html(reviewed)}"
+        + (" unless it gives its own day." if own else "."),
         "                    It describes offices and institutions; where it names who holds",
         "                    one today, that comes from the same data as the rest of the site.",
         "                    It is not legal advice.</p>",
@@ -702,8 +778,39 @@ def jump_options(codes):
                    f"({_e(c)})</option>" for c in named)
 
 
-def render(slug, host, codes=()):
-    """The HTML for one guide page."""
+def _prerendered(key, people):
+    """The markup a pre-rendered block holds, from *people* (``(profiles,
+    summary)``), or None to keep the block's own words."""
+    if not people:
+        return None
+    profiles, summary = people
+    if key == "committees":
+        return pages.committees_html(profiles, (summary or {}).get("committees"))
+    chamber = key.split("-", 1)[1]
+    return pages.leaders_html(profiles, chamber, (summary or {}).get("congress"))
+
+
+_LIVE_BLOCK = re.compile(r'(?P<pad>[ ]*)<div class="guide-live" data-live="(?P<key>[a-z-]+)">\n'
+                         r'[ ]*<p class="results-bar" role="status">.*?</p>\n[ ]*</div>')
+
+
+def _fill_prerendered(text, people):
+    """*text* with each pre-rendered block's words replaced by the people
+    it names. Nothing on the page fills them later."""
+    def one(match):
+        key = match.group("key")
+        body = _prerendered(key, people) if key in PRERENDERED else None
+        if body is None:
+            return match.group(0)
+        pad = match.group("pad")
+        return (f'{pad}<div class="guide-live guide-built" data-built-from="{_e(key)}">\n'
+                f"{pad}    {body}\n{pad}</div>")
+    return _LIVE_BLOCK.sub(one, text)
+
+
+def render(slug, host, codes=(), members=None):
+    """The HTML for one guide page. *members*, ``(profiles, summary)``,
+    fills the blocks that name members (:data:`PRERENDERED`)."""
     page = _page(slug)
     path = page_path(slug)
     canonical = f"https://{host}/{path}" if host else path
@@ -717,7 +824,7 @@ def render(slug, host, codes=()):
     crumbs = [pages._HOME, (pages.section_name("guide"), page_path("index"))]
     if slug != "index":
         crumbs.append((name(slug), path))
-    return pages.render_page(
+    text = pages.render_page(
         title=_e(f"{name(slug)} — Know Your Candidate"),
         og_title=_e(name(slug)),
         description=_e(page["description"]),
@@ -738,11 +845,12 @@ def render(slug, host, codes=()):
         scripts=pages._scripts(scripts(slug)),
         **layout,
     )
+    return _fill_prerendered(text, members) if members else text
 
 
-def render_all(host, codes=()):
+def render_all(host, codes=(), members=None):
     """``{path inside the site: html}`` for every guide page."""
-    return {page_path(slug): render(slug, host, codes) for slug in slugs()}
+    return {page_path(slug): render(slug, host, codes, members) for slug in slugs()}
 
 
 # -------------------------------------------------------------- validation

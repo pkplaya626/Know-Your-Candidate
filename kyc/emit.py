@@ -8,7 +8,18 @@ import re
 
 SITE_DIR = "candidate_profiles_site"
 DATA_DIR = os.path.join(SITE_DIR, "data")
-DATA_FILE = os.path.join(DATA_DIR, "profiles.js")
+# One build's profiles, races and headline figures, in the files each page
+# needs (rule 94). profiles.js held all of them, 6.7 MB, and every grid,
+# map, state and district page loaded it to show one state.
+PEOPLE_DIR = os.path.join(DATA_DIR, "people")
+# The build's headline figures and its signature: every page with people.
+PEOPLE_META_FILE = os.path.join(PEOPLE_DIR, "meta.js")
+# Everyone's card and search fields, and every race: the grid and the map.
+PEOPLE_INDEX_FILE = os.path.join(PEOPLE_DIR, "index.js")
+# The file whose signature is the build's, which ``verify`` compares.
+DATA_FILE = PEOPLE_META_FILE
+# The single file the split replaced: a build removes it, verify refuses it.
+LEGACY_PROFILES_FILE = os.path.join(DATA_DIR, "profiles.js")
 GEO_FILE = os.path.join(DATA_DIR, "geo.js")
 ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 # What the guide's maps say about each state (kyc/government_maps.py).
@@ -30,7 +41,7 @@ COURT_COUNTIES_FILE = os.path.join(DATA_DIR, "courtcounties.js")
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
 # Each chamber's roll calls and how every member voted in them
 # (kyc/rollcalls.py), loaded by the profile dialog the first time a member of
-# that chamber is opened, so profiles.js does not carry them.
+# that chamber is opened, so the people files do not carry them.
 VOTES_DIR = os.path.join(DATA_DIR, "votes")
 # The global each chamber's file assigns, and its path under data/.
 VOTES_GLOBALS = {"house": "kycVotesHouse", "senate": "kycVotesSenate"}
@@ -50,7 +61,8 @@ LOOKUP_INDEX_FILE = os.path.join(LOOKUP_DIR, "index.js")
 PAGE_REQUIREMENTS = {
     "index.html": (
         "assets/kyc.js",
-        "data/profiles.js",
+        "data/people/meta.js",
+        "data/people/index.js",
         "data/odds.js",
         "data/lookup/index.js",
         "assets/kyc-odds.js",
@@ -62,7 +74,8 @@ PAGE_REQUIREMENTS = {
     ),
     "map.html": (
         "assets/kyc.js",
-        "data/profiles.js",
+        "data/people/meta.js",
+        "data/people/index.js",
         "data/geo.js",
         "data/odds.js",
         "data/stategov.js",
@@ -77,10 +90,33 @@ PAGE_REQUIREMENTS = {
     ),
 }
 
-# The generated state pages sit one directory down and load the same data.
+# Your ballot (rule 92): the data its lists are drawn from, then the modules
+# that draw races, offices and the lookup, then its own. It loads the build's
+# figures and no one's records: an answer is in one state, or two where a
+# ZIP code crosses a line, and loads those states' files before it is drawn
+# (rule 94), each named in its onDemandData template.
+BALLOT_PAGE_REQUIREMENTS = (
+    "assets/kyc.js",
+    "data/people/meta.js",
+    "data/odds.js",
+    "data/stategov.js",
+    "data/lookup/index.js",
+    "assets/kyc-odds.js",
+    "assets/kyc-cards.js",
+    "assets/kyc-profile.js",
+    "assets/kyc-stategov.js",
+    "assets/kyc-findrep.js",
+    "assets/kyc-ballot.js",
+)
+
+# The generated state pages sit one directory down. Each loads the build's
+# figures and its own state's people and races (rule 94); "{code}" is the
+# page's own postal code, lower case. The directory of states loads the
+# index instead, as the grid does: it counts every state's races.
 STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
-    "../data/profiles.js",
+    "../data/people/meta.js",
+    "../data/people/{code}.js",
     "../data/odds.js",
     "../data/stategov.js",
     "../data/lookup/index.js",
@@ -89,15 +125,32 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",
 )
+
+# The directory of states, in the same folder: every state's counts and
+# races, from the index of everyone.
+STATES_INDEX_REQUIREMENTS = tuple(
+    src.replace("{code}", "index") for src in STATE_PAGE_REQUIREMENTS)
+
+
+def people_on_demand(loaded):
+    """The people files (paths under data/) a page that opens profiles must
+    name in its onDemandData template, given the script sources it loads:
+    the index of everyone and every state's file, but those it loads."""
+    have = {src.split("data/", 1)[1] for src in loaded if "data/people/" in src}
+    wanted = ["people/index.js"] + [f"people/{c.lower()}.js" for c in people_codes()]
+    return [name for name in wanted if name not in have]
+
 
 # A state's district page. It reads the profiles for every claim about a
 # person and its own state's map file for the lines, so both load first.
 # "{code}" is the page's own postal code, lower case.
 DISTRICT_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
-    "../data/profiles.js",
+    "../data/people/meta.js",
+    "../data/people/{code}.js",
     "../data/odds.js",
     "../data/districts/{code}.js",
     "../data/lookup/index.js",
@@ -116,6 +169,7 @@ LEGISLATURE_PAGE_REQUIREMENTS = (
     "../data/lookup/index.js",
     "../assets/kyc-regionmap.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-ballot.js",
     "../assets/kyc-legislature.js",
 )
 
@@ -167,6 +221,9 @@ GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
 # depth), and the manifest a phone reads to add the site to its home screen.
 ABOUT_FILE = os.path.join(SITE_DIR, "about.html")
 NOT_FOUND_FILE = os.path.join(SITE_DIR, "404.html")
+# Your ballot (rule 92), generated at the root: the profiles and the lookup,
+# then the module that draws the page from them.
+BALLOT_FILE = os.path.join(SITE_DIR, "ballot.html")
 MANIFEST_FILE = os.path.join(SITE_DIR, "site.webmanifest")
 # The first district page lived here for a day; the address still answers.
 REDIRECTS = {os.path.join(SITE_DIR, "redistricting", "ca.html"): "../districts/ca.html"}
@@ -255,30 +312,230 @@ def read_signature(root=".", path=None):
     return None
 
 
-def write_profiles(profiles, stats, root=".", races=None, summary=None):
-    """Emit ``candidate_profiles_site/data/profiles.js``.
+# ------------------------------------------------------------------ people
 
-    A plain script assignment rather than JSON + ``fetch`` so the pages keep
+# What the index of everyone leaves for each state's file (rule 94): fields
+# only the profile dialog shows, the race's money and ballot comparison
+# (folds drawn when a reader opens them, after the state's file loads), and
+# fields no page reads. Everything else - the card, the filters and sorts,
+# KYC.standing, the search fields, the portrait - is in the index, and a
+# field added to the profiles later is in it until it is named here: a
+# card's field missing from the index draws the card wrong, and silently.
+# tests/render_test.js draws every view from the index and from the full
+# records and fails where the two differ.
+#
+# A sitting member's card carries a way to reach their office (kyc-cards.js
+# contactOf, PR #114): the contact form, else the Washington phone, else a
+# district office's phone. The form and the phone are card fields. The
+# district offices, 43 KB gzipped, are the dialog's, except on the record of
+# a member with neither form nor phone, whose card calls the first district
+# office with a phone: that record carries its offices whole in the index
+# (INDEX_KEEPS_FOR_THE_CARD), never a part of them, since a record is filled
+# from its state's file and never replaced (kyc.js takePeople).
+INDEX_LEAVES_OUT = frozenset({
+    # The profile dialog's.
+    "campaignCommittee", "campaignIssuesUrl", "campaignSiteVia", "committeeList",
+    "disclosureFiled", "disclosureSource",
+    "disclosureUrl", "disclosureYear", "districtOffices", "districtOfficesRead", "fecName",
+    "fundingBase", "fundingBreakdown", "incumbentSeat", "officialIssuesUrl", "pay",
+    "photoCredit", "platformRead", "refs", "social", "website", "wikipedia",
+    # The race's money and its ballot side by side (kyc-cards.js moneyBlock,
+    # compareBlock), and the dialog's.
+    "receipts", "disbursements", "cashOnHand", "financeSince", "financeAsOf", "financePeriod",
+    "financeElection", "financeSource", "outsideSpending", "outsideSpendingOther",
+    "campaignSite", "fieldSources", "platformFeatured",
+    # Read by no page: the pipeline's provenance.
+    "ballotParty", "campaignCommitteeId", "committeesSource", "directoryEdition",
+    "electionPageSite", "fecParty", "filedName", "financeCycle", "hasRealFinance",
+    "isUpIn2026", "nameVia", "photoSource", "photo_url", "rosterFecId", "rosterName",
+    "termEndYear", "wikipediaVia", "wikipediaWithheld",
+})
+
+
+class PeopleSplitError(ValueError):
+    """The profiles cannot be split by state without losing someone."""
+
+
+def people_codes():
+    """Every state, D.C. and territory: one people file each, written even
+    when it holds nobody, so every page can name every file (rule 76)."""
+    from .pages import STATE_NAMES
+
+    return sorted(STATE_NAMES)
+
+
+def people_file(code, root="."):
+    """``candidate_profiles_site/data/people/tx.js``."""
+    return os.path.join(root, PEOPLE_DIR, f"{code.lower()}.js")
+
+
+def split_problems(profiles, races=None):
+    """Why the profiles cannot be split by state, as strings; empty when
+    they can. A state's file must hold everyone its races and its people
+    point at - a race's people, a member's other run, the seat they hold -
+    or a state page would draw a race without a candidate and say nothing."""
+    codes = set(people_codes())
+    by_id = {p.get("id"): p for p in profiles}
+    race_state = {r.get("id"): r.get("state") for r in races or []}
+    out = []
+    for p in profiles:
+        if p.get("state") not in codes:
+            out.append(f"{p.get('id')} ({p.get('name')}) is filed under {p.get('state')!r}, "
+                       "which has no people file")
+            continue
+        for key in ("raceId", "contestRaceId", "heldRaceId", "raceStatusRace"):
+            rid = p.get(key)
+            if rid in race_state and race_state[rid] != p["state"]:
+                out.append(f"{p['id']} ({p['state']}) has {key} {rid}, another state's race")
+        others = [p.get("alsoRunningId"), p.get("incumbentId"),
+                  (p.get("outsideSpending") or {}).get("runningElsewhere")]
+        for other in filter(None, others):
+            if other in by_id and by_id[other].get("state") != p["state"]:
+                out.append(f"{p['id']} ({p['state']}) points at {other}, "
+                           f"who is filed under {by_id[other].get('state')}")
+    for r in races or []:
+        if r.get("state") not in codes:
+            out.append(f"race {r.get('id')} is in {r.get('state')!r}, which has no people file")
+            continue
+        for pid in list(r.get("incumbentIds") or []) + list(r.get("candidateIds") or []):
+            if pid in by_id and by_id[pid].get("state") != r["state"]:
+                out.append(f"race {r['id']} lists {pid}, who is filed under "
+                           f"{by_id[pid].get('state')}")
+    return out
+
+
+def _card_calls_a_district_office(profile):
+    """Whether a card reaches this member through a district office's phone
+    (kyc-cards.js contactOf): no web contact form and no Washington phone,
+    and an office with a phone."""
+    form = str(profile.get("contactForm") or "")
+    return (not re.match(r"https?://", form, re.I) and not profile.get("phone")
+            and any(isinstance(o, dict) and o.get("phone")
+                    for o in profile.get("districtOffices") or []))
+
+
+# Fields the index leaves out but for the records whose card reads them,
+# where the record carries the field whole: {field: test of the profile}.
+INDEX_KEEPS_FOR_THE_CARD = {"districtOffices": _card_calls_a_district_office}
+
+
+def index_record(profile):
+    """A profile as the index holds it: without :data:`INDEX_LEAVES_OUT`,
+    but for a field its card reads (:data:`INDEX_KEEPS_FOR_THE_CARD`)."""
+    return {k: v for k, v in profile.items()
+            if k not in INDEX_LEAVES_OUT
+            or (k in INDEX_KEEPS_FOR_THE_CARD and INDEX_KEEPS_FOR_THE_CARD[k](profile))}
+
+
+def people_payloads(profiles, races=None, summary=None):
+    """``{"index": payload, code: payload}``: every file the people are
+    split into, but the build's figures. Each names the build it is from
+    (``build``, the signature ``verify`` compares), and a page puts no file
+    from another build beside its own (rule 34): the grid and every state
+    page read one build. Raises :class:`PeopleSplitError` where the split
+    would lose someone (:func:`split_problems`)."""
+    problems = split_problems(profiles, races)
+    if problems:
+        raise PeopleSplitError("; ".join(problems[:5]) +
+                               (f" (and {len(problems) - 5} more)" if len(problems) > 5 else ""))
+    build = data_signature(profiles, races, summary)
+    races = list(races or [])
+    out = {"index": {"build": build, "index": True,
+                     "people": [index_record(p) for p in profiles], "races": races}}
+    for code in people_codes():
+        out[code] = {"build": build, "state": code,
+                     "people": [p for p in profiles if p.get("state") == code],
+                     "races": [r for r in races if r.get("state") == code]}
+    return out
+
+
+def people_signature(payload):
+    """Content hash of one people file's payload, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def _people_path(key, root="."):
+    return os.path.join(root, PEOPLE_INDEX_FILE) if key == "index" else people_file(key, root)
+
+
+def write_people(profiles, stats, root=".", races=None, summary=None):
+    """Emit the people files: ``data/people/meta.js`` (the build's figures
+    and signature), ``data/people/index.js`` (everyone's card and search
+    fields, and every race) and ``data/people/<st>.js`` (a state's full
+    records and its races). Returns ``[(path, size)]`` for the files
+    written; the index and the states' only when their content changed.
+
+    Plain script assignments rather than JSON + ``fetch`` so the pages keep
     working when opened straight off disk - ``file://`` requests are blocked
-    by CORS, but ``<script src>`` is not.
-    """
-    path = os.path.join(root, DATA_FILE)
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+    by CORS, but ``<script src>`` is not. Each people file assigns one
+    global, ``kycPeopleFile``, which assets/kyc.js takes in as it is
+    assigned (``KYC.people``)."""
+    payloads = people_payloads(profiles, races, summary)
+    os.makedirs(os.path.join(root, PEOPLE_DIR), exist_ok=True)
 
     built = build_timestamp()
     meta = {"built": built, "counts": stats,
             "signature": data_signature(profiles, races, summary)}
     if summary:
         meta.update(summary)
-
-    text = (
+    meta_path = os.path.join(root, PEOPLE_META_FILE)
+    written = [(meta_path, _atomic_write(meta_path, (
         _BANNER.format(source="the roster CSVs at the repository root", built=built)
-        + f"// Profiles: {len(profiles)}\n"
-        + f"window.legislatorsData = {_json(profiles)};\n"
-        + f"window.kycRaces = {_json(races or [])};\n"
-        + f"window.kycBuildMeta = {_json(meta)};\n"
-    )
-    return path, _atomic_write(path, text)
+        + f"// Profiles: {len(profiles)} (data/people/index.js, data/people/<st>.js)\n"
+        + f"window.kycBuildMeta = {_json(meta)};\n")))]
+
+    expected = {os.path.basename(meta_path)}
+    for key, payload in payloads.items():
+        path = _people_path(key, root)
+        expected.add(os.path.basename(path))
+        signature = people_signature(payload)
+        if read_signature(path=path) == signature:
+            continue
+        what = ("everyone's card and search fields, and every race" if key == "index"
+                else f"{key}'s people and races")
+        text = (
+            _BANNER.format(source="the roster CSVs at the repository root", built=built)
+            + f"// {what}: {len(payload['people'])} profiles, {len(payload['races'])} races\n"
+            + f"window.kycPeopleFile = {_json(payload)};\n"
+            + 'window.kycPeopleFileMeta = {"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    # A file no build writes any more is not left to be served.
+    for name in os.listdir(os.path.join(root, PEOPLE_DIR)):
+        if name.endswith(".js") and name not in expected:
+            os.remove(os.path.join(root, PEOPLE_DIR, name))
+    legacy = os.path.join(root, LEGACY_PROFILES_FILE)
+    if os.path.exists(legacy):
+        os.remove(legacy)
+    return written
+
+
+def check_people(profiles, races=None, summary=None, root="."):
+    """``[(path, problem)]`` for people files missing, out of date or left
+    over - the meta file is ``verify``'s own check (:func:`read_signature`)."""
+    problems = []
+    try:
+        payloads = people_payloads(profiles, races, summary)
+    except PeopleSplitError as exc:
+        return [(os.path.join(root, PEOPLE_DIR), str(exc))]
+    expected = {os.path.basename(PEOPLE_META_FILE)}
+    for key, payload in payloads.items():
+        path = _people_path(key, root)
+        expected.add(os.path.basename(path))
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != people_signature(payload):
+            problems.append((path, "stale"))
+    folder = os.path.join(root, PEOPLE_DIR)
+    if os.path.isdir(folder):
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".js") and name not in expected:
+                problems.append((os.path.join(folder, name), "not a file this build writes"))
+    if os.path.exists(os.path.join(root, LEGACY_PROFILES_FILE)):
+        problems.append((os.path.join(root, LEGACY_PROFILES_FILE),
+                         "replaced by data/people/ (rule 94); a build removes it"))
+    return problems
 
 
 def state_codes(profiles):
@@ -317,8 +574,12 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None):
     # manifest.
     out[ABOUT_FILE] = pages.render_about(host, dates, codes)
     out[NOT_FOUND_FILE] = pages.render_404(host, codes)
+    out[BALLOT_FILE] = pages.render_ballot_page(host)
     out[MANIFEST_FILE] = pages.webmanifest()
-    for relative, text in government.render_all(host, state_codes(profiles)).items():
+    # The guide's Congress page names members from the profiles themselves:
+    # it loads none (rule 94).
+    for relative, text in government.render_all(host, state_codes(profiles),
+                                                members=(profiles, summary)).items():
         out[os.path.join(SITE_DIR, *relative.split("/"))] = text
     from . import census
     from .government_maps import STATES
@@ -530,7 +791,7 @@ def write_lookup_index(payload, root="."):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     text = (
         _BANNER.format(source="lookup_maps/*.json, data/lookup/*.js, data/legislature/*.js, "
-                       "data/voting_links.json",
+                       "data/voting_links.json, data/voting_dates.json",
                        built=build_timestamp())
         + f"window.kycLookupIndex = {_json(payload)};\n"
         + 'window.kycLookupIndexMeta = {"signature":"' + signature + '"};\n'
@@ -553,9 +814,9 @@ def check_lookup(payloads, root="."):
             problems.append((path, "stale"))
     if problems:
         return problems
-    from . import voting
+    from . import voting, voting_dates
     index = lookup.index(payloads, lookup_stamps(payloads, root),
-                         voting.for_page(voting.load_cache(root)))
+                         voting.for_page(voting.load_cache(root), voting_dates.load(root)))
     path = os.path.join(root, LOOKUP_INDEX_FILE)
     committed = read_signature(path=path)
     if committed is None:
@@ -570,7 +831,7 @@ def write_odds(payload, root="."):
 
     Market prices and polling averages, keyed by race id, in a file of their
     own: the twelve-hourly odds refresh writes this and odds.json and nothing
-    else, so it never collides with the weekly roster refresh's profiles.js.
+    else, so it never collides with the weekly roster refresh's people files.
     """
     path = os.path.join(root, ODDS_FILE)
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -934,12 +1195,17 @@ def check_pages(root="."):
                     code = name[:-len(".html")]
                     checks[f"{os.path.basename(folder)}/{name}"] = tuple(
                         src.replace("{code}", code) for src in required)
+    # The directory of states counts every state's races: it loads the
+    # index of everyone, as the grid does, not a state's file (rule 94).
+    if "states/index.html" in checks:
+        checks["states/index.html"] = STATES_INDEX_REQUIREMENTS
 
     checks["federal/index.html"] = FEDERAL_PAGE_REQUIREMENTS
     # The directories and the frame load nothing but the shared module.
     checks["districts/index.html"] = ("../assets/kyc.js",)
     checks["courts/index.html"] = ("../assets/kyc.js",)
     checks["about.html"] = ("assets/kyc.js",)
+    checks["ballot.html"] = BALLOT_PAGE_REQUIREMENTS
     checks["404.html"] = ("/assets/kyc.js",)
     checks["legislature/index.html"] = ("../assets/kyc.js", "../data/stategov.js",
                                         "../assets/kyc-stategov.js")
@@ -969,6 +1235,10 @@ def check_pages(root="."):
             lazy = on_demand_sources(text)
             absent = [prefix + "data/" + VOTES_FILES[c] for c in sorted(VOTES_FILES)
                       if prefix + "data/" + VOTES_FILES[c] not in lazy]
+            # And every people file it does not load (rule 94): a profile of
+            # another state, a ZIP code answered in one, an id to place.
+            absent += [prefix + "data/" + name for name in people_on_demand(loaded)
+                       if prefix + "data/" + name not in lazy]
             if absent:
                 problems.append("opens profiles but its onDemandData template does not name "
                                 + ", ".join(absent))
