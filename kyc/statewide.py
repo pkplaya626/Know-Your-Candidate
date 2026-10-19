@@ -319,7 +319,8 @@ def holder_status(code, key, entry, holder):
     family = fold(surname(holder))
     researched = entry.get("holderResearched")
     stale = None
-    if researched and fold(surname(researched)) != family:
+    if researched and (fold(surname(researched)) != family
+                       or not same_given_name(holder, researched)):
         stale = (f"{code} {key}: the list was read with {researched} as the holder; the "
                  f"rosters name {holder}")
     carriers = _carriers(entry["candidates"], family)
@@ -341,7 +342,8 @@ def holder_status(code, key, entry, holder):
                  else f"{holder} is on the {certified}list of candidates for this office")
         return dict(base, why="listed", text=words, name=person["name"]), None
     return None, (f"{code} {key}: the list names {', '.join(p['name'] for p in carriers)}, "
-                  f"which may or may not be {holder}; not settled here")
+                  f"which may or may not be {holder}; not settled here"
+                  + (f" ({stale.split(': ', 1)[1]})" if stale else ""))
 
 
 def for_page(entry, holder_name=None):

@@ -67,7 +67,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2357 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2378 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1726,36 +1726,81 @@ Two more tables, each checked by `ballot2026.check()`:
   2027), with the month where it is not November (Louisiana's October
   round reads "Next election: October 2027"). Never computed from a term
   length; an office without an entry shows no year.
-- `OPEN_SEATS`: an office on the ballot whose holder is not running for it,
-  only from the constitution's term limit (read with the NGA's count of the
-  governor's terms) or the election office's certified list of candidates
-  for that office. `stategov` withholds an entry, and says so in the build,
-  when the office's holder is someone else or the NGA counts fewer terms.
+- `OPEN_SEATS`: an office on the ballot whose holder cannot run for it
+  again, from the constitution's term limit (read with the NGA's count of
+  the governor's terms). `stategov` withholds an entry, and says so in the
+  build, when the office's holder is someone else or the NGA counts fewer
+  terms. Whether a holder is on the ballot is the list of candidates' to
+  say (below); a term limit stays beside it as the reason, and the two must
+  agree.
 
 On the page:
 
 - each state page's list of races for Congress says which of the offices
   this site covers the same ballot also elects, that it may hold other
   contests and measures this site does not list, and that the site lists the
-  candidates for Congress only;
+  candidates for Congress there and those for the governor and statewide
+  officers under State government, not those for the legislature;
 - the State government section and the map's state panel mark each office on
   its own label line - "This office is on the Nov 3, 2026 ballot", never
   under the person who holds it, who may not be running - or say why not
   (not elected in 2026, with "Next elected: November <year>" where `NEXT`
   has it; appointed; chosen by the legislature; no such office), each mark
-  linked to its source. Where `OPEN_SEATS` has the office, "Open seat:
-  <holder> is term-limited" or "is not on the list of candidates for this
-  office", or, where that list names them, "<holder> is on the list of
-  candidates for this office", with the source, until Election Day. Every
-  other office on the ballot says "Whether <holder> is running for this
-  office is not checked here" (`holderStatus` "unchecked"), so no office
-  is silent beside another's "Open seat";
+  linked to its source. Under each office, its holder line, read from the
+  office's list of candidates for whoever holds it today: "Open seat:
+  <holder> is not on the certified list of candidates for this office" (with
+  "is term-limited ... and" first where `OPEN_SEATS` has the limit), or
+  "<holder> is on the certified list of candidates for this office" - never
+  "running for re-election" - with the source, until Election Day. An
+  office whose list does not settle its holder (a namesake on the list)
+  says "Whether <holder> is running for this office is not checked here"
+  (`holderStatus` "unchecked") and the build says why, so no office is
+  silent beside another's "Open seat";
 - the map has a "2026 governor's races" view: a state electing its governor
   is drawn in the party of its current governor, every other state in the
   empty grey, and the legend says the colour is the current governor's.
 
-Who is running for these offices is not listed: no source keyed by an id the
-site can hold lists state candidates, and names from a search are not data.
+### Statewide candidates
+
+Under each office on the ballot, the candidates its election office lists
+(rule 91): `data/statewide_candidates.json`, a hand-edited cache researched
+jurisdiction by jurisdiction on 2026-10-18 from each Secretary of State's,
+board of elections' or election commission's certified or qualified list -
+a county election office's where the state publishes none that could be
+read (Arkansas, Nevada, Florida's governor) - with every list re-opened by
+a second reader. Ballotpedia, Wikipedia, news and party sites were leads,
+never sources (rule 50). 129 offices in 42 jurisdictions; the build log
+counts the candidates.
+
+| Shown | Source | Field (`ballot2026.offices.<office>.candidates` in `stategov.js`) |
+|-------|--------|-------|
+| Each candidate's name and party, as the list prints them | the list | `candidates[].name`, `.party` (a write-in's "WRI" or "Write-In" label is dropped) |
+| The running mate on a joint ticket; the ticket as the ballot prints it, where it prints surnames | the list | `.runningMate`, `.ballotName` |
+| Write-in candidates, apart, "names not printed on the ballot" | the list, or the office's write-in list | `.writeIn`; `writeIns` (its address, office and day read) |
+| "Certified by the <office> (read <day>)", linked; "Listed by" and the reason where the list is not a certified statewide one | the list | `url`, `by`, `read`, `certified`, `uncertified` |
+| The office's holder on the list | `statewide.holder_status` | `.holder` (the search leaves them to their holder row) |
+
+Candidates are listed by surname, printed names first, and the page says
+so: the lists' own orders differ (Minnesota rotates its ballot by
+precinct). No portrait, money or platform for these people; none is a
+profile, and none is linked to a profile of the same name (rule 25): the
+lists carry no id. The home search finds them under "Other officials" as
+"Candidate for <office>, <state> (Nov 3, 2026 ballot)", linked to the state
+page. From the day after Election Day the block is in the past tense and
+links the state's official results page (`voting.RESULTS`): this site does
+not read state results and names no winner.
+
+`statewide.problems`, run by `build --check` (`validate.check_statewide_candidates`)
+and by every build (`stategov.build` stops), fails a list that is not the
+jurisdiction's election office's (its own domains, or an evidenced entry in
+`overrides.STATEWIDE_LISTS_ELSEWHERE`), has no quote or day read, an office
+the list covers that `kyc/ballot2026.py` does not put on the ballot or the
+reverse, a list marked not certified without the reason, a candidate field
+the list does not print, two holders on one list, and a holder said to be
+off the list whose surname is on it - a namesake is recorded with why in
+the office's `namesakes` ("Eddie Lee Murphy" is not Governor Bill Lee). A
+holder the list writes with another given name ("Lombardo, Joseph") is
+settled only by `overrides.STATEWIDE_NAME_FORMS`, with evidence.
 
 ## State high courts
 
