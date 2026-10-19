@@ -165,6 +165,10 @@
     var houseRaces = stateRaces.filter(function (r) { return r.chamber === "House"; })
       .sort(function (a, b) { return (a.district || 0) - (b.district || 0); });
 
+    // The statewide questions on the ballot (rule 95), after the races, as
+    // a printed ballot puts them; "" where nothing is recorded.
+    var measures = KYC.ballot.measuresSection(code);
+
     var html = [];
     html.push(
       '<header class="state-hero">',
@@ -201,6 +205,7 @@
       house.length ? ["delegation", info.territory ? delegateTitle(info) : "House delegation"] : null,
       KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", govHeading(info)] : null,
       senateRaces.length + houseRaces.length ? ["races", "2026 races"] : null,
+      measures ? ["measures", KYC.ballot.measuresName(code)] : null,
     ].filter(Boolean);
     if (parts.length > 1) {
       html.push('<nav class="toolbar jump-row state-parts" aria-label="On this page">' +
@@ -301,6 +306,7 @@
         "</section>"
       );
     }
+    if (measures) html.push(measures);
 
     target.innerHTML = html.join("");
     if (KYC.findRep) KYC.findRep.mountAll(target);
@@ -308,8 +314,18 @@
 
   /** What else the state's November 3 ballot elects, from the same table the
    *  State government section marks, in a sentence. This site lists the
-   *  candidates for Congress only, and says so. */
+   *  candidates for Congress only, and says so. The statewide questions,
+   *  where its ballot holds them, are listed in their own section (rule 95),
+   *  and the sentence points there. */
   function alsoOnBallot(code, name, territory) {
+    var words = officesAlso(code, name, territory);
+    if (!KYC.ballot.hasMeasures(code)) return words;
+    var section = KYC.ballot.measuresName(code);
+    return words + " The ballot's " + KYC.escapeHtml(section.toLowerCase()) + " are listed under " +
+      '<a class="state-jump" href="#measures">' + KYC.escapeHtml(section) + "</a>.";
+  }
+
+  function officesAlso(code, name, territory) {
     var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
     // The words the Your ballot page says too (kyc-ballot.js, rule 12).
     var rest = KYC.ballot.unlisted;

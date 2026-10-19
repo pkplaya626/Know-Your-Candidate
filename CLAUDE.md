@@ -43,6 +43,7 @@ data/courts.json            ──┤   (each state's highest court, from the co
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
+data/ballot_measures.json   ──┤   (each jurisdiction's statewide questions, from its own list: hand-edited, kyc/ballot_measures.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -66,6 +67,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/stategov.js   (governors, chamber control, trifectas)
+                                             data/measures.js   (the statewide questions: kyc/ballot_measures.py)
                                              data/legislature/*.js (one state legislature per state)
                                              data/local/*.js    (one state's counties and governments)
                                              data/courtcounties.js (each county's federal district court)
@@ -121,7 +123,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
-  `statewide_candidates.json`,
+  `statewide_candidates.json`, `ballot_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
@@ -191,8 +193,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1977 tests, no dependencies
-npm install && npm test                       # 3005 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2011 tests, no dependencies
+npm install && npm test                       # 3051 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1793,7 +1795,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the words the legislature page says it in, and the state page's voting
     block and its key dates live in the same module. It never names who
     holds a seat (rule 27) beyond a race's own words, and what it does not
-    hold - legislative candidates, ballot measures, local contests - is
+    hold - legislative candidates, local questions and contests - is
     "not listed here", with the state's own sample ballot where one is
     linked; a seat whose district the record cannot name is said to be
     unknown, never "not up" (rule 19). A place with no election that day
@@ -1865,6 +1867,51 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     as though it were the Senate. The guide's Congress page names its
     members from the build (`pages.committees_html`, `leaders_html`) and
     loads no profile data.
+
+95. **A ballot question is the election office's words, and "none" is a
+    document's.** Every state page said the ballot also held "ballot
+    measures, which this site does not list", and a reader asking what was
+    on her ballot got no question at all (audit 2026-10-17, RACES-16,
+    STATEGOV-14, PERSONA-08). The questions are a hand-edited cache,
+    `data/ballot_measures.json` (`kyc/ballot_measures.py`), researched from
+    each election office's own list and re-opened by a second reader, and
+    written to `data/measures.js` for the state pages' "Statewide
+    questions" section and Your ballot's last card, one implementation
+    (`KYC.ballot`, rule 12). Each measure is its designation, its title
+    where the state prints one, its official text quoted, its kind and who
+    put it on the ballot, its source's address and words and the day read;
+    a measure or list on any host but the jurisdiction's own official
+    domains or an evidenced `overrides.MEASURE_SOURCES_ELSEWHERE` entry
+    fails the build (rule 50). A quoted text is said to be what it is:
+    California's are the voter guide's summaries, not the ballot label
+    (`textNote`), and one the source cuts is marked cut. The page never
+    says what a yes or a no vote does in its own words, and no colour
+    suggests a side; a record field the cache does not define (a "yes
+    means" of the site's own) is refused. "None" is said only with what
+    shows it, quoted: the office's sentence (Illinois, Oregon), an office's
+    list of its ballots' questions, or the official ballots, which print
+    every statewide question (`noneFrom`), named as the ballot read - often
+    one county's - never "the official sample ballots" as though every one
+    had been. A proclamation calling the election for offices is no basis:
+    Texas's first "none" rested on one, which would not name an amendment
+    election that its own resolution sets. A shown title is the document's
+    own name: the researchers' "linked from https://..." asides were link
+    text on the page, and a title carrying an address or a note is refused.
+    A question on every ballot that each town or city decides for itself
+    (New Hampshire's HB 1300 question, with "[name of municipality]" in its
+    text) is `local`, listed apart and never counted as statewide.
+    Where no official source says either way (American Samoa, Maine,
+    Pennsylvania, Puerto Rico), the page says this site has not found an
+    official list and links the election office, never "none" (rule 19):
+    Maine's first record said "none" on a town's sample ballot, and a
+    second reader set it back. A measure decided at an earlier 2026
+    election, or taken off by a court, is not listed. "Statewide" is a
+    state's word (rule 75): the District's are District-wide, a
+    territory's Territory-wide, and neither is told of a county's questions.
+    From the day after Election Day the heading and lead are in the past
+    tense beside the state's results page - "that were on the ballot" only
+    over a list, never over "none" or "not found" - and this site reads no
+    result of a ballot question.
 
 ## District maps
 

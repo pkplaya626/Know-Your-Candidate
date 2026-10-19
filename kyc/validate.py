@@ -1659,7 +1659,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None, voting_dates=None, statewide=None):
+        history=None, voting_dates=None, statewide=None, measures=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1715,7 +1715,28 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_voting_dates(voting_dates)
     if statewide is not None:
         issues += check_statewide_candidates(statewide, snapshot)
+    if measures is not None:
+        issues += check_ballot_measures(measures)
     return issues
+
+
+def check_ballot_measures(data):
+    """The statewide questions (kyc/ballot_measures.py, rule 95): every
+    measure and every list an official page's, quoted, never a compiled
+    table, news or an advocate's (rule 50); a "none" only with the official
+    words or ballots it rests on, quoted; a jurisdiction no official source
+    speaks for sent to its election office, never told "none" (rule 19);
+    every date in the cycle. An error: the page quotes these to voters, and
+    the build refuses to write them."""
+    from . import ballot_measures
+    if not data:
+        return [Issue("error", "ballot-measures-missing",
+                      f"no {ballot_measures.CACHE_PATH}; no page lists the statewide questions")]
+    found = ballot_measures.problems(data)
+    if found:
+        return [Issue("error", "ballot-measures", f"{len(found)} problems in the ballot measures "
+                      "(kyc/ballot_measures.py)", found)]
+    return []
 
 
 def check_statewide_candidates(data, snapshot=None):

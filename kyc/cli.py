@@ -35,6 +35,7 @@ from .profiles import build_profiles, screen_field
 from . import federal as federal_mod
 from . import judiciary as judiciary_mod
 from . import vacancies as vacancies_mod
+from . import ballot_measures as measures_mod
 
 
 def _load(args):
@@ -269,7 +270,10 @@ def _build(args):
                           vacancies=vacancies_mod.load_cache(args.root),
                           history=lineage,
                           voting_dates=voting_dates_mod.load(args.root),
-                          statewide=statewide_mod.load(args.root))
+                          statewide=statewide_mod.load(args.root),
+                          # {} when the cache is missing, so validate's
+                          # error says so under --check too (PR #120 review).
+                          measures=measures_mod.load(args.root) or {})
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -435,6 +439,24 @@ def _build(args):
           f"{listed['writeIns']} write-ins for {listed['offices']} offices; "
           f"{listed['certified']} list(s) whose own words certify them, "
           f"{listed['notState']} not the state's own")
+
+    # The statewide questions (rule 95): a cache that breaks its rules is
+    # validate's error above, and is never written to the page.
+    measures_cache = measures_mod.load(args.root)
+    if measures_cache and not measures_mod.problems(measures_cache):
+        measures = measures_mod.for_page(measures_cache)
+        measures_file = os.path.join(args.root, emit.MEASURES_FILE)
+        if emit.read_signature(path=measures_file) != emit.measures_signature(measures):
+            m_path, m_size = emit.write_measures(measures, args.root)
+            print(f"[ok] wrote {m_path} ({m_size / 1024:.0f} KB)")
+        m_stats = measures_mod.stats(measures_cache)
+        print(f"[ok] ballot measures: {m_stats['measures']} in {m_stats['with']} jurisdictions "
+              f"(and {m_stats['local']} on every ballot, decided locally); "
+              f"{m_stats['none']} with none; {m_stats['unknown']} with no official list found")
+    else:
+        print(f"[error] {measures_mod.CACHE_PATH} is missing or breaks its rules; "
+              f"{emit.MEASURES_FILE} not written", file=sys.stderr)
+        return 2
 
     # The federal executive and courts (kyc/federal_build.py): one file for
     # the hub, one per court, each rewritten only when what it says changed.
@@ -1533,6 +1555,20 @@ def _verify(args):
     else:
         print(f"  ok  {emit.STATEGOV_FILE} matches the governor, legislator and NCSL caches "
               f"({gov_expected[:16]}...)")
+
+    # The statewide questions (rule 95): the page's file is the cache's.
+    measures_cache = measures_mod.load(args.root)
+    unfit = measures_mod.problems(measures_cache) if measures_cache else ["missing"]
+    measures_committed = emit.read_signature(path=os.path.join(args.root, emit.MEASURES_FILE))
+    if unfit:
+        problems.append(f"{measures_mod.CACHE_PATH}: {len(unfit)} problem(s): {unfit[0]}")
+    elif measures_committed is None:
+        problems.append(f"{emit.MEASURES_FILE} is missing or carries no signature")
+    elif measures_committed != emit.measures_signature(measures_mod.for_page(measures_cache)):
+        problems.append(f"{emit.MEASURES_FILE} is stale")
+    else:
+        print(f"  ok  {emit.MEASURES_FILE} matches {measures_mod.CACHE_PATH} "
+              f"({measures_committed[:16]}...)")
 
     from . import federal_build
     try:
