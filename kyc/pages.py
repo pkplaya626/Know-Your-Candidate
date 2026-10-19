@@ -692,8 +692,10 @@ def measures_static(code, rec, past, summary=None, pad="                "):
                         f'{"voted" if past else "votes"} on it for itself, and its own ballot names '
                         "the place.</p>")
             rows += items(local, "local")
-        rows.append(f'{pad}    <p class="measures-words">Each is linked to the source its official '
-                    "text is quoted from. This site does not say what a yes or a no vote does.</p>")
+        # The plain list quotes no text, so it points at where the text is
+        # rather than at a quotation it does not carry (PR #123 review).
+        rows.append(f'{pad}    <p class="measures-words">Each is linked to the page its official '
+                    "text is on. This site does not say what a yes or a no vote does.</p>")
         if past:
             rows.append(f'{pad}    <p class="measures-results">This site does not read the results '
                         "of ballot questions.</p>")

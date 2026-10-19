@@ -195,8 +195,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2047 tests, no dependencies
-npm install && npm test                       # 3079 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2048 tests, no dependencies
+npm install && npm test                       # 3089 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1937,7 +1937,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     its statewide questions (rule 95) from the record `data/measures.js`
     is written from (`pages.measures_static`, each designation and title
     linked to its source, in `KYC.ballot`'s words); its script draws over
-    them, and a failed load keeps them. Where someone
+    them, and a failed load keeps them: a failed `data/measures.js` keeps
+    the plain questions under a line saying so, and Your ballot's last card
+    says the list did not load (`KYC.ballot.measuresMissing`); drawn from
+    nothing, they vanished without a word (PR #123 review). Where someone
     stands is said in the profile dialog's words: `share.status_words`
     reads `KYC.standing` the way kyc.js does, on the day the results were
     read (`share.post_election`), and `testSharePages` compares the two for
@@ -1956,7 +1959,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the card the pages unfurl with said "every fact names its source" over
     pages that named none. The seat is in words in a description ("member
     of the U.S. House for AL-4"; a card's bullet read as a glitch in an
-    unfurl), the holder of a race's seat is marked while seated (rule 67),
+    unfurl), a race's description credits its source before its list and
+    stops at `share.DESCRIPTION_MAX` characters with how many more (an
+    unfurler's cut took 62 races' later candidates and every credit), the
+    holder of a race's seat is marked while seated (rule 67),
     and a member leaving says where they are going (`otherOffice`) or when
     their seat is next up, as the dialog does. Nothing in them is dated or
     carries the build's time, and an unchanged share page is not rewritten:

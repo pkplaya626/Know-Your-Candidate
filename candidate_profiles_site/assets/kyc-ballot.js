@@ -731,6 +731,32 @@
     return !!rec && rec.has === true && !noElection(code);
   }
 
+  /** Whether data/measures.js failed to load: no record for any place,
+   *  which is not a place with no record. A failed load is said on the
+   *  page, and the state page keeps the list it was written with (rules
+   *  76, 96): drawn from nothing, the questions vanished without a word
+   *  (PR #123 review). */
+  function measuresMissing() {
+    return !global.kycMeasures;
+  }
+
+  /** What a reader is told where the list did not load. *onStatePage*:
+   *  above the plain list the page was written with, which stays. */
+  function measuresFailedLine(code, onStatePage) {
+    var section = measuresName(code).toLowerCase();
+    if (onStatePage) {
+      return '<p class="results-bar measures-failed">The ' + esc(section) + " in full, with " +
+        "their official text, did not load. Below is what this page was written with; reload " +
+        "the page to try again.</p>";
+    }
+    var sample = sampleLink(code);
+    return '<p class="measures-lead measures-failed">The list of ' + esc(section) + " did not " +
+      "load, so this page cannot say whether any is on this ballot. Reload the page, or see " +
+      '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#measures") + '">' +
+      esc(placeName(code)) + "'s page</a>" +
+      (sample ? " or the election office's sample ballot: " + sample : "") + ".</p>";
+  }
+
   /** The state page's section: its own heading and the same list. */
   function measuresSection(code) {
     var body = measuresBody(code, { level: 3 });
@@ -1171,7 +1197,9 @@
     // The statewide questions last, as a printed ballot puts them (rule 95):
     // a card whether there are any or not, since "none" and "not found"
     // are each something to say (rule 19).
-    var questions = measuresBody(code, { level: 5 });
+    // A list that did not load is said in the same card, never dropped.
+    var questions = !noElection(code) && measuresMissing() ? measuresFailedLine(code)
+      : measuresBody(code, { level: 5 });
     var asked = hasMeasures(code);
     var cards = senateCards(code).concat(houseCards(code, ctx.race, ctx))
       .concat(statewide).concat(legislature)
@@ -1493,6 +1521,8 @@
     measuresSection: measuresSection,
     measuresName: measuresName,
     hasMeasures: hasMeasures,
+    measuresMissing: measuresMissing,
+    measuresFailedLine: measuresFailedLine,
     // The Your ballot page.
     zipBallot: zipBallot,
     pointBallot: pointBallot,

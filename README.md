@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3079 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3089 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -155,6 +155,7 @@ CI asserts that a rebuild changes nothing.
 | `officers.py` | Lieutenant governors and secretaries of state, from their associations' rosters (the `officers` command) |
 | `courts.py` | Each state's court of last resort and its members, from each court's own page (the `courts` command) |
 | `stategov.py` | Who runs each state: governor, chamber control, trifecta, checked against NCSL |
+| `ballot_measures.py` | The statewide questions on each jurisdiction's November 3 ballot, from the hand-edited cache `data/ballot_measures.json` read from each election office's own list; checks it and writes `data/measures.js` (rule 95) |
 | `campaigns.py` | Campaign websites from each candidate's FEC committee |
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `oge.py` | The executive's financial reports from the Office of Government Ethics, by office (the `oge` command) |

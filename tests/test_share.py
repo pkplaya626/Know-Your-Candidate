@@ -288,8 +288,30 @@ class TestSharePages(unittest.TestCase):
         description = share.describe_race(r, by_id, {r["id"]: r})
         # The holder under the name the list gives them, not the record's.
         self.assertIn("Held by Test M. Member (Republican).", description)
-        self.assertTrue(description.endswith("Per Wikipedia's election results page and the Texas list."),
-                        description)
+        # Who says so comes before the list, where an unfurler's cut cannot
+        # reach it (PR #123 review).
+        self.assertIn("Where each stands, per Wikipedia's election results page and the Texas "
+                      "list: ", description)
+        self.assertTrue(description.endswith("."), description)
+
+    def test_a_long_race_description_stops_and_says_how_many_more(self):
+        ids = [f"FEC_{i:02d}" for i in range(12)]
+        people = [person(id=i, name=f"Candidate Number {i} Longname", isCandidate=True,
+                         party="Republican", raceStatusSource="certified",
+                         raceStatusSourceName="the Texas list") for i in ids]
+        r = race(candidateIds=ids)
+        by_id = {p["id"]: p for p in people}
+        description = share.describe_race(r, by_id, {r["id"]: r})
+        self.assertLessEqual(len(description), share.DESCRIPTION_MAX, description)
+        self.assertLess(description.index("Where each stands, per"), 200, description)
+        shown = description.count("Candidate Number")
+        self.assertGreaterEqual(shown, 1)
+        self.assertTrue(description.endswith(f"; and {12 - shown} more in this race."), description)
+        # A race that fits is listed whole.
+        short = race(candidateIds=ids[:2])
+        whole = share.describe_race(short, by_id, {short["id"]: short})
+        self.assertEqual(whole.count("Candidate Number"), 2)
+        self.assertNotIn("more in this race", whole)
 
     def test_a_holder_who_has_left_holds_nothing(self):
         r = race(incumbent={"name": "Gone Member", "party": "Republican", "seated": False},

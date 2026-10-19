@@ -170,6 +170,23 @@
     // The statewide questions on the ballot (rule 95), after the races, as
     // a printed ballot puts them; "" where nothing is recorded.
     var measures = KYC.ballot.measuresSection(code);
+    // Where data/measures.js did not load, the plain list the page was
+    // written with stays, under a line saying so (rules 76, 96): drawn
+    // from nothing, it vanished without a word (PR #123 review).
+    var keptMeasures = false;
+    if (!measures && KYC.ballot.measuresMissing()) {
+      var written = target.querySelector("#measures");
+      if (written) {
+        var kept = written.cloneNode(true);
+        var heading = kept.querySelector("h2");
+        var holder = doc.createElement("div");
+        holder.innerHTML = KYC.ballot.measuresFailedLine(code, true);
+        if (heading) heading.parentNode.insertBefore(holder.firstChild, heading.nextSibling);
+        else kept.insertBefore(holder.firstChild, kept.firstChild);
+        measures = kept.outerHTML;
+        keptMeasures = !!kept.querySelector("[data-measure]");
+      }
+    }
 
     var html = [];
     html.push(
@@ -299,7 +316,7 @@
         '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
           "November ballot, and - folded under the race - everyone no longer running. " +
-          alsoOnBallot(code, name, info.territory) + "</p>",
+          alsoOnBallot(code, name, info.territory, keptMeasures) + "</p>",
         (senateRaces.length + houseRaces.length > 3 && jumps
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
           : ""),
@@ -318,10 +335,11 @@
    *  State government section marks, in a sentence. This site lists the
    *  candidates for Congress only, and says so. The statewide questions,
    *  where its ballot holds them, are listed in their own section (rule 95),
-   *  and the sentence points there. */
-  function alsoOnBallot(code, name, territory) {
+   *  and the sentence points there. *kept*: the plain list the page was
+   *  written with holds questions, where the data file did not load. */
+  function alsoOnBallot(code, name, territory, kept) {
     var words = officesAlso(code, name, territory);
-    if (!KYC.ballot.hasMeasures(code)) return words;
+    if (!kept && !KYC.ballot.hasMeasures(code)) return words;
     var section = KYC.ballot.measuresName(code);
     return words + " The ballot's " + KYC.escapeHtml(section.toLowerCase()) + " are listed under " +
       '<a class="state-jump" href="#measures">' + KYC.escapeHtml(section) + "</a>.";

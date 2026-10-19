@@ -29,6 +29,9 @@ from urllib.parse import urlparse
 
 PROFILE_DIR = "p"
 RACE_DIR = "r"
+# The longest a race page's description runs (describe_race): unfurlers cut
+# at 200-300 characters.
+DESCRIPTION_MAX = 300
 
 
 def _e(text):
@@ -756,10 +759,24 @@ def describe_race(race, by_id, races_by_id, post=False):
         people.append(f"{person.get('name')}" + (f" ({person['party']})" if person.get("party")
                                                   else "") + (f": {status}" if status else ""))
     sources = race_sources(race, by_id)
-    return " ".join(filter(None, [
-        f"{_what(race)[0].upper()}{_what(race)[1:]} for {label}.", held,
-        "; ".join(people) + "." if people else "",
-        f"Per {_and(sources)}." if sources and people else ""]))
+    lead = " ".join(filter(None, [f"{_what(race)[0].upper()}{_what(race)[1:]} for {label}.", held]))
+    if not people:
+        return lead
+    # Who says where each stands comes before the list, and the list stops
+    # at DESCRIPTION_MAX with how many more it leaves for the page: an
+    # unfurler cuts a description at 200-300 characters, and on 62 race
+    # pages it cut the later candidates mid-sentence and the source credit
+    # always (PR #123 review). The first person is always named.
+    head = lead + (f" Where each stands, per {_and(sources)}: " if sources else " ")
+    shown = people[:1]
+    for i, words in enumerate(people[1:], start=1):
+        rest = len(people) - i - 1
+        tail = f"; and {rest} more in this race." if rest else "."
+        if len(head + "; ".join(shown + [words]) + tail) > DESCRIPTION_MAX:
+            break
+        shown.append(words)
+    more = len(people) - len(shown)
+    return head + "; ".join(shown) + (f"; and {more} more in this race." if more else ".")
 
 
 def render_race(race, host, by_id, races_by_id, post=False):

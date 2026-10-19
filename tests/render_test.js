@@ -268,6 +268,42 @@ async function testMeasures() {
       wrong.slice(0, 4).join(" | "));
   });
 
+  /* A failed data/measures.js: the state page drew over its plain list and
+   * put nothing back, and Your ballot dropped the card, both without a word
+   * (PR #123 review, rules 76 and 96). */
+  const caNoData = await buildPage("states/ca.html", { block: ["data/measures.js"] });
+  const caBallotNoData = await ballotFor("#/?zip=94103", { block: ["data/measures.js"] });
+  await settle(50);
+  suite("a statewide-questions file that did not load is said, and the plain list stays", () => {
+    const { window, D, errors } = caNoData;
+    const file = fs.readFileSync(path.join(SITE, "states", "ca.html"), "utf8");
+    const plainCount = (file.match(/<li data-measure="/g) || []).length;
+    const section = D.getElementById("measures");
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the data really did not load", !window.kycMeasures);
+    check("the page was drawn (not left as the plain page)", !!D.querySelector("#senators .card-grid"));
+    check("the plain list the page was written with stays, every question",
+      !!section && plainCount > 0 && section.querySelectorAll("li[data-measure]").length === plainCount,
+      (section ? section.querySelectorAll("li[data-measure]").length : 0) + " / " + plainCount);
+    check("a line under the heading says the full list did not load",
+      !!section && !!section.querySelector("h2 + .measures-failed") &&
+      /did not load/.test(section.querySelector(".measures-failed").textContent));
+    check("its jump chip and the race list's pointer are still there",
+      !!D.querySelector('.state-parts a[href="#measures"]') &&
+      !!D.querySelector('#races .state-note a[href="#measures"]'));
+    check("one section, not two", D.querySelectorAll("#measures").length === 1);
+    const card = caBallotNoData.out.querySelector(".ballot-contest.ballot-measures");
+    check("Your ballot: no page errors", caBallotNoData.errors.length === 0, caBallotNoData.errors.join(" | "));
+    check("Your ballot: the last card says the list did not load, and where to look",
+      !!card && /did not load/.test(card.textContent) &&
+      !!card.querySelector('a[href$="states/ca.html#measures"]') &&
+      !/No statewide question/.test(card.textContent),
+      card ? card.textContent : "no card");
+    check("Your ballot: the order note still names the card",
+      /then a note on statewide questions\./.test(
+        (caBallotNoData.out.querySelector(".ballot-note") || { textContent: "" }).textContent));
+  });
+
   const caAfter = await buildPage("states/ca.html", { now: "2026-11-05T09:00:00" });
   const txAfter = await buildPage("states/tx.html", { now: "2026-11-05T09:00:00" });
   const meAfter = await buildPage("states/me.html", { now: "2026-11-05T09:00:00" });
