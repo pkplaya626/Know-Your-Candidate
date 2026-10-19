@@ -273,7 +273,7 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           # Shutdown Resources", Gillibrand's "Know More
                           # About the Senator", Mfume's "Community issues
                           # and events".
-                          r"office\s+hours|grant\s+opportunities|portal|"
+                          r"office\s+hours|grant\s+(?:opportunities|announcements?)|portal|"
                           r"appropriations\s+requests?|cpf\s+requests?|authorization\s+requests?|"
                           r"know\s+more\s+about|shutdown\s+information|"
                           r"tele(?:phone)?-?\s*town\s*halls?|"
@@ -290,7 +290,10 @@ _NOT_A_TOPIC = re.compile(r"\b(?:news\s+alert|press\s+releases?|fact\s+sheet|faq
                           # The House template's stock category "Congress",
                           # whose page is "news and information related to
                           # Congress": not an issue a member chose.
-                          r"^(?:legislation|cpf(?:\s+requests?)?|grants?|congress)$",
+                          # And the catch-all at the foot of a list ("Other",
+                          # Sullivan's, Nehls's, Torres's: 2026-10-18).
+                          r"^(?:legislation|cpf(?:\s+requests?)?|grants?|congress|"
+                          r"other(?:\s+issues)?|miscellaneous)$",
                           re.I)
 # A line cut short: "Sponsored &", "AI, Social Media,".
 _CUT = re.compile(r"[&,;/(]\s*$|\b(?:and|or)\s*$", re.I)

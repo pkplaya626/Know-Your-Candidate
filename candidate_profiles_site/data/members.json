@@ -18245,7 +18245,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -18295,8 +18294,7 @@
     "Supporting Oklahoma Business Growth",
     "Oklahoma’s Role in Supporting Our Military",
     "Tribal Nations",
-    "Health, Education, Labor & Pensions",
-    "Appropriations Request Disclosures"
+    "Health, Education, Labor & Pensions"
    ],
    "issuesUrl": "https://www.armstrong.senate.gov/issues/",
    "read": "2026-10-18",
@@ -18316,7 +18314,7 @@
    "via": "http"
   },
   "B000668": {
-   "contact": "https://bentz.house.gov/zip_authentication?form=/contact",
+   "contact": "https://bentz.house.gov/contact",
    "contactStatus": "checked",
    "how": "index",
    "issues": [
@@ -18885,7 +18883,8 @@
    "via": "http"
   },
   "B001302": {
-   "contactStatus": "none",
+   "contact": "https://biggs.house.gov/contact/email",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Education",
@@ -19163,11 +19162,20 @@
   "B001323": {
    "contact": "https://begich.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://begich.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://begich.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "B001324": {
@@ -19242,7 +19250,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Agriculture",
     "Border Security",
     "Economy",
@@ -19377,8 +19384,7 @@
    "via": "http"
   },
   "C001035": {
-   "contact": "https://www.collins.senate.gov/contact/email-senator-collins",
-   "contactStatus": "checked",
+   "contactStatus": "none",
    "how": "index",
    "issues": [
     "Defense & National Security",
@@ -19757,7 +19763,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Hurricanes Laura, Delta and Zeta Resources",
     "Infrastructure",
     "Border Security",
     "Budget",
@@ -19892,7 +19897,6 @@
    "how": "index",
    "issues": [
     "Agriculture and Trade",
-    "Constituent Services",
     "Defense & Foreign Policy",
     "Energy and the Environment",
     "Health Care",
@@ -20079,12 +20083,13 @@
     "Energy and Environment",
     "water and the great salt lake",
     "Foreign Policy and Defense",
-    "AI, Social Media,",
+    "AI, Social Media, and youth Safety",
     "Budget and Debt",
     "Public Lands and Rural Utah",
     "Affordability and Jobs",
     "Education and Family",
     "Health Care",
+    "growth and Infrastructure",
     "Veterans",
     "Immigration and Border Security"
    ],
@@ -20226,7 +20231,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy and Small Businesses",
     "Education",
     "Foreign Affairs",
@@ -20245,11 +20249,21 @@
   "C001125": {
    "contact": "https://troycarter.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans",
+    "Infrastructure"
+   ],
+   "issuesUrl": "https://troycarter.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://troycarter.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "C001126": {
@@ -20275,7 +20289,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -20410,7 +20423,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -20553,19 +20565,12 @@
   },
   "D000530": {
    "contactStatus": "none",
-   "how": "index",
-   "issues": [
-    "Know Your Rights",
-    "Report: Smartphones in Schools",
-    "2025 End of Year Report",
-    "Derailment Resources and Updates",
-    "FY 2026 Requested Community Projects"
-   ],
-   "issuesUrl": "https://deluzio.house.gov/issues",
+   "pageRead": "https://deluzio.house.gov/issues",
    "read": "2026-10-18",
+   "reason": "no page or menu of the site lists issues",
    "status": 200,
    "url": "https://deluzio.house.gov",
-   "verdict": "listed",
+   "verdict": "none",
    "via": "http"
   },
   "D000563": {
@@ -20803,7 +20808,8 @@
    "via": "http"
   },
   "D000629": {
-   "contactStatus": "none",
+   "contact": "https://davids.house.gov/contact/email-me",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Agriculture",
@@ -20852,8 +20858,7 @@
     "Energy",
     "Health",
     "Natural Resources",
-    "Veterans",
-    "Congress"
+    "Veterans"
    ],
    "issuesUrl": "https://downing.house.gov/issues",
    "read": "2026-10-18",
@@ -20928,11 +20933,21 @@
   "E000246": {
    "contact": "https://edwards.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans",
+    "Chat with Chuck"
+   ],
+   "issuesUrl": "https://edwards.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://edwards.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "E000294": {
@@ -21114,11 +21129,20 @@
   "F000110": {
    "contact": "https://fields.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://fields.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://fields.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "F000246": {
@@ -21143,7 +21167,8 @@
    "via": "http"
   },
   "F000446": {
-   "contactStatus": "none",
+   "contact": "https://feenstra.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Agriculture",
@@ -21402,7 +21427,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Agriculture & Energy",
@@ -21424,7 +21448,6 @@
     "The Working Families Tax Cuts",
     "Agriculture",
     "Armed Services",
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -21509,7 +21532,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -21527,11 +21549,20 @@
   "F000481": {
    "contact": "https://figures.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://figures.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://figures.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "F000482": {
@@ -21558,11 +21589,20 @@
   "F000483": {
    "contact": "https://friedman.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://friedman.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://friedman.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "F000484": {
@@ -21654,8 +21694,7 @@
     "Gun Safety",
     "Education",
     "Workers’ Rights",
-    "Immigration",
-    "Know More About the Senator"
+    "Immigration"
    ],
    "issuesUrl": "https://www.gillibrand.senate.gov/priorities/",
    "read": "2026-10-18",
@@ -22006,7 +22045,8 @@
    "via": "http"
   },
   "G000597": {
-   "contactStatus": "none",
+   "contact": "https://garbarino.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "China",
@@ -22080,8 +22120,7 @@
     "Veterans and First Responders",
     "Small Business",
     "Social Security and Medicare",
-    "Arts and Culture",
-    "Congress"
+    "Arts and Culture"
    ],
    "issuesUrl": "https://goldman.house.gov/issues",
    "read": "2026-10-18",
@@ -22149,7 +22188,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -22195,11 +22233,26 @@
   "G000606": {
    "contact": "https://grijalva.house.gov/contact/write-adelita",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Veterans",
+    "Public Education",
+    "Labor and Workforce",
+    "Immigration",
+    "Energy, Environment, and Natural Resources",
+    "Housing",
+    "Protecting Rights and Freedoms",
+    "Tribal Sovereignty",
+    "Foreign Policy",
+    "LGBTQIA+ Rights"
+   ],
+   "issuesUrl": "https://grijalva.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://grijalva.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "G000607": {
@@ -22213,8 +22266,7 @@
     "National Security and Foreign Affairs",
     "Jobs and Economic Growth",
     "Supporting Veterans and Military Families",
-    "Wildlife",
-    "Congress"
+    "Wildlife"
    ],
    "issuesUrl": "https://gallagher.house.gov/issues",
    "read": "2026-10-18",
@@ -22302,8 +22354,7 @@
    "via": "http"
   },
   "H001046": {
-   "contact": "https://www.heinrich.senate.gov/contact/write-martin",
-   "contactStatus": "checked",
+   "contactStatus": "none",
    "how": "index",
    "issues": [
     "Agriculture",
@@ -22408,7 +22459,6 @@
    "contactStatus": "none",
    "how": "index",
    "issues": [
-    "Sponsored &",
     "Agriculture",
     "Education",
     "Energy",
@@ -22419,8 +22469,7 @@
     "Public Safety and Quality of Life",
     "Transportation",
     "Veterans",
-    "Water Infrastructure and Flood Protection",
-    "Jobs, Economy, Fiscal Responsibility"
+    "Water Infrastructure and Flood Protection"
    ],
    "issuesUrl": "https://www.hoeven.senate.gov/issues",
    "read": "2026-10-18",
@@ -22656,7 +22705,8 @@
    "via": "http"
   },
   "H001086": {
-   "contactStatus": "none",
+   "contact": "https://harshbarger.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Border Security",
@@ -22775,11 +22825,20 @@
   "H001095": {
    "contact": "https://hunt.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://hunt.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://hunt.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "H001096": {
@@ -22809,11 +22868,32 @@
   "H001098": {
    "contact": "https://hamadeh.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "America First",
+    "Back The Blue",
+    "Border Memorial Bill",
+    "Charlie Kirk Commemorative Coin Act",
+    "China Daily Ban",
+    "DOJ Retracts Phoenix Police Department Consent Decree",
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "NDAA",
+    "Opinion",
+    "Peace Through Strength",
+    "PPD Desent Decree Retraction",
+    "PROVE Act",
+    "Tax Cuts for Veterans Act of 2025",
+    "Veterans"
+   ],
+   "issuesUrl": "https://hamadeh.house.gov/issues/",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://hamadeh.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "H001099": {
@@ -22906,7 +22986,6 @@
    "how": "index",
    "issues": [
     "Agriculture",
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -22935,7 +23014,8 @@
    "via": "http"
   },
   "I000056": {
-   "contactStatus": "none",
+   "contact": "https://issa.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Economy",
@@ -22974,8 +23054,7 @@
     "Transportation & Infrastructure",
     "Veterans",
     "Elections",
-    "Know Your Rights",
-    "Congress"
+    "Know Your Rights"
    ],
    "issuesUrl": "https://ivey.house.gov/issues",
    "read": "2026-10-18",
@@ -23281,7 +23360,6 @@
     "Equality",
     "Foreign Affairs",
     "House Administration",
-    "Congress",
     "Education"
    ],
    "issuesUrl": "https://juliejohnson.house.gov/issues",
@@ -23294,11 +23372,20 @@
   "J000311": {
    "contact": "https://jack.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://jack.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://jack.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "J000312": {
@@ -23344,7 +23431,6 @@
    "contactStatus": "checked",
    "how": "menu",
    "issues": [
-    "Current Legislation",
     "Jobs and the Economy",
     "Agriculture & Rural Communities",
     "Health Care",
@@ -23686,7 +23772,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -23788,7 +23873,6 @@
    "issues": [
     "Agriculture",
     "Border",
-    "Congress",
     "Crime",
     "Economic Growth",
     "Education",
@@ -24236,11 +24320,21 @@
   "L000598": {
    "contact": "https://lalota.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans",
+    "Law Enforcement"
+   ],
+   "issuesUrl": "https://lalota.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://lalota.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "L000599": {
@@ -24272,11 +24366,24 @@
   "L000600": {
    "contact": "https://langworthy.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans",
+    "Agriculture",
+    "Oversight and Accountability",
+    "Rules",
+    "Grant Announcements"
+   ],
+   "issuesUrl": "https://langworthy.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://langworthy.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "L000601": {
@@ -24332,7 +24439,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Energy",
     "Health",
@@ -24351,7 +24457,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -24410,7 +24515,8 @@
    "via": "http"
   },
   "M000194": {
-   "contactStatus": "none",
+   "contact": "https://mace.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Oversight & Accountability",
@@ -24467,7 +24573,8 @@
    "via": "http"
   },
   "M000317": {
-   "contactStatus": "none",
+   "contact": "https://malliotakis.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Economy",
@@ -24490,7 +24597,6 @@
    "issues": [
     "Advocating for Families",
     "Agriculture",
-    "Coronavirus Updates",
     "Defense",
     "Drug Epidemic",
     "Economy",
@@ -24527,7 +24633,8 @@
    "via": "http"
   },
   "M000871": {
-   "contactStatus": "none",
+   "contact": "https://mann.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Agriculture",
@@ -24577,7 +24684,7 @@
    "status": 200,
    "url": "https://www.moran.senate.gov",
    "verdict": "listed",
-   "via": "http"
+   "via": "chrome"
   },
   "M001111": {
    "contact": "https://www.murray.senate.gov/write-to-patty/",
@@ -25131,7 +25238,8 @@
    "via": "http"
   },
   "M001214": {
-   "contactStatus": "none",
+   "contact": "https://mrvan.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Appropriations & Federal Funding",
@@ -25175,7 +25283,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -25226,7 +25333,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Health",
@@ -25246,7 +25352,6 @@
    "how": "index",
    "issues": [
     "Veterans",
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -25295,11 +25400,22 @@
   "M001224": {
    "contact": "https://moran.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Election Integrity",
+    "Pro-Life",
+    "Energy",
+    "Veterans",
+    "Border Security"
+   ],
+   "issuesUrl": "https://moran.house.gov/issues/",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://moran.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "M001225": {
@@ -25352,7 +25468,6 @@
     "Armed Services",
     "Civil Rights",
     "Communications And Technology",
-    "Congress",
     "Economy",
     "Education",
     "Energy/Environment",
@@ -25376,7 +25491,6 @@
    "how": "index",
    "issues": [
     "Border Security and Immigration",
-    "Congress",
     "Defense and National Security",
     "Economy and Jobs",
     "Energy, Natural Resources, and Public Lands",
@@ -25461,11 +25575,20 @@
   "M001232": {
    "contact": "https://mcclaindelaney.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://mcclaindelaney.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://mcclaindelaney.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "M001233": {
@@ -25501,7 +25624,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Labor & Economy",
     "Education",
     "Energy",
@@ -25522,21 +25644,39 @@
   "M001236": {
    "contact": "https://timmoore.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://timmoore.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://timmoore.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "M001237": {
    "contact": "https://mcdonaldrivet.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://mcdonaldrivet.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://mcdonaldrivet.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "M001238": {
@@ -25544,7 +25684,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -25563,7 +25702,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -25579,11 +25717,20 @@
   },
   "M001240": {
    "contactStatus": "none",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://mcdowell.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://mcdowell.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "M001241": {
@@ -25591,7 +25738,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Education",
     "Energy",
     "Health",
@@ -25627,8 +25773,7 @@
     "Getting Tough on Crime",
     "Confronting China",
     "Shaking Up Washington",
-    "Strengthening Our Communities",
-    "Telephone Townhall Questions & Answers"
+    "Strengthening Our Communities"
    ],
    "issuesUrl": "https://www.mccormick.senate.gov/issues/",
    "read": "2026-10-18",
@@ -25652,7 +25797,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Health",
@@ -25672,7 +25816,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -25903,7 +26046,8 @@
    "via": "http"
   },
   "O000019": {
-   "contactStatus": "none",
+   "contact": "https://obernolte.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Budget",
@@ -25989,11 +26133,20 @@
   "O000175": {
    "contact": "https://ogles.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://ogles.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://ogles.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "O000176": {
@@ -26001,7 +26154,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -26020,7 +26172,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -26374,7 +26525,7 @@
    "status": 200,
    "url": "https://plaskett.house.gov",
    "verdict": "listed",
-   "via": "chrome"
+   "via": "http"
   },
   "P000613": {
    "contact": "https://panetta.house.gov/contact",
@@ -26457,11 +26608,20 @@
   "P000620": {
    "contact": "https://pettersen.house.gov/contact",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://pettersen.house.gov/issues/",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://pettersen.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "P000621": {
@@ -26469,7 +26629,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -26489,7 +26648,6 @@
    "how": "index",
    "issues": [
     "Veterans",
-    "Congress",
     "Economy",
     "Small Businesses",
     "Transportation and Infrastructure"
@@ -26607,7 +26765,7 @@
    "status": 200,
    "url": "https://halrogers.house.gov",
    "verdict": "listed",
-   "via": "http"
+   "via": "chrome"
   },
   "R000575": {
    "contact": "https://mikerogers.house.gov/contact/",
@@ -26642,7 +26800,7 @@
   "R000584": {
    "contact": "https://www.risch.senate.gov/contact/share-your-opinion/",
    "contactStatus": "checked",
-   "how": "home",
+   "how": "index",
    "issues": [
     "Maintaining Peace through Strength",
     "Supporting Idaho Agriculture",
@@ -26654,9 +26812,10 @@
     "Securing our Southern Border & Communities",
     "Defending our Public Lands & Resources"
    ],
-   "issuesUrl": "https://www.risch.senate.gov",
+   "issuesUrl": "https://www.risch.senate.gov/about/issues-and-solutions/",
    "read": "2026-10-18",
    "status": 200,
+   "unlinked": true,
    "url": "https://www.risch.senate.gov",
    "verdict": "listed",
    "via": "http"
@@ -26929,11 +27088,20 @@
   "R000620": {
    "contact": "https://rivas.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://rivas.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://rivas.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "R000621": {
@@ -26984,7 +27152,8 @@
    "via": "http"
   },
   "S000168": {
-   "contactStatus": "none",
+   "contact": "https://salazar.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Economy",
@@ -27090,7 +27259,8 @@
    "via": "http"
   },
   "S000510": {
-   "contactStatus": "none",
+   "contact": "https://adamsmith.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "America's Workers",
@@ -27247,7 +27417,6 @@
    "contactStatus": "checked",
    "how": "menu",
    "issues": [
-    "congress",
     "economy & jobs",
     "education",
     "energy",
@@ -27413,7 +27582,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -27550,11 +27718,19 @@
   "S001198": {
    "contact": "https://www.sullivan.senate.gov/contact/email/",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Jobs and the Economy",
+    "National Security",
+    "Other",
+    "Veterans"
+   ],
+   "issuesUrl": "https://www.sullivan.senate.gov/about/issues/",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://www.sullivan.senate.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "S001199": {
@@ -27830,15 +28006,19 @@
   "S001218": {
    "contact": "https://stansbury.house.gov/contact",
    "contactStatus": "checked",
-   "how": "home",
+   "how": "index",
    "issues": [
-    "Community Well-Being",
+    "Economy and Jobs",
+    "Education",
     "Energy, Climate & Environment",
-    "COVID and Community Resources"
+    "Health Care",
+    "Veterans Affairs, Voting Rights, and Good Government",
+    "Community Well-Being"
    ],
-   "issuesUrl": "https://stansbury.house.gov",
+   "issuesUrl": "https://stansbury.house.gov/issues",
    "read": "2026-10-18",
    "status": 200,
+   "unlinked": true,
    "url": "https://stansbury.house.gov",
    "verdict": "listed",
    "via": "http"
@@ -27981,8 +28161,7 @@
     "Reproductive Freedom",
     "Science, Space, and Technology",
     "Seniors",
-    "Veterans",
-    "Congress"
+    "Veterans"
    ],
    "issuesUrl": "https://salinas.house.gov/issues",
    "read": "2026-10-18",
@@ -28005,14 +28184,11 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
     "Health",
-    "Veterans",
-    "FY 2026 CPF Requests",
-    "FY 2027 CPF Requests"
+    "Veterans"
    ],
    "issuesUrl": "https://schmidt.house.gov/issues",
    "read": "2026-10-18",
@@ -28027,7 +28203,6 @@
    "how": "index",
    "issues": [
     "Stop Scams Caucus",
-    "Congress",
     "Energy",
     "Veterans",
     "Economy",
@@ -28044,25 +28219,42 @@
   "S001230": {
    "contact": "https://subramanyam.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans",
+    "Federal Workforce"
+   ],
+   "issuesUrl": "https://subramanyam.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://subramanyam.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "S001231": {
    "contact": "https://simon.house.gov/contact/email-me",
    "contactStatus": "checked",
-   "how": "home",
+   "how": "index",
    "issues": [
-    "Equality, Racial, and Social Justice",
+    "Economy and Small Business",
+    "Education",
+    "Energy and the Environment",
+    "Veterans",
+    "Foreign Policy",
     "Health Care",
-    "Education"
+    "Housing",
+    "Immigration",
+    "Labor"
    ],
-   "issuesUrl": "https://simon.house.gov",
+   "issuesUrl": "https://simon.house.gov/issues",
    "read": "2026-10-18",
    "status": 200,
+   "unlinked": true,
    "url": "https://simon.house.gov",
    "verdict": "listed",
    "via": "http"
@@ -28721,8 +28913,7 @@
     "National Defense",
     "Energy",
     "Education",
-    "Healthcare",
-    "Congress"
+    "Healthcare"
    ],
    "issuesUrl": "https://vanorden.house.gov/issues",
    "read": "2026-10-18",
@@ -28745,8 +28936,7 @@
     "Armed Services & National Security",
     "Education & Family Support",
     "Rights & Freedoms",
-    "Supporting Tribal Communities",
-    "Congress"
+    "Supporting Tribal Communities"
    ],
    "issuesUrl": "https://vasquez.house.gov/issues",
    "read": "2026-10-18",
@@ -28768,11 +28958,20 @@
   "V000139": {
    "contact": "https://vanepps.house.gov/contact/email-me",
    "contactStatus": "checked",
+   "how": "index",
+   "issues": [
+    "Economy",
+    "Education",
+    "Energy",
+    "Health",
+    "Veterans"
+   ],
+   "issuesUrl": "https://vanepps.house.gov/issues",
    "read": "2026-10-18",
-   "reason": "no page or menu of the site lists issues",
    "status": 200,
+   "unlinked": true,
    "url": "https://vanepps.house.gov",
-   "verdict": "none",
+   "verdict": "listed",
    "via": "http"
   },
   "W000187": {
@@ -29172,7 +29371,8 @@
    "via": "http"
   },
   "W000821": {
-   "contactStatus": "none",
+   "contact": "https://westerman.house.gov/contact",
+   "contactStatus": "checked",
    "how": "index",
    "issues": [
     "Accountability",
@@ -29223,7 +29423,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -29242,7 +29441,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -29291,7 +29489,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",
@@ -29363,7 +29560,6 @@
    "contactStatus": "checked",
    "how": "index",
    "issues": [
-    "Congress",
     "Economy",
     "Education",
     "Energy",

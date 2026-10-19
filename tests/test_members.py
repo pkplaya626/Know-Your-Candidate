@@ -341,7 +341,7 @@ class TestTheIssuesTheirSiteLists(unittest.TestCase):
                      "Telephone Townhall Questions & Answers", "Local Resources",
                      "FY2027 MILITARY CONSTRUCTION AUTHORIZATION REQUESTS",
                      "Hurricanes Laura, Delta and Zeta Resources", "Resources for Homeowners",
-                     "9th District", "District"):
+                     "9th District", "District", "Other", "Grant Announcements"):
             self.assertEqual(members.topic(text, "Rick Larsen", OTHERS), "", text)
             self.assertTrue(members.furniture(text), text)
         self.assertEqual(members.topic("President's Administration", "Rick Larsen", OTHERS), "")
