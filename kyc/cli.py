@@ -167,6 +167,9 @@ def _build(args):
     else:
         print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
               "articles and campaign sites")
+    # Whose photograph each portrait is, once every source has had its say.
+    from .photos import assign_credits
+    stats["photo_credits"] = assign_credits(profiles)
     # The offices each person has held, by id; a challenger's only while
     # their profile links the article they were read from (rule 20).
     from . import history as history_mod
@@ -1284,6 +1287,8 @@ def _verify(args):
     cache = portraits.load_cache(args.root)
     stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
     enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
+    from .photos import assign_credits
+    stats["photo_credits"] = assign_credits(profiles)
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
                             snapshot=legislators.load_snapshot(args.root))
@@ -1684,7 +1689,7 @@ def _officers(args):
             return 2
     else:
         try:
-            cache = officers.fetch()
+            cache = officers.fetch(previous=officers.load_cache(args.root))
         except officers.OfficersError as exc:
             print(f"[error] {exc}", file=sys.stderr)
             return 2
@@ -1701,7 +1706,8 @@ def _officers(args):
         print(f"  [warn] {code}: NASS lists {nass} as {office}, NLGA {nlga}; neither is shown")
     ag = cache.get("ag", {})
     confirmed = sum(1 for row in ag.values() if row.get("name") and not row.get("unconfirmed"))
-    print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page")
+    print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page; "
+          f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph")
     for problem in cache.pop("agProblems", officers.ag_problems(ag)):
         print(f"  [warn] {problem}")
     if not args.check:

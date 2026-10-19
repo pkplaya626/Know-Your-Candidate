@@ -65,13 +65,16 @@ THUMB_STEPS = (120, 250, 330, 500)
 # Wikimedia asks for a descriptive User-Agent identifying the client.
 _UA = {"User-Agent": "know-your-candidate/2.1 (open-source civic data project)"}
 _TIMEOUT = 25
-_THUMB_SIZE = 800
+# The article's lead image at a width Wikimedia serves as standard: one it
+# does not is rendered on demand and refused under load (TECH-13).
+_THUMB_SIZE = 960
 _BATCH = 50
 
-# Serialise API calls and keep a courteous gap between them. The Wikipedia
+# Serialise API calls and keep a courteous gap between them: one a second,
+# since Wikimedia answers a burst with 429 for everything (rule 42). The
 # API is batched 50 titles at a time, so this costs very little wall clock.
 _api_lock = threading.Lock()
-_api_gap = 0.9
+_api_gap = 1.0
 _last_call = [0.0]
 
 _BAD_TITLE = re.compile(r"\(disambiguation\)|^List of |^\d{4} United States", re.I)
@@ -211,8 +214,11 @@ def _api_endpoint(project):
     return f"https://{wiki}.wikipedia.org/w/api.php"
 
 
-def image_sizes(urls, log=None):
-    """``{url: (width, height)}`` of the original behind each Wikimedia URL."""
+def file_info(urls, log=None):
+    """``{url: imageinfo}`` for the file behind each Wikimedia URL: its
+    measured ``width`` and ``height``, its ``descriptionurl`` and the
+    licence fields of its ``extmetadata``. One request a batch of fifty,
+    through :func:`_api`'s one-a-second gap."""
     wanted = {}
     for url in urls:
         parts = wikimedia_file(url)
@@ -225,7 +231,8 @@ def image_sizes(urls, log=None):
         titles = list(by_title)
         for i in range(0, len(titles), _BATCH):
             try:
-                payload = _api({"prop": "imageinfo", "iiprop": "size",
+                payload = _api({"prop": "imageinfo", "iiprop": "size|url|extmetadata",
+                                "iiextmetadatafilter": _CREDIT_FIELDS,
                                 "titles": "|".join(titles[i:i + _BATCH])},
                                endpoint=_api_endpoint(project))
             except Exception as exc:
@@ -239,8 +246,222 @@ def image_sizes(urls, log=None):
                 title = alias.get(page.get("title"), page.get("title"))
                 if info.get("width"):
                     for url in by_title.get(title, []):
-                        out[url] = (info["width"], info["height"])
+                        out[url] = info
     return out
+
+
+def image_sizes(urls, log=None):
+    """``{url: (width, height)}`` of the original behind each Wikimedia URL."""
+    return {url: (info["width"], info["height"])
+            for url, info in file_info(urls, log=log).items()}
+
+
+# ------------------------------------------------------------------ credits
+#
+# A Commons file is free to use on the terms of its licence, and 148 of the
+# 381 Wikimedia portraits on the site in October 2026 were CC BY or CC BY-SA:
+# their licences require the author's name, the licence and a link to it
+# beside the photograph. None was shown (TRUST-08). The file's own
+# description page is the record of who made it and on what terms, so the
+# credit is read from it - never typed in - and stored with the portrait.
+
+_CREDIT_FIELDS = "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree"
+
+# Which reading of a file's description page a stored credit is. A credit
+# read by an earlier form is read again: the first printed Commons' hidden
+# duplicate spans, uploaders' sentences and file names as authors.
+CREDIT_FORM = 2
+
+# Licence codes Commons gives where the licence has a name.
+LICENCE_NAMES = {
+    "PDM-owner": "Public Domain Mark",
+    "PDM": "Public Domain Mark",
+    "FAL": "Free Art License",
+}
+
+_HIDDEN = re.compile(
+    r"<(?P<tag>[a-z][a-z0-9]*)\b[^>]*\bstyle\s*=\s*\"[^\"]*display\s*:\s*none[^\"]*\"[^>]*>"
+    r".*?</(?P=tag)\s*>", re.I | re.S)
+_FILE_NAME = re.compile(r"[^\s:/]+\.(?:jpe?g|png|gif|tiff?|svg|webp)\b", re.I)
+# What Commons' templates say where no author is known: {{Unknown|author}},
+# "unidentified photographer", a sentence about not knowing.
+_NO_AUTHOR = re.compile(
+    r"^(?:unknown|unidentified|anonymous|not known|author unknown|no author|"
+    r"photographer unknown|unnamed|n/?a\b|i do not know|i don't know)", re.I)
+# What an uploader adds to the author's line about themselves.
+_UPLOADER = re.compile(
+    r"\s*(?:\(\s*talk\s*\)|(?:the )?original uploader was\b.*$|"
+    r"later versions?(?:\(s\))? (?:were|was) uploaded by\b.*$|"
+    r"(?<=\.)\s*\S+ at [A-Z][a-z]+ Wikipedia\b\s*\.?)", re.I | re.S)
+
+
+def plain_text(fragment):
+    """Text with its HTML gone, and what Commons hides from readers gone
+    with it: an author given as ``Unknown author<span style="display:
+    none;">Unknown author</span>`` read "Unknown author Unknown author"
+    under five profiles' and six judges' photographs."""
+    import html as html_mod
+
+    text = _HIDDEN.sub(" ", str(fragment or ""))
+    text = re.sub(r"<[^>]+>", " ", text)
+    return " ".join(html_mod.unescape(text).split())
+
+
+def author_of(fragment):
+    """The author a Commons file's ``Artist`` field names, as a reader should
+    see it, or ``None`` where it names no one.
+
+    Each line of a list is read alone, without a leading file name (Judge
+    Keenan's photograph is cut from another file: "Warner_Keenan_Webb.jpg:
+    Mark Warner" and "derivative work: Athenchen"), an uploader's note
+    about themselves or "(talk)". What is left is no author when it is a
+    form of "unknown", a sentence about not knowing ("I do not know the
+    name of the photographer ..."), a bare address or a file name; a phrase
+    said twice is said once."""
+    raw = _HIDDEN.sub(" ", str(fragment or ""))
+    items = re.findall(r"<li\b[^>]*>(.*?)</li>", raw, re.I | re.S) or [raw]
+    out = []
+    for item in items:
+        text = plain_text(item)
+        text = re.sub(rf"^{_FILE_NAME.pattern}\s*:\s*", "", text, flags=re.I)
+        # An interwiki link's prefix: "en:United States District Court ...".
+        text = re.sub(r"^[a-z]{2,3}:(?=[A-Z])", "", text)
+        cleaned = _UPLOADER.sub("", text).strip(" ;,")
+        text = " ".join((cleaned or text).split())
+        # A sentence's full stop, not an initial's ("S.D.N.Y.").
+        text = re.sub(r"(?:(?<=[a-z]{2})|(?<=\)))\s*\.$", "", text)
+        half = len(text) // 2
+        if len(text) % 2 == 1 and text[:half] == text[half + 1:]:
+            text = text[:half]
+        if (not text or _NO_AUTHOR.search(text) or re.search(r"(?:^|\s)I\s", text)
+                or re.fullmatch(r"(?:https?:)?//\S+|https?://\S+", text)
+                or _FILE_NAME.fullmatch(text)):
+            continue
+        if text not in out:
+            out.append(text)
+    return "; ".join(out) or None
+
+
+def licence_name(code):
+    """A licence as a reader can read it: Commons' code where it is a name
+    ("CC BY-SA 4.0", "Public domain"), the name where it is only a code."""
+    code = plain_text(code) or None
+    return LICENCE_NAMES.get(code, code) if code else None
+
+
+def credit_of(info):
+    """The credit a Commons file's own description page gives it:
+    ``{"by", "licence", "licenceUrl", "file", "attribution", "nonFree",
+    "form"}``. ``by`` is ``None`` where the page names no author
+    (:func:`author_of`); ``licence`` is ``None`` when the page records
+    none, which ``validate`` refuses (rule 87)."""
+    meta = info.get("extmetadata") or {}
+
+    def field(name):
+        return plain_text((meta.get(name) or {}).get("value")) or None
+
+    return {
+        "by": author_of((meta.get("Artist") or {}).get("value")),
+        "licence": licence_name((meta.get("LicenseShortName") or {}).get("value")),
+        "licenceUrl": field("LicenseUrl"),
+        "file": info.get("descriptionurl") or None,
+        "attribution": (field("AttributionRequired") or "").lower() == "true",
+        "nonFree": (field("NonFree") or "").lower() == "true",
+        "form": CREDIT_FORM,
+    }
+
+
+def credit_all(cache, log=print):
+    """Give each Wikimedia portrait in *cache* its file's ``credit``.
+
+    Only records that have none, or one read by an earlier form
+    (:data:`CREDIT_FORM`), are asked about, fifty to a request, one request
+    a second. A file the API does not describe keeps what it had, and one
+    that never had a credit is not shown until it has one
+    (:func:`apply_cache`); it is asked about again next run."""
+    todo = {key: record for key, record in cache.items()
+            if record.get("url") and wikimedia_file(record["url"])
+            and (record.get("credit") or {}).get("form") != CREDIT_FORM}
+    if not todo:
+        return 0
+    log(f"    credits: reading {len(todo)} Wikimedia file description(s) ...")
+    infos = file_info([record["url"] for record in todo.values()], log=log)
+    done = 0
+    for record in todo.values():
+        info = infos.get(record["url"])
+        if info:
+            record["credit"] = credit_of(info)
+            done += 1
+    log(f"    credits: {done} read, {len(todo) - done} could not be")
+    return done
+
+
+# ----------------------------------------------------------------- weights
+#
+# A portrait not on Wikimedia is one file at one size. Its weight is
+# measured when it is found - the House Clerk's run 50-100 KB; one campaign
+# site's original was a 1.3 MB PNG for a 165px card (TECH-13) - so a heavy
+# one can be refused before a reader downloads it.
+
+def measure(url, timeout=_TIMEOUT):
+    """``{"bytes", "width", "height"}`` of the image at *url*, from its
+    first 64 KB and the size the server reports, or ``None`` when it could
+    not be told (rule 8: unknown is not too big). A JPEG whose metadata
+    runs past 64 KB before its dimensions (the NGA's 7.6 MB headshot of
+    Ohio's governor carries 100 KB of it) is read again to 512 KB."""
+    for span_end in (65535, 524287):
+        found = _measure_head(url, span_end, timeout)
+        if found is None:
+            return None
+        total, size = found
+        if size:
+            return {"bytes": total, "width": size[0], "height": size[1]} if total else None
+        if not total or total <= span_end + 1:
+            return None
+    return None
+
+
+def _measure_head(url, span_end, timeout):
+    """``(total bytes or None, (width, height) or None)`` from the first
+    *span_end* + 1 bytes of *url*, or ``None`` when it is not an image."""
+    headers = dict(_UA, Range=f"bytes=0-{span_end}")
+    try:
+        req = urllib.request.Request(url, headers=headers)
+        with urllib.request.urlopen(req, timeout=timeout) as response:
+            if not (response.headers.get("Content-Type") or "").startswith("image/"):
+                return None
+            head = response.read(span_end + 1)
+            total = None
+            span = response.headers.get("Content-Range") or ""
+            if "/" in span and span.rsplit("/", 1)[1].isdigit():
+                total = int(span.rsplit("/", 1)[1])
+            elif response.status == 200 and response.headers.get("Content-Length", "").isdigit():
+                total = int(response.headers["Content-Length"])
+    except Exception:
+        return None
+    return total, image_size(head)
+
+
+_measure_gap = 1.0
+
+
+def measure_all(cache, log=print):
+    """Record the weight of each non-Wikimedia portrait in *cache* that has
+    none, one request a second."""
+    todo = [record for record in cache.values()
+            if record.get("url") and not wikimedia_file(record["url"]) and "bytes" not in record]
+    if not todo:
+        return 0
+    log(f"    weights: measuring {len(todo)} portrait(s) ...")
+    done = 0
+    for record in todo:
+        time.sleep(_measure_gap)
+        found = measure(record["url"])
+        if found:
+            record.update(found)
+            done += 1
+    log(f"    weights: {done} measured, {len(todo) - done} could not be")
+    return done
 
 
 def _render(url):
@@ -309,6 +530,48 @@ def size_all(cache, log=print):
         log("    sizes: Wikimedia stopped answering; the rest are kept unchecked (rule 8)")
     log(f"    sizes: {sized} measured ({refused} refused), {len(todo) - sized} could not be")
     return sized
+
+
+def image_size(data):
+    """``(width, height)`` of a PNG, JPEG, GIF or WebP from its bytes, or None."""
+    import struct
+
+    if data[:8] == b"\x89PNG\r\n\x1a\n" and data[12:16] == b"IHDR":
+        return struct.unpack(">II", data[16:24])
+    if data[:6] in (b"GIF87a", b"GIF89a"):
+        return struct.unpack("<HH", data[6:10])
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        kind = data[12:16]
+        if kind == b"VP8 " and len(data) >= 30:
+            w, h = struct.unpack("<HH", data[26:30])
+            return w & 0x3FFF, h & 0x3FFF
+        if kind == b"VP8L" and len(data) >= 25:
+            bits = int.from_bytes(data[21:25], "little")
+            return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
+        if kind == b"VP8X" and len(data) >= 30:
+            return (int.from_bytes(data[24:27], "little") + 1,
+                    int.from_bytes(data[27:30], "little") + 1)
+        return None
+    if data[:2] == b"\xff\xd8":
+        i = 2
+        while i + 9 < len(data):
+            if data[i] != 0xFF:
+                i += 1
+                continue
+            marker = data[i + 1]
+            if marker == 0xFF:
+                i += 1
+                continue
+            if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
+                i += 2
+                continue
+            length = int.from_bytes(data[i + 2:i + 4], "big")
+            if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
+                          0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
+                h, w = struct.unpack(">HH", data[i + 5:i + 9])
+                return w, h
+            i += 2 + length
+    return None
 
 
 # ------------------------------------------------------------------ sources
@@ -506,7 +769,10 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
 
     if not todo:
         log(f"  portraits: {len(cache)} cached, nothing to resolve")
-        if size_all(cache, log=log):
+        changed = size_all(cache, log=log)
+        changed += credit_all(cache, log=log)
+        changed += measure_all(cache, log=log)
+        if changed:
             save_cache(cache, root)
         return cache, {"resolved": 0, "cached": len(cache)}
 
@@ -629,6 +895,8 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         }
 
     size_all(cache, log=log)
+    credit_all(cache, log=log)
+    measure_all(cache, log=log)
     shared = inherit_cross_links(profiles, cache)
     if shared:
         log(f"    cross-link inheritance: {shared}")
@@ -663,7 +931,7 @@ def inherit_cross_links(profiles, cache):
                 "url": source["url"], "via": "cross-link",
                 "name": profile["name"], "title": source.get("title"),
             }
-            for field in ("width", "height", "set"):
+            for field in ("width", "height", "set", "credit", "bytes"):
                 if field in source:
                     cache[key][field] = source[field]
             shared += 1
@@ -720,11 +988,39 @@ def apply_cache(profiles, cache):
         if not url or not route_ok(profile, record):
             profile["photoSource"] = None
             continue
+        if (record.get("credit") or {}).get("nonFree"):
+            # A file Wikipedia holds under fair use is licensed to no one
+            # else: it is not shown here.
+            profile["photoSource"] = None
+            continue
+        if wikimedia_file(url) and not (record.get("credit") or {}).get("licence"):
+            # Its credit has not been read yet (Commons did not answer): it
+            # waits for the next run rather than show uncredited or hold the
+            # build (rule 8), and the next photograph or the silhouette shows.
+            profile["photoSource"] = None
+            continue
         profile["photos"] = [url] + [u for u in profile["photos"] if u != url]
         profile["photo_url"] = url
         profile["photoSource"] = record.get("via")
         # Sizes of this same photograph, for the page's srcset.
         if record.get("set"):
             profile["photoSet"] = record["set"]
+        if wikimedia_file(url):
+            profile["photoCredit"] = commons_credit(record.get("credit"))
         hits += 1
     return hits
+
+
+def commons_credit(credit):
+    """What the page prints for a Commons file: its author, its licence and
+    the file's page, as the file's description page records them - or, with
+    no recorded licence, ``licence`` ``None``, which ``validate`` fails."""
+    credit = credit or {}
+    out = {"by": credit.get("by"), "licence": credit.get("licence"),
+           "licenceUrl": credit.get("licenceUrl"), "page": credit.get("file"),
+           "via": "Wikimedia Commons"}
+    if credit.get("attribution") and not credit.get("by"):
+        # The licence asks for the author and the page names none: the line
+        # says so, and links the file's page (rule 87).
+        out["authorUnrecorded"] = True
+    return out

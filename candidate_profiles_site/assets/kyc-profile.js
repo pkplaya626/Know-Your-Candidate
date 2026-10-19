@@ -69,6 +69,8 @@
       '        <span id="profileModalCrossLink" hidden></span>',
       "      </p>",
       '      <p class="modal-meta" id="profileModalStatus" hidden></p>',
+      // Whose photograph the portrait is, and on what licence (rule 87).
+      '      <p class="modal-credit" id="profileModalPhotoCredit" hidden></p>',
       "    </div>",
       "  </header>",
       '  <div class="modal-body scroll-y">',
@@ -149,7 +151,24 @@
       "  </footer>",
       "</div>",
     ].join("");
+    // The credit follows the photograph shown: a fallback that loads in
+    // place of the first is another photograph, credited by its host.
+    var photo = wrap.querySelector("#profileModalPhoto");
+    photo.addEventListener("load", showPhotoCredit);
+    photo.addEventListener("error", showPhotoCredit);
     return wrap;
+  }
+
+  /** Credit the photograph the dialog's portrait shows now, or hide the
+   *  line for the silhouette. */
+  function showPhotoCredit() {
+    var photo = el("profileModalPhoto");
+    var line = el("profileModalPhotoCredit");
+    if (!photo || !line) return;
+    var html = KYC.photoCreditHtml(
+      KYC.shownPhotoCredit(photo, KYC.byId(photo.getAttribute("data-profile"))));
+    line.innerHTML = html;
+    line.hidden = !html;
   }
 
   function el(id) {
@@ -1044,6 +1063,7 @@
     photo.setAttribute("data-profile", item.id);
     photo.alt = "Portrait of " + item.name;
     KYC.setPortrait(photo, item, "116px");
+    showPhotoCredit();
 
     el("profileModalAge").innerHTML = renderAge(item);
 

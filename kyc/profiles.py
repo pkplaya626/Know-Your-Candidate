@@ -24,7 +24,7 @@ from .normalize import (
     parse_district,
     parse_state_abbrev,
 )
-from .photos import candidate_photos, member_photos
+from .photos import assign_credits, candidate_photos, member_photos
 
 ELECTION_YEAR = 2026
 NEXT_CONGRESS_START = "2027-01-03"
@@ -1151,4 +1151,7 @@ def build_profiles(data, snapshot=None, field=None, finance=None, committees=Non
             if p["seatUp2026"] and not p["isCandidate"] and not p["seekingReelection2026"]
         ),
     }
+    # Whose photograph each chain starts with; the portrait and enrichment
+    # caches replace the first photograph later, and the build credits again.
+    assign_credits(profiles)
     return profiles, stats

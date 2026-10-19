@@ -68,7 +68,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2359 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2357 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1067,6 +1067,45 @@ URL, and `validate` fails a `photoSet` that names another file.
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
 | `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile) or `campaign-site` |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
+| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the site). Absent for the silhouette |
+
+### Credits and weights
+
+Every photograph the page shows says whose it is (rule 87). The profile and
+official dialogs print one line under the name: "Photo: Gage Skidmore, CC
+BY-SA 3.0, via Wikimedia Commons", the licence linked to its deed and
+"Wikimedia Commons" to the file's page. In October 2026, 153 of the 394
+Wikimedia portraits were CC BY or CC BY-SA, whose terms require exactly that,
+and none was credited. `portraits` reads each Commons file's `Artist`,
+`LicenseShortName` and `LicenseUrl` from its `extmetadata` (fifty files a
+request, one request a second), strips the markup from the author - with
+what Commons hides (a duplicate "Unknown author" span), an uploader's note
+about themselves, a leading file name, and any "unknown" or sentence that
+names no one (`portraits.author_of`) - names a licence code ("PDM-owner" is
+the Public Domain Mark), and keeps them in the cache as `credit`, with the
+`form` of the reading so an older one is read again; a file Wikipedia holds
+as non-free is not shown, and one whose credit Commons has not yet answered
+for waits for the next run. A fallback photograph that loads in the first one's place is credited
+by its host, from `kycBuildMeta.photoCredits`. `validate` fails a photograph
+with no credit (`photo-uncredited`) and a Commons portrait with no recorded
+licence (`photo-licence-missing`).
+
+A portrait not on Wikimedia is one file at one size, so its weight is
+recorded when it is found: `bytes`, `width` and `height` in the portrait
+cache for the House Clerk's (50-100 KB, 335px), `portraitWeight` in the
+enrichment cache for a campaign's, `headshotWeight` in the executives cache
+for a governor's NGA headshot. An image over 300 KB or 1,200px
+(`photos.MAX_PORTRAIT_BYTES`, `MAX_PORTRAIT_PX`) is shown smaller from the
+same file (`photos.lighter_form`): its host's own resizer (Squarespace,
+imgix) or WordPress.com's Photon (`i0.wp.com/<host>/<path>?w=500`), at 500px
+or 330px, once that copy is weighed, within the caps and the same shape as
+the original. Where neither serves it, the original is shown all the same,
+and `portraitHeavy` says so (`kept: true`). On 2026-10-18, 21 of the
+campaign portraits were over the caps: 20 are shown smaller, one at full
+size; 33 of the 55 governors' headshots are shown through Photon
+(`headshotSmall`). The page offers a srcset no size wider than a 2x screen
+needs for the width it draws, so a 165px card stops at the 330px file and a
+judge's 116px portrait at the 250px one.
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
 hand-corrected URL.
@@ -1668,6 +1707,29 @@ confirm it. A few offices need another official page
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.
 
+An attorney general's photograph is the office's own
+(`officers.add_ag_photos`), read from the pages that confirmed the name and
+the attorney general's page they link ("Meet the Attorney General", "About
+Nick Brown"): never NAAG's, which refuses every script, never a party
+association's, and only for a holder the office confirmed. An image is taken
+when its file name or alt text carries the surname and says it is a likeness
+("headshot", "portrait", "photo of") or is nothing but the name and the
+title; when nothing in its words or class says logo, banner, seal, header,
+slider or a scene ("talking to a townhall crowd", "sworn in"); when it is
+head-and-shoulders shaped; and when it, or a size of the same file its
+srcset or its host's resizer serves, is no heavier than 300 KB or 1,200px.
+The cache keeps `photo`, `photoPage` and `photoWeight`; a read that
+concludes nothing keeps the same person's last photograph. On 2026-10-18 the
+offices of 19 of the 48 confirmed attorneys general showed one that passed;
+the others' are too heavy (California's is 6 MB), landscape, unlabelled or
+drawn by script, and each build lists them. A photograph the rosters cannot
+tie to a person - NASS files some under the state's code, "AZ.jpg" - or one
+from a governor's own office where the NGA's is over 1 MB is shown through
+`overrides.OFFICER_PHOTOS`, an entry naming the holder it was checked for,
+the page, its weight and the evidence, and it is withheld, with a warning,
+once the roster names someone else. Each card's sources line says whose
+every photograph on it is.
+
 ### What else is on the November 3 ballot
 
 The site lists the candidates for Congress, but a reader's ballot holds
@@ -1835,7 +1897,7 @@ per court show them (below).
 | Who sits on the Supreme Court | supremecourt.gov's list of the justices (rule 57) | The directory's open Supreme Court rows include two retired justices, who are not members: read naively it seats eleven |
 | The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover |
 | The territorial courts' judges | Each court's own website (`kyc/territorial_courts.py`): Guam's "Judicial Officers" page, the Northern Mariana Islands' banner, each Virgin Islands judge's own page | A recipe per court, as for the state high courts (rule 57): district judges only, never more than the statute's seats (48 U.S.C. 1424b, 1614, 1821), at most one chief; a page not read keeps the last roster, and one never read says so - never "none". Shown by name and title, with nothing to open |
-| A judge's Wikipedia article, Wikidata item and portrait | The FJC's own page for the judge's `nid`, whose canonical address is the judge's slug; the Wikidata item carrying that slug as P2736 (`kyc/judge_links.py`) | Two ids, never a name. Two items for one slug, a label or article title without the surname, an item whose year of birth is not the directory's (or that gives none), two images or two articles: nothing. A portrait is a JPEG, PNG or WebP no more than a fifth wider than tall, not in `overrides.NOT_A_PORTRAIT`, drawn from Wikimedia's sizes of that one file (rule 42) and credited to Wikimedia Commons. Read by `judiciary`; a failure keeps the last links |
+| A judge's Wikipedia article, Wikidata item and portrait | The FJC's own page for the judge's `nid`, whose canonical address is the judge's slug; the Wikidata item carrying that slug as P2736 (`kyc/judge_links.py`) | Two ids, never a name. Two items for one slug, a label or article title without the surname, an item whose year of birth is not the directory's (or that gives none), two images or two articles: nothing. A portrait is a JPEG, PNG or WebP no more than a fifth wider than tall, not in `overrides.NOT_A_PORTRAIT`, drawn from Wikimedia's sizes of that one file (rule 42) and credited under the judge's name with its author and licence as the file's Commons page records them (`by`, `licence`, `licenceUrl`, read with the file's size); a file with no recorded licence, or a non-free one, is not shown, and the build fails a Commons portrait without a licence (`judge-portrait-licence-missing`). Read by `judiciary`; a failure keeps the last links |
 | Each court's website | uscourts.gov's list of court websites (`kyc/court_info.py`) | Joined to the court ids by the circuit, state and district the list names, never by host name (`ca-n` is `cand.uscourts.gov`); every host the judiciary's own; each address fetched once |
 | Which district court, and which division, covers each county | 28 U.S.C. 81-131 as govinfo publishes it (`tools/fetch_court_districts.py`, `kyc/court_districts.py`) into `data/court_districts.json`, with the amendments since the edition | The statute's names joined to the Census counties by name within the state; every county of a state of several districts placed exactly once or the build fails; a Code spelling or typo is an evidenced alias; Virginia's independent cities placed by their neighbours only where all agree |
 

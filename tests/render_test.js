@@ -660,7 +660,8 @@ async function testDirectory() {
       img.setAttribute("data-profile", real.id);
       KYC.setPortrait(img, real, "116px");
       check("the dialog's portrait gets the sizes too",
-        img.getAttribute("srcset") === KYC.portraitSrcset(real) && img.getAttribute("sizes") === "116px");
+        img.getAttribute("srcset") === KYC.portraitSrcset(real, "116px") &&
+          img.getAttribute("sizes") === "116px");
       KYC.handleImageFallback(img, real.id);
       check("a size that fails is retried as the same photograph's plain URL",
         !img.hasAttribute("srcset") && !img.hasAttribute("sizes") &&
@@ -673,6 +674,102 @@ async function testDirectory() {
       check("the next profile's portrait does not keep the last one's sizes",
         !img.hasAttribute("srcset") && !img.hasAttribute("sizes"));
     }
+
+    // TECH-13: a 165px card on a 3x phone fetched a 494px original. No size
+    // wider than a 2x screen needs is offered; the smallest at least that
+    // wide is the last.
+    const four = { photos: ["https://u.test/x.jpg"], photoSet: [120, 250, 330, 494].map((w) =>
+      [w, "https://u.test/" + w + "px-x.jpg"]) };
+    const widths = (sizes) => KYC.portraitSrcset(four, sizes).split(", ").map((e) => e.split(" ")[1]);
+    check("a 165px card is offered sizes up to 330px, never the 494px original",
+      widths("165px").join() === "120w,250w,330w", widths("165px").join());
+    check("a 116px dialog portrait up to 250px", widths("116px").join() === "120w,250w",
+      widths("116px").join());
+    check("a 36px circle the smallest alone", widths("36px").join() === "120w", widths("36px").join());
+  });
+
+  suite("index.html — every portrait says whose photograph it is (rule 87)", () => {
+    // 148 of 381 Wikimedia portraits were CC BY or CC BY-SA, and none was
+    // credited; the footer credited every portrait to Congress.gov (TRUST-08).
+    const shown = window.legislatorsData.filter((p) => (p.photos || [])[0] &&
+      p.photos[0] !== "placeholder");
+    const bare = shown.filter((p) => !p.photoCredit || !(p.photoCredit.by || p.photoCredit.licence));
+    check("every profile that shows a photograph carries its credit", !bare.length,
+      bare.slice(0, 5).map((p) => p.id).join(","));
+    const unlicensed = shown.filter((p) => /wikimedia\.org/.test(p.photos[0]) &&
+      !(p.photoCredit || {}).licence);
+    check("and every Wikimedia one its licence", !unlicensed.length,
+      unlicensed.slice(0, 5).map((p) => p.id).join(","));
+
+    const line = () => D.getElementById("profileModalPhotoCredit");
+    const commons = shown.find((p) => (p.photoCredit || {}).via === "Wikimedia Commons" &&
+      p.photoCredit.by && p.photoCredit.licenceUrl && p.photoCredit.page);
+    check("a Commons portrait with an author and a licence link exists", !!commons);
+    if (commons) {
+      KYC.profile.open(commons.id);
+      const text = line().textContent;
+      check("the dialog credits its author, its licence and Commons",
+        !line().hidden && text.indexOf("Photo: " + commons.photoCredit.by + ", " +
+          commons.photoCredit.licence + ", via Wikimedia Commons") === 0, text);
+      check("linking the licence and the file's own page",
+        !!line().querySelector('a[href="' + commons.photoCredit.licenceUrl + '"]') &&
+          !!line().querySelector('a[href="' + commons.photoCredit.page + '"]'));
+      KYC.profile.close();
+    }
+
+    const house = shown.find((p) => p.photoSource === "clerk.house.gov" && p.photos.length > 2);
+    if (house) {
+      KYC.profile.open(house.id);
+      check("a House portrait is the House's",
+        line().textContent === "Photo: U.S. House of Representatives", line().textContent);
+      // A fallback that loads in the first one's place is another
+      // photograph, credited by the host that serves it.
+      const photo = D.getElementById("profileModalPhoto");
+      KYC.handleImageFallback(photo, house.id);
+      photo.dispatchEvent(new window.Event("load"));
+      const host = new URL(house.photos[1]).hostname;
+      check("a fallback photograph is credited to its own source",
+        line().textContent === "Photo: " + window.kycBuildMeta.photoCredits[host],
+        line().textContent);
+      KYC.profile.close();
+    }
+
+    const campaign = shown.find((p) => p.photoSource === "campaign-site");
+    if (campaign) {
+      KYC.profile.open(campaign.id);
+      check("a campaign's photograph is credited to its website, linked",
+        /^Photo: the campaign's website/.test(line().textContent) &&
+          !!line().querySelector("a[href^='https://']"), line().textContent);
+      KYC.profile.close();
+    }
+
+    const silhouette = window.legislatorsData.find((p) => (p.photos || [])[0] === "placeholder");
+    if (silhouette) {
+      KYC.profile.open(silhouette.id);
+      check("the silhouette is credited to no one", line().hidden && !line().textContent);
+      KYC.profile.close();
+    }
+
+    const hostile = KYC.photoCreditHtml({ by: '<img src=x onerror="1">', licence: "CC BY 4.0",
+      licenceUrl: "javascript:alert(1)", page: "https://commons.wikimedia.org/wiki/File:X.jpg",
+      via: "Wikimedia Commons" });
+    check("a credit is escaped, and links only http(s)",
+      !/<img/.test(hostile) && !/javascript:/.test(hostile) && /CC BY 4\.0/.test(hostile), hostile);
+    // A licence asking for an author the file's page does not name says so,
+    // and still links the file's page; it never prints a placeholder name.
+    const unrecorded = KYC.photoCreditHtml({ by: null, licence: "CC BY-SA 4.0",
+      page: "https://commons.wikimedia.org/wiki/File:Judge_Moore.jpg", via: "Wikimedia Commons",
+      authorUnrecorded: true });
+    check("a credit with no recorded author says so, and links the file",
+      /^Photo: author not recorded on Commons, /.test(unrecorded.replace(/<[^>]+>/g, "")) &&
+        /File:Judge_Moore\.jpg/.test(unrecorded), unrecorded);
+    const shownCredits = window.legislatorsData
+      .map((p) => KYC.photoCreditHtml(p.photoCredit).replace(/<[^>]+>/g, ""))
+      .filter(Boolean);
+    check("no credit prints a doubled phrase, a file name or an uploader's sentence",
+      shownCredits.length > 0 && shownCredits.every((t) =>
+        !/Unknown author Unknown author|\.jpe?g\s*:|I do not know|uploader|PDM-owner/i.test(t)),
+      shownCredits.filter((t) => /Unknown author Unknown|\.jpe?g\s*:|I do not know/i.test(t))[0]);
     const profileJs = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
     check("the dialog sets its portrait through setPortrait",
       /KYC\.setPortrait\(photo, item, "116px"\)/.test(profileJs) && !/photo\.src\s*=/.test(profileJs));
@@ -7057,10 +7154,44 @@ async function testStateGov() {
         !/party-/.test(shape(unconfirmed).style.fill) &&
         /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent));
     }
+    // STATEGOV-13: no attorney general had a photograph, so their rows read
+    // differently from every row above them.
+    const pictured = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.photo &&
+      !data.states[c].ag.unconfirmed);
+    check("attorneys general are pictured", !!pictured);
+    if (pictured) {
+      const ag = data.states[pictured].ag;
+      pick("#/?state=" + pictured + "&mode=ag");
+      check("a confirmed attorney general's row carries their photograph",
+        [...D.querySelectorAll("#delegation .gov-officer-photo")].some((i) =>
+          i.getAttribute("src") === ag.photo));
+      const sources = (D.querySelector("#delegation .gov-sources") || {}).textContent || "";
+      check("and the sources say whose photograph it is (rule 87)",
+        sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
+    }
+    // A named holder without a photograph keeps the photograph's column, so
+    // the row lines up with the pictured rows above it.
+    const bare = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.name &&
+      !data.states[c].ag.photo && !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed);
+    if (bare) {
+      pick("#/?state=" + bare + "&mode=ag");
+      const row = [...D.querySelectorAll("#delegation .gov-officer")].find((li) =>
+        li.textContent.indexOf(data.states[bare].ag.name) !== -1);
+      check("an unpictured attorney general's row keeps the photograph's column",
+        !!row && !row.classList.contains("gov-officer-text") &&
+        !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"));
+    }
   });
 
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
+    const uncredited = stateCodes.filter((c) => {
+      const s = data.states[c];
+      return (s.governor.headshot && !s.governor.headshotBy) ||
+        ["lt", "ag", "sos"].some((k) => s[k] && s[k].photo && !s[k].photoBy);
+    });
+    check("every photograph on a state's card says whose it is (rule 87)", !uncredited.length,
+      uncredited.join(","));
     check("a majority is more than half of all seats", stateCodes.every((c) => {
       const s = data.states[c];
       return ["upper", "lower"].every((k) => {
@@ -8502,7 +8633,12 @@ async function testFederal() {
     check("an executive photo is drawn from the sizes of that one file", sized.length > 0 &&
       sized.every((img) => urlsOf(img).every((u) =>
         u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
-      sized.some((img) => urlsOf(img).length > 1));
+      sized.some((img) => urlsOf(img).length > 0));
+    // TECH-13: a 72px photo is offered no size wider than a 2x screen needs.
+    const widthsOf = (img) => [...(img.getAttribute("srcset") || "").matchAll(/\s(\d+)w/g)]
+      .map((m) => parseInt(m[1], 10));
+    check("and offered no size wider than a 2x screen needs", sized.every((img) =>
+      widthsOf(img).filter((w) => w >= 144).length <= 1));
     // The court tables; the list of vacancies links courts again, by row.
     const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')]
       .filter((a) => !a.closest("#vacancy-list")).map((a) => a.getAttribute("href"))
@@ -8734,6 +8870,10 @@ async function testFederal() {
       !!modal.querySelector('a[href^="https://www.senate.gov/"]'));
     check("and no party", !PARTY_WORDS.test(D.getElementById("officialModalMeta").textContent) &&
       !modal.querySelector(".party-tag"));
+    const credit = D.getElementById("officialModalPhotoCredit");
+    check("their photograph is credited under their name, as a profile's is (rule 87)",
+      office.holder.photo ? !credit.hidden && credit.textContent === "Photo: The White House"
+        : credit.hidden, credit.textContent);
     KYC.official.close();
     const record = d.offices.find((o) => o.holder && (o.holder.politicalHistory || {}).rows &&
       o.holder.politicalHistory.rows.some((r) => r.congress));
@@ -9441,7 +9581,22 @@ async function testFederalAudit() {
       const file = (/\/commons\/(?:thumb\/)?([0-9a-f]\/[0-9a-f]{2}\/[^/]+)/.exec(withLinks.judge.portrait.set[0][1]) || [])[1];
       check("a portrait, in sizes of one Wikimedia file only (rule 42)", !!file && urls.length > 1 &&
         urls.every((u) => u.startsWith("https://upload.wikimedia.org/") && u.includes(file)), urls.join(" "));
-      check("credited, with a link to the file", /Wikimedia Commons/.test(doc.getElementById("officialModalSource").textContent));
+      // Rule 87: its author and licence, as the file's own page gives them,
+      // on the line under the name, linked to the file.
+      const credit = doc.getElementById("officialModalPhotoCredit");
+      const p = withLinks.judge.portrait;
+      check("a judge's Commons portrait carries its licence", !!p.licence, JSON.stringify(p));
+      check("credited under the name with its author, licence and Commons, linked to the file",
+        !credit.hidden && credit.textContent.indexOf("Photo: " + (p.by ? p.by + ", " :
+          p.authorUnrecorded ? "author not recorded on Commons, " : "") + p.licence +
+          ", via Wikimedia Commons") === 0 && !!credit.querySelector('a[href="' + p.source + '"]'),
+        credit.textContent);
+      // TECH-13: the 116px portrait is offered no size wider than a 2x
+      // screen needs; a 3x phone fetched the Commons original.
+      const widths = (photo.getAttribute("srcset") || "").split(",").map((x) =>
+        parseInt(x.trim().split(" ")[1], 10)).filter((w) => w > 0);
+      check("the dialog's srcset stops at the first size a 2x screen needs",
+        widths.length > 0 && widths.filter((w) => w >= 232).length <= 1, widths.join(" "));
     });
   }
 }

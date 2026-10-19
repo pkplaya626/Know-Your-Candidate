@@ -42,7 +42,8 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .portraits import article_is_theirs, surname_of, title_is_about
+from .photos import campaign_credit, lighter_form, too_heavy
+from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "enrichment.json")
@@ -798,48 +799,6 @@ def _hinted(words):
         a in words and b in words for a, b in _PORTRAIT_PAIRS)
 
 
-def image_size(data):
-    """``(width, height)`` of a PNG, JPEG, GIF or WebP from its bytes, or None."""
-    import struct
-
-    if data[:8] == b"\x89PNG\r\n\x1a\n" and data[12:16] == b"IHDR":
-        return struct.unpack(">II", data[16:24])
-    if data[:6] in (b"GIF87a", b"GIF89a"):
-        return struct.unpack("<HH", data[6:10])
-    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
-        kind = data[12:16]
-        if kind == b"VP8 " and len(data) >= 30:
-            w, h = struct.unpack("<HH", data[26:30])
-            return w & 0x3FFF, h & 0x3FFF
-        if kind == b"VP8L" and len(data) >= 25:
-            bits = int.from_bytes(data[21:25], "little")
-            return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
-        if kind == b"VP8X" and len(data) >= 30:
-            return (int.from_bytes(data[24:27], "little") + 1,
-                    int.from_bytes(data[27:30], "little") + 1)
-        return None
-    if data[:2] == b"\xff\xd8":
-        i = 2
-        while i + 9 < len(data):
-            if data[i] != 0xFF:
-                i += 1
-                continue
-            marker = data[i + 1]
-            if marker == 0xFF:
-                i += 1
-                continue
-            if marker in (0xD8, 0x01) or 0xD0 <= marker <= 0xD7:
-                i += 2
-                continue
-            length = int.from_bytes(data[i + 2:i + 4], "big")
-            if marker in (0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7,
-                          0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF):
-                h, w = struct.unpack(">HH", data[i + 5:i + 9])
-                return w, h
-            i += 2 + length
-    return None
-
-
 def portrait_shape(url, hinted=False):
     """``True`` when the image is head-and-shoulders shaped, ``False`` when it
     is not (a banner, a wordmark, an icon), ``None`` when it could not be read.
@@ -849,25 +808,39 @@ def portrait_shape(url, hinted=False):
     nineteen images the first full run took that were not portraits, fifteen
     were. An image whose own name says it is a headshot may be square.
     """
+    return portrait_check(url, hinted)[0]
+
+
+def portrait_check(url, hinted=False):
+    """``(shape, weight)``: :func:`portrait_shape`'s verdict, and the
+    image's ``{"bytes", "width", "height"}`` when it was read (``None``
+    otherwise). A file larger than the read limit weighs at least that."""
     try:
         req = urllib.request.Request(url, headers=dict(
             _UA_WEB, Accept="image/jpeg,image/png,image/webp,image/*;q=0.8"))
         with urllib.request.urlopen(req, timeout=_TIMEOUT) as response:
             if response.status != 200:
-                return False
+                return False, None
             if not (response.headers.get("Content-Type") or "").startswith("image/"):
-                return False
-            data = response.read(MAX_BODY)
+                return False, None
+            data = response.read(MAX_BODY + 1)
+            length = response.headers.get("Content-Length") or ""
+            encoding = response.headers.get("Content-Encoding")
     except urllib.error.HTTPError as exc:
-        return None if exc.code in (403, 429) or exc.code >= 500 else False
+        return (None if exc.code in (403, 429) or exc.code >= 500 else False), None
     except Exception:
-        return None
-    size = image_size(data)
+        return None, None
+    # Some servers gzip an image when asked for gzip at all (Missouri's
+    # attorney general's headshot): its size is read from the image, its
+    # weight is what crossed the wire.
+    size = image_size(_decoded(data, encoding) or b"")
     if not size or not all(size):
-        return None
+        return None, None
     width, height = size
+    weight = {"bytes": int(length) if length.isdigit() else len(data),
+              "width": width, "height": height}
     widest = 1.35 if hinted else 0.9
-    return min(width, height) >= 200 and 0.5 <= width / height <= widest
+    return min(width, height) >= 200 and 0.5 <= width / height <= widest, weight
 
 
 def portrait(page, base, profile):
@@ -993,11 +966,88 @@ def _read_one(profile, url, pause=1.0, extract=True, rivals=()):
     refused = [u for u, _ in pictures if u in overrides.NOT_A_PORTRAIT]
     if refused:
         record["notPortraits"] = refused
-    for picture, hinted in [p for p in pictures if p[0] not in refused][:3]:
-        if portrait_shape(picture, hinted) is True:
-            record["portrait"] = picture
-            break
+    take_portrait(record, [p for p in pictures if p[0] not in refused])
     return record
+
+
+def _weigh(url):
+    """An image's weight, for ``photos.lighter_form``; ``None`` unread."""
+    return portrait_check(url, True)[1]
+
+
+def lighten(record, picture, weight):
+    """Put *picture* in *record* as its portrait, at a lighter form of the
+    same file when it is too heavy (``photos.lighter_form``: the host's own
+    resizer, or Photon). A heavy file with no lighter form is still taken -
+    a nominee's only likeness is not withheld for its weight; eleven were,
+    and showed the silhouette beside an opponent's photograph - and the
+    weight is said in ``portraitHeavy`` either way (TECH-13)."""
+    why = too_heavy(weight)
+    if why:
+        found = lighter_form(picture, weight, _weigh)
+        record["portraitHeavy"] = [{"url": picture, "why": why,
+                                    "kept": not found}]
+        if found:
+            picture, weight = found
+    else:
+        record.pop("portraitHeavy", None)
+    record["portrait"] = picture
+    if weight:
+        record["portraitWeight"] = weight
+    return picture
+
+
+def take_portrait(record, pictures, tries=3):
+    """Put the first of *pictures* that is head-and-shoulders shaped in
+    *record*, with its measured weight, lightened if it is too heavy
+    (:func:`lighten`)."""
+    record.pop("portrait", None)
+    record.pop("portraitWeight", None)
+    record.pop("portraitHeavy", None)
+    for picture, hinted in pictures[:tries]:
+        verdict, weight = portrait_check(picture, hinted)
+        if verdict is True:
+            return lighten(record, picture, weight)
+    return None
+
+
+def measure_portraits(cache, log=print, pause=1.0):
+    """Weigh each cached campaign-site portrait that has no recorded weight,
+    and lighten one that is too heavy (:func:`lighten`). Returns how many
+    were weighed.
+
+    Only the image is fetched, never the site: a picture is chosen by the
+    full read (``_read_one``), which first checks that the page names the
+    candidate (rule 38) and is not spam or parking (rule 39). A record whose
+    picture an earlier run refused for its weight alone (``portraitHeavy``
+    with no ``portrait``) has that same picture weighed again and taken,
+    lightened where it can be."""
+    people = (cache or {}).get("people") or {}
+    weighed = 0
+    for entry in people.values():
+        for key in ("site", "listed"):
+            record = entry.get(key) or {}
+            refused = record.get("portraitHeavy") or []
+            if record.get("portrait"):
+                # A heavy one kept at full size is tried again each run.
+                if "portraitWeight" in record and not too_heavy(record["portraitWeight"]):
+                    continue
+                picture = record["portrait"]
+            elif refused:
+                picture = refused[0]["url"]
+            else:
+                continue
+            time.sleep(pause)
+            weight = _weigh(picture)
+            if not weight:
+                continue                       # could not tell: kept (rule 8)
+            weighed += 1
+            lighten(record, picture, weight)
+            if record.get("portraitHeavy"):
+                state = ("kept at full size" if record["portraitHeavy"][0]["kept"]
+                         else "taken smaller")
+                log(f"    {entry.get('name')}: {picture} is {too_heavy(weight)}; {state}")
+    return weighed
 
 
 # --------------------------------------------------------------------- cache
@@ -1139,6 +1189,11 @@ def resolve_all(profiles, root=".", refresh=False, limit=None, log=print, worker
                 save_cache(cache, root)
                 log(f"    {done}/{len(todo)} read")
     cache["checked"] = stamp
+    # A portrait taken before weights were recorded, by a read not yet due
+    # again, is weighed now (TECH-13).
+    weighed = measure_portraits(cache, log=log)
+    if weighed:
+        log(f"    weighed {weighed} campaign-site portrait(s)")
     save_cache(cache, root)
 
     counts = collections.Counter()
@@ -1268,6 +1323,10 @@ def apply_cache(profiles, cache, as_of=None):
         if shown.get("issues") and fill_field(profile, "platforms", "; ".join(shown["issues"]),
                                               "campaign-site"):
             counts["issues"] += 1
+        if shown.get("portrait") and too_heavy(shown.get("portraitWeight")):
+            # No lighter form of it was found (lighten): shown all the same,
+            # lazily, and counted for the build's report (TECH-13).
+            counts["portrait_heavy"] += 1
         if shown.get("portrait") and not profile.get("photoSource") \
                 and profile.get("source") == "fec-field" \
                 and shown["portrait"] not in overrides.NOT_A_PORTRAIT:
@@ -1275,6 +1334,7 @@ def apply_cache(profiles, cache, as_of=None):
             profile["photos"] = [shown["portrait"]] + photos
             profile["photo_url"] = shown["portrait"]
             profile["photoSource"] = "campaign-site"
+            profile["photoCredit"] = campaign_credit(profile.get("campaignSite"))
             counts["portrait"] += 1
     return counts
 

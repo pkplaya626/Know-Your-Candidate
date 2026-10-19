@@ -6,6 +6,13 @@
    "office": "https://law.alaska.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://law.alaska.gov/img/Mills.jpg",
+   "photoPage": "https://law.alaska.gov/department/about.html",
+   "photoWeight": {
+    "bytes": 28072,
+    "height": 250,
+    "width": 200
+   },
    "selection": "Appointed by the governor",
    "title": "Acting Attorney General"
   },
@@ -15,6 +22,13 @@
    "office": "https://www.alabamaag.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://live-al-ago.pantheonsite.io/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
+   "photoPage": "https://www.alabamaag.gov/",
+   "photoWeight": {
+    "bytes": 10190,
+    "height": 300,
+    "width": 283
+   },
    "title": "Attorney General"
   },
   "AR": {
@@ -31,6 +45,13 @@
    "office": "https://www.azag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png?w=300&ssl=1",
+   "photoPage": "https://www.azag.gov/",
+   "photoWeight": {
+    "bytes": 82254,
+    "height": 300,
+    "width": 300
+   },
    "title": "Attorney General"
   },
   "CA": {
@@ -39,6 +60,13 @@
    "office": "https://www.oag.ca.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg?w=300&ssl=1",
+   "photoPage": "https://www.oag.ca.gov/",
+   "photoWeight": {
+    "bytes": 8728,
+    "height": 450,
+    "width": 300
+   },
    "title": "Attorney General"
   },
   "CO": {
@@ -47,6 +75,13 @@
    "office": "https://coag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://coag.gov/app/uploads/2019/06/phil-weiser-pillars-copy-200x300.png",
+   "photoPage": "https://coag.gov/about-us/colorado-attorney-general/",
+   "photoWeight": {
+    "bytes": 86486,
+    "height": 300,
+    "width": 200
+   },
    "title": "Attorney General"
   },
   "CT": {
@@ -55,6 +90,13 @@
    "office": "https://portal.ct.gov/ag",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://portal.ct.gov/-/media/ag/about-the-ag/agtong-headshot.png?rev=4a0632a1575241d28bb665b018292c1b&la=en&h=185&w=200&hash=967A32323799CA3E2102ABB9309E36C1",
+   "photoPage": "https://portal.ct.gov/ag/about-the-ag/william-tong-biography-page",
+   "photoWeight": {
+    "bytes": 44010,
+    "height": 185,
+    "width": 200
+   },
    "title": "Attorney General"
   },
   "DE": {
@@ -79,6 +121,13 @@
    "office": "https://law.georgia.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://law.georgia.gov/sites/law.georgia.gov/files/styles/square/public/2025-07/Chris%20Carr%20Headshot%20%282025%29_0.jpg?h=42c7cc76&itok=p0yGEBpV",
+   "photoPage": "https://law.georgia.gov/biography-attorney-general",
+   "photoWeight": {
+    "bytes": 106794,
+    "height": 1000,
+    "width": 1000
+   },
    "title": "Attorney General"
   },
   "HI": {
@@ -120,6 +169,13 @@
    "office": "https://www.in.gov/attorneygeneral/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.in.gov/attorneygeneral/images/ag-rokita.jpg",
+   "photoPage": "https://www.in.gov/attorneygeneral/about-the-office/about-the-attorney-general",
+   "photoWeight": {
+    "bytes": 32959,
+    "height": 463,
+    "width": 327
+   },
    "title": "Attorney General"
   },
   "KS": {
@@ -136,6 +192,13 @@
    "office": "https://www.ag.ky.gov/Pages/default.aspx",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.ag.ky.gov/about/SiteAssets/Pages/Attorney-General/Russell-Coleman-400x500.jpg",
+   "photoPage": "https://www.ag.ky.gov/about/Pages/Attorney-General.aspx",
+   "photoWeight": {
+    "bytes": 125394,
+    "height": 500,
+    "width": 400
+   },
    "title": "Attorney General"
   },
   "LA": {
@@ -144,6 +207,13 @@
    "office": "https://www.ag.state.la.us/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.ag.state.la.us/images/Liz/AgLizMurrillHeadshot.jpg",
+   "photoPage": "https://www.ag.state.la.us/",
+   "photoWeight": {
+    "bytes": 207604,
+    "height": 1165,
+    "width": 900
+   },
    "title": "Attorney General"
   },
   "MA": {
@@ -170,8 +240,7 @@
    "party": "D",
    "partyKey": "D",
    "selection": "Chosen by the legislature",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "MI": {
    "listedBy": "Democratic Attorneys General Association",
@@ -187,6 +256,13 @@
    "office": "https://www.ag.state.mn.us/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://www.ag.state.mn.us/_Img/hm/Keith-Ellison.jpg",
+   "photoPage": "https://www.ag.state.mn.us/",
+   "photoWeight": {
+    "bytes": 17988,
+    "height": 200,
+    "width": 134
+   },
    "title": "Attorney General"
   },
   "MO": {
@@ -195,6 +271,13 @@
    "office": "https://ago.mo.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://ago.mo.gov/wp-content/uploads/Hanaway-Headshot-230x300.jpg",
+   "photoPage": "https://ago.mo.gov/",
+   "photoWeight": {
+    "bytes": 25764,
+    "height": 300,
+    "width": 230
+   },
    "title": "Attorney General"
   },
   "MS": {
@@ -211,6 +294,13 @@
    "office": "https://dojmt.gov/attorney-generals-office/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://dojmt.gov/wp-content/uploads/2024/01/austin-knudsen-about-200x200.png",
+   "photoPage": "https://dojmt.gov/attorney-generals-office/",
+   "photoWeight": {
+    "bytes": 5972,
+    "height": 200,
+    "width": 200
+   },
    "title": "Attorney General"
   },
   "NC": {
@@ -227,6 +317,13 @@
    "office": "https://attorneygeneral.nd.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://attorneygeneral.nd.gov/wp-content/uploads/2023/02/Attorney-General-Wrigley.jpg",
+   "photoPage": "https://attorneygeneral.nd.gov/attorney-generals-office/attorney-general-drew-h-wrigley/",
+   "photoWeight": {
+    "bytes": 64762,
+    "height": 1152,
+    "width": 768
+   },
    "title": "Attorney General"
   },
   "NE": {
@@ -253,6 +350,13 @@
    "office": "https://www.njoag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg?w=300&ssl=1",
+   "photoPage": "https://www.njoag.gov/about/meet-attorney-general-davenport/",
+   "photoWeight": {
+    "bytes": 8662,
+    "height": 375,
+    "width": 300
+   },
    "selection": "Appointed by the governor",
    "title": "Attorney General"
   },
@@ -262,6 +366,13 @@
    "office": "https://nmdoj.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://nmdoj.gov/wp-content/uploads/2023/12/DSC071201-e1702312591459-996x1024-1-292x300.png",
+   "photoPage": "https://nmdoj.gov/about-the-office/meet-the-attorney-general/",
+   "photoWeight": {
+    "bytes": 38635,
+    "height": 300,
+    "width": 292
+   },
    "title": "Attorney General"
   },
   "NV": {
@@ -270,6 +381,13 @@
    "office": "https://ag.nv.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://ag.nv.gov/uploadedImages/agnvgov/Content/About/20210324_AGPic.jpg",
+   "photoPage": "https://ag.nv.gov/About/AG_Aaron_Ford/",
+   "photoWeight": {
+    "bytes": 39455,
+    "height": 480,
+    "width": 480
+   },
    "title": "Attorney General"
   },
   "NY": {
@@ -286,6 +404,13 @@
    "office": "https://www.ohioattorneygeneral.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.ohioattorneygeneral.gov/Images/Media/ANDY-WILSON.aspx",
+   "photoPage": "https://www.ohioattorneygeneral.gov/About-AG/Andy-Wilson",
+   "photoWeight": {
+    "bytes": 51718,
+    "height": 300,
+    "width": 253
+   },
    "title": "Attorney General"
   },
   "OK": {
@@ -302,6 +427,13 @@
    "office": "https://www.doj.state.or.us/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://www.doj.state.or.us/wp-content/uploads/2024/12/Rayfield_400x600x96_4-17x6-25-250x375.jpg",
+   "photoPage": "https://www.doj.state.or.us/",
+   "photoWeight": {
+    "bytes": 14942,
+    "height": 375,
+    "width": 250
+   },
    "title": "Attorney General"
   },
   "PA": {
@@ -318,6 +450,13 @@
    "office": "https://riag.ri.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://riag.ri.gov/sites/g/files/xkgbur496/files/styles/max_325x325/public/2021-05/PFN.jpg?itok=L5nFPCGM",
+   "photoPage": "https://riag.ri.gov/about-our-office/attorney-general-peter-f-neronha",
+   "photoWeight": {
+    "bytes": 12900,
+    "height": 325,
+    "width": 260
+   },
    "title": "Attorney General"
   },
   "SC": {
@@ -334,6 +473,13 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://i0.wp.com/atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg?w=300&ssl=1",
+   "photoPage": "https://atg.sd.gov/OurOffice/bio.aspx",
+   "photoWeight": {
+    "bytes": 11176,
+    "height": 449,
+    "width": 300
+   },
    "title": "Attorney General"
   },
   "TN": {
@@ -342,6 +488,13 @@
    "office": "https://www.tn.gov/attorneygeneral.html",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti/_jcr_content/contentFullWidth/tn_textandimage/image.img.jpg/1740766397785.jpg",
+   "photoPage": "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti.html",
+   "photoWeight": {
+    "bytes": 82283,
+    "height": 400,
+    "width": 400
+   },
    "selection": "Appointed by the state Supreme Court",
    "title": "Attorney General"
   },
@@ -375,6 +528,13 @@
    "office": "https://ago.vermont.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://ago.vermont.gov/sites/ago/files/inline-images/Charity%20R%20Clark%20headshot.jpg",
+   "photoPage": "https://ago.vermont.gov/about-attorney-generals-office",
+   "photoWeight": {
+    "bytes": 48182,
+    "height": 813,
+    "width": 581
+   },
    "title": "Attorney General"
   },
   "WA": {
@@ -411,7 +571,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-17T18:07:17+00:00",
+ "fetched": "2026-10-18T22:56:19+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
@@ -796,6 +956,7 @@
    "name": "Ghazala Hashmi",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://i0.wp.com/nlga.us/wp-content/uploads/2026/03/Hashmi1.jpg?ssl=1&w=300",
    "title": "Lieutenant Governor",
    "website": "https://www.ltgov.virginia.gov/"
   },

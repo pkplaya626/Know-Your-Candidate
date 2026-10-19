@@ -204,6 +204,36 @@ class TestForState(unittest.TestCase):
             nlga_entry(n.title(), "A B (D), Lieutenant Governor") for n in US_STATES if n != "NEW JERSEY")
         self.assertNotIn("photo", officers.parse_nlga(page)["NJ"])
 
+    def test_an_nlga_card_with_only_a_src_keeps_its_photo(self):
+        # Virginia's card carried a plain src, no srcset, and Ghazala
+        # Hashmi lost her photograph (STATEGOV-13). The host's own resizer
+        # gives the same file at 300px.
+        from kyc.normalize import US_STATES
+        card = nlga_entry("Virginia", "Ghazala Hashmi (D), Lieutenant Governor").replace(
+            'src="https://i0.wp.com/nlga.us/x.jpg" srcset="'
+            'https://i0.wp.com/nlga.us/x.jpg?w=400 400w, '
+            'https://i0.wp.com/nlga.us/x.jpg?resize=150%2C150 150w"',
+            'src="https://i0.wp.com/nlga.us/wp-content/uploads/2026/03/Hashmi1.jpg?w=800&#038;ssl=1"')
+        page = card + "".join(nlga_entry(n.title(), "A B (D), Lieutenant Governor")
+                              for n in US_STATES if n != "VIRGINIA")
+        self.assertEqual(officers.parse_nlga(page)["VA"]["photo"],
+                         "https://i0.wp.com/nlga.us/wp-content/uploads/2026/03/Hashmi1.jpg"
+                         "?ssl=1&w=300")
+
+    def test_a_roster_photograph_says_whose_it_is(self):
+        cache = {"lt": {"AL": {"name": "Will Ainsworth", "party": "R", "partyKey": "R",
+                               "title": "Lieutenant Governor",
+                               "photo": "https://i0.wp.com/nlga.us/Will-Ainsworth.jpg"}},
+                 "sos": {"AL": {"name": "Wes Allen", "party": "R", "partyKey": "R",
+                                "title": "Secretary of State", "electionChief": True,
+                                "photo": "https://www.nass.org/AL-Allen-2023.jpg"}},
+                 "ag": {"AL": {"name": "Steve Marshall"}}}
+        out = officers.for_state("AL", cache, [])
+        self.assertEqual(out["lt"]["photoBy"], officers.NLGA_BY)
+        self.assertEqual(out["sos"]["photoBy"], officers.NASS_BY)
+        out["ag"]["photo"] = "x"
+        self.assertNotIn("photo", cache["ag"]["AL"])   # the cache is not written through
+
     def test_a_nass_photo_must_carry_the_surname(self):
         self.assertTrue(officers._surname_in("Wes Allen", "https://x/AL-Allen-2023.jpg?itok=1"))
         self.assertFalse(officers._surname_in("Steve Simon", "https://x/MN-SOS-2023.jpg"))
@@ -352,6 +382,155 @@ class TestAttorneysGeneral(unittest.TestCase):
         self.assertTrue(sos["FL"]["officeConfirms"])
         page = officers.for_state("FL", {"sos": sos, "lt": {}}, [])
         self.assertNotIn("notMember", page["sos"])
+
+
+class TestAttorneyGeneralPhotos(unittest.TestCase):
+    """STATEGOV-13: no attorney general had a photograph. Each is read from
+    the office's own pages, the ones that confirmed the name, and only an
+    image the page says is the holder's likeness is taken."""
+
+    HOME = ("https://ag.example.gov/", """<html><body>
+      <img src="/img/AG-Griffin-Logo.png" alt="Tim Griffin Attorney General of Arkansas">
+      <img src="/img/Upcoming.png" alt="AG Griffin talking to a townhall crowd.">
+      <img src="/img/peter1.jpg" alt="Attorney General Griffin discusses health care">
+      <img src="/img/hero-bg.jpg" alt="AG Tim Griffin">
+      <img src="data:image/gif;base64,R0lGOD" data-src="/img/Griffin-headshot.jpg" alt="">
+      <a href="/meet-tim/">Meet Tim</a> <a href="/about-us/">About us</a>
+      <a href="https://news.example.com/griffin">Griffin wins</a>
+    </body></html>""")
+
+    @staticmethod
+    def weigh(table):
+        """A stand-in for enrich.portrait_check from ``{url: weight}``."""
+        def check(url, hinted):
+            weight = table.get(url)
+            return (None, None) if weight == "unknown" else (bool(weight), weight or None)
+        return check
+
+    def test_only_a_likeness_is_a_candidate(self):
+        found = officers.likeness_candidates("Tim Griffin", "AR", [self.HOME])
+        self.assertEqual([urls for urls, _, _ in found],
+                         [["https://ag.example.gov/img/Griffin-headshot.jpg"]])
+
+    def test_an_alt_that_is_only_the_name_and_title_is_taken(self):
+        page = ("https://ag.example.gov/about", '<img src="/a/x1.jpg" alt="Attorney General '
+                'Rob Bonta"><img src="/a/x2.jpg" alt="Attorney General Rob Bonta at a rally">'
+                '<img src="/a/AG_Rob_Bonta_0007a.jpg" alt="">'
+                # Another first name in the file is someone else of the name.
+                '<img src="/a/AG_Marty_Bonta_0007a.jpg" alt="">')
+        found = officers.likeness_candidates("Rob Bonta", "CA", [page])
+        self.assertEqual([u[-1] for u, _, _ in found],
+                         ["https://ag.example.gov/a/x1.jpg",
+                          "https://ag.example.gov/a/AG_Rob_Bonta_0007a.jpg"])
+
+    def test_a_heavy_original_gives_way_to_a_size_of_the_same_file(self):
+        page = ("https://ag.example.gov/", '<img src="/u/Ellison-headshot.jpg" '
+                'srcset="/u/Ellison-headshot-150x150.jpg 150w, /u/Ellison-headshot-300x375.jpg 300w,'
+                ' /u/Ellison-headshot.jpg 2000w" alt="">')
+        check = self.weigh({
+            "https://ag.example.gov/u/Ellison-headshot-300x375.jpg":
+                {"bytes": 30_000, "width": 300, "height": 375},
+            "https://ag.example.gov/u/Ellison-headshot.jpg":
+                {"bytes": 4_000_000, "width": 2000, "height": 2500}})
+        photo, why = officers.ag_photo("Keith Ellison", "MN", [page], check=check)
+        self.assertEqual(photo["photo"], "https://ag.example.gov/u/Ellison-headshot-300x375.jpg")
+        self.assertEqual(photo["photoPage"], "https://ag.example.gov/")
+        heavy = self.weigh({"https://ag.example.gov/u/Ellison-headshot-300x375.jpg":
+                            {"bytes": 400_000, "width": 300, "height": 375},
+                            "https://ag.example.gov/u/Ellison-headshot.jpg":
+                            {"bytes": 4_000_000, "width": 2000, "height": 2500}})
+        self.assertEqual(officers.ag_photo("Keith Ellison", "MN", [page], check=heavy), (None, "none"))
+
+    def test_a_landscape_or_tiny_image_is_not_a_portrait(self):
+        page = ("https://ag.example.gov/", '<img src="/u/Jones-headshot.jpg" alt="">')
+        for weight in ({"bytes": 70_000, "width": 425, "height": 283},
+                       {"bytes": 5_000, "width": 90, "height": 120}):
+            check = self.weigh({"https://ag.example.gov/u/Jones-headshot.jpg": weight})
+            self.assertEqual(officers.ag_photo("Jay Jones", "VA", [page], check=check)[0], None)
+
+    def test_the_attorney_generals_own_page_is_read_for_one(self):
+        bio = ('<img src="/img/Mills.jpg" alt="Attorney General Griffin">')
+        got = []
+        rows = {"AR": {"name": "Tim Griffin", "party": "R"},
+                "NC": {"name": "Dan Bishop", "unconfirmed": True}}
+        check = self.weigh({"https://ag.example.gov/img/Griffin-headshot.jpg": None,
+                            "https://ag.example.gov/img/Mills.jpg":
+                                {"bytes": 28_000, "width": 200, "height": 250}})
+
+        def get(url, timeout=60):
+            got.append(url)
+            return bio
+        problems = officers.add_ag_photos(rows, {"AR": [self.HOME]}, check=check, pause=0, get=get)
+        self.assertEqual(got, ["https://ag.example.gov/meet-tim/"])
+        self.assertEqual(rows["AR"]["photo"], "https://ag.example.gov/img/Mills.jpg")
+        self.assertEqual(rows["AR"]["photoPage"], "https://ag.example.gov/meet-tim/")
+        self.assertNotIn("photo", rows["NC"])          # never an unconfirmed holder's
+        self.assertEqual(len(problems), 1)
+        self.assertIn("photograph added for Tim Griffin", problems[0])
+
+    def test_a_read_that_concludes_nothing_keeps_the_same_persons_last_photo(self):
+        check = self.weigh({"https://ag.example.gov/img/Griffin-headshot.jpg": "unknown"})
+        old = {"AR": {"name": "Tim Griffin", "photo": "https://ag.example.gov/old.jpg",
+                      "photoPage": "https://ag.example.gov/"}}
+
+        def get(url, timeout=60):
+            raise officers.OfficersError("refused")
+        rows = {"AR": {"name": "Tim Griffin"}}
+        problems = officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0,
+                                          get=get)
+        self.assertEqual(rows["AR"]["photo"], "https://ag.example.gov/old.jpg")
+        self.assertIn("kept", problems[0])
+        # A new holder never inherits it.
+        rows = {"AR": {"name": "Someone Else"}}
+        officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0, get=get)
+        self.assertNotIn("photo", rows["AR"])
+
+    def test_a_colleague_sharing_letters_or_a_surname_is_not_the_attorney_general(self):
+        """A substring test took "Carrie-Smith-Headshot" for Chris Carr and
+        "jane-stanford-portrait" for Aaron Ford, and nothing looked at a
+        first name: "Solicitor General Jessica Ford headshot" passed too."""
+        def taken(name, code, tag):
+            return [u[-1] for u, _, _ in officers.likeness_candidates(
+                name, code, [("https://ag.example.gov/", tag)])]
+        self.assertEqual(taken("Chris Carr", "GA", '<img src="/uploads/Carrie-Smith-Headshot.jpg" '
+                                                   'alt="Chief of Staff Carrie Smith">'), [])
+        self.assertEqual(taken("Aaron Ford", "NV", '<img src="/img/jane-stanford-portrait.jpg" '
+                                                   'alt="">'), [])
+        self.assertEqual(taken("Aaron Ford", "NV", '<img src="/uploads/staff-07.jpg" '
+                                                   'alt="Solicitor General Jessica Ford headshot">'),
+                         [])
+        self.assertEqual(taken("Aaron Ford", "NV", '<img src="/u/jessicafordheadshot.jpg" alt="">'),
+                         [])
+        # The holder, with a middle initial, in run-together words, or by an
+        # evidenced short form (NAME_FORMS), is still found.
+        self.assertTrue(taken("Aaron Ford", "NV", '<img src="/uploads/staff-07.jpg" '
+                                                  'alt="Attorney General Aaron D. Ford headshot">'))
+        self.assertTrue(taken("Liz Murrill", "LA", '<img src="/i/aglizmurrillheadshot.jpg" alt="">'))
+        self.assertTrue(taken("Liz Murrill", "LA", '<img src="/i/AgLizMurrillHeadshot.jpg" alt="">'))
+        self.assertTrue(taken("Letitia James", "NY", '<img src="/u/x.jpg" '
+                                                     'alt="Attorney General Tish James headshot">'))
+
+    def test_a_photograph_added_changed_or_dropped_is_said(self):
+        old = {"name": "Tim Griffin", "photo": "https://ag.example.gov/old.jpg"}
+        self.assertEqual(officers.photo_changes("AR", old, dict(old)), [])
+        added = officers.photo_changes("AR", {}, {"name": "Tim Griffin", "photo": "https://a/x.jpg",
+                                                  "photoPage": "https://a/"})
+        self.assertIn("added", added[0])
+        changed = officers.photo_changes("AR", old, {"name": "Tim Griffin",
+                                                     "photo": "https://ag.example.gov/new.jpg"})
+        self.assertIn("changed", changed[0])
+        self.assertIn("old.jpg", changed[0])
+        self.assertIn("dropped", officers.photo_changes("AR", old, {"name": "Tim Griffin"})[0])
+
+    def test_the_page_is_told_whose_photograph_it_is(self):
+        cache = {"lt": {}, "sos": {}, "ag": {"AR": {
+            "name": "Tim Griffin", "photo": "https://ag.example.gov/img/g.jpg",
+            "photoPage": "https://www.ag.example.gov/meet-tim/",
+            "photoWeight": {"bytes": 1, "width": 200, "height": 250}}}}
+        ag = officers.for_state("AR", cache, [])["ag"]
+        self.assertEqual(ag["photoBy"], "the office's website (ag.example.gov)")
+        self.assertNotIn("photoWeight", ag)
+        self.assertIn("photoWeight", cache["ag"]["AR"])
 
 
 class TestCommitted(unittest.TestCase):
