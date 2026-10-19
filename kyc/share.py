@@ -442,7 +442,7 @@ def _item(person, by_id, races_by_id, post, root, indent):
     party = f" ({_e(person['party'])})" if person.get("party") else ""
     return (f'{indent}<li data-id="{_e(person["id"])}"><a href="{root}'
             f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>{party}'
-            + (f": {_e(status)}" if status else "") + "</li>")
+            + (f': <span class="share-standing">{_e(status)}</span>' if status else "") + "</li>")
 
 
 def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):

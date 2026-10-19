@@ -85,6 +85,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              about.html, 404.html (generated: the site's frame, kyc/pages.py)
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
+                                             p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
@@ -107,6 +108,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-guide.js
                                              assets/kyc-official.js
                                              assets/kyc-federal.js
+                                             assets/kyc-share.js
                                              assets/kyc-findrep.js
                                              assets/kyc-ballot.js
 ```
@@ -1862,6 +1864,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     as though it were the Senate. The guide's Congress page names its
     members from the build (`pages.committees_html`, `leaders_html`) and
     loads no profile data.
+
+96. **A person or a race shared is its own page, and a page says its facts
+    without scripts.** A profile and a race live behind a fragment
+    (`#/profile/<id>`) that every crawler drops, so each shared person
+    unfurled as the home page's card - whose image said "who is running in
+    2026" and named three sources, false of a court page and after the
+    election - and "Copy link" did nothing where the clipboard refused
+    (TECH-09). And with scripts off, or to a crawler's first pass, a state
+    page read "Loading..." for ever (TECH-10). So the build writes a share
+    page per profile (`p/<id>.html`) and per race (`r/<raceId>.html`,
+    `kyc/share.py`): its own title, description, canonical address and
+    image, the facts in plain text, and a link to the view, which
+    `assets/kyc-share.js` follows at once for a reader with scripts. Not a
+    meta refresh: that would send a reader without scripts, and some
+    unfurlers, to a view that needs them. The image is a photograph only
+    by a sourced route (rule 24): the article's own `photoSet`, the Clerk's
+    portrait, or a credited campaign portrait; anything else is the card.
+    A state page is written with its `<h1>`, delegation and races as plain
+    lists from the build's profiles and races (`pages.state_static`); its
+    script draws over them, and a failed load keeps them. Where someone
+    stands is said in the profile dialog's words: `share.status_words`
+    reads `KYC.standing` the way kyc.js does, on the day the results were
+    read (`share.post_election`), and `testSharePages` compares the two for
+    every profile, every race's lists and every state page's, so a word
+    changed in one is a failure, not a drift (rule 63). Nothing in them is
+    dated or carries the build's time, and an unchanged share page is not
+    rewritten: a refresh that moves nobody touches none of 3,000 files.
+    They are in the sitemap, and `verify` regenerates them with the state
+    pages, reporting one stale, missing, or left for a profile or race the
+    data no longer holds (the build removes those). Every generated page
+    and both templates carry a `<noscript>` line saying what needs
+    JavaScript. "Copy link" is `KYC.shareLink`: the device's share sheet,
+    else the clipboard, else a selected read-only field saying to copy it.
 
 ## District maps
 

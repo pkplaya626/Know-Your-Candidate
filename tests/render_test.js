@@ -10842,6 +10842,245 @@ async function testFederalAudit() {
 const WORD_DATE = /(Jan|Feb|March|April|May|June|July|Aug|Sept|Oct|Nov|Dec)\.? \d{1,2}, \d{4}/;
 const ISSUE_FORM = "https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml";
 
+/* ============================================================ share pages */
+
+/* The text kyc/share.py escaped (html.escape), read back. */
+function unescapeHtml(s) {
+  return String(s).replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">").replace(/&#8217;/g, "\u2019").replace(/&middot;/g, "\u00b7")
+    .replace(/&amp;/g, "&");
+}
+
+/* The <li data-id> of a plain list, with the standing each one is given. */
+function plainItems(block) {
+  return [...String(block || "").matchAll(
+    /<li data-id="([^"]+)">.*?(?:<span class="share-standing">(.*?)<\/span>)?<\/li>/g)]
+    .map((m) => ({ id: unescapeHtml(m[1]), standing: m[2] === undefined ? null : unescapeHtml(m[2]) }));
+}
+
+function plainList(html, attr, id) {
+  const m = new RegExp('<ul class="share-list[^"]*" ' + attr + '="' + id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
+    '">([\\s\\S]*?)</ul>').exec(html);
+  return m ? plainItems(m[1]) : [];
+}
+
+/* Rule 96: a profile's and a race's share page, and a state page's plain
+ * lists, are written by the pipeline (kyc/share.py) in the words the page
+ * code gives the same people. Every one is compared with KYC.standing as
+ * the profile dialog shows it, on the day the results were read: the day
+ * the pipeline writes them for (share.post_election). Two copies of the
+ * status words once drifted apart unseen (rule 63); these cannot. */
+async function testSharePages() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const asOf = String((meta.election || {}).resultsAsOf || CAMPAIGN_NOW).slice(0, 10);
+  const { window, D, errors } = await buildPage("index.html", { now: asOf + "T12:00:00" });
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const races = window.kycRaces;
+  const read = (rel) => {
+    const file = path.join(SITE, ...rel.split("/"));
+    return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
+  };
+  const words = (p) => {
+    const spec = KYC.standing(p, "long");
+    if (!spec) return null;
+    const line = KYC.ballotLine(p);
+    return spec.label + (!p.isCandidate && p.contestLabel ? " for " + p.contestLabel : "") +
+      (line ? " \u2013 " + line + " line" : "");
+  };
+  const byId = new Map(people.map((p) => [p.id, p]));
+  const split = (race) => {
+    const ids = race.incumbentIds.concat(race.candidateIds);
+    const list = ids.filter((id, i) => ids.indexOf(id) === i).map((id) => byId.get(id)).filter(Boolean);
+    const moved = list.filter((p) => !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1 &&
+      !!p.contestRaceId && p.contestRaceId !== race.id && !!p.contestLabel);
+    const rest = list.filter((p) => moved.indexOf(p) === -1);
+    return { ids, moved, running: rest.filter((p) => !KYC.offBallot(p.raceStatus)),
+             out: rest.filter((p) => KYC.offBallot(p.raceStatus)) };
+  };
+
+  suite("share pages — one per profile and race, in the page code's words (rule 96)", () => {
+    check("the index page loads", errors.length === 0, errors.join(" | "));
+    const pFiles = new Set(fs.readdirSync(path.join(SITE, "p")));
+    const rFiles = new Set(fs.readdirSync(path.join(SITE, "r")));
+    check("a share page for every profile, and none for anyone else",
+      pFiles.size === people.length && people.every((p) => pFiles.has(p.id + ".html")),
+      `${pFiles.size} pages, ${people.length} profiles`);
+    check("a share page for every race, and none for any other",
+      rFiles.size === races.length && races.every((r) => rFiles.has(r.id + ".html")),
+      `${rFiles.size} pages, ${races.length} races`);
+    const wrong = [];
+    const images = [];
+    let photos = 0;
+    people.forEach((p) => {
+      const html = read("p/" + p.id + ".html") || "";
+      const m = /<p class="share-status"><strong>(.*?)<\/strong><\/p>/.exec(html);
+      const shown = m ? unescapeHtml(m[1]) : null;
+      const want = words(p);
+      if (shown !== want) wrong.push(`${p.id}: "${shown}" for "${want}"`);
+      const desc = /<meta name="description" content="([^"]*)">/.exec(html);
+      if (want && !(desc && unescapeHtml(desc[1]).indexOf(want) !== -1)) wrong.push(`${p.id}: description`);
+      // A portrait only by a sourced route (rule 24): never a fallback's.
+      const img = (/<meta property="og:image" content="([^"]*)">/.exec(html) || [])[1];
+      const url = img ? unescapeHtml(img) : "";
+      const sizes = (p.photoSet || []).map((s) => s[1]);
+      const ok = /\/assets\/social-card\.png$/.test(url) ||
+        (sizes.length ? sizes.indexOf(url) !== -1
+          : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
+              (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
+            (p.photoSource === "campaign-site" && !!p.photoCredit)));
+      if (!ok || /Special:/.test(url)) images.push(`${p.id}: ${url}`);
+      if (!/social-card/.test(url)) photos += 1;
+    });
+    check("every profile's share page says where they stand as the dialog does",
+      wrong.length === 0, wrong.slice(0, 6).join(" | "));
+    check("a share image is the person's sourced photograph or the site's card", images.length === 0 &&
+      photos > 100, images.slice(0, 4).join(" | ") || `${photos} photographs`);
+    const raceWrong = [];
+    races.forEach((race) => {
+      const html = read("r/" + race.id + ".html") || "";
+      const s = split(race);
+      if (s.ids.length !== new Set(s.ids).size) raceWrong.push(`${race.id}: someone twice`);
+      const running = plainList(html, "data-race", race.id);
+      const out = plainList(html, "data-race-out", race.id);
+      const same = (got, want) => got.map((x) => x.id).join() === want.map((p) => p.id).join() &&
+        got.every((x, i) => x.standing === words(want[i]));
+      if (!same(running, s.running)) raceWrong.push(`${race.id}: running ${running.map((x) => x.id)}`);
+      if (!same(out, s.out)) raceWrong.push(`${race.id}: out ${out.map((x) => x.id)}`);
+      s.moved.forEach((p) => {
+        if (html.indexOf('<p class="race-held">Held by <a href="../p/' + p.id + '.html">') === -1) {
+          raceWrong.push(`${race.id}: held by ${p.id}`);
+        }
+      });
+      const named = KYC.ballotSource(race);
+      const others = ((race.results || {}).otherNominees || []).filter((n) => !((race.results.maybeProfiled || {})[n]));
+      if (others.length && unescapeHtml(html).indexOf("Also on the November ballot, " + named) === -1) {
+        raceWrong.push(`${race.id}: the names with no profile`);
+      }
+    });
+    check("every race's share page lists its people as its section on the state page does",
+      raceWrong.length === 0, raceWrong.slice(0, 6).join(" | "));
+    const sample = read("p/" + people[0].id + ".html") || "";
+    check("no inline script; the view is linked and opened by kyc-share.js",
+      !/<script>/.test(sample) && /<script src="\.\.\/assets\/kyc-share\.js\?v=[0-9a-f]+"><\/script>/.test(sample) &&
+      sample.indexOf('id="shareView" href="../index.html#/profile/' + people[0].id + '"') !== -1);
+    check("its own address, title and description", /<link rel="canonical" href="https:\/\/[^/]+\/p\//.test(sample) &&
+      /<meta property="og:url" content="https:\/\/[^/]+\/p\//.test(sample) &&
+      sample.indexOf("<title>" + KYC.escapeHtml(people[0].name)) !== -1);
+    const sizes = [...pFiles].concat([...rFiles].map((f) => "r:" + f)).map((f) =>
+      fs.statSync(path.join(SITE, f.startsWith("r:") ? "r" : "p", f.replace(/^r:/, ""))).size);
+    check("each share page is small", Math.max(...sizes) < 8000, `largest ${Math.max(...sizes)} bytes`);
+  });
+
+  suite("state pages — written with their names before the script draws (TECH-10)", () => {
+    const wrong = [];
+    peopleStates().forEach((code) => {
+      const html = read("states/" + code + ".html");
+      if (html === null) return;
+      const st = code.toUpperCase();
+      const name = (meta.states[st] || {}).name;
+      if (name && html.indexOf('<h1 class="state-title">' + KYC.escapeHtml(name) + "</h1>") === -1) wrong.push(`${code}: h1`);
+      const block = (re) => (re.exec(html) || [])[1] || "";
+      const seated = people.filter((p) => KYC.seated(p) && p.state === st);
+      const senators = seated.filter((p) => p.chamber.indexOf("Senate") !== -1).map((p) => p.id);
+      const house = seated.filter((p) => p.chamber.indexOf("House") !== -1)
+        .sort((a, b) => KYC.districtOrder(a) - KYC.districtOrder(b)).map((p) => p.id);
+      const gotSen = plainItems(block(/id="senators">([\s\S]*?)<\/section>/)).map((x) => x.id);
+      const gotHouse = plainItems(block(/id="delegation">([\s\S]*?)<\/section>/)).map((x) => x.id);
+      if (gotSen.join() !== senators.join()) wrong.push(`${code}: senators ${gotSen}`);
+      if (gotHouse.join() !== house.join()) wrong.push(`${code}: House ${gotHouse}`);
+      const mine = races.filter((r) => r.state === st);
+      const order = mine.filter((r) => r.chamber === "Senate").concat(mine.filter((r) => r.chamber === "House")
+        .sort((a, b) => (a.district || 0) - (b.district || 0))).map((r) => r.id);
+      const got = [...html.matchAll(/<h3 class="race-title" id="race-([^"]+)">/g)].map((m) => unescapeHtml(m[1]));
+      if (got.join() !== order.join()) wrong.push(`${code}: races ${got.length} for ${order.length}`);
+      mine.forEach((race) => {
+        const listed = plainList(html, "data-race", race.id);
+        if (listed.map((x) => x.id).join() !== split(race).running.map((p) => p.id).join()) {
+          wrong.push(`${code}: ${race.id}`);
+        }
+      });
+    });
+    check("every state page's h1, delegation and races are the data's", wrong.length === 0,
+      wrong.slice(0, 6).join(" | "));
+  });
+
+  // Copy link: the share page's address, by the device's share sheet, the
+  // clipboard, or a field to copy from by hand (TECH-09).
+  const settle = () => new Promise((r) => setTimeout(r, 0));
+  const someone = people.find((p) => p.isCandidate) || people[0];
+  KYC.profile.open(someone.id);
+  const copy = D.getElementById("profileModalCopy");
+  const want = new window.URL("p/" + someone.id + ".html", window.location.href).href;
+  let copied = null;
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  copy.click();
+  await settle();
+  const viaClipboard = copied;
+  const said = copy.textContent;
+  await new Promise((r) => setTimeout(r, 1900));
+  const back = copy.textContent;
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+    value: { writeText: () => Promise.reject(new Error("NotAllowedError")) } });
+  copy.click();
+  await settle(); await settle();
+  const field = copy.nextElementSibling;
+  const input = field && field.querySelector("input");
+  const picked = !!input && D.activeElement === input &&
+    input.selectionEnd - input.selectionStart === input.value.length;
+  let shared = null;
+  Object.defineProperty(window.navigator, "share", { configurable: true,
+    value: (d) => { shared = d; return Promise.resolve(); } });
+  copied = null;
+  copy.click();
+  await settle();
+  delete window.navigator.share;
+  KYC.profile.close();
+  KYC.profile.open(people[1].id);
+  const cleared = !(copy.nextElementSibling && copy.nextElementSibling.classList.contains("share-field"));
+  suite("Copy link — the share page, shared, copied, or offered to copy (TECH-09)", () => {
+    check("the clipboard gets the share page's address", viaClipboard === want, `${viaClipboard} for ${want}`);
+    check("a device that shares opens its share sheet on the address, and copies nothing",
+      copied === null && !!shared && shared.url === want && shared.title === someone.name,
+      `${shared && shared.url}`);
+    check("the button says it was copied, then says what it does again", /Copied/.test(said) &&
+      /Copy link/.test(back), said + " / " + back);
+    check("a refused clipboard leaves the link in a selected read-only field", !!input && input.readOnly &&
+      input.value === want && picked && /Copy this link/.test(field.textContent));
+    check("a dialog opened on someone else does not offer the last link", cleared);
+  });
+  window.close();
+
+  // A race's own "Copy link", on a state page.
+  const state = await buildPage("states/vt.html");
+  let raceCopied = null;
+  Object.defineProperty(state.window.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { raceCopied = t; return Promise.resolve(); } } });
+  const raceButton = state.D.querySelector("[data-share-race]");
+  if (raceButton) raceButton.click();
+  await settle();
+  suite("a race section's Copy link", () => {
+    const id = raceButton && raceButton.getAttribute("data-share-race");
+    check("every race section has one", state.D.querySelectorAll(".race").length > 0 &&
+      state.D.querySelectorAll(".race").length === state.D.querySelectorAll(".race [data-share-race]").length);
+    check("it copies the race's share page", !!id && raceCopied ===
+      new state.window.URL("../r/" + id + ".html", state.window.location.href).href, raceCopied);
+    check("the script's view replaced the plain lists", !state.D.querySelector(".share-static") &&
+      state.D.querySelectorAll("#stateContent .card").length > 0);
+  });
+  state.window.close();
+
+  // A state page whose people did not load keeps its plain lists.
+  const broken = await buildPage("states/vt.html", { block: ["data/people/vt.js"] });
+  suite("a state page whose data did not load", () => {
+    check("says so above the plain lists, which stay",
+      !!broken.D.querySelector("#stateContent > .results-bar") &&
+      broken.D.querySelectorAll("#stateContent .share-list li").length > 0);
+  });
+  broken.window.close();
+}
+
 async function testFrame() {
   const PAGES = ["index.html", "map.html", "about.html", "404.html", "states/ca.html",
     "districts/ca.html", "districts/index.html", "legislature/index.html", "legislature/nc.html",
@@ -13082,6 +13321,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();
+  if (!only || only === "share") await testSharePages();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;
