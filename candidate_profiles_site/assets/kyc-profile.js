@@ -258,13 +258,14 @@
         html += '<p class="field-credit">Read' +
           (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
           ": " + outLink(item.website, "their official website") + "</p>";
-      } else if (absence === "see_site" && item.officialIssuesUrl) {
+      } else if ((absence === "see_site" || absence === "see_home") && item.officialIssuesUrl) {
         // An issues page this site could not read a list from: linked,
         // never called empty (rule 86).
         html += '<p class="field-credit">Read' +
           (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
-          ": " + outLink(item.officialIssuesUrl, siteHome(item.officialIssuesUrl, item.website)
-            ? "their official website" : "their issues page") + "</p>";
+          ": " + outLink(item.officialIssuesUrl, absence === "see_home" ||
+            siteHome(item.officialIssuesUrl, item.website) ? "their official website"
+            : "their issues page") + "</p>";
       }
     }
 

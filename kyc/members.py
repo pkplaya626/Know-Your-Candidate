@@ -310,6 +310,25 @@ def stock_list(items):
     return bool(items) and all(" ".join(i.split()).lower() in STOCK_CATEGORIES for i in items)
 
 
+def without_stock(items):
+    """*items* less the House template's stock categories, where the list
+    carries the whole set of them (any "Congress" aside, which is never an
+    issue): Schrier's page lists the five over her own "Environment" and
+    "Agriculture", which are what she added. A list holding only some of
+    those words ("Economy", "Health" among a member's own) keeps them."""
+    items = list(items)
+    folded = {" ".join(i.split()).lower() for i in items}
+    if not (STOCK_CATEGORIES - {"congress"}) <= folded:
+        return items
+    return [i for i in items if " ".join(i.split()).lower() not in STOCK_CATEGORIES]
+
+
+def site_home(url):
+    """True when *url* is a site's home page (no path): never called an
+    issues page (Stansbury's link, before the review of PR #106)."""
+    return bool(url) and not urllib.parse.urlsplit(url).path.strip("/")
+
+
 def same_issue(text):
     """A key under which two spellings of one item meet: Hoeven's "Jobs,
     Economy, and Fiscal Responsibility" and "Jobs, Economy, Fiscal
@@ -1418,11 +1437,11 @@ def apply_cache(profiles, cache):
         withheld = OFFICIAL_ISSUES_NOT_A_LIST.get(bioguide)
         if withheld and withheld[1] == site.get("issuesUrl"):
             issues = []             # read as a list, and not one (overrides)
-        if stock_list(issues):
-            # The House template's stock categories and nothing of the
-            # member's own: the page is there, and is linked, as it is for
-            # every member whose site carries it.
-            issues = []
+        if stock_list(issues) or without_stock(issues) != issues:
+            # The House template's stock categories: the page is there, and
+            # is linked, as it is for every member whose site carries it,
+            # and only what the member added to them is their list.
+            issues = [] if stock_list(issues) else without_stock(issues)
             counts["platform_stock"] += 1
         listed = len(issues) >= 3
         if listed and fill_field(profile, "platforms", "; ".join(issues), SITE_SOURCE):
@@ -1443,7 +1462,14 @@ def apply_cache(profiles, cache):
             profile["platformRead"] = site.get("read")
             page = site.get("pageRead") or (site.get("issuesUrl")
                                              if site.get("verdict") == "listed" else None)
-            if page:
+            if page and site_home(page):
+                # The issue pages came from the home page or the site's
+                # menu, too few to list: the site is linked, and called the
+                # website, never "their issues page".
+                profile["quality"]["platforms"] = "see_home"
+                profile["officialIssuesUrl"] = page
+                counts["platform_see_home"] += 1
+            elif page:
                 profile["quality"]["platforms"] = "see_site"
                 profile["officialIssuesUrl"] = page
                 counts["platform_see_site"] += 1

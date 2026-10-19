@@ -1203,6 +1203,21 @@ async function testDirectoryAsync() {
       platform.textContent);
     KYC.profile.close();
 
+    // Issue pages only from the home page, too few to list: the website,
+    // never an "issues page" (Stansbury's, before the review of PR #106).
+    host.quality = { platforms: "see_home" };
+    host.officialIssuesUrl = host.website;
+    delete host.__search;
+    KYC.profile.open(host.id);
+    check("issue pages too few to list link the website, never 'their issues page'",
+      /On their official website/.test(platform.textContent) && !/issues page/.test(platform.textContent) &&
+        !/No data/.test(platform.textContent) &&
+        [...platform.querySelectorAll("a")].some((a) => a.textContent === "their official website"),
+      platform.textContent);
+    check("and that is not searchable as a platform", !KYC.matchesQuery(host, "on their official website"));
+    KYC.profile.close();
+    host.quality = { platforms: "see_site" };
+
     // The page linked is the home page: called the website, never "their
     // issues page" (Stansbury's, before the review of PR #106).
     host.officialIssuesUrl = host.website.replace(/\/$/, "");
