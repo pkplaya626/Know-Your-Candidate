@@ -6331,6 +6331,58 @@ async function testFindRepNav() {
       !!D.activeElement && D.activeElement.classList.contains("findrep-zip"),
       D.activeElement && D.activeElement.outerHTML.slice(0, 80));
   });
+
+  // A page whose own panel answers as the home page's does - it holds
+  // profiles - keeps the reader there (PR #118 review): a state page's
+  // panel, and the map's, which sits in the drawer itself.
+  const follow = async (page) => {
+    await until(() => !!page.D.querySelector("[data-findrep][data-findrep-ready]"), 6000);
+    const toggle = page.D.querySelector(".sidebar-toggle");
+    if (toggle) toggle.click();
+    const a = page.D.querySelector('.site-nav a[data-nav="findrep"]');
+    const ev = new page.window.MouseEvent("click", { bubbles: true, cancelable: true, button: 0 });
+    // Whether the page caught it, read after its own listener (on the
+    // document); then nothing is followed, which jsdom cannot do.
+    let caught = null;
+    page.window.addEventListener("click", (e) => { caught = e.defaultPrevented; e.preventDefault(); },
+      { once: true });
+    a.dispatchEvent(ev);
+    await settle(500);
+    const active = page.D.activeElement;
+    return { caught, open: page.D.body.classList.contains("sidebar-open"),
+      inPanel: !!active && active.classList.contains("findrep-zip") && !!active.closest("[data-findrep]") };
+  };
+  const onState = await follow(state);
+  const map = await buildPage("map.html");
+  const onMap = await follow(map);
+  const leg = await buildPage("legislature/oh.html");
+  const onLeg = await follow(leg);
+  suite("the drawer's Find who represents you, on a page with its own panel (PR #118 review)", () => {
+    check("no page errors", state.errors.length === 0 && map.errors.length === 0 && leg.errors.length === 0,
+      state.errors.concat(map.errors, leg.errors).join(" | "));
+    check("a state page's link brings its own panel into view, the ZIP code field focused",
+      onState.caught && !onState.open && onState.inPanel, JSON.stringify(onState));
+    check("the map's brings the panel in its drawer into view, and leaves the drawer open",
+      onMap.caught && onMap.open && onMap.inPanel, JSON.stringify(onMap));
+    check("a legislature page's panel names no member of Congress: the link goes home",
+      onLeg.caught === false, JSON.stringify(onLeg));
+  });
+
+  // One ZIP code's shares add up as its land does, on the panel and the
+  // ballot page alike; a third party is named, never "I" (PR #118 review).
+  const F = home.window.KYC.findRep;
+  suite("the answer's shares and party words (PR #118 review)", () => {
+    check("shares of one ZIP code's land add up to 100%, largest remainder first",
+      F.pcts([0.335, 0.335, 0.33]).join() === "34%,33%,33%" && F.pcts([0.9151, 0.0849]).join() === "92%,8%" &&
+        F.pcts([0.4, 0.3, 0.3]).join() === "40%,30%,30%", F.pcts([0.335, 0.335, 0.33]).join());
+    check("a sliver is under 1%, and a share short of the whole is never 100%",
+      F.pcts([0.996, 0.004]).join() === "99%,under 1%", F.pcts([0.996, 0.004]).join());
+    check("D, R and I as before, and a third party by its own name",
+      F.partyLetter({ party: "Democrat" }) === "D" && F.partyLetter({ party: "Republican" }) === "R" &&
+        F.partyLetter({ party: "Independent" }) === "I" &&
+        F.partyLetter({ party: "Libertarian" }) === "Libertarian" &&
+        F.partyLetter({ party: "Green" }) === "Green" && F.partyLetter({ party: "" }) === "");
+  });
 }
 
 /* GRID-16: a sitting member's card, and a race their seat is in, say how
@@ -12799,6 +12851,28 @@ async function testPeopleSplit() {
         built.window.location.hash);
     });
     built.window.close();
+  }
+  {
+    // A member who left during this Congress has no profile; a link to
+    // their id says whose it is and who holds the seat now (PR #118 review).
+    const probe = await buildPage("index.html", { people: "index" });
+    const gone = ((probe.window.KYC.meta() || {}).departed || []).find((r) => r.holder);
+    probe.window.close();
+    if (gone) {
+      const built = await buildPage("index.html", { people: "index", hash: "#/profile/" + gone.id });
+      await until(() => /No profile on this site has the id/.test(
+        (built.D.getElementById("profileModalWaiting") || {}).textContent || ""), 6000);
+      const line = built.D.getElementById("profileModalWaiting");
+      const to = line.querySelector("button[data-goto]");
+      suite("index.html#/profile/ — a member who left during this Congress", () => {
+        check("names them and when the term ended",
+          line.textContent.indexOf("It is the id of " + gone.name + ", who left the") !== -1 &&
+            /congress-legislators ends the term on/.test(line.textContent), line.textContent);
+        check("and opens the seat's holder now",
+          !!to && to.getAttribute("data-goto") === gone.holder.id && to.textContent === gone.holder.name);
+      });
+      built.window.close();
+    }
   }
   {
     // On a state page an unknown id is looked for in the index first.

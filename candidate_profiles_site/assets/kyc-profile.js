@@ -1628,7 +1628,26 @@
    * and a state page to say this sentence. */
   function showNobody(id) {
     el("profileModalName").textContent = "Profile";
-    showWaiting("No profile on this site has the id " + KYC.escapeHtml(id) + ".");
+    showWaiting("No profile on this site has the id " + KYC.escapeHtml(id) + "." + departedWords(id));
+  }
+
+  /* An id that is a member who left during this Congress (the grid's
+   * search lists them, kycBuildMeta.departed) says whose it is and who
+   * holds the seat now, in the search row's words: a link to J.D. Vance's
+   * old profile said only that no profile has the id (PR #118 review). */
+  function departedWords(id) {
+    var row = (KYC.meta().departed || []).filter(function (r) { return r.id === id; })[0];
+    if (!row) return "";
+    var holder = row.holder ? String(row.holder.name) : "";
+    return " It is the id of " + KYC.escapeHtml(row.name) + ", who left " +
+      (row.chamber === "Senate" ? "the Senate" : "the House") +
+      " during this Congress; congress-legislators ends the term on " +
+      KYC.escapeHtml(KYC.dateWords(row.left)) + ". " +
+      (row.holder
+        ? 'The seat is now held by <button type="button" class="link-button" data-goto="' +
+          KYC.escapeAttr(row.holder.id) + '">' + KYC.escapeHtml(holder) + "</button>" +
+          (/\.$/.test(holder) ? "" : ".")
+        : "Congress’s membership list seats nobody there now.");
   }
 
   function open(id, opts) {

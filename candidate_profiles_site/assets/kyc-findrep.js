@@ -504,9 +504,19 @@
     });
   }
 
+  /** A person's party, in brackets after the name: D and R, I for an
+   *  independent, and any other party by its own name. The colour bucket
+   *  (KYC.partyKey) folds every third party into "i", and the answer
+   *  called the Libertarian Ted Brown "(I)" beside a ballot page that
+   *  names him Libertarian (PR #118 review). */
   function partyLetter(p) {
     var key = KYC.partyKey(p);
-    return key === "d" ? "D" : key === "r" ? "R" : key === "i" ? "I" : "";
+    if (key === "d") return "D";
+    if (key === "r") return "R";
+    if (key !== "i") return "";
+    var party = String((p && p.party) || "").trim();
+    if (!party || party === "Other") return "";
+    return party === "Independent" ? "I" : party;
   }
 
   /** A person's name, linked to their profile on this page. */
@@ -524,9 +534,29 @@
   }
 
   function pct(share) {
-    var whole = Math.round(share * 100);
+    return pctWords(Math.round(share * 100), share);
+  }
+
+  function pctWords(whole, share) {
     if (whole >= 100 && share < 1) whole = 99;
     return whole < 1 ? "under 1%" : whole + "%";
+  }
+
+  /** The shares of one ZIP area's land, *shares*, as whole percentages
+   *  that add up to what the shares do (largest remainder): rounded one by
+   *  one, 91.5% and 8.5% read "92%" and "9%" of one ZIP code (PR #118
+   *  review). The ballot page writes its shares with this too. */
+  function pcts(shares) {
+    var raw = shares.map(function (s) { return Math.max(0, Number(s) || 0) * 100; });
+    var target = Math.round(raw.reduce(function (a, b) { return a + b; }, 0));
+    var whole = raw.map(Math.floor);
+    var left = target - whole.reduce(function (a, b) { return a + b; }, 0);
+    raw.map(function (r, i) { return i; }).sort(function (a, b) {
+      return (raw[b] - whole[b]) - (raw[a] - whole[a]) || a - b;
+    }).forEach(function (i) {
+      if (left > 0) { whole[i] += 1; left -= 1; }
+    });
+    return whole.map(function (w, i) { return pctWords(w, shares[i]); });
   }
 
   function districtsPage(code, now, next) {
@@ -559,10 +589,11 @@
    *  *one(id)*'s words, with the share where there is more than one. */
   function each(parts, one) {
     var shares = parts.length > 1 && Array.isArray(parts[0]) && typeof parts[0][1] === "number";
-    return parts.map(function (p) {
+    var words = shares ? pcts(parts.map(function (p) { return p[1]; })) : [];
+    return parts.map(function (p, i) {
       var id = Array.isArray(p) ? p[0] : p;
       return '<div class="findrep-item">' +
-        (shares ? '<span class="findrep-share">' + pct(p[1]) + "</span> " : "") + one(id) + "</div>";
+        (shares ? '<span class="findrep-share">' + words[i] + "</span> " : "") + one(id) + "</div>";
     }).join("");
   }
 
@@ -760,7 +791,7 @@
     if (!people().length || noElection(code)) return "";
     var past = KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election";
     return ' <a class="btn" data-findrep-ballot href="' + KYC.escapeAttr(KYC.siteRoot() + "ballot.html" +
-      (zip5 ? "#/?zip=" + zip5 : "")) + '">' + KYC.icon("vote") +
+      (zip5 ? "#/?zip=" + zip5 : "")) + '">' + KYC.icon("ballot") +
       (past ? " See what was on your ballot" : " See everything on your ballot") +
       (zip5 ? "" : " (use your location again there)") + "</a>";
   }
@@ -1166,15 +1197,25 @@
   /* Followed on the page that holds the panel, the link would be a
    * navigation the grid's router reads as a view, clearing the reader's
    * filters and redrawing the grid. It is caught: the drawer closes and
-   * the panel is brought into view with the ZIP code field focused. */
+   * the panel is brought into view with the ZIP code field focused.
+   *
+   * So it is on any page whose panel answers what the home page's does -
+   * one that holds profiles and so names Congress (the map, a state page): the
+   * link took a state page's reader away from the panel on it, and on the
+   * map, where the panel sits in the drawer itself, listed it twice with
+   * two behaviours (PR #118 review). There the drawer stays open and its
+   * panel is brought into view. A legislature or county page's panel
+   * names no member of Congress, so the link still goes home. */
   function catchNavLink(event) {
     var a = event.target && event.target.closest && event.target.closest('a[data-nav="findrep"]');
     if (!a || event.defaultPrevented || event.button || event.metaKey || event.ctrlKey ||
         event.shiftKey || event.altKey) return;
-    if (pathOf(a.pathname) !== pathOf(global.location.pathname)) return;
-    if (!doc.querySelector("[data-findrep][data-findrep-ready]")) return;
+    var slot = doc.querySelector("[data-findrep][data-findrep-ready]");
+    if (!slot) return;
+    if (pathOf(a.pathname) !== pathOf(global.location.pathname) && !people().length) return;
     event.preventDefault();
-    KYC.closeDrawer(reveal);
+    if (slot.closest && slot.closest(".sidebar")) reveal();
+    else KYC.closeDrawer(reveal);
   }
 
   /* Arrived from another page's drawer: the panel, and the fragment
@@ -1222,6 +1263,8 @@
     plans: plans,
     reach: reach,
     pct: pct,
+    pcts: pcts,
+    partyLetter: partyLetter,
     landIn: landIn,
     houseRace: houseRace,
     senateRaces: senateRaces,
@@ -1243,7 +1286,7 @@
     // from the day after the election it speaks of a ballot that was.
     if (KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election") {
       Array.prototype.forEach.call(doc.querySelectorAll("a[data-ballot-entry]"), function (a) {
-        a.innerHTML = KYC.icon("vote") + " See what was on your ballot";
+        a.innerHTML = KYC.icon("ballot") + " See what was on your ballot";
       });
     }
     arrive();

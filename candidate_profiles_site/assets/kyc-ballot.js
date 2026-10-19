@@ -317,6 +317,10 @@
     return ((mine && mine.lines) || []).filter(function (l) { return l.k === "none"; })[0] || null;
   }
 
+  /** What the way to this page says it holds, wherever it is offered. */
+  var ENTRY_WORDS = "Every contest on your ballot that this site can name, from your ZIP code " +
+    "or location: Congress, statewide offices and your state legislative seats.";
+
   /** The way from a state's voting block to the reader's whole ballot
    *  (ballot.html), which needs their ZIP code or location to name their
    *  districts. */
@@ -326,10 +330,11 @@
     if (noElection(code)) return "";
     var past = KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election";
     return '<p class="vote-ballot"><a class="btn" data-ballot-entry href="' +
-      KYC.escapeAttr(KYC.siteRoot() + "ballot.html") + '">' + KYC.icon("vote") +
+      KYC.escapeAttr(KYC.siteRoot() + "ballot.html") + '">' + KYC.icon("ballot") +
       (past ? " See what was on your ballot" : " See everything on your ballot") + "</a> " +
-      '<span class="field-note">Every contest on your ballot that this site can name, from ' +
-      "your ZIP code or your location.</span></p>";
+      // The home page's hero says the same words (index.html .intro-ballot;
+      // test_site checks the two agree): one link, one description.
+      '<span class="field-note">' + ENTRY_WORDS + "</span></p>";
   }
 
   function votingBlock(code, name) {
@@ -674,6 +679,14 @@
     });
   }
 
+  /** Each part's share of the ZIP area's land, in words that add up as
+   *  the panel's do (KYC.findRep.pcts); none for a location's parts. */
+  function shareWords(parts) {
+    var shares = parts.map(function (p) { return Array.isArray(p) ? p[1] : null; });
+    return shares.every(function (s) { return typeof s === "number"; })
+      ? KYC.findRep.pcts(shares) : [];
+  }
+
   /** The House: one card per district the ZIP area or the location
    *  reaches, on the map the 2026 race is fought on, each with its share of
    *  the ZIP area's land where there is more than one. */
@@ -682,7 +695,8 @@
     var title = info.delegates && !info.house
       ? (info.delegateTitle || "Delegate") + " to the U.S. House" : "U.S. House";
     var several = parts.length > 1;
-    return parts.map(function (part) {
+    var words = shareWords(parts);
+    return parts.map(function (part, i) {
       var n = Array.isArray(part) ? part[0] : part;
       var share = Array.isArray(part) ? part[1] : null;
       var race = KYC.findRep.houseRace(code, n);
@@ -690,7 +704,7 @@
         : "District " + n + (ctx.redrawn ? ", on the 2026 map" : "");
       var lead = !several ? ""
         : share !== null
-          ? '<p class="ballot-share"><span class="findrep-share">' + KYC.findRep.pct(share) +
+          ? '<p class="ballot-share"><span class="findrep-share">' + words[i] +
             "</span> of ZIP " + esc(ctx.zip) + "&rsquo;s land is in this district.</p>"
           : '<p class="ballot-share">One of the districts in reach of your location.</p>';
       if (race) return raceCard(code, race, title, seat, lead);
@@ -772,8 +786,9 @@
           '">pick it on the legislature page &rsaquo;</a></p>' + chamberBallot(c));
       }
       var several = parts.length > 1;
+      var words = shareWords(parts);
       var maybe = false, unknown = false;
-      var rows = parts.map(function (part) {
+      var rows = parts.map(function (part, i) {
         var id = Array.isArray(part) ? part[0] : part;
         var share = Array.isArray(part) && several ? part[1] : null;
         var href = pageUrl + "#/?" + (ch === "lower" ? "chamber=lower&" : "") + "d=" +
@@ -788,7 +803,7 @@
           : '<p class="leg-ballot">Whether this district ' + (past ? "had" : "has") +
             " a seat on the Nov 3, 2026 ballot is not known here.</p>";
         return '<div class="ballot-seat-row"><p class="ballot-seat-name">' +
-          (share !== null ? '<span class="findrep-share">' + KYC.findRep.pct(share) + "</span> " : "") +
+          (share !== null ? '<span class="findrep-share">' + words[i] + "</span> " : "") +
           '<a class="ballot-district" href="' + KYC.escapeAttr(href) + '">' +
           esc(KYC.findRep.districtName(c, id)) + "</a></p>" + says + "</div>";
       });
@@ -1131,7 +1146,7 @@
 
   function mountAsk(slot) {
     slot.innerHTML =
-      '<h2 class="findrep-title" id="ballotAskTitle">' + KYC.icon("vote") + " Find your ballot</h2>" +
+      '<h2 class="findrep-title" id="ballotAskTitle">' + KYC.icon("ballot") + " Find your ballot</h2>" +
       '<form class="findrep-form" novalidate>' +
         '<label class="findrep-label" for="ballotZip">ZIP code</label>' +
         '<input class="text-input findrep-zip" id="ballotZip" name="zip" type="text" ' +

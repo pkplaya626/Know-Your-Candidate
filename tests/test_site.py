@@ -812,6 +812,25 @@ class TestBallotPage(unittest.TestCase):
         with open(os.path.join(ROOT, emit.BALLOT_FILE), encoding="utf-8") as handle:
             self.assertIn('data-page="ballot"', handle.read())
 
+    def test_every_way_to_it_says_the_same_words_under_its_own_icon(self):
+        # The home page's hero and each state's voting block described one
+        # link two ways, under the "How to vote" icon (PR #118 review).
+        import re
+        site = os.path.join(ROOT, emit.SITE_DIR)
+        with open(os.path.join(site, "index.html"), encoding="utf-8") as handle:
+            index = handle.read()
+        with open(os.path.join(site, "assets", "kyc-ballot.js"), encoding="utf-8") as handle:
+            script = handle.read()
+        hero = re.search(r'<p class="intro-ballot">(.*?)</p>', index, re.S).group(1)
+        note = re.search(r'<span class="field-note">(.*?)</span>', hero, re.S).group(1)
+        words = re.search(r'var ENTRY_WORDS = ((?:"[^"]*"\s*\+?\s*)+);', script).group(1)
+        words = "".join(re.findall(r'"([^"]*)"', words))
+        self.assertEqual(" ".join(note.split()), words)
+        self.assertIn('<use href="#i-ballot"/>', hero)
+        self.assertIn('KYC.icon("ballot")', script)
+        self.assertIn('href="ballot.html" data-nav="ballot">\n                <svg class="icon" '
+                      'aria-hidden="true"><use href="#i-ballot"/>', index)
+
 
 class TestStatePages(unittest.TestCase):
     """Fifty-seven pages from one template, checked the way the data is."""

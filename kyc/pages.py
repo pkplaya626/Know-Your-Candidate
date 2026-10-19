@@ -161,7 +161,7 @@ def nav_groups():
         )),
         (f"Elections {CYCLE}", (
             ("candidates", "index.html", "user", "Candidates"),
-            ("ballot", BALLOT_PATH, "vote", "Your ballot"),
+            ("ballot", BALLOT_PATH, "ballot", "Your ballot"),
             ("races", "map.html", "map", "Races & partisan map"),
         )),
         ("Federal", (

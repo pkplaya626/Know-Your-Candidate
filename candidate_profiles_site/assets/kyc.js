@@ -22,6 +22,9 @@
   var ICONS = {
     menu: "M3 6h18M3 12h18M3 18h18",
     vote: "M9 12l2 2 4-4M3 7l9-4 9 4v10l-9 4-9-4z",
+    // A ballot sheet, one row marked: "Your ballot" and the ways to it,
+    // beside "How to vote", which the site's own mark (vote) draws.
+    ballot: "M5 3h14v18H5zM8 8.5l1.3 1.3L12 7M14 8.5h2M8 14h3v3H8zM14 15.5h2",
     search: "M11 11m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-4.5-4.5",
     "search-x": "M11 11m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M20 20l-4.5-4.5M9 9l4 4M13 9l-4 4",
     grid: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
