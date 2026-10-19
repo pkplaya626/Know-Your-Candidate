@@ -305,6 +305,83 @@ class TestRaces(unittest.TestCase):
         self.assertEqual(races[0]["lastElection"]["year"], 2022)
         self.assertEqual(races[0]["lastElection"]["term"], "unexpired")
 
+    # Who took a seat after its counted election (PR #110 review). The
+    # people are the cache's fixtures and a record written here, so the
+    # checks hold in every phase of the cycle (rule 68).
+    def _record(self, **incumbents):
+        return {"cycle": 2026, "electionDay": "2026-11-03", "incumbents": incumbents}
+
+    def test_a_seat_filled_by_a_special_election_is_not_its_last_election(self):
+        # VA-11: Gerald Connolly won in 2024, died in office, and James
+        # Walkinshaw won the September 2025 special. "The last election to
+        # this district" over Connolly's result was false.
+        races = [{"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1}]
+        record = self._record(**{"H-VA-1-2026": {
+            "name": "James R. Walkinshaw", "termStart": "2025-09-10", "appointed": False}})
+        sh.apply(races, self._cache(), record=record)
+        self.assertEqual(races[0]["lastElection"]["seatedSince"],
+                         {"name": "James R. Walkinshaw", "since": "2025-09-10",
+                          "how": "special-election"})
+
+    def test_a_holder_of_the_winners_surname_is_still_someone_else(self):
+        # AZ-7: Raúl M. Grijalva won in 2024; Adelita S. Grijalva won the
+        # special after his death.
+        races = [{"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1}]
+        record = self._record(**{"H-VA-1-2026": {
+            "name": "Adelia S. Moore", "termStart": "2025-11-12"}})
+        sh.apply(races, self._cache(), record=record)
+        self.assertIn("seatedSince", races[0]["lastElection"])
+
+    def test_the_winner_sworn_in_late_is_the_winner(self):
+        # Seated after January 3 by the snapshot, under a fuller name: the
+        # 2024 winner, not a special election's.
+        races = [{"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1}]
+        snapshot = {"legislators": [
+            {"name": "Barry Moore Jr.", "chamber": "House", "state": "VA", "district": 1,
+             "termStart": "2025-03-01"},
+            {"name": "Someone Else", "chamber": "House", "state": "VA", "district": 1,
+             "termStart": "2025-01-20"}]}
+        sh.apply(races, self._cache(), record=self._record(), snapshot=snapshot)
+        self.assertNotIn("seatedSince", races[0]["lastElection"])
+
+    def test_an_appointed_senator_is_said_as_an_appointment(self):
+        races = [{"id": "S-OK-2026", "chamber": "Senate", "state": "OK", "senateClass": 2}]
+        record = self._record(**{"S-OK-2026": {
+            "name": "Alan Armstrong", "termStart": "2026-03-24", "appointed": True}})
+        sh.apply(races, self._cache(), record=record)
+        self.assertEqual(races[0]["lastElection"]["seatedSince"]["how"], "appointment")
+
+    def test_a_member_seated_after_election_day_is_the_races_own_winner(self):
+        # In January the snapshot seats the 2026 winners: their result is
+        # the race's, not a special since the counted one.
+        races = [{"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1}]
+        snapshot = {"legislators": [
+            {"name": "New Member", "chamber": "House", "state": "VA", "district": 1,
+             "termStart": "2027-01-03"}]}
+        sh.apply(races, self._cache(), record=self._record(), snapshot=snapshot)
+        self.assertNotIn("seatedSince", races[0]["lastElection"])
+
+    def test_the_committed_record_marks_every_special_since_2024(self):
+        # Every House seat on the same lines whose record incumbent was
+        # seated after the 2024 winners is marked, and none other.
+        cache = sh.load_cache(ROOT)
+        if cache is None:
+            self.skipTest("no seat history cache")
+        with open(os.path.join(ROOT, "candidate_profiles_site", "data", "record_2026.json"),
+                  encoding="utf-8") as handle:
+            record = json.load(handle)
+        races = [dict(r, id=k) for k, r in record["races"].items()]
+        sh.apply(races, cache, record=record)
+        from kyc.districts import REDRAWN
+        for race in races:
+            if race["chamber"] != "House" or race["state"] in REDRAWN:
+                continue
+            last = race["lastElection"]
+            inc = record["incumbents"].get(race["id"]) or {}
+            late = (inc.get("termStart") or "") > "2025-02-02"
+            if "candidates" in last:
+                self.assertEqual("seatedSince" in last, late, race["id"])
+
     def test_the_committed_cache_covers_every_race_it_can(self):
         cache = sh.load_cache(ROOT)
         if cache is None:

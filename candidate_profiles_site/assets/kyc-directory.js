@@ -291,8 +291,13 @@
   function gapLead(race, source) {
     var g = KYC.odds.gap(race, source);
     if (!g) return "";
+    // Each price with the outcome it is on, as the market labels it: two
+    // bare percentages left the reader to guess whose they were.
+    var on = function (label, price) {
+      return (label ? label + " " : "") + KYC.odds.percent(price);
+    };
     return KYC.escapeHtml(KYC.odds.sourceName(source) + "’s two highest prices: " +
-      KYC.odds.percent(g.top) + " and " + KYC.odds.percent(g.second) + ", " +
+      on(g.topLabel, g.top) + " and " + on(g.secondLabel, g.second) + ", " +
       Math.round(g.gap * 100) + " points apart. A market price is what a trader pays for a " +
       "$1 contract, not a poll or this site’s forecast.");
   }
@@ -483,7 +488,17 @@
           (hiddenOut === 1 ? "is" : "are") + " hidden.") + outToggle();
       }
     }
-    return html + challengerNote() + KYC.escapeHtml(zipWords());
+    // A closest-first order reorders the cards by market prices: said here
+    // as the races view says it, or it reads as an order of the people.
+    return html + challengerNote() + (closeSource() ? " " + KYC.escapeHtml(cardOrderWords()) : "") +
+      KYC.escapeHtml(zipWords());
+  }
+
+  function cardOrderWords() {
+    return "Cards ordered by their race, closest first by " +
+      KYC.odds.sourceName(closeSource()) + "’s prices, the gap between its two highest; races " +
+      "it does not price after them. Market prices are what traders pay, not polls or this " +
+      "site’s forecast.";
   }
 
   /* The Challengers chip and the sidebar's "Challengers on the ballot"

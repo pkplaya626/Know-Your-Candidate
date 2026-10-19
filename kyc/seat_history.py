@@ -1031,10 +1031,89 @@ def senate_last(cache, state, senate_class):
     return best, withheld
 
 
-def apply(races, cache):
+# How long after the counted election's term began a holder may have been
+# sworn in and still be that election's winner: Jim Justice took the Senate
+# seat he won in 2024 on January 14, 2025.
+SEATING_GRACE = 30
+
+
+def _same_person(a, b):
+    """The counted winner and the seat's holder, by first given name and
+    surname. Used only to leave a holder unremarked, never to attribute a
+    result: Raúl M. Grijalva won Arizona's 7th in 2024, and Adelita S.
+    Grijalva, who shares his surname, holds it after a special election."""
+    def key(name):
+        words = [w for w in _fold(name).split() if w not in SUFFIXES]
+        return (words[0], surname(name)) if words else ("", "")
+    return key(a) == key(b)
+
+
+def _seat_holders(race, record, snapshot):
+    """Everyone who held the race's seat before Election Day by the
+    record (frozen, so it keeps the special election's winner past January
+    3) or the membership snapshot: ``[{"name", "since", "appointed"}]``."""
+    from . import cycle as cycle_mod
+    day = (record or {}).get("electionDay") or cycle_mod.general_election_day(
+        (record or {}).get("cycle") or cycle_mod.CYCLE).isoformat()
+    out = []
+    inc = ((record or {}).get("incumbents") or {}).get(race["id"])
+    if inc and inc.get("termStart"):
+        out.append({"name": inc["name"], "since": inc["termStart"],
+                    "appointed": bool(inc.get("appointed"))})
+    for person in (snapshot or {}).get("legislators") or []:
+        start = person.get("termStart") or ""
+        if not start or start >= day or person.get("chamber") != race["chamber"] or \
+                person.get("state") != race["state"]:
+            continue
+        if race["chamber"] == "Senate":
+            if person.get("senateClass") != race.get("senateClass"):
+                continue
+        elif (person.get("district") or 0) != (race.get("district") or 0):
+            continue
+        out.append({"name": person["name"], "since": start,
+                    "appointed": person.get("how") == "appointment"})
+    return out
+
+
+def seated_since(race, result, record, snapshot):
+    """Who has held the seat since the counted election without having won
+    it, or None: ``{"name", "since", "how"}``, *how* "appointment" or
+    "special-election". Five House seats on the 2026 ballot were filled by
+    special elections after 2024's (VA-11, AZ-7, NJ-11, GA-14, GA-13), and
+    "the last election to this district" over Gerald Connolly's 2024 result
+    named a man who died in office as the seat's last winner, beside the
+    member who won it after him (rule 90). A House vacancy is filled only by
+    election; a Senate one by appointment until one is held."""
+    if not result or not result.get("candidates"):
+        return None
+    date = result["date"]
+    year = int(date[:4])
+    # The counted election's term began on January 3 after a November
+    # election; a January runoff's winner is seated within days.
+    began = f"{year + 1}-01-03" if date[5:7] in ("11", "12") else date
+    late = (datetime.date.fromisoformat(began) +
+            datetime.timedelta(days=SEATING_GRACE)).isoformat()
+    winner = result["candidates"][0]["name"]
+    found = None
+    for holder in _seat_holders(race, record, snapshot):
+        since = holder["since"]
+        if since <= date or _same_person(holder["name"], winner):
+            continue
+        if not holder["appointed"] and since <= late:
+            continue
+        if found is None or since > found["since"]:
+            found = {"name": holder["name"], "since": since,
+                     "how": "appointment" if holder["appointed"] else "special-election"}
+    return found
+
+
+def apply(races, cache, record=None, snapshot=None):
     """Attach ``lastElection`` to each race: the seat's last result as the
     page shows it, ``{"redrawn": True}`` for a district redrawn since, or
     ``{"withheld": why}`` where the sources disagree or one is missing.
+    A result whose seat has been filled since by a special election or an
+    appointment carries ``seatedSince`` (:func:`seated_since`): the result
+    is then the last *regular* election, and the page says so.
     Returns how many races carry a result."""
     from .districts import REDRAWN
     if not cache:
@@ -1056,11 +1135,16 @@ def apply(races, cache):
                 race["lastElection"] = {"withheld": withheld[key]["why"], "year": HOUSE_YEAR}
         else:
             best, held = senate_last(cache, race["state"], race.get("senateClass"))
+            result = None
             if held:
                 race["lastElection"] = {"withheld": held[0]["why"], "year": held[0]["year"]}
             elif best:
+                result = best
                 race["lastElection"] = _shown(best, "Senate")
                 shown += 1
+        since = seated_since(race, result, record, snapshot) if result else None
+        if since:
+            race["lastElection"]["seatedSince"] = since
     return shown
 
 

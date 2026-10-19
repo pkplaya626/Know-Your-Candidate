@@ -2656,6 +2656,27 @@
       " gives the same office the same years." + escapeHtml(withheld) + "</p>";
   }
 
+  /** The same record in a narrow column (the ballot comparison, GRID-17):
+   *  each office with its place and years and the note the panel gives it,
+   *  the first *limit* of them. One renderer of a row's words with the panel
+   *  (rule 12): the comparison's own copy dropped the place, so a mayoralty
+   *  read with no city. */
+  function officesHeldShort(record, limit) {
+    if (!record) return '<span class="kyc-absent">No linked record</span>';
+    var rows = record.rows || [];
+    if (!rows.length) return '<span class="kyc-absent">None the sources agree on</span>';
+    limit = limit || rows.length;
+    return '<ul class="compare-list">' + rows.slice(0, limit).map(function (row) {
+      var note = HELD_NOTES[row.agree];
+      var place = heldPlace(row);
+      return "<li>" + escapeHtml(row.office) + (place ? ", " + escapeHtml(place) : "") +
+        ' <span class="faint">' + escapeHtml(heldYears(row)) + "</span>" +
+        (note ? ' <span class="held-note" title="' + escapeAttr(note[1]) + '">' +
+          escapeHtml(note[0]) + "</span>" : "") + "</li>";
+    }).join("") + (rows.length > limit ? '<li class="faint">and ' + (rows.length - limit) +
+      " more on the profile</li>" : "") + "</ul>";
+  }
+
   /** What a Cabinet office's holder is called, as the federal page and
    *  the guide both say it: their own title where it is not the office's
    *  ("Secretary of War" for the Secretary of Defense), else none, and
@@ -2738,6 +2759,7 @@
     escapeAttr: escapeAttr,
     renderField: renderField,
     officesHeld: officesHeld,
+    officesHeldShort: officesHeldShort,
     holderRole: holderRole,
     heldText: heldText,
     heldYears: heldYears,

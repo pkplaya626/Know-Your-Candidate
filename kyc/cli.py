@@ -185,7 +185,8 @@ def _build(args):
                                 filed=candidates.filed_rows(field), record=raw.get("record"),
                                 snapshot=snapshot)
     stats.update(races_mod.stats(race_list))
-    counts, money_problems = _outside_and_seats(args.root, profiles, race_list)
+    counts, money_problems = _outside_and_seats(args.root, profiles, race_list,
+                                                record=raw.get("record"), snapshot=snapshot)
     stats.update(counts)
     print(f"  outside spending: {counts['outside_spending']} profiles; last elections: "
           f"{counts['last_elections']} races")
@@ -547,15 +548,16 @@ def _campaigns(args):
     return 1 if stats.get("stopped") else 0
 
 
-def _outside_and_seats(root, profiles, race_list):
+def _outside_and_seats(root, profiles, race_list, record=None, snapshot=None):
     """Outside spending on the profiles (kyc/outside.py) and each seat's
     last election on the races (kyc/seat_history.py), from their caches;
-    the counts and what a build says about them."""
+    the counts and what a build says about them. The record and the
+    snapshot say who has held a seat since its last counted election."""
     from . import outside, seat_history
     spending = outside.load_cache(root)
     applied, refused = outside.apply(profiles, spending) if spending else (0, [])
     history = seat_history.load_cache(root)
-    shown = seat_history.apply(race_list, history)
+    shown = seat_history.apply(race_list, history, record=record, snapshot=snapshot)
     problems = outside.problems(spending, refused) + seat_history.problems(history, race_list)
     return {"outside_spending": applied, "last_elections": shown}, problems
 
@@ -1336,7 +1338,8 @@ def _verify(args):
         snapshot=legislators.load_snapshot(args.root),
     )
     stats.update(races_mod.stats(race_list))
-    stats.update(_outside_and_seats(args.root, profiles, race_list)[0])
+    stats.update(_outside_and_seats(args.root, profiles, race_list, record=raw.get("record"),
+                                    snapshot=legislators.load_snapshot(args.root))[0])
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes,

@@ -164,6 +164,25 @@ def office_of(profile):
     return "S" if "Senate" in (profile.get("chamber") or "") else "H"
 
 
+CANDIDACY = {"H": "House", "S": "Senate"}
+
+
+def merged(items):
+    """One row per committee: a committee that spent under two of one
+    person's registrations is one group, its spending summed. Tricia
+    Pridemore's GOPAC money, filed under both her ids, read "3 groups" for
+    two and was listed twice among the top three."""
+    out = {}
+    for row in items:
+        key = row.get("committeeId") or ("name", row.get("committee"))
+        if key in out:
+            out[key] = dict(out[key], total=out[key]["total"] + (row.get("total") or 0),
+                            count=(out[key].get("count") or 0) + (row.get("count") or 0))
+        else:
+            out[key] = dict(row, total=row.get("total") or 0)
+    return list(out.values())
+
+
 def apply(profiles, cache):
     """Attach ``outsideSpending`` to each profile with a row, checked
     against the profile's office and state; returns ``(applied, refused)``,
@@ -189,9 +208,10 @@ def apply(profiles, cache):
         if not ids:
             continue
         out = {"asOf": cache["read"], "cycle": cache.get("cycle", CYCLE),
-               "url": fec_url(ids[0], cache.get("cycle", CYCLE))}
+               "url": fec_url(ids[0], cache.get("cycle", CYCLE)),
+               "candidacy": CANDIDACY[office_of(profile)]}
         for side, items in sides.items():
-            items = sorted(items, key=lambda r: (-r["total"], r["committeeId"] or ""))
+            items = sorted(merged(items), key=lambda r: (-r["total"], r["committeeId"] or ""))
             out[side] = round(sum(r["total"] for r in items), 2)
             out[side + "Committees"] = len(items)
             out[side + "Top"] = [{"committee": r["committee"], "total": round(r["total"])}
@@ -200,7 +220,32 @@ def apply(profiles, cache):
             continue
         profile["outsideSpending"] = out
         applied += 1
+    elsewhere(profiles)
     return applied, refused
+
+
+def elsewhere(profiles):
+    """A member running for another seat has two candidacies, and the FEC
+    totals outside spending under each id apart: Andy Barr's $7.2 million
+    from Defend American Jobs is filed under his House id, his Senate
+    filing's under the Senate one. Neither is moved or summed into the
+    other. The member's own line says it is their other candidacy's
+    (``runningElsewhere``: the profile of the campaign they are running),
+    and that campaign's profile carries a copy (``outsideSpendingOther``)
+    that the race block shows on a line of its own."""
+    by_id = {p["id"]: p for p in profiles if p.get("id")}
+    for profile in profiles:
+        profile.pop("outsideSpendingOther", None)
+    for profile in profiles:
+        own = profile.get("outsideSpending")
+        running = by_id.get(profile.get("alsoRunningId") or "")
+        if not own or not running or running is profile:
+            continue
+        if office_of(running) == office_of(profile):
+            continue
+        own["runningElsewhere"] = running["id"]
+        running["outsideSpendingOther"] = dict(own, profileId=profile["id"])
+        running["outsideSpendingOther"].pop("runningElsewhere", None)
 
 
 def problems(cache, refused):

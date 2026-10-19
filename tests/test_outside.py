@@ -116,6 +116,41 @@ class TestApply(unittest.TestCase):
         problems = outside.problems(self._cache(), refused)
         self.assertEqual(problems[0][:2], ("error", "outside-attribution"))
 
+    def test_one_committee_under_two_of_a_persons_ids_is_one_group(self):
+        # Tricia Pridemore's GOPAC money, filed under both her House ids,
+        # read "3 groups" for two and was listed twice.
+        cache = {"read": "2026-10-18", "cycle": 2026, "candidates": {
+            "H4GA11087": {"support": [{"committeeId": "C7", "committee": "GOPAC", "total": 200.0,
+                                       "count": 1}], "oppose": []},
+            "H6GA11207": {"support": [{"committeeId": "C7", "committee": "GOPAC", "total": 90.0,
+                                       "count": 2},
+                                      {"committeeId": "C8", "committee": "WFW", "total": 100.0,
+                                       "count": 1}], "oppose": []}}}
+        profile = {"name": "Tricia Pridemore", "chamber": "House", "state": "GA",
+                   "fecCandidateId": "H4GA11087", "otherFecIds": ["H6GA11207"]}
+        outside.apply([profile], cache)
+        out = profile["outsideSpending"]
+        self.assertEqual(out["supportCommittees"], 2)
+        self.assertEqual(out["supportTop"], [{"committee": "GOPAC", "total": 290},
+                                             {"committee": "WFW", "total": 100}])
+        self.assertEqual(out["support"], 390.0)
+
+    def test_a_members_other_candidacy_is_labelled_and_never_summed(self):
+        # Andy Barr's House id carries outside money for a House race he is
+        # not running; his Senate filing carries its own. Each stays where
+        # the FEC filed it, and the Senate campaign carries the other apart.
+        member = {"id": "M1", "name": "Andy Barr", "chamber": "House", "state": "NC",
+                  "fecCandidateId": "H6NC04001", "alsoRunningId": "C1"}
+        running = {"id": "C1", "name": "Andy Barr", "chamber": "Senate", "state": "NC",
+                   "fecCandidateId": "S6NC00407"}
+        outside.apply([member, running], self._cache())
+        self.assertEqual(member["outsideSpending"]["runningElsewhere"], "C1")
+        self.assertEqual(member["outsideSpending"]["candidacy"], "House")
+        self.assertEqual(running["outsideSpending"]["support"], 300.0)
+        self.assertEqual(running["outsideSpendingOther"]["support"], 5.0)
+        self.assertEqual(running["outsideSpendingOther"]["candidacy"], "House")
+        self.assertNotIn("runningElsewhere", running["outsideSpendingOther"])
+
     def test_a_profile_with_no_id_is_never_matched_by_name(self):
         profile = {"name": "Roy Cooper", "chamber": "Senate", "state": "NC",
                    "officeLabel": "Senate • NC"}

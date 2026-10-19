@@ -9719,6 +9719,13 @@ async function testRaceMoney() {
     check("every row with figures says through when (campaigns file on different days)",
       barred.every((r) => /^FEC, through [A-Z][a-z]+\.? \d{1,2}, 20\d\d$/.test(
         r.querySelector(".money-asof").textContent)));
+    // The totals' source is linked to the filing, not left to the outside
+    // line's link (PR #110 review).
+    check("the FEC beside each campaign's totals links that candidate's filings",
+      barred.every((r) => {
+        const a = r.querySelector(".money-asof a");
+        return !!a && /^https:\/\/www\.fec\.gov\/data\/candidate\/[HSP]\w+\/$/.test(a.href);
+      }));
     check("the bars are neutral ink: no party colour on a bar, the party only in its chip",
       rows.every((r) => !r.querySelector(".money-bars [class*='party']")) &&
         rows.every((r) => !!r.querySelector(".money-who .party-chip")));
@@ -9731,7 +9738,7 @@ async function testRaceMoney() {
       /Raised includes loans and transfers/.test(b.textContent)));
     const outside = D.querySelectorAll(".money-outside");
     check("outside groups' spending is each side as filed, dated and linked to the FEC, never netted",
-      [...outside].every((o) => /^Outside groups spent \$[\d.]+[KMB]? (supporting|opposing)/.test(o.textContent) &&
+      [...outside].every((o) => /^(?:Filed (?:under their|separately under their) (?:House|Senate) candidacy[^:]*: o|O)utside groups spent \$[\d.]+[KMB]? (supporting|opposing)/.test(o.textContent) &&
         /processed when read on/.test(o.textContent) && /fec\.gov/.test(o.querySelector("a").href) &&
         !/\bnet\b/i.test(o.textContent)), outside.length + " lines");
   });
@@ -9755,9 +9762,71 @@ async function testRaceMoney() {
     check("a redrawn district says so and shows no 2024 result",
       house.length > 0 && house.every((d) => {
         openFold(window, d);
-        return /redrawn since 2024/.test(d.querySelector("summary").textContent) &&
-          /not shown/.test(d.textContent) && !/\d+\.\d%/.test(d.textContent);
+        return /not shown \(district redrawn for 2026\)/.test(d.querySelector("summary").textContent) &&
+          /counted on the old lines/.test(d.textContent) && !/other voters/.test(d.textContent) &&
+          !/\d+\.\d%/.test(d.textContent);
       }));
+  });
+
+  /* "The last election to this district" over a 2024 result was false
+   * where a special election has filled the seat since (VA-11, AZ-7,
+   * NJ-11, GA-13, GA-14), and every "Last time" becomes 2026's own from the
+   * day after Election Day (PR #110 review; rule 63). */
+  suite("the seat's last election: specials since, and the day after", () => {
+    const all = window.kycRaces;
+    const specials = all.filter((r) => r.lastElection && r.lastElection.seatedSince &&
+      r.lastElection.seatedSince.how === "special-election");
+    const campaign = new window.Date(2026, 9, 20);
+    const after = new window.Date(2026, 10, 4);
+    const holder = (html) => {
+      const box = D.createElement("div");
+      box.innerHTML = html;
+      return box;
+    };
+    check("the record's House specials since 2024 are marked (five while their holders sit)",
+      !oldCongressSits(window) || specials.length >= 5, specials.map((r) => r.id).join(","));
+    check("a seat filled by a special says its figure is the last regular election's, and who " +
+      "took the seat after it",
+      specials.every((r) => {
+        const box = holder(KYC.cards.lastTimeBlock(r, { lazy: false, now: campaign }));
+        const text = box.textContent;
+        return /^Last regular election \(20\d\d\)/.test(box.querySelector("summary").textContent) &&
+          text.includes(r.lastElection.seatedSince.name + " took the seat on") &&
+          /after a special election whose result this site does not show/.test(text) &&
+          !/The last election to this/.test(text);
+      }));
+    const appointed = all.filter((r) => r.lastElection && r.lastElection.seatedSince &&
+      r.lastElection.seatedSince.how === "appointment");
+    check("an appointee is said as one, and the counted election is still the last",
+      appointed.every((r) => {
+        const text = holder(KYC.cards.lastTimeBlock(r, { lazy: false, now: campaign })).textContent;
+        return /by appointment\./.test(text) && /The last election to this seat before the 2026 election/.test(text);
+      }), appointed.length);
+    const shown = all.filter((r) => r.lastElection && r.lastElection.candidates);
+    check("no fold calls a result the last election without saying before 2026's",
+      shown.every((r) => !/last (regular )?election to this (district|seat)\.(?! )/.test(
+        holder(KYC.cards.lastTimeBlock(r, { lazy: false, now: campaign })).textContent)));
+    check("from the day after Election Day it is 'Before 2026', never 'Last time'",
+      shown.every((r) => /^Before 2026/.test(holder(KYC.cards.lastTimeBlock(r,
+        { lazy: false, now: after })).querySelector("summary").textContent)));
+    const rcv = shown.filter((r) => r.lastElection.rankedChoice === "first-choices" &&
+      r.lastElection.candidates[1]);
+    check("a ranked-choice count's first choices are a lead, not a win, in the summary",
+      rcv.every((r) => / led first choices by \d+\.\d points$/.test(holder(KYC.cards.lastTimeBlock(r,
+        { lazy: false, now: campaign })).querySelector("summary").textContent)), rcv.length);
+    const unchecked = all.filter((r) => r.lastElection && r.lastElection.withheld === "unchecked");
+    check("a result the second compilation does not confirm says so, not that it was unread",
+      unchecked.every((r) => /does not confirm it/.test(holder(KYC.cards.lastTimeBlock(r,
+        { lazy: false })).textContent)), unchecked.length);
+  });
+
+  suite("compare the ballot: offices with their place, one renderer", () => {
+    const html = KYC.officesHeldShort({ rows: [
+      { office: "Mayor", where: "Burlington, Vermont", from: 1981, to: 1989, agree: "year-off" },
+      { office: "Member of the Vermont House", from: 1990, to: 1991 }] }, 4);
+    check("a local office keeps its place and its note", /Mayor, Burlington, Vermont/.test(html) &&
+      /years differ by one/.test(html), html);
+    check("an absent record is said as one", /No linked record/.test(KYC.officesHeldShort(null)));
   });
 
   suite("states/nc.html — compare the ballot", () => {
@@ -9772,9 +9841,57 @@ async function testRaceMoney() {
       check("one column per person on the ballot, each opening their profile",
         heads.length >= 2 && heads.every((th) => th.querySelector("[data-id]")), heads.length);
       check("party, offices, money, platform and site, and never net worth",
-        rows.join("|") === "Party|Public offices held|Campaign money|Platform, in the campaign’s words|Campaign site" &&
+        rows.join("|") === "Party|Public offices held|Campaign money|Platform|Campaign site" &&
           !/net worth:/i.test(table.textContent.replace(/No net worth/, "")), rows.join("|"));
       check("its money carries the FEC's date", /FEC, through/.test(table.textContent));
+      // Curated roster text was headed "in the campaign's words" (PR #110
+      // review): each platform says where it came from.
+      const platforms = table ? [...table.querySelectorAll("tbody tr")][3] : null;
+      const cells = platforms ? [...platforms.querySelectorAll("td")] : [];
+      check("each platform cell says its source, the roster's never as the campaign's words",
+        cells.every((td, i) => {
+          const list = td.querySelector(".compare-list");
+          if (!list) return true;
+          const from = td.querySelector(".compare-source");
+          return !!from && /^(Headings from the campaign’s own site|From the candidate’s Wikipedia article|From Wikipedia’s 2026 election page|This site’s roster summary, not the campaign’s words)$/.test(from.textContent);
+        }), cells.length);
+    }
+  });
+
+  // The CSS that keeps an open comparison scrolling inside its race: a grid
+  // track sized to its content widened the section on a phone and clipped
+  // the money figures beside it (PR #110 review, PA-1 at 390px). jsdom has
+  // no layout, so the rule itself is checked.
+  suite("kyc.css — a race's folds stay the section's width", () => {
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    check("the folds' grid has one track no wider than the section",
+      /\.race-extra\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)/.test(css));
+    check("each fold may shrink below its content", /\.race-extra > \*\s*\{\s*min-width:\s*0;?\s*\}/.test(css));
+    check("the comparison scrolls inside its box", /\.compare-scroll\s*\{[^}]*overflow-x:\s*auto/.test(css));
+  });
+
+  suite("outside spending under a member's other candidacy", () => {
+    const people = window.legislatorsData;
+    const others = people.filter((p) => p.outsideSpendingOther);
+    check("the campaign of a member running for the other chamber carries it (while they run)",
+      !oldCongressSits(window) || others.length > 0, others.length);
+    others.forEach((p) => {
+      const member = people.find((m) => m.id === p.outsideSpendingOther.profileId);
+      const row = holderOf(KYC.cards.moneyBlock(
+        window.kycRaces.find((r) => r.id === (p.contestRaceId || p.raceId)) || { id: "x" }, [p],
+        { open: true }));
+      // A campaign off the ballot (a lost primary) has no money row.
+      check(p.name + "'s race row shows the other candidacy's spending apart, never added in",
+        !row.querySelector(".money-row") || /Filed separately under their (House|Senate) candidacy, and not added in here: outside groups spent/
+          .test(row.textContent), row.textContent.slice(0, 200));
+      check(p.name + "'s member line says whose candidacy it is",
+        !!member && /^Filed under their (House|Senate) candidacy, not the (House|Senate) campaign they are running: /
+          .test(holderOf(KYC.cards.outsideLine(member)).textContent));
+    });
+    function holderOf(html) {
+      const box = D.createElement("div");
+      box.innerHTML = html;
+      return box;
     }
   });
 
@@ -9810,12 +9927,31 @@ async function testRaceMoney() {
         (firstNull === -1 || gaps.slice(firstNull).every((g) => !g)), priced.slice(0, 5).join(","));
     const lead = close.D.querySelector("#results .race-lead");
     check("each says it is a market price, not a poll or a forecast",
-      !!lead && /Kalshi’s two highest prices: \d+% and \d+%/.test(lead.textContent) &&
+      !!lead && /Kalshi’s two highest prices: .*\d+% and .*\d+%/.test(lead.textContent) &&
         /not a poll/.test(lead.textContent), lead && lead.textContent);
     check("the races Kalshi does not price follow under a heading that says so",
       firstNull === -1 || /No usable Kalshi market/.test(close.D.getElementById("results").textContent));
     check("the view's line says what the order is", /closest first by Kalshi/.test(
       close.D.getElementById("resultsLabel").textContent));
+    // A party-only market over a ballot of one party's people cannot tell
+    // them apart: it is listed unranked, never "98 points apart" (rule 79).
+    const blind = close.window.kycRaces.filter((r) =>
+      /cannot tell them apart/.test(K.odds.render(r, { compact: false })));
+    check("a party-only market over one party's ballot is not ranked",
+      blind.every((r) => ["kalshi", "polymarket"].every((s) => {
+        const g = K.odds.gap(r, s);
+        return !g || !/^(?:(?:Democratic|Republican) [Pp]arty|Democrats?|Republicans?)$/.test(g.topLabel);
+      })), blind.map((r) => r.id).join(","));
+  });
+
+  const cards = await buildPage("index.html", { hash: "#/?sort=close-polymarket" });
+  await settle(100);
+  suite("index.html — the cards say what a closest-first order is", () => {
+    check("the cards' line names the market and says it is not a poll",
+      /Cards ordered by their race, closest first by Polymarket’s prices/.test(
+        cards.D.getElementById("resultsLabel").textContent) &&
+        /not polls/.test(cards.D.getElementById("resultsLabel").textContent),
+      cards.D.getElementById("resultsLabel").textContent);
   });
 
   suite("index.html — a profile's outside spending", () => {

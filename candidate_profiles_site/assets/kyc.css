@@ -4463,7 +4463,11 @@ button.local-county-link {
 /* Under each race's people (assets/kyc-cards.js): the campaigns' money as
  * bars on one scale, the seat's last election, and the ballot side by
  * side. Each a fold, styled as the folds above it. */
-.race-extra { display: grid; gap: var(--s-2); margin-top: var(--s-4); }
+/* One track no wider than the section: a grid item's min-width is its
+   content's, so an open comparison table widened the track to its own width
+   and clipped the money figures beside it instead of scrolling. */
+.race-extra { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); margin-top: var(--s-4); }
+.race-extra > * { min-width: 0; }
 .race-money,
 .race-last,
 .race-compare { display: block; }

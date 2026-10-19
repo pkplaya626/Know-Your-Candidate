@@ -1520,8 +1520,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     sits behind a form asking for a name and an email, each state's 2024
     Wikipedia page) - a lead, rule 50 - and the page says what was
     checked; the cache keeps every difference. A district in
-    `districts.REDRAWN` shows no 2024 figure: its 2024 election was other
-    voters', and the race says so and links where its area came from.
+    `districts.REDRAWN` shows no 2024 figure, and says only what is true of
+    every redrawn district - the result was counted on the old lines - and
+    links where its area came from: "fought by other voters" was false of
+    FL-1, 99.8% of whose old area it keeps. A result is "the last election
+    before the 2026 election", never "the last election": five House seats
+    (VA-11, AZ-7, NJ-11, GA-13, GA-14) were filled by special elections
+    after 2024, and the page named Gerald Connolly as VA-11's last winner
+    beside the member who won it after his death. Who took a seat after its
+    counted election comes from the frozen record and the snapshot
+    (`seat_history.seated_since`, `seatedSince`): the fold then says the
+    last *regular* election and who took the seat, by special election or
+    appointment, on what day. From the day after Election Day the fold is
+    "Before 2026", not "Last time" (rule 63), and a ranked-choice count's
+    first choices are a lead, never a win.
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own
@@ -1531,6 +1543,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     id's office and state are the profile's (`outside-attribution` is an
     error), never by name; each side is its own total, never a net, and
     says the FEC's processed filings trail the 24- and 48-hour reports.
+    One committee under two of a person's ids is one group (`merged`). A
+    member running for the other chamber keeps what was filed under their
+    own id, labelled as that candidacy's, and the campaign they are running
+    shows it on a line of its own (`outsideSpendingOther`), never summed:
+    Andy Barr's $7.2 million under his House id read as spending on a House
+    race he is not in. A comparison's platform says where each came from:
+    sitting members' are this site's roster summaries, not the campaign's
+    words. A party-only market over one party's ballot is never ranked by
+    closeness (rule 79).
     A race's money is its campaigns' own totals as bars in neutral ink on
     one scale, the party only in the name chip, each row with its own
     through-date. Closest races are ordered by one market's prices, the

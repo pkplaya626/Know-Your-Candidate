@@ -715,9 +715,17 @@
   function renderOutside(item) {
     var target = el("profileModalOutside");
     var o = item.outsideSpending;
-    if (!o) {
+    var other = item.outsideSpendingOther ?
+      '<p class="finance-period">' + KYC.cards.outsideOtherLine(item) + "</p>" : "";
+    if (!o && !other) {
       target.hidden = true;
       target.innerHTML = "";
+      return;
+    }
+    if (!o) {
+      target.hidden = false;
+      target.innerHTML = '<span class="field-label">Outside spending</span>' + other +
+        '<p class="faint outside-note">' + KYC.escapeHtml(KYC.cards.outsideNote) + "</p>";
       return;
     }
     var side = function (word, total, n, top) {
@@ -735,7 +743,7 @@
       '<p class="finance-period">' + KYC.cards.outsideLine(item) + "</p>" +
       '<div class="outside-sides">' +
       side("Supporting", o.support, o.supportCommittees, o.supportTop) +
-      side("Opposing", o.oppose, o.opposeCommittees, o.opposeTop) + "</div>" +
+      side("Opposing", o.oppose, o.opposeCommittees, o.opposeTop) + "</div>" + other +
       '<p class="faint outside-note">' + KYC.escapeHtml(KYC.cards.outsideNote) + "</p>";
   }
 
