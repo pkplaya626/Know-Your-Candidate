@@ -582,7 +582,9 @@
           '<button type="button" data-layout="map" aria-pressed="' + String(!squares) + '">A map</button>' +
           '<button type="button" data-layout="tiles" aria-pressed="' + String(squares) +
           '">One square per seat</button></div></div>' : "") +
-      KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now" });
+      // On a phone, the one-line form: the map stays near the first screen.
+      KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
+        compact: !!(global.matchMedia && global.matchMedia("(max-width: 1000px)").matches) });
     stage.hidden = squares;
     tiles.hidden = !squares;
     if (squares) {

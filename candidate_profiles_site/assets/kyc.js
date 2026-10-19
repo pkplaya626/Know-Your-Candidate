@@ -2875,7 +2875,8 @@
       // colour: only what the bar adds, in one line.
       var hatched = up ? [["R", "R"], ["I", "I"], ["D", "D"]].filter(function (p) { return upOf(p[0]); })
         .map(function (p) { return upOf(p[0]) + " " + p[1]; }) : [];
-      return '<figure class="balance-bar balance-bar-compact" data-chamber="' + attr(chamber) + '">' + track +
+      return '<figure class="balance-bar balance-bar-compact" data-chamber="' + attr(chamber) + '">' +
+        (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
         '<p class="bb-note">' + (hatched.length
           ? '<span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span> Hatched: the ' +
             esc(hatched.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot. "
