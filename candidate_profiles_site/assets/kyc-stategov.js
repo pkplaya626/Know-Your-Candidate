@@ -834,6 +834,88 @@
     return offices.length ? "the " + andList(offices) : "";
   }
 
+  /* ----------------------------------------------------------- at a glance */
+
+  /** One chamber's seats as one bar: Republicans from the left, Democrats
+   *  from the right, others between and a seat with nobody listed outlined
+   *  (never "vacant", rule 51), a tick at half where parties hold seats. */
+  function chamberBar(c) {
+    var unlisted = Math.max(0, c.seats - (c.listed || 0));
+    var parts = [["r", c.R], ["i", c.I], ["n", c.N], ["vacant", unlisted], ["d", c.D]]
+      .filter(function (p) { return p[1] > 0; });
+    var said = [["R", "Republican"], ["D", "Democratic"], ["I", "independent or third-party"],
+      ["N", "nonpartisan"]].filter(function (p) { return c[p[0]]; })
+      .map(function (p) { return c[p[0]] + " " + p[1]; });
+    if (unlisted) said.push(unlisted + " with nobody listed");
+    var partisan = !!(c.R || c.D || c.I);
+    var label = c.title + ": " + c.seats + " seats, " + said.join(", ") + ".";
+    return '<div class="bb-track glance-bar" role="img" aria-label="' + KYC.escapeAttr(label) +
+      '" title="' + KYC.escapeAttr(label) + '">' + parts.map(function (p) {
+        return '<span class="bb-seg bb-' + p[0] + '" style="width:' + (100 * p[1] / c.seats).toFixed(3) +
+          '%"></span>';
+      }).join("") + (partisan ? '<span class="bb-half" aria-hidden="true"></span>' : "") + "</div>";
+  }
+
+  function glanceChamber(c, code, which) {
+    var b = ballot(code);
+    var up = b && b.chambers[which];
+    return '<li class="glance-chamber"><span class="glance-label">' + KYC.escapeHtml(c.title) + "</span>" +
+      chamberBar(c) + '<span class="glance-facts">' + pills(c) +
+      (c.seats - c.listed > 0 ? ' <span class="faint">· ' + (c.seats - c.listed) + " nobody listed</span>" : "") +
+      (up && up.up ? ' <span class="faint">· ' + (up.up === up.seats ? "all" : up.up + " of " + up.seats) +
+        " regular-election seats on the Nov 3, 2026 ballot</span>" : "") + "</span></li>";
+  }
+
+  function glanceCourt(court) {
+    if (!court) return "";
+    var word = court.word || "justices";
+    return '<li><span class="glance-label">' + KYC.escapeHtml(court.name) + "</span>" +
+      '<span class="glance-facts">' + (court.seats ? court.seats + " " + KYC.escapeHtml(word) : "") +
+      (court.chosen ? (court.seats ? ", " : "") + KYC.escapeHtml(court.chosen) : "") +
+      (court.term ? "; term: " + KYC.escapeHtml(court.term) : "") + "</span></li>";
+  }
+
+  /** The state's government at a glance (VISUALS-28): who holds the
+   *  governorship, how each chamber's seats divide and whether one party
+   *  holds all three, and the high court's size and how it is chosen,
+   *  without a party (a justice is not a party's officeholder). The ballot
+   *  mark is the office's, as everywhere (rule 79). Every detail is in the
+   *  section under it, with its sources. "" for D.C. and anywhere not
+   *  covered. */
+  function glance(code) {
+    var s = state(code);
+    if (!s || !s.governor) return "";
+    var gov = s.governor;
+    var govUp = ballotItem(code, "governor");
+    var exec = '<div class="glance-box"><p class="glance-kind">Executive</p>' +
+      '<p class="glance-label">Governor' + (govUp && govUp.up
+        ? ' <span class="glance-mark">This office ' + (after() ? "was" : "is") +
+          " on the Nov 3, 2026 ballot</span>" : "") + "</p>" +
+      // Whether the holder is running, in the section's own words (rule
+      // 79): the mark above a governor's name with nothing beside it read
+      // as "Brian Kemp is running" (PR #111 review).
+      openSeat(code, "governor") +
+      '<p class="glance-who">' + KYC.escapeHtml(gov.name) + ' <span class="party-' +
+      KYC.escapeAttr(String(gov.partyKey || "i").toLowerCase()) + '">(' + KYC.escapeHtml(gov.party) +
+      ")</span></p>" +
+      (s.lt || s.ag || s.sos ? '<p class="faint">' + (s.territory ? "Territorial" : "Statewide") +
+        " officers below.</p>" : "") + "</div>";
+    var leg = '<div class="glance-box"><p class="glance-kind">Legislature</p>' + (s.upper
+      ? '<ul class="glance-list">' + glanceChamber(s.upper, code, "upper") +
+        (s.lower ? glanceChamber(s.lower, code, "lower") : "") + "</ul>" +
+        '<p class="glance-control">' + KYC.escapeHtml(trifectaText(s.trifecta).split(":")[0]) + "</p>" +
+        (s.legislature === "coalition" && s.note ? '<p class="faint">' + KYC.escapeHtml(s.note) + "</p>" : "")
+      : '<p class="faint">' + (s.territory ? "The territory’s legislature is not covered here."
+        : "Not covered here.") + "</p>") + "</div>";
+    var courts = s.court || s.criminalCourt
+      ? '<ul class="glance-list">' + glanceCourt(s.court) + glanceCourt(s.criminalCourt) + "</ul>"
+      : '<p class="faint">Not covered here.</p>';
+    var bench = '<div class="glance-box"><p class="glance-kind">' +
+      (s.criminalCourt ? "Highest courts" : "Highest court") + "</p>" + courts + "</div>";
+    return '<div class="state-glance" role="group" aria-label="' +
+      KYC.escapeAttr(KYC.stateName(code) + "’s government at a glance") + '">' + exec + leg + bench + "</div>";
+  }
+
   KYC.stategov = {
     modes: ["governor", "lt", "ag", "sos", "legislature", "trifecta", "governor2026"],
     ballotList: ballotList,
@@ -844,5 +926,6 @@
     legend: legend,
     badge: badge,
     render: render,
+    glance: glance,
   };
 })(window);

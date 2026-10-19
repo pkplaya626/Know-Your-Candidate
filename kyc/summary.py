@@ -75,9 +75,22 @@ def district_maps():
     return districts.index()
 
 
-def build(profiles, races=None, committees=None, results=None, snapshot=None):
+def seated_up(senators, races):
+    """Who sits in the Senate seats on the 2026 ballot, by party: the
+    balance bar hatches them (VISUALS-21). A seat is matched by its state
+    and class, never by who held it when the record was frozen, so an
+    appointee or a special election's winner seated since is counted in
+    the seat they sit in (rule 65)."""
+    seats = {(r["state"], r.get("senateClass")) for r in races or ()
+             if r.get("chamber") == "Senate" and r.get("senateClass")}
+    return _split([p for p in senators if (p.get("state"), p.get("senateClass")) in seats])
+
+
+def build(profiles, races=None, committees=None, results=None, snapshot=None, root=None):
     """Chamber balance and 2026 election headline figures. *results*, the
-    results cache, dates what the page says about who won.
+    results cache, dates what the page says about who won. Given *root*,
+    the House tile layout is laid out from the district maps under it
+    (``kyc/tiles.py``).
 
     The balance counts who sits now (``record.seated``); the seats up and
     who defends them count the record's incumbents, a former member among
@@ -180,7 +193,26 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
         summary["house"]["vacant"] = sum(
             s["balance"]["house"]["vacant"] for s in summary["states"].values()
             if not s["territory"])
+    if races is not None and summary["election"]["phase"] == "campaign":
+        # Only while the races are the next election: once the Congress the
+        # cycle elects sits, no seat in it is "on the 2026 ballot" any more.
+        summary["senate"]["up"] = seated_up(senate, races)
     summary["districtMaps"] = district_maps()
+    # Where each state sits on the tile maps: the States & territories
+    # picker and the House's one square per seat (kyc/tiles.py).
+    from . import tiles
+    summary["stateGrid"] = {code: list(at) for code, at in sorted(tiles.STATE_GRID.items())}
+    if root is not None:
+        layout = tiles.house(root)
+        # Each block holds the state's seats: its members and its vacancies.
+        seats = {code: sum(s["balance"]["house"].values()) for code, s in summary["states"].items()
+                 if not s.get("territory") and code in layout["states"]}
+        problems = tiles.check(layout, seats if races is not None else None)
+        if problems:
+            # A square on the wrong place reads as normal on the page: never
+            # ship one (a silent data error is the worst failure here).
+            raise tiles.TileError("; ".join(problems))
+        summary["houseTiles"] = layout
     if committees:
         summary["committees"] = committee_table(committees, profiles)
     return summary

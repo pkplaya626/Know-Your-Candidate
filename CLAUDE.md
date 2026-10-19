@@ -187,8 +187,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1910 tests, no dependencies
-npm install && npm test                       # 2645 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1927 tests, no dependencies
+npm install && npm test                       # 2710 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1797,6 +1797,12 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - Icons come from the sprite in `kyc.js` via `KYC.icon(name)` or
   `<use href="#i-name">`.
 - Every view needs a URL. Use `KYC.router`.
+- A chart is boxes and page text (rule 46), never a third-party script, and
+  its colours are tokens: a party's colour only for a person's or a seat's
+  party (a holder, a candidate in the markets and polls), `--cat-*` for kinds that are not parties, one neutral ink for judges, races
+  and navigation. A layout the page cannot work out cheaply (the House tiles)
+  is computed in the pipeline (`kyc/tiles.py`), and anything that draws is
+  timed throttled (rule 45). README's "Charts" lists them.
 - New dialogs use `KYC.createModal` so they get the focus trap for free; new
   menus use `KYC.createMenu` so they are keyboard-operable.
 - Headline figures come from `window.kycBuildMeta`, never typed into a page.

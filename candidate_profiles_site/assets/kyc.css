@@ -2131,6 +2131,34 @@ a.badge-link {
 .funding-part {
   white-space: nowrap;
 }
+/* The same shares as one bar (VISUALS-24), in category tones, each part
+ * named beside its swatch below it. */
+.funding-bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  margin: var(--s-1) 0 var(--s-2);
+}
+.fs-seg { flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.fs-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--s-1);
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.fs-ind { background-color: var(--cat-1); }
+.fs-pac { background-color: var(--cat-2); }
+.fs-party { background-color: var(--cat-3); }
+.fs-self { background-color: var(--cat-5); }
+.fs-xfer { background-color: var(--cat-4); }
+.fs-loan {
+  background-color: var(--cat-4);
+  background-image: repeating-linear-gradient(135deg, transparent 0 2px,
+    color-mix(in srgb, var(--surface-1) 70%, transparent) 2px 4px);
+}
+.fs-other { background-color: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
 
 .funding-base {
   display: block;
@@ -4971,4 +4999,358 @@ button.local-county-link {
 .outside-note { font-size: var(--t-xs); margin: var(--s-2) 0 0; }
 @media (max-width: 560px) {
   .money-bar { grid-template-columns: 3rem minmax(0, 1fr) 3.75rem; }
+}
+
+/* ============================================================ charts
+ * Pictures of the build's own figures (audit 2026-10-17, VISUALS-21 to
+ * -35). Boxes and page text only (rule 46), every colour a token, so the
+ * three themes and a forced dark mode treat them as they treat text. */
+
+/* The balance of power (KYC.balanceBar): one bar per chamber, a 2px
+ * surface gap between its parts, a hatch on the seats on the ballot. */
+.balance-bar { margin: 0 0 var(--s-4); }
+.balance-bar-slot .balance-bar { margin-top: calc(-1 * var(--s-2)); }
+.bb-title { font-size: var(--t-sm); font-weight: 700; color: var(--text); }
+.bb-track {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin: var(--s-2) 0 var(--s-2);
+}
+.balance-bar-compact .bb-track { height: 10px; }
+.bb-seg { flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.bb-r { background-color: var(--party-r); }
+.bb-d { background-color: var(--party-d); }
+.bb-i { background-color: var(--party-i); }
+.bb-vacant { background-color: transparent; border: 1px solid var(--text-muted); }
+.bb-neutral { background-color: var(--text-muted); }
+/* Stripes of the page's own surface over the party's colour: the same
+ * party, marked as on the ballot, readable without telling hues apart. */
+.bb-up {
+  background-image: repeating-linear-gradient(135deg, transparent 0 3px,
+    color-mix(in srgb, var(--surface-1) 62%, transparent) 3px 5.5px);
+}
+.bb-half {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+  border-radius: 1px;
+}
+.bb-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.bb-key li { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+.bb-key strong { color: var(--text); }
+.bb-key .bb-ballot { white-space: normal; }
+.bb-faint { color: var(--text-muted); }
+.bb-swatch { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; }
+.bb-note { margin: var(--s-1) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.map-balance { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 var(--s-5);
+  padding: var(--s-3) var(--s-4) 0; }
+.map-balance[hidden] { display: none; }
+.map-balance .balance-bar { margin-bottom: var(--s-3); }
+/* On a laptop the map's column is a fixed height, so every line above the
+ * map is taken from it (PR #111 review: VT, NH and CT fell to callouts).
+ * The layout choice, the bar and its title share one row; the note sits
+ * under the bar. */
+@media (min-width: 1001px) {
+  .map-balance { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4) 0; }
+  .map-balance .map-layout { flex: none; }
+  .map-balance .balance-bar {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--s-3);
+    margin: 0;
+  }
+  .map-balance .bb-title { grid-column: 1; }
+  .map-balance .bb-track { grid-column: 2; margin: 0; }
+  .map-balance .bb-note { grid-column: 1 / -1; margin: 2px 0 0; }
+}
+
+/* The House, one square per seat (KYC.houseTiles): each state a button,
+ * placed by percentage from kyc/tiles.py, its code page text above its
+ * block. */
+/* In the desktop layout the main column is a fixed height: the squares
+ * scroll inside it, as the map letterboxes. A phone scrolls the page. */
+.map-tiles { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--s-3) var(--s-4) var(--s-4); }
+.map-tiles[hidden] { display: none; }
+.house-tiles { position: relative; width: 100%; max-width: 920px; height: auto; margin: 0 auto; }
+/* On a wide screen, as wide as fits the height left under the bar, the
+ * way the map letterboxes (--ht-ratio is the layout's width over height). */
+@media (min-width: 1001px) {
+  .map-tiles .house-tiles {
+    max-width: min(920px, max(360px, calc((100vh - 540px) * var(--ht-ratio, 1))));
+  }
+}
+.ht-state {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.ht-code {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+.ht-block { display: grid; gap: 1px; }
+.ht-seat { border-radius: 1px; min-width: 0; min-height: 0; }
+.ht-r { background: var(--party-r); }
+.ht-d { background: var(--party-d); }
+.ht-i { background: var(--party-i); }
+.ht-vacant { background: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
+.ht-state.is-selected .ht-code { color: var(--text); text-decoration: underline; }
+@media (hover: hover) {
+  .ht-state:hover .ht-code { color: var(--text); text-decoration: underline; }
+}
+.ht-state.is-selected .ht-block { outline: 2px solid var(--text); outline-offset: 2px; }
+.ht-state:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.map-legend .swatch.ht-vacant { background: transparent; border-color: var(--text-muted); }
+.map-layout { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-xs);
+  color: var(--text-muted); }
+
+/* A state's House races as a navigator (KYC.districtTiles): each square a
+ * link, laid out as the districts lie, in neutral ink. */
+.district-tiles.jump-row {
+  display: grid;
+  grid-template-columns: repeat(var(--dt-cols), minmax(0, 2.25rem));
+  grid-template-rows: repeat(var(--dt-rows), auto);
+  gap: 3px;
+  margin: var(--s-2) 0 var(--s-4);
+}
+.dt-caption { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.dt-seat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-decoration: none;
+}
+.dt-seat:focus-visible { border-color: var(--accent); background: var(--surface-3); }
+@media (hover: hover) {
+  .dt-seat:hover { border-color: var(--accent); background: var(--surface-3); }
+}
+
+/* The states as a grid of links (KYC.statePicker). */
+.tile-picker { margin: 0 0 var(--s-4); }
+.tp-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 2.6rem));
+  gap: 3px;
+}
+.tp-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-decoration: none;
+}
+.tp-tile:focus-visible { border-color: var(--accent); background: var(--surface-3); }
+@media (hover: hover) {
+  .tp-tile:hover { border-color: var(--accent); background: var(--surface-3); }
+}
+/* Under the code, never over a letter of it; in the corner on a phone,
+ * where the tile is too short for both. */
+.tp-dot {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  margin-left: -2.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text);
+}
+@media (max-width: 600px) {
+  .tp-dot { top: 2px; right: 2px; bottom: auto; left: auto; margin-left: 0; width: 4px; height: 4px; }
+}
+.tp-key { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.tp-dot-key { position: static; display: inline-block; margin: 0 var(--s-1) 0 0; vertical-align: 1px; }
+
+/* Each state's local governments by kind, as one bar (pages.local_bar). */
+.lg-bar { display: flex; gap: 2px; height: 8px; margin: var(--s-1) 0 0; min-width: 8rem; max-width: 100%; }
+.lg-seg { display: inline-block; flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.lg-county { background: var(--cat-1); }
+.lg-municipal { background: var(--cat-2); }
+.lg-township { background: var(--cat-3); }
+.lg-school { background: var(--cat-5); }
+.lg-special { background: var(--cat-4); }
+.lg-none { display: block; white-space: normal; margin-top: 2px; font-size: var(--t-xs); font-weight: 400; color: var(--text-muted); }
+.lg-key { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); margin: 0 0 var(--s-2);
+  font-size: var(--t-xs); color: var(--text-muted); }
+.lg-key-item { display: inline-flex; align-items: center; gap: var(--s-1); }
+.lg-key .lg-seg { width: 10px; height: 10px; flex: none; }
+
+/* A state's government at a glance (KYC.stategov.glance): three boxes,
+ * stacked on a phone. Party colour only for who holds a seat. */
+.state-glance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+.glance-box {
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+}
+.glance-box p { margin: 0 0 var(--s-1); }
+.glance-kind {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.glance-label { display: block; font-weight: 700; color: var(--text); }
+.glance-mark { display: block; font-size: var(--t-xs); font-weight: 600; color: var(--text-muted); }
+.glance-who { font-size: var(--t-md); }
+.glance-list { margin: 0 0 var(--s-1); padding: 0; list-style: none; display: grid; gap: var(--s-2); }
+.glance-facts { display: block; font-size: var(--t-xs); color: var(--text-muted); }
+.glance-bar { margin: var(--s-1) 0; height: 10px; }
+.bb-n { background-color: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
+.glance-control { font-weight: 600; }
+
+/* The federal courts as a ladder (kyc-federal.js courtLadder): every rung a
+ * link to its court, in neutral ink. */
+.court-ladder { margin: 0 0 var(--s-5); }
+.court-ladder figcaption { margin-bottom: var(--s-3); font-size: var(--t-sm); color: var(--text-muted); }
+.cl-top { display: flex; justify-content: center; }
+.cl-top .cl-node { min-width: 12rem; }
+.cl-node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  text-decoration: none;
+  text-align: center;
+}
+.cl-node:focus-visible { border-color: var(--accent); background: var(--surface-2); }
+@media (hover: hover) {
+  .cl-node:hover { border-color: var(--accent); background: var(--surface-2); }
+}
+.cl-name { font-weight: 700; font-size: var(--t-sm); }
+.cl-facts { font-size: var(--t-xs); color: var(--text-muted); }
+.cl-open { font-size: var(--t-xs); font-weight: 700; color: var(--warn-text); }
+.cl-step {
+  margin: var(--s-1) 0;
+  text-align: center;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.cl-step::before { content: "\2191  "; }
+.cl-circuits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cl-circuit { display: flex; flex-direction: column; gap: var(--s-1); }
+.cl-sub { font-size: var(--t-xs); color: var(--text-muted); text-align: center; }
+a.cl-sub { color: var(--accent); }
+.cl-total { margin: 0; text-align: center; font-size: var(--t-sm); color: var(--text); }
+
+/* A court's bench on a line of years (kyc-federal.js benchTimeline): a row
+ * per appointing President, a dot per judge, one neutral ink. */
+.bench-timeline { margin: var(--s-3) 0 var(--s-4); font-size: var(--t-xs); color: var(--text-muted); }
+.bench-timeline figcaption { margin-bottom: var(--s-2); font-size: var(--t-sm); color: var(--text); font-weight: 600; }
+.bt-rows { margin: 0; padding: 0; list-style: none; }
+.bt-row, .bt-axis { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--s-2); align-items: center; }
+.bt-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.bt-track { position: relative; height: 18px; border-bottom: 1px solid var(--border); }
+.bt-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  box-shadow: 0 0 0 1.5px var(--surface-0);
+}
+.bt-ticks { position: relative; height: 14px; }
+.bt-ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+@media (max-width: 560px) {
+  .bt-row, .bt-axis { grid-template-columns: 6.5rem minmax(0, 1fr); }
+}
+
+/* Polling averages as dots on one axis (kyc-odds.js pollDots): a row per
+ * aggregator, a shape per candidate as well as the party's colour. */
+.poll-dots { margin: var(--s-1) 0 var(--s-2); font-size: var(--t-xs); color: var(--text-muted); }
+.poll-key, .poll-rows { margin: 0; padding: 0; list-style: none; }
+.poll-key { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); margin-bottom: var(--s-1); }
+.poll-key li { display: inline-flex; align-items: center; gap: var(--s-1); color: var(--text); }
+.poll-key .poll-dot { position: static; margin: 0; }
+.poll-row, .poll-axis { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center;
+  gap: var(--s-2); }
+.poll-row { min-height: 20px; }
+.poll-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.poll-track { position: relative; height: 20px; border-bottom: 1px solid var(--border); }
+.poll-dot {
+  position: absolute;
+  top: 50%;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+}
+.poll-dot-ring {
+  background-image: radial-gradient(circle, var(--surface-1) 0 2.5px, transparent 3px);
+}
+.poll-dot-square { border-radius: 1px; }
+.poll-dot-diamond { border-radius: 1px; transform: rotate(45deg) scale(0.85); }
+.poll-ticks { position: relative; height: 14px; }
+.poll-ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+/* Room at the right for the last tick's label, centred on its value. */
+.poll-row, .poll-axis, .bt-row, .bt-axis { padding-right: 16px; }
+@media (max-width: 560px) {
+  .poll-row, .poll-axis { grid-template-columns: 5.5rem minmax(0, 1fr); }
 }
