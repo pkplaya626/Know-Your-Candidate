@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3024 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3032 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -270,12 +270,21 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   for every race, each with its own title, description, canonical address
   and image (the person's photograph only where it came by a sourced route,
   otherwise the share card), the facts in plain text, and a link to the view
-  that `assets/kyc-share.js` follows for a reader with scripts. "Copy link"
-  in the profile dialog and on every race section gives this address, by the
-  device's share sheet, the clipboard, or a selected field to copy from.
+  that `assets/kyc-share.js` follows for a reader with scripts. Each status
+  names the source the profile dialog credits; the description writes the
+  seat in words ("member of the U.S. House for AL-4"); a race page marks the
+  seat's holder. A page shared under an id its profile no longer has (a
+  folded filing, a filer since seated) is kept as that profile's, never
+  deleted. "Copy link" in the profile dialog and on every race section gives
+  this address, by a phone's share sheet, the clipboard, or a selected field
+  to copy from. The words are checked against the page code for every case
+  of the status table (`tests/fixtures/share_status_words.json`, written by
+  `share.write_status_table()` after a change to the words on both sides).
 - Every page has a `<noscript>` line saying what needs JavaScript, and the
   state pages, the federal pages and the court pages carry their names in
-  plain HTML that the scripts draw over.
+  plain HTML that the scripts draw over. The legislature and county pages
+  say they list nothing without it; a district map page points to its
+  state's page.
 
 ### No third-party runtime dependencies
 

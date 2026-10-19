@@ -193,8 +193,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2004 tests, no dependencies
-npm install && npm test                       # 3024 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2011 tests, no dependencies
+npm install && npm test                       # 3032 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -464,8 +464,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `portraits.article_is_theirs`, so none of them disagrees.
 
 34. **Fifty-seven near-identical pages are generated, not maintained.** The
-    state pages come from one template and carry nothing but a state code;
-    `assets/kyc-state.js` renders them from the same build's people files as the
+    state pages come from one template, with the state's code and its names
+    written in as plain lists from the same build (rule 96);
+    `assets/kyc-state.js` draws over them from the same build's people files as the
     grid. A hand-edited copy per state would drift the first time one was
     touched, and a state page that disagreed with the grid about who holds
     a district would look entirely normal.
@@ -1890,16 +1891,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     stands is said in the profile dialog's words: `share.status_words`
     reads `KYC.standing` the way kyc.js does, on the day the results were
     read (`share.post_election`), and `testSharePages` compares the two for
-    every profile, every race's lists and every state page's, so a word
-    changed in one is a failure, not a drift (rule 63). Nothing in them is
-    dated or carries the build's time, and an unchanged share page is not
-    rewritten: a refresh that moves nobody touches none of 3,000 files.
-    They are in the sitemap, and `verify` regenerates them with the state
-    pages, reporting one stale, missing, or left for a profile or race the
-    data no longer holds (the build removes those). Every generated page
-    and both templates carry a `<noscript>` line saying what needs
-    JavaScript. "Copy link" is `KYC.shareLink`: the device's share sheet,
-    else the clipboard, else a selected read-only field saying to copy it.
+    every profile, every race's lists and every state page's. That covers
+    only the statuses today's data holds: "elected", "defeated", "runoff"
+    and every post-election word would first have met the page code on the
+    night a November result was read, and a word changed in kyc.js alone
+    would have held that refresh (PR #121 review). So every case of the
+    table - each status, member or not, appointed, unconfirmed, minor-party,
+    all-party, certified or qualified, before and after Election Day, and
+    each filer the results do not settle - is written by `share.status_table`
+    to `tests/fixtures/share_status_words.json`, which `test_share` checks is
+    current and the render suite asks `KYC.raceStatus` about row by row: a
+    word changed on one side fails the day it changes (rule 63). Each status
+    carries the source the dialog's badge credits (`share.status_source`):
+    the card the pages unfurl with said "every fact names its source" over
+    pages that named none. The seat is in words in a description ("member
+    of the U.S. House for AL-4"; a card's bullet read as a glitch in an
+    unfurl), the holder of a race's seat is marked while seated (rule 67),
+    and a member leaving says where they are going (`otherOffice`) or when
+    their seat is next up, as the dialog does. Nothing in them is dated or
+    carries the build's time, and an unchanged share page is not rewritten:
+    a refresh that moves nobody touches none of 3,000 files. They are in
+    the sitemap, and `verify` regenerates them with the state pages,
+    reporting one stale, missing, or left for a profile or race the data no
+    longer holds (the build removes those) - except a page at an id the
+    profile still answers to (`share.aliases`: a folded filing, a filer
+    since seated), which is rewritten as that profile's, its canonical
+    address the profile's own page, so a link once shared never becomes a
+    404. A crawler that runs scripts may fold a share page into the view it
+    is sent to, and so into the home page; the unfurlers this is for run
+    none. Every generated page and both templates carry a `<noscript>` line
+    saying what needs JavaScript, and a page that lists nothing without it
+    (a legislature's, a county page) says so rather than promising plain
+    text. "Copy link" is `KYC.shareLink`: a phone's share sheet (the main
+    pointer coarse: desktop browsers have one too, and the button says
+    "Copy"), else the clipboard, else a selected read-only field saying to
+    copy it. A shared race opens its state page at the race and holds it
+    there while the page above it draws (`kyc-state.js` `holdPlace`, until
+    the reader moves): it once landed 3,000px short on a phone.
 
 ## District maps
 
