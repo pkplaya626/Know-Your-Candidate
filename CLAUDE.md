@@ -42,6 +42,7 @@ data/statewide_officers.json ─┤   (lieutenant governors, secretaries of stat
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
+data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -114,6 +115,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
+  `statewide_candidates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`
@@ -180,8 +182,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1824 tests, no dependencies
-npm install && npm test                       # 2544 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1869 tests, no dependencies
+npm install && npm test                       # 2586 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1323,14 +1325,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     none of them is on that ballot. The mark says "This office is on the
     Nov 3, 2026 ballot" and sits on the office's label line, never in the
     holder's block. Who is not running is said only where a cited source
-    says so (`ballot2026.OPEN_SEATS`): the constitution's term limit, read
-    with the NGA's count of the governor's terms, or the election office's
-    certified list for that office - never news, and never a term limit for
-    anyone else, since a term-limited officer may be on the ballot for
-    another office. `stategov` withholds an entry whose holder has changed.
-    Every other office on the ballot says by name that this was not checked
-    (`holderStatus` "unchecked"): silence beside Georgia's governor, with
-    "Open seat" beside Alaska's, read as "Brian Kemp is running" (rule 19).
+    says so: the election office's list of candidates for that office
+    (rule 91), with the constitution's term limit (`ballot2026.OPEN_SEATS`,
+    read with the NGA's count of the governor's terms) as the reason beside
+    it - never news, and never a term limit for anyone else, since a
+    term-limited officer may be on the ballot for another office. `stategov`
+    withholds an entry whose holder has changed. Any other office on the
+    ballot says by name that this was not checked (`holderStatus`
+    "unchecked"): silence beside Georgia's governor, with "Open seat" beside
+    Alaska's, read as "Brian Kemp is running" (rule 19).
     A voting link is credited to its own source, link by link - "the first
     four from NASS" credited NASS with eleven curated sample-ballot pages -
     and "each link opened" is said only of links found live.
@@ -1642,6 +1645,50 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     editorial list. The votes are in `data/votes/<chamber>.js`, loaded on
     demand from the stamped URLs every profile page names in its
     `onDemandData` template (rule 76), never in `profiles.js`.
+
+91. **A ballot's candidates are the election office's list, read for
+    whoever holds the office today.** The state pages marked 36
+    governorships and some 90 other statewide offices "This office is on
+    the Nov 3, 2026 ballot" and named no one running for any of them; a
+    reader asked "who is on my ballot" and got the holder, who in half the
+    states is not (audit 2026-10-17, FRESHNESS-05, STATEGOV-14,
+    PERSONA-08, RACES-16). The candidates are a hand-edited cache,
+    `data/statewide_candidates.json` (`kyc/statewide.py`), each list the
+    jurisdiction's own election office's - a county's only where the state
+    publishes none that can be read, by an evidenced
+    `overrides.STATEWIDE_LISTS_ELSEWHERE` entry - quoted and dated, and
+    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list is
+    named as the document it is ("the Clark County Registrar of Voters’
+    notice of general election"), never "Certified by" a body: the first
+    page credited a county's sample ballot and a commission's voter guide
+    as certified by them. "Certified" is said only where the document's
+    own words say so (`certifiedQuote`) and the state's own office
+    published it; a county's or commission's list says why the state's
+    was not used (`notStateList`). Names are the list's, written first
+    name first, in ordinary capitals and without a ballot title (rule 77:
+    "Lombardo, Joseph", "JOSH SHAPIRO", "Governor Sarah Huckabee
+    Sanders"), the list's form kept beside them; a party the list
+    abbreviates is spelled out from its key or statute
+    (`statewide.PARTY_CODES`), and an unexplained code fails the build.
+    Write-ins apart, listed by surname and said to be; no portrait, money
+    or platform, never a profile (rule 27), never joined to one by a name
+    (rule 25): a sitting member a list names is a build warning
+    (`statewide-member-unnoted`) until an evidenced
+    `OTHER_OFFICE_NOMINEES` entry says so on their profile - Amy
+    Klobuchar was on Minnesota's governor ballot while hers said nothing.
+    The holder line is read from the list for the roster's holder at build
+    time, never copied from the research: "not among the candidates for
+    this office" where no one on it carries their surname (a hyphen and a
+    space one spelling), "among the candidates" (never "running for
+    re-election") only where the list's marked holder carries their
+    surname and given name, each naming the list. A namesake settles nothing: the first
+    read called Governor Bill Lee absent from a list printing "Eddie Lee
+    Murphy" only because a person had looked, so a namesake is recorded
+    with why (`namesakes`), and a short form the list does not print
+    ("Joe" for "Lombardo, Joseph") is an evidenced
+    `overrides.STATEWIDE_NAME_FORMS` entry, or the line says "not
+    checked". After Election Day the block is in the past tense and links
+    the state's results; this site names no state winner.
 
 ## District maps
 

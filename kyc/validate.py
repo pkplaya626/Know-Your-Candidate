@@ -1645,7 +1645,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None, voting_dates=None):
+        history=None, voting_dates=None, statewide=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1698,7 +1698,36 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_voting_links(voting)
     if voting_dates is not None:
         issues += check_voting_dates(voting_dates)
+    if statewide is not None:
+        issues += check_statewide_candidates(statewide, snapshot)
     return issues
+
+
+def check_statewide_candidates(data, snapshot=None):
+    """The statewide candidates (kyc/statewide.py, rule 91): every list the
+    election office's own, quoted and dated, never a compiled table (rule
+    50); exactly the offices kyc/ballot2026.py puts on the 2026 ballot; the
+    list's words only - no portrait, money or platform; and the holder read
+    consistently. An error: the page names real people as on a ballot.
+
+    A warning, not a join, for a sitting member whose name and state a
+    list carries and whose profile does not say so (rule 25): the lead is
+    for a person to confirm and record in overrides.OTHER_OFFICE_NOMINEES."""
+    from . import statewide
+    if not data:
+        return [Issue("error", "statewide-candidates-missing",
+                      f"no {statewide.CACHE_PATH}; no statewide office lists its candidates")]
+    found = statewide.problems(data)
+    if found:
+        return [Issue("error", "statewide-candidates", f"{len(found)} problems in the statewide "
+                      "candidates (kyc/statewide.py)", found)]
+    leads = statewide.member_leads(data, (snapshot or {}).get("legislators"),
+                                   set(overrides.OTHER_OFFICE_NOMINEES))
+    if leads:
+        return [Issue("warning", "statewide-member-unnoted",
+                      f"{len(leads)} sitting member(s) of Congress share a name with a statewide "
+                      "candidate in their state and have no OTHER_OFFICE_NOMINEES entry", leads)]
+    return []
 
 
 def check_voting_dates(data):

@@ -24,6 +24,7 @@ from . import (
     races as races_mod,
     results as results_mod,
     sources,
+    statewide as statewide_mod,
     summary as summary_mod,
     validate,
     voteview,
@@ -262,7 +263,8 @@ def _build(args):
                           judiciary=judiciary_mod.load_cache(args.root),
                           vacancies=vacancies_mod.load_cache(args.root),
                           history=lineage,
-                          voting_dates=voting_dates_mod.load(args.root))
+                          voting_dates=voting_dates_mod.load(args.root),
+                          statewide=statewide_mod.load(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -415,6 +417,11 @@ def _build(args):
     gov_stats = stategov.stats(state_gov)
     print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
         f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
+    listed = statewide_mod.stats(statewide_mod.load(args.root))
+    print(f"[ok] statewide candidates: {listed['candidates']} on the ballot and "
+          f"{listed['writeIns']} write-ins for {listed['offices']} offices; "
+          f"{listed['certified']} list(s) whose own words certify them, "
+          f"{listed['notState']} not the state's own")
 
     # The federal executive and courts (kyc/federal_build.py): one file for
     # the hub, one per court, each rewritten only when what it says changed.

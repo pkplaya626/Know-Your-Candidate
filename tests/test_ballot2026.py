@@ -224,16 +224,31 @@ class TestOpenSeats(unittest.TestCase):
         self.assertEqual(seat["why"], "unchecked")
         self.assertIn("NGA counts 1", problem)
 
+    # The lists themselves are data/statewide_candidates.json now (rule 91);
+    # an entry here may still give a list's answer where none is in hand.
+    LIST = "https://sos.iowa.gov/a-list.pdf"
+
     def test_a_list_that_does_not_name_them(self):
-        seat, problem = ballot2026.open_seat("IA", "governor", "Kim Reynolds", 2)
+        from unittest import mock
+        with mock.patch.dict(ballot2026.OPEN_SEATS, {("IA", "governor"): (
+                "Pat Holder", "not-listed", None, self.LIST, "a list")}):
+            seat, problem = ballot2026.open_seat("IA", "governor", "Pat Holder", 2)
         self.assertIsNone(problem)
-        self.assertEqual(seat["text"], "Kim Reynolds is not on the list of candidates for this office")
+        self.assertEqual(seat["text"], "Pat Holder is not on the list of candidates for this office")
 
     def test_a_list_that_names_them(self):
-        seat, problem = ballot2026.open_seat("CA", "ag", "Rob Bonta")
+        from unittest import mock
+        with mock.patch.dict(ballot2026.OPEN_SEATS, {("IA", "ag"): (
+                "Pat Holder", "listed", None, self.LIST, "a list")}):
+            seat, problem = ballot2026.open_seat("IA", "ag", "Pat Holder")
         self.assertIsNone(problem)
         self.assertEqual(seat["why"], "listed")
-        self.assertEqual(seat["text"], "Rob Bonta is on the list of candidates for this office")
+        self.assertEqual(seat["text"], "Pat Holder is on the list of candidates for this office")
+
+    def test_only_term_limits_remain_where_the_lists_answer(self):
+        # Every office with an entry has a list in the statewide cache, so an
+        # entry here is a reason beside the list, never a second copy of it.
+        self.assertEqual({v[1] for v in ballot2026.OPEN_SEATS.values()}, {"term-limit"})
 
     def test_no_entry_says_it_was_not_checked(self):
         # Silence beside one office read as "running" once another office

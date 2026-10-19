@@ -2232,7 +2232,9 @@ async function testStates() {
     check("the race list says what else the ballot elects",
       !!note && /Of the state offices this site covers, the same ballot also elects the governor/
         .test(note.textContent) && /ballot measures, which this site does not list/.test(note.textContent) &&
-        /This site lists the candidates for Congress only/.test(note.textContent),
+        note.textContent.indexOf("This site lists the candidates for Congress here, and those for " +
+          window.KYC.stategov.listsCandidates("TX") + " under State government; not those for the " +
+          "legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")),
       note && note.textContent);
     check("the governor, each officer and each chamber is marked, linked to its source",
       marks.length >= 6 && marks.every((a) => /^https:\/\//.test(a.getAttribute("href")) &&
@@ -2260,12 +2262,27 @@ async function testStates() {
       note && note.textContent);
   });
 
+  // Delaware elects only its attorney general of these offices in 2026: the
+  // sentence named "the governor" anyway (PR #109 review).
+  const de = await buildPage("states/de.html");
+  suite("states/de.html — the race list names only the offices whose candidates it lists", () => {
+    const note = de.D.querySelector("#races .state-note");
+    const listed = de.window.KYC.stategov.listsCandidates("DE");
+    check("names the attorney general, not the governor",
+      !!note && listed === "the attorney general" &&
+        note.textContent.indexOf("and those for the attorney general under State government") !== -1 &&
+        !/those for the governor/.test(note.textContent), note && note.textContent);
+  });
+
   const gu = await buildPage("states/gu.html");
   suite("states/gu.html — a territory's ballot is not only local", () => {
     const note = gu.D.querySelector("#races .state-note");
     check("names territorial contests, not only local ones",
       !!note && /territorial and local contests/.test(note.textContent) &&
         !/state offices/.test(note.textContent), note && note.textContent);
+    check("and says where the governor's candidates are listed",
+      /Territorial government, which lists the candidates for the governor/.test(note.textContent),
+      note && note.textContent);
   });
   const az = await buildPage("map.html", { hash: "#/?state=AZ&mode=lt" });
   suite("map.html — Arizona's first lieutenant governor", () => {
@@ -2298,37 +2315,54 @@ async function testStates() {
     // ballot's lists (PERSONA-02): each office says so, citing the list.
     const sg = ga.window.kycStateGov.states.GA;
     const open = [...gov.querySelectorAll(".gov-open-seat")].map((p) => p.textContent);
-    check("each of the four offices says its holder is not on the list, with the list linked",
+    check("each of the four offices says its holder is not on the list, naming the list",
       ["governor", "lt", "ag", "sos"].every((k) => open.some((t) =>
-        t.indexOf("Open seat: " + sg[k].name + " is not on the list of candidates for this office") === 0)) &&
+        t.indexOf("Open seat: " + sg[k].name + " is not among the candidates for this office (" +
+          sg.ballot2026.offices[k].holderStatus.cite + ")") === 0)) &&
         [...gov.querySelectorAll(".gov-open-seat a")].every((a) => /sos\.ga\.gov/.test(a.getAttribute("href"))),
       open.join(" | "));
+    // Georgia's list is the Secretary of State's spreadsheet, which does not
+    // call itself a certification: nothing calls it one (PR #109 review).
+    check("a list that does not say it is certified is never called certified",
+      !/certified list|Certified by/.test(open.join(" ")), open.join(" | "));
   });
 
   /* Silence beside one office read as "the holder is running" once another
    * office said "Open seat" (PR #94 review, rule 19): every office on the
-   * ballot says something about its holder, and where nothing was read, it
-   * says that. Minnesota's lists were not read. */
+   * ballot says something about its holder. Minnesota's lists are read now
+   * (rule 91), so none says "not checked". */
   const mnGov = await buildPage("states/mn.html");
-  suite("states/mn.html — an office whose list was not read says so, by name", () => {
+  suite("states/mn.html — every office on the ballot says something of its holder", () => {
     const gov = mnGov.D.getElementById("state-government");
     const sg = mnGov.window.kycStateGov.states.MN;
     const up = Object.keys(sg.ballot2026.offices).filter((k) => sg.ballot2026.offices[k].up);
-    const lines = [...gov.querySelectorAll(".gov-holder-unchecked")].map((p) => p.textContent);
     check("every office on the ballot carries a holder line",
       up.length >= 4 && gov.querySelectorAll(".gov-holder-status").length === up.length,
       up.join(",") + " / " + gov.querySelectorAll(".gov-holder-status").length);
-    check("Tim Walz's office says it was not checked, and claims nothing either way",
-      lines.indexOf("Whether " + sg.governor.name + " is running for this office is not checked here.") !== -1 &&
-        !gov.querySelector(".gov-open-seat"), lines.join(" | "));
+    check("with a list in hand, nothing says 'not checked'",
+      !gov.querySelector(".gov-holder-unchecked"),
+      [...gov.querySelectorAll(".gov-holder-unchecked")].map((p) => p.textContent).join(" | "));
   });
   const caGov = await buildPage("states/ca.html");
   suite("states/ca.html — the certified list read both ways", () => {
+    const sg = caGov.window.kycStateGov.states.CA;
     const lines = [...caGov.D.querySelectorAll("#state-government .gov-holder-status")].map((p) => p.textContent);
-    check("Newsom is not on it; Bonta is, without an 'Open seat' label",
-      lines.some((t) => /^Open seat: Gavin Newsom is not on the list/.test(t)) &&
-        lines.some((t) => /^Rob Bonta is on the list of candidates for this office/.test(t)),
+    const offices = sg.ballot2026.offices;
+    const listed = ["governor", "lt", "ag", "sos"].filter((k) =>
+      offices[k] && offices[k].holderStatus && offices[k].holderStatus.why === "listed");
+    const off = ["governor", "lt", "ag", "sos"].filter((k) =>
+      offices[k] && offices[k].holderStatus && offices[k].holderStatus.why === "not-listed");
+    check("a holder the list leaves off is an open seat; one it names is not",
+      listed.length && off.length &&
+        off.every((k) => lines.some((t) => t.indexOf("Open seat: " + offices[k].holderStatus.holder +
+          " is not among the candidates for this office (the California Secretary of State’s " +
+          "certified list of candidates)") === 0)) &&
+        listed.every((k) => lines.some((t) => t.indexOf(offices[k].holderStatus.holder +
+          " is among the candidates for this office (the California Secretary of State’s " +
+          "certified list of candidates)") === 0)),
       lines.join(" | "));
+    check("never 'running for re-election': the list says only that they are on it",
+      !/re-?election/i.test(caGov.D.getElementById("state-government").textContent));
   });
 
   const fl = await buildPage("states/fl.html");
@@ -2347,6 +2381,185 @@ async function testStates() {
       /This office was on the Nov 3, 2026 ballot/.test(gov.textContent));
     check("the open-seat line is gone: the office has a winner now",
       !gov.querySelector(".gov-open-seat"));
+  });
+
+  /* The candidates for each statewide office on the ballot, from the
+   * election office's own list (audit 2026-10-17, FRESHNESS-05,
+   * STATEGOV-14, PERSONA-08, RACES-16; rule 91). */
+  suite("states/ga.html — an open governor's seat lists who is on the ballot", () => {
+    const gov = ga.D.getElementById("state-government");
+    const item = ga.window.kycStateGov.states.GA.ballot2026.offices.governor;
+    const block = gov.querySelector(".gov-candidates");
+    const names = block ? [...block.querySelectorAll(".gov-candidate-name")].map((n) => n.textContent) : [];
+    const printed = item.candidates.candidates.filter((c) => !c.writeIn);
+    const writeIns = item.candidates.candidates.filter((c) => c.writeIn);
+    check("every candidate the list gives, as it prints them, in the pipeline's order",
+      names.join("|") === printed.concat(writeIns).map((c) => c.name).join("|") && printed.length >= 2,
+      names.join(" | "));
+    check("party in words, never the list's code",
+      printed.every((c) => !c.party || block.textContent.indexOf(c.name + " (" + c.party + ")") !== -1) &&
+        printed.every((c) => !/^[A-Z]{1,4}$/.test(c.party || "")),
+      printed.map((c) => c.party).join(" | "));
+    check("write-ins apart, under their own heading",
+      writeIns.length > 0 && !!block.querySelector(".gov-writein-head") &&
+        /Write-in candidates \(names not printed on the ballot\)/.test(block.textContent) &&
+        block.querySelectorAll(".gov-writein-list .gov-candidate").length === writeIns.length);
+    const source = block.querySelector(".gov-candidates-source");
+    check("credited to the list, linked, with the day it was read, and the order said",
+      /^In surname order, not ballot order\. (Names are written [^.]*\. )?Source: the Georgia Secretary of State’s list of November candidates \(read /.test(source.textContent) &&
+        [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
+      source.textContent);
+    check("no portrait, no profile link, no money (rules 24, 25, 27)",
+      !block.querySelector("img, a[href*='#/profile/']") && !/\$/.test(block.textContent));
+    check("the governor's holder line still says the seat is open",
+      /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
+    check("every office on the ballot lists its candidates",
+      gov.querySelectorAll(".gov-candidates").length === 4);
+  });
+
+  const maGov = await buildPage("states/ma.html");
+  suite("states/ma.html — a joint ticket, and a holder on the list", () => {
+    const gov = maGov.D.getElementById("state-government");
+    const sg = maGov.window.kycStateGov.states.MA;
+    const ticket = sg.ballot2026.offices.governor.candidates.candidates.find((c) => c.runningMate);
+    const rows = [...gov.querySelectorAll(".gov-candidate")].map((li) => li.textContent);
+    check("the governor's list names each running mate for lieutenant governor",
+      !!ticket && rows.some((t) => t.indexOf(ticket.name) === 0 &&
+        t.indexOf(", with " + ticket.runningMate + " for lieutenant governor") !== -1), rows.join(" | "));
+    const mate = sg.ballot2026.offices.lt.candidates.candidates.find((c) => c.runningMate);
+    check("the lieutenant governor's list names the governor each runs with",
+      !!mate && rows.some((t) => t.indexOf(", running with " + mate.runningMate + " for governor") !== -1));
+    check("a ticket the ballot prints by surnames says how it is printed",
+      !ticket.ballotName || rows.some((t) => t.indexOf("printed on the ballot as “" + ticket.ballotName + "”") !== -1));
+    const status = sg.ballot2026.offices.governor.holderStatus;
+    const line = gov.querySelector(".gov-holder-status");
+    check("a holder the list names: among its candidates, never an open seat",
+      status.why === "listed" && line.textContent.indexOf(status.holder +
+        " is among the candidates for this office (the Secretary of the Commonwealth of " +
+        "Massachusetts’ sample ballot)") === 0 &&
+        !line.classList.contains("gov-open-seat"), line.textContent);
+    const lone = sg.ballot2026.offices.governor.candidates.candidates.find((c) => c.surnameOnly);
+    check("a name the ballot prints as a surname only says so, and no first name is invented",
+      !lone || rows.some((t) => t.indexOf(lone.name + " (the list gives a surname only)") === 0),
+      rows.join(" | "));
+  });
+
+  /* A list from a county or a commission is named as what it is and is
+   * never "Certified by" it; the page says why the state's own was not used
+   * (PR #109 review: "Certified by the Clark County Registrar of Voters"). */
+  const nvGov = await buildPage("states/nv.html");
+  suite("states/nv.html — a county's notice, named as one; names and parties in words", () => {
+    const gov = nvGov.D.getElementById("state-government");
+    const item = nvGov.window.kycStateGov.states.NV.ballot2026.offices.governor;
+    const block = gov.querySelector(".gov-candidates");
+    check("credited as the county's notice, never 'Certified by'",
+      /Source: the Clark County Registrar of Voters’ notice of general election \(read /
+        .test(block.querySelector(".gov-candidates-source").textContent) &&
+        !/Certified by/.test(gov.textContent) &&
+        ![...gov.querySelectorAll(".gov-candidates-source, .gov-holder-status")]
+          .some((p) => /certified/i.test(p.textContent)), block.textContent);
+    check("says why the state's own list was not used",
+      /^Not the state’s own list\. The Secretary of State's own certified list could not be read/
+        .test((block.querySelector(".gov-candidates-uncertified") || {}).textContent || ""));
+    const names = [...block.querySelectorAll(".gov-candidate-name")];
+    check("names first name first, the list's own form on hover (rule 77)",
+      names.length >= 2 && names.every((n) => !/,/.test(n.textContent)) &&
+        names.some((n) => /^The list prints: [^,]+, /.test(n.getAttribute("title") || "")),
+      names.map((n) => n.textContent + " / " + n.getAttribute("title")).join(" | "));
+    check("the page says how names are written",
+      /Names are written first name first, in ordinary capitals/.test(block.textContent));
+    check("a party the list abbreviates is spelled out",
+      item.candidates.candidates.some((c) => c.party === "No Political Party") &&
+        !/\((IAP|LPN|NPP|DEM|REP)\)/.test(gov.textContent), block.textContent);
+  });
+
+  const flList = await buildPage("states/fl.html");
+  suite("states/fl.html — the Division of Elections' own listing, not a county's ballot", () => {
+    const gov = flList.D.getElementById("state-government");
+    const sources = [...gov.querySelectorAll(".gov-candidates-source a")].map((a) => a.getAttribute("href"));
+    check("every list is the Division's", sources.length >= 3 &&
+      sources.every((h) => /^https:\/\/dos\.elections\.myflorida\.com\//.test(h)), sources.join(" | "));
+    check("no county is credited", !/Miami-Dade/.test(gov.textContent));
+  });
+
+  /* Pennsylvania's lieutenant governor candidates come from the Department
+   * of State's record of each: each name links its own record, and the
+   * holder line links the holder's, never another candidate's (PR #109
+   * review). */
+  const paGov = await buildPage("states/pa.html");
+  suite("states/pa.html — each candidate's own record", () => {
+    const sg = paGov.window.kycStateGov.states.PA.ballot2026.offices.lt;
+    const people = sg.candidates.candidates;
+    const gov = paGov.D.getElementById("state-government");
+    const links = [...gov.querySelectorAll(".gov-candidate-name a")].map((a) => a.getAttribute("href"));
+    check("each lieutenant governor candidate is linked to their own record",
+      people.length >= 2 && people.every((p) => p.record && links.indexOf(p.record) !== -1) &&
+        new Set(people.map((p) => p.record)).size === people.length, links.join(" | "));
+    const holder = people.find((p) => p.holder);
+    check("the holder line links the holder's own record",
+      !holder || (sg.holderStatus.why === "listed" && sg.holderStatus.source === holder.record),
+      JSON.stringify(sg.holderStatus));
+    check("no name in capitals (rule 77)",
+      [...gov.querySelectorAll(".gov-candidate-name")].every((n) => n.textContent !== n.textContent.toUpperCase()));
+    check("the order is said once, never 'Listed by' twice",
+      !/Listed by surname[^.]*\. Listed by/.test(gov.textContent) &&
+        /In surname order, not ballot order\./.test(gov.textContent));
+  });
+
+  const inGov = await buildPage("states/in.html");
+  suite("states/in.html — a write-in's party, without the word write-in again", () => {
+    const rows = [...inGov.D.querySelectorAll("#state-government .gov-writein-list .gov-candidate")]
+      .map((li) => li.textContent);
+    check("no 'Write-In (' inside the write-in list", rows.length > 0 &&
+      rows.every((t) => !/Write-In \(/i.test(t)), rows.join(" | "));
+  });
+
+  // A jurisdiction whose list has not been read says so, office by office,
+  // and claims nothing about its holder (rule 19). Every office on the 2026
+  // ballot has a list now, so the case is made by withholding one.
+  const unread = await buildPage("states/ga.html", { setup(window) {
+    let value;
+    Object.defineProperty(window, "kycStateGov", { configurable: true, get() { return value; },
+      set(v) {
+        const ag = v.states.GA.ballot2026.offices.ag;
+        delete ag.candidates;
+        ag.holderStatus = { holder: v.states.GA.ag.name, why: "unchecked",
+          text: "Whether " + v.states.GA.ag.name + " is running for this office is not checked here" };
+        value = v;
+      } });
+  } });
+  suite("states/ga.html — an office whose list was not read", () => {
+    const gov = unread.D.getElementById("state-government");
+    const none = gov.querySelectorAll(".gov-candidates-none");
+    check("says the candidates are not listed, and why",
+      none.length === 1 && /The candidates for this office are not listed here: no election office's list of them has been read\./
+        .test(none[0].textContent), none.length && none[0].textContent);
+    check("and that the holder was not checked, by name",
+      !!gov.querySelector(".gov-holder-unchecked"));
+    check("the other offices still list theirs", gov.querySelectorAll(".gov-candidate-list").length >= 3);
+  });
+
+  const vaGov = await buildPage("states/va.html");
+  suite("states/va.html — no statewide office on the 2026 ballot", () => {
+    const gov = vaGov.D.getElementById("state-government");
+    check("no candidates are listed and no list is credited",
+      !gov.querySelector(".gov-candidates") && !/election office's own list/.test(gov.textContent));
+  });
+
+  const gaVoted = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00" });
+  suite("states/ga.html after Election Day — the candidates were on the ballot", () => {
+    const gov = gaVoted.D.getElementById("state-government");
+    const heads = [...gov.querySelectorAll(".gov-candidates-head:not(.gov-writein-head)")].map((p) => p.textContent);
+    check("in the past tense", heads.length === 4 &&
+      heads.every((t) => t === "Candidates who were on the Nov 3, 2026 ballot"), heads.join(" | "));
+    const results = ((gaVoted.window.kycBuildMeta.voting || {}).GA || {}).results;
+    const source = gov.querySelector(".gov-candidates-source");
+    check("the state's own results are linked; this site names no winner",
+      /This site does not read the state's results and names no winner/.test(source.textContent) &&
+        (!results || [...source.querySelectorAll("a")].some((a) => a.getAttribute("href") === results)) &&
+        !/\b(won|winner:|elected governor)\b/i.test(gov.textContent.replace(/names no winner/g, "")),
+      source.textContent);
+    check("no open-seat line: the office has a winner now", !gov.querySelector(".gov-open-seat"));
   });
 
   suite("states/va.html — when an office not up in 2026 is next elected (PERSONA-19)", () => {
@@ -2776,9 +2989,9 @@ async function testStates() {
     const before = window.location.hash;
     parts[3].dispatchEvent(new window.MouseEvent("click", { bubbles: true, cancelable: true }));
     check("a jump leaves the address as it was", window.location.hash === before, window.location.hash);
-    check("the race list says it covers Congress only",
+    check("the race list says it covers Congress, and where the statewide candidates are",
       /2026 races for Congress in Texas/.test(D.getElementById("races").textContent) &&
-        /candidates for Congress only/.test(D.getElementById("races").textContent));
+        /not those for the legislature/.test(D.getElementById("races").textContent));
     const grids = [...content.querySelectorAll(".state-section > .card-grid")];
     check("both senators are shown", grids[0].querySelectorAll(".card").length === senators.length);
     check("the whole delegation is shown",
@@ -7560,6 +7773,17 @@ async function testStateGov() {
     check("its label says whether the governor is elected on Nov 3",
       /elected on Nov 3/.test(shape(up[0]).getAttribute("aria-label")) &&
       /no governor's election in 2026/.test(shape("VA").getAttribute("aria-label")));
+    // An open seat is said in words, naming the list that says so, as every
+    // other such claim on the site does (PR #109 review).
+    const openSeat = up.find((c) => {
+      const hs = data.states[c].ballot2026.offices.governor.holderStatus;
+      return hs && hs.why === "not-listed" && hs.holder === data.states[c].governor.name;
+    });
+    check("an open seat's label names the list that leaves the governor off",
+      !openSeat || shape(openSeat).getAttribute("aria-label").indexOf("open seat: " +
+        data.states[openSeat].governor.name + " is not among the candidates on " +
+        data.states[openSeat].ballot2026.offices.governor.holderStatus.cite) !== -1,
+      openSeat && shape(openSeat).getAttribute("aria-label"));
     // The colour is the sitting governor's party, who may not be running
     // (audit 2026-10-17, RACES-09): the legend says whose party it is.
     const legendText = D.getElementById("mapLegend").textContent;
@@ -8614,6 +8838,59 @@ async function testSearchAndFilters() {
     check("linked to the state's page", [...box.querySelectorAll("a")].some((a) =>
       a.textContent === window.kycStateGov.states[govState].governor.name &&
       /states\/[a-z]{2}\.html#state-government$/.test(a.getAttribute("href"))), box.textContent);
+  });
+  // The statewide candidates (rule 91): found by name, listed for the
+  // office they are a candidate for, linked to the state page; never a
+  // profile card, and never matched to one by name (rule 25).
+  const gaGov = window.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates
+    .find((c) => !c.writeIn && !c.holder);
+  typeInto(window, D, gaGov.name);
+  await settle(250);
+  suite("search — a candidate for governor", () => {
+    const box = D.getElementById("officialResults");
+    const row = [...box.querySelectorAll(".official-row")].find((li) =>
+      li.querySelector(".official-name").textContent === gaGov.name);
+    check("is listed as a candidate for the office, linked to the state's page",
+      !!row && row.querySelector(".official-role").textContent ===
+        "Candidate for Governor, Georgia (Nov 3, 2026 ballot)" &&
+        row.querySelector("a").getAttribute("href") === "states/ga.html#state-government",
+      box.textContent);
+    check("never as a profile card", !box.querySelector(".card, a[href*='#/profile/']"));
+    // A candidate who holds no office is not an "official" (PR #109 review).
+    const list = row && row.closest(".official-list");
+    const head = list && list.previousElementSibling && list.previousElementSibling.previousElementSibling;
+    check("under its own heading, not 'Other officials'",
+      !!head && head.textContent === "Statewide candidates on the Nov 3, 2026 ballot", head && head.textContent);
+  });
+  // The list's own form of a name finds the candidate, who is shown by the
+  // name the page writes ("Lombardo, Joseph" is Joseph Lombardo).
+  const nvRow = window.kycStateGov.states.NV.ballot2026.offices.governor.candidates.candidates
+    .find((c) => c.printed && !c.holder);
+  if (nvRow) typeInto(window, D, nvRow.printed);
+  await settle(250);
+  // After Election Day the search says it in the past tense, as the state
+  // page does; it names no winner (PR #109 review).
+  const voted = await buildPage("index.html", { now: "2026-11-05T09:00:00" });
+  await settle(50);
+  loadOfficials(voted.window);
+  typeInto(voted.window, voted.D, gaGov.name);
+  await settle(250);
+  suite("search after Election Day — a candidate who was on the ballot", () => {
+    const box = voted.D.getElementById("officialResults");
+    const row = [...box.querySelectorAll(".official-row")].find((li) =>
+      li.querySelector(".official-name").textContent === gaGov.name);
+    check("in the past tense",
+      !!row && row.querySelector(".official-role").textContent ===
+        "Was a candidate for Governor, Georgia, on the Nov 3, 2026 ballot", box.textContent);
+    check("under a heading in the past tense",
+      /Statewide candidates who were on the Nov 3, 2026 ballot/.test(box.textContent));
+  });
+  suite("search — a candidate by the list's own form of the name", () => {
+    if (!nvRow) { check("no list writes a name another way", true); return; }
+    const box = D.getElementById("officialResults");
+    check("is found, and shown first name first",
+      [...box.querySelectorAll(".official-name")].some((a) => a.textContent === nvRow.name) &&
+        box.textContent.indexOf(nvRow.printed + " —") === -1, box.textContent);
   });
   const departed = (KYC.meta().departed || [])[0];
   if (departed) typeInto(window, D, departed.name);
