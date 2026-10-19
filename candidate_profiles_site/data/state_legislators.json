@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-17T18:07:49+00:00",
+ "fetched": "2026-10-19T18:07:22+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -12139,6 +12139,8 @@
     "email": "carlos.barron.house@coleg.gov",
     "id": "ocd-person/5f8d1bd0-329b-4a87-8d2f-cb62b8f2e921",
     "image": "https://i0.wp.com/coloradocommunitymedia.com/wp-content/uploads/2024/10/7A10C326-743A-4DF1-9625-6E709398C30F-JF-Services-Inc-Office-e1728345969755.jpg?resize=150%2C150&ssl=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "broken",
     "links": [
      "https://leg.colorado.gov/legislators/carlos-barron"
     ],
@@ -50908,6 +50910,8 @@
     "email": "terry.baker@house.maryland.gov",
     "id": "ocd-person/e5f4fb79-fd8e-437d-9488-68fd47d430c6",
     "image": "https://msa.maryland.gov/msa/mdmanual/36loc/wa/leg/images/1198-1-09528b.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/baker04"
     ],
@@ -51790,6 +51794,8 @@
     "email": "andre.johnson@house.maryland.gov",
     "id": "ocd-person/ecb19095-2750-4bef-bb87-1f646818a9b1",
     "image": "https://msa.maryland.gov/msa/mdmanual/36loc/ha/leg/images/1198-1-09406b.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/johnson02",
      "https://msa.maryland.gov/msa/mdmanual/06hse/html/msa17954.html"
@@ -52530,6 +52536,8 @@
     "email": "robbyn.lewis@house.maryland.gov",
     "id": "ocd-person/d0e4f14b-c4a3-485e-88f7-ea7a86f67ca1",
     "image": "http://msa.maryland.gov/msa/mdmanual/06hse/images/1198-1-07944b.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/lewis01",
      "https://mgaleg.maryland.gov/webmga/frmMain.aspx?pid=sponpage&tab=subject6&id=lewis01&stab=01"
@@ -53791,6 +53799,8 @@
     "email": "daniel.ankeles@legislature.maine.gov",
     "id": "ocd-person/eb5efd36-8020-46f1-a6ef-6dac6873f692",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/4ce09159-182e-48aa-93cb-0c127b0abe7c_ANKELES.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1495",
      "https://www.maine.gov/housedems/ankeles"
@@ -53807,6 +53817,8 @@
     "email": "poppy.arford@legislature.maine.gov",
     "id": "ocd-person/522f7557-1c06-451b-9c81-78080fc5c21c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/e67bda1d-1bd9-46a4-8dca-4c3616a20dfa_ArfordNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1421",
      "https://www.maine.gov/housedems/arfordp"
@@ -53868,6 +53880,8 @@
     "email": "anne.graham@legislature.maine.gov",
     "id": "ocd-person/2f7e7649-5c68-4f8f-8c9a-7993b66d383a",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3c31dd8d-1de9-4bf3-b506-b7c45790974f_AGRAHAM.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/259",
      "https://www.mainelegislature.org/house/house/MemberProfiles/Details/259"
@@ -53884,6 +53898,8 @@
     "email": "barbara.bagshaw@legislature.maine.gov",
     "id": "ocd-person/72cc3b25-8e1e-4095-93be-216ee191572c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/d2a8373a-d1e8-4e25-936a-4fbcd3ac4087_BBAGSHAW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1473",
      "https://mainehousegop.org/members/bagshaw-barbara/"
@@ -53949,6 +53965,8 @@
     "email": "tiffany.strout@legislature.maine.gov",
     "id": "ocd-person/2ffd13d7-b22a-4bea-8bc0-eaa6c0a53c17",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/0cea9b69-973d-411d-bbd7-b5c6e1e6d559_TSTROUT.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1459",
      "https://mainehousegop.org/members/strout-tiffany/"
@@ -53980,6 +53998,8 @@
     "email": "amy.kuhn@legislature.maine.gov",
     "id": "ocd-person/d9825f86-280b-4b70-9a6e-2bb7f02e239a",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a99f9866-50ae-4e3a-8eee-10a3e0d00dce_AKUHN.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1474",
      "https://legislature.maine.gov/housedems/kuhn",
@@ -54044,6 +54064,8 @@
     "email": "michael.brennan@legislature.maine.gov",
     "id": "ocd-person/b0c25078-ee4b-4638-9523-17997681a6e7",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3626b818-d26c-4777-99c6-0a04ef459fc3_brennan.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "broken",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1350"
     ],
@@ -54059,6 +54081,8 @@
     "email": "sam.zager@legislature.maine.gov",
     "id": "ocd-person/59c5505d-902d-4b6a-b3d5-8e036e640348",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b6cd2a0d-2b96-4103-a43b-bea5aef4a435_Zager.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1418",
      "https://www.maine.gov/housedems/zagers"
@@ -54075,6 +54099,8 @@
     "email": "matt.moonen@legislature.maine.gov",
     "id": "ocd-person/7f03a30f-5a77-49b2-8c92-57f7a4238052",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5ce2da1b-2227-407f-8f25-9cc5647cf4c5_moonen.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/118"
     ],
@@ -54108,6 +54134,8 @@
     "email": "charles.skold@legislature.maine.gov",
     "id": "ocd-person/d87034c7-fd93-4ba1-a61b-f4ea810506c9",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/f62e4eee-633b-458e-9410-219176bec3a2_CSKOLD.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1475",
      "https://www.maine.gov/housedems/skold"
@@ -54124,6 +54152,8 @@
     "email": "william.faulkingham@legislature.maine.gov",
     "id": "ocd-person/43c2650b-6248-46f9-a553-8c2bd0bab294",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b1dc14b4-920f-4f14-99c9-bce559bceb76_FaulkinghamNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1379",
      "https://mainehousegop.org/members/faulkingham-billy-bob/"
@@ -54140,6 +54170,8 @@
     "email": "deqa.dhalac@legislature.maine.gov",
     "id": "ocd-person/3080d13f-59de-437a-b405-a2313be6ee89",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/57526b13-6bb7-4ccf-b3e4-136ae6208e84_DHALAC.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1476"
     ],
@@ -54169,6 +54201,8 @@
     "email": "matthew.beck@legislature.maine.gov",
     "id": "ocd-person/dec943c1-07d5-479a-972f-a3c1cc6a2714",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/10b00e2f-ff9f-4f15-b72a-1b8ed89dc9a8_BECK.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1509"
     ],
@@ -54199,6 +54233,8 @@
     "email": "sophia.warren@legislature.maine.gov",
     "id": "ocd-person/140459ab-ba63-410a-819c-aec28c2f2f66",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/cf752b53-787f-40ea-980b-165536a3a6c7_Warren.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1413"
     ],
@@ -54214,6 +54250,8 @@
     "email": "kelly.murphy@legislature.maine.gov",
     "id": "ocd-person/8abb4c0b-ed96-442e-8483-93a05845dcc5",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/17a7b5d3-e413-418b-bad4-831e543f1099_MURPHY.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1477",
      "https://www.maine.gov/housedems/murphy"
@@ -54230,6 +54268,8 @@
     "email": "andrew.gattine@legislature.maine.gov",
     "id": "ocd-person/81123167-ba38-419a-92e5-fe0102d6a553",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a5278ffe-f50e-4998-83fb-cad702fc9659_gattam.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/68"
     ],
@@ -54260,6 +54300,8 @@
     "email": "suzanne.salisbury@legislature.maine.gov",
     "id": "ocd-person/d43df0c7-0dfd-4640-9881-f37611c15830",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/51e7366f-0985-40da-ad18-0933d15e2d99_SalisburyNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1415",
      "https://www.maine.gov/housedems/salisburys"
@@ -54327,6 +54369,8 @@
     "email": "lori.gramlich@legislature.maine.gov",
     "id": "ocd-person/3cdb36ad-77a1-401d-8479-630ae970300b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/d346883e-e53b-4578-bd40-44eb245624e9_gramlich.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1342"
     ],
@@ -54357,6 +54401,8 @@
     "email": "marc.malon@legislature.maine.gov",
     "id": "ocd-person/48305a9e-8f2a-4cea-8689-b93491c82ad5",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/24740258-3b61-4d37-9179-239dbb5b64ee_MMALON.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1478"
     ],
@@ -54372,6 +54418,8 @@
     "email": "traci.gere@legislature.maine.gov",
     "id": "ocd-person/10c768fb-c5ef-448e-9759-d76f6c313909",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/593607d8-2dcf-4adc-8351-ebf61eeda842_Gere2021.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1408",
      "https://www.maine.gov/housedems/geret"
@@ -54388,6 +54436,8 @@
     "email": "daniel.sayre@legislature.maine.gov",
     "id": "ocd-person/f9010476-1b1e-4407-b672-b81cd0ee8ae6",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5eaede44-a899-42af-a114-5ea2bc5af4db_DSAYRE.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1479",
      "https://www.maine.gov/housedems/sayre"
@@ -54435,6 +54485,8 @@
     "email": "mark.blier@legislature.maine.gov",
     "id": "ocd-person/134a1697-216a-4761-827f-840f72c640a0",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/0b41e77d-6373-4758-bc30-be7babfa921e_BlierNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1344",
      "https://mainehousegop.org/members/blier-mark/"
@@ -54451,6 +54503,8 @@
     "email": "david.woodsome@legislature.maine.gov",
     "id": "ocd-person/30414bf4-13ad-4bd5-a1d9-3cf11be6464d",
     "image": "https://legislature.maine.gov/uploads/visual_edit/woodsome-5x7-2.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1480",
      "https://mainehousegop.org/members/woodsome-david/",
@@ -54483,6 +54537,8 @@
     "email": "wayne.parry@legislature.maine.gov",
     "id": "ocd-person/8a75e2da-2389-4052-9592-1e607ba2dfc1",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/64b98aaf-c97d-41c4-88d7-3139d1d72339_Parry.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/124",
      "https://mainehousegop.org/members/parry-wayne/"
@@ -54499,6 +54555,8 @@
     "email": "lucas.lanigan@legislature.maine.gov",
     "id": "ocd-person/85c0e0b8-2654-4da5-96e6-8745ec68d0af",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/beba31fd-c03d-41e8-91d9-97bf04b13254_LANIGAN.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1481",
      "https://mainehousegop.org/members/lanigan-lucas/"
@@ -54544,6 +54602,8 @@
     "email": "jeffrey.adams@legislature.maine.gov",
     "id": "ocd-person/2288cf22-64f4-4f1f-b5e3-b1ada5c72914",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/19be31f4-e0c7-4466-bcc7-ba2191307f59_ADAMS.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1469",
      "https://mainehousegop.org/members/adams-jeffrey/"
@@ -54575,6 +54635,8 @@
     "email": "gerry.runte@legislature.maine.gov",
     "id": "ocd-person/7dea9101-48ec-4f1a-871e-a4f1c98b8914",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a2caaeac-ae5a-4ffd-b7a6-45e1840bba4b_RUNTE.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1470",
      "https://legislature.maine.gov/house/MemberProfiles/Details/1470",
@@ -54592,6 +54654,8 @@
     "email": "holly.sargent@legislature.maine.gov",
     "id": "ocd-person/82f5c446-4f81-4c54-98ae-7b302003d39d",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/191052f1-463d-4a44-bfdc-ecde7bb45ec0_SARGENT.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1471",
      "https://www.maine.gov/housedems/sargent"
@@ -54608,6 +54672,8 @@
     "email": "thomas.lavigne@legislature.maine.gov",
     "id": "ocd-person/be3df38c-150a-4e3c-8c16-6e97bdbeadc4",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/fc7494df-6e51-45a2-9716-43f8d0f0b162_LAVIGNE.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1472",
      "https://mainehousegop.org/members/lavigne-thomas/"
@@ -54624,6 +54690,8 @@
     "email": "tiffany.roberts@legislature.maine.gov",
     "id": "ocd-person/524f6cce-8333-442a-aff3-2e92bd9df894",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/524ac892-9d68-4268-8883-b94a2e993161_Roberts.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1385"
     ],
@@ -54639,6 +54707,8 @@
     "email": "holly.eaton@legislature.maine.gov",
     "id": "ocd-person/cd08563e-987c-4c06-9487-4a22015e18a9",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/56d51271-b0dc-43ea-8f70-423d544537d5_EATON.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1461",
      "https://www.maine.gov/housedems/eaton"
@@ -54655,6 +54725,8 @@
     "email": "michele.meyer@legislature.maine.gov",
     "id": "ocd-person/e26fdc8a-3099-4ea4-ad2d-1ccdc45ce1e6",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b1004d88-844a-4d6d-9e4a-e6a329b430c9_meyer.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1337"
     ],
@@ -54670,6 +54742,8 @@
     "email": "kristi.mathieson@legislature.maine.gov",
     "id": "ocd-person/375e5fda-9367-4ce3-a209-1c772c32219f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/61a4ca7c-418f-4f26-a7eb-e355ea89333e_Mathieson.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1406",
      "https://www.maine.gov/housedems/mathiesonk"
@@ -54734,6 +54808,8 @@
     "email": "richard.campbell@legislature.maine.gov",
     "id": "ocd-person/0f9ba178-89fb-439e-afa2-c327414d966d",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/8be4f86f-6d8b-4193-a213-a97eb6b5ac5b_camprh.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/21",
      "https://mainehousegop.org/members/campbell-richard/"
@@ -54750,6 +54826,8 @@
     "email": "roger.albert@legislature.maine.gov",
     "id": "ocd-person/c76a67f9-4d87-4a73-8d89-eea7cd8a3a98",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/ce15102a-72b1-4d16-adcc-ec90fdd077e0_ALBERT.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1454",
      "https://mainehousegop.org/members/albert-roger/"
@@ -54782,6 +54860,8 @@
     "email": "ambureen.rana@legislature.maine.gov",
     "id": "ocd-person/8f61f208-cf99-489a-aa36-847438b0ed60",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/1f89f046-4256-4341-9236-68c67e6efd77_ARANA.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1464",
      "https://www.maine.gov/housedems/rana"
@@ -54798,6 +54878,8 @@
     "email": "laura.supica@legislature.maine.gov",
     "id": "ocd-person/a65cc42d-ae91-4f47-8269-4673f106682f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/1a8dbf21-c24a-4e1c-89e3-53030c1ecfe5_Supica.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1438",
      "https://www.maine.gov/housedems/supical"
@@ -54859,6 +54941,8 @@
     "email": "james.dill@legislature.maine.gov",
     "id": "ocd-person/a3281b8a-e758-4804-a964-e8db96d043a8",
     "image": "https://legislature.maine.gov/uploads/visual_edit/dill-5x7.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/253"
     ],
@@ -54874,6 +54958,8 @@
     "email": "gary.drinkwater@legislature.maine.gov",
     "id": "ocd-person/7893adc7-d4fb-42e4-bae0-1258ce673096",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3b421f7d-d986-4022-886f-90d3f5e19f79_drinkwater.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1376",
      "https://mainehousegop.org/members/drinkwater-gary/"
@@ -54890,6 +54976,8 @@
     "email": "irene.gifford@legislature.maine.gov",
     "id": "ocd-person/e603c478-27c7-4f68-ba31-4ef3732ab916",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/af5019e3-ac57-47c4-bc0e-b9eb39973a6f_GIFFORD.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1465",
      "https://mainehousegop.org/members/gifford-irene/"
@@ -54923,6 +55011,8 @@
     "email": "mark.babin@legislature.maine.gov",
     "id": "ocd-person/a3a29593-781a-462d-93cc-685be03b3b56",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/05fa532f-1a27-4521-af69-ceecf5c3311e_BABIN.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1455",
      "https://mainehousegop.org/members/babin-mark/"
@@ -54939,6 +55029,8 @@
     "email": "james.white@legislature.maine.gov",
     "id": "ocd-person/54f9af68-0a59-4cd7-a448-40725e8781ab",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/4f4a6b7f-2c72-4910-848e-2f14ebf20832_WHITEJ.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1466",
      "https://mainehousegop.org/members/white-james/"
@@ -54955,6 +55047,8 @@
     "email": "chad.perkins@legislature.maine.gov",
     "id": "ocd-person/1793f579-da58-422f-bc22-36da20ce246c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a6f40ce5-a695-480d-92cf-cfe044f027ac_CPERKINS.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1467",
      "https://mainehousegop.org/members/perkins-chad/"
@@ -55016,6 +55110,8 @@
     "email": "jim.thorne@legislature.maine.gov",
     "id": "ocd-person/e4f0e3da-2e65-4986-96ad-1ef21f9da73d",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/92dc9462-f2b9-4767-8dec-39b147b90d53_ThorneNEWNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1431",
      "https://mainehousegop.org/members/thorne-james/"
@@ -55062,6 +55158,8 @@
     "email": "benjamin.hymes@legislature.maine.gov",
     "id": "ocd-person/f52b3788-349b-4b6c-84a3-72d02a953616",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/04372b02-d30f-4b91-a71e-0d7e188b385f_HYMES.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1497",
      "https://mainehousegop.org/members/hymes-benjamin/"
@@ -55078,6 +55176,8 @@
     "email": "jan.dodge@legislature.maine.gov",
     "id": "ocd-person/b7b97724-7abc-44fb-bace-d3606d3fadb2",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3966d66f-a9d5-4de6-963e-cbe39eacecb3_JDODGE.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1366"
     ],
@@ -55093,6 +55193,8 @@
     "email": "timothy.guerrette@legislature.maine.gov",
     "id": "ocd-person/2e5b6467-1014-4771-9aae-2c401029ed01",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/140ecd56-dda0-495a-8f55-a372f209dcea_TGUERRETTE.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1456",
      "https://mainehousegop.org/members/guerrette-timothy/"
@@ -55141,6 +55243,8 @@
     "email": "valli.geiger@legislature.maine.gov",
     "id": "ocd-person/0842c8ba-66a3-4896-aede-def84a65605b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b7429307-4ee4-4919-b291-30007ac4f3d6_GeigerNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1430",
      "https://www.maine.gov/housedems/geigerv"
@@ -55187,6 +55291,8 @@
     "email": "abden.simmons@legislature.maine.gov",
     "id": "ocd-person/b6cdaab7-6aec-4c65-a239-e18c6e839fbc",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/75e9b804-f745-4f44-9817-146eb1a8c378_simmas[1].jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/144",
      "https://mainehousegop.org/members/simmons-abden/"
@@ -55203,6 +55309,8 @@
     "email": "lydia.crafts@legislature.maine.gov",
     "id": "ocd-person/b795e4ca-6b0d-4101-902d-8db5c1b54485",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/aee526c2-f213-42e1-b859-11325b8c555a_Crafts.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1429",
      "https://www.maine.gov/housedems/craftsl"
@@ -55237,6 +55345,8 @@
     "email": "holly.stover@legislature.maine.gov",
     "id": "ocd-person/468ba602-86c5-4293-85b2-45e87313c1c3",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/fc29e232-5948-4268-8919-22a92f6ab7ab_stover.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1363"
     ],
@@ -55281,6 +55391,8 @@
     "email": "david.sinclair@legislature.maine.gov",
     "id": "ocd-person/8dd63807-ac15-408c-97de-c8e9195a6a42",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/10a6470d-cab7-4912-8ce5-b2ed172f4f28_SinclairCropped3.JPG",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1508"
     ],
@@ -55312,6 +55424,8 @@
     "email": "sally.cluchey@legislature.maine.gov",
     "id": "ocd-person/d91a8965-c40d-481f-af61-5acb9b953fd3",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/c6886b51-5eda-49d0-b7ad-a5315555764c_SCLUCHEY.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1501",
      "https://legislature.maine.gov/housedems/clucheys",
@@ -55330,6 +55444,8 @@
     "email": "michael.lemelin@legislature.maine.gov",
     "id": "ocd-person/feb330d7-8122-4547-b38a-38279732a9ce",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/2f05ff55-e46c-41ce-b4b9-5d144bc7b7ee_LemelinNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1428",
      "https://mainehousegop.org/members/lemelin-michael/"
@@ -55346,6 +55462,8 @@
     "email": "karen.montell@legislature.maine.gov",
     "id": "ocd-person/80900bc0-7e26-4195-a0af-ec56b9f34fe0",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/509661e8-e573-4bef-b8ed-47c5c0a586a4_MONTELL.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1502"
     ],
@@ -55391,6 +55509,8 @@
     "email": "tavis.hasenfus@legislature.maine.gov",
     "id": "ocd-person/194ff967-ad0b-4f2d-8cb7-ef1e062b235c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/7caf9ecd-04e1-4e00-b772-b38616cac2ab_HasenfusNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1427",
      "https://www.maine.gov/housedems/hasenfust"
@@ -55439,6 +55559,8 @@
     "email": "donald.ardell@legislature.maine.gov",
     "id": "ocd-person/1b986e08-1270-49ba-b6d0-941a950d3008",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3bf42df4-0f16-418b-ad61-621fd8c4c1e0_ARDELL.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1457",
      "https://mainehousegop.org/members/ardell-donald/"
@@ -55455,6 +55577,8 @@
     "email": "william.bridgeo@legislature.maine.gov",
     "id": "ocd-person/44cd2c44-aa58-4129-bc5f-eefc64bf836f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3f618227-f773-43c5-9a0e-d081871faa0e_WBRIDGEO.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1504",
      "https://legislature.maine.gov/housedems/bridgeo",
@@ -55486,6 +55610,8 @@
     "email": "katrina.smith@legislature.maine.gov",
     "id": "ocd-person/b07e421b-8c1f-473d-aa7a-10d71e8a443b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5d2a8b6b-bea9-4f98-ad05-6d20c8f83aa6_KSMITH.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1505",
      "https://mainehousegop.org/members/smith-katrina/"
@@ -55553,6 +55679,8 @@
     "email": "robert.nutting@legislature.maine.gov",
     "id": "ocd-person/32f4600c-1bc1-4758-8d94-69878c863e00",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/10857e45-bb21-4dfb-92af-ab7059898dbe_nuttrw.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/218",
      "https://mainehousegop.org/members/nutting-robert/"
@@ -55599,6 +55727,8 @@
     "email": "dean.cray@legislature.maine.gov",
     "id": "ocd-person/8bc14822-ff62-4ffe-bf42-4114bd5bd99b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/898a0677-23f7-4936-a1a4-c913ae94227c_CRAY.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/249",
      "https://mainehousegop.org/members/cray-dean/"
@@ -55615,6 +55745,8 @@
     "email": "gregory.swallow@legislature.maine.gov",
     "id": "ocd-person/90989c27-4cd8-409e-8325-9bd50dac9cf4",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/e42361cf-f827-42a9-85de-64b34fc21ab3_swallow.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1381",
      "https://mainehousegop.org/members/swallow-gregory/"
@@ -55679,6 +55811,8 @@
     "email": "michael.soboleski@legislature.maine.gov",
     "id": "ocd-person/fc107a79-150e-414f-b796-960c96d75eb6",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/cb4e1505-8bc4-478c-a23c-d677f2d58e50_MSOBOLESKI.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1482",
      "https://mainehousegop.org/members/soboleski-michael/"
@@ -55728,6 +55862,8 @@
     "email": "sheila.lyman@legislature.maine.gov",
     "id": "ocd-person/7498179f-e3de-47b7-9aee-9abee716522a",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/07bd7878-b32c-4a23-b44a-9f56e3353fdf_LymanNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1424",
      "https://mainehousegop.org/members/lyman-sheila/"
@@ -55744,6 +55880,8 @@
     "email": "tammy.schmersal-burgess@legislature.maine.gov",
     "id": "ocd-person/444d3040-a7ee-4559-8d5f-bfc515617605",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/c0bba107-42c6-442e-aea6-3cdc8e53c9eb_TBURGESS.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1483",
      "https://mainehousegop.org/members/schmersal-burgess-tammy/"
@@ -55760,6 +55898,8 @@
     "email": "rachel.henderson@legislature.maine.gov",
     "id": "ocd-person/b61923e6-c463-4df4-95b2-117d74c030bd",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/7c8fd3af-5878-4aea-91fe-0faa167ad005_HENDERSON.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "broken",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1484",
      "https://mainehousegop.org/members/henderson-rachel/"
@@ -55791,6 +55931,8 @@
     "email": "tracy.quint@legislature.maine.gov",
     "id": "ocd-person/3853d2fe-2580-4041-abb1-b4136172e9c0",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a2caf281-9523-418e-b5a2-1a0635438985_QuintNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1443",
      "https://legislature.maine.gov/house/MemberProfiles/Details/1443",
@@ -55808,6 +55950,8 @@
     "email": "caldwell.jackson@legislature.maine.gov",
     "id": "ocd-person/cf1f0a32-7107-44ea-96f2-1f3c604d87cc",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/4a816ecf-f3c1-49e1-88e9-f7a4d18cb5de_JACKSON.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1485",
      "https://mainehousegop.org/members/jackson-caldwell/"
@@ -55872,6 +56016,8 @@
     "email": "mark.walker@legislature.maine.gov",
     "id": "ocd-person/d16d8ff0-3e6f-4970-9baf-767c9eb09fab",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/006156d6-d589-47bc-a865-871a85279134_MWALKER.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1487",
      "https://mainehousegop.org/members/walker-mark/"
@@ -55888,6 +56034,8 @@
     "email": "kimberly.pomerleau@legislature.maine.gov",
     "id": "ocd-person/410a9d92-cdb2-4927-b589-72e32d525883",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/be0d0db4-52a9-40c7-8300-6cbb2e7e652d_POMERLEAU.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1488",
      "https://mainehousegop.org/members/pomerleau-kimberly/"
@@ -55950,6 +56098,8 @@
     "email": "adam.lee@legislature.maine.gov",
     "id": "ocd-person/dff0e200-fd8c-4ada-ac3d-e014a529dd59",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/cc770c67-4f1f-4e24-a168-4a359d33b108_ALEE.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1491",
      "https://legislature.maine.gov/housedems/lee",
@@ -55997,6 +56147,8 @@
     "email": "joshua.morris@legislature.maine.gov",
     "id": "ocd-person/64a07a85-a469-4c9d-9b7c-bf4de46ade74",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/78e82de0-6a49-4118-9325-db07c8e934df_morris.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1359",
      "https://mainehousegop.org/members/morris-joshua/"
@@ -56013,6 +56165,8 @@
     "email": "stephen.wood@legislature.maine.gov",
     "id": "ocd-person/94645c8f-f06c-485e-b5fa-797e3590ea30",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/1e90c36e-1b64-464a-8371-c4bb4bad5925_woodsj[1].jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/40",
      "https://mainehousegop.org/members/wood-stephen/"
@@ -56059,6 +56213,8 @@
     "email": "mana.abdi@legislature.maine.gov",
     "id": "ocd-person/0bb988f9-6dca-4fd8-ac06-3603af31094f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/0b0aefe9-d3ab-435e-bf39-4028eaabde3a_MABDI.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1492",
      "https://www.maine.gov/housedems/abdi"
@@ -56075,6 +56231,8 @@
     "email": "michel.lajoie@legislature.maine.gov",
     "id": "ocd-person/c3185181-4ae9-42ce-8bf5-9a2f04c2422b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5dfb974c-7ace-4bd3-86bf-d975d1ac8aa1_lajoma.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/212"
     ],
@@ -56090,6 +56248,8 @@
     "email": "richard.mason@legislature.maine.gov",
     "id": "ocd-person/6c313875-2dc9-4ef5-b869-c3cc0b7d5c97",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/00d3edf9-afa9-42a9-894e-6f123441a00b_MasonNEW.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/158",
      "https://mainehousegop.org/members/mason-richard/"
@@ -56122,6 +56282,8 @@
     "email": "cheryl.golek@legislature.maine.gov",
     "id": "ocd-person/cef7caa9-828c-4272-a694-2aa16a5397ea",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/bedcf53e-b367-42a7-9db6-a1c317f925af_GOLEK.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1494",
      "https://legislature.maine.gov/housedems/golek",
@@ -56152,6 +56314,8 @@
     "email": "aaron.dana@legislature.maine.gov",
     "id": "ocd-person/906cd606-c6ff-41e5-87a6-e038b711fa61",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/27852f04-e612-46a5-9727-1bbd1d5e48e0_DANA.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1507"
     ],
@@ -56183,6 +56347,8 @@
     "email": "david.haggan@legislature.maine.gov",
     "id": "ocd-person/b3f3ab98-9169-42f8-b7d7-c04b3bdfb545",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/ef1b37a7-5997-414d-9ae4-6f38e8f619d8_haggdg.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District10",
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/77",
@@ -56201,6 +56367,8 @@
     "email": "chip.curry@legislature.maine.gov",
     "id": "ocd-person/6d397c09-c2d3-41ff-b33a-c42efae4f187",
     "image": "https://legislature.maine.gov/uploads/visual_edit/chipcurry-web-1024x683.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District11",
      "https://legislature.maine.gov/district11",
@@ -56218,6 +56386,8 @@
     "email": "anne.beebe-center@legislature.maine.gov",
     "id": "ocd-person/db11e611-94a4-4451-8486-f941a532789d",
     "image": "https://legislature.maine.gov/uploads/visual_edit/beebe-center-1024x1024.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District12",
      "https://legislature.maine.gov/district12",
@@ -56235,6 +56405,8 @@
     "email": "cameron.reny@legislature.maine.gov",
     "id": "ocd-person/38a3d5d7-cc62-4479-bfba-03d40099e7cd",
     "image": "https://legislature.maine.gov/uploads/visual_edit/reny-2.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District13",
      "https://legislature.maine.gov/district13",
@@ -56252,6 +56424,8 @@
     "email": "craig.hickman@legislature.maine.gov",
     "id": "ocd-person/5a475e6f-5277-425e-bb09-1c55facbc736",
     "image": "https://legislature.maine.gov/uploads/visual_edit/hickman-1024x1024.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District14",
      "https://www.mainesenate.org",
@@ -56269,6 +56443,8 @@
     "email": "dick.bradstreet@legislature.maine.gov",
     "id": "ocd-person/ec504278-9872-4842-a99c-80b31e563707",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/25f23c49-eaab-420a-8fdd-b4d2afb931bc_bradrt.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District15",
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/18",
@@ -56286,6 +56462,8 @@
     "email": "scott.cyrway@legislature.maine.gov",
     "id": "ocd-person/73dfc0b1-9ce4-4d8e-8119-1dc7396fbb2c",
     "image": "https://legislature.maine.gov/uploads/visual_edit/cyrway-5x7-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District16",
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1506",
@@ -56305,6 +56483,8 @@
     "email": "jeffrey.timberlake@legislature.maine.gov",
     "id": "ocd-person/3ef077c6-482d-4dc2-92ef-69ac2a09bf06",
     "image": "https://legislature.maine.gov/uploads/visual_edit/timberlake-jeff-3.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District17",
      "https://legislature.maine.gov/district17",
@@ -56322,6 +56502,8 @@
     "email": "richard.bennett@legislature.maine.gov",
     "id": "ocd-person/4276be86-7dfa-4817-9792-52622b93ff40",
     "image": "https://legislature.maine.gov/uploads/visual_edit/bennett-5x7.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District18",
      "https://mesenategop.com/senator-rick-bennett/",
@@ -56357,6 +56539,8 @@
     "email": "trey.stewart@legislature.maine.gov",
     "id": "ocd-person/bd417e77-81d9-4e60-8b2a-b940da10bc37",
     "image": "https://legislature.maine.gov/uploads/visual_edit/stewart-harold-trey-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District2",
      "https://legislature.maine.gov/district2",
@@ -56375,6 +56559,8 @@
     "email": "bruce.bickford@legislature.maine.gov",
     "id": "ocd-person/0b3965de-8fe2-42b4-bc21-115d6b2b470f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/6512eb18-497f-48cf-8e14-5c46c8827181_bickba.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District20",
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/16",
@@ -56392,6 +56578,8 @@
     "email": "margaret.rotundo@legislature.maine.gov",
     "id": "ocd-person/062977a2-a482-4c4f-b053-75cae4bdce31",
     "image": "https://legislature.maine.gov/uploads/visual_edit/rotundo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District21",
      "https://legislature.maine.gov/district21",
@@ -56409,6 +56597,8 @@
     "email": "james.libby@legislature.maine.gov",
     "id": "ocd-person/32c9dbd7-beb7-481e-b0f4-22f3eaa00e50",
     "image": "https://legislature.maine.gov/uploads/visual_edit/libby-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District22",
      "https://legislature.maine.gov/district22",
@@ -56426,6 +56616,8 @@
     "email": "mattie.daughtry@legislature.maine.gov",
     "id": "ocd-person/863a9ef0-5916-40d6-9929-7a7b498af0ec",
     "image": "https://legislature.maine.gov/uploads/visual_edit/daughtry-matthea-2.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District23",
      "https://legislature.maine.gov/district23",
@@ -56443,6 +56635,8 @@
     "email": "denise.tepler@legislature.maine.gov",
     "id": "ocd-person/0321d169-de06-4377-8cd5-6cdb51471393",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/da8c36fc-c7af-419a-b9a9-a0b4080be157_teplda[1].jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District24",
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/55",
@@ -56460,6 +56654,8 @@
     "email": "teresa.pierce@legislature.maine.gov",
     "id": "ocd-person/0d692e7b-535a-498b-8072-a258806fecb4",
     "image": "https://legislature.maine.gov/uploads/visual_edit/pierce-web-748x1024.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District25",
      "https://legislature.maine.gov/district25",
@@ -56478,6 +56674,8 @@
     "email": "timothy.nangle@legislature.maine.gov",
     "id": "ocd-person/2715d740-16c6-49ec-9224-d3d9a24e47ee",
     "image": "https://legislature.maine.gov/uploads/visual_edit/nangle.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District26",
      "https://legislature.maine.gov/district26",
@@ -56495,6 +56693,8 @@
     "email": "jill.duson@legislature.maine.gov",
     "id": "ocd-person/c2268745-e66c-42d5-93bf-3b52819006e9",
     "image": "https://legislature.maine.gov/uploads/visual_edit/duson-3.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District27",
      "https://legislature.maine.gov/district27",
@@ -56512,6 +56712,8 @@
     "email": "rachel.talbotross@legislature.maine.gov",
     "id": "ocd-person/a3fd29b8-0e0e-4559-a71f-6f7cf20be60f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5a851e9e-6f42-4467-adb4-dbfc44dee0ad_talbr_[1].jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District28",
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/56",
@@ -56529,6 +56731,8 @@
     "email": "anne.carney@legislature.maine.gov",
     "id": "ocd-person/50f75f0e-328c-413c-8733-de2872c5b7b0",
     "image": "https://legislature.maine.gov/uploads/visual_edit/carney-web-1-1024x854.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District29",
      "https://legislature.maine.gov/district29",
@@ -56546,6 +56750,8 @@
     "email": "brad.farrin@legislature.maine.gov",
     "id": "ocd-person/72193c8f-2b94-4e56-bff4-482bde6037eb",
     "image": "https://legislature.maine.gov/uploads/visual_edit/farrin-bradlee-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District3",
      "https://legislature.maine.gov/district3",
@@ -56563,6 +56769,8 @@
     "email": "stacy.brenner@legislature.maine.gov",
     "id": "ocd-person/b060c143-2734-491d-b28f-f6e4e2c77cb8",
     "image": "https://legislature.maine.gov/uploads/visual_edit/brenner-1022x1024.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District30",
      "https://legislature.maine.gov/district30",
@@ -56580,6 +56788,8 @@
     "email": "donna.bailey@legislature.maine.gov",
     "id": "ocd-person/d071215f-4839-4c4c-ab4d-f3c7179004a6",
     "image": "https://legislature.maine.gov/uploads/visual_edit/bailey-donna-6.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District31",
      "https://legislature.maine.gov/district31",
@@ -56597,6 +56807,8 @@
     "email": "henry.ingwersen@legislature.maine.gov",
     "id": "ocd-person/050d357e-3b22-4647-942f-56c9d8755194",
     "image": "https://legislature.maine.gov/uploads/visual_edit/ingwersen-1024x1024.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District32",
      "https://legislature.maine.gov/district32",
@@ -56614,6 +56826,8 @@
     "email": "matthew.harrington@legislature.maine.gov",
     "id": "ocd-person/f4b39a4f-3a31-4e15-9b0a-459cb260f535",
     "image": "https://legislature.maine.gov/uploads/visual_edit/harrington-matt.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District33",
      "https://legislature.maine.gov/district33",
@@ -56632,6 +56846,8 @@
     "email": "joe.rafferty@legislature.maine.gov",
     "id": "ocd-person/8c2c2996-5a72-4c9a-a0d9-958099f3a304",
     "image": "https://legislature.maine.gov/uploads/visual_edit/rafferty-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District34",
      "https://legislature.maine.gov/district34",
@@ -56649,6 +56865,8 @@
     "email": "mark.lawrence@legislature.maine.gov",
     "id": "ocd-person/ce4a4a85-e41d-410f-bfba-07f7f5b9dee0",
     "image": "https://legislature.maine.gov/uploads/visual_edit/lawrence-5x7-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District35",
      "https://legislature.maine.gov/district35",
@@ -56666,6 +56884,8 @@
     "email": "stacey.guerin@legislature.maine.gov",
     "id": "ocd-person/3439fe0c-fb43-4977-ac8c-1dd1f8f10e96",
     "image": "https://legislature.maine.gov/uploads/visual_edit/guerin-headshot-outdoors-rgb.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District4",
      "https://legislature.maine.gov/district4",
@@ -56683,6 +56903,8 @@
     "email": "russell.black@legislature.maine.gov",
     "id": "ocd-person/fa3e8ae3-757e-44fb-9451-6bf381d748ce",
     "image": "https://legislature.maine.gov/uploads/visual_edit/black-5x7.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District5",
      "https://mesenategop.com/your-senators/senator-russell-black/"
@@ -56699,6 +56921,8 @@
     "email": "marianne.moore@legislature.maine.gov",
     "id": "ocd-person/24bd9e6e-f10d-4e0d-a4b1-72bbe45f4e0d",
     "image": "https://legislature.maine.gov/uploads/visual_edit/moore-5x7.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District6",
      "https://mesenategop.com/your-senators/senator-marianne-moore/",
@@ -56716,6 +56940,8 @@
     "email": "nicole.grohoski@legislature.maine.gov",
     "id": "ocd-person/e53a09e6-a38e-4622-97e4-c40bf2d93faa",
     "image": "https://legislature.maine.gov/uploads/visual_edit/senator-grohoski-photo-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District7",
      "https://legislature.maine.gov/district7",
@@ -56734,6 +56960,8 @@
     "email": "mike.tipping@legislature.maine.gov",
     "id": "ocd-person/a18c5356-5572-4a99-8a7c-e86105afb821",
     "image": "https://legislature.maine.gov/uploads/visual_edit/tipping-1.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District8",
      "https://legislature.maine.gov/district8",
@@ -56751,6 +56979,8 @@
     "email": "joe.baldacci@legislature.maine.gov",
     "id": "ocd-person/34231d57-22e2-4f2f-be41-d2734fa6211f",
     "image": "https://legislature.maine.gov/uploads/visual_edit/baldacci-1024x683.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District9",
      "https://legislature.maine.gov/district9",
@@ -57864,6 +58094,8 @@
     "email": "josephpavlov@house.mi.gov",
     "id": "ocd-person/65bb5257-9a90-4b14-a7bd-aee9efd0ab55",
     "image": "https://i1.wp.com/www.joepavlov.com/wp-content/uploads/2024/08/JoePavolv-@-Wood-Door.jpg?resize=841%2C841&strip=info&ssl=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "broken",
     "links": [
      "https://gophouse.org/member/RepJosephGPavlov"
     ],
@@ -59509,6 +59741,8 @@
     "email": "rep.keith.allen@house.mn.gov",
     "id": "ocd-person/939c0bab-e76d-443f-b46b-7f98d05036e2",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/19A.gif",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15627"
     ],
@@ -59542,6 +59776,8 @@
     "email": "rep.john.burkel@house.mn.gov",
     "id": "ocd-person/c86f501e-0b47-4e57-8f5a-d7d0be2392af",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/01A.gif",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15538"
     ],
@@ -59626,6 +59862,8 @@
     "email": "rep.bjorn.olson@house.mn.gov",
     "id": "ocd-person/ad3245d1-b310-4d50-8290-e642d078f661",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/22A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15544"
     ],
@@ -59642,6 +59880,8 @@
     "email": "rep.terry.stier@house.mn.gov",
     "id": "ocd-person/9e7eca64-ff97-48f2-8887-916e50d917cd",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/22B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15646",
      "https://www.lrl.mn.gov/legdb/fulldetail?ID=15646"
@@ -59675,6 +59915,8 @@
     "email": "rep.patricia.mueller@house.mn.gov",
     "id": "ocd-person/71df2690-6a54-4452-960a-54a5b6540bc7",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/23B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15561"
     ],
@@ -59741,6 +59983,8 @@
     "email": "rep.andy.smith@house.mn.gov",
     "id": "ocd-person/41cf59c9-a2c3-442d-85f1-7d6ec8de1a97",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/25B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15606"
     ],
@@ -59774,6 +60018,8 @@
     "email": "rep.greg.davids@house.mn.gov",
     "id": "ocd-person/5bf21441-27fe-4f78-8fc1-83ca3ee5700d",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/26B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/10123"
     ],
@@ -59789,6 +60035,8 @@
     "email": "rep.shane.mekeland@house.mn.gov",
     "id": "ocd-person/204ac87d-7f04-4b49-adc4-658faec7d413",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/27A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15500"
     ],
@@ -59804,6 +60052,8 @@
     "email": "rep.bryan.lawrence@house.mn.gov",
     "id": "ocd-person/b135d3fd-c3cd-4bb5-a0b8-eefef669aada",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/27B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15626"
     ],
@@ -60214,6 +60464,8 @@
     "email": "rep.samantha.vang@house.mn.gov",
     "id": "ocd-person/3f73ba2f-f038-47ff-b721-27118592b691",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/38B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15510"
     ],
@@ -60434,6 +60686,8 @@
     "email": "rep.peter.fischer@house.mn.gov",
     "id": "ocd-person/929dc6f7-63f4-4a9d-ba24-6ab8c5964acf",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/44A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15396"
     ],
@@ -60466,6 +60720,8 @@
     "email": "rep.andrew.myers@house.mn.gov",
     "id": "ocd-person/bba68b5b-90ac-4465-bdd2-fdf23c33b87a",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/45A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15618"
     ],
@@ -60481,6 +60737,8 @@
     "email": "rep.patty.acomb@house.mn.gov",
     "id": "ocd-person/b393cb61-cb71-4cd0-8132-6e21c2a7202d",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/45B.gif",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15513"
     ],
@@ -60514,6 +60772,8 @@
     "email": "rep.cheryl.youakim@house.mn.gov",
     "id": "ocd-person/ec1171fd-3b90-4137-b01d-041f905c642d",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/46B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15450"
     ],
@@ -60546,6 +60806,8 @@
     "email": "rep.ethan.cha@house.mn.gov",
     "id": "ocd-person/d0e94ca0-b600-4567-88ee-34a861ca38aa",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/47B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15621"
     ],
@@ -60561,6 +60823,8 @@
     "email": "rep.jim.nash@house.mn.gov",
     "id": "ocd-person/d7012c12-e223-4409-823b-ba3e55be6677",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/48A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15441"
     ],
@@ -60627,6 +60891,8 @@
     "email": "rep.heather.keeler@house.mn.gov",
     "id": "ocd-person/3ace0851-830e-42a1-8390-27c1142f2367",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/04A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15539"
     ],
@@ -60678,6 +60944,8 @@
     "email": "rep.steve.elkins@house.mn.gov",
     "id": "ocd-person/b867618c-7a49-4cb3-94ac-b5836ae8dedf",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/50B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15517"
     ],
@@ -60727,6 +60995,8 @@
     "email": "rep.liz.reyer@house.mn.gov",
     "id": "ocd-person/e57307af-8e06-4c44-997d-a2cad2cdb231",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/52A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.leg.state.mn.us/members/profile/15549",
      "https://www.house.mn.gov/members/profile/15549"
@@ -60743,6 +61013,8 @@
     "email": "rep.bianca.virnig@house.mn.gov",
     "id": "ocd-person/971431ad-1fdb-49e5-9cf0-57cfff1645a8",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/52B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15625"
     ],
@@ -60792,6 +61064,8 @@
     "email": "rep.brad.tabke@house.mn.gov",
     "id": "ocd-person/05f634e6-f8d3-4983-9604-dfc8dddc574e",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/54A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15523"
     ],
@@ -60808,6 +61082,8 @@
     "email": "rep.ben.bakeberg@house.mn.gov",
     "id": "ocd-person/f8d52f8b-1b8c-454d-87be-42edd3100511",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/54B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15569"
     ],
@@ -60875,6 +61151,8 @@
     "email": "rep.john.huot@house.mn.gov",
     "id": "ocd-person/5d8ac115-4a2b-4f0f-b70a-c1df26184891",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/56B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15527"
     ],
@@ -60907,6 +61185,8 @@
     "email": "rep.jeff.witte@house.mn.gov",
     "id": "ocd-person/72c6929c-a329-4613-99a0-5e339f5a045f",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/57B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15570"
     ],
@@ -60922,6 +61202,8 @@
     "email": "rep.kristi.pursell@house.mn.gov",
     "id": "ocd-person/ed73b309-bb2f-4805-a33b-a3fb760e6664",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/58A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15571"
     ],
@@ -61076,6 +61358,8 @@
     "email": "rep.jamie.long@house.mn.gov",
     "id": "ocd-person/b6ea5e13-3aad-438c-bed0-749a9bff80c3",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/61B.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15529"
     ],
@@ -61091,6 +61375,8 @@
     "email": "rep.aisha.gomez@house.mn.gov",
     "id": "ocd-person/09493dc0-a224-4cf6-a859-1384ffeda8a0",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/62A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15531"
     ],
@@ -61158,6 +61444,8 @@
     "email": "rep.meg.luger-nikolai@house.mn.gov",
     "id": "ocd-person/8164812a-be9a-44e0-bf42-741cb4a01e2c",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/64A.gif?v=012126",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15654"
     ],
@@ -61293,6 +61581,8 @@
     "email": "rep.ben.davis@house.mn.gov",
     "id": "ocd-person/f5597924-50c0-4bfc-bd63-3d3b814274f8",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/06A.gif?v=112221",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15594"
     ],
@@ -100487,6 +100777,8 @@
     "email": "rep.juliefahey@oregonlegislature.gov",
     "id": "ocd-person/b523dd9a-d913-4a8e-95e2-c546016f2b1a",
     "image": "https://www.oregonlegislature.gov/fahey/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/fahey"
     ],
@@ -100507,6 +100799,8 @@
     "email": "rep.shellyboshartdavis@oregonlegislature.gov",
     "id": "ocd-person/52af68c5-c141-4e35-912b-11d71b83af33",
     "image": "https://www.oregonlegislature.gov/boshartdavis/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/boshartdavis"
     ],
@@ -100547,6 +100841,8 @@
     "email": "rep.eddiehl@oregonlegislature.gov",
     "id": "ocd-person/fa290a38-0cea-4dc8-a981-33ee4ff341f4",
     "image": "https://www.oregonlegislature.gov/diehl/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/diehl"
     ],
@@ -100566,6 +100862,8 @@
     "email": "rep.ricklewis@oregonlegislature.gov",
     "id": "ocd-person/dc371425-a173-439f-903c-6e2e3fd145cd",
     "image": "https://www.oregonlegislature.gov/lewis/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/lewis"
     ],
@@ -100584,6 +100882,8 @@
     "email": "rep.tomandersen@oregonlegislature.gov",
     "id": "ocd-person/4d850bbf-df69-4431-bad6-9444c63d4f0c",
     "image": "https://www.oregonlegislature.gov/andersen/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/andersen"
     ],
@@ -100603,6 +100903,8 @@
     "email": "rep.virgleosborne@oregonlegislature.gov",
     "id": "ocd-person/f5938046-4558-441b-9e63-6bff0e114bf4",
     "image": "https://www.oregonlegislature.gov/osborne/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/osborne"
     ],
@@ -100621,6 +100923,8 @@
     "email": "rep.paulevans@oregonlegislature.gov",
     "id": "ocd-person/8334f7e1-d712-44b4-8570-d0d0a6d131d3",
     "image": "https://www.oregonlegislature.gov/evans/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/evans"
     ],
@@ -100677,6 +100981,8 @@
     "email": "rep.annascharf@oregonlegislature.gov",
     "id": "ocd-person/a22ec130-3ba7-4304-9e6f-3a950b8454cb",
     "image": "https://www.oregonlegislature.gov/scharf/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/scharf"
     ],
@@ -100695,6 +101001,8 @@
     "email": "rep.lucettaelmer@oregonlegislature.gov",
     "id": "ocd-person/20f31b04-63fd-45a8-8075-5e6e1beae485",
     "image": "https://www.oregonlegislature.gov/elmer/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/elmer"
     ],
@@ -100713,6 +101021,8 @@
     "email": "rep.benbowman@oregonlegislature.gov",
     "id": "ocd-person/a19e8e1f-4859-4d05-8dc7-6f0a352c0757",
     "image": "https://www.oregonlegislature.gov/bowman/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/bowman"
     ],
@@ -100879,6 +101189,8 @@
     "email": "rep.shannonisadore@oregonlegislature.gov",
     "id": "ocd-person/4a77ea61-457a-4111-bd2e-f2ee054ab4dc",
     "image": "https://www.oregonlegislature.gov/isadore/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/isadore"
     ],
@@ -100938,6 +101250,8 @@
     "email": "rep.haipham@oregonlegislature.gov",
     "id": "ocd-person/a13db125-e6e2-4621-a1a7-7de714796b90",
     "image": "https://www.oregonlegislature.gov/phamh/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/phamh"
     ],
@@ -100958,6 +101272,8 @@
     "email": "rep.juleswalters@oregonlegislature.gov",
     "id": "ocd-person/55ecfa8d-e89f-4a7b-af2d-6822f1025607",
     "image": "https://www.oregonlegislature.gov/house/MemberPhotos/walters.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/walters"
     ],
@@ -101059,6 +101375,8 @@
     "email": "rep.markgamba@oregonlegislature.gov",
     "id": "ocd-person/6adb2361-6526-450f-b2b1-e9f32311ca7d",
     "image": "https://www.oregonlegislature.gov/gamba/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/gamba"
     ],
@@ -101079,6 +101397,8 @@
     "email": "rep.robnosse@oregonlegislature.gov",
     "id": "ocd-person/2aa7ebf4-d8a7-42c6-8e20-1edef58aa545",
     "image": "http://www.oregonlegislature.gov/house/MemberPhotos/nosse.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/nosse"
     ],
@@ -101118,6 +101438,8 @@
     "email": "rep.travisnelson@oregonlegislature.gov",
     "id": "ocd-person/e2a96554-b503-4aad-856c-84266386e957",
     "image": "https://www.oregonlegislature.gov/nelson/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/nelson"
     ],
@@ -101177,6 +101499,8 @@
     "email": "rep.andreavalderrama@oregonlegislature.gov",
     "id": "ocd-person/3efec526-6660-45fa-9a10-b02716b2a779",
     "image": "https://www.oregonlegislature.gov/valderrama/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/valderrama",
      "https://www.oregonlegislature.gov/valderrama/Pages/map.aspx"
@@ -101217,6 +101541,8 @@
     "email": "rep.zachhudson@oregonlegislature.gov",
     "id": "ocd-person/83bbae41-6ba0-477e-a584-8ad7df1283d8",
     "image": "https://www.oregonlegislature.gov/hudson/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/hudson"
     ],
@@ -101237,6 +101563,8 @@
     "email": "rep.pammarsh@oregonlegislature.gov",
     "id": "ocd-person/ec643441-bffe-4f43-80a4-ab834ae0f1bd",
     "image": "https://www.oregonlegislature.gov/marsh/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/marsh"
     ],
@@ -101255,6 +101583,8 @@
     "email": "rep.rickiruiz@oregonlegislature.gov",
     "id": "ocd-person/fce6eed7-4438-4f31-b47a-ee054c28d4f7",
     "image": "https://www.oregonlegislature.gov/ruiz/PublishingImages/Rep%20Ricki%20Ruiz%20Headshot%202026.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/ruiz"
     ],
@@ -101408,6 +101738,8 @@
     "email": "rep.bobbylevy@oregonlegislature.gov",
     "id": "ocd-person/4c9f2660-6dd3-49f5-a503-6fe5bc5c7787",
     "image": "https://www.oregonlegislature.gov/levy/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/levy"
     ],
@@ -101426,6 +101758,8 @@
     "email": "rep.vikkibreeseiverson@oregonlegislature.gov",
     "id": "ocd-person/a3140c7f-befe-4b83-bc54-1451b5fe00f5",
     "image": "https://www.oregonlegislature.gov/breese-iverson/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/breese-iverson"
     ],
@@ -101515,6 +101849,8 @@
     "email": "rep.boomerwright@oregonlegislature.gov",
     "id": "ocd-person/a95c31b3-9bfa-4ab1-93d1-278082ead92a",
     "image": "https://www.oregonlegislature.gov/wright/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/wright"
     ],
@@ -101533,6 +101869,8 @@
     "email": "sen.davidbrocksmith@oregonlegislature.gov",
     "id": "ocd-person/26a734f0-51f9-4959-a213-bc345c1050ec",
     "image": "https://www.oregonlegislature.gov/smithd/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/smithd"
     ],
@@ -101573,6 +101911,8 @@
     "email": "sen.kimthatcher@oregonlegislature.gov",
     "id": "ocd-person/5947e2cd-aa8b-4df1-869f-961357705a3c",
     "image": "https://www.oregonlegislature.gov/thatcher/PublishingImages/thatcher2023.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/thatcher"
     ],
@@ -101592,6 +101932,8 @@
     "email": "sen.brucestarr@oregonlegislature.gov",
     "id": "ocd-person/e420fffb-7b56-42db-8cc4-531526ad6802",
     "image": "https://www.oregonlegislature.gov/starr/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/starr"
     ],
@@ -101626,6 +101968,8 @@
     "email": "sen.katelieber@oregonlegislature.gov",
     "id": "ocd-person/cc87cb36-e12e-42e1-ac5e-c2d50e1d2018",
     "image": "https://www.oregonlegislature.gov/lieber/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/lieber"
     ],
@@ -101704,6 +102048,8 @@
     "email": "sen.wlnsveycampos@oregonlegislature.gov",
     "id": "ocd-person/72027f00-3e3c-47c7-ab62-cc89ebb1ed72",
     "image": "https://www.oregonlegislature.gov/campos/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/campos"
     ],
@@ -101724,6 +102070,8 @@
     "email": "sen.robwagner@oregonlegislature.gov",
     "id": "ocd-person/e40f7f2c-4c6a-4064-9fde-e6b380dde2aa",
     "image": "https://www.oregonlegislature.gov/wagner/PublishingImages/Headshot%20in%20the%20shrub.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/wagner"
     ],
@@ -101819,6 +102167,8 @@
     "email": "sen.khanhpham@oregonlegislature.gov",
     "id": "ocd-person/3b7edee5-fb20-48d2-98db-541721e24e65",
     "image": "https://www.oregonlegislature.gov/pham/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/pham"
     ],
@@ -101860,6 +102210,8 @@
     "email": "sen.chrisgorsek@oregonlegislature.gov",
     "id": "ocd-person/d5d3b10e-9a5c-464a-93ad-bd824af1cbc0",
     "image": "http://www.oregonlegislature.gov/house/MemberPhotos/gorsek.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/gorsek"
     ],
@@ -101880,6 +102232,8 @@
     "email": "sen.christinedrazan@oregonlegislature.gov",
     "id": "ocd-person/9c7dcacb-50b9-4338-924b-cf6d333dc43a",
     "image": "https://www.oregonlegislature.gov/drazan/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/drazan"
     ],
@@ -101939,6 +102293,8 @@
     "email": "sen.toddnash@oregonlegislature.gov",
     "id": "ocd-person/66c4922d-6b7e-4636-85a4-565e812df7a2",
     "image": "https://www.oregonlegislature.gov/nash/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/nash"
     ],
@@ -102033,6 +102389,8 @@
     "email": "sen.cedrichayden@oregonlegislature.gov",
     "id": "ocd-person/95da50da-34df-41f5-8900-ff8bec038272",
     "image": "https://www.oregonlegislature.gov/hayden/PublishingImages/Pages/default/Sen%20Hayden%202023%20closer.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/hayden"
     ],
@@ -102052,6 +102410,8 @@
     "email": "sen.jamesmanning@oregonlegislature.gov",
     "id": "ocd-person/f1be7436-8ea5-48b2-8997-53dd566633b9",
     "image": "https://www.oregonlegislature.gov/manning/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/Manning",
      "https://www.oregonlegislature.gov/manning"
@@ -117795,6 +118155,8 @@
     "email": "brian.harrison@house.texas.gov",
     "id": "ocd-person/b1bf46ac-e99e-49f6-8f40-cf07aca12187",
     "image": "https://house.texas.gov/images/members/4085.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4085",
      "https://house.texas.gov/members/member-page/?district=10"
@@ -117812,6 +118174,8 @@
     "email": "venton.jones@house.texas.gov",
     "id": "ocd-person/6b2d7f89-d7e0-44d1-b861-3167915f6925",
     "image": "https://house.texas.gov/images/members/4275.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4275",
      "https://house.texas.gov/members/member-page/?district=100"
@@ -117845,6 +118209,8 @@
     "email": "ana-maria.ramos@house.texas.gov",
     "id": "ocd-person/7f893a20-0547-4ad9-9a94-1084a9ef6469",
     "image": "https://house.texas.gov/images/members/3735.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3735",
      "https://house.texas.gov/members/member-page/?district=102",
@@ -117864,6 +118230,8 @@
     "email": "rafael.anchia@house.texas.gov",
     "id": "ocd-person/f72eb41b-2ff9-434f-96cf-75b9724289ab",
     "image": "https://house.texas.gov/images/members/2150.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2150",
      "https://house.texas.gov/members/member-page/?district=103"
@@ -117897,6 +118265,8 @@
     "email": "terry.meza@house.texas.gov",
     "id": "ocd-person/bdecc388-4028-48e2-b211-75c59c1c5ec2",
     "image": "https://house.texas.gov/images/members/3455.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3455",
      "https://house.texas.gov/members/member-page/?district=105"
@@ -117914,6 +118284,8 @@
     "email": "jared.patterson@house.texas.gov",
     "id": "ocd-person/e926ca11-64dd-4e15-97bd-1f7b0915de36",
     "image": "https://house.texas.gov/images/members/3655.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3655",
      "https://house.texas.gov/members/member-page/?district=106"
@@ -117931,6 +118303,8 @@
     "email": "linda.garcia@house.texas.gov",
     "id": "ocd-person/5d3626bb-c865-4c92-a717-a72036c6ce5a",
     "image": "https://www.house.texas.gov/images/members/4485.jpg?v=3",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/107"
     ],
@@ -117947,6 +118321,8 @@
     "email": "morgan.meyer@house.texas.gov",
     "id": "ocd-person/2639e096-d327-4c4d-823f-759b1ce373e0",
     "image": "https://house.texas.gov/images/members/3075.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3075",
      "https://house.texas.gov/members/member-page/?district=108"
@@ -117963,6 +118339,8 @@
     "email": "aicha.davis@house.texas.gov",
     "id": "ocd-person/c55d85ff-7172-42d4-9c8f-da2f258dc19b",
     "image": "https://www.house.texas.gov/images/members/4465.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/109"
     ],
@@ -117979,6 +118357,8 @@
     "email": "joanne.shofner@house.texas.gov",
     "id": "ocd-person/b39cf891-a259-422c-945a-94b65430ea0a",
     "image": "https://www.house.texas.gov/images/members/4755.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/11",
      "https://www.house.texas.gov/members/4755"
@@ -117996,6 +118376,8 @@
     "email": "toni.rose@house.texas.gov",
     "id": "ocd-person/0acfbb85-b501-45ce-9a9b-90537090a455",
     "image": "https://house.texas.gov/images/members/2555.jpg?v=3",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2555",
      "https://house.texas.gov/members/member-page/?district=110"
@@ -118032,6 +118414,8 @@
     "email": "angie.button@house.texas.gov",
     "id": "ocd-person/2a9478ef-b573-4de6-ab96-bb3f6091346f",
     "image": "https://house.texas.gov/images/members/2510.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2510",
      "https://house.texas.gov/members/member-page/?district=112"
@@ -118049,6 +118433,8 @@
     "email": "rhetta.bowers@house.texas.gov",
     "id": "ocd-person/69ef7d69-9a5e-42be-b463-8873cb52ad10",
     "image": "https://house.texas.gov/images/members/3565.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3565",
      "https://house.texas.gov/members/member-page/?district=113"
@@ -118066,6 +118452,8 @@
     "email": "john.bryant@house.texas.gov",
     "id": "ocd-person/4e07d8dc-f5b5-47e7-a1de-83f36d3b734f",
     "image": "https://house.texas.gov/images/members/4120.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4120",
      "https://house.texas.gov/members/member-page/?district=114"
@@ -118082,6 +118470,8 @@
     "email": "cassandra.garciahernandez@house.texas.gov",
     "id": "ocd-person/f331962f-370b-4b74-876e-aa6a8e2e58e2",
     "image": "https://www.house.texas.gov/images/members/4495.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/115"
     ],
@@ -118098,6 +118488,8 @@
     "email": "trey.martinezfischer@house.texas.gov",
     "id": "ocd-person/07f5e898-8d5d-435a-bf97-7bfb26fce5ac",
     "image": "https://house.texas.gov/images/members/2835.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2835",
      "https://house.texas.gov/members/member-page/?district=116"
@@ -118115,6 +118507,8 @@
     "email": "philip.cortez@house.texas.gov",
     "id": "ocd-person/12d67093-ab4c-425d-afa3-e5777db09d1c",
     "image": "https://house.texas.gov/images/members/2365.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2365",
      "https://house.texas.gov/members/member-page/?district=117"
@@ -118132,6 +118526,8 @@
     "email": "john.lujan@house.texas.gov",
     "id": "ocd-person/fbd66d9f-2a93-4cbf-b75d-b51cb01e955e",
     "image": "https://house.texas.gov/images/members/3145.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3145",
      "https://house.texas.gov/members/member-page/?district=118"
@@ -118166,6 +118562,8 @@
     "email": "trey.wharton@house.texas.gov",
     "id": "ocd-person/afd236d4-4266-4777-8d3d-be7616a7e43f",
     "image": "https://house.texas.gov/images/members/4795.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4795"
     ],
@@ -118199,6 +118597,8 @@
     "email": "marc.lahood@house.texas.gov",
     "id": "ocd-person/d34eead2-bd19-49ce-8131-6d314d58e6a1",
     "image": "https://www.house.texas.gov/images/members/4595.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/121"
     ],
@@ -118214,6 +118614,8 @@
     "email": "mark.dorazio@house.texas.gov",
     "id": "ocd-person/2c0a4352-9871-4122-97fd-832ec998e907",
     "image": "https://house.texas.gov/images/members/4145.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/122",
      "https://house.texas.gov/members/member-page/?district=122"
@@ -118231,6 +118633,8 @@
     "email": "diego.bernal@house.texas.gov",
     "id": "ocd-person/7847295c-78f3-4f8c-adb6-3536fca2782e",
     "image": "https://house.texas.gov/images/members/3110.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3110",
      "https://house.texas.gov/members/member-page/?district=123"
@@ -118247,6 +118651,8 @@
     "email": "josey.garcia@house.texas.gov",
     "id": "ocd-person/1ec50565-379f-4a8b-ab18-c54d31df9929",
     "image": "https://house.texas.gov/images/members/4170.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/124",
      "https://house.texas.gov/members/member-page/?district=124"
@@ -118264,6 +118670,8 @@
     "email": "ray.lopez@house.texas.gov",
     "id": "ocd-person/01ce2f6b-0500-4baa-a47f-386f9c6286b0",
     "image": "https://house.texas.gov/images/members/3915.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3915",
      "https://house.texas.gov/members/member-page/?district=125"
@@ -118280,6 +118688,8 @@
     "email": "sam.harless@house.texas.gov",
     "id": "ocd-person/2db06a9d-ae17-4881-98b4-5172fdfca19f",
     "image": "https://house.texas.gov/images/members/3775.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3775",
      "https://house.texas.gov/members/member-page/?district=126"
@@ -118296,6 +118706,8 @@
     "email": "charles.cunningham@house.texas.gov",
     "id": "ocd-person/41f4a5e2-a2d5-4e54-aae3-9c99f9ea5eba",
     "image": "https://house.texas.gov/images/members/4130.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4130",
      "https://house.texas.gov/members/member-page/?district=127"
@@ -118330,6 +118742,8 @@
     "email": "dennis.paul@house.texas.gov",
     "id": "ocd-person/e05f502a-0d27-4c51-8cad-d3b5eca585b1",
     "image": "https://house.texas.gov/images/members/3090.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3090",
      "https://house.texas.gov/members/member-page/?district=129"
@@ -118346,6 +118760,8 @@
     "email": "angelia.orr@house.texas.gov",
     "id": "ocd-person/aa0d12c3-c318-4c97-a0d4-c63795ec50d9",
     "image": "https://house.texas.gov/images/members/4340.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4340",
      "https://house.texas.gov/members/member-page/?district=13"
@@ -118380,6 +118796,8 @@
     "email": "alma.allen@house.texas.gov",
     "id": "ocd-person/2fd6fcd3-9676-42a4-b879-e317576ff18f",
     "image": "https://house.texas.gov/images/members/2100.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2100",
      "https://house.texas.gov/members/member-page/?district=131"
@@ -118397,6 +118815,8 @@
     "email": "mike.schofield@house.texas.gov",
     "id": "ocd-person/df010291-7350-4262-9220-4c576730b2db",
     "image": "https://house.texas.gov/images/members/3095.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3095",
      "https://house.texas.gov/members/member-page/?district=132"
@@ -118414,6 +118834,8 @@
     "email": "mano.deayala@house.texas.gov",
     "id": "ocd-person/a61b0fd1-9fdf-4b4c-abe6-b790cc856023",
     "image": "https://house.texas.gov/images/members/4135.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4135",
      "https://house.texas.gov/members/member-page/?district=133"
@@ -118431,6 +118853,8 @@
     "email": "ann.johnson@house.texas.gov",
     "id": "ocd-person/45f3ddfb-5994-4f05-b2c8-e0e3b2a99c47",
     "image": "https://house.texas.gov/images/members/3985.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/134",
      "https://house.texas.gov/members/member-page/?district=134"
@@ -118448,6 +118872,8 @@
     "email": "jon.rosenthal@house.texas.gov",
     "id": "ocd-person/ab211984-06a9-447c-9ded-564d200bee60",
     "image": "https://house.texas.gov/images/members/3635.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/135",
      "https://house.texas.gov/members/member-page/?district=135"
@@ -118464,6 +118890,8 @@
     "email": "john.bucy@house.texas.gov",
     "id": "ocd-person/53b19d1e-5b07-4f6e-87a9-27baecddaf70",
     "image": "https://house.texas.gov/images/members/3595.jpg?v=5",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/136",
      "https://house.texas.gov/members/member-page/?district=136"
@@ -118481,6 +118909,8 @@
     "email": "gene.wu@house.texas.gov",
     "id": "ocd-person/5556a81a-eca2-451d-bb29-74cfb00d1959",
     "image": "https://house.texas.gov/images/members/2865.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2865",
      "https://house.texas.gov/members/member-page/?district=137"
@@ -118498,6 +118928,8 @@
     "email": "lacey.hull@house.texas.gov",
     "id": "ocd-person/2609ba13-abf1-40b5-9f4c-a4c1135e56e2",
     "image": "https://house.texas.gov/images/members/3975.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3975",
      "https://house.texas.gov/members/member-page/?district=138"
@@ -118514,6 +118946,8 @@
     "email": "charlene.wardjohnson@house.texas.gov",
     "id": "ocd-person/e6ccd3a9-8f52-46d4-af8d-d0301a8e3a05",
     "image": "https://www.house.texas.gov/images/members/4785.jpg?v=3",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/139"
     ],
@@ -118530,6 +118964,8 @@
     "email": "paul.dyson@house.texas.gov",
     "id": "ocd-person/89b43853-82e0-434c-9946-4fd9057e1842",
     "image": "https://www.house.texas.gov/images/members/4475.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/14",
      "https://www.house.texas.gov/members/4475"
@@ -118564,6 +119000,8 @@
     "email": "senfronia.thompson@house.texas.gov",
     "id": "ocd-person/ace50d18-fc98-4460-9d90-928c0e88c79a",
     "image": "https://house.texas.gov/images/members/4630.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4630",
      "https://house.texas.gov/members/member-page/?district=141"
@@ -118598,6 +119036,8 @@
     "email": "ana.hernandez@house.texas.gov",
     "id": "ocd-person/4f98520b-d88b-4053-acc5-3cb2fff14660",
     "image": "https://house.texas.gov/images/members/3155.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3155",
      "https://house.texas.gov/members/member-page/?district=143"
@@ -118615,6 +119055,8 @@
     "email": "maryann.perez@house.texas.gov",
     "id": "ocd-person/26244d6a-f0d5-4dbe-b9ed-a38df74a7bac",
     "image": "https://house.texas.gov/images/members/2535.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2535",
      "https://house.texas.gov/members/member-page/?district=144"
@@ -118632,6 +119074,8 @@
     "email": "christina.morales@house.texas.gov",
     "id": "ocd-person/791e4399-56bb-4d4c-8561-71f0979fb999",
     "image": "https://house.texas.gov/images/members/3910.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3910",
      "https://house.texas.gov/members/member-page/?district=145"
@@ -118649,6 +119093,8 @@
     "email": "laurena.simmons@house.texas.gov",
     "id": "ocd-person/9dc31ea5-fd89-4909-a9bf-d732ea02282a",
     "image": "https://house.texas.gov/images/members/4765.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4765"
     ],
@@ -118665,6 +119111,8 @@
     "email": "jolanda.jones@house.texas.gov",
     "id": "ocd-person/45cd43ff-77b3-467c-aa61-890ebee8ece5",
     "image": "https://house.texas.gov/images/members/4105.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4105",
      "https://house.texas.gov/members/member-page/?district=147"
@@ -118699,6 +119147,8 @@
     "email": "hubert.vo@house.texas.gov",
     "id": "ocd-person/5c2743d2-fe0e-41d6-969d-de830d5787f8",
     "image": "https://house.texas.gov/images/members/4900.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4900",
      "https://house.texas.gov/members/member-page/?district=149"
@@ -118715,6 +119165,8 @@
     "email": "steve.toth@house.texas.gov",
     "id": "ocd-person/6c80914d-b07b-4d27-95e2-0e5aa2b0c7d9",
     "image": "https://house.texas.gov/images/members/2825.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2825",
      "https://house.texas.gov/members/member-page/?district=15"
@@ -118732,6 +119184,8 @@
     "email": "valoree.swanson@house.texas.gov",
     "id": "ocd-person/7298c6a9-c6be-41cd-a2ba-0cc79c851373",
     "image": "https://house.texas.gov/images/members/3425.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3425",
      "https://house.texas.gov/members/member-page/?district=150"
@@ -118749,6 +119203,8 @@
     "email": "will.metcalf@house.texas.gov",
     "id": "ocd-person/e7a379ec-9de2-48a2-918b-5ba58e1fd3f3",
     "image": "https://house.texas.gov/images/members/2900.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2900",
      "https://house.texas.gov/members/member-page/?district=16"
@@ -118766,6 +119222,8 @@
     "email": "stan.gerdes@house.texas.gov",
     "id": "ocd-person/97fc1e34-35fb-470f-a098-4ba8f0c3c8d4",
     "image": "https://house.texas.gov/images/members/4195.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4195",
      "https://house.texas.gov/members/member-page/?district=17"
@@ -118783,6 +119241,8 @@
     "email": "janis.holt@house.texas.gov",
     "id": "ocd-person/0deb3053-0d5d-46b4-93d2-8eb9de0c4ffd",
     "image": "https://www.house.texas.gov/images/members/4535.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/18",
      "https://www.house.texas.gov/members/4535"
@@ -118799,6 +119259,8 @@
     "email": "ellen.troxclair@house.texas.gov",
     "id": "ocd-person/34590156-1109-4ab6-84bc-bbe07764f365",
     "image": "https://house.texas.gov/images/members/4385.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/19",
      "https://house.texas.gov/members/4385",
@@ -118817,6 +119279,8 @@
     "email": "brent.money@house.texas.gov",
     "id": "ocd-person/469f1932-49dc-4a46-8341-b2cd9bc0f96d",
     "image": "https://www.house.texas.gov/images/members/4670.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/2",
      "https://www.house.texas.gov/members/4670"
@@ -118833,6 +119297,8 @@
     "email": "terry.wilson@house.texas.gov",
     "id": "ocd-person/ec19bc97-3146-4100-8294-329b88aec0e8",
     "image": "https://house.texas.gov/images/members/3525.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3525",
      "https://house.texas.gov/members/member-page/?district=20"
@@ -118850,6 +119316,8 @@
     "email": "dade.phelan@house.texas.gov",
     "id": "ocd-person/7952d7d7-0fe5-4712-9967-6cb9bcedff05",
     "image": "https://house.texas.gov/images/members/2905.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2905",
      "https://house.texas.gov/members/member-page/?district=21",
@@ -118871,6 +119339,8 @@
     "email": "christian.manuel@house.texas.gov",
     "id": "ocd-person/26090510-8782-4d64-b981-3d1cde573090",
     "image": "https://house.texas.gov/images/members/4255.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4255",
      "https://house.texas.gov/members/member-page/?district=22"
@@ -118888,6 +119358,8 @@
     "email": "terri.leo-wilson@house.texas.gov",
     "id": "ocd-person/cee6cb7a-8d88-4c34-be27-dd10d1f31768",
     "image": "https://house.texas.gov/images/members/4290.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4290",
      "https://house.texas.gov/members/member-page/?district=23"
@@ -118905,6 +119377,8 @@
     "email": "greg.bonnen@house.texas.gov",
     "id": "ocd-person/d0fbfb15-2f0c-4167-b8b4-d6135bbb6616",
     "image": "https://house.texas.gov/images/members/2875.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/24",
      "https://house.texas.gov/members/member-page/?district=24"
@@ -118922,6 +119396,8 @@
     "email": "cody.vasut@house.texas.gov",
     "id": "ocd-person/3194ee5e-f4d8-4449-8ff6-ec47c0822a3d",
     "image": "https://house.texas.gov/images/members/4065.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4065",
      "https://house.texas.gov/members/member-page/?district=25"
@@ -118954,6 +119430,8 @@
     "email": "ron.reynolds@house.texas.gov",
     "id": "ocd-person/72bad853-b403-49c2-9a99-32c5fb3222c7",
     "image": "https://house.texas.gov/images/members/2040.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2040",
      "https://house.texas.gov/members/member-page/?district=27"
@@ -118970,6 +119448,8 @@
     "email": "gary.gates@house.texas.gov",
     "id": "ocd-person/5ff88048-ebd8-4ac3-af9c-d02e1305ef37",
     "image": "https://house.texas.gov/images/members/3920.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3920",
      "https://house.texas.gov/members/member-page/?district=28"
@@ -118986,6 +119466,8 @@
     "email": "jeff.barry@house.texas.gov",
     "id": "ocd-person/988efb07-ace2-4419-ac40-ccec69ebe875",
     "image": "https://www.house.texas.gov/images/members/4405.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/29"
     ],
@@ -119001,6 +119483,8 @@
     "email": "cecil.bell@house.texas.gov",
     "id": "ocd-person/33f871c9-15a6-4094-9181-ff822cd9eca4",
     "image": "https://house.texas.gov/images/members/2335.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2335",
      "https://house.texas.gov/members/3",
@@ -119019,6 +119503,8 @@
     "email": "aj.louderback@house.texas.gov",
     "id": "ocd-person/dd3e49ca-2b2b-4a83-ae63-0ade6ccef73f",
     "image": "https://house.texas.gov/images/members/4620.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://ajlouderback.com/",
      "https://house.texas.gov/members/4620"
@@ -119052,6 +119538,8 @@
     "email": "todd.hunter@house.texas.gov",
     "id": "ocd-person/9447575b-d8a1-45dd-bd68-77b12fe347ab",
     "image": "https://house.texas.gov/images/members/3365.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3365",
      "https://house.texas.gov/members/member-page/?district=32"
@@ -119068,6 +119556,8 @@
     "email": "katrina.pierson@house.texas.gov",
     "id": "ocd-person/1205faf4-7ced-4d21-aa8c-aad9239e3157",
     "image": "https://www.house.texas.gov/images/members/4715.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/33"
     ],
@@ -119084,6 +119574,8 @@
     "email": "denise.villalobos@house.texas.gov",
     "id": "ocd-person/42c40e86-b355-4724-8582-995125377240",
     "image": "https://house.texas.gov/images/members/4770.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/34",
      "https://house.texas.gov/members/4770"
@@ -119101,6 +119593,8 @@
     "email": "oscar.longoria@house.texas.gov",
     "id": "ocd-person/896e8f9c-7dca-4f7d-8554-c0324cfa7265",
     "image": "https://house.texas.gov/images/members/2485.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2485",
      "https://house.texas.gov/members/35",
@@ -119120,6 +119614,8 @@
     "email": "sergio.munoz@house.texas.gov",
     "id": "ocd-person/b7c4e0e7-4949-4dff-bc4c-fdaaada3f37d",
     "image": "https://house.texas.gov/images/members/2060.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2060",
      "https://house.texas.gov/members/member-page/?district=36"
@@ -119137,6 +119633,8 @@
     "email": "janie.lopez@house.texas.gov",
     "id": "ocd-person/a732704e-9b03-449c-b24f-f4c567b5acdd",
     "image": "https://house.texas.gov/images/members/4295.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/37",
      "https://house.texas.gov/members/4295",
@@ -119154,6 +119652,8 @@
     "email": "erin.gamez@house.texas.gov",
     "id": "ocd-person/2cadcb59-210a-4a71-af9f-7dba9ab06112",
     "image": "https://house.texas.gov/images/members/4095.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/38",
      "https://house.texas.gov/members/4095",
@@ -119207,6 +119707,8 @@
     "email": "terry.canales@house.texas.gov",
     "id": "ocd-person/3e4ae7d4-dbb2-4991-8b44-8ada6023d7da",
     "image": "https://house.texas.gov/images/members/2340.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2340",
      "https://house.texas.gov/members/member-page/?district=40"
@@ -119224,6 +119726,8 @@
     "email": "bobby.guerra@house.texas.gov",
     "id": "ocd-person/51591894-e9ff-48d3-81c5-897ec1c5e600",
     "image": "https://house.texas.gov/images/members/2325.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2325",
      "https://house.texas.gov/members/member-page/?district=41"
@@ -119240,6 +119744,8 @@
     "email": "richard.raymond@house.texas.gov",
     "id": "ocd-person/d4a94a68-02a7-44c0-901f-9cd57350229a",
     "image": "https://house.texas.gov/images/members/4215.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4215",
      "https://house.texas.gov/members/member-page/?district=42"
@@ -119256,6 +119762,8 @@
     "email": "jm.lozano@house.texas.gov",
     "id": "ocd-person/a43f2db5-4b24-4dfa-af7f-a2c7cbc5ea21",
     "image": "https://house.texas.gov/images/members/2065.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2065",
      "https://house.texas.gov/members/member-page/?district=43"
@@ -119272,6 +119780,8 @@
     "email": "alan.schoolcraft@house.texas.gov",
     "id": "ocd-person/1493b76f-b77d-48db-9ecd-26d0e2dfc843",
     "image": "https://house.texas.gov/images/members/4745.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4745"
     ],
@@ -119287,6 +119797,8 @@
     "email": "erin.zwiener@house.texas.gov",
     "id": "ocd-person/b55d57f4-bd06-4487-8860-0b6eeb9a1dea",
     "image": "https://house.texas.gov/images/members/3710.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3710",
      "https://house.texas.gov/members/member-page/?district=45"
@@ -119303,6 +119815,8 @@
     "email": "sheryl.cole@house.texas.gov",
     "id": "ocd-person/97805dd7-1f42-482c-bac3-049dfccda311",
     "image": "https://house.texas.gov/images/members/3625.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3625",
      "https://house.texas.gov/members/46",
@@ -119320,6 +119834,8 @@
     "email": "vikki.goodwin@house.texas.gov",
     "id": "ocd-person/25157308-7474-4600-8b83-173d79e16a21",
     "image": "https://house.texas.gov/images/members/3820.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3820",
      "https://house.texas.gov/members/member-page/?district=47"
@@ -119336,6 +119852,8 @@
     "email": "donna.howard@house.texas.gov",
     "id": "ocd-person/349071fd-3c36-43c6-aaca-6d7f9d04322d",
     "image": "https://house.texas.gov/images/members/3310.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3310",
      "https://house.texas.gov/members/member-page/?district=48"
@@ -119352,6 +119870,8 @@
     "email": "gina.hinojosa@house.texas.gov",
     "id": "ocd-person/1f9ed42e-27de-4cd1-b2bf-f890ee33cb49",
     "image": "https://house.texas.gov/images/members/3210.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3210",
      "https://house.texas.gov/members/member-page/?district=49"
@@ -119369,6 +119889,8 @@
     "email": "cole.hefner@house.texas.gov",
     "id": "ocd-person/43bbf34a-6bc4-41f9-9bdc-3e944c5b8495",
     "image": "https://house.texas.gov/images/members/3505.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3505",
      "https://house.texas.gov/members/member-page/?district=5"
@@ -119385,6 +119907,8 @@
     "email": "james.talarico@house.texas.gov",
     "id": "ocd-person/5e4e2fd2-e8a9-46f3-aab5-ffbc782afa8b",
     "image": "https://house.texas.gov/images/members/3685.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3685",
      "https://house.texas.gov/members/member-page/?district=50",
@@ -119402,6 +119926,8 @@
     "email": "lulu.flores@house.texas.gov",
     "id": "ocd-person/ab3ddc65-0fb9-476b-993f-b3dc4050127e",
     "image": "https://house.texas.gov/images/members/4150.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4150",
      "https://house.texas.gov/members/member-page/?district=51",
@@ -119420,6 +119946,8 @@
     "email": "caroline.harrisdavila@house.texas.gov",
     "id": "ocd-person/72920206-cbe7-4429-b42b-c6fc746a1d56",
     "image": "https://house.texas.gov/images/members/4205.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4205",
      "https://house.texas.gov/members/member-page/?district=52"
@@ -119437,6 +119965,8 @@
     "email": "wes.virdell@house.texas.gov",
     "id": "ocd-person/436ab2a5-12ca-4a9c-b8ec-73b1bae4ee68",
     "image": "https://www.house.texas.gov/images/members/4775.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/53"
     ],
@@ -119453,6 +119983,8 @@
     "email": "brad.buckley@house.texas.gov",
     "id": "ocd-person/e3533cbc-f3ab-46bc-a591-c68657f82527",
     "image": "https://house.texas.gov/images/members/3585.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/54",
      "https://house.texas.gov/members/member-page/?district=54"
@@ -119485,6 +120017,8 @@
     "email": "pat.curry@house.texas.gov",
     "id": "ocd-person/0e79cc57-2894-432e-9aca-505a41d4de2c",
     "image": "https://house.texas.gov/images/members/4415.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4415"
     ],
@@ -119501,6 +120035,8 @@
     "email": "richard.hayes@house.texas.gov",
     "id": "ocd-person/f8e0a89e-889a-4fcf-8a0a-1e0e091d89d0",
     "image": "https://house.texas.gov/images/members/4165.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4165",
      "https://house.texas.gov/members/member-page/?district=57"
@@ -119518,6 +120054,8 @@
     "email": "helen.kerwin@house.texas.gov",
     "id": "ocd-person/92b45572-c15c-4270-8356-6c3db1846c7b",
     "image": "https://www.house.texas.gov/images/members/4575.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/58"
     ],
@@ -119534,6 +120072,8 @@
     "email": "shelby.slawson@house.texas.gov",
     "id": "ocd-person/ddebb940-33f9-4b5c-a8fa-e22c63a594e9",
     "image": "https://house.texas.gov/images/members/4055.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4055",
      "https://house.texas.gov/members/member-page/?district=59"
@@ -119551,6 +120091,8 @@
     "email": "daniel.alders@house.texas.gov",
     "id": "ocd-person/f602a657-8951-4dcb-9bd8-c04bcce4ba56",
     "image": "https://www.house.texas.gov/images/members/4395.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/4395",
      "https://www.house.texas.gov/members/6"
@@ -119568,6 +120110,8 @@
     "email": "mike.olcott@house.texas.gov",
     "id": "ocd-person/4b70019b-d7c1-4414-bcb1-7bf917081ed5",
     "image": "https://www.house.texas.gov/images/members/4705.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/60"
     ],
@@ -119583,6 +120127,8 @@
     "email": "keresa.richardson@house.texas.gov",
     "id": "ocd-person/2b79c268-eaf3-4915-a0e0-faec03b652d8",
     "image": "https://house.texas.gov/images/members/4735.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/61"
     ],
@@ -119598,6 +120144,8 @@
     "email": "shelley.luther@house.texas.gov",
     "id": "ocd-person/89e814c4-6091-4156-b3b5-42a7980f8b4d",
     "image": "https://www.house.texas.gov/images/members/4645.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/62"
     ],
@@ -119614,6 +120162,8 @@
     "email": "ben.bumgarner@house.texas.gov",
     "id": "ocd-person/ba43365e-63dc-4bdc-aadc-e3939aa7465b",
     "image": "https://house.texas.gov/images/members/4125.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/63",
      "https://house.texas.gov/members/member-page/?district=63"
@@ -119631,6 +120181,8 @@
     "email": "andy.hopper@house.texas.gov",
     "id": "ocd-person/ee8cc382-84b7-47e3-824f-e05cf6455161",
     "image": "https://www.house.texas.gov/images/members/4555.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/64"
     ],
@@ -119646,6 +120198,8 @@
     "email": "mitch.little@house.texas.gov",
     "id": "ocd-person/96dfe856-d5b0-4f7a-86f6-06c2175a4d4a",
     "image": "https://house.texas.gov/images/members/4615.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4615"
     ],
@@ -119662,6 +120216,8 @@
     "email": "matt.shaheen@house.texas.gov",
     "id": "ocd-person/71555c46-28b0-4887-98a1-997dc7482e75",
     "image": "https://house.texas.gov/images/members/2995.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/66",
      "https://house.texas.gov/members/member-page/?district=66",
@@ -119681,6 +120237,8 @@
     "email": "jeff.leach@house.texas.gov",
     "id": "ocd-person/40a678a3-7d85-486e-bf38-5d070142aa83",
     "image": "https://house.texas.gov/images/members/2475.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2475",
      "https://house.texas.gov/members/member-page/?district=67"
@@ -119714,6 +120272,8 @@
     "email": "james.frank@house.texas.gov",
     "id": "ocd-person/6cbb02e6-5876-47a1-86aa-98566fe0073a",
     "image": "https://house.texas.gov/images/members/2385.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2385",
      "https://house.texas.gov/members/member-page/?district=69"
@@ -119731,6 +120291,8 @@
     "email": "jay.dean@house.texas.gov",
     "id": "ocd-person/37886d81-901f-43b4-841b-f3ffbfeeb257",
     "image": "https://house.texas.gov/images/members/3515.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3515",
      "https://house.texas.gov/members/7",
@@ -119749,6 +120311,8 @@
     "email": "mihaela.plesa@house.texas.gov",
     "id": "ocd-person/b69579f7-74de-4a71-86ba-033264cc5bc7",
     "image": "https://house.texas.gov/images/members/4345.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/70",
      "https://house.texas.gov/members/member-page/?district=70"
@@ -119782,6 +120346,8 @@
     "email": "drew.darby@house.texas.gov",
     "id": "ocd-person/40f0e868-e021-4453-8675-a9d2357e41e1",
     "image": "https://house.texas.gov/images/members/2645.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2645",
      "https://house.texas.gov/members/member-page/?district=72"
@@ -119799,6 +120365,8 @@
     "email": "carrie.isaac@house.texas.gov",
     "id": "ocd-person/64221b86-e3ca-4b67-b2bb-3f4f9641e133",
     "image": "https://house.texas.gov/images/members/4265.jpg?v=3",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/73",
      "https://house.texas.gov/members/member-page/?district=73"
@@ -119815,6 +120383,8 @@
     "email": "eddie.morales@house.texas.gov",
     "id": "ocd-person/c84056d0-47e0-4a0c-94e1-9f90c2d90a15",
     "image": "https://house.texas.gov/images/members/4000.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4000",
      "https://house.texas.gov/members/member-page/?district=74"
@@ -119848,6 +120418,8 @@
     "email": "suleman.lalani@house.texas.gov",
     "id": "ocd-person/51927936-c6fc-453b-8afd-5f0b53de7d46",
     "image": "https://house.texas.gov/images/members/4285.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4285",
      "https://house.texas.gov/members/member-page/?district=76"
@@ -119865,6 +120437,8 @@
     "email": "vincent.perez@house.texas.gov",
     "id": "ocd-person/5236ee6e-a57c-4d81-90b4-50a9abde8e5e",
     "image": "https://www.house.texas.gov/images/members/4710.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/77"
     ],
@@ -119881,6 +120455,8 @@
     "email": "joe.moody@house.texas.gov",
     "id": "ocd-person/5898294d-5b10-4aaf-a084-b8522e69623c",
     "image": "https://house.texas.gov/images/members/3850.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3850",
      "https://house.texas.gov/members/member-page/?district=78",
@@ -119899,6 +120475,8 @@
     "email": "claudia.ordaz@house.texas.gov",
     "id": "ocd-person/6feda596-fd20-429b-ae4e-bedab7e5a1c5",
     "image": "https://house.texas.gov/images/members/4015.jpg?v=3",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4015",
      "https://house.texas.gov/members/member-page/?district=76",
@@ -119917,6 +120495,8 @@
     "email": "cody.harris@house.texas.gov",
     "id": "ocd-person/baafecd4-6f74-4a97-b564-691c1e938291",
     "image": "https://house.texas.gov/images/members/3580.jpg?v=3",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3580",
      "https://house.texas.gov/members/member-page/?district=8"
@@ -119933,6 +120513,8 @@
     "email": "don.mclaughlin@house.texas.gov",
     "id": "ocd-person/0941f4bf-2ac8-48d0-8675-191514e06850",
     "image": "https://house.texas.gov/images/members/4655.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4655"
     ],
@@ -119948,6 +120530,8 @@
     "email": "brooks.landgraf@house.texas.gov",
     "id": "ocd-person/83030f8b-5f1f-4475-b564-a07ae42f6d98",
     "image": "https://house.texas.gov/images/members/3040.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3040",
      "https://house.texas.gov/members/member-page/?district=81"
@@ -119965,6 +120549,8 @@
     "email": "tom.craddick@house.texas.gov",
     "id": "ocd-person/d4d5c127-1ef6-445d-a89b-d9f02c812365",
     "image": "https://house.texas.gov/images/members/2610.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2610",
      "https://house.texas.gov/members/member-page/?district=82"
@@ -119982,6 +120568,8 @@
     "email": "dustin.burrows@house.texas.gov",
     "id": "ocd-person/fff5eb4f-2c41-4d00-a1c5-e566a15b063e",
     "image": "https://house.texas.gov/images/members/3055.jpg?v=2",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3055",
      "https://house.texas.gov/members/member-page/?district=83",
@@ -120000,6 +120588,8 @@
     "email": "carl.tepper@house.texas.gov",
     "id": "ocd-person/8f7f161e-6ef4-4c12-8eea-de88a313b36c",
     "image": "https://house.texas.gov/images/members/4360.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4360",
      "https://house.texas.gov/members/member-page/?district=84"
@@ -120017,6 +120607,8 @@
     "email": "stan.kitzman@house.texas.gov",
     "id": "ocd-person/2662f888-95e0-4de3-be5b-3d023623c447",
     "image": "https://house.texas.gov/images/members/4280.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4280",
      "https://house.texas.gov/members/member-page/?district=85"
@@ -120034,6 +120626,8 @@
     "email": "john.smithee@house.texas.gov",
     "id": "ocd-person/3cac81cd-62ca-41d6-aa4a-8e4156244dec",
     "image": "https://house.texas.gov/images/members/4530.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/4530",
      "https://house.texas.gov/members/member-page/?district=86"
@@ -120050,6 +120644,8 @@
     "email": "caroline.fairly@house.texas.gov",
     "id": "ocd-person/5c40c2b0-07c1-4c73-b15b-14d0ef6df40e",
     "image": "https://www.house.texas.gov/images/members/4480.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/87"
     ],
@@ -120065,6 +120661,8 @@
     "email": "ken.king@house.texas.gov",
     "id": "ocd-person/d9f32e07-7835-4edf-b986-7a2cf16d608b",
     "image": "https://house.texas.gov/images/members/2455.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2455",
      "https://house.texas.gov/members/member-page/?district=88"
@@ -120082,6 +120680,8 @@
     "email": "candy.noble@house.texas.gov",
     "id": "ocd-person/f4976334-0e0e-4474-b5b4-3264e8d73f1d",
     "image": "https://house.texas.gov/images/members/3740.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3740",
      "https://house.texas.gov/members/member-page/?district=89"
@@ -120099,6 +120699,8 @@
     "email": "trent.ashby@house.texas.gov",
     "id": "ocd-person/68f05872-16c8-4d3a-ab5f-ea667ca52b27",
     "image": "https://house.texas.gov/images/members/2330.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2330",
      "https://house.texas.gov/members/member-page/?district=09",
@@ -120117,6 +120719,8 @@
     "email": "ramon.romero@house.texas.gov",
     "id": "ocd-person/c0fc4283-3ed5-4165-a066-80de16f492b7",
     "image": "https://house.texas.gov/images/members/3060.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3060",
      "https://house.texas.gov/members/member-page/?district=90"
@@ -120134,6 +120738,8 @@
     "email": "david.lowe@house.texas.gov",
     "id": "ocd-person/15ce6502-645c-4031-994d-b228e1c69bb4",
     "image": "https://www.house.texas.gov/images/members/4643.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/91"
     ],
@@ -120150,6 +120756,8 @@
     "email": "salman.bhojani@house.texas.gov",
     "id": "ocd-person/4fb2e1fd-fbb3-4a55-8417-761da2f6048e",
     "image": "https://house.texas.gov/images/members/4115.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/92",
      "https://house.texas.gov/members/member-page/?district=92"
@@ -120167,6 +120775,8 @@
     "email": "tony.tinderholt@house.texas.gov",
     "id": "ocd-person/1ca78d00-1ede-4486-b14e-16bd81ba73e4",
     "image": "https://house.texas.gov/images/members/3065.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3065",
      "https://house.texas.gov/members/member-page/?district=94"
@@ -120184,6 +120794,8 @@
     "email": "nicole.collier@house.texas.gov",
     "id": "ocd-person/ea169f77-0bd8-4ca0-ac59-f894c9a09e71",
     "image": "https://house.texas.gov/images/members/2360.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/95",
      "https://house.texas.gov/members/member-page/?district=95",
@@ -120202,6 +120814,8 @@
     "email": "david.cook@house.texas.gov",
     "id": "ocd-person/2d5f629c-76a7-455b-aff7-262d8c1c23f6",
     "image": "https://house.texas.gov/images/members/3960.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/3960",
      "https://house.texas.gov/members/member-page/?district=96"
@@ -120219,6 +120833,8 @@
     "email": "john.mcqueeney@house.texas.gov",
     "id": "ocd-person/f926d7a8-7ec7-4020-9e18-5a475565fd41",
     "image": "https://www.house.texas.gov/images/members/4665.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.house.texas.gov/members/97"
     ],
@@ -120234,6 +120850,8 @@
     "email": "giovanni.capriglione@house.texas.gov",
     "id": "ocd-person/40ecf6ee-92a4-4daf-b950-ac70b6cdfeee",
     "image": "https://house.texas.gov/images/members/2345.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/98",
      "https://house.texas.gov/members/member-page/?district=98",
@@ -120252,6 +120870,8 @@
     "email": "charlie.geren@house.texas.gov",
     "id": "ocd-person/65a42043-6243-4f79-b1e0-69b3b8b4af29",
     "image": "https://house.texas.gov/images/members/2945.jpg?v=1",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/2945",
      "https://house.texas.gov/members/member-page/?district=99"
@@ -120269,6 +120889,8 @@
     "email": "bryan.hughes@senate.texas.gov",
     "id": "ocd-person/8326538c-c907-43b2-a6db-76434036afd7",
     "image": "https://senate.texas.gov/members/d01/img/Hughes_86-0702D-030-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=1"
     ],
@@ -120285,6 +120907,8 @@
     "email": "phil.king@senate.texas.gov",
     "id": "ocd-person/98bef50a-73c7-4139-9b8e-628d0e89d659",
     "image": "https://senate.texas.gov/members/d10/img/King_88-0550D-004-WEB.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/member-page/?district=61",
      "https://senate.texas.gov/member.php?d=10"
@@ -120301,6 +120925,8 @@
     "email": "mayes.middleton@senate.texas.gov",
     "id": "ocd-person/1399b6ba-cbfa-45ca-bf91-6ba89fe777bf",
     "image": "https://senate.texas.gov/members/d11/img/Middleton_87-0662D-009.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/member-page/?district=23",
      "https://senate.texas.gov/member.php?d=11"
@@ -120317,6 +120943,8 @@
     "email": "tan.parker@senate.texas.gov",
     "id": "ocd-person/fa4817bf-6dc6-4deb-9965-cf3f208ec976",
     "image": "https://senate.texas.gov/members/d12/img/86_20190619_SAM_0008.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/member-page/?district=63",
      "https://senate.texas.gov/member.php?d=12",
@@ -120335,6 +120963,8 @@
     "email": "borris.miles@senate.texas.gov",
     "id": "ocd-person/3475b324-1c9b-4513-90e6-063aba5ac04e",
     "image": "https://senate.texas.gov/members/d13/img/Sen-Miles-2025-Headshot-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=13"
     ],
@@ -120350,6 +120980,8 @@
     "email": "sarah.eckhardt@senate.texas.gov",
     "id": "ocd-person/20cda9bf-a1e6-4427-8115-e5655ddd8eb0",
     "image": "https://senate.texas.gov/members/d14/img/SE_headshot_2020.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=14"
     ],
@@ -120366,6 +120998,8 @@
     "email": "molly.cook@senate.texas.gov",
     "id": "ocd-person/06aed58e-f403-43a5-b4b9-8785a4acf981",
     "image": "https://senate.texas.gov/members/d15/img/Cook_88-0807D-014-2025.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=15"
     ],
@@ -120382,6 +121016,8 @@
     "email": "nathan.johnson@senate.texas.gov",
     "id": "ocd-person/dee454b1-6da0-4b1b-a232-033e7de8551f",
     "image": "https://senate.texas.gov/members/d16/img/SNJ-Headshot-2023-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=16"
     ],
@@ -120398,6 +121034,8 @@
     "email": "joan.huffman@senate.texas.gov",
     "id": "ocd-person/1997b231-45f7-4f29-a435-9f52e60ebea4",
     "image": "https://senate.texas.gov/members/d17/img/Huffman_9S5A0096-2021web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=17"
     ],
@@ -120447,6 +121085,8 @@
     "email": "bob.hall@senate.texas.gov",
     "id": "ocd-person/013d69b7-a958-490c-a4a2-7224a30efa08",
     "image": "https://senate.texas.gov/members/d02/img/headshot.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=2"
     ],
@@ -120463,6 +121103,8 @@
     "email": "juan.hinojosa@senate.texas.gov",
     "id": "ocd-person/72766791-084c-4a20-a12c-6e809b51e95c",
     "image": "https://senate.texas.gov/members/d20/img/Hinojosa_84-0784D-006.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=20"
     ],
@@ -120479,6 +121121,8 @@
     "email": "judith.zaffirini@senate.texas.gov",
     "id": "ocd-person/c7aad3b7-ca16-4989-bf68-87ed72498a6b",
     "image": "https://senate.texas.gov/members/d21/img/Zaffirini_2017.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=21"
     ],
@@ -120495,6 +121139,8 @@
     "email": "royce.west@senate.texas.gov",
     "id": "ocd-person/d6f40682-7b90-4735-980c-7c95ef402a78",
     "image": "https://senate.texas.gov/members/d23/img/West_87-0474D-015-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=23"
     ],
@@ -120511,6 +121157,8 @@
     "email": "pete.flores@senate.texas.gov",
     "id": "ocd-person/682e8ef8-8fc1-4490-a04d-63a7c6d92185",
     "image": "https://senate.texas.gov/members/d24/img/Flores_86-0634D-001-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=24"
     ],
@@ -120527,6 +121175,8 @@
     "email": "donna.campbell@senate.texas.gov",
     "id": "ocd-person/9f80cd7f-1067-4322-8777-62bc129cd6f2",
     "image": "https://senate.texas.gov/members/d25/img/headshot.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=25"
     ],
@@ -120543,6 +121193,8 @@
     "email": "jose.menendez@senate.texas.gov",
     "id": "ocd-person/8bb90ee9-e764-44da-b27f-b5bc3cdb394e",
     "image": "https://senate.texas.gov/members/d26/img/headshot.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=26"
     ],
@@ -120559,6 +121211,8 @@
     "email": "adam.hinojosa@senate.texas.gov",
     "id": "ocd-person/7f748f58-e6f2-4c86-ad01-52c7ca3435ca",
     "image": "https://senate.texas.gov/members/d27/img/Hinojosa_Adam-88-0913D-005-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=27"
     ],
@@ -120575,6 +121229,8 @@
     "email": "charles.perry@senate.texas.gov",
     "id": "ocd-person/6522ba2d-f263-455a-9470-cec0aa03033b",
     "image": "https://senate.texas.gov/members/d28/img/Perry-Headshot-2019.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=28"
     ],
@@ -120591,6 +121247,8 @@
     "email": "cesar.blanco@senate.texas.gov",
     "id": "ocd-person/3e0f0e51-20c0-4da4-82b5-ff81606148d0",
     "image": "https://senate.texas.gov/members/d29/img/SCBBio88th-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://house.texas.gov/members/member-page/?district=76",
      "https://senate.texas.gov/member.php?d=29"
@@ -120608,6 +121266,8 @@
     "email": "robert.nichols@senate.texas.gov",
     "id": "ocd-person/26b83cfe-10c0-4ac6-ae02-dac30e2856b1",
     "image": "https://senate.texas.gov/members/d03/img/headshot.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=3"
     ],
@@ -120624,6 +121284,8 @@
     "email": "brent.hagenbuch@senate.texas.gov",
     "id": "ocd-person/c15c9bf3-f28a-4c01-9a10-383bc7a05cb9",
     "image": "https://www.senate.texas.gov/members/d30/img/Hagenbuch_89-0029-009-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://www.senate.texas.gov/member.php?d=30"
     ],
@@ -120640,6 +121302,8 @@
     "email": "kevin.sparks@senate.texas.gov",
     "id": "ocd-person/aa6deb86-b21b-4ed2-ad67-bd6217238afc",
     "image": "https://senate.texas.gov/members/d31/img/Sparks_88-0063D-012-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=31"
     ],
@@ -120655,6 +121319,8 @@
     "email": "brett.ligon@senate.texas.gov",
     "id": "ocd-person/6fde08be-f7c0-464a-83a7-430c60617beb",
     "image": "https://senate.texas.gov/members/d04/img/Ligon_Brett_Headshot_web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=4"
     ],
@@ -120687,6 +121353,8 @@
     "email": "carol.alvarado@senate.texas.gov",
     "id": "ocd-person/e78373de-6d96-44db-b552-6da34ed992fc",
     "image": "https://senate.texas.gov/members/d06/img/CA-2018_web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=6"
     ],
@@ -120703,6 +121371,8 @@
     "email": "paul.bettencourt@senate.texas.gov",
     "id": "ocd-person/a9f861bf-1a13-4d3b-816a-69589e9b25e7",
     "image": "https://senate.texas.gov/members/d07/img/action.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=7"
     ],
@@ -120719,6 +121389,8 @@
     "email": "angela.paxton@senate.texas.gov",
     "id": "ocd-person/895887ba-73cd-4321-827d-bb06d4eedfdf",
     "image": "https://senate.texas.gov/members/d08/img/Paxton_2026.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=8"
     ],
@@ -120735,6 +121407,8 @@
     "email": "taylor.rehmet@senate.texas.gov",
     "id": "ocd-person/9647d335-a650-4aa7-b11f-973c4e86b5a6",
     "image": "https://senate.texas.gov/members/d09/img/Rehmet-89-0739D-017-web.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://senate.texas.gov/member.php?d=9"
     ],
@@ -132576,6 +133250,8 @@
     "email": "rep.neylon@legis.wisconsin.gov",
     "id": "ocd-person/22d8a510-3b36-432a-9d3d-08efe7e74d5e",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2492.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/assembly/1592",
      "https://docs.legis.wisconsin.gov/2019/legislators/assembly/1892",
@@ -132657,6 +133333,8 @@
     "email": "rep.clancy@legis.wisconsin.gov",
     "id": "ocd-person/91423371-a92c-4006-ad7d-e21f2f7e666b",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2538.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2538",
      "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2721",
@@ -132760,6 +133438,8 @@
     "email": "rep.andraca@legis.wisconsin.gov",
     "id": "ocd-person/bcca1ebf-1a4c-4624-97a6-dbfd3e255191",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2443.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2021/legislators/assembly/2266",
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2443",
@@ -132942,6 +133622,8 @@
     "email": "rep.august@legis.wisconsin.gov",
     "id": "ocd-person/b4554989-ede4-44a0-a541-c2aea2659d39",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2445.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/assembly/1534",
      "https://docs.legis.wisconsin.gov/2019/legislators/assembly/1826",
@@ -133030,6 +133712,8 @@
     "email": "rep.callahan@legis.wisconsin.gov",
     "id": "ocd-person/23c03244-880a-4263-8e2f-18c0c5556b45",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2456.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2021/legislators/assembly/2260",
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2456",
@@ -133115,6 +133799,8 @@
     "email": "rep.dallman@legis.wisconsin.gov",
     "id": "ocd-person/c4afc94c-3bad-4e77-9f81-de613c406860",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2459.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://alexdallman.com/",
      "https://docs.legis.wisconsin.gov/2021/legislators/assembly/2256",
@@ -133339,6 +134025,8 @@
     "email": "rep.goeben@legis.wisconsin.gov",
     "id": "ocd-person/b8666d84-956f-40a7-8faa-75709f9d4a12",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2542.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2542",
      "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2732",
@@ -133435,6 +134123,8 @@
     "email": "rep.palmeri@legis.wisconsin.gov",
     "id": "ocd-person/aef40b88-72b7-4001-b336-9210a55a2bde",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2547.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2547",
      "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2767",
@@ -133515,6 +134205,8 @@
     "email": "rep.gundrum@legis.wisconsin.gov",
     "id": "ocd-person/264f7afa-69cb-46f3-97f3-ff8f21a1d68a",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2467.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/assembly/1780",
      "https://docs.legis.wisconsin.gov/2019/legislators/assembly/1852",
@@ -133695,6 +134387,8 @@
     "email": "rep.neubauer@legis.wisconsin.gov",
     "id": "ocd-person/62f218bf-b308-4240-84b3-4be181466b42",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2491.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/assembly/1782",
      "https://docs.legis.wisconsin.gov/2019/legislators/assembly/1860",
@@ -133799,6 +134493,8 @@
     "email": "rep.vandermeer@legis.wisconsin.gov",
     "id": "ocd-person/5858f406-f96a-4846-8a9e-0bede48d94ed",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2529.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/assembly/1624",
      "https://docs.legis.wisconsin.gov/2019/legislators/assembly/1864",
@@ -134077,6 +134773,8 @@
     "email": "rep.maxey@legis.wisconsin.gov",
     "id": "ocd-person/f20f569f-1f36-4856-9193-b4b938dfcdaf",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2537.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2537",
      "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2873",
@@ -134365,6 +135063,8 @@
     "email": "rep.duchow@legis.wisconsin.gov",
     "id": "ocd-person/171aec6e-ba95-4244-9854-84cddf028d90",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2463.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/assembly/1552",
      "https://docs.legis.wisconsin.gov/2019/legislators/assembly/1893",
@@ -134470,6 +135170,8 @@
     "email": "sen.nass@legis.wisconsin.gov",
     "id": "ocd-person/0301a2cd-37fc-46f6-948a-f1fade57b5c0",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/senate/2427.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/senate/1519",
      "https://docs.legis.wisconsin.gov/2019/legislators/senate/1911",
@@ -134576,6 +135278,8 @@
     "email": "sen.ratcliff@legis.wisconsin.gov",
     "id": "ocd-person/784b437c-b5d1-4adc-909a-2bc28c9d6e88",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2546.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2023/legislators/assembly/2546",
      "https://docs.legis.wisconsin.gov/2025/legislators/senate/2837",
@@ -134678,6 +135382,8 @@
     "email": "sen.feyen@legis.wi.gov",
     "id": "ocd-person/a0284290-ef4c-4f10-a5be-485115057ab5",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/senate/2418.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/senate/1644",
      "https://docs.legis.wisconsin.gov/2019/legislators/senate/1900",
@@ -134812,6 +135518,8 @@
     "email": "sen.roys@legis.wisconsin.gov",
     "id": "ocd-person/967afe3c-119d-4051-a8b1-674f328c4775",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/senate/2432.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2021/legislators/senate/2252",
      "https://docs.legis.wisconsin.gov/2023/legislators/senate/2432",
@@ -134933,6 +135641,8 @@
     "email": "sen.smith@legis.wisconsin.gov",
     "id": "ocd-person/8a1ee7b3-8450-45b4-a1cf-5e05788c0653",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/senate/2433.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2019/legislators/senate/1944",
      "https://docs.legis.wisconsin.gov/2021/legislators/senate/2114",
@@ -135037,6 +135747,8 @@
     "email": "sen.johnson@legis.wisconsin.gov",
     "id": "ocd-person/eba6f26b-65c9-42fe-a8a5-09e11c8d089a",
     "image": "https://docs.legis.wisconsin.gov/2023/legislators/senate/2421.jpg",
+    "imageChecked": "2026-10-19",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2017/legislators/senate/1643",
      "https://docs.legis.wisconsin.gov/2019/legislators/senate/1904",
