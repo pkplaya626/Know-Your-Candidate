@@ -268,6 +268,12 @@ def place_info(codes, voting=None):
         check = links.get("status") or links.get("polling")
         if check:
             entry["check"] = check
+        # The election office's own record that no election is held there
+        # on November 3 (voting_dates "noElection": Puerto Rico): the answer
+        # offers no ballot to see (rule 92).
+        dated = (((voting or {}).get("_dates") or {}).get("states") or {}).get(code) or {}
+        if any(line.get("k") == "none" for line in dated.get("lines") or ()):
+            entry["noElection"] = True
         out[code] = entry
     return out
 

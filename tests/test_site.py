@@ -395,6 +395,48 @@ class TestPageWiring(unittest.TestCase):
         self.assertIn("out of order", result["index.html"][1])
 
 
+class TestBallotPage(unittest.TestCase):
+    """Your ballot (rule 92): a generated page, in the navigation and the
+    sitemap, loading its data before the module that draws it."""
+
+    def setUp(self):
+        from kyc import pages
+        self.pages = pages
+        self.html = pages.render_ballot_page("example.org")
+
+    def test_it_is_in_the_navigation_beside_the_candidates(self):
+        keys = [k for _h, entries in self.pages.nav_groups() for k, *_rest in entries]
+        self.assertEqual(keys[:3], ["candidates", "ballot", "races"])
+        self.assertIn('href="ballot.html" data-nav="ballot" aria-current="page"', self.html)
+
+    def test_it_loads_its_data_then_the_modules_in_order(self):
+        loaded = emit.script_sources(self.html)
+        wanted = [s for s in emit.BALLOT_PAGE_REQUIREMENTS if s != "assets/kyc.js"]
+        self.assertEqual([s.split("?")[0] for s in loaded if s.split("?")[0] in wanted], wanted)
+        # It opens profiles, so it names the votes the dialog loads.
+        self.assertIn('id="onDemandData"', self.html)
+
+    def test_the_election_day_and_cycle_are_the_cycles_never_typed(self):
+        from kyc.cycle import CYCLE, general_election_day
+        day = general_election_day(CYCLE)
+        self.assertIn(f"{day.strftime('%B')} {day.day}, {day.year}", self.html)
+        self.assertIn(f"Elections {CYCLE}", self.html)
+
+    def test_who_represents_you_is_another_question(self):
+        # Rule 27: the page says it answers who is on the ballot, and sends
+        # "who represents me" to the lookup.
+        self.assertIn('href="index.html#findrep"', self.html)
+        self.assertIn("Who represents you now is another question", self.html)
+
+    def test_the_sitemap_lists_it(self):
+        self.assertIn("<loc>https://example.org/ballot.html</loc>",
+                      self.pages.sitemap("example.org", ["TX"]))
+
+    def test_the_shipped_page_is_current(self):
+        with open(os.path.join(ROOT, emit.BALLOT_FILE), encoding="utf-8") as handle:
+            self.assertIn('data-page="ballot"', handle.read())
+
+
 class TestStatePages(unittest.TestCase):
     """Fifty-seven pages from one template, checked the way the data is."""
 
@@ -430,6 +472,7 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(locs, [
             "<loc>https://example.org/</loc>",
             "<loc>https://example.org/map.html</loc>",
+            "<loc>https://example.org/ballot.html</loc>",
             "<loc>https://example.org/about.html</loc>",
             "<loc>https://example.org/states/index.html</loc>",
             "<loc>https://example.org/states/ak.html</loc>",
@@ -452,7 +495,7 @@ class TestStatePages(unittest.TestCase):
             self.assertEqual([r for r in relative
                               if not r.startswith(("districts/", "government/", "legislature/",
                                                     "counties/", "courts/", "federal/"))],
-                             ["404.html", "about.html", "redistricting/ca.html",
+                             ["404.html", "about.html", "ballot.html", "redistricting/ca.html",
                               "site.webmanifest", "states/ak.html", "states/index.html",
                               "states/tx.html"])
             # A district map for every state and territory, whatever the

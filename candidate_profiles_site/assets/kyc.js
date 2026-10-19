@@ -44,6 +44,7 @@
     link: "M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1",
     share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4",
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
+    print: "M6 9V3h12v6M6 17H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z",
     sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
     landmark: "M3 9l9-5 9 5zM6 11v6M10 11v6M14 11v6M18 11v6M4 17h16M3 20h18",
     scale: "M12 3v18M7 21h10M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2M2 16l3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1zM16 16l3-8 3 8c-.9.7-1.9 1-3 1s-2.1-.3-3-1z",
@@ -838,6 +839,19 @@
   /** True when *status* means on the November ballot, counted or not. */
   function onNovemberBallot(status) {
     return !!NOVEMBER[status];
+  }
+
+  /** Whether *p* is among the people still in *race* as the lookup's answer
+   *  and the Your ballot page list them: once the primary has settled the
+   *  race, only those on the November ballot or through to it; before it,
+   *  anyone the primary has not removed. A filer the results do not settle
+   *  after the primary (ballotUnknown) is not counted on the ballot (rule
+   *  74), so neither view lists them as on it (PR #115 review: IL-4's card
+   *  counted 5 on the ballot over 7 names). */
+  function stillRunning(race, p) {
+    var status = p.isCandidate ? p.raceStatus : contestStatus(p);
+    if (race && race.settled) return onNovemberBallot(status) || status === "advanced";
+    return !offBallot(status);
   }
 
   /* Portraits are resolved and checked at build time, so this runtime chain
@@ -2718,6 +2732,18 @@
   initTheme();
   ready(initShell);
 
+  /* An address that carries a ZIP code (the Your ballot page's
+   * "#/?zip=30303") will draw an answer once the data has loaded: marked
+   * now, before first paint, so the page holds the answer's room and the
+   * footer does not jump down under the reader when it comes (PR #115
+   * review: a layout shift of 0.15-0.28 on a throttled phone). The page's
+   * module takes the mark off when its answer is drawn. */
+  try {
+    if (/[?&]zip=\d{5}\b/.test(String(global.location.hash || "")) && doc.documentElement) {
+      doc.documentElement.classList.add("has-zip");
+    }
+  } catch (e) { /* no location: nothing to hold */ }
+
   /* ---------------------------------------------------------- offices held */
 
   /* The public offices a person has held (kyc/history.py): service in
@@ -2975,6 +3001,7 @@
     reportUrl: reportUrl,
     offBallot: offBallot,
     onNovemberBallot: onNovemberBallot,
+    stillRunning: stillRunning,
     meta: meta,
     recordPhase: recordPhase,
     portraitSrc: portraitSrc,

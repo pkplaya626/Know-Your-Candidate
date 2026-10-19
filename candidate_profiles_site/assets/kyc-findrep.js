@@ -469,9 +469,7 @@
       if (!p || seen[p.id]) return false;
       seen[p.id] = true;
       if (!p.isCandidate && (p.contestRaceId || p.raceId) !== race.id) return false;
-      var status = p.isCandidate ? p.raceStatus : KYC.contestStatus(p);
-      if (race.settled) return KYC.onNovemberBallot(status) || status === "advanced";
-      return !KYC.offBallot(status);
+      return KYC.stillRunning(race, p);
     }).sort(function (a, b) {
       // Members first, then the race's own order (by surname, TRUST-15).
       return (a.isCandidate ? 1 : 0) - (b.isCandidate ? 1 : 0) ||
@@ -717,12 +715,35 @@
     return { now: redrawn && KYC.recordPhase() ? "next" : "cd", race: redrawn ? "next" : "cd" };
   }
 
-  function answer(head, code, rows, notes) {
+  /** Whether the election office's own record says no election is held
+   *  there on November 3 (kyc/voting_dates.py, "noElection": Puerto Rico),
+   *  from the lookup index, as every page has it (lookup.place_info). Such
+   *  a place has no ballot to show. */
+  function noElection(code) {
+    return !!placeOf(code).noElection;
+  }
+
+  /** The way from this answer to the reader's whole ballot (kyc-ballot.js),
+   *  which is not this answer: who represents a reader is not who is on
+   *  their ballot (rule 27). The address carries a ZIP code the reader
+   *  typed, never a location (rule 92); from a location the ballot page
+   *  asks for it again. Only where the page lists Congress: the legislature
+   *  and county pages' answers send the reader to the state page first. */
+  function ballotLink(zip5, code) {
+    if (!people().length || noElection(code)) return "";
+    var past = KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election";
+    return ' <a class="btn" data-findrep-ballot href="' + KYC.escapeAttr(KYC.siteRoot() + "ballot.html" +
+      (zip5 ? "#/?zip=" + zip5 : "")) + '">' + KYC.icon("vote") +
+      (past ? " See what was on your ballot" : " See everything on your ballot") +
+      (zip5 ? "" : " (use your location again there)") + "</a>";
+  }
+
+  function answer(head, code, rows, notes, zip5) {
     return '<div class="findrep-answer">' +
       '<p class="findrep-place">' + head + "</p>" +
       '<dl class="findrep-list">' + rows.join("") + "</dl>" +
       (notes.length ? '<p class="findrep-note">' + notes.join(" ") + "</p>" : "") +
-      '<p class="findrep-actions">' + voteLink(code) + "</p>" +
+      '<p class="findrep-actions">' + voteLink(code) + ballotLink(zip5, code) + "</p>" +
       "</div>";
   }
 
@@ -741,43 +762,64 @@
       "the representative is the one elected on the old map, the race is on the new one.";
   }
 
+  /** What a ZIP code that is no ZIP area is told, here and on the ballot
+   *  page (one sentence, rule 12). */
+  function noZipArea(code5) {
+    return '<p class="findrep-note">' + KYC.escapeHtml(code5) + " is not one of the Census " +
+      "Bureau's ZIP Code Tabulation Areas. A ZIP code used only for post office boxes, or by " +
+      "a single building or business, has no area of its own, and nor does one created " +
+      "since 2020. Try the ZIP code of your home, or use your location.</p>";
+  }
+
+  /** "ZIP 42223 crosses a state line: ...", said before either state's
+   *  answer: a reader reading only the first would take its state for
+   *  theirs. *what* names the answers below ("answer", "ballot"). */
+  function crossesNote(code5, found, what) {
+    return '<p class="findrep-note findrep-crosses">ZIP ' + KYC.escapeHtml(code5) +
+      " crosses a state line: " + list(found.map(function (f) {
+        return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(placeWords(f.code));
+      })) + ". Each state's " + (what || "answer") + " is below, and every share in them is of " +
+      "the whole ZIP area. Use your location to know which is yours.</p>";
+  }
+
+  /** One state's parts of a ZIP area (an entry of ``zip()``'s list), by
+   *  level: ``{now, race, upper, lower, county}``, each ``[[id, share]]``
+   *  largest first, or ``[id]`` where WHOLE of the land is in one. The
+   *  answer and the ballot page pick them alike (rule 12). */
+  function zipParts(f) {
+    var e = f.entry, w = whole(), key = plans(f.data);
+    function pick(parts) {
+      parts = (parts || []).slice().sort(shareSort);
+      return parts.length && parts[0][1] >= w ? [parts[0][0]] : parts;
+    }
+    return { now: pick(e[key.now]), race: pick(e[key.race]), upper: pick(e.su),
+             lower: pick(e.sl), county: pick(e.co) };
+  }
+
   /** The answer for a ZIP code, from ``zip()``'s list. */
   function zipAnswer(code5, found) {
-    if (!found.length) {
-      return '<p class="findrep-note">' + KYC.escapeHtml(code5) + " is not one of the Census " +
-        "Bureau's ZIP Code Tabulation Areas. A ZIP code used only for post office boxes, or by " +
-        "a single building or business, has no area of its own, and nor does one created " +
-        "since 2020. Try the ZIP code of your home, or use your location.</p>";
-    }
+    if (!found.length) return noZipArea(code5);
     var out = [];
     var split = false;
     var crosses = found.length > 1;
-    if (crosses) {
-      // Said first, before either state's answer: a reader reading only
-      // the first would take its state for theirs.
-      out.push('<p class="findrep-note findrep-crosses">ZIP ' + KYC.escapeHtml(code5) +
-        " crosses a state line: " + list(found.map(function (f) {
-          return pct(landIn(f.entry)) + " of its land is in " + KYC.escapeHtml(placeWords(f.code));
-        })) + ". Each state's answer is below, and every share in them is of the whole ZIP " +
-        "area. Use your location to know which is yours.</p>");
-    }
+    if (crosses) out.push(crossesNote(code5, found));
     found.forEach(function (f) {
-      var e = f.entry, data = f.data, code = f.code, w = whole();
-      var key = plans(data);
+      var data = f.data, code = f.code;
+      var parts = zipParts(f);
       // *shown* is false for a level this page does not list (Congress,
       // on a page with no profiles): its split is not this answer's to
       // speak of (PR #104 review).
-      function pick(parts, shown) {
-        parts = (parts || []).slice().sort(shareSort);
-        if (parts.length && parts[0][1] >= w) return [parts[0][0]];
-        if (parts.length > 1 && shown !== false) split = true;
-        return parts;
+      function pick(list, shown) {
+        if (list.length > 1 && shown !== false) split = true;
+        return list;
       }
+      var e = f.entry;
       var federal = people().length > 0;
-      var now = pick(e[key.now], federal), next = pick(e[key.race], federal);
+      var now = pick(parts.now, federal), next = pick(parts.race, federal);
       var rows = federalRows(code, now, next, code5)
-        .concat(legislatureRows(code, f.leg, { upper: pick(e.su), lower: pick(e.sl) }, f.legFailed))
-        .concat(countyRows(code, data, pick(e.co)));
+        .concat(legislatureRows(code, f.leg, { upper: pick(parts.upper), lower: pick(parts.lower) },
+          f.legFailed))
+        .concat(countyRows(code, data, pick(parts.county)));
       var head = "ZIP " + KYC.escapeHtml(code5) + ", " + KYC.escapeHtml(nameOf(code)) +
         (crosses ? " (" + pct(landIn(e)) + " of its land)" : "");
       var notes = [];
@@ -785,7 +827,7 @@
       if (redrawn) notes.push(redrawn);
       var map = districtsPage(code, ids(now), ids(next));
       if (map) notes.push(mapLink(map));
-      out.push(answer(head, code, rows, notes) + sourcesNote(data));
+      out.push(answer(head, code, rows, notes, code5) + sourcesNote(data));
     });
     // Every state the ZIP reaches has its own lookup to check with, where
     // the site holds one; "your state's own lookup" was said in American
@@ -1080,6 +1122,7 @@
     NEAR_KM: NEAR_KM,
     MAX_NEAR: MAX_NEAR,
     ROUGH_KM: ROUGH_KM,
+    PRIVACY: PRIVACY,
     mount: mount,
     ask: ask,
     reveal: reveal,
@@ -1092,7 +1135,35 @@
     officialLookup: officialLookup,
     zipAnswer: zipAnswer,
     pointAnswer: pointAnswer,
+    // The pieces the ballot page (kyc-ballot.js) answers with, so a ZIP
+    // code or a point is placed, and its doubts said, as here (rule 12).
+    noZipArea: noZipArea,
+    crossesNote: crossesNote,
+    zipParts: zipParts,
+    pointNotes: pointNotes,
+    plans: plans,
+    reach: reach,
+    pct: pct,
+    landIn: landIn,
+    houseRace: houseRace,
+    senateRaces: senateRaces,
+    districtName: districtName,
+    nameOf: nameOf,
+    placeWords: placeWords,
+    voteLink: voteLink,
+    canLocate: canLocate,
+    remember: remember,
+    noElection: noElection,
   };
 
-  KYC.ready(function () { mountAll(doc); });
+  KYC.ready(function () {
+    mountAll(doc);
+    // The home page's way to the ballot page is typed into its template;
+    // from the day after the election it speaks of a ballot that was.
+    if (KYC.electionStatus((KYC.meta().election || {}).year || 2026).phase === "post-election") {
+      Array.prototype.forEach.call(doc.querySelectorAll("a[data-ballot-entry]"), function (a) {
+        a.innerHTML = KYC.icon("vote") + " See what was on your ballot";
+      });
+    }
+  });
 })(window);

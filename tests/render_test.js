@@ -3125,8 +3125,8 @@ async function testNavigation() {
     check("five groups, from elections to learning", JSON.stringify(heads) === JSON.stringify(GROUPS),
       heads.join(" | "));
     const keys = [...D.querySelectorAll(".site-nav [data-nav]")].map((a) => a.getAttribute("data-nav"));
-    check("ten places to go, About & sources last", keys.join(",") ===
-      "candidates,races,congress,executive,courts,states,legislatures,local,guide,about",
+    check("eleven places to go, About & sources last", keys.join(",") ===
+      "candidates,ballot,races,congress,executive,courts,states,legislatures,local,guide,about",
       keys.join(","));
     check("the grid is Candidates",
       D.querySelector('.site-nav [aria-current="page"]').getAttribute("data-nav") === "candidates");
@@ -11717,6 +11717,437 @@ async function testCharts() {
   }
 }
 
+/* ============================================================ Your ballot */
+
+/* ballot.html (kyc-ballot.js, rule 92): every contest on one reader's
+ * ballot, from a ZIP code in the address or a location. */
+async function ballotFor(hash, opts) {
+  const built = await buildPage("ballot.html", Object.assign({ hash }, opts || {}));
+  const out = built.D.getElementById("ballotResult");
+  await until(() => out && !out.hidden && !/Looking up|Finding your location/.test(out.textContent), 8000);
+  return Object.assign(built, { out, text: out ? out.textContent : "" });
+}
+
+/** A contest's card by its heading's first words. */
+function contestsOf(out) {
+  return [...out.querySelectorAll(".ballot-contest")].map((li) => ({
+    li,
+    office: li.querySelector(".ballot-office").firstChild.textContent.trim(),
+    seat: (li.querySelector(".ballot-seat") || { textContent: "" }).textContent.trim(),
+  }));
+}
+
+const badgeWords = (el) => [...el.querySelectorAll(".badge")].map((b) => b.textContent.trim());
+
+async function testBallot() {
+  // A redrawn state's ZIP code that touches two districts on the 2026 map:
+  // Frisco, Texas (75036), in TX-26 and TX-4.
+  // A browser that can share a location, so the page offers it.
+  const tx = await ballotFor("#/?zip=75036", { setup: at(0, 0, 1) });
+  const txState = await buildPage("states/tx.html");
+  await settle(50);
+  suite("Your ballot: a ZIP code across two House districts in a redrawn state", () => {
+    const { window, out, errors } = tx;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the page asked the lookup itself, from the ZIP code in its address",
+      /Your ballot: ZIP 75036, Texas/.test(tx.text), tx.text.slice(0, 200));
+    check("its address carries the ZIP code, and nothing else", window.location.hash === "#/?zip=75036",
+      window.location.hash);
+    const entry = window.kycLookup.TX.zips["75036"];
+    const shares = (entry.next || []).filter((p) => p[1] < window.kycLookupIndex.whole);
+    const cards = contestsOf(out);
+    const house = cards.filter((c) => c.office === "U.S. House");
+    check("one House card per district the ZIP area reaches on the 2026 map",
+      house.length === entry.next.length && entry.next.length > 1,
+      house.map((c) => c.seat).join(" | "));
+    check("each with its share of the ZIP area's land", house.every((c) =>
+      /of ZIP 75036.s land is in this district/.test(c.li.textContent)) && shares.length > 1);
+    check("each named on the 2026 map", house.every((c) => /on the 2026 map/.test(c.seat)) ||
+      window.KYC.recordPhase());
+    check("the caveat, and the way to an exact answer: the reader's location",
+      /crosses district lines/.test(tx.text) &&
+      !!out.querySelector(".ballot-state [data-ballot-locate]"));
+    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature)/)[1]);
+    const rank = { federal: 0, statewide: 1, legislature: 2 };
+    check("in ballot order: Congress, statewide offices, the legislature",
+      order.every((k, i) => !i || rank[order[i - 1]] <= rank[k]) && order[0] === "federal" &&
+      order.indexOf("statewide") !== -1 && order.indexOf("legislature") !== -1, order.join(","));
+    check("the Senate first among them", cards[0].office === "U.S. Senate");
+    // The same people, order, words and count as the state page's race
+    // sections (rules 12 and 73): each race card against its section.
+    const D2 = txState.D;
+    const differ = [];
+    cards.filter((c) => c.li.id && /^contest-[SH]-/.test(c.li.id)).forEach((c) => {
+      const id = c.li.id.replace(/^contest-/, "");
+      const section = D2.getElementById("race-" + id);
+      if (!section) return differ.push(id + ": no section");
+      // The ballot lists those on it first and those whose ballot status
+      // is not known apart (PR #115 review), each in the section's order.
+      const theirCards = [...section.querySelectorAll(":scope > .card-grid .card")];
+      const theirs = theirCards.map((n) => n.querySelector(".card-name").textContent);
+      const listed = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person .link-button")]
+        .map((n) => n.textContent);
+      const unsure = [...c.li.querySelectorAll(".ballot-unsure .ballot-person .link-button")].map((n) => n.textContent);
+      const ours = listed.concat(unsure);
+      const expect = theirs.filter((n) => listed.includes(n)).concat(theirs.filter((n) => unsure.includes(n)));
+      if (JSON.stringify(expect) !== JSON.stringify(ours) || ours.length !== theirs.length) {
+        differ.push(id + ": " + ours + " / " + theirs);
+      }
+      const head = section.querySelector(".race-head");
+      if (JSON.stringify(badgeWords(head)) !== JSON.stringify(badgeWords(c.li.querySelector(".ballot-badges")))) {
+        differ.push(id + " badges: " + badgeWords(c.li.querySelector(".ballot-badges")) + " / " + badgeWords(head));
+      }
+      const statusOf = {};
+      theirCards.forEach((n) => { statusOf[n.querySelector(".card-name").textContent] = badgeWords(n).join("+"); });
+      const theirStatus = ours.map((n) => statusOf[n]);
+      const ourStatus = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person, .ballot-unsure .ballot-person")]
+        .map((n) => badgeWords(n).join("+"));
+      if (JSON.stringify(theirStatus) !== JSON.stringify(ourStatus)) differ.push(id + " status: " + ourStatus + " / " + theirStatus);
+    });
+    check("each race lists the race section's people, in its order, with its status words and counts",
+      differ.length === 0, differ.join(" || "));
+    check("each person opens their profile here", (() => {
+      const b = out.querySelector(".ballot-person .link-button");
+      if (!b) return false;
+      b.click();
+      return window.location.hash === "#/profile/" + encodeURIComponent(b.getAttribute("data-id"));
+    })());
+    const leg = cards.filter((c) => /ballot-legislature/.test(c.li.className));
+    check("the state legislature: each chamber's district, and whether its seat is up, from the record",
+      leg.length === 2 && leg.every((c) => c.li.querySelector(".leg-ballot")), leg.map((c) => c.office).join(" | "));
+    const senate = leg[0].li;
+    const sid = senate.querySelector(".ballot-district").getAttribute("href").match(/d=([^&]+)$/)[1];
+    const leg2 = Object.values(window.kycLegislature || {})[0];
+    check("a seat the record says is not up is said so, never guessed",
+      !leg2 || leg2.chambers.upper.districts[decodeURIComponent(sid)].up !== false ||
+      /not up for regular election in 2026/.test(senate.textContent), senate.textContent.slice(0, 200));
+    check("legislative candidates are not listed here, and said so",
+      /candidates for (this seat|these seats) are not listed here/.test(tx.text));
+    check("ballot measures and local contests: not listed here",
+      /Also on your ballot, not listed here/.test(tx.text) && /ballot measures/.test(tx.text));
+    check("the key dates, passed ones said passed on the reader's day",
+      !!out.querySelector(".ballot-dates .vote-dates") && /Passed/.test(out.querySelector(".ballot-dates").textContent));
+    check("and the way to how to vote in Texas", !!out.querySelector('.ballot-dates a[href$="states/tx.html#voting"]'));
+  });
+
+  // Georgia: a Senate race and an open governor's seat with its listed
+  // candidates; a ZIP code typed into the page.
+  const ga = await buildPage("ballot.html");
+  const slot = ga.D.getElementById("ballotAsk");
+  slot.querySelector("#ballotZip").value = "30009";
+  slot.querySelector("form").dispatchEvent(new ga.window.Event("submit", { bubbles: true, cancelable: true }));
+  const gaOut = ga.D.getElementById("ballotResult");
+  await until(() => !/Looking up/.test(gaOut.textContent) && gaOut.querySelector(".ballot-state"), 8000);
+  suite("Your ballot: Georgia, a Senate race and an open governor's seat", () => {
+    const { window } = ga;
+    const cards = contestsOf(gaOut);
+    check("a typed ZIP code is written into the address, for a copied link", window.location.hash === "#/?zip=30009",
+      window.location.hash);
+    check("the U.S. Senate race", cards.some((c) => c.office === "U.S. Senate" && c.li.querySelector(".ballot-person")));
+    const gov = cards.find((c) => c.office === "Governor");
+    const listed = window.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates;
+    check("the governor's office, marked on the ballot from the state's record",
+      !!gov && /This office is on the Nov 3, 2026 ballot/.test(gov.li.textContent));
+    check("with every candidate the election office lists, printed names first and write-ins apart",
+      !!gov && gov.li.querySelectorAll(".gov-candidate-list:not(.gov-writein-list) li").length ===
+        listed.filter((p) => !p.writeIn).length &&
+        gov.li.querySelectorAll(".gov-writein-list li").length === listed.filter((p) => p.writeIn).length);
+    check("credited to the list as the document it is, and dated (rule 91), never 'Certified by'",
+      !!gov && /Source: .*\(read /.test(gov.li.textContent) && !/Certified by/.test(gov.li.textContent));
+    check("no statewide candidate is linked to a profile (rule 25)",
+      !!gov && !gov.li.querySelector(".gov-candidates [data-id]"));
+    check("Georgia's every statewide office on the ballot has its card",
+      ["Governor", "Lieutenant governor", "Attorney general", "Secretary of state"].every((o) =>
+        cards.some((c) => c.office === o)));
+    check("the reader's state is remembered", window.KYC.rememberedState() === "GA");
+    check("print: one button, and it prints", (() => {
+      let printed = 0;
+      window.print = () => { printed += 1; };
+      const b = gaOut.querySelector("[data-ballot-print]");
+      if (!b) return false;
+      b.click();
+      return printed === 1 && /Print or save this list/.test(b.textContent);
+    })());
+    check("printed in the light theme's colours, the reader's own put back after", (() => {
+      const root = window.document.documentElement;
+      const meta = window.document.querySelector('meta[name="color-scheme"]');
+      root.setAttribute("data-theme", "dark");
+      meta.setAttribute("content", "only dark");
+      window.dispatchEvent(new window.Event("beforeprint"));
+      const during = [root.getAttribute("data-theme"), meta.getAttribute("content")].join();
+      window.dispatchEvent(new window.Event("afterprint"));
+      return during === "light,only light" && root.getAttribute("data-theme") === "dark" &&
+        meta.getAttribute("content") === "only dark";
+    })());
+  });
+
+  suite("Your ballot: the print stylesheet keeps the list and drops the controls", () => {
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    const blocks = [...css.matchAll(/@media print\s*\{([\s\S]*?)\n\}/g)].map((m) => m[1]);
+    const ballot = blocks.find((b) => /\.ballot-ask/.test(b)) || "";
+    check("the ZIP form, the print button and the page's controls are hidden in print",
+      /\.ballot-ask,[\s\S]*\.ballot-print-row,[\s\S]*display: none/.test(ballot));
+    check("a contest is never split across pages", /\.ballot-contest \{ break-inside: avoid/.test(ballot));
+    check("the scrolling column becomes the page", /overflow: visible/.test(ballot));
+    check("the list itself is not hidden", !/\.ballot-list|\.ballot-contest,|\.ballot-state,/.test(
+      (ballot.match(/([^{}]*)\{ display: none/) || [""])[0]));
+  });
+
+  // Kentucky elects no statewide officer in 2026.
+  const ky = await ballotFor("#/?zip=40202");
+  suite("Your ballot: a state with no statewide office on the ballot", () => {
+    const cards = contestsOf(ky.out);
+    const none = cards.find((c) => /^No statewide office this site covers is on this ballot/.test(c.office));
+    check("said in one card, each office with its record's mark", !!none &&
+      none.li.querySelectorAll(".ballot-offlist li .gov-ballot-mark").length >= 4,
+      cards.map((c) => c.office).join(" | "));
+    check("and no candidates for an office not on it", !ky.out.querySelector(".gov-candidates"));
+    check("the order line names no statewide offices", !/then statewide offices/.test(ky.text));
+  });
+
+  const dc = await ballotFor("#/?zip=20001");
+  suite("Your ballot: the District of Columbia in its own words", () => {
+    check("no page errors", dc.errors.length === 0, dc.errors.join(" | "));
+    const cards = contestsOf(dc.out);
+    check("its Delegate's race", cards.some((c) => /Delegate to the U.S. House/.test(c.office)),
+      cards.map((c) => c.office).join(" | "));
+    check("no statewide office, no state legislature", !/statewide|state legislature/i.test(
+      [...dc.out.querySelectorAll(".ballot-office, .ballot-heading")].map((h) => h.textContent).join(" ")));
+    check("the District's own contests, not listed here", /the District's own contests/.test(dc.text));
+    check("'the District of Columbia' in a sentence (rule 75)", /Key dates in the District of Columbia/.test(dc.text));
+  });
+
+  const gu = await ballotFor("#/?zip=96910");
+  const pr = await ballotFor("#/?zip=00601");
+  suite("Your ballot: a territory in its own words", () => {
+    const cards = contestsOf(gu.out);
+    check("Guam's Delegate race and its own offices", cards.some((c) => /Delegate/.test(c.office)) &&
+      cards.some((c) => c.office === "Governor"), cards.map((c) => c.office).join(" | "));
+    check("never 'statewide' of a territory", !/statewide/i.test(gu.text), (gu.text.match(/.{40}statewide.{40}/i) || [""])[0]);
+    check("territorial offices, in the order line", /then territorial offices/.test(gu.text));
+    check("Puerto Rico: no election on November 3, in its election office's words",
+      /No election is held in Puerto Rico on November 3, 2026/.test(pr.text) && !/Election Day is/.test(pr.text));
+    check("and its Resident Commissioner's seat not on this ballot, with its term",
+      /Resident Commissioner to the U\.S\. House/.test(pr.text) && /next in \d{4}/.test(pr.text));
+    check("never 'may also hold' where no election is held", !/may also hold/.test(pr.text));
+  });
+
+  const pobox = await ballotFor("#/?zip=30003");
+  suite("Your ballot: a ZIP code with no ZIP area", () => {
+    check("said so, with the way on", /not one of the Census Bureau's ZIP Code Tabulation Areas/.test(pobox.text));
+    check("and no ballot is guessed", !pobox.out.querySelector(".ballot-state"));
+  });
+
+  // A location: answered, and never written into the address (rule 92).
+  const here = await buildPage("ballot.html", { hash: "#/?zip=30009", setup: at(33.749, -84.388, 0, 30) });
+  const hereOut = here.D.getElementById("ballotResult");
+  await until(() => hereOut.querySelector(".ballot-state"), 8000);
+  here.D.querySelector("#ballotAsk [data-ballot-locate]").click();
+  await until(() => /your location/.test(hereOut.textContent) && !/Finding/.test(hereOut.textContent), 8000);
+  suite("Your ballot: from a location", () => {
+    check("the location's ballot", /Your ballot: your location, Georgia/.test(hereOut.textContent),
+      hereOut.textContent.slice(0, 160));
+    check("the address keeps no ZIP code and no coordinate", here.window.location.hash === "#/" &&
+      !/33\.7|84\.3/.test(here.window.location.href), here.window.location.href);
+  });
+
+  // The day after the election: an election held, the federal results the
+  // site has, the state's own results for the rest, no state winner named.
+  const after = await ballotFor("#/?zip=30009", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: after Election Day", () => {
+    check("it says the election has been held", /election has been held/.test(after.text));
+    check("and links the state's own results for state offices",
+      /does not read state or local results and names no winner/.test(after.text) &&
+      !!after.out.querySelector('.ballot-after a[target="_blank"]'));
+    const gov = contestsOf(after.out).find((c) => c.office === "Governor");
+    check("a statewide office's candidates in the past tense, no winner named",
+      !!gov && /Candidates who were on the Nov 3, 2026 ballot/.test(gov.li.textContent) &&
+      !/Won by|Elected/.test(gov.li.textContent));
+    check("the page's own words in the past tense", /What was on the ballot/.test(after.text));
+    check("every federal race says its result or that none has been read",
+      contestsOf(after.out).filter((c) => /ballot-federal/.test(c.li.className) && !/ballot-off/.test(c.li.className))
+        .every((c) => /Won by|Going to a runoff|Awaiting result/.test(c.li.querySelector(".ballot-badges").textContent)));
+  });
+
+  // PR #115 review: every race's card, in every state, lists under "On your
+  // ballot" only the people the lookup's answer lists (KYC.stillRunning);
+  // a filer whose ballot status is not known after the primary is named
+  // apart, and a holder off the ballot by their own status, never among
+  // those who "lost the primary, withdrew, or were not on the primary
+  // ballot".
+  suite("Your ballot: every race lists only who is on it, the rest apart", () => {
+    const { window } = tx;
+    const KYC = window.KYC;
+    const D = window.document;
+    const bad = [], holders = [], unsureSeen = [], lookup = [];
+    const codes = [...new Set(window.kycRaces.map((r) => r.state))];
+    codes.forEach((code) => {
+      const districts = window.kycRaces.filter((r) => r.state === code && r.chamber === "House")
+        .map((r) => r.district);
+      const box = D.createElement("div");
+      box.innerHTML = KYC.ballot.stateBallot(code, { head: code, race: districts, upper: [], lower: [], notes: [] });
+      box.querySelectorAll(".ballot-contest[id^='contest-']").forEach((li) => {
+        const race = window.kycRaces.find((r) => "contest-" + r.id === li.id);
+        if (!race) return;
+        li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person [data-id]").forEach((b) => {
+          const p = KYC.byId(b.getAttribute("data-id"));
+          if (!p || !KYC.stillRunning(race, p)) bad.push(race.id + ": " + b.textContent);
+        });
+        li.querySelectorAll(".ballot-unsure .ballot-person [data-id]").forEach((b) => {
+          unsureSeen.push(race.id);
+          const p = KYC.byId(b.getAttribute("data-id"));
+          if (!p || KYC.stillRunning(race, p) || KYC.offBallot(p.raceStatus)) bad.push(race.id + " (apart): " + b.textContent);
+        });
+        // A holder off this ballot, not running elsewhere, is named with
+        // their status.
+        race.incumbentIds.map(KYC.byId).filter(Boolean).forEach((p) => {
+          if (p.isCandidate || !KYC.offBallot(p.raceStatus)) return;
+          if (p.contestRaceId && p.contestRaceId !== race.id && p.contestLabel) return;
+          const line = li.querySelector('.ballot-holder [data-id="' + p.id + '"]');
+          if (!line || !line.parentNode.querySelector(".badge")) holders.push(race.id + ": " + p.name);
+        });
+        // The count of people out never counts a holder named above it.
+        const outLine = (li.textContent.match(/\d+( other)? (?:person|people) no longer in this race/) || [""])[0];
+        if (outLine && li.querySelector(".ballot-holder") && !/ other /.test(outLine)) {
+          bad.push(race.id + ": holder counted among those out");
+        }
+        // The same people as the lookup's answer for this race.
+        const ids = [...li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person [data-id]")]
+          .map((b) => b.getAttribute("data-id")).sort();
+        const theirs = KYC.findRep.running(race).map((p) => p.id).sort();
+        if (JSON.stringify(ids) !== JSON.stringify(theirs)) lookup.push(race.id + ": " + ids + " / " + theirs);
+      });
+    });
+    check("each person under 'On your ballot' is on it, by the lookup's own test", bad.length === 0,
+      bad.slice(0, 8).join(" | "));
+    check("each seat's holder off the ballot is named with their own status", holders.length === 0,
+      holders.slice(0, 8).join(" | "));
+    // Asked while the campaign's Congress sits (rule 68): from January 3 a
+    // re-seated member's seat is their new term's, which the lookup reads
+    // and the race record does not.
+    check("each race lists the same people as the lookup's answer for it",
+      lookup.length === 0 || !oldCongressSits(window), lookup.slice(0, 6).join(" | "));
+    check("(a filer whose status is not known exists to test with, or none does)",
+      unsureSeen.length > 0 || !oldCongressSits(window));
+  });
+
+  // PR #115 review: West Virginia's Senate and North Dakota's House name
+  // the districts up; Virginia's legislature is not up at all.
+  const nd = await ballotFor("#/?zip=58501");
+  const wv = await ballotFor("#/?zip=25301");
+  const va = await ballotFor("#/?zip=23219");
+  const az = await ballotFor("#/?zip=85004");
+  const mt = await ballotFor("#/?zip=59601");
+  suite("Your ballot: each legislative seat, in the record's words", () => {
+    const legOf = (b) => contestsOf(b.out).filter((c) => /ballot-legislature/.test(c.li.className));
+    const ndHouse = legOf(nd).find((c) => /House/.test(c.office));
+    check("North Dakota's House: whether the seat is up, never 'not known'",
+      !!ndHouse && !/not known here/.test(ndHouse.li.textContent) &&
+      /(on the Nov 3, 2026 ballot|no regular election in 2026|not up for regular election)/.test(ndHouse.li.textContent),
+      ndHouse && ndHouse.li.textContent.slice(0, 300));
+    const wvSenate = legOf(wv).find((c) => /Senate/.test(c.office));
+    check("West Virginia's Senate: one of each district's seats is up",
+      !!wvSenate && /One of this district's seats is on the Nov 3, 2026 ballot|special election/.test(wvSenate.li.textContent) &&
+      !/not known here/.test(wvSenate.li.textContent), wvSenate && wvSenate.li.textContent.slice(0, 300));
+    const azHouse = legOf(az).find((c) => /House/.test(c.office));
+    check("Arizona's House, two members a district: 'this district's seats', never 'this seat'",
+      !!azHouse && /This district's seats are on the Nov 3, 2026 ballot/.test(azHouse.li.textContent) &&
+      !/This seat is/.test(azHouse.li.textContent), azHouse && azHouse.li.textContent.slice(0, 300));
+    const mtSenate = legOf(mt).find((c) => /Senate/.test(c.office));
+    check("Montana's Senate: not known on each row, the chamber's count said once, the gap this site's",
+      !!mtSenate && [...mtSenate.li.querySelectorAll(".ballot-seat-row")].every((r) =>
+        /is not known here/.test(r.textContent) && !/seats are on the Nov 3/.test(r.textContent)) &&
+        (mtSenate.li.textContent.match(/of the 50 seats are on the Nov 3, 2026 ballot/g) || []).length === 1 &&
+        /This site's record of the 2026 ballot gives how many/.test(mtSenate.li.textContent) &&
+        !/The state's record gives how many/.test(mtSenate.li.textContent) && !/\( |\s\)/.test(mtSenate.li.textContent),
+      mtSenate && mtSenate.li.textContent.slice(0, 400));
+    const vaLeg = legOf(va);
+    check("Virginia's legislature, not up: drawn as off this ballot, and out of the order line",
+      vaLeg.length > 0 && vaLeg.every((c) => /ballot-off/.test(c.li.className)) &&
+      !/then the state legislature/.test(va.text), va.text.match(/Congress first[^.]*\./));
+    check("a chamber with a seat up is a contest, not drawn as off it",
+      legOf(az).every((c) => !/ballot-off/.test(c.li.className)) && /then the state legislature/.test(az.text));
+  });
+
+  suite("Your ballot: a statewide office's holder is named as the holder", () => {
+    const { window } = az;
+    const sg = window.KYC.stategov;
+    const states = window.kycStateGov.states;
+    const missed = [];
+    let seen = 0;
+    Object.keys(states).forEach((code) => {
+      ["governor", "lt", "ag", "sos"].forEach((k) => {
+        const item = sg.ballotOf(code) && sg.ballotOf(code).offices[k];
+        const status = item && item.up && item.holderStatus;
+        if (!status || !status.holder || status.text.indexOf(status.holder) === -1) return;
+        seen += 1;
+        const line = sg.openSeat(code, k, { role: true });
+        if (!/[Tt]he holder, /.test(line) || /Open seat: The/.test(line)) missed.push(code + " " + k + ": " + line);
+      });
+    });
+    check("on the ballot page, every holder line says who the holder is", seen > 0 && missed.length === 0,
+      missed.slice(0, 4).join(" | "));
+    const gov = contestsOf(az.out).find((c) => c.office === "Governor");
+    const st = states.AZ.ballot2026.offices.governor.holderStatus;
+    check("Arizona's governor card", !gov || !st || !st.holder ||
+      gov.li.textContent.indexOf("he holder, " + st.holder + ",") !== -1, gov && gov.li.textContent.slice(0, 300));
+  });
+
+  suite("Your ballot: the answer's room is held, and let go when it is drawn", () => {
+    check("kyc.js marks an address with a ZIP code before first paint",
+      /classList\.add\("has-zip"\)/.test(fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8")));
+    check("the stylesheet holds the room", /html\.has-zip \.ballot-result \{ min-height/.test(
+      fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")));
+    check("and the drawn answer lets it go", !az.window.document.documentElement.classList.contains("has-zip"));
+    check("the ways to an exact answer on a row of their own, out of the sentence",
+      !!tx.out.querySelector(".ballot-state > .ballot-actions [data-ballot-locate]") &&
+      !tx.out.querySelector(".findrep-note [data-ballot-locate]"));
+  });
+
+  const guam = gu;
+  suite("Your ballot: Guam's sample ballot, said once", () => {
+    check("never 'links no sample ballot' over a list that is one",
+      !/This site links no sample ballot/.test(guam.text) &&
+      (!/sample ballot/.test((contestsOf(guam.out).find((c) => c.office === "Governor") || { li: { textContent: "" } }).li.textContent) ||
+        /the candidate lists above cite/.test(guam.text)), (guam.text.match(/.{60}no sample ballot.{80}/) || [""])[0]);
+  });
+
+  const azAfter = await ballotFor("#/?zip=85004", { now: "2026-11-05T12:00:00" });
+  const prAfter = await ballotFor("#/?zip=00601", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: after Election Day, every line in the past tense", () => {
+    check("'Who was on the ballot for this seat is', never '... are'",
+      /Who was on the ballot for (this seat|these seats|this district) is not listed here/.test(azAfter.text) &&
+      !/Who was on the ballot for [a-z' ]+ are not listed/.test(azAfter.text), (azAfter.text.match(/Who was on.{60}/) || [""])[0]);
+    check("the unlisted contests in the past tense",
+      /Also on the ballot, not listed here/.test(azAfter.text) && /may also have held/.test(azAfter.text) &&
+      !/may also hold/.test(azAfter.text) && !/Also on your ballot/.test(azAfter.text));
+    check("the order line in the past tense", /may have listed them in another order/.test(azAfter.text));
+    check("Puerto Rico keeps its no-election line under a neutral heading",
+      /Puerto Rico in 2026/.test(prAfter.text) && !/Key dates in Puerto Rico/.test(prAfter.text) &&
+      (prAfter.out.querySelector(".ballot-dates").textContent.match(/No election is held in Puerto Rico/) || []).length === 1 &&
+      !/What was on the ballot/.test(prAfter.text) && /The offices this site covers/.test(prAfter.text),
+      prAfter.text.slice(0, 300));
+  });
+
+  // The ways in: the lookup's answer, each state's voting block, the home page.
+  const home = await askZip("index.html", "30009");
+  const gaPage = await buildPage("states/ga.html");
+  const prPage = await buildPage("states/pr.html");
+  const prAnswer = await askZip("index.html", "00601");
+  await settle(50);
+  suite("Your ballot: the ways to it", () => {
+    const link = home.out.querySelector("a[data-findrep-ballot]");
+    check("the lookup's answer: 'See everything on your ballot', carrying the ZIP code only",
+      !!link && /ballot\.html#\/\?zip=30009$/.test(link.getAttribute("href")) &&
+      /See everything on your ballot/.test(link.textContent), link && link.getAttribute("href"));
+    check("the home page's hero", !!home.D.querySelector('.intro a[data-ballot-entry][href="ballot.html"]'));
+    check("each state's voting block", !!gaPage.D.querySelector('#voting a[data-ballot-entry][href$="ballot.html"]'));
+    check("but not where no election is held", !prPage.D.querySelector("#voting a[data-ballot-entry]") &&
+      !!prAnswer.out.querySelector(".findrep-answer") && !prAnswer.out.querySelector("a[data-findrep-ballot]"));
+    check("the navigation", !!home.D.querySelector('.site-nav a[data-nav="ballot"][href="ballot.html"]'));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "index.html" || only === "votes") await testVotes();
@@ -11754,6 +12185,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
+  if (!only || only === "ballot" || only === "findrep") await testBallot();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();
