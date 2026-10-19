@@ -270,15 +270,42 @@ def file_page(url):
             + urllib.parse.quote(urllib.parse.unquote(url.rsplit("/", 1)[-1])))
 
 
-def join(judges, slugs, wikidata, sizes, previous=None):
+def credit_fields(credit):
+    """What a portrait carries of its Commons file's credit (rule 87): the
+    author and licence its description page gives, never typed in."""
+    from .portraits import CREDIT_FORM
+
+    out = {"licence": credit["licence"], "creditForm": credit.get("form") or CREDIT_FORM}
+    if credit.get("by"):
+        out["by"] = credit["by"]
+    elif credit.get("attribution"):
+        # The licence asks for the author; the file's page names none.
+        out["authorUnrecorded"] = True
+    if credit.get("licenceUrl"):
+        out["licenceUrl"] = credit["licenceUrl"]
+    return out
+
+
+def credit_problem(name, url, credit):
+    """Why a Commons file may not be shown with a credit, or ``""``."""
+    if not credit or not credit.get("licence"):
+        return f"{name}: {url} has no licence recorded on its Commons page; not shown"
+    if credit.get("nonFree"):
+        return f"{name}: {url} is not a free file (Wikipedia's fair use); not shown"
+    return ""
+
+
+def join(judges, slugs, wikidata, sizes, previous=None, credits=None):
     """``({nid: {"wikidata", "wikipedia"?, "portrait"?}}, problems)``.
 
     *judges* is ``{id: record}`` (judiciary.json's), *slugs* ``{nid:
     slug}``, *wikidata* :func:`read_wikidata`'s, *sizes* ``{upload url:
-    (width, height)}``, *previous* the last cache's ``judges``. A size that
-    could not be read concludes nothing (rule 8): the last portrait read of
-    the same file is kept, and a judge whose page was not read keeps the
-    last entry whole."""
+    (width, height)}``, *credits* ``{upload url: portraits.credit_of(...)}``
+    - a portrait is shown only with its file's author and licence (rule
+    87) - and *previous* the last cache's ``judges``. A size that could not
+    be read concludes nothing (rule 8): the last portrait read of the same
+    file is kept, and a judge whose page was not read keeps the last entry
+    whole."""
     from . import overrides
     from .portraits import thumb_set, title_is_about
 
@@ -341,17 +368,66 @@ def join(judges, slugs, wikidata, sizes, previous=None):
             elif size[0] > size[1] * WIDEST:
                 problems.append(f"{name}: {url} is wider than a portrait ({size[0]}x{size[1]}); "
                                 f"not shown as a portrait")
+            elif credit_problem(name, url, (credits or {}).get(url)):
+                problems.append(credit_problem(name, url, (credits or {}).get(url)))
             else:
                 photo_set = thumb_set(url, size[0])
-                entry["portrait"] = {
+                entry["portrait"] = dict({
                     "url": photo_set[0][1], "set": photo_set,
                     "credit": "Wikimedia Commons",
                     "source": file_page(url),
-                }
+                }, **credit_fields(credits[url]))
         elif item["images"]:
             problems.append(f"{name}: {qid} has {len(item['images'])} images; none shown")
         out[nid] = entry
     return out, problems
+
+
+def files_read(infos):
+    """``(sizes, credits)`` from ``{url: imageinfo}`` (``portraits.file_info``)."""
+    from .portraits import credit_of
+    sizes = {url: (info["width"], info["height"]) for url, info in infos.items()}
+    return sizes, {url: credit_of(info) for url, info in infos.items()}
+
+
+def credit_portraits(cache, info_of=None, log=print):
+    """Give each portrait in *cache* that carries no licence its file's
+    author and licence, read from the file's Commons page; a portrait whose
+    page records none, or that is not a free file, is withdrawn and said.
+    Returns ``(credited, withdrawn)``. A file the read did not answer for
+    keeps its portrait and is asked about again (rule 8) - ``validate``
+    fails it meanwhile, since shown uncredited is the defect (rule 87)."""
+    from .portraits import CREDIT_FORM
+    if info_of is None:
+        from .portraits import file_info as info_of
+    judges = (cache or {}).get("judges") or {}
+    # A credit read by an earlier form of the reading is read again: the
+    # first printed Commons' hidden spans and uploaders' sentences.
+    todo = {nid: entry["portrait"] for nid, entry in judges.items()
+            if (entry.get("portrait") or {}).get("credit") == "Wikimedia Commons"
+            and (not entry["portrait"].get("licence")
+                 or entry["portrait"].get("creditForm") != CREDIT_FORM)}
+    if not todo:
+        return 0, 0
+    if log:
+        log(f"  judges' portraits: reading {len(todo)} files' licences from Commons ...")
+    _, credits = files_read(info_of([p["url"] for p in todo.values()]))
+    credited = withdrawn = 0
+    for nid, portrait in todo.items():
+        credit = credits.get(portrait["url"])
+        if credit is None:
+            continue
+        why = credit_problem(nid, portrait["url"], credit)
+        if why:
+            del judges[nid]["portrait"]
+            cache.setdefault("problems", []).append(why)
+            withdrawn += 1
+        else:
+            for key in ("by", "authorUnrecorded", "licenceUrl"):
+                portrait.pop(key, None)
+            portrait.update(credit_fields(credit))
+            credited += 1
+    return credited, withdrawn
 
 
 def refresh(judiciary_cache, root=".", read=None, sizes_of=None, log=print, limit=None):
@@ -368,17 +444,21 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, log=print, limi
     wanted = sorted({commons_url(next(iter(i["images"])))
                      for nid in nids if slugs.get(nid) in wikidata
                      for i in wikidata[slugs[nid]].values() if len(i["images"]) == 1} - {None})
+    # Each file's size and its credit, from one imageinfo read of its
+    # Commons page (one request a batch of fifty, one a second).
     if sizes_of is None:
-        from .portraits import image_sizes
-        sizes_of = image_sizes
-    sizes = sizes_of(wanted)
-    joined, problems = join(judges, slugs, wikidata, sizes, previous.get("judges"))
+        from .portraits import file_info
+        sizes_of = file_info
+    sizes, credits = files_read(sizes_of(wanted))
+    joined, problems = join(judges, slugs, wikidata, sizes, previous.get("judges"), credits)
     cache = {"read": datetime.date.today().isoformat(),
              "sources": {"fjc": "https://www.fjc.gov/history/judges",
                          "wikidata": "https://www.wikidata.org/wiki/Property:P2736"},
              "slugs": {k: slugs[k] for k in sorted(slugs) if k in nids},
              "judges": {k: joined[k] for k in sorted(joined)},
              "problems": problems, "unread": unread}
+    # A portrait kept from an earlier read without its licence gets one.
+    credit_portraits(cache, sizes_of, log)
     save_cache(cache, root)
     return cache
 
@@ -390,6 +470,16 @@ def problems(cache):
     if not cache:
         return []
     out = []
+    # Rule 87: a Commons portrait shown without its author and licence is
+    # the defect the credits fix; run 'judiciary' to read them.
+    unlicensed = sorted(nid for nid, entry in (cache.get("judges") or {}).items()
+                        if (entry.get("portrait") or {}).get("credit") == "Wikimedia Commons"
+                        and not entry["portrait"].get("licence"))
+    if unlicensed:
+        out.append(("error", "judge-portrait-licence-missing",
+                    f"{len(unlicensed)} judges' Wikimedia Commons portraits have no recorded "
+                    "licence; run 'judiciary' to read their files' descriptions",
+                    [f"FJC {nid}" for nid in unlicensed]))
     if cache.get("problems"):
         out.append(("warn", "judge-links-withheld",
                     f"{len(cache['problems'])} judges' Wikipedia links, Wikidata items or portraits "

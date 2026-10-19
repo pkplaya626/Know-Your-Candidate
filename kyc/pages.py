@@ -262,7 +262,9 @@ _CONGRESS_SOURCES = """\
                     as last read on <time data-results-as-of></time></span>; the November
                     ballot, where this site reads one, from the certified list of candidates
                     its election office publishes, credited on each race it sets; portraits
-                    from Congress.gov and Wikipedia.</p>
+                    from the House of Representatives, Congress.gov, Wikimedia Commons and
+                    candidates' campaign websites, each credited under the photograph on the
+                    profile, a Wikimedia Commons file with its author and licence.</p>
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $5,000 for the 2026 cycle
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People no longer in a race - beaten
@@ -491,10 +493,12 @@ _STATE_SCRIPTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/stategov.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-state.js",
 )
 
@@ -502,11 +506,21 @@ _DISTRICT_SCRIPTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/districts/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-districts.js",
 )
+
+# "Find who represents me" on a state's legislature and county pages: the
+# panel (kyc-findrep.js) is written into this slot, first on the page.
+# *view* is the id of the page's map: a district picked in the answer is
+# selected on this page, and the panel scrolls the map into view.
+def _findrep_slot(code, view):
+    return (f'                <section class="state-section findrep" id="findrep" data-findrep '
+            f'data-findrep-state="{_e(code)}" data-findrep-view="{_e(view)}"></section>')
 
 
 def _e(text):
@@ -1068,6 +1082,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
         f'                        <a class="btn" href="{_e(_learn("states"))}"><svg class="icon" aria-hidden="true"><use href="#i-landmark"/></svg> {_e(_guide_name("states"))}</a>',
         "                    </p>",
         "                </header>",
+        _findrep_slot(code, "legMap"),
         '                <div class="toolbar legislature-toolbar">',
         chambers,
         '                    <div class="party-legend" aria-label="Colours">',
@@ -1103,7 +1118,8 @@ def render_legislature_page(code, host, summary=None, dates=None):
         "                    gives it.</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
-        "../data/legislature/{code}.js", "../assets/kyc-regionmap.js", "../assets/kyc-legislature.js")]
+        "../data/legislature/{code}.js", "../data/lookup/index.js", "../assets/kyc-regionmap.js",
+        "../assets/kyc-findrep.js", "../assets/kyc-legislature.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(f"{title}: every district and member"),
@@ -1526,6 +1542,7 @@ def render_counties_page(code, host, listed=None):
         f'                        <a class="btn" href="{_e(_learn("local"))}"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg> {_e(_guide_name("local"))}</a>',
         "                    </p>",
         "                </header>",
+        _findrep_slot(code, "localMap"),
         '                <div class="segmented" role="group" aria-label="Map view">',
         f'                    <button type="button" data-view="counties" aria-pressed="true">{_e(button)}</button>',
         '                    <button type="button" data-view="cities" aria-pressed="false">Cities &amp; towns</button>',
@@ -1569,8 +1586,8 @@ def render_counties_page(code, host, listed=None):
         + ".</p>",
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
-        "../data/local/{code}.js", "../data/courtcounties.js", "../assets/kyc-regionmap.js",
-        "../assets/kyc-local.js")]
+        "../data/local/{code}.js", "../data/courtcounties.js", "../data/lookup/index.js",
+        "../assets/kyc-regionmap.js", "../assets/kyc-findrep.js", "../assets/kyc-local.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(title),
@@ -1828,13 +1845,19 @@ def _about_main(dates):
         "                            navigation can offer it again. To clear them, clear this site's data",
         "                            in your browser's settings.</li>",
         "                        <li>Portraits and some images load from the sites that publish them:",
-        "                            Wikimedia Commons, the House Clerk, Congress.gov, state legislatures",
-        "                            and campaign sites. Those sites see your IP address when your browser",
+        "                            Wikimedia Commons, the House Clerk, Congress.gov, state legislatures,",
+        "                            state officers' offices and their associations, and campaign sites,",
+        "                            some of them through WordPress.com's image service (i0.wp.com), which",
+        "                            serves a heavy photograph at a smaller size. Those sites see your IP",
+        "                            address when your browser",
         "                            fetches an image, as any website would; this site asks your browser",
         "                            not to tell them which page you were reading.</li>",
-        "                        <li>&#8220;Find my district&#8221; asks your browser for your location",
-        "                            and places it on the map on your device. It is never sent",
-        "                            anywhere.</li>",
+        "                        <li>&#8220;Find my district&#8221; and &#8220;Find who represents you&#8221;",
+        "                            ask your browser for your location, or take a ZIP code you type, and",
+        "                            look it up on your device, in this site&#8217;s own file for your",
+        "                            state. Neither is ever sent anywhere; the host sees only which",
+        "                            state&#8217;s file was fetched, as it would for that state&#8217;s",
+        "                            page.</li>",
         "                        <li>The site is served by GitHub Pages, which receives your IP address",
         "                            with each request, as any web host does; see",
         '                            <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub&#8217;s',
@@ -1867,7 +1890,11 @@ def _about_main(dates):
         f'                        <a href="{repo}/blob/main/LICENSE-DATA.md">Creative Commons Attribution',
         "                        4.0</a> (CC BY 4.0): you may reuse it, with credit to Know Your",
         "                        Candidate and the dates the data carries. Photographs, and the",
-        "                        datasets this project reads, keep their own owners' terms.</p>",
+        "                        datasets this project reads, keep their own owners' terms: each",
+        "                        photograph on a profile or an official's record is credited under",
+        "                        it, a Wikimedia Commons file with its author and licence as the",
+        "                        file's own page records them; a state officer's in the sources line",
+        "                        of their state's card.</p>",
         "                </section>",
         "            </article>",
     ])

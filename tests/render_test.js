@@ -11,9 +11,40 @@
 
 const fs = require("fs");
 const path = require("path");
-const { JSDOM, VirtualConsole } = require("jsdom");
+const { JSDOM, VirtualConsole, requestInterceptor } = require("jsdom");
 
 const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
+
+/* A script a page adds itself - "Find who represents me" loads one state's
+ * lookup and legislature files only when a reader asks (kyc-findrep.js) -
+ * is served from the site's own folder, as the browser would fetch it, and
+ * runs and fires its load event as in a browser. Anything else is refused,
+ * and nothing reaches the network: the pages load nothing from another host
+ * (CLAUDE.md), and a stylesheet is nothing a test reads. *served* lists the
+ * site's files a page asked for. */
+function siteResources(served, refuse) {
+  return {
+    interceptors: [requestInterceptor((request) => {
+      const u = new URL(request.url);
+      if (u.hostname !== "kyc.local") return new Response("", { status: 403 });
+      if (/\.css$/.test(u.pathname)) return new Response("", { headers: { "Content-Type": "text/css" } });
+      const file = path.join(SITE, ...decodeURIComponent(u.pathname).split("/").filter(Boolean));
+      served.push(u.pathname + u.search);
+      if (refuse && refuse.test(u.pathname)) return new Response("", { status: 503 });
+      if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return new Response("", { status: 404 });
+      return new Response(fs.readFileSync(file), {
+        headers: { "Content-Type": "application/javascript; charset=utf-8" },
+      });
+    })],
+  };
+}
+
+/* Until *test* holds, or *ms* pass: a lookup answers after its files load. */
+async function until(test, ms) {
+  const end = Date.now() + (ms || 5000);
+  while (!test() && Date.now() < end) await new Promise((r) => setTimeout(r, 10));
+  return test();
+}
 
 /* ------------------------------------------------------------------ setup */
 
@@ -133,8 +164,10 @@ function buildPage(page, opts) {
   }
   html = html.replace(/<!--inert-(\d+)-->/g, (m, i) => inert[Number(i)]);
 
+  const served = [];
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
+    resources: siteResources(served, opts.refuse),
     url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -163,7 +196,8 @@ function buildPage(page, opts) {
   });
 
   const { window } = dom;
-  const packed = { window, D: window.document, errors, sources: sources.map((m) => m[1].split("?v=")[0]) };
+  const packed = { window, D: window.document, errors, served,
+    sources: sources.map((m) => m[1].split("?v=")[0]) };
 
   // Wait for jsdom's own DOMContentLoaded rather than dispatching one. An
   // earlier version fired the event by hand, jsdom then fired its own, and
@@ -626,7 +660,8 @@ async function testDirectory() {
       img.setAttribute("data-profile", real.id);
       KYC.setPortrait(img, real, "116px");
       check("the dialog's portrait gets the sizes too",
-        img.getAttribute("srcset") === KYC.portraitSrcset(real) && img.getAttribute("sizes") === "116px");
+        img.getAttribute("srcset") === KYC.portraitSrcset(real, "116px") &&
+          img.getAttribute("sizes") === "116px");
       KYC.handleImageFallback(img, real.id);
       check("a size that fails is retried as the same photograph's plain URL",
         !img.hasAttribute("srcset") && !img.hasAttribute("sizes") &&
@@ -639,6 +674,102 @@ async function testDirectory() {
       check("the next profile's portrait does not keep the last one's sizes",
         !img.hasAttribute("srcset") && !img.hasAttribute("sizes"));
     }
+
+    // TECH-13: a 165px card on a 3x phone fetched a 494px original. No size
+    // wider than a 2x screen needs is offered; the smallest at least that
+    // wide is the last.
+    const four = { photos: ["https://u.test/x.jpg"], photoSet: [120, 250, 330, 494].map((w) =>
+      [w, "https://u.test/" + w + "px-x.jpg"]) };
+    const widths = (sizes) => KYC.portraitSrcset(four, sizes).split(", ").map((e) => e.split(" ")[1]);
+    check("a 165px card is offered sizes up to 330px, never the 494px original",
+      widths("165px").join() === "120w,250w,330w", widths("165px").join());
+    check("a 116px dialog portrait up to 250px", widths("116px").join() === "120w,250w",
+      widths("116px").join());
+    check("a 36px circle the smallest alone", widths("36px").join() === "120w", widths("36px").join());
+  });
+
+  suite("index.html — every portrait says whose photograph it is (rule 87)", () => {
+    // 148 of 381 Wikimedia portraits were CC BY or CC BY-SA, and none was
+    // credited; the footer credited every portrait to Congress.gov (TRUST-08).
+    const shown = window.legislatorsData.filter((p) => (p.photos || [])[0] &&
+      p.photos[0] !== "placeholder");
+    const bare = shown.filter((p) => !p.photoCredit || !(p.photoCredit.by || p.photoCredit.licence));
+    check("every profile that shows a photograph carries its credit", !bare.length,
+      bare.slice(0, 5).map((p) => p.id).join(","));
+    const unlicensed = shown.filter((p) => /wikimedia\.org/.test(p.photos[0]) &&
+      !(p.photoCredit || {}).licence);
+    check("and every Wikimedia one its licence", !unlicensed.length,
+      unlicensed.slice(0, 5).map((p) => p.id).join(","));
+
+    const line = () => D.getElementById("profileModalPhotoCredit");
+    const commons = shown.find((p) => (p.photoCredit || {}).via === "Wikimedia Commons" &&
+      p.photoCredit.by && p.photoCredit.licenceUrl && p.photoCredit.page);
+    check("a Commons portrait with an author and a licence link exists", !!commons);
+    if (commons) {
+      KYC.profile.open(commons.id);
+      const text = line().textContent;
+      check("the dialog credits its author, its licence and Commons",
+        !line().hidden && text.indexOf("Photo: " + commons.photoCredit.by + ", " +
+          commons.photoCredit.licence + ", via Wikimedia Commons") === 0, text);
+      check("linking the licence and the file's own page",
+        !!line().querySelector('a[href="' + commons.photoCredit.licenceUrl + '"]') &&
+          !!line().querySelector('a[href="' + commons.photoCredit.page + '"]'));
+      KYC.profile.close();
+    }
+
+    const house = shown.find((p) => p.photoSource === "clerk.house.gov" && p.photos.length > 2);
+    if (house) {
+      KYC.profile.open(house.id);
+      check("a House portrait is the House's",
+        line().textContent === "Photo: U.S. House of Representatives", line().textContent);
+      // A fallback that loads in the first one's place is another
+      // photograph, credited by the host that serves it.
+      const photo = D.getElementById("profileModalPhoto");
+      KYC.handleImageFallback(photo, house.id);
+      photo.dispatchEvent(new window.Event("load"));
+      const host = new URL(house.photos[1]).hostname;
+      check("a fallback photograph is credited to its own source",
+        line().textContent === "Photo: " + window.kycBuildMeta.photoCredits[host],
+        line().textContent);
+      KYC.profile.close();
+    }
+
+    const campaign = shown.find((p) => p.photoSource === "campaign-site");
+    if (campaign) {
+      KYC.profile.open(campaign.id);
+      check("a campaign's photograph is credited to its website, linked",
+        /^Photo: the campaign's website/.test(line().textContent) &&
+          !!line().querySelector("a[href^='https://']"), line().textContent);
+      KYC.profile.close();
+    }
+
+    const silhouette = window.legislatorsData.find((p) => (p.photos || [])[0] === "placeholder");
+    if (silhouette) {
+      KYC.profile.open(silhouette.id);
+      check("the silhouette is credited to no one", line().hidden && !line().textContent);
+      KYC.profile.close();
+    }
+
+    const hostile = KYC.photoCreditHtml({ by: '<img src=x onerror="1">', licence: "CC BY 4.0",
+      licenceUrl: "javascript:alert(1)", page: "https://commons.wikimedia.org/wiki/File:X.jpg",
+      via: "Wikimedia Commons" });
+    check("a credit is escaped, and links only http(s)",
+      !/<img/.test(hostile) && !/javascript:/.test(hostile) && /CC BY 4\.0/.test(hostile), hostile);
+    // A licence asking for an author the file's page does not name says so,
+    // and still links the file's page; it never prints a placeholder name.
+    const unrecorded = KYC.photoCreditHtml({ by: null, licence: "CC BY-SA 4.0",
+      page: "https://commons.wikimedia.org/wiki/File:Judge_Moore.jpg", via: "Wikimedia Commons",
+      authorUnrecorded: true });
+    check("a credit with no recorded author says so, and links the file",
+      /^Photo: author not recorded on Commons, /.test(unrecorded.replace(/<[^>]+>/g, "")) &&
+        /File:Judge_Moore\.jpg/.test(unrecorded), unrecorded);
+    const shownCredits = window.legislatorsData
+      .map((p) => KYC.photoCreditHtml(p.photoCredit).replace(/<[^>]+>/g, ""))
+      .filter(Boolean);
+    check("no credit prints a doubled phrase, a file name or an uploader's sentence",
+      shownCredits.length > 0 && shownCredits.every((t) =>
+        !/Unknown author Unknown author|\.jpe?g\s*:|I do not know|uploader|PDM-owner/i.test(t)),
+      shownCredits.filter((t) => /Unknown author Unknown|\.jpe?g\s*:|I do not know/i.test(t))[0]);
     const profileJs = fs.readFileSync(path.join(SITE, "assets", "kyc-profile.js"), "utf8");
     check("the dialog sets its portrait through setPortrait",
       /KYC\.setPortrait\(photo, item, "116px"\)/.test(profileJs) && !/photo\.src\s*=/.test(profileJs));
@@ -4286,7 +4417,466 @@ async function located(page, lat, lon, accuracy) {
   const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy) });
   built.D.getElementById("locateMe").click();
   const out = built.D.getElementById("locateResult");
-  return { text: out.textContent, html: out.innerHTML, D: built.D, window: built.window };
+  // The finer lines load first (kyc-findrep.js), so the answer comes after.
+  await until(() => !/Finding your location/.test(out.textContent));
+  return { text: out.textContent, html: out.innerHTML, D: built.D, window: built.window,
+    served: built.served, errors: built.errors };
+}
+
+/* "Find who represents me": a ZIP code typed into the panel on *page*. */
+async function askZip(page, zip, opts) {
+  const built = await buildPage(page, opts);
+  const slot = built.D.querySelector("[data-findrep]");
+  if (!slot) return Object.assign(built, { slot: null, out: null, text: "" });
+  slot.querySelector(".findrep-zip").value = zip;
+  slot.querySelector("form").dispatchEvent(new built.window.Event("submit",
+    { bubbles: true, cancelable: true }));
+  const out = slot.querySelector(".findrep-result");
+  await until(() => !out.hidden && !/Looking up/.test(out.textContent));
+  return Object.assign(built, { slot, out, text: out.textContent });
+}
+
+/* The same, from a location the browser shares. */
+async function askHere(page, lat, lon, accuracy) {
+  const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy) });
+  const slot = built.D.querySelector("[data-findrep]");
+  slot.querySelector("[data-findrep-locate]").click();
+  const out = slot.querySelector(".findrep-result");
+  await until(() => !out.hidden && !/Finding your location/.test(out.textContent));
+  return Object.assign(built, { slot, out, text: out.textContent });
+}
+
+/** A row of the answer by its heading. */
+function answerRow(out, heading) {
+  const row = [...out.querySelectorAll(".findrep-row")]
+    .find((r) => r.querySelector("dt").textContent.trim() === heading);
+  return row ? row.querySelector("dd") : null;
+}
+
+/** Who sits for a House district now, from the data (rule 27), so no test
+ *  names a member (rule 68). */
+function holdersOf(window, code, n) {
+  return window.legislatorsData.filter((p) => window.KYC.seated(p) && p.state === code &&
+    /House/.test(p.chamber) && String(p.districtNum) === String(n));
+}
+
+async function testFindRep() {
+  // Athens, Ohio: OH-12 on the map members were elected on, OH-2 on 2026's.
+  const athens = await askZip("index.html", "45701");
+  const { window, out } = athens;
+  const KYC = window.KYC;
+  const oh = (window.kycLookup || {}).OH;
+  const entry = oh && oh.zips["45701"];
+  suite("index.html — find who represents you, by ZIP code (GRID-06, PERSONA-04)", () => {
+    check("no page errors", athens.errors.length === 0, athens.errors.join(" | "));
+    const slot = athens.slot;
+    check("the home page's hero holds the panel, above the state picker",
+      !!slot && !!slot.closest(".intro") &&
+        !!(slot.compareDocumentPosition(athens.D.getElementById("introForm")) &
+          window.Node.DOCUMENT_POSITION_FOLLOWING));
+    const note = slot.querySelector(".findrep-privacy");
+    check("beside the control, in view: the ZIP code and location stay on the device",
+      !!note && /stay on this device/.test(note.textContent) && /sends them nowhere/.test(note.textContent) &&
+        slot.querySelector(".findrep-zip").getAttribute("aria-describedby") === note.id);
+    check("only Ohio's lookup and legislature files were loaded, each at its version (rule 76)",
+      athens.served.length === 2 && athens.served.every((s) => /\?v=[0-9a-f]{10}$/.test(s)) &&
+        athens.served.some((s) => /^\/data\/lookup\/oh\.js/.test(s)) &&
+        athens.served.some((s) => /^\/data\/legislature\/oh\.js/.test(s)), athens.served.join(", "));
+    check("the lookup's threshold is the build's (rule 85)", window.kycLookupIndex.whole === 0.99);
+    check("the answer is Ohio's", /ZIP 45701, Ohio/.test(athens.text), athens.text.slice(0, 200));
+    if (!entry) return check("Ohio's lookup holds 45701", false);
+    const record = KYC.recordPhase();
+    const now = record ? entry.next[0][0] : entry.cd[0][0];
+    const rep = answerRow(out, "U.S. representative");
+    const held = holdersOf(window, "OH", now);
+    check("it names the representative for the district members sit in, linked to the profile",
+      !!rep && (held.length ? held.every((p) => rep.innerHTML.indexOf("#/profile/" + p.id) !== -1 &&
+        rep.textContent.indexOf(p.name) !== -1) : /no sitting member|Vacant/.test(rep.textContent)) &&
+        rep.textContent.indexOf("OH-" + now) !== -1, rep && rep.textContent);
+    const race = answerRow(out, "Your 2026 House race") || answerRow(out, "The 2026 House race");
+    const raceId = "H-OH-" + String(entry.next[0][0]).padStart(2, "0") + "-2026";
+    check("and the 2026 race on the new map, linked to it on the state page",
+      !!race && !!race.querySelector('a[href="states/oh.html#race-' + raceId + '"]') &&
+        race.textContent.indexOf("OH-" + entry.next[0][0]) !== -1, race && race.innerHTML.slice(0, 200));
+    const raceData = window.kycRaces.find((r) => r.id === raceId);
+    const unfiled = ((raceData && raceData.results) || {}).otherNominees || [];
+    check("naming the nominees with no profile here too, as every view of a race does",
+      !!race && unfiled.every((n) => race.textContent.indexOf(n) !== -1), unfiled.join(", "));
+    check("in Ohio, redrawn, the representative and the race are on different maps, and it says so",
+      record || (now !== entry.next[0][0] && /redrawn for 2026/.test(athens.text)));
+    const sen = answerRow(out, "U.S. senators");
+    const senators = window.legislatorsData.filter((p) => KYC.seated(p) && p.state === "OH" &&
+      /Senate/.test(p.chamber));
+    check("both senators, by name", !!sen && senators.length > 0 &&
+      senators.every((p) => sen.textContent.indexOf(p.name) !== -1), sen && sen.textContent);
+    const leg = window.kycLegislature && window.kycLegislature.OH;
+    const upper = answerRow(out, "Ohio " + leg.chambers.upper.title);
+    const su = entry.su[0][0];
+    const senMembers = (leg.chambers.upper.members[su] || []).map((m) => m.name);
+    check("the state senator, on the legislature page's district",
+      !!upper && !!upper.querySelector('a[href="legislature/oh.html#/?d=' + su + '"]') &&
+        senMembers.every((n) => upper.textContent.indexOf(n) !== -1), upper && upper.innerHTML);
+    const lower = answerRow(out, "Ohio " + leg.chambers.lower.title);
+    const pct = (s) => Math.round(s * 100) + "%";
+    check("a ZIP code across two house districts lists both, each with its share of the land",
+      !!lower && entry.sl.length === 2 && entry.sl.every((p) =>
+        lower.querySelector('a[href="legislature/oh.html#/?chamber=lower&d=' + p[0] + '"]') &&
+        lower.textContent.indexOf(pct(p[1])) !== -1), lower && lower.textContent);
+    const county = answerRow(out, "County");
+    check("the county, linked to its governments",
+      !!county && !!county.querySelector('a[href="counties/oh.html#/?county=' + entry.co[0][0] + '"]'),
+      county && county.innerHTML);
+    check("and how to vote in Ohio (GRID-16)",
+      !!out.querySelector('a[href="states/oh.html#voting"]'));
+    check("the hero's own voting link now goes to Ohio's",
+      /states\/oh\.html#voting$/.test(athens.slot.querySelector("[data-findrep-vote]").getAttribute("href")));
+  });
+
+  const split = await askZip("index.html", "43215");
+  const splitEntry = split.window.kycLookup.OH.zips["43215"];
+  // A ZIP 99% or more in one district names it alone; found in the data.
+  const near = Object.keys(oh.zips).find((z) => oh.zips[z].cd.length > 1 &&
+    oh.zips[z].cd[0][1] >= 0.99 && oh.zips[z].cd[0][1] < 1);
+  const almost = near ? await askZip("index.html", near) : null;
+  const none = await askZip("index.html", "00000");
+  const bad = await askZip("index.html", "12");
+  suite("index.html — what a ZIP code cannot say (rule 85)", () => {
+    const rep = answerRow(split.out, "U.S. representative");
+    const now = split.window.KYC.recordPhase() ? splitEntry.next : splitEntry.cd;
+    check("a ZIP across a district line lists every district, with its share, and chooses none",
+      now.length > 1 && !!rep && rep.querySelectorAll(".findrep-share").length === now.length &&
+        now.every((p) => rep.textContent.indexOf("OH-" + p[0]) !== -1), rep && rep.textContent);
+    check("and says a ZIP code can cross lines, offering the reader's location",
+      /can cross district lines/.test(split.text) && /use your location/.test(split.text) &&
+        !!split.out.querySelector('a[target="_blank"][rel~="noopener"]'), split.text.slice(-400));
+    check("a ZIP 99% in one district names that one alone", !!almost &&
+      (() => {
+        const r = answerRow(almost.out, "U.S. representative");
+        const e = oh.zips[near].cd;
+        return almost.window.KYC.recordPhase() || (!!r && !r.querySelector(".findrep-share") &&
+          r.textContent.indexOf("OH-" + e[0][0]) !== -1 && r.textContent.indexOf("OH-" + e[1][0] + ")") === -1);
+      })(), near);
+    check("a ZIP with no Census ZIP area says why: PO-box-only ZIP codes have none",
+      /not one of the Census Bureau's ZIP Code Tabulation Areas/.test(none.text) &&
+        /post office boxes/.test(none.text) && none.served.length === 0, none.text);
+    check("anything but a ZIP code is asked for again", /five-digit ZIP code/.test(bad.text), bad.text);
+  });
+
+  // A ZIP code typed into the grid's search: no profile carries one.
+  const searched = await buildPage("index.html", { hash: "#/?q=45701" });
+  const searchOut = searched.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 45701, Ohio/.test(searchOut.textContent));
+  suite("index.html — a ZIP code in the search (GRID-06)", () => {
+    check("is answered by the hero's panel, not 'try a state code' alone",
+      /ZIP 45701, Ohio/.test(searchOut.textContent) &&
+        searched.D.querySelector("[data-findrep] .findrep-zip").value === "45701",
+      searchOut.textContent.slice(0, 120));
+  });
+
+  // The reader's location, on the home page.
+  const here = await askHere("index.html", 39.33, -82.10, 25);
+  const paris = await askHere("index.html", 48.8566, 2.3522, 25);
+  suite("index.html — find who represents you, from a location", () => {
+    check("no page errors", here.errors.length === 0, here.errors.join(" | "));
+    const KYC2 = here.window.KYC;
+    const rep = answerRow(here.out, "U.S. representative");
+    const want = KYC2.recordPhase() ? 2 : 12;
+    check("Athens, Ohio: the representative of the district on the map members sit under",
+      /Your location, Ohio/.test(here.text) && !!rep && rep.textContent.indexOf("OH-" + want) !== -1 &&
+        holdersOf(here.window, "OH", want).every((p) => rep.textContent.indexOf(p.name) !== -1),
+      rep && rep.textContent);
+    const race = answerRow(here.out, "Your 2026 House race") || answerRow(here.out, "The 2026 House race");
+    check("and the 2026 race on the new map", !!race && /OH-2\b/.test(race.textContent), race && race.textContent);
+    check("the state senator and representative, and the county", !!answerRow(here.out, "County") &&
+      here.out.querySelectorAll('a[href^="legislature/oh.html#/?"]').length >= 2);
+    check("never 'within about 0 km'", !/about 0 k?m/.test(here.text));
+    check("an inland point says nothing of a border or shore", !/border or shore/.test(here.text),
+      here.text.slice(-300));
+    check("outside every state, it says so and names nothing",
+      /not in any state/.test(paris.text) && !paris.out.querySelector(".findrep-row"), paris.text);
+  });
+
+  // A state page, a legislature page, a county page: the same panel.
+  const ohState = await askZip("states/oh.html", "85004");
+  const legPage = await askZip("legislature/oh.html", "45701");
+  const coPage = await askZip("counties/oh.html", "45701");
+  suite("the panel on the state, legislature and county pages (PERSONA-05, STATEGOV-04)", () => {
+    const slot = ohState.slot;
+    check("the state page opens with it, for its state, before the voting block",
+      !!slot && slot.getAttribute("data-findrep-state") === "OH" &&
+        !!(slot.compareDocumentPosition(ohState.D.getElementById("voting")) &
+          ohState.window.Node.DOCUMENT_POSITION_FOLLOWING));
+    check("with 'How to vote in Ohio' beside it, to the voting block",
+      !!slot.querySelector('.findrep-form a[href="#voting"]') &&
+        /How to vote in Ohio/.test(slot.querySelector(".findrep-form").textContent));
+    check("a ZIP code from another state is answered for that state",
+      /ZIP 85004, Arizona/.test(ohState.text), ohState.text.slice(0, 120));
+    check("no page errors on the state page", ohState.errors.length === 0, ohState.errors.join(" | "));
+    check("the legislature page has it, and answers from its own file",
+      !!legPage.slot && legPage.served.every((s) => !/legislature\//.test(s)) &&
+        !!legPage.out.querySelector('a[href="../legislature/oh.html#/?d=' +
+          legPage.window.kycLookup.OH.zips["45701"].su[0][0] + '"]'), legPage.served.join(", "));
+    check("and sends the reader to the state page for Congress, which it does not load, " +
+      "carrying the ZIP code in the fragment",
+      !!legPage.out.querySelector('a[href="../states/oh.html#findrep?zip=45701"]'));
+    check("the county page has it, naming the county on that page",
+      !!coPage.slot && !!coPage.out.querySelector('a[href^="../counties/oh.html#/?county="]'));
+    check("no page errors on the legislature and county pages",
+      legPage.errors.length + coPage.errors.length === 0, legPage.errors.concat(coPage.errors).join(" | "));
+  });
+
+  await testFindRepReview(legPage, coPage);
+  await testFindRepSecondReview();
+}
+
+/* The PR #104 second review: a page with no profiles spoke of congressional
+ * lines it lists none of, and lost the ZIP code on the way to the state
+ * page; the grid's search did not take ZIP+4. */
+async function testFindRepSecondReview() {
+  // Downtown Dallas: near a congressional line and a state legislative one.
+  const legHere = await askHere("legislature/tx.html", 32.7767, -96.797);
+  const stateHere = await askHere("states/tx.html", 32.7767, -96.797);
+  // The legislature page's link, followed: the state page asks the ZIP code.
+  const followed = await buildPage("states/oh.html", { hash: "#findrep?zip=45701" });
+  const followedOut = followed.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 45701, Ohio/.test(followedOut.textContent));
+  // ZIP+4, the panel's own form, typed into the grid's search.
+  const plus4 = await buildPage("index.html", { hash: "#/?q=43215-1234" });
+  const plus4Out = plus4.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 43215, Ohio/.test(plus4Out.textContent));
+  suite("the panel where no profiles load, and ZIP+4 in the grid (PR #104 second review)", () => {
+    check("the state page, at the same spot, does speak of a congressional line (the check below is not vacuous)",
+      /congressional district line|several congressional districts/.test(stateHere.text), stateHere.text.slice(-400));
+    check("the legislature page's notes speak of no congressional line it does not list",
+      !/congressional district line|congressional districts meet|several congressional/.test(legHere.text) &&
+        /state legislative district line/.test(legHere.text), legHere.text.slice(-400));
+    const congress = answerRow(legHere.out, "Congress");
+    check("and its Congress link, for a location, says to use it again on the state page",
+      !!congress && /use your location again/.test(congress.textContent) &&
+        !!congress.querySelector('a[href="../states/tx.html#findrep"]'), congress && congress.innerHTML);
+    const mapLink = legHere.out.querySelector("a[href*='districts/']");
+    check("its district map link says it is the congressional map",
+      !mapLink || /congressional district/.test(mapLink.textContent), mapLink && mapLink.textContent);
+    check("the state page asks a ZIP code the link carried, and drops it from the address",
+      /ZIP 45701, Ohio/.test(followedOut.textContent) && !/zip=/.test(followed.window.location.href) &&
+        followed.D.querySelector("[data-findrep] .findrep-zip").value === "45701",
+      followed.window.location.href);
+    check("the grid hands ZIP+4 to the panel by its first five digits",
+      /ZIP 43215, Ohio/.test(plus4Out.textContent) &&
+        /ZIP code is answered above/.test(plus4.D.getElementById("resultsLabel").textContent),
+      plus4Out.textContent.slice(0, 120));
+    check("no page errors", legHere.errors.length + stateHere.errors.length + followed.errors.length +
+      plus4.errors.length === 0,
+      legHere.errors.concat(stateHere.errors, followed.errors, plus4.errors).join(" | "));
+  });
+}
+
+/* The PR #104 review: the legislature and county pages load no profiles.js,
+ * and the panel there named "OH Senate", sent "How to vote" to a #voting the
+ * page does not have, and dropped the district map and the state's lookup. */
+async function testFindRepReview(legPage, coPage) {
+  suite("the panel on pages without profiles.js names the state and links what it has", () => {
+    for (const [label, built] of [["legislature", legPage], ["county", coPage]]) {
+      const top = built.slot.querySelector(".findrep-form .findrep-vote a");
+      check(label + " page: 'How to vote in Ohio' goes to the state page's voting block, " +
+        "not a #voting the page does not have",
+        !!top && top.getAttribute("href") === "../states/oh.html#voting" &&
+          /How to vote in Ohio/.test(top.textContent) && !built.D.getElementById("voting"),
+        top && top.outerHTML);
+      check(label + " page: the answer calls the state Ohio, never OH",
+        /ZIP 45701, Ohio/.test(built.text) && !/\bOH (Senate|House)\b/.test(built.text) &&
+          !/How to vote in OH\b/.test(built.text), built.text.slice(0, 160));
+      check(label + " page: it links the district map and Ohio's own lookup",
+        !!built.out.querySelector('a[href^="../districts/oh.html#/?"]') &&
+          /Check with Ohio's own lookup/.test(built.text), built.text.slice(-300));
+      check(label + " page: no note about House rows the answer does not show",
+        !/redrawn for 2026/.test(built.text));
+    }
+    const leg = legPage.window.kycLegislature.OH;
+    check("the legislature page's answer names the chambers in full",
+      !!answerRow(legPage.out, "Ohio " + leg.chambers.upper.title) &&
+        !!answerRow(legPage.out, "Ohio " + leg.chambers.lower.title));
+  });
+
+  // A district picked in the answer is selected on the page, and the map,
+  // below the panel, is brought into view.
+  const scrolled = [];
+  const picked = await askZip("legislature/oh.html", "45701", { setup: (w) => {
+    w.Element.prototype.scrollIntoView = function () { scrolled.push(this.id); };
+  } });
+  const link = picked.out.querySelector('a[href^="../legislature/oh.html#/?d="]');
+  if (link) link.click();
+  await until(() => scrolled.indexOf("legMap") !== -1, 1000);
+  suite("legislature/oh.html — a district picked in the panel's answer", () => {
+    check("is selected, and the map is brought into view",
+      !!link && /d=/.test(picked.window.location.hash) && scrolled.indexOf("legMap") !== -1,
+      picked.window.location.hash + " " + scrolled.join(","));
+  });
+
+  // The territories' and D.C.'s areas, in their own words (rule 75).
+  const sanJuan = await askZip("index.html", "00901");
+  const dc = await askZip("index.html", "20001");
+  suite("index.html — D.C. and the territories: no 'County' (rule 75)", () => {
+    check("Puerto Rico's area is a municipio", !answerRow(sanJuan.out, "County") &&
+      !!answerRow(sanJuan.out, "Municipio"), sanJuan.text.slice(0, 300));
+    check("D.C. is its own county-equivalent: no row for it", /ZIP 20001/.test(dc.text) &&
+      !answerRow(dc.out, "County"), dc.text.slice(0, 300));
+    check("and is 'the District of Columbia' in a sentence, as its state page says",
+      /How to vote in the District of Columbia/.test(dc.text) &&
+        !/in District of Columbia\b/.test(dc.text), dc.text.slice(-300));
+  });
+
+  // Never "the state" of a territory: no state line on an island, and no
+  // "your state's own lookup" where none is linked (rule 75).
+  const sanJuanHere = await askHere("index.html", 18.4655, -66.1057, 25);
+  const samoa = await askZip("index.html", "96799");
+  suite("index.html — a territory's edge is its shore", () => {
+    const hit = sanJuanHere;
+    check("San Juan, by the shore, is answered for Puerto Rico", /Your location, Puerto Rico/.test(hit.text),
+      hit.text.slice(0, 120));
+    check("with no word of a state line or another side to live on",
+      !/state line|other side of that line|border or shore/.test(hit.text), hit.text.slice(-400));
+    check("American Samoa's answer sends no one to 'your state's own lookup'",
+      /ZIP 96799, American Samoa/.test(samoa.text) && !/your state/.test(samoa.text), samoa.text.slice(-300));
+  });
+
+  // The legislature's members in the legislature page's words.
+  const omaha = await askZip("index.html", "68102");
+  const anchorage = await askZip("index.html", "99501");
+  suite("index.html — a state legislator's party and district, in words", () => {
+    check("Nebraska's members are Nonpartisan, never '(N)'",
+      /Nonpartisan/.test(omaha.text) && !/\(N\)/.test(omaha.text), omaha.text.slice(0, 400));
+    const ak = anchorage.window.kycLegislature && anchorage.window.kycLegislature.AK;
+    const entry = anchorage.window.kycLookup.AK.zips["99501"];
+    const upper = ak && answerRow(anchorage.out, "Alaska " + ak.chambers.upper.title);
+    const names = (entry.su || []).map((p) => ak.chambers.upper.districts[p[0]].name);
+    check("Alaska's lettered Senate district reads 'District I', not 'I'",
+      !!upper && names.length > 0 && names.every((n) => upper.textContent.indexOf("District " + n) !== -1),
+      upper && upper.textContent);
+  });
+
+  // A ZIP code across a state line says so, first, and links each state's lookup.
+  const crossing = await askZip("index.html", "42223");
+  suite("index.html — a ZIP code across a state line", () => {
+    const note = crossing.out.querySelector(".findrep-crosses");
+    const states = crossing.out.querySelectorAll(".findrep-place");
+    check("says it crosses a state line, naming each state with its share",
+      !!note && states.length === 2 && /crosses a state line/.test(note.textContent) &&
+        /Kentucky/.test(note.textContent) && /Tennessee/.test(note.textContent),
+      note && note.textContent);
+    check("and links each state's own lookup",
+      /Check with Kentucky's own lookup/.test(crossing.text) &&
+        /Check with Tennessee's own lookup/.test(crossing.text), crossing.text.slice(-400));
+  });
+
+  // Just inside Missouri, a block from the Kansas line.
+  const kc = await askHere("index.html", 39.09, -94.6050, 25);
+  const kcFailed = await buildPage("index.html", { refuse: /^\/data\/lookup\/mo\.js$/,
+    setup: at(39.09, -94.6050, 0, 25) });
+  const failedSlot = kcFailed.D.querySelector("[data-findrep]");
+  failedSlot.querySelector("[data-findrep-locate]").click();
+  const failedOut = failedSlot.querySelector(".findrep-result");
+  await until(() => !failedOut.hidden && !/Finding your location/.test(failedOut.textContent));
+  const hit = await kc.window.KYC.findRep.where(-94.6050, 39.09, 25);
+  const kansas = await kc.window.KYC.findRep.where(-94.6050, 39.09, 25, "KS");
+  suite("index.html — a location near a state line", () => {
+    const inMissouri = /Your location, Missouri/.test(kc.text);
+    check("the point is within Kansas's margin too, so the refusal below is a real test",
+      kansas.code === "KS" && kansas.found.cd.kind !== "none" && !kansas.found.cd.inside.length, kansas.code + " " +
+        (kansas.found && kansas.found.cd.kind));
+    check("Kansas City, Missouri, a block from Kansas, is answered for Missouri", inMissouri,
+      kc.text.slice(0, 120));
+    check("and says it is near the state's border, which a district line note would not",
+      /Missouri's border or shore/.test(kc.text) && /If you live on the other side of that line/.test(kc.text),
+      kc.text.slice(-500));
+    check("with Missouri's file refused, the neighbour's edge is not answered: it did not load",
+      !inMissouri || (/did not load/.test(failedOut.textContent) &&
+        !/Your location, Kansas/.test(failedOut.textContent)), failedOut.textContent);
+    check("the legislature's coarser lines are read with a wider margin, by the file's own figure",
+      !!hit.leg && hit.leg.lineErrorKm > 0 &&
+        Math.abs(hit.legMarginKm - (hit.marginKm + hit.leg.lineErrorKm)) < 1e-9,
+      hit.leg && [hit.marginKm, hit.legMarginKm, hit.leg.lineErrorKm].join(" "));
+  });
+
+  // The grid: a ZIP code in the search says where it was answered.
+  const searched = await buildPage("index.html", { hash: "#/?q=45701" });
+  const senate = await buildPage("index.html", { hash: "#/?view=senate&q=45701" });
+  const senateOut = senate.D.querySelector("[data-findrep] .findrep-result");
+  await until(() => /ZIP 45701, Ohio/.test(senateOut.textContent));
+  suite("index.html — the grid's empty state for a ZIP code", () => {
+    const note = searched.D.querySelector("#noResults .empty-zip");
+    check("says the ZIP code was answered above, with a way there that keeps the search",
+      !!note && !note.hidden && /answered\s+above/.test(note.textContent) &&
+        !!note.querySelector("button[data-findrep-reveal]") && !note.querySelector('a[href="#findrep"]'),
+      note && note.outerHTML);
+    check("and the results label says so",
+      /ZIP code is answered above/.test(searched.D.getElementById("resultsLabel").textContent));
+    check("the Senate view hands a ZIP code to the panel too", /ZIP 45701, Ohio/.test(senateOut.textContent),
+      senateOut.textContent.slice(0, 120));
+  });
+
+  // A ZIP code typed into the grid's search, which also reads states,
+  // districts and officials (#103): the hero's panel answers it, the grid
+  // says so in both its line and its empty state, Escape takes it back, and
+  // typed again after a clear it is asked again.
+  const typed = await buildPage("index.html");
+  const tw = typed.window, TD = typed.D;
+  const heroOut = TD.querySelector("[data-findrep] .findrep-result");
+  const heroZip = TD.querySelector("[data-findrep] .findrep-zip");
+  const typedLabel = () => TD.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+  typeInto(tw, TD, "43215");
+  await until(() => /ZIP 43215, Ohio/.test(heroOut.textContent), 4000);
+  await settle(250);
+  const firstLabel = typedLabel();
+  const zipNoteShown = TD.querySelector("#noResults .empty-zip");
+  const emptyShown = !TD.getElementById("noResults").hidden;
+  const cardsShown = TD.querySelectorAll("#results .card").length;
+  const officialsShown = !TD.getElementById("officialResults").hidden;
+  TD.getElementById("searchInput").dispatchEvent(new tw.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  await settle(250);
+  const clearedLabel = typedLabel();
+  const clearedHash = tw.location.hash;
+  const noteAfterClear = TD.querySelector("#noResults .empty-zip");
+  const noteGone = !noteAfterClear || noteAfterClear.hidden;
+  heroZip.value = "";
+  typeInto(tw, TD, "43215");
+  await until(() => heroZip.value === "43215", 4000);
+  suite("index.html — a ZIP code typed into the grid's search", () => {
+    check("the hero's panel answers it, with the ZIP code in its box",
+      /ZIP 43215, Ohio/.test(heroOut.textContent) && !!answerRow(heroOut, "U.S. senators"),
+      heroOut.textContent.slice(0, 160));
+    check("the results line says it was answered above", /ZIP code is answered above/.test(firstLabel),
+      firstLabel);
+    check("with no profile shown, the empty state says so and offers the answer",
+      cardsShown > 0 || (emptyShown && !!zipNoteShown && !zipNoteShown.hidden &&
+        !!zipNoteShown.querySelector("button[data-findrep-reveal]")),
+      cardsShown + " " + (zipNoteShown && zipNoteShown.outerHTML));
+    check("and no official is offered for a ZIP code", !officialsShown);
+    check("Escape takes the query and the ZIP words back",
+      !/ZIP code/.test(clearedLabel) && !/[?&]q=/.test(clearedHash) &&
+        noteGone,
+      clearedLabel + " | " + clearedHash);
+    check("typed again after a clear, it is asked again", heroZip.value === "43215");
+    check("no page errors", typed.errors.length === 0, typed.errors.join(" | "));
+  });
+
+  // The states index: no "How to vote" link to the page the reader is on.
+  const list = await buildPage("states/index.html");
+  const listVote = list.D.querySelector("[data-findrep] [data-findrep-vote]");
+  suite("states/index.html — the voting button waits for a state", () => {
+    check("hidden until a state is known, never a link to this page",
+      !!listVote && (listVote.hidden || !/states\/index\.html$/.test(listVote.getAttribute("href"))),
+      listVote && listVote.outerHTML);
+  });
+
+  // The map page's sidebar (RACES-12).
+  const onMap = await askZip("map.html", "45701");
+  suite("map.html — find who represents you in the sidebar (RACES-12)", () => {
+    check("the sidebar holds the panel", !!onMap.slot && !!onMap.slot.closest(".sidebar"));
+    check("and answers a ZIP code", /ZIP 45701, Ohio/.test(onMap.text) &&
+      !!answerRow(onMap.out, "U.S. senators"), onMap.text.slice(0, 200));
+    check("no page errors", onMap.errors.length === 0, onMap.errors.join(" | "));
+  });
 }
 
 // Never "between" one district, or none.
@@ -4304,11 +4894,21 @@ async function testFindMyDistrict() {
   const { window, D, errors } = page;
   const KYC = window.KYC;
   const state = window.kycDistricts.PA;
-  // A town near a line, found with the page's own geometry.
-  const near = places.PA.find((p) => {
-    const f = KYC.districtMap.locate(p[1], p[2], 30);
-    return f && f[0].kind === "line" && f[0].inside.length + f[0].near.length === 2;
-  });
+  D.getElementById("locateMe").click();
+  const said = D.getElementById("locateResult");
+  await until(() => !/Finding your location/.test(said.textContent));
+  // A town near a line, found with the lines the page places a reader on:
+  // the lookup file's (kyc-findrep.js), loaded by the click above.
+  let near = null, nearFound = null;
+  for (const p of places.PA) {
+    const hit = await KYC.findRep.where(p[1], p[2], 30, "PA");
+    const f = hit.code && hit.found.cd;
+    if (f && f.kind === "line" && f.inside.length + f.near.length === 2) {
+      near = p;
+      nearFound = f;
+      break;
+    }
+  }
   suite("districts/pa.html — find my district", () => {
     check("no page errors", errors.length === 0, errors.join(" | "));
     const button = D.getElementById("locateMe");
@@ -4325,8 +4925,6 @@ async function testFindMyDistrict() {
     });
     check("every Pennsylvania town lands on its own point", off.length === 0,
       off.slice(0, 3).map((p) => p[0]).join(", "));
-    button.click();
-    const said = D.getElementById("locateResult");
     check("Erie is in PA-16, as on record", !said.hidden &&
       /^You are in PA-16\./.test(said.textContent), said.textContent);
     check("and PA-16 is the district shown", D.getElementById("districtPick").value === "16",
@@ -4334,6 +4932,14 @@ async function testFindMyDistrict() {
     check("with the state's own lookup to confirm it",
       !!said.querySelector('a[target="_blank"][rel~="noopener"]'));
     check("a Pennsylvania town lies near a line, to test with", !!near);
+    check("the finer lines came from Pennsylvania's lookup file, at its version",
+      page.served.some((s) => /^\/data\/lookup\/pa\.js\?v=[0-9a-f]{10}$/.test(s)), page.served.join(", "));
+    const rep = answerRow(said, "U.S. representative");
+    check("the answer names who represents the reader, not only a number (PERSONA-18)",
+      !!rep && holdersOf(window, "PA", 16).every((p) => rep.textContent.indexOf(p.name) !== -1) &&
+        !!answerRow(said, "U.S. senators"), said.textContent.slice(0, 300));
+    check("the reader's point is marked on the map", D.querySelectorAll(".reader-pin").length >= 1 &&
+      /your location marked/.test(D.querySelector(".district-statewide").getAttribute("aria-label")));
   });
 
   const rough = await located("districts/pa.html", plat, plon, 20000);
@@ -4343,14 +4949,96 @@ async function testFindMyDistrict() {
       /too rough to place in a district/.test(rough.text) && !/You are in/.test(rough.text) &&
         /about 20 km/.test(rough.text), rough.text);
     if (line) {
-      const f = KYC.districtMap.locate(near[1], near[2], 30)[0];
-      const both = f.inside.concat(f.near).map((n) => "PA-" + n);
+      const both = nearFound.inside.concat(nearFound.near).map((n) => "PA-" + n);
       check("near a line, both districts are named, neither chosen, and it says why",
         /near the line between/.test(line.text) && both.every((s) => line.text.indexOf(s) !== -1) &&
-          !/You are in/.test(line.text) && (line.text.match(/simplified/g) || []).length === 1,
+          !/You are in/.test(line.text) &&
+          (line.text.match(/cannot say which side you are on/g) || []).length === 1,
         line.text);
+      check("and how near: within about 400 m of the line, not 3 km (RACES-01)",
+        /Within about 400 m of a line/.test(line.text), line.text);
       check("and the map shows both", line.D.getElementById("districtPick").value === "");
     }
+  });
+
+  // Athens, Ohio: OH-12 on the map members were elected on, OH-2 on the
+  // 2026 map. Each map's card shows its own district (PERSONA-01).
+  const athens = await located("districts/oh.html", 39.33, -82.10, 25);
+  // Brooklyn, with a fix good to 1.5 km: more districts in reach than the
+  // page can show, which is not an approximate location (RACES-02).
+  const brooklyn = await located("districts/ny.html", 40.6710, -73.9814, 1500);
+  suite("districts — each map's own district, and where several meet", () => {
+    check("no page errors", athens.errors.length === 0, athens.errors.join(" | "));
+    check("Athens is in OH-12 on the old map and OH-2 on the new",
+      /On the map members were elected on, you are in OH-12\./.test(athens.text) &&
+        /On the map for 2026, you are in OH-2\./.test(athens.text), athens.text.slice(0, 200));
+    check("the address carries both maps' districts",
+      /[#&?]d=2(&|$)/.test(athens.window.location.hash) && /was=12/.test(athens.window.location.hash),
+      athens.window.location.hash);
+    const cards = athens.D.querySelectorAll(".plan-card");
+    const facts = (card) => [...card.querySelectorAll(".district-fact-title")].map((h) => h.textContent);
+    check("the old map's card shows OH-12, the new map's OH-2",
+      cards.length === 2 && facts(cards[0]).length === 1 && /^OH-12 on the/.test(facts(cards[0])[0]) &&
+        facts(cards[1]).length === 1 && /^OH-2 on the/.test(facts(cards[1])[0]),
+      facts(cards[0]).concat(facts(cards[1])).join(" | "));
+    check("each close-up is of its own map's district, and the reader's point is on both",
+      /Close-up: OH-12/.test(cards[0].textContent) && /Close-up: OH-2/.test(cards[1].textContent) &&
+        cards[0].querySelectorAll(".reader-pin").length >= 2 && cards[1].querySelectorAll(".reader-pin").length >= 2);
+    const rep = answerRow(athens.D.getElementById("locateResult"), "U.S. representative");
+    const now = athens.window.KYC.recordPhase() ? 2 : 12;
+    check("the answer names the representative of the reader's district on the map members sit under",
+      !!rep && rep.textContent.indexOf("OH-" + now) !== -1 &&
+        holdersOf(athens.window, "OH", now).every((p) => rep.textContent.indexOf(p.name) !== -1),
+      rep && rep.textContent);
+    const reopened = athens.window.location.hash;
+    check("a shared link opens on the same two districts", /d=2/.test(reopened) && /was=12/.test(reopened));
+    check("a fix where several districts meet says so, never 'approximate' or 'about 0 km'",
+      /where several districts meet/.test(brooklyn.text) && !/approximate/.test(brooklyn.text) &&
+        !/about 0 k?m/.test(brooklyn.text) && /NY-\d+/.test(brooklyn.text), brooklyn.text.slice(0, 200));
+    check("a distance under a kilometre is said in metres",
+      athens.window.KYC.findRep.distance(30) === "about 30 m" &&
+        athens.window.KYC.findRep.distance(2500) === "about 2.5 km");
+  });
+
+  // South Houston with a fix good to 2.5 km: four districts in reach on the
+  // map members were elected on, one on the 2026 map. The crowded sentence
+  // lists the crowded map's districts and names that map, and the other map
+  // still says where the reader is (PR #104 review: it listed the 2026
+  // map's districts as though they were the crowded ones).
+  const houston = await located("districts/tx.html", 29.60, -95.28, 2500);
+  const houstonHit = await houston.window.KYC.findRep.where(-95.28, 29.60, 2500, "TX");
+  suite("districts/tx.html — crowded on one map only", () => {
+    const reachOf = (f) => f.inside.concat(f.near);
+    const old = houstonHit.code ? reachOf(houstonHit.found.cd) : [];
+    const now = houstonHit.code ? reachOf(houstonHit.found.next) : [];
+    check("the point is crowded on the old map and not the new (a real test)",
+      old.length > 3 && now.length > 0 && now.length <= 3, old.join(",") + " / " + now.join(","));
+    const said = /several districts meet \(([^)]*)\)/.exec(houston.text);
+    check("the crowded districts are the old map's, and the sentence names that map",
+      !!said && /^on the map members were elected on, /.test(said[1]) &&
+        old.every((n) => new RegExp("\\bTX-" + n + "\\b").test(said[1])), houston.text.slice(0, 240));
+    check("and the 2026 map's own district is said beside it",
+      now.every((n) => new RegExp("On the map for 2026, you [^.]*\\bTX-" + n + "\\b").test(houston.text)),
+      houston.text.slice(0, 400));
+  });
+  const shared = await buildPage("districts/oh.html", { hash: "#/?d=2&was=12" });
+  suite("districts/oh.html — a shared link with both maps' districts", () => {
+    const cards = shared.D.querySelectorAll(".plan-card");
+    check("opens OH-12 on the old map and OH-2 on the new",
+      cards.length === 2 && /^OH-12 on the/.test((cards[0].querySelector(".district-fact-title") || {}).textContent) &&
+        /^OH-2 on the/.test((cards[1].querySelector(".district-fact-title") || {}).textContent));
+  });
+
+  // The lookup file does not load: the page's own lines answer, with their
+  // wider margin - never "not in Pennsylvania" for a reader in it.
+  const offline = await buildPage("districts/pa.html", { setup: at(plat, plon), refuse: /\/lookup\// });
+  offline.D.getElementById("locateMe").click();
+  const offOut = offline.D.getElementById("locateResult");
+  await until(() => !/Finding your location/.test(offOut.textContent));
+  suite("districts/pa.html — when the finer lines do not load", () => {
+    check("Erie is still placed in PA-16, on the page's own lines",
+      /You are in PA-16\./.test(offOut.textContent) && !/not in Pennsylvania/.test(offOut.textContent),
+      offOut.textContent.slice(0, 160));
   });
 
   const paris = await located("districts/pa.html", 48.8566, 2.3522);
@@ -4360,8 +5048,9 @@ async function testFindMyDistrict() {
   const bay = await located("districts/tx.html", 29.55, -94.85);
   const tx = town("TX", "Austin");
   const austin = await located("districts/tx.html", tx[2], tx[1]);
-  const texhomaTX = await located("districts/tx.html", 36.4983, -101.7849);
-  const texhomaOK = await located("districts/ok.html", 36.5035, -101.7832);
+  // Texhoma straddles the line at 36.5 degrees north: 30 m either side of it.
+  const texhomaTX = await located("districts/tx.html", 36.4997, -101.7849);
+  const texhomaOK = await located("districts/ok.html", 36.5003, -101.7832);
   suite("districts — find my district at the edges", () => {
     check("a location far outside the state says so",
       /not in Pennsylvania/.test(paris.text), paris.text);
@@ -4369,8 +5058,9 @@ async function testFindMyDistrict() {
     check("a refused location says what to do, and links the state's lookup",
       /did not share a location/.test(deniedOut.textContent) &&
         !!deniedOut.querySelector('a[target="_blank"]'), deniedOut.textContent);
-    check("Kansas City, Kansas is at Missouri's edge or outside it, never 'between' one district",
-      /at the edge of Missouri or just outside it/.test(kck.text) && !lonelyBetween(kck.html), kck.text);
+    check("Kansas City, Kansas is not placed in Missouri, nor 'between' one district",
+      (/not in Missouri/.test(kck.text) || /at the edge of Missouri or just outside it/.test(kck.text)) &&
+        !/You are in MO-/.test(kck.text) && !lonelyBetween(kck.html), kck.text);
     check("over Galveston Bay no sentence names nothing",
       !lonelyBetween(bay.html) && !/between \./.test(bay.text) &&
         !/On the map members were elected on, the map/.test(bay.text), bay.text);
@@ -6248,10 +6938,44 @@ async function testStateGov() {
         !/party-/.test(shape(unconfirmed).style.fill) &&
         /Not confirmed by the office/.test(D.getElementById("mapLegend").textContent));
     }
+    // STATEGOV-13: no attorney general had a photograph, so their rows read
+    // differently from every row above them.
+    const pictured = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.photo &&
+      !data.states[c].ag.unconfirmed);
+    check("attorneys general are pictured", !!pictured);
+    if (pictured) {
+      const ag = data.states[pictured].ag;
+      pick("#/?state=" + pictured + "&mode=ag");
+      check("a confirmed attorney general's row carries their photograph",
+        [...D.querySelectorAll("#delegation .gov-officer-photo")].some((i) =>
+          i.getAttribute("src") === ag.photo));
+      const sources = (D.querySelector("#delegation .gov-sources") || {}).textContent || "";
+      check("and the sources say whose photograph it is (rule 87)",
+        sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
+    }
+    // A named holder without a photograph keeps the photograph's column, so
+    // the row lines up with the pictured rows above it.
+    const bare = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.name &&
+      !data.states[c].ag.photo && !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed);
+    if (bare) {
+      pick("#/?state=" + bare + "&mode=ag");
+      const row = [...D.querySelectorAll("#delegation .gov-officer")].find((li) =>
+        li.textContent.indexOf(data.states[bare].ag.name) !== -1);
+      check("an unpictured attorney general's row keeps the photograph's column",
+        !!row && !row.classList.contains("gov-officer-text") &&
+        !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"));
+    }
   });
 
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
+    const uncredited = stateCodes.filter((c) => {
+      const s = data.states[c];
+      return (s.governor.headshot && !s.governor.headshotBy) ||
+        ["lt", "ag", "sos"].some((k) => s[k] && s[k].photo && !s[k].photoBy);
+    });
+    check("every photograph on a state's card says whose it is (rule 87)", !uncredited.length,
+      uncredited.join(","));
     check("a majority is more than half of all seats", stateCodes.every((c) => {
       const s = data.states[c];
       return ["upper", "lower"].every((k) => {
@@ -7695,7 +8419,12 @@ async function testFederal() {
     check("an executive photo is drawn from the sizes of that one file", sized.length > 0 &&
       sized.every((img) => urlsOf(img).every((u) =>
         u.split("?")[0] === img.getAttribute("src").split("?")[0])) &&
-      sized.some((img) => urlsOf(img).length > 1));
+      sized.some((img) => urlsOf(img).length > 0));
+    // TECH-13: a 72px photo is offered no size wider than a 2x screen needs.
+    const widthsOf = (img) => [...(img.getAttribute("srcset") || "").matchAll(/\s(\d+)w/g)]
+      .map((m) => parseInt(m[1], 10));
+    check("and offered no size wider than a 2x screen needs", sized.every((img) =>
+      widthsOf(img).filter((w) => w >= 144).length <= 1));
     // The court tables; the list of vacancies links courts again, by row.
     const links = [...D.querySelectorAll('#courts table a[href^="../courts/"]')]
       .filter((a) => !a.closest("#vacancy-list")).map((a) => a.getAttribute("href"))
@@ -7927,6 +8656,10 @@ async function testFederal() {
       !!modal.querySelector('a[href^="https://www.senate.gov/"]'));
     check("and no party", !PARTY_WORDS.test(D.getElementById("officialModalMeta").textContent) &&
       !modal.querySelector(".party-tag"));
+    const credit = D.getElementById("officialModalPhotoCredit");
+    check("their photograph is credited under their name, as a profile's is (rule 87)",
+      office.holder.photo ? !credit.hidden && credit.textContent === "Photo: The White House"
+        : credit.hidden, credit.textContent);
     KYC.official.close();
     const record = d.offices.find((o) => o.holder && (o.holder.politicalHistory || {}).rows &&
       o.holder.politicalHistory.rows.some((r) => r.congress));
@@ -8634,7 +9367,22 @@ async function testFederalAudit() {
       const file = (/\/commons\/(?:thumb\/)?([0-9a-f]\/[0-9a-f]{2}\/[^/]+)/.exec(withLinks.judge.portrait.set[0][1]) || [])[1];
       check("a portrait, in sizes of one Wikimedia file only (rule 42)", !!file && urls.length > 1 &&
         urls.every((u) => u.startsWith("https://upload.wikimedia.org/") && u.includes(file)), urls.join(" "));
-      check("credited, with a link to the file", /Wikimedia Commons/.test(doc.getElementById("officialModalSource").textContent));
+      // Rule 87: its author and licence, as the file's own page gives them,
+      // on the line under the name, linked to the file.
+      const credit = doc.getElementById("officialModalPhotoCredit");
+      const p = withLinks.judge.portrait;
+      check("a judge's Commons portrait carries its licence", !!p.licence, JSON.stringify(p));
+      check("credited under the name with its author, licence and Commons, linked to the file",
+        !credit.hidden && credit.textContent.indexOf("Photo: " + (p.by ? p.by + ", " :
+          p.authorUnrecorded ? "author not recorded on Commons, " : "") + p.licence +
+          ", via Wikimedia Commons") === 0 && !!credit.querySelector('a[href="' + p.source + '"]'),
+        credit.textContent);
+      // TECH-13: the 116px portrait is offered no size wider than a 2x
+      // screen needs; a 3x phone fetched the Commons original.
+      const widths = (photo.getAttribute("srcset") || "").split(",").map((x) =>
+        parseInt(x.trim().split(" ")[1], 10)).filter((w) => w > 0);
+      check("the dialog's srcset stops at the first size a 2x screen needs",
+        widths.length > 0 && widths.filter((w) => w >= 232).length <= 1, widths.join(" "));
     });
   }
 }
@@ -8750,7 +9498,7 @@ async function testFrame() {
     check("privacy as the code behaves: no cookies or analytics, two settings kept on the device, " +
       "the location never sent", /No cookies, no analytics/.test(text) &&
         /theme you picked and the last state you looked at/.test(text) &&
-        /never sent anywhere/.test(text));
+        /Neither is ever sent anywhere/.test(text) && /ZIP code/.test(text));
     check("accessibility: the standard aimed at, its limits, and how to report",
       /WCAG\)? 2\.2 at level AA/.test(text) && /Known limits/.test(text));
     check("the refresh schedule, in words", /every day from Oct\. 15 to Nov\. 2, 2026/.test(text) &&
@@ -9224,6 +9972,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
   if (!only || only === "redistricting") await testFindMyDistrict();
+  if (!only || only === "findrep") await testFindRep();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();

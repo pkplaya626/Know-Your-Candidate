@@ -35,6 +35,10 @@ VOTES_DIR = os.path.join(DATA_DIR, "votes")
 # The global each chamber's file assigns, and its path under data/.
 VOTES_GLOBALS = {"house": "kycVotesHouse", "senate": "kycVotesSenate"}
 VOTES_FILES = {chamber: f"votes/{chamber}.js" for chamber in VOTES_GLOBALS}
+# "Find who represents me": one file per state, loaded only when a reader
+# types a ZIP code or shares a location, and the index that finds them.
+LOOKUP_DIR = os.path.join(DATA_DIR, "lookup")
+LOOKUP_INDEX_FILE = os.path.join(LOOKUP_DIR, "index.js")
 
 # The scripts each page must load, in the order it must load them. The build
 # never rewrites a page; it only reports when one has drifted out of step with
@@ -48,9 +52,11 @@ PAGE_REQUIREMENTS = {
         "assets/kyc.js",
         "data/profiles.js",
         "data/odds.js",
+        "data/lookup/index.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
+        "assets/kyc-findrep.js",
         "assets/kyc-senate.js",
         "assets/kyc-directory.js",
     ),
@@ -60,10 +66,12 @@ PAGE_REQUIREMENTS = {
         "data/geo.js",
         "data/odds.js",
         "data/stategov.js",
+        "data/lookup/index.js",
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
         "assets/kyc-stategov.js",
+        "assets/kyc-findrep.js",
         "assets/kyc-usmap.js",
         "assets/kyc-map.js",
     ),
@@ -75,10 +83,12 @@ STATE_PAGE_REQUIREMENTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/stategov.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-state.js",
 )
 
@@ -90,9 +100,11 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../data/profiles.js",
     "../data/odds.js",
     "../data/districts/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-districts.js",
 )
 
@@ -101,7 +113,9 @@ DISTRICT_PAGE_REQUIREMENTS = (
 LEGISLATURE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/legislature/{code}.js",
+    "../data/lookup/index.js",
     "../assets/kyc-regionmap.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-legislature.js",
 )
 
@@ -132,7 +146,9 @@ COUNTIES_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/local/{code}.js",
     "../data/courtcounties.js",
+    "../data/lookup/index.js",
     "../assets/kyc-regionmap.js",
+    "../assets/kyc-findrep.js",
     "../assets/kyc-local.js",
 )
 
@@ -451,6 +467,101 @@ def check_districts(maps, root="."):
             problems.append((path, "missing or carries no signature"))
         elif committed != districts_signature(payload):
             problems.append((path, "stale"))
+    return problems
+
+
+def lookup_file(code, root="."):
+    """``candidate_profiles_site/data/lookup/tx.js``."""
+    return os.path.join(root, LOOKUP_DIR, f"{code.lower()}.js")
+
+
+def lookup_signature(payload):
+    """Content hash of one lookup payload, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
+
+
+def write_lookup(payloads, root="."):
+    """Emit one ``data/lookup/<st>.js`` per state whose content changed.
+
+    Several of them can be on one page at once - a ZIP code that crosses a
+    state line - so each adds its state to ``window.kycLookup`` rather than
+    replacing it. Returns ``[(path, size)]`` for the files written."""
+    os.makedirs(os.path.join(root, LOOKUP_DIR), exist_ok=True)
+    written = []
+    for code, payload in sorted(payloads.items()):
+        path = lookup_file(code, root)
+        signature = lookup_signature(payload)
+        if read_signature(path=path) == signature:
+            continue
+        text = (
+            _BANNER.format(source=f"lookup_maps/{code.lower()}.json", built=build_timestamp())
+            + "window.kycLookup = window.kycLookup || {};\n"
+            + f"window.kycLookup[{_json(code)}] = {_json(payload)};\n"
+            + 'window.kycLookupMeta = {"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    return written
+
+
+def lookup_stamps(codes, root="."):
+    """``{code: {"lookup": path, "legislature": path}}``: each file the
+    lookup loads, relative to the site's root, stamped with its content
+    signature as a page's script tags are (rule 76). Read from the files as
+    written, so the index can only be built after them."""
+    from . import assets
+
+    out = {}
+    for code in codes:
+        name = code.lower() + ".js"
+        entry = {"lookup": f"data/lookup/{name}?v={assets.data_version('lookup/' + name, root)}"}
+        if os.path.exists(legislature_file(code, root)):
+            entry["legislature"] = (f"data/legislature/{name}?v="
+                                    f"{assets.data_version('legislature/' + name, root)}")
+        out[code] = entry
+    return out
+
+
+def write_lookup_index(payload, root="."):
+    """Emit ``data/lookup/index.js`` when its content changed."""
+    path = os.path.join(root, LOOKUP_INDEX_FILE)
+    signature = lookup_signature(payload)
+    if read_signature(path=path) == signature:
+        return None
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="lookup_maps/*.json, data/lookup/*.js, data/legislature/*.js, "
+                       "data/voting_links.json",
+                       built=build_timestamp())
+        + f"window.kycLookupIndex = {_json(payload)};\n"
+        + 'window.kycLookupIndexMeta = {"signature":"' + signature + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def check_lookup(payloads, root="."):
+    """``[(path, problem)]`` for lookup files missing or out of date, the
+    index among them (its stamps are read from the files on disk)."""
+    from . import lookup
+
+    problems = []
+    for code, payload in sorted(payloads.items()):
+        path = lookup_file(code, root)
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != lookup_signature(payload):
+            problems.append((path, "stale"))
+    if problems:
+        return problems
+    from . import voting
+    index = lookup.index(payloads, lookup_stamps(payloads, root),
+                         voting.for_page(voting.load_cache(root)))
+    path = os.path.join(root, LOOKUP_INDEX_FILE)
+    committed = read_signature(path=path)
+    if committed is None:
+        problems.append((path, "missing or carries no signature"))
+    elif committed != lookup_signature(index):
+        problems.append((path, "stale"))
     return problems
 
 

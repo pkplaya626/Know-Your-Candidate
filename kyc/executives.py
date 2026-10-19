@@ -169,8 +169,44 @@ def fetch(pause=1.0, previous=None):
             if size is None and old.get("headshot") == entry["headshot"]:
                 size = old.get("headshotBytes")
             out[entry["state"]]["headshotBytes"] = size
+            weigh_headshot(out[entry["state"]], old)
         time.sleep(pause)
     return out
+
+
+def weigh_headshot(gov, old=None, weigh=None):
+    """Weigh *gov*'s NGA headshot (``headshotWeight``) and, when it is over
+    the caps a portrait is held to (``photos.too_heavy``: 300 KB, 1,200px),
+    find the same file smaller (``headshotSmall``, ``headshotSmallWeight``)
+    through ``photos.lighter_form``. In place; returns *gov*.
+
+    The NGA posts no smaller copy and resizes nothing itself; 27 of its 55
+    headshots weighed 320 KB to 7.6 MB, each drawn in a circle of 40-72px
+    on every state page (TECH-13). Photon serves each one scaled: the same
+    photograph, checked to be the same shape. A weight that cannot be read
+    keeps the last one read of the same file (rule 8)."""
+    from .photos import lighter_form, too_heavy
+    if weigh is None:
+        from .portraits import measure as weigh
+
+    old = old or {}
+    same = old.get("headshot") == gov.get("headshot")
+    for key in ("headshotWeight", "headshotSmall", "headshotSmallWeight"):
+        gov.pop(key, None)
+    weight = weigh(gov["headshot"]) or (old.get("headshotWeight") if same else None)
+    if not weight:
+        return gov
+    gov["headshotWeight"] = weight
+    if not too_heavy(weight):
+        return gov
+    time.sleep(1.0)
+    found = lighter_form(gov["headshot"], weight, weigh)
+    if not found and same and old.get("headshotSmall") and not weigh(old["headshotSmall"]):
+        # The smaller form could not be read now; the last one read stands.
+        found = old["headshotSmall"], old.get("headshotSmallWeight")
+    if found and found[1]:
+        gov["headshotSmall"], gov["headshotSmallWeight"] = found
+    return gov
 
 
 # --------------------------------------------------------------- wikidata

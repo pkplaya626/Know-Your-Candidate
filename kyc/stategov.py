@@ -72,10 +72,6 @@ def coalition_holds(code, records, chambers):
                        f"belong to {max(sessions) if sessions else 'an unknown one'}")
     return True, ""
 
-# The NGA posts no smaller copy of its headshots, and a guessed size URL is
-# a 404. Most are 0.3-0.9 MB; one is 7.6 MB, for a 72px circle. A headshot
-# whose size is unknown or above this is left off the card.
-HEADSHOT_MAX_BYTES = 1_000_000
 
 
 class StateGovError(RuntimeError):
@@ -217,8 +213,86 @@ def _governor(gov, problems=None):
     for key in ("website", "phone", "address"):
         if gov.get(key):
             out[key] = gov[key]
-    if gov.get("headshot") and 0 < (gov.get("headshotBytes") or 0) <= HEADSHOT_MAX_BYTES:
-        out["headshot"] = gov["headshot"]
+    shown = headshot(gov)
+    if shown:
+        out["headshot"] = shown
+        out["headshotBy"] = "National Governors Association"
+    return out
+
+
+def headshot(gov):
+    """The NGA headshot the card shows, or ``""``: the file itself when it is
+    within the caps every portrait is held to (``photos.too_heavy``), else
+    the same file smaller (``executives.weigh_headshot``), else none - the
+    NGA's run to 7.6 MB, for a circle of 40-72px (TECH-13). A headshot
+    never weighed is not shown: unknown is not small."""
+    from .photos import too_heavy
+
+    if not gov.get("headshot"):
+        return ""
+    weight = gov.get("headshotWeight") or (
+        {"bytes": gov["headshotBytes"]} if gov.get("headshotBytes") else None)
+    if not weight:
+        return ""
+    if not too_heavy(weight):
+        return gov["headshot"]
+    small = gov.get("headshotSmallWeight")
+    if gov.get("headshotSmall") and small and not too_heavy(small):
+        return gov["headshotSmall"]
+    return ""
+
+
+def officer_photos(code, entry):
+    """Apply ``overrides.OFFICER_PHOTOS`` to one state's offices, in place:
+    a photograph for a holder whose roster has none, while the roster names
+    the person the entry was checked for. Returns a problem for each entry
+    that no longer fits - the office changed hands, or the roster now has a
+    photograph of its own - so a stale one is never shown (rule 87)."""
+    from .overrides import OFFICER_PHOTOS
+
+    problems = []
+    for (state, office), photo in sorted(OFFICER_PHOTOS.items()):
+        if state != code:
+            continue
+        holder = entry.get(office)
+        field, by_field, page_field = (("headshot", "headshotBy", "headshotPage")
+                                       if office == "governor"
+                                       else ("photo", "photoBy", "photoPage"))
+        name = " ".join(str((holder or {}).get("name") or "").split())
+        if (not isinstance(holder, dict) or holder.get("unconfirmed") or holder.get("disputed")
+                or holder.get("notMember") or name != photo["name"]):
+            problems.append(f"{code} {office}: overrides.OFFICER_PHOTOS is for {photo['name']}; "
+                            f"the roster names {name or 'no confirmed holder'}, so no "
+                            "photograph is shown")
+            continue
+        if holder.get(field):
+            problems.append(f"{code} {office}: the roster now has a photograph of {name}; "
+                            "overrides.OFFICER_PHOTOS may be unneeded")
+            continue
+        holder[field] = photo["photo"]
+        holder[by_field] = photo["by"]
+        holder[page_field] = photo["page"]
+    return problems
+
+
+def unpictured(states):
+    """One line per office naming the confirmed holders the card shows
+    without a photograph (STATEGOV-13): a person's to look for one from
+    their office or its association, never a search."""
+    out = []
+    for office, label in (("governor", "governors"), ("lt", "lieutenant governors"),
+                          ("sos", "secretaries of state"), ("ag", "attorneys general")):
+        codes = []
+        for code, entry in sorted(states.items()):
+            holder = entry.get(office) or {}
+            if not holder.get("name") or any(holder.get(k) for k in (
+                    "unconfirmed", "disputed", "unlisted", "vacant", "none", "notMember")):
+                continue
+            if not holder.get("headshot" if office == "governor" else "photo"):
+                codes.append(code)
+        if codes:
+            out.append(f"{len(codes)} {label} have no photograph from their office or its "
+                       f"association: {', '.join(codes)}")
     return out
 
 
@@ -290,6 +364,7 @@ def build(root="."):
             entry["territory"] = True
         entry.update(officers.for_state(code, officer_cache, disputes))
         problems.extend(office_links(code, entry))
+        problems.extend(officer_photos(code, entry))
         entry.update(courts.for_state(code, court_cache))
         # Its federal courts: the district courts in it and its court of
         # appeals (kyc/federal_courts.py), each linked to its own page.
@@ -322,6 +397,7 @@ def build(root="."):
     missing = [c for c in STATES if c not in states]
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
+    problems.extend(unpictured(states))
     payload = {
         "states": states,
         "sources": {

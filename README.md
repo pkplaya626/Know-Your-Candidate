@@ -64,10 +64,11 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… refresh` | `fetch`, then `build` |
 | `python tools/fetch_district_maps.py` | Rebuild `district_maps/`: every state's district boundaries, the new 2026 maps, and the towns to label (network) |
 | `python tools/fetch_local_maps.py` | Rebuild `local_maps/`: every incorporated place, one point each, for the county pages (network) |
+| `python tools/fetch_lookup_maps.py` | Rebuild `lookup_maps/`: every ZIP code area's share of each district and county, and the finer boundaries a location is placed on, for "Find who represents you" (network) |
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2259 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2357 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -204,7 +205,8 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   no cookies, analytics or accounts; two settings in `localStorage` (the theme
   and the last state viewed); images from the hosts that publish them, asked
   for with no referrer (`<meta name="referrer" content="no-referrer">`);
-  "Find my district" never sends the location. Accessibility: WCAG 2.2 AA as
+  "Find my district" and "Find who represents you" never send the location
+  or the ZIP code. Accessibility: WCAG 2.2 AA as
   the aim, what is tested, the known limits. The licence: MIT for the code,
   CC BY 4.0 for the data.
 - **Report a problem**: every footer, the profile dialog and an official's
@@ -1064,6 +1066,45 @@ URL, and `validate` fails a `photoSet` that names another file.
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
 | `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile) or `campaign-site` |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
+| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the site). Absent for the silhouette |
+
+### Credits and weights
+
+Every photograph the page shows says whose it is (rule 87). The profile and
+official dialogs print one line under the name: "Photo: Gage Skidmore, CC
+BY-SA 3.0, via Wikimedia Commons", the licence linked to its deed and
+"Wikimedia Commons" to the file's page. In October 2026, 153 of the 394
+Wikimedia portraits were CC BY or CC BY-SA, whose terms require exactly that,
+and none was credited. `portraits` reads each Commons file's `Artist`,
+`LicenseShortName` and `LicenseUrl` from its `extmetadata` (fifty files a
+request, one request a second), strips the markup from the author - with
+what Commons hides (a duplicate "Unknown author" span), an uploader's note
+about themselves, a leading file name, and any "unknown" or sentence that
+names no one (`portraits.author_of`) - names a licence code ("PDM-owner" is
+the Public Domain Mark), and keeps them in the cache as `credit`, with the
+`form` of the reading so an older one is read again; a file Wikipedia holds
+as non-free is not shown, and one whose credit Commons has not yet answered
+for waits for the next run. A fallback photograph that loads in the first one's place is credited
+by its host, from `kycBuildMeta.photoCredits`. `validate` fails a photograph
+with no credit (`photo-uncredited`) and a Commons portrait with no recorded
+licence (`photo-licence-missing`).
+
+A portrait not on Wikimedia is one file at one size, so its weight is
+recorded when it is found: `bytes`, `width` and `height` in the portrait
+cache for the House Clerk's (50-100 KB, 335px), `portraitWeight` in the
+enrichment cache for a campaign's, `headshotWeight` in the executives cache
+for a governor's NGA headshot. An image over 300 KB or 1,200px
+(`photos.MAX_PORTRAIT_BYTES`, `MAX_PORTRAIT_PX`) is shown smaller from the
+same file (`photos.lighter_form`): its host's own resizer (Squarespace,
+imgix) or WordPress.com's Photon (`i0.wp.com/<host>/<path>?w=500`), at 500px
+or 330px, once that copy is weighed, within the caps and the same shape as
+the original. Where neither serves it, the original is shown all the same,
+and `portraitHeavy` says so (`kept: true`). On 2026-10-18, 21 of the
+campaign portraits were over the caps: 20 are shown smaller, one at full
+size; 33 of the 55 governors' headshots are shown through Photon
+(`headshotSmall`). The page offers a srcset no size wider than a 2x screen
+needs for the width it draws, so a 165px card stops at the 330px file and a
+judge's 116px portrait at the 250px one.
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
 hand-corrected URL.
@@ -1684,6 +1725,29 @@ confirm it. A few offices need another official page
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.
 
+An attorney general's photograph is the office's own
+(`officers.add_ag_photos`), read from the pages that confirmed the name and
+the attorney general's page they link ("Meet the Attorney General", "About
+Nick Brown"): never NAAG's, which refuses every script, never a party
+association's, and only for a holder the office confirmed. An image is taken
+when its file name or alt text carries the surname and says it is a likeness
+("headshot", "portrait", "photo of") or is nothing but the name and the
+title; when nothing in its words or class says logo, banner, seal, header,
+slider or a scene ("talking to a townhall crowd", "sworn in"); when it is
+head-and-shoulders shaped; and when it, or a size of the same file its
+srcset or its host's resizer serves, is no heavier than 300 KB or 1,200px.
+The cache keeps `photo`, `photoPage` and `photoWeight`; a read that
+concludes nothing keeps the same person's last photograph. On 2026-10-18 the
+offices of 19 of the 48 confirmed attorneys general showed one that passed;
+the others' are too heavy (California's is 6 MB), landscape, unlabelled or
+drawn by script, and each build lists them. A photograph the rosters cannot
+tie to a person - NASS files some under the state's code, "AZ.jpg" - or one
+from a governor's own office where the NGA's is over 1 MB is shown through
+`overrides.OFFICER_PHOTOS`, an entry naming the holder it was checked for,
+the page, its weight and the evidence, and it is withheld, with a warning,
+once the roster names someone else. Each card's sources line says whose
+every photograph on it is.
+
 ### What else is on the November 3 ballot
 
 The site lists the candidates for Congress, but a reader's ballot holds
@@ -1851,7 +1915,7 @@ per court show them (below).
 | Who sits on the Supreme Court | supremecourt.gov's list of the justices (rule 57) | The directory's open Supreme Court rows include two retired justices, who are not members: read naively it seats eleven |
 | The courts, and the circuits | `kyc/federal_courts.py`, from 28 U.S.C. 41 and the directory's court names | 13 courts of appeals, 91 Article III district courts, the Court of International Trade; Guam's, the Northern Mariana Islands' and the Virgin Islands' courts are Article IV courts the directory does not cover |
 | The territorial courts' judges | Each court's own website (`kyc/territorial_courts.py`): Guam's "Judicial Officers" page, the Northern Mariana Islands' banner, each Virgin Islands judge's own page | A recipe per court, as for the state high courts (rule 57): district judges only, never more than the statute's seats (48 U.S.C. 1424b, 1614, 1821), at most one chief; a page not read keeps the last roster, and one never read says so - never "none". Shown by name and title, with nothing to open |
-| A judge's Wikipedia article, Wikidata item and portrait | The FJC's own page for the judge's `nid`, whose canonical address is the judge's slug; the Wikidata item carrying that slug as P2736 (`kyc/judge_links.py`) | Two ids, never a name. Two items for one slug, a label or article title without the surname, an item whose year of birth is not the directory's (or that gives none), two images or two articles: nothing. A portrait is a JPEG, PNG or WebP no more than a fifth wider than tall, not in `overrides.NOT_A_PORTRAIT`, drawn from Wikimedia's sizes of that one file (rule 42) and credited to Wikimedia Commons. Read by `judiciary`; a failure keeps the last links |
+| A judge's Wikipedia article, Wikidata item and portrait | The FJC's own page for the judge's `nid`, whose canonical address is the judge's slug; the Wikidata item carrying that slug as P2736 (`kyc/judge_links.py`) | Two ids, never a name. Two items for one slug, a label or article title without the surname, an item whose year of birth is not the directory's (or that gives none), two images or two articles: nothing. A portrait is a JPEG, PNG or WebP no more than a fifth wider than tall, not in `overrides.NOT_A_PORTRAIT`, drawn from Wikimedia's sizes of that one file (rule 42) and credited under the judge's name with its author and licence as the file's Commons page records them (`by`, `licence`, `licenceUrl`, read with the file's size); a file with no recorded licence, or a non-free one, is not shown, and the build fails a Commons portrait without a licence (`judge-portrait-licence-missing`). Read by `judiciary`; a failure keeps the last links |
 | Each court's website | uscourts.gov's list of court websites (`kyc/court_info.py`) | Joined to the court ids by the circuit, state and district the list names, never by host name (`ca-n` is `cand.uscourts.gov`); every host the judiciary's own; each address fetched once |
 | Which district court, and which division, covers each county | 28 U.S.C. 81-131 as govinfo publishes it (`tools/fetch_court_districts.py`, `kyc/court_districts.py`) into `data/court_districts.json`, with the amendments since the edition | The statute's names joined to the Census counties by name within the state; every county of a state of several districts placed exactly once or the build fails; a Code spelling or typo is an evidenced alias; Virginia's independent cities placed by their neighbours only where all agree |
 
@@ -2340,24 +2404,97 @@ A second source was tried first and rejected: USGS GNIS disagrees with the
 Census by kilometres for dozens of ordinary towns, and for Alvin, Texas, it is
 the USGS point that is out of town.
 
+### Find who represents you
+
+The home page's hero, every state page, and every legislature and county page
+open with **Find who represents you**, and the map page's sidebar holds it
+too: a ZIP code box and a **Use my location** button, with **How to vote in
+your state** beside them (`assets/kyc-findrep.js`). The voting button goes to
+the state page's voting block (on the states list it waits until a state is
+known). A ZIP code typed into the grid's search is answered by the panel,
+and the empty grid says so with a button back to the answer. One answer
+names, each linked:
+
+- the U.S. representative, on the map members sit under, and the 2026 House
+  race, on the map for 2026 where the state was redrawn (in Athens, Ohio:
+  OH-12 now, OH-2 on the ballot), with the race's people and their status
+  words, nominees with no profile here included;
+- both senators, and any Senate race on the ballot;
+- the state senator and representative, from the legislature page's own
+  file, with their party in words and their district as the legislature
+  names it ("District I", "Chittenden-16"), linked to the district there; a
+  district with nobody listed says "nobody listed", and members the map
+  cannot place are pointed to;
+- the county, by the county page's own name for it (a parish, a borough, a
+  planning region, an independent city), linked to its governments; in a
+  territory, its municipio, municipality, island or district, as the Census
+  Bureau calls them (`lookup.TERRITORY_AREAS`); none for D.C. and Guam, each
+  its own county-equivalent.
+
+The legislature and county pages load no `profiles.js`, so the state's name,
+its district map and its own lookup come from the lookup index
+(`lookup.place_info`), and members of Congress are linked on the state page.
+
+Everything happens on the device. The page downloads this site's file for the
+reader's state, `data/lookup/<st>.js`, and looks the ZIP code or the point up
+in it; nothing the reader typed or shared is sent anywhere, and the panel says
+so beside the control. The Census Bureau's geocoder would take an address,
+but it sends no CORS header, so a page could call it only by loading a remote
+script, which the site never does, and it would send the address away.
+
+A ZIP code is not a place (rule 85). The Census Bureau maps ZIP codes as ZIP
+Code Tabulation Areas, built from the addresses in each block; a ZIP code used
+only for post office boxes, or created since 2020, has none, and the answer
+says so. A ZIP code across a state line says so before either state's answer,
+and links each state's own lookup. A ZIP area's share of a district is a share of its land, from the
+Bureau's relationship files: to the 119th Congress's districts, to the 2024
+state legislative districts (the session year of every legislature map on
+the site), and to the counties, except Connecticut's, whose planning regions
+replaced its counties in 2022 and are measured instead. No relationship file
+exists for a 2026 map, so `tools/fetch_lookup_maps.py` measures those shares
+by overlaying the ZIP areas on the enacted plan; the same measurement of the
+119th map is compared with the Bureau's file for every redrawn state and
+written into the file (it differs by 0.05 to 0.3 percentage points on
+average). A ZIP area with 99% or more of its land in one district names it;
+anything else lists every district with its share, says a ZIP code can cross
+lines, and offers the reader's location and the state's own lookup.
+
+A location is placed on the Census Bureau's 1:500,000 boundaries (each
+redrawn state's own plan for the 2026 map), simplified to 30 m or a
+thirty-thousandth of the state's size, and on the legislature file's own
+lines through the projection it carries (`projection`). Within 400 m of a
+line, plus the browser's own stated accuracy, the answer names both sides and
+says why, naming the kind of line: a congressional or state legislative
+district line, a county line, or the state line and the shore. The
+legislature's lines are coarser (simplified at 120-300 m and rounded for
+drawing), so their margin is wider by what each file records (`lineErrorKm`),
+and the answer says so. A state whose file did not load is never answered
+with a neighbour's whose edge is near. Only the states whose box holds the point are loaded, and only
+the reader's state's files are fetched for a ZIP code
+(`data/lookup/index.js`: each ZIP prefix's states, and every file's
+versioned address, rule 76).
+
 ### Find my district
 
 A district page with more than one seat has a **Find my district** button.
 The browser shares the reader's location, if they allow it, and the page
-places it on the map **on the device**: nothing is sent anywhere. Each
+places it **on the device**: nothing is sent anywhere. Each
 state's district file carries the projection the build drew it with
 (`projection`: the Albers parallels and meridian, and the fit), so the page
 projects the location exactly as the towns on the map were projected; a test
 replays every town's longitude and latitude through the page's own code and
 checks it lands on the town's point.
 
-The maps are the Census Bureau's 1:5,000,000 cartographic boundaries,
-simplified again for display. A reviewer measured them against the finer
-1:500,000 boundaries and the official 2026 plans: in about 145,000 test
-points none was placed in the wrong district with confidence, and the
-deepest misplacement was 0.85 km. So the page allows 3 km, plus however far
-off the browser says its own fix may be (a Wi-Fi or IP location is often
-several kilometres), and answers in one of five ways:
+The location is placed on the same finer lines as Find who represents you,
+from the state's lookup file. The page's own drawing is the Census Bureau's
+1:5,000,000 boundaries, simplified again for display; within 3 km of its
+lines it could not tell a reader which side they were on, which in a big city
+was nearly everyone (RACES-01). They are used only when the lookup file does
+not load, with the 3 km margin. The answer names who represents the reader
+and the 2026 race (PERSONA-18), draws a pin at their point on every view of
+both maps, and in a redrawn state picks out each map's own district: the
+address carries both (`#/?d=2&was=12`, PERSONA-01). It answers in one of
+these ways:
 
 - "You are in PA-16": inside one district, no line within reach;
 - "near the line between PA-2 and PA-3": both are named, neither chosen;
@@ -2367,8 +2504,10 @@ several kilometres), and answers in one of five ways:
   MO-5": inside no district, but close to one;
 - "That location is not in Pennsylvania", with a link to find the state.
 
-A fix rougher than 10 km, or one that reaches more than three districts, is
-"too rough to place in a district". A state redrawn for 2026 is answered on
+A fix rougher than 10 km is "too rough to place in a district"; a fix that
+reaches more than three districts is "where several districts meet", never
+an approximate location, and a distance under a kilometre is said in metres
+(RACES-02). A state redrawn for 2026 is answered on
 both maps. A refused or failed location says what to do instead. Every
 answer links the state's own voter lookup (from NASS's Can I Vote) to
 confirm it, and the answer stays above the map rather than scrolling away.

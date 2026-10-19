@@ -350,6 +350,72 @@ OFFICE_LINKS = {
                                     "'Governor of Virginia'"),
 }
 
+
+# Photographs of state officers whose roster has none (STATEGOV-13), each looked at on the day given: {(state, office):
+# {name, photo, page, by, weight, checked, evidence}}. office is "governor",
+# "lt", "ag" or "sos". An entry is shown only while the roster names that
+# very person as the holder (stategov.officer_photos): once the office
+# changes hands the build says so and shows nothing, never a predecessor's
+# face (rule 87). Never from a search - the office's own page, or the
+# association whose roster names them.
+def _officer_photo(name, photo, page, by, weight, evidence, checked="2026-10-18"):
+    return {"name": name, "photo": photo, "page": page, "by": by,
+            "weight": dict(zip(("bytes", "width", "height"), weight)),
+            "checked": checked, "evidence": evidence}
+
+
+_NASS = "https://www.nass.org/sites/default/files/styles/secretary/public/"
+_NASS_BY = "National Association of Secretaries of State"
+# NASS files its members' photographs under the state's code, which
+# officers._surname_in cannot tie to a person; each of these was looked at
+# and was uploaded after its holder took office, so it cannot be a
+# predecessor's.
+_NASS_CARD = ("NASS's roster card names {} beside this photograph, filed as {} in {}, after "
+              "they took office ({}); a head-and-shoulders portrait. {}")
+
+
+# An attorney general's photograph is read by the pipeline from the
+# office's own pages (officers.add_ag_photos); NAAG's member pages answer a
+# script and a headless browser with a Cloudflare challenge.
+OFFICER_PHOTOS = {
+    ("AZ", "sos"): _officer_photo(
+        "Adrian Fontes", _NASS + "2024-07/AZ.jpg?itok=-XCD586X", "https://www.nass.org/membership",
+        _NASS_BY, (24106, 355, 450), _NASS_CARD.format(
+            "Adrian Fontes", "AZ.jpg", "July 2024", "January 2023",
+            "azsos.gov refuses a script (HTTP 403).")),
+    ("MN", "sos"): _officer_photo(
+        "Steve Simon", _NASS + "2024-07/MN.jpg?itok=eqzGnPsy", "https://www.nass.org/membership",
+        _NASS_BY, (18126, 355, 450), _NASS_CARD.format(
+            "Steve Simon", "MN.jpg", "July 2024", "January 2015",
+            "sos.mn.gov answers a script with a bot check.")),
+    ("VT", "sos"): _officer_photo(
+        "Sarah Copeland Hanzas", _NASS + "2023-07/VT.jpg?itok=OT3AvScG",
+        "https://www.nass.org/membership", _NASS_BY, (23856, 355, 450), _NASS_CARD.format(
+            "Sarah Copeland Hanzas", "VT.jpg", "July 2023", "January 2023",
+            "sos.vermont.gov shows no photograph of her a script can find.")),
+    ("MS", "sos"): _officer_photo(
+        "Michael Watson", _NASS + "2022-07/MS.jpg?itok=3rNYOJpS", "https://www.nass.org/membership",
+        _NASS_BY, (22287, 355, 450), _NASS_CARD.format(
+            "Michael Watson", "MS.jpg", "July 2022", "January 2020",
+            "The same man as the office's own headshot on sos.ms.gov/about-us/biography, which is "
+            "2.9 MB.")),
+    ("NY", "sos"): _officer_photo(
+        "Walter Mosley", _NASS + "2024-06/NY.jpg?itok=Jors_L6r", "https://www.nass.org/membership",
+        _NASS_BY, (17599, 355, 450),
+        "NASS's roster card names Walter Mosley beside this photograph, filed as NY.jpg in June "
+        "2024; a head-and-shoulders portrait, the same photograph as the department's own "
+        "'Walter T. Mosley Headshot' on dos.ny.gov/about-our-executive-team. dos.ny.gov answers "
+        "a script and a headless browser with a Cloudflare challenge, so a reader's browser may "
+        "be refused it too: NASS's copy is linked."),
+    ("SD", "sos"): _officer_photo(
+        "Monae Johnson",
+        "https://sdsos.gov/general-information/assets/Secretary%20Johnson_Pic2024.5.jpg",
+        "https://sdsos.gov/about-the-office/about-secretary-johnson.aspx",
+        "South Dakota Secretary of State", (16591, 310, 431),
+        "The office's 'About Secretary Johnson' page; the same photograph as NASS's card for "
+        "South Dakota."),
+}
+
 # Campaign websites that must never be linked, keyed on the host the FEC
 # committee registered (lower case; a key without "www." also covers the
 # "www." form). The FEC keeps whatever site a committee once filed, and a

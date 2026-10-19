@@ -3148,6 +3148,11 @@
     "description": "Trump-endorsed Navy SEAL and farmer fighting for Kentucky families and the America First agenda.",
     "final": "https://www.edgallrein.com/",
     "portrait": "https://cdn.prod.website-files.com/687e8388e36137e01e4ad24f/68f50cbc33480946aa776f43_03adfdf55e5823f3386e146e8e0d9241_gallrein-portrait_cutout.webp",
+    "portraitWeight": {
+     "bytes": 36234,
+     "height": 800,
+     "width": 730
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -3640,6 +3645,11 @@
     ],
     "issuesUrl": "https://jamieforlouisiana.com/issues",
     "portrait": "https://jamieforlouisiana.com/assets/general/tractor-portrait.jpg",
+    "portraitWeight": {
+     "bytes": 172322,
+     "height": 1080,
+     "width": 864
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -3791,6 +3801,11 @@
     ],
     "issuesUrl": "https://bengsforsouthdakota.com/what-i-stand-for/",
     "portrait": "https://bengsforsouthdakota.com/wp-content/uploads/2026/09/brian-bengs-candid.jpg",
+    "portraitWeight": {
+     "bytes": 71986,
+     "height": 772,
+     "width": 577
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -4480,6 +4495,11 @@
    "site": {
     "final": "https://www.burley4congress.com/",
     "portrait": "https://static.wixstatic.com/media/a86008_695773585da14371ab38bd4ec9820404~mv2.png/v1/fill/w_559,h_537,al_c,lg_1,q_85,enc_avif,quality_auto/headshot-removebg-preview.png",
+    "portraitWeight": {
+     "bytes": 102218,
+     "height": 537,
+     "width": 559
+    },
     "reason": "moved to burley4congress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -4765,6 +4785,11 @@
    "site": {
     "final": "https://www.lilytangwilliams.com/",
     "portrait": "https://www.lilytangwilliams.com/wp-content/uploads/2022/01/lily-tang-williams-homepage.png",
+    "portraitWeight": {
+     "bytes": 259204,
+     "height": 782,
+     "width": 600
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -5000,7 +5025,18 @@
      "Ending the Influence of Lobbyists and Special Interests"
     ],
     "issuesUrl": "https://www.davidpan4congress.com/issues",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/64cf1b438f455911726f83b9/42dc3e83-c84b-4e9f-89dc-7f4300821dee/DavidPan_Headshot_2023-2.jpg",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/64cf1b438f455911726f83b9/42dc3e83-c84b-4e9f-89dc-7f4300821dee/DavidPan_Headshot_2023-2.jpg?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/64cf1b438f455911726f83b9/42dc3e83-c84b-4e9f-89dc-7f4300821dee/DavidPan_Headshot_2023-2.jpg",
+      "why": "1200x1552px, over 1200px"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 34344,
+     "height": 647,
+     "width": 500
+    },
     "reason": "moved to davidpan4congress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -5156,6 +5192,11 @@
     "final": "https://ronrussellforcongress.com",
     "issuesUrl": "https://ronrussellforcongress.com/issues/",
     "portrait": "https://ronrussellforcongress.com/wp-content/uploads/2024/08/ron-russell-img-1-263x300.png",
+    "portraitWeight": {
+     "bytes": 111977,
+     "height": 300,
+     "width": 263
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -5168,6 +5209,11 @@
    "site": {
     "final": "https://callieforcongress.com",
     "portrait": "https://callieforcongress.com/wp-content/uploads/2026/05/1-Callie-Barr-4-27-26-692-web_300x375.png",
+    "portraitWeight": {
+     "bytes": 167424,
+     "height": 375,
+     "width": 300
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -5300,6 +5346,11 @@
    "site": {
     "final": "https://www.derekmerrin.com/",
     "portrait": "https://irp.cdn-website.com/073f65c5/dms3rep/multi/opt/Merrin-Solo-73-568h.jpg",
+    "portraitWeight": {
+     "bytes": 24650,
+     "height": 570,
+     "width": 409
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -5816,7 +5867,18 @@
      "GUN VIOLENCE PREVENTION"
     ],
     "issuesUrl": "https://www.nurselee4az.com/issues",
-    "portrait": "https://run.imgix.net/f9df0b31-2ce0-4b8a-9a5d-4765b3afb86b/ab4b5c88-afea-4c83-9eb7-311e7cead6a6/ab4b5c88-afea-4c83-9eb7-311e7cead6a6.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C777%2C3648%2C3648&auto=compress%2Cformat&fit=fillmax&w=2048&q=75",
+    "portrait": "https://run.imgix.net/f9df0b31-2ce0-4b8a-9a5d-4765b3afb86b/ab4b5c88-afea-4c83-9eb7-311e7cead6a6/ab4b5c88-afea-4c83-9eb7-311e7cead6a6.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C777%2C3648%2C3648&auto=compress%2Cformat&fit=fillmax&q=75&w=500",
+    "portraitHeavy": [
+     {
+      "url": "https://run.imgix.net/f9df0b31-2ce0-4b8a-9a5d-4765b3afb86b/ab4b5c88-afea-4c83-9eb7-311e7cead6a6/ab4b5c88-afea-4c83-9eb7-311e7cead6a6.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C777%2C3648%2C3648&auto=compress%2Cformat&fit=fillmax&w=2048&q=75",
+      "why": "885 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 34406,
+     "height": 500,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6018,6 +6080,11 @@
     ],
     "issuesUrl": "https://www.shanelewisforcongress.com/issues",
     "portrait": "https://images.squarespace-cdn.com/content/v1/699ca62672f2f441420897e9/109e6ee2-7b4c-447f-b2b9-e666e5780825/Shane+Lewis+Marine+Photo.jpg",
+    "portraitWeight": {
+     "bytes": 15408,
+     "height": 470,
+     "width": 375
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6103,7 +6170,19 @@
      "Winning CD-24 takes a team"
     ],
     "issuesUrl": "https://bobsmithforcongress.com/issues/",
-    "portrait": "https://bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09.jpg",
+    "portrait": "https://i0.wp.com/bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09.jpg?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09.jpg",
+      "why": "1638x2048px, over 1200px"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 23260,
+     "height": 625,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6116,7 +6195,19 @@
    "site": {
     "description": "Running to bring Leadership & Commonsense Solutions to Washington for the people of the Inland Empire and Imperial County.",
     "final": "https://joemalesforca.com",
-    "portrait": "https://joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-847x1024.png",
+    "portrait": "https://i0.wp.com/joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-847x1024.png?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-847x1024.png",
+      "why": "499 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 182458,
+     "height": 604,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6328,7 +6419,18 @@
     "description": "Jim Desmond, U.S. Navy Veteran & North County leader, is running for Congress in CA-48 to fight for lower costs, safer communities, and a secure border.",
     "final": "https://www.desmondforcongress.com",
     "issuesUrl": "https://www.desmondforcongress.com/cost-of-living",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/678019956176610b8d5f03b5/511bb210-c01b-44b2-ae67-574d2c2edc74/Jim_Desmond_4x6+copy.jpg",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/678019956176610b8d5f03b5/511bb210-c01b-44b2-ae67-574d2c2edc74/Jim_Desmond_4x6+copy.jpg?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/678019956176610b8d5f03b5/511bb210-c01b-44b2-ae67-574d2c2edc74/Jim_Desmond_4x6+copy.jpg",
+      "why": "1200x1800px, over 1200px"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 46010,
+     "height": 750,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6706,6 +6808,11 @@
     "description": "You deserve a government that works for you. Rachel Grage is running for Congress to represent all citizens of NE Florida, District 5.",
     "final": "https://rachelgrage.com",
     "portrait": "https://rachelgrage.com/_ipx/w_400&f_webp/images/rg.png",
+    "portraitWeight": {
+     "bytes": 18984,
+     "height": 469,
+     "width": 400
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -6947,6 +7054,18 @@
      "status": 403
     },
     "portrait": "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997",
+    "portraitHeavy": [
+     {
+      "kept": true,
+      "url": "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997",
+      "why": "306 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 306579,
+     "height": 913,
+     "width": 800
+    },
     "reason": "moved to michaelquirkforcongress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -7046,7 +7165,18 @@
      "History of Service & Community Involvement"
     ],
     "issuesUrl": "https://www.scottsingerusa.com/priorities",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/693c3ee95bff1a362a266abf/3c7175b3-7440-4496-bd80-c46ba66628c1/Singer+Proofs-91.jpg",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/693c3ee95bff1a362a266abf/3c7175b3-7440-4496-bd80-c46ba66628c1/Singer+Proofs-91.jpg?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/693c3ee95bff1a362a266abf/3c7175b3-7440-4496-bd80-c46ba66628c1/Singer+Proofs-91.jpg",
+      "why": "323 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 28360,
+     "height": 750,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -7133,7 +7263,18 @@
     "description": "Learn how Amanda Hollowell advocates for public education, affordable living, healthcare, and climate resilience in Georgia's First Congressional District.",
     "final": "https://www.amandaforga.com/",
     "issuesUrl": "https://www.amandaforga.com/issues",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/6879022f5686401f7b648b84/1d7e216d-6a81-439a-9f1a-d5e78df398fd/Amanda-Hollowell_Headshot_Silo.png",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/6879022f5686401f7b648b84/1d7e216d-6a81-439a-9f1a-d5e78df398fd/Amanda-Hollowell_Headshot_Silo.png?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/6879022f5686401f7b648b84/1d7e216d-6a81-439a-9f1a-d5e78df398fd/Amanda-Hollowell_Headshot_Silo.png",
+      "why": "5102 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 261414,
+     "height": 768,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -7188,6 +7329,11 @@
    "site": {
     "final": "https://www.kellyesti4congress.com/",
     "portrait": "https://static.wixstatic.com/media/7d9660_bda4c45919f84546afe8accaab2636d2~mv2.png/v1/crop/x_535,y_0,w_836,h_1080/fill/w_471,h_608,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Kelly%20Esti%20Headshot%208_edited.png",
+    "portraitWeight": {
+     "bytes": 140508,
+     "height": 608,
+     "width": 471
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -7679,6 +7825,11 @@
     ],
     "issuesUrl": "https://www.wilsonforcongress.com/issues",
     "portrait": "https://static.wixstatic.com/media/b8cc96_db133280d3d64883af6a55faebb356b4~mv2.png/v1/fill/w_555,h_739,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/854B7425_edited_edited.png",
+    "portraitWeight": {
+     "bytes": 156470,
+     "height": 739,
+     "width": 555
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -8191,6 +8342,11 @@
    "site": {
     "final": "https://rickedmonds.com/",
     "portrait": "https://rickedmonds.com/wp-content/uploads/2026/06/rick-edmonds-headshot-Thumb.jpg",
+    "portraitWeight": {
+     "bytes": 19908,
+     "height": 512,
+     "width": 512
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -8230,7 +8386,18 @@
    "site": {
     "description": "Discover his focus on fiscal reform, economic growth, and dedicated service to the community.",
     "final": "https://www.mebruerforcongress.com/",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/69ae035a0f16472c8d935e76/37dd9b40-cb4d-4767-b068-88c731c65068/Mebruer+small+smile.jpg",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/69ae035a0f16472c8d935e76/37dd9b40-cb4d-4767-b068-88c731c65068/Mebruer+small+smile.jpg?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/69ae035a0f16472c8d935e76/37dd9b40-cb4d-4767-b068-88c731c65068/Mebruer+small+smile.jpg",
+      "why": "1540 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 49526,
+     "height": 752,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -8295,6 +8462,11 @@
     "description": "This is home. Pat Moore is running for Congress in Louisiana's 5th District because our communities deserve to be heard.",
     "final": "https://patmooreforcongress.com",
     "portrait": "https://raw.githubusercontent.com/dpconway4-bot/pat-moore-for-congress/main/assets/pat-moore-headshot.jpg",
+    "portraitWeight": {
+     "bytes": 68132,
+     "height": 700,
+     "width": 480
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -8807,6 +8979,11 @@
     ],
     "issuesUrl": "https://trinaforcongress.com/priorities/",
     "portrait": "https://trinaforcongress.com/wp-content/uploads/2026/07/Trina-Headshot-Editedv2-940x1024.webp",
+    "portraitWeight": {
+     "bytes": 52846,
+     "height": 1024,
+     "width": 940
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -8925,7 +9102,18 @@
      "National Security"
     ],
     "issuesUrl": "https://www.jeffreyhulumiiiforcongress.com/issues",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/694b68bda075c00cb651a859/867af869-d239-45ea-a655-8dc28c6efadf/Hulum+profile+png+1600x1600.png",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/694b68bda075c00cb651a859/867af869-d239-45ea-a655-8dc28c6efadf/Hulum+profile+png+1600x1600.png?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/694b68bda075c00cb651a859/867af869-d239-45ea-a655-8dc28c6efadf/Hulum+profile+png+1600x1600.png",
+      "why": "990 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 145004,
+     "height": 500,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -9295,6 +9483,11 @@
     "final": "https://deniseforcongress.org",
     "issuesUrl": "https://deniseforcongress.org/priorities/",
     "portrait": "https://deniseforcongress.org/wp-content/uploads/2025/04/APC-Powell-2025-2-copy-832x1024.webp",
+    "portraitWeight": {
+     "bytes": 34972,
+     "height": 1024,
+     "width": 832
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -9447,6 +9640,11 @@
    "site": {
     "final": "https://www.herzigforcongress.com",
     "portrait": "https://static.wixstatic.com/media/18a1de_c99c0e04e59d4253bc99a48059351abd~mv2.jpg/v1/fill/w_233,h_316,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Portrait%20-%20Herzig.jpg",
+    "portraitWeight": {
+     "bytes": 14662,
+     "height": 316,
+     "width": 233
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -9635,6 +9833,11 @@
     "description": "Chris Gallant is a military pilot, union leader, and public servant running to represent Long Island with integrity, discipline, and a commitment to real problem solving.",
     "final": "https://gallantny.com",
     "portrait": "https://gallantny.com/wp-content/uploads/2025/07/gallant-iso-1-819x1024.png",
+    "portraitWeight": {
+     "bytes": 217268,
+     "height": 1024,
+     "width": 819
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10165,7 +10368,19 @@
     "description": "Independent candidate Robert P. Henri is running for Congress to force votes on major reforms Americans already support and hold lawmakers accountable if they fail to follow through.",
     "final": "https://projectduecourse.org/",
     "issuesUrl": "https://projectduecourse.org/issues",
-    "portrait": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
+    "portrait": "https://i0.wp.com/projectduecourse.org/RPH_Candidate_Photo.jpg?w=330&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
+      "why": "582 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 162038,
+     "height": 438,
+     "width": 330
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10213,7 +10428,19 @@
      "National Security and Foreign Policy"
     ],
     "issuesUrl": "https://www.moniqueforcongress.com/issues/",
-    "portrait": "https://www.moniqueforcongress.com/images/despain-large.png",
+    "portrait": "https://i0.wp.com/www.moniqueforcongress.com/images/despain-large.png?w=330&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://www.moniqueforcongress.com/images/despain-large.png",
+      "why": "1290 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 147294,
+     "height": 524,
+     "width": 330
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10251,7 +10478,18 @@
      "PEACE AS A POLICY"
     ],
     "issuesUrl": "https://www.chrisrabb.com/platform",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/68f683d3b3e16053a5779ba6/dc419544-d153-4c6a-899c-1865b06baece/Chris+Rabb+-+Main+Page+Headshot.png",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/68f683d3b3e16053a5779ba6/dc419544-d153-4c6a-899c-1865b06baece/Chris+Rabb+-+Main+Page+Headshot.png?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/68f683d3b3e16053a5779ba6/dc419544-d153-4c6a-899c-1865b06baece/Chris+Rabb+-+Main+Page+Headshot.png",
+      "why": "1798 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 131676,
+     "height": 405,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10367,7 +10605,19 @@
      "Voting Rights"
     ],
     "issuesUrl": "https://www.nancymannion.com/Priorities/",
-    "portrait": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
+    "portrait": "https://i0.wp.com/www.nancymannion.com/img/Nancy-Mannion-Main.png?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
+      "why": "375 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 178798,
+     "height": 595,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10381,7 +10631,19 @@
     "description": "Alan Bradstock, a veteran and former FBI agent with 20 years of service, is running as the Democratic Congressional Candidate in Pennsylvania’s 14th District.",
     "final": "https://www.bradstockforcongress.com/",
     "issuesUrl": "https://www.bradstockforcongress.com/issues",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/6897cada8764414f9733ee5d/51b95d22-2439-4280-9610-178c96eb48e1/Alan+Smiles+at+Park+2.png?format=1500w",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/6897cada8764414f9733ee5d/51b95d22-2439-4280-9610-178c96eb48e1/Alan+Smiles+at+Park+2.png?format=300w",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://images.squarespace-cdn.com/content/v1/6897cada8764414f9733ee5d/51b95d22-2439-4280-9610-178c96eb48e1/Alan+Smiles+at+Park+2.png?format=1500w",
+      "why": "2584 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 180096,
+     "height": 400,
+     "width": 300
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -10912,7 +11174,19 @@
      "Upholding Humane Foreign Policy"
     ],
     "issuesUrl": "https://chelseyhockettforcongress.com/issues.html",
-    "portrait": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
+    "portrait": "https://i0.wp.com/chelseyhockettforcongress.com/images/chelsey.jpg?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
+      "why": "713 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 34180,
+     "height": 750,
+     "width": 499
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11403,6 +11677,11 @@
     ],
     "issuesUrl": "https://shannontaylorva.com/priorities/",
     "portrait": "https://shannontaylorva.com/wp-content/uploads/2024/01/Shannon_Taylor_Headshot-1024x1024.jpg",
+    "portraitWeight": {
+     "bytes": 100470,
+     "height": 1024,
+     "width": 1024
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11681,7 +11960,18 @@
    "name": "Amanda McKinney",
    "site": {
     "final": "https://www.mckinneyforwashington.com",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/69414dc907486468d86ae59d/d60c3278-f7ce-430d-b8a9-722e7f0d813b/Amanda+McKinney+Headshot+2.JPG",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/69414dc907486468d86ae59d/d60c3278-f7ce-430d-b8a9-722e7f0d813b/Amanda+McKinney+Headshot+2.JPG?format=500w",
+    "portraitHeavy": [
+     {
+      "url": "https://images.squarespace-cdn.com/content/v1/69414dc907486468d86ae59d/d60c3278-f7ce-430d-b8a9-722e7f0d813b/Amanda+McKinney+Headshot+2.JPG",
+      "why": "395 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 53804,
+     "height": 631,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11699,7 +11989,19 @@
     "description": "I’m running for Congress to keep that dream within reach for working families and ensure the next generation has the same chance to build a meaningful life.",
     "final": "https://www.melineforcongress.com/",
     "issuesUrl": "https://www.melineforcongress.com/priorities",
-    "portrait": "https://cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped.png",
+    "portrait": "https://i0.wp.com/cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped.png?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped.png",
+      "why": "1690 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 207934,
+     "height": 437,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11814,6 +12116,11 @@
     ],
     "issuesUrl": "https://www.clarkforwi.com/issues",
     "portrait": "https://run.imgix.net/f4e1e107-abb4-4f40-87fa-8787f2696112/546b8a5f-99e1-430a-a21d-261828accdd1/546b8a5f-99e1-430a-a21d-261828accdd1.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C0%2C600%2C600&auto=compress%2Cformat&fit=fillmax&w=2048&q=75",
+    "portraitWeight": {
+     "bytes": 71856,
+     "height": 600,
+     "width": 600
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11869,7 +12176,19 @@
      "Supreme Court Reform"
     ],
     "issuesUrl": "https://rickcrosson.com/priorities/",
-    "portrait": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
+    "portrait": "https://i0.wp.com/rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
+      "why": "1536x2048px, over 1200px"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 14094,
+     "height": 666,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11939,7 +12258,19 @@
    "name": "Angelica Maria Duenas",
    "site": {
     "final": "https://angelica4congress.com/",
-    "portrait": "https://angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-876x1024.png",
+    "portrait": "https://i0.wp.com/angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-876x1024.png?w=330&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-876x1024.png",
+      "why": "1330 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 138580,
+     "height": 385,
+     "width": 329
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12088,6 +12419,11 @@
     "description": "Ted Brown - Libertarian candidate for U.S. Senator from Texas. Liberty for each, for all, and forever!",
     "final": "https://tedbrown.org/website/",
     "portrait": "https://tedbrown.org/website/images/ted-headshot-2026.jpg",
+    "portraitWeight": {
+     "bytes": 10815,
+     "height": 410,
+     "width": 410
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12153,6 +12489,11 @@
     "final": "https://drmikekatz.com/",
     "issuesUrl": "https://drmikekatz.com/platform",
     "portrait": "https://drmikekatz.com/imgs/profile-suit.png",
+    "portraitWeight": {
+     "bytes": 244802,
+     "height": 559,
+     "width": 447
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12286,7 +12627,19 @@
      "Bring Back Courage and Common Sense"
     ],
     "issuesUrl": "https://micheletafoya.com/issues/",
-    "portrait": "https://micheletafoya.com/wp-content/uploads/2026/01/Headshot_Update_Tafoya-963x1024.png",
+    "portrait": "https://i0.wp.com/micheletafoya.com/wp-content/uploads/2026/01/Headshot_Update_Tafoya-963x1024.png?w=500&ssl=1",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://micheletafoya.com/wp-content/uploads/2026/01/Headshot_Update_Tafoya-963x1024.png",
+      "why": "1130 KB, over 300 KB"
+     }
+    ],
+    "portraitWeight": {
+     "bytes": 218618,
+     "height": 531,
+     "width": 499
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,

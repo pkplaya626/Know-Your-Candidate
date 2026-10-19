@@ -26,6 +26,7 @@ district_maps/*.json        ──┤   (every state's districts; tools/fetch_di
 legislative_maps/*.json     ──┤   (state senate and house districts, counties; tools/fetch_legislative_maps.py)
 local_governments/*.json    ──┤   (every local government, from the Census listing; localgov)
 local_maps/*.json           ──┤   (every incorporated place and county subdivision, a point each; tools/fetch_local_maps.py)
+lookup_maps/*.json          ──┤   (ZIP code areas' shares, finer lines for a location; tools/fetch_lookup_maps.py)
 congress_snapshot.json      ──┤
 data/fec_field.json         ──┤   (the FEC's 2026 candidate register)
 data/disclosures.json       ──┤
@@ -63,6 +64,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/local/*.js    (one state's counties and governments)
                                              data/courtcounties.js (each county's federal district court)
                                              data/districts/*.js (one district map per state)
+                                             data/lookup/*.js   ("Find who represents you", one per state, and the index: kyc/lookup.py)
                                              states/*.html      (generated, one per state)
                                              districts/*.html   (generated, one per state)
                                              government/*.html  (generated: Know Your Government, kyc/government_text.py)
@@ -98,6 +100,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-guide.js
                                              assets/kyc-official.js
                                              assets/kyc-federal.js
+                                             assets/kyc-findrep.js
 ```
 
 - The root CSVs are the editorial source of truth. The state atlas and
@@ -171,15 +174,16 @@ python build_profile_site.py tribes           # every tribal government and its 
 python build_profile_site.py votes            # every roll call of the Congress (House Clerk, Senate LIS); resumes (rule 89)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
+python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1701 tests, no dependencies
-npm install && npm test                       # 2259 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1743 tests, no dependencies
+npm install && npm test                       # 2357 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `votes` and `congress` touch the network, as do the three `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `votes` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1390,6 +1394,107 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     not a runoff for Congress. The cycle's dates are reread each cycle, and
     `check` refuses a date outside it.
 
+85. **A ZIP code is not a place, and a location is placed on lines fine
+    enough to place it.** "Who represents me" had no answer outside a
+    district page's GPS button, and that button read the 1:5,000,000 maps
+    the page draws with a 3 km margin: in Manhattan none of 25 points got
+    one district, a 30 m fix in Brooklyn was told it was "approximate (to
+    within about 0 km)", and in Athens, Ohio the old map's card showed OH-2
+    and David Taylor, not OH-12 and the reader's own member, because one
+    list of numbers picked both maps. Now `kyc-findrep.js` answers a ZIP code
+    or a location at every level from `data/lookup/<st>.js` and the
+    legislature file, on the device, and the district page places a point on
+    the same lines: the Census Bureau's 1:500,000 boundaries and each
+    redrawn state's own plan, near a line within 400 m plus the browser's
+    stated accuracy, each map's own district in the address (`d=`, `was=`).
+    The state legislature's districts are not on those lines but on the
+    legislature page's, simplified at 120-300 m and rounded to 0.1 map unit,
+    so a reader 500 m from a Texas house line was named one legislator with
+    no caveat: each legislature file says how far its lines may stray
+    (`lineErrorKm`, `legislature.line_error_km`, from the tool's own
+    `statelegs.map_tolerance_m`), the margin there is wider by it, and the
+    answer gives both margins. The panel is on pages without profiles.js
+    too, where it read "OH Senate" and sent "How to vote" to a `#voting`
+    the page did not have, which its router read as clearing the reader's
+    selection: a state's name, district map and own lookup come from the
+    lookup index (`lookup.place_info`), and `#voting` is used only where
+    the page holds that block. A note names the kind of line that is near
+    (a district line, a county line, the state line or the shore); a ZIP
+    code across a state line says so first; and a file that failed to load
+    is never answered with a neighbour's edge. A place is in its own words
+    there too (rule 75): "the District of Columbia" in a sentence
+    (`place`), and no "if you live across the state line" by Puerto Rico's
+    shore, or Hawaii's (`alone`: no state meets it across a land line).
+    A ZIP area's share of a district is a share of its land, from the
+    Census relationship files of the vintage the pages draw (the 2024
+    legislative districts; counties by the 2020 file except where they
+    changed, `fetch_lookup_maps.COUNTIES_CHANGED`); a 2026 plan's shares are
+    measured, and the same measurement of the 119th map is compared with the
+    Bureau's file and kept in the file. Only `lookup.WHOLE` (99%) of a ZIP
+    area's land names one district; anything less lists every district with
+    its share and offers the location, and a ZIP code with no ZIP area (post
+    office boxes) says so. `lookup.build` refuses a ZIP code naming a
+    district, county or legislative district the pages do not draw. Never
+    send what a reader typed: the Census geocoder takes addresses, but only
+    through a remote script, and it would send them away.
+
+87. **A photograph says whose it is, read from its source, and weighs
+    what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
+    CC BY-SA, whose terms require the author, the licence and a link, and
+    none was credited; the footer gave every portrait to Congress.gov,
+    though the House's are the Clerk's and two dozen came from campaign
+    sites. `portraits` reads each Commons file's author and licence from
+    its own description page (`extmetadata`), never typed in; a non-free
+    file is not shown. Both dialogs print the credit under the name, a
+    government photograph names its host, a campaign's its website, and a
+    fallback that loads instead is credited by its own host.
+    `validate` fails a shown photograph with no credit and a Commons one
+    with no recorded licence, a judge's (`judge_links`, read with the
+    file's size) included. A credit is the file page's words with what
+    Commons hides or says of no one taken out (`portraits.author_of`): a
+    hidden duplicate span printed "Unknown author Unknown author" under
+    ten photographs, an uploader's sentence about not knowing the
+    photographer ran to four lines on a phone, a file name stood as an
+    author and "PDM-owner" as a licence. Where the licence asks for an
+    author the page does not name, the line says "author not recorded on
+    Commons" and links the file. A new Commons portrait whose credit
+    could not be read waits off the page for the next run (rule 8) rather
+    than fail the build. A portrait not on Wikimedia is weighed when
+    found: one campaign's was a 5 MB PNG for a 165px card, and 27 of the
+    NGA's governors' headshots weighed 320 KB to 7.6 MB for a 40px
+    circle. Over 300 KB or 1,200px it is shown smaller from the same file
+    - its host's own resizer, or WordPress.com's Photon, which fetches
+    that very address and scales it (rule 42) - once the smaller copy is
+    weighed and found the same shape (`photos.lighter_form`). Where
+    neither serves it, it is shown all the same and said
+    (`portraitHeavy`): withholding them left eleven November nominees
+    with the silhouette beside an opponent's photograph. The House
+    Clerk's are only weighed; every one is within the caps. A server that
+    gzips an image is read through it (Missouri's attorney general's
+    headshot read as "not an image"). No srcset offers a size wider than
+    a 2x screen needs, the officials' dialog's included. A state officer's photograph
+    comes only from their office or their association's roster, matched by
+    state, never a search. No attorney general had one: NAAG's member
+    pages answer every script and a headless browser with a Cloudflare
+    challenge, and a party association's photograph is the party's. So
+    `officers.add_ag_photos` reads the office's own pages - those that
+    confirmed the name (rule 56), and the attorney general's page they
+    link - and takes only an image carrying the surname as a word, or in
+    run-together words of the holder's name and title
+    ("AgLizMurrillHeadshot"), with no other first name before it, whose
+    words say it is a likeness ("headshot", "photo of") or are nothing but
+    the name and title. A substring test would take "Carrie-Smith-Headshot"
+    for Chris Carr and "Solicitor General Jessica Ford headshot" for Aaron
+    Ford, and every photograph added, changed or dropped is reported for a
+    person to look at. Arkansas's "AG-Griffin-Logo.png" is alt-texted "Tim Griffin
+    Attorney General of Arkansas", Arizona's "AG Mayes talking to a
+    townhall crowd": a logo, a banner or a scene is refused by its words,
+    a landscape frame by its shape. A NASS card filed under the state's
+    code ("AZ.jpg") cannot carry a surname; it is shown only through an
+    evidenced `overrides.OFFICER_PHOTOS` entry, which names the holder it
+    was checked for and is withheld, and said, once the roster names
+    someone else. Every build lists the confirmed officers still shown
+    without one.
 89. **A vote is a member's by the record's id, inside a term they served,
     and an absence from the record is not a missed vote.** "How did my
     representative vote" had no answer but a DW-NOMINATE score
