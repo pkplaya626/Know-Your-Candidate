@@ -11019,6 +11019,9 @@ async function testSharePages() {
   await settle();
   const viaClipboard = copied;
   const said = copy.textContent;
+  // A second click while it says "Copied" still comes back to "Copy link".
+  copy.click();
+  await settle();
   await new Promise((r) => setTimeout(r, 1900));
   const back = copy.textContent;
   Object.defineProperty(window.navigator, "clipboard", { configurable: true,
@@ -11032,20 +11035,35 @@ async function testSharePages() {
   let shared = null;
   Object.defineProperty(window.navigator, "share", { configurable: true,
     value: (d) => { shared = d; return Promise.resolve(); } });
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  // A desktop browser with a share sheet (Chrome, Edge, Safari): the button
+  // says "Copy link", so it copies.
   copied = null;
   copy.click();
   await settle();
+  const desktopCopied = copied;
+  const desktopShared = shared;
+  // A phone: its share sheet.
+  const mouse = window.matchMedia;
+  window.matchMedia = (q) => Object.assign(mouse(q), { matches: /pointer: coarse/.test(q) });
+  copied = null;
+  copy.click();
+  await settle();
+  window.matchMedia = mouse;
   delete window.navigator.share;
   KYC.profile.close();
   KYC.profile.open(people[1].id);
   const cleared = !(copy.nextElementSibling && copy.nextElementSibling.classList.contains("share-field"));
   suite("Copy link — the share page, shared, copied, or offered to copy (TECH-09)", () => {
     check("the clipboard gets the share page's address", viaClipboard === want, `${viaClipboard} for ${want}`);
-    check("a device that shares opens its share sheet on the address, and copies nothing",
+    check("a phone opens its share sheet on the address, and copies nothing",
       copied === null && !!shared && shared.url === want && shared.title === someone.name,
       `${shared && shared.url}`);
-    check("the button says it was copied, then says what it does again", /Copied/.test(said) &&
-      /Copy link/.test(back), said + " / " + back);
+    check("a desktop browser with a share sheet copies, as the button says",
+      desktopCopied === want && desktopShared === null, `${desktopCopied} / ${desktopShared}`);
+    check("the button says it was copied, then says what it does again, clicked twice or not",
+      /Copied/.test(said) && /Copy link/.test(back) && !/Copied/.test(back), said + " / " + back);
     check("a refused clipboard leaves the link in a selected read-only field", !!input && input.readOnly &&
       input.value === want && picked && /Copy this link/.test(field.textContent));
     check("a dialog opened on someone else does not offer the last link", cleared);

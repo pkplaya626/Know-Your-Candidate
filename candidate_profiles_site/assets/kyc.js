@@ -2541,17 +2541,24 @@
     }
   }
 
-  /** Share or copy *url* from *button*: the device's share sheet where it
-   *  has one; else the clipboard; and where the clipboard is missing or
-   *  refuses (an in-app browser, a page not served over HTTPS), a read-only
-   *  field after the button, its text selected, that says to copy it. The
-   *  handler did nothing at all there (TECH-09). */
+  /** Share or copy *url* from *button*: a phone's share sheet; else the
+   *  clipboard; and where the clipboard is missing or refuses (an in-app
+   *  browser, a page not served over HTTPS), a read-only field after the
+   *  button, its text selected, that says to copy it. The handler did
+   *  nothing at all there (TECH-09). The sheet only where the pointer is a
+   *  finger: desktop Chrome, Edge and Safari have one too, and a button
+   *  that says "Copy link" opened it and copied nothing (PR #121 review). */
   function shareLink(button, url, title) {
     var nav = global.navigator || {};
-    var original = button.innerHTML;
+    // What the button says at rest, kept once: read again on a second click
+    // within the "Copied" moment, it was "Copied", and stayed so for good.
+    if (!button.hasAttribute("data-label")) button.setAttribute("data-label", button.innerHTML);
     var said = function () {
       button.innerHTML = icon("check") + " Copied";
-      setTimeout(function () { button.innerHTML = original; }, 1800);
+      clearTimeout(button._kycCopied);
+      button._kycCopied = setTimeout(function () {
+        button.innerHTML = button.getAttribute("data-label");
+      }, 1800);
     };
     var field = function () { showShareField(button, url); };
     var copy = function () {
@@ -2564,7 +2571,7 @@
       }
       Promise.resolve(done).then(said, field);
     };
-    if (typeof nav.share === "function") {
+    if (typeof nav.share === "function" && touchFirst()) {
       var shared;
       try {
         shared = nav.share({ title: title || doc.title, url: url });
@@ -2578,6 +2585,15 @@
       return;
     }
     copy();
+  }
+
+  /** True where the main pointer is a finger (a phone or a tablet). */
+  function touchFirst() {
+    try {
+      return !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
+    } catch (e) {
+      return false;
+    }
   }
 
   function showShareField(button, url) {
