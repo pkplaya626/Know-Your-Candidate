@@ -4843,3 +4843,132 @@ button.local-county-link {
   /* 16px, or iOS zooms the page when the field is tapped (rule 44). */
   .race-jump .select { font-size: 16px; }
 }
+
+/* ====================================== 16. money, last time, comparison */
+
+/* Under each race's people (assets/kyc-cards.js): the campaigns' money as
+ * bars on one scale, the seat's last election, and the ballot side by
+ * side. Each a fold, styled as the folds above it. */
+/* One track no wider than the section: a grid item's min-width is its
+   content's, so an open comparison table widened the track to its own width
+   and clipped the money figures beside it instead of scrolling. */
+.race-extra { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); margin-top: var(--s-4); }
+.race-extra > * { min-width: 0; }
+.race-money,
+.race-last,
+.race-compare { display: block; }
+.race-money > summary,
+.race-last > summary,
+.race-compare > summary {
+  cursor: pointer;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  list-style: none;
+}
+.race-money > summary::-webkit-details-marker,
+.race-last > summary::-webkit-details-marker,
+.race-compare > summary::-webkit-details-marker { display: none; }
+.race-money > summary::before,
+.race-last > summary::before,
+.race-compare > summary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: var(--s-2);
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  vertical-align: 1px;
+  transition: transform 0.18s var(--ease);
+}
+.race-money[open] > summary::before,
+.race-last[open] > summary::before,
+.race-compare[open] > summary::before { transform: rotate(90deg); }
+.race-extra .race-note,
+.race-money .race-note,
+.race-last .race-note,
+.race-compare .race-note {
+  margin: var(--s-2) 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.race-mates > .race-money,
+.race-mates > .race-last,
+.race-mates > .race-compare { display: block; margin-top: var(--s-2); }
+
+.money-rows { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-3); }
+.money-row { display: grid; gap: var(--s-1); min-width: 0; }
+.money-who { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); font-size: var(--t-sm); font-weight: 600; }
+.party-chip {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  padding: 0 var(--s-1);
+  border: 1px solid currentColor;
+  border-radius: 4px;
+}
+.money-bars { display: grid; gap: 3px; }
+.money-bar {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 4.25rem;
+  gap: var(--s-2);
+  align-items: center;
+  font-size: var(--t-xs);
+}
+.money-label { color: var(--text-muted); }
+/* Neutral ink: a bar's length is money, not a side (VISUALS-20). */
+.money-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.money-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--text-muted);
+}
+.money-value { text-align: right; font-variant-numeric: tabular-nums; }
+.money-asof,
+.money-none { font-size: var(--t-xs); color: var(--text-faint); }
+.money-outside { display: block; font-size: var(--t-xs); color: var(--text-muted); }
+
+.compare-scroll { overflow-x: auto; margin-top: var(--s-2); }
+.compare-table { border-collapse: collapse; font-size: var(--t-xs); min-width: 100%; }
+.compare-table th,
+.compare-table td {
+  padding: var(--s-2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  min-width: 9rem;
+}
+.compare-table thead th { font-size: var(--t-sm); }
+.compare-table tbody th {
+  position: sticky;
+  left: 0;
+  min-width: 6.5rem;
+  background: var(--surface-1);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.compare-list { margin: 0; padding-left: 1rem; }
+.compare-list li + li { margin-top: 2px; }
+
+.last-table { border-collapse: collapse; font-size: var(--t-sm); margin: var(--s-2) 0; }
+.last-table th,
+.last-table td { padding: var(--s-1) var(--s-3) var(--s-1) 0; text-align: left; font-weight: 400; }
+.last-table td { font-variant-numeric: tabular-nums; }
+
+.outside-panel { margin-top: var(--s-3); }
+.outside-sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-3); }
+.outside-list { margin: var(--s-1) 0 0; padding-left: 1rem; font-size: var(--t-xs); }
+.outside-note { font-size: var(--t-xs); margin: var(--s-2) 0 0; }
+@media (max-width: 560px) {
+  .money-bar { grid-template-columns: 3rem minmax(0, 1fr) 3.75rem; }
+}

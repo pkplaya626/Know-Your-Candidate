@@ -1284,6 +1284,64 @@
     return !ABSENT[status] && status !== "generic";
   }
 
+  /* A filed figure as a number: "$47,190,466.06" -> 47190466.06; null for
+   * anything that is not a figure (an absence's words). A filed $0 is a
+   * figure (rule 6). */
+  function moneyAmount(item, field) {
+    if (!item || !hasValue(item, field) || !item.financeSource) return null;
+    var text = String(item[field] == null ? "" : item[field]).trim().replace(/[$,]/g, "");
+    return /^-?\d+(?:\.\d+)?$/.test(text) ? parseFloat(text) : null;
+  }
+
+  /* A figure rounded for a bar's label, "$35.0M", "$412K", "$950"; the
+   * exact figure is the profile's. */
+  function moneyShort(value) {
+    if (value === null || value === undefined || isNaN(value)) return "";
+    var sign = value < 0 ? "-" : "";
+    var v = Math.abs(value);
+    if (v >= 1e9) return sign + "$" + (v / 1e9).toFixed(1) + "B";
+    if (v >= 1e6) return sign + "$" + (v / 1e6).toFixed(1) + "M";
+    if (v >= 1e3) return sign + "$" + Math.round(v / 1e3) + "K";
+    return sign + "$" + Math.round(v);
+  }
+
+  /* A profile's platform as its items: the campaign site's issue headings
+   * ("; "-joined by kyc/enrich.py), a member's official website's issue
+   * list (also "; "-joined, by kyc/members.py, rule 86), a list literal, or
+   * comma-separated text. One reading for the dialog and the race's
+   * comparison table (rule 12). Null when there is nothing to list. */
+  function platformItems(item) {
+    if (!item || !hasValue(item, "platforms")) return null;
+    var text = String(item.platforms || "").trim();
+    if (!text) return null;
+    var source = (item.fieldSources || {}).platforms;
+    var fromSite = source === "campaign-site" || source === "official-site";
+    var parts = null;
+    if (fromSite) {
+      parts = text.split(/;\s+/);
+    } else if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
+      try {
+        var parsed = JSON.parse(text.replace(/'/g, '"'));
+        if (Array.isArray(parsed)) parts = parsed.map(String);
+      } catch (e) {
+        /* not a list literal after all; fall through to the comma split */
+      }
+    }
+    if (!parts) {
+      // The rosters separate items with commas and use them inside items
+      // too: "Telecommunications, technology, and digital privacy" is one
+      // item, not three bullets reading "technology" and "and digital
+      // privacy". Items start with a capital; a fragment that does not
+      // belongs to the one before it.
+      parts = text.split(/,\s+/).reduce(function (items, piece) {
+        if (items.length && /^[a-z]/.test(piece)) items[items.length - 1] += ", " + piece;
+        else items.push(piece);
+        return items;
+      }, []);
+    }
+    return { items: parts, fromSite: fromSite, text: text };
+  }
+
   /* ============================================================= election */
 
   /* Federal general elections fall on the first Tuesday after the first
@@ -2760,6 +2818,27 @@
       " gives the same office the same years." + escapeHtml(withheld) + "</p>";
   }
 
+  /** The same record in a narrow column (the ballot comparison, GRID-17):
+   *  each office with its place and years and the note the panel gives it,
+   *  the first *limit* of them. One renderer of a row's words with the panel
+   *  (rule 12): the comparison's own copy dropped the place, so a mayoralty
+   *  read with no city. */
+  function officesHeldShort(record, limit) {
+    if (!record) return '<span class="kyc-absent">No linked record</span>';
+    var rows = record.rows || [];
+    if (!rows.length) return '<span class="kyc-absent">None the sources agree on</span>';
+    limit = limit || rows.length;
+    return '<ul class="compare-list">' + rows.slice(0, limit).map(function (row) {
+      var note = HELD_NOTES[row.agree];
+      var place = heldPlace(row);
+      return "<li>" + escapeHtml(row.office) + (place ? ", " + escapeHtml(place) : "") +
+        ' <span class="faint">' + escapeHtml(heldYears(row)) + "</span>" +
+        (note ? ' <span class="held-note" title="' + escapeAttr(note[1]) + '">' +
+          escapeHtml(note[0]) + "</span>" : "") + "</li>";
+    }).join("") + (rows.length > limit ? '<li class="faint">and ' + (rows.length - limit) +
+      " more on the profile</li>" : "") + "</ul>";
+  }
+
   /** What a Cabinet office's holder is called, as the federal page and
    *  the guide both say it: their own title where it is not the office's
    *  ("Secretary of War" for the Secretary of Defense), else none, and
@@ -2842,6 +2921,7 @@
     escapeAttr: escapeAttr,
     renderField: renderField,
     officesHeld: officesHeld,
+    officesHeldShort: officesHeldShort,
     holderRole: holderRole,
     heldText: heldText,
     heldYears: heldYears,
@@ -2854,6 +2934,9 @@
     vacancyOf: vacancyOf,
     possessive: possessive,
     hasValue: hasValue,
+    moneyAmount: moneyAmount,
+    moneyShort: moneyShort,
+    platformItems: platformItems,
     partyKey: partyKey,
     partyClass: partyClass,
     hatchDefs: hatchDefs,

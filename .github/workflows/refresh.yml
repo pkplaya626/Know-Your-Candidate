@@ -165,6 +165,18 @@ jobs:
         if: env.FEC_API_KEY != ''
         run: python build_profile_site.py campaigns --limit 150 || true
 
+      # Outside groups' independent expenditures for and against each
+      # candidate, by candidate id (kyc/outside.py): about 70 requests at
+      # the key's pace. A read that fails keeps the committed cache and
+      # stops nothing else in this run. The seats' last elections
+      # (kyc/seat_history.py) are a past count and are not re-read here.
+      - name: Refresh outside spending
+        continue-on-error: true
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        if: env.FEC_API_KEY != ''
+        run: python build_profile_site.py outside
+
       - name: Refresh financial disclosure links (House Clerk and Senate eFD)
         run: python build_profile_site.py disclosures
 

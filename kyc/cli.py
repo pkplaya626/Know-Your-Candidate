@@ -195,6 +195,11 @@ def _build(args):
                                 filed=candidates.filed_rows(field), record=raw.get("record"),
                                 snapshot=snapshot)
     stats.update(races_mod.stats(race_list))
+    counts, money_problems = _outside_and_seats(args.root, profiles, race_list,
+                                                record=raw.get("record"), snapshot=snapshot)
+    stats.update(counts)
+    print(f"  outside spending: {counts['outside_spending']} profiles; last elections: "
+          f"{counts['last_elections']} races")
     markets = odds_mod.load_cache(args.root)
     if markets:
         reach = odds_mod.coverage(markets, race_list)
@@ -272,7 +277,7 @@ def _build(args):
     for level, code, message, detail in members_mod.problems(profiles, member_sources):
         issues.append(validate.Issue(level, code, message, detail))
     departed_rows, departed_problems = _departed(args.root, snapshot, profiles)
-    for level, code, message, detail in departed_problems:
+    for level, code, message, detail in departed_problems + money_problems:
         issues.append(validate.Issue(level, code, message, detail))
     # What the judges' Wikipedia and portrait join withheld (kyc/judge_links.py):
     # said by every build, not only by the refresh that found it.
@@ -318,6 +323,8 @@ def _build(args):
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = departed_rows
+    from . import seat_history as seat_history_mod
+    summary["lastElectionSources"] = seat_history_mod.page_sources()
     path, size = emit.write_profiles(
         profiles, stats, args.root, races=race_list, summary=summary
     )
@@ -569,6 +576,20 @@ def _campaigns(args):
     return 1 if stats.get("stopped") else 0
 
 
+def _outside_and_seats(root, profiles, race_list, record=None, snapshot=None):
+    """Outside spending on the profiles (kyc/outside.py) and each seat's
+    last election on the races (kyc/seat_history.py), from their caches;
+    the counts and what a build says about them. The record and the
+    snapshot say who has held a seat since its last counted election."""
+    from . import outside, seat_history
+    spending = outside.load_cache(root)
+    applied, refused = outside.apply(profiles, spending) if spending else (0, [])
+    history = seat_history.load_cache(root)
+    shown = seat_history.apply(race_list, history, record=record, snapshot=snapshot)
+    problems = outside.problems(spending, refused) + seat_history.problems(history, race_list)
+    return {"outside_spending": applied, "last_elections": shown}, problems
+
+
 def _departed(root, snapshot, profiles):
     """The members who left the sitting Congress, for the grid's search,
     and what is wrong with the list (kyc/departed.py)."""
@@ -667,6 +688,74 @@ def _members(args):
         print(f"  [{level}] {code}: {message}")
         for line in (detail if args.verbose else detail[:10]):
             print(f"           - {line}")
+    return 0
+
+
+def _seats(args):
+    """Each seat's last election (kyc/seat_history.py): the Clerk of the
+    House's official statistics, checked against a second compilation. A
+    read that fails keeps the committed cache (rule 8)."""
+    from . import seat_history
+
+    if args.check:
+        cache = seat_history.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {seat_history.CACHE_PATH}; run 'seats'", file=sys.stderr)
+            return 2
+    else:
+        raw = _load(args)
+        if raw is None:
+            return 2
+        record = raw.get("record") or {}
+        try:
+            races = record.get("races") or {}
+            cache = seat_history.build(list(races.values()) if isinstance(races, dict) else races)
+        except (seat_history.ClerkFormatError, OSError, portraits.PortraitError) as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    print(f"  {len(cache['house'])} House results and {len(cache['senate'])} Senate results "
+          f"shown, {len(cache['withheld'])} withheld (read {cache['read']})")
+    for item in cache["withheld"]:
+        print(f"    withheld {item['seat']} {item['year']}: {item['why']}"
+              + (f" ({item['page']})" if item.get("page") else ""))
+    if not args.check:
+        print(f"[ok] wrote {seat_history.save_cache(cache, args.root)}")
+    return 0
+
+
+def _outside(args):
+    """Independent expenditures for and against each candidate
+    (kyc/outside.py), by FEC candidate id at the key's pace (rule 37). A
+    read that fails keeps the committed cache (rule 8)."""
+    from . import outside
+
+    raw = _load(args)
+    if raw is None:
+        return 2
+    field = candidates.load_cache(args.root)
+    finance = fec.load_cache(args.root)
+    profiles, _stats = build_profiles(raw, snapshot=legislators.load_snapshot(args.root),
+                                      field=field, finance=finance)
+    fec.apply_cache(profiles, finance)
+    if args.check:
+        cache = outside.load_cache(args.root)
+        if not cache:
+            print(f"[error] no {outside.CACHE_PATH}; run 'outside'", file=sys.stderr)
+            return 2
+    else:
+        ids = [i for p in profiles for i in outside.profile_ids(p)]
+        try:
+            cache = outside.fetch(ids)
+        except (outside.OutsideError, fec.FecError) as exc:
+            print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
+            return 2
+    applied, refused = outside.apply(profiles, cache)
+    print(f"  {len(cache['candidates'])} of {cache['asked']} candidate ids with independent "
+          f"expenditures; {applied} profiles show them (read {cache['read']})")
+    for level, code, message, detail in outside.problems(cache, refused):
+        print(f"  [{level}] {code}: {message}" + (f" ({detail[:5]})" if detail else ""))
+    if not args.check:
+        print(f"[ok] wrote {outside.save_cache(cache, args.root)}")
     return 0
 
 
@@ -1318,6 +1407,8 @@ def _verify(args):
         snapshot=legislators.load_snapshot(args.root),
     )
     stats.update(races_mod.stats(race_list))
+    stats.update(_outside_and_seats(args.root, profiles, race_list, record=raw.get("record"),
+                                    snapshot=legislators.load_snapshot(args.root))[0])
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes,
@@ -1325,6 +1416,8 @@ def _verify(args):
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = _departed(args.root, legislators.load_snapshot(args.root), profiles)[0]
+    from . import seat_history as seat_history_mod
+    summary["lastElectionSources"] = seat_history_mod.page_sources()
 
     problems = []
     from . import cycle as cycle_mod
@@ -2318,6 +2411,16 @@ def build_parser():
     hist.add_argument("--check", action="store_true",
                       help="report the committed cache; make no network call")
 
+    seats = add("seats", help="each seat's last election: the Clerk of the House's official "
+                              "statistics, checked against a second compilation")
+    seats.add_argument("--check", action="store_true",
+                       help="report the committed cache; make no network call")
+
+    out = add("outside", help="independent expenditures for and against each candidate, "
+                              "from the FEC")
+    out.add_argument("--check", action="store_true",
+                     help="report the committed cache; make no network call")
+
     vac = add("vacancies", help="vacancies in the federal courts, as uscourts.gov lists them")
     vac.add_argument("--check", action="store_true",
                      help="report the committed cache; make no network call")
@@ -2390,6 +2493,10 @@ def main(argv=None):
         return _history(args)
     if args.command == "members":
         return _members(args)
+    if args.command == "seats":
+        return _seats(args)
+    if args.command == "outside":
+        return _outside(args)
     if args.command == "oge":
         return _oge(args)
     if args.command == "votes":

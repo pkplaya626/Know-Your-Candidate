@@ -275,5 +275,32 @@
         " " + NO_TIES + "</p></section>";
   }
 
-  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices };
+  /* How close one source's market prices a race: the gap between its two
+   * highest prices, from that source alone (PERSONA-11; rule 40: never a
+   * blend of two). Null where the source has no market on the race, its
+   * market has fewer than two outcomes, or its prices do not add up to
+   * about a dollar (COHERENT), since a gap between those says nothing - or
+   * where it resolves on the party only and everyone on the November ballot
+   * is one party's (oneParty, rule 79): CA-11's two Democrats were ranked
+   * "98 points apart" by a market that cannot tell them apart. */
+  var SOURCE_NAMES = { kalshi: "Kalshi", polymarket: "Polymarket" };
+
+  function gap(race, source) {
+    var odds = (data().races || {})[race && race.id] || {};
+    var market = (odds.markets || []).filter(function (m) { return m.source === source; })[0];
+    if (!market || !coherent(market).ok) return null;
+    if (partyOnly(market) && oneParty(race)) return null;
+    var outcomes = (market.outcomes || []).slice().sort(function (a, b) {
+      return (b.price || 0) - (a.price || 0);
+    });
+    if (outcomes.length < 2) return null;
+    var top = outcomes[0].price || 0;
+    var second = outcomes[1].price || 0;
+    return { gap: top - second, top: top, second: second,
+             topLabel: outcomes[0].label || "", secondLabel: outcomes[1].label || "",
+             url: market.url, asOf: data().asOf };
+  }
+
+  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices,
+               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; } };
 })(window);
