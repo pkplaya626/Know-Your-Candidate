@@ -1672,6 +1672,7 @@
     waitingFor = null;
     showWaiting("");
     current = item;
+    KYC.clearShareField(el("profileModalCopy"));
     render(item);
     // A tab, a bookmark or a history entry names the person (GRID-24).
     if (baseTitle === null) baseTitle = doc.title;
@@ -1738,23 +1739,12 @@
       if (event.target.id === "profileModalVoteSearch") searchVotes(event.target.value);
     });
 
+    // The person's share page (rule 96): its own title, description and
+    // portrait when the link is unfurled, and it opens this dialog.
     var copy = el("profileModalCopy");
     copy.addEventListener("click", function () {
       if (!current) return;
-      var url =
-        global.location.origin === "null"
-          ? global.location.href
-          : global.location.origin + global.location.pathname +
-            "#/profile/" + encodeURIComponent(current.id);
-      var done = function () {
-        copy.innerHTML = KYC.icon("check") + " Copied";
-        setTimeout(function () {
-          copy.innerHTML = KYC.icon("share") + " Copy link";
-        }, 1800);
-      };
-      if (global.navigator.clipboard && global.navigator.clipboard.writeText) {
-        global.navigator.clipboard.writeText(url).then(done, function () {});
-      }
+      KYC.shareLink(copy, KYC.shareUrl("profile", current.id), current.name);
     });
 
     return dialog;

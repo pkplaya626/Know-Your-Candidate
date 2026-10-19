@@ -392,6 +392,27 @@ svg.district-map,
 }
 .skip-link:focus { left: 12px; top: 12px; }
 
+/* What a page without scripts can and cannot show (TECH-10), and the plain
+ * lists a state page is written with before its script draws over them
+ * (rule 96). */
+.noscript-note {
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--t-sm);
+}
+.share-list { margin: var(--s-2) 0 var(--s-4); padding-left: var(--s-5); }
+.share-list li { margin: var(--s-1) 0; }
+
+/* "Copy link" where the clipboard refused: the link, selected, to copy by
+ * hand (KYC.shareLink). */
+.share-field { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-sm); }
+.share-field label { display: inline-flex; align-items: center; gap: var(--s-2); flex-wrap: wrap; }
+.share-field-input { width: min(22rem, 70vw); }
+.race-head .race-share { margin-left: auto; }
+
 .scroll-y {
   overflow-y: auto;
   overscroll-behavior: contain;

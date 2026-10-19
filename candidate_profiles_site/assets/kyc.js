@@ -2525,6 +2525,85 @@
     return siteRoot() + "states/" + String(code).toLowerCase() + ".html";
   }
 
+  /* ---------------------------------------------------------------- share */
+
+  /** The address of a profile's or a race's share page (rule 96), whole:
+   *  "https://host/p/<id>.html". A crawler drops the "#/profile/<id>" a
+   *  view lives behind, so a link to the view unfurled as the home page's
+   *  card; the share page carries the person's own. *kind* "race" or
+   *  "profile". */
+  function shareUrl(kind, id) {
+    var path = siteRoot() + (kind === "race" ? "r/" : "p/") + encodeURIComponent(id) + ".html";
+    try {
+      return new URL(path, global.location.href).href;
+    } catch (e) {
+      return path;
+    }
+  }
+
+  /** Share or copy *url* from *button*: the device's share sheet where it
+   *  has one; else the clipboard; and where the clipboard is missing or
+   *  refuses (an in-app browser, a page not served over HTTPS), a read-only
+   *  field after the button, its text selected, that says to copy it. The
+   *  handler did nothing at all there (TECH-09). */
+  function shareLink(button, url, title) {
+    var nav = global.navigator || {};
+    var original = button.innerHTML;
+    var said = function () {
+      button.innerHTML = icon("check") + " Copied";
+      setTimeout(function () { button.innerHTML = original; }, 1800);
+    };
+    var field = function () { showShareField(button, url); };
+    var copy = function () {
+      if (!nav.clipboard || typeof nav.clipboard.writeText !== "function") return field();
+      var done;
+      try {
+        done = nav.clipboard.writeText(url);
+      } catch (e) {
+        return field();
+      }
+      Promise.resolve(done).then(said, field);
+    };
+    if (typeof nav.share === "function") {
+      var shared;
+      try {
+        shared = nav.share({ title: title || doc.title, url: url });
+      } catch (e) {
+        return copy();
+      }
+      // Closing the sheet is the reader's answer, not a failure to share.
+      Promise.resolve(shared).then(function () {}, function (err) {
+        if (!err || err.name !== "AbortError") copy();
+      });
+      return;
+    }
+    copy();
+  }
+
+  function showShareField(button, url) {
+    var next = button.nextElementSibling;
+    var box = next && next.classList.contains("share-field") ? next : null;
+    if (!box) {
+      box = doc.createElement("span");
+      box.className = "share-field";
+      box.setAttribute("role", "status");
+      box.innerHTML = '<label>Copy this link: <input type="text" class="input share-field-input" ' +
+        'readonly spellcheck="false"></label>';
+      button.insertAdjacentElement("afterend", box);
+    }
+    var input = box.querySelector("input");
+    input.value = url;
+    input.focus();
+    input.select();
+  }
+
+  /** Take away the field showShareField left after *button*: a dialog
+   *  opened on someone else must not offer the last person's link. */
+  function clearShareField(button) {
+    var next = button && button.nextElementSibling;
+    if (next && next.classList.contains("share-field")) next.parentNode.removeChild(next);
+  }
+
   /* The last state a reader looked at, so the sidebar can offer it back -
    * a per-viewer convenience, kept in this browser only. */
   var STATE_KEY = "kycState";
@@ -3273,6 +3352,9 @@
     // states
     stateName: stateName,
     stateUrl: stateUrl,
+    shareUrl: shareUrl,
+    shareLink: shareLink,
+    clearShareField: clearShareField,
     siteRoot: siteRoot,
     rememberState: rememberState,
     rememberedState: rememberedState,

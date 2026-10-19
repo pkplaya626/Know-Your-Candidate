@@ -684,6 +684,7 @@
     }
     ensure();
     current = id;
+    KYC.clearShareField(el("officialModalCopy"));
     render(id, found);
     el("officialModalReport").setAttribute("data-profile", id);
     // A tab or a bookmark names the person, as a profile's does (GRID-24).
@@ -740,12 +741,8 @@
       if (!current) return;
       var url = global.location.origin === "null" ? global.location.href
         : global.location.origin + global.location.pathname + "#/official/" + encodeURIComponent(current);
-      if (global.navigator.clipboard && global.navigator.clipboard.writeText) {
-        global.navigator.clipboard.writeText(url).then(function () {
-          copy.innerHTML = KYC.icon("check") + " Copied";
-          setTimeout(function () { copy.innerHTML = KYC.icon("share") + " Copy link"; }, 1800);
-        }, function () {});
-      }
+      // The one way a page shares a link, with its fallbacks (KYC.shareLink).
+      KYC.shareLink(copy, url);
     });
     return dialog;
   }

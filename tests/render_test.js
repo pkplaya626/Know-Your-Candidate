@@ -10987,7 +10987,8 @@ async function testFrame() {
     check("a search box, and every section", !!missing.D.querySelector('form[data-site-search] input[name="q"]') &&
       missing.D.querySelectorAll(".directory-list a").length >= 9);
     check("not indexed, and not in the sitemap", !!missing.D.querySelector('meta[name="robots"][content="noindex"]') &&
-      !/404\.html/.test(fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8")));
+      // The page's own address: share pages' ids can hold "404" (FEC_H6IL07404).
+      !/\/404\.html</.test(fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8")));
   });
 
   // The home page answers ?q=, the address its SearchAction gives.
