@@ -717,12 +717,12 @@
     return { now: redrawn && KYC.recordPhase() ? "next" : "cd", race: redrawn ? "next" : "cd" };
   }
 
-  /** The election office's own line that no election is held there on
-   *  November 3 (kyc/voting_dates.py, "noElection": Puerto Rico), or null.
-   *  Such a place has no ballot to show. */
+  /** Whether the election office's own record says no election is held
+   *  there on November 3 (kyc/voting_dates.py, "noElection": Puerto Rico),
+   *  from the lookup index, as every page has it (lookup.place_info). Such
+   *  a place has no ballot to show. */
   function noElection(code) {
-    var mine = (((KYC.meta().voting || {})._dates || {}).states || {})[code];
-    return ((mine && mine.lines) || []).filter(function (l) { return l.k === "none"; })[0] || null;
+    return !!placeOf(code).noElection;
   }
 
   /** The way from this answer to the reader's whole ballot (kyc-ballot.js),

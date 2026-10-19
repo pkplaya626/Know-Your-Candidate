@@ -11962,6 +11962,7 @@ async function testBallot() {
   const home = await askZip("index.html", "30009");
   const gaPage = await buildPage("states/ga.html");
   const prPage = await buildPage("states/pr.html");
+  const prAnswer = await askZip("index.html", "00601");
   await settle(50);
   suite("Your ballot: the ways to it", () => {
     const link = home.out.querySelector("a[data-findrep-ballot]");
@@ -11970,7 +11971,8 @@ async function testBallot() {
       /See everything on your ballot/.test(link.textContent), link && link.getAttribute("href"));
     check("the home page's hero", !!home.D.querySelector('.intro a[data-ballot-entry][href="ballot.html"]'));
     check("each state's voting block", !!gaPage.D.querySelector('#voting a[data-ballot-entry][href$="ballot.html"]'));
-    check("but not where no election is held", !prPage.D.querySelector("#voting a[data-ballot-entry]"));
+    check("but not where no election is held", !prPage.D.querySelector("#voting a[data-ballot-entry]") &&
+      !!prAnswer.out.querySelector(".findrep-answer") && !prAnswer.out.querySelector("a[data-findrep-ballot]"));
     check("the navigation", !!home.D.querySelector('.site-nav a[data-nav="ballot"][href="ballot.html"]'));
   });
 }

@@ -575,9 +575,9 @@ def check_lookup(payloads, root="."):
             problems.append((path, "stale"))
     if problems:
         return problems
-    from . import voting
+    from . import voting, voting_dates
     index = lookup.index(payloads, lookup_stamps(payloads, root),
-                         voting.for_page(voting.load_cache(root)))
+                         voting.for_page(voting.load_cache(root), voting_dates.load(root)))
     path = os.path.join(root, LOOKUP_INDEX_FILE)
     committed = read_signature(path=path)
     if committed is None:

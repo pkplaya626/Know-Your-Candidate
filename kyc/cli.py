@@ -393,8 +393,11 @@ def _build(args):
         print(f"[error] {exc}", file=sys.stderr)
         return 2
     written_lookup = emit.write_lookup(lookups, args.root)
+    # With the dates: a place whose record says it holds no election is
+    # marked in the index (lookup.place_info, rule 92).
     emit.write_lookup_index(lookup_mod.index(lookups, emit.lookup_stamps(lookups, args.root),
-                                             voting_mod.for_page(voting_mod.load_cache(args.root))),
+                                             voting_mod.for_page(voting_mod.load_cache(args.root),
+                                                                 voting_dates_mod.load(args.root))),
                             args.root)
     lookup_stats = lookup_mod.stats(lookups)
     print(f"[ok] lookup: {lookup_stats['lookup_zips']:,} ZIP areas in "

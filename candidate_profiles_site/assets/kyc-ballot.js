@@ -313,7 +313,8 @@
   /** The election office's own line that no election is held on November
    *  3 there (voting_dates, "noElection"), or null. */
   function noElection(code) {
-    return KYC.findRep ? KYC.findRep.noElection(code) : null;
+    var mine = (((KYC.meta().voting || {})._dates || {}).states || {})[code];
+    return ((mine && mine.lines) || []).filter(function (l) { return l.k === "none"; })[0] || null;
   }
 
   /** The way from a state's voting block to the reader's whole ballot
