@@ -8997,10 +8997,11 @@ async function testVotes() {
       /Voting record, left to right \(Voteview\)/.test(D.getElementById("profileModal").textContent));
 
     // A bill's number as a reader types it.
-    const index = [...entry.votes].findIndex((c, i) => c !== "." && /^H R \d+$/.test(house.rolls[i][3]));
+    const index = [...entry.votes].findIndex((c, i) => c !== "." && /^H\.R\. \d+$/.test(house.rolls[i][3]));
     const measure = house.rolls[index][3];
     const input = D.getElementById("profileModalVoteSearch");
-    input.value = measure.replace("H R ", "H.R. ");
+    // As a reader types it: "hr 9497" is H.R. 9497.
+    input.value = measure.replace("H.R. ", "hr ");
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
   });
   await settle(250);
@@ -9016,7 +9017,10 @@ async function testVotes() {
       }), measure + ": " + found.length);
     check("and never a longer number that starts the same ('H.R. 1' is not H.R. 10)",
       found.every((row) => !new RegExp("^" + want + "\\d").test(compact(row.querySelector("strong") ? row.querySelector("strong").textContent : ""))));
-    check("the count says what matched", /match(es)? “/.test(text("profileModalVoteList")));
+    check("the count says what matched", /match(es)? “/.test(text("profileModalVoteHead")));
+    check("only the count is announced as the reader types, not every row",
+      D.getElementById("profileModalVoteHead").getAttribute("aria-live") === "polite" &&
+        !D.getElementById("profileModalVoteList").hasAttribute("aria-live"));
     const input = D.getElementById("profileModalVoteSearch");
     input.value = "zzzz no such bill";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
@@ -9024,16 +9028,40 @@ async function testVotes() {
   });
   await settle(250);
   suite("profile — a search that finds nothing says so", () => {
-    check("none of their votes match", /None of their votes match/.test(text("profileModalVoteList")) &&
+    check("none of their votes match", /None of their votes match/.test(text("profileModalVoteHead")) &&
       !D.querySelector("#profileModalVoteList .vote-row"));
+    const input = D.getElementById("profileModalVoteSearch");
+    input.value = "ice";
+    input.dispatchEvent(new window.Event("input", { bubbles: true }));
+  });
+  await settle(250);
+  suite("profile — a word is searched from its start", () => {
+    // 37 House titles hold "ice" inside "justice", "service", "police".
+    const rows = [...D.querySelectorAll("#profileModalVoteList .vote-row")];
+    check("'ICE' never finds 'justice'", rows.every((row) => {
+      const roll = house.rolls.find((r) => r[7] === row.querySelector("a").href);
+      return /(^|[^a-z0-9])ice/.test(KYC.searchFold([roll[3], roll[4], roll[2], roll[5]].join(" ")));
+    }), rows.map((row) => row.textContent.slice(0, 60)).join(" | "));
     const input = D.getElementById("profileModalVoteSearch");
     input.value = "";
     input.dispatchEvent(new window.Event("input", { bubbles: true }));
   });
   await settle(250);
   suite("profile — more votes on request", () => {
+    D.querySelector("[data-votes-more]").focus();
     D.querySelector("[data-votes-more]").click();
-    check("ten more", D.querySelectorAll("#profileModalVoteList .vote-row").length === 20);
+    const more = D.querySelectorAll("#profileModalVoteList .vote-row");
+    check("ten more", more.length === 20);
+    check("and the reader goes on from the first of them, not the top of the page",
+      D.activeElement === more[10], D.activeElement && D.activeElement.tagName);
+    check("a House number is written as the bills write it, never the Clerk's 'H R'",
+      house.rolls.every((r) => !/^(H|S)( [A-Z]+)* \d+$/.test(r[3]) && !/^(QUORUM|ADJOURN)$/.test(r[3])) &&
+        [...more].some((row) => /^H\.(R|Res|J\.Res|Con\.Res)\. \d+/.test(row.querySelector(".vote-what").textContent)));
+    check("a placeholder is never a title (rule 10)",
+      !/short title on file/i.test(text("profileModalVotes")) &&
+        ![...house.rolls, ...senate.rolls].some((r) => /short title on file/i.test(r[4])));
+    check("the House's two words for each vote are explained",
+      /“Aye” and “No” are the House’s words on a recorded vote/.test(text("profileModalVotes")));
     KYC.profile.close();
 
     // Rule 17: a vote cast before a member was seated never reaches them.
@@ -9063,6 +9091,35 @@ async function testVotes() {
     check("a challenger has no votes panel (rule 27)", D.getElementById("profileModalVotesPanel").hidden);
     KYC.profile.close();
 
+    // A member's filing for another seat shows the member's votes, and says
+    // whose record and which seat they were cast in, as the panels beside
+    // it do (Andy Barr's Senate filing).
+    const filing = window.legislatorsData.find((p) => p.isCandidate && p.incumbentId &&
+      p.incumbentId !== p.id && KYC.byId(p.incumbentId) && KYC.seated(KYC.byId(p.incumbentId)) &&
+      (house.members[p.incumbentId] || senate.members[p.incumbentId]));
+    if (filing) {
+      KYC.profile.open(filing.id);
+      const seat = KYC.byId(filing.incumbentId).officeLabel;
+      check("a member's filing for another seat says which seat its votes were cast in",
+        text("profileModalVotes").indexOf("record as the member for " + seat) !== -1 &&
+          D.querySelectorAll("#profileModalVoteList .vote-row").length > 0, text("profileModalVotes").slice(-160));
+      KYC.profile.close();
+    }
+
+    // A member who has changed chambers since the Congress the record is of
+    // (a representative seated as a senator on January 3): their votes come
+    // from the chamber they sat in, which the panel names.
+    const mover = window.legislatorsData.find((p) => !p.isCandidate && /House/.test(p.chamber) &&
+      has(house, p) && !senate.members[p.id]);
+    const was = mover && mover.chamber;
+    if (mover) mover.chamber = "Senate";
+    if (mover) KYC.profile.open(mover.id);
+    if (mover) check("a member who changed chambers is shown the votes of the chamber they sat in, named",
+      /Their votes as a member of the House in the \d+(st|nd|rd|th) Congress/.test(text("profileModalVotes")) &&
+        D.querySelectorAll("#profileModalVoteList .vote-row").length === 10, text("profileModalVotes").slice(0, 200));
+    KYC.profile.close();
+    if (mover) mover.chamber = was;
+
     // When are they next up (PROFILES-25), in the card's words.
     if (oldCongressSits(window)) {
       const later = window.legislatorsData.find((p) => KYC.seated(p) && /Senate/.test(p.chamber) &&
@@ -9079,6 +9136,12 @@ async function testVotes() {
       check("the Speaker's roll calls quote the House's rule beside the count",
         /House Rule I, clause 7/.test(text("profileModalVotes")) &&
           /not required to vote/.test(text("profileModalVotes")), text("profileModalVotes").slice(0, 400));
+      const notes = [...D.querySelectorAll("#profileModalVotes .vote-note")].map((n) => n.textContent);
+      check("the roll calls that do not list the Speaker are given their reason in the same sentence",
+        !house.members[speaker.id].unlisted ||
+          notes.some((n) => /does not list them at all in [\d,]+ other roll calls? held while they served: the Speaker need not vote/.test(n) &&
+            /House Rule I, clause 7/.test(n)), notes.join(" | "));
+      check("and no note opens on an 'It' with nothing before it", !notes.some((n) => /^It /.test(n)));
       KYC.profile.close();
     }
     const delegate = window.legislatorsData.find((p) => house.members[p.id] && house.members[p.id].delegate);

@@ -323,6 +323,113 @@ class TestAttribution(unittest.TestCase):
                          "roll_call_votes/vote1191/vote_119_1_00001.htm")
         self.assertEqual([p[1] for p in problems], ["votes-unattributed"])
 
+    def test_one_lis_id_under_two_members_gives_its_votes_to_neither(self):
+        members = {
+            "A000382": member("Angela D. Alsobrooks", "Alsobrooks", "Senate", "MD",
+                              "2025-01-03", "2031-01-03", lis="S428"),
+            "A000999": member("Ann Alsobrooks", "Alsobrooks", "Senate", "MD",
+                              "2025-01-03", "2031-01-03", lis="S428"),
+        }
+        cache = cache_with(senate_rolls=[(senate_xml(1, members=[
+            ("S428", "Angela", "Alsobrooks", "D", "MD", "Yea")]), 1, 1)], members=members)
+        problems = []
+        payload = rollcalls.chamber_payload(cache, "senate", problems)
+        self.assertEqual(payload["members"], {})
+        warned = [p for p in problems if p[1] == "votes-unattributed"]
+        self.assertEqual(len(warned), 1)
+        self.assertIn("A000382 and A000999", warned[0][3][0])
+
+    @staticmethod
+    def build_with(members, rolls):
+        problems = []
+        cache = cache_with(house_rolls=rolls, members=json.loads(json.dumps(members)))
+        return rollcalls.chamber_payload(cache, "house", problems), problems
+
+    def test_a_roll_call_on_the_day_a_member_was_seated_before_they_are_listed(self):
+        # Walkinshaw's term began on 2025-09-10; House roll call 244 that
+        # evening does not list him, the next one does. He was not left out
+        # of a roll call "held while he served". One a day later that does
+        # not list him is said.
+        members = dict(self.MEMBERS, W000831=member(
+            "James R. Walkinshaw", "Walkinshaw", "House", "VA", "2025-09-10", "2027-01-03"))
+        payload, _ = self.build_with(members, [
+            (house_xml(244, date="10-Sep-2025", votes=[("A000370", "Adams", "D", "NC", "Yea")]),
+             2025, 244),
+            (house_xml(245, date="10-Sep-2025", votes=[("A000370", "Adams", "D", "NC", "Yea"),
+                                                       ("W000831", "Walkinshaw", "D", "VA", "Yea")]),
+             2025, 245),
+            (house_xml(246, date="11-Sep-2025", votes=[("A000370", "Adams", "D", "NC", "Yea")]),
+             2025, 246)])
+        entry = payload["members"]["W000831"]
+        self.assertEqual((entry["votes"], entry["listed"], entry["unlisted"]), (".Y.", 1, 1))
+        payload, _ = self.build_with(members, [
+            (house_xml(244, date="10-Sep-2025", votes=[("A000370", "Adams", "D", "NC", "Yea")]),
+             2025, 244),
+            (house_xml(245, date="10-Sep-2025", votes=[("W000831", "Walkinshaw", "D", "VA", "Yea")]),
+             2025, 245)])
+        self.assertNotIn("unlisted", payload["members"]["W000831"])
+
+    def test_a_roll_call_on_the_day_a_member_left_after_they_are_listed(self):
+        # Turner's term ends on 2025-03-05: a roll call that day after the
+        # last that lists him is not one he was left out of.
+        payload, _ = self.build([
+            (house_xml(1, date="5-Mar-2025", votes=[("T000488", "Turner (TX)", "D", "TX", "Yea")]),
+             2025, 1),
+            (house_xml(2, date="5-Mar-2025", votes=[("A000370", "Adams", "D", "NC", "Yea")]),
+             2025, 2)])
+        self.assertNotIn("unlisted", payload["members"]["T000488"])
+
+
+class TestTitles(unittest.TestCase):
+    """Rule 10: a placeholder is not a title, and one bill reads one way."""
+
+    MEMBERS = {"A000382": member("Angela D. Alsobrooks", "Alsobrooks", "Senate", "MD",
+                                 "2025-01-03", "2031-01-03", lis="S428")}
+
+    def test_the_senates_no_short_title_on_file_is_not_a_title(self):
+        placeholder = senate_xml(3, members=[("S428", "Angela", "Alsobrooks", "D", "MD", "Nay")],
+                                 amendment="S.Amdt. 14").replace(
+            b"Laken Riley Act", b"No short title on file")
+        record, _ = rollcalls.parse_senate(placeholder, 119, 1, 3)
+        self.assertEqual(record["title"], "")
+        self.assertEqual(rollcalls._titled("No Short Title on File."), "")
+
+    def test_a_roll_call_with_no_title_takes_its_measures(self):
+        # The passage vote titles S. 5; the amendment's, read before the
+        # parser refused the placeholder, carries it in the cache.
+        cache = cache_with(senate_rolls=[
+            (senate_xml(1, members=[("S428", "Angela", "Alsobrooks", "D", "MD", "Yea")]), 1, 1),
+            (senate_xml(3, members=[("S428", "Angela", "Alsobrooks", "D", "MD", "Nay")],
+                        amendment="S.Amdt. 14"), 1, 3)], members=dict(self.MEMBERS))
+        cache["senate"]["rolls"][1]["title"] = "No short title on file"
+        rows = rollcalls.chamber_payload(cache, "senate", [])["rolls"]
+        self.assertTrue(rows[0][4].startswith("A bill to require"))
+        self.assertEqual(rows[1][4], rows[0][4])
+        self.assertFalse(any("on file" in str(cell) for row in rows for cell in row))
+
+    def test_house_numbers_in_the_bills_style_and_no_procedure_as_a_measure(self):
+        self.assertEqual(rollcalls._house_measure("H R 9497"), ("H.R. 9497", ""))
+        self.assertEqual(rollcalls._house_measure("H J RES 213"), ("H.J.Res. 213", ""))
+        self.assertEqual(rollcalls._house_measure("H CON RES 93"), ("H.Con.Res. 93", ""))
+        self.assertEqual(rollcalls._house_measure("S 1582"), ("S. 1582", ""))
+        self.assertEqual(rollcalls._house_measure("QUORUM"), ("", "Quorum call"))
+        self.assertEqual(rollcalls._house_measure("ADJOURN"), ("", ""))
+        members = dict(TestAttribution.MEMBERS)
+        cache = cache_with(house_rolls=[
+            (house_xml(1, legis="H R 8800", desc="Big Act",
+                       votes=[("A000370", "Adams", "D", "NC", "Yea")]), 2025, 1),
+            (house_xml(2, legis="H R 8800", desc="", question="On Agreeing to the Amendment",
+                       votes=[("A000370", "Adams", "D", "NC", "Aye")]), 2025, 2),
+            (house_xml(3, legis="QUORUM", desc="", question="Call by States",
+                       votes=[("A000370", "Adams", "D", "NC", "Present")]), 2025, 3),
+            (house_xml(4, legis="ADJOURN", desc="", question="On Motion to Adjourn",
+                       votes=[("A000370", "Adams", "D", "NC", "No")]), 2025, 4)],
+            members=members)
+        rows = rollcalls.chamber_payload(cache, "house", [])["rolls"]
+        self.assertEqual([(r[3], r[4]) for r in rows],
+                         [("H.R. 8800", "Big Act"), ("H.R. 8800", "Big Act"),
+                          ("", "Quorum call"), ("", "")])
+
 
 class TestReading(unittest.TestCase):
     def reader(self, answers):
@@ -443,6 +550,18 @@ class TestCommittedSite(unittest.TestCase):
     def test_the_committed_vote_files_match_the_cache(self):
         payloads = rollcalls.payloads(rollcalls.load_cache(ROOT))
         self.assertEqual(emit.check_votes(payloads, ROOT), [])
+
+    def test_no_placeholder_or_clerks_code_reaches_the_vote_files(self):
+        # Rule 10, read from the files the page loads.
+        for chamber in rollcalls.CHAMBERS:
+            with open(emit.votes_file(chamber, ROOT), encoding="utf-8") as handle:
+                text = handle.read()
+            self.assertNotIn("short title on file", text.lower())
+            line = next(x for x in text.splitlines() if re.match(r"^window\.kycVotes[A-Z][a-z]+ = ", x))
+            payload = json.loads(line[line.index("{"):line.rindex(";")])
+            measures = [row[3] for row in payload["rolls"]]
+            self.assertEqual([m for m in measures if re.match(r"^(H|S)( [A-Z]+)* \d+$", m)
+                              or m in rollcalls.HOUSE_PROCEDURES], [])
 
 
 if __name__ == "__main__":

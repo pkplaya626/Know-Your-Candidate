@@ -309,14 +309,32 @@
   // The member whose votes the panel is for, and what it shows of them.
   var voter = null;
   var votesView = null;
+  // "From <name>'s record as the member for <seat>" on a member's filing
+  // for another seat, as the voting and committee panels say it.
+  var voteCredit = "";
 
   function votesTarget() { return el("profileModalVotes"); }
 
-  function renderVotes(member) {
+  /** A chamber's votes, loaded the first time they are asked for; null
+   * when they could not be. */
+  function withVotes(chamber, done) {
+    var name = VOTE_GLOBALS[chamber];
+    if (global[name]) {
+      done(global[name]);
+      return;
+    }
+    votesTarget().innerHTML = '<p class="kyc-absent" role="status">Loading their votes&hellip;</p>';
+    KYC.loadData("votes/" + chamber + ".js", name, function (ok) {
+      done(ok ? global[name] : null);
+    });
+  }
+
+  function renderVotes(member, credit) {
     var panel = el("profileModalVotesPanel");
     var target = votesTarget();
     voter = null;
     votesView = null;
+    voteCredit = credit || "";
     // Only a member's own record (rule 27): a challenger has none, and a
     // former member keeps the votes they cast (rule 67).
     if (!member || member.isCandidate || !/^[A-Z]\d{6}$/.test(member.id || "")) {
@@ -327,21 +345,26 @@
     voter = member;
     panel.hidden = false;
     var chamber = /Senate/.test(member.chamber || "") ? "senate" : "house";
-    var name = VOTE_GLOBALS[chamber];
-    if (global[name]) {
-      drawVotes(member, global[name]);
-      return;
-    }
-    target.innerHTML = '<p class="kyc-absent" role="status">Loading their votes&hellip;</p>';
-    KYC.loadData("votes/" + chamber + ".js", name, function (ok) {
+    withVotes(chamber, function (data) {
       if (voter !== member) return;          // another profile is open now
-      if (ok) {
-        drawVotes(member, global[name]);
-      } else {
+      if (!data) {
         // Said on the page, not left on "Loading" (rule 76).
         target.innerHTML = '<p class="kyc-absent" role="status">Their votes could not be ' +
-          "loaded. Reload the page to try again.</p>";
+          "loaded. Reload the page to try again.</p>" + voteCredit;
+        return;
       }
+      if ((data.members || {})[member.id]) {
+        drawVotes(member, data);
+        return;
+      }
+      // A member who has changed chambers since the Congress the record is
+      // of (a representative seated as a senator on January 3): their votes
+      // are in the other chamber's record, and the panel names it.
+      withVotes(chamber === "senate" ? "house" : "senate", function (other) {
+        if (voter !== member) return;
+        var there = other && (other.members || {})[member.id];
+        drawVotes(member, there ? other : data, !!there);
+      });
     });
   }
 
@@ -353,7 +376,7 @@
       "</a> of the " + KYC.escapeHtml(KYC.ordinal(data.congress)) + " Congress";
   }
 
-  function drawVotes(member, data) {
+  function drawVotes(member, data, moved) {
     var target = votesTarget();
     var entry = (data.members || {})[member.id];
     var read = data.read ? ", read on " + KYC.escapeHtml(KYC.dateWords(data.read)) : "";
@@ -362,19 +385,23 @@
       // a member seated since it was read, or a delegate, whom the House's
       // roll calls do not list.
       target.innerHTML = '<p class="kyc-absent">' + KYC.escapeHtml(member.name) + " is in no " +
-        "roll call of " + voteRecordName(data) + read + ".</p>";
+        "roll call of " + voteRecordName(data) + read + ".</p>" + voteCredit;
       return;
     }
     votesView = { member: member, data: data, entry: entry, query: "", shown: VOTES_STEP,
                   numbers: {} };
     var share = entry.share.toFixed(1).replace(/\.0$/, "");
-    var html = '<p class="vote-summary"><strong>Not voting in ' + entry.notVoting.toLocaleString() +
+    var html = (moved ? '<p class="vote-note">Their votes as a member of the ' +
+        KYC.escapeHtml(data.chamber) + " in the " + KYC.escapeHtml(KYC.ordinal(data.congress)) +
+        " Congress.</p>" : "") +
+      '<p class="vote-summary"><strong>Not voting in ' + entry.notVoting.toLocaleString() +
       " of " + entry.listed.toLocaleString() + " roll calls</strong> (" + share + "%), as " +
       "the record lists them.</p>";
     // Roll calls held while they served that do not list them at all are
-    // never counted as missed, and are said: the Clerk lists a Speaker who
-    // does not vote nowhere, and a delegate only in the Committee of the
-    // Whole. Each with the House's own rule.
+    // never counted as missed, and are said with the reason in the same
+    // sentence: the Clerk lists a Speaker who does not vote nowhere, and a
+    // delegate only in the Committee of the Whole's. Each with the House's
+    // own rule.
     var quote = function (rule) {
       return rule ? ' <a href="' + KYC.escapeAttr(rule.url) + '" target="_blank" ' +
         'rel="noopener noreferrer">' + KYC.escapeHtml(rule.cite) + "</a>: “" +
@@ -382,25 +409,33 @@
     };
     var notes = [];
     if (entry.unlisted) {
-      notes.push("The record does not list them at all in " + entry.unlisted.toLocaleString() +
-        " other roll call" + (entry.unlisted === 1 ? "" : "s") + " held while they served" +
-        (entry.delegate ? ": they are listed in the Committee of the Whole’s." +
-          quote(data.delegateRule) : "."));
+      var unlisted = "The record does not list them at all in " + entry.unlisted.toLocaleString() +
+        " other roll call" + (entry.unlisted === 1 ? "" : "s") + " held while they served";
+      notes.push(unlisted + (entry.delegate
+        ? ": a delegate votes only in the Committee of the Whole, and is listed only in its " +
+          "roll calls." + quote(data.delegateRule)
+        : entry.asSpeaker ? ": the Speaker need not vote." + quote(data.speakerRule) : "."));
     }
     if (entry.asSpeaker) {
-      notes.push("It names them as Speaker in " + entry.asSpeaker.toLocaleString() +
-        " of the roll calls it lists them in." + quote(data.speakerRule));
+      notes.push("The record names them as Speaker in " + entry.asSpeaker.toLocaleString() +
+        " of the " + entry.listed.toLocaleString() + " roll calls it lists them in." +
+        (entry.unlisted ? "" : quote(data.speakerRule)));
     }
     notes.forEach(function (note) { html += '<p class="vote-note">' + note + "</p>"; });
     html += '<div class="vote-search"><label class="field-label" for="profileModalVoteSearch">' +
       "Search their votes</label>" +
       '<input id="profileModalVoteSearch" class="text-input" type="search" autocomplete="off" ' +
       'spellcheck="false" placeholder="A bill’s title or number, e.g. H.R. 1"></div>' +
-      '<div id="profileModalVoteList" aria-live="polite"></div>' +
+      // Only the count is announced as the reader types, not every row.
+      '<p class="vote-head" id="profileModalVoteHead" aria-live="polite"></p>' +
+      '<div id="profileModalVoteList"></div>' +
       '<p class="held-source">Every roll call of ' + voteRecordName(data) +
       (data.first ? ", " + KYC.escapeHtml(KYC.dateWords(data.first)) + " to " +
         KYC.escapeHtml(KYC.dateWords(data.last)) : "") + read + ", in which the record lists " +
-      "them. Each vote as the record gives it, with a link to it.</p>";
+      "them. Each vote as the record gives it, with a link to it." +
+      (data.chamber === "House" ? " “Aye” and “No” are the House’s words on a recorded vote, " +
+        "and “Yea” and “Nay” on a yea-and-nay vote; each pair means the same." : "") +
+      "</p>" + voteCredit;
     target.innerHTML = html;
     drawVoteList();
   }
@@ -443,7 +478,8 @@
     return function (roll) {
       var hay = " " + KYC.searchFold([roll[3], roll[4], roll[2], roll[5]].join(" "))
         .replace(/[^a-z0-9 ]+/g, " ") + " ";
-      return words.every(function (w) { return hay.indexOf(w) !== -1; });
+      // From the start of a word: "ICE" is not in "justice" or "police".
+      return words.every(function (w) { return hay.indexOf(" " + w) !== -1; });
     };
   }
 
@@ -455,7 +491,9 @@
     // question, which is then not said twice.
     var headline = roll[4] || (roll[3] ? "" : roll[2]);
     var question = headline === roll[2] ? "" : roll[2];
-    return '<li class="vote-row"><span class="vote-cast' + (missed ? " vote-missed" : "") + '">' +
+    // Focusable from script, so "Show more" can move the reader to the
+    // first row it added.
+    return '<li class="vote-row" tabindex="-1"><span class="vote-cast' + (missed ? " vote-missed" : "") + '">' +
       KYC.escapeHtml(cast) + '</span><span class="vote-body"><span class="vote-what">' +
       (roll[3] ? "<strong>" + KYC.escapeHtml(roll[3]) + "</strong> " : "") +
       KYC.escapeHtml(headline) + "</span>" +
@@ -469,7 +507,8 @@
   function drawVoteList() {
     var view = votesView;
     var list = el("profileModalVoteList");
-    if (!view || !list) return;
+    var headEl = el("profileModalVoteHead");
+    if (!view || !list || !headEl) return;
     var rolls = view.data.rolls;
     var codes = view.data.codes;
     var votes = view.entry.votes;
@@ -487,7 +526,8 @@
       ? (found.length ? found.length.toLocaleString() + (found.length === 1 ? " vote matches" :
           " votes match") : "None of their votes match") + " “" + query + "”"
       : "Their most recent votes";
-    var html = '<p class="vote-head">' + KYC.escapeHtml(head) + "</p>";
+    if (headEl.textContent !== head) headEl.textContent = head;
+    var html = "";
     if (shown.length) {
       html += '<ol class="vote-list">' + shown.map(function (index) {
         return voteRow(rolls[index], codes[votes.charAt(index)], view.data);
@@ -1192,16 +1232,18 @@
      * member)" under "Currently holds House • AL-1" (PROFILES-03). */
     var sitting = item.isCandidate && item.incumbentId ? KYC.byId(item.incumbentId) : null;
     sitting = sitting && KYC.seated(sitting) && sitting.id !== item.id ? sitting : null;
+    // In the filing's own name: "From Garland Barr's record" on Andy Barr's
+    // Senate filing read as someone else's (the roster's name).
+    var from = sitting ? '<p class="field-credit">From ' + KYC.escapeHtml(item.name) +
+      "’s record as the member for " + '<button type="button" class="link-button" data-goto="' +
+      KYC.escapeAttr(sitting.id) + '">' + KYC.escapeHtml(sitting.officeLabel) + "</button></p>" : "";
     renderVoting(sitting || item);
-    renderVotes(sitting || item);
+    // The votes panel draws when its chamber's file has come, and carries
+    // the same line then.
+    renderVotes(sitting || item, from);
     renderCommittees(sitting || item);
     renderLeadership(sitting || item);
     if (sitting) {
-      // In the filing's own name: "From Garland Barr's record" on Andy
-      // Barr's Senate filing read as someone else's (the roster's name).
-      var from = '<p class="field-credit">From ' + KYC.escapeHtml(item.name) +
-        "’s record as the member for " + '<button type="button" class="link-button" data-goto="' +
-        KYC.escapeAttr(sitting.id) + '">' + KYC.escapeHtml(sitting.officeLabel) + "</button></p>";
       el("profileModalVoting").insertAdjacentHTML("beforeend", from);
       el("profileModalCommittees").insertAdjacentHTML("beforeend", from);
     }
@@ -1269,8 +1311,13 @@
       var goto = event.target.closest("[data-goto]");
       if (goto) open(goto.getAttribute("data-goto"));
       if (event.target.closest("[data-votes-more]") && votesView) {
+        var before = votesView.shown;
         votesView.shown += VOTES_STEP;
         drawVoteList();
+        // The button is redrawn away: the reader goes on from the first new
+        // row, not from the top of the page.
+        var added = el("profileModalVoteList").querySelectorAll(".vote-row")[before];
+        if (added) added.focus();
       }
     });
     // The search over a member's votes: redrawn as the reader types.

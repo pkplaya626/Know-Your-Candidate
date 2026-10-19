@@ -1411,7 +1411,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     absent from 154 of the House's votes, so only a record's "Not Voting"
     is missed, the rest is said apart with the House's own rule quoted
     (Rule I, clause 7; Rule III, clause 3(a)). A "Not Voting" dated after a
-    member left (David Scott, listed the day after) is nobody's. The Clerk answers a roll call it
+    member left (David Scott, listed the day after) is nobody's. A roll
+    call on the day a member took their seat, before the first that lists
+    them, or on the day they left, after the last, was not held while they
+    served: congress-legislators dates a term by the day, and six members
+    seated mid-Congress were told the record had left them out of one
+    (Walkinshaw, House roll call 244 of 2025, on his first day). One LIS id
+    under two members gives its votes to neither. A record's placeholder
+    is not a title (rule 10): the Senate's "No short title on file" stood
+    in a bill's place on 169 votes, and a roll call with no title takes the
+    one its measure's other roll calls give. The Clerk's "H R 9497" is
+    written "H.R. 9497", as the Senate's record and the bills write it, and
+    its "QUORUM" and "ADJOURN" are not measures. A word is searched from
+    its start: "ICE" found 37 votes on "justice", "service" and "police".
+    The Clerk answers a roll call it
     has not posted with HTTP 200 and an "Error sanitizing file" note: not
     a file (rule 52), and it ends the run there without concluding
     anything (rule 8). Nothing is chosen: no "key votes", which would be an

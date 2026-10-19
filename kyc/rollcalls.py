@@ -138,6 +138,46 @@ def fold(text):
     return " ".join(re.sub(r"[^a-z0-9]+", " ", stripped.lower()).split())
 
 
+# What a record writes where a measure has no title is not a title (rule
+# 10): the Senate's LIS gives 169 of the 119th Congress's votes, most of
+# them on amendments, "No short title on file" (read 2026-10-18), and the
+# page showed it in a bill's place. Every one of those measures has a title
+# on another of its roll calls (_measure_titles).
+NO_TITLE = frozenset({"no short title on file"})
+
+
+def _titled(*values):
+    """The first of *values* that is a title, not a placeholder; "" if none."""
+    for value in values:
+        if value and fold(value) not in NO_TITLE:
+            return value
+    return ""
+
+
+# The Clerk writes a measure's number with spaces ("H R 9497", "H J RES
+# 213"); the page writes it as the bills and the Senate's record do ("H.R.
+# 9497"), or one bill read two ways side by side. Search ignores both.
+HOUSE_MEASURES = {"H R": "H.R.", "H RES": "H.Res.", "H J RES": "H.J.Res.",
+                  "H CON RES": "H.Con.Res.", "S": "S.", "S RES": "S.Res.",
+                  "S J RES": "S.J.Res.", "S CON RES": "S.Con.Res."}
+# The Clerk's codes in the measure's place for a roll call on no measure:
+# a quorum call ("Call by States", "Call of the House") and a motion to
+# adjourn, whose question ("On Motion to Adjourn") already says what it was.
+HOUSE_PROCEDURES = {"QUORUM": "Quorum call", "ADJOURN": ""}
+
+
+def _house_measure(text):
+    """``(measure, title)`` as the page writes them: the measure's number in
+    the bills' style, or none and a title for a roll call on no measure."""
+    text = " ".join(str(text or "").split())
+    if text in HOUSE_PROCEDURES:
+        return "", HOUSE_PROCEDURES[text]
+    match = re.match(r"^([A-Z]+(?: [A-Z]+)*) (\d+)$", text)
+    if match and match.group(1) in HOUSE_MEASURES:
+        return f"{HOUSE_MEASURES[match.group(1)]} {match.group(2)}", ""
+    return text, ""
+
+
 def _house_date(value):
     try:
         return datetime.datetime.strptime(value.strip(), "%d-%b-%Y").date().isoformat()
@@ -264,8 +304,8 @@ def parse_senate(raw, congress, session, vote):
         # An amendment's vote names the measure it would amend there.
         "measure": (_text(document, "document_name") or
                     _text(amendment, "amendment_to_document_number")),
-        "title": (_text(document, "document_short_title") or _text(document, "document_title") or
-                  _text(amendment, "amendment_to_document_short_title")),
+        "title": _titled(_text(document, "document_short_title"), _text(document, "document_title"),
+                         _text(amendment, "amendment_to_document_short_title")),
         "voteTitle": _text(root, "vote_title"),
         "amendment": " ".join(x for x in (number, number and purpose and
                                           purpose != "No Statement of Purpose on File." and
@@ -555,6 +595,28 @@ def _serving(person, chamber, date):
                for t in person["terms"])
 
 
+def _seat_days(person, chamber, rolls, row):
+    """The roll calls held on the day a member took their seat before the
+    first that lists them, and on the day they left after the last: the
+    record lists no one before they are sworn in or after they have gone,
+    and congress-legislators dates a term by the day, not the hour. Never
+    "held while they served" (rule 19): six members seated mid-Congress were
+    told the record left them out of a roll call held, in each case, on the
+    day their term began before the first that listed them (Walkinshaw:
+    House roll call 244 of 2025, on 2025-09-10)."""
+    out = set()
+    for term in person["terms"]:
+        if term["chamber"] != chamber:
+            continue
+        for day, forward in ((term["start"], True), (term["end"], False)):
+            those = [i for i, r in enumerate(rolls) if r["date"] == day]
+            for i in (those if forward else reversed(those)):
+                if row[i] != NOT_LISTED:
+                    break
+                out.add(i)
+    return out
+
+
 def _amendment_words(text):
     """A House amendment as the page says it: the Clerk's words for it
     ("Scott of Virginia Amendment No. 3") where they carry its number,
@@ -569,8 +631,27 @@ def _amendment_words(text):
     return f"Amendment {number}: {words}"
 
 
-def _roll_row(chamber, congress, roll):
+def _measure_titles(rolls):
+    """The title each measure's roll calls give it most often, the latest of
+    them on a tie: the title of a roll call that gives none (97 House roll
+    calls on amendments, and the Senate's placeholder). One bill's title,
+    from the record's own roll calls on that bill."""
+    seen = {}
+    for index, roll in enumerate(rolls):
+        title = _titled(roll.get("title"))
+        if roll.get("measure") and title:
+            counts = seen.setdefault(roll["measure"], {})
+            counts[title] = (counts.get(title, (0, -1))[0] + 1, index)
+    return {measure: max(counts.items(), key=lambda kv: kv[1])[0]
+            for measure, counts in seen.items()}
+
+
+def _roll_row(chamber, congress, roll, titles=None):
+    title = _titled(roll.get("title")) or (titles or {}).get(roll.get("measure"), "")
+    measure = roll["measure"]
     if chamber == "house":
+        measure, procedure = _house_measure(measure)
+        title = title or procedure
         rid = f"{roll['year']}-{roll['n']}"
         url = HOUSE_PAGE.format(year=roll["year"], roll=roll["n"])
         result = roll["result"]
@@ -587,10 +668,9 @@ def _roll_row(chamber, congress, roll):
         url = SENATE_PAGE.format(congress=congress, session=roll["session"], vote=roll["n"])
         result = roll["result"]
         detail = roll.get("amendment") or ""
-        if roll.get("voteTitle") and fold(roll["voteTitle"]) != fold(roll.get("title")):
+        if roll.get("voteTitle") and fold(roll["voteTitle"]) != fold(title):
             detail = "; ".join(x for x in (roll["voteTitle"], detail) if x)
-    return [rid, roll["date"], roll["question"], roll["measure"], roll["title"], detail,
-            result, url]
+    return [rid, roll["date"], roll["question"], measure, title, detail, result, url]
 
 
 def chamber_payload(cache, chamber, problems=None):
@@ -608,7 +688,15 @@ def chamber_payload(cache, chamber, problems=None):
     rolls = sorted(part.get("rolls") or [], key=lambda r: (r["session"], r["n"]))
     members = cache.get("members") or {}
     title = "House" if chamber == "house" else "Senate"
-    by_lis = {p["lis"]: b for b, p in members.items() if p.get("lis")}
+    # One LIS id is one senator. Two bioguide ids under it would give one
+    # person's votes to another, so the id gives its votes to neither.
+    by_lis, shared_lis = {}, {}
+    for bioguide, person in sorted(members.items()):
+        lis = person.get("lis")
+        if lis and lis in by_lis:
+            shared_lis.setdefault(lis, [by_lis[lis]]).append(bioguide)
+        elif lis:
+            by_lis[lis] = bioguide
 
     def bioguide_of(vid):
         return vid if chamber == "house" else by_lis.get(vid)
@@ -617,6 +705,10 @@ def chamber_payload(cache, chamber, problems=None):
 
     refused_ids, known = {}, set()
     for vid in sorted(part.get("seen") or {}):
+        if chamber == "senate" and vid in shared_lis:
+            refused_ids[vid] = (f"{vid} is the LIS id of {' and '.join(shared_lis[vid])} in "
+                                "congress-legislators, and is given to neither")
+            continue
         bioguide = bioguide_of(vid)
         person = members.get(bioguide) if bioguide else None
         if not person and vid in ROLL_CALL_NON_MEMBERS:
@@ -674,6 +766,7 @@ def chamber_payload(cache, chamber, problems=None):
                                    for b, d in sorted(outside.items())]))
 
     not_voting = codes[NOT_VOTING]
+    titles = _measure_titles(rolls)
     out_members = {}
     for bioguide, row in sorted(strings.items()):
         person = members[bioguide]
@@ -683,10 +776,11 @@ def chamber_payload(cache, chamber, problems=None):
                  "share": round(100.0 * missed / listed, 1) if listed else 0.0}
         # Roll calls held while they served that the record does not list
         # them in at all: never counted as missed, and said on the page. The
-        # Clerk lists a Speaker who does not vote nowhere; a member seated or
-        # gone on the day of a roll call may be absent from it; a delegate
-        # is listed only in the Committee of the Whole's.
-        serving = sum(1 for r in rolls if _serving(person, title, r["date"]))
+        # Clerk lists a Speaker who does not vote nowhere, and a delegate
+        # only in the Committee of the Whole's.
+        edges = _seat_days(person, title, rolls, row)
+        serving = sum(1 for i, r in enumerate(rolls) if _serving(person, title, r["date"])
+                      and i not in edges)
         if serving > listed:
             entry["unlisted"] = serving - listed
         if title == "House" and {t["state"] for t in person["terms"]} & DELEGATIONS:
@@ -710,7 +804,7 @@ def chamber_payload(cache, chamber, problems=None):
         "codes": {code: words for words, code in sorted(codes.items(), key=lambda kv: kv[1])
                   if any(code in row for row in strings.values())},
         "notVoting": NOT_VOTING,
-        "rolls": [_roll_row(chamber, congress, r) for r in rolls],
+        "rolls": [_roll_row(chamber, congress, r, titles) for r in rolls],
         "members": out_members,
     }
     if chamber == "house":
