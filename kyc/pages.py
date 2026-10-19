@@ -507,12 +507,15 @@ def _state_main():
 
 # "{people}" is the page's people file: its own state's ("ca.js"), or, on
 # the directory of states, the index of everyone ("index.js"), whose races
-# it counts.
+# it counts. A state's page lists its statewide questions (rule 95); the
+# directory of states lists none, and does not load them.
+_STATE_MEASURES = "../data/measures.js"
 _STATE_SCRIPTS = (
     "../data/people/meta.js",
     "../data/people/{people}",
     "../data/odds.js",
     "../data/stategov.js",
+    _STATE_MEASURES,
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
@@ -555,7 +558,8 @@ _PROFILE_DIALOG = "assets/kyc-profile.js"
 def _state_scripts(code=None):
     """A state page's scripts, or the directory of states' (*code* None)."""
     people = f"{code.lower()}.js" if code else "index.js"
-    return tuple(src.replace("{people}", people) for src in _STATE_SCRIPTS)
+    return tuple(src.replace("{people}", people) for src in _STATE_SCRIPTS
+                 if code or src != _STATE_MEASURES)
 
 
 def _scripts(sources):
@@ -2287,6 +2291,7 @@ _BALLOT_SCRIPTS = (
     "data/people/meta.js",
     "data/odds.js",
     "data/stategov.js",
+    "data/measures.js",
     "data/lookup/index.js",
     "assets/kyc-odds.js",
     "assets/kyc-cards.js",
@@ -2317,10 +2322,12 @@ _BALLOT_SOURCES = """\
                     election pages, and their candidates from the election office's own list,
                     each list named and dated where it is shown; the districts a ZIP code or a
                     location falls in from the Census Bureau's boundaries and ZIP Code
-                    Tabulation Areas; the key dates from each election office's own pages.</p>
+                    Tabulation Areas; the key dates from each election office's own pages; the
+                    statewide questions from each election office's own list, each with its
+                    official text and source.</p>
                 <p><strong>Not listed here:</strong> the candidates for the state legislature,
-                    ballot measures, and judicial and local contests. Where a state's election
-                    office links a sample ballot, the page links it.</p>"""
+                    local ballot questions, and judicial and local contests. Where a state's
+                    election office links a sample ballot, the page links it.</p>"""
 
 
 def render_ballot_page(host):
@@ -2343,8 +2350,9 @@ def render_ballot_page(host):
         '                    <p class="districts-lede" data-ballot-lede>Every contest on your',
         f'                        {_e(when)} ballot that this site can name, from your ZIP code or',
         "                        your location: the races for Congress and who is in them, the",
-        "                        statewide offices and their candidates, and whether your seats in the",
-        "                        state legislature are up. Who represents you now is another question:",
+        "                        statewide offices and their candidates, whether your seats in the",
+        "                        state legislature are up, and the statewide questions in their official",
+        "                        words. Who represents you now is another question:",
         '                        <a href="index.html#findrep">find who represents you</a>.</p>',
         "                </header>",
         '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',

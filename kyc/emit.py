@@ -26,6 +26,9 @@ ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
 # Each state's governor and which party holds each chamber (kyc/stategov.py).
 STATEGOV_FILE = os.path.join(DATA_DIR, "stategov.js")
+# The statewide questions on each jurisdiction's ballot (kyc/ballot_measures.py),
+# for Your ballot and the state pages.
+MEASURES_FILE = os.path.join(DATA_DIR, "measures.js")
 # One file per state: its legislative districts and who sits for them.
 LEGISLATURE_DIR = os.path.join(DATA_DIR, "legislature")
 # The federal executive and courts: one file for the hub, one per court.
@@ -100,6 +103,7 @@ BALLOT_PAGE_REQUIREMENTS = (
     "data/people/meta.js",
     "data/odds.js",
     "data/stategov.js",
+    "data/measures.js",
     "data/lookup/index.js",
     "assets/kyc-odds.js",
     "assets/kyc-cards.js",
@@ -119,6 +123,7 @@ STATE_PAGE_REQUIREMENTS = (
     "../data/people/{code}.js",
     "../data/odds.js",
     "../data/stategov.js",
+    "../data/measures.js",
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
@@ -132,7 +137,8 @@ STATE_PAGE_REQUIREMENTS = (
 # The directory of states, in the same folder: every state's counts and
 # races, from the index of everyone.
 STATES_INDEX_REQUIREMENTS = tuple(
-    src.replace("{code}", "index") for src in STATE_PAGE_REQUIREMENTS)
+    src.replace("{code}", "index") for src in STATE_PAGE_REQUIREMENTS
+    if src != "../data/measures.js")
 
 
 def people_on_demand(loaded):
@@ -879,6 +885,26 @@ def write_stategov(payload, root="."):
         + 'window.kycStateGovMeta = {"signature":"' + stategov_signature(payload) + '"};\n'
     )
     return path, _atomic_write(path, text)
+
+
+def write_measures(payload, root="."):
+    """Emit ``candidate_profiles_site/data/measures.js``: each jurisdiction's
+    statewide questions in the page's words (kyc/ballot_measures.py, rule
+    95), rewritten only when its signature changes."""
+    path = os.path.join(root, MEASURES_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="kyc/ballot_measures.py, data/ballot_measures.json",
+                       built=build_timestamp())
+        + f"window.kycMeasures = {_json(payload)};\n"
+        + 'window.kycMeasuresMeta = {"signature":"' + measures_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def measures_signature(payload):
+    """Content hash of the ballot measures, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 
 def stategov_signature(payload):
