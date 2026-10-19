@@ -124,6 +124,135 @@
       " is shown without one.</p>";
   }
 
+  /** A court's active bench on a line of years (VISUALS-30): a row per
+   *  appointing President, earliest first as in the strip above, each judge
+   *  a dot at the day they were commissioned to this court (a justice at
+   *  the oath the Court lists). One neutral ink: a President, not a party.
+   *  The names and dates are page text in the table below; each dot says
+   *  its own in its title. */
+  function benchTimeline(court, judges) {
+    var id = court.id;
+    var rows = [];
+    var byName = {};
+    judges.forEach(function (j) {
+      var seat = (j.seats || []).filter(function (s) { return s.court === id; })[0] || {};
+      var when = id === "scotus" ? oathOf(j) : seat.commissioned;
+      var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(when || ""));
+      if (!m || !seat.appointedBy) return;
+      var at = +m[1] + (+m[2] - 1) / 12 + (+m[3] - 1) / 365;
+      if (!byName[seat.appointedBy]) {
+        byName[seat.appointedBy] = { name: seat.appointedBy, dots: [] };
+        rows.push(byName[seat.appointedBy]);
+      }
+      byName[seat.appointedBy].dots.push({ at: at, judge: j.name, when: when });
+    });
+    if (!rows.length) return "";
+    rows.forEach(function (r) { r.dots.sort(function (a, b) { return a.at - b.at; }); });
+    rows.sort(function (a, b) { return a.dots[0].at - b.dots[0].at; });
+    var all = [];
+    rows.forEach(function (r) { r.dots.forEach(function (d) { all.push(d.at); }); });
+    var first = Math.floor(Math.min.apply(null, all) / 5) * 5;
+    var last = Math.max(Math.ceil((Math.max.apply(null, all) + 0.01) / 5) * 5, first + 10);
+    var x = function (v) { return (100 * (v - first) / (last - first)).toFixed(2) + "%"; };
+    var ticks = [];
+    for (var t = first; t <= last; t += (last - first > 30 ? 10 : 5)) ticks.push(t);
+    var counted = judges.length === all.length ? "" : " " + (judges.length - all.length) +
+      " with no commission date in the directory " + (judges.length - all.length === 1 ? "is" : "are") +
+      " not drawn.";
+    return '<figure class="bench-timeline">' +
+      "<figcaption>" + (id === "scotus" ? "The justices, by the year each took the oath"
+        : "Active judges, by the year each was commissioned to this court") + "</figcaption>" +
+      '<ul class="bt-rows">' + rows.map(function (r) {
+        var words = r.dots.length + " appointed by " + r.name + ": " +
+          r.dots.map(function (d) { return d.judge + " (" + KYC.dateWords(d.when) + ")"; }).join("; ");
+        // Judges commissioned close together stack instead of hiding one
+        // another: a dot goes up a level until nothing on it is that near.
+        var levels = [];
+        var placed = r.dots.map(function (d) {
+          var level = 0;
+          while ((levels[level] || []).some(function (at) {
+            return Math.abs(at - d.at) / (last - first) < 0.03;
+          })) level += 1;
+          (levels[level] = levels[level] || []).push(d.at);
+          return { d: d, level: level };
+        });
+        return '<li class="bt-row"><span class="bt-name">' + esc(r.name) + "</span>" +
+          '<span class="bt-track" role="img" aria-label="' + KYC.escapeAttr(words) + '" style="height:' +
+          (levels.length * 10 + 8) + 'px">' +
+          placed.map(function (p) {
+            return '<span class="bt-dot" style="left:' + x(p.d.at) + ";bottom:" + (4 + p.level * 10) +
+              'px" title="' + KYC.escapeAttr(p.d.judge + ", " + KYC.dateWords(p.d.when)) + '"></span>';
+          }).join("") + "</span></li>";
+      }).join("") + "</ul>" +
+      '<div class="bt-axis" aria-hidden="true"><span class="bt-name"></span><span class="bt-ticks">' +
+      ticks.map(function (v) { return '<span style="left:' + x(v) + '">' + v + "</span>"; }).join("") +
+      "</span></div>" + (counted ? '<p class="faint">' + esc(counted.trim()) + "</p>" : "") + "</figure>";
+  }
+
+  /** The federal courts as a ladder (VISUALS-29): the Supreme Court over
+   *  the thirteen courts of appeals, each over the district courts whose
+   *  appeals it hears, with the judges and vacancies each counts, every
+   *  rung a link to its court's page. Counted from the courts' own rows,
+   *  never typed. */
+  function courtLadder(d) {
+    var courts = d.courts || [];
+    var top = courts.filter(function (c) { return c.kind === "supreme"; })[0];
+    var appeals = courts.filter(function (c) { return c.kind === "appeals"; });
+    if (!top || !appeals.length) return "";
+    var plural = function (n, one, many) { return n + " " + (n === 1 ? one : many || one + "s"); };
+    var gaps = function (c) {
+      return [c.vacancies ? plural(c.vacancies, "vacancy", "vacancies") : "",
+        c.future ? c.future + " announced" : ""].filter(Boolean).join(", ");
+    };
+    var below = function (circuit) {
+      return courts.filter(function (c) {
+        return (c.kind === "district" || c.kind === "territorial") && c.circuit === circuit.circuit;
+      });
+    };
+    var trials = courts.filter(function (c) { return c.kind === "district" || c.kind === "territorial"; });
+    var sum = function (list, key) { return list.reduce(function (n, c) { return n + (c[key] || 0); }, 0); };
+    var rung = function (c, label, facts) {
+      var open = gaps(c);
+      return '<a class="cl-node" href="' + KYC.escapeAttr("../courts/" + c.id + ".html") + '">' +
+        '<span class="cl-name">' + esc(label) + "</span>" +
+        '<span class="cl-facts">' + esc(facts) + "</span>" +
+        (open ? '<span class="cl-open">' + esc(open) + "</span>" : "") + "</a>";
+    };
+    var circuitCards = appeals.map(function (c) {
+      var mine = below(c);
+      var label = shortName(c).replace(/ Circuit$/, "");
+      var listed = mine.filter(function (x) { return x.listed; });
+      var open = sum(mine, "vacancies");
+      return '<li class="cl-circuit">' +
+        rung(c, label, c.active + " active, " + c.senior + " senior") +
+        (mine.length
+          ? '<a class="cl-sub" href="#districts-' + KYC.escapeAttr(c.id) + '">' +
+            esc(plural(mine.length, "district court")) + ": " +
+            esc(sum(listed, "active") + " active" + (listed.length < mine.length ? " in the directory" : "") +
+              (open ? ", " + plural(open, "vacancy", "vacancies") : "")) + "</a>"
+          : c.circuit === "Federal"
+            ? '<span class="cl-sub cl-note">No district courts: its appeals come from the ' +
+              "Court of International Trade and national bodies</span>" : "") + "</li>";
+    }).join("");
+    var openTrial = sum(trials, "vacancies");
+    return '<figure class="court-ladder">' +
+      "<figcaption>How the federal courts are arranged, with each court’s judges as the " +
+      "directory counts them and its vacancies as the courts list them. Each box opens " +
+      "that court’s page.</figcaption>" +
+      '<div class="cl-top">' + rung(top, "Supreme Court", top.active + " justices") + "</div>" +
+      '<p class="cl-step" aria-hidden="true">hears appeals from</p>' +
+      '<ol class="cl-circuits">' + circuitCards + "</ol>" +
+      '<p class="cl-step" aria-hidden="true">each hears appeals from the district courts under it</p>' +
+      '<p class="cl-total">' + esc(plural(trials.length, "district court") + " in all: " +
+        sum(trials.filter(function (c) { return c.listed; }), "active") + " active judges in the directory" +
+        (openTrial ? ", " + plural(openTrial, "vacancy", "vacancies") + " now" : "")) +
+      (function (n) {
+        return n ? esc(" (the " + plural(n, "territorial court") + "’ judges serve under Article IV, " +
+          "outside the directory, and are not counted here)") : "";
+      })(trials.filter(function (c) { return !c.listed; }).length) + ".</p>" +
+      "</figure>";
+  }
+
   /** "5 active, 4 senior". A judge the courts' list has on senior status,
    *  whom the directory still lists as active, is counted senior and said
    *  so: neither source is picked silently (kyc/vacancies.py). */
@@ -610,7 +739,7 @@
 
     var courts = d.courts.filter(function (c) { return c.kind !== "supreme"; });
     var appeals = courts.filter(function (c) { return c.kind === "appeals"; });
-    var body = circuitMapMarkup() + '<div class="fed-search">' +
+    var body = courtLadder(d) + circuitMapMarkup() + '<div class="fed-search">' +
       '<label class="field-label" for="judgeSearch">Find a federal judge or Cabinet officer</label>' +
       '<input id="judgeSearch" class="search-input" type="search" autocomplete="off" ' +
       'placeholder="A name" aria-describedby="judgeSearchCount">' +
@@ -637,7 +766,8 @@
         return c.kind !== "appeals" && c.kind !== "trade" && c.circuit === circuit.circuit;
       });
       if (!districts.length) return;
-      body += '<h3 class="panel-subhead">District courts of the ' + esc(shortName(circuit)) + "</h3>" +
+      body += '<h3 class="panel-subhead" id="districts-' + KYC.escapeAttr(circuit.id) +
+        '">District courts of the ' + esc(shortName(circuit)) + "</h3>" +
         table("", COURT_HEADS, courtRows(districts, "../courts/"));
     });
     var trade = courts.filter(function (c) { return c.kind === "trade"; });
@@ -1022,6 +1152,8 @@
     html += appointerStrip(court, id === "scotus" ? "The justices, by the President who appointed them"
       : "Active judges, by the President who appointed them");
     if (court.appointers && court.appointers.length) html += appointersNote(court.kind);
+    // When each sat down, by appointing President (VISUALS-30).
+    html += benchTimeline(court, active);
     var heads = id === "scotus" ? ["Justice", "Title", "Appointed by", "Took the oath"]
       : ["Judge", "Title", "Appointed by", "Commissioned"];
     html += section("active", id === "scotus" ? "The justices" : "Active judges",

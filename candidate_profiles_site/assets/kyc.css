@@ -4663,6 +4663,72 @@ button.local-county-link {
 .tp-key { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
 .tp-dot-key { position: static; display: inline-block; margin: 0 var(--s-1) 0 0; vertical-align: 1px; }
 
+/* The federal courts as a ladder (kyc-federal.js courtLadder): every rung a
+ * link to its court, in neutral ink. */
+.court-ladder { margin: 0 0 var(--s-5); }
+.court-ladder figcaption { margin-bottom: var(--s-3); font-size: var(--t-sm); color: var(--text-muted); }
+.cl-top { display: flex; justify-content: center; }
+.cl-top .cl-node { min-width: 12rem; }
+.cl-node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  text-decoration: none;
+  text-align: center;
+}
+.cl-node:hover,
+.cl-node:focus-visible { border-color: var(--accent); background: var(--surface-2); }
+.cl-name { font-weight: 700; font-size: var(--t-sm); }
+.cl-facts { font-size: var(--t-xs); color: var(--text-muted); }
+.cl-open { font-size: var(--t-xs); font-weight: 700; color: var(--warn-text); }
+.cl-step {
+  margin: var(--s-1) 0;
+  text-align: center;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.cl-step::before { content: "\2191  "; }
+.cl-circuits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cl-circuit { display: flex; flex-direction: column; gap: var(--s-1); }
+.cl-sub { font-size: var(--t-xs); color: var(--text-muted); text-align: center; }
+a.cl-sub { color: var(--accent); }
+.cl-total { margin: 0; text-align: center; font-size: var(--t-sm); color: var(--text); }
+
+/* A court's bench on a line of years (kyc-federal.js benchTimeline): a row
+ * per appointing President, a dot per judge, one neutral ink. */
+.bench-timeline { margin: var(--s-3) 0 var(--s-4); font-size: var(--t-xs); color: var(--text-muted); }
+.bench-timeline figcaption { margin-bottom: var(--s-2); font-size: var(--t-sm); color: var(--text); font-weight: 600; }
+.bt-rows { margin: 0; padding: 0; list-style: none; }
+.bt-row, .bt-axis { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--s-2); align-items: center; }
+.bt-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.bt-track { position: relative; height: 18px; border-bottom: 1px solid var(--border); }
+.bt-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  box-shadow: 0 0 0 1.5px var(--surface-0);
+}
+.bt-ticks { position: relative; height: 14px; }
+.bt-ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+@media (max-width: 560px) {
+  .bt-row, .bt-axis { grid-template-columns: 6.5rem minmax(0, 1fr); }
+}
+
 /* Polling averages as dots on one axis (kyc-odds.js pollDots): a row per
  * aggregator, a shape per candidate as well as the party's colour. */
 .poll-dots { margin: var(--s-1) 0 var(--s-2); font-size: var(--t-xs); color: var(--text-muted); }
@@ -4691,9 +4757,8 @@ button.local-county-link {
 .poll-dot-diamond { border-radius: 1px; transform: rotate(45deg) scale(0.85); }
 .poll-ticks { position: relative; height: 14px; }
 .poll-ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
-/* The end ticks stay inside the axis, never past the panel's edge. */
-.poll-ticks span:first-child { transform: none; }
-.poll-ticks span:last-child { transform: translateX(-100%); }
+/* Room at the right for the last tick's label, centred on its value. */
+.poll-row, .poll-axis, .bt-row, .bt-axis { padding-right: 16px; }
 @media (max-width: 560px) {
   .poll-row, .poll-axis { grid-template-columns: 5.5rem minmax(0, 1fr); }
 }
