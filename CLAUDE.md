@@ -187,7 +187,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1929 tests, no dependencies
+python -m unittest discover tests             # 1931 tests, no dependencies
 npm install && npm test                       # 2726 real-DOM checks (needs jsdom)
 ```
 
@@ -1320,8 +1320,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     shipped as gambling sites, for good. A person's finding goes in
     `overrides.BLOCKED_LOCAL_HOSTS`. A look that concludes nothing never
     undoes a withdrawal (`merge`). Domains keep lapsing (rule 39): the
-    weekly refresh looks at 6,000 addresses a run, oldest first, and the
-    build warns about any not looked at in 60 days. As of 2026-10-18, 7,366
+    weekly refresh looks at 6,000 addresses a run, oldest first, inside a
+    time budget that ends the run cleanly well before its step's limit
+    (`--max-minutes`): killed at the limit, its threads saved the cache
+    after the next step had read it, and verify failed the refresh of
+    2026-10-19. The build warns about any address not looked at in 60 days. As of 2026-10-18, 7,366
     of 39,447 governments' links are withdrawn: 5,090 dead, 1,179 gone,
     351 for sale, 255 gambling, 254 parked, 208 elsewhere, 20 expired and
     9 a business's; 5,269 could not be confirmed and stay linked, marked

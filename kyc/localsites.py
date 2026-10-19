@@ -917,11 +917,19 @@ def merge(old, new, today):
 
 
 def check_all(root=".", codes=None, workers=24, limit=None, refresh=False, retry_unread=True,
-              log=print, save_every=500, check=check_one, recheck=()):
+              log=print, save_every=500, check=check_one, recheck=(), max_seconds=None,
+              clock=time.monotonic):
     """Open every address that is due, many hosts at once and one request at
     a time per host; saves the cache as it goes, so a stopped run resumes.
     The addresses looked at longest ago go first, so a run capped with
-    *limit* each week (the refresh workflow) works through all of them."""
+    *limit* each week (the refresh workflow) works through all of them.
+
+    *max_seconds* is a time budget: once it is spent no new address is
+    opened, the ones already open finish, and the cache is saved once, so
+    the run ends cleanly and the rest wait for the next. A run killed at its
+    step's time limit instead saved its cache from threads still finishing
+    after the next step had read it, and verify found the county files
+    stale (the refresh of 2026-10-19)."""
     cache = load_cache(root)
     cache["source"] = SOURCE
     sites = cache.setdefault("sites", {})
@@ -942,11 +950,16 @@ def check_all(root=".", codes=None, workers=24, limit=None, refresh=False, retry
         todo = todo[:limit]
     log(f"[..] {len(todo):,} of {len(wanted):,} addresses to check, {workers} at a time")
     gate = _Gate()
-    started = time.monotonic()
+    started = clock()
     lock = threading.Lock()
     done = [0]
+    late = [0]
 
     def one(url):
+        if max_seconds is not None and clock() - started >= max_seconds:
+            with lock:
+                late[0] += 1
+            return
         try:
             entry = check(url, wanted[url], gate, today=today)
         except Exception as exc:          # one address never stops the run
@@ -957,10 +970,13 @@ def check_all(root=".", codes=None, workers=24, limit=None, refresh=False, retry
             done[0] += 1
             if done[0] % save_every == 0:
                 save_cache(cache, root)
-                log(f"    {done[0]:,} checked, {time.monotonic() - started:,.0f} s")
+                log(f"    {done[0]:,} checked, {clock() - started:,.0f} s")
     with ThreadPoolExecutor(max_workers=workers) as pool:
         list(pool.map(one, todo))
     save_cache(cache, root)
+    if late[0]:
+        log(f"[..] the time budget ({max_seconds / 60:,.0f} min) is spent: {done[0]:,} checked, "
+            f"{late[0]:,} left for the next run")
     return cache
 
 

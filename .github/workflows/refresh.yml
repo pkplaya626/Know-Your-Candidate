@@ -306,7 +306,7 @@ jobs:
       - name: Look again at local governments' listed websites
         continue-on-error: true
         timeout-minutes: 45
-        run: python build_profile_site.py localgov --check-sites --limit 6000
+        run: python build_profile_site.py localgov --check-sites --limit 6000 --max-minutes 35
 
       # Market prices are not refreshed here: .github/workflows/odds.yml
       # does that every twelve hours and publishes on its own. The build

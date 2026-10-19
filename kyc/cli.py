@@ -1648,8 +1648,9 @@ def _local_sites(args):
     if unknown:
         print(f"[error] --recheck: not a verdict: {', '.join(unknown)}", file=sys.stderr)
         return 2
+    budget = args.max_minutes * 60 if args.max_minutes else None
     cache = localsites.check_all(args.root, codes=codes, workers=args.workers, limit=args.limit,
-                                 refresh=args.refresh, recheck=recheck)
+                                 refresh=args.refresh, recheck=recheck, max_seconds=budget)
     counts = localsites.summary(cache)
     total = sum(counts.values())
     print(f"[ok] {total:,} addresses in {localsites.CACHE_PATH}: " + ", ".join(
@@ -2348,6 +2349,9 @@ def build_parser():
                        help="hosts checked at once (default 24)")
     local.add_argument("--limit", type=int, default=None,
                        help="check at most this many addresses this run (it resumes)")
+    local.add_argument("--max-minutes", type=float, default=None,
+                       help="open no new address after this many minutes, then save and stop "
+                            "(it resumes); keep it well inside a CI step's time limit")
     local.add_argument("--refresh", action="store_true",
                        help="check every address again, not only those due")
     local.add_argument("--recheck", default="",
