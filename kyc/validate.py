@@ -685,6 +685,36 @@ def check_curated_candidates(profiles):
     return issues
 
 
+# Where a biography field may come from: the sources the page badges
+# (assets/kyc.js FIELD_SOURCES). Anything else - a roster column typed by
+# hand - is not shown (rule 86).
+BIO_FIELDS = ("education", "previous_professions", "platforms")
+BIO_SOURCES = {"wikipedia", "election-page", "campaign-site", "official-site",
+               "member-wikipedia", "congressional-directory"}
+
+
+def check_bio_sources(profiles):
+    """A profile's education, previous careers or platform shown with no
+    source the page can name. The rosters' columns for these were typed
+    with no source and in uneven words - one member's platform "Anti-abortion
+    legislation", four others' "Pro-life advocacy" (TRUST-05) - and they
+    reached 537 member profiles unbadged, reading as fact."""
+    unsourced = []
+    for p in profiles:
+        quality = p.get("quality") or {}
+        for field in BIO_FIELDS:
+            value = p.get(field)
+            if value in (None, "") or quality.get(field):
+                continue        # an absence, said as one
+            if (p.get("fieldSources") or {}).get(field) not in BIO_SOURCES:
+                unsourced.append(f"{p['name']} ({p.get('officeLabel')}): {field}")
+    if unsourced:
+        return [Issue("error", "bio-unsourced",
+                      f"{len(unsourced)} biography fields would be shown with no named source",
+                      unsourced)]
+    return []
+
+
 def check_duplicate_people(profiles):
     """Flag pairs in one race that look like the same person filed twice.
 
@@ -1645,6 +1675,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
     issues += check_curated_candidates(profiles)
+    issues += check_bio_sources(profiles)
     issues += check_finance_periods(profiles)
     issues += check_field_screen(field)
     issues += check_registrations(profiles, field)

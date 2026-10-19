@@ -51,6 +51,7 @@ data/political_history.json ──┤   (public offices held: congress-legislato
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
+data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
@@ -118,6 +119,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
+  `members.json` (`members`, rule 86) is a hand-editable cache too.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them to check they load the right scripts in the right order, and rewrites
   nothing in them but the version stamps on their asset URLs (rule 76); they
@@ -166,19 +168,20 @@ python build_profile_site.py judiciary        # every sitting federal judge (FJC
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
+python build_profile_site.py members          # members' education and careers (Congressional Directory), platform (official site), offices
 python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1743 tests, no dependencies
-npm install && npm test                       # 2357 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1787 tests, no dependencies
+npm install && npm test                       # 2383 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1432,6 +1435,58 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     district, county or legislative district the pages do not draw. Never
     send what a reader typed: the Census geocoder takes addresses, but only
     through a remote script, and it would send them away.
+86. **A member's biography is a source's words, and says which.** The
+    rosters' Education, Previous Professions and "Policy Focus & Platforms"
+    columns were typed with no source and reached 537 member profiles
+    unbadged, in uneven words: "Anti-abortion legislation" for one member,
+    "Pro-life advocacy" for four others (TRUST-05). `profiles` never reads
+    them, and `validate` fails any education, careers or platform without a
+    source the page badges (`bio-unsourced`). `kyc/members.py` fills them by
+    id: education and careers from the Congressional Directory, joined on
+    the office web address congress-legislators lists for the bioguide id
+    and cross-checked against the printed surname (the Biographical
+    Directory answers a script 403 and headless Chrome a Cloudflare
+    challenge); education or an occupation from the infobox of the article
+    the id maps to where the Directory has none; the platform from the
+    official site's own issues list, one level, in its words, never a line
+    naming the member or anyone else ("Trump's One Big Beautiful Betrayal"
+    is a banner under Van Hollen's issues path). An "On The Issues" link
+    can lead to a page whose children are a voting record (Matsui's
+    /legislative-work), so pages filed under an issues path win. A link
+    is labelled by its first block of words: Cruz's issues are cards, and
+    read whole "Tax Reform Promote jobs, growth, and opportunity" passed as
+    an issue while the cards with longer blurbs were dropped, a partial list
+    that looked whole. The House template's furniture filed under Issues
+    (Community Project Funding, Legislative Process, Bill Search) is not an
+    issue. A site read that lists none is "Not listed on their official
+    site", never "No data" and never the typed text; a refusal concludes
+    nothing until headless Chrome has tried (rule 8). A contact page is
+    linked only once a fetch shows a form to write with, or the House's
+    shared form framed on the member's page: a soft 200 is not one. A
+    challenger's dialog leads with the race, then the money, the platform
+    and the biography, and its absences are said once (PROFILES-18).
+    The review of the first build found more, each now refused or said:
+    the House template's stock categories ("Congress; Economy; Education;
+    Energy; Health; Veterans", each "news and information related to")
+    were eighteen members' platforms while Figures's identical page read
+    "Not listed", so a list of nothing but those links the page, for
+    everyone (`stock_list`), and "Congress" is never an issue - a page
+    listing them among the member's own is quoted whole, since Schrier's
+    gives both the same card and blurb and nothing tells a default kept
+    from one chosen; a home page is never called "their issues page"
+    (Stansbury's was), and too few issue pages linked from it read "On
+    their official website" (`see_home`); a heading
+    broken by `</br>` was cut to "Sponsored &", and a line ending in "&" or
+    a comma is not taken; one issue spelled twice is listed once; a home
+    page's own issue links were shown as the list when Hoyer's unlinked
+    /issues held nine to its five, so `/issues` is tried first and a home
+    page's links are said to be what it "features" (`platformFeatured`); a
+    newsletter form (Aguilar's, Mfume's) is not a way to write, and a
+    name and an email alone never make one; the Directory printed no ";"
+    before Graves's and McConnell's "election history", which ran into
+    their careers; an address it prints that leads to the member's listed
+    site (dingell.house.gov) joins, and members it does not hold are
+    reported (`members-directory-unjoined`), never left silently blank.
 
 87. **A photograph says whose it is, read from its source, and weighs
     what a card needs.** 153 of 394 Wikimedia portraits were CC BY or

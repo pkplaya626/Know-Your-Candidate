@@ -74,21 +74,22 @@
       "    </div>",
       "  </header>",
       '  <div class="modal-body scroll-y">',
-      '    <div class="modal-column">',
-      '      <section class="panel">',
+      '    <div class="modal-column" id="profileModalColA">',
+      '      <section class="panel" id="profileModalBioPanel">',
       '        <h3 class="panel-head">' + KYC.icon("user") + " Biography</h3>",
       '        <div class="field-grid">',
-      '          <div class="field"><span class="field-label">Age / born</span>',
+      '          <div class="field" id="profileModalAgeField"><span class="field-label">Age / born</span>',
       '            <span class="field-value" id="profileModalAge"></span></div>',
       '          <div class="field" id="profileModalDisclosureField"><span class="field-label">Financial disclosure</span>',
       '            <span class="field-value" id="profileModalDisclosure"></span></div>',
-      '          <div class="field span-2"><span class="field-label">Education</span>',
+      '          <div class="field span-2" id="profileModalEducationField"><span class="field-label">Education</span>',
       '            <span class="field-value subtle" id="profileModalEducation"></span></div>',
-      '          <div class="field span-2"><span class="field-label">Previous careers</span>',
+      '          <div class="field span-2" id="profileModalCareersField"><span class="field-label">Previous careers</span>',
       '            <span class="field-value subtle" id="profileModalCareers"></span></div>',
       "        </div>",
+      '        <p class="absent-summary" id="profileModalBioAbsent" hidden></p>',
       "      </section>",
-      '      <section class="panel">',
+      '      <section class="panel" id="profileModalHeldPanel">',
       '        <h3 class="panel-head">' + KYC.icon("landmark") + " Public offices held</h3>",
       '        <div id="profileModalHeld"></div>',
       "      </section>",
@@ -96,13 +97,13 @@
       '        <h3 class="panel-head">' + KYC.icon("link") + " Contact &amp; links</h3>",
       '        <div id="profileModalContact"></div>',
       "      </section>",
-      '      <section class="panel panel-accent">',
+      '      <section class="panel panel-accent" id="profileModalPlatformPanel">',
       '        <h3 class="panel-head">' + KYC.icon("scroll") + " Platform &amp; priorities</h3>",
       '        <div class="scroll-y scroll-box" id="profileModalPlatform"></div>',
       "      </section>",
       "    </div>",
-      '    <div class="modal-column">',
-      '      <section class="panel">',
+      '    <div class="modal-column" id="profileModalColB">',
+      '      <section class="panel" id="profileModalFinancePanel">',
       '        <h3 class="panel-head">' + KYC.icon("dollar") + " Campaign finance</h3>",
       '        <div class="money-grid">',
       '          <div class="money-tile in"><span class="label">Raised</span>',
@@ -119,11 +120,11 @@
       '        <span class="field-label">Funding sources</span>',
       '        <p class="note-box" id="profileModalFunding" style="margin-top:6px"></p>',
       "      </section>",
-      '      <section class="panel">',
+      '      <section class="panel" id="profileModalVotingPanel">',
       '        <h3 class="panel-head">' + KYC.icon("chart") + " Voting record</h3>",
       '        <div class="note-box" id="profileModalVoting"></div>',
       "      </section>",
-      '      <section class="panel">',
+      '      <section class="panel" id="profileModalCommitteesPanel">',
       '        <h3 class="panel-head">' + KYC.icon("layers") + " Committees</h3>",
       '        <div class="scroll-y scroll-box list-rows" id="profileModalCommittees"></div>',
       "      </section>",
@@ -181,13 +182,29 @@
       KYC.escapeHtml(label) + "</a>";
   }
 
+  /** True when `url` is the home page of the site at `website` (no path),
+   *  which a link must call the website, never "their issues page". */
+  function siteHome(url, website) {
+    function home(u) {
+      var m = /^https?:\/\/(?:www\.)?([^\/?#]+)(\/[^?#]*)?/i.exec(String(u || ""));
+      return m ? { host: m[1].toLowerCase(), path: (m[2] || "/").replace(/\/+$/, "") } : null;
+    }
+    var a = home(url);
+    var b = home(website);
+    return !!a && a.path === "" && (!b || a.host === b.host);
+  }
+
   /** Platform text arrives as prose, a comma list, or a Python-style list
    *  literal - or, for a filed candidate, as the headings of their campaign's
    *  issues page, joined with "; " by kyc/enrich.py. Whatever the shape,
    *  every fragment is escaped, and what came from a campaign says so. */
   function renderPlatform(item) {
     var target = el("profileModalPlatform");
-    var fromSite = (item.fieldSources || {}).platforms === "campaign-site";
+    var source = (item.fieldSources || {}).platforms;
+    // A member's comes from their official website (kyc/members.py); the
+    // rosters' typed summaries are never shown (TRUST-05, rule 86).
+    var fromOfficial = source === "official-site";
+    var fromSite = source === "campaign-site" || fromOfficial;
     var html = "";
 
     // The campaign's own one-line description of itself, quoted, never
@@ -235,7 +252,19 @@
       } else {
         html += '<p class="note-box">' + KYC.escapeHtml(text) + "</p>";
       }
-      if (fromSite) {
+      if (fromOfficial) {
+        // A list read from the home page's own issue links is what that
+        // page features, which may not be every issue (Hoyer's showed five
+        // of nine): said as that, and the link names the page it is.
+        html += '<p class="field-credit">' + KYC.sourceBadge(item, "platforms").trim() +
+          (item.platformFeatured ? " The issues their official website’s home page features"
+            : " The issues their official website lists") +
+          (item.platformRead ? ", as read on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
+          (item.officialIssuesUrl ? ": " + outLink(item.officialIssuesUrl,
+            siteHome(item.officialIssuesUrl, item.website) ? "their official website" : "read them there")
+            : "") +
+          "</p>";
+      } else if (fromSite) {
         html += '<p class="field-credit">' + KYC.sourceBadge(item, "platforms").trim() +
           " The headings of the campaign’s issues page" +
           (item.campaignIssuesUrl ? ": " + outLink(item.campaignIssuesUrl, "read it in full") : "") +
@@ -243,6 +272,20 @@
       }
     } else if (!item.campaignQuote) {
       html += KYC.renderField(item, "platforms");
+      var absence = (item.quality || {}).platforms;
+      if (absence === "not_listed" && item.website) {
+        html += '<p class="field-credit">Read' +
+          (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
+          ": " + outLink(item.website, "their official website") + "</p>";
+      } else if ((absence === "see_site" || absence === "see_home") && item.officialIssuesUrl) {
+        // An issues page this site could not read a list from: linked,
+        // never called empty (rule 86).
+        html += '<p class="field-credit">Read' +
+          (item.platformRead ? " on " + KYC.escapeHtml(KYC.dateWords(item.platformRead)) : "") +
+          ": " + outLink(item.officialIssuesUrl, absence === "see_home" ||
+            siteHome(item.officialIssuesUrl, item.website) ? "their official website"
+            : "their issues page") + "</p>";
+      }
     }
 
     if (!fromSite && item.campaignIssuesUrl) {
@@ -606,6 +649,35 @@
       KYC.escapeHtml(label) + KYC.icon("share", "link-chip-icon") + "</a>";
   }
 
+  /* Casework - a Social Security check, a VA claim, the IRS - is done by a
+   * member's offices at home, and the profile listed only the Washington
+   * one (PERSONA-14). These are congress-legislators' records of each
+   * member's offices, by bioguide id. A senator's are state offices. */
+  function homeOffices(item) {
+    var senate = item.chamber.indexOf("Senate") !== -1;
+    var kind = senate ? "state office" : "district office";
+    var list = item.districtOffices.map(function (o) {
+      var street = [o.building, o.address, o.suite].filter(Boolean).join(", ");
+      var place = [o.city, [o.state, o.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+      return '<li class="home-office"><strong>' + KYC.escapeHtml(o.city || "") + "</strong>" +
+        (o.phone ? ' <a href="tel:' + KYC.escapeAttr(String(o.phone).replace(/[^\d+]/g, "")) +
+          '">' + KYC.escapeHtml(o.phone) + "</a>" : "") +
+        '<span class="home-office-address">' + KYC.escapeHtml([street, place].filter(Boolean)
+          .join(", ")) + "</span>" +
+        (o.hours ? '<span class="home-office-hours">' + KYC.escapeHtml(o.hours) + "</span>" : "") +
+        "</li>";
+    }).join("");
+    return '<span class="field-label">' + (senate ? "State offices" : "District offices") +
+      "</span>" +
+      '<p class="casework-note">For help with a federal agency – Social Security, the VA, ' +
+      "the IRS – call a " + kind + ".</p>" +
+      '<ul class="home-offices">' + list + "</ul>" +
+      '<p class="field-credit">From ' + outLink(
+        "https://github.com/unitedstates/congress-legislators", "congress-legislators") +
+      (item.districtOfficesRead ? ", as read on " +
+        KYC.escapeHtml(KYC.dateWords(item.districtOfficesRead)) : "") + "</p>";
+  }
+
   function renderContact(item) {
     var panel = el("profileModalContactPanel");
     var target = el("profileModalContact");
@@ -622,7 +694,15 @@
           : (item.campaignCommittee ? item.campaignCommittee + " - " : "") +
             "as filed with the FEC"));
     }
-    if (item.contactForm) sites.push(linkChip(item.contactForm, "Contact form"));
+    if (item.contactForm) {
+      // congress-legislators holds a form for 88 members; for the rest it
+      // is the page their own site links as Contact, fetched and seen to
+      // hold a form before it is linked (PROFILES-16).
+      sites.push(linkChip(item.contactForm, "Contact form", item.contactFormVia === "official-site"
+        ? "The contact page their official website links" +
+          (item.contactFormChecked ? ", checked on " + KYC.dateWords(item.contactFormChecked) : "")
+        : null));
+    }
     if (sites.length) rows.push('<div class="links-row">' + sites.join("") + "</div>");
 
     var office = [];
@@ -632,7 +712,11 @@
         KYC.escapeHtml(item.phone) + "</a></span>");
     }
     if (item.office) office.push("<span>" + KYC.escapeHtml(item.office) + "</span>");
-    if (office.length) rows.push('<p class="modal-meta contact-office">' + office.join("") + "</p>");
+    if (office.length) {
+      rows.push((item.districtOffices ? '<span class="field-label">Washington office</span>' : "") +
+        '<p class="modal-meta contact-office">' + office.join("") + "</p>");
+    }
+    if (item.districtOffices && item.districtOffices.length) rows.push(homeOffices(item));
 
     var social = [];
     var seen = {};
@@ -853,6 +937,70 @@
     return '<span class="kyc-absent">No data</span>';
   }
 
+  /* A challenger's dialog opened on a portrait, a header and a wall of "No
+   * data", with "not a sitting member" twice and their opponents two phone
+   * screens down (PROFILES-18). For someone who does not hold the seat the
+   * order is what a voter came for - the race and its status, then the
+   * money, then what they say they stand for, then who they are - and the
+   * voting record and committees, which only a member has, are not shown.
+   * A member's dialog keeps its order. */
+  var MEMBER_ORDER = [
+    ["profileModalColA", ["profileModalBioPanel", "profileModalHeldPanel",
+      "profileModalContactPanel", "profileModalPlatformPanel"]],
+    ["profileModalColB", ["profileModalFinancePanel", "profileModalVotingPanel",
+      "profileModalCommitteesPanel", "profileModalRacePanel"]],
+  ];
+  var CHALLENGER_ORDER = [
+    ["profileModalColA", ["profileModalRacePanel", "profileModalFinancePanel",
+      "profileModalPlatformPanel"]],
+    ["profileModalColB", ["profileModalBioPanel", "profileModalHeldPanel",
+      "profileModalContactPanel", "profileModalVotingPanel", "profileModalCommitteesPanel"]],
+  ];
+
+  function arrange(challenger) {
+    (challenger ? CHALLENGER_ORDER : MEMBER_ORDER).forEach(function (column) {
+      var parent = el(column[0]);
+      column[1].forEach(function (id) { parent.appendChild(el(id)); });
+    });
+    el("profileModalVotingPanel").hidden = challenger;
+    el("profileModalCommitteesPanel").hidden = challenger;
+    el("profileModal").classList.toggle("profile-challenger", challenger);
+  }
+
+  /* For a challenger, each biography field nobody has a source for is said
+   * once, in one line, rather than as a row of "No data" apiece. A member's
+   * absences stay in place: for them each is a gap in a record that is
+   * otherwise there. */
+  function collapseAbsences(item, challenger) {
+    var missing = [];
+    var noAge = KYC.ageOf(item) === null &&
+      !(KYC.hasValue(item, "birthdate") && item.birthdate && item.birthdate !== "Unknown");
+    [["profileModalAgeField", noAge, "age"],
+     ["profileModalEducationField", !KYC.hasValue(item, "education") || !item.education,
+       "education"],
+     ["profileModalCareersField",
+       !KYC.hasValue(item, "previous_professions") || !item.previous_professions,
+       "previous careers"]].forEach(function (row) {
+      var hide = challenger && row[1];
+      el(row[0]).hidden = hide;
+      if (hide) missing.push(row[2]);
+    });
+    var noRecord = challenger && !item.politicalHistory;
+    el("profileModalHeldPanel").hidden = noRecord;
+    if (noRecord) missing.push("public offices held");
+    var line = el("profileModalBioAbsent");
+    line.hidden = !missing.length;
+    line.innerHTML = missing.length
+      ? '<span class="kyc-absent" title="' + KYC.escapeAttr(
+          "This site takes a challenger's biography only from a source tied to them: the " +
+          "article their state's election page links, or their campaign's own site. Neither " +
+          "gave these.") + '">No data</span> for ' + KYC.escapeHtml(
+          missing.length > 1
+            ? missing.slice(0, -1).join(", ") + " or " + missing[missing.length - 1]
+            : missing[0]) + "."
+      : "";
+  }
+
   /* ------------------------------------------------------------------ open */
 
   function render(item) {
@@ -987,6 +1135,9 @@
      * member)" under "Currently holds House • AL-1" (PROFILES-03). */
     var sitting = item.isCandidate && item.incumbentId ? KYC.byId(item.incumbentId) : null;
     sitting = sitting && KYC.seated(sitting) && sitting.id !== item.id ? sitting : null;
+    var challenger = !!item.isCandidate && !sitting;
+    arrange(challenger);
+    collapseAbsences(item, challenger);
     renderVoting(sitting || item);
     renderCommittees(sitting || item);
     renderLeadership(sitting || item);

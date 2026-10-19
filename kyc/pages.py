@@ -553,6 +553,7 @@ DATED_CACHES = (
     ("history", "political_history.json", ("read",)),
     ("oge", "oge_disclosures.json", ("read",)),
     ("enrichment", "enrichment.json", ("checked",)),
+    ("members", "members.json", ("read",)),
 )
 
 
@@ -1614,13 +1615,14 @@ DATASETS = (
      '<a href="https://github.com/unitedstates/congress-legislators">congress-legislators</a>',
      "Every member: seat, party, term, contact details, ids for outbound links", "refresh",
      "congress"),
-    # The rosters' biography columns are not read by a script: they are the
-    # editorial source of truth, kept by hand (CLAUDE.md), and the page must
-    # not say every fact is read from a source.
-    ("Members' biographies",
-     "The member rosters in this site's repository, kept by hand",
-     "Education, earlier careers and stated priorities, where the rosters hold them",
-     "curated", None),
+    # The rosters' typed biography columns are never shown (rule 86): each
+    # field comes from a source tied to the member by id, and says which.
+    ("Members' biographies and priorities",
+     '<a href="https://www.govinfo.gov/app/collection/cdir">Official Congressional '
+     "Directory</a>; the Wikipedia article congress-legislators links to each member; each "
+     "member's official website; congress-legislators' district offices",
+     "Education and earlier careers in the Directory's words; the issues a member's own "
+     "site lists; a checked contact form; offices at home", "refresh", "members"),
     ("Editorial decisions",
      "This site's repository: each decision recorded with its evidence and date",
      "What no source can settle alone: a lapsed campaign site, one person filed under two names",
@@ -1796,9 +1798,14 @@ def _about_main(dates):
         '                <section class="guide-section" id="data">',
         '                    <h2 class="state-heading">Where the data comes from</h2>',
         "                    <p>Most facts are read from a named source by a script and checked before",
-        "                        they are published. The member rosters' biographies, and the decisions",
-        "                        no source can settle alone, are kept by hand in the repository, where",
-        "                        each change is public. Where a source says nothing, the site says so,",
+        "                        they are published. The decisions no source can settle alone, and what",
+        "                        a person read from an office's own page where no script can (each",
+        "                        state's voting dates, a ballot printed as a PDF, a court roster its",
+        "                        site will not serve to a script),",
+        "                        are kept by hand in the repository, where each change is public. A",
+        "                        member's biography and priorities are never typed in: each is read",
+        "                        from a source tied to them and says which. Where a source says",
+        "                        nothing, the site says so,",
         "                        rather than guessing. The repository's",
         f'                        <a href="{repo}#readme">README</a> lists every field and where it comes',
         "                        from.</p>",

@@ -632,6 +632,29 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
+# A member's official issues page whose list `members` reads but that is not
+# the page's list of issues, keyed on bioguide id: (date checked, the page
+# read, what it shows). The rules take a page's links or one level of its
+# headings in its words; a page that splits each title across two headings
+# passes them and reads as fragments. The page is linked instead ("On their
+# official site's issues page"). The refresh re-reads every site, so a
+# correction made by editing the cache would not last; members.problems
+# reports an entry whose page is no longer the one read.
+OFFICIAL_ISSUES_NOT_A_LIST = {
+    "L000575": ("2026-10-18", "https://www.lankford.senate.gov/issues/",
+                "each title is split over two headings: 'Protecting' over 'Life, Liberty & "
+                "Our Families', 'Bringing Down' over 'High Costs in Our Nation'"),
+    # Read 2026-10-18 for the review of PR #106: the index lists the House
+    # template's stock categories, each twice, beside categories that are
+    # labels for constituent mail rather than positions - "PRO CHOICE",
+    # "Pro Life", "PRO AG", "REDUCE TROOPS IN MIDDLE EAST PRO" - and one page
+    # under two names ("11 Ideals for TX-11", "TX-11 Ideals"). As a platform
+    # it would read as though a member who lists "Pro Life" held both views.
+    "P000048": ("2026-10-18", "https://pfluger.house.gov/issues/",
+                "mail categories ('PRO CHOICE', 'Pro Life', 'REDUCE TROOPS IN MIDDLE EAST PRO') "
+                "listed among the stock categories, each of those twice"),
+}
+
 # The 2026 Senate seats are no longer typed here. A surname table matched
 # Darline Graham to Lindsey Graham's seat; the seats are now the frozen race
 # record, keyed on bioguide ids (kyc/record.py, data/record_2026.json).

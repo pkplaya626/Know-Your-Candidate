@@ -995,10 +995,20 @@
     not_disclosed: "Not disclosed",
     unknown: "No data",
     no_filing: "No filing this cycle",
+    not_listed: "Not listed on their official site",
+    see_site: "On their official site's issues page",
+    see_home: "On their official website",
   };
   var ABSENT_TITLE = {
     not_disclosed: "No public disclosure exists for this field.",
     unknown: "No source has been recorded for this field yet.",
+    // Work this site did (rule 19): it read the member's official website.
+    not_listed: "This site read the member's official website and found no page or menu " +
+      "listing the issues they work on.",
+    see_site: "This site read the member's official website and found an issues page, but no " +
+      "list of issues it could take in the page's own words. The page is linked.",
+    see_home: "This site read the member's official website and found issue pages it links, " +
+      "but no issues page and too few issues to list. The site is linked.",
     // The only absence that reports work we actually did.
     no_filing: "Checked with the FEC: this candidate has no filing for the "
       + "current cycle. Members running for a different seat file under a "
@@ -1018,6 +1028,15 @@
     "wikipedia": ["Wikipedia", "From the candidate's Wikipedia article"],
     "campaign-site": ["Campaign site",
       "From the campaign's own website, in its own words"],
+    // A member's (kyc/members.py, rule 86): each tied to them by their id,
+    // never by a search on their name.
+    "official-site": ["Official site",
+      "From their official website, in its own words"],
+    "congressional-directory": ["Congressional Directory",
+      "From the Official Congressional Directory, printed by the Government Publishing " +
+      "Office from each member's own office, in its words"],
+    "member-wikipedia": ["Wikipedia",
+      "From the infobox of the Wikipedia article congress-legislators links to this member"],
   };
 
   /** The badge saying where a pipeline-filled field came from, or "". */

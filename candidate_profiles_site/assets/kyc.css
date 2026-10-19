@@ -1418,6 +1418,30 @@ a.badge-link {
 .contact-office { margin: 0 0 var(--s-2); }
 .contact-office a { color: inherit; }
 
+/* A member's offices at home, where casework is done (PERSONA-14). */
+.casework-note {
+  margin: var(--s-1) 0 var(--s-2);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.home-offices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--s-2) var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-sm);
+  line-height: 1.45;
+}
+.home-office a { color: inherit; white-space: nowrap; }
+.home-office-address, .home-office-hours { display: block; color: var(--text-muted); }
+.home-office-hours { font-size: var(--t-xs); color: var(--text-faint); }
+
+/* A challenger's absences, said once (PROFILES-18). */
+.absent-summary { margin: var(--s-2) 0 0; font-size: var(--t-sm); line-height: 1.5; }
+
 .committee, .leadership-posts { align-items: flex-start; }
 .committee .badge, .leadership-posts .badge { margin-left: var(--s-2); vertical-align: middle; }
 .committee-subs {

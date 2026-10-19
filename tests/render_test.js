@@ -1239,6 +1239,214 @@ async function testDirectoryAsync() {
     check("built profiles carry the election period", !!real);
   });
 
+  /* TRUST-05: members' education, careers and platform were the rosters'
+   * typed text, unsourced and unevenly worded ("Anti-abortion legislation"
+   * for one member, "Pro-life advocacy" for four others). Now each comes
+   * from a source tied to the member by id, and says which (rule 86);
+   * PERSONA-14 and PROFILES-16 add their offices at home and a checked
+   * contact page. */
+  suite("index.html — a member's biography, platform and offices, sourced", () => {
+    const SOURCED = { "congressional-directory": 1, "member-wikipedia": 1, "official-site": 1 };
+    const members = window.legislatorsData.filter((p) => !p.isCandidate);
+    const bare = [];
+    members.forEach((p) => ["education", "previous_professions", "platforms"].forEach((f) => {
+      if (KYC.hasValue(p, f) && p[f] && !SOURCED[(p.fieldSources || {})[f]]) bare.push(p.id + " " + f);
+    }));
+    check("no member's education, careers or platform is shown without its source",
+      bare.length === 0, bare.slice(0, 5).join(", "));
+
+    const host = members.find((p) => KYC.seated(p) && p.chamber === "House" && p.website);
+    check("a House member exists to test", !!host);
+    if (!host) return;
+    const fields = {
+      platforms: "Agriculture; Health Care, Medicare and Medicaid; Veterans",
+      education: "B.A., Pacific Lutheran University, Tacoma, WA, 1987",
+      previous_professions: "member, Snohomish County Council, 1998-2001",
+      quality: {}, officialIssuesUrl: host.website + "/issues", platformRead: "2026-10-18",
+      fieldSources: { platforms: "official-site", education: "congressional-directory",
+        previous_professions: "congressional-directory" },
+      contactForm: host.website + "/contact/email-me", contactFormVia: "official-site",
+      contactFormChecked: "2026-10-18",
+      districtOffices: [
+        { address: "2930 Wetmore Avenue", suite: "Suite 9F", city: "Everett", state: "WA",
+          zip: "98201", phone: "425-252-3188", hours: "<b>M-F</b> 9-5" },
+        { address: "119 North Commercial Street", city: "Bellingham", state: "WA",
+          zip: "98225", phone: "360-733-4500" }],
+      districtOfficesRead: "2026-10-18",
+      platformFeatured: false,
+    };
+    const saved = {};
+    Object.keys(fields).forEach((k) => { saved[k] = host[k]; host[k] = fields[k]; });
+    delete host.__search;
+    KYC.profile.open(host.id);
+    const platform = D.getElementById("profileModalPlatform");
+    const bullets = [...platform.querySelectorAll(".bullets li")].map((li) => li.textContent);
+    check("the issues their site lists are one bullet each, split on semicolons",
+      bullets.length === 3 && bullets[1] === "Health Care, Medicare and Medicaid", bullets.join(" | "));
+    check("the platform says it is from their official website, with the date and the page",
+      /Official site/.test(platform.textContent) && /official website lists/.test(platform.textContent) &&
+        /Oct\. 18, 2026/.test(platform.textContent) &&
+        [...platform.querySelectorAll("a")].some((a) => a.href === host.website + "/issues"));
+    const education = D.getElementById("profileModalEducation");
+    check("education is credited to the Congressional Directory",
+      /Congressional Directory/.test(education.textContent) &&
+        /Government Publishing Office/.test((education.querySelector(".field-source") || {}).title || ""));
+    const contact = D.getElementById("profileModalContact");
+    check("a House member's offices at home are listed, with the casework line",
+      /District offices/.test(contact.textContent) &&
+        /For help with a federal agency/.test(contact.textContent) &&
+        /Social Security, the VA, the IRS/.test(contact.textContent) &&
+        contact.querySelectorAll(".home-office").length === 2);
+    check("each office's phone can be dialled",
+      [...contact.querySelectorAll(".home-office a")].map((a) => a.getAttribute("href")).join(" ") ===
+        "tel:4252523188 tel:3607334500");
+    check("an office's hours are text, never markup",
+      !contact.querySelector(".home-office b") && /<b>M-F<\/b>/.test(contact.textContent));
+    check("the offices say where they come from and when",
+      /congress-legislators, as read on Oct\. 18, 2026/.test(contact.textContent));
+    const form = [...contact.querySelectorAll("a")].find((a) => /Contact form/.test(a.textContent));
+    check("a contact page from their own site says it was checked",
+      !!form && form.href === host.website + "/contact/email-me" && /checked on Oct\. 18, 2026/.test(form.title));
+    KYC.profile.close();
+
+    // Read, and their site lists no issues: said as that, with the site.
+    host.platforms = "No data";
+    host.quality = { platforms: "not_listed" };
+    host.fieldSources = {};
+    KYC.profile.open(host.id);
+    check("a site with no issues list reads 'Not listed on their official site', linked",
+      /Not listed on their official site/.test(platform.textContent) && !/No data/.test(platform.textContent) &&
+        [...platform.querySelectorAll("a")].some((a) => a.href.replace(/\/$/, "") === host.website.replace(/\/$/, "")),
+      platform.textContent);
+    check("and it is not searchable as a platform", !KYC.matchesQuery(host, "not listed on their official"));
+    KYC.profile.close();
+
+    // An issues page with no list this site could read: linked, never
+    // called empty.
+    host.quality = { platforms: "see_site" };
+    host.officialIssuesUrl = host.website + "/issues/";
+    delete host.__search;
+    KYC.profile.open(host.id);
+    check("an issues page with no list read is linked, not called empty",
+      /issues page/.test(platform.textContent) && !/Not listed/.test(platform.textContent) &&
+        !/No data/.test(platform.textContent) &&
+        [...platform.querySelectorAll("a")].some((a) => a.href === host.website + "/issues/"),
+      platform.textContent);
+    KYC.profile.close();
+
+    // Issue pages only from the home page, too few to list: the website,
+    // never an "issues page" (Stansbury's, before the review of PR #106).
+    host.quality = { platforms: "see_home" };
+    host.officialIssuesUrl = host.website;
+    delete host.__search;
+    KYC.profile.open(host.id);
+    check("issue pages too few to list link the website, never 'their issues page'",
+      /On their official website/.test(platform.textContent) && !/issues page/.test(platform.textContent) &&
+        !/No data/.test(platform.textContent) &&
+        [...platform.querySelectorAll("a")].some((a) => a.textContent === "their official website"),
+      platform.textContent);
+    check("and that is not searchable as a platform", !KYC.matchesQuery(host, "on their official website"));
+    KYC.profile.close();
+    host.quality = { platforms: "see_site" };
+
+    // The page linked is the home page: called the website, never "their
+    // issues page" (Stansbury's, before the review of PR #106).
+    host.officialIssuesUrl = host.website.replace(/\/$/, "");
+    KYC.profile.open(host.id);
+    const homeLink = [...platform.querySelectorAll("a")].find((a) =>
+      a.href.replace(/\/$/, "") === host.website.replace(/\/$/, ""));
+    check("a home page linked for the issues is called their official website",
+      !!homeLink && homeLink.textContent === "their official website" &&
+        !/their issues page/.test(platform.textContent), platform.textContent);
+    KYC.profile.close();
+
+    // A list read from the home page's own issue links is what it features,
+    // not the site's whole list (Hoyer's home page showed five of nine).
+    host.platforms = fields.platforms;
+    host.quality = {};
+    host.fieldSources = { platforms: "official-site" };
+    host.platformFeatured = true;
+    delete host.__search;
+    KYC.profile.open(host.id);
+    check("a home page's featured issues say so, and link the website",
+      /home page features/.test(platform.textContent) && !/official website lists/.test(platform.textContent) &&
+        /their official website/.test(platform.textContent) && !/read them there/.test(platform.textContent),
+      platform.textContent);
+    KYC.profile.close();
+    Object.keys(saved).forEach((k) => {
+      if (saved[k] === undefined) delete host[k]; else host[k] = saved[k];
+    });
+    delete host.__search;
+
+    const senator = members.find((p) => KYC.seated(p) && p.chamber === "Senate");
+    if (senator) {
+      const kept = senator.districtOffices;
+      senator.districtOffices = [{ address: "915 Second Avenue", city: "Seattle", state: "WA",
+        phone: "206-553-5545" }];
+      KYC.profile.open(senator.id);
+      const text = D.getElementById("profileModalContact").textContent;
+      check("a senator's are state offices", /State offices/.test(text) && /call a state office/.test(text) &&
+        !/District offices/.test(text), text.slice(0, 200));
+      KYC.profile.close();
+      if (kept === undefined) delete senator.districtOffices; else senator.districtOffices = kept;
+    }
+    const withOffices = members.filter((p) => KYC.seated(p) && (p.districtOffices || []).length);
+    check("the built profiles carry members' offices at home",
+      withOffices.length > members.filter((p) => KYC.seated(p)).length / 2, withOffices.length);
+  });
+
+  /* PROFILES-18: a challenger's dialog opened on a wall of absences, with
+   * "not a sitting member" twice and their opponents two phone screens
+   * down. The race comes first, then the money, then the platform, then the
+   * biography; panels only a member has are not shown. */
+  suite("index.html — a challenger's profile leads with the race", () => {
+    const challenger = window.legislatorsData.find((p) => p.isCandidate && !p.incumbentId &&
+      (p.contestRaceId || p.raceId) && !p.politicalHistory);
+    check("a challenger exists to test", !!challenger);
+    if (!challenger) return;
+    const saved = { education: challenger.education, quality: challenger.quality,
+      previous_professions: challenger.previous_professions, birthdate: challenger.birthdate,
+      age: challenger.age };
+    challenger.education = "No data";
+    challenger.previous_professions = "No data";
+    challenger.birthdate = "Unknown";
+    challenger.age = "Unknown";
+    challenger.quality = Object.assign({}, challenger.quality,
+      { education: "unknown", previous_professions: "unknown", birthdate: "unknown" });
+    KYC.profile.open(challenger.id);
+    const order = ["profileModalRacePanel", "profileModalFinancePanel", "profileModalPlatformPanel",
+      "profileModalBioPanel"].map((id) => D.getElementById(id));
+    const before = (a, b) => !!(a.compareDocumentPosition(b) & 4);
+    check("race, then money, then platform, then biography",
+      before(order[0], order[1]) && before(order[1], order[2]) && before(order[2], order[3]));
+    check("no voting-record or committee panel for someone who holds no seat",
+      D.getElementById("profileModalVotingPanel").hidden &&
+        D.getElementById("profileModalCommitteesPanel").hidden);
+    const bio = D.getElementById("profileModalBioPanel");
+    const absent = D.getElementById("profileModalBioAbsent");
+    check("the absent fields are said once, in one line",
+      !absent.hidden && /No data/.test(absent.textContent) &&
+        /age, education, previous careers or public offices held/.test(absent.textContent) &&
+        [...bio.querySelectorAll(".kyc-absent")].filter((s) => !s.closest("[hidden]")).length === 1,
+      absent.textContent);
+    check("and the empty rows are not shown",
+      D.getElementById("profileModalEducationField").hidden &&
+        D.getElementById("profileModalCareersField").hidden &&
+        D.getElementById("profileModalHeldPanel").hidden);
+    KYC.profile.close();
+    Object.assign(challenger, saved);
+
+    // A member's dialog keeps its panels and its order.
+    const member = window.legislatorsData.find((p) => KYC.seated(p) && !p.isCandidate);
+    KYC.profile.open(member.id);
+    check("a member's dialog shows the voting record and committees, biography first",
+      !D.getElementById("profileModalVotingPanel").hidden &&
+        !D.getElementById("profileModalCommitteesPanel").hidden &&
+        before(D.getElementById("profileModalBioPanel"), D.getElementById("profileModalFinancePanel")) &&
+        D.getElementById("profileModalBioAbsent").hidden);
+    KYC.profile.close();
+  });
+
   suite("index.html — gaps filled from a named source", () => {
     // kyc/enrich.py fills a filed candidate's empty fields from their
     // Wikipedia infobox and their campaign's own site. Borrow a real filed
@@ -1302,15 +1510,23 @@ async function testDirectoryAsync() {
     });
     delete host.__search;
 
-    // A roster platform with commas inside its items (Edward Markey's).
-    const markey = KYC.byId("M000133");
-    if (markey) {
-      KYC.profile.open(markey.id);
+    // A platform with commas inside its items (an official site's
+    // "Telecommunications, technology, and digital privacy").
+    const listed = window.legislatorsData.find((p) => !p.isCandidate && KYC.seated(p));
+    if (listed) {
+      const keep = { platforms: listed.platforms, quality: listed.quality, fieldSources: listed.fieldSources };
+      listed.platforms = "Telecommunications, technology, and digital privacy; Veterans";
+      listed.quality = {};
+      listed.fieldSources = Object.assign({}, listed.fieldSources, { platforms: "official-site" });
+      delete listed.__search;
+      KYC.profile.open(listed.id);
       const items = [...D.querySelectorAll("#profileModalPlatform .bullets li")].map((li) => li.textContent);
       check("an item with commas inside it stays one bullet",
         items.includes("Telecommunications, technology, and digital privacy") &&
           !items.some((t) => /^(and|or) /.test(t)), items.join(" | "));
       KYC.profile.close();
+      Object.assign(listed, keep);
+      delete listed.__search;
     }
 
     const quoted = window.legislatorsData.find((p) => p.campaignQuote);
@@ -9513,8 +9729,13 @@ async function testFrame() {
     check("the FEC's figures say where their date is, not a dash",
       !!fecRow && /run through/.test(fecRow.lastElementChild.textContent), fecRow && fecRow.textContent);
     check("the hand-kept rosters are a source of their own, and the page does not say every fact is a script's",
-      rows.some((r) => /kept by hand/.test(r.textContent)) && !/Every fact is read from a source by a script/.test(text) &&
+      /kept by hand/.test(text) && !/Every fact is read from a source by a script/.test(text) &&
         /Most facts are read/.test(text));
+    // Rule 86: the rosters' typed biographies are no longer a source.
+    check("a member's biography is not said to be kept by hand",
+      !rows.some((r) => /rosters in this site's repository/.test(r.textContent)) &&
+        rows.some((r) => /Congressional Directory/.test(r.textContent)) &&
+        !/rosters' biographies/.test(text));
     check("a report needs a GitHub account, and the page says so", /needs a free GitHub account/.test(text));
     check("the maps' limit as it is: no list of every state", /no view lists every state/.test(text) &&
       !/list beside or below/.test(text));
