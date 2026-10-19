@@ -189,8 +189,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1935 tests, no dependencies
-npm install && npm test                       # 2785 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1936 tests, no dependencies
+npm install && npm test                       # 2806 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1795,6 +1795,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     held and links the state's results, and names no state winner. It
     prints in the light theme's colours whatever the reader chose: printed
     from the dark theme, its light text came out white on white paper.
+    Its review found the shared split was not enough. "On your ballot"
+    lists only whom the lookup's answer lists (`KYC.stillRunning`): IL-4's
+    card counted five on the ballot over seven names, two of them filers
+    the results do not settle (rule 74), who are now named apart; a holder
+    off the ballot is named with their own status (rule 61), never among
+    those who "lost the primary, withdrew, or were not on the primary
+    ballot". A statewide holder line says who the holder is, since no
+    holder block stands above it. "Not known" is this site's gap, not the
+    state's: North Dakota's House and West Virginia's Senate records name
+    their districts (`legislature.seats_up`), and a district's seats take
+    the words their count gives (`districtSeats`: Arizona's House elects
+    two a district, never "this seat").
 
 ## District maps
 

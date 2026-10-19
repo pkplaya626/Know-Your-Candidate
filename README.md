@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2785 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2806 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2640,10 +2640,10 @@ contest:
 
 | Contest | From | Shown |
 | --- | --- | --- |
-| U.S. Senate, regular then special | the 2026 race record | the race's badges and people as the state page's race section draws them: the same split, order, status words and counts (`KYC.cards.racePeople`, rule 73), nominees with no profile named, each person opening their profile |
+| U.S. Senate, regular then special | the 2026 race record | the race's badges and people as the state page's race section draws them: the same split, order, status words and counts (`KYC.cards.racePeople`, rule 73), nominees with no profile named, each person opening their profile. Under the race, only whom the lookup's answer lists (`KYC.stillRunning`); a filer whose ballot status is not known after the primary is named apart, and a holder off the ballot is named with their own status |
 | U.S. House (or the Delegate, the Resident Commissioner) | the ZIP area's districts on the 2026 map | the same, one card per district with its share of the ZIP area's land where there are several, and the location offered for an exact answer |
-| Governor, lieutenant governor, attorney general, secretary of state | `ballot2026` and the election office's list (rule 91) | the office's mark, its holder line and its listed candidates, write-ins apart, as the state page shows them; the offices not on this ballot with their record's words |
-| State senate and house | the lookup's legislative districts, `legislature.seats_up` | whether each district's seat is on the ballot, in the legislature page's words; its candidates are not listed here |
+| Governor, lieutenant governor, attorney general, secretary of state | `ballot2026` and the election office's list (rule 91) | the office's mark, its holder line (naming the holder as the holder) and its listed candidates, write-ins apart, as the state page shows them; the offices not on this ballot with their record's words |
+| State senate and house | the lookup's legislative districts, `legislature.seats_up`, `legislature.district_seats` | whether each district's seat is on the ballot, in the legislature page's words and in the words its count of seats gives ("this seat", "this district's seats", "one of this district's seats"); where this site's record names no district, that is said on the row; its candidates are not listed here; a chamber with no seat in reach up is drawn as off the ballot |
 
 Then what the site does not list (ballot measures, local and judicial
 contests, the legislature's candidates), with the state's own sample ballot
