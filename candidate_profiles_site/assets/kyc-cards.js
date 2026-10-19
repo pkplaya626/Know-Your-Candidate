@@ -657,8 +657,9 @@
   var OUTSIDE_NOTE = "Independent expenditures: money spent by groups that are not the " +
     "campaign (super PACs, party committees, other PACs) to support or oppose this candidate, " +
     "as the FEC totals them by candidate. The FEC processes filings days to weeks after they " +
-    "are made, so the latest spending, reported in 24- and 48-hour reports, is often not yet " +
-    "in these totals. Each side is shown as filed; nothing is netted.";
+    "are made, sometimes longer, so the latest spending, reported in 24- and 48-hour reports, " +
+    "is often not yet in these totals, and in a race spent on heavily near the election the " +
+    "totals can be well below what has been spent. Each side is shown as filed; nothing is netted.";
   function outsideSpan(o, lead, opts) {
     var side = function (total, n, word) {
       return total ? KYC.moneyShort(total) + " " + word +
@@ -671,6 +672,9 @@
       (lead ? "outside" : "Outside") + " groups spent " + KYC.escapeHtml(parts.join(" and ")) +
       " in 2025–26, in the filings the FEC had processed when read on " +
       KYC.escapeHtml(KYC.dateWords(o.asOf)) +
+      // Said on the line, where a phone reader sees it (wave 2d review: a
+      // title alone let the totals read as the race's whole scale).
+      "; the latest spending may not be in them yet" +
       ' &middot; <a href="' + KYC.escapeAttr(o.url) +
       '" target="_blank" rel="noopener noreferrer">FEC</a></span>';
   }
@@ -799,8 +803,25 @@
    * platform headings with where they came from, and its site. No net
    * worth (rule 26); money only as filed (rule 61). */
 
+  /* What was looked at, under a platform the comparison cannot show: a
+   * member's official website is not a campaign's site (wave 2d review:
+   * Ossoff's "Not listed on their official site" beside Collins's "No
+   * data" read as Ossoff having no platform). */
+  var MEMBER_SITE_ABSENCES = { not_listed: 1, see_site: 1, see_home: 1 };
+  function platformLooked(p) {
+    var q = (p.quality || {}).platforms;
+    return MEMBER_SITE_ABSENCES[q]
+      ? "This site read their official website, not a campaign site"
+      : "Nothing recorded from a campaign site or article";
+  }
+
   function compareCell(p, what) {
     if (what === "party") {
+      // The FEC files a write-in's party as "Write-in": a way of running,
+      // not a party, said as a status (wave 2d review).
+      if (/^write-?in$/i.test(String(p.party || "").trim())) {
+        return '<span class="faint">Write-in candidate; no party on file</span>';
+      }
       // ballotLineSuffix is markup already escaped: " – Working Families line".
       var line = KYC.ballotLineSuffix(p);
       return partyChip(p) + (line
@@ -821,7 +842,10 @@
     }
     if (what === "platform") {
       var plat = KYC.platformItems(p);
-      if (!plat) return KYC.renderField(p, "platforms");
+      if (!plat) {
+        return KYC.renderField(p, "platforms") + '<span class="faint compare-source">' +
+          KYC.escapeHtml(platformLooked(p)) + "</span>";
+      }
       return '<ul class="compare-list">' + plat.items.slice(0, 8).map(function (x) {
         return "<li>" + KYC.escapeHtml(x) + "</li>";
       }).join("") + (plat.items.length > 8 ? '<li class="faint">and ' + (plat.items.length - 8) +
@@ -869,21 +893,36 @@
     ["site", "Campaign site"],
   ];
 
+  /* A table side by side where there is room; on a phone a card per
+   * person, the same cells in the same order (wave 2d review: a five-way
+   * race showed 1.3 columns per screen, rows tall with blank cells, the
+   * two nominees behind two write-ins). CSS shows one of the two. */
   function compareTable(race, people, attr, self) {
     var shown = ballotPeople(race, people);
+    var cells = shown.map(function (p) {
+      return COMPARE_ROWS.map(function (row) { return compareCell(p, row[0]); });
+    });
     return '<div class="compare-scroll"><table class="compare-table"><thead><tr>' +
       '<th scope="col"><span class="sr-only">Compared</span></th>' +
       shown.map(function (p) {
         return '<th scope="col">' + personButton(p, attr, self) + "</th>";
       }).join("") + "</tr></thead><tbody>" +
-      COMPARE_ROWS.map(function (row) {
+      COMPARE_ROWS.map(function (row, j) {
         return '<tr><th scope="row">' + KYC.escapeHtml(row[1]) + "</th>" +
-          shown.map(function (p) { return "<td>" + compareCell(p, row[0]) + "</td>"; }).join("") +
+          shown.map(function (p, i) { return "<td>" + cells[i][j] + "</td>"; }).join("") +
           "</tr>";
       }).join("") + "</tbody></table></div>" +
+      '<ul class="compare-cards">' + shown.map(function (p, i) {
+        return '<li class="compare-card"><p class="compare-card-name">' + personButton(p, attr, self) +
+          '</p><dl class="compare-card-rows">' + COMPARE_ROWS.map(function (row, j) {
+            return "<dt>" + KYC.escapeHtml(row[1]) + "</dt><dd>" + cells[i][j] + "</dd>";
+          }).join("") + "</dl></li>";
+      }).join("") + "</ul>" +
       '<p class="race-note">Offices: only those two sources agree on. Platform: each says ' +
-      "where it came from, the campaign’s own words only where its site was read. No net " +
-      "worth: a disclosure reports assets in bands, not a figure.</p>";
+      "where it came from. A sitting member’s is the list of issues their official website " +
+      "gives, a challenger’s the headings of their campaign’s site: not the same kind of page, " +
+      "and a member’s campaign site is not read for it. No net worth: a disclosure reports " +
+      "assets in bands, not a figure.</p>";
   }
 
   function compareBlock(race, people, opts) {

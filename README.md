@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2710 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2726 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2766,7 +2766,7 @@ neutral ink for judges, races and navigation (audit 2026-10-17).
 
 | Chart | Where | From |
 |---|---|---|
-| Balance of power: each chamber as one bar, Republicans from the left and Democrats from the right, the Senate seats on the 2026 ballot hatched in their holder's colour, a tick at half | every sidebar; above the map in its views of Congress, in its one-line form | `kycBuildMeta.senate` / `.house`; `senate.up` (seated senators in a 2026 race's seat, by state and class; sent only while the cycle is a campaign) |
+| Balance of power: each chamber as one bar, Republicans from the left and Democrats from the right, the Senate seats on the 2026 ballot dotted in their holder's colour (not hatched: the map under it hatches "no race", "none" and a split), a tick at half | every sidebar; above the map in its views of Congress, in its one-line form, which prints the counts below the laptop layout | `kycBuildMeta.senate` / `.house`; `senate.up` (seated senators in a 2026 race's seat, by state and class; sent only while the cycle is a campaign) |
 | The House, one square per voting seat, each state a button | the map's House view, "One square per seat" (`#/?mode=house&layout=tiles`) | `kycBuildMeta.houseTiles`, laid out by `kyc/tiles.py` from the district maps' label points: north to south, then west to east, within each state's block; `cells2026` for a redrawn state, used once the Congress the 2026 election chose sits |
 | A state's House races as squares laid out as the districts lie | a state page's 2026 races, with four or more districts | `houseTiles` (the 2026 plan) and `kycRaces` |
 | The states as a map-like grid of links, a dot where a Senate seat is on the 2026 ballot | States & territories | `kycBuildMeta.stateGrid` (`tiles.STATE_GRID`) |

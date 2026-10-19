@@ -4280,6 +4280,25 @@ function testColourVision(css) {
     "the guide's categories": ["var(--cat-1)", "var(--cat-2)", "var(--cat-3)", "var(--cat-4)",
       "var(--cat-5)", "var(--none-fill)"],
   };
+  // The charts' fills, read from their own rules (wave 2d review: the
+  // balance bar and the House squares filled independents with the light
+  // theme's text amber, the olive rule 88 removed from every map).
+  const ruleFill = (sel) => {
+    const m = css.match(new RegExp("^" + sel.replace(/\./g, "\\.") + " \\{ background(?:-color)?: ([^;]+);", "m"));
+    if (!m) throw new Error("no fill rule for " + sel);
+    return m[1].trim();
+  };
+  LEGENDS["the balance bar"] = ["r", "d", "i"].map((p) => ruleFill(".bb-" + p));
+  LEGENDS["the House squares"] = ["r", "d", "i"].map((p) => ruleFill(".ht-" + p));
+  suite("kyc.css — no fill is a text colour (rule 88)", () => {
+    const fills = [...css.matchAll(/(?:^|[;{\s])(?:background(?:-color)?|fill)\s*:\s*[^;}]*var\(--party-i\)[^;}]*/g)]
+      .map((m) => m[0].trim());
+    check("no background or fill draws with --party-i, the independents' text colour", fills.length === 0,
+      fills.slice(0, 4).join(" | "));
+    const up = css.match(/^\.bb-up \{([^}]*)\}/m);
+    check("the bar marks a seat on the ballot with dots, not the map's hatch",
+      !!up && /radial-gradient/.test(up[1]) && !/linear-gradient/.test(up[1]), up ? up[1] : "no .bb-up rule");
+  });
   suite("kyc.css — legend colours under colour-vision deficiency (Machado 2009)", () => {
     for (const [name, t] of Object.entries(themes)) {
       for (const [legend, fills] of Object.entries(LEGENDS)) {
@@ -11173,6 +11192,23 @@ async function testRaceMoney() {
           const from = td.querySelector(".compare-source");
           return !!from && /^(Headings from the campaign’s own site|The issues their official website lists|The issues their official website’s home page features|From the candidate’s Wikipedia article|From Wikipedia’s 2026 election page|This site’s roster summary, not the campaign’s words)$/.test(from.textContent);
         }), cells.length);
+      // An absent platform says what was looked at (wave 2d review: an
+      // official site's "not listed" beside a challenger's "No data").
+      check("a cell with no platform says what was looked at",
+        cells.every((td) => td.querySelector(".compare-list") ||
+          /^(This site read their official website, not a campaign site|Nothing recorded from a campaign site or article)$/
+            .test((td.querySelector(".compare-source") || {}).textContent || "")),
+        cells.map((td) => td.textContent.slice(0, 60)).join(" | "));
+      check("the note says a member's platform and a challenger's are not the same kind of page",
+        /official website/.test(fold.querySelector(".race-note").textContent));
+      // A phone gets a card per person with the same rows (wave 2d review).
+      const cards = [...fold.querySelectorAll(".compare-cards > .compare-card")];
+      check("a card per person, in the table's order, each with the table's rows",
+        cards.length === heads.length && cards.every((c, i) =>
+          c.querySelector("[data-id]") && heads[i].querySelector("[data-id]") &&
+          c.querySelector("[data-id]").getAttribute("data-id") === heads[i].querySelector("[data-id]").getAttribute("data-id") &&
+          [...c.querySelectorAll("dt")].map((dt) => dt.textContent).join("|") === rows.join("|")),
+        `${cards.length} cards for ${heads.length} columns`);
     }
     // A member's platform is their official website's issue list (#106,
     // rule 86), "; "-joined like a campaign's headings: the comparison read
@@ -11192,7 +11228,9 @@ async function testRaceMoney() {
     check("a race beside the Senate's has a comparison to test", !!other && !!sample);
     if (other && sample) {
       keep = { platforms: sample.platforms, fieldSources: sample.fieldSources,
-        quality: sample.quality, platformFeatured: sample.platformFeatured };
+        quality: sample.quality, platformFeatured: sample.platformFeatured, party: sample.party };
+      // The FEC files a write-in's party as "Write-in" (six profiles do).
+      sample.party = "Write-in";
       sample.platforms = "Agriculture; Health Care, Medicare and Medicaid; Veterans";
       sample.fieldSources = Object.assign({}, sample.fieldSources, { platforms: "official-site" });
       sample.quality = {};
@@ -11221,6 +11259,11 @@ async function testRaceMoney() {
         items.length === 3 && items[1] === "Health Care, Medicare and Medicaid" &&
           cell.querySelector(".compare-source").textContent === "The issues their official website lists",
         items.join(" | ") + " / " + (cell ? cell.textContent.slice(-60) : "no cell"));
+      const partyRow = table ? [...table.querySelectorAll("tbody tr")][0] : null;
+      const partyCell = partyRow && col >= 0 ? partyRow.querySelectorAll("td")[col] : null;
+      check("a write-in's FEC 'party' is said as a status, never as a party",
+        !!partyCell && partyCell.textContent === "Write-in candidate; no party on file" &&
+          !partyCell.querySelector(".party-chip"), partyCell ? partyCell.textContent : "no cell");
       holder.remove();
       Object.assign(sample, keep);
       delete sample.__search;
@@ -11376,19 +11419,31 @@ async function testCharts() {
       const senate = D.querySelector('.balance-bar-slot [data-chamber="senate"]');
       const up = meta.senate.up;
       if (up) {
-        const hatched = (cls) => [...senate.querySelectorAll(".bb-up." + cls)].reduce((n, s) => n + width(s), 0);
-        check("each party's Senate seats on the 2026 ballot are hatched, in its own colour",
-          Math.abs(hatched("bb-r") - up.R) < 0.01 && Math.abs(hatched("bb-d") - up.D) < 0.01 &&
-            Math.abs(hatched("bb-i") - up.I) < 0.01, JSON.stringify(up));
-        check("the hatched seats are the races' seats", up.total === meta.election.senateSeatsUp ||
+        const dotted = (cls) => [...senate.querySelectorAll(".bb-up." + cls)].reduce((n, s) => n + width(s), 0);
+        check("each party's Senate seats on the 2026 ballot are dotted, in its own colour",
+          Math.abs(dotted("bb-r") - up.R) < 0.01 && Math.abs(dotted("bb-d") - up.D) < 0.01 &&
+            Math.abs(dotted("bb-i") - up.I) < 0.01, JSON.stringify(up));
+        check("the dotted seats are the races' seats", up.total === meta.election.senateSeatsUp ||
           up.total <= meta.election.senateSeatsUp, `${up.total} of ${meta.election.senateSeatsUp}`);
+        check("the bar's words call its mark what it is: dotted, never hatched",
+          /Dotted: the /.test(senate.textContent) && !/Hatched/.test(senate.textContent), senate.textContent);
       } else {
-        check("nothing is hatched once the Congress the cycle elects sits", !senate.querySelector(".bb-up"));
+        check("nothing is dotted once the Congress the cycle elects sits", !senate.querySelector(".bb-up"));
       }
-      check("the House bar hatches nothing: every seat is on the ballot, and says so",
+      check("the House bar dots nothing: every seat is on the ballot, and says so",
         !D.querySelector('.balance-bar-slot [data-chamber="house"] .bb-up'));
       check("the map's Senate view carries the Senate's bar",
         !D.getElementById("mapBalance").hidden && !!D.querySelector('#mapBalance [data-chamber="senate"]'));
+      // The map has no hover on a phone: its bar prints every part's count,
+      // the independents' too (wave 2d review: an unlabelled amber sliver).
+      const mapCounts = D.querySelector('#mapBalance [data-chamber="senate"] .bb-counts');
+      const want = [["R", "r"], ["I", "i"], ["D", "d"]].filter(([k]) => meta.senate[k])
+        .map(([k, c]) => [`${meta.senate[k]} ${k}`, c]);
+      check("the map's bar prints each party's count, in its party's colour",
+        !!mapCounts && want.every(([t, c]) => [...mapCounts.querySelectorAll(".party-" + c)]
+          .some((n) => n.textContent === t)), mapCounts ? mapCounts.textContent : "no counts");
+      check("the sidebar's bar does not repeat the counts printed above it",
+        !D.querySelector(".balance-bar-slot .bb-counts"));
     });
 
     suite("charts — the House as one square per seat (VISUALS-27)", () => {
@@ -11568,6 +11623,15 @@ async function testCharts() {
       const latest = Math.max(...dated.map((j) => +j.seats.filter((s) => s.court === "ca9")[0].commissioned.slice(0, 4)));
       check("the axis ends where the bench does, never years ahead", years.length > 1 &&
         Math.max(...years) <= latest + 1, `${years.join(",")} for ${latest}`);
+      // Inset by the dot's radius, so the latest judge's dot stays on the
+      // rule (wave 2d review: past its end at 390px).
+      const lefts = [...fig.querySelectorAll(".bt-dot, .bt-ticks span")].map((s) => s.getAttribute("style") || "");
+      const inside = lefts.every((l) => {
+        const m = /left:\s*calc\(5px \+ \(100% - 10px\) \* ([\d.]+)\)/.exec(l);
+        return m && +m[1] >= 0 && +m[1] <= 1;
+      });
+      check("every dot and tick is placed inside the track by a dot's radius", inside,
+        lefts.filter((l) => !/calc\(5px/.test(l)).slice(0, 3).join(" | "));
     });
   }
 

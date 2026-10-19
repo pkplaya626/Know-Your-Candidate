@@ -687,7 +687,7 @@
   /* ------------------------------------------- bars and squares (charts) */
 
   /* Above the map in the views of Congress, the chamber's seats as one bar
-   * with the seats on the 2026 ballot hatched (VISUALS-21); in the House
+   * with the seats on the 2026 ballot dotted (VISUALS-21); in the House
    * view, a choice between the map and one square per seat (VISUALS-27),
    * since the map gives Wyoming's one seat California's weight. */
   function drawCharts() {
@@ -708,9 +708,11 @@
           '">One square per seat</button></div></div>' : "") +
       // The one-line form at every width: the sidebar carries the full key,
       // and the full bar here took the map 110-150px on a laptop (PR #111
-      // review), pushing Vermont and Connecticut into callouts.
+      // review), pushing Vermont and Connecticut into callouts. Its counts
+      // are printed below the laptop layout, where the sidebar is not
+      // beside the map and a phone has no hover for the track's title.
       KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now",
-        compact: true });
+        compact: true, counts: true });
     stage.hidden = squares;
     tiles.hidden = !squares;
     if (squares) {

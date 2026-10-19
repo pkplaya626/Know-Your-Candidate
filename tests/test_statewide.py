@@ -224,6 +224,10 @@ class TestNames(unittest.TestCase):
         self.assertEqual(words("NV", "NPP"), "No Political Party")
         self.assertEqual(words("FL", "NPA"), "No Party Affiliation")
         self.assertEqual(words("PA", "DEM"), "Democratic")
+        # One party, one word on every state page (wave 2d review).
+        self.assertEqual(words("GU", "DEMOCRAT"), "Democratic")
+        self.assertEqual(words("AL", "Democrat"), "Democratic")
+        self.assertEqual(words("LA", "Registered Democrat"), "Registered Democrat")
         self.assertEqual(words("GA", "R"), "Republican")
         self.assertEqual(words("VT", "FREEDOM AND UNITY"), "Freedom and Unity")
         self.assertEqual(words("TX", "GREEN"), "Green")

@@ -20,8 +20,9 @@ The totals are the 2025-26 two-year cycle's, not a senator's six-year
 election period: read over the election period, Jon Ossoff's rows held
 spending from Georgia's January 2021 runoff, about another election
 entirely, and came back once per cycle. They are the FEC's processed
-filings, which trail the 24- and 48-hour reports by days; the page dates
-them by the day they were read.
+filings, which trail the 24- and 48-hour reports by days or weeks; the page
+dates them by the day they were read and says, on the line, that the latest
+spending may not be in them yet.
 
     python build_profile_site.py outside            # refresh (network)
     python build_profile_site.py outside --check    # report from the cache

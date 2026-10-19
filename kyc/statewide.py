@@ -68,8 +68,13 @@ _DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # Anything else that reads as a code is refused by ``problems``, so no
 # reader is left with "(IAP)".
 PARTY_CODES = {
+    # "Democrat" is the noun some lists print where others print "DEM" or
+    # "Democratic": one party, so one word for it on every state page (wave
+    # 2d review: Guam's and Alabama's read "(Democrat)", Georgia's
+    # "(Democratic)"). A longer name a list gives ("Democratic-NPL",
+    # "Registered Democrat") is that list's own and kept.
     "*": {"D": "Democratic", "DEM": "Democratic", "R": "Republican", "REP": "Republican",
-          "LIB": "Libertarian"},
+          "LIB": "Libertarian", "Democrat": "Democratic", "DEMOCRAT": "Democratic"},
     # The Division of Elections' listing: "REP, DEM, LPF (Libertarian Party
     # of Florida), NPA (no party affiliation)" (the cache's notes, read
     # 2026-10-18).

@@ -3059,12 +3059,16 @@
   /** One chamber's seats as one bar (VISUALS-21): Republicans from the
    *  left, Democrats from the right, independents and empty seats between,
    *  as the legislatures' seat strips run (KYC.seatStrip). A Senate seat on
-   *  the November 3 ballot is hatched in its holder's colour; every House
-   *  seat is on it, which a hatch over the whole bar would not tell anyone,
-   *  so the caption says so instead. A tick marks half the seats. An
-   *  independent is never folded into either party (rule: the rosters do
-   *  not say whom they caucus with). Nothing is hatched once the Congress
-   *  the cycle elects sits (summary.py sends no "up" then). */
+   *  the November 3 ballot is dotted in its holder's colour - dotted, not
+   *  hatched, because the map drawn under the bar hatches "no race",
+   *  "none" and a split delegation (rule 88); every House seat is on it,
+   *  which dots over the whole bar would not tell anyone, so the caption
+   *  says so instead. A tick marks half the seats. An independent is never
+   *  folded into either party (rule: the rosters do not say whom they
+   *  caucus with). Nothing is dotted once the Congress the cycle elects
+   *  sits (summary.py sends no "up" then). The compact form prints the
+   *  counts when asked (opts.counts): the map has no sidebar above it, and
+   *  a phone has no hover to read the track's title. */
   function balanceBar(chamber, opts) {
     opts = opts || {};
     var info = KYC.meta();
@@ -3116,7 +3120,7 @@
     }
     var ballot = up
       ? '<li class="bb-ballot"><span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span>' +
-        "Hatched: a seat on the Nov 3, 2026 ballot</li>"
+        "Dotted: a seat on the Nov 3, 2026 ballot</li>"
       : chamber === "house" && (info.election || {}).phase === "campaign"
         ? '<li class="bb-ballot">Every House seat ' + (past() ? "was" : "is") +
           " on the Nov 3, 2026 ballot</li>" : "";
@@ -3125,13 +3129,19 @@
     if (opts.compact) {
       // Under the sidebar's counts, which already name each party in its
       // colour: only what the bar adds, in one line.
-      var hatched = up ? [["R", "R"], ["I", "I"], ["D", "D"]].filter(function (p) { return upOf(p[0]); })
+      var dotted = up ? [["R", "R"], ["I", "I"], ["D", "D"]].filter(function (p) { return upOf(p[0]); })
         .map(function (p) { return upOf(p[0]) + " " + p[1]; }) : [];
+      // Where nothing above the bar names the parts (the map), the counts
+      // come first, each in its party's text colour, in the bar's order.
+      var counts = !opts.counts ? "" : [["R", "r"], ["I", "i"], ["D", "d"]].filter(function (p) { return c[p[0]]; })
+        .map(function (p) {
+          return '<strong class="party-' + p[1] + '">' + c[p[0]] + " " + p[0] + "</strong>";
+        }).concat(vacant ? ["<strong>" + vacant + " vacant</strong>"] : []).join(" · ");
       return '<figure class="balance-bar balance-bar-compact" data-chamber="' + attr(chamber) + '">' +
         (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
-        '<p class="bb-note">' + (hatched.length
-          ? '<span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span> Hatched: the ' +
-            esc(hatched.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot. "
+        '<p class="bb-note">' + (counts ? '<span class="bb-counts">' + counts + ". </span>" : "") + (dotted.length
+          ? '<span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span> Dotted: the ' +
+            esc(dotted.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot. "
           : chamber === "house" && (info.election || {}).phase === "campaign"
             ? "Every seat " + (past() ? "was" : "is") + " on the Nov 3, 2026 ballot. " : "") +
         "The tick marks half: " + (chamber === "senate" ? 51 : Math.floor(seats / 2) + 1) +

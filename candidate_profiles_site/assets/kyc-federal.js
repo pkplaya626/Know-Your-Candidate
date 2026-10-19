@@ -159,7 +159,12 @@
     // reaches back at least ten years.
     var last = Math.ceil(Math.max.apply(null, all) + 0.01);
     var first = Math.min(Math.floor(Math.min.apply(null, all) / 5) * 5, last - 10);
-    var x = function (v) { return (100 * (v - first) / (last - first)).toFixed(2) + "%"; };
+    // A dot's centre and a tick sit inside the track by a dot's radius
+    // (.bt-dot is 9px), so a judge commissioned this year is drawn on the
+    // rule, not past its end (wave 2d review: the Sixth Circuit at 390px).
+    var x = function (v) {
+      return "calc(5px + (100% - 10px) * " + ((v - first) / (last - first)).toFixed(4) + ")";
+    };
     var step = last - first > 30 ? 10 : 5;
     var ticks = [];
     for (var t = Math.ceil(first / step) * step; t <= last; t += step) ticks.push(t);

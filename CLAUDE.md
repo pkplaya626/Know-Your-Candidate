@@ -188,7 +188,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 1928 tests, no dependencies
-npm install && npm test                       # 2710 real-DOM checks (needs jsdom)
+npm install && npm test                       # 2726 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1590,12 +1590,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
       apart (7 under tritanopia).
     - Split, divided and "none" are hatched as well as coloured
       (`KYC.svgFill`, one pattern fill per shape, rule 45), and that pair
-      needs 5.
+      needs 5. A pattern means one thing on a screen: the balance bar over
+      the map marks the seats on the ballot with dots, never the map's
+      hatch, which there means "no race".
     - Grey means "none" and nothing else: no category is grey
       (`--none-fill`, the Eleventh Circuit was).
     - A fill is never also a text colour that needs 4.5:1. Light
-      `--party-i` is text; `--party-i-fill` fills. A callout writes on a
-      fill in the ink `KYC.fillInk` names for it.
+      `--party-i` is text; `--party-i-fill` fills, in every chart as on
+      every map (the balance bar and the House squares came in with the
+      text amber, and `testColourVision` now reads their rules). A callout
+      writes on a fill in the ink `KYC.fillInk` names for it.
     - No status or money colour is a party's: "Lost primary" was the
       Republican red, "Open seat" the independents' amber, a Democrat's
       "Spent" red.

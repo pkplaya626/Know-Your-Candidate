@@ -4932,12 +4932,11 @@ button.local-county-link {
 .money-rows { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-3); }
 .money-row { display: grid; gap: var(--s-1); min-width: 0; }
 .money-who { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); font-size: var(--t-sm); font-weight: 600; }
+/* A party as the race's own list writes it: coloured text, no outline
+ * (wave 2d review: two styles for one fact a few lines apart). */
 .party-chip {
   font-size: var(--t-xs);
   font-weight: 600;
-  padding: 0 var(--s-1);
-  border: 1px solid currentColor;
-  border-radius: 4px;
 }
 .money-bars { display: grid; gap: 3px; }
 .money-bar {
@@ -4985,7 +4984,26 @@ button.local-county-link {
   color: var(--text-muted);
   font-weight: 600;
 }
+.compare-cards { display: none; margin: var(--s-2) 0 0; padding: 0; list-style: none; }
+.compare-card { padding: var(--s-2) 0; border-bottom: 1px solid var(--border); }
+.compare-card-name { margin: 0 0 var(--s-1); font-size: var(--t-sm); font-weight: 600; }
+.compare-card-rows {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--s-1) var(--s-2);
+  margin: 0;
+  font-size: var(--t-xs);
+}
+.compare-card-rows dt { color: var(--text-muted); font-weight: 600; }
+.compare-card-rows dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+/* Below this width the table showed little over one person at a time. */
+@media (max-width: 640px) {
+  .compare-scroll { display: none; }
+  .compare-cards { display: block; }
+}
 .compare-list { margin: 0; padding-left: 1rem; }
+/* Where a platform came from, or what was looked at: a line of its own. */
+.compare-source { display: block; }
 .compare-list li + li { margin-top: 2px; }
 
 .last-table { border-collapse: collapse; font-size: var(--t-sm); margin: var(--s-2) 0; }
@@ -5007,7 +5025,7 @@ button.local-county-link {
  * three themes and a forced dark mode treat them as they treat text. */
 
 /* The balance of power (KYC.balanceBar): one bar per chamber, a 2px
- * surface gap between its parts, a hatch on the seats on the ballot. */
+ * surface gap between its parts, dots on the seats on the ballot. */
 .balance-bar { margin: 0 0 var(--s-4); }
 .balance-bar-slot .balance-bar { margin-top: calc(-1 * var(--s-2)); }
 .bb-title { font-size: var(--t-sm); font-weight: 700; color: var(--text); }
@@ -5022,14 +5040,18 @@ button.local-county-link {
 .bb-seg { flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
 .bb-r { background-color: var(--party-r); }
 .bb-d { background-color: var(--party-d); }
-.bb-i { background-color: var(--party-i); }
+.bb-i { background-color: var(--party-i-fill); }
 .bb-vacant { background-color: transparent; border: 1px solid var(--text-muted); }
 .bb-neutral { background-color: var(--text-muted); }
-/* Stripes of the page's own surface over the party's colour: the same
- * party, marked as on the ballot, readable without telling hues apart. */
+/* Dots of the page's own surface over the party's colour: the same party,
+ * marked as on the ballot, readable without telling hues apart. Dots, not
+ * stripes: the map under the bar hatches "no race", "none" and a split
+ * delegation (rule 88), and one pattern must not mean both on one screen. */
 .bb-up {
-  background-image: repeating-linear-gradient(135deg, transparent 0 3px,
-    color-mix(in srgb, var(--surface-1) 62%, transparent) 3px 5.5px);
+  background-image: radial-gradient(circle,
+    color-mix(in srgb, var(--surface-1) 72%, transparent) 0 1.25px, transparent 1.7px);
+  background-size: 4px 4px;
+  background-position: 0 1px;
 }
 .bb-half {
   position: absolute;
@@ -5079,6 +5101,8 @@ button.local-county-link {
   .map-balance .bb-title { grid-column: 1; }
   .map-balance .bb-track { grid-column: 2; margin: 0; }
   .map-balance .bb-note { grid-column: 1 / -1; margin: 2px 0 0; }
+  /* The sidebar beside the map prints the counts; the note keeps one line. */
+  .map-balance .bb-counts { display: none; }
 }
 
 /* The House, one square per seat (KYC.houseTiles): each state a button,
@@ -5122,7 +5146,7 @@ button.local-county-link {
 .ht-seat { border-radius: 1px; min-width: 0; min-height: 0; }
 .ht-r { background: var(--party-r); }
 .ht-d { background: var(--party-d); }
-.ht-i { background: var(--party-i); }
+.ht-i { background: var(--party-i-fill); }
 .ht-vacant { background: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
 .ht-state.is-selected .ht-code { color: var(--text); text-decoration: underline; }
 @media (hover: hover) {
