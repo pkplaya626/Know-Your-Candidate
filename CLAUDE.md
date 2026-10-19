@@ -1418,6 +1418,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     shared form framed on the member's page: a soft 200 is not one. A
     challenger's dialog leads with the race, then the money, the platform
     and the biography, and its absences are said once (PROFILES-18).
+    The review of the first build found more, each now refused or said:
+    the House template's stock categories ("Congress; Economy; Education;
+    Energy; Health; Veterans", each "news and information related to")
+    were eighteen members' platforms while Figures's identical page read
+    "Not listed", so a list of nothing but those links the page, for
+    everyone (`stock_list`), and "Congress" is never an issue; a heading
+    broken by `</br>` was cut to "Sponsored &", and a line ending in "&" or
+    a comma is not taken; one issue spelled twice is listed once; a home
+    page's own issue links were shown as the list when Hoyer's unlinked
+    /issues held nine to its five, so `/issues` is tried first and a home
+    page's links are said to be what it "features" (`platformFeatured`); a
+    newsletter form (Aguilar's, Mfume's) is not a way to write, and a
+    name and an email alone never make one; the Directory printed no ";"
+    before Graves's and McConnell's "election history", which ran into
+    their careers; an address it prints that leads to the member's listed
+    site (dingell.house.gov) joins, and members it does not hold are
+    reported (`members-directory-unjoined`), never left silently blank.
 
 ## District maps
 

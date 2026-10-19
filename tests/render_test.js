@@ -1142,6 +1142,7 @@ async function testDirectoryAsync() {
         { address: "119 North Commercial Street", city: "Bellingham", state: "WA",
           zip: "98225", phone: "360-733-4500" }],
       districtOfficesRead: "2026-10-18",
+      platformFeatured: false,
     };
     const saved = {};
     Object.keys(fields).forEach((k) => { saved[k] = host[k]; host[k] = fields[k]; });
@@ -1199,6 +1200,31 @@ async function testDirectoryAsync() {
       /issues page/.test(platform.textContent) && !/Not listed/.test(platform.textContent) &&
         !/No data/.test(platform.textContent) &&
         [...platform.querySelectorAll("a")].some((a) => a.href === host.website + "/issues/"),
+      platform.textContent);
+    KYC.profile.close();
+
+    // The page linked is the home page: called the website, never "their
+    // issues page" (Stansbury's, before the review of PR #106).
+    host.officialIssuesUrl = host.website.replace(/\/$/, "");
+    KYC.profile.open(host.id);
+    const homeLink = [...platform.querySelectorAll("a")].find((a) =>
+      a.href.replace(/\/$/, "") === host.website.replace(/\/$/, ""));
+    check("a home page linked for the issues is called their official website",
+      !!homeLink && homeLink.textContent === "their official website" &&
+        !/their issues page/.test(platform.textContent), platform.textContent);
+    KYC.profile.close();
+
+    // A list read from the home page's own issue links is what it features,
+    // not the site's whole list (Hoyer's home page showed five of nine).
+    host.platforms = fields.platforms;
+    host.quality = {};
+    host.fieldSources = { platforms: "official-site" };
+    host.platformFeatured = true;
+    delete host.__search;
+    KYC.profile.open(host.id);
+    check("a home page's featured issues say so, and link the website",
+      /home page features/.test(platform.textContent) && !/official website lists/.test(platform.textContent) &&
+        /their official website/.test(platform.textContent) && !/read them there/.test(platform.textContent),
       platform.textContent);
     KYC.profile.close();
     Object.keys(saved).forEach((k) => {

@@ -307,9 +307,11 @@ jobs:
           git commit -m "Reconcile the rosters with the current Congress
 
           Opened automatically by .github/workflows/refresh.yml. Congressional
-          membership comes from congress-legislators; education, net worth,
-          committees and platform are editorial research and are left empty
-          rather than invented. State governments come from their own
+          membership comes from congress-legislators; a new member's
+          education, careers and platform are left empty rather than
+          invented until the members command reads them from the
+          Congressional Directory and their official site, and net worth is
+          never derived. State governments come from their own
           authorities: governors from the NGA, lieutenant governors from NLGA,
           secretaries of state from NASS, legislators from Open States, party
           counts from NCSL."
