@@ -517,12 +517,25 @@
     grid.innerHTML = people.map(function (p) { return card(p); }).join("");
   }
 
-  function raceSection(race, people, opts) {
-    opts = opts || {};
+  /** A race's people as every view that lists the race splits them: the
+   *  seat's holder running elsewhere (*moved*, one line above the race),
+   *  the people still in it (*running*) and those no longer in it (*out*),
+   *  each in the pipeline's order; *people* is everyone but the moved. The
+   *  race sections and the Your ballot page split them here, so the two
+   *  list the same people (rules 12 and 73). */
+  function racePeople(race, people) {
     var moved = people.filter(function (p) { return elsewhere(race, p); });
     people = people.filter(function (p) { return moved.indexOf(p) === -1; });
-    var running = people.filter(function (p) { return !offBallot(p); });
-    var out = people.filter(offBallot);
+    return { moved: moved, people: people,
+             running: people.filter(function (p) { return !offBallot(p); }),
+             out: people.filter(offBallot) };
+  }
+
+  function raceSection(race, people, opts) {
+    opts = opts || {};
+    var split = racePeople(race, people);
+    var moved = split.moved, running = split.running, out = split.out;
+    people = split.people;
     var body = moved.map(heldByLine).join("") +
       '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
@@ -1093,6 +1106,8 @@
     card: card,
     raceBadges: raceBadges,
     raceSection: raceSection,
+    racePeople: racePeople,
+    heldByLine: heldByLine,
     fillOut: fillOut,
     legend: legend,
   };

@@ -920,6 +920,12 @@
     modes: ["governor", "lt", "ag", "sos", "legislature", "trifecta", "governor2026"],
     ballotList: ballotList,
     listsCandidates: listsCandidates,
+    // The office's ballot mark, holder line and candidates, as the state
+    // page shows them, for the Your ballot page too (kyc-ballot.js, rule 12).
+    ballotOf: ballot,
+    officeMark: officeMark,
+    openSeat: openSeat,
+    candidatesBlock: candidatesBlock,
     titles: TITLES,
     state: state,
     look: look,

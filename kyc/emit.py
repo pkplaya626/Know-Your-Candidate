@@ -77,6 +77,22 @@ PAGE_REQUIREMENTS = {
     ),
 }
 
+# Your ballot (rule 92): the data its lists are drawn from, then the modules
+# that draw races, offices and the lookup, then its own.
+BALLOT_PAGE_REQUIREMENTS = (
+    "assets/kyc.js",
+    "data/profiles.js",
+    "data/odds.js",
+    "data/stategov.js",
+    "data/lookup/index.js",
+    "assets/kyc-odds.js",
+    "assets/kyc-cards.js",
+    "assets/kyc-profile.js",
+    "assets/kyc-stategov.js",
+    "assets/kyc-findrep.js",
+    "assets/kyc-ballot.js",
+)
+
 # The generated state pages sit one directory down and load the same data.
 STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
@@ -89,6 +105,7 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",
 )
 
@@ -116,6 +133,7 @@ LEGISLATURE_PAGE_REQUIREMENTS = (
     "../data/lookup/index.js",
     "../assets/kyc-regionmap.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-ballot.js",
     "../assets/kyc-legislature.js",
 )
 
@@ -167,6 +185,9 @@ GOVERNMENT_DIR = os.path.join(SITE_DIR, "government")
 # depth), and the manifest a phone reads to add the site to its home screen.
 ABOUT_FILE = os.path.join(SITE_DIR, "about.html")
 NOT_FOUND_FILE = os.path.join(SITE_DIR, "404.html")
+# Your ballot (rule 92), generated at the root: the profiles and the lookup,
+# then the module that draws the page from them.
+BALLOT_FILE = os.path.join(SITE_DIR, "ballot.html")
 MANIFEST_FILE = os.path.join(SITE_DIR, "site.webmanifest")
 # The first district page lived here for a day; the address still answers.
 REDIRECTS = {os.path.join(SITE_DIR, "redistricting", "ca.html"): "../districts/ca.html"}
@@ -317,6 +338,7 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None):
     # manifest.
     out[ABOUT_FILE] = pages.render_about(host, dates, codes)
     out[NOT_FOUND_FILE] = pages.render_404(host, codes)
+    out[BALLOT_FILE] = pages.render_ballot_page(host)
     out[MANIFEST_FILE] = pages.webmanifest()
     for relative, text in government.render_all(host, state_codes(profiles)).items():
         out[os.path.join(SITE_DIR, *relative.split("/"))] = text
@@ -940,6 +962,7 @@ def check_pages(root="."):
     checks["districts/index.html"] = ("../assets/kyc.js",)
     checks["courts/index.html"] = ("../assets/kyc.js",)
     checks["about.html"] = ("assets/kyc.js",)
+    checks["ballot.html"] = BALLOT_PAGE_REQUIREMENTS
     checks["404.html"] = ("/assets/kyc.js",)
     checks["legislature/index.html"] = ("../assets/kyc.js", "../data/stategov.js",
                                         "../assets/kyc-stategov.js")

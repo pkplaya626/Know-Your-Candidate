@@ -48,10 +48,6 @@
       : list.slice(0, -1).join(", ") + " and " + list[list.length - 1];
   }
 
-  function after() {
-    return KYC.electionStatus(2026).phase === "post-election";
-  }
-
   function partyClass(people) {
     if (!people || !people.length) return "party-none";
     var keys = {};
@@ -162,80 +158,12 @@
 
   /* -------------------------------------------------------- 2026 ballot */
 
-  function nextLine(b) {
-    if (!b.next) return "";
-    return " " + link(b.next.source, "Next regular election: " + (b.next.month || "November") +
-      " " + b.next.year);
-  }
+  /* Whether a chamber's seats, and one district's, are on the November 3
+   * ballot: the words are KYC.ballot's, which the Your ballot page says
+   * too (kyc-ballot.js, rule 12). */
+  function chamberBallot(c) { return KYC.ballot.chamberBallot(c); }
 
-  function plainName(name) { return String(name).replace(/^0+(?=\d)/, ""); }
-
-  /** What the state's record says beyond "all" or "none", and beyond the
-   *  term the next line states: "all" alone says nothing the count did not
-   *  ("The state's record: all." read on Connecticut's page), and "all
-   *  (2-year terms)" repeated the term line under it. */
-  function basisText(c) {
-    var t = String(c.ballot.basis || "").replace(/^(none regular|none|all)\b:?\s*/i, "").trim();
-    if (c.termYears) {
-      var n = String(c.termYears);
-      t = t.replace(new RegExp("\\s*\\(" + n + "-year terms\\)"), "")
-        .replace(new RegExp(",\\s*" + n + "-year terms\\b"), "")
-        .replace(new RegExp("\\b" + n + "-year terms,?\\s*"), "");
-    }
-    t = t.replace(/^\((.*)\)$/, "$1").replace(/\(\s*\)/g, "").replace(/^[\s,;]+|[\s,;]+$/g, "");
-    return t ? t.charAt(0).toUpperCase() + t.slice(1) + "." : "";
-  }
-
-  /** The chamber's districts with an election for the rest of a term
-   *  (kyc/legislature.specials), from the same record. */
-  function specialLine(c) {
-    var list = (c.specials || []).map(plainName);
-    if (!list.length) return "";
-    return (list.length === 1 ? "District " : "Districts ") + andList(list) + (c.ballot.up ? " also " : " ") +
-      (list.length === 1 ? (after() ? "had" : "has") : (after() ? "had" : "have")) +
-      " a special election for the rest of a term on the Nov 3, 2026 ballot.";
-  }
-
-  /** The chamber's seats on the November 3 ballot, in the state's own
-   *  record's words, linked to it: the regular elections, then any special
-   *  election for the rest of a term. */
-  function chamberBallot(c) {
-    var b = c.ballot;
-    if (!b) return "";
-    var was = after() ? "were" : "are";
-    var head = !b.up ? "No regular elections for the " + c.title + " in 2026."
-      : b.up === b.seats ? "All " + b.seats + " seats " + was + " on the Nov 3, 2026 ballot."
-      : b.up + " of the " + b.seats + " seats " + was + " on the Nov 3, 2026 ballot.";
-    var more = basisText(c);
-    var special = specialLine(c);
-    return '<p class="leg-ballot">' + KYC.escapeHtml(head) +
-      (special ? " " + KYC.escapeHtml(special) : "") +
-      (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
-      " " + link(b.source, "Source") + (!b.up ? nextLine(b) : "") + "</p>" +
-      (c.termYears ? '<p class="leg-term">Members serve ' + KYC.escapeHtml(String(c.termYears)) +
-        "-year terms, as the state's record says.</p>" : "");
-  }
-
-  /** One district's seat on the ballot, where the record names it. A
-   *  district the record names for a special election is on the ballot,
-   *  and its panel says so first (rule 74; PR #96 review: Kansas Senate 24
-   *  read "not up for regular election" over a seat on the ballot). */
-  function districtBallot(id) {
-    var c = current();
-    var d = c.districts[id];
-    if (!c.ballot || !d || (d.up === undefined && !d.special)) return chamberBallot(c);
-    var is = after() ? "was" : "is";
-    var text = d.special
-      ? "A special election for the rest of a term in this district " + is + " on the Nov 3, 2026 ballot." +
-        (d.up === true ? " So " + is + " its regular election."
-          : d.up === false ? " It " + (after() ? "had" : "has") + " no regular election in 2026." : "")
-      : d.up ? "This seat " + is + " on the Nov 3, 2026 ballot."
-      : "This seat " + is + " not up for regular election in 2026.";
-    var more = basisText(c);
-    return '<p class="leg-ballot">' + KYC.escapeHtml(text) +
-      (more ? ' <span class="faint">' + KYC.escapeHtml("The state's record: " + more) + "</span>" : "") +
-      " " + link(c.ballot.source, "Source") + (!d.up && !d.special ? nextLine(c.ballot) : "") + "</p>";
-  }
+  function districtBallot(id) { return KYC.ballot.seatBallot(current(), id); }
 
   function showDistrict(id) {
     var people = current().members[id] || [];

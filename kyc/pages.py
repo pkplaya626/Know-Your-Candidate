@@ -136,6 +136,10 @@ $scripts
 </html>
 """)
 
+# The Your ballot page (kyc-ballot.js, rule 92), at the site's root.
+BALLOT_PATH = "ballot.html"
+
+
 # The site's navigation, by level of government. One table: every generated
 # page renders it, and emit.check_nav holds the two hand-maintained pages,
 # index.html and map.html, to it. Each entry is (key, path from the site's
@@ -147,6 +151,7 @@ def nav_groups():
     return (
         (f"Elections {CYCLE}", (
             ("candidates", "index.html", "user", "Candidates"),
+            ("ballot", BALLOT_PATH, "vote", "Your ballot"),
             ("races", "map.html", "map", "Races & partisan map"),
         )),
         ("Federal", (
@@ -499,6 +504,7 @@ _STATE_SCRIPTS = (
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",
 )
 
@@ -1156,7 +1162,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
         "../data/legislature/{code}.js", "../data/lookup/index.js", "../assets/kyc-regionmap.js",
-        "../assets/kyc-findrep.js", "../assets/kyc-legislature.js")]
+        "../assets/kyc-findrep.js", "../assets/kyc-ballot.js", "../assets/kyc-legislature.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(f"{title}: every district and member"),
@@ -2023,6 +2029,100 @@ def render_404(host, codes=()):
     )
 
 
+# The Your ballot page: what it loads, data before code (rule 14). It opens
+# profiles in the dialog, and names the vote files that dialog loads.
+_BALLOT_SCRIPTS = (
+    "data/profiles.js",
+    "data/odds.js",
+    "data/stategov.js",
+    "data/lookup/index.js",
+    "assets/kyc-odds.js",
+    "assets/kyc-cards.js",
+    "assets/kyc-profile.js",
+    "assets/kyc-stategov.js",
+    "assets/kyc-findrep.js",
+    "assets/kyc-ballot.js",
+)
+
+_BALLOT_SIDEBAR = """
+        <div class="sidebar-section">
+            <h2 class="sidebar-heading">
+                <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                $year midterms
+            </h2>
+            <time id="electionCountdown" class="badge badge-warn countdown"></time>
+            <a class="sidebar-link learn-link" href="government/elections.html">How elections work</a>
+        </div>
+"""
+
+_BALLOT_SOURCES = """\
+                <p><strong>Sources:</strong> the races for Congress and everyone in them as the
+                    rest of this site lists them: the candidate field from the Federal Election
+                    Commission, primary results from each state's Wikipedia election page, and the
+                    November ballot from the certified list of candidates its election office
+                    publishes, where this site reads one, each race crediting its own; the
+                    statewide offices on the ballot from each state's constitution, statutes and
+                    election pages, and their candidates from the election office's own list,
+                    each list named and dated where it is shown; the districts a ZIP code or a
+                    location falls in from the Census Bureau's boundaries and ZIP Code
+                    Tabulation Areas; the key dates from each election office's own pages.</p>
+                <p><strong>Not listed here:</strong> the candidates for the state legislature,
+                    ballot measures, and judicial and local contests. Where a state's election
+                    office links a sample ballot, the page links it.</p>"""
+
+
+def render_ballot_page(host):
+    """ballot.html, Your ballot (rule 92): every contest on one reader's
+    ballot that the site can name, from a ZIP code or a location looked up
+    on the device. The page is drawn by ``assets/kyc-ballot.js``; the
+    address carries a ZIP code (``#/?zip=``), never a location."""
+    from .cycle import CYCLE, general_election_day
+
+    path = BALLOT_PATH
+    canonical = f"https://{host}/{path}" if host else path
+    name = section_name("ballot")
+    day = general_election_day(CYCLE)
+    when = f"{day.strftime('%B')} {day.day}, {day.year}"
+    main = "\n".join([
+        '            <div id="ballotPage" class="state-page ballot-page">',
+        '                <header class="state-hero">',
+        f'                    <p class="state-kicker">Elections {CYCLE}</p>',
+        f'                    <h1 class="state-title">{_e(name)}</h1>',
+        '                    <p class="districts-lede" data-ballot-lede>Every contest on your',
+        f'                        {_e(when)} ballot that this site can name, from your ZIP code or',
+        "                        your location: the races for Congress and who is in them, the",
+        "                        statewide offices and their candidates, and whether your seats in the",
+        "                        state legislature are up. Who represents you now is another question:",
+        '                        <a href="index.html#findrep">find who represents you</a>.</p>',
+        "                </header>",
+        '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',
+        '                <div class="ballot-result" id="ballotResult" role="status" aria-live="polite" hidden></div>',
+        "                <noscript><p>This page looks your ZIP code up in your browser, and needs",
+        "                    JavaScript to do it. Each state's page lists its races without it.</p></noscript>",
+        "            </div>",
+    ])
+    return render_page(
+        title=_e(f"{name} — Know Your Candidate"),
+        og_title=_e(f"{name}: every contest on your {CYCLE} ballot"),
+        description=_e(f"Every contest on your {when} ballot that this site can name, from "
+                       "your ZIP code or location: Congress, statewide offices and their "
+                       "candidates, and your state legislative seats."),
+        canonical=_e(canonical),
+        host=_e(host or ""),
+        code="",
+        page_kind="ballot",
+        root="",
+        search="",
+        sidebar=string.Template(_BALLOT_SIDEBAR).substitute(year=CYCLE),
+        nav_current="ballot",
+        main=main,
+        footer=_BALLOT_SOURCES,
+        built="stamp",
+        crumbs=[_HOME, (name, path)],
+        scripts=_scripts(_BALLOT_SCRIPTS),
+    )
+
+
 # The name of districts/index.html, wherever it is shown or linked.
 DISTRICTS_INDEX_NAME = "District maps"
 
@@ -2228,6 +2328,7 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
 
     url("", "1.0")
     url("map.html", "0.8")
+    url(BALLOT_PATH, "0.8")
     url("about.html", "0.4", "monthly")
     url("states/index.html", "0.8")
     for code in sorted(codes):

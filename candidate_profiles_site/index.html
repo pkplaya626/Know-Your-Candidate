@@ -25,8 +25,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=b9f9b76c6a">
-<script src="assets/kyc.js?v=a806153900"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=2a7f6a5a5b">
+<script src="assets/kyc.js?v=45fd190e49"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
@@ -149,6 +149,10 @@
             <a class="nav-link" href="index.html" data-nav="candidates" aria-current="page">
                 <svg class="icon" aria-hidden="true"><use href="#i-user"/></svg>
                 Candidates
+            </a>
+            <a class="nav-link" href="ballot.html" data-nav="ballot">
+                <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+                Your ballot
             </a>
             <a class="nav-link" href="map.html" data-nav="races">
                 <svg class="icon" aria-hidden="true"><use href="#i-map"/></svg>
@@ -323,6 +327,14 @@
                 <!-- "Find who represents me": a ZIP code or a location, looked up on
                      the device (assets/kyc-findrep.js writes the controls here). -->
                 <section class="findrep" id="findrep" data-findrep></section>
+                <!-- Who is on the reader's ballot is another question than who
+                     represents them (rule 27): its own page, Your ballot
+                     (assets/kyc-ballot.js, rule 92). -->
+                <p class="intro-ballot"><a class="btn" href="ballot.html" data-ballot-entry>
+                    <svg class="icon" aria-hidden="true"><use href="#i-vote"/></svg>
+                    See everything on your ballot</a>
+                    <span class="field-note">Congress, statewide offices and your legislative
+                        seats, from your ZIP code or location.</span></p>
                 <!-- A form, not a select that navigates on change: arrow keys
                      and type-ahead left the page on the first key (WCAG 3.2.2). -->
                 <form class="intro-pick" id="introForm">
@@ -406,9 +418,9 @@
 <script src="data/odds.js"></script>
 <script src="data/lookup/index.js?v=540c440033"></script>
 <script src="assets/kyc-odds.js?v=c1d28927af"></script>
-<script src="assets/kyc-cards.js?v=051e13084b"></script>
+<script src="assets/kyc-cards.js?v=444b3e6a5a"></script>
 <script src="assets/kyc-profile.js?v=ef222fe63e"></script>
-<script src="assets/kyc-findrep.js?v=904968445e"></script>
+<script src="assets/kyc-findrep.js?v=598f4fca76"></script>
 <script src="assets/kyc-senate.js?v=42f079f467"></script>
 <script src="assets/kyc-directory.js?v=bedd2412e3"></script>
 </body>
