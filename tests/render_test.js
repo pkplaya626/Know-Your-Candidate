@@ -6302,6 +6302,61 @@ async function testContactActions() {
   });
 }
 
+/* PROFILES-25: what the job pays, on a sitting member's profile, as the
+ * law sets it for their post (kyc/pay.py), with its source. */
+async function testPayLine() {
+  const page = await buildPage("index.html");
+  await settle(300);
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const meta = window.kycBuildMeta.pay;
+  const people = window.legislatorsData;
+  const open = (p) => {
+    window.location.hash = "#/profile/" + encodeURIComponent(p.id);
+    window.dispatchEvent(new window.HashChangeEvent("hashchange"));
+    const field = D.getElementById("profileModalPayField");
+    return { hidden: !field || field.hidden, text: field ? field.textContent : "",
+             html: field ? field.innerHTML : "" };
+  };
+  const plain = people.find((p) => KYC.seated(p) && p.pay && !p.pay.post);
+  const leader = people.find((p) => KYC.seated(p) && p.pay && p.pay.post);
+  const challenger = people.find((p) => p.isCandidate);
+  const former = people.find((p) => p.formerMember);
+  suite("index.html — what the job pays (PROFILES-25)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    if (!meta) {
+      // Another Congress than the table's: nobody has a figure (kyc/pay.py).
+      check("no member carries a figure without the table's year",
+        people.every((p) => !p.pay), "");
+      return;
+    }
+    check("every sitting member has a figure, and nobody else",
+      people.every((p) => !!p.pay === (KYC.seated(p) && !p.isCandidate)));
+    const a = plain && open(plain);
+    check("a member's profile says the salary the law sets, for the year, with its source",
+      !!a && !a.hidden && a.text.indexOf("$" + meta.member.toLocaleString("en-US") + " a year in " +
+        meta.year) !== -1 && /the law sets for a member of Congress/.test(a.text) &&
+        a.html.indexOf(meta.sources[0].url) !== -1 && /read on/.test(a.text), a && a.text);
+    const b = leader && open(leader);
+    check("a post paid more says the post's rate, by the post's name",
+      !b || (!b.hidden && b.text.indexOf("$" + leader.pay.amount.toLocaleString("en-US")) !== -1 &&
+        b.text.indexOf(leader.pay.post) !== -1), b && b.text);
+    check("a challenger's profile names no salary (rule 27)", !challenger || open(challenger).hidden);
+    check("nor a former member's", !former || open(former).hidden);
+  });
+  // Read in a later year than the table's: no figure, rather than a stale one.
+  const later = await buildPage("index.html", { now: "2027-02-01T12:00:00Z" });
+  await settle(300);
+  const sitting = later.window.legislatorsData.find((p) => later.window.KYC.seated(p) && p.pay);
+  suite("index.html — what the job pays, read in a later year", () => {
+    later.window.location.hash = "#/profile/" + (sitting ? sitting.id : "");
+    later.window.dispatchEvent(new later.window.HashChangeEvent("hashchange"));
+    const field = later.D.getElementById("profileModalPayField");
+    check("the line is not shown once the reader's year is past the table's",
+      !sitting || !field || field.hidden);
+  });
+}
+
 async function testAndroidBack() {
   // A phone's layout: the queries a phone matches.
   const phone = (window) => {
@@ -11865,6 +11920,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "findrep") await testFindRep();
   if (!only || only === "findrep") await testFindRepNav();
   if (!only || only === "index.html") await testContactActions();
+  if (!only || only === "index.html") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();

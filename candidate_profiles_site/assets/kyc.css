@@ -2219,6 +2219,8 @@ a.badge-link {
 }
 .campaign-quote footer { margin-top: var(--s-1); }
 .field-credit { margin: var(--s-2) 0 0; }
+/* A credit under a field's own words (what the job pays) is a line of its own. */
+.field-value > .field-credit { display: block; }
 .field-credit .badge { margin-right: var(--s-1); }
 
 .note-box {

@@ -86,6 +86,8 @@
       '            <span class="field-value subtle" id="profileModalEducation"></span></div>',
       '          <div class="field span-2" id="profileModalCareersField"><span class="field-label">Previous careers</span>',
       '            <span class="field-value subtle" id="profileModalCareers"></span></div>',
+      '          <div class="field span-2" id="profileModalPayField" hidden><span class="field-label">What the job pays</span>',
+      '            <span class="field-value subtle" id="profileModalPay"></span></div>',
       "        </div>",
       '        <p class="absent-summary" id="profileModalBioAbsent" hidden></p>',
       "      </section>",
@@ -633,6 +635,33 @@
       posts.map(function (title) {
         return '<span class="badge badge-accent">' + KYC.escapeHtml(title) + "</span>";
       }).join(" ") + "</span></div>");
+  }
+
+  /* What the job pays (PROFILES-25): the salary the law sets for the
+   * post, from kyc/pay.py's table - never a figure about the person. Only
+   * on a sitting member (rule 27), and only in the year the table is for:
+   * a page read in a later year has no figure rather than a stale one. */
+  function renderPay(item) {
+    var field = el("profileModalPayField");
+    var pay = KYC.seated(item) && item.pay;
+    var meta = KYC.meta().pay;
+    var year = new Date().getFullYear();
+    field.hidden = !(pay && meta && pay.amount && meta.year === year);
+    if (field.hidden) {
+      el("profileModalPay").innerHTML = "";
+      return;
+    }
+    var money = function (n) { return "$" + Number(n).toLocaleString("en-US"); };
+    var source = (meta.sources || [])[0];
+    el("profileModalPay").innerHTML = "<strong>" + money(pay.amount) + "</strong> a year in " +
+      meta.year + ", " + (pay.post
+        ? "the salary the law sets for the " + KYC.escapeHtml(pay.post) + ". Other members are " +
+          "paid " + money(meta.member) + "."
+        : "the salary the law sets for a member of Congress. The Speaker, the President " +
+          "pro tempore and each chamber's majority and minority leaders are paid more.") +
+      " Annual raises have been denied by law every year since 2009." +
+      (source ? '<span class="field-credit">From ' + outLink(source.url, source.title) +
+        ", read on " + KYC.escapeHtml(KYC.dateWords(source.read)) + ".</span>" : "");
   }
 
   function renderCommittees(item) {
@@ -1520,6 +1549,7 @@
     renderVotes(sitting || item, from);
     renderCommittees(sitting || item);
     renderLeadership(sitting || item);
+    renderPay(item);
     if (sitting) {
       el("profileModalVoting").insertAdjacentHTML("beforeend", from);
       el("profileModalCommittees").insertAdjacentHTML("beforeend", from);

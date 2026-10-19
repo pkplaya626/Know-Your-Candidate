@@ -160,6 +160,13 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         },
     }
 
+    # What the job pays: the year and sources of each profile's figure
+    # (kyc/pay.py), where the membership is of the Congress they are for.
+    from . import pay as pay_mod
+    pay = pay_mod.for_page(summary["congress"])
+    if pay:
+        summary["pay"] = pay
+
     if races is not None:
         summary["races"] = {
             "total": len(races),
