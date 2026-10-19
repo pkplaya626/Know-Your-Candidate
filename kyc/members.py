@@ -809,6 +809,11 @@ def holds_form(markup, url, website):
             return True
         if _SIGN_UP_WORDS.search(re.sub(r"<[^>]+>", " ", body)):
             continue
+        # A message form in steps: Adam Smith's webform asks for a name on
+        # its first page and the message on the next ("Next Page").
+        if re.search(r"wizard-next|webform-wizard|\bvalue\s*=\s*[\"']next(?:\s+page)?[\"']",
+                     body, re.I):
+            return True
         for field in _INPUT.findall(body):
             found = {k.lower(): v for k, v in _ATTR.findall(field)}
             if found.get("type", "").lower() in ("hidden", "submit", "button"):

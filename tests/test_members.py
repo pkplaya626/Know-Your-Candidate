@@ -476,6 +476,13 @@ class TestTheContactPage(unittest.TestCase):
             '<form><input name="email"><textarea name="msg"></textarea>'
             '<label><input type="checkbox" name="optin"> Subscribe to my newsletter</label></form>',
             site + "/contact/", site))
+        # A message form in steps: a name first, the message on the next page
+        # (Adam Smith's /contact, 2026-10-18).
+        self.assertTrue(members.holds_form(
+            '<form class="webform-submission-webform-222-add-form"><select name="honorific_2">'
+            '</select><input name="first_name_2"><input name="last_name_2">'
+            '<input class="webform-button--next" data-drupal-selector="edit-wizard-next" '
+            'type="submit" name="op" value="Next Page"></form>', site + "/contact/", site))
         # The address check before the message.
         self.assertTrue(members.holds_form(
             '<form id="address-verify"><input name="street_address"><input name="city">'
