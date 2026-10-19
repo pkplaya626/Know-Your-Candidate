@@ -186,13 +186,26 @@ jobs:
       # legislator (Open States) and each highest court's members (the
       # courts). Each command refuses an incomplete roster rather than
       # writing it, and a change reaches the page only through this run's
-      # pull request. No key needed.
-      - name: Refresh state governments
-        run: |
-          python build_profile_site.py executives
-          python build_profile_site.py officers
-          python build_profile_site.py statelegs
-          python build_profile_site.py courts
+      # pull request. No key needed. A roster that cannot be read keeps the
+      # committed cache and stops nothing else in this run (rule 8): on
+      # 2026-10-19 one association's page that did not resolve in DNS
+      # stopped the whole daily refresh, money and results with it, when
+      # these four ran as one step.
+      - name: Refresh the governors and party counts
+        continue-on-error: true
+        run: python build_profile_site.py executives
+
+      - name: Refresh the statewide officers
+        continue-on-error: true
+        run: python build_profile_site.py officers
+
+      - name: Refresh the state legislators
+        continue-on-error: true
+        run: python build_profile_site.py statelegs
+
+      - name: Refresh the state high courts
+        continue-on-error: true
+        run: python build_profile_site.py courts
 
       # The President, the Vice President and the Cabinet: the White House's
       # pages, each office's own page and the Senate's roll calls

@@ -187,7 +187,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1928 tests, no dependencies
+python -m unittest discover tests             # 1929 tests, no dependencies
 npm install && npm test                       # 2726 real-DOM checks (needs jsdom)
 ```
 
@@ -239,7 +239,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 
 8. **Never discard on an inconclusive network check.** `portraits.check_image`
    is deliberately tristate. Treating HTTP 429 as "broken" silently threw away
-   ~160 working portraits.
+   ~160 working portraits. Nor let one source stop the others: a refresh step
+   whose source cannot be read keeps its committed cache and the run goes on
+   (`continue-on-error`). On 2026-10-19 one association's roster that did not
+   resolve in DNS failed the whole daily refresh, money and results with it,
+   because four state-government commands ran as one step.
 
 9. **Never add a topical hint to a Wikipedia search.** `Dan Osborn NE politician`
    pushes his own article out of the results; `Dan Osborn` returns it first.
