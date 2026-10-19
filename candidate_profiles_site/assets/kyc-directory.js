@@ -179,6 +179,44 @@
     },
   };
 
+  /* Closest races first, by one market's prices (PERSONA-11): the gap
+   * between the two highest prices one source quotes on the race
+   * (KYC.odds.gap), never a blend of two sources (rule 40). A card sorts by
+   * its race; a race no market of that source prices, or prices
+   * incoherently, goes after every race it does. */
+  var CLOSE = { "close-kalshi": "kalshi", "close-polymarket": "polymarket" };
+  var raceById = {};
+  races.forEach(function (r) { raceById[r.id] = r; });
+  var gapMemo = {};
+
+  function raceGap(race, source) {
+    if (!race || !KYC.odds || !KYC.odds.gap) return null;
+    var key = source + "|" + race.id;
+    if (!(key in gapMemo)) {
+      var g = KYC.odds.gap(race, source);
+      gapMemo[key] = g ? g.gap : null;
+    }
+    return gapMemo[key];
+  }
+
+  function closeSource() {
+    return CLOSE[state.sort] || null;
+  }
+
+  function byGap(source, x, y, then) {
+    if (x === null || y === null) return (x === null ? 1 : 0) - (y === null ? 1 : 0) || then();
+    return x - y || then();
+  }
+
+  Object.keys(CLOSE).forEach(function (key) {
+    SORTS[key] = function (a, b) {
+      var source = CLOSE[key];
+      return byGap(source, raceGap(raceById[a.contestRaceId || a.raceId], source),
+        raceGap(raceById[b.contestRaceId || b.raceId], source),
+        function () { return SORTS.region(a, b); });
+    };
+  });
+
   /* A person with no birthdate on record goes after everyone with one,
    * under a divider that says how many (GRID-20): 79% of challengers have
    * none, and the age sorts put them last without a word. */
@@ -227,7 +265,12 @@
     data.forEach(function (item) {
       if (hideable(item) && matchesFilters(item)) shown.add(item.id);
     });
-    return races.slice().sort(raceOrder).map(function (race) {
+    var source = closeSource();
+    var order = source ? function (a, b) {
+      return byGap(source, raceGap(a, source), raceGap(b, source),
+        function () { return raceOrder(a, b); });
+    } : raceOrder;
+    return races.slice().sort(order).map(function (race) {
       var people = race.incumbentIds
         .concat(race.candidateIds)
         .filter(function (id) { return shown.has(id); })
@@ -243,10 +286,37 @@
 
   /* A flat grid of 594 cards answers "who is in Congress". It does not answer
    * the question a voter actually has, which is "who is running for my seat". */
+  /* What the closest-first order read from a race: one source's two
+   * highest prices and the points between them, said as prices. */
+  function gapLead(race, source) {
+    var g = KYC.odds.gap(race, source);
+    if (!g) return "";
+    return KYC.escapeHtml(KYC.odds.sourceName(source) + "’s two highest prices: " +
+      KYC.odds.percent(g.top) + " and " + KYC.odds.percent(g.second) + ", " +
+      Math.round(g.gap * 100) + " points apart. A market price is what a trader pays for a " +
+      "$1 contract, not a poll or this site’s forecast.");
+  }
+
   function raceSections(list) {
     var out = [];
     var last = null;
     var states = [];
+    var source = closeSource();
+    if (source) {
+      // Closest first: one list, each race named with its state, and the
+      // races the source does not price after a heading that says so.
+      var unpriced = false;
+      list.forEach(function (entry) {
+        if (!unpriced && raceGap(entry.race, source) === null) {
+          unpriced = true;
+          out.push('<h2 class="race-state-heading">No usable ' +
+            KYC.escapeHtml(KYC.odds.sourceName(source)) + " market: these races, by state</h2>");
+        }
+        out.push(KYC.cards.raceSection(entry.race, entry.people, { lazyOut: true,
+          title: entry.race.label, lead: gapLead(entry.race, source) }));
+      });
+      return out.join("");
+    }
     list.forEach(function (entry) {
       var code = entry.race.state;
       if (code !== last) {
@@ -517,7 +587,7 @@
       renderLabel(label, KYC.escapeHtml("Showing " + plural(list.length, "race", "races") +
         narrowed() + ": " + plural(people, "person", "people") + " on the ballot or holding " +
         "the seat" + (out ? ", and " + out.toLocaleString() + " out of the race folded under " +
-        "each" : "") + ". Races by state, Senate before House, then by district." + zipWords()));
+        "each" : "") + ". " + raceOrderWords() + zipWords()));
       grid.className = "";
       // The races, then which party the markets expect to hold each chamber.
       grid.innerHTML = raceSections(list) +
@@ -1156,6 +1226,30 @@
       "next on the ballot.",
   };
 
+  /* The closest-first sorts order the races view too, so there the menu
+   * says what they do instead. */
+  function sortNote() {
+    var source = closeSource();
+    if (source && state.view === "race") {
+      return "The races view lists races closest first by " + KYC.odds.sourceName(source) +
+        "’s prices: the gap between its two highest. Market prices, not polls or a forecast.";
+    }
+    if (source && state.view === "grid") {
+      return "Cards by how close " + KYC.odds.sourceName(source) + "’s prices put their race: " +
+        "market prices, not polls or a forecast. People in races it does not price come last.";
+    }
+    return SORT_NOTES[state.view] || "";
+  }
+
+  function raceOrderWords() {
+    var source = closeSource();
+    return source
+      ? "Races closest first by " + KYC.odds.sourceName(source) + "’s prices, the gap between " +
+        "its two highest; races it does not price after them, by state. Market prices are what " +
+        "traders pay, not polls or this site’s forecast."
+      : "Races by state, Senate before House, then by district.";
+  }
+
   function syncSort() {
     var current = "";
     Array.prototype.forEach.call(doc.querySelectorAll("#sortPanel [data-sort]"), function (item) {
@@ -1169,8 +1263,8 @@
     if (!label || !button || !note) return;       // never stop the list being drawn
     label.textContent = current;
     button.setAttribute("aria-label", "Sort the cards: " + current);
-    note.hidden = !SORT_NOTES[state.view];
-    if (SORT_NOTES[state.view]) note.textContent = SORT_NOTES[state.view];
+    note.hidden = !sortNote();
+    if (sortNote()) note.textContent = sortNote();
   }
 
   /* One delegated listener for the whole grid, rather than an inline onclick

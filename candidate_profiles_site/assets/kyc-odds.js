@@ -259,5 +259,24 @@
         "</p></section>";
   }
 
-  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices };
+  /* How close one source's market prices a race: the gap between its two
+   * highest prices, from that source alone (PERSONA-11; rule 40: never a
+   * blend of two). Null where the source has no market on the race, its
+   * market has fewer than two outcomes, or its prices do not add up to
+   * about a dollar (COHERENT), since a gap between those says nothing. */
+  var SOURCE_NAMES = { kalshi: "Kalshi", polymarket: "Polymarket" };
+
+  function gap(race, source) {
+    var odds = (data().races || {})[race && race.id] || {};
+    var market = (odds.markets || []).filter(function (m) { return m.source === source; })[0];
+    if (!market || !coherent(market).ok) return null;
+    var prices = (market.outcomes || []).map(function (o) { return o.price || 0; })
+      .sort(function (a, b) { return b - a; });
+    if (prices.length < 2) return null;
+    return { gap: prices[0] - prices[1], top: prices[0], second: prices[1],
+             url: market.url, asOf: data().asOf };
+  }
+
+  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices,
+               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; } };
 })(window);

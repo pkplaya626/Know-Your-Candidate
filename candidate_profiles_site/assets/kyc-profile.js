@@ -118,6 +118,8 @@
       '        <p class="finance-period" id="profileModalOtherCampaign" hidden></p>',
       '        <span class="field-label">Funding sources</span>',
       '        <p class="note-box" id="profileModalFunding" style="margin-top:6px"></p>',
+      // Groups that are not the campaign, for and against (kyc/outside.py).
+      '        <div class="outside-panel" id="profileModalOutside" hidden></div>',
       "      </section>",
       '      <section class="panel">',
       '        <h3 class="panel-head">' + KYC.icon("chart") + " Voting record</h3>",
@@ -200,32 +202,12 @@
         "</footer></blockquote>";
     }
 
-    if (KYC.hasValue(item, "platforms")) {
-      var text = String(item.platforms || "").trim();
-      var parts = null;
-
-      if (fromSite) {
-        parts = text.split(/;\s+/);
-      } else if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
-        try {
-          var parsed = JSON.parse(text.replace(/'/g, '"'));
-          if (Array.isArray(parsed)) parts = parsed.map(String);
-        } catch (e) {
-          /* not a list literal after all; fall through to the comma split */
-        }
-      }
-      if (!parts) {
-        // The rosters separate items with commas and use them inside items
-        // too: "Telecommunications, technology, and digital privacy" is one
-        // item, not three bullets reading "technology" and "and digital
-        // privacy". Items start with a capital; a fragment that does not
-        // belongs to the one before it.
-        parts = text.split(/,\s+/).reduce(function (items, piece) {
-          if (items.length && /^[a-z]/.test(piece)) items[items.length - 1] += ", " + piece;
-          else items.push(piece);
-          return items;
-        }, []);
-      }
+    // One reading of the field for the dialog and the race's comparison
+    // table (KYC.platformItems).
+    var platform = KYC.platformItems(item);
+    if (platform) {
+      var text = platform.text;
+      var parts = platform.items;
 
       if (parts.length > 1) {
         html +=
@@ -476,6 +458,12 @@
      * race's card on a state page links it. */
     var source = KYC.resultsSourceHtml(race);
     if (source) html += '<p class="race-note race-results">' + source + "</p>";
+    // What the race is fought with and over, as the race's own section
+    // shows it (KYC.cards), with this person among the rest.
+    var everyone = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(Boolean);
+    html += KYC.cards.moneyBlock(race, everyone, { open: true, attr: "data-goto" }) +
+      KYC.cards.lastTimeBlock(race) +
+      KYC.cards.compareBlock(race, everyone, { attr: "data-goto", scope: "dialog" });
     panel.hidden = false;
     target.innerHTML = redrawnNote(item, race) + html;
   }
@@ -719,6 +707,36 @@
     target.innerHTML = KYC.escapeHtml(words + id + money) +
       ' <button type="button" class="link-button" data-goto="' + KYC.escapeAttr(filing.id) +
       '">Its profile &rsaquo;</button>';
+  }
+
+  /* Outside spending: each side's total and the committees that spent it,
+   * as the FEC totals them by candidate (PERSONA-12). Two sides, never a
+   * net; the committees as filed. */
+  function renderOutside(item) {
+    var target = el("profileModalOutside");
+    var o = item.outsideSpending;
+    if (!o) {
+      target.hidden = true;
+      target.innerHTML = "";
+      return;
+    }
+    var side = function (word, total, n, top) {
+      if (!total) return "";
+      return '<div class="outside-side"><span class="field-label">' + KYC.escapeHtml(word) +
+        " " + KYC.escapeHtml(KYC.moneyShort(total)) + "</span>" +
+        '<ul class="outside-list">' + (top || []).map(function (c) {
+          return "<li>" + KYC.escapeHtml(c.committee) + ' <span class="faint">' +
+            KYC.escapeHtml(KYC.moneyShort(c.total)) + "</span></li>";
+        }).join("") + (n > (top || []).length ? '<li class="faint">and ' +
+          (n - top.length) + " more</li>" : "") + "</ul></div>";
+    };
+    target.hidden = false;
+    target.innerHTML = '<span class="field-label">Outside spending</span>' +
+      '<p class="finance-period">' + KYC.cards.outsideLine(item) + "</p>" +
+      '<div class="outside-sides">' +
+      side("Supporting", o.support, o.supportCommittees, o.supportTop) +
+      side("Opposing", o.oppose, o.opposeCommittees, o.opposeTop) + "</div>" +
+      '<p class="faint outside-note">' + KYC.escapeHtml(KYC.cards.outsideNote) + "</p>";
   }
 
   function renderCrossLink(item) {
@@ -1000,6 +1018,7 @@
       el("profileModalCommittees").insertAdjacentHTML("beforeend", from);
     }
     renderOtherCampaign(item);
+    renderOutside(item);
     renderContact(item);
     renderRace(item);
 

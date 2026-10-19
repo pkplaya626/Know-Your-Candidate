@@ -422,9 +422,10 @@ _PDF_TOKEN = re.compile(rb"\((?:\\.|[^\\)])*\)|<<|>>|\[|\]|<[0-9A-Fa-f\s]*>|/[^\
 _PDF_ESCAPES = {ord("n"): b"\n", ord("r"): b"\r", ord("t"): b"\t", ord("b"): b"\b", ord("f"): b"\f"}
 
 
-def _pdf_string(token):
+def _pdf_string(token, decode=None):
     """A PDF literal string ``(...)`` as text (WinAnsi, as a simple
-    TrueType font without its own encoding writes it)."""
+    TrueType font without its own encoding writes it), or as *decode* reads
+    its bytes, for a font with an encoding of its own."""
     body, out, i = token[1:-1], bytearray(), 0
     while i < len(body):
         if body[i] == 0x5C and i + 1 < len(body):
@@ -439,10 +440,12 @@ def _pdf_string(token):
             continue
         out.append(body[i])
         i += 1
+    if decode:
+        return decode(bytes(out))
     return bytes(out).decode("cp1252", errors="replace")
 
 
-def pdf_lines(data):
+def pdf_lines(data, decode=None):
     """The lines of text a PDF draws, in the order its content streams draw
     them, with the standard library alone: each Flate-compressed (or plain)
     stream's text operators. A move to a new line (``Td``/``TD`` down,
@@ -473,7 +476,7 @@ def pdf_lines(data):
 
         for token in _PDF_TOKEN.findall(body):
             if token.startswith(b"("):
-                operands.append(_pdf_string(token))
+                operands.append(_pdf_string(token, decode))
             elif re.fullmatch(rb"[-+]?(?:\d+\.?\d*|\.\d+)", token):
                 operands.append(float(token))
             elif token in (b"[", b"]", b"<<", b">>") or token.startswith((b"/", b"<")):

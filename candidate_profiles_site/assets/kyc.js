@@ -1232,6 +1232,62 @@
     return !ABSENT[status] && status !== "generic";
   }
 
+  /* A filed figure as a number: "$47,190,466.06" -> 47190466.06; null for
+   * anything that is not a figure (an absence's words). A filed $0 is a
+   * figure (rule 6). */
+  function moneyAmount(item, field) {
+    if (!item || !hasValue(item, field) || !item.financeSource) return null;
+    var text = String(item[field] == null ? "" : item[field]).trim().replace(/[$,]/g, "");
+    return /^-?\d+(?:\.\d+)?$/.test(text) ? parseFloat(text) : null;
+  }
+
+  /* A figure rounded for a bar's label, "$35.0M", "$412K", "$950"; the
+   * exact figure is the profile's. */
+  function moneyShort(value) {
+    if (value === null || value === undefined || isNaN(value)) return "";
+    var sign = value < 0 ? "-" : "";
+    var v = Math.abs(value);
+    if (v >= 1e9) return sign + "$" + (v / 1e9).toFixed(1) + "B";
+    if (v >= 1e6) return sign + "$" + (v / 1e6).toFixed(1) + "M";
+    if (v >= 1e3) return sign + "$" + Math.round(v / 1e3) + "K";
+    return sign + "$" + Math.round(v);
+  }
+
+  /* A profile's platform as its items: the campaign site's issue headings
+   * ("; "-joined by kyc/enrich.py), a list literal, or the roster's
+   * comma-separated text. One reading for the dialog and the race's
+   * comparison table (rule 12). Null when there is nothing to list. */
+  function platformItems(item) {
+    if (!item || !hasValue(item, "platforms")) return null;
+    var text = String(item.platforms || "").trim();
+    if (!text) return null;
+    var fromSite = (item.fieldSources || {}).platforms === "campaign-site";
+    var parts = null;
+    if (fromSite) {
+      parts = text.split(/;\s+/);
+    } else if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
+      try {
+        var parsed = JSON.parse(text.replace(/'/g, '"'));
+        if (Array.isArray(parsed)) parts = parsed.map(String);
+      } catch (e) {
+        /* not a list literal after all; fall through to the comma split */
+      }
+    }
+    if (!parts) {
+      // The rosters separate items with commas and use them inside items
+      // too: "Telecommunications, technology, and digital privacy" is one
+      // item, not three bullets reading "technology" and "and digital
+      // privacy". Items start with a capital; a fragment that does not
+      // belongs to the one before it.
+      parts = text.split(/,\s+/).reduce(function (items, piece) {
+        if (items.length && /^[a-z]/.test(piece)) items[items.length - 1] += ", " + piece;
+        else items.push(piece);
+        return items;
+      }, []);
+    }
+    return { items: parts, fromSite: fromSite, text: text };
+  }
+
   /* ============================================================= election */
 
   /* Federal general elections fall on the first Tuesday after the first
@@ -2694,6 +2750,9 @@
     vacancyOf: vacancyOf,
     possessive: possessive,
     hasValue: hasValue,
+    moneyAmount: moneyAmount,
+    moneyShort: moneyShort,
+    platformItems: platformItems,
     partyKey: partyKey,
     partyClass: partyClass,
     seatStrip: seatStrip,

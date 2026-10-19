@@ -601,7 +601,7 @@
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);
       return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false,
-                                               fullOdds: true });
+                                               fullOdds: true, moneyOpen: true });
     }).join("");
     if (raceHtml) {
       /* Texas has 38 districts; a row of jump chips saves the scroll. */
