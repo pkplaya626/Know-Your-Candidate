@@ -44,10 +44,48 @@
   --party-r: #ff6f64;
   --party-i: #ffc24d;
   --party-vacant: var(--text-muted);
-  --split: #b98cff;
+  /* An independent's colour where it fills a shape. The same as the text
+   * colour here; the light theme's amber text (4.5:1 on white) was the
+   * same olive as its Republican red to a deuteranope (2.3 in OKLab x100),
+   * so its fill is a lighter amber of its own (audit 2026-10-17,
+   * VISUALS-04). */
+  --party-i-fill: var(--party-i);
+  /* "Split" and "divided" sit between the parties in lightness, not only in
+   * hue: the old lilac was 0.8 from the Democratic blue to a deuteranope,
+   * and every divided state read as Democratic (VISUALS-03). Where it fills
+   * a shape it is also hatched (--split-hatch, KYC.svgFill), a cue
+   * that is not colour at all. render_test.js runs the Machado protanopia,
+   * deuteranopia and tritanopia matrices over these tokens. */
+  --split: #8a5cd6;
+  --split-hatch: #c9b0f7;
+  /* A word on the split fill: white here, the text colour in light. */
+  --split-ink: #ffffff;
+  /* Nothing to show (no race, no senators, none of a thing): a grey kept
+   * for that alone, lighter than the page so the country keeps its
+   * outline - the page's own surface made those states black holes in the
+   * dark and AMOLED themes (VISUALS-19, RACES-17) - and hatched where it
+   * fills a shape. */
+  --none-fill: #2b313a;
+  --none-hatch: #4a5361;
+  /* A vacant seat's fill on the partisan map: a grey at least 10 apart
+   * from every party fill under each simulation; the faint text grey was
+   * 8.3 from the Republican red to a protanope. */
+  --vacant-fill: var(--text-muted);
+  --vacant-ink: var(--text-inverse);
+  /* A body elected without party labels, or an office a state does not
+   * have, on the state-government map: a grey of its own, apart from the
+   * vacant grey, the hatched "none" and the text colour (a dispute). */
+  --nonpartisan-fill: #c4c8d4;
+  /* A party's colour lighter in weight: a House majority short of the
+   * whole delegation, an open Senate seat. A step of lightness from the
+   * party's own colour, which a reader who cannot see hue still tells
+   * apart; the page's text reads on it at 4.5:1. */
+  --party-r-tint: color-mix(in srgb, var(--party-r) 55%, var(--surface-1));
+  --party-d-tint: color-mix(in srgb, var(--party-d) 55%, var(--surface-1));
 
   --money-in: #46d17d;
-  --money-out: #ff6f64;
+  /* Money out is plain text: a Democrat's "Spent" was in Republican red. */
+  --money-out: var(--text);
   /* A badge's word over its own 14% tint. The same as the colour except in
    * the light theme, where 11px bold text needs 4.5:1 and the plain colours
    * reached 4.17-4.42 (redefined there). */
@@ -55,8 +93,12 @@
   --warn-text: var(--warn);
   --danger-text: var(--danger);
 
-  --warn: #ffc24d;
-  --danger: #ff6f64;
+  /* Status colours never alias a party's (VISUALS-06): "Lost primary" was
+   * the Republican red and "Open seat" the independents' amber. An
+   * attention status is magenta; an "out" status is slate, outlined with a
+   * dashed edge (.badge-danger). */
+  --warn: #f08bd8;
+  --danger: #aab4c3;
 
   /* Districts picked out on the redistricting maps. Teal, magenta and lime,
      because red, blue, amber and purple already mean a party here. */
@@ -66,19 +108,31 @@
 
   /* The guide's maps colour categories that are not parties - which
      legislatures have an Assembly, which circuit hears a state's appeals -
-     so they never use red, blue, amber or purple. Defined from the focus
-     colours and the text, they follow every theme. */
-  --cat-1: var(--focus-1);
-  --cat-2: var(--focus-2);
-  --cat-3: var(--focus-3);
-  --cat-4: color-mix(in srgb, var(--text-muted) 55%, var(--surface-1));
+     so they never use red, blue, amber or purple, and never grey, which
+     means "none" (VISUALS-08). Teal, magenta, olive, deep green and the
+     text colour: each pair at least 10 apart (OKLab x100) under
+     protanopia, deuteranopia and tritanopia in every theme, and each at
+     least 3:1 on the page. Teal and magenta were 3.7 apart to a
+     deuteranope, which erased the judges map's main distinction
+     (VISUALS-07). */
+  --cat-1: #2ec4b6;
+  --cat-2: #be39af;
+  --cat-3: #799f4a;
+  --cat-4: #3b6d4a;
   --cat-5: var(--text);
-  /* Counts (the local map): one hue, five steps, faint to full. */
-  --scale-1: color-mix(in srgb, var(--focus-1) 18%, var(--surface-2));
-  --scale-2: color-mix(in srgb, var(--focus-1) 38%, var(--surface-2));
-  --scale-3: color-mix(in srgb, var(--focus-1) 58%, var(--surface-2));
-  --scale-4: color-mix(in srgb, var(--focus-1) 78%, var(--surface-2));
-  --scale-5: var(--focus-1);
+  /* The word a callout writes on each, at 4.5:1 or better. */
+  --cat-1-ink: var(--text-inverse);
+  --cat-2-ink: #ffffff;
+  --cat-3-ink: var(--text-inverse);
+  --cat-4-ink: var(--text);
+  /* Counts (the local map): one hue, five steps. The first starts at 40%:
+     at 18% it was 1.4:1 from "None" and from the page (GUIDE-16), and
+     "None" is hatched besides. */
+  --scale-1: color-mix(in srgb, var(--cat-1) 40%, var(--surface-2));
+  --scale-2: color-mix(in srgb, var(--cat-1) 55%, var(--surface-2));
+  --scale-3: color-mix(in srgb, var(--cat-1) 70%, var(--surface-2));
+  --scale-4: color-mix(in srgb, var(--cat-1) 85%, var(--surface-2));
+  --scale-5: var(--cat-1);
 
   /* State codes on the partisan map, over any party colour. */
   --map-label: #ffffff;
@@ -136,6 +190,8 @@
   --text-muted: #97a0ad;
   --text-faint: #737b89;
   --text-inverse: #000000;
+  --none-fill: #22252b;
+  --none-hatch: #3d434d;
 }
 
 /* "only light": a reader who chose Light keeps it. Samsung Internet's dark
@@ -164,20 +220,38 @@
   --party-d: #14549e;
   --party-r: #b3261e;
   --party-i: #815500;
-  --split: #6b3fbe;
+  --party-i-fill: #d29a1e;
+  --split: #b59be6;
+  --split-hatch: #7a5cc4;
+  --split-ink: var(--text);
+  --none-fill: #d9dee6;
+  --none-hatch: #9aa4b2;
+  --vacant-fill: #b0bac7;
+  --vacant-ink: var(--text);
+  --nonpartisan-fill: #303440;
+  --party-r-tint: #ca6762;
+  --party-d-tint: #7298c5;
 
   --money-in: #12703a;
-  --money-out: #b3261e;
   --money-in-text: #0e5c2f;
-  --warn-text: #6b4600;
-  --danger-text: #8f1d17;
+  --warn-text: #8a1b6c;
+  --danger-text: #4f5a69;
 
-  --warn: #815500;
-  --danger: #b3261e;
+  --warn: #a2207f;
+  --danger: #4f5a69;
 
   --focus-1: #0e7c72;
   --focus-2: #a5228f;
   --focus-3: #557a0d;
+
+  --cat-1: #0e7c72;
+  --cat-2: #e658be;
+  --cat-3: #7a9765;
+  --cat-4: #195232;
+  --cat-1-ink: var(--text-inverse);
+  --cat-2-ink: var(--text);
+  --cat-3-ink: var(--text);
+  --cat-4-ink: var(--text-inverse);
 
   --shadow-1: 0 1px 2px rgb(16 20 26 / 0.08);
   --shadow-2: 0 4px 16px rgb(16 20 26 / 0.12);
@@ -929,10 +1003,13 @@ a.badge-link {
   background: color-mix(in srgb, var(--warn) 14%, transparent);
   border-color: color-mix(in srgb, var(--warn) 34%, transparent);
 }
+/* An "out" status (lost, eliminated, not running): slate with a dashed
+ * edge, in no party's colour (VISUALS-06). */
 .badge-danger {
   color: var(--danger-text);
   background: color-mix(in srgb, var(--danger) 14%, transparent);
-  border-color: color-mix(in srgb, var(--danger) 34%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 60%, transparent);
+  border-style: dashed;
 }
 .badge-money {
   color: var(--money-in-text);
@@ -982,6 +1059,23 @@ a.badge-link {
   contain-intrinsic-size: auto 700px;
 }
 .race .card { content-visibility: visible; }
+/* On a phone a state page's people are rows, not portrait tiles: a 52px
+ * portrait (or initials) beside the name, seat, party and status.
+ * California's page was 50,000-60,000px, about 60 screens, mostly
+ * 150x190 portraits two to a row and every member twice (VISUALS-15). */
+@media (max-width: 600px) {
+  #stateContent .card-grid { grid-template-columns: minmax(0, 1fr); gap: var(--s-3); }
+  #stateContent .card {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--s-3);
+    contain-intrinsic-size: auto 88px;
+  }
+  #stateContent .card-photo { flex: none; width: 52px; }
+  #stateContent .card .card-photo.card-monogram { width: 52px; height: 52px; font-size: var(--t-md); }
+  #stateContent .card-body { flex: 1; min-width: 0; }
+  #stateContent .race { contain-intrinsic-size: auto 400px; }
+}
 
 .card-photo {
   position: relative;
@@ -992,6 +1086,22 @@ a.badge-link {
   border-radius: var(--radius);
   background: var(--surface-3);
 }
+/* No portrait: the person's initials in a disc, the rest of the card for
+ * what the site knows (VISUALS-16). */
+.card .card-photo.card-monogram {
+  width: 56px;
+  height: 56px;
+  aspect-ratio: auto;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--t-lg);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+.card-no-photo { contain-intrinsic-size: auto 150px; }
 .card-photo img {
   width: 100%;
   height: 100%;
@@ -1080,6 +1190,71 @@ a.badge-link {
 }
 .card .badge { margin-top: var(--s-1); }
 
+/* ------------------------------------------- how they voted (kyc-profile.js) */
+/* A member's roll-call votes as the record gives them. The vote is a word in
+ * a neutral box, never a party's or a judgement's colour: "Nay" is not bad
+ * news, and "Not Voting" is set apart only by being fainter. */
+.vote-summary { margin: 0; }
+.vote-note {
+  margin: var(--s-2) 0 0;
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+}
+.vote-search {
+  display: grid;
+  gap: var(--s-1);
+  margin: var(--s-3) 0 0;
+}
+.vote-head {
+  margin: var(--s-3) 0 var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  font-weight: 700;
+}
+.vote-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.vote-row {
+  display: grid;
+  grid-template-columns: minmax(4.75em, max-content) minmax(0, 1fr);
+  gap: var(--s-2);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+.vote-row:last-child { border-bottom: 0; }
+.vote-cast {
+  align-self: start;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.vote-cast.vote-missed {
+  color: var(--text-faint);
+  background: transparent;
+  border-style: dashed;
+}
+.vote-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.vote-what { overflow-wrap: anywhere; }
+.vote-detail,
+.vote-meta {
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  overflow-wrap: anywhere;
+}
+.vote-more { margin-top: var(--s-2); }
+
 /* ------------------------------------------- prediction markets and polls */
 /* assets/kyc-odds.js: each source quoted as it publishes itself. */
 .odds {
@@ -1106,6 +1281,10 @@ a.badge-link {
   color: var(--text-muted);
 }
 .odds-subhead .odds-faint { text-transform: none; letter-spacing: 0; font-weight: 500; }
+/* On a person's own profile the prices are closed until opened (TRUST-14). */
+.odds-collapsed > summary { cursor: pointer; }
+.odds-collapsed:not([open]) > summary { margin-bottom: 0; }
+.odds-collapsed[open] > summary { margin-bottom: var(--s-2); }
 .odds-faint { color: var(--text-faint); }
 .odds-market {
   display: grid;
@@ -1124,7 +1303,7 @@ a.badge-link {
 .odds-seg { display: block; height: 100%; }
 .odds-seg-d { background: var(--party-d); }
 .odds-seg-r { background: var(--party-r); }
-.odds-seg-i { background: var(--party-i); }
+.odds-seg-i { background: var(--party-i-fill); }
 .odds-legend {
   grid-column: 2;
   display: flex;
@@ -1418,6 +1597,30 @@ a.badge-link {
 .contact-office { margin: 0 0 var(--s-2); }
 .contact-office a { color: inherit; }
 
+/* A member's offices at home, where casework is done (PERSONA-14). */
+.casework-note {
+  margin: var(--s-1) 0 var(--s-2);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+.home-offices {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--s-2) var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-sm);
+  line-height: 1.45;
+}
+.home-office a { color: inherit; white-space: nowrap; }
+.home-office-address, .home-office-hours { display: block; color: var(--text-muted); }
+.home-office-hours { font-size: var(--t-xs); color: var(--text-faint); }
+
+/* A challenger's absences, said once (PROFILES-18). */
+.absent-summary { margin: var(--s-2) 0 0; font-size: var(--t-sm); line-height: 1.5; }
+
 .committee, .leadership-posts { align-items: flex-start; }
 .committee .badge, .leadership-posts .badge { margin-left: var(--s-2); vertical-align: middle; }
 .committee-subs {
@@ -1473,7 +1676,15 @@ a.badge-link {
   font-size: var(--t-md);
   font-weight: 600;
 }
-.intro-pick .select { width: auto; min-width: 12rem; max-width: 20rem; }
+/* Never wider than the screen: its longest option laid a 260px phone out
+ * at 287px, cutting the profile's close button off (PERSONA-21). */
+.intro-pick .select {
+  width: auto;
+  min-width: min(12rem, 100%);
+  /* By the screen, not the column: a percentage cap does not count while
+   * the column sizes itself to what it holds. */
+  max-width: min(20rem, calc(100vw - 3rem));
+}
 
 /* "Find who represents you" (kyc-findrep.js): a ZIP code or a location,
  * and one answer for every level - on the home page, the state pages and
@@ -1920,6 +2131,34 @@ a.badge-link {
 .funding-part {
   white-space: nowrap;
 }
+/* The same shares as one bar (VISUALS-24), in category tones, each part
+ * named beside its swatch below it. */
+.funding-bar {
+  display: flex;
+  gap: 2px;
+  height: 12px;
+  margin: var(--s-1) 0 var(--s-2);
+}
+.fs-seg { flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.fs-swatch {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: var(--s-1);
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+.fs-ind { background-color: var(--cat-1); }
+.fs-pac { background-color: var(--cat-2); }
+.fs-party { background-color: var(--cat-3); }
+.fs-self { background-color: var(--cat-5); }
+.fs-xfer { background-color: var(--cat-4); }
+.fs-loan {
+  background-color: var(--cat-4);
+  background-image: repeating-linear-gradient(135deg, transparent 0 2px,
+    color-mix(in srgb, var(--surface-1) 70%, transparent) 2px 4px);
+}
+.fs-other { background-color: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
 
 .funding-base {
   display: block;
@@ -1990,12 +2229,33 @@ a.badge-link {
   height: 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  background: linear-gradient(
-    to right,
-    var(--party-d) 0%,
-    var(--split) 50%,
-    var(--party-r) 100%
-  );
+  /* Neutral ink: the caption says the score is not a party label, and a
+   * blue-to-red track said it was (TRUST-12, VISUALS-05). The centre is
+   * marked; every sitting member of the chamber is a tick
+   * (.ideology-peer), so a score is read against the chamber. */
+  background: var(--surface-3);
+}
+.ideology-track::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -3px;
+  bottom: -3px;
+  width: 1px;
+  background: var(--border-strong);
+}
+.ideology-peer {
+  position: absolute;
+  top: 1px;
+  bottom: 1px;
+  width: 1px;
+  background: var(--text-faint);
+  opacity: 0.55;
+}
+.ideology-place {
+  margin-top: var(--s-2);
+  font-size: var(--t-sm);
+  color: var(--text-muted);
 }
 .ideology-marker {
   position: absolute;
@@ -2058,6 +2318,12 @@ a.badge-link {
   border-radius: 2px;
   border: 1px solid var(--border);
 }
+/* The map's state panel before a state is picked: no empty grey pill
+ * (VISUALS-11). */
+#panelCounts:empty { display: none; }
+/* Brought up after a tap on a phone (kyc-usmap.js reveal), below the
+ * sticky header. */
+.detail-panel { scroll-margin-top: calc(var(--header-h) + var(--s-2)); }
 
 /* Every state is a focusable button in the SVG, so the map is operable
    from the keyboard rather than mouse-only. */
@@ -2076,9 +2342,12 @@ a.badge-link {
   stroke: var(--accent);
   stroke-width: 2.5;
 }
+/* The picked state: a thick solid line, never the dashed one that marks
+ * a special election (.is-marked), which keeps its dashes when picked. */
 .state[aria-pressed="true"] {
   stroke: var(--text);
-  stroke-width: 2.5;
+  stroke-width: 3.5;
+  stroke-dasharray: none;
 }
 /* A state in the contiguous block is outlined by its neighbours. A
    territory in the strip below has none, so it needs a border of its own or
@@ -2122,6 +2391,29 @@ a.badge-link {
   .us-map-labels .map-callout:hover { border-color: var(--text); }
 }
 .us-map-labels .map-callout.is-selected { outline: 2px solid var(--text); outline-offset: 0; }
+/* A hatched fill's callout: the hatch is its edge, never behind its word. */
+.us-map-labels .map-callout.is-hatched { border: 2px solid transparent; }
+/* A state the view marks (a special election): a dashed outline, and the
+ * legend's key drawn the same way (RACES-21). */
+.state.is-marked {
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
+.state.is-marked[aria-pressed="true"] { stroke-width: 3.5; stroke-dasharray: 5 3; }
+.map-legend .swatch-special {
+  width: 26px;
+  height: 12px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+.map-legend .swatch-special rect {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 2;
+  stroke-dasharray: 5 3;
+}
 /* A territory's code and the strip's caption sit on the page itself. */
 .us-map-labels .territory-label {
   background: none;
@@ -2246,7 +2538,8 @@ a.badge-link {
 @media (hover: hover) {
   .person-row:hover { background: var(--surface-3); }
 }
-.person-row img {
+.person-row img,
+.person-row .thumb-monogram {
   grid-area: photo;
   width: 38px;
   height: 38px;
@@ -2650,6 +2943,40 @@ a.badge-link {
   margin: 0;
 }
 .state-links .btn { text-decoration: none; }
+/* On a phone a page's first screen was all controls: California's held its
+ * title, seven stat badges, six full-width buttons and four jump chips, and
+ * its first senator started at 1,147px; Texas's district map at 1,224px
+ * (TECH-14, VISUALS-02). The figures read as one line of text, and the
+ * links and the jump chips each take one row that scrolls sideways. */
+@media (max-width: 600px) {
+  .state-summary {
+    display: block;
+    font-size: var(--t-sm);
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+  .state-summary .badge {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-size: inherit;
+    white-space: normal;
+  }
+  .state-summary .badge + .badge::before { content: "\00b7\00a0"; color: var(--text-faint); }
+  .state-links,
+  .jump-row.state-parts {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    padding-bottom: var(--s-1);
+  }
+  .state-links .btn,
+  .jump-row.state-parts .chip { flex: none; white-space: nowrap; }
+  .state-links .btn { padding: var(--s-2) var(--s-3); font-size: var(--t-sm); min-height: 44px; }
+}
 .vote-box .state-note { margin-top: var(--s-2); }
 .vote-dates {
   margin: var(--s-3) 0 0;
@@ -2794,13 +3121,27 @@ a.badge-link {
 @media (hover: hover) {
   .race-mate:hover .race-mate-name { color: var(--accent); }
 }
-.race-mate img {
+.race-mate img,
+.race-mate .thumb-monogram {
   flex: none;
   width: 36px;
   height: 36px;
   border-radius: 50%;
   object-fit: cover;
   background: var(--surface-3);
+}
+/* No portrait: the person's initials in a disc of the portrait's size,
+ * as the cards draw them (KYC.portraitThumb, VISUALS-16). */
+.thumb-monogram {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-size: var(--t-sm);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+  line-height: 1;
 }
 .race-mate-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .race-mate-name { font-weight: 600; }
@@ -2893,6 +3234,11 @@ a.badge-link {
   font-weight: 600;
 }
 .districts-pick .select { width: auto; }
+/* On a phone the controls stack: no extra gap between rows that are each
+ * already a 44px touch target (VISUALS-02). */
+@media (max-width: 600px) {
+  .districts-tools { gap: 0 var(--s-3); }
+}
 .districts-toggle {
   display: inline-flex;
   align-items: center;
@@ -2983,7 +3329,7 @@ a.badge-link {
  * no members until November and is left plain. */
 .district-shape.party-d { fill: color-mix(in srgb, var(--party-d) 70%, var(--surface-1)); }
 .district-shape.party-r { fill: color-mix(in srgb, var(--party-r) 70%, var(--surface-1)); }
-.district-shape.party-i { fill: color-mix(in srgb, var(--party-i) 70%, var(--surface-1)); }
+.district-shape.party-i { fill: color-mix(in srgb, var(--party-i-fill) 70%, var(--surface-1)); }
 .district-shape.party-vacant {
   fill: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
 }
@@ -3029,7 +3375,7 @@ a.badge-link {
 }
 .swatch.party-fill-d { background: color-mix(in srgb, var(--party-d) 70%, var(--surface-1)); }
 .swatch.party-fill-r { background: color-mix(in srgb, var(--party-r) 70%, var(--surface-1)); }
-.swatch.party-fill-i { background: color-mix(in srgb, var(--party-i) 70%, var(--surface-1)); }
+.swatch.party-fill-i { background: color-mix(in srgb, var(--party-i-fill) 70%, var(--surface-1)); }
 .swatch.party-fill-vacant {
   background: color-mix(in srgb, var(--party-vacant) 35%, var(--surface-1));
 }
@@ -3050,6 +3396,14 @@ a.badge-link {
   stroke-width: 1;
   stroke-dasharray: 3 2;
   vector-effect: non-scaling-stroke;
+}
+/* A picked district's number set beside a district too small for it,
+ * joined to its own label point (kyc-districts.js statewide, RACES-24). */
+.pick-leader {
+  stroke: var(--text);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
 }
 /* The other map's lines for the picked districts, dashed, on a halo so a
  * line stays visible where it crosses a fill of its own colour. */
@@ -3179,7 +3533,7 @@ a.badge-link {
   font-size: var(--t-xs);
   color: var(--text-muted);
 }
-.districts-sources p { margin: 0 0 var(--s-1); }
+.districts-sources p { margin: 0 0 var(--s-1); overflow-wrap: anywhere; }
 
 /* ============================================================== 16. guide */
 
@@ -3851,8 +4205,16 @@ a.badge-link {
 .leg-subhead { margin-top: var(--s-4) !important; font-weight: 700; color: var(--text); }
 
 /* A district's two parties, half and half: the split colour of the map. */
-.district-shape.party-split { fill: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
-.swatch.party-fill-split { background: color-mix(in srgb, var(--split) 70%, var(--surface-1)); }
+.district-shape.party-split {
+  fill: var(--hatch-split-soft, color-mix(in srgb, var(--split) 70%, var(--surface-1)));
+}
+/* The legend's swatch is hatched as the map is (kyc-regionmap.js draws the
+ * pattern in each map, VISUALS-03). */
+.swatch.party-fill-split {
+  background: repeating-linear-gradient(135deg,
+    color-mix(in srgb, var(--split-hatch) 70%, var(--surface-1)) 0 2px,
+    color-mix(in srgb, var(--split) 70%, var(--surface-1)) 2px 5px);
+}
 /* A seat elected without a party label (Nebraska's Legislature) is a
  * neutral of its own, apart from a seat with nobody listed, which is left
  * plain and outlined (audit 2026-10-17, STATEGOV-06). */
@@ -3883,7 +4245,7 @@ a.badge-link {
 }
 .seat-d { background: var(--party-d); }
 .seat-r { background: var(--party-r); }
-.seat-i { background: var(--party-i); }
+.seat-i { background: var(--party-i-fill); }
 .seat-n { background: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
 .seat-none { background: transparent; border-color: var(--text-muted); }
 .seat-half {
@@ -3901,6 +4263,10 @@ a.badge-link {
 .leg-holds { font-weight: 600; color: var(--text); }
 .leg-ballot a,
 .leg-page a { color: var(--accent); }
+/* The state's record is quoted as written, and Indiana's lists districts
+ * with no space after each comma: one word that laid a 320px phone out at
+ * 434px (TECH-07). */
+.leg-ballot { overflow-wrap: anywhere; }
 .leg-lines { font-size: var(--t-xs); color: var(--text-muted); }
 .gov-chamber .seat-strip { margin: var(--s-1) 0; }
 /* The picked district: outlined over every fill. */
@@ -4083,7 +4449,32 @@ button.local-county-link {
 .map-views {
   display: flex;
   flex-wrap: wrap;
+  align-items: flex-end;
   gap: var(--s-2);
+}
+/* Each group of views says what it is (VISUALS-12): three bare rows did
+ * not say why "2026 races" and "2026 governor's races" were apart. */
+.map-view-group,
+.map-mode-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.map-view-kicker {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+/* On a phone the ten views are one menu: three boxed rows of buttons took
+ * the first 330-385px of the screen above the map (TECH-14, RACES-17). */
+.map-mode-pick { display: none; }
+@media (max-width: 760px) {
+  .map-views { width: 100%; margin-left: 0; }
+  .map-view-group { display: none; }
+  .map-mode-pick { display: flex; width: 100%; }
+  .map-mode-pick .select { width: 100%; }
 }
 
 .stategov { padding: var(--s-2) var(--s-1); }
@@ -4161,6 +4552,29 @@ button.local-county-link {
 .gov-office { margin: 0; }
 .gov-office .gov-ballot-mark { margin-top: 0; }
 .gov-holder-status { margin: 2px 0 0; font-size: var(--t-sm); color: var(--text-muted); }
+/* The candidates the election office lists for an office on the ballot
+ * (rule 91): plain text in the office's row, no party colours and no
+ * portraits, credited to the list beneath them. */
+.gov-candidates {
+  margin: var(--s-2) 0 var(--s-3);
+  padding-left: var(--s-3);
+  border-left: 2px solid var(--border);
+  font-size: var(--t-sm);
+}
+.gov-candidates p { margin: 0 0 2px; }
+.gov-candidates-head {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.gov-candidates .gov-writein-head { margin-top: var(--s-2); }
+.gov-candidate-list { list-style: none; margin: 0 0 var(--s-1); padding: 0; }
+.gov-candidate { padding: 1px 0; overflow-wrap: anywhere; }
+.gov-candidate-name { font-weight: 600; color: var(--text); }
+.gov-candidate-party { color: var(--text-muted); }
+.gov-candidates-uncertified,
+.gov-candidates-none { color: var(--text-muted); }
+.gov-candidates-source { font-size: var(--t-xs); }
 .gov-next {
   margin-left: var(--s-1);
   font-size: var(--t-xs);
@@ -4456,4 +4870,511 @@ button.local-county-link {
 @media (max-width: 1000px) {
   /* 16px, or iOS zooms the page when the field is tapped (rule 44). */
   .race-jump .select { font-size: 16px; }
+}
+
+/* ====================================== 16. money, last time, comparison */
+
+/* Under each race's people (assets/kyc-cards.js): the campaigns' money as
+ * bars on one scale, the seat's last election, and the ballot side by
+ * side. Each a fold, styled as the folds above it. */
+/* One track no wider than the section: a grid item's min-width is its
+   content's, so an open comparison table widened the track to its own width
+   and clipped the money figures beside it instead of scrolling. */
+.race-extra { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); margin-top: var(--s-4); }
+.race-extra > * { min-width: 0; }
+.race-money,
+.race-last,
+.race-compare { display: block; }
+.race-money > summary,
+.race-last > summary,
+.race-compare > summary {
+  cursor: pointer;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--text-muted);
+  list-style: none;
+}
+.race-money > summary::-webkit-details-marker,
+.race-last > summary::-webkit-details-marker,
+.race-compare > summary::-webkit-details-marker { display: none; }
+.race-money > summary::before,
+.race-last > summary::before,
+.race-compare > summary::before {
+  content: "";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-right: var(--s-2);
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  vertical-align: 1px;
+  transition: transform 0.18s var(--ease);
+}
+.race-money[open] > summary::before,
+.race-last[open] > summary::before,
+.race-compare[open] > summary::before { transform: rotate(90deg); }
+.race-extra .race-note,
+.race-money .race-note,
+.race-last .race-note,
+.race-compare .race-note {
+  margin: var(--s-2) 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.race-mates > .race-money,
+.race-mates > .race-last,
+.race-mates > .race-compare { display: block; margin-top: var(--s-2); }
+
+.money-rows { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-3); }
+.money-row { display: grid; gap: var(--s-1); min-width: 0; }
+.money-who { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s-2); font-size: var(--t-sm); font-weight: 600; }
+/* A party as the race's own list writes it: coloured text, no outline
+ * (wave 2d review: two styles for one fact a few lines apart). */
+.party-chip {
+  font-size: var(--t-xs);
+  font-weight: 600;
+}
+.money-bars { display: grid; gap: 3px; }
+.money-bar {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 4.25rem;
+  gap: var(--s-2);
+  align-items: center;
+  font-size: var(--t-xs);
+}
+.money-label { color: var(--text-muted); }
+/* Neutral ink: a bar's length is money, not a side (VISUALS-20). */
+.money-track {
+  height: 8px;
+  border-radius: 4px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.money-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--text-muted);
+}
+.money-value { text-align: right; font-variant-numeric: tabular-nums; }
+.money-asof,
+.money-none { font-size: var(--t-xs); color: var(--text-faint); }
+.money-outside { display: block; font-size: var(--t-xs); color: var(--text-muted); }
+
+.compare-scroll { overflow-x: auto; margin-top: var(--s-2); }
+.compare-table { border-collapse: collapse; font-size: var(--t-xs); min-width: 100%; }
+.compare-table th,
+.compare-table td {
+  padding: var(--s-2);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+  min-width: 9rem;
+}
+.compare-table thead th { font-size: var(--t-sm); }
+.compare-table tbody th {
+  position: sticky;
+  left: 0;
+  min-width: 6.5rem;
+  background: var(--surface-1);
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.compare-cards { display: none; margin: var(--s-2) 0 0; padding: 0; list-style: none; }
+.compare-card { padding: var(--s-2) 0; border-bottom: 1px solid var(--border); }
+.compare-card-name { margin: 0 0 var(--s-1); font-size: var(--t-sm); font-weight: 600; }
+.compare-card-rows {
+  display: grid;
+  grid-template-columns: 6.5rem minmax(0, 1fr);
+  gap: var(--s-1) var(--s-2);
+  margin: 0;
+  font-size: var(--t-xs);
+}
+.compare-card-rows dt { color: var(--text-muted); font-weight: 600; }
+.compare-card-rows dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+/* Below this width the table showed little over one person at a time. */
+@media (max-width: 640px) {
+  .compare-scroll { display: none; }
+  .compare-cards { display: block; }
+}
+.compare-list { margin: 0; padding-left: 1rem; }
+/* Where a platform came from, or what was looked at: a line of its own. */
+.compare-source { display: block; }
+.compare-list li + li { margin-top: 2px; }
+
+.last-table { border-collapse: collapse; font-size: var(--t-sm); margin: var(--s-2) 0; }
+.last-table th,
+.last-table td { padding: var(--s-1) var(--s-3) var(--s-1) 0; text-align: left; font-weight: 400; }
+.last-table td { font-variant-numeric: tabular-nums; }
+
+.outside-panel { margin-top: var(--s-3); }
+.outside-sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-3); }
+.outside-list { margin: var(--s-1) 0 0; padding-left: 1rem; font-size: var(--t-xs); }
+.outside-note { font-size: var(--t-xs); margin: var(--s-2) 0 0; }
+@media (max-width: 560px) {
+  .money-bar { grid-template-columns: 3rem minmax(0, 1fr) 3.75rem; }
+}
+
+/* ============================================================ charts
+ * Pictures of the build's own figures (audit 2026-10-17, VISUALS-21 to
+ * -35). Boxes and page text only (rule 46), every colour a token, so the
+ * three themes and a forced dark mode treat them as they treat text. */
+
+/* The balance of power (KYC.balanceBar): one bar per chamber, a 2px
+ * surface gap between its parts, dots on the seats on the ballot. */
+.balance-bar { margin: 0 0 var(--s-4); }
+.balance-bar-slot .balance-bar { margin-top: calc(-1 * var(--s-2)); }
+.bb-title { font-size: var(--t-sm); font-weight: 700; color: var(--text); }
+.bb-track {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin: var(--s-2) 0 var(--s-2);
+}
+.balance-bar-compact .bb-track { height: 10px; }
+.bb-seg { flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.bb-r { background-color: var(--party-r); }
+.bb-d { background-color: var(--party-d); }
+.bb-i { background-color: var(--party-i-fill); }
+.bb-vacant { background-color: transparent; border: 1px solid var(--text-muted); }
+.bb-neutral { background-color: var(--text-muted); }
+/* Dots of the page's own surface over the party's colour: the same party,
+ * marked as on the ballot, readable without telling hues apart. Dots, not
+ * stripes: the map under the bar hatches "no race", "none" and a split
+ * delegation (rule 88), and one pattern must not mean both on one screen. */
+.bb-up {
+  background-image: radial-gradient(circle,
+    color-mix(in srgb, var(--surface-1) 72%, transparent) 0 1.25px, transparent 1.7px);
+  background-size: 4px 4px;
+  background-position: 0 1px;
+}
+.bb-half {
+  position: absolute;
+  left: 50%;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+  border-radius: 1px;
+}
+.bb-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.bb-key li { display: inline-flex; align-items: center; gap: var(--s-1); white-space: nowrap; }
+.bb-key strong { color: var(--text); }
+.bb-key .bb-ballot { white-space: normal; }
+.bb-faint { color: var(--text-muted); }
+.bb-swatch { display: inline-block; flex: none; width: 10px; height: 10px; border-radius: 2px; }
+.bb-note { margin: var(--s-1) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.map-balance { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 var(--s-5);
+  padding: var(--s-3) var(--s-4) 0; }
+.map-balance[hidden] { display: none; }
+.map-balance .balance-bar { margin-bottom: var(--s-3); }
+/* On a laptop the map's column is a fixed height, so every line above the
+ * map is taken from it (PR #111 review: VT, NH and CT fell to callouts).
+ * The layout choice, the bar and its title share one row; the note sits
+ * under the bar. */
+@media (min-width: 1001px) {
+  .map-balance { display: flex; align-items: center; gap: var(--s-4); padding: var(--s-2) var(--s-4) 0; }
+  .map-balance .map-layout { flex: none; }
+  .map-balance .balance-bar {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--s-3);
+    margin: 0;
+  }
+  .map-balance .bb-title { grid-column: 1; }
+  .map-balance .bb-track { grid-column: 2; margin: 0; }
+  .map-balance .bb-note { grid-column: 1 / -1; margin: 2px 0 0; }
+  /* The sidebar beside the map prints the counts; the note keeps one line. */
+  .map-balance .bb-counts { display: none; }
+}
+
+/* The House, one square per seat (KYC.houseTiles): each state a button,
+ * placed by percentage from kyc/tiles.py, its code page text above its
+ * block. */
+/* In the desktop layout the main column is a fixed height: the squares
+ * scroll inside it, as the map letterboxes. A phone scrolls the page. */
+.map-tiles { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: var(--s-3) var(--s-4) var(--s-4); }
+.map-tiles[hidden] { display: none; }
+.house-tiles { position: relative; width: 100%; max-width: 920px; height: auto; margin: 0 auto; }
+/* On a wide screen, as wide as fits the height left under the bar, the
+ * way the map letterboxes (--ht-ratio is the layout's width over height). */
+@media (min-width: 1001px) {
+  .map-tiles .house-tiles {
+    max-width: min(920px, max(360px, calc((100vh - 540px) * var(--ht-ratio, 1))));
+  }
+}
+.ht-state {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+.ht-code {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+.ht-block { display: grid; gap: 1px; }
+.ht-seat { border-radius: 1px; min-width: 0; min-height: 0; }
+.ht-r { background: var(--party-r); }
+.ht-d { background: var(--party-d); }
+.ht-i { background: var(--party-i-fill); }
+.ht-vacant { background: transparent; box-shadow: inset 0 0 0 1px var(--text-muted); }
+.ht-state.is-selected .ht-code { color: var(--text); text-decoration: underline; }
+@media (hover: hover) {
+  .ht-state:hover .ht-code { color: var(--text); text-decoration: underline; }
+}
+.ht-state.is-selected .ht-block { outline: 2px solid var(--text); outline-offset: 2px; }
+.ht-state:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+.map-legend .swatch.ht-vacant { background: transparent; border-color: var(--text-muted); }
+.map-layout { display: inline-flex; align-items: center; gap: var(--s-2); font-size: var(--t-xs);
+  color: var(--text-muted); }
+
+/* A state's House races as a navigator (KYC.districtTiles): each square a
+ * link, laid out as the districts lie, in neutral ink. */
+.district-tiles.jump-row {
+  display: grid;
+  grid-template-columns: repeat(var(--dt-cols), minmax(0, 2.25rem));
+  grid-template-rows: repeat(var(--dt-rows), auto);
+  gap: 3px;
+  margin: var(--s-2) 0 var(--s-4);
+}
+.dt-caption { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.dt-seat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-decoration: none;
+}
+.dt-seat:focus-visible { border-color: var(--accent); background: var(--surface-3); }
+@media (hover: hover) {
+  .dt-seat:hover { border-color: var(--accent); background: var(--surface-3); }
+}
+
+/* The states as a grid of links (KYC.statePicker). */
+.tile-picker { margin: 0 0 var(--s-4); }
+.tp-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 2.6rem));
+  gap: 3px;
+}
+.tp-tile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  min-width: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-decoration: none;
+}
+.tp-tile:focus-visible { border-color: var(--accent); background: var(--surface-3); }
+@media (hover: hover) {
+  .tp-tile:hover { border-color: var(--accent); background: var(--surface-3); }
+}
+/* Under the code, never over a letter of it; in the corner on a phone,
+ * where the tile is too short for both. */
+.tp-dot {
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  margin-left: -2.5px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text);
+}
+@media (max-width: 600px) {
+  .tp-dot { top: 2px; right: 2px; bottom: auto; left: auto; margin-left: 0; width: 4px; height: 4px; }
+}
+.tp-key { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
+.tp-dot-key { position: static; display: inline-block; margin: 0 var(--s-1) 0 0; vertical-align: 1px; }
+
+/* Each state's local governments by kind, as one bar (pages.local_bar). */
+.lg-bar { display: flex; gap: 2px; height: 8px; margin: var(--s-1) 0 0; min-width: 8rem; max-width: 100%; }
+.lg-seg { display: inline-block; flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.lg-county { background: var(--cat-1); }
+.lg-municipal { background: var(--cat-2); }
+.lg-township { background: var(--cat-3); }
+.lg-school { background: var(--cat-5); }
+.lg-special { background: var(--cat-4); }
+.lg-none { display: block; white-space: normal; margin-top: 2px; font-size: var(--t-xs); font-weight: 400; color: var(--text-muted); }
+.lg-key { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); margin: 0 0 var(--s-2);
+  font-size: var(--t-xs); color: var(--text-muted); }
+.lg-key-item { display: inline-flex; align-items: center; gap: var(--s-1); }
+.lg-key .lg-seg { width: 10px; height: 10px; flex: none; }
+
+/* A state's government at a glance (KYC.stategov.glance): three boxes,
+ * stacked on a phone. Party colour only for who holds a seat. */
+.state-glance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+.glance-box {
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+}
+.glance-box p { margin: 0 0 var(--s-1); }
+.glance-kind {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.glance-label { display: block; font-weight: 700; color: var(--text); }
+.glance-mark { display: block; font-size: var(--t-xs); font-weight: 600; color: var(--text-muted); }
+.glance-who { font-size: var(--t-md); }
+.glance-list { margin: 0 0 var(--s-1); padding: 0; list-style: none; display: grid; gap: var(--s-2); }
+.glance-facts { display: block; font-size: var(--t-xs); color: var(--text-muted); }
+.glance-bar { margin: var(--s-1) 0; height: 10px; }
+.bb-n { background-color: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
+.glance-control { font-weight: 600; }
+
+/* The federal courts as a ladder (kyc-federal.js courtLadder): every rung a
+ * link to its court, in neutral ink. */
+.court-ladder { margin: 0 0 var(--s-5); }
+.court-ladder figcaption { margin-bottom: var(--s-3); font-size: var(--t-sm); color: var(--text-muted); }
+.cl-top { display: flex; justify-content: center; }
+.cl-top .cl-node { min-width: 12rem; }
+.cl-node {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text);
+  text-decoration: none;
+  text-align: center;
+}
+.cl-node:focus-visible { border-color: var(--accent); background: var(--surface-2); }
+@media (hover: hover) {
+  .cl-node:hover { border-color: var(--accent); background: var(--surface-2); }
+}
+.cl-name { font-weight: 700; font-size: var(--t-sm); }
+.cl-facts { font-size: var(--t-xs); color: var(--text-muted); }
+.cl-open { font-size: var(--t-xs); font-weight: 700; color: var(--warn-text); }
+.cl-step {
+  margin: var(--s-1) 0;
+  text-align: center;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+}
+.cl-step::before { content: "\2191  "; }
+.cl-circuits {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--s-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cl-circuit { display: flex; flex-direction: column; gap: var(--s-1); }
+.cl-sub { font-size: var(--t-xs); color: var(--text-muted); text-align: center; }
+a.cl-sub { color: var(--accent); }
+.cl-total { margin: 0; text-align: center; font-size: var(--t-sm); color: var(--text); }
+
+/* A court's bench on a line of years (kyc-federal.js benchTimeline): a row
+ * per appointing President, a dot per judge, one neutral ink. */
+.bench-timeline { margin: var(--s-3) 0 var(--s-4); font-size: var(--t-xs); color: var(--text-muted); }
+.bench-timeline figcaption { margin-bottom: var(--s-2); font-size: var(--t-sm); color: var(--text); font-weight: 600; }
+.bt-rows { margin: 0; padding: 0; list-style: none; }
+.bt-row, .bt-axis { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--s-2); align-items: center; }
+.bt-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
+.bt-track { position: relative; height: 18px; border-bottom: 1px solid var(--border); }
+.bt-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin-left: -4.5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  box-shadow: 0 0 0 1.5px var(--surface-0);
+}
+.bt-ticks { position: relative; height: 14px; }
+.bt-ticks span { position: absolute; top: 2px; transform: translateX(-50%); }
+@media (max-width: 560px) {
+  .bt-row, .bt-axis { grid-template-columns: 6.5rem minmax(0, 1fr); }
+}
+
+/* Polling averages as dots on one axis (kyc-odds.js pollDots): a row per
+ * aggregator, a shape per candidate as well as the party's colour. */
+.poll-dots { margin: var(--s-1) 0 var(--s-2); font-size: var(--t-xs); color: var(--text-muted); }
+.poll-key, .poll-rows { margin: 0; padding: 0; list-style: none; }
+.poll-key { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); margin-bottom: var(--s-1); }
+.poll-key li { display: inline-flex; align-items: center; gap: var(--s-1); color: var(--text); }
+.poll-key .poll-dot { position: static; margin: 0; }
+.poll-row, .poll-axis { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center;
+  gap: var(--s-2); }
+.poll-row { min-height: 20px; }
+.poll-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.poll-track { position: relative; height: 20px; border-bottom: 1px solid var(--border); }
+.poll-dot {
+  position: absolute;
+  top: 50%;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+}
+.poll-dot-ring {
+  background-image: radial-gradient(circle, var(--surface-1) 0 2.5px, transparent 3px);
+}
+.poll-dot-square { border-radius: 1px; }
+.poll-dot-diamond { border-radius: 1px; transform: rotate(45deg) scale(0.85); }
+.poll-ticks { position: relative; height: 14px; }
+.poll-ticks span { position: absolute; top: 0; transform: translateX(-50%); white-space: nowrap; }
+/* Room at the right for the last tick's label, centred on its value. */
+.poll-row, .poll-axis, .bt-row, .bt-axis { padding-right: 16px; }
+@media (max-width: 560px) {
+  .poll-row, .poll-axis { grid-template-columns: 5.5rem minmax(0, 1fr); }
 }

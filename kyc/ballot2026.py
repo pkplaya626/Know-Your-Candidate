@@ -12,8 +12,9 @@ pages - never NCSL, Ballotpedia or Wikipedia, which were leads only (rule
 50). It was researched state by state on 2026-10-14 and every value checked
 again, independently, by a second reader; ``check`` holds the table to its
 own rules and its chamber sizes to ``government_maps.SEATS``. Who is
-running for these offices is not here: no source keyed by an id the site
-can hold lists state candidates, and names from a search are not data.
+running for these offices is not here but in each election office's own
+list, data/statewide_candidates.json (kyc/statewide.py, rule 91), which
+must list exactly the offices this table puts on the ballot.
 
 Each office is ``(how it is filled, on the 2026 ballot, a note, source)``.
 Each chamber is ``(its name, seats, seats on the 2026 ballot, which, source)``;
@@ -1176,40 +1177,32 @@ NEXT = {
     ("WV", "sos"): (2028, "https://sos.wv.gov/media/460/download?inline="),
 }
 
-# Offices on the ballot whose holder is not running for them, only where a
-# cited source says so (audit 2026-10-17, STATEGOV-01): the constitution's
-# term limit, read with the NGA's count of the governor's terms, or the
-# election office's certified list for the office, which does not name them.
-# Never inferred, and never from news: a term-limited officer may be on the
-# ballot for another office, and a holder absent from a list that is not a
-# candidate list is not "not running". {(state, office): (holder as the
-# rosters name them, "term-limit" | "not-listed" | "listed", terms the limit
-# needs or None, source, what the source is)}. "listed" is the other answer
-# the same list gives: the holder is on it, for this office. stategov drops
-# an entry, and says so, when the office's holder is someone else or the
-# NGA counts fewer terms.
+# Offices on the ballot whose holder cannot run for them again, where the
+# constitution or the organic act says so (audit 2026-10-17, STATEGOV-01):
+# the term limit, read with the NGA's count of the governor's terms. Never
+# inferred, and never from news: a term-limited officer may be on the ballot
+# for another office. {(state, office): (holder as the rosters name them,
+# "term-limit", terms the limit needs, source, what the source is)}. stategov
+# drops an entry, and says so, when the office's holder is someone else or
+# the NGA counts fewer terms.
 #
-# An office on the ballot with no entry here is said to be unchecked, by
-# name, on the page (``holder_status``): with an open-seat line beside
-# Alaska's governor, silence beside Georgia's read as "Brian Kemp is
-# running" (PR #94 review, rule 19). Checked 2026-10-17.
+# Whether a holder is on the ballot is the election office's list's to say,
+# in data/statewide_candidates.json (kyc/statewide.py, rule 91): the
+# "not-listed" and "listed" entries that stood here for Georgia, California,
+# Iowa, Maine, Alaska's lieutenant governor and the Northern Marianas were
+# read from those same lists and now come from them. An entry here stays as
+# the reason beside the list, and the two must agree. "not-listed" and
+# "listed" remain the reasons an entry may give where no list is in hand.
+# An office on the ballot with neither is said to be unchecked, by name, on
+# the page (rule 19). Checked 2026-10-17.
 OPEN_SEATS = {
     ("AK", "governor"): ("Mike Dunleavy", "term-limit", 2,
         "https://ltgov.alaska.gov/information/alaskas-constitution/",
         "Alaska Const. art. III, s.5: no one elected for two full successive terms"),
-    ("AK", "lt"): ("Nancy Dahlstrom", "not-listed", None,
-        "https://www.elections.alaska.gov/candidates/?election=26genr",
-        "the Division of Elections' certified 2026 general election tickets"),
     ("FL", "governor"): ("Ron DeSantis", "term-limit", 2,
         "http://www.leg.state.fl.us/statutes/index.cfm?submenu=3#A4S05",
         "Fla. Const. art. IV, s.5(b): no one who has served more than six years in two "
         "consecutive terms"),
-    ("IA", "governor"): ("Kim Reynolds", "not-listed", None,
-        "https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate%20List%20Database%20-%20All%20Elections_1.pdf",
-        "the Secretary of State's 2026 general election candidate list"),
-    ("IA", "lt"): ("Chris Cournoyer", "not-listed", None,
-        "https://sos.iowa.gov/sites/default/files/2026-08/2026%20General%20-%20Candidate%20List%20Database%20-%20All%20Elections_1.pdf",
-        "the Secretary of State's 2026 general election candidate list"),
     ("MI", "governor"): ("Gretchen Whitmer", "term-limit", 2,
         "https://www.legislature.mi.gov/Laws/MCL?objectName=mcl-Article-V-30",
         "Mich. Const. art. V, s.30: no one elected more than two times"),
@@ -1225,54 +1218,6 @@ OPEN_SEATS = {
     ("VI", "governor"): ("Albert Bryan", "term-limit", 2,
         "https://www.law.cornell.edu/uscode/text/48/1591",
         "48 U.S.C. 1591: no one elected for two full successive terms"),
-    ("MP", "governor"): ("David M. Apatang", "not-listed", None,
-        "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing",
-        "the Commonwealth Election Commission's certified 2026 list"),
-    ("MP", "lt"): ("Dennis Mendiola", "not-listed", None,
-        "https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing",
-        "the Commonwealth Election Commission's certified 2026 list"),
-    # Georgia's list of candidates on the November 3 ballot, the spreadsheet
-    # in the zip this page links ("November 2026 Federal and State
-    # Candidates.xlsx", read 2026-10-17): Governor Rick Jackson (R) and
-    # Keisha Lance Bottoms (D); Lieutenant Governor Greg Dolezal (R) and
-    # Josh McLaurin (D); Secretary of State Tim Fleming (R) and Penny Brown
-    # Reynolds (D); Attorney General Brian Strickland (R) and Tanya Miller
-    # (D). None of the four holders is on it (PERSONA-02).
-    ("GA", "governor"): ("Brian Kemp", "not-listed", None,
-        "https://sos.ga.gov/november-3-2026-general-election",
-        "the Secretary of State's list of candidates on the November 3 ballot"),
-    ("GA", "lt"): ("Burt Jones", "not-listed", None,
-        "https://sos.ga.gov/november-3-2026-general-election",
-        "the Secretary of State's list of candidates on the November 3 ballot"),
-    ("GA", "ag"): ("Chris Carr", "not-listed", None,
-        "https://sos.ga.gov/november-3-2026-general-election",
-        "the Secretary of State's list of candidates on the November 3 ballot"),
-    ("GA", "sos"): ("Brad Raffensperger", "not-listed", None,
-        "https://sos.ga.gov/november-3-2026-general-election",
-        "the Secretary of State's list of candidates on the November 3 ballot"),
-    # California's Official Certified List of Candidates, dated August 27,
-    # 2026 (read 2026-10-17): Governor Xavier Becerra and Steve Hilton;
-    # Lieutenant Governor Fiona Ma and Gloria Romero (Eleni Kounalakis is
-    # on it for Treasurer); Secretary of State Shirley N. Weber* and Attorney
-    # General Rob Bonta*, starred as incumbents (STATEGOV-01, RACES-09).
-    ("CA", "governor"): ("Gavin Newsom", "not-listed", None,
-        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
-        "the Secretary of State's certified list of candidates"),
-    ("CA", "lt"): ("Eleni Kounalakis", "not-listed", None,
-        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
-        "the Secretary of State's certified list of candidates"),
-    ("CA", "ag"): ("Rob Bonta", "listed", None,
-        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
-        "the Secretary of State's certified list of candidates"),
-    ("CA", "sos"): ("Shirley Weber", "listed", None,
-        "https://elections.cdn.sos.ca.gov/statewide-elections/2026-general/cert-list-candidates.pdf",
-        "the Secretary of State's certified list of candidates"),
-    # Maine's 2026 General Candidate List (read 2026-10-17): its GOV rows are
-    # Rick Bennett (Independent), Robert B. Charles (R) and Hannah M.
-    # Pingree (D) (FRESHNESS-04).
-    ("ME", "governor"): ("Janet Mills", "not-listed", None,
-        "https://www.maine.gov/sos/sites/maine.gov.sos/files/inline-files/2026%20General%20Candidate%20List%20-%20FINAL.xlsx",
-        "the Secretary of State's 2026 general election candidate list"),
 }
 OPEN_REASONS = ("term-limit", "not-listed", "listed")
 
@@ -1403,24 +1348,30 @@ def open_seat(code, key, holder=None, terms=None):
     fewer terms than the term limit needs: an open-seat line about the
     wrong person, or one the limit does not reach, is worse than none.
     """
-    unchecked = ({"holder": holder, "why": "unchecked",
-                  "text": f"Whether {holder} is running for this office is not checked here"}
-                 if holder else None)
+    unchecked_ = unchecked(holder)
     value = OPEN_SEATS.get((code, key))
     if not value:
-        return unchecked, None
+        return unchecked_, None
     name, why, need, source, cite = value
     if holder != name:
-        return unchecked, (f"{code} {key}: OPEN_SEATS names {name}, but the office's holder "
+        return unchecked_, (f"{code} {key}: OPEN_SEATS names {name}, but the office's holder "
                            f"is {holder or 'not listed'}; the open-seat line is withheld")
     if why == "term-limit" and (terms or 0) < need:
-        return unchecked, (f"{code} {key}: OPEN_SEATS says {name} is term-limited after "
+        return unchecked_, (f"{code} {key}: OPEN_SEATS says {name} is term-limited after "
                            f"{need} terms; the NGA counts {terms or 0}; the open-seat line "
                            f"is withheld")
     text = (f"{name} is term-limited" if why == "term-limit"
             else f"{name} is on the list of candidates for this office" if why == "listed"
             else f"{name} is not on the list of candidates for this office")
     return {"holder": name, "why": why, "text": text, "source": source, "cite": cite}, None
+
+
+def unchecked(holder):
+    """The record that says, by name, that whether *holder* is running was
+    not checked here; None with no named holder."""
+    return ({"holder": holder, "why": "unchecked",
+             "text": f"Whether {holder} is running for this office is not checked here"}
+            if holder else None)
 
 
 def _source_problems(code, field, source):

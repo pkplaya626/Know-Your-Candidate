@@ -126,6 +126,15 @@ OTHER_OFFICE_NOMINEES = {
     # Republican primary results, August 4: James 50.05%.
     "J000307": ("Republican nominee for Governor of Michigan",
                 _GOV.format("Michigan"), "2026-10-17"),
+    # Democratic primary results, August 11: Klobuchar 89.7% ("Election box
+    # winning candidate ... [[Amy Klobuchar]] ... 615,041", read 2026-10-18;
+    # the article: "Democratic senator Amy Klobuchar ... launched a campaign
+    # for the governor's office on January 29, 2026"). The Secretary of
+    # State's sample ballot prints "Amy Klobuchar and Ben Schierer
+    # Democratic-Farmer-Labor" (data/statewide_candidates.json). Her Senate
+    # seat is not up, so only her profile says it (PR #109 review).
+    "K000367": ("Democratic-Farmer-Labor nominee for Governor of Minnesota",
+                _GOV.format("Minnesota"), "2026-10-18"),
     # Republican primary results, August 6: Blackburn 43.6%. Her Senate
     # seat is not up, so only her profile says it.
     "B001243": ("Republican nominee for Governor of Tennessee",
@@ -644,6 +653,29 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
+# A member's official issues page whose list `members` reads but that is not
+# the page's list of issues, keyed on bioguide id: (date checked, the page
+# read, what it shows). The rules take a page's links or one level of its
+# headings in its words; a page that splits each title across two headings
+# passes them and reads as fragments. The page is linked instead ("On their
+# official site's issues page"). The refresh re-reads every site, so a
+# correction made by editing the cache would not last; members.problems
+# reports an entry whose page is no longer the one read.
+OFFICIAL_ISSUES_NOT_A_LIST = {
+    "L000575": ("2026-10-18", "https://www.lankford.senate.gov/issues/",
+                "each title is split over two headings: 'Protecting' over 'Life, Liberty & "
+                "Our Families', 'Bringing Down' over 'High Costs in Our Nation'"),
+    # Read 2026-10-18 for the review of PR #106: the index lists the House
+    # template's stock categories, each twice, beside categories that are
+    # labels for constituent mail rather than positions - "PRO CHOICE",
+    # "Pro Life", "PRO AG", "REDUCE TROOPS IN MIDDLE EAST PRO" - and one page
+    # under two names ("11 Ideals for TX-11", "TX-11 Ideals"). As a platform
+    # it would read as though a member who lists "Pro Life" held both views.
+    "P000048": ("2026-10-18", "https://pfluger.house.gov/issues/",
+                "mail categories ('PRO CHOICE', 'Pro Life', 'REDUCE TROOPS IN MIDDLE EAST PRO') "
+                "listed among the stock categories, each of those twice"),
+}
+
 # The 2026 Senate seats are no longer typed here. A surname table matched
 # Darline Graham to Lindsey Graham's seat; the seats are now the frozen race
 # record, keyed on bioguide ids (kyc/record.py, data/record_2026.json).
@@ -926,6 +958,75 @@ COURT_ROSTERS = {
            "Anthony Cannataro', 'Hon. Caitlin J. Halligan'; the same page: 'On September 24, "
            "2026, Chief Judge Rowan D. Wilson conducted a statewide public hearing'. "
            "Cloudflare answers a headless Chrome 'Just a moment...'."),
+}
+
+# Ids a chamber's roll calls list that belong to no member of that Congress,
+# with what the record shows and why (kyc/rollcalls.py). Their votes are
+# given to nobody either way (rule 17); an entry here only says the build
+# need not warn about it, and validate warns once the id is a member's after
+# all. Keyed on the record's id, never a name.
+ROLL_CALL_NON_MEMBERS = {
+    "G000578": (
+        "Matt Gaetz, re-elected for FL-1 in 2024, did not take the seat in the 119th "
+        "Congress: congress-legislators gives him no term in it, and FL-1's next member, "
+        "Jimmy Patronis (P000622), was seated on 2025-04-02 after a special election. The "
+        "Clerk's roll call 1 of 2025 (the call of the House by states, 2025-01-03) lists "
+        "'Gaetz' (FL) as Not Voting; read 2026-10-18."),
+}
+
+# Lists of the statewide candidates (data/statewide_candidates.json, rule
+# 91) published on a host that is not the jurisdiction's own domain
+# (voting_dates.JURISDICTION_DOMAINS): the state election office's own file
+# store or vendor, or - only where the state's own list could not be read or
+# does not exist - a county's election office or another state body.
+# {url prefix: (codes, who publishes it, own, evidence)}, where *own* is True
+# only for the state election office's own document on another host. A list
+# that is not the state's own is never called certified and says on the page
+# why it was used (statewide.problems; PR #109 review: a county's sample
+# ballot read "Certified by" the county). Being a .gov host is not enough: a
+# list counts here only for the jurisdictions named. Read 2026-10-18.
+STATEWIDE_LISTS_ELSEWHERE = {
+    "https://votepulaskiar.gov/": (
+        ("AR",), "Pulaski County Board of Election Commissioners", False,
+        "the county board's Notice of Election for November 3, 2026 (PDF, Last-Modified "
+        "2026-10-05); Arkansas's Secretary of State publishes no list of the November "
+        "candidates, and its candidate search (candidates.arkansas.gov) names the same people "
+        "for these offices"),
+    "https://storageccec.blob.core.usgovcloudapi.net/public/docs/": (
+        ("AZ",), "Arizona Citizens Clean Elections Commission", False,
+        "the Commission's 2026 Voter Education Guide, the state's candidate statement pamphlet "
+        "(PDF, Last-Modified 2026-09-11); the Commission certifies no candidates; the "
+        "Secretary of State's listing is behind a bot check, and Pima County's official "
+        "candidate list (updated 9/9/2026) agrees on every name and running mate"),
+    "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/": (
+        ("GU",), "Guam Election Commission", True,
+        "'2026 General Election Sample Ballot', linked by that name from the Commission's home "
+        "page, https://gec.guam.gov/"),
+    "https://mi-boe.entellitrak.com/etk-mi-boe-prod/": (
+        ("MI",), "Michigan Department of State", True,
+        "the Bureau of Elections' Official Candidate Listing, linked as '2026 November General "
+        "Candidate Listing' from https://www.michigan.gov/sos/elections"),
+    "https://www.clarkcountynv.gov/": (
+        ("NV",), "Clark County Registrar of Voters", False,
+        "the Registrar's Notice of General Election, which lists every contest on Clark "
+        "County's ballot, statewide ones included; nvsos.gov refused every request (an "
+        "Incapsula block), so the Secretary of State's own certified list could not be read"),
+    "https://sos-prod.tnsosgovfiles.com/": (
+        ("TN",), "Tennessee Secretary of State", True,
+        "the Division of Elections' file store, linked as PDF from "
+        "https://sos.tn.gov/elections/2026-candidate-lists"),
+}
+
+# A holder whose name the list of candidates prints with another given name,
+# where only a short form and its full form differ (rule 56: a different
+# first name is never taken on a surname alone). {(state, office, holder as
+# the rosters name them): (the list's name, evidence)}.
+STATEWIDE_NAME_FORMS = {
+    ("NV", "governor", "Joe Lombardo"): (
+        "Lombardo, Joseph",
+        "the Governor's own site, gov.nv.gov (read 2026-10-18), links his account "
+        "twitter.com/JosephMLombardo; the Clark County notice prints 'Lombardo, Joseph REP' "
+        "for Governor, and both researchers read it as the governor"),
 }
 
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.

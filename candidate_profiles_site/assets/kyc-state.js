@@ -592,20 +592,28 @@
       html.push(
         '<section class="state-section" id="state-government">',
         '<h2 class="state-heading">' + govHeading(info) + "</h2>",
+        // The three branches at a glance, the details under them (VISUALS-28).
+        KYC.stategov.glance ? KYC.stategov.glance(code) : "",
         '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
         "</section>"
       );
     }
 
-    /* The 2026 races, one section each, in ballot order. */
+    /* The 2026 races, one section each, in ballot order. Each race's
+     * markets are closed until opened (cards.raceSection): as tall as its
+     * people, they made California's page about 60 screens long on a phone
+     * (VISUALS-15). */
     var raceHtml = senateRaces.concat(houseRaces).map(function (race) {
       var people = peopleIn(race);
       return cards.raceSection(race, people, { title: districtLabel(race), stateLink: false,
-                                               fullOdds: true });
+                                               fullOdds: true, moneyOpen: true });
     }).join("");
     if (raceHtml) {
-      /* Texas has 38 districts; a row of jump chips saves the scroll. */
-      var jumps = senateRaces.concat(houseRaces).map(function (race) {
+      /* Texas has 38 districts; a row of jump chips saves the scroll. With
+       * several districts the House races are squares laid out as the
+       * districts lie (VISUALS-27), the Senate's a chip beside them. */
+      var tiles = houseRaces.length > 3 && KYC.districtTiles ? KYC.districtTiles(code, houseRaces) : "";
+      var jumps = senateRaces.concat(tiles ? [] : houseRaces).map(function (race) {
         var short = race.chamber === "Senate" ? "Senate" : (race.district ? String(race.district) : "At-large");
         return '<a class="chip chip-link" href="#' + KYC.escapeAttr("race-" + race.id) + '" title="' +
           KYC.escapeAttr(districtLabel(race)) + '">' + KYC.escapeHtml(short) + "</a>";
@@ -618,9 +626,10 @@
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
           "November ballot, and - folded under the race - everyone no longer running. " +
           alsoOnBallot(code, name, info.territory) + "</p>",
-        (senateRaces.length + houseRaces.length > 3
+        (senateRaces.length + houseRaces.length > 3 && jumps
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
           : ""),
+        tiles,
         raceHtml,
         "</section>"
       );
@@ -649,10 +658,12 @@
     if (territory) {
       // A territory's own record covers its governor only (ballot2026.TERRITORIES):
       // its legislature and local offices are not in it, and are said so.
+      var named = KYC.stategov && KYC.stategov.listsCandidates(code);
       return (list
         ? "Of the territorial offices this site covers, the same ballot also elects the " +
           KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
-          '<a class="state-jump" href="#state-government">Territorial government</a>). '
+          '<a class="state-jump" href="#state-government">Territorial government</a>' +
+          (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). "
         : list === "" ? KYC.escapeHtml(name) + " does not elect its governor in 2026. " : "") +
         "Your ballot may also hold territorial and local contests, such as for the " +
         "legislature, which this site does not list.";
@@ -665,10 +676,17 @@
         "general, secretary of state or regular legislative seats is elected in 2026; the " +
         "ballot may still hold " + rest + ".";
     }
+    // The statewide offices' candidates are listed under State government
+    // from the election office's own list (rule 91); the legislature's are
+    // not, and the sentence says which.
+    var listed = KYC.stategov && KYC.stategov.listsCandidates(code);
     return "Of the state offices this site covers, the same ballot also elects " +
       KYC.escapeHtml(list) + " (see " +
       '<a class="state-jump" href="#state-government">State government</a>). It may also hold ' +
-      rest + ". This site lists the candidates for Congress only.";
+      rest + ". " + (listed
+        ? "This site lists the candidates for Congress here, and those for " +
+          KYC.escapeHtml(listed) + " under State government; not those for the legislature."
+        : "This site lists the candidates for Congress only.");
   }
 
   /* A link to a section of this page ("#state-government", from the guide)
@@ -727,6 +745,8 @@
       '<h1 class="state-title">States &amp; territories</h1>',
       '<p class="state-summary">One page each: who holds the seats, the 2026 races, and everyone who has filed.</p>',
       "</header>",
+      // Every page at its place on a map-like grid (VISUALS-35).
+      KYC.statePicker ? KYC.statePicker() : "",
       // The list of states is right here: no "How to vote" link to this page.
       '<section class="state-section findrep" id="findrep" data-findrep data-findrep-list></section>',
       '<div class="state-list" id="stateList">' + rows.join("") + "</div>",

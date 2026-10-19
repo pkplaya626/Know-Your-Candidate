@@ -880,6 +880,25 @@
     return !first || first === "placeholder" ? SILHOUETTE : first;
   }
 
+  /** Has the build found a portrait for *item* (rule 24: none is guessed)? */
+  function hasPortrait(item) {
+    return portraitSrc(item) !== SILHOUETTE;
+  }
+
+  /** "Mary Gay Scanlon" -> "MS", "Ralph Abraham Jr." -> "RA": the letters
+   *  a card shows in a disc where there is no portrait. A race of six grey
+   *  silhouettes was the largest thing on its cards and said nothing
+   *  (audit 2026-10-17, VISUALS-16). */
+  function monogram(name) {
+    var words = String(name || "").replace(/\([^)]*\)|"[^"]*"/g, " ")
+      .split(/[\s,]+/).filter(function (w) {
+        return w && !/^(jr|sr|ii|iii|iv|v|md|phd|dr|mr|mrs|ms)\.?$/i.test(w) && /\p{L}/u.test(w);
+      });
+    if (!words.length) return "";
+    var letter = function (w) { return (w.match(/\p{L}/u) || [""])[0].toUpperCase(); };
+    return words.length === 1 ? letter(words[0]) : letter(words[0]) + letter(words[words.length - 1]);
+  }
+
   /* Sizes of the first portrait for a srcset, when the build found several
    * of the same photograph: the browser then fetches one sharp at this
    * screen's density, rather than a 960px original for a 38px circle. */
@@ -914,6 +933,20 @@
     return 'src="' + escapeAttr(portraitSrc(item)) + '"' + (set
       ? ' srcset="' + escapeAttr(set) + '" sizes="' + escapeAttr(sizes) + '"'
       : "");
+  }
+
+  /** A small round portrait for a row - the map's panel, a profile's race -
+   *  or, where the build found none, the person's initials in a disc of the
+   *  same size. The cards had the disc and the rows kept grey silhouettes
+   *  (VISUALS-16); one helper draws it for every row (rule 12). *sizes* is
+   *  the width it is drawn at, e.g. "38px". */
+  function portraitThumb(item, sizes) {
+    if (!hasPortrait(item)) {
+      return '<span class="thumb-monogram" aria-hidden="true">' +
+        escapeHtml(monogram(item && item.name)) + "</span>";
+    }
+    return "<img " + portraitAttrs(item, sizes) + ' alt="" loading="lazy" decoding="async"' +
+      ' data-photo-idx="0" data-profile="' + escapeAttr(item.id) + '">';
   }
 
   /** Point an existing <img> at a profile's portrait - the dialog reuses one
@@ -995,10 +1028,20 @@
     not_disclosed: "Not disclosed",
     unknown: "No data",
     no_filing: "No filing this cycle",
+    not_listed: "Not listed on their official site",
+    see_site: "On their official site's issues page",
+    see_home: "On their official website",
   };
   var ABSENT_TITLE = {
     not_disclosed: "No public disclosure exists for this field.",
     unknown: "No source has been recorded for this field yet.",
+    // Work this site did (rule 19): it read the member's official website.
+    not_listed: "This site read the member's official website and found no page or menu " +
+      "listing the issues they work on.",
+    see_site: "This site read the member's official website and found an issues page, but no " +
+      "list of issues it could take in the page's own words. The page is linked.",
+    see_home: "This site read the member's official website and found issue pages it links, " +
+      "but no issues page and too few issues to list. The site is linked.",
     // The only absence that reports work we actually did.
     no_filing: "Checked with the FEC: this candidate has no filing for the "
       + "current cycle. Members running for a different seat file under a "
@@ -1018,6 +1061,15 @@
     "wikipedia": ["Wikipedia", "From the candidate's Wikipedia article"],
     "campaign-site": ["Campaign site",
       "From the campaign's own website, in its own words"],
+    // A member's (kyc/members.py, rule 86): each tied to them by their id,
+    // never by a search on their name.
+    "official-site": ["Official site",
+      "From their official website, in its own words"],
+    "congressional-directory": ["Congressional Directory",
+      "From the Official Congressional Directory, printed by the Government Publishing " +
+      "Office from each member's own office, in its words"],
+    "member-wikipedia": ["Wikipedia",
+      "From the infobox of the Wikipedia article congress-legislators links to this member"],
   };
 
   /** The badge saying where a pipeline-filled field came from, or "". */
@@ -1232,6 +1284,64 @@
     return !ABSENT[status] && status !== "generic";
   }
 
+  /* A filed figure as a number: "$47,190,466.06" -> 47190466.06; null for
+   * anything that is not a figure (an absence's words). A filed $0 is a
+   * figure (rule 6). */
+  function moneyAmount(item, field) {
+    if (!item || !hasValue(item, field) || !item.financeSource) return null;
+    var text = String(item[field] == null ? "" : item[field]).trim().replace(/[$,]/g, "");
+    return /^-?\d+(?:\.\d+)?$/.test(text) ? parseFloat(text) : null;
+  }
+
+  /* A figure rounded for a bar's label, "$35.0M", "$412K", "$950"; the
+   * exact figure is the profile's. */
+  function moneyShort(value) {
+    if (value === null || value === undefined || isNaN(value)) return "";
+    var sign = value < 0 ? "-" : "";
+    var v = Math.abs(value);
+    if (v >= 1e9) return sign + "$" + (v / 1e9).toFixed(1) + "B";
+    if (v >= 1e6) return sign + "$" + (v / 1e6).toFixed(1) + "M";
+    if (v >= 1e3) return sign + "$" + Math.round(v / 1e3) + "K";
+    return sign + "$" + Math.round(v);
+  }
+
+  /* A profile's platform as its items: the campaign site's issue headings
+   * ("; "-joined by kyc/enrich.py), a member's official website's issue
+   * list (also "; "-joined, by kyc/members.py, rule 86), a list literal, or
+   * comma-separated text. One reading for the dialog and the race's
+   * comparison table (rule 12). Null when there is nothing to list. */
+  function platformItems(item) {
+    if (!item || !hasValue(item, "platforms")) return null;
+    var text = String(item.platforms || "").trim();
+    if (!text) return null;
+    var source = (item.fieldSources || {}).platforms;
+    var fromSite = source === "campaign-site" || source === "official-site";
+    var parts = null;
+    if (fromSite) {
+      parts = text.split(/;\s+/);
+    } else if (text.charAt(0) === "[" && text.charAt(text.length - 1) === "]") {
+      try {
+        var parsed = JSON.parse(text.replace(/'/g, '"'));
+        if (Array.isArray(parsed)) parts = parsed.map(String);
+      } catch (e) {
+        /* not a list literal after all; fall through to the comma split */
+      }
+    }
+    if (!parts) {
+      // The rosters separate items with commas and use them inside items
+      // too: "Telecommunications, technology, and digital privacy" is one
+      // item, not three bullets reading "technology" and "and digital
+      // privacy". Items start with a capital; a fragment that does not
+      // belongs to the one before it.
+      parts = text.split(/,\s+/).reduce(function (items, piece) {
+        if (items.length && /^[a-z]/.test(piece)) items[items.length - 1] += ", " + piece;
+        else items.push(piece);
+        return items;
+      }, []);
+    }
+    return { items: parts, fromSite: fromSite, text: text };
+  }
+
   /* ============================================================= election */
 
   /* Federal general elections fall on the first Tuesday after the first
@@ -1439,12 +1549,35 @@
       }
     });
 
+    /* A role="menu" is announced as one, and a screen reader then hands the
+     * keys to the page: arrows, Home and End moved nothing (audit
+     * 2026-10-17, TECH-15). They move among the items, wrapping, as the
+     * APG menu-button pattern has them. */
+    function items() {
+      var marked = panel.querySelectorAll('[role^="menuitem"]');
+      var list = marked.length ? marked : panel.querySelectorAll(FOCUSABLE);
+      return Array.prototype.filter.call(list, function (node) {
+        return !node.disabled && !node.hidden && !node.closest("[hidden]");
+      });
+    }
+
     function onKey(event) {
       if (event.key === "Escape") {
         event.preventDefault();
         close();
         button.focus();
+        return;
       }
+      var move = { ArrowDown: 1, ArrowUp: -1, Home: "first", End: "last" }[event.key];
+      if (!move) return;
+      var list = items();
+      if (!list.length) return;
+      event.preventDefault();
+      var at = list.indexOf(doc.activeElement);
+      var next = move === "first" ? 0 : move === "last" ? list.length - 1
+        : at === -1 ? (move > 0 ? 0 : list.length - 1)
+        : (at + move + list.length) % list.length;
+      list[next].focus();
     }
 
     function onOutside(event) {
@@ -1618,6 +1751,87 @@
 
   function partyClass(item) {
     return "party-" + partyKey(item);
+  }
+
+  /* ------------------------------------------------------------- hatches */
+
+  /* "Split" and "none" are told apart from the colours around them by a
+   * hatch as well as a colour, a cue that does not depend on seeing hue:
+   * to a deuteranope the old split lilac was the Democratic blue, and every
+   * divided state read as Democratic (audit 2026-10-17, VISUALS-03). A map
+   * draws the patterns in its own SVG at its own scale (hatchDefs) and
+   * names them on the SVG as custom properties (hatchVars); a shape's fill
+   * then names the property with its plain colour as the fallback
+   * (svgFill), so a map with no patterns still draws the colour. One fill
+   * per shape, no clip or mask (rule 45). */
+  var HATCHES = {
+    "split": ["var(--split)", "var(--split-hatch)", 0.4],
+    "split-soft": ["color-mix(in srgb, var(--split) 70%, var(--surface-1))",
+      "color-mix(in srgb, var(--split-hatch) 70%, var(--surface-1))", 0.4],
+    "none": ["var(--none-fill)", "var(--none-hatch)", 0.22],
+  };
+  var HATCHED = { "var(--split)": "split", "var(--none-fill)": "none" };
+
+  /** The patterns, *unit* map units apart (about 6px on screen), with ids
+   *  that begin with *prefix*. */
+  function hatchDefs(prefix, unit) {
+    var u = (+unit || 6).toFixed(2);
+    var w = function (share) { return (unit * share).toFixed(2); };
+    return "<defs>" + Object.keys(HATCHES).map(function (key) {
+      var h = HATCHES[key];
+      return '<pattern id="' + prefix + "hatch-" + key + '" patternUnits="userSpaceOnUse" width="' +
+        u + '" height="' + u + '" patternTransform="rotate(45)">' +
+        '<rect width="' + u + '" height="' + u + '" style="fill:' + h[0] + '"/>' +
+        '<rect width="' + w(h[2]) + '" height="' + u + '" style="fill:' + h[1] + '"/></pattern>';
+    }).join("") + "</defs>";
+  }
+
+  /** The style that names the patterns for the shapes inside an SVG. */
+  function hatchVars(prefix) {
+    return Object.keys(HATCHES).map(function (key) {
+      return "--hatch-" + key + ":url(#" + prefix + "hatch-" + key + ")";
+    }).join(";");
+  }
+
+  /** A shape's fill: a hatched colour names its pattern, the colour after. */
+  function svgFill(fill) {
+    var key = HATCHED[fill];
+    return key ? "var(--hatch-" + key + ", " + fill + ")" : fill;
+  }
+
+  /* A scroll the page makes for the reader animates only for a reader who
+   * has not asked for less motion: an explicit { behavior: "smooth" }
+   * overrides the stylesheet's reduced-motion rule (audit 2026-10-17,
+   * TECH-16). Every scrollIntoView the modules make passes this. */
+  function scrollBehavior() {
+    try {
+      if (global.matchMedia && global.matchMedia("(prefers-reduced-motion: reduce)").matches) return "auto";
+    } catch (e) { /* no media queries: the default */ }
+    return "smooth";
+  }
+
+  /* The word's colour on a fill, where the callout's default (the inverse
+   * text) does not read: the mid-tones and the greys name their own ink,
+   * per theme, in kyc.css. */
+  var FILL_INK = {
+    "var(--split)": "var(--split-ink)",
+    "var(--party-r-tint)": "var(--text)",
+    "var(--party-d-tint)": "var(--text)",
+    "var(--vacant-fill)": "var(--vacant-ink)",
+    "var(--none-fill)": "var(--text)",
+  };
+  function fillInk(fill) {
+    return FILL_INK[fill] || (/--surface-/.test(fill || "") ? "var(--text)" : "");
+  }
+
+  /** The same fill as an HTML background, for a legend swatch or a callout. */
+  function swatchFill(fill) {
+    var key = HATCHED[fill];
+    if (!key) return fill;
+    var h = HATCHES[key];
+    var edge = (5 * h[2]).toFixed(1);
+    return "repeating-linear-gradient(135deg, " + h[1] + " 0 " + edge + "px, " + h[0] + " " +
+      edge + "px 5px)";
   }
 
   /* Search across everything a voter might reasonably type, not just name
@@ -2020,9 +2234,11 @@
   /* --------------------------------------------------- data on demand */
 
   /* A data file the page needs only sometimes - the officials the grid's
-   * search also looks through - is named, with its version stamp, in an
-   * inert <template id="onDemandData"> (so the build stamps it, rule 76)
-   * and loaded the first time it is wanted. *global* is the variable it
+   * search also looks through, a chamber's roll calls for the profile
+   * dialog - is named, with its version stamp, in an inert
+   * <template id="onDemandData"> (so the build stamps it, rule 76) and
+   * loaded the first time it is wanted. *file* is its path under data/; a
+   * page a folder down names it "../data/...". *global* is the variable it
    * assigns: one already there (a page that loads it anyway, a test) is
    * used as it is. */
   var demanded = {};
@@ -2034,7 +2250,9 @@
     var tag = null;
     if (holder && holder.content) {
       tag = Array.prototype.filter.call(holder.content.querySelectorAll("script[src]"),
-        function (s) { return s.getAttribute("src").split("?")[0] === "data/" + file; })[0];
+        function (s) {
+          return s.getAttribute("src").split("?")[0].replace(/^(\.\.\/)+/, "") === "data/" + file;
+        })[0];
     }
     if (!tag) { done(false); return; }
     demanded[file] = [done];
@@ -2600,6 +2818,27 @@
       " gives the same office the same years." + escapeHtml(withheld) + "</p>";
   }
 
+  /** The same record in a narrow column (the ballot comparison, GRID-17):
+   *  each office with its place and years and the note the panel gives it,
+   *  the first *limit* of them. One renderer of a row's words with the panel
+   *  (rule 12): the comparison's own copy dropped the place, so a mayoralty
+   *  read with no city. */
+  function officesHeldShort(record, limit) {
+    if (!record) return '<span class="kyc-absent">No linked record</span>';
+    var rows = record.rows || [];
+    if (!rows.length) return '<span class="kyc-absent">None the sources agree on</span>';
+    limit = limit || rows.length;
+    return '<ul class="compare-list">' + rows.slice(0, limit).map(function (row) {
+      var note = HELD_NOTES[row.agree];
+      var place = heldPlace(row);
+      return "<li>" + escapeHtml(row.office) + (place ? ", " + escapeHtml(place) : "") +
+        ' <span class="faint">' + escapeHtml(heldYears(row)) + "</span>" +
+        (note ? ' <span class="held-note" title="' + escapeAttr(note[1]) + '">' +
+          escapeHtml(note[0]) + "</span>" : "") + "</li>";
+    }).join("") + (rows.length > limit ? '<li class="faint">and ' + (rows.length - limit) +
+      " more on the profile</li>" : "") + "</ul>";
+  }
+
   /** What a Cabinet office's holder is called, as the federal page and
    *  the guide both say it: their own title where it is not the office's
    *  ("Secretary of War" for the Secretary of Defense), else none, and
@@ -2682,6 +2921,7 @@
     escapeAttr: escapeAttr,
     renderField: renderField,
     officesHeld: officesHeld,
+    officesHeldShort: officesHeldShort,
     holderRole: holderRole,
     heldText: heldText,
     heldYears: heldYears,
@@ -2694,8 +2934,17 @@
     vacancyOf: vacancyOf,
     possessive: possessive,
     hasValue: hasValue,
+    moneyAmount: moneyAmount,
+    moneyShort: moneyShort,
+    platformItems: platformItems,
     partyKey: partyKey,
     partyClass: partyClass,
+    hatchDefs: hatchDefs,
+    hatchVars: hatchVars,
+    svgFill: svgFill,
+    swatchFill: swatchFill,
+    fillInk: fillInk,
+    scrollBehavior: scrollBehavior,
     seatStrip: seatStrip,
     seatKey: seatKey,
     // data
@@ -2731,6 +2980,9 @@
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,
     portraitAttrs: portraitAttrs,
+    hasPortrait: hasPortrait,
+    monogram: monogram,
+    portraitThumb: portraitThumb,
     setPortrait: setPortrait,
     shownPhotoCredit: shownPhotoCredit,
     cappedSrcset: cappedSrcset,
@@ -2768,4 +3020,314 @@
     rememberedState: rememberedState,
     renderRememberedState: renderRememberedState,
   };
+})(window);
+
+/* ================================================================ charts
+ *
+ * Pictures of figures the build already counts (audit 2026-10-17): the
+ * balance of power with the seats on the 2026 ballot (VISUALS-21), the
+ * House as one square per seat (VISUALS-27), a state's districts as a
+ * navigator, and the states as a grid of links (VISUALS-35). Every one is
+ * page text and plain boxes - no SVG text (rule 46) and no script from
+ * anywhere else - coloured from the theme's tokens, and placed from
+ * figures the pipeline computed (kyc/summary.py, kyc/tiles.py), never
+ * worked out again here. */
+(function (global) {
+  "use strict";
+
+  var KYC = global.KYC;
+  var doc = global.document;
+  if (!KYC) return;
+  var esc = KYC.escapeHtml;
+  var attr = KYC.escapeAttr;
+
+  var WORDS = {
+    R: ["Republican", "Republicans"], D: ["Democratic", "Democrats"],
+    I: ["independent", "Independents"],
+  };
+
+  function share(n, total) {
+    return (100 * n / total).toFixed(3) + "%";
+  }
+
+  function past() {
+    return KYC.electionStatus(2026).phase === "post-election";
+  }
+
+  /* ------------------------------------------------- the balance of power */
+
+  /** One chamber's seats as one bar (VISUALS-21): Republicans from the
+   *  left, Democrats from the right, independents and empty seats between,
+   *  as the legislatures' seat strips run (KYC.seatStrip). A Senate seat on
+   *  the November 3 ballot is dotted in its holder's colour - dotted, not
+   *  hatched, because the map drawn under the bar hatches "no race",
+   *  "none" and a split delegation (rule 88); every House seat is on it,
+   *  which dots over the whole bar would not tell anyone, so the caption
+   *  says so instead. A tick marks half the seats. An independent is never
+   *  folded into either party (rule: the rosters do not say whom they
+   *  caucus with). Nothing is dotted once the Congress the cycle elects
+   *  sits (summary.py sends no "up" then). The compact form prints the
+   *  counts when asked (opts.counts): the map has no sidebar above it, and
+   *  a phone has no hover to read the track's title. */
+  function balanceBar(chamber, opts) {
+    opts = opts || {};
+    var info = KYC.meta();
+    var c = info[chamber];
+    if (!c) return "";
+    var seats = chamber === "senate" ? 100 : (c.seats || 435);
+    var held = (c.R || 0) + (c.D || 0) + (c.I || 0);
+    var vacant = Math.max(0, seats - held);
+    var up = chamber === "senate" ? c.up : null;
+    var parts = [];
+    var add = function (key, n, hatched) {
+      if (n > 0) parts.push({ key: key, n: n, up: hatched });
+    };
+    var upOf = function (key) { return up ? up[key] || 0 : 0; };
+    add("r", (c.R || 0) - upOf("R"), false);
+    add("r", upOf("R"), true);
+    add("i", (c.I || 0) - upOf("I"), false);
+    add("i", upOf("I"), true);
+    add("vacant", vacant, false);
+    add("d", upOf("D"), true);
+    add("d", (c.D || 0) - upOf("D"), false);
+    var name = chamber === "senate" ? "Senate" : "House";
+    var verb = past() ? "were" : "are";
+    var counted = [["R", c.R], ["I", c.I], ["D", c.D]].filter(function (p) { return p[1]; })
+      .map(function (p) {
+        return p[1] + " " + WORDS[p[0]][p[1] === 1 ? 0 : 1] +
+          (upOf(p[0]) ? " (" + upOf(p[0]) + " of their seats " + verb + " on the Nov 3, 2026 ballot)" : "");
+      });
+    if (vacant) counted.push(vacant + " vacant");
+    var half = chamber === "senate"
+      ? "51 seats is a majority; at 50 each, the Vice President breaks a tie"
+      : (Math.floor(seats / 2) + 1) + " of " + seats + " seats is a majority";
+    var spoken = "The " + name + ": " + counted.join(", ") + ". The tick marks half the seats: " + half + ".";
+    var bar = parts.map(function (p) {
+      return '<span class="bb-seg bb-' + p.key + (p.up ? " bb-up" : "") + '" style="width:' +
+        share(p.n, seats) + '"></span>';
+    }).join("");
+    var key = [["R", "r"], ["I", "i"], ["D", "d"]].filter(function (p) { return c[p[0]]; })
+      .map(function (p) {
+        var n = c[p[0]];
+        return '<li><span class="bb-swatch bb-' + p[1] + '" aria-hidden="true"></span>' +
+          esc(WORDS[p[0]][n === 1 ? 0 : 1].replace(/^./, function (ch) { return ch.toUpperCase(); })) +
+          " <strong>" + n + "</strong>" +
+          (up && upOf(p[0]) ? ' <span class="bb-faint">' + upOf(p[0]) + " up</span>" : "") + "</li>";
+      });
+    if (vacant) {
+      key.push('<li><span class="bb-swatch bb-vacant" aria-hidden="true"></span>Vacant <strong>' +
+        vacant + "</strong></li>");
+    }
+    var ballot = up
+      ? '<li class="bb-ballot"><span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span>' +
+        "Dotted: a seat on the Nov 3, 2026 ballot</li>"
+      : chamber === "house" && (info.election || {}).phase === "campaign"
+        ? '<li class="bb-ballot">Every House seat ' + (past() ? "was" : "is") +
+          " on the Nov 3, 2026 ballot</li>" : "";
+    var track = '<div class="bb-track" role="img" aria-label="' + attr(spoken) + '" title="' + attr(spoken) +
+      '">' + bar + '<span class="bb-half" aria-hidden="true"></span></div>';
+    if (opts.compact) {
+      // Under the sidebar's counts, which already name each party in its
+      // colour: only what the bar adds, in one line.
+      var dotted = up ? [["R", "R"], ["I", "I"], ["D", "D"]].filter(function (p) { return upOf(p[0]); })
+        .map(function (p) { return upOf(p[0]) + " " + p[1]; }) : [];
+      // Where nothing above the bar names the parts (the map), the counts
+      // come first, each in its party's text colour, in the bar's order.
+      var counts = !opts.counts ? "" : [["R", "r"], ["I", "i"], ["D", "d"]].filter(function (p) { return c[p[0]]; })
+        .map(function (p) {
+          return '<strong class="party-' + p[1] + '">' + c[p[0]] + " " + p[0] + "</strong>";
+        }).concat(vacant ? ["<strong>" + vacant + " vacant</strong>"] : []).join(" · ");
+      return '<figure class="balance-bar balance-bar-compact" data-chamber="' + attr(chamber) + '">' +
+        (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
+        '<p class="bb-note">' + (counts ? '<span class="bb-counts">' + counts + ". </span>" : "") + (dotted.length
+          ? '<span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span> Dotted: the ' +
+            esc(dotted.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot. "
+          : chamber === "house" && (info.election || {}).phase === "campaign"
+            ? "Every seat " + (past() ? "was" : "is") + " on the Nov 3, 2026 ballot. " : "") +
+        "The tick marks half: " + (chamber === "senate" ? 51 : Math.floor(seats / 2) + 1) +
+        " is a majority.</p></figure>";
+    }
+    return '<figure class="balance-bar" data-chamber="' + attr(chamber) + '">' +
+      (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
+      '<ul class="bb-key">' + key.join("") + ballot + "</ul>" +
+      '<p class="bb-note">The tick marks half the seats: ' + esc(half) + "." +
+      (chamber === "house" && info.delegates
+        ? " Voting seats only: the " + info.delegates + " delegates have no floor vote." : "") + "</p>" +
+      "</figure>";
+  }
+
+  /* ------------------------------------------- the House, a square a seat */
+
+  function houseLayout() {
+    return KYC.meta().houseTiles || null;
+  }
+
+  /** The plan whose districts members sit for: the 2024 map until the
+   *  Congress the 2026 election chose is seated, then the 2026 map. */
+  function seatedCells(block) {
+    return KYC.recordPhase() && block.cells2026 ? block.cells2026 : block.cells;
+  }
+
+  function seatedBySeat() {
+    var out = {};
+    (global.legislatorsData || []).forEach(function (p) {
+      if (!KYC.seated(p) || String(p.chamber).indexOf("House") === -1) return;
+      if (p.districtNum === null || p.districtNum === undefined) return;
+      out[p.state + "-" + p.districtNum] = p;
+    });
+    return out;
+  }
+
+  function partyLetter(p) {
+    var key = KYC.partyKey(p);
+    return key === "d" || key === "r" ? key : "i";
+  }
+
+  /** The House as one square per voting seat, each state a button (a tap
+   *  picks it, as on the map), its code above its block as page text. The
+   *  layout is kyc/tiles.py's; the colour is whoever sits for the seat. */
+  function houseTiles(opts) {
+    opts = opts || {};
+    var layout = houseLayout();
+    if (!layout) return "";
+    var who = seatedBySeat();
+    var W = layout.width;
+    var H = layout.height;
+    var states = Object.keys(layout.states).sort();
+    var html = states.map(function (code) {
+      var b = layout.states[code];
+      var gap = layout.gap || 0;
+      var slot = Math.max(b.cols, layout.slot || 2);
+      var reach = slot + gap;
+      var left = b.x - (slot - b.cols) / 2 - gap / 2;
+      var top = b.y - layout.band;
+      var cells = seatedCells(b);
+      var tally = { r: 0, d: 0, i: 0, vacant: 0 };
+      var squares = Object.keys(cells).map(function (n) {
+        var p = who[code + "-" + n];
+        var kind = p ? partyLetter(p) : "vacant";
+        tally[kind] += 1;
+        var seat = code + (n === "0" ? " at large" : "-" + n);
+        return '<span class="ht-seat ht-' + kind + '" style="grid-column:' + (cells[n][0] + 1) +
+          ";grid-row:" + (cells[n][1] + 1) + '" title="' + attr(seat + ": " +
+          (p ? p.name + " (" + p.party + ")" : "vacant")) + '"></span>';
+      }).join("");
+      var said = [["r", "Republican"], ["d", "Democratic"], ["i", "independent"], ["vacant", "vacant"]]
+        .filter(function (k) { return tally[k[0]]; })
+        .map(function (k) { return tally[k[0]] + " " + k[1]; });
+      var total = Object.keys(cells).length;
+      var label = KYC.stateName(code) + ": " + total + (total === 1 ? " seat, " : " seats, ") + said.join(", ");
+      return '<button type="button" class="ht-state' + (opts.selected === code ? " is-selected" : "") +
+        '" data-state="' + attr(code) + '" aria-pressed="' + String(opts.selected === code) +
+        '" aria-label="' + attr(label) + '" style="left:' + share(left, W) + ";top:" + share(top, H) +
+        ";width:" + share(reach, W) + ";height:" + share(layout.band + b.rows, H) + '">' +
+        '<span class="ht-code" style="height:' + share(layout.band, layout.band + b.rows) + '">' +
+        esc(code) + "</span>" +
+        '<span class="ht-block" style="width:' + share(b.cols, reach) + ";height:" +
+        share(b.rows, layout.band + b.rows) + ";grid-template-columns:repeat(" + b.cols +
+        ",1fr);grid-template-rows:repeat(" + b.rows + ',1fr)">' + squares + "</span></button>";
+    }).join("");
+    return '<div class="house-tiles" style="aspect-ratio:' + W + " / " + H + ";--ht-ratio:" +
+      (W / H).toFixed(4) + '">' + html + "</div>";
+  }
+
+  /** The key under the tiles: only the kinds some square is drawn in. */
+  function houseTilesKey() {
+    var layout = houseLayout();
+    if (!layout) return "";
+    var who = seatedBySeat();
+    var seen = {};
+    Object.keys(layout.states).forEach(function (code) {
+      var cells = seatedCells(layout.states[code]);
+      Object.keys(cells).forEach(function (n) {
+        var p = who[code + "-" + n];
+        seen[p ? partyLetter(p) : "vacant"] = true;
+      });
+    });
+    return [["r", "Republican"], ["d", "Democratic"], ["i", "Independent"], ["vacant", "Vacant"]]
+      .filter(function (k) { return seen[k[0]]; })
+      .map(function (k) {
+        return '<span class="key"><span class="swatch ht-swatch ht-' + k[0] + '"></span>' + esc(k[1]) + "</span>";
+      }).join("");
+  }
+
+  /** A state's House districts as a navigator (VISUALS-27): one square
+   *  per 2026 race, placed as kyc/tiles.py places them on the 2026 map,
+   *  each a link to that race on the page. Neutral: the race is open to
+   *  everyone on its ballot, and a square names its district, not a party.
+   *  "" where there is nothing to navigate (one district, or no layout). */
+  function districtTiles(code, races) {
+    var layout = houseLayout();
+    var b = layout && layout.states[code];
+    if (!b || !races || races.length < 2) return "";
+    var cells = b.cells2026 || b.cells;
+    var byNum = {};
+    races.forEach(function (r) { byNum[String(r.district || 0)] = r; });
+    var nums = Object.keys(cells);
+    if (nums.some(function (n) { return !byNum[n]; })) return "";
+    var links = nums.map(function (n) {
+      var r = byNum[n];
+      return '<a class="dt-seat" href="#' + attr("race-" + r.id) + '" style="grid-column:' +
+        (cells[n][0] + 1) + ";grid-row:" + (cells[n][1] + 1) + '" title="' + attr(r.label || "District " + n) +
+        '"><span class="sr-only">District </span>' + esc(n) + "</a>";
+    }).join("");
+    return '<p class="dt-caption">House races: a square per district, in bands from the state’s ' +
+      "north to its south, west to east within each band.</p>" +
+      '<nav class="district-tiles jump-row" aria-label="Jump to a House race, districts laid out as on the map"' +
+      ' style="--dt-cols:' + b.cols + ";--dt-rows:" + b.rows + '">' + links + "</nav>";
+  }
+
+  /* ------------------------------------------------ the states as a grid */
+
+  /** Every state, D.C. and territory as a tile at its place on a map-like
+   *  grid (VISUALS-35), each a link to its page; a dot marks a state with a
+   *  Senate seat on the 2026 ballot. Neutral fill: a link, not a party. */
+  function statePicker() {
+    var grid = KYC.meta().stateGrid;
+    var states = KYC.meta().states || {};
+    if (!grid) return "";
+    var senate = {};
+    (global.kycRaces || []).forEach(function (r) {
+      if (r.chamber === "Senate") senate[r.state] = true;
+    });
+    var verb = past() ? "was" : "is";
+    var tiles = Object.keys(grid).filter(function (code) { return states[code]; }).sort()
+      .map(function (code) {
+        var at = grid[code];
+        var name = states[code].name;
+        // The territories' row (kyc/tiles.py's last) sits one empty row
+        // below the states'.
+        var apart = at[0] >= 8;
+        return '<a class="tp-tile' + (apart ? " tp-territory" : "") + '" href="' +
+          attr(KYC.stateUrl(code)) + '" data-state="' + attr(code) + '" style="grid-row:' +
+          (at[0] + (apart ? 2 : 1)) +
+          ";grid-column:" + (at[1] + 1) + '" title="' + attr(name + (senate[code]
+            ? ": a Senate seat " + verb + " on the Nov 3, 2026 ballot" : "")) + '">' +
+          '<span aria-hidden="true">' + esc(code) + "</span>" +
+          '<span class="sr-only">' + esc(name) + (senate[code] ? ", Senate race in 2026" : "") + "</span>" +
+          (senate[code] ? '<span class="tp-dot" aria-hidden="true"></span>' : "") + "</a>";
+      }).join("");
+    return '<nav class="tile-picker" aria-label="States and territories, laid out as on a map">' +
+      '<div class="tp-grid">' + tiles + "</div>" +
+      '<p class="tp-key"><span class="tp-dot tp-dot-key" aria-hidden="true"></span>A Senate seat ' + verb +
+      " on the Nov 3, 2026 ballot. The bottom row is the territories.</p></nav>";
+  }
+
+  /* The sidebar's chamber counts, with the bar under each. */
+  KYC.ready(function () {
+    [["senateBalance", "senate"], ["houseBalance", "house"]].forEach(function (pair) {
+      var slot = doc.getElementById(pair[0]);
+      if (!slot || !KYC.meta()[pair[1]]) return;
+      var wrap = doc.createElement("div");
+      wrap.className = "balance-bar-slot";
+      wrap.innerHTML = balanceBar(pair[1], { compact: true });
+      slot.parentNode.insertBefore(wrap, slot.nextSibling);
+    });
+  });
+
+  KYC.balanceBar = balanceBar;
+  KYC.houseTiles = houseTiles;
+  KYC.houseTilesKey = houseTilesKey;
+  KYC.districtTiles = districtTiles;
+  KYC.statePicker = statePicker;
 })(window);

@@ -42,6 +42,7 @@ data/statewide_officers.json ─┤   (lieutenant governors, secretaries of stat
 data/courts.json            ──┤   (each state's highest court, from the courts)
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
+data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -51,7 +52,11 @@ data/political_history.json ──┤   (public offices held: congress-legislato
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
+data/members.json           ──┤   (members' platforms, education, careers, offices: members)
+data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
+data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
+data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -74,6 +79,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              courts/*.html      (generated, one per federal court)
                                              data/federal.js    (the executive, the Supreme Court, the courts)
                                              data/judiciary/*.js (one federal court's judges, and the judges' search)
+                                             data/votes/*.js    (each chamber's roll calls, loaded by the profile dialog on demand)
                                              about.html, 404.html (generated: the site's frame, kyc/pages.py)
                                              districts/index.html, courts/index.html (generated directories)
                                              site.webmanifest   (generated)
@@ -111,13 +117,18 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
+  `statewide_candidates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
-  `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`
+  `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
+  `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
   the 2026 ballot, a curated table citing each state's own record.
+  `members.json` (`members`, rule 86) is a hand-editable cache too.
+  `roll_calls.json`, written by `votes`, is a cache too; `data/votes/*.js`
+  is generated from it alone.
 - `index.html` / `map.html` are **hand-maintained templates**. The build reads
   them to check they load the right scripts in the right order, and rewrites
   nothing in them but the version stamps on their asset URLs (rule 76); they
@@ -166,19 +177,23 @@ python build_profile_site.py judiciary        # every sitting federal judge (FJC
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
+python build_profile_site.py members          # members' education and careers (Congressional Directory), platform (official site), offices
 python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
+python build_profile_site.py votes            # every roll call of the Congress (House Clerk, Senate LIS); resumes (rule 89)
+python build_profile_site.py seats            # each seat's last election (the Clerk's statistics; checked against MIT or Wikipedia)
+python build_profile_site.py outside          # outside spending for and against each candidate (FEC Schedule E, by candidate id)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1743 tests, no dependencies
-npm install && npm test                       # 2357 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1928 tests, no dependencies
+npm install && npm test                       # 2726 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -577,7 +592,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     is the pole of what the page draws: a new map's district is labelled on
     its land (`geo.polylabel(..., within=)`). The grid search it replaced
     ignored its own bounding box and numbered FL-19 and OH-14 on their own
-    borders.
+    borders. No word may sit on another: at 320-390px the partisan map put
+    West Virginia's code on Vermont's callout ("WV T") and Mississippi's on
+    Alabama's, and two picked district numbers on Texas's map covered each
+    other. Clearing an overlap must not move a word off its own land: the
+    first fix sent Kentucky's, Indiana's and West Virginia's codes to the
+    Atlantic column on lines up to 170px long, and stepped Texas's "37"
+    onto district 11. `kyc-usmap.js` moves a colliding code only within
+    the box the build measured clear of its state's edges (`labelRoom`),
+    then makes it a callout beside its own state; only the small coastal
+    states (`SMALL_ROOM`) join the column. A picked district's number
+    moves to another point inside its district, or becomes a callout with
+    a line to its own label point (`pick-leader`), clear of the numbers
+    already drawn. `testMapOnAPhone` and `testDistrictsOnAPhone` check
+    both.
 
 44. **On a phone, the page scrolls.** A fixed body with a scrolling box
     inside kept Safari's toolbars on screen, broke tap-to-top, and pinned the
@@ -1145,7 +1173,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     races' own sum (`summary.by_state`), and a figure that reads as what
     it is not carries its note from one table (`government_maps.COUNT_NOTES`).
     Say what a second source checks: "checked against NCSL" was read as
-    covering the seat counts, when only control was compared.
+    covering the seat counts, when only control was compared. A race's
+    people include its holder: the map's first race-first panel listed
+    only filers under "Still in the race", so 25 renominated senators -
+    Susan Collins, Jon Ossoff - were missing from the list and its count,
+    and named only under "Seat held by", below the markets.
 
 74. **A status word must describe the race it badges, and what that race
     decided.** California's and Washington's top two and Alaska's top
@@ -1298,14 +1330,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     none of them is on that ballot. The mark says "This office is on the
     Nov 3, 2026 ballot" and sits on the office's label line, never in the
     holder's block. Who is not running is said only where a cited source
-    says so (`ballot2026.OPEN_SEATS`): the constitution's term limit, read
-    with the NGA's count of the governor's terms, or the election office's
-    certified list for that office - never news, and never a term limit for
-    anyone else, since a term-limited officer may be on the ballot for
-    another office. `stategov` withholds an entry whose holder has changed.
-    Every other office on the ballot says by name that this was not checked
-    (`holderStatus` "unchecked"): silence beside Georgia's governor, with
-    "Open seat" beside Alaska's, read as "Brian Kemp is running" (rule 19).
+    says so: the election office's list of candidates for that office
+    (rule 91), with the constitution's term limit (`ballot2026.OPEN_SEATS`,
+    read with the NGA's count of the governor's terms) as the reason beside
+    it - never news, and never a term limit for anyone else, since a
+    term-limited officer may be on the ballot for another office. `stategov`
+    withholds an entry whose holder has changed. Any other office on the
+    ballot says by name that this was not checked (`holderStatus`
+    "unchecked"): silence beside Georgia's governor, with "Open seat" beside
+    Alaska's, read as "Brian Kemp is running" (rule 19).
     A voting link is credited to its own source, link by link - "the first
     four from NASS" credited NASS with eleven curated sample-ballot pages -
     and "each link opened" is said only of links found live.
@@ -1433,6 +1466,59 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     send what a reader typed: the Census geocoder takes addresses, but only
     through a remote script, and it would send them away.
 
+86. **A member's biography is a source's words, and says which.** The
+    rosters' Education, Previous Professions and "Policy Focus & Platforms"
+    columns were typed with no source and reached 537 member profiles
+    unbadged, in uneven words: "Anti-abortion legislation" for one member,
+    "Pro-life advocacy" for four others (TRUST-05). `profiles` never reads
+    them, and `validate` fails any education, careers or platform without a
+    source the page badges (`bio-unsourced`). `kyc/members.py` fills them by
+    id: education and careers from the Congressional Directory, joined on
+    the office web address congress-legislators lists for the bioguide id
+    and cross-checked against the printed surname (the Biographical
+    Directory answers a script 403 and headless Chrome a Cloudflare
+    challenge); education or an occupation from the infobox of the article
+    the id maps to where the Directory has none; the platform from the
+    official site's own issues list, one level, in its words, never a line
+    naming the member or anyone else ("Trump's One Big Beautiful Betrayal"
+    is a banner under Van Hollen's issues path). An "On The Issues" link
+    can lead to a page whose children are a voting record (Matsui's
+    /legislative-work), so pages filed under an issues path win. A link
+    is labelled by its first block of words: Cruz's issues are cards, and
+    read whole "Tax Reform Promote jobs, growth, and opportunity" passed as
+    an issue while the cards with longer blurbs were dropped, a partial list
+    that looked whole. The House template's furniture filed under Issues
+    (Community Project Funding, Legislative Process, Bill Search) is not an
+    issue. A site read that lists none is "Not listed on their official
+    site", never "No data" and never the typed text; a refusal concludes
+    nothing until headless Chrome has tried (rule 8). A contact page is
+    linked only once a fetch shows a form to write with, or the House's
+    shared form framed on the member's page: a soft 200 is not one. A
+    challenger's dialog leads with the race, then the money, the platform
+    and the biography, and its absences are said once (PROFILES-18).
+    The review of the first build found more, each now refused or said:
+    the House template's stock categories ("Congress; Economy; Education;
+    Energy; Health; Veterans", each "news and information related to")
+    were eighteen members' platforms while Figures's identical page read
+    "Not listed", so a list of nothing but those links the page, for
+    everyone (`stock_list`), and "Congress" is never an issue - a page
+    listing them among the member's own is quoted whole, since Schrier's
+    gives both the same card and blurb and nothing tells a default kept
+    from one chosen; a home page is never called "their issues page"
+    (Stansbury's was), and too few issue pages linked from it read "On
+    their official website" (`see_home`); a heading
+    broken by `</br>` was cut to "Sponsored &", and a line ending in "&" or
+    a comma is not taken; one issue spelled twice is listed once; a home
+    page's own issue links were shown as the list when Hoyer's unlinked
+    /issues held nine to its five, so `/issues` is tried first and a home
+    page's links are said to be what it "features" (`platformFeatured`); a
+    newsletter form (Aguilar's, Mfume's) is not a way to write, and a
+    name and an email alone never make one; the Directory printed no ";"
+    before Graves's and McConnell's "election history", which ran into
+    their careers; an address it prints that leads to the member's listed
+    site (dingell.house.gov) joins, and members it does not hold are
+    reported (`members-directory-unjoined`), never left silently blank.
+
 87. **A photograph says whose it is, read from its source, and weighs
     what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
     CC BY-SA, whose terms require the author, the licence and a link, and
@@ -1491,6 +1577,193 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     someone else. Every build lists the confirmed officers still shown
     without one.
 
+88. **A colour that carries meaning is checked as a colour-blind reader
+    sees it, and is never the only cue.** The 2026-10-17 audit ran the
+    Machado matrices over the legends: to a deuteranope the split lilac was
+    the Democratic blue (0.8 apart in OKLab x100), so 21 divided
+    governments read as Democratic trifectas; the light theme's Republican
+    red and independent amber were one olive (2.3); the guide's teal and
+    magenta 3.7 apart erased the judges map's main distinction. So:
+    - `render_test.js` (`testColourVision`) runs protanopia, deuteranopia
+      and tritanopia over every legend's fills, in all three themes, from
+      the tokens. Two fills a reader must tell apart by colour alone are 10
+      apart (7 under tritanopia).
+    - Split, divided and "none" are hatched as well as coloured
+      (`KYC.svgFill`, one pattern fill per shape, rule 45), and that pair
+      needs 5. A pattern means one thing on a screen: the balance bar over
+      the map marks the seats on the ballot with dots, never the map's
+      hatch, which there means "no race".
+    - Grey means "none" and nothing else: no category is grey
+      (`--none-fill`, the Eleventh Circuit was).
+    - A fill is never also a text colour that needs 4.5:1. Light
+      `--party-i` is text; `--party-i-fill` fills, in every chart as on
+      every map (the balance bar and the House squares came in with the
+      text amber, and `testColourVision` now reads their rules). A callout
+      writes on a fill in the ink `KYC.fillInk` names for it.
+    - No status or money colour is a party's: "Lost primary" was the
+      Republican red, "Open seat" the independents' amber, a Democrat's
+      "Spent" red.
+    - A scale that is not about party (the ideology score) is drawn in
+      neutral ink.
+    - A distinction drawn only in a hover title does not exist for a
+      touch reader: an open Senate seat is its party's tint, a special
+      election is outlined, each with a legend key. A key is drawn as
+      the map draws it: a 2px dashed border on a 10px square drew solid,
+      the look of a picked state's outline, so the special-election key
+      is the map's own dash on an SVG wide enough to show it, and a
+      picked state's line is solid and thicker.
+
+89. **A vote is a member's by the record's id, inside a term they served,
+    and an absence from the record is not a missed vote.** "How did my
+    representative vote" had no answer but a DW-NOMINATE score
+    (PERSONA-15). `kyc/rollcalls.py` reads every roll call from the House
+    Clerk's XML (bioguide ids) and the Senate's LIS XML (LIS ids, mapped
+    through congress-legislators), and gives a vote to a member only by
+    that id and only on a day congress-legislators has them serving in that
+    chamber: the first House roll call of 2025 lists Matt Gaetz, who never
+    took his seat (`overrides.ROLL_CALL_NON_MEMBERS`), and a member seated
+    in a special election is listed in nothing before it. The record's
+    words for each id are checked against the member - its state, and its
+    surname among their name's words, never a first name (the Senate
+    writes "John Reed" for Jack Reed) - and an id that disagrees gives
+    nobody anything (`votes-unattributed`). The Clerk writes a delegate's
+    state "XX" in the Committee of the Whole's roll calls; that passes only
+    for a member who sits for D.C. or a territory. Read on 2026-10-18, the
+    Clerk listed the Speaker in 522 of the 676 roll calls held: one he does
+    not vote in names him nowhere. Counted as missed, he would have read as
+    absent from 154 of the House's votes, so only a record's "Not Voting"
+    is missed, the rest is said apart with the House's own rule quoted
+    (Rule I, clause 7; Rule III, clause 3(a)). A "Not Voting" dated after a
+    member left (David Scott, listed the day after) is nobody's. A roll
+    call on the day a member took their seat, before the first that lists
+    them, or on the day they left, after the last, was not held while they
+    served: congress-legislators dates a term by the day, and six members
+    seated mid-Congress were told the record had left them out of one
+    (Walkinshaw, House roll call 244 of 2025, on his first day). One LIS id
+    under two members gives its votes to neither. A record's placeholder
+    is not a title (rule 10): the Senate's "No short title on file" stood
+    in a bill's place on 169 votes, and a roll call with no title takes the
+    one its measure's other roll calls give. The Clerk's "H R 9497" is
+    written "H.R. 9497", as the Senate's record and the bills write it, and
+    its "QUORUM" and "ADJOURN" are not measures. A word is searched from
+    its start: "ICE" found 37 votes on "justice", "service" and "police".
+    The Clerk answers a roll call it
+    has not posted with HTTP 200 and an "Error sanitizing file" note: not
+    a file (rule 52), and it ends the run there without concluding
+    anything (rule 8). Nothing is chosen: no "key votes", which would be an
+    editorial list. The votes are in `data/votes/<chamber>.js`, loaded on
+    demand from the stamped URLs every profile page names in its
+    `onDemandData` template (rule 76), never in `profiles.js`.
+
+90. **A past result belongs to the lines it was fought on, is read from
+    the official count, and is checked before it is shown; money is
+    attributed by id and shown as filed.** The 2026-10-17 audit found no
+    past result, no outside spending and no money beside a race anywhere
+    (RACES-15, PERSONA-11/12, VISUALS-20/33). `kyc/seat_history.py`
+    reads the Clerk of the House's "Statistics of the Presidential and
+    Congressional Election" (2024 for the House; 2020, 2022 and 2024 for
+    the Senate, the latest election to a term ending when the seat's
+    does: Oklahoma's class II seat was last elected in 2022's special,
+    not 2020) from its PDF. Each file numbers its accented letters
+    afresh (0x83 is "é" in 2020 and "í" in 2024), so the decoder reads
+    the file's own /Differences and fails on any byte it does not name.
+    A block whose names and counts do not pair is an error, never
+    guessed: the page number follows a page's last count, a fusion line
+    names a party and no one ("Conservative, Common Sense"), a runoff's
+    counts are footnoted (Georgia's January 5, 2021 runoff) and shown as
+    the runoff's, Maine's final ranked-choice round and Alaska's first
+    choices say which they are, and an unopposed name has no count and a
+    footnote saying why. A result is shown only where a second
+    compilation names the same winner and runner-up, in that order, with
+    counts within 1% (MIT's Senate returns; for the House, whose MIT file
+    sits behind a form asking for a name and an email, each state's 2024
+    Wikipedia page) - a lead, rule 50 - and the page says what was
+    checked; the cache keeps every difference. A district in
+    `districts.REDRAWN` shows no 2024 figure, and says only what is true of
+    every redrawn district - the result was counted on the old lines - and
+    links where its area came from: "fought by other voters" was false of
+    FL-1, 99.8% of whose old area it keeps. A result is "the last election
+    before the 2026 election", never "the last election": five House seats
+    (VA-11, AZ-7, NJ-11, GA-13, GA-14) were filled by special elections
+    after 2024, and the page named Gerald Connolly as VA-11's last winner
+    beside the member who won it after his death. Who took a seat after its
+    counted election comes from the frozen record and the snapshot
+    (`seat_history.seated_since`, `seatedSince`): the fold then says the
+    last *regular* election and who took the seat, by special election or
+    appointment, on what day. From the day after Election Day the fold is
+    "Before 2026", not "Last time" (rule 63), and a ranked-choice count's
+    first choices are a lead, never a win.
+    `kyc/outside.py` reads independent expenditures from the FEC's
+    by-candidate totals for the 2025-26 cycle (an election-period read gave
+    Jon Ossoff the January 2021 runoff's spending), by the profile's own
+    candidate ids at the key's pace (rule 37), one side at a time where
+    one candidate's rows run past a page (sorted on committee and side
+    together, the API repeated 12 of 101 rows). A row counts only where its
+    id's office and state are the profile's (`outside-attribution` is an
+    error), never by name; each side is its own total, never a net, and
+    says the FEC's processed filings trail the 24- and 48-hour reports.
+    One committee under two of a person's ids is one group (`merged`). A
+    member running for the other chamber keeps what was filed under their
+    own id, labelled as that candidacy's, and the campaign they are running
+    shows it on a line of its own (`outsideSpendingOther`), never summed:
+    Andy Barr's $7.2 million under his House id read as spending on a House
+    race he is not in. A comparison's platform says where each came from,
+    in the words the dialog uses (`KYC.platformItems`, one reading): a
+    sitting member's is their official website's issue list (rule 86),
+    never the campaign's words, and is split on its semicolons as a
+    campaign's headings are - read as comma-split roster text, it was
+    called "this site's roster summary". A party-only market over one party's ballot is never ranked by
+    closeness (rule 79).
+    A race's money is its campaigns' own totals as bars in neutral ink on
+    one scale, the party only in the name chip, each row with its own
+    through-date. Closest races are ordered by one market's prices, the
+    gap between its two highest, never a blend (rule 40). In the grid's
+    races view every new fold is drawn when opened (GRID-14's budget).
+
+91. **A ballot's candidates are the election office's list, read for
+    whoever holds the office today.** The state pages marked 36
+    governorships and some 90 other statewide offices "This office is on
+    the Nov 3, 2026 ballot" and named no one running for any of them; a
+    reader asked "who is on my ballot" and got the holder, who in half the
+    states is not (audit 2026-10-17, FRESHNESS-05, STATEGOV-14,
+    PERSONA-08, RACES-16). The candidates are a hand-edited cache,
+    `data/statewide_candidates.json` (`kyc/statewide.py`), each list the
+    jurisdiction's own election office's - a county's only where the state
+    publishes none that can be read, by an evidenced
+    `overrides.STATEWIDE_LISTS_ELSEWHERE` entry - quoted and dated, and
+    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list is
+    named as the document it is ("the Clark County Registrar of Voters’
+    notice of general election"), never "Certified by" a body: the first
+    page credited a county's sample ballot and a commission's voter guide
+    as certified by them. "Certified" is said only where the document's
+    own words say so (`certifiedQuote`) and the state's own office
+    published it; a county's or commission's list says why the state's
+    was not used (`notStateList`). Names are the list's, written first
+    name first, in ordinary capitals and without a ballot title (rule 77:
+    "Lombardo, Joseph", "JOSH SHAPIRO", "Governor Sarah Huckabee
+    Sanders"), the list's form kept beside them; a party the list
+    abbreviates is spelled out from its key or statute
+    (`statewide.PARTY_CODES`), and an unexplained code fails the build.
+    Write-ins apart, listed by surname and said to be; no portrait, money
+    or platform, never a profile (rule 27), never joined to one by a name
+    (rule 25): a sitting member a list names is a build warning
+    (`statewide-member-unnoted`) until an evidenced
+    `OTHER_OFFICE_NOMINEES` entry says so on their profile - Amy
+    Klobuchar was on Minnesota's governor ballot while hers said nothing.
+    The holder line is read from the list for the roster's holder at build
+    time, never copied from the research: "not among the candidates for
+    this office" where no one on it carries their surname (a hyphen and a
+    space one spelling), "among the candidates" (never "running for
+    re-election") only where the list's marked holder carries their
+    surname and given name, each naming the list. A namesake settles nothing: the first
+    read called Governor Bill Lee absent from a list printing "Eddie Lee
+    Murphy" only because a person had looked, so a namesake is recorded
+    with why (`namesakes`), and a short form the list does not print
+    ("Joe" for "Lombardo, Joseph") is an evidenced
+    `overrides.STATEWIDE_NAME_FORMS` entry, or the line says "not
+    checked". After Election Day the block is in the past tense and links
+    the state's results; this site names no state winner.
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from
@@ -1528,6 +1801,12 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
 - Icons come from the sprite in `kyc.js` via `KYC.icon(name)` or
   `<use href="#i-name">`.
 - Every view needs a URL. Use `KYC.router`.
+- A chart is boxes and page text (rule 46), never a third-party script, and
+  its colours are tokens: a party's colour only for a person's or a seat's
+  party (a holder, a candidate in the markets and polls), `--cat-*` for kinds that are not parties, one neutral ink for judges, races
+  and navigation. A layout the page cannot work out cheaply (the House tiles)
+  is computed in the pipeline (`kyc/tiles.py`), and anything that draws is
+  timed throttled (rule 45). README's "Charts" lists them.
 - New dialogs use `KYC.createModal` so they get the focus trap for free; new
   menus use `KYC.createMenu` so they are keyboard-operable.
 - Headline figures come from `window.kycBuildMeta`, never typed into a page.

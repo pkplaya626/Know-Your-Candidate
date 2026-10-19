@@ -171,17 +171,111 @@
     }, rows[0]);
   }
 
+  /* --------------------------------------------------------- the polls */
+
+  /** The candidates in the order the market bars above list them
+   *  (VISUALS-34): Texas's markets put Talarico first and its polls Paxton,
+   *  so a reader comparing the two read them crossed. A result is matched
+   *  to a market outcome by the same profile id, or by party where that
+   *  party is one candidate on each side; anyone unmatched keeps the
+   *  aggregator's order, after them. Returns a sort key for a result. */
+  function marketOrder(odds) {
+    var outcomes = [];
+    (odds.markets || []).some(function (m) {
+      var shown = (m.outcomes || []).filter(function (o) { return o.price >= FLOOR; });
+      if (shown.length && coherent(m).ok) { outcomes = shown; return true; }
+      return false;
+    });
+    var once = function (list, key) {
+      return list.filter(function (x) { return party(x.party) === key; }).length === 1;
+    };
+    return function (result, results) {
+      for (var i = 0; i < outcomes.length; i++) {
+        var o = outcomes[i];
+        if (o.id && result.id && o.id === result.id) return i;
+      }
+      for (var j = 0; j < outcomes.length; j++) {
+        var p = party(outcomes[j].party);
+        if (p !== "i" && p === party(result.party) && once(outcomes, p) && once(results, p)) return j;
+      }
+      return outcomes.length + results.indexOf(result);
+    };
+  }
+
+  function ordered(results, key) {
+    return results.slice().sort(function (a, b) { return key(a, results) - key(b, results); });
+  }
+
+  var MARKS = ["poll-dot-fill", "poll-dot-ring", "poll-dot-square", "poll-dot-diamond"];
+
+  /* The narrowest axis the dots are drawn on, in points. */
+  var SPAN = 30;
+
+  /** Each aggregator's average as dots on one shared axis, one row each:
+   *  a party's colour and, for whoever cannot tell the colours apart, a
+   *  shape per candidate, named in the key. The axis spans the figures
+   *  shown, rounded out to fives, and never less than thirty points: on a
+   *  ten-point axis Maine's 49.7 against 47.4 looked like a wide gap (PR
+   *  #111 review). Every number is page text in the table beside it. */
+  function pollDots(rows, key) {
+    if (!rows.length) return "";
+    var all = [];
+    rows.forEach(function (row) { row.results.forEach(function (r) { all.push(r.pct); }); });
+    var lo = Math.max(0, Math.floor((Math.min.apply(null, all) - 2) / 5) * 5);
+    var hi = Math.min(100, Math.ceil((Math.max.apply(null, all) + 2) / 5) * 5);
+    if (hi - lo < SPAN) {
+      lo = Math.max(0, Math.floor(((lo + hi) / 2 - SPAN / 2) / 5) * 5);
+      hi = Math.min(100, lo + SPAN);
+      lo = Math.min(lo, hi - SPAN);
+    }
+    var at = function (v) { return (100 * (v - lo) / (hi - lo)).toFixed(2) + "%"; };
+    var names = ordered(rows[0].results, key);
+    var mark = function (r) {
+      var i = names.map(function (n) { return n.label; }).indexOf(r.label);
+      return MARKS[(i < 0 ? names.length : i) % MARKS.length];
+    };
+    var ticks = [];
+    for (var t = lo; t <= hi; t += (hi - lo > SPAN ? 10 : 5)) ticks.push(t);
+    var body = rows.map(function (row) {
+      var spoken = row.aggregator + ": " + ordered(row.results, key).map(function (r) {
+        return r.label + " " + r.pct.toFixed(1) + "%";
+      }).join(", ");
+      return '<li class="poll-row"><span class="poll-name">' + KYC.escapeHtml(row.aggregator) + "</span>" +
+        '<span class="poll-track" role="img" aria-label="' + KYC.escapeAttr(spoken) + '" title="' +
+        KYC.escapeAttr(spoken) + '">' + ordered(row.results, key).map(function (r) {
+          return '<span class="poll-dot ' + mark(r) + " odds-seg-" + party(r.party) + '" style="left:' +
+            at(r.pct) + '"></span>';
+        }).join("") + "</span></li>";
+    }).join("");
+    return '<div class="poll-dots">' +
+      '<ul class="poll-key">' + names.map(function (r) {
+        return '<li><span class="poll-dot ' + mark(r) + " odds-seg-" + party(r.party) +
+          '" aria-hidden="true"></span>' + KYC.escapeHtml(r.label) + "</li>";
+      }).join("") + "</ul>" +
+      '<ul class="poll-rows">' + body + "</ul>" +
+      '<div class="poll-axis" aria-hidden="true"><span class="poll-name"></span><span class="poll-ticks">' +
+      ticks.map(function (v) { return '<span style="left:' + at(v) + '">' + v + "%</span>"; }).join("") +
+      "</span></div></div>";
+  }
+
   /** The polling averages, as each aggregator published them. */
-  function pollTable(polls) {
+  function pollTable(polls, key) {
     var rows = (polls && polls.rows) || [];
     if (!rows.length) return "";
-    var heads = rows[0].results.map(function (r) {
+    var columns = ordered(rows[0].results, key);
+    var heads = columns.map(function (r) {
       return '<th scope="col" class="party-' + party(r.party) + '">' + KYC.escapeHtml(r.label) + "</th>";
     }).join("");
     var body = rows.map(function (row) {
       var best = Math.max.apply(null, row.results.map(function (r) { return r.pct; }));
+      // Each row's figures under the columns' names, whatever order the
+      // aggregator gave them in.
+      var cells = columns.map(function (c, i) {
+        return row.results.filter(function (r) { return r.label === c.label; })[0] ||
+          row.results[rows[0].results.indexOf(c)] || row.results[i];
+      });
       return "<tr><th scope=\"row\">" + link(row.url, row.aggregator) + "</th>" +
-        row.results.map(function (r) {
+        cells.map(function (r) {
           var text = r.pct.toFixed(1);
           return "<td>" + (r.pct === best ? "<strong>" + text + "</strong>" : text) + "</td>";
         }).join("") +
@@ -189,7 +283,7 @@
     }).join("");
     return '<div class="odds-polls">' +
       '<p class="odds-subhead">Polling averages <span class="odds-faint">' +
-        link(polls.url, "as listed on Wikipedia", polls.page) + "</span></p>" +
+        link(polls.url, "as listed on Wikipedia", polls.page) + "</span></p>" + pollDots(rows, key) +
       '<div class="odds-scroll"><table class="odds-poll-table"><thead><tr><th scope="col">Average</th>' +
         heads + '<th scope="col">Updated</th></tr></thead><tbody>' + body +
       "</tbody></table></div></div>";
@@ -205,11 +299,12 @@
     var polls = odds.polls && odds.polls.rows && odds.polls.rows.length ? odds.polls : null;
     if (!markets.length && !polls) return "";
     var pollHtml = "";
+    var key = marketOrder(odds);
     if (polls && opts.compact) {
       var first = latest(polls.rows);
       var when = day(isoOf(first.updated));
       pollHtml = '<p class="odds-line"><span class="odds-source">Polls</span> ' +
-        first.results.map(function (r) {
+        ordered(first.results, key).map(function (r) {
           return '<span class="party-' + party(r.party) + '">' + KYC.escapeHtml(r.label) + " " +
             r.pct.toFixed(1) + "</span>";
         }).join(" · ") +
@@ -218,18 +313,35 @@
         (polls.rows.length > 1 ? "; " + (polls.rows.length - 1) + " more average" +
           (polls.rows.length > 2 ? "s" : "") : "") + ")</span></p>";
     } else if (polls) {
-      pollHtml = pollTable(polls);
+      pollHtml = pollTable(polls, key);
     }
-    return '<section class="odds' + (opts.compact ? " odds-compact" : "") + '" aria-label="' +
-      KYC.escapeAttr("Prediction markets and polling averages for " + (race.label || "this race")) + '">' +
-      '<p class="odds-subhead">' + (finalPrices() ? FINAL_HEAD : "Prediction markets") +
-        ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></p>" +
-      markets.join("") + pollHtml +
+    var head = (finalPrices() ? FINAL_HEAD : "Prediction markets") +
+      ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span>";
+    var body = markets.join("") + pollHtml +
       '<p class="odds-note">A market price is what traders pay for a contract worth $1 if that ' +
         "outcome happens. It is not a poll, and not this site’s forecast. Polling averages " +
-        "are each aggregator’s own." + (finalPrices() ? FINAL_NOTE : "") + "</p>" +
-      "</section>";
+        "are each aggregator’s own" + (polls ? ", drawn as published, and not this site’s forecast either" : "") +
+        "." + (finalPrices() ? FINAL_NOTE : "") + " " + NO_TIES + "</p>";
+    var label = KYC.escapeAttr("Prediction markets and polling averages for " + (race.label || "this race"));
+    /* On a person's own profile the prices sit closed under a heading the
+     * reader opens: a challenger's page that showed "2%" before anything
+     * else about the race read as a verdict on them (TRUST-14). Every
+     * price is still quoted as published when opened (rule 40). */
+    if (opts.collapsed) {
+      return '<details class="odds odds-compact odds-collapsed" aria-label="' + label + '">' +
+        '<summary class="odds-subhead">' +
+          // From Election Day the closed block's own words say final (rule 41).
+          (finalPrices() ? FINAL_HEAD : "What prediction markets say about this race") +
+          ' <span class="odds-faint">as of ' + KYC.escapeHtml(day(data().asOf)) + "</span></summary>" +
+        body + "</details>";
+    }
+    return '<section class="odds' + (opts.compact ? " odds-compact" : "") + '" aria-label="' + label + '">' +
+      '<p class="odds-subhead">' + head + "</p>" + body + "</section>";
   }
+
+  /* The markets are trading platforms; the site quotes them and takes
+   * nothing from them, and says so where it quotes them (TRUST-14). */
+  var NO_TIES = "This site has no relationship with these markets and earns no money from them.";
 
   /* From Election Day on, these are the last prices read before the first
    * polls closed (odds.yml stops there), and the page says so: prices that
@@ -256,8 +368,35 @@
       markets.map(function (m) { return marketRow(m, null); }).join("") +
       '<p class="odds-note">What traders pay for a $1 contract on each party winning a majority. ' +
         "Not a poll, and not this site’s forecast." + (finalPrices() ? FINAL_NOTE : "") +
-        "</p></section>";
+        " " + NO_TIES + "</p></section>";
   }
 
-  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices };
+  /* How close one source's market prices a race: the gap between its two
+   * highest prices, from that source alone (PERSONA-11; rule 40: never a
+   * blend of two). Null where the source has no market on the race, its
+   * market has fewer than two outcomes, or its prices do not add up to
+   * about a dollar (COHERENT), since a gap between those says nothing - or
+   * where it resolves on the party only and everyone on the November ballot
+   * is one party's (oneParty, rule 79): CA-11's two Democrats were ranked
+   * "98 points apart" by a market that cannot tell them apart. */
+  var SOURCE_NAMES = { kalshi: "Kalshi", polymarket: "Polymarket" };
+
+  function gap(race, source) {
+    var odds = (data().races || {})[race && race.id] || {};
+    var market = (odds.markets || []).filter(function (m) { return m.source === source; })[0];
+    if (!market || !coherent(market).ok) return null;
+    if (partyOnly(market) && oneParty(race)) return null;
+    var outcomes = (market.outcomes || []).slice().sort(function (a, b) {
+      return (b.price || 0) - (a.price || 0);
+    });
+    if (outcomes.length < 2) return null;
+    var top = outcomes[0].price || 0;
+    var second = outcomes[1].price || 0;
+    return { gap: top - second, top: top, second: second,
+             topLabel: outcomes[0].label || "", secondLabel: outcomes[1].label || "",
+             url: market.url, asOf: data().asOf };
+  }
+
+  KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices,
+               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; } };
 })(window);

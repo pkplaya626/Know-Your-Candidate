@@ -165,6 +165,18 @@ jobs:
         if: env.FEC_API_KEY != ''
         run: python build_profile_site.py campaigns --limit 150 || true
 
+      # Outside groups' independent expenditures for and against each
+      # candidate, by candidate id (kyc/outside.py): about 70 requests at
+      # the key's pace. A read that fails keeps the committed cache and
+      # stops nothing else in this run. The seats' last elections
+      # (kyc/seat_history.py) are a past count and are not re-read here.
+      - name: Refresh outside spending
+        continue-on-error: true
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        if: env.FEC_API_KEY != ''
+        run: python build_profile_site.py outside
+
       - name: Refresh financial disclosure links (House Clerk and Senate eFD)
         run: python build_profile_site.py disclosures
 
@@ -230,6 +242,15 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py tribes
 
+      # How each member voted: the roll calls posted since the last run, from
+      # the House Clerk's and the Senate's own records, one request a second
+      # (kyc/rollcalls.py). A refused or failed request ends the run with
+      # what was read saved; the next run goes on from there.
+      - name: Read the new roll calls
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python build_profile_site.py votes
+
       # The public offices each person has held: Congress from
       # congress-legislators, every other office from Wikidata where the
       # person's own Wikipedia article gives the same office the same years
@@ -239,6 +260,19 @@ jobs:
       - name: Refresh the public offices each person has held
         continue-on-error: true
         run: python build_profile_site.py history
+
+      # Members' education and careers from the Congressional Directory (on
+      # GovInfo, through the api.data.gov key the FEC uses), the issues their
+      # official sites list, a checked contact page, and their offices at
+      # home (kyc/members.py, rule 86). Sites read in the last 27 days are
+      # skipped and a run reads at most 150, one request at a time; a read
+      # that concludes nothing keeps the last one.
+      - name: Refresh members' biographies, platforms and offices
+        continue-on-error: true
+        timeout-minutes: 40
+        env:
+          FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
+        run: python build_profile_site.py members --limit 150
 
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
@@ -294,9 +328,11 @@ jobs:
           git commit -m "Reconcile the rosters with the current Congress
 
           Opened automatically by .github/workflows/refresh.yml. Congressional
-          membership comes from congress-legislators; education, net worth,
-          committees and platform are editorial research and are left empty
-          rather than invented. State governments come from their own
+          membership comes from congress-legislators; a new member's
+          education, careers and platform are left empty rather than
+          invented until the members command reads them from the
+          Congressional Directory and their official site, and net worth is
+          never derived. State governments come from their own
           authorities: governors from the NGA, lieutenant governors from NLGA,
           secretaries of state from NASS, legislators from Open States, party
           counts from NCSL."

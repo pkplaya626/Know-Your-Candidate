@@ -204,14 +204,18 @@
 
     function current() { return data.modes[mode]; }
 
+    /* "None" is the grey kept for that, hatched (KYC.svgFill): the lowest
+     * count was 1.4:1 from it (GUIDE-16). */
     function fill(token) {
-      return token === "none" ? "var(--surface-2)" : "var(--" + token + ")";
+      return token === "none" ? "var(--none-fill)" : "var(--" + token + ")";
     }
 
-    /* The faint fills - the low counts, grey, none - take the theme's own
-     * text colour in a callout; the bright ones keep the dark default. */
-    var LIGHT_INK = { "scale-1": 1, "scale-2": 1, "scale-3": 1, "cat-4": 1, none: 1 };
+    /* A callout's word: the faint fills - the low counts, none - take the
+     * theme's own text colour; each category names its own ink in each
+     * theme (--cat-N-ink in kyc.css), the colour that reads on it. */
+    var LIGHT_INK = { "scale-1": 1, "scale-2": 1, "scale-3": 1, none: 1 };
     function ink(token) {
+      if (/^cat-[1-4]$/.test(token)) return "var(--" + token + "-ink)";
       return LIGHT_INK[token] ? "var(--text)" : "";
     }
 
@@ -224,7 +228,7 @@
       var value = m.values[code];
       var e = value === undefined ? null : entry(m, value);
       if (!e) {
-        return { fill: "var(--surface-2)", ink: "var(--text)",
+        return { fill: "var(--none-fill)", ink: "var(--text)",
                  text: map.name(code) + ": " + (m.outside || "not shown") };
       }
       return { fill: fill(e.token), ink: ink(e.token), text: map.name(code) + ": " + e.label };
@@ -252,7 +256,7 @@
           ? '<span class="swatch swatch-label" style="background:' + fill(e.token) +
             (ink(e.token) ? ";color:" + ink(e.token) : "") + '">' +
             KYC.escapeHtml(e.key === "none" ? "–" : e.key) + "</span>"
-          : '<span class="swatch" style="background:' + fill(e.token) + '"></span>';
+          : '<span class="swatch" style="background:' + KYC.swatchFill(fill(e.token)) + '"></span>';
         return '<span class="key">' + chip + KYC.escapeHtml(e.label) + "</span>";
       }).join("");
     }
@@ -331,7 +335,7 @@
         var listed = rows ? factList(rows) : "";
         return '<div class="guide-fact' + (id === mode ? " is-current" : "") + '">' +
           '<p class="guide-fact-title">' +
-          (e ? '<span class="swatch" style="background:' + fill(e.token) + '"></span>' : "") +
+          (e ? '<span class="swatch" style="background:' + KYC.swatchFill(fill(e.token)) + '"></span>' : "") +
           KYC.escapeHtml(m.label) + (e ? ' <span class="faint">' + KYC.escapeHtml(e.label) + "</span>" : "") +
           "</p><p>" + KYC.escapeHtml(fact) + "</p>" + listed +
           (link ?'<p><a href="' + KYC.escapeAttr(link[1]) +

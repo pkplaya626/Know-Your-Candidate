@@ -685,6 +685,36 @@ def check_curated_candidates(profiles):
     return issues
 
 
+# Where a biography field may come from: the sources the page badges
+# (assets/kyc.js FIELD_SOURCES). Anything else - a roster column typed by
+# hand - is not shown (rule 86).
+BIO_FIELDS = ("education", "previous_professions", "platforms")
+BIO_SOURCES = {"wikipedia", "election-page", "campaign-site", "official-site",
+               "member-wikipedia", "congressional-directory"}
+
+
+def check_bio_sources(profiles):
+    """A profile's education, previous careers or platform shown with no
+    source the page can name. The rosters' columns for these were typed
+    with no source and in uneven words - one member's platform "Anti-abortion
+    legislation", four others' "Pro-life advocacy" (TRUST-05) - and they
+    reached 537 member profiles unbadged, reading as fact."""
+    unsourced = []
+    for p in profiles:
+        quality = p.get("quality") or {}
+        for field in BIO_FIELDS:
+            value = p.get(field)
+            if value in (None, "") or quality.get(field):
+                continue        # an absence, said as one
+            if (p.get("fieldSources") or {}).get(field) not in BIO_SOURCES:
+                unsourced.append(f"{p['name']} ({p.get('officeLabel')}): {field}")
+    if unsourced:
+        return [Issue("error", "bio-unsourced",
+                      f"{len(unsourced)} biography fields would be shown with no named source",
+                      unsourced)]
+    return []
+
+
 def check_duplicate_people(profiles):
     """Flag pairs in one race that look like the same person filed twice.
 
@@ -1615,7 +1645,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None, voting_dates=None):
+        history=None, voting_dates=None, statewide=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1645,6 +1675,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
     issues += check_curated_candidates(profiles)
+    issues += check_bio_sources(profiles)
     issues += check_finance_periods(profiles)
     issues += check_field_screen(field)
     issues += check_registrations(profiles, field)
@@ -1667,7 +1698,36 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_voting_links(voting)
     if voting_dates is not None:
         issues += check_voting_dates(voting_dates)
+    if statewide is not None:
+        issues += check_statewide_candidates(statewide, snapshot)
     return issues
+
+
+def check_statewide_candidates(data, snapshot=None):
+    """The statewide candidates (kyc/statewide.py, rule 91): every list the
+    election office's own, quoted and dated, never a compiled table (rule
+    50); exactly the offices kyc/ballot2026.py puts on the 2026 ballot; the
+    list's words only - no portrait, money or platform; and the holder read
+    consistently. An error: the page names real people as on a ballot.
+
+    A warning, not a join, for a sitting member whose name and state a
+    list carries and whose profile does not say so (rule 25): the lead is
+    for a person to confirm and record in overrides.OTHER_OFFICE_NOMINEES."""
+    from . import statewide
+    if not data:
+        return [Issue("error", "statewide-candidates-missing",
+                      f"no {statewide.CACHE_PATH}; no statewide office lists its candidates")]
+    found = statewide.problems(data)
+    if found:
+        return [Issue("error", "statewide-candidates", f"{len(found)} problems in the statewide "
+                      "candidates (kyc/statewide.py)", found)]
+    leads = statewide.member_leads(data, (snapshot or {}).get("legislators"),
+                                   set(overrides.OTHER_OFFICE_NOMINEES))
+    if leads:
+        return [Issue("warning", "statewide-member-unnoted",
+                      f"{len(leads)} sitting member(s) of Congress share a name with a statewide "
+                      "candidate in their state and have no OTHER_OFFICE_NOMINEES entry", leads)]
+    return []
 
 
 def check_voting_dates(data):

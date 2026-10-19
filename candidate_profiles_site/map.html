@@ -23,8 +23,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=4b12c6f3bc">
-<script src="assets/kyc.js?v=5edae3ec75"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=b9f9b76c6a">
+<script src="assets/kyc.js?v=a806153900"></script>
 </head>
 <body>
 
@@ -186,33 +186,68 @@
         <div class="toolbar">
             <div class="map-legend" id="mapLegend" aria-live="polite"></div>
             <div class="map-views push-right">
-                <div class="segmented" role="group" aria-label="Congress">
-                    <button type="button" data-mode="senate" aria-pressed="true">Senate</button>
-                    <button type="button" data-mode="senate2026" aria-pressed="false">
-                        <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
-                        2026 races
-                    </button>
-                    <button type="button" data-mode="house" aria-pressed="false">House</button>
+                <!-- On a phone the ten views are one menu, so the map starts on the first screen. -->
+                <label class="map-mode-pick">
+                    <span class="map-view-kicker">Map view</span>
+                    <select id="mapModeSelect" class="select">
+                        <optgroup label="U.S. Congress">
+                            <option value="senate">Senate</option>
+                            <option value="senate2026">2026 Senate races</option>
+                            <option value="house">House</option>
+                        </optgroup>
+                        <optgroup label="Statewide offices">
+                            <option value="governor">Governors</option>
+                            <option value="lt">Lieutenant governors</option>
+                            <option value="ag">Attorneys general</option>
+                            <option value="sos">Secretaries of state</option>
+                            <option value="governor2026">2026 governor's races</option>
+                        </optgroup>
+                        <optgroup label="Party control of state government">
+                            <option value="legislature">Legislatures</option>
+                            <option value="trifecta">Trifectas</option>
+                        </optgroup>
+                    </select>
+                </label>
+                <div class="map-view-group">
+                    <span class="map-view-kicker" id="mapViewsCongress">U.S. Congress</span>
+                    <div class="segmented" role="group" aria-labelledby="mapViewsCongress">
+                        <button type="button" data-mode="senate" aria-pressed="true">Senate</button>
+                        <button type="button" data-mode="senate2026" aria-pressed="false">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="#i-flag"/></svg>
+                            2026 races
+                        </button>
+                        <button type="button" data-mode="house" aria-pressed="false">House</button>
+                    </div>
                 </div>
-                <div class="segmented" role="group" aria-label="Statewide offices">
-                    <button type="button" data-mode="governor" aria-pressed="false">Governors</button>
-                    <button type="button" data-mode="lt" aria-pressed="false">Lt. governors</button>
-                    <button type="button" data-mode="ag" aria-pressed="false">Attorneys general</button>
-                    <button type="button" data-mode="sos" aria-pressed="false">Secretaries of state</button>
-                    <button type="button" data-mode="governor2026" aria-pressed="false">2026 governor's races</button>
+                <div class="map-view-group">
+                    <span class="map-view-kicker" id="mapViewsOffices">Statewide offices</span>
+                    <div class="segmented" role="group" aria-labelledby="mapViewsOffices">
+                        <button type="button" data-mode="governor" aria-pressed="false">Governors</button>
+                        <button type="button" data-mode="lt" aria-pressed="false">Lt. governors</button>
+                        <button type="button" data-mode="ag" aria-pressed="false">Attorneys general</button>
+                        <button type="button" data-mode="sos" aria-pressed="false">Secretaries of state</button>
+                        <button type="button" data-mode="governor2026" aria-pressed="false">2026 governor's races</button>
+                    </div>
                 </div>
-                <div class="segmented" role="group" aria-label="Party control of state government">
-                    <button type="button" data-mode="legislature" aria-pressed="false">Legislatures</button>
-                    <button type="button" data-mode="trifecta" aria-pressed="false">Trifectas</button>
+                <div class="map-view-group">
+                    <span class="map-view-kicker" id="mapViewsControl">Party control of state government</span>
+                    <div class="segmented" role="group" aria-labelledby="mapViewsControl">
+                        <button type="button" data-mode="legislature" aria-pressed="false">Legislatures</button>
+                        <button type="button" data-mode="trifecta" aria-pressed="false">Trifectas</button>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- The chamber's seats as a bar in the views of Congress, and the
+             House as one square per seat (kyc-map.js, KYC.balanceBar). -->
+        <div class="map-balance" id="mapBalance" hidden></div>
         <div class="map-stage" id="mapStage">
             <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"
                  role="group" aria-label="Map of U.S. states and territories.
                  Each state is a button that opens its delegation."></svg>
         </div>
+        <div class="map-tiles" id="mapTiles" hidden></div>
     </main>
 
     <aside class="detail-panel" aria-label="State delegation">
@@ -258,17 +293,23 @@
     </footer>
 </div>
 
-<script src="data/profiles.js?v=c1d158362e"></script>
+<!-- Loaded only when a member's profile is opened (KYC.loadData): named
+     here, inert, so the build stamps their versions with the rest (rule 76). -->
+<template id="onDemandData">
+<script src="data/votes/house.js?v=90967e1d0d"></script>
+<script src="data/votes/senate.js?v=df28986068"></script>
+</template>
+<script src="data/profiles.js?v=c110bdc9e5"></script>
 <script src="data/geo.js?v=720a1e65d9"></script>
 <script src="data/odds.js"></script>
-<script src="data/stategov.js?v=8a1deba302"></script>
+<script src="data/stategov.js?v=527b67c8a8"></script>
 <script src="data/lookup/index.js?v=540c440033"></script>
-<script src="assets/kyc-odds.js?v=1852f17dc4"></script>
-<script src="assets/kyc-cards.js?v=a67ab65c61"></script>
-<script src="assets/kyc-profile.js?v=3a957b12a7"></script>
-<script src="assets/kyc-stategov.js?v=dd94f8a786"></script>
-<script src="assets/kyc-findrep.js?v=708ec7448e"></script>
-<script src="assets/kyc-usmap.js?v=d1ac1c1524"></script>
-<script src="assets/kyc-map.js?v=96e414509e"></script>
+<script src="assets/kyc-odds.js?v=c1d28927af"></script>
+<script src="assets/kyc-cards.js?v=051e13084b"></script>
+<script src="assets/kyc-profile.js?v=ef222fe63e"></script>
+<script src="assets/kyc-stategov.js?v=fd9b6cde3d"></script>
+<script src="assets/kyc-findrep.js?v=904968445e"></script>
+<script src="assets/kyc-usmap.js?v=77eb08148c"></script>
+<script src="assets/kyc-map.js?v=fc4993fc7c"></script>
 </body>
 </html>

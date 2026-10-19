@@ -527,8 +527,25 @@ def _e(text):
     return html.escape(str(text), quote=True)
 
 
+_PROFILE_DIALOG = "assets/kyc-profile.js"
+
+
 def _scripts(sources):
-    return "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
+    """The page's script tags. A page that opens the profile dialog also
+    names, inert, the vote files the dialog loads when a member is opened
+    (KYC.loadData), so the build stamps their versions with the rest
+    (rule 76) and the page loads them only when wanted."""
+    from .emit import VOTES_FILES
+
+    tags = "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
+    dialog = [src for src in sources if src.endswith(_PROFILE_DIALOG)]
+    if not dialog:
+        return tags
+    prefix = dialog[0][:-len(_PROFILE_DIALOG)]
+    lazy = "\n".join(f'<script src="{_e(prefix)}data/{_e(VOTES_FILES[chamber])}"></script>'
+                     for chamber in sorted(VOTES_FILES))
+    return ("<!-- Loaded only when a member's profile is opened (KYC.loadData). -->\n"
+            f'<template id="onDemandData">\n{lazy}\n</template>\n' + tags)
 
 
 # The caches whose dates the footers print: (key, file under data/, the
@@ -553,6 +570,7 @@ DATED_CACHES = (
     ("history", "political_history.json", ("read",)),
     ("oge", "oge_disclosures.json", ("read",)),
     ("enrichment", "enrichment.json", ("checked",)),
+    ("members", "members.json", ("read",)),
 )
 
 
@@ -758,6 +776,33 @@ def _local_kinds():
             for key, _short, title, _one, plural in kinds]
 
 
+# Each kind of local government's tone on the directory's bars: category
+# colours, never a party's (rule 49), in the table's order of kinds.
+LOCAL_TONES = {"county": "lg-county", "municipal": "lg-municipal", "township": "lg-township",
+               "school": "lg-school", "special": "lg-special"}
+
+
+def local_bar(name, counts, kinds):
+    """One state's local governments as one bar, a part per kind as wide as
+    its share of the total (VISUALS-32). A kind the Census marks "X" - the
+    state has none - is no part of the bar but a word under it, "none":
+    never a zero-length part a reader cannot see (rule 49). *kinds* is
+    ``[(key, words, none)]`` without the total. "" with no total."""
+    total = (counts or {}).get("total")
+    if not total:
+        return ""
+    present = [(k, w, counts[k]) for k, w, _n in kinds if counts.get(k)]
+    absent = [w.lower() for k, w, _n in kinds if counts.get(k) is None]
+    spoken = (f"{name}: {total:,} local governments: "
+              + ", ".join(f"{n:,} {w.lower()}" for _k, w, n in present)
+              + (f"; none of: {', '.join(absent)}" if absent else "") + ".")
+    parts = "".join(
+        f'<span class="lg-seg {LOCAL_TONES[k]}" style="width:{100 * n / total:.3f}%"></span>'
+        for k, _w, n in present)
+    return (f'<span class="lg-bar" role="img" aria-label="{_e(spoken)}" title="{_e(spoken)}">{parts}</span>'
+            + (f'<span class="lg-none">None: {_e(", ".join(absent))}</span>' if absent else ""))
+
+
 def render_counties_index(host, census=None, dates=None):
     """Every state's local governments, counted by kind as the Census of
     Governments counts them, each state linked to its counties page. A
@@ -791,10 +836,18 @@ def render_counties_index(host, census=None, dates=None):
                      f'aria-label="What this count is">*</a></sup>')
         return f"<td>{value:,}{mark}</td>"
 
+    parts = [k for k in kinds if k[0] != "total"]
     rows = "\n".join(
         f'                        <tr><th scope="row"><a href="{_e(code.lower())}.html">'
-        f'{_e(state_name(code))}</a></th>' + "".join(cell(code, k, n) for k, _w, n in kinds) + "</tr>"
+        f'{_e(state_name(code))}</a>{local_bar(state_name(code), counts.get(code), parts)}</th>'
+        + "".join(cell(code, k, n) for k, _w, n in kinds) + "</tr>"
         for code in sorted(STATES, key=state_name))
+    # What the bars' tones are, once, above the table.
+    key = ('                <p class="lg-key">' + "".join(
+        f'<span class="lg-key-item"><span class="lg-seg {LOCAL_TONES[k]}" aria-hidden="true"></span>'
+        f"{_e(w)}</span>" for k, w, _n in parts)
+        + '<span class="lg-key-item">Each bar is a state&#8217;s governments, by kind; '
+        "&#8220;None&#8221; names a kind the state does not have.</span></p>")
     year = (census or {}).get("year")
     # D.C. and the territories are not in the table, and it says why. D.C.'s
     # count is the same table's, as the guide's map shows it; the scope is
@@ -824,6 +877,7 @@ def render_counties_index(host, census=None, dates=None):
         '                        <a class="btn" href="../states/index.html"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg> States &amp; territories</a>',
         "                    </p>",
         "                </header>",
+        key,
         '                <div class="directory-scroll" tabindex="0" role="region" aria-label="Local governments by state">',
         '                    <table class="directory-table directory-wrap">',
         '                        <thead><tr><th scope="col">State</th>' +
@@ -1614,13 +1668,14 @@ DATASETS = (
      '<a href="https://github.com/unitedstates/congress-legislators">congress-legislators</a>',
      "Every member: seat, party, term, contact details, ids for outbound links", "refresh",
      "congress"),
-    # The rosters' biography columns are not read by a script: they are the
-    # editorial source of truth, kept by hand (CLAUDE.md), and the page must
-    # not say every fact is read from a source.
-    ("Members' biographies",
-     "The member rosters in this site's repository, kept by hand",
-     "Education, earlier careers and stated priorities, where the rosters hold them",
-     "curated", None),
+    # The rosters' typed biography columns are never shown (rule 86): each
+    # field comes from a source tied to the member by id, and says which.
+    ("Members' biographies and priorities",
+     '<a href="https://www.govinfo.gov/app/collection/cdir">Official Congressional '
+     "Directory</a>; the Wikipedia article congress-legislators links to each member; each "
+     "member's official website; congress-legislators' district offices",
+     "Education and earlier careers in the Directory's words; the issues a member's own "
+     "site lists; a checked contact form; offices at home", "refresh", "members"),
     ("Editorial decisions",
      "This site's repository: each decision recorded with its evidence and date",
      "What no source can settle alone: a lapsed campaign site, one person filed under two names",
@@ -1796,9 +1851,14 @@ def _about_main(dates):
         '                <section class="guide-section" id="data">',
         '                    <h2 class="state-heading">Where the data comes from</h2>',
         "                    <p>Most facts are read from a named source by a script and checked before",
-        "                        they are published. The member rosters' biographies, and the decisions",
-        "                        no source can settle alone, are kept by hand in the repository, where",
-        "                        each change is public. Where a source says nothing, the site says so,",
+        "                        they are published. The decisions no source can settle alone, and what",
+        "                        a person read from an office's own page where no script can (each",
+        "                        state's voting dates, a ballot printed as a PDF, a court roster its",
+        "                        site will not serve to a script),",
+        "                        are kept by hand in the repository, where each change is public. A",
+        "                        member's biography and priorities are never typed in: each is read",
+        "                        from a source tied to them and says which. Where a source says",
+        "                        nothing, the site says so,",
         "                        rather than guessing. The repository's",
         f'                        <a href="{repo}#readme">README</a> lists every field and where it comes',
         "                        from.</p>",

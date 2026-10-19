@@ -957,7 +957,7 @@
         if (!a || a.pathname !== global.location.pathname || !/^#\//.test(a.hash || "")) return;
         global.setTimeout(function () {
           var target = doc.getElementById(view);
-          if (target && target.scrollIntoView) target.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (target && target.scrollIntoView) target.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
         }, 0);
       });
     }
@@ -1047,7 +1047,7 @@
       { bubbles: true, cancelable: true }));
     var box = slot.getBoundingClientRect();
     if ((box.bottom < 0 || box.top > (global.innerHeight || 0)) && slot.scrollIntoView) {
-      slot.scrollIntoView({ behavior: "smooth", block: "start" });
+      slot.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
     }
     return true;
   }
@@ -1056,7 +1056,7 @@
   function reveal() {
     var slot = doc.querySelector("[data-findrep][data-findrep-ready]");
     if (!slot) return false;
-    if (slot.scrollIntoView) slot.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (slot.scrollIntoView) slot.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
     var out = slot.querySelector(".findrep-result");
     var target = out && !out.hidden ? out : slot.querySelector(".findrep-zip");
     if (target === out) out.setAttribute("tabindex", "-1");

@@ -343,7 +343,7 @@
     // after a tap, bring the answer into view.
     if (picked && !(opts && opts.fromRoute) && global.matchMedia &&
         global.matchMedia("(max-width: 1000px)").matches) {
-      el("legPanelTitle").scrollIntoView({ behavior: "smooth", block: "start" });
+      el("legPanelTitle").scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
     }
     if (!(opts && opts.fromRoute)) {
       KYC.router.writeFilters({ chamber: chamber === "upper" ? "" : chamber, d: picked });
@@ -392,7 +392,7 @@
       var row = event.target.closest("[data-region]");
       if (row) {
         pick(row.getAttribute("data-region"));
-        el("legMap").scrollIntoView({ behavior: "smooth", block: "start" });
+        el("legMap").scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
       }
     });
     KYC.router.onChange(function () {

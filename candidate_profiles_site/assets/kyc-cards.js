@@ -177,14 +177,20 @@
    * under an age sort, where a search matched (kyc-directory.js). */
   function card(item, opts) {
     var note = opts && opts.note;
+    // No portrait (rule 24 guesses none): a disc with the person's
+    // initials, not a 150x190 grey silhouette (VISUALS-16).
+    var photo = KYC.hasPortrait(item)
+      ? ['<span class="card-photo">',
+        // Cards measured 146-171px wide from a phone to a 2,000px screen.
+        '<img ', KYC.portraitAttrs(item, "165px"),
+        ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
+        KYC.escapeAttr(item.id), '">', "</span>"].join("")
+      : '<span class="card-photo card-monogram" aria-hidden="true">' +
+        KYC.escapeHtml(KYC.monogram(item.name)) + "</span>";
     return [
-      '<button type="button" class="card" data-id="', KYC.escapeAttr(item.id), '">',
-      '<span class="card-photo">',
-      // Cards measured 146-171px wide from a phone to a 2,000px screen.
-      '<img ', KYC.portraitAttrs(item, "165px"),
-      ' alt="" loading="lazy" decoding="async" data-photo-idx="0" data-profile="',
-      KYC.escapeAttr(item.id), '">',
-      "</span>",
+      '<button type="button" class="card', KYC.hasPortrait(item) ? "" : " card-no-photo",
+      '" data-id="', KYC.escapeAttr(item.id), '">',
+      photo,
       '<span class="card-body">',
       '<span class="card-name clamp-2">', KYC.escapeHtml(item.name), "</span>",
       '<span class="card-office truncate">', KYC.escapeHtml(item.officeLabel), "</span>",
@@ -536,13 +542,26 @@
       '" title="' + KYC.escapeAttr("Everything about " + KYC.stateName(race.state)) + '">' +
       KYC.escapeHtml(KYC.stateName(race.state)) + " &rsaquo;</a>";
     // The people first, then the markets: a reader came for who is running,
-    // and 61% of House market blocks only show a 95-99% favourite.
-    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds }) : "";
+    // and 61% of House market blocks only show a 95-99% favourite. Beside
+    // the people the markets are closed until opened, at every width and in
+    // every view (TRUST-14): open on a desktop state page and in the map's
+    // panel, closed on a phone and on a profile, the same prices read as a
+    // verdict in some places and not others.
+    var odds = KYC.odds ? KYC.odds.render(race, { compact: !opts.fullOdds,
+                                                  collapsed: opts.collapsedOdds !== false }) : "";
+    // Then what the race is fought with and over: each campaign's money,
+    // the seat's last result, and the ballot side by side.
+    var extra = moneyBlock(race, people, { open: opts.moneyOpen, lazy: !!opts.lazyOut,
+                                          scope: opts.scope }) +
+      lastTimeBlock(race, { lazy: !!opts.lazyOut, scope: opts.scope }) +
+      compareBlock(race, people, { scope: opts.scope });
     return [
       '<section class="race" id="', KYC.escapeAttr("race-" + race.id), '">',
       '<div class="race-head"><h3 class="race-title">',
       KYC.escapeHtml(title), link, "</h3>", raceBadges(race), "</div>",
+      opts.lead ? '<p class="race-order race-lead">' + opts.lead + "</p>" : "",
       body,
+      extra ? '<div class="race-extra">' + extra + "</div>" : "",
       odds,
       "</section>",
     ].join("");
@@ -605,7 +624,466 @@
     return parts.length ? '<p class="' + (cls || "race-note") + '">' + parts.join(" ") + "</p>" : "";
   }
 
+  /* ------------------------------------------------- money in the race */
+
+  /* Raised, spent and cash on hand for each person on the ballot, as bars
+   * on one scale (VISUALS-20, PERSONA-11). The bars are neutral ink: the
+   * party is in the name chip only, so the length reads as money and not as
+   * a side. Each row carries its own through-date, because campaigns file
+   * on different days (NC's Senate nominees: Jun 30 and Sep 30), and the
+   * labels are rounded; the exact figure is the profile's. */
+  var MONEY = [
+    ["receipts", "Raised", "Raised, including loans and transfers (FEC)"],
+    ["disbursements", "Spent", "Spent (FEC)"],
+    ["cashOnHand", "Cash", "Cash on hand at the end of the period (FEC)"],
+  ];
+
+  /* A person in a race block, opening their profile; in their own dialog
+   * (*self*: their ids, a member's filing for this seat among them) their
+   * name alone, so no one is listed as a link to themselves (PROFILES-02). */
+  function personButton(p, attr, self) {
+    if (self && self[p.id]) return '<span class="money-self">' + KYC.escapeHtml(p.name) + "</span>";
+    return '<button type="button" class="link-button" ' + (attr || "data-id") + '="' +
+      KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>";
+  }
+
+  function partyChip(p) {
+    return '<span class="party-chip ' + KYC.partyClass(p) + '">' +
+      KYC.escapeHtml(p.party) + "</span>";
+  }
+
+  /* What outside groups reported spending for and against a person, as
+   * filed: each side's own total, never a net (kyc/outside.py). */
+  var OUTSIDE_NOTE = "Independent expenditures: money spent by groups that are not the " +
+    "campaign (super PACs, party committees, other PACs) to support or oppose this candidate, " +
+    "as the FEC totals them by candidate. The FEC processes filings days to weeks after they " +
+    "are made, sometimes longer, so the latest spending, reported in 24- and 48-hour reports, " +
+    "is often not yet in these totals, and in a race spent on heavily near the election the " +
+    "totals can be well below what has been spent. Each side is shown as filed; nothing is netted.";
+  function outsideSpan(o, lead, opts) {
+    var side = function (total, n, word) {
+      return total ? KYC.moneyShort(total) + " " + word +
+        (n ? " (" + n + (n === 1 ? " group" : " groups") + ")" : "") : "";
+    };
+    var parts = [side(o.support, o.supportCommittees, "supporting"),
+                 side(o.oppose, o.opposeCommittees, "opposing")].filter(Boolean);
+    return '<span class="money-outside' + (opts && opts.block ? " block" : "") + '" title="' +
+      KYC.escapeAttr(OUTSIDE_NOTE) + '">' + KYC.escapeHtml(lead || "") +
+      (lead ? "outside" : "Outside") + " groups spent " + KYC.escapeHtml(parts.join(" and ")) +
+      " in 2025–26, in the filings the FEC had processed when read on " +
+      KYC.escapeHtml(KYC.dateWords(o.asOf)) +
+      // Said on the line, where a phone reader sees it (wave 2d review: a
+      // title alone let the totals read as the race's whole scale).
+      "; the latest spending may not be in them yet" +
+      ' &middot; <a href="' + KYC.escapeAttr(o.url) +
+      '" target="_blank" rel="noopener noreferrer">FEC</a></span>';
+  }
+
+  function chamberWord(p) {
+    return /Senate/.test((p && p.chamber) || "") ? "Senate" : "House";
+  }
+
+  /* A member running for the other chamber has two candidacies, and the
+   * FEC totals outside spending under each id apart (kyc/outside.py
+   * elsewhere): on the member's own line it says whose candidacy it is, and
+   * the campaign they are running carries it on a line of its own, never
+   * added to its own figures. Andy Barr's $7.2 million under his House id
+   * read as his Senate race's under a House candidacy he is not running. */
+  function outsideLine(p, opts) {
+    var o = p && p.outsideSpending;
+    if (!o) return "";
+    var lead = "";
+    if (o.runningElsewhere) {
+      var running = KYC.byId(o.runningElsewhere);
+      lead = "Filed under their " + (o.candidacy || chamberWord(p)) + " candidacy, not the " +
+        (running ? chamberWord(running) : "other") + " campaign they are running: ";
+    }
+    return outsideSpan(o, lead, opts);
+  }
+
+  function outsideOtherLine(p, opts) {
+    var o = p && p.outsideSpendingOther;
+    if (!o) return "";
+    return outsideSpan(o, "Filed separately under their " + (o.candidacy || "other") +
+      " candidacy, and not added in here: ", opts);
+  }
+
+  function moneyRow(p, max, attr, self) {
+    var bars = "";
+    var any = false;
+    MONEY.forEach(function (spec) {
+      var value = KYC.moneyAmount(p, spec[0]);
+      if (value === null) return;
+      any = true;
+      var width = max > 0 ? Math.max(0, Math.min(100, 100 * value / max)) : 0;
+      bars += '<span class="money-bar" title="' + KYC.escapeAttr(spec[2] + ": " + p[spec[0]]) + '">' +
+        '<span class="money-label">' + KYC.escapeHtml(spec[1]) + "</span>" +
+        '<span class="money-track" aria-hidden="true"><span class="money-fill" style="width:' +
+        width.toFixed(1) + '%"></span></span>' +
+        '<span class="money-value">' + KYC.escapeHtml(KYC.moneyShort(value)) + "</span></span>";
+    });
+    var through = p.financeAsOf ? "through " + KYC.dateWords(p.financeAsOf) : "";
+    // The totals' own source, linked to the filing they are from: the only
+    // "FEC" link in the row was the outside-spending one's.
+    var fec = p.fecCandidateId
+      ? '<a href="' + KYC.escapeAttr("https://www.fec.gov/data/candidate/" +
+          encodeURIComponent(p.fecCandidateId) + "/") + '" target="_blank" ' +
+        'rel="noopener noreferrer" title="' + KYC.escapeAttr("Candidate " + p.fecCandidateId +
+          "'s filings at the Federal Election Commission") + '">FEC</a>'
+      : "FEC";
+    var body = any
+      ? '<span class="money-bars">' + bars + "</span>" +
+        '<span class="money-asof">' + fec + KYC.escapeHtml(through ? ", " + through : "") +
+        "</span>"
+      // No figure: the absence in its own words (rule 19), never a $0 bar.
+      : '<span class="money-none">' + KYC.renderField(p, "receipts") + "</span>";
+    return '<li class="money-row"><span class="money-who">' + personButton(p, attr, self) + " " +
+      partyChip(p) + "</span>" + body + outsideLine(p) + outsideOtherLine(p) + "</li>";
+  }
+
+  /* The people a race's money block and comparison list: those on its
+   * ballot, in the race's own order. */
+  function ballotPeople(race, people) {
+    return people.filter(function (p) { return !offBallot(p) && !elsewhere(race, p); });
+  }
+
+  function moneyBlock(race, people, opts) {
+    opts = opts || {};
+    var shown = ballotPeople(race, people);
+    if (!shown.length) return "";
+    return fold("race-money", "Money in the race", opts, (opts.scope || "race") + ":money:" + race.id,
+      function () {
+        var max = 0;
+        shown.forEach(function (p) {
+          MONEY.forEach(function (spec) {
+            var v = KYC.moneyAmount(p, spec[0]);
+            if (v !== null && v > max) max = v;
+          });
+        });
+        var below = (((race.results || {}).belowThreshold) || []).map(function (b) {
+          return KYC.escapeHtml(b.name);
+        });
+        return '<p class="race-note">Each campaign’s own totals as filed with the FEC, on one ' +
+          "scale. Raised includes loans and transfers. Campaigns report through different " +
+          "days; each row says which. Exact figures are on each profile.</p>" +
+          '<ul class="money-rows">' + shown.map(function (p) {
+            return moneyRow(p, max, opts.attr, opts.self);
+          }).join("") + "</ul>" +
+          (below.length ? '<p class="race-note">On the ballot with no FEC filing over $5,000: ' +
+            below.join(", ") + ".</p>" : "");
+      });
+  }
+
+  /* A race's fold: drawn now when it opens on arrival, else when the reader
+   * opens it (fillFold). The grid's races view holds 475 races, and drawn
+   * at once their money and last results nearly doubled its markup, which
+   * GRID-14 had cut to 2.5 MB. */
+  var lazyFolds = {};
+
+  function fold(cls, summary, opts, key, body) {
+    var eager = opts.open || !opts.lazy;
+    if (!eager) lazyFolds[key] = body;
+    return '<details class="' + cls + '"' + (opts.open ? " open" : "") +
+      (eager ? "" : ' data-fold="' + KYC.escapeAttr(key) + '"') + "><summary>" +
+      KYC.escapeHtml(summary) + '</summary><div class="fold-body">' + (eager ? body() : "") +
+      "</div></details>";
+  }
+
+  function fillFold(details) {
+    var body = lazyFolds[details.getAttribute("data-fold")];
+    var target = details.querySelector(".fold-body");
+    if (!body || !target || target.childElementCount) return;
+    target.innerHTML = body();
+  }
+
+  /* ------------------------------------------------ compare the ballot */
+
+  /* The people on a race's ballot side by side (GRID-17): party and
+   * ballot line, offices held, money with its date, the campaign's own
+   * platform headings with where they came from, and its site. No net
+   * worth (rule 26); money only as filed (rule 61). */
+
+  /* What was looked at, under a platform the comparison cannot show: a
+   * member's official website is not a campaign's site (wave 2d review:
+   * Ossoff's "Not listed on their official site" beside Collins's "No
+   * data" read as Ossoff having no platform). */
+  var MEMBER_SITE_ABSENCES = { not_listed: 1, see_site: 1, see_home: 1 };
+  function platformLooked(p) {
+    var q = (p.quality || {}).platforms;
+    return MEMBER_SITE_ABSENCES[q]
+      ? "This site read their official website, not a campaign site"
+      : "Nothing recorded from a campaign site or article";
+  }
+
+  function compareCell(p, what) {
+    if (what === "party") {
+      // The FEC files a write-in's party as "Write-in": a way of running,
+      // not a party, said as a status (wave 2d review).
+      if (/^write-?in$/i.test(String(p.party || "").trim())) {
+        return '<span class="faint">Write-in candidate; no party on file</span>';
+      }
+      // ballotLineSuffix is markup already escaped: " – Working Families line".
+      var line = KYC.ballotLineSuffix(p);
+      return partyChip(p) + (line
+        ? ' <span class="faint">' + line.replace(/^ – /, "") + "</span>" : "");
+    }
+    if (what === "held") return KYC.officesHeldShort(p.politicalHistory, 4);
+    if (what === "money") {
+      var lines = MONEY.map(function (spec) {
+        var v = KYC.moneyAmount(p, spec[0]);
+        return v === null ? "" : "<li>" + KYC.escapeHtml(spec[1]) + " " +
+          KYC.escapeHtml(KYC.moneyShort(v)) + "</li>";
+      }).filter(Boolean);
+      if (!lines.length) return KYC.renderField(p, "receipts");
+      return '<ul class="compare-list">' + lines.join("") + "</ul>" +
+        '<span class="faint">' + KYC.escapeHtml("FEC" + (p.financeAsOf ? ", through " +
+          KYC.dateWords(p.financeAsOf) : "")) + "</span>" + outsideLine(p, { block: true }) +
+        outsideOtherLine(p, { block: true });
+    }
+    if (what === "platform") {
+      var plat = KYC.platformItems(p);
+      if (!plat) {
+        return KYC.renderField(p, "platforms") + '<span class="faint compare-source">' +
+          KYC.escapeHtml(platformLooked(p)) + "</span>";
+      }
+      return '<ul class="compare-list">' + plat.items.slice(0, 8).map(function (x) {
+        return "<li>" + KYC.escapeHtml(x) + "</li>";
+      }).join("") + (plat.items.length > 8 ? '<li class="faint">and ' + (plat.items.length - 8) +
+        " more</li>" : "") + "</ul>" + '<span class="faint compare-source">' +
+        KYC.escapeHtml(platformFrom(p)) +
+        "</span>";
+    }
+    if (what === "site") {
+      return p.campaignSite
+        ? '<a href="' + KYC.escapeAttr(p.campaignSite) + '" target="_blank" ' +
+          'rel="noopener noreferrer">' + KYC.escapeHtml(String(p.campaignSite)
+            .replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")) + "</a>"
+        : '<span class="kyc-absent">None linked</span>';
+    }
+    return "";
+  }
+
+  /* Where each cell's platform came from, in words under it. The row was
+   * headed "in the campaign's words" over sitting members' platforms that
+   * are this site's own roster summaries (rules 38, 61); a badge reading
+   * "Campaign site" also sat right above the row of that name. */
+  var PLATFORM_FROM = {
+    "campaign-site": "Headings from the campaign’s own site",
+    // A member's, from their official website (kyc/members.py, rule 86):
+    // the office's site, not the campaign's, and said as the dialog says
+    // it - a home page's featured issues may not be every issue.
+    "official-site": "The issues their official website lists",
+    "official-featured": "The issues their official website’s home page features",
+    "wikipedia": "From the candidate’s Wikipedia article",
+    "election-page": "From Wikipedia’s 2026 election page",
+    roster: "This site’s roster summary, not the campaign’s words",
+  };
+
+  function platformFrom(p) {
+    var source = (p.fieldSources || {}).platforms;
+    if (source === "official-site" && p.platformFeatured) return PLATFORM_FROM["official-featured"];
+    return PLATFORM_FROM[source] || PLATFORM_FROM.roster;
+  }
+
+  var COMPARE_ROWS = [
+    ["party", "Party"],
+    ["held", "Public offices held"],
+    ["money", "Campaign money"],
+    ["platform", "Platform"],
+    ["site", "Campaign site"],
+  ];
+
+  /* A table side by side where there is room; on a phone a card per
+   * person, the same cells in the same order (wave 2d review: a five-way
+   * race showed 1.3 columns per screen, rows tall with blank cells, the
+   * two nominees behind two write-ins). CSS shows one of the two. */
+  function compareTable(race, people, attr, self) {
+    var shown = ballotPeople(race, people);
+    var cells = shown.map(function (p) {
+      return COMPARE_ROWS.map(function (row) { return compareCell(p, row[0]); });
+    });
+    return '<div class="compare-scroll"><table class="compare-table"><thead><tr>' +
+      '<th scope="col"><span class="sr-only">Compared</span></th>' +
+      shown.map(function (p) {
+        return '<th scope="col">' + personButton(p, attr, self) + "</th>";
+      }).join("") + "</tr></thead><tbody>" +
+      COMPARE_ROWS.map(function (row, j) {
+        return '<tr><th scope="row">' + KYC.escapeHtml(row[1]) + "</th>" +
+          shown.map(function (p, i) { return "<td>" + cells[i][j] + "</td>"; }).join("") +
+          "</tr>";
+      }).join("") + "</tbody></table></div>" +
+      '<ul class="compare-cards">' + shown.map(function (p, i) {
+        return '<li class="compare-card"><p class="compare-card-name">' + personButton(p, attr, self) +
+          '</p><dl class="compare-card-rows">' + COMPARE_ROWS.map(function (row, j) {
+            return "<dt>" + KYC.escapeHtml(row[1]) + "</dt><dd>" + cells[i][j] + "</dd>";
+          }).join("") + "</dl></li>";
+      }).join("") + "</ul>" +
+      '<p class="race-note">Offices: only those two sources agree on. Platform: each says ' +
+      "where it came from. A sitting member’s is the list of issues their official website " +
+      "gives, a challenger’s the headings of their campaign’s site: not the same kind of page, " +
+      "and a member’s campaign site is not read for it. No net worth: a disclosure reports " +
+      "assets in bands, not a figure.</p>";
+  }
+
+  function compareBlock(race, people, opts) {
+    opts = opts || {};
+    if (ballotPeople(race, people).length < 2) return "";
+    // Always drawn when opened: a table per race is markup no one asked for.
+    return fold("race-compare", "Compare the ballot", { lazy: true },
+      (opts.scope || "race") + ":compare:" + race.id,
+      function () { return compareTable(race, people, opts.attr, opts.self); });
+  }
+
+  // One listener for every page that draws a race: a details element's
+  // toggle does not bubble, so it is caught on the way down.
+  if (global.document && global.document.addEventListener) {
+    global.document.addEventListener("toggle", function (event) {
+      var t = event.target;
+      if (t && t.matches && t.matches("details[data-fold]") && t.open) fillFold(t);
+    }, true);
+  }
+
+  /* ---------------------------------------------------------- last time */
+
+  /* The seat's last election before 2026's (kyc/seat_history.py): who
+   * won, with what share and margin, from the Clerk of the House's official
+   * statistics, checked against a second compilation. A district redrawn
+   * for 2026 says so and shows no 2024 figure (rule 90). A seat filled
+   * since by a special election says its figure is the last *regular*
+   * election's and who took the seat after it: "the last election to this
+   * district" over Gerald Connolly's 2024 result sat beside the member who
+   * won VA-11's 2025 special. From the day after Election Day the fold is
+   * "Before 2026", not "Last time", which would then be 2026's own (rule
+   * 63). *now* is for tests. */
+  function pct(v) {
+    return (Math.round(v * 10) / 10).toFixed(1) + "%";
+  }
+
+  function lastTimeLabel(last, now) {
+    var past = KYC.electionStatus(undefined, now).phase === "post-election";
+    var special = last.seatedSince && last.seatedSince.how !== "appointment";
+    if (special) return past ? "Before 2026, the last regular election" : "Last regular election";
+    return past ? "Before 2026" : "Last time";
+  }
+
+  function lastTimeSummary(race, last, now) {
+    var label = lastTimeLabel(last, now);
+    if (last.redrawn) return label + ": not shown (district redrawn for 2026)";
+    if (last.withheld) return label + ": not shown";
+    var won = last.candidates[0];
+    label += " (" + last.year + "): ";
+    if (last.kind === "unopposed") return label + won.name + ", unopposed";
+    if (!last.candidates[1]) return label + won.name + " won";
+    // A ranked-choice count's first choices are not its result: Nick
+    // Begich "won by 2.0 points" was his lead in first choices.
+    return label + won.name + (last.rankedChoice === "first-choices"
+      ? " led first choices by " : " won by ") + last.margin.toFixed(1) + " points";
+  }
+
+  /* Who took the seat after the counted election, in words that stay true
+   * on any day: "took the seat on", never "holds". */
+  function seatedSinceWords(last) {
+    var s = last.seatedSince;
+    if (!s) return "";
+    return " " + s.name + " took the seat on " + KYC.dateWords(s.since) +
+      (s.how === "appointment" ? ", by appointment."
+        : ", after a special election whose result this site does not show.");
+  }
+
+  function lastTimeBody(race, last) {
+    var where = race.chamber === "Senate" ? "this seat" : "this district";
+    if (last.redrawn) {
+      var plan = (KYC.meta().districtMaps || {})[race.state];
+      var link = plan ? ' <a href="' + KYC.escapeAttr(KYC.siteRoot() + plan.page + "#/?d=" +
+        (race.district || 0)) + '">See where its area came from &rsaquo;</a>' : "";
+      // Said of every redrawn district alike: many of Florida's and North
+      // Carolina's new districts are nearly the old ones, so "fought by
+      // other voters" was not true of them.
+      return '<p class="race-note">' + KYC.escapeHtml(KYC.stateName(race.state)) +
+        " redrew its House districts for 2026. The " + last.year + " result was counted on " +
+        "the old lines, which this site does not carry over to the new ones." + link + "</p>";
+    }
+    if (last.withheld) {
+      return '<p class="race-note">The ' + last.year + " result is not shown: " +
+        (last.withheld === "disagree"
+          ? "the Clerk of the House’s statistics and the compilation this site checks them " +
+            "against disagree about it."
+          : "the compilation this site checks the Clerk of the House’s statistics against " +
+            "does not confirm it.") + "</p>";
+    }
+    var day = KYC.dateWords(last.date);
+    var lead;
+    if (last.kind === "runoff") {
+      lead = "Decided in the runoff on " + day + ", between the two the November vote left.";
+    } else if (last.kind === "rcv-final") {
+      lead = "The final round of the ranked-choice count, " + day + ".";
+    } else if (last.kind === "unopposed") {
+      lead = "Election of " + day + ".";
+    } else {
+      lead = "Election of " + day + (race.chamber === "Senate" && last.term === "unexpired"
+        ? ", a special election for the rest of the term" : "") + ".";
+    }
+    var rows;
+    if (last.kind === "unopposed") {
+      rows = '<p class="race-note">' + KYC.escapeHtml(last.candidates[0].name + " (" +
+        last.candidates[0].party + ") was unopposed. " + (last.note || "")) + "</p>";
+    } else {
+      rows = '<table class="last-table"><tbody>' + last.candidates.map(function (c, i) {
+        return "<tr><th scope=\"row\">" + KYC.escapeHtml(c.name) + ' <span class="faint">' +
+          KYC.escapeHtml(c.party) + "</span>" + (i === 0 ? ' <span class="badge badge-neutral">Won</span>' : "") +
+          "</th><td>" + pct(c.share) + "</td><td class=\"faint\">" +
+          c.votes.toLocaleString("en-US") + " votes</td></tr>";
+      }).join("") + (last.others ? '<tr><th scope="row">Everyone else</th><td>' +
+        pct(last.othersShare) + '</td><td class="faint">' + last.others.toLocaleString("en-US") +
+        " votes</td></tr>" : "") + "</tbody></table>" +
+        '<p class="race-note">' + (last.candidates[1]
+          ? "Margin: " + last.margin.toFixed(1) + " points. "
+          : "No other candidate was named on the ballot. ") +
+        "Shares are of the " + last.total.toLocaleString("en-US") +
+        " votes cast for a candidate; blank and spoiled ballots are not counted." +
+        (last.rankedChoice === "first-choices" ? " " + KYC.stateName(race.state) +
+          " counts ranked choices: these are first choices, as the Clerk lists them." : "") +
+        "</p>";
+    }
+    // The sources, once for the page (kycBuildMeta.lastElectionSources).
+    var sources = KYC.meta().lastElectionSources || {};
+    var source = sources[String(last.year)] || {};
+    var by = last.checkedBy === "mit" ? sources.mit
+      : last.checkedBy ? { title: "Wikipedia’s “" + last.checkedBy + "”",
+                           url: "https://en.wikipedia.org/wiki/" +
+                             encodeURIComponent(last.checkedBy.replace(/ /g, "_")) }
+      : null;
+    var checked = by && by.url
+      ? " The winner and runner-up checked against " + '<a href="' +
+        KYC.escapeAttr(by.url) + '" target="_blank" rel="noopener noreferrer">' +
+        KYC.escapeHtml(by.title) + "</a>."
+      : "";
+    var special = last.seatedSince && last.seatedSince.how !== "appointment";
+    return '<p class="race-note">' + KYC.escapeHtml(lead) + " " +
+      KYC.escapeHtml("The last " + (special ? "regular " : "") + "election to " + where +
+        " before the 2026 election." + seatedSinceWords(last)) + "</p>" + rows +
+      '<p class="race-note race-results">Counts: <a href="' + KYC.escapeAttr(source.url || "") +
+      '" target="_blank" rel="noopener noreferrer">' + KYC.escapeHtml(source.title || "") +
+      "</a>, compiled from each state’s certified results." + checked + "</p>";
+  }
+
+  function lastTimeBlock(race, opts) {
+    opts = opts || {};
+    var last = race && race.lastElection;
+    if (!last) return "";
+    return fold("race-last", lastTimeSummary(race, last, opts.now), opts,
+      (opts.scope || "race") + ":last:" + race.id,
+      function () { return lastTimeBody(race, last); });
+  }
+
   KYC.cards = {
+    moneyBlock: moneyBlock,
+    compareBlock: compareBlock,
+    fillFold: fillFold,
+    lastTimeBlock: lastTimeBlock,
+    outsideLine: outsideLine,
+    outsideOtherLine: outsideOtherLine,
+    outsideNote: OUTSIDE_NOTE,
     unprofiledNames: unprofiledNames,
     unprofiledNote: unprofiledNote,
     orderNote: orderNote,

@@ -40,9 +40,13 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… federal` | The President, the Vice President and the Cabinet: who holds each office, from the White House's pages, each office's own page and the Senate's roll-call votes (`--check` reports the cache) |
 | `… judiciary` | Every sitting federal judge, from the Federal Judicial Center's directory, and the Supreme Court's members as the Court lists them; the territorial courts' judges from each court's own site; each judge's Wikipedia article and portrait through the FJC id on Wikidata. A short read keeps the last cache (`--check` reports it) |
 | `… oge` | The financial reports the President, the Vice President and the Cabinet filed with the Office of Government Ethics, attributed by office and checked against the filer each report names (`--check` reports the cache). See [Financial disclosures](#financial-disclosures) |
+| `… members` | Each sitting member's education and earlier careers (the Congressional Directory, by their official web address; their Wikipedia infobox by their id where the Directory has none), the issues their official website lists, a checked contact page and their offices at home (`congress-legislators`); a read that concludes nothing keeps the last one (`--check` reports the cache, `--id` re-reads one site, `--all` every site however recent its read, `--no-sites` skips the sites). See [A member's biography and platform](#a-members-biography-and-platform) |
+| `… votes` | Every roll call of the 119th Congress, from the House Clerk's and the Senate's own XML records, attributed to members by id: one request a second, saved as it goes and resumed by the next run (`--chamber`, `--limit`; `--check` reports the cache). See [How members voted](#how-members-voted) |
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
+| `… seats` | Each seat's last election, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
+| `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
@@ -67,13 +71,14 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2357 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2726 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds` and `congress` touch the network. `build` and
+`campaigns`, `enrich`, `odds`, `votes` and `congress` touch the network, with
+the other refresh commands listed above. `build` and
 `verify` are fully offline and read the committed caches and snapshot.
 
 ## How the data flows
@@ -139,6 +144,7 @@ CI asserts that a rebuild changes nothing.
 | `enrich.py` | Fill filed candidates' gaps from their Wikipedia infobox and campaign site; check every linked campaign site |
 | `oge.py` | The executive's financial reports from the Office of Government Ethics, by office (the `oge` command) |
 | `history.py` | The public offices each person has held, from congress-legislators and Wikidata, corroborated by the person's own article (the `history` command) |
+| `rollcalls.py` | Every roll call of the Congress from the House Clerk's and the Senate's records, each vote attributed to a member by id inside a term they served (the `votes` command); writes `data/votes/house.js` and `data/votes/senate.js` |
 | `odds.py` | Prediction-market prices (Kalshi, Polymarket) and published polling averages for the 2026 Senate races |
 | `validate.py` | Data-quality checks |
 | `emit.py` | Write the data files atomically; verify the pages are wired up |
@@ -470,15 +476,15 @@ so their names no longer claim one (`Cleaned_House.csv`,
 atomically:
 
 - **Newly seated members** get a row with only the columns the dataset
-  actually knows. Education, net worth, committees and platform are editorial
-  research that no dataset supplies, so they stay empty and the provenance
-  layer reports them as *No data* — which is true, and better than a plausible
-  invention.
+  actually knows. Education, net worth, committees and platform stay empty:
+  the roster's columns for them are never shown (rule 86), and `members`
+  fills a member's education, careers and platform from sources tied to them
+  by id - see [A member's biography and platform](#a-members-biography-and-platform).
 - **A new term** — everyone re-elected, on January 3 — rewrites the row's
   chamber, state, district, term dates and status. A representative elected to
   the Senate moves to the Senate file, and their committee assignments are
-  emptied, since they described the House seat. Name, education, professions
-  and platform are the person's, and stay. A new term never changes a party,
+  emptied, since they described the House seat. The name is the person's,
+  and stays. A new term never changes a party,
   so a party difference is still an error for somebody to look at.
 - **Anyone who has left** moves, row and all, to `Former_Members.csv`, with
   the day they left, the record that says so and their last Congress. A 2026
@@ -628,7 +634,10 @@ supplies, so they stay empty and the provenance layer reports them as
 *No data*. For anyone still in a race, background, education, age, what the
 campaign says it stands for and a portrait are filled where the person's own
 sources say so - see [Filling the gaps](#filling-the-gaps) - each credited to
-its source.
+its source. A sitting member's education, earlier careers and the issues they
+work on come from the Congressional Directory, the article their id maps to and
+their official website, each badged - never the rosters' typed columns; see
+[A member's biography and platform](#a-members-biography-and-platform).
 
 They also carry **no portrait**. Portrait resolution for a member goes through
 the authoritative bioguide→Wikipedia mapping and cannot pick the wrong person.
@@ -1154,6 +1163,23 @@ Chris Coons showed $4,168,081 (2025-26) beside challengers measured from
 | `financeElection` | The election an election-period total is for: 2026 for anyone on this year's ballot, 2028 or 2030 for a senator not up this year |
 | `fundingBreakdown`, `funding_sources` | What the receipts were, by kind: Individual, PACs, Party, Self-funded (the candidate's own contributions; "Self-funded (incl. loans)" when a loan from the candidate is in it), Bank and other loans, Transfers from other committees (the campaign's other committees) and Other (offsets and other receipts). Each share is of total receipts, or of `fundingBase` where a negative adjustment brought the receipts below the parts. A record cached before loans and transfers were read has no breakdown until `finance` reads it again |
 | `fundingBase` | The sum the funding shares are of, where it is not the receipts figure: the positive parts, when an adjustment the FEC deducts (a negative category) brought the net receipts below them. The page says so beside the split |
+| `outsideSpending` | Independent expenditures for and against this candidate in the 2025-26 cycle, from `outside`: `{support, oppose, supportCommittees, opposeCommittees, supportTop, opposeTop, asOf, cycle, url}`. Each side is its own total, never a net; `*Top` are the three committees that spent most on that side, as the FEC names them; `asOf` the day the FEC's processed filings were read; `url` the FEC's table for the candidate id; `candidacy` (`House` or `Senate`) the office the ids are for. One committee under two of the person's ids is one group. `runningElsewhere`, on a member running for the other chamber, is the profile of the campaign they are running: these rows are their own candidacy's, not that campaign's. Only rows whose candidate id is the profile's and whose office and state are the profile's (rule 20) |
+| `outsideSpendingOther` | On the campaign of a member running for the other chamber: a copy of the member's `outsideSpending` (with `profileId`, the member's profile), shown on a line of its own and never added to this campaign's figures |
+
+### Outside spending
+
+`python build_profile_site.py outside` reads the FEC's independent
+expenditures by candidate (`/schedules/schedule_e/by_candidate/`, the
+2025-26 cycle) for every candidate id a profile carries, forty ids a
+request at the key's pace (rule 37). A batch over a page is split, and one
+candidate's rows over a page are read a side at a time, sorted on the
+committee, and counted (rule 36). The cache, `data/outside_spending.json`,
+holds each id's committees by side. The build attaches them only where the
+id's own office and state are the profile's; a row filed for another seat is
+an `outside-attribution` error, and nothing is ever matched by name. The
+FEC processes filings days to weeks after they are made, so the latest
+spending - reported in 24- and 48-hour reports - is often not in these
+totals, and the page says so beside them.
 
 A coverage end the filer gave that is still to come ("through 2026-12-31" in
 October) is shown "as filed", and `validate` lists it
@@ -1284,10 +1310,109 @@ values are excluded from search, so "not disclosed" does not match everyone.
 
 A field the pipeline filled from a named source rather than a roster records
 that source in `fieldSources` - `wikipedia` (an article's infobox),
-`election-page` (the race page's description) or `campaign-site` (the
-campaign's own issues page) - and the page shows it as a badge beside the
-value, with a tooltip saying exactly where it came from. See
+`election-page` (the race page's description), `campaign-site` (the
+campaign's own issues page), or for a member `congressional-directory`,
+`member-wikipedia` (the article their id maps to) or `official-site` (the
+issues their official website lists) - and the page shows it as a badge
+beside the value, with a tooltip saying exactly where it came from. A
+member's `platforms` whose site was read and lists no issues has the quality
+`not_listed`, shown as "Not listed on their official site"; one whose site
+has an issues page this site could not read a list from in the page's own
+words (prose under tabs, a page drawn by script, a page recorded in
+`overrides.OFFICIAL_ISSUES_NOT_A_LIST`) has the quality `see_site`, shown as
+"On their official site's issues page" with that page linked; one whose
+only issue pages are linked from its home page or menu, too few to list,
+has the quality `see_home`, shown as "On their official website" with the
+site linked (a home page is never called an issues page). See
 [Filling the gaps](#filling-the-gaps).
+
+## A member's biography and platform
+
+The rosters' Education, Previous Professions and "Policy Focus & Platforms"
+columns were typed by hand, with no source, in wording that was not
+even-handed: one member's platform read "Anti-abortion legislation" while four
+others' read "Pro-life advocacy", and forty Democrats had "Reproductive rights"
+where eighty-nine Republicans had "border security" (TRUST-05). They reached
+537 member profiles unbadged, reading as fact. None of it is shown now (rule
+86); `validate` fails a profile whose education, careers or platform has no
+source the page can name (`bio-unsourced`). `python build_profile_site.py
+members` writes `data/members.json`, and each field is filled from a source
+tied to the member by id, never by a search on their name:
+
+| What | From | Shown as |
+|---|---|---|
+| Education, earlier careers | The [Official Congressional Directory](https://www.govinfo.gov/app/collection/cdir) (GovInfo, the latest edition for the sitting Congress): each member's "education:" and "professional history:" (with any "military service:"), in its words. An entry is joined to a member by the office web address printed under it, which must be the address `congress-legislators` lists for their bioguide id or lead to it when opened (the Directory prints dingell.house.gov, which leads to debbiedingell.house.gov), and its printed name must carry their surname. Members it does not hold, and entries that join no one, are a build warning (`members-directory-unjoined`) | The field, badged **Congressional Directory** |
+| Education or an occupation, where the Directory has none | The infobox of the Wikipedia article `congress-legislators` maps the bioguide id to, its title checked against the surname after redirects ("Politician" alone is not an earlier career, and is left out) | The field, badged **Wikipedia** |
+| The issues they work on | Their official website (the `.house.gov` / `.senate.gov` address `congress-legislators` lists): the page its home page links as "Issues" (or "Priorities"), read one level down - its links to its own issue pages, in their words - or the site's own "Issues" menu (a list or a panel of `<div>`s), or that page's list or headings, a heading every page carries (the offices' cities) excepted. A link is labelled by its first block of words (a card's title, not its blurb). Nothing that names the member or anyone else, a recent President or Vice President included ("Trump's One Big Beautiful Betrayal", "Repeal Obamacare"), and none of the site's furniture filed under Issues (Community Project Funding, Legislative Process, Bill Search, an office, office hours, appropriations requests, a help page). A line cut short ("Sponsored &") is not taken, and one issue spelled twice is listed once. Where the home page links no issues page, `/issues` is tried before the home page's own issue links, which are shown as what the home page features. A list of nothing but the House template's stock categories (Congress, Economy, Education, Energy, Health, Veterans) is not a platform the member chose, and "Congress" is never an issue; a page listing them among the member's own is quoted whole, since nothing on it tells a default kept from one chosen | Bullets badged **Official site**, dated and linked to that page; "On their official site's issues page", linked, where the site has an issues page but no list could be read from it, or lists only the stock categories; "On their official website", linked, where only its home page or menu links issue pages, too few to list; "Not listed on their official site" where the site has none |
+| A contact form | The page the home page links as Contact (or Email me), fetched and seen to hold a form to write to the office - a message box, or a ZIP or street-address step, never a site search or a newsletter sign-up (a name and an email alone, or a form the page's settings name as its newsletter) - or to lead to one; only where `congress-legislators` holds none | The *Contact form* chip, its title saying when it was checked |
+| Offices at home | `congress-legislators`' `legislators-district-offices`, by bioguide id: address, phone and hours | *District offices* (a senator's *State offices*), under a line saying a federal agency problem is casework for them |
+
+The Biographical Directory (bioguide.congress.gov) answers HTTP 403 to a
+script and a Cloudflare challenge to headless Chrome (2026-10-18), so it is
+linked from every member's profile but not read. A site that turns the
+request away, or draws itself with script, concludes nothing (rule 8) until
+headless Chrome has read it too, and a read that concludes nothing keeps the
+last good one. Official sites are read one request at a time, 1.5 seconds
+apart, and again after 27 days.
+
+## How members voted
+
+A member's profile shows how they voted in the roll calls of the 119th
+Congress: the most recent first, ten at a time, each with its date, the
+question, the bill or nomination and its title as the record gives it, the
+member's vote in the record's own word ("Yea", "Aye", "Not Voting", a name in
+an election of the Speaker), the result, and a link to the official record.
+A search box finds any of their votes by a bill's title or its number, typed
+as a reader types it ("H.R. 1", "hr1", "S 5", "PN1129"; a number is matched
+whole, so H.R. 1 is not H.R. 10). Beside them: how many roll calls the record
+lists them as not voting in, of how many it lists them in. No votes are
+chosen for the reader; there is no "key votes" list.
+
+`python build_profile_site.py votes` reads the two official records into
+`data/roll_calls.json` (`kyc/rollcalls.py`):
+
+- **The House**: the Clerk's XML, one file a roll call
+  (`clerk.house.gov/evs/<year>/roll<NNN>.xml`), each vote keyed by bioguide
+  id. A number the Clerk has not posted is answered with HTTP 200 and an
+  "Error sanitizing file" note, which is not a file and concludes nothing:
+  the run stops there and the next one asks again.
+- **The Senate**: each session's vote menu, then each vote's LIS XML, keyed
+  by the senator's LIS member id, which congress-legislators maps to their
+  bioguide id.
+
+One request a second, saved every 25 roll calls; a run that stops keeps what
+it read, and a refused or failed request ends the run rather than skipping a
+vote. The weekly refresh reads what is new.
+
+A vote reaches a profile only by an id the record holds, and only inside a
+term congress-legislators gives the member in that chamber, so a vote cast
+before someone was seated, or under another member's id, never appears on
+their profile. The record's own words for each id - its state, its surname -
+are checked against the member the id names, and an id that disagrees gives
+nobody its votes (the build says so: `votes-unattributed`). The Clerk writes
+a delegate's state as "XX", accepted only for a member who sits for D.C. or
+a territory. A member who left keeps the votes they cast. An id the record
+lists for no member of the Congress (Matt Gaetz, who did not take his seat,
+is in the first roll call) is an evidenced entry in
+`overrides.ROLL_CALL_NON_MEMBERS`.
+
+Roll calls held while a member served that do not list them at all are never
+counted as missed, and the profile says how many: the Clerk lists a Speaker
+who does not vote nowhere, and a delegate only in the Committee of the
+Whole's roll calls. Each is said with the House's own rule, quoted (Rule I,
+clause 7; Rule III, clause 3(a)).
+
+The build writes `data/votes/house.js` and `data/votes/senate.js`, each
+rewritten only when its content signature changes. They are not in
+`profiles.js`: every page that opens a profile names them, with their version
+stamps, in an inert `<template id="onDemandData">`, and the dialog loads a
+chamber's file the first time one of its members is opened (`KYC.loadData`).
+While it loads the panel says so, and if it fails, that it failed.
+
+The left-right score from Voteview stays beside the votes, headed "Voting
+record, left to right (Voteview)". A senator whose seat is not on the 2026
+ballot reads "Seat up in 2028" (or 2030) in the dialog, as on the card; a
+seat on the 2026 ballot says so through its race.
 
 ## Public offices held
 
@@ -1387,7 +1512,34 @@ Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 | `senateClass` / `special` | The Senate seat's class, and whether it is a special election, from the record |
 | `results.sourceUrl` | Where the race's statuses were read: the Wikipedia results page the cache names (by its title), or the Secretary of State's Candidate Inquiry for a ballot read from a qualified list. The race head links it ("Results: Wikipedia, read Oct. 17, 2026"), and every status says whose word it is ("per Wikipedia's results page"), never "the published results", which read as a certified count |
 
+| `lastElection` | The seat's last election, from `seats` (`kyc/seat_history.py`): `{year, date, kind, candidates: [{name, party, votes, share}], others, othersShare, total, margin, checkedBy}` - the winner and runner-up as the Clerk of the House's statistics count them, shares of the votes cast for a candidate (blank and void ballots excluded), the margin of the votes. `kind` is `general`, `runoff` (Georgia's 2021 runoff), `rcv-final` (Maine's final ranked-choice round) or `unopposed` (with the Clerk's `note`); `rankedChoice: "first-choices"` where the counts are first choices (Alaska). `checkedBy` is `"mit"` or the Wikipedia article checked against. `{redrawn: true, year}` for a district redrawn for 2026, which carries no 2024 figure (rule 90); `{withheld, year}` where no second source agrees. `seatedSince: {name, since, how}` where someone took the seat after the counted election without having won it, by `special-election` or `appointment` (from the frozen record and the snapshot): the result is then the last regular election's. The sources' titles and addresses are `kycBuildMeta.lastElectionSources`, by year |
+
 `incumbentIds` comes from the record too: the person who held the seat, sitting or former, never whoever sits in it now. Every race of the record exists, whoever points at it.
+
+### The seat's last election
+
+`python build_profile_site.py seats` reads the Clerk of the House's
+"Statistics of the Presidential and Congressional Election" for 2020, 2022
+and 2024 from its PDF: every House seat's 2024 result, and each Senate
+seat's latest election to the term on the ballot (Oklahoma's class II seat
+was last elected in 2022's special, Nebraska's in 2024's). The FEC's own
+compilation for 2024 was not published when this was built. Each result is
+shown only where a second compilation names the same winner and runner-up
+in that order with counts within 1%: MIT Election Data and Science Lab's
+Senate returns, and for the House each state's 2024 Wikipedia page (MIT's
+House file sits behind a download form asking for a name and an email).
+What no second source confirms is withheld and says so. A district redrawn
+for 2026 shows no 2024 result: it says the old lines' election was other
+voters' and links where its area came from.
+
+Each race block, on the state pages, in the grid's races view and in the
+profile dialog, shows under its people the campaigns' money as bars on one
+scale (raised including loans, spent, cash on hand, each row with its own
+through-date), the last election folded, and "Compare the ballot": party,
+offices held, money, the campaign's own platform headings with where they
+came from, and its site. The grid's sort menu orders races closest first by
+one market's prices - Kalshi's or Polymarket's, the gap between its two
+highest, never a blend of the two.
 
 ## State pages
 
@@ -1726,36 +1878,100 @@ Two more tables, each checked by `ballot2026.check()`:
   2027), with the month where it is not November (Louisiana's October
   round reads "Next election: October 2027"). Never computed from a term
   length; an office without an entry shows no year.
-- `OPEN_SEATS`: an office on the ballot whose holder is not running for it,
-  only from the constitution's term limit (read with the NGA's count of the
-  governor's terms) or the election office's certified list of candidates
-  for that office. `stategov` withholds an entry, and says so in the build,
-  when the office's holder is someone else or the NGA counts fewer terms.
+- `OPEN_SEATS`: an office on the ballot whose holder cannot run for it
+  again, from the constitution's term limit (read with the NGA's count of
+  the governor's terms). `stategov` withholds an entry, and says so in the
+  build, when the office's holder is someone else or the NGA counts fewer
+  terms. Whether a holder is on the ballot is the list of candidates' to
+  say (below); a term limit stays beside it as the reason, and the two must
+  agree.
 
 On the page:
 
 - each state page's list of races for Congress says which of the offices
   this site covers the same ballot also elects, that it may hold other
   contests and measures this site does not list, and that the site lists the
-  candidates for Congress only;
+  candidates for Congress there and those for the offices whose lists it
+  holds, by name ("those for the attorney general under State government"),
+  not those for the legislature; a territory's says its Territorial
+  government section lists the governor's candidates;
 - the State government section and the map's state panel mark each office on
   its own label line - "This office is on the Nov 3, 2026 ballot", never
   under the person who holds it, who may not be running - or say why not
   (not elected in 2026, with "Next elected: November <year>" where `NEXT`
   has it; appointed; chosen by the legislature; no such office), each mark
-  linked to its source. Where `OPEN_SEATS` has the office, "Open seat:
-  <holder> is term-limited" or "is not on the list of candidates for this
-  office", or, where that list names them, "<holder> is on the list of
-  candidates for this office", with the source, until Election Day. Every
-  other office on the ballot says "Whether <holder> is running for this
-  office is not checked here" (`holderStatus` "unchecked"), so no office
-  is silent beside another's "Open seat";
+  linked to its source. Under each office, its holder line, read from the
+  office's list of candidates for whoever holds it today: "Open seat:
+  <holder> is not among the candidates for this office (<the list>)" (with
+  "is term-limited ... and" first where `OPEN_SEATS` has the limit), or
+  "<holder> is among the candidates for this office (<the list>)" - never
+  "running for re-election", and the list named as the document it is -
+  until Election Day. An office whose list does not settle its holder (a
+  namesake on the list) says "Whether <holder> is running for this office
+  is not checked here" (`holderStatus` "unchecked") and the build says why,
+  so no office is silent beside another's "Open seat";
 - the map has a "2026 governor's races" view: a state electing its governor
   is drawn in the party of its current governor, every other state in the
-  empty grey, and the legend says the colour is the current governor's.
+  empty grey, and the legend says the colour is the current governor's; an
+  open seat says so in the state's label, naming the list.
 
-Who is running for these offices is not listed: no source keyed by an id the
-site can hold lists state candidates, and names from a search are not data.
+### Statewide candidates
+
+Under each office on the ballot, the candidates its election office lists
+(rule 91): `data/statewide_candidates.json`, a hand-edited cache researched
+jurisdiction by jurisdiction on 2026-10-18 from each Secretary of State's,
+board of elections' or election commission's own list - a county election
+office's or another state body's only where the state's own could not be
+read or does not exist (Arkansas, Arizona, Nevada) - with every list
+re-opened by a second reader. Ballotpedia, Wikipedia, news and party sites
+were leads, never sources (rule 50). 129 offices in 42 jurisdictions; the
+build log counts the candidates, the lists whose own words certify them and
+those that are not the state's own.
+
+| Shown | Source | Field (`ballot2026.offices.<office>.candidates` in `stategov.js`) |
+|-------|--------|-------|
+| Each candidate's name, first name first, in ordinary capitals and without a ballot title; the list's own form on hover | the list (`statewide.display_name`) | `candidates[].name`, `.printed` (where the two differ) |
+| "(the list gives a surname only)" where the ballot prints a ticket by surnames | the list | `.surnameOnly` |
+| The party, in words where the list abbreviates it (`statewide.PARTY_CODES`, from the list's key or the statute); a write-in's "WRI" or "Write-In (...)" label is dropped | the list | `.party` |
+| The running mate on a joint ticket; the ticket as the ballot prints it, where it prints surnames | the list | `.runningMate`, `.ballotName` |
+| A link to the candidate's own record, where the list is one record per candidate (Pennsylvania's lieutenant governors) | the election office | `.record` |
+| Write-in candidates, apart, "names not printed on the ballot" | the list, or the office's write-in list | `.writeIn`; `writeIns` (its address, office, kind and day read) |
+| "Source: <the office’s kind of document> (read <day>)", linked | the list | `url`, `by`, `source`, `read`, `certified` |
+| "Not the state’s own list." and why, for a county's or commission's | the list | `notStateList` |
+| The office's holder on the list | `statewide.holder_status` | `.holder` (the search leaves them to their holder row) |
+
+Candidates are listed by surname, printed names first, and the page says
+so: the lists' own orders differ (Minnesota rotates its ballot by
+precinct). No portrait, money or platform for these people; none is a
+profile, and none is linked to a profile of the same name (rule 25): the
+lists carry no id. A sitting member of Congress a list names in their own
+state is a build warning (`statewide-member-unnoted`) until an evidenced
+`overrides.OTHER_OFFICE_NOMINEES` entry says so on their profile. The home
+search finds the candidates under their own heading, "Statewide candidates
+on the Nov 3, 2026 ballot", as "Candidate for <office>, <state> (Nov 3, 2026
+ballot)" - also by the list's own form of the name - linked to the state
+page; from the day after Election Day, "Was a candidate for <office>,
+<state>, on the Nov 3, 2026 ballot". From that day the state page's block
+is in the past tense too, and links the state's official results page
+(`voting.RESULTS`): this site does not read state results and names no
+winner.
+
+`statewide.problems`, run by `build --check` (`validate.check_statewide_candidates`)
+and by every build (`stategov.build` stops), fails a list that is not the
+jurisdiction's election office's (its own domains, or an evidenced entry in
+`overrides.STATEWIDE_LISTS_ELSEWHERE`, which says whether it is the state
+office's own document on another host), has no quote, kind or day read, an
+office the list covers that `kyc/ballot2026.py` does not put on the ballot
+or the reverse, a list marked certified without the document's own words
+saying so (`certifiedQuote`) or published by anyone but the state's own
+office, a county's or commission's list that does not say why
+(`notStateList`), a party code `PARTY_CODES` cannot spell out, a candidate
+field the list does not print, two holders on one list, an elsewhere entry
+no list uses, and a holder said to be off the list whose surname is on it -
+a namesake is recorded with why in the office's `namesakes` ("Eddie Lee
+Murphy" is not Governor Bill Lee). A holder the list writes with another
+given name ("Lombardo, Joseph") is settled only by
+`overrides.STATEWIDE_NAME_FORMS`, with evidence.
 
 ## State high courts
 
@@ -2454,7 +2670,11 @@ confirm it, and the answer stays above the map rather than scrolling away.
 
 | Field | Source | Who has it |
 |---|---|---|
-| `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators` | Sitting members |
+| `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators`; where it holds no `contactForm`, the contact page the member's official site links, fetched and seen to hold a form (`contactFormVia: "official-site"`, `contactFormChecked`: the day) | Sitting members |
+| `districtOffices`, `districtOfficesRead` | `[{building, address, suite, city, state, zip, phone, hours}]` from `congress-legislators`' `legislators-district-offices`, by bioguide id, and the day it was read (`members`) | Sitting members it lists |
+| `officialIssuesUrl`, `platformRead` | The official-site page the member's `platforms` was read from, and the day; `platformRead` alone where the site lists no issues | Sitting members whose site was read |
+| `platformFeatured` | `true` where the site has no issues page and `platforms` is the issue pages its home page links: what the home page features, which may not be every issue | Sitting members whose list came from the home page |
+| `directoryEdition` | The Congressional Directory edition (`CDIR-2026-02-20`) a member's education or careers came from | Members in the Directory |
 | `social` (`twitter`, `twitter_id`, `facebook`, `instagram`, `youtube`, `youtube_id`, `bluesky`) | `legislators-social-media`, the project's verified account list. An X account is linked by `twitter_id` (`x.com/i/user/<id>`, which follows a renamed handle) where the file holds one; a handle X answers "not found" for with no id is dropped (`overrides.DEAD_X_HANDLES`). A YouTube value is given its shape in the pipeline: a channel id (`UC...`) becomes `youtube_id` (`/channel/`), an `@handle` stays one (`/@handle`), and a legacy username is linked as `overrides.YOUTUBE_LEGACY_NAMES` found it on a dated check, or dropped | Sitting members |
 | `refs` (`govtrack`, `opensecrets`, `votesmart`, `ballotpedia`) | Reference ids from `congress-legislators` | Sitting members |
 | `wikipedia` | The bioguide mapping for members; the state ballot page's own link for filed candidates (`wikipediaVia`), kept only while it leads, through its redirects, to a whole article about them (`enrich`) | Members, and candidates the ballot page links |
@@ -2535,6 +2755,27 @@ rather than reading 433 as a full chamber.
 They used to be literal text in both pages — `53 R | 47 D/I`, `35`, `435` —
 with a copy-pasted counting function per page and nothing tying either to the
 rosters they described.
+
+## Charts
+
+Every chart draws a figure the build already counts, as boxes and page text
+(never SVG text, rule 46), coloured from the theme's tokens: a party's colour
+only for a person's or a seat's party (a holder, a candidate in the markets and
+polls), `--cat-*` for kinds that are not parties, and one
+neutral ink for judges, races and navigation (audit 2026-10-17).
+
+| Chart | Where | From |
+|---|---|---|
+| Balance of power: each chamber as one bar, Republicans from the left and Democrats from the right, the Senate seats on the 2026 ballot dotted in their holder's colour (not hatched: the map under it hatches "no race", "none" and a split), a tick at half | every sidebar; above the map in its views of Congress, in its one-line form, which prints the counts below the laptop layout | `kycBuildMeta.senate` / `.house`; `senate.up` (seated senators in a 2026 race's seat, by state and class; sent only while the cycle is a campaign) |
+| The House, one square per voting seat, each state a button | the map's House view, "One square per seat" (`#/?mode=house&layout=tiles`) | `kycBuildMeta.houseTiles`, laid out by `kyc/tiles.py` from the district maps' label points: north to south, then west to east, within each state's block; `cells2026` for a redrawn state, used once the Congress the 2026 election chose sits |
+| A state's House races as squares laid out as the districts lie | a state page's 2026 races, with four or more districts | `houseTiles` (the 2026 plan) and `kycRaces` |
+| The states as a map-like grid of links, a dot where a Senate seat is on the 2026 ballot | States & territories | `kycBuildMeta.stateGrid` (`tiles.STATE_GRID`) |
+| A state's government at a glance: governor, whether the governor is running in the section's own words (rule 79), each chamber's seats, the high court's size and selection (no party) | a state page's State government | `data/stategov.js` |
+| Funding sources as one bar | the profile's campaign finance | `fundingBreakdown`, of `fundingBase` or the receipts |
+| Polling averages as dots on one axis of at least thirty points, a row per aggregator, in the market bars' candidate order (the compact panel prints the line only) | every race's markets block | `data/odds.js` |
+| The federal courts as a ladder, a judge senior by the courts' list but not yet the directory said on every count holding one (rule 82) | Federal government, the federal courts | `data/federal.js` |
+| A court's active bench by year commissioned, a row per appointing President, the axis ending at the latest commission | each federal court's page | `data/judiciary/<court>.js` |
+| Local governments by kind, a Census "X" said as "None" under the bar (rule 49) | Counties & local governments | `census_governments.json` (`pages.local_bar`) |
 
 ## Validation
 
