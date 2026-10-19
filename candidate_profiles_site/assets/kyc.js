@@ -2769,3 +2769,300 @@
     renderRememberedState: renderRememberedState,
   };
 })(window);
+
+/* ================================================================ charts
+ *
+ * Pictures of figures the build already counts (audit 2026-10-17): the
+ * balance of power with the seats on the 2026 ballot (VISUALS-21), the
+ * House as one square per seat (VISUALS-27), a state's districts as a
+ * navigator, and the states as a grid of links (VISUALS-35). Every one is
+ * page text and plain boxes - no SVG text (rule 46) and no script from
+ * anywhere else - coloured from the theme's tokens, and placed from
+ * figures the pipeline computed (kyc/summary.py, kyc/tiles.py), never
+ * worked out again here. */
+(function (global) {
+  "use strict";
+
+  var KYC = global.KYC;
+  var doc = global.document;
+  if (!KYC) return;
+  var esc = KYC.escapeHtml;
+  var attr = KYC.escapeAttr;
+
+  var WORDS = {
+    R: ["Republican", "Republicans"], D: ["Democratic", "Democrats"],
+    I: ["independent", "Independents"],
+  };
+
+  function share(n, total) {
+    return (100 * n / total).toFixed(3) + "%";
+  }
+
+  function past() {
+    return KYC.electionStatus(2026).phase === "post-election";
+  }
+
+  /* ------------------------------------------------- the balance of power */
+
+  /** One chamber's seats as one bar (VISUALS-21): Republicans from the
+   *  left, Democrats from the right, independents and empty seats between,
+   *  as the legislatures' seat strips run (KYC.seatStrip). A Senate seat on
+   *  the November 3 ballot is hatched in its holder's colour; every House
+   *  seat is on it, which a hatch over the whole bar would not tell anyone,
+   *  so the caption says so instead. A tick marks half the seats. An
+   *  independent is never folded into either party (rule: the rosters do
+   *  not say whom they caucus with). Nothing is hatched once the Congress
+   *  the cycle elects sits (summary.py sends no "up" then). */
+  function balanceBar(chamber, opts) {
+    opts = opts || {};
+    var info = KYC.meta();
+    var c = info[chamber];
+    if (!c) return "";
+    var seats = chamber === "senate" ? 100 : (c.seats || 435);
+    var held = (c.R || 0) + (c.D || 0) + (c.I || 0);
+    var vacant = Math.max(0, seats - held);
+    var up = chamber === "senate" ? c.up : null;
+    var parts = [];
+    var add = function (key, n, hatched) {
+      if (n > 0) parts.push({ key: key, n: n, up: hatched });
+    };
+    var upOf = function (key) { return up ? up[key] || 0 : 0; };
+    add("r", (c.R || 0) - upOf("R"), false);
+    add("r", upOf("R"), true);
+    add("i", (c.I || 0) - upOf("I"), false);
+    add("i", upOf("I"), true);
+    add("vacant", vacant, false);
+    add("d", upOf("D"), true);
+    add("d", (c.D || 0) - upOf("D"), false);
+    var name = chamber === "senate" ? "Senate" : "House";
+    var verb = past() ? "were" : "are";
+    var counted = [["R", c.R], ["I", c.I], ["D", c.D]].filter(function (p) { return p[1]; })
+      .map(function (p) {
+        return p[1] + " " + WORDS[p[0]][p[1] === 1 ? 0 : 1] +
+          (up ? " (" + upOf(p[0]) + " of their seats " + verb + " on the Nov 3, 2026 ballot)" : "");
+      });
+    if (vacant) counted.push(vacant + " vacant");
+    var half = chamber === "senate"
+      ? "51 seats is a majority; at 50 each, the Vice President breaks a tie"
+      : (Math.floor(seats / 2) + 1) + " of " + seats + " seats is a majority";
+    var spoken = "The " + name + ": " + counted.join(", ") + ". The tick marks half the seats: " + half + ".";
+    var bar = parts.map(function (p) {
+      return '<span class="bb-seg bb-' + p.key + (p.up ? " bb-up" : "") + '" style="width:' +
+        share(p.n, seats) + '"></span>';
+    }).join("");
+    var key = [["R", "r"], ["I", "i"], ["D", "d"]].filter(function (p) { return c[p[0]]; })
+      .map(function (p) {
+        var n = c[p[0]];
+        return '<li><span class="bb-swatch bb-' + p[1] + '" aria-hidden="true"></span>' +
+          esc(WORDS[p[0]][n === 1 ? 0 : 1].replace(/^./, function (ch) { return ch.toUpperCase(); })) +
+          " <strong>" + n + "</strong>" +
+          (up && upOf(p[0]) ? ' <span class="bb-faint">' + upOf(p[0]) + " up</span>" : "") + "</li>";
+      });
+    if (vacant) {
+      key.push('<li><span class="bb-swatch bb-vacant" aria-hidden="true"></span>Vacant <strong>' +
+        vacant + "</strong></li>");
+    }
+    var ballot = up
+      ? '<li class="bb-ballot"><span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span>' +
+        "Hatched: a seat on the Nov 3, 2026 ballot</li>"
+      : chamber === "house" && (info.election || {}).phase === "campaign"
+        ? '<li class="bb-ballot">Every House seat ' + (past() ? "was" : "is") +
+          " on the Nov 3, 2026 ballot</li>" : "";
+    var track = '<div class="bb-track" role="img" aria-label="' + attr(spoken) + '" title="' + attr(spoken) +
+      '">' + bar + '<span class="bb-half" aria-hidden="true"></span></div>';
+    if (opts.compact) {
+      // Under the sidebar's counts, which already name each party in its
+      // colour: only what the bar adds, in one line.
+      var hatched = up ? [["R", "R"], ["I", "I"], ["D", "D"]].filter(function (p) { return upOf(p[0]); })
+        .map(function (p) { return upOf(p[0]) + " " + p[1]; }) : [];
+      return '<figure class="balance-bar balance-bar-compact" data-chamber="' + attr(chamber) + '">' + track +
+        '<p class="bb-note">' + (hatched.length
+          ? '<span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span> Hatched: the ' +
+            esc(hatched.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot. "
+          : chamber === "house" && (info.election || {}).phase === "campaign"
+            ? "Every seat " + (past() ? "was" : "is") + " on the Nov 3, 2026 ballot. " : "") +
+        "The tick marks half: " + (chamber === "senate" ? 51 : Math.floor(seats / 2) + 1) +
+        " is a majority.</p></figure>";
+    }
+    return '<figure class="balance-bar" data-chamber="' + attr(chamber) + '">' +
+      (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
+      '<ul class="bb-key">' + key.join("") + ballot + "</ul>" +
+      '<p class="bb-note">The tick marks half the seats: ' + esc(half) + "." +
+      (chamber === "house" && info.delegates
+        ? " Voting seats only: the " + info.delegates + " delegates have no floor vote." : "") + "</p>" +
+      "</figure>";
+  }
+
+  /* ------------------------------------------- the House, a square a seat */
+
+  function houseLayout() {
+    return KYC.meta().houseTiles || null;
+  }
+
+  /** The plan whose districts members sit for: the 2024 map until the
+   *  Congress the 2026 election chose is seated, then the 2026 map. */
+  function seatedCells(block) {
+    return KYC.recordPhase() && block.cells2026 ? block.cells2026 : block.cells;
+  }
+
+  function seatedBySeat() {
+    var out = {};
+    (global.legislatorsData || []).forEach(function (p) {
+      if (!KYC.seated(p) || String(p.chamber).indexOf("House") === -1) return;
+      if (p.districtNum === null || p.districtNum === undefined) return;
+      out[p.state + "-" + p.districtNum] = p;
+    });
+    return out;
+  }
+
+  function partyLetter(p) {
+    var key = KYC.partyKey(p);
+    return key === "d" || key === "r" ? key : "i";
+  }
+
+  /** The House as one square per voting seat, each state a button (a tap
+   *  picks it, as on the map), its code above its block as page text. The
+   *  layout is kyc/tiles.py's; the colour is whoever sits for the seat. */
+  function houseTiles(opts) {
+    opts = opts || {};
+    var layout = houseLayout();
+    if (!layout) return "";
+    var who = seatedBySeat();
+    var W = layout.width;
+    var H = layout.height;
+    var states = Object.keys(layout.states).sort();
+    var html = states.map(function (code) {
+      var b = layout.states[code];
+      var slot = Math.max(b.cols, layout.slot || 2);
+      var left = b.x - (slot - b.cols) / 2;
+      var top = b.y - layout.band;
+      var cells = seatedCells(b);
+      var tally = { r: 0, d: 0, i: 0, vacant: 0 };
+      var squares = Object.keys(cells).map(function (n) {
+        var p = who[code + "-" + n];
+        var kind = p ? partyLetter(p) : "vacant";
+        tally[kind] += 1;
+        var seat = code + (n === "0" ? " at large" : "-" + n);
+        return '<span class="ht-seat ht-' + kind + '" style="grid-column:' + (cells[n][0] + 1) +
+          ";grid-row:" + (cells[n][1] + 1) + '" title="' + attr(seat + ": " +
+          (p ? p.name + " (" + p.party + ")" : "vacant")) + '"></span>';
+      }).join("");
+      var said = [["r", "Republican"], ["d", "Democratic"], ["i", "independent"], ["vacant", "vacant"]]
+        .filter(function (k) { return tally[k[0]]; })
+        .map(function (k) { return tally[k[0]] + " " + k[1]; });
+      var total = Object.keys(cells).length;
+      var label = KYC.stateName(code) + ": " + total + (total === 1 ? " seat, " : " seats, ") + said.join(", ");
+      return '<button type="button" class="ht-state' + (opts.selected === code ? " is-selected" : "") +
+        '" data-state="' + attr(code) + '" aria-pressed="' + String(opts.selected === code) +
+        '" aria-label="' + attr(label) + '" style="left:' + share(left, W) + ";top:" + share(top, H) +
+        ";width:" + share(slot, W) + ";height:" + share(layout.band + b.rows, H) + '">' +
+        '<span class="ht-code" style="height:' + share(layout.band, layout.band + b.rows) + '">' +
+        esc(code) + "</span>" +
+        '<span class="ht-block" style="width:' + share(b.cols, slot) + ";height:" +
+        share(b.rows, layout.band + b.rows) + ";grid-template-columns:repeat(" + b.cols +
+        ",1fr);grid-template-rows:repeat(" + b.rows + ',1fr)">' + squares + "</span></button>";
+    }).join("");
+    return '<div class="house-tiles" style="padding-bottom:' + share(H, W) + ";--ht-ratio:" +
+      (W / H).toFixed(4) + '">' + html + "</div>";
+  }
+
+  /** The key under the tiles: only the kinds some square is drawn in. */
+  function houseTilesKey() {
+    var layout = houseLayout();
+    if (!layout) return "";
+    var who = seatedBySeat();
+    var seen = {};
+    Object.keys(layout.states).forEach(function (code) {
+      var cells = seatedCells(layout.states[code]);
+      Object.keys(cells).forEach(function (n) {
+        var p = who[code + "-" + n];
+        seen[p ? partyLetter(p) : "vacant"] = true;
+      });
+    });
+    return [["r", "Republican"], ["d", "Democratic"], ["i", "Independent"], ["vacant", "Vacant"]]
+      .filter(function (k) { return seen[k[0]]; })
+      .map(function (k) {
+        return '<span class="key"><span class="swatch ht-swatch ht-' + k[0] + '"></span>' + esc(k[1]) + "</span>";
+      }).join("");
+  }
+
+  /** A state's House districts as a navigator (VISUALS-27): one square
+   *  per 2026 race, placed as kyc/tiles.py places them on the 2026 map,
+   *  each a link to that race on the page. Neutral: the race is open to
+   *  everyone on its ballot, and a square names its district, not a party.
+   *  "" where there is nothing to navigate (one district, or no layout). */
+  function districtTiles(code, races) {
+    var layout = houseLayout();
+    var b = layout && layout.states[code];
+    if (!b || !races || races.length < 2) return "";
+    var cells = b.cells2026 || b.cells;
+    var byNum = {};
+    races.forEach(function (r) { byNum[String(r.district || 0)] = r; });
+    var nums = Object.keys(cells);
+    if (nums.some(function (n) { return !byNum[n]; })) return "";
+    var links = nums.map(function (n) {
+      var r = byNum[n];
+      return '<a class="dt-seat" href="#' + attr("race-" + r.id) + '" style="grid-column:' +
+        (cells[n][0] + 1) + ";grid-row:" + (cells[n][1] + 1) + '" title="' + attr(r.label || "District " + n) +
+        '"><span class="sr-only">District </span>' + esc(n) + "</a>";
+    }).join("");
+    return '<p class="dt-caption">House races: a square per district, laid out roughly where each ' +
+      "district lies, north at the top.</p>" +
+      '<nav class="district-tiles jump-row" aria-label="Jump to a House race, districts laid out as on the map"' +
+      ' style="--dt-cols:' + b.cols + ";--dt-rows:" + b.rows + '">' + links + "</nav>";
+  }
+
+  /* ------------------------------------------------ the states as a grid */
+
+  /** Every state, D.C. and territory as a tile at its place on a map-like
+   *  grid (VISUALS-35), each a link to its page; a dot marks a state with a
+   *  Senate seat on the 2026 ballot. Neutral fill: a link, not a party. */
+  function statePicker() {
+    var grid = KYC.meta().stateGrid;
+    var states = KYC.meta().states || {};
+    if (!grid) return "";
+    var senate = {};
+    (global.kycRaces || []).forEach(function (r) {
+      if (r.chamber === "Senate") senate[r.state] = true;
+    });
+    var verb = past() ? "was" : "is";
+    var tiles = Object.keys(grid).filter(function (code) { return states[code]; }).sort()
+      .map(function (code) {
+        var at = grid[code];
+        var name = states[code].name;
+        // The territories' row (kyc/tiles.py's last) sits one empty row
+        // below the states'.
+        var apart = at[0] >= 8;
+        return '<a class="tp-tile' + (apart ? " tp-territory" : "") + '" href="' +
+          attr(KYC.stateUrl(code)) + '" data-state="' + attr(code) + '" style="grid-row:' +
+          (at[0] + (apart ? 2 : 1)) +
+          ";grid-column:" + (at[1] + 1) + '" title="' + attr(name + (senate[code]
+            ? ": a Senate seat " + verb + " on the Nov 3, 2026 ballot" : "")) + '">' +
+          '<span aria-hidden="true">' + esc(code) + "</span>" +
+          '<span class="sr-only">' + esc(name) + (senate[code] ? ", Senate race in 2026" : "") + "</span>" +
+          (senate[code] ? '<span class="tp-dot" aria-hidden="true"></span>' : "") + "</a>";
+      }).join("");
+    return '<nav class="tile-picker" aria-label="States and territories, laid out as on a map">' +
+      '<div class="tp-grid">' + tiles + "</div>" +
+      '<p class="tp-key"><span class="tp-dot tp-dot-key" aria-hidden="true"></span>A Senate seat ' + verb +
+      " on the Nov 3, 2026 ballot. The bottom row is the territories.</p></nav>";
+  }
+
+  /* The sidebar's chamber counts, with the bar under each. */
+  KYC.ready(function () {
+    [["senateBalance", "senate"], ["houseBalance", "house"]].forEach(function (pair) {
+      var slot = doc.getElementById(pair[0]);
+      if (!slot || !KYC.meta()[pair[1]]) return;
+      var wrap = doc.createElement("div");
+      wrap.className = "balance-bar-slot";
+      wrap.innerHTML = balanceBar(pair[1], { compact: true });
+      slot.parentNode.insertBefore(wrap, slot.nextSibling);
+    });
+  });
+
+  KYC.balanceBar = balanceBar;
+  KYC.houseTiles = houseTiles;
+  KYC.houseTilesKey = houseTilesKey;
+  KYC.districtTiles = districtTiles;
+  KYC.statePicker = statePicker;
+})(window);

@@ -25,6 +25,9 @@
 
   var mode = "senate";
   var selected = "";
+  // The House view drawn as the map ("map") or one square per seat
+  // ("tiles", VISUALS-27); in the address as layout=tiles.
+  var layout = "map";
 
   /* --------------------------------------------------------- delegations */
 
@@ -550,16 +553,71 @@
     });
   }
 
+  /** The address of what is on screen: the state, the view, and the
+   *  House's layout when it is the squares. */
+  function routeNow() {
+    return { state: selected, mode: mode === "senate" ? "" : mode,
+             layout: mode === "house" && layout === "tiles" ? "tiles" : "" };
+  }
+
+  /* ------------------------------------------- bars and squares (charts) */
+
+  /* Above the map in the views of Congress, the chamber's seats as one bar
+   * with the seats on the 2026 ballot hatched (VISUALS-21); in the House
+   * view, a choice between the map and one square per seat (VISUALS-27),
+   * since the map gives Wyoming's one seat California's weight. */
+  function drawCharts() {
+    var box = doc.getElementById("mapBalance");
+    var tiles = doc.getElementById("mapTiles");
+    var stage = doc.getElementById("mapStage");
+    if (!box || !tiles || !KYC.balanceBar) return;
+    var chamber = mode === "house" ? "house" : mode === "senate" || mode === "senate2026" ? "senate" : "";
+    var squares = mode === "house" && layout === "tiles" && !!KYC.houseTiles &&
+      !!(KYC.meta() || {}).houseTiles;
+    box.hidden = !chamber;
+    box.innerHTML = !chamber ? "" :
+      (mode === "house" && (KYC.meta() || {}).houseTiles
+        ? '<div class="map-layout"><span id="mapLayoutLabel">Draw the House as</span>' +
+          '<div class="segmented" role="group" aria-labelledby="mapLayoutLabel">' +
+          '<button type="button" data-layout="map" aria-pressed="' + String(!squares) + '">A map</button>' +
+          '<button type="button" data-layout="tiles" aria-pressed="' + String(squares) +
+          '">One square per seat</button></div></div>' : "") +
+      KYC.balanceBar(chamber, { title: chamber === "senate" ? "The Senate now" : "The House now" });
+    stage.hidden = squares;
+    tiles.hidden = !squares;
+    if (squares) {
+      tiles.innerHTML = KYC.houseTiles({ selected: selected }) +
+        '<p class="bb-note">Each square is a voting seat, coloured by who sits for it, placed ' +
+        "roughly where its district lies within its state. Pick a state for its delegation.</p>";
+      // The key says what the squares are, in place of the map's ramp.
+      doc.getElementById("mapLegend").innerHTML = KYC.houseTilesKey();
+    } else {
+      tiles.innerHTML = "";
+    }
+  }
+
+  function setLayout(next) {
+    layout = next === "tiles" ? "tiles" : "map";
+    drawLegend();
+    drawCharts();
+    KYC.router.writeFilters(routeNow());
+  }
+
   function select(code, opts) {
     if (!code) return;
     selected = code;
     map.setSelected(code);
     showPanel(code);
+    Array.prototype.forEach.call(doc.querySelectorAll("#mapTiles .ht-state"), function (b) {
+      var on = b.getAttribute("data-state") === code;
+      b.classList.toggle("is-selected", on);
+      b.setAttribute("aria-pressed", String(on));
+    });
     var picker = doc.getElementById("mapStateSelect");
     if (picker && picker.value !== code) picker.value = code;
     // Every view needs a URL: a selected state is shareable as #/?state=TX.
     if (!(opts && opts.fromRoute)) {
-      KYC.router.writeFilters({ state: code, mode: mode === "senate" ? "" : mode });
+      KYC.router.writeFilters(routeNow());
     }
     KYC.rememberState(code);
     KYC.renderRememberedState();
@@ -582,10 +640,11 @@
       line.hidden = (" " + line.getAttribute("data-sources") + " ").indexOf(" " + mode + " ") === -1;
     });
     drawLegend();
+    drawCharts();
     map.paint();
     if (selected) showPanel(selected);
     if (!(opts && opts.fromRoute)) {
-      KYC.router.writeFilters({ state: selected, mode: mode === "senate" ? "" : mode });
+      KYC.router.writeFilters(routeNow());
     }
   }
 
@@ -625,12 +684,21 @@
      * before it was read - so map.html#/?state=TX, every state page's map
      * link and every shared profile link all landed on a blank map. */
     var initial = KYC.router.read();
+    layout = initial.params.layout === "tiles" ? "tiles" : "map";
     setMode(MODE_TITLE[initial.params.mode] ? initial.params.mode : "senate",
             { fromRoute: true });
 
     doc.querySelector(".map-views").addEventListener("click", function (event) {
       var button = event.target.closest("[data-mode]");
       if (button) setMode(button.getAttribute("data-mode"));
+    });
+    doc.getElementById("mapBalance").addEventListener("click", function (event) {
+      var button = event.target.closest("[data-layout]");
+      if (button) setLayout(button.getAttribute("data-layout"));
+    });
+    doc.getElementById("mapTiles").addEventListener("click", function (event) {
+      var state = event.target.closest(".ht-state");
+      if (state) select(state.getAttribute("data-state"));
     });
 
     doc.getElementById("delegation").addEventListener("click", function (event) {
@@ -646,13 +714,18 @@
       }
       if (KYC.profile.isOpen()) KYC.profile.close();
       var wanted = route.params.mode || "senate";
+      var shape = route.params.layout === "tiles" ? "tiles" : "map";
+      if (shape !== layout) {
+        layout = shape;
+        if (wanted === mode) { drawLegend(); drawCharts(); }
+      }
       if (wanted !== mode) setMode(wanted, { fromRoute: true });
       if (route.params.state && route.params.state !== selected) {
         select(route.params.state, { fromRoute: true });
       } else if (!route.params.state && selected) {
         // Back on the list with a state still showing - after closing a
         // profile someone landed on directly - so the address says which.
-        KYC.router.writeFilters({ state: selected, mode: mode === "senate" ? "" : mode });
+        KYC.router.writeFilters(routeNow());
       }
     });
     if (initial.view === "profile") {

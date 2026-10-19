@@ -296,7 +296,7 @@ def _build(args):
 
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
-                                results=outcomes, snapshot=snapshot)
+                                results=outcomes, snapshot=snapshot, root=args.root)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = departed_rows
@@ -1252,7 +1252,8 @@ def _verify(args):
     summary = summary_mod.build(profiles, races=race_list,
                                 committees=legislators.load_committees(args.root),
                                 results=outcomes,
-                                snapshot=legislators.load_snapshot(args.root))
+                                snapshot=legislators.load_snapshot(args.root),
+                                root=args.root)
     summary["voting"] = voting_mod.for_page(voting_mod.load_cache(args.root),
                                           voting_dates_mod.load(args.root))
     summary["departed"] = _departed(args.root, legislators.load_snapshot(args.root), profiles)[0]

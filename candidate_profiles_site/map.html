@@ -23,8 +23,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=4b12c6f3bc">
-<script src="assets/kyc.js?v=5edae3ec75"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=683f43da0f">
+<script src="assets/kyc.js?v=54097912d9"></script>
 </head>
 <body>
 
@@ -208,11 +208,15 @@
             </div>
         </div>
 
+        <!-- The chamber's seats as a bar in the views of Congress, and the
+             House as one square per seat (kyc-map.js, KYC.balanceBar). -->
+        <div class="map-balance" id="mapBalance" hidden></div>
         <div class="map-stage" id="mapStage">
             <svg id="usMap" viewBox="0 0 975 652" preserveAspectRatio="xMidYMid meet"
                  role="group" aria-label="Map of U.S. states and territories.
                  Each state is a button that opens its delegation."></svg>
         </div>
+        <div class="map-tiles" id="mapTiles" hidden></div>
     </main>
 
     <aside class="detail-panel" aria-label="State delegation">
@@ -258,7 +262,7 @@
     </footer>
 </div>
 
-<script src="data/profiles.js?v=e50b57303d"></script>
+<script src="data/profiles.js?v=e0d84da9d9"></script>
 <script src="data/geo.js?v=720a1e65d9"></script>
 <script src="data/odds.js"></script>
 <script src="data/stategov.js?v=8a1deba302"></script>
@@ -269,6 +273,6 @@
 <script src="assets/kyc-stategov.js?v=dd94f8a786"></script>
 <script src="assets/kyc-findrep.js?v=708ec7448e"></script>
 <script src="assets/kyc-usmap.js?v=d1ac1c1524"></script>
-<script src="assets/kyc-map.js?v=96e414509e"></script>
+<script src="assets/kyc-map.js?v=b4d9740dec"></script>
 </body>
 </html>

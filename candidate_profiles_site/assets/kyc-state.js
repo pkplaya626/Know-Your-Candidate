@@ -604,8 +604,11 @@
                                                fullOdds: true });
     }).join("");
     if (raceHtml) {
-      /* Texas has 38 districts; a row of jump chips saves the scroll. */
-      var jumps = senateRaces.concat(houseRaces).map(function (race) {
+      /* Texas has 38 districts; a row of jump chips saves the scroll. With
+       * several districts the House races are squares laid out as the
+       * districts lie (VISUALS-27), the Senate's a chip beside them. */
+      var tiles = houseRaces.length > 3 && KYC.districtTiles ? KYC.districtTiles(code, houseRaces) : "";
+      var jumps = senateRaces.concat(tiles ? [] : houseRaces).map(function (race) {
         var short = race.chamber === "Senate" ? "Senate" : (race.district ? String(race.district) : "At-large");
         return '<a class="chip chip-link" href="#' + KYC.escapeAttr("race-" + race.id) + '" title="' +
           KYC.escapeAttr(districtLabel(race)) + '">' + KYC.escapeHtml(short) + "</a>";
@@ -618,9 +621,10 @@
         '<p class="state-note">Each seat with the sitting member, everyone on the ' +
           "November ballot, and - folded under the race - everyone no longer running. " +
           alsoOnBallot(code, name, info.territory) + "</p>",
-        (senateRaces.length + houseRaces.length > 3
+        (senateRaces.length + houseRaces.length > 3 && jumps
           ? '<nav class="toolbar jump-row" aria-label="Jump to a race">' + jumps + "</nav>"
           : ""),
+        tiles,
         raceHtml,
         "</section>"
       );
@@ -727,6 +731,8 @@
       '<h1 class="state-title">States &amp; territories</h1>',
       '<p class="state-summary">One page each: who holds the seats, the 2026 races, and everyone who has filed.</p>',
       "</header>",
+      // Every page at its place on a map-like grid (VISUALS-35).
+      KYC.statePicker ? KYC.statePicker() : "",
       // The list of states is right here: no "How to vote" link to this page.
       '<section class="state-section findrep" id="findrep" data-findrep data-findrep-list></section>',
       '<div class="state-list" id="stateList">' + rows.join("") + "</div>",
