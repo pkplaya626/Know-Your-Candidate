@@ -489,15 +489,16 @@ def _build(args):
         guide_path, guide_size = emit.write_government(guide_maps, args.root)
         print(f"[ok] wrote {guide_path} ({guide_size / 1024:.0f} KB)")
 
-    written = emit.write_state_pages(profiles, args.root, summary=summary)
+    # The sitemap and the share pages (rule 96) are written with the rest.
+    written = emit.write_state_pages(profiles, args.root, summary=summary, races=race_list)
     maps = [w for w in written
             if os.path.normpath(emit.DISTRICT_PAGES_DIR) in os.path.normpath(w)]
     states = [w for w in written if os.path.normpath(emit.STATES_DIR) in os.path.normpath(w)]
-    print(f"[ok] wrote {len(states)} state pages under {emit.STATES_DIR} and "
-          f"{len(maps)} district pages under {emit.DISTRICT_PAGES_DIR}")
-    sitemap_path = emit.write_sitemap(profiles, args.root)
-    if sitemap_path:
-        print(f"[ok] wrote {sitemap_path}")
+    share_dirs = {os.path.normpath(os.path.join(args.root, d)) for d in emit.SHARE_DIRS}
+    shared = [w for w in written if os.path.normpath(os.path.dirname(w)) in share_dirs]
+    print(f"[ok] wrote {len(states)} state pages under {emit.STATES_DIR}, "
+          f"{len(maps)} district pages under {emit.DISTRICT_PAGES_DIR} and "
+          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)}")
     from . import assets
     restamped = assets.stamp_templates(args.root)
     if restamped:
@@ -1494,13 +1495,13 @@ def _verify(args):
     else:
         print(f"  ok  {emit.VOTES_DIR}: both chambers match {rollcalls.CACHE_PATH}")
 
-    stale_pages = emit.check_state_pages(profiles, args.root, summary=summary)
+    stale_pages = emit.check_state_pages(profiles, args.root, summary=summary, races=race_list)
     if stale_pages:
         problems.append(f"{len(stale_pages)} state page(s) are {stale_pages[0][1]}: "
                         + ", ".join(rel for rel, _ in stale_pages[:5])
                         + (" ..." if len(stale_pages) > 5 else ""))
     else:
-        print(f"  ok  {emit.STATES_DIR} pages match the template")
+        print(f"  ok  {emit.STATES_DIR} pages, the share pages and the sitemap match the template")
 
     odds_expected = emit.odds_signature(odds_mod.payload(odds_mod.load_cache(args.root)))
     odds_committed = emit.read_signature(path=os.path.join(args.root, emit.ODDS_FILE))

@@ -278,7 +278,7 @@
     var won = namesWith(race, "elected", res.otherElected);
     if (won.length === 1) {
       return '<span class="badge badge-money" title="' + KYC.escapeAttr(
-        "Marked as the winner on the state's Wikipedia election results page.") +
+        "Marked as the winner on Wikipedia's election results page.") +
         '">Won by ' + KYC.escapeHtml(won[0]) + "</span>";
     }
     var runoff = namesWith(race, "runoff", res.otherRunoff);
@@ -622,7 +622,11 @@
     return [
       '<section class="race" id="', KYC.escapeAttr("race-" + race.id), '">',
       '<div class="race-head"><h3 class="race-title">',
-      KYC.escapeHtml(title), link, "</h3>", raceBadges(race), "</div>",
+      KYC.escapeHtml(title), link, "</h3>", raceBadges(race),
+      '<button type="button" class="btn race-share" data-share-race="' + KYC.escapeAttr(race.id) +
+        '" aria-label="' + KYC.escapeAttr("Copy link to " + race.label) + '">' +
+        KYC.icon("share") + " Copy link</button>",
+      "</div>",
       opts.lead ? '<p class="race-order race-lead">' + opts.lead + "</p>" : "",
       body,
       extra ? '<div class="race-extra">' + extra + "</div>" : "",
@@ -1033,6 +1037,14 @@
       var t = event.target;
       if (t && t.matches && t.matches("details[data-fold]") && t.open) fillFold(t);
     }, true);
+    // A race's "Copy link": its share page (rule 96), delegated (rule 13).
+    global.document.addEventListener("click", function (event) {
+      var button = event.target && event.target.closest && event.target.closest("[data-share-race]");
+      if (!button) return;
+      var id = button.getAttribute("data-share-race");
+      var race = KYC.races().filter(function (r) { return r.id === id; })[0];
+      KYC.shareLink(button, KYC.shareUrl("race", id), race ? race.label : "");
+    });
   }
 
   /* ---------------------------------------------------------- last time */

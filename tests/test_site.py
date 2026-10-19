@@ -890,13 +890,14 @@ class TestStatePages(unittest.TestCase):
                 os.path.relpath(w, os.path.join(tmp, emit.SITE_DIR)).replace(os.sep, "/")
                 for w in written)
             # The guide's pages are checked in test_guide.py, the federal
-            # pages in test_federal_pages.py.
+            # pages in test_federal_pages.py, the share pages in
+            # test_share.py. The sitemap is written with the pages it names.
             self.assertEqual([r for r in relative
                               if not r.startswith(("districts/", "government/", "legislature/",
                                                     "counties/", "courts/", "federal/"))],
                              ["404.html", "about.html", "ballot.html", "redistricting/ca.html",
-                              "site.webmanifest", "states/ak.html", "states/index.html",
-                              "states/tx.html"])
+                              "site.webmanifest", "sitemap.xml", "states/ak.html",
+                              "states/index.html", "states/tx.html"])
             # A district map for every state and territory, whatever the
             # roster, and the folder's own directory of them.
             self.assertEqual(len([r for r in relative if r.startswith("districts/")
