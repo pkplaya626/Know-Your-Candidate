@@ -169,14 +169,60 @@
       KYC.escapeHtml((row.current ? "" : "Former ") + row.office) + "</span>";
   }
 
+  /** How to reach a sitting member's office, or null (GRID-16): the
+   *  contact form their record or their official website gives (the
+   *  dialog's "Contact form", checked as kyc/members.py reads it), else the
+   *  Washington office's phone, else a district or state office's. Only a
+   *  member who sits now (KYC.seated): a challenger's campaign form is not
+   *  "contact your representative" (rule 27), and a former member's office
+   *  is closed. Never a campaign site. */
+  function contactOf(item) {
+    if (!item || !KYC.seated(item)) return null;
+    var who = item.name + "’s office";
+    if (item.contactForm) {
+      return { href: item.contactForm, external: true, label: "Contact office",
+        title: "Write to " + who + ": " + (item.contactFormVia === "official-site"
+          ? "the contact page their official website links" +
+            (item.contactFormChecked ? ", checked on " + KYC.dateWords(item.contactFormChecked) : "")
+          : "the contact form congress-legislators records for them") };
+    }
+    var tel = function (phone, where) {
+      return { href: "tel:" + String(phone).replace(/[^\d+]/g, ""), label: "Call office",
+        title: "Call " + who + " in " + where + ": " + phone };
+    };
+    if (item.phone) return tel(item.phone, "Washington");
+    var home = (item.districtOffices || []).filter(function (o) { return o && o.phone; })[0];
+    return home ? tel(home.phone, home.city || "the " +
+      (/Senate/.test(item.chamber) ? "state" : "district")) : null;
+  }
+
+  /** The contact link itself, beside a card or in a line of a race. */
+  function contactLink(item, cls) {
+    var c = contactOf(item);
+    if (!c) return "";
+    return '<a class="' + (cls || "card-contact") + '" href="' + KYC.escapeAttr(c.href) + '"' +
+      (c.external ? ' target="_blank" rel="noopener noreferrer"' : "") +
+      ' title="' + KYC.escapeAttr(c.title) + '" aria-label="' +
+      KYC.escapeAttr(c.label.replace(/ office$/, "") + " " + item.name + "’s office") + '">' +
+      (c.external ? KYC.icon("share", "icon-sm") : "") + KYC.escapeHtml(c.label) + "</a>";
+  }
+
   /* Every interpolation is escaped. The previous version put item.name,
    * item.party and the office label straight into innerHTML and carried an
    * onclick with the id interpolated into it; one delegated listener reads
    * data-id instead. */
   /* *opts.note* is a line the view adds under the card's facts: an age
-   * under an age sort, where a search matched (kyc-directory.js). */
+   * under an age sort, where a search matched (kyc-directory.js). A sitting
+   * member's card carries a way to reach their office beside it, outside
+   * the button: a link cannot sit inside one. */
   function card(item, opts) {
-    var note = opts && opts.note;
+    var note = opts && typeof opts === "object" ? opts.note : "";
+    var contact = contactLink(item);
+    var html = cardButton(item, note);
+    return contact ? '<div class="card-cell">' + html + contact + "</div>" : html;
+  }
+
+  function cardButton(item, note) {
     // No portrait (rule 24 guesses none): a disc with the person's
     // initials, not a 150x190 grey silhouette (VISUALS-16).
     var photo = KYC.hasPortrait(item)
@@ -498,9 +544,12 @@
           "new district map")
       : line.past ? "ran for " + seat + " and is not on its November ballot"
       : "is running for " + seat;
+    // They still hold the seat, so the race says how to reach their office
+    // as their card would (GRID-16).
+    var contact = contactLink(p, "card-contact race-held-contact");
     return '<p class="race-held">Held by <button type="button" class="link-button" data-id="' +
       KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>, who " +
-      KYC.escapeHtml(what) + ".</p>";
+      KYC.escapeHtml(what) + "." + (contact ? " " + contact : "") + "</p>";
   }
 
   /* The people the primary removed, folded under the race. With
@@ -1091,6 +1140,7 @@
     raceBadge: raceBadge,
     statusBadge: statusBadge,
     card: card,
+    contactOf: contactOf,
     raceBadges: raceBadges,
     raceSection: raceSection,
     fillOut: fillOut,

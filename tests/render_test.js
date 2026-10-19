@@ -6238,6 +6238,70 @@ async function testFindRepNav() {
   });
 }
 
+/* GRID-16: a sitting member's card, and a race their seat is in, say how
+ * to reach their office; nobody else's does (rule 27). */
+async function testContactActions() {
+  const page = await buildPage("index.html", { hash: "#/?view=race&state=OH" });
+  await settle(300);
+  const { window, D, errors } = page;
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const seated = people.filter((p) => KYC.seated(p));
+  const others = people.filter((p) => !KYC.seated(p));
+  const html = (p) => {
+    const box = D.createElement("div");
+    box.innerHTML = KYC.cards.card(p);
+    return box;
+  };
+  const wrong = [];
+  seated.forEach((p) => {
+    const a = html(p).querySelector(".card-cell > a.card-contact");
+    const want = p.contactForm || (p.phone ? "tel:" + String(p.phone).replace(/[^\d+]/g, "") : null);
+    if (!want ? !!a : !a || a.getAttribute("href") !== want) wrong.push(p.id);
+  });
+  const leaked = others.filter((p) => html(p).querySelector(".card-contact")).map((p) => p.id);
+  const sample = seated.find((p) => p.contactForm) || seated[0];
+  const link = sample && html(sample).querySelector("a.card-contact");
+  const phoneOnly = Object.assign({}, sample, { contactForm: null, phone: "202-555-0100" });
+  const call = html(phoneOnly).querySelector("a.card-contact");
+  const campaign = Object.assign({}, sample, { contactForm: null, phone: null, districtOffices: null,
+    campaignSite: "https://example.org/" });
+  suite("index.html — a way to reach a member's office, on the card (GRID-16)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("every sitting member's card carries their office's contact form, else its phone",
+      seated.length > 0 && wrong.length === 0, wrong.slice(0, 5).join(", "));
+    check("beside the card's button, never inside it (a link in a button is not operable)",
+      !!link && !link.closest("button") && !!link.parentNode.querySelector("button.card[data-id]"));
+    check("a form opens safely in a new tab and is named for whose office it is",
+      !!link && link.getAttribute("target") === "_blank" && /noopener/.test(link.getAttribute("rel")) &&
+        link.getAttribute("aria-label") === "Contact " + sample.name + "’s office" &&
+        /official website|congress-legislators/.test(link.getAttribute("title")));
+    check("a phone is a call to the Washington office, with the number in its title",
+      !!call && call.getAttribute("href") === "tel:2025550100" && /Washington: 202-555-0100/.test(
+        call.getAttribute("title")) && call.textContent.trim() === "Call office");
+    check("a campaign site is never offered as the office's contact",
+      !html(campaign).querySelector(".card-contact"));
+    check("no challenger's or former member's card carries one (rule 27)", leaked.length === 0,
+      leaked.slice(0, 5).join(", "));
+    const raced = [...D.querySelectorAll("section.race .card-cell > a.card-contact")];
+    check("the race view's cards carry it too", raced.length > 0);
+  });
+  if (!oldCongressSits(window)) return;
+  // A holder running for another seat is a line above the race, not a card.
+  const moved = seated.find((p) => p.contestRaceId && p.heldRaceId &&
+    p.contestRaceId !== p.heldRaceId && p.contestLabel);
+  const race = moved && window.kycRaces.find((r) => r.id === moved.heldRaceId);
+  if (!race) return;
+  const box = D.createElement("div");
+  box.innerHTML = KYC.cards.raceSection(race, people.filter((p) =>
+    (race.incumbentIds || []).indexOf(p.id) !== -1 || p.contestRaceId === race.id));
+  const held = box.querySelector(".race-held");
+  suite("index.html — a race whose holder runs elsewhere still says how to reach them (GRID-16)", () => {
+    check("the Held by line carries the holder's office contact",
+      !!held && !!held.querySelector("a.card-contact"), held ? held.innerHTML.slice(0, 200) : moved.id);
+  });
+}
+
 async function testAndroidBack() {
   // A phone's layout: the queries a phone matches.
   const phone = (window) => {
@@ -11800,6 +11864,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
   if (!only || only === "findrep") await testFindRepNav();
+  if (!only || only === "index.html") await testContactActions();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();

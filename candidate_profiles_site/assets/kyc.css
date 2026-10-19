@@ -1149,6 +1149,38 @@ a.badge-link {
   color: var(--text-muted);
 }
 
+/* A sitting member's way to reach their office (GRID-16), beside the card's
+ * button and not inside it: a link cannot sit inside a button. */
+.card-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  min-width: 0;
+}
+.card-contact {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-height: 32px;
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-decoration: none;
+}
+@media (hover: hover) {
+  .card-contact:hover { background: var(--surface-1); border-color: var(--border-strong); }
+}
+.race-held .card-contact { margin-left: var(--s-1); vertical-align: middle; }
+@media (max-width: 600px) {
+  /* Under the row's words, not its portrait. */
+  #stateContent .card-cell .card-contact { margin-left: calc(52px + var(--s-3)); }
+}
+
 /* Public offices held (KYC.officesHeld): newest first, the years beside the
  * office, the place under it. */
 .held-list {
