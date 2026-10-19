@@ -179,9 +179,17 @@ jobs:
           COPY="$RUNNER_TEMP/rehearsal/$SCENARIO"
           if [ -d "$COPY" ]; then cd "$COPY" && python -m unittest discover tests; fi
 
+      # Each step has a bound. #114's January job once sat in this step for
+      # 50 minutes, until it was stopped, and its log was lost with it; two
+      # reruns of the same commit finished the page checks in four minutes.
+      # A stall now fails in its own step, named, within minutes.
+      - name: Install jsdom
+        timeout-minutes: 10
+        run: npm install --no-fund --no-audit
+
       - name: Page checks on the rehearsed data
+        timeout-minutes: 20
         run: |
-          npm install --no-fund --no-audit
           COPY="$RUNNER_TEMP/rehearsal/$SCENARIO"
           if [ -d "$COPY" ]; then
             cd "$COPY" && NODE_PATH="$GITHUB_WORKSPACE/node_modules" node tests/render_test.js

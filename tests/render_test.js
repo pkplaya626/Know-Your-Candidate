@@ -9012,8 +9012,11 @@ async function testSearchAndFilters() {
     D.querySelector('#sortPanel [data-sort="age-desc"]').click();
     const first = D.querySelector("#results .card");
     check("an age sort prints the age", /Age \d+/.test(first.textContent), first.textContent);
-    // The cards come a window at a time: draw them all.
-    while (D.getElementById("gridMore")) D.getElementById("gridMore").click();
+    // The cards come a window at a time: draw them all. Bounded: a click
+    // that draws nothing (a card that throws) leaves the button in place,
+    // and an unbounded loop would spin until the job is killed.
+    for (let i = 0; D.getElementById("gridMore") && i < 1000; i++) D.getElementById("gridMore").click();
+    check("every window of cards draws", !D.getElementById("gridMore"));
     const divider = D.querySelector("#results .grid-divider");
     const unknown = cards().some((p) => KYC.ageOf(p) === null);
     check("and says where the unknown ages start", !unknown ||
