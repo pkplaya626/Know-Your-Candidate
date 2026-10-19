@@ -172,7 +172,9 @@ _GENERATED = {"legislature/index.html", "counties/index.html"}
 # The sections a site page's script draws, which a link may name: the
 # federal hub's (assets/kyc-federal.js; tests/test_guide.py holds the two
 # to each other).
-SITE_ANCHORS = {"federal/index.html": ("executive", "cabinet", "changes", "supreme-court", "courts")}
+# The home page's "Find who represents you" panel is in its markup.
+SITE_ANCHORS = {"federal/index.html": ("executive", "cabinet", "changes", "supreme-court", "courts"),
+                "index.html": ("findrep",)}
 
 
 #   voting:                the reader's state's voting section (VOTING)
@@ -291,6 +293,66 @@ def _flow(spec, here, pad):
                              f'<span>{inline(text, here)}</span></li>')
             lines.append(f"{pad}            </ul>")
         lines.append(f"{pad}        </li>")
+    lines.append(f"{pad}    </ol>")
+    if spec.get("caption"):
+        lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
+    return lines + [f"{pad}</figure>"]
+
+
+BILLFLOW_RESULTS = ("law", "not-law")
+
+
+def _billflow(spec, here, pad):
+    """How a bill becomes law, as a diagram (VISUALS-31): the House's and
+    the Senate's steps side by side, meeting where both pass the same text,
+    then the president and what each answer makes of the bill.
+
+    Every word is page text in an HTML box (rule 46). The connectors are
+    an SVG of lines alone, drawn by kyc-guide.js from where the boxes fall
+    on a wide screen; on a phone, or with no script, the stages are a
+    numbered list read top to bottom (kyc.css .guide-billflow)."""
+    def box(node, title, text, result=None, cls=""):
+        words = f'<strong>{inline(title, here)}</strong>'
+        if text:
+            words += f'<span>{inline(text, here)}</span>'
+        if result:
+            said, kind = result
+            if kind not in BILLFLOW_RESULTS:
+                raise ValueError(f"{here}: a bill's result is one of {BILLFLOW_RESULTS}: {kind!r}")
+            words += (f'<em class="billflow-result" data-result="{_e(kind)}">'
+                      f'{inline(said, here)}</em>')
+        return f'<div class="billflow-box{cls}" data-node="{_e(node)}">{words}</div>'
+
+    tracks = spec["tracks"]
+    if len(tracks) != 2:
+        raise ValueError(f"{here}: a bill's flow has the two chambers' tracks")
+    lines = [f'{pad}<figure class="guide-billflow" data-billflow>',
+             f'{pad}    <svg class="billflow-lines" aria-hidden="true" focusable="false"></svg>',
+             f'{pad}    <ol class="billflow">']
+    for t, (heading, steps) in enumerate(tracks):
+        lines.append(f'{pad}        <li class="billflow-stage billflow-track" data-track="{t}">'
+                     f'<p class="billflow-head">{inline(heading, here)}</p>')
+        lines.append(f'{pad}            <ol class="billflow-steps">')
+        for s, (title, text) in enumerate(steps):
+            lines.append(f'{pad}                <li>{box(f"t{t}-{s}", title, text)}</li>')
+        lines.append(f"{pad}            </ol>")
+        lines.append(f"{pad}        </li>")
+    for node, key in (("joined", "joined"), ("president", "president")):
+        title, text = spec[key]
+        lines.append(f'{pad}        <li class="billflow-stage billflow-{node}">'
+                     f'{box(node, title, text)}</li>')
+    lines.append(f'{pad}        <li class="billflow-stage billflow-answers">'
+                 f'<p class="billflow-head">{inline(spec["answers"], here)}</p>')
+    lines.append(f'{pad}            <ul class="billflow-ends">')
+    for e, end in enumerate(spec["ends"]):
+        title, text, result = end[0], end[1], end[2]
+        cell = box(f"end-{e}", title, text, result)
+        if len(end) > 3 and end[3]:
+            o_title, o_text, o_result = end[3]
+            cell += box(f"end-{e}-then", o_title, o_text, o_result, " billflow-then")
+        lines.append(f'{pad}                <li class="billflow-end">{cell}</li>')
+    lines.append(f"{pad}            </ul>")
+    lines.append(f"{pad}        </li>")
     lines.append(f"{pad}    </ol>")
     if spec.get("caption"):
         lines.append(f'{pad}    <figcaption>{inline(spec["caption"], here)}</figcaption>')
@@ -440,6 +502,8 @@ def _block(block, here, pad, level=3):
         return [f'{pad}<h{level} class="guide-subheading"{anchor}>{inline(block[1], here)}</h{level}>']
     if kind == "flow":
         return _flow(block[1], here, pad)
+    if kind == "billflow":
+        return _billflow(block[1], here, pad)
     if kind == "checks":
         return _checks(block[1], here, pad)
     if kind == "ladder":

@@ -458,19 +458,46 @@ class TestNewSections(unittest.TestCase):
                 self.assertTrue(have[sid]["sources"], f"{slug}#{sid}")
 
     def test_the_bill_flow_is_page_text(self):
+        # VISUALS-31: drawn as the two chambers' tracks meeting, every word in
+        # an HTML box; the only SVG is an empty one kyc-guide.js draws lines in.
         html = government.render("congress", "example.org")
-        flow = html[html.index('<figure class="guide-flow">'):]
+        flow = html[html.index('<figure class="guide-billflow" data-billflow>'):]
         flow = flow[:flow.index("</figure>")]
-        self.assertNotIn("<svg", flow)
-        for step in ("Committee", "On the Senate floor", "three-fifths", "pocket", "Override"):
+        svgs = re.findall(r"<svg[^>]*>(.*?)</svg>", flow, re.S)
+        self.assertEqual(svgs, [""])
+        self.assertIn('<svg class="billflow-lines" aria-hidden="true"', flow)
+        for step in ("Committee", "On the Senate floor", "three-fifths", "pocket", "Override",
+                     "Sundays excepted", "Rules Committee", "unanimous"):
             self.assertIn(step, flow)
-        # One chamber's floor, then the other chamber: never the House floor
-        # and the Senate floor as two steps followed by "the other chamber",
-        # which reads as a third passage.
-        titles = re.findall(r'<li class="guide-flow-step"><strong>(.*?)</strong>', flow)
-        self.assertNotIn("On the House floor", titles)
-        self.assertEqual(titles.index("The other chamber"),
-                         titles.index("On the floor of its chamber") + 1)
+        tracks = re.findall(r'<p class="billflow-head">(In the (?:House|Senate))</p>', flow)
+        self.assertEqual(tracks, ["In the House", "In the Senate"])
+        # Each track is its own chamber's three steps; neither is followed by
+        # a step "the other chamber", which read as a third passage.
+        for t in (0, 1):
+            nodes = re.findall(rf'data-node="t{t}-(\d)"><strong>(.*?)</strong>', flow)
+            self.assertEqual([title for _n, title in nodes][:2], ["Introduced", "Committee"])
+            self.assertEqual(len(nodes), 3)
+        self.assertNotIn("The other chamber", flow)
+        # They meet at one text, then the president, then each answer's result.
+        order = [flow.index(f'data-node="{n}"') for n in ("t1-2", "joined", "president", "end-0")]
+        self.assertEqual(order, sorted(order))
+        results = re.findall(r'data-node="(end-\d(?:-then)?)">.*?'
+                             r'(?:data-result="([a-z-]+)">(.*?)</em>|</div>)', flow)
+        self.assertEqual([(n, k) for n, k, _w in results],
+                         [("end-0", "law"), ("end-1", "law"), ("end-2", "not-law"), ("end-3", ""),
+                          ("end-3-then", "law")])
+        self.assertIn("two-thirds of the other", flow)
+
+    def test_a_bill_result_names_one_of_two_outcomes(self):
+        spec = {"tracks": [("A", [("x", "y")]), ("B", [("x", "y")])], "joined": ("j", ""),
+                "president": ("p", ""), "answers": "a",
+                "ends": [("Signs it", "", ("It is law", "enacted"))]}
+        with self.assertRaises(ValueError):
+            government._billflow(spec, "congress", "")
+
+    def test_the_congress_page_was_checked_when_its_bill_flow_was_drawn(self):
+        page = next(p for p in PAGES if p["slug"] == "congress")
+        self.assertGreaterEqual(page.get("reviewed", government.REVIEWED), "2026-10-19")
 
     def test_every_redrawn_state_is_listed_from_the_table(self):
         from kyc import districts

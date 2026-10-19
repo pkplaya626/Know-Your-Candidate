@@ -6357,6 +6357,59 @@ async function testPayLine() {
   });
 }
 
+/* VISUALS-31: how a bill becomes law, as two chambers' tracks meeting. The
+ * words are page text; the lines are one SVG path with no text (rule 46),
+ * drawn from where the boxes fall. jsdom lays nothing out, so the boxes are
+ * given a wide figure's places and the stylesheet's "lines shown". */
+async function testBillFlow() {
+  const page = await buildPage("government/congress.html");
+  await settle(100);
+  const { window, D, errors } = page;
+  const figure = D.querySelector("[data-billflow]");
+  const svg = figure && figure.querySelector("svg.billflow-lines");
+  // A wide layout: the tracks side by side, each box 60px tall with 30px gaps.
+  const place = {};
+  const at = (x, y, w) => ({ left: x, right: x + w, top: y, bottom: y + 60, width: w, height: 60 });
+  [0, 1].forEach((t) => [0, 1, 2].forEach((s) => { place[`t${t}-${s}`] = at(t * 500, s * 90, 450); }));
+  place.joined = at(250, 300, 450);
+  place.president = at(250, 390, 450);
+  [0, 1, 2, 3].forEach((e) => { place[`end-${e}`] = at(e * 240, 500, 220); });
+  place["end-3-then"] = at(720, 590, 220);
+  [...figure.querySelectorAll("[data-node]")].forEach((n) => {
+    n.getBoundingClientRect = () => place[n.getAttribute("data-node")];
+  });
+  figure.getBoundingClientRect = () => at(0, 0, 950);
+  const real = window.getComputedStyle;
+  window.getComputedStyle = (el, ...rest) => (el === svg ? { display: "block" } : real(el, ...rest));
+  window.KYC.guide.initBillFlow();
+  window.getComputedStyle = real;
+  const d = (svg.querySelector("path") || { getAttribute: () => "" }).getAttribute("d");
+  suite("government/congress.html — how a bill becomes law, drawn (VISUALS-31)", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the House's and the Senate's steps, as page text",
+      [...figure.querySelectorAll(".billflow-track .billflow-head")].map((h) => h.textContent)
+        .join("|") === "In the House|In the Senate" &&
+        figure.querySelectorAll('.billflow-track [data-node]').length === 6);
+    check("meeting at one text, then the president and four answers, the veto's override under it",
+      !!figure.querySelector('[data-node="joined"]') && !!figure.querySelector('[data-node="president"]') &&
+        figure.querySelectorAll(".billflow-end").length === 4 &&
+        !!figure.querySelector('.billflow-end:last-child [data-node="end-3-then"]'));
+    check("each answer says what it makes of the bill, in words",
+      [...figure.querySelectorAll(".billflow-result")].map((r) => r.textContent).join("|") ===
+        "It is law|It is law, as if signed|It is not law|It is law");
+    check("the lines are SVG with no text in it (rule 46), hidden from assistive technology",
+      !!svg && svg.getAttribute("aria-hidden") === "true" && !svg.querySelector("text") &&
+        svg.querySelectorAll("*").length === 1);
+    // 4 steps within the tracks, 2 into the joined box, 1 to the president,
+    // 4 to the answers, 1 to the override: 12 lines, each with an arrowhead.
+    check("one path: a line and an arrowhead for each of the 12 links", (d.match(/M/g) || []).length === 24, d);
+    check("a track meets the joined box inside its edge",
+      d.indexOf("M225 240V270H262V299") !== -1 && d.indexOf("M725 240V270H688V299") !== -1, d);
+    check("the president fans out to each answer's top",
+      [110, 350, 590, 830].every((x) => d.indexOf("H" + x + "V499") !== -1), d);
+  });
+}
+
 async function testAndroidBack() {
   // A phone's layout: the queries a phone matches.
   const phone = (window) => {
@@ -11887,6 +11940,7 @@ async function testCharts() {
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "charts") await testCharts();
   if (!only || only === "guide") await testGuide();
+  if (!only || only === "guide") await testBillFlow();
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "counties") await testCounties();

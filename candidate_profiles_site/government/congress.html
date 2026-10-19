@@ -23,7 +23,7 @@
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
 <link rel="manifest" href="../site.webmanifest">
-<link rel="stylesheet" href="../assets/kyc.css?v=5edfaf2b17">
+<link rel="stylesheet" href="../assets/kyc.css?v=11f07c48c5">
 <script src="../assets/kyc.js?v=a4af592dc4"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Know Your Candidate","item":"https://candidates.radicalrelay.us/"},{"@type":"ListItem","position":2,"name":"Know Your Government","item":"https://candidates.radicalrelay.us/government/index.html"},{"@type":"ListItem","position":3,"name":"How Congress works","item":"https://candidates.radicalrelay.us/government/congress.html"}]}</script>
 </head>
@@ -219,30 +219,36 @@
                 </section>
                 <section class="guide-section" id="lawmaking" aria-labelledby="lawmaking-title">
                     <h2 class="guide-heading" id="lawmaking-title">How a bill becomes law</h2>
-                    <p>A bill can start in either chamber, except that a bill for raising revenue must start in the House (Article I, Section 7). One that becomes law passes these steps:</p>
-                    <figure class="guide-flow">
-                        <ol class="guide-flow-steps">
-                            <li class="guide-flow-step"><strong>Introduced</strong><span>A representative or a senator introduces it.</span>
+                    <p>A bill can start in either chamber, except that a bill for raising revenue must start in the House (Article I, Section 7). It passes one chamber and then the other, and becomes law only once both have passed it in the same words and the president has signed it, let it stand or been overridden:</p>
+                    <figure class="guide-billflow" data-billflow>
+                        <svg class="billflow-lines" aria-hidden="true" focusable="false"></svg>
+                        <ol class="billflow">
+                            <li class="billflow-stage billflow-track" data-track="0"><p class="billflow-head">In the House</p>
+                                <ol class="billflow-steps">
+                                    <li><div class="billflow-box" data-node="t0-0"><strong>Introduced</strong><span>A representative introduces it, or it arrives having passed the Senate.</span></div></li>
+                                    <li><div class="billflow-box" data-node="t0-1"><strong>Committee</strong><span>It is referred to a committee, which can hold hearings and mark it up: debate, amend and rewrite it. A bill the committee does not report usually goes no further.</span></div></li>
+                                    <li><div class="billflow-box" data-node="t0-2"><strong>On the House floor</strong><span>For most major bills the Rules Committee proposes a special rule, setting the terms of debate and which amendments may be offered, which the House adopts before taking up the bill. The bill passes by a simple majority.</span></div></li>
+                                </ol>
                             </li>
-                            <li class="guide-flow-step"><strong>Committee</strong><span>It is referred to a committee, which can hold hearings and mark it up: debate, amend and rewrite it. A bill the committee does not report usually goes no further.</span>
+                            <li class="billflow-stage billflow-track" data-track="1"><p class="billflow-head">In the Senate</p>
+                                <ol class="billflow-steps">
+                                    <li><div class="billflow-box" data-node="t1-0"><strong>Introduced</strong><span>A senator introduces it, or it arrives having passed the House.</span></div></li>
+                                    <li><div class="billflow-box" data-node="t1-1"><strong>Committee</strong><span>It is generally referred to the committee with jurisdiction over most of its subject, which can hold hearings and mark it up. A bill the committee does not report usually goes no further.</span></div></li>
+                                    <li><div class="billflow-box" data-node="t1-2"><strong>On the Senate floor</strong><span>Debate has no time limit unless the Senate sets one, so opponents can hold a bill up by debating it at length or by other delays: a filibuster. Ending debate, called cloture, takes three-fifths of the senators duly chosen and sworn, 60 when every seat is filled. Most business moves instead by unanimous consent: an agreement setting aside the rules to speed things up, which any one senator can block by objecting. The bill passes by a simple majority.</span></div></li>
+                                </ol>
                             </li>
-                            <li class="guide-flow-step"><strong>On the floor of its chamber</strong><span>In the House, for most major bills the Rules Committee proposes a special rule, setting the terms of debate and which amendments may be offered, which the House adopts before taking up the bill; the bill then passes by a simple majority. On the Senate floor, debate has no time limit unless the Senate sets one, so opponents can hold a bill up by debating it at length or by other delays: a filibuster. Ending debate, called cloture, takes three-fifths of the senators duly chosen and sworn, 60 when every seat is filled. Most business moves instead by unanimous consent: an agreement setting aside the rules to speed things up, which any one senator can block by objecting.</span>
-                            </li>
-                            <li class="guide-flow-step"><strong>The other chamber</strong><span>The bill then goes to the other chamber, through its own committee and its own floor in the same way.</span>
-                            </li>
-                            <li class="guide-flow-step"><strong>The same words</strong><span>Both chambers must pass identical text. Where their versions differ, a conference committee of members of both may work out a compromise, which then goes back to each for a vote.</span>
-                            </li>
-                            <li class="guide-flow-step"><strong>The president</strong><span>Has ten days, Sundays excepted, to act on the bill.</span>
-                                <ul class="guide-flow-options">
-                                    <li><strong>Signs it</strong><span>It becomes law.</span></li>
-                                    <li><strong>Does nothing</strong><span>It becomes law after ten days, unless Congress has adjourned and so prevented its return. Then it does not: a pocket veto, which Congress cannot override.</span></li>
-                                    <li><strong>Vetoes it</strong><span>It goes back to the chamber where it started, with the president's objections.</span></li>
+                            <li class="billflow-stage billflow-joined"><div class="billflow-box" data-node="joined"><strong>Both chambers pass the same text</strong><span>The second chamber may amend what the first passed. Where their versions differ, a conference committee of members of both may work out a compromise, which goes back to each for a vote. Only a bill both have passed in the same words goes to the president.</span></div></li>
+                            <li class="billflow-stage billflow-president"><div class="billflow-box" data-node="president"><strong>The president</strong><span>Has ten days, Sundays excepted, from when the bill is presented, to act on it.</span></div></li>
+                            <li class="billflow-stage billflow-answers"><p class="billflow-head">What the president's answer makes of it</p>
+                                <ul class="billflow-ends">
+                                    <li class="billflow-end"><div class="billflow-box" data-node="end-0"><strong>Signs it</strong><span>Approves the bill and signs it.</span><em class="billflow-result" data-result="law">It is law</em></div></li>
+                                    <li class="billflow-end"><div class="billflow-box" data-node="end-1"><strong>Does not sign or return it</strong><span>Ten days pass, Sundays excepted, while Congress can receive it back.</span><em class="billflow-result" data-result="law">It is law, as if signed</em></div></li>
+                                    <li class="billflow-end"><div class="billflow-box" data-node="end-2"><strong>Does not sign it, and Congress adjourns</strong><span>Congress's adjournment prevents its return within the ten days: a pocket veto, which Congress cannot override.</span><em class="billflow-result" data-result="not-law">It is not law</em></div></li>
+                                    <li class="billflow-end"><div class="billflow-box" data-node="end-3"><strong>Vetoes it</strong><span>Returns it, with the president's objections, to the chamber where it started.</span></div><div class="billflow-box billflow-then" data-node="end-3-then"><strong>Override</strong><span>Two-thirds of that chamber, and then two-thirds of the other, vote to pass it again. Short of that in either, it is not law.</span><em class="billflow-result" data-result="law">It is law</em></div></li>
                                 </ul>
                             </li>
-                            <li class="guide-flow-step"><strong>Override</strong><span>A vetoed bill becomes law if two-thirds of each chamber pass it again.</span>
-                            </li>
                         </ol>
-                        <figcaption>The path Article I, Section 7 sets, through each chamber's rules.</figcaption>
+                        <figcaption>The path Article I, Section 7 sets, through each chamber's rules. The chambers are drawn side by side, but a bill passes one and then the other.</figcaption>
                     </figure>
                     <h3 class="guide-subheading">The exception: budget reconciliation</h3>
                     <p>One kind of bill cannot be filibustered. Under the Congressional Budget Act of 1974, a reconciliation bill changes existing law to bring taxes and spending in line with a budget resolution Congress has adopted, and the Senate's debate on it is limited to 20 hours (2 U.S.C. 641), so it can pass by a simple majority. Since the 2010s, the Senate has also ended debate on nominations by a simple majority.</p>
@@ -336,7 +342,7 @@
                 </section>
                 <section class="guide-section" id="reaching" aria-labelledby="reaching-title">
                     <h2 class="guide-heading" id="reaching-title">Reaching your members</h2>
-                    <p>Everyone in a state has one representative, for the district they live in, and two senators. The District of Columbia and each territory elect one delegate, or Puerto Rico's resident commissioner, and no senators. <a href="../states/index.html">Find yours by state</a> or on <a href="../map.html">the partisan map</a>: each member's profile here gives their office's phone number and address and their official website, as the congress-legislators project records them, and a contact form where that record lists one. For senators it mostly does; for representatives it rarely does, and a representative's form is on their own website. The <a href="https://www.house.gov/representatives/find-your-representative" target="_blank" rel="noopener noreferrer">House</a> and the <a href="https://www.senate.gov/senators/senators-contact.htm" target="_blank" rel="noopener noreferrer">Senate</a> list their members too.</p>
+                    <p>Everyone in a state has one representative, for the district they live in, and two senators. The District of Columbia and each territory elect one delegate, or Puerto Rico's resident commissioner, and no senators. <a href="../index.html#findrep">Find who represents you</a> by ZIP code or location, <a href="../states/index.html">by state</a> or on <a href="../map.html">the partisan map</a>: each member's profile here gives their office's phone number and address and their official website, as the congress-legislators project records them, and a contact form: the one that record lists, which for senators it mostly does, or else the contact page their official website links, opened and seen to hold a form. Each sitting member's card links the same form, or their office's phone where there is none. The <a href="https://www.house.gov/representatives/find-your-representative" target="_blank" rel="noopener noreferrer">House</a> and the <a href="https://www.senate.gov/senators/senators-contact.htm" target="_blank" rel="noopener noreferrer">Senate</a> list their members too.</p>
                     <p>Members' offices also help the people they represent with federal agencies, work called casework. Staff can ask an agency to look at a case and move it through its normal steps, but cannot make it decide in the constituent's favor. An agency generally will not discuss a person's records with the office without that person's signed consent, under the Privacy Act (5 U.S.C. 552a).</p>
                     <p class="guide-see"><span>See it on this site:</span> <a href="../states/index.html">Your state's members of Congress</a></p>
                     <p class="guide-sources"><span>Sources:</span> <a href="https://www.house.gov/representatives/find-your-representative" target="_blank" rel="noopener noreferrer">U.S. House of Representatives: Find your representative</a>; <a href="https://www.senate.gov/senators/senators-contact.htm" target="_blank" rel="noopener noreferrer">U.S. Senate: Contacting U.S. senators</a>; <a href="https://github.com/unitedstates/congress-legislators" target="_blank" rel="noopener noreferrer">congress-legislators: members, committee rosters and leadership posts</a>; <a href="https://www.congress.gov/crs-product/RL33209" target="_blank" rel="noopener noreferrer">Congressional Research Service, Casework in a Congressional Office (RL33209)</a>; <a href="https://www.law.cornell.edu/uscode/text/5/552a" target="_blank" rel="noopener noreferrer">5 U.S.C. 552a (Privacy Act)</a></p>
@@ -360,7 +366,7 @@
             <footer class="site-footer">
                 <p><strong>About this guide:</strong> a plain-language summary of how
                     American government is organized. Each section lists the sources
-                    it was checked against, on <time datetime="2026-10-18">Oct. 18, 2026</time>.
+                    it was checked against, on <time datetime="2026-10-19">Oct. 19, 2026</time>.
                     It describes offices and institutions; where it names who holds
                     one today, that comes from the same data as the rest of the site.
                     It is not legal advice.</p>
@@ -380,6 +386,6 @@
 <script src="../assets/kyc-odds.js?v=c1d28927af"></script>
 <script src="../assets/kyc-cards.js?v=6a2b6d7c7d"></script>
 <script src="../assets/kyc-profile.js?v=9c76cc2788"></script>
-<script src="../assets/kyc-guide.js?v=410825c715"></script>
+<script src="../assets/kyc-guide.js?v=d7c6ac7683"></script>
 </body>
 </html>

@@ -3802,6 +3802,131 @@ a.badge-link {
 }
 .guide-flow-options span { color: var(--text-muted); }
 
+/* How a bill becomes law (VISUALS-31): every word in an HTML box (rule 46).
+ * Narrow - a phone, or a browser without container queries - it is a
+ * numbered list of stages on one line, the House's steps, then the
+ * Senate's, read top to bottom. Wide, the two chambers' tracks stand side
+ * by side and meet above the president, and kyc-guide.js draws the
+ * connectors as one SVG path of lines under the boxes (.billflow-lines). */
+.guide-billflow {
+  position: relative;
+  margin: 0 0 var(--s-5);
+  container-type: inline-size;
+}
+.billflow-lines {
+  display: none;
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+.billflow-lines path { fill: none; stroke: var(--border-strong); stroke-width: 2; }
+.billflow {
+  position: relative;
+  counter-reset: billflow;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.billflow ol,
+.billflow ul { margin: 0; padding: 0; list-style: none; }
+.billflow-stage {
+  counter-increment: billflow;
+  position: relative;
+  margin: 0 0 var(--s-3) var(--s-6);
+}
+.billflow-stage::before {
+  content: counter(billflow);
+  position: absolute;
+  z-index: 1;
+  left: calc(-1 * var(--s-6));
+  top: var(--s-2);
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--surface-3);
+  color: var(--text);
+  font-weight: 700;
+  font-size: var(--t-xs);
+  line-height: 1.6rem;
+  text-align: center;
+}
+/* The connector, narrow: one line through every stage's number. */
+.billflow::before {
+  content: "";
+  position: absolute;
+  left: calc(0.8rem - 1px);
+  top: calc(var(--s-2) + 0.8rem);
+  bottom: var(--s-6);
+  border-left: 2px solid var(--border-strong);
+}
+.billflow-head {
+  margin: 0 0 var(--s-2);
+  padding-top: var(--s-2);
+  font-weight: 700;
+  font-size: var(--t-md);
+}
+.billflow-steps,
+.billflow-ends { display: grid; gap: var(--s-2); }
+.billflow-end { display: grid; gap: var(--s-2); align-content: start; }
+.billflow-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+}
+.billflow-box > span { color: var(--text-muted); }
+.billflow-joined .billflow-box,
+.billflow-box[data-node="president"] { border-top: 3px solid var(--accent); }
+.billflow-then { border-style: dashed; border-color: var(--border-strong); }
+.billflow-result {
+  align-self: flex-start;
+  margin-top: var(--s-1);
+  padding: 2px var(--s-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-pill);
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--t-xs);
+}
+.billflow-result[data-result="not-law"] { border-style: dashed; border-color: var(--border-strong); }
+@container (min-width: 44rem) {
+  .billflow-lines { display: block; }
+  .billflow {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--s-6);
+    row-gap: var(--s-6);
+  }
+  .billflow::before,
+  .billflow-stage::before { content: none; }
+  .billflow-stage { margin: 0; }
+  .billflow-joined,
+  .billflow-president,
+  .billflow-answers { grid-column: 1 / -1; }
+  .billflow-joined .billflow-box,
+  .billflow-president .billflow-box { width: min(100%, 34rem); margin: 0 auto; }
+  .billflow-track .billflow-head { text-align: center; }
+  /* A label on the line from the president down to the answers. */
+  .billflow-answers .billflow-head {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto var(--s-5);
+    padding: var(--s-1) var(--s-3);
+    background: var(--surface-0);
+    font-size: var(--t-sm);
+    text-align: center;
+  }
+  .billflow-steps { gap: var(--s-5); }
+  .billflow-ends { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s-3); }
+  .billflow-end { gap: var(--s-5); }
+}
+
 /* Who checks whom: a box per branch, its checks on the others inside. */
 .guide-checks { margin: 0 0 var(--s-5); }
 .guide-checks-row {
