@@ -137,6 +137,18 @@ class TestOverrides(unittest.TestCase):
         self.assertNotIn("polling", voting.for_page(cache)["OH"])
         self.assertEqual(voting.dead_links(cache), ["OH polling: https://vote.oh.gov/polling"])
 
+    def test_oregons_walled_lookup_is_reached_through_its_my_vote_page(self):
+        # On 2026-10-18 GitHub's runner got 404 twice from ORESTAR's bot
+        # wall, the lookup was called dead, and the daily refresh stopped.
+        nass, url, _label, _why = overrides.VOTING_LINKS[("OR", "status")]
+        cache = cache_of(OR={"status": nass})
+        cache["links"] = {nass: voting.DEAD, url: voting.LIVE}
+        self.assertEqual(voting.effective(cache)["OR"]["status"],
+                         {"url": "https://sos.oregon.gov/elections/pages/myvote.aspx",
+                          "from": voting.OFFICE})
+        self.assertEqual(voting.dead_links(cache), [])
+        self.assertEqual(voting.for_page(cache)["OR"]["status"], url)
+
 
 class TestValidate(unittest.TestCase):
     def codes(self, cache):

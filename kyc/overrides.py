@@ -315,6 +315,18 @@ VOTING_LINKS = {
         "https://sos.wyo.gov/Elections/State/RegisteringToVote.aspx", None, None,
         "NASS lists 'Registering to Vote in Wyoming' - the same page as 'register', with no "
         "lookup on it - so 'Check your registration' led to no check (read 2026-10-17)"),
+    # The lookup itself is not dead: it sits behind a bot wall that answered
+    # a captcha page ("Oregon Secretary of State Captcha/Support ID") to a
+    # browser-like request on 2026-10-19 and 404 to GitHub's runner twice on
+    # 2026-10-18, after reading live on 2026-10-17. A wall concludes nothing
+    # (rule 8), and its 404 stopped the daily refresh; the Secretary of
+    # State's own My Vote page, which a script can read, links the lookup.
+    ("OR", "status"): (
+        "https://secure.sos.state.or.us/orestar/vr/showVoterSearch.do?lang=eng",
+        "https://sos.oregon.gov/elections/pages/myvote.aspx", None,
+        "NASS links the ORESTAR voter lookup, behind a bot wall a script cannot pass; "
+        "'Oregon Secretary of State : My Vote' on sos.oregon.gov links it as 'Go to My Vote "
+        "Now' (read 2026-10-19)"),
 }
 
 # Links on a state's government block that the rosters give wrongly, each
