@@ -439,7 +439,7 @@
    * switch that shows them - "No profiles matching “Gulrez Khan”" hid the
    * one person it had found; and that the officials found below are not
    * profiles. */
-  function emptyLabel(officials) {
+  function emptyLabel(officials, answers) {
     var note = state.q ? KYC.queryNote(state.q) : "";
     var html = KYC.escapeHtml("No profiles" + (narrowed() || " match these filters") +
       (narrowed() && activeFilters() ? " with these filters" : "") + (note ? ". " + note : "."));
@@ -451,6 +451,10 @@
     if (officials) {
       html += " " + KYC.escapeHtml("The people found below are listed elsewhere on the site, " +
         "each linked to the page about them.");
+    }
+    if (answers) {
+      html += " " + KYC.escapeHtml("The offices, places and bodies found below are each " +
+        "linked to the page about them.");
     }
     return html + KYC.escapeHtml(zipWords());
   }
@@ -533,7 +537,7 @@
         ".") + "</span>" : "";
   }
 
-  function renderSenate(grid, empty, label, officials) {
+  function renderSenate(grid, empty, label, officials, answers) {
     var view = KYC.senate.render(data, races, {
       matches: senateMatches,
       showOut: state.eliminated === "show",
@@ -543,11 +547,11 @@
         view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s") + narrowed() +
         (zipWords() ? "." + zipWords() : "");
     } else {
-      renderLabel(label, emptyLabel(officials));
+      renderLabel(label, emptyLabel(officials, answers));
     }
     grid.className = "senate-view";
     grid.innerHTML = view.html;
-    empty.hidden = view.people > 0 || officials;
+    empty.hidden = view.people > 0 || officials || answers;
     showLegend(view.people > 0);
   }
 
@@ -571,20 +575,22 @@
     var label = doc.getElementById("resultsLabel");
     renderActiveFilters();
     var officials = renderOfficials();
+    var answers = renderAnswers();
     askZip();
 
     if (state.view === "senate" && KYC.senate) {
       if (observer) { observer.disconnect(); observer = null; }
-      renderSenate(grid, empty, label, officials);
+      renderSenate(grid, empty, label, officials, answers);
       return;
     }
 
     if (!visible.length) {
-      renderLabel(label, emptyLabel(officials));
+      renderLabel(label, emptyLabel(officials, answers));
       grid.innerHTML = "";
-      // "Nothing matches" under the official who did (GRID-07), or over a
-      // match the out-of-the-race switch hides: the line says which.
-      empty.hidden = officials || (hiddenOut > 0 && state.eliminated === "hide");
+      // "Nothing matches" under the official who did (GRID-07), or the
+      // office or place that did (rule 97), or over a match the
+      // out-of-the-race switch hides: the line says which.
+      empty.hidden = officials || answers || (hiddenOut > 0 && state.eliminated === "hide");
       showLegend(false);
       return;
     }
@@ -701,7 +707,7 @@
     officialIndex = null;
     if (!listDrawn) return;
     if (!visible.length || state.view === "senate") render();
-    else renderOfficials();
+    else { renderOfficials(); renderAnswers(); }
   }
 
   var KIND_ORDER = { executive: 0, justice: 1, governor: 2, officer: 3, judge: 4, candidate: 5 };
@@ -709,11 +715,18 @@
     ["ag", "Attorney General"], ["sos", "Secretary of State"]];
 
   /* An officer row is shown only where the state's page names them as the
-   * holder: not a listing the office has not confirmed, nor two sources
-   * that disagree, nor a vacancy (kyc-stategov.js officerRow). */
-  function namedHolder(off) {
-    return off && off.name && !off.disputed && !off.unlisted && !off.unconfirmed &&
-      !off.vacant && !off.none && !off.notMember;
+   * holder (kyc-search.js, which answers "Ohio governor" by the same test). */
+  var namedHolder = KYC.answers.namedHolder;
+
+  /* A title before a name is how a reader writes it - "Judge Boasberg",
+   * "Secretary Rubio", "Gov. DeWine" - and no official's name holds it
+   * (rule 97). */
+  var TITLE_BEFORE = /^(?:(?:the )?(?:chief )?(?:judge|justice|secretary|sec|governor|gov|lieutenant governor|lt gov|attorney general|ag|president|vice president|vp|director|administrator|ambassador|acting|senator|sen|representative|rep|congressman|congresswoman|delegate) )+(?=\S)/;
+
+  function officialQuery(q) {
+    var folded = KYC.searchFold(q);
+    var bare = folded.replace(TITLE_BEFORE, "");
+    return bare || folded;
   }
 
   function buildOfficialIndex() {
@@ -829,7 +842,7 @@
       if (place) {
         s = !place.chamber && place.district === undefined && row.state === place.state ? 1 : -1;
       } else {
-        s = KYC.nameScore(state.q, [row.name, row.alt]);
+        s = KYC.nameScore(officialQuery(state.q), [row.name, row.alt]);
       }
       if (s >= 0) hits.push({ row: row, score: s });
     });
@@ -853,7 +866,7 @@
         if (place.district !== undefined && row.district !== place.district &&
             !(place.district === 1 && row.district === 0)) return;
       } else {
-        s = KYC.nameScore(state.q, [row.name].concat(row.aliases || []));
+        s = KYC.nameScore(officialQuery(state.q), [row.name].concat(row.aliases || []));
       }
       if (s >= 0) hits.push({ row: row, score: s });
     });
@@ -974,6 +987,45 @@
         "”: each shares the surname alone.</p>"
       : "";
     box.innerHTML = namesakes + (goneFirst ? parts[1] + parts[0] : parts[0] + parts[1]);
+    box.hidden = false;
+    return true;
+  }
+
+  /* ------------------------------------------- offices, places, bodies */
+
+  /* What the search names that is not a person: an office and who holds
+   * it, a county, a legislature, a committee, a court, a ballot question
+   * (kyc-search.js, rule 97). Its data is fetched when a query needs it;
+   * what arrives later draws the answers again. */
+  var answersPending = {};
+
+  function wantAnswers(wants) {
+    wants.forEach(function (pair) {
+      var file = pair[0];
+      if (global[pair[1]] !== undefined || answersPending[file]) return;
+      answersPending[file] = true;
+      KYC.loadData(file, pair[1], function (ok) {
+        answersPending[file] = false;
+        if (ok) answersArrived();
+      });
+    });
+  }
+
+  function answersArrived() {
+    if (!listDrawn) return;
+    if (!visible.length || state.view === "senate") render();
+    else renderAnswers();
+  }
+
+  /** Draws the answers the query names; true when there are any. */
+  function renderAnswers() {
+    var box = doc.getElementById("searchAnswers");
+    if (!box || !KYC.answers) return false;
+    if (!state.q) { box.hidden = true; box.innerHTML = ""; return false; }
+    var found = KYC.answers.answer(typed());
+    wantAnswers(found.wants);
+    if (!found.html) { box.hidden = true; box.innerHTML = ""; return false; }
+    if (box.innerHTML !== found.html) box.innerHTML = found.html;
     box.hidden = false;
     return true;
   }
@@ -1166,6 +1218,24 @@
         apply();
       });
     }
+  }
+
+  /* The answers' buttons: "Find who represents you", and a ZIP code typed
+   * with an office ("state senator 43215"), asked of the lookup in the
+   * hero. Buttons, not "#findrep" links, which the router would read as a
+   * view and clear the search. */
+  function initAnswers() {
+    var box = doc.getElementById("searchAnswers");
+    if (!box) return;
+    box.addEventListener("click", function (event) {
+      var ask = event.target.closest("[data-findrep-zip]");
+      if (ask && KYC.findRep) {
+        KYC.findRep.ask(ask.getAttribute("data-findrep-zip"));
+        KYC.findRep.reveal();
+        return;
+      }
+      if (event.target.closest("[data-findrep-reveal]") && KYC.findRep) KYC.findRep.reveal();
+    });
   }
 
   /* The results line's own switch for the people out of the race. */
@@ -1435,8 +1505,8 @@
      * the page says something failed, and the error still reaches the
      * console. */
     var failed = [];
-    [initChips, initFiltersToggle, initActiveFilters, initLabel, initStateFilter, initSearch,
-     initSort, initCards, initLegend]
+    [initChips, initFiltersToggle, initActiveFilters, initLabel, initAnswers, initStateFilter,
+     initSearch, initSort, initCards, initLegend]
       .forEach(function (step) {
         try { step(); } catch (err) { failed.push(err); }
       });

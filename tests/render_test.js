@@ -9751,13 +9751,26 @@ async function testSearchAndFilters() {
   typeInto(lazy.window, lazy.D, "zzz");
   await settle(250);
   suite("search — the officials' data comes on demand", () => {
-    // The officials' files; the votes' are the profile dialog's (testVotes).
+    // The officials' files and the search's places and bodies (rule 97);
+    // the votes' are the profile dialog's (testVotes).
     const srcs = [...template.content.querySelectorAll("script")].map((s) => s.getAttribute("src"))
       .filter((s) => !/^data\/(votes|people)\//.test(s));
-    check("the page names each file with its version", srcs.length === 3 &&
+    check("the page names each file with its version", srcs.length === 5 &&
       srcs.every((s) => /^data\/[a-z/]+\.js\?v=[0-9a-f]{10}$/.test(s)), srcs.join(" "));
     const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
-    check("and fetches them when a query is typed", srcs.every((s) => added.indexOf(s) !== -1), added.join(" "));
+    const typed = srcs.filter((s) => !/^data\/measures\.js/.test(s));
+    check("and fetches them when a query is typed", typed.length === 4 &&
+      typed.every((s) => added.indexOf(s) !== -1), added.join(" "));
+    // The ballot questions are fetched only when a query names one.
+    check("but not the ballot questions, which no query named",
+      !added.some((s) => /^data\/measures\.js/.test(s)), added.join(" "));
+  });
+  typeInto(lazy.window, lazy.D, "Proposition 1");
+  await settle(250);
+  suite("search — the ballot questions come when a query names one (rule 97)", () => {
+    const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
+    check("data/measures.js is fetched, from its stamped address",
+      added.some((s) => /^data\/measures\.js\?v=[0-9a-f]{10}$/.test(s)), added.join(" "));
   });
 
   // TECH-03: a query typed before the profiles arrived is kept.

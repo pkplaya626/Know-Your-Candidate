@@ -2003,6 +2003,15 @@
   var NAME_FIELDS = ["name"];
   var OFFICE_FIELDS = ["state", "party", "district", "officeLabel", "contestLabel"];
 
+  /* The words a seat's holder is called by: a delegate or the Resident
+   * Commissioner by the place's own title (rule 75). */
+  function seatTitles(item) {
+    if (String(item.chamber).indexOf("Senate") !== -1) return "Senator";
+    var title = ((meta().states || {})[item.state] || {}).delegateTitle;
+    if (title) return title;
+    return "Representative Congressman Congresswoman Congressmember";
+  }
+
   function searchTiers(item) {
     if (item.__tiers) return item.__tiers;
     var names = [item.name].concat(item.aliases || []).filter(Boolean).map(String);
@@ -2016,6 +2025,10 @@
     // congress-legislators): "Speaker" found only a "motivational speaker"
     // in a challenger's text, never the Speaker (GRID-05).
     if (seated(item)) (item.leadership || []).forEach(function (t) { office.push(String(t)); });
+    // The seat's title, as a reader puts it before a name: "Senator
+    // Warren", "Rep. Crockett", "Congressman Davidson" found nobody by the
+    // office (rule 97). A seated member's only: a candidate holds no seat.
+    if (seated(item)) office.push(seatTitles(item));
     var body = [];
     SEARCH_FIELDS.forEach(function (field) {
       if (NAME_FIELDS.indexOf(field) !== -1 || OFFICE_FIELDS.indexOf(field) !== -1) return;
@@ -2121,6 +2134,32 @@
    * "TX-35", "texas district 35", "ny14", "AZ at large" are a race, and
    * "TX-3" is never TX-30 to TX-39; "Kansas" is Kansas's people, not
    * everyone whose text mentions it (GRID-03, GRID-04). */
+  /* The short forms a reader writes a state's name in ("Calif.", "Tex.",
+   * "Mass."), with whether one alone is the state. A word that is also an
+   * English word or the start of a name ("Miss", "Wash", "Del", "Mont" of
+   * Montgomery, "Tenn" of Tenney) names the state only beside an office or
+   * a court ("Ill. governor", "D. Del.", kyc-search.js), never typed alone:
+   * there it is a name being typed. */
+  var STATE_ABBREVIATIONS = {
+    ala: ["AL", false], ariz: ["AZ", true], ark: ["AR", false], cal: ["CA", false],
+    calif: ["CA", true], colo: ["CO", false], conn: ["CT", false], del: ["DE", false],
+    fla: ["FL", true], haw: ["HI", false], ill: ["IL", false], ind: ["IN", false],
+    kan: ["KS", false], kans: ["KS", true], mass: ["MA", false], mich: ["MI", false],
+    minn: ["MN", false], miss: ["MS", false], mont: ["MT", false], neb: ["NE", false],
+    nebr: ["NE", true], nev: ["NV", false], okla: ["OK", true], ore: ["OR", false],
+    oreg: ["OR", true], penn: ["PA", false], penna: ["PA", true], tenn: ["TN", false],
+    tex: ["TX", false], wash: ["WA", false], wis: ["WI", false], wisc: ["WI", true],
+    wyo: ["WY", true], "w va": ["WV", true], wva: ["WV", true], "n mex": ["NM", true],
+    "n dak": ["ND", true], "s dak": ["SD", true], "n car": ["NC", true], "s car": ["SC", true],
+  };
+
+  /** The state a short form names ("calif" -> "CA"), or null; *alone*
+   *  asks only for the forms that name it typed on their own. */
+  function stateAbbreviation(word, alone) {
+    var hit = STATE_ABBREVIATIONS[word];
+    return hit && (!alone || hit[1]) ? hit[0] : null;
+  }
+
   var stateByName = null;
   function stateNames() {
     if (stateByName === null) {
@@ -2132,7 +2171,15 @@
       if (states.DC) {
         ["washington dc", "washington d c", "d c"].forEach(function (n) { stateByName[n] = "DC"; });
       }
-      if (states.VI) stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
+      if (states.VI) {
+        stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
+        stateByName["virgin islands"] = "VI";
+      }
+      if (states.MP) stateByName["northern marianas"] = stateByName["mariana islands"] = "MP";
+      Object.keys(STATE_ABBREVIATIONS).forEach(function (word) {
+        var code = stateAbbreviation(word, true);
+        if (code && states[code]) stateByName[word] = code;
+      });
     }
     return stateByName;
   }
@@ -2155,6 +2202,13 @@
       function () { return { chamber: "Senate" }; }],
     [/^(?:us |u s )?(?:house|representatives?|reps?|house delegation|house members)$/,
       function () { return { chamber: "House" }; }],
+    // "Ohio congressman", "Texas congresswomen" (rule 97): the state's seats
+    // in the House, as a reader says them.
+    [/^(?:us |u s )?(?:congress ?(?:man|woman|men|women|person|people|member|members))$/,
+      function () { return { chamber: "House" }; }],
+    // "Ohio delegation", "Ohio members of Congress": both chambers.
+    [/^(?:(?:us |u s )?congressional delegation|delegation|members of congress|congress)$/,
+      function () { return {}; }],
   ];
 
   /** *query* read as a place: `{state, chamber, district, any}` (any: a
@@ -3348,6 +3402,7 @@
     searchFold: searchFold,
     nameScore: nameScore,
     stateNamed: stateNamed,
+    stateAbbreviation: stateAbbreviation,
     loadData: loadData,
     people: people,
     races: races,

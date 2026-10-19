@@ -1126,7 +1126,8 @@ def committees_html(profiles, committees):
                 "so this list is empty. Each member's profile lists their committees.</p>")
     out = []
     for group, heading, one, many in _COMMITTEE_GROUPS:
-        rows = sorted((row for row in leads.values() if _committee_group(row["info"]) == group),
+        rows = sorted((dict(row, code=code) for code, row in leads.items()
+                       if _committee_group(row["info"]) == group),
                       key=lambda row: _sort_name(row["info"].get("name")).casefold())
         if not rows:
             # One chamber's rosters can be out before the other's.
@@ -1155,7 +1156,9 @@ def committees_html(profiles, committees):
             url = row["info"].get("url")
             cell = (f'<a href="{_e(url)}" target="_blank" rel="noopener noreferrer">{name}</a>'
                     if url else name)
-            body.append(f'<tr><th scope="row">{cell}</th>'
+            # Addressed by its code, so the home search links the row
+            # (kyc/search_index.py, rule 97).
+            body.append(f'<tr id="committee-{_e(row["code"])}"><th scope="row">{cell}</th>'
                         + _lead_cell(row["majority"], re.compile(r"^chair(man|woman)?$", re.I),
                                      "Chair")
                         + _lead_cell(row["minority"], re.compile(r"^ranking member$", re.I),
@@ -1590,7 +1593,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
     """A state's legislature: its Senate and House districts on a map, and
     the members who sit for them. The page carries the state code only;
     ``assets/kyc-legislature.js`` draws it from ``data/legislature/<st>.js``."""
-    from .government_maps import LEGISLATURE_NAME, LOWER_CHAMBER, SEATS, STATES
+    from .government_maps import LOWER_CHAMBER, SEATS, STATES, legislature_title
     from .government import jump_options
 
     name = state_name(code)
@@ -1598,13 +1601,12 @@ def render_legislature_page(code, host, summary=None, dates=None):
     canonical = f"https://{host}/{path}" if host else path
     senate, house = SEATS[code]
     lower = LOWER_CHAMBER.get(code, "House of Representatives")
+    title = legislature_title(code)
     if code == "NE":
-        title = "Nebraska Legislature"
         lede = (f"Nebraska's Legislature has one chamber of {senate} members, called "
                 f"senators, each elected from a district on a nonpartisan ballot.")
         chambers = ""
     else:
-        title = f"{name} {LEGISLATURE_NAME.get(code, 'Legislature')}"
         lede = (f"The {name} Senate has {senate} members and the {lower} {house}. Pick a "
                 f"district on the map to see who sits for it.")
         chambers = "\n".join([
