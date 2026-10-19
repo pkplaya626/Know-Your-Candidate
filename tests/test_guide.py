@@ -346,6 +346,10 @@ class TestNoCongressIsTyped(unittest.TestCase):
     PATTERN = re.compile(r"[^.<>]*\b\d+(?:st|nd|rd|th) Congress[^.<>]*")
 
     def found(self, text):
+        # A block the build writes from the data (rule 94: the Congress
+        # page's leaders and committee leads) names the data's Congress,
+        # as a page printing kycBuildMeta.congress does: its line goes.
+        text = re.sub(r'(<div class="guide-live guide-built"[^>]*>\n)[^\n]*', r"\1", text)
         return [m.group(0).strip() for m in self.PATTERN.finditer(text)
                 if "artographic" not in m.group(0)]
 

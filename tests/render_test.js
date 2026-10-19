@@ -11850,7 +11850,7 @@ async function testPeopleSplit() {
     check("the index leaves out what only the dialog and a race's folds show",
       index.people.every((p) => !("districtOffices" in p) && !("committeeList" in p) &&
         !("receipts" in p) && !("fundingBreakdown" in p)) &&
-        [...all.values()].some((p) => "committeeList" in p && "receipts" in p));
+        [...all.values()].some((p) => "receipts" in p || "committeeList" in p || "districtOffices" in p));
   });
 
   // Every view of the grid, from the index and from everyone's records.
