@@ -12022,8 +12022,11 @@ async function testBallot() {
       bad.slice(0, 8).join(" | "));
     check("each seat's holder off the ballot is named with their own status", holders.length === 0,
       holders.slice(0, 8).join(" | "));
-    check("each race lists the same people as the lookup's answer for it", lookup.length === 0,
-      lookup.slice(0, 6).join(" | "));
+    // Asked while the campaign's Congress sits (rule 68): from January 3 a
+    // re-seated member's seat is their new term's, which the lookup reads
+    // and the race record does not.
+    check("each race lists the same people as the lookup's answer for it",
+      lookup.length === 0 || !oldCongressSits(window), lookup.slice(0, 6).join(" | "));
     check("(a filer whose status is not known exists to test with, or none does)",
       unsureSeen.length > 0 || !oldCongressSits(window));
   });
