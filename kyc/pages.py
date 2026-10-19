@@ -68,6 +68,7 @@ $jsonld</head>
 <body data-root="$root" data-state="$code" data-page="$page_kind">
 
 <a href="#stateMain" class="skip-link">Skip to content</a>
+$noscript
 <button type="button" class="sidebar-scrim" tabindex="-1" aria-hidden="true"></button>
 
 <header class="app-header">
@@ -286,6 +287,26 @@ _CONGRESS_SOURCES = """\
                     in a primary, withdrawn, or left off a certified list - stay on record
                     and are shown under each race.</p>"""
 
+_PHOTO_CREDIT_END = "a Wikimedia Commons file with its author and licence.</p>"
+
+
+def _state_sources(code, questions=True):
+    """A state's page lists its statewide questions too (rule 95), so its
+    footer names where they come from, as Your ballot's does (PR #120
+    review), in the place's own word for them (rule 75). A place with no
+    election that day lists none (*questions* False)."""
+    if not questions:
+        return _CONGRESS_SOURCES
+    scope = ("District-wide" if code == "DC" else
+             "territory-wide" if code in TERRITORIES else "statewide")
+    out = _CONGRESS_SOURCES.replace(
+        _PHOTO_CREDIT_END,
+        f"a Wikimedia Commons file with its author and licence; the {scope}\n"
+        "                    questions from the election office's own list, voter guide or official\n"
+        "                    sample ballots, each with its official text and source, read by hand.</p>", 1)
+    assert out != _CONGRESS_SOURCES
+    return out
+
 
 # ------------------------------------------------------- the site's frame
 
@@ -484,6 +505,7 @@ def render_page(**fields):
     fields["jsonld"] = breadcrumbs(host, crumbs) if crumbs else fields.get("jsonld", "")
     fields.setdefault("jump_options", "")
     fields.setdefault("jump_attrs", "")
+    fields["noscript"] = noscript_html(fields.pop("noscript", None))
     # An empty list is filled on the page with every state and territory; a
     # list written here (the legislature and county pages) may hold only
     # the fifty states, and its label says what it holds.
@@ -492,27 +514,261 @@ def render_page(**fields):
     fields["jump_label"] = "Jump to a state or territory" if whole else "Jump to a state"
     return _PAGE.substitute(search=search, **fields)
 
-# The state pages render everything on the client, from the build's
-# figures and their own state's people file (rule 94). The
-# guide page's name rides on the container, so the button the page draws to
-# it is called what the guide calls itself (rule 75), never retyped.
+# Every page says, to a reader whose browser runs no script, what of it
+# needs one (TECH-10): no page said anything, and the state pages read
+# "Loading..." for ever. A page whose script does one thing says that
+# instead (the Your ballot page).
+NOSCRIPT = ("The maps, filters and search on this site need JavaScript, which this browser "
+            "is not running. What this page lists in plain text is here without it.")
+
+
+# The legislature pages draw every member from their state's file, and say
+# so: the general line promised "what this page lists in plain text" over a
+# page that lists nobody without a script (PR #121 review).
+LEGISLATURE_NOSCRIPT = ("The district map and the members who sit for each district need "
+                        "JavaScript, which this browser is not running, and this page lists "
+                        "none of them without it.")
+
+
+def noscript_html(words=None):
+    """The ``<noscript>`` line the frame carries, before the header."""
+    return (f'<noscript><p class="noscript-note" role="note">{words or _e(NOSCRIPT)}'
+            "</p></noscript>")
+
+
+# A state page is written with its facts in plain lists, from the build's
+# own profiles and races (rule 96): an <h1>, who holds the seats and every
+# race's people, each linked to their share page. kyc-state.js draws the
+# full view over them from the same build's people file (rule 94), so a
+# reader with scripts sees what they always saw, and verify regenerates the
+# lists from the data, so the two cannot disagree. The guide page's name
+# rides on the container, so the button the page draws to it is called what
+# the guide calls itself (rule 75), never retyped.
 _STATE_MAIN = string.Template("""\
             <div id="stateContent" class="state-page" data-guide-name="$guide">
-                <p class="results-bar" role="status">Loading&hellip;</p>
+$static
             </div>""")
 
+_PLAIN = ("This is a plain list, written into the page: the cards, the maps, the filters and "
+          "the money need JavaScript.")
 
-def _state_main():
-    return _STATE_MAIN.substitute(guide=_e(_guide_name("states")))
+
+def _state_main(static=None):
+    return _STATE_MAIN.substitute(
+        guide=_e(_guide_name("states")),
+        static=static or '                <p class="results-bar" role="status">Loading&hellip;</p>')
+
+
+def _person_item(person, indent, extra=""):
+    from .share import profile_path
+
+    party = f" ({_e(person['party'])})" if person.get("party") else ""
+    return (f'{indent}<li data-id="{_e(person["id"])}"><a href="../{_e(profile_path(person["id"]))}">'
+            f'{_e(person.get("name") or "")}</a>{party}{extra}</li>')
+
+
+def state_static(code, info, profiles, races, summary=None, measures=None):
+    """A state page's facts as plain markup: its name, who holds its seats
+    and every 2026 race for Congress there, with each person's standing in
+    the profile dialog's words (``share.status_words``), and the statewide
+    questions on its ballot from *measures* (``ballot_measures.for_page``)."""
+    from . import share
+    from .cycle import CYCLE
+    from .record import seated
+
+    name = state_name(code)
+    pad = "                "
+    rows = [f'{pad}<header class="state-hero">',
+            f'{pad}    <p class="state-kicker">State &amp; territory pages</p>',
+            f'{pad}    <h1 class="state-title">{_e(name)}</h1>',
+            f"{pad}</header>"]
+    if profiles is None:
+        rows.append(f'{pad}<p class="results-bar" role="status">Loading&hellip;</p>')
+        return "\n".join(rows)
+    by_id = {p["id"]: p for p in profiles}
+    races = [r for r in races or [] if r.get("state") == code]
+    races_by_id = {r["id"]: r for r in races}
+    post = share.post_election(summary)
+    members = [p for p in profiles if seated(p) and p.get("state") == code]
+    senators = [p for p in members if "Senate" in str(p.get("chamber"))]
+    house = sorted((p for p in members if "House" in str(p.get("chamber"))), key=_district_order)
+    rows.append(f'{pad}<div class="share-static">')
+    if senators:
+        rows += [f'{pad}<section class="state-section" id="senators">',
+                 f'{pad}    <h2 class="state-heading">U.S. senators</h2>',
+                 f'{pad}    <ul class="share-list">']
+        rows += [_person_item(p, pad + "        ", f", {_e(p.get('officeLabel') or '')}")
+                 for p in senators]
+        rows += [f"{pad}    </ul>", f"{pad}</section>"]
+    vacancies = (info or {}).get("vacancies") or []
+    if house or vacancies:
+        title = (info or {}).get("delegateTitle", "Delegate")
+        heading = (f"{_e(title)} to the U.S. House" if (info or {}).get("territory")
+                   else "U.S. House delegation")
+        rows += [f'{pad}<section class="state-section" id="delegation">',
+                 f'{pad}    <h2 class="state-heading">{heading}</h2>',
+                 f'{pad}    <ul class="share-list">']
+        rows += [_person_item(p, pad + "        ", f", {_e(p.get('officeLabel') or '')}")
+                 for p in house]
+        rows += [f"{pad}        <li>District {_e(v.get('district'))}: vacant</li>" for v in vacancies]
+        rows += [f"{pad}    </ul>", f"{pad}</section>"]
+    ordered = ([r for r in races if r.get("chamber") == "Senate"]
+               + sorted((r for r in races if r.get("chamber") == "House"),
+                        key=lambda r: r.get("district") or 0))
+    if ordered:
+        rows += [f'{pad}<section class="state-section" id="races">',
+                 f'{pad}    <h2 class="state-heading">{CYCLE} races for Congress in {_e(name)}</h2>']
+        for race in ordered:
+            rows += [f'{pad}    <h3 class="race-title" id="{_e("race-" + race["id"])}">'
+                     f'<a href="../{_e(share.race_path(race["id"]))}">{_e(race.get("label") or race["id"])}'
+                     "</a></h3>",
+                     share.race_list_html(race, by_id, races_by_id, post, indent=pad + "    ")]
+        rows.append(f"{pad}</section>")
+    questions = measures_static(code, (measures or {}).get(code), post, summary, pad)
+    if questions:
+        rows.append(questions)
+    rows += [f'{pad}<p class="faint">{_e(_PLAIN)}</p>', f"{pad}</div>"]
+    return "\n".join(rows)
+
+
+def _no_election(code, summary):
+    """KYC.ballot's noElection: the jurisdiction's own record says no
+    election is held there on November 3 (Puerto Rico)."""
+    dates = (((summary or {}).get("voting") or {}).get("_dates") or {}).get("states") or {}
+    return any(line.get("k") == "none" for line in (dates.get(code) or {}).get("lines") or [])
+
+
+def _out_link(href, text):
+    return (f'<a href="{_e(href)}" target="_blank" rel="noopener noreferrer">{_e(text)}</a>')
+
+
+def measures_static(code, rec, past, summary=None, pad="                "):
+    """A state page's statewide questions as plain markup (rule 95, rule 96):
+    the same record ``data/measures.js`` carries (``ballot_measures.for_page``)
+    and the same words as ``KYC.ballot.measuresSection``, which draws the
+    full section - each official text, folded - over it. Each question is
+    its designation and title, linked to its source; this site never says
+    what a yes or a no vote does. ``""`` where nothing is recorded or the
+    place holds no election that day. *past*: the results the build holds
+    were read after Election Day (``share.post_election``)."""
+    if not rec or _no_election(code, summary):
+        return ""
+    name = ("District-wide" if code == "DC" else
+            "Territory-wide" if code in TERRITORIES else "Statewide")
+    scope = name.lower()
+    has = rec.get("has")
+    heading = name + " questions" + (" that were on the Nov 3, 2026 ballot" if past and has is True
+                                     else " on the Nov 3, 2026 ballot")
+    rows = [f'{pad}<section class="state-section measures-section" id="measures">',
+            f'{pad}    <h2 class="state-heading">{_e(heading)}</h2>']
+    read = time_html(rec.get("read"))
+
+    def items(entries, kind):
+        out = [f'{pad}    <ol class="share-list" data-measures="{kind}">']
+        for i, m in entries:
+            title = f": {_e(m['title'])}" if m.get("title") else ""
+            out.append(f'{pad}        <li data-measure="{i}">{_e(m["designation"])}{title} '
+                       f'({_out_link(m["source"], "source")})</li>')
+        return out + [f"{pad}    </ol>"]
+
+    if has is True:
+        all_items = list(enumerate(rec.get("measures") or []))
+        statewide = [(i, m) for i, m in all_items if not m.get("local")]
+        local = [(i, m) for i, m in all_items if m.get("local")]
+        n = len(statewide)
+        count = (f"One {scope} question {'was' if past else 'is'}" if n == 1 else
+                 f"{n} {scope} questions {'were' if past else 'are'}")
+        rows.append(f'{pad}    <p class="measures-lead">{count} on the Nov 3, 2026 ballot, as the '
+                    f'{_e(rec["by"])} lists {"it" if n == 1 else "them"}: '
+                    f'{_out_link(rec["list"]["url"], rec["list"]["title"])}, read {read}.</p>')
+        rows += items(statewide, "statewide")
+        if local:
+            verb, verbs = ("was", "were") if past else ("is", "are")
+            lead = (f"One more question {verb} on every ballot, but {verb} not one {scope} decision"
+                    if len(local) == 1 else
+                    f"{len(local)} more questions {verbs} on every ballot, but {verbs} not {scope} "
+                    "decisions")
+            rows.append(f'{pad}    <p class="measures-lead measures-apart">{lead}: each town or city '
+                        f'{"voted" if past else "votes"} on it for itself, and its own ballot names '
+                        "the place.</p>")
+            rows += items(local, "local")
+        # The plain list quotes no text, so it points at where the text is
+        # rather than at a quotation it does not carry (PR #123 review).
+        rows.append(f'{pad}    <p class="measures-words">Each is linked to the page its official '
+                    "text is on. This site does not say what a yes or a no vote does.</p>")
+        if past:
+            rows.append(f'{pad}    <p class="measures-results">This site does not read the results '
+                        "of ballot questions.</p>")
+    elif has is False:
+        rows.append(f'{pad}    <p class="measures-lead">No {scope} question {"was" if past else "is"} '
+                    "on the Nov 3, 2026 ballot.</p>")
+        rows.append(f'{pad}    <p class="measures-source">{_measures_none(rec, scope, read)}</p>')
+    else:
+        rows.append(f'{pad}    <p class="measures-lead">This site {"did" if past else "has"} not '
+                    f'{"find" if past else "found"} an official list of {scope} questions on the '
+                    f'Nov 3, 2026 ballot, and does not say there {"were" if past else "are"} none. '
+                    "The election office&#x27;s own site: "
+                    f'{_out_link(rec["office"]["url"], rec["office"]["name"])}.</p>')
+    if name == "Statewide":
+        others = "Other local" if any(m.get("local") for m in rec.get("measures") or []) else "Local"
+        rows.append(f'{pad}    <p class="measures-local">{others} questions - a county&#x27;s, a '
+                    "city&#x27;s or a school district&#x27;s - are not listed here.</p>")
+    rows.append(f"{pad}</section>")
+    return "\n".join(rows)
+
+
+def _measures_none(rec, scope, read):
+    """KYC.ballot's noneLine: what a "none" rests on, in the record's words."""
+    lst = rec.get("list")
+    src = f"{_out_link(lst['url'], lst['title'])}, read {read}" if lst else ""
+    basis = (rec.get("none") or {}).get("from")
+    if basis == "statement":
+        words = (rec.get("none") or {}).get("words") or ""
+        return f"The {_e(rec['by'])} says: “{_e(words)}” ({src})."
+    if basis == "list":
+        return (f"The {_e(rec['by'])}&#x27;s list of the questions on its ballots holds none that "
+                f"is {scope}: {src}. A {scope} question would be on every ballot.")
+    ballot = _out_link(lst["url"], lst["title"]) if lst else "the official sample ballot"
+    return (f"This site read {ballot} on {read}, and it prints no {scope} question. A {scope} "
+            "question would be printed on every ballot.")
+
+
+def _district_order(person):
+    """KYC.districtOrder: the district's number, else the first number in
+    its name, else last."""
+    num = person.get("districtNum")
+    if num is not None:
+        return num
+    found = re.search(r"\d+", str(person.get("district") or ""))
+    return int(found.group(0)) if found else 999
+
+
+def states_static(codes):
+    """The directory of states as a plain list of its pages."""
+    pad = "                "
+    rows = [f'{pad}<header class="state-hero">',
+            f'{pad}    <h1 class="state-title">States &amp; territories</h1>',
+            f"{pad}</header>"]
+    if not codes:
+        rows.append(f'{pad}<p class="results-bar" role="status">Loading&hellip;</p>')
+        return "\n".join(rows)
+    rows += [f'{pad}<div class="share-static">', f'{pad}    <ul class="share-list">']
+    for code in sorted(codes, key=state_name):
+        rows.append(f'{pad}        <li><a href="{_e(code.lower())}.html">{_e(state_name(code))}</a></li>')
+    rows += [f"{pad}    </ul>", f"{pad}</div>"]
+    return "\n".join(rows)
 
 # "{people}" is the page's people file: its own state's ("ca.js"), or, on
 # the directory of states, the index of everyone ("index.js"), whose races
-# it counts.
+# it counts. A state's page lists its statewide questions (rule 95); the
+# directory of states lists none, and does not load them.
+_STATE_MEASURES = "../data/measures.js"
 _STATE_SCRIPTS = (
     "../data/people/meta.js",
     "../data/people/{people}",
     "../data/odds.js",
     "../data/stategov.js",
+    _STATE_MEASURES,
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
@@ -555,7 +811,8 @@ _PROFILE_DIALOG = "assets/kyc-profile.js"
 def _state_scripts(code=None):
     """A state page's scripts, or the directory of states' (*code* None)."""
     people = f"{code.lower()}.js" if code else "index.js"
-    return tuple(src.replace("{people}", people) for src in _STATE_SCRIPTS)
+    return tuple(src.replace("{people}", people) for src in _STATE_SCRIPTS
+                 if code or src != _STATE_MEASURES)
 
 
 def _scripts(sources):
@@ -667,8 +924,10 @@ def read_words(span):
 _HOME = ("Know Your Candidate", "")
 
 
-def render_state(code, host, summary=None):
-    """The HTML for one state's page."""
+def render_state(code, host, summary=None, profiles=None, races=None, measures=None):
+    """The HTML for one state's page; with the build's *profiles* and
+    *races*, its facts written in as plain lists (``state_static``), with
+    the statewide questions *measures* holds (``ballot_measures.for_page``)."""
     name = state_name(code)
     info = ((summary or {}).get("states") or {}).get(code) or {}
     if code in TERRITORIES and info.get("houseTerm"):
@@ -699,14 +958,17 @@ def render_state(code, host, summary=None):
         nav_current="states",
         nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
-        main=_state_main(),
+        main=_state_main(state_static(code, info, profiles, races, summary, measures)),
+        # Puerto Rico's seat has no 2026 race, and no election that day.
+        footer=_state_sources(code, not (code in TERRITORIES and info.get("houseTerm"))),
         scripts=_scripts(_state_scripts(code)),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code))],
     )
 
 
-def render_states_index(host):
-    """The directory of every state and territory page."""
+def render_states_index(host, codes=()):
+    """The directory of every state and territory page; *codes*, the pages
+    it lists in plain text before its script draws the directory."""
     canonical = f"https://{host}/states/index.html" if host else "states/index.html"
     return render_page(
         title=_e("States & territories — Know Your Candidate"),
@@ -719,7 +981,7 @@ def render_states_index(host):
         page_kind="states",
         search_placeholder=_e("Search states…"),
         nav_current="states",
-        main=_state_main(),
+        main=_state_main(states_static(codes)),
         crumbs=[_HOME, (section_name("states"), "states/index.html")],
         scripts=_scripts(_state_scripts()),
     )
@@ -1306,6 +1568,12 @@ def render_district_page(code, host, summary=None):
         scripts=_scripts(scripts),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code)),
                 (headline, path)],
+        # What this page holds is all drawn: say so, and where the same
+        # people are in plain text (PR #121 review).
+        noscript=(f"The district map, and who sits for each district, need JavaScript, which "
+                  f"this browser is not running. Without it, "
+                  f'<a href="../{_e(page_path(code))}">{_e(_possessive(name))} page</a> lists its '
+                  "members of Congress and its races in plain text."),
     )
 
 
@@ -1433,6 +1701,7 @@ def render_legislature_page(code, host, summary=None, dates=None):
         built=_read_span(dates, "openstates"),
         crumbs=[_HOME, (section_name("legislatures"), "legislature/index.html"), (title, path)],
         scripts=_scripts(scripts),
+        noscript=_e(LEGISLATURE_NOSCRIPT),
     )
 
 
@@ -1901,6 +2170,8 @@ def render_counties_page(code, host, listed=None):
         built=(listed, listed) if listed else None,
         crumbs=[_HOME, (section_name("local"), "counties/index.html"), (name, path)],
         scripts=_scripts(scripts),
+        noscript=_e(f"The map of {many} and the governments in each need JavaScript, which "
+                    "this browser is not running, and this page lists none of them without it."),
     )
 
 
@@ -1978,6 +2249,11 @@ DATASETS = (
     ("Voting information", '<a href="https://www.nass.org/can-I-vote">NASS Can I Vote</a>',
      "Each state's official pages to register, find a polling place and vote", "refresh",
      "voting"),
+    # Rule 95: a hand-edited cache, each list dated on the page that shows it.
+    ("Statewide ballot questions",
+     "Each election office's own list, voter guide or official sample ballots",
+     "The statewide questions on the Nov 3, 2026 ballot, in their official words",
+     "hand", None),
     ("President, Vice President and Cabinet",
      "The White House, each office's own page, the Senate's roll calls",
      "Who holds each office, and since when", "refresh", "executive"),
@@ -2016,6 +2292,7 @@ _WHEN_READ = {
     "manual": "By hand, from time to time",
     "guide": "Checked by hand; each page gives its date",
     "curated": "When a change is needed; each change is a public commit",
+    "hand": "By hand, and again by a second reader",
 }
 
 # What the "Last read" column says for a dataset with no single read date:
@@ -2026,6 +2303,7 @@ _NO_READ_DATE = {
     "Market prices and polling averages": "Each price gives the day it was read",
     "Members' biographies": "In the repository's history",
     "Editorial decisions": "Each decision gives its date",
+    "Statewide ballot questions": "Each state's page gives the day its list was read",
 }
 
 
@@ -2287,6 +2565,7 @@ _BALLOT_SCRIPTS = (
     "data/people/meta.js",
     "data/odds.js",
     "data/stategov.js",
+    "data/measures.js",
     "data/lookup/index.js",
     "assets/kyc-odds.js",
     "assets/kyc-cards.js",
@@ -2317,10 +2596,12 @@ _BALLOT_SOURCES = """\
                     election pages, and their candidates from the election office's own list,
                     each list named and dated where it is shown; the districts a ZIP code or a
                     location falls in from the Census Bureau's boundaries and ZIP Code
-                    Tabulation Areas; the key dates from each election office's own pages.</p>
+                    Tabulation Areas; the key dates from each election office's own pages; the
+                    statewide questions from each election office's own list, each with its
+                    official text and source.</p>
                 <p><strong>Not listed here:</strong> the candidates for the state legislature,
-                    ballot measures, and judicial and local contests. Where a state's election
-                    office links a sample ballot, the page links it.</p>"""
+                    local ballot questions, and judicial and local contests. Where a state's
+                    election office links a sample ballot, the page links it.</p>"""
 
 
 def render_ballot_page(host):
@@ -2343,14 +2624,13 @@ def render_ballot_page(host):
         '                    <p class="districts-lede" data-ballot-lede>Every contest on your',
         f'                        {_e(when)} ballot that this site can name, from your ZIP code or',
         "                        your location: the races for Congress and who is in them, the",
-        "                        statewide offices and their candidates, and whether your seats in the",
-        "                        state legislature are up. Who represents you now is another question:",
+        "                        statewide offices and their candidates, whether your seats in the",
+        "                        state legislature are up, and the statewide questions in their official",
+        "                        words. Who represents you now is another question:",
         '                        <a href="index.html#findrep">find who represents you</a>.</p>',
         "                </header>",
         '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',
         '                <div class="ballot-result" id="ballotResult" role="status" aria-live="polite" hidden></div>',
-        "                <noscript><p>This page looks your ZIP code up in your browser, and needs",
-        "                    JavaScript to do it, as the rest of this site does.</p></noscript>",
         "            </div>",
     ])
     return render_page(
@@ -2372,6 +2652,8 @@ def render_ballot_page(host):
         built="stamp",
         crumbs=[_HOME, (name, path)],
         scripts=_scripts(_BALLOT_SCRIPTS),
+        noscript=("This page looks your ZIP code up in your browser, and needs JavaScript to "
+                  "do it, as the maps, filters and search on the rest of this site do."),
     )
 
 
@@ -2559,11 +2841,13 @@ def render_redirect(target, host):
     ])
 
 
-def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=(), courts=()):
+def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=(), courts=(),
+            profiles=(), races=()):
     """``sitemap.xml`` listing the two hand-maintained pages and every state.
 
     Individual profiles live behind hash fragments, which crawlers do not
-    treat as separate URLs, so they are not listed.
+    treat as separate URLs: each is listed by its share page (rule 96),
+    as each race is, last.
     """
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -2605,5 +2889,10 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
         url("courts/index.html", "0.5")
     for court in courts:
         url(f"courts/{court}.html", "0.5")
+    from .share import profile_path, race_path
+    for rid in sorted(races):
+        url(race_path(rid), "0.4")
+    for pid in sorted(profiles):
+        url(profile_path(pid), "0.3")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

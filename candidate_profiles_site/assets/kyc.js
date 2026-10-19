@@ -413,7 +413,8 @@
    * renomination, a November win a re-election. `off` takes someone out of
    * the race, behind a toggle. Someone who lost in November was on the
    * ballot, and stays in view beside the person who beat them. */
-  var SOURCE = " Source: the state's Wikipedia election results page.";
+  // Never "the state's": a territory's, or D.C.'s, is not (rule 75).
+  var SOURCE = " Source: Wikipedia's election results page.";
   /* A sitting member leaving the seat they hold, in the same words whether
    * the results list them as withdrawn or do not list them: only the title,
    * which cites its source, differs. */
@@ -2525,6 +2526,101 @@
     return siteRoot() + "states/" + String(code).toLowerCase() + ".html";
   }
 
+  /* ---------------------------------------------------------------- share */
+
+  /** The address of a profile's or a race's share page (rule 96), whole:
+   *  "https://host/p/<id>.html". A crawler drops the "#/profile/<id>" a
+   *  view lives behind, so a link to the view unfurled as the home page's
+   *  card; the share page carries the person's own. *kind* "race" or
+   *  "profile". */
+  function shareUrl(kind, id) {
+    var path = siteRoot() + (kind === "race" ? "r/" : "p/") + encodeURIComponent(id) + ".html";
+    try {
+      return new URL(path, global.location.href).href;
+    } catch (e) {
+      return path;
+    }
+  }
+
+  /** Share or copy *url* from *button*: a phone's share sheet; else the
+   *  clipboard; and where the clipboard is missing or refuses (an in-app
+   *  browser, a page not served over HTTPS), a read-only field after the
+   *  button, its text selected, that says to copy it. The handler did
+   *  nothing at all there (TECH-09). The sheet only where the pointer is a
+   *  finger: desktop Chrome, Edge and Safari have one too, and a button
+   *  that says "Copy link" opened it and copied nothing (PR #121 review). */
+  function shareLink(button, url, title) {
+    var nav = global.navigator || {};
+    // What the button says at rest, kept once: read again on a second click
+    // within the "Copied" moment, it was "Copied", and stayed so for good.
+    if (!button.hasAttribute("data-label")) button.setAttribute("data-label", button.innerHTML);
+    var said = function () {
+      button.innerHTML = icon("check") + " Copied";
+      clearTimeout(button._kycCopied);
+      button._kycCopied = setTimeout(function () {
+        button.innerHTML = button.getAttribute("data-label");
+      }, 1800);
+    };
+    var field = function () { showShareField(button, url); };
+    var copy = function () {
+      if (!nav.clipboard || typeof nav.clipboard.writeText !== "function") return field();
+      var done;
+      try {
+        done = nav.clipboard.writeText(url);
+      } catch (e) {
+        return field();
+      }
+      Promise.resolve(done).then(said, field);
+    };
+    if (typeof nav.share === "function" && touchFirst()) {
+      var shared;
+      try {
+        shared = nav.share({ title: title || doc.title, url: url });
+      } catch (e) {
+        return copy();
+      }
+      // Closing the sheet is the reader's answer, not a failure to share.
+      Promise.resolve(shared).then(function () {}, function (err) {
+        if (!err || err.name !== "AbortError") copy();
+      });
+      return;
+    }
+    copy();
+  }
+
+  /** True where the main pointer is a finger (a phone or a tablet). */
+  function touchFirst() {
+    try {
+      return !!(global.matchMedia && global.matchMedia("(pointer: coarse)").matches);
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function showShareField(button, url) {
+    var next = button.nextElementSibling;
+    var box = next && next.classList.contains("share-field") ? next : null;
+    if (!box) {
+      box = doc.createElement("span");
+      box.className = "share-field";
+      box.setAttribute("role", "status");
+      box.innerHTML = '<label>Copy this link: <input type="text" class="input share-field-input" ' +
+        'readonly spellcheck="false"></label>';
+      button.insertAdjacentElement("afterend", box);
+    }
+    var input = box.querySelector("input");
+    input.value = url;
+    input.focus();
+    input.select();
+  }
+
+  /** Take away the field showShareField left after *button*: a dialog
+   *  opened on someone else must not offer the last person's link. */
+  function clearShareField(button) {
+    var next = button && button.nextElementSibling;
+    if (next && next.classList.contains("share-field")) next.parentNode.removeChild(next);
+  }
+
   /* The last state a reader looked at, so the sidebar can offer it back -
    * a per-viewer convenience, kept in this browser only. */
   var STATE_KEY = "kycState";
@@ -3273,6 +3369,9 @@
     // states
     stateName: stateName,
     stateUrl: stateUrl,
+    shareUrl: shareUrl,
+    shareLink: shareLink,
+    clearShareField: clearShareField,
     siteRoot: siteRoot,
     rememberState: rememberState,
     rememberedState: rememberedState,

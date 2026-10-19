@@ -84,6 +84,298 @@ async function until(test, ms) {
   return test();
 }
 
+/* ============================================== the statewide questions */
+
+/* The statewide questions on each ballot (kyc-ballot.js, rule 95): every
+ * state page said the ballot also held "ballot measures, which this site
+ * does not list" (audit 2026-10-17, RACES-16, STATEGOV-14, PERSONA-08). */
+async function testMeasures() {
+  const officialText = (li) => [...li.querySelectorAll(".measure-text p")].map((p) => p.textContent).join("\n");
+  const ca = await buildPage("states/ca.html");
+  await settle(50);
+  suite("states/ca.html — the statewide questions, in their official words", () => {
+    const { window, D, errors } = ca;
+    const rec = window.kycMeasures.CA;
+    const section = D.getElementById("measures");
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("its own section, named as its jump chip names it", !!section &&
+      section.querySelector("h2").textContent === "Statewide questions on the Nov 3, 2026 ballot" &&
+      !!D.querySelector('.state-parts a[href="#measures"]') &&
+      D.querySelector('.state-parts a[href="#measures"]').textContent === window.KYC.ballot.measuresName("CA"));
+    const items = section ? [...section.querySelectorAll("li.measure")] : [];
+    check("every measure the record lists, in its order", rec.has === true && items.length === rec.measures.length &&
+      items.every((li, i) => li.querySelector(".measure-name").firstChild.textContent.trim() === rec.measures[i].designation),
+      items.length + " / " + rec.measures.length);
+    check("each quoted exactly as the record holds it", items.every((li, i) =>
+      officialText(li) === rec.measures[i].text.split(/\n+/).join("\n")));
+    check("each says what kind it is and who put it on the ballot", items.every((li, i) =>
+      li.querySelector(".measure-kind").textContent.indexOf(rec.measures[i].kind) === 0 &&
+      /Put on the ballot by (the Legislature|a citizens' petition)/.test(li.querySelector(".measure-kind").textContent)));
+    check("each links its source and its voter guide page, outside the site", items.every((li, i) => {
+      const hrefs = [...li.querySelectorAll(".measure-links a")].map((a) => a.getAttribute("href"));
+      return hrefs.includes(rec.measures[i].source) && (!rec.measures[i].guide || hrefs.includes(rec.measures[i].guide)) &&
+        [...li.querySelectorAll(".measure-links a")].every((a) => a.target === "_blank" && /noopener/.test(a.rel));
+    }));
+    check("the list is credited to the office that publishes it, and dated",
+      /as the California Secretary of State lists them/.test(section.textContent) &&
+      !!section.querySelector('.measures-lead a[href="' + rec.list.url + '"]') && /read Oct\. 19, 2026/.test(section.textContent));
+    check("a text that is not the ballot's own wording says what it is",
+      /summary in the Official Voter Information Guide, not the label printed on the ballot/.test(section.textContent));
+    check("no colour, badge or word of the site's own takes a side", !section.querySelector(".badge, [style], .party, [class*=yes], [class*=oppose], [class*=support]") &&
+      /does not say what a yes or a no vote does/.test(section.textContent));
+    check("local questions are not listed here, and said so", /Local questions .* are not listed here/.test(section.textContent));
+    const note = D.querySelector("#races .state-note");
+    check("the race list's note points to them, and no longer calls them unlisted",
+      !!note && !!note.querySelector('a[href="#measures"]') && !/ballot measures, which/.test(note.textContent),
+      note && note.textContent);
+  });
+
+  /* Folding: a long text shows its first lines and opens in place. */
+  const az = await buildPage("states/az.html");
+  await settle(50);
+  suite("states/az.html — a long official text is folded after its first lines", () => {
+    const { window, D } = az;
+    const items = [...D.querySelectorAll("#measures li.measure")];
+    const long = items.filter((li, i) => window.kycMeasures.AZ.measures[i].text.length > 320);
+    const short = items.filter((li, i) => window.kycMeasures.AZ.measures[i].text.length <= 320);
+    check("each long one is folded, with the button that opens it", long.length > 0 && long.every((li) =>
+      li.querySelector(".measure-text.is-folded") && li.querySelector("button[data-measure-more]")
+        .getAttribute("aria-expanded") === "false"), long.length + " long");
+    check("a short one is whole, with no button", short.every((li) =>
+      !li.querySelector(".is-folded") && !li.querySelector("[data-measure-more]")));
+    const li = long[0];
+    const button = li && li.querySelector("[data-measure-more]");
+    const text = button && D.getElementById(button.getAttribute("aria-controls"));
+    if (button) button.click();
+    check("'Read the whole text' opens it in place", !!text && !text.classList.contains("is-folded") &&
+      button.getAttribute("aria-expanded") === "true" && button.textContent === "Show less");
+    if (button) button.click();
+    check("and folds it again", !!text && text.classList.contains("is-folded") &&
+      button.textContent === "Read the whole text");
+    const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    check("a folded text is printed whole, without its button", /\.measure-text\.is-folded \{ max-height: none; overflow: visible;/.test(css) &&
+      /\.measure-more \{ display: none !important; \}/.test(css));
+    check("a long word or address wraps at a phone's width", /\.measure-text \{[^}]*overflow-wrap: anywhere/.test(css) &&
+      /\.measure-name \{[^}]*overflow-wrap: anywhere/.test(css));
+  });
+
+  const tx = await buildPage("states/tx.html");
+  const me = await buildPage("states/me.html");
+  const dc = await buildPage("states/dc.html");
+  const mp = await buildPage("states/mp.html");
+  const gu = await buildPage("states/gu.html");
+  const pr = await buildPage("states/pr.html");
+  await settle(50);
+  suite("state pages — none, not found, the District and the territories", () => {
+    const sec = (p) => p.D.getElementById("measures");
+    const t = (p) => (sec(p) || { textContent: "" }).textContent;
+    // A "none" on a ballot names the ballot read, never "the official
+    // sample ballots" as though every county's had been (PR #120 review).
+    check("Texas: none, credited to the ballot that was read, by name",
+      /No statewide question is on the Nov 3, 2026 ballot\./.test(t(tx)) &&
+      tx.window.kycMeasures.TX.none.from === "ballots" &&
+      t(tx).indexOf("This site read " + tx.window.kycMeasures.TX.list.title + " on Oct. 19, 2026, and it " +
+        "prints no statewide question.") !== -1 &&
+      !/sample ballots print none|orders it only/.test(t(tx)) &&
+      !!sec(tx).querySelector('a[href="' + tx.window.kycMeasures.TX.list.url + '"]') &&
+      !sec(tx).querySelector("li.measure"), t(tx).slice(0, 300));
+    check("no list's or guide's link text is a note or an address",
+      [tx, me, dc, mp, gu].every((p) => [...(sec(p) || p.D.createElement("i")).querySelectorAll("a")].every((a) =>
+        !/https?:|\blinked\b|described as/.test(a.textContent))));
+    // The District and the territories hold no county's or school
+    // district's question; a state's words are not theirs (rule 75).
+    check("the District and the territories are not told of counties' questions",
+      [dc, mp, gu].every((p) => !/a county's, a city's or a school district's/.test(t(p))) &&
+      /a county's, a city's or a school district's/.test(t(tx)));
+    check("Maine: not found, never 'none', and the election office's own site",
+      /has not found an official list of statewide questions/.test(t(me)) && /does not say there are none/.test(t(me)) &&
+      !/No statewide question is/.test(t(me)) &&
+      !!sec(me).querySelector('a[href^="https://www.maine.gov/"]'), t(me).slice(0, 300));
+    check("the District's questions are its own, not a state's",
+      /^District-wide questions on the Nov 3, 2026 ballot/.test(sec(dc) ? sec(dc).querySelector("h2").textContent : "") &&
+      sec(dc).querySelectorAll("li.measure").length === dc.window.kycMeasures.DC.measures.length);
+    check("a territory's are territory-wide; who put one on the ballot, where not recorded, is said so",
+      /^Territory-wide questions/.test(sec(mp) ? sec(mp).querySelector("h2").textContent : "") &&
+      /Who put it on the ballot is not recorded here/.test(t(mp)) && /No territory-wide question is on/.test(t(gu)),
+      t(mp).slice(0, 200));
+    check("a place with no election that day lists no questions", !sec(pr));
+  });
+
+  /* New Hampshire's HB 1300 question is on every ballot, but each town or
+   * city decides it for itself: it is listed apart and not counted as a
+   * statewide question (PR #120 review). */
+  const nh = await buildPage("states/nh.html");
+  await settle(50);
+  suite("states/nh.html — a question each town decides for itself is not a statewide one", () => {
+    const { window, D } = nh;
+    const section = D.getElementById("measures");
+    const text = section ? section.textContent : "";
+    const rec = window.kycMeasures.NH;
+    const local = rec.measures.filter((m) => m.local);
+    const statewide = rec.measures.filter((m) => !m.local);
+    check("the record marks one question as decided locally", local.length > 0 && statewide.length > 0);
+    check("the lead counts only the statewide ones", statewide.length === 1
+      ? /One statewide question is on the Nov 3, 2026 ballot/.test(text)
+      : new RegExp(statewide.length + " statewide questions are on").test(text), text.slice(0, 200));
+    check("the statewide list holds only those", !!section &&
+      section.querySelectorAll("ol.measures:not(.measures-local-list) > li.measure").length === statewide.length);
+    check("the local one is listed apart, and says each town or city votes on it for itself",
+      !!section && section.querySelectorAll("ol.measures-local-list > li.measure").length === local.length &&
+      /not one statewide decision: each town or city votes on it for itself/.test(text) &&
+      /Other local questions/.test(text));
+    check("its kind line does not repeat its designation", !!section &&
+      [...section.querySelectorAll("li.measure")].every((li) =>
+        li.querySelector(".measure-kind").textContent.indexOf(
+          li.querySelector(".measure-name").firstChild.textContent.trim()) === -1));
+  });
+
+  /* A state page is written with its statewide questions in plain text
+   * (pages.measures_static, rule 96), from the record measures.js is
+   * written from; the script draws its section over them. The two must say
+   * the same: the questions, in order, and the lead's words. */
+  suite("state pages' plain lists hold the questions the drawn section shows (rules 95, 96)", () => {
+    const wrong = [];
+    [["CA", ca], ["AZ", az], ["TX", tx], ["ME", me], ["DC", dc], ["MP", mp], ["GU", gu], ["PR", pr], ["NH", nh]]
+      .forEach(([code, page]) => {
+        const file = fs.readFileSync(path.join(SITE, "states", code.toLowerCase() + ".html"), "utf8");
+        const holder = page.D.createElement("div");
+        const at = /<section class="state-section measures-section" id="measures">[\s\S]*?<\/section>/.exec(file);
+        holder.innerHTML = at ? at[0] : "";
+        const plain = holder.querySelector("section");
+        const drawn = page.D.getElementById("measures");
+        if (!drawn || !plain) {
+          if (!!drawn !== !!plain) wrong.push(`${code}: drawn ${!!drawn}, plain ${!!plain}`);
+          return;
+        }
+        const text = (el, sel) => [...el.querySelectorAll(sel)].map((n) => n.textContent.replace(/\s+/g, " ").trim());
+        ["h2", ".measures-lead", ".measures-source"].forEach((sel) => {
+          if (text(plain, sel).join("|") !== text(drawn, sel).join("|")) {
+            wrong.push(`${code} ${sel}: "${text(plain, sel)[0]}" / "${text(drawn, sel)[0]}"`);
+          }
+        });
+        const drawnItems = [...drawn.querySelectorAll("li.measure")].map((li) => {
+          const title = li.querySelector(".measure-title");
+          return li.querySelector(".measure-name").firstChild.textContent.trim() +
+            (title ? ": " + title.textContent.trim() : "");
+        });
+        const plainItems = [...plain.querySelectorAll("li[data-measure]")].map((li) =>
+          li.textContent.replace(/\s+/g, " ").replace(/ \(source\)$/, "").trim());
+        if (drawnItems.join("|") !== plainItems.join("|")) {
+          wrong.push(`${code}: items ${plainItems.length} / ${drawnItems.length}: ${plainItems[0]} / ${drawnItems[0]}`);
+        }
+      });
+    check("each plain list says what the drawn section says, question by question", wrong.length === 0,
+      wrong.slice(0, 4).join(" | "));
+  });
+
+  /* A failed data/measures.js: the state page drew over its plain list and
+   * put nothing back, and Your ballot dropped the card, both without a word
+   * (PR #123 review, rules 76 and 96). */
+  const caNoData = await buildPage("states/ca.html", { block: ["data/measures.js"] });
+  const caBallotNoData = await ballotFor("#/?zip=94103", { block: ["data/measures.js"] });
+  await settle(50);
+  suite("a statewide-questions file that did not load is said, and the plain list stays", () => {
+    const { window, D, errors } = caNoData;
+    const file = fs.readFileSync(path.join(SITE, "states", "ca.html"), "utf8");
+    const plainCount = (file.match(/<li data-measure="/g) || []).length;
+    const section = D.getElementById("measures");
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("the data really did not load", !window.kycMeasures);
+    check("the page was drawn (not left as the plain page)", !!D.querySelector("#senators .card-grid"));
+    check("the plain list the page was written with stays, every question",
+      !!section && plainCount > 0 && section.querySelectorAll("li[data-measure]").length === plainCount,
+      (section ? section.querySelectorAll("li[data-measure]").length : 0) + " / " + plainCount);
+    check("a line under the heading says the full list did not load",
+      !!section && !!section.querySelector("h2 + .measures-failed") &&
+      /did not load/.test(section.querySelector(".measures-failed").textContent));
+    check("its jump chip and the race list's pointer are still there",
+      !!D.querySelector('.state-parts a[href="#measures"]') &&
+      !!D.querySelector('#races .state-note a[href="#measures"]'));
+    check("one section, not two", D.querySelectorAll("#measures").length === 1);
+    const card = caBallotNoData.out.querySelector(".ballot-contest.ballot-measures");
+    check("Your ballot: no page errors", caBallotNoData.errors.length === 0, caBallotNoData.errors.join(" | "));
+    check("Your ballot: the last card says the list did not load, and where to look",
+      !!card && /did not load/.test(card.textContent) &&
+      !!card.querySelector('a[href$="states/ca.html#measures"]') &&
+      !/No statewide question/.test(card.textContent),
+      card ? card.textContent : "no card");
+    check("Your ballot: the order note still names the card",
+      /then a note on statewide questions\./.test(
+        (caBallotNoData.out.querySelector(".ballot-note") || { textContent: "" }).textContent));
+  });
+
+  const caAfter = await buildPage("states/ca.html", { now: "2026-11-05T09:00:00" });
+  const txAfter = await buildPage("states/tx.html", { now: "2026-11-05T09:00:00" });
+  const meAfter = await buildPage("states/me.html", { now: "2026-11-05T09:00:00" });
+  await settle(50);
+  suite("state pages after Election Day — the questions in the past tense, no result of our own", () => {
+    const section = caAfter.D.getElementById("measures");
+    const text = section ? section.textContent : "";
+    const results = ((caAfter.window.kycBuildMeta.voting || {}).CA || {}).results;
+    check("the heading and the lead are in the past tense",
+      /questions that were on the Nov 3, 2026 ballot/.test(section.querySelector("h2").textContent) &&
+      /questions were on the Nov 3, 2026 ballot/.test(text));
+    check("no measure repeats the tense the heading and the lead carry",
+      [...section.querySelectorAll("li.measure")].every((li) => !/Was on the Nov 3, 2026 ballot/.test(li.textContent)));
+    check("the state's own results, and no result said here", /does not read the results of ballot questions/.test(text) &&
+      (!results || !!section.querySelector('.measures-results a[href="' + results + '"]')) &&
+      !/\b(passed|failed|approved|rejected)\b/i.test(section.querySelector(".measures-results").textContent));
+    check("a 'none' is in the past tense too", /No statewide question was on the Nov 3, 2026 ballot/.test(
+      txAfter.D.getElementById("measures").textContent));
+    // "...that were on the ballot" says there were some: never over a
+    // "none" or a "not found" (PR #120 review, rule 19).
+    check("over a 'none' or a 'not found', the heading does not say there were questions",
+      [txAfter, meAfter].every((p) => p.D.querySelector("#measures h2").textContent ===
+        "Statewide questions on the Nov 3, 2026 ballot"),
+      [txAfter, meAfter].map((p) => p.D.querySelector("#measures h2").textContent).join(" | "));
+    check("'not found' is in the past tense, and still never 'none'",
+      /did not find an official list/.test(meAfter.D.getElementById("measures").textContent) &&
+      !/No statewide question/.test(meAfter.D.getElementById("measures").textContent));
+  });
+
+  /* Your ballot: a card after the state offices, the same list. */
+  const caBallot = await ballotFor("#/?zip=94103");
+  suite("Your ballot: the statewide questions after the state offices", () => {
+    const { window, out, errors } = caBallot;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const cards = [...out.querySelectorAll(".ballot-list > .ballot-contest")];
+    const card = out.querySelector(".ballot-contest.ballot-measures");
+    check("one card, last in the list", !!card && cards[cards.length - 1] === card &&
+      card.querySelector(".ballot-office").textContent.trim() === "Statewide questions");
+    check("the order note names them", /then the statewide questions/.test(out.textContent));
+    const items = card ? [...card.querySelectorAll("li.measure")] : [];
+    check("the same list as the state page's", items.length === window.kycMeasures.CA.measures.length &&
+      items.every((li, i) => officialText(li) === window.kycMeasures.CA.measures[i].text.split(/\n+/).join("\n")));
+    check("each measure's heading sits under the card's", items.every((li) => li.querySelector("h5.measure-name")));
+    check("only local questions are left unlisted", /local ballot questions/.test(out.textContent) &&
+      !/, and ballot measures,/.test(out.textContent));
+    window.dispatchEvent(new window.Event("beforeprint"));
+    check("in print mode the list is all there, folded texts included (the stylesheet opens them)",
+      out.querySelectorAll("li.measure .measure-text").length === items.length);
+    window.dispatchEvent(new window.Event("afterprint"));
+  });
+
+  const txBallot = await ballotFor("#/?zip=75036");
+  const meBallot = await ballotFor("#/?zip=04101");
+  const caBallotAfter = await ballotFor("#/?zip=94103", { now: "2026-11-05T12:00:00" });
+  suite("Your ballot: none, not found, and after the day", () => {
+    const card = (b) => b.out.querySelector(".ballot-contest.ballot-measures");
+    check("Texas: a card drawn as off this ballot, saying none", !!card(txBallot) &&
+      /ballot-off/.test(card(txBallot).className) && /No statewide question is on/.test(card(txBallot).textContent) &&
+      !/then the statewide questions/.test(txBallot.out.textContent));
+    check("Maine: not found, never none", !!card(meBallot) &&
+      /has not found an official list/.test(card(meBallot).textContent) &&
+      !/No statewide question is/.test(card(meBallot).textContent));
+    // The order note names every card the list shows (PR #120 review).
+    check("the order note names the card even where it says none or not found",
+      [txBallot, meBallot].every((b) => /then a note on statewide questions\./.test(
+        (b.out.querySelector(".ballot-note") || { textContent: "" }).textContent)));
+    check("after the day, in the past tense, said once", !!card(caBallotAfter) &&
+      /questions were on the Nov 3, 2026 ballot/.test(card(caBallotAfter).textContent) &&
+      [...card(caBallotAfter).querySelectorAll("li.measure")].every((li) => !/Was on the Nov 3, 2026 ballot/.test(li.textContent)));
+  });
+}
+
 /* ------------------------------------------------------------------ setup */
 
 /* The page reads the clock: after Election Day a nominee reads "Awaiting
@@ -2297,7 +2589,7 @@ async function testStates() {
     const marks = gov ? [...gov.querySelectorAll(".gov-ballot-mark")] : [];
     check("the race list says what else the ballot elects",
       !!note && /Of the state offices this site covers, the same ballot also elects the governor/
-        .test(note.textContent) && /ballot measures, which this site does not list/.test(note.textContent) &&
+        .test(note.textContent) && /local ballot questions, which this site does not list/.test(note.textContent) &&
         note.textContent.indexOf("This site lists the candidates for Congress here, and those for " +
           window.KYC.stategov.listsCandidates("TX") + " under State government; not those for the " +
           "legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")),
@@ -3053,7 +3345,10 @@ async function testStates() {
     // where each part starts, and every link lands on a section.
     const parts = [...D.querySelectorAll(".state-parts a")];
     check("an 'On this page' row links every part of the page",
-      parts.length === 4 && parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
+      // The four parts, and the statewide questions where the record has
+      // any word on them (rule 95: Texas's is "none").
+      parts.length === 4 + (window.kycMeasures && window.kycMeasures.TX ? 1 : 0) &&
+      parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
       parts.map((a) => a.getAttribute("href")).join(" "));
     // Left in the address, a fragment sent the reader back to the section
     // when a profile closed. A jump scrolls and leaves the address alone.
@@ -10842,6 +11137,385 @@ async function testFederalAudit() {
 const WORD_DATE = /(Jan|Feb|March|April|May|June|July|Aug|Sept|Oct|Nov|Dec)\.? \d{1,2}, \d{4}/;
 const ISSUE_FORM = "https://github.com/pkplaya626/Know-Your-Candidate/issues/new?template=correction.yml";
 
+/* ============================================================ share pages */
+
+/* The text kyc/share.py escaped (html.escape), read back. */
+function unescapeHtml(s) {
+  return String(s).replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">").replace(/&#8217;/g, "\u2019").replace(/&middot;/g, "\u00b7")
+    .replace(/&amp;/g, "&");
+}
+
+/* The <li data-id> of a plain list, with the standing each one is given. */
+function plainItems(block) {
+  return [...String(block || "").matchAll(
+    /<li data-id="([^"]+)">.*?(?:<span class="share-standing">(.*?)<\/span>)?<\/li>/g)]
+    .map((m) => ({ id: unescapeHtml(m[1]), standing: m[2] === undefined ? null : unescapeHtml(m[2]) }));
+}
+
+function plainList(html, attr, id) {
+  const m = new RegExp('<ul class="share-list[^"]*" ' + attr + '="' + id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") +
+    '">([\\s\\S]*?)</ul>').exec(html);
+  return m ? plainItems(m[1]) : [];
+}
+
+/* Rule 96: a profile's and a race's share page, and a state page's plain
+ * lists, are written by the pipeline (kyc/share.py) in the words the page
+ * code gives the same people. Every one is compared with KYC.standing as
+ * the profile dialog shows it, on the day the results were read: the day
+ * the pipeline writes them for (share.post_election). Two copies of the
+ * status words once drifted apart unseen (rule 63); these cannot. */
+async function testSharePages() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const asOf = String((meta.election || {}).resultsAsOf || CAMPAIGN_NOW).slice(0, 10);
+  const { window, D, errors } = await buildPage("index.html", { now: asOf + "T12:00:00" });
+  const KYC = window.KYC;
+  const people = window.legislatorsData;
+  const races = window.kycRaces;
+  const read = (rel) => {
+    const file = path.join(SITE, ...rel.split("/"));
+    return fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null;
+  };
+  const words = (p) => {
+    const spec = KYC.standing(p, "long");
+    if (!spec) return null;
+    const line = KYC.ballotLine(p);
+    return spec.label + (!p.isCandidate && p.contestLabel ? " for " + p.contestLabel : "") +
+      (line ? " \u2013 " + line + " line" : "");
+  };
+  // The source a status's long title credits: its words after "Source:".
+  const creditOf = (spec) => {
+    const title = (spec && spec.title) || "";
+    const at = title.lastIndexOf(" Source: ");
+    return at === -1 ? null : title.slice(at + 9).replace(/\.$/, "");
+  };
+  const pageNow = new window.Date();
+  const byId = new Map(people.map((p) => [p.id, p]));
+  const split = (race) => {
+    const ids = race.incumbentIds.concat(race.candidateIds);
+    const list = ids.filter((id, i) => ids.indexOf(id) === i).map((id) => byId.get(id)).filter(Boolean);
+    const moved = list.filter((p) => !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1 &&
+      !!p.contestRaceId && p.contestRaceId !== race.id && !!p.contestLabel);
+    const rest = list.filter((p) => moved.indexOf(p) === -1);
+    return { ids, moved, running: rest.filter((p) => !KYC.offBallot(p.raceStatus)),
+             out: rest.filter((p) => KYC.offBallot(p.raceStatus)) };
+  };
+
+  suite("share pages — one per profile and race, in the page code's words (rule 96)", () => {
+    check("the index page loads", errors.length === 0, errors.join(" | "));
+    const pFiles = new Set(fs.readdirSync(path.join(SITE, "p")));
+    const rFiles = new Set(fs.readdirSync(path.join(SITE, "r")));
+    // Besides each profile's own page, only a page kept at an id a profile
+    // answers to (a merged filing, a filer since seated), pointing at it.
+    const strays = [...pFiles].filter((f) => {
+      const id = f.replace(/\.html$/, "");
+      if (people.some((p) => p.id === id)) return false;
+      const owner = KYC.byId(id);
+      const html = read("p/" + f) || "";
+      return !(owner && owner.id !== id &&
+        html.indexOf('/p/' + owner.id + '.html">') !== -1 &&
+        html.indexOf('id="shareView" href="../index.html#/profile/' + owner.id + '"') !== -1);
+    });
+    check("a share page for every profile, and none for anyone else",
+      people.every((p) => pFiles.has(p.id + ".html")) && strays.length === 0,
+      `${pFiles.size} pages, ${people.length} profiles; ${strays.slice(0, 4)}`);
+    check("a share page for every race, and none for any other",
+      rFiles.size === races.length && races.every((r) => rFiles.has(r.id + ".html")),
+      `${rFiles.size} pages, ${races.length} races`);
+    const wrong = [];
+    const images = [];
+    let photos = 0;
+    people.forEach((p) => {
+      const html = read("p/" + p.id + ".html") || "";
+      const m = /<p class="share-status"><strong>(.*?)<\/strong><\/p>/.exec(html);
+      const shown = m ? unescapeHtml(m[1]) : null;
+      const want = words(p);
+      if (shown !== want) wrong.push(`${p.id}: "${shown}" for "${want}"`);
+      const desc = /<meta name="description" content="([^"]*)">/.exec(html);
+      const spec = KYC.standing(p, "long");
+      if (spec && !(desc && unescapeHtml(desc[1]).indexOf(spec.label) !== -1)) wrong.push(`${p.id}: description`);
+      // Who says so: the source the dialog's badge credits (rule 19).
+      const credit = /<p class="share-source faint">Source: (.*?)\.<\/p>/.exec(html);
+      const said = credit ? unescapeHtml(credit[1]) : null;
+      if (said !== creditOf(spec)) wrong.push(`${p.id}: source "${said}" for "${creditOf(spec)}"`);
+      if (said && !(desc && unescapeHtml(desc[1]).indexOf(", per " + said) !== -1)) wrong.push(`${p.id}: description's source`);
+      // Where a member leaving is going, and when a seat not up is next up.
+      const other = KYC.otherOffice(p, pageNow);
+      const otherShown = /<p class="share-other">(.*?)\. <span/.exec(html);
+      if ((other ? other.text : null) !== (otherShown ? unescapeHtml(otherShown[1]) : null)) {
+        wrong.push(`${p.id}: other office "${otherShown && otherShown[1]}"`);
+      }
+      const next = KYC.seated(p) && !p.seatUp2026 && p.electionYear ? "Seat up in " + p.electionYear : null;
+      const nextShown = /<p class="share-next">(.*?)<\/p>/.exec(html);
+      if (next !== (nextShown ? nextShown[1] : null)) wrong.push(`${p.id}: "${nextShown && nextShown[1]}" for "${next}"`);
+      // A portrait only by a sourced route (rule 24): never a fallback's.
+      const img = (/<meta property="og:image" content="([^"]*)">/.exec(html) || [])[1];
+      const url = img ? unescapeHtml(img) : "";
+      const sizes = (p.photoSet || []).map((s) => s[1]);
+      const ok = /\/assets\/social-card\.png$/.test(url) ||
+        (sizes.length ? sizes.indexOf(url) !== -1
+          : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
+              (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
+            (p.photoSource === "campaign-site" && !!p.photoCredit)));
+      if (!ok || /Special:/.test(url)) images.push(`${p.id}: ${url}`);
+      if (!/social-card/.test(url)) photos += 1;
+    });
+    check("every profile's share page says where they stand as the dialog does",
+      wrong.length === 0, wrong.slice(0, 6).join(" | "));
+    check("a share image is the person's sourced photograph or the site's card", images.length === 0 &&
+      photos > 100, images.slice(0, 4).join(" | ") || `${photos} photographs`);
+    const raceWrong = [];
+    races.forEach((race) => {
+      const html = read("r/" + race.id + ".html") || "";
+      const s = split(race);
+      if (s.ids.length !== new Set(s.ids).size) raceWrong.push(`${race.id}: someone twice`);
+      const running = plainList(html, "data-race", race.id);
+      const out = plainList(html, "data-race-out", race.id);
+      const same = (got, want) => got.map((x) => x.id).join() === want.map((p) => p.id).join() &&
+        got.every((x, i) => x.standing === words(want[i]));
+      if (!same(running, s.running)) raceWrong.push(`${race.id}: running ${running.map((x) => x.id)}`);
+      // The seat's holder is marked while they sit in it (rule 67).
+      const marked = [...html.matchAll(/<li data-id="([^"]+)">[^\n]*?<span class="share-holder">/g)]
+        .map((m) => unescapeHtml(m[1]));
+      const holders = s.running.filter((p) => race.incumbentIds.indexOf(p.id) !== -1 && KYC.seated(p)).map((p) => p.id);
+      if (marked.join() !== holders.join()) raceWrong.push(`${race.id}: holder ${marked} for ${holders}`);
+      const credits = [];
+      s.moved.concat(s.running, s.out).forEach((p) => {
+        const c = creditOf(KYC.standing(p, "long"));
+        if (c && credits.indexOf(c) === -1) credits.push(c);
+      });
+      const sources = /<p class="share-source faint">Where each stands: per (.*?)\.<\/p>/.exec(html);
+      const andList = (w) => w.length < 2 ? w.join("") : w.slice(0, -1).join(", ") + " and " + w[w.length - 1];
+      if ((sources ? unescapeHtml(sources[1]) : "") !== andList(credits)) raceWrong.push(`${race.id}: sources`);
+      if (!same(out, s.out)) raceWrong.push(`${race.id}: out ${out.map((x) => x.id)}`);
+      s.moved.forEach((p) => {
+        if (html.indexOf('<p class="race-held">Held by <a href="../p/' + p.id + '.html">') === -1) {
+          raceWrong.push(`${race.id}: held by ${p.id}`);
+        }
+      });
+      const named = KYC.ballotSource(race);
+      const others = ((race.results || {}).otherNominees || []).filter((n) => !((race.results.maybeProfiled || {})[n]));
+      if (others.length && unescapeHtml(html).indexOf("Also on the November ballot, " + named) === -1) {
+        raceWrong.push(`${race.id}: the names with no profile`);
+      }
+    });
+    check("every race's share page lists its people as its section on the state page does",
+      raceWrong.length === 0, raceWrong.slice(0, 6).join(" | "));
+    const sample = read("p/" + people[0].id + ".html") || "";
+    check("no inline script; the view is linked and opened by kyc-share.js",
+      !/<script>/.test(sample) && /<script src="\.\.\/assets\/kyc-share\.js\?v=[0-9a-f]+"><\/script>/.test(sample) &&
+      sample.indexOf('id="shareView" href="../index.html#/profile/' + people[0].id + '"') !== -1);
+    check("its own address, title and description", /<link rel="canonical" href="https:\/\/[^/]+\/p\//.test(sample) &&
+      /<meta property="og:url" content="https:\/\/[^/]+\/p\//.test(sample) &&
+      sample.indexOf("<title>" + KYC.escapeHtml(people[0].name)) !== -1);
+    const sizes = [...pFiles].concat([...rFiles].map((f) => "r:" + f)).map((f) =>
+      fs.statSync(path.join(SITE, f.startsWith("r:") ? "r" : "p", f.replace(/^r:/, ""))).size);
+    check("each share page is small", Math.max(...sizes) < 8000, `largest ${Math.max(...sizes)} bytes`);
+  });
+
+  // Every case of the status table, on both sides (PR #121 review). The
+  // people in today's data hold only some statuses: "elected", "defeated",
+  // "runoff" and every post-election word would first meet the page code on
+  // the night a November result was read, and a word changed in kyc.js
+  // alone would have held that refresh. The pipeline's answers are in
+  // tests/fixtures/share_status_words.json (share.status_table; test_share
+  // checks the file is current); each is asked of the page code here.
+  const table = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "share_status_words.json"), "utf8"));
+  const CAMPAIGN_DAY = new window.Date(2026, 9, 1, 12);
+  const AFTER_DAY = new window.Date(2026, 10, 5, 12);
+  suite("share pages' status words — every case, asked of the page code (rule 96)", () => {
+    const off = [];
+    table.statuses.forEach((row) => {
+      const [status, allParty, source, own, appointed, unconfirmed, minor, post, label, gone] = row;
+      const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
+        unconfirmed: !!unconfirmed, minor: !!minor, allParty: allParty || undefined,
+        source: source || undefined, now: post ? AFTER_DAY : CAMPAIGN_DAY });
+      if (!spec || spec.label !== label || !!spec.off !== !!gone) {
+        off.push(`${row.slice(0, 8).join("/")}: "${spec && spec.label}" for "${label}"`);
+      }
+    });
+    check("every status, member or not, appointed, unconfirmed, minor-party, all-party, " +
+      "certified or qualified, before and after Election Day", table.statuses.length > 1000 &&
+      off.length === 0, off.slice(0, 4).join(" | ") || `${table.statuses.length} cases`);
+    const credited = table.credits.filter(([status, source, name, credit]) =>
+      creditOf(KYC.raceStatus(status, "long", { source: source || undefined,
+        sourceName: name || undefined, now: CAMPAIGN_DAY })) !== credit);
+    check("and the source each credits", credited.length === 0,
+      credited.slice(0, 4).map((r) => r.join("/")).join(" | "));
+    const filers = table.filers.filter(([fake, label, credit]) => {
+      const spec = KYC.standing(Object.assign({ isCandidate: true, id: "FAKE" }, fake), "long");
+      return !spec || spec.label !== label || creditOf(spec) !== credit;
+    });
+    check("and each filer the results do not settle", table.filers.length >= 4 && filers.length === 0,
+      filers.map((r) => JSON.stringify(r)).join(" | "));
+  });
+
+  suite("state pages — written with their names before the script draws (TECH-10)", () => {
+    const wrong = [];
+    peopleStates().forEach((code) => {
+      const html = read("states/" + code + ".html");
+      if (html === null) return;
+      const st = code.toUpperCase();
+      const name = (meta.states[st] || {}).name;
+      if (name && html.indexOf('<h1 class="state-title">' + KYC.escapeHtml(name) + "</h1>") === -1) wrong.push(`${code}: h1`);
+      const block = (re) => (re.exec(html) || [])[1] || "";
+      const seated = people.filter((p) => KYC.seated(p) && p.state === st);
+      const senators = seated.filter((p) => p.chamber.indexOf("Senate") !== -1).map((p) => p.id);
+      const house = seated.filter((p) => p.chamber.indexOf("House") !== -1)
+        .sort((a, b) => KYC.districtOrder(a) - KYC.districtOrder(b)).map((p) => p.id);
+      const gotSen = plainItems(block(/id="senators">([\s\S]*?)<\/section>/)).map((x) => x.id);
+      const gotHouse = plainItems(block(/id="delegation">([\s\S]*?)<\/section>/)).map((x) => x.id);
+      if (gotSen.join() !== senators.join()) wrong.push(`${code}: senators ${gotSen}`);
+      if (gotHouse.join() !== house.join()) wrong.push(`${code}: House ${gotHouse}`);
+      const mine = races.filter((r) => r.state === st);
+      const order = mine.filter((r) => r.chamber === "Senate").concat(mine.filter((r) => r.chamber === "House")
+        .sort((a, b) => (a.district || 0) - (b.district || 0))).map((r) => r.id);
+      const got = [...html.matchAll(/<h3 class="race-title" id="race-([^"]+)">/g)].map((m) => unescapeHtml(m[1]));
+      if (got.join() !== order.join()) wrong.push(`${code}: races ${got.length} for ${order.length}`);
+      mine.forEach((race) => {
+        const listed = plainList(html, "data-race", race.id);
+        if (listed.map((x) => x.id).join() !== split(race).running.map((p) => p.id).join()) {
+          wrong.push(`${code}: ${race.id}`);
+        }
+      });
+    });
+    check("every state page's h1, delegation and races are the data's", wrong.length === 0,
+      wrong.slice(0, 6).join(" | "));
+  });
+
+  // Copy link: the share page's address, by the device's share sheet, the
+  // clipboard, or a field to copy from by hand (TECH-09).
+  const settle = () => new Promise((r) => setTimeout(r, 0));
+  const someone = people.find((p) => p.isCandidate) || people[0];
+  KYC.profile.open(someone.id);
+  const copy = D.getElementById("profileModalCopy");
+  const want = new window.URL("p/" + someone.id + ".html", window.location.href).href;
+  let copied = null;
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  copy.click();
+  await settle();
+  const viaClipboard = copied;
+  const said = copy.textContent;
+  // A second click while it says "Copied" still comes back to "Copy link".
+  copy.click();
+  await settle();
+  await new Promise((r) => setTimeout(r, 1900));
+  const back = copy.textContent;
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+    value: { writeText: () => Promise.reject(new Error("NotAllowedError")) } });
+  copy.click();
+  await settle(); await settle();
+  const field = copy.nextElementSibling;
+  const input = field && field.querySelector("input");
+  const picked = !!input && D.activeElement === input &&
+    input.selectionEnd - input.selectionStart === input.value.length;
+  let shared = null;
+  Object.defineProperty(window.navigator, "share", { configurable: true,
+    value: (d) => { shared = d; return Promise.resolve(); } });
+  Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  // A desktop browser with a share sheet (Chrome, Edge, Safari): the button
+  // says "Copy link", so it copies.
+  copied = null;
+  copy.click();
+  await settle();
+  const desktopCopied = copied;
+  const desktopShared = shared;
+  // A phone: its share sheet.
+  const mouse = window.matchMedia;
+  window.matchMedia = (q) => Object.assign(mouse(q), { matches: /pointer: coarse/.test(q) });
+  copied = null;
+  copy.click();
+  await settle();
+  window.matchMedia = mouse;
+  delete window.navigator.share;
+  KYC.profile.close();
+  KYC.profile.open(people[1].id);
+  const cleared = !(copy.nextElementSibling && copy.nextElementSibling.classList.contains("share-field"));
+  suite("Copy link — the share page, shared, copied, or offered to copy (TECH-09)", () => {
+    check("the clipboard gets the share page's address", viaClipboard === want, `${viaClipboard} for ${want}`);
+    check("a phone opens its share sheet on the address, and copies nothing",
+      copied === null && !!shared && shared.url === want && shared.title === someone.name,
+      `${shared && shared.url}`);
+    check("a desktop browser with a share sheet copies, as the button says",
+      desktopCopied === want && desktopShared === null, `${desktopCopied} / ${desktopShared}`);
+    check("the button says it was copied, then says what it does again, clicked twice or not",
+      /Copied/.test(said) && /Copy link/.test(back) && !/Copied/.test(back), said + " / " + back);
+    check("a refused clipboard leaves the link in a selected read-only field", !!input && input.readOnly &&
+      input.value === want && picked && /Copy this link/.test(field.textContent));
+    check("a dialog opened on someone else does not offer the last link", cleared);
+  });
+  window.close();
+
+  // A race's own "Copy link", on a state page.
+  const state = await buildPage("states/vt.html");
+  let raceCopied = null;
+  Object.defineProperty(state.window.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { raceCopied = t; return Promise.resolve(); } } });
+  const raceButton = state.D.querySelector("[data-share-race]");
+  if (raceButton) raceButton.click();
+  await settle();
+  suite("a race section's Copy link", () => {
+    const id = raceButton && raceButton.getAttribute("data-share-race");
+    check("every race section has one", state.D.querySelectorAll(".race").length > 0 &&
+      state.D.querySelectorAll(".race").length === state.D.querySelectorAll(".race [data-share-race]").length);
+    check("it copies the race's share page", !!id && raceCopied ===
+      new state.window.URL("../r/" + id + ".html", state.window.location.href).href, raceCopied);
+    check("the script's view replaced the plain lists", !state.D.querySelector(".share-static") &&
+      state.D.querySelectorAll("#stateContent .card").length > 0);
+  });
+  state.window.close();
+
+  // A shared race's link (r/<raceId>.html sends a reader to the race on its
+  // state page) lands on the race, and is held there while what is drawn
+  // above it goes on growing, until the reader moves: on a phone it was
+  // left 3,000px above CA-22 (PR #121 review). jsdom lays nothing out, so
+  // the jumps themselves are counted.
+  const target = races.filter((r) => r.state === "CA").slice(-1)[0] || races[races.length - 1];
+  const sizes = [];
+  const jumps = [];
+  const landed = await buildPage("states/" + target.state.toLowerCase() + ".html", {
+    hash: "#race-" + target.id,
+    setup: (w) => {
+      w.ResizeObserver = function (cb) {
+        const me = { cb, on: false };
+        sizes.push(me);
+        this.observe = () => { me.on = true; };
+        this.disconnect = () => { me.on = false; };
+      };
+      w.HTMLElement.prototype.scrollIntoView = function () { jumps.push(this.id); };
+    },
+  });
+  await settle();
+  const first = jumps.slice();
+  const grow = () => sizes.forEach((o) => { if (o.on) o.cb([]); });
+  grow();
+  const held = jumps.length;
+  landed.window.dispatchEvent(new landed.window.WheelEvent("wheel", { deltaY: -100 }));
+  grow();
+  suite("a shared race's link lands on its race (PR #121 review)", () => {
+    check("it jumps to the race once the page is drawn", first.length === 1 &&
+      first[0] === "race-" + target.id, first.join());
+    check("and again when what is above it grows", held === 2 && jumps[1] === "race-" + target.id,
+      jumps.join());
+    check("until the reader scrolls, and then never again", jumps.length === 2 &&
+      sizes.every((o) => !o.on), jumps.join());
+    check("the fragment is dropped from the address", landed.window.location.hash === "",
+      landed.window.location.hash);
+  });
+  landed.window.close();
+
+  // A state page whose people did not load keeps its plain lists.
+  const broken = await buildPage("states/vt.html", { block: ["data/people/vt.js"] });
+  suite("a state page whose data did not load", () => {
+    check("says so above the plain lists, which stay",
+      !!broken.D.querySelector("#stateContent > .results-bar") &&
+      broken.D.querySelectorAll("#stateContent .share-list li").length > 0);
+  });
+  broken.window.close();
+}
+
 async function testFrame() {
   const PAGES = ["index.html", "map.html", "about.html", "404.html", "states/ca.html",
     "districts/ca.html", "districts/index.html", "legislature/index.html", "legislature/nc.html",
@@ -10987,7 +11661,8 @@ async function testFrame() {
     check("a search box, and every section", !!missing.D.querySelector('form[data-site-search] input[name="q"]') &&
       missing.D.querySelectorAll(".directory-list a").length >= 9);
     check("not indexed, and not in the sitemap", !!missing.D.querySelector('meta[name="robots"][content="noindex"]') &&
-      !/404\.html/.test(fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8")));
+      // The page's own address: share pages' ids can hold "404" (FEC_H6IL07404).
+      !/\/404\.html</.test(fs.readFileSync(path.join(SITE, "sitemap.xml"), "utf8")));
   });
 
   // The home page answers ?q=, the address its SearchAction gives.
@@ -12142,9 +12817,9 @@ async function testBallot() {
     check("the caveat, and the way to an exact answer: the reader's location",
       /crosses district lines/.test(tx.text) &&
       !!out.querySelector(".ballot-state [data-ballot-locate]"));
-    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature)/)[1]);
-    const rank = { federal: 0, statewide: 1, legislature: 2 };
-    check("in ballot order: Congress, statewide offices, the legislature",
+    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature|measures)/)[1]);
+    const rank = { federal: 0, statewide: 1, legislature: 2, measures: 3 };
+    check("in ballot order: Congress, statewide offices, the legislature, the questions",
       order.every((k, i) => !i || rank[order[i - 1]] <= rank[k]) && order[0] === "federal" &&
       order.indexOf("statewide") !== -1 && order.indexOf("legislature") !== -1, order.join(","));
     check("the Senate first among them", cards[0].office === "U.S. Senate");
@@ -12198,8 +12873,8 @@ async function testBallot() {
       /not up for regular election in 2026/.test(senate.textContent), senate.textContent.slice(0, 200));
     check("legislative candidates are not listed here, and said so",
       /candidates for (this seat|these seats) are not listed here/.test(tx.text));
-    check("ballot measures and local contests: not listed here",
-      /Also on your ballot, not listed here/.test(tx.text) && /ballot measures/.test(tx.text));
+    check("local ballot questions and local contests: not listed here",
+      /Also on your ballot, not listed here/.test(tx.text) && /local ballot questions/.test(tx.text));
     check("the key dates, passed ones said passed on the reader's day",
       !!out.querySelector(".ballot-dates .vote-dates") && /Passed/.test(out.querySelector(".ballot-dates").textContent));
     check("and the way to how to vote in Texas", !!out.querySelector('.ballot-dates a[href$="states/tx.html#voting"]'));
@@ -13069,6 +13744,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testFindMyDistrict();
   if (!only || only === "findrep") await testFindRep();
   if (!only || only === "ballot" || only === "findrep") await testBallot();
+  if (!only || only === "ballot" || only === "states") await testMeasures();
   if (!only || only === "findrep") await testFindRepNav();
   if (!only || only === "index.html") await testContactActions();
   if (!only || only === "index.html") await testPayLine();
@@ -13081,6 +13757,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();
+  if (!only || only === "share") await testSharePages();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

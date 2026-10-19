@@ -43,6 +43,7 @@ data/courts.json            ──┤   (each state's highest court, from the co
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
+data/ballot_measures.json   ──┤   (each jurisdiction's statewide questions, from its own list: hand-edited, kyc/ballot_measures.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -66,6 +67,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/stategov.js   (governors, chamber control, trifectas)
+                                             data/measures.js   (the statewide questions: kyc/ballot_measures.py)
                                              data/legislature/*.js (one state legislature per state)
                                              data/local/*.js    (one state's counties and governments)
                                              data/courtcounties.js (each county's federal district court)
@@ -85,6 +87,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              about.html, 404.html (generated: the site's frame, kyc/pages.py)
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
+                                             p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
@@ -107,6 +110,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-guide.js
                                              assets/kyc-official.js
                                              assets/kyc-federal.js
+                                             assets/kyc-share.js
                                              assets/kyc-findrep.js
                                              assets/kyc-ballot.js
 ```
@@ -121,7 +125,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
-  `statewide_candidates.json`,
+  `statewide_candidates.json`, `ballot_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
@@ -191,8 +195,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1977 tests, no dependencies
-npm install && npm test                       # 3005 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2048 tests, no dependencies
+npm install && npm test                       # 3089 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -462,8 +466,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `portraits.article_is_theirs`, so none of them disagrees.
 
 34. **Fifty-seven near-identical pages are generated, not maintained.** The
-    state pages come from one template and carry nothing but a state code;
-    `assets/kyc-state.js` renders them from the same build's people files as the
+    state pages come from one template, with the state's code and its names
+    written in as plain lists from the same build (rule 96);
+    `assets/kyc-state.js` draws over them from the same build's people files as the
     grid. A hand-edited copy per state would drift the first time one was
     touched, and a state page that disagreed with the grid about who holds
     a district would look entirely normal.
@@ -1793,7 +1798,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the words the legislature page says it in, and the state page's voting
     block and its key dates live in the same module. It never names who
     holds a seat (rule 27) beyond a race's own words, and what it does not
-    hold - legislative candidates, ballot measures, local contests - is
+    hold - legislative candidates, local questions and contests - is
     "not listed here", with the state's own sample ballot where one is
     linked; a seat whose district the record cannot name is said to be
     unknown, never "not up" (rule 19). A place with no election that day
@@ -1865,6 +1870,120 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     as though it were the Senate. The guide's Congress page names its
     members from the build (`pages.committees_html`, `leaders_html`) and
     loads no profile data.
+
+95. **A ballot question is the election office's words, and "none" is a
+    document's.** Every state page said the ballot also held "ballot
+    measures, which this site does not list", and a reader asking what was
+    on her ballot got no question at all (audit 2026-10-17, RACES-16,
+    STATEGOV-14, PERSONA-08). The questions are a hand-edited cache,
+    `data/ballot_measures.json` (`kyc/ballot_measures.py`), researched from
+    each election office's own list and re-opened by a second reader, and
+    written to `data/measures.js` for the state pages' "Statewide
+    questions" section and Your ballot's last card, one implementation
+    (`KYC.ballot`, rule 12). Each measure is its designation, its title
+    where the state prints one, its official text quoted, its kind and who
+    put it on the ballot, its source's address and words and the day read;
+    a measure or list on any host but the jurisdiction's own official
+    domains or an evidenced `overrides.MEASURE_SOURCES_ELSEWHERE` entry
+    fails the build (rule 50). A quoted text is said to be what it is:
+    California's are the voter guide's summaries, not the ballot label
+    (`textNote`), and one the source cuts is marked cut. The page never
+    says what a yes or a no vote does in its own words, and no colour
+    suggests a side; a record field the cache does not define (a "yes
+    means" of the site's own) is refused. "None" is said only with what
+    shows it, quoted: the office's sentence (Illinois, Oregon), an office's
+    list of its ballots' questions, or the official ballots, which print
+    every statewide question (`noneFrom`), named as the ballot read - often
+    one county's - never "the official sample ballots" as though every one
+    had been. A proclamation calling the election for offices is no basis:
+    Texas's first "none" rested on one, which would not name an amendment
+    election that its own resolution sets. A shown title is the document's
+    own name: the researchers' "linked from https://..." asides were link
+    text on the page, and a title carrying an address or a note is refused.
+    A question on every ballot that each town or city decides for itself
+    (New Hampshire's HB 1300 question, with "[name of municipality]" in its
+    text) is `local`, listed apart and never counted as statewide.
+    Where no official source says either way (American Samoa, Maine,
+    Pennsylvania, Puerto Rico), the page says this site has not found an
+    official list and links the election office, never "none" (rule 19):
+    Maine's first record said "none" on a town's sample ballot, and a
+    second reader set it back. A measure decided at an earlier 2026
+    election, or taken off by a court, is not listed. "Statewide" is a
+    state's word (rule 75): the District's are District-wide, a
+    territory's Territory-wide, and neither is told of a county's questions.
+    From the day after Election Day the heading and lead are in the past
+    tense beside the state's results page - "that were on the ballot" only
+    over a list, never over "none" or "not found" - and this site reads no
+    result of a ballot question.
+
+96. **A person or a race shared is its own page, and a page says its facts
+    without scripts.** A profile and a race live behind a fragment
+    (`#/profile/<id>`) that every crawler drops, so each shared person
+    unfurled as the home page's card - whose image said "who is running in
+    2026" and named three sources, false of a court page and after the
+    election - and "Copy link" did nothing where the clipboard refused
+    (TECH-09). And with scripts off, or to a crawler's first pass, a state
+    page read "Loading..." for ever (TECH-10). So the build writes a share
+    page per profile (`p/<id>.html`) and per race (`r/<raceId>.html`,
+    `kyc/share.py`): its own title, description, canonical address and
+    image, the facts in plain text, and a link to the view, which
+    `assets/kyc-share.js` follows at once for a reader with scripts. Not a
+    meta refresh: that would send a reader without scripts, and some
+    unfurlers, to a view that needs them. The image is a photograph only
+    by a sourced route (rule 24): the article's own `photoSet`, the Clerk's
+    portrait, or a credited campaign portrait; anything else is the card.
+    A state page is written with its `<h1>`, delegation and races as plain
+    lists from the build's profiles and races (`pages.state_static`), and
+    its statewide questions (rule 95) from the record `data/measures.js`
+    is written from (`pages.measures_static`, each designation and title
+    linked to its source, in `KYC.ballot`'s words); its script draws over
+    them, and a failed load keeps them: a failed `data/measures.js` keeps
+    the plain questions under a line saying so, and Your ballot's last card
+    says the list did not load (`KYC.ballot.measuresMissing`); drawn from
+    nothing, they vanished without a word (PR #123 review). Where someone
+    stands is said in the profile dialog's words: `share.status_words`
+    reads `KYC.standing` the way kyc.js does, on the day the results were
+    read (`share.post_election`), and `testSharePages` compares the two for
+    every profile, every race's lists and every state page's. That covers
+    only the statuses today's data holds: "elected", "defeated", "runoff"
+    and every post-election word would first have met the page code on the
+    night a November result was read, and a word changed in kyc.js alone
+    would have held that refresh (PR #121 review). So every case of the
+    table - each status, member or not, appointed, unconfirmed, minor-party,
+    all-party, certified or qualified, before and after Election Day, and
+    each filer the results do not settle - is written by `share.status_table`
+    to `tests/fixtures/share_status_words.json`, which `test_share` checks is
+    current and the render suite asks `KYC.raceStatus` about row by row: a
+    word changed on one side fails the day it changes (rule 63). Each status
+    carries the source the dialog's badge credits (`share.status_source`):
+    the card the pages unfurl with said "every fact names its source" over
+    pages that named none. The seat is in words in a description ("member
+    of the U.S. House for AL-4"; a card's bullet read as a glitch in an
+    unfurl), a race's description credits its source before its list and
+    stops at `share.DESCRIPTION_MAX` characters with how many more (an
+    unfurler's cut took 62 races' later candidates and every credit), the
+    holder of a race's seat is marked while seated (rule 67),
+    and a member leaving says where they are going (`otherOffice`) or when
+    their seat is next up, as the dialog does. Nothing in them is dated or
+    carries the build's time, and an unchanged share page is not rewritten:
+    a refresh that moves nobody touches none of 3,000 files. They are in
+    the sitemap, and `verify` regenerates them with the state pages,
+    reporting one stale, missing, or left for a profile or race the data no
+    longer holds (the build removes those) - except a page at an id the
+    profile still answers to (`share.aliases`: a folded filing, a filer
+    since seated), which is rewritten as that profile's, its canonical
+    address the profile's own page, so a link once shared never becomes a
+    404. A crawler that runs scripts may fold a share page into the view it
+    is sent to, and so into the home page; the unfurlers this is for run
+    none. Every generated page and both templates carry a `<noscript>` line
+    saying what needs JavaScript, and a page that lists nothing without it
+    (a legislature's, a county page) says so rather than promising plain
+    text. "Copy link" is `KYC.shareLink`: a phone's share sheet (the main
+    pointer coarse: desktop browsers have one too, and the button says
+    "Copy"), else the clipboard, else a selected read-only field saying to
+    copy it. A shared race opens its state page at the race and holds it
+    there while the page above it draws (`kyc-state.js` `holdPlace`, until
+    the reader moves): it once landed 3,000px short on a phone.
 
 ## District maps
 

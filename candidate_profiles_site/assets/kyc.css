@@ -392,6 +392,29 @@ svg.district-map,
 }
 .skip-link:focus { left: 12px; top: 12px; }
 
+/* What a page without scripts can and cannot show (TECH-10), and the plain
+ * lists a state page is written with before its script draws over them
+ * (rule 96). */
+.noscript-note {
+  margin: 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--surface-2);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--t-sm);
+}
+.share-list { margin: var(--s-2) 0 var(--s-4); padding-left: var(--s-5); }
+.share-list li { margin: var(--s-1) 0; }
+
+/* "Copy link" where the clipboard refused: the link, selected, to copy by
+ * hand (KYC.shareLink). */
+.share-field { display: flex; flex: 1 0 100%; min-width: 0; font-size: var(--t-sm); }
+.share-field label { display: flex; flex: 1; min-width: 0; align-items: center; gap: var(--s-2);
+                     flex-wrap: wrap; }
+.share-field-input { flex: 1 1 14rem; min-width: 0; width: 100%; }
+.modal-footer-actions:has(.share-field) { flex-wrap: wrap; }
+.race-head .race-share { margin-left: auto; }
+
 .scroll-y {
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -3174,6 +3197,56 @@ html.has-zip .ballot-result { min-height: 100vh; }
 .ballot-contest .gov-candidates { margin-top: 0; }
 @media (max-width: 999px) {
   .ballot-contest { padding: var(--s-3); }
+}
+
+/* The statewide questions (rule 95), on the state pages and Your ballot
+ * alike: each in its official words, folded after its first lines. No
+ * colour or mark suggests a side; the quote's rule is the border's grey. */
+.measures-section > p,
+.ballot-measures > p { margin: 0; max-width: 70ch; }
+.measures-section { display: grid; gap: var(--s-2); }
+.measures-words,
+.measures-local,
+.measures-results,
+.measures-source { font-size: var(--t-sm); color: var(--text-muted); }
+.measures-lead { font-weight: 600; }
+.measures { display: grid; gap: var(--s-3); margin: 0; padding: 0; list-style: none; }
+.measure {
+  display: grid;
+  gap: var(--s-1);
+  min-width: 0;
+  padding-top: var(--s-3);
+  border-top: 1px solid var(--border);
+}
+.measure-name { margin: 0; font-size: var(--t-md); font-weight: 700; overflow-wrap: anywhere; }
+.measure-title { display: block; margin-top: 2px; font-weight: 600; color: var(--text-muted); }
+.measure-kind,
+.measure-note,
+.measure-links { margin: 0; font-size: var(--t-sm); max-width: 70ch; }
+.measure-note { color: var(--text-muted); }
+.measure-text {
+  margin: 0;
+  padding: 0 0 0 var(--s-3);
+  border-left: 3px solid var(--border);
+  max-width: 70ch;
+  overflow-wrap: anywhere;
+}
+.measure-text p { margin: 0; }
+.measure-text p + p { margin-top: var(--s-2); }
+/* About four lines, then the button that opens the rest. The fade is a
+ * mask: only its opacity counts, so every theme draws it alike. */
+.measure-text.is-folded {
+  max-height: 6.2em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, var(--text) 60%, transparent);
+  mask-image: linear-gradient(to bottom, var(--text) 60%, transparent);
+}
+.measure-more { justify-self: start; font-size: var(--t-sm); }
+@media print {
+  .ballot-contest.ballot-measures { break-inside: auto; }
+  .measure { break-inside: avoid; }
+  .measure-text.is-folded { max-height: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }
+  .measure-more { display: none !important; }
 }
 
 /* Print or save the list: the reader's ballot and its sources, without

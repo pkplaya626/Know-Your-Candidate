@@ -1017,6 +1017,66 @@ STATEWIDE_LISTS_ELSEWHERE = {
         "https://sos.tn.gov/elections/2026-candidate-lists"),
 }
 
+# The statewide ballot measures (data/ballot_measures.json, rule 95) cited
+# from an official page on a host that is not the jurisdiction's own domain
+# (voting_dates.JURISDICTION_DOMAINS): the election office's own file store
+# or second domain, or a county's or town's official ballot where the state
+# publishes the wording nowhere it could be read. A statewide question is
+# printed on every ballot in the state, so one county's full set of official
+# ballots shows what is statewide. {url prefix: (codes, who publishes it,
+# evidence)}. Being a .gov host is not enough: a page counts here only for
+# the jurisdictions named. Read 2026-10-19.
+MEASURE_SOURCES_ELSEWHERE = {
+    "https://www.nvsos.gov/": (
+        ("NV",), "Nevada Secretary of State",
+        "the Secretary of State's own site; its 2026 Petitions page ('Updated July 27, 2026') "
+        "names the statewide questions on the November 2026 ballot"),
+    "https://www.clarkcountynv.gov/": (
+        ("NV",), "Clark County Election Department",
+        "the Department's official ballot-questions booklet for the November 3, 2026 general "
+        "election, which prints State Questions 6 and 7; the Secretary of State's 2026 Ballot "
+        "Question Guide was not yet posted ('will be published HERE prior to the 2026 General "
+        "Election')"),
+    "https://s3.amazonaws.com/dl.ncsbe.gov/": (
+        ("NC",), "North Carolina State Board of Elections",
+        "the State Board's file store, linked as 'Statewide referenda' from "
+        "https://www.ncsbe.gov/voting/upcoming-election"),
+    "https://www.beaufortncboe.org/": (
+        ("NC",), "Beaufort County Board of Elections",
+        "the Legislative Services Officer's official summary explanation of the 2026 "
+        "amendments (N.C.G.S. 147-54.10, adopted August 20, 2026) as the county board posts "
+        "it; it was found on no state host"),
+    "https://www.votedouglascounty-ne.gov/": (
+        ("NE",), "Douglas County Election Commission",
+        "the Commission's countywide sample ballot for the 11/03/2026 general election, the "
+        "printed wording of Proposed Amendment No. 1, which the Secretary of State's pamphlet "
+        "does not cover; the Legislative Council Executive Board's approved ballot statement "
+        "on sos.nebraska.gov (a scan) carries the same words"),
+    "https://www.edenvt.org/": (
+        ("VT",), "Town of Eden",
+        "the town's official sample ballot, whose 'OFFICIAL STATE CONSTITUTIONAL AMENDMENT "
+        "BALLOT NOVEMBER 3, 2026' column prints both proposals; Burlington's sample ballot "
+        "prints the same text word for word"),
+    "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/": (
+        ("GU",), "Guam Election Commission",
+        "'2026 General Election Sample Ballots', linked by that name from "
+        "https://gec.guam.gov/2026-general-election-info/"),
+    "https://www.somersetcountynj.gov/": (
+        ("NJ",), "Somerset County Clerk",
+        "the Clerk's official 2026 general-election sample ballots for every municipality "
+        "(Last-Modified 2026-10-09), linked from the County Clerk's Election Division page; "
+        "the Division of Elections' 2026 page lists no statewide public question"),
+    "https://www.vote.nyc/": (
+        ("NY",), "Board of Elections in the City of New York",
+        "the Board's 'Appendix A, Proposed Questions, 2026 General Election', linked from "
+        "https://vote.nyc/page/ballot-proposals; the State Board of Elections publishes no "
+        "2026 ballot-proposals page"),
+    "https://www.gtcountysc.gov/": (
+        ("SC",), "Georgetown County Board of Voter Registration and Elections",
+        "the county's official sample ballots for all 52 ballot styles of the November 3, "
+        "2026 general election, linked from https://www.gtcountysc.gov/398/Upcoming-Elections"),
+}
+
 # A holder whose name the list of candidates prints with another given name,
 # where only a short form and its full form differ (rule 56: a different
 # first name is never taken on a surname alone). {(state, office, holder as
