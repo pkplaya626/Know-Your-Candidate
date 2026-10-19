@@ -27,7 +27,7 @@
  * more coarsely, so their margin is wider by what that file records
  * (``lineErrorKm``, kyc/legislature.py), and the answer gives both margins.
  *
- * The pages without profiles.js (the legislature and county pages) still
+ * The pages without people files (the legislature and county pages) still
  * name each state, link its district map and its own lookup: those words
  * come from the lookup index (``states``, kyc/lookup.place_info), never
  * KYC.meta(), which is empty there.
@@ -213,7 +213,7 @@
   }
 
   /** "Ohio", never "OH": the legislature and county pages load no
-   *  profiles.js, so KYC.stateName would give the code there. */
+   *  people files, so KYC.stateName would give the code there. */
   function nameOf(code) {
     return placeOf(code).name || KYC.stateName(code);
   }
@@ -756,7 +756,7 @@
 
   /** "Ohio's House map was redrawn for 2026 ...", only where the answer
    *  shows the House rows it explains: the legislature and county pages
-   *  show none (they load no profiles.js). */
+   *  show none (they load no people files). */
   function redrawnNote(code, data) {
     if (!data.next || KYC.recordPhase() || !people().length) return "";
     return KYC.escapeHtml(KYC.possessive(placeWords(code))) + " House map was redrawn for 2026: " +

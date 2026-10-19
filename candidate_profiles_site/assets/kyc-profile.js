@@ -378,8 +378,8 @@
    * votes": which votes matter is theirs to say. A vote reaches a profile
    * only by the member's id and inside a term they served (rule 17); the
    * pipeline did that, and counted (rule 1). A chamber's file is loaded the
-   * first time one of its members is opened (KYC.loadData), so profiles.js
-   * does not carry every vote. */
+   * first time one of its members is opened (KYC.loadData), so the people files
+   * do not carry every vote. */
   var VOTE_GLOBALS = { house: "kycVotesHouse", senate: "kycVotesSenate" };
   var VOTES_STEP = 10;
   // The member whose votes the panel is for, and what it shows of them.

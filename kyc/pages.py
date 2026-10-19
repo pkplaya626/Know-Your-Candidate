@@ -5,7 +5,7 @@ are not: fifty-six near-identical documents would drift the moment one of
 them was edited by hand, so they are written by the build from one template
 here, and every state's page is identical except for the facts about that
 state. The content itself is rendered on the client by ``assets/kyc-state.js``
-from the same ``profiles.js`` the other pages load, so a state page can never
+from its own state's people file, of the same build the other pages load, so a state page can never
 disagree with the grid about who represents a district.
 
 The pages live one directory down (``states/tx.html``), so every asset and
@@ -222,7 +222,7 @@ _SITE_SEARCH = """\
     </form>
 """
 
-# The sidebar of every page that loads profiles.js: the chambers' balance,
+# The sidebar of every page that loads the build's figures: the chambers' balance,
 # the state's own delegation on its pages, and the election.
 _CONGRESS_SIDEBAR = """
         <div class="sidebar-section">
@@ -326,7 +326,7 @@ _SECTION_TAGS = {"executive": "Federal government"}
 
 def brand_sub(nav_current=None, congress=False):
     """The tag beside the site's name: which part of the site this is. A
-    page that loads profiles.js names the Congress its data is of
+    page that loads the build's figures names the Congress its data is of
     (``data-congress``, filled by kyc.js); every other page names its
     section as the navigation does (rule 75), never "U.S. Congress" over a
     county, a court or the guide."""
@@ -336,7 +336,7 @@ def brand_sub(nav_current=None, congress=False):
     return f'<span class="brand-sub">{_e(name)}</span>' if name else ""
 
 
-# The build's date in a footer, filled from profiles.js by kyc.js.
+# The build's date in a footer, filled from data/people/meta.js by kyc.js.
 BUILD_STAMP = 'Data built <time id="buildStamp">&mdash;</time>. '
 
 
@@ -367,7 +367,7 @@ def footer_meta(root="", when="", page=None):
 def built_line(root="../", built=None):
     """The sidebar's line saying how fresh the page's data is, with the way
     to its sources: a grid of a thousand cards pushes the footer out of
-    reach (TRUST-04). *built* is "stamp" where the page loads profiles.js
+    reach (TRUST-04). *built* is "stamp" where the page loads the build's figures
     (kyc.js fills it), a date, or None for a page with no data."""
     if built == "stamp":
         when = 'Data built <time data-built>&mdash;</time> &middot; '
@@ -1226,7 +1226,7 @@ def render_district_page(code, host, summary=None):
 
     The introduction is static, so the page says what it is without
     JavaScript; the maps and every claim about a person are rendered by
-    ``assets/kyc-districts.js`` from the state's map file and profiles.js.
+    ``assets/kyc-districts.js`` from the state's map file and its people file.
     """
     from .districts import REDRAWN, page_path as district_path
     from .government_maps import STATES

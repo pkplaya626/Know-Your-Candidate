@@ -20,7 +20,7 @@ Python 3.9+ and the standard library. Nothing to install.
 
 | Command | What it does |
 |---|---|
-| `python build_profile_site.py` | Build `data/profiles.js`, `data/geo.js` and `data/districts/*.js` |
+| `python build_profile_site.py` | Build `data/people/*.js`, `data/geo.js` and `data/districts/*.js` |
 | `… build --check` | Validate only; write nothing |
 | `… build --strict` | Refuse to write if validation finds an error |
 | `… build --json` | Emit the validation report as JSON |
@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2726 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2865 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -86,7 +86,7 @@ the other refresh commands listed above. `build` and
 ```text
 Cleaned_House.csv                        ─┐
 Cleaned_Senate.csv                       ─┤
-Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/profiles.js ─┬─> index.html
+Congressional_Candidates_2026.csv        ─┼─> kyc/ ─> data/people/*.js ─┬─> index.html
 Completed_Primary_Candidates_2026.csv    ─┤          data/geo.js       ─┤   (grid + races)
 Late_Primary_Candidates_2026.csv         ─┘          portraits.json     └─> map.html
 us_atlas_states_topo.json                ──> kyc/geo.py                     (partisan map)
@@ -98,8 +98,22 @@ congress_snapshot.json                   ──> kyc/legislators.py
 
 The CSVs and the state atlas at the repo root are the source of truth.
 Everything under `candidate_profiles_site/data/` is **generated** — never edit
-`profiles.js` or `geo.js` by hand. They are committed so the site serves
+`people/*.js` or `geo.js` by hand. They are committed so the site serves
 straight from GitHub Pages with no build step.
+
+The profiles are written in the files each page needs (CLAUDE.md rule 94):
+
+| File | Holds | Loaded by |
+|------|-------|-----------|
+| `data/people/meta.js` | `kycBuildMeta`: the build's figures, its signature, each chamber's left-right scores (`chamberScores`) | every page with people, and the guide's Congress page |
+| `data/people/index.js` | every profile without the fields in `emit.INDEX_LEAVES_OUT`, and every race | `index.html`, `map.html`, `states/index.html`; elsewhere on demand |
+| `data/people/<st>.js` | one state's profiles whole, and its races | `states/<st>.html`, `districts/<st>.html`; elsewhere on demand (`KYC.loadPeople`) |
+
+Each people file assigns `window.kycPeopleFile`, which `assets/kyc.js` takes
+into `window.legislatorsData` and `window.kycRaces` (`KYC.people()`,
+`KYC.races()`) as it arrives, filling the index's records in place. Every
+file names its build (`build`), and a file from another build than the
+page's `kycBuildMeta.signature` is refused and said on the page.
 
 Both pages load their data with `<script src>` rather than `fetch()`, so
 opening the HTML directly off disk still works (`file://` blocks `fetch`, not
@@ -232,8 +246,8 @@ page, so it is written by one set of helpers in `kyc/pages.py`, and
   its footer out of reach. "Data built" is the reader's own calendar day of
   the build (`KYC.localDay`), never a UTC date in their future.
 - **The header's tag names the section** (`pages.brand_sub`, from the
-  navigation's own names, rule 75); only a page that loads `profiles.js` says
-  which Congress.
+  navigation's own names, rule 75); only a page that loads the build's figures
+  (`data/people/meta.js`) says which Congress.
 - `404.html`, which GitHub Pages serves for any missing address at any depth
   (so its URLs start at the root), with the search and every section;
   `districts/index.html` ("District maps", linked from each district page)
@@ -1303,7 +1317,7 @@ in another committee entirely. Showing their last cycle's figures instead
 would be worse than either: a member's 2024 receipts on a page about the 2026
 midterms reads as current money.
 
-`profiles.js` carries a `quality` map per profile listing only the fields that
+Each profile carries a `quality` map listing only the fields that
 are *not* real data. About **11% of surfaced fields** fall into one of those
 categories — that is the honest picture, and the page shows it as such. Absent
 values are excluded from search, so "not disclosed" does not match everyone.
@@ -1404,7 +1418,7 @@ clause 7; Rule III, clause 3(a)).
 
 The build writes `data/votes/house.js` and `data/votes/senate.js`, each
 rewritten only when its content signature changes. They are not in
-`profiles.js`: every page that opens a profile names them, with their version
+the people files: every page that opens a profile names them, with their version
 stamps, in an inert `<template id="onDemandData">`, and the dialog loads a
 chamber's file the first time one of its members is opened (`KYC.loadData`).
 While it loads the panel says so, and if it fails, that it failed.
@@ -1552,7 +1566,7 @@ November ballot, and the people the primary removed folded under each race.
 The same profile dialog opens from every card.
 
 The pages carry nothing but the state code; `assets/kyc-state.js` renders
-them from the same `profiles.js` the grid and map load, so a state page can
+them from its own state's people file, of the same build the grid and map load, so a state page can
 never disagree with the grid about who represents a district. They are
 generated, so `verify` regenerates them in memory and fails when a page on
 disk is not what the template would write.
@@ -1633,8 +1647,10 @@ here in a different way:
   BIA's directory, with a disputed leadership said in words and the
   directory's asterisks dropped; a caucus's own style for its minority lead
   (`overrides.COMMITTEE_TITLES`, "Co-Chair") with the evidence.
-- **Only the page that shows people loads them.** The Congress page loads
-  `profiles.js` like a state page; the others load only `kyc.js` and
+- **No guide page loads profiles.** The Congress page's committee leads and
+  chamber leaders are written in by the build (`pages.committees_html`,
+  `leaders_html`), each a link to the profile on the grid; it loads only the
+  build's figures for its sidebar. The others load only `kyc.js` and
   `kyc-guide.js`, and carry their "Jump to" list in the HTML.
 
 Every page links to the guide from its sidebar, and the guide links back into
@@ -2505,7 +2521,7 @@ petition, and the courts kept the 2022 map in place; its page says so.
   on a touch screen, compares up to three.
   The choice is in the address (`#/?d=3,6`).
 - **A close-up of the picked districts.** It shows county lines, towns, and
-  captions naming who holds the seat or is running in it, from `profiles.js`.
+  captions naming who holds the seat or is running in it, from the state's people file.
   On a redrawn state the other map's lines are dashed.
 - **Party colours.** Each district is drawn in the party of the member who
   holds it, or as vacant. A redrawn state's new map is left plain: nobody
@@ -2525,7 +2541,7 @@ fitted to it. California uses EPSG:3310's parameters, and Alaska's Aleutians
 are unwrapped across the antimeridian. So the page loads no mapping library,
 and a share of the drawing is a share of the ground. `data/districts/<st>.js`
 holds only geometry, one file per state; everything said about a person comes
-from `profiles.js`.
+from the state's people file.
 
 The build fails loudly when:
 
@@ -2585,7 +2601,7 @@ names, each linked:
   Bureau calls them (`lookup.TERRITORY_AREAS`); none for D.C. and Guam, each
   its own county-equivalent.
 
-The legislature and county pages load no `profiles.js`, so the state's name,
+The legislature and county pages load no people files, so the state's name,
 its district map and its own lookup come from the lookup index
 (`lookup.place_info`), and members of Congress are linked on the state page.
 
@@ -2792,7 +2808,7 @@ the build timestamp excluded, and `verify` compares it against a rebuild:
 
 ```
 [error] the committed site data is out of date:
-  - candidate_profiles_site/data/profiles.js is stale
+  - candidate_profiles_site/data/people/meta.js is stale
        committed fb5d549512d1f75b...
        rebuilt   3c49b99d632c308b...
 

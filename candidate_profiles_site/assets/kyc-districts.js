@@ -5,7 +5,7 @@
  * by kyc/districts.py, which also measured how much of each new district's
  * land came from each old one. Everything said about a person - who holds a
  * seat, who is running where, who is on the November ballot - comes from
- * profiles.js, the same records the grid and the state pages render, so this
+ * its state's people file, the same records the grid and the state pages render, so this
  * page cannot disagree with them about anyone.
  *
  * Each district is drawn once, into one hidden <defs>, and every view - the

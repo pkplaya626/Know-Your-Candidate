@@ -41,7 +41,7 @@ COURT_COUNTIES_FILE = os.path.join(DATA_DIR, "courtcounties.js")
 DISTRICTS_DIR = os.path.join(DATA_DIR, "districts")
 # Each chamber's roll calls and how every member voted in them
 # (kyc/rollcalls.py), loaded by the profile dialog the first time a member of
-# that chamber is opened, so profiles.js does not carry them.
+# that chamber is opened, so the people files do not carry them.
 VOTES_DIR = os.path.join(DATA_DIR, "votes")
 # The global each chamber's file assigns, and its path under data/.
 VOTES_GLOBALS = {"house": "kycVotesHouse", "senate": "kycVotesSenate"}
@@ -779,7 +779,7 @@ def write_odds(payload, root="."):
 
     Market prices and polling averages, keyed by race id, in a file of their
     own: the twelve-hourly odds refresh writes this and odds.json and nothing
-    else, so it never collides with the weekly roster refresh's profiles.js.
+    else, so it never collides with the weekly roster refresh's people files.
     """
     path = os.path.join(root, ODDS_FILE)
     os.makedirs(os.path.dirname(path), exist_ok=True)
