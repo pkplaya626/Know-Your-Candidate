@@ -88,23 +88,27 @@ def cache_dir():
     return path
 
 
-def _whole(url, body):
+def _whole(url, body, archive=False):
     """Whether *body* is what *url* promised. The Census server answers a
     burst with a "Request Rejected" page and status 200; cached, that page
-    would stand in for the file on every later run."""
-    if url.lower().endswith(".zip"):
+    would stand in for the file on every later run. *archive* says the
+    caller reads a zip whatever the URL ends in: Utah's download service
+    answers "Up to date download file is being generated" (status 202, a
+    JSON body) at a URL ending in "?layers=0", and that was cached too."""
+    if archive or url.lower().endswith(".zip"):
         return zipfile.is_zipfile(io.BytesIO(body))
     return True
 
 
-def get(url, pause=0.0):
-    """Download *url*, caching it so a re-run does not fetch it again."""
+def get(url, pause=0.0, archive=False):
+    """Download *url*, caching it so a re-run does not fetch it again.
+    *archive*: the body must be a zip (see ``_whole``)."""
     name = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24]
     path = os.path.join(cache_dir(), name)
     if os.path.exists(path):
         with open(path, "rb") as handle:
             body = handle.read()
-        if _whole(url, body):
+        if _whole(url, body, archive):
             return body
         os.remove(path)                 # a rejection cached by an older run
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
@@ -112,7 +116,7 @@ def get(url, pause=0.0):
         try:
             with urllib.request.urlopen(request, timeout=180) as response:
                 body = response.read()
-            if not _whole(url, body):
+            if not _whole(url, body, archive):
                 raise OSError(f"{url} did not return the file (the server rejected the request)")
             break
         except urllib.error.HTTPError as exc:
@@ -174,7 +178,7 @@ def read_shp(data):
 
 
 def read_layer(url):
-    archive = zipfile.ZipFile(io.BytesIO(get(url)))
+    archive = zipfile.ZipFile(io.BytesIO(get(url, archive=True)))
     # macOS archives carry "__MACOSX/._x.shp" resource forks; they are not data.
     names = [n for n in archive.namelist() if "__MACOSX" not in n]
     cpg = [n for n in names if n.lower().endswith(".cpg")]
@@ -294,7 +298,7 @@ def official_plan(spec, seats, extent):
     the file is refused: a wrong projection draws the right districts in the
     wrong place, which is exactly what must never look normal.
     """
-    archive = zipfile.ZipFile(io.BytesIO(get(spec["url"])))
+    archive = zipfile.ZipFile(io.BytesIO(get(spec["url"], archive=True)))
     names = archive.namelist()
     prj = [n for n in names if n.lower().endswith(".prj") and "__MACOSX" not in n]
     if not prj:

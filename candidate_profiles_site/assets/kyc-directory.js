@@ -284,6 +284,61 @@
     }
   }
 
+  /* No profile carries a ZIP code: "85004" in the search found nobody and
+   * said to try a state code (GRID-06). A ZIP code is answered by "Find who
+   * represents you" in the hero instead, once per ZIP code typed, whatever
+   * the grid finds: a profile's text can hold the number too. ZIP+4 is
+   * the panel's own form ("43215-1234"), asked by its first five digits. */
+  var askedZip = "";
+  function searchedZip() {
+    var m = /^(\d{5})(?:-?\d{4})?$/.exec(String(state.q || "").trim());
+    return m && KYC.findRep ? m[1] : "";
+  }
+
+  function askZip() {
+    var zip = searchedZip();
+    zipNote(zip);
+    if (!zip) {
+      // Typed again after a clear, the same ZIP code is asked again.
+      askedZip = "";
+      return;
+    }
+    if (zip === askedZip) return;
+    askedZip = zip;
+    KYC.findRep.ask(zip);
+  }
+
+  /* The empty grid says where the ZIP code was answered, with a way there:
+   * on a wide screen the hero scrolls away with the results (PR #104
+   * review). A button, not a "#findrep" link, which the router would read
+   * as a view and clear the search. */
+  function zipNote(zip) {
+    var empty = doc.getElementById("noResults");
+    if (!empty) return;
+    var note = empty.querySelector(".empty-zip");
+    if (!zip) {
+      if (note) note.hidden = true;
+      return;
+    }
+    if (!note) {
+      note = doc.createElement("p");
+      note.className = "empty-zip";
+      empty.insertBefore(note, empty.querySelector("p"));
+      empty.addEventListener("click", function (event) {
+        if (event.target.closest && event.target.closest("[data-findrep-reveal]")) KYC.findRep.reveal();
+      });
+    }
+    note.hidden = false;
+    note.innerHTML = "No profile carries a ZIP code: " + KYC.escapeHtml(zip) + " is answered " +
+      "above, under Find who represents you. " +
+      '<button type="button" class="btn" data-findrep-reveal>See the answer</button>';
+  }
+
+  /* The results line's words for a ZIP code, said wherever the line is. */
+  function zipWords() {
+    return searchedZip() ? " The ZIP code is answered above, under Find who represents you." : "";
+  }
+
   /* What was searched for, as the reader typed it. */
   function typed() {
     return ((doc.getElementById("searchInput") || {}).value || state.q).trim();
@@ -322,7 +377,7 @@
       html += " " + KYC.escapeHtml("The people found below are listed elsewhere on the site, " +
         "each linked to the page about them.");
     }
-    return html;
+    return html + KYC.escapeHtml(zipWords());
   }
 
   function plural(n, one, many) {
@@ -358,7 +413,7 @@
           (hiddenOut === 1 ? "is" : "are") + " hidden.") + outToggle();
       }
     }
-    return html + challengerNote();
+    return html + challengerNote() + KYC.escapeHtml(zipWords());
   }
 
   /* The Challengers chip and the sidebar's "Challengers on the ballot"
@@ -400,7 +455,8 @@
     });
     if (view.people) {
       label.textContent = "Showing " + view.people.toLocaleString() + " profiles across " +
-        view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s") + narrowed();
+        view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s") + narrowed() +
+        (zipWords() ? "." + zipWords() : "");
     } else {
       renderLabel(label, emptyLabel(officials));
     }
@@ -430,6 +486,7 @@
     var label = doc.getElementById("resultsLabel");
     renderActiveFilters();
     var officials = renderOfficials();
+    askZip();
 
     if (state.view === "senate" && KYC.senate) {
       if (observer) { observer.disconnect(); observer = null; }
@@ -460,7 +517,7 @@
       renderLabel(label, KYC.escapeHtml("Showing " + plural(list.length, "race", "races") +
         narrowed() + ": " + plural(people, "person", "people") + " on the ballot or holding " +
         "the seat" + (out ? ", and " + out.toLocaleString() + " out of the race folded under " +
-        "each" : "") + ". Races by state, Senate before House, then by district."));
+        "each" : "") + ". Races by state, Senate before House, then by district." + zipWords()));
       grid.className = "";
       // The races, then which party the markets expect to hold each chamber.
       grid.innerHTML = raceSections(list) +
@@ -1055,8 +1112,11 @@
       // Searching from 800px down the list left the reader among the
       // matches with the count off-screen - under the keyboard, on
       // Samsung Internet, where it shrinks the page.
+      // A ZIP code is answered in the hero, and the panel brings itself
+      // into view (KYC.findRep.ask): scrolling to the results line after
+      // it left the reader below the answer (PR #104 review).
       var label = doc.getElementById("resultsLabel");
-      if (label && label.getBoundingClientRect().top < 0) {
+      if (label && !searchedZip() && label.getBoundingClientRect().top < 0) {
         label.scrollIntoView({ block: "start" });
       }
     };

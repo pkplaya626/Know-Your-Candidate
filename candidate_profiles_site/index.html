@@ -25,8 +25,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=482822c344">
-<script src="assets/kyc.js?v=8b93c240da"></script>
+<link rel="stylesheet" href="assets/kyc.css?v=1562c0ed78">
+<script src="assets/kyc.js?v=e88f29e09d"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
@@ -308,6 +308,9 @@
                 <p class="intro-text">Every member of Congress, and the 2026 candidates for it
                     from the FEC's register. Each state's page adds its governor, legislature,
                     high court and local governments.</p>
+                <!-- "Find who represents me": a ZIP code or a location, looked up on
+                     the device (assets/kyc-findrep.js writes the controls here). -->
+                <section class="findrep" id="findrep" data-findrep></section>
                 <!-- A form, not a select that navigates on change: arrow keys
                      and type-ahead left the page on the first key (WCAG 3.2.2). -->
                 <form class="intro-pick" id="introForm">
@@ -383,10 +386,12 @@
 </template>
 <script src="data/profiles.js?v=e613cd4910"></script>
 <script src="data/odds.js"></script>
+<script src="data/lookup/index.js?v=c61492c380"></script>
 <script src="assets/kyc-odds.js?v=1852f17dc4"></script>
 <script src="assets/kyc-cards.js?v=a67ab65c61"></script>
-<script src="assets/kyc-profile.js?v=917cd1a23c"></script>
+<script src="assets/kyc-profile.js?v=2d44b9532b"></script>
+<script src="assets/kyc-findrep.js?v=708ec7448e"></script>
 <script src="assets/kyc-senate.js?v=c6029e87b2"></script>
-<script src="assets/kyc-directory.js?v=be22a7e7a4"></script>
+<script src="assets/kyc-directory.js?v=8b4fe0a7e5"></script>
 </body>
 </html>

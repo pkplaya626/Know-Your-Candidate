@@ -826,9 +826,7 @@ def build_state(code, root=".", places=None):
         # Rounded: the last bits of these floats come from the platform's
         # maths library, and differed between Windows and Linux, so seven
         # files read as stale in CI. Ten figures move a point by 1e-7 units.
-        "projection": {"parallels": [_sig(p) for p in albers.parallels],
-                       "meridian": _sig(albers.meridian), "minX": _sig(fit.min_x),
-                       "maxY": _sig(fit.max_y), "k": _sig(fit.k), "pad": PAD},
+        "projection": projection_payload(albers, fit),
         "plans": out_plans,
         "flows": flows(areas, overlaps) if len(keys) == 2 else [],
         "counties": _counties(topo, raw_arcs, fit),
@@ -839,6 +837,15 @@ def build_state(code, root=".", places=None):
         if len(rings[0]) > 1 else [],
         "sources": _sources(code, topo),
     }
+
+
+def projection_payload(albers, fit):
+    """How a longitude and latitude land on a map drawn with *albers* and
+    *fit*, for the page to place a reader's location on the device: the
+    district pages' maps and the legislature pages' (kyc-findrep.js)."""
+    return {"parallels": [_sig(p) for p in albers.parallels],
+            "meridian": _sig(albers.meridian), "minX": _sig(fit.min_x),
+            "maxY": _sig(fit.max_y), "k": _sig(fit.k), "pad": PAD}
 
 
 def _sig(value):

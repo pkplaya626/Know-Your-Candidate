@@ -34,6 +34,30 @@ SOURCE = "Open States (Plural Policy), current legislators"
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "state_legislators.json")
 MAPS_DIR = "legislative_maps"
 
+# How tools/fetch_legislative_maps.py simplifies a state's districts, here so
+# the build can say how far the drawn lines may stray (kyc/legislature.py
+# ``lineErrorKm``, which "Find who represents me" widens its margin by). The
+# districts are far smaller than congressional ones - a Boston house district
+# is a few kilometres across - so they keep more detail: Douglas-Peucker at
+# 120 m, rising with the state's size (an eight-thousandth of its diagonal),
+# so Alaska's coast does not cost what Massachusetts's districts need.
+MAP_TOLERANCE_M = 120.0
+MAP_MAX_TOLERANCE_M = 300.0
+
+
+def map_tolerance_m(points):
+    """The simplification tolerance, in metres, for a state whose upper
+    chamber's districts have these ``(lon, lat)`` *points*."""
+    import math
+    lons = [p[0] for p in points]
+    lats = [p[1] for p in points]
+    mid = math.radians((min(lats) + max(lats)) / 2)
+    width = (max(lons) - min(lons)) * 111320.0 * math.cos(mid)
+    height = (max(lats) - min(lats)) * 110574.0
+    # Capped: Alaska's Aleutians cross the 180th meridian, so its "width"
+    # spans the globe, and Anchorage's districts are a few kilometres across.
+    return min(MAP_MAX_TOLERANCE_M, max(MAP_TOLERANCE_M, math.hypot(width, height) / 8000.0))
+
 REQUIRED = ("id", "name", "current_party", "current_district", "current_chamber")
 
 
