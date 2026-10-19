@@ -2176,9 +2176,11 @@
   /* --------------------------------------------------- data on demand */
 
   /* A data file the page needs only sometimes - the officials the grid's
-   * search also looks through - is named, with its version stamp, in an
-   * inert <template id="onDemandData"> (so the build stamps it, rule 76)
-   * and loaded the first time it is wanted. *global* is the variable it
+   * search also looks through, a chamber's roll calls for the profile
+   * dialog - is named, with its version stamp, in an inert
+   * <template id="onDemandData"> (so the build stamps it, rule 76) and
+   * loaded the first time it is wanted. *file* is its path under data/; a
+   * page a folder down names it "../data/...". *global* is the variable it
    * assigns: one already there (a page that loads it anyway, a test) is
    * used as it is. */
   var demanded = {};
@@ -2190,7 +2192,9 @@
     var tag = null;
     if (holder && holder.content) {
       tag = Array.prototype.filter.call(holder.content.querySelectorAll("script[src]"),
-        function (s) { return s.getAttribute("src").split("?")[0] === "data/" + file; })[0];
+        function (s) {
+          return s.getAttribute("src").split("?")[0].replace(/^(\.\.\/)+/, "") === "data/" + file;
+        })[0];
     }
     if (!tag) { done(false); return; }
     demanded[file] = [done];

@@ -230,6 +230,15 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py tribes
 
+      # How each member voted: the roll calls posted since the last run, from
+      # the House Clerk's and the Senate's own records, one request a second
+      # (kyc/rollcalls.py). A refused or failed request ends the run with
+      # what was read saved; the next run goes on from there.
+      - name: Read the new roll calls
+        continue-on-error: true
+        timeout-minutes: 30
+        run: python build_profile_site.py votes
+
       # The public offices each person has held: Congress from
       # congress-legislators, every other office from Wikidata where the
       # person's own Wikipedia article gives the same office the same years

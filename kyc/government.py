@@ -735,7 +735,7 @@ def render(slug, host, codes=()):
         jump_attrs=(' data-jump="map"' if modes else
                     ' data-jump-to="states/{code}.html#voting"' if slug == "elections" else ""),
         crumbs=crumbs,
-        scripts="\n".join(f'<script src="{_e(src)}"></script>' for src in scripts(slug)),
+        scripts=pages._scripts(scripts(slug)),
         **layout,
     )
 

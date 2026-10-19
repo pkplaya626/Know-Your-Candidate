@@ -1190,6 +1190,71 @@ a.badge-link {
 }
 .card .badge { margin-top: var(--s-1); }
 
+/* ------------------------------------------- how they voted (kyc-profile.js) */
+/* A member's roll-call votes as the record gives them. The vote is a word in
+ * a neutral box, never a party's or a judgement's colour: "Nay" is not bad
+ * news, and "Not Voting" is set apart only by being fainter. */
+.vote-summary { margin: 0; }
+.vote-note {
+  margin: var(--s-2) 0 0;
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+}
+.vote-search {
+  display: grid;
+  gap: var(--s-1);
+  margin: var(--s-3) 0 0;
+}
+.vote-head {
+  margin: var(--s-3) 0 var(--s-1);
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  font-weight: 700;
+}
+.vote-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.vote-row {
+  display: grid;
+  grid-template-columns: minmax(4.75em, max-content) minmax(0, 1fr);
+  gap: var(--s-2);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--border);
+}
+.vote-row:last-child { border-bottom: 0; }
+.vote-cast {
+  align-self: start;
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-3);
+  color: var(--text);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.vote-cast.vote-missed {
+  color: var(--text-faint);
+  background: transparent;
+  border-style: dashed;
+}
+.vote-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.vote-what { overflow-wrap: anywhere; }
+.vote-detail,
+.vote-meta {
+  color: var(--text-muted);
+  font-size: var(--t-xs);
+  overflow-wrap: anywhere;
+}
+.vote-more { margin-top: var(--s-2); }
+
 /* ------------------------------------------- prediction markets and polls */
 /* assets/kyc-odds.js: each source quoted as it publishes itself. */
 .odds {

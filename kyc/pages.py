@@ -527,8 +527,25 @@ def _e(text):
     return html.escape(str(text), quote=True)
 
 
+_PROFILE_DIALOG = "assets/kyc-profile.js"
+
+
 def _scripts(sources):
-    return "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
+    """The page's script tags. A page that opens the profile dialog also
+    names, inert, the vote files the dialog loads when a member is opened
+    (KYC.loadData), so the build stamps their versions with the rest
+    (rule 76) and the page loads them only when wanted."""
+    from .emit import VOTES_FILES
+
+    tags = "\n".join(f'<script src="{_e(src)}"></script>' for src in sources)
+    dialog = [src for src in sources if src.endswith(_PROFILE_DIALOG)]
+    if not dialog:
+        return tags
+    prefix = dialog[0][:-len(_PROFILE_DIALOG)]
+    lazy = "\n".join(f'<script src="{_e(prefix)}data/{_e(VOTES_FILES[chamber])}"></script>'
+                     for chamber in sorted(VOTES_FILES))
+    return ("<!-- Loaded only when a member's profile is opened (KYC.loadData). -->\n"
+            f'<template id="onDemandData">\n{lazy}\n</template>\n' + tags)
 
 
 # The caches whose dates the footers print: (key, file under data/, the
