@@ -883,16 +883,34 @@
   /* Sizes of the first portrait for a srcset, when the build found several
    * of the same photograph: the browser then fetches one sharp at this
    * screen's density, rather than a 960px original for a 38px circle. */
-  function portraitSrcset(item) {
+  function portraitSrcset(item, sizes) {
     var set = item && item.photoSet;
     if (!set || !set.length || portraitSrc(item) === SILHOUETTE) return "";
-    return set.map(function (entry) { return entry[1] + " " + entry[0] + "w"; }).join(", ");
+    return cappedSrcset(set, sizes);
+  }
+
+  /** A srcset of ``[[width, url], ...]`` (one photograph's sizes) for an
+   *  image drawn *sizes* wide ("116px"), offering no size wider than a 2x
+   *  screen needs (TECH-13): a 165px card on a 3x phone fetched a 494px
+   *  original where the 330px file is sharp enough, and a judge's 116px
+   *  portrait fetched the Commons original. The smallest size at least
+   *  that wide is the last one offered. */
+  function cappedSrcset(set, sizes) {
+    var sorted = (set || []).slice().sort(function (a, b) { return a[0] - b[0]; });
+    var px = parseFloat(sizes);
+    var cap = px > 0 ? 2 * px : Infinity;
+    var kept = [];
+    for (var i = 0; i < sorted.length; i++) {
+      kept.push(sorted[i]);
+      if (sorted[i][0] >= cap) break;
+    }
+    return kept.map(function (entry) { return entry[1] + " " + entry[0] + "w"; }).join(", ");
   }
 
   /** The src - and srcset and sizes, when there are sizes - of a portrait
    *  <img>, escaped. *sizes* is the width it is drawn at, e.g. "38px". */
   function portraitAttrs(item, sizes) {
-    var set = portraitSrcset(item);
+    var set = portraitSrcset(item, sizes);
     return 'src="' + escapeAttr(portraitSrc(item)) + '"' + (set
       ? ' srcset="' + escapeAttr(set) + '" sizes="' + escapeAttr(sizes) + '"'
       : "");
@@ -901,7 +919,7 @@
   /** Point an existing <img> at a profile's portrait - the dialog reuses one
    *  element, so a srcset left by the last profile must go. */
   function setPortrait(img, item, sizes) {
-    var set = portraitSrcset(item);
+    var set = portraitSrcset(item, sizes);
     img.setAttribute("data-photo-idx", "0");
     img.removeAttribute("srcset");
     img.removeAttribute("sizes");
@@ -910,6 +928,50 @@
       img.setAttribute("srcset", set);
     }
     img.src = portraitSrc(item);
+  }
+
+  function hostOf(url) {
+    try {
+      return new URL(String(url)).hostname.toLowerCase();
+    } catch (e) {
+      return "";
+    }
+  }
+
+  /** Whose photograph an <img> drawn by setPortrait is showing now: the
+   *  profile's own credit for its first portrait (``photoCredit``), a
+   *  fallback's by the host that serves it (``kycBuildMeta.photoCredits``),
+   *  or null for the silhouette (rule 87). */
+  function shownPhotoCredit(img, item) {
+    if (!img || !item) return null;
+    var src = img.getAttribute("src") || "";
+    if (!src || src === SILHOUETTE) return null;
+    var at = parseInt(img.getAttribute("data-photo-idx") || "0", 10);
+    if (!at) return item.photoCredit || null;
+    var table = (global.kycBuildMeta && global.kycBuildMeta.photoCredits) || {};
+    var by = table[hostOf((item.photos || [])[at])];
+    return by ? { by: by } : null;
+  }
+
+  /** One line crediting a photograph: "Photo: <author>, <licence>, via
+   *  Wikimedia Commons", each linked where the credit holds the address,
+   *  or "" when there is no credit. Escaped. */
+  function photoCreditHtml(credit) {
+    if (!credit || !(credit.by || credit.licence)) return "";
+    function anchor(href, text) {
+      return /^https?:\/\//.test(href || "")
+        ? '<a href="' + escapeAttr(href) + '" target="_blank" rel="noopener noreferrer">' +
+          escapeHtml(text) + "</a>"
+        : escapeHtml(text);
+    }
+    var parts = [];
+    if (credit.by) parts.push(credit.via ? escapeHtml(credit.by) : anchor(credit.page, credit.by));
+    // The licence asks for the author and the file's page names none.
+    else if (credit.authorUnrecorded) parts.push("author not recorded on Commons");
+    if (credit.licence) parts.push(anchor(credit.licenceUrl, credit.licence));
+    var line = parts.length ? "Photo: " + parts.join(", ") : "Photo";
+    if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
+    return line;
   }
 
   /* Delegated: one listener for every portrait on the page, rather than an
@@ -2670,6 +2732,9 @@
     portraitSrcset: portraitSrcset,
     portraitAttrs: portraitAttrs,
     setPortrait: setPortrait,
+    shownPhotoCredit: shownPhotoCredit,
+    cappedSrcset: cappedSrcset,
+    photoCreditHtml: photoCreditHtml,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,
     // behaviour

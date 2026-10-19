@@ -189,6 +189,24 @@ def _smallest(srcset):
     return best[1] if best else ""
 
 
+def _card_photo(fragment):
+    """The photograph on an NLGA card: the smallest size its srcset offers,
+    or - for a card that has only a ``src`` - that file at 300px from the
+    host's own resizer. Virginia's lieutenant governor's card carried a
+    plain ``src`` and lost its photograph because only a srcset was read
+    (STATEGOV-13)."""
+    from .photos import host_resized
+
+    img = re.search(r'<img[^>]*\bsrcset="([^"]+)"', fragment)
+    if img:
+        return _smallest(img.group(1))
+    img = re.search(r'<img[^>]*\bsrc="(https://[^"]+)"', fragment)
+    if not img:
+        return ""
+    src = html.unescape(img.group(1))
+    return host_resized(src, 300) or src
+
+
 def parse_nlga(page):
     """``{code: officer}`` from NLGA's member list: the lieutenant governor,
     or the officer first in line where a state has none."""
@@ -204,9 +222,9 @@ def parse_nlga(page):
             if not name:
                 raise OfficersError(f"NLGA {code}: no name and party in {who!r}")
             entry.update(name=name, party=party, partyKey=party_key(party))
-            img = re.search(r'<img[^>]*\bsrcset="([^"]+)"', before)
-            if img and _surname_in(name, _smallest(img.group(1))):
-                entry["photo"] = _smallest(img.group(1))
+            photo = _card_photo(before)
+            if photo and _surname_in(name, photo):
+                entry["photo"] = photo
         site = re.search(r'<a href="([^"]+)"[^>]*>\s*<span class="elementor-icon-list-text">\s*'
                          r'Website', after)
         if site:
@@ -455,8 +473,8 @@ def acting(name, text):
     return bool(re.search(rf"\bacting attorney general (?:[a-z]+ ){{0,2}}{last}\b", _fold(text)))
 
 
-def _office_text(url, pause):
-    """The visible text of an office page and of any page it links as its
+def _office_pages(url, pause):
+    """``[(url, html)]``: an office page and any page it links as its
     attorney general's own ("Attorney General", "About the Attorney
     General"), or ``None`` when the site refuses the request. A failed
     request is tried once more before the office counts as unreadable: one
@@ -472,22 +490,333 @@ def _office_text(url, pause):
         return None
     if re.search(r"<title>\s*(Access Denied|Just a moment|Not allowed)", page, re.I):
         return None
-    texts = [visible_text(page)]
     # A page that draws itself with JavaScript (Nevada's secretary of state)
     # says nothing either way: unreadable, not "does not name them".
-    if len(texts[0]) < 300:
+    if len(visible_text(page)) < 300:
         return None
+    pages = [(url, page)]
     for href, label in re.findall(r'<a\s+href="([^"]+)"[^>]*>\s*([^<]{0,40})</a>', page):
         if re.fullmatch(r"(About|Meet)?\s*(the\s+)?Attorney General", _text(label), re.I):
             target = urllib.parse.urljoin(url, html.unescape(href))
             if urllib.parse.urlparse(target).netloc == urllib.parse.urlparse(url).netloc:
                 time.sleep(pause)
                 try:
-                    texts.append(visible_text(_get(target)))
+                    pages.append((target, _get(target)))
                 except OfficersError:
                     pass
                 break
-    return " ".join(texts)
+    return pages
+
+
+def _office_text(url, pause):
+    """The visible text of :func:`_office_pages`, or ``None``."""
+    pages = _office_pages(url, pause)
+    return " ".join(visible_text(page) for _, page in pages) if pages else None
+
+
+# ------------------------------------------- attorneys general's photographs
+#
+# No attorney general had a photograph (STATEGOV-13). NAAG's member pages
+# hold one each, but answer a script - and a headless browser - with a
+# Cloudflare challenge, and a party association's photograph is the
+# party's. So the photograph is the office's own, from the very pages that
+# confirmed the name (``names_holder``): never a search, and only for a
+# holder the office confirmed. An image is taken when
+#
+# - its file name or alt text carries the holder's surname;
+# - it says it is a likeness ("headshot", "portrait", "official photo",
+#   "photo of") or its alt text is nothing but the name, the title and the
+#   state: "Attorney General Rob Bonta", not "AG Mayes talking to a
+#   townhall crowd" or "Attorney General Neronha discusses health care";
+# - nothing in its file name, alt text or class says logo, banner, seal,
+#   header, slider or background: Arkansas's "AG-Griffin-Logo.png" carries
+#   the alt text "Tim Griffin Attorney General of Arkansas";
+# - it is head-and-shoulders shaped (``enrich.portrait_check``) and no
+#   heavier than a campaign's may be (``photos.too_heavy``), or a size of
+#   the same file its srcset or its host's resizer serves is.
+#
+# A size that could not be read concludes nothing (rule 8): the last
+# photograph read of the same person is kept.
+
+_LIKENESS = re.compile(r"\b(?:headshot|head shot|portrait|official photo|official headshot|"
+                       r"photo of|photograph of|picture of|image of)\b")
+# The same said in a file name, whose words often run together
+# ("AgLizMurrillHeadshot.jpg").
+_LIKENESS_FILE = ("headshot", "portrait")
+_NOT_LIKENESS = re.compile(r"\b(?:logo|logos|banner|seal|hero|header|hdr|background|bg|slider|"
+                           r"slide|carousel|cta|icon|signature|flag|crowd|podium|"
+                           r"conference|swearing|sworn|event|events|townhall|town hall|award|"
+                           r"meeting|group|with|speaks|speaking|talking|discusses|"
+                           r"announces|video|map|graphic|cover|book|report)\b")
+_NOT_LIKENESS_FILE = ("logo", "banner", "header", "slider", "background", "cobrand", "signature")
+# Words an alt text may carry beside the name and still be only the name.
+_TITLE_WORDS = {"attorney", "general", "ag", "the", "of", "office", "state", "s", "honorable",
+                "hon", "official", "mr", "ms", "mrs", "dr", "jr", "sr", "ii", "iii", "iv",
+                "photo", "photograph", "portrait", "headshot", "head", "shot", "picture",
+                "image", "pic", "and", "reporter"}
+
+
+def _img_tags(page):
+    """``[(src, srcset, alt, class)]`` of every ``<img>`` on *page*, a lazy
+    one's real address (``data-src``) in place of its placeholder."""
+    out = []
+    for tag in re.findall(r"<img\b[^>]*>", page, re.I):
+        def attr(name):
+            found = re.search(rf'\b{name}\s*=\s*(?:"([^"]*)"|\'([^\']*)\')', tag, re.I)
+            return html.unescape((found.group(1) if found.group(1) is not None
+                                  else found.group(2)) if found else "")
+        src = attr("data-src") or attr("data-lazy-src") or attr("src")
+        if not src or src.startswith("data:"):
+            continue
+        out.append((src, attr("data-srcset") or attr("srcset"), attr("alt"), attr("class")))
+    return out
+
+
+def _file_words(url):
+    """The words of an image's file name: split at separators, at a change
+    of case ("AgLizMurrillHeadshot") and between letters and digits."""
+    path = urllib.parse.unquote(urllib.parse.urlsplit(url).path)
+    stem = path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
+    stem = re.sub(r"(?<=[a-z])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])", " ", stem)
+    stem = re.sub(r"(?<=[A-Za-z])(?=\d)|(?<=\d)(?=[A-Za-z])", " ", stem)
+    return _fold(stem.replace("_", " ").replace("-", " "))
+
+
+def _compound_of(word, pieces, wanted):
+    """Whether *word* is made of *pieces* end to end with *wanted* among
+    them: "agmurrillheadshot" is ag + murrill + headshot. "carrie" is not
+    carr + anything, nor "stanford" stan + ford unless "stan" is a piece."""
+    best = {0: False}
+    for end in range(1, len(word) + 1):
+        for start in range(end):
+            if start in best and word[start:end] in pieces:
+                best[end] = best.get(end, False) or best[start] or word[start:end] == wanted
+    return best.get(len(word), False)
+
+
+def _names_someone_else(words, surname, firsts, middles):
+    """Whether *words* put a first name other than the holder's before
+    their surname: "Solicitor General Jessica Ford" on Aaron Ford's
+    pages. Initials and the holder's middle names are passed over; a title
+    word or nothing before the surname is no one else (rule 56)."""
+    for at, word in enumerate(words):
+        if word != surname:
+            continue
+        before = at - 1
+        while before >= 0 and (len(words[before]) == 1 or words[before] in middles):
+            before -= 1
+        if before < 0:
+            continue
+        word = words[before]
+        if word in firsts or word in _TITLE_WORDS or any(c.isdigit() for c in word):
+            continue
+        return True
+    return False
+
+
+def likeness_candidates(name, code, pages):
+    """The images on the office's *pages* that may be *name*'s likeness,
+    best first: ``[(urls, page, hinted)]``, *urls* the sizes of one file to
+    try, smallest useful first. Only what the words around an image say is
+    read here; whether it is head-and-shoulders shaped is the fetch's.
+
+    The surname must be a word of the alt text or of the file name, or
+    the file name's run-together words must break into the holder's name,
+    title and likeness words with the surname among them
+    ("AgLizMurrillHeadshot"): "Carrie-Smith-Headshot" is not Chris Carr's,
+    nor "jane-stanford-portrait" Aaron Ford's. And neither may put another
+    first name before the surname (rule 56): "Solicitor General Jessica
+    Ford headshot" is not the attorney general's face. An evidenced
+    ``NAME_FORMS`` short form counts as the holder's first name."""
+    from .pages import state_name
+
+    words = [w for w in _fold(name).split() if w not in _SUFFIX]
+    if len(words) < 2:
+        return []
+    surname = words[-1]
+    firsts = {words[0]} | {_fold(form).split()[0] for form, office_form in NAME_FORMS.items()
+                           if office_form == name and _fold(form).split()}
+    middles = set(words[1:-1])
+    plain = set(words) | _TITLE_WORDS | set(_fold(state_name(code)).split()) | {code.lower()}
+    pieces = plain | firsts | set(_LIKENESS_FILE) | {"official", "photo", "pic", "img"}
+    found, seen = [], set()
+    for page_url, page in pages:
+        for src, srcset, alt, klass in _img_tags(page):
+            url = urllib.parse.urljoin(page_url, src)
+            if not url.startswith("https://") or url in seen:
+                continue
+            seen.add(url)
+            said = _fold(alt)
+            file = _file_words(url)
+            flat = file.replace(" ", "")
+            in_alt = surname in said.split()
+            in_file = surname in file.split() or any(
+                _compound_of(word, pieces, surname) for word in file.split())
+            if not (in_alt or in_file):
+                continue
+            if _names_someone_else(said.split(), surname, firsts, middles) \
+                    or _names_someone_else(file.split(), surname, firsts, middles):
+                continue
+            if _NOT_LIKENESS.search(" ".join((said, file, _fold(klass)))) \
+                    or any(word in flat for word in _NOT_LIKENESS_FILE):
+                continue
+            hinted = bool(_LIKENESS.search(said + " " + file)) \
+                or any(word in flat for word in _LIKENESS_FILE)
+            # Nothing but the name and the title, in the alt text or, with
+            # its counters set aside, the file name ("AG_Marty_Jackley_0007a").
+            named = [w for w in file.split()
+                     if len(w) > 1 and not any(c.isdigit() for c in w)]
+            if not hinted and not (said.split() and set(said.split()) <= plain) \
+                    and not (surname in named and set(named) <= plain):
+                continue
+            sizes = []
+            for part in (srcset or "").split(","):
+                bits = part.split()
+                if len(bits) == 2 and bits[1].endswith("w") and bits[1][:-1].isdigit():
+                    sizes.append((int(bits[1][:-1]), urllib.parse.urljoin(page_url, bits[0])))
+            urls = [u for w, u in sorted(sizes) if w >= 200 and u.startswith("https://")]
+            urls += [u for u in [url] if u not in urls]
+            found.append((urls, page_url, hinted))
+    found.sort(key=lambda item: not item[2])
+    return found
+
+
+def ag_photo(name, code, pages, check=None, refused=()):
+    """``(photo, why)``: ``{"photo", "photoPage", "photoWeight"}`` from the
+    office's own *pages* (``[(url, html)]``), or ``None`` and why not -
+    ``"none"`` when no image passed, ``"unknown"`` when one could not be
+    read (rule 8). *check* is ``enrich.portrait_check``."""
+    from .photos import smaller_form, too_heavy
+    if check is None:
+        from .enrich import portrait_check as check
+
+    unknown = False
+    for urls, page_url, hinted in likeness_candidates(name, code, pages):
+        tried = list(urls)
+        for url in urls:
+            smaller = smaller_form(url, 300)
+            if smaller and smaller not in tried:
+                tried.append(smaller)
+        for url in tried:
+            if url in refused:
+                break
+            shape, weight = check(url, hinted)
+            if not weight:
+                if shape is None:
+                    unknown = True
+                    continue
+                break                         # not an image
+            # Head-and-shoulders: drawn in a 40px circle, so 120px is
+            # enough, and a square headshot is common.
+            width, height = weight["width"], weight["height"]
+            if not (min(width, height) >= 120
+                    and 0.5 <= width / height <= (1.35 if hinted else 1.0)):
+                break                         # the file's shape is every size's
+            if too_heavy(weight):
+                continue
+            return {"photo": url, "photoPage": page_url, "photoWeight": weight}, ""
+    return None, "unknown" if unknown else "none"
+
+
+_BIO_LABEL = re.compile(r"^(?:about|meet|biography of)(?: the)? (?:attorney general|ag)\b|"
+                        r"\b(?:bio|biography)\b")
+
+
+def bio_links(name, pages, limit=2):
+    """The office's own pages about its attorney general that *pages* link
+    and did not read: a link on the same host labelled with the holder's
+    surname ("Meet AG Brown", "About Nick Brown") or as the attorney
+    general's biography ("Meet the Attorney General", "Bio"). Most offices
+    keep the official photograph there, not on the front page."""
+    words = [w for w in _fold(name).split() if w not in _SUFFIX]
+    if len(words) < 2:
+        return []
+    surname = words[-1]
+    read = {url for url, _ in pages}
+    ranked = []
+    for page_url, page in pages:
+        host = urllib.parse.urlsplit(page_url).hostname
+        for href, label in re.findall(r'<a\b[^>]*?href="([^"#]+)"[^>]*>(.*?)</a>', page, re.S | re.I):
+            said = _fold(_text(label)).strip()
+            if not said or len(said.split()) > 8:
+                continue
+            target = urllib.parse.urljoin(page_url, html.unescape(href))
+            if urllib.parse.urlsplit(target).hostname != host or target in read:
+                continue
+            named = set(said.split()) & set(words)
+            about = re.match(r"(?:about|meet) ", said)
+            if surname in said.split() or _BIO_LABEL.search(said) or (about and named):
+                rank = 0 if named and (about or _BIO_LABEL.search(said)) else 1
+                ranked.append((rank, len(ranked), target))
+    out = []
+    for _, _, target in sorted(ranked):
+        if target not in out:
+            out.append(target)
+    return out[:limit]
+
+
+def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
+    """Give each confirmed attorney general in *rows* their office's
+    photograph (:func:`ag_photo`), in place. *pages* is ``{code: [(url,
+    html)]}``, the pages that were read for the name; where those show
+    none, the attorney general's own page they link (:func:`bio_links`) is
+    read too. *previous* is the last cache's rows. Returns the problems to
+    report."""
+    from . import overrides
+
+    get = get or _get
+    problems = []
+    for code, row in sorted(rows.items()):
+        if not row.get("name") or row.get("unconfirmed") or row.get("disputed"):
+            continue
+        read = list(pages.get(code) or [])
+        found, why = ag_photo(row["name"], code, read, check=check,
+                              refused=overrides.NOT_A_PORTRAIT)
+        if not found:
+            more = []
+            for url in bio_links(row["name"], read):
+                time.sleep(pause)
+                try:
+                    more.append((url, get(url)))
+                except OfficersError:
+                    why = "unknown"
+            if more:
+                again, why_again = ag_photo(row["name"], code, more, check=check,
+                                            refused=overrides.NOT_A_PORTRAIT)
+                found = again
+                why = "unknown" if "unknown" in (why, why_again) else why_again
+        time.sleep(pause)
+        old = (previous or {}).get(code) or {}
+        if not found and why == "unknown" and old.get("photo") and old.get("name") == row["name"]:
+            found = {k: old[k] for k in ("photo", "photoPage", "photoWeight") if old.get(k)}
+            problems.append(f"{code}: {row['name']}'s photograph could not be read; "
+                            "the last one read is kept")
+        if found:
+            row.update(found)
+        else:
+            problems.append(f"{code}: the office's own pages show no photograph of "
+                            f"{row['name']} that passes the checks")
+        problems.extend(photo_changes(code, old, row))
+    return problems
+
+
+def photo_changes(code, old, row):
+    """What changed in an attorney general's photograph since the last
+    read, said so a person looks at it: a photograph added, changed or
+    dropped beside a named official is a claim about their face, and a
+    40px circle is not looked at by anyone else (rule 87, like courts'
+    ``changed``)."""
+    was, now = (old or {}).get("photo"), row.get("photo")
+    if was == now:
+        return []
+    who = row.get("name") or (old or {}).get("name") or "the attorney general"
+    if not was:
+        return [f"{code}: photograph added for {who}: {now} (from {row.get('photoPage')}); "
+                "look at it"]
+    if not now:
+        return [f"{code}: photograph dropped for {who} (was {was})"]
+    return [f"{code}: photograph changed for {who}: {was} -> {now} "
+            f"(from {row.get('photoPage')}); look at it"]
 
 
 def attorneys_general(raga, daga, office_texts):
@@ -563,20 +892,27 @@ def ag_problems(rows):
     return out
 
 
-def fetch_attorneys_general(pause=0.5):
-    """``(rows, problems)`` from the live rosters, USA.gov and every office."""
+def fetch_attorneys_general(pause=0.5, previous=None):
+    """``(rows, problems)`` from the live rosters, USA.gov and every office,
+    each confirmed holder with their office's photograph (``add_ag_photos``;
+    *previous* is the last cache's rows, whose photograph a read that
+    concludes nothing keeps)."""
     from .government_maps import STATES
     from .pages import state_name
     raga, daga = parse_raga(_get(RAGA_URL)), parse_daga(_get(DAGA_URL))
-    texts = {}
+    texts, read = {}, {}
     for code in STATES:
         slug = re.sub(r"[^a-z]+", "-", state_name(code).lower()).strip("-")
         url = usagov_office(_get(USAGOV_URL.format(slug=slug)))
         pages = OFFICE_PAGES.get(code, [url])
-        found = [t for t in (_office_text(p, pause) for p in pages) if t]
-        texts[code] = (OFFICE_LINK.get(code, url), " ".join(found) if found else None)
+        read[code] = [pair for found in (_office_pages(p, pause) for p in pages) if found
+                      for pair in found]
+        texts[code] = (OFFICE_LINK.get(code, url),
+                       " ".join(visible_text(page) for _, page in read[code]) or None)
         time.sleep(pause)
-    return attorneys_general(raga, daga, texts)
+    rows, problems = attorneys_general(raga, daga, texts)
+    problems += add_ag_photos(rows, read, previous)
+    return rows, problems
 
 
 def confirm_non_members(sos, pause=0.5):
@@ -592,10 +928,11 @@ def confirm_non_members(sos, pause=0.5):
     return sos
 
 
-def fetch():
+def fetch(previous=None):
     """``{"sos": {...}, "lt": {...}, "ag": {...}}`` from the live rosters,
-    with the attorney-general problems to report."""
-    ag, problems = fetch_attorneys_general()
+    with the attorney-general problems to report. *previous* is the cache
+    being replaced."""
+    ag, problems = fetch_attorneys_general(previous=(previous or {}).get("ag"))
     return {"sos": confirm_non_members(parse_nass(_get(NASS_URL))),
             "lt": parse_nlga(_get(NLGA_URL)), "ag": ag, "agProblems": problems}
 
@@ -620,6 +957,17 @@ def _surname_in(name, url):
     return bool(surname) and surname in file
 
 
+NASS_BY = "National Association of Secretaries of State"
+NLGA_BY = "National Lieutenant Governors Association"
+
+
+def _credited(person, by):
+    """*person* with whose photograph it is, when it has one (rule 87)."""
+    if person.get("photo"):
+        person["photoBy"] = by
+    return person
+
+
 def for_state(code, cache, disputes):
     """``{"lt": ..., "sos": ...}`` for one state, as the page shows them.
     *disputes* is ``overlaps(...)``: an office the rosters disagree about
@@ -630,15 +978,22 @@ def for_state(code, cache, disputes):
     if (code, "Lieutenant Governor") in named:
         out["lt"] = {"disputed": list(named[(code, "Lieutenant Governor")])}
     elif lt and lieutenant(lt):
-        out["lt"] = {"vacant": True, "title": lt["title"]} if lt.get("vacant") else _person(lt)
+        out["lt"] = ({"vacant": True, "title": lt["title"]} if lt.get("vacant")
+                     else _credited(_person(lt), NLGA_BY))
     elif lt:
         # No lieutenant governor. The officer first in line is named only
         # when that office is neither vacant nor in dispute.
         out["lt"] = {"none": True}
         if not lt.get("vacant") and (code, office_of(lt["title"])) not in named:
-            out["lt"]["successor"] = _person(lt)
+            out["lt"]["successor"] = _credited(_person(lt), NLGA_BY)
     if code in cache.get("ag", {}):
-        out["ag"] = cache["ag"][code]
+        out["ag"] = dict(cache["ag"][code])
+        out["ag"].pop("photoWeight", None)
+        if out["ag"].get("photo"):
+            # The office's own photograph, from the page it was read on.
+            host = urllib.parse.urlsplit(out["ag"].get("photoPage") or "").hostname or ""
+            out["ag"]["photoBy"] = ("the office's website (" + host.removeprefix("www.") + ")"
+                                    if host else "the office's website")
     sos = cache["sos"].get(code)
     if (code, "Secretary of State") in named:
         out["sos"] = {"disputed": list(named[(code, "Secretary of State")])}
@@ -650,7 +1005,7 @@ def for_state(code, cache, disputes):
             del person["photo"]
         if sos.get("member") is False and not sos.get("officeConfirms"):
             person["notMember"] = True
-        out["sos"] = person
+        out["sos"] = _credited(person, NASS_BY)
     return out
 
 

@@ -1774,6 +1774,15 @@ a.badge-link {
   font-size: var(--t-sm);
   color: var(--text-muted);
 }
+/* Whose photograph the portrait is, and on what licence (rule 87). */
+.modal-credit {
+  margin: 0;
+  font-size: var(--t-xs);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+/* Muted like the line, but underlined: a link must look like one. */
+.modal-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 /* The FEC's name for someone the ballot names otherwise (PERSONA-20). */
 .modal-aka {
   margin: 0;
@@ -4202,6 +4211,8 @@ button.local-county-link {
   object-position: center 20%;
   background: var(--surface-3);
 }
+/* No photograph: the circle's place, faintly, so the names line up. */
+.gov-officer-nophoto { display: block; background: none; border: 1px dashed var(--border); }
 .gov-officer-name { font-weight: 700; color: var(--text); }
 .gov-officer-note { font-size: var(--t-sm); color: var(--text-muted); }
 /* A line under a panel's lists: who else is on the ballot, and where. */

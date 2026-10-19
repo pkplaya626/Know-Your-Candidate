@@ -11,6 +11,7 @@ shipped in the build metadata. If the roster changes, the sidebar changes.
 """
 
 from .normalize import TERRITORIES
+from .photos import HOST_CREDITS
 
 ELECTION_YEAR = 2026
 
@@ -114,6 +115,9 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None):
         # dates (cycle.snapshot_congress): the pages print it, never a
         # typed "119th" that January 3 would make false.
         "congress": _congress(snapshot),
+        # Whose photograph a government portrait is, by its host: the page
+        # credits a fallback photograph by this when the first fails to load.
+        "photoCredits": dict(sorted(HOST_CREDITS.items())),
         "senate": _split(senate),
         "house": dict(_split(house_voting), seats=HOUSE_SEATS),
         "delegates": len(delegates),

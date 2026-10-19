@@ -262,7 +262,9 @@ _CONGRESS_SOURCES = """\
                     as last read on <time data-results-as-of></time></span>; the November
                     ballot, where this site reads one, from the certified list of candidates
                     its election office publishes, credited on each race it sets; portraits
-                    from Congress.gov and Wikipedia.</p>
+                    from the House of Representatives, Congress.gov, Wikimedia Commons and
+                    candidates' campaign websites, each credited under the photograph on the
+                    profile, a Wikimedia Commons file with its author and licence.</p>
                 <p><strong>Who counts as a candidate:</strong> everyone the FEC records
                     as having raised or spent more than $5,000 for the 2026 cycle
                     (52&nbsp;U.S.C.&nbsp;&sect;30101(2)). People no longer in a race - beaten
@@ -1826,8 +1828,11 @@ def _about_main(dates):
         "                            navigation can offer it again. To clear them, clear this site's data",
         "                            in your browser's settings.</li>",
         "                        <li>Portraits and some images load from the sites that publish them:",
-        "                            Wikimedia Commons, the House Clerk, Congress.gov, state legislatures",
-        "                            and campaign sites. Those sites see your IP address when your browser",
+        "                            Wikimedia Commons, the House Clerk, Congress.gov, state legislatures,",
+        "                            state officers' offices and their associations, and campaign sites,",
+        "                            some of them through WordPress.com's image service (i0.wp.com), which",
+        "                            serves a heavy photograph at a smaller size. Those sites see your IP",
+        "                            address when your browser",
         "                            fetches an image, as any website would; this site asks your browser",
         "                            not to tell them which page you were reading.</li>",
         "                        <li>&#8220;Find my district&#8221; and &#8220;Find who represents you&#8221;",
@@ -1868,7 +1873,11 @@ def _about_main(dates):
         f'                        <a href="{repo}/blob/main/LICENSE-DATA.md">Creative Commons Attribution',
         "                        4.0</a> (CC BY 4.0): you may reuse it, with credit to Know Your",
         "                        Candidate and the dates the data carries. Photographs, and the",
-        "                        datasets this project reads, keep their own owners' terms.</p>",
+        "                        datasets this project reads, keep their own owners' terms: each",
+        "                        photograph on a profile or an official's record is credited under",
+        "                        it, a Wikimedia Commons file with its author and licence as the",
+        "                        file's own page records them; a state officer's in the sources line",
+        "                        of their state's card.</p>",
         "                </section>",
         "            </article>",
     ])

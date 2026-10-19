@@ -111,7 +111,7 @@ def _judge(record, links=None):
     # The Court's own portrait of a justice stands; the Commons one is for
     # everyone the Court does not photograph.
     if joined.get("portrait") and not out.get("portrait"):
-        out["portrait"] = joined["portrait"]
+        out["portrait"] = {k: v for k, v in joined["portrait"].items() if k != "creditForm"}
     # The name they go by; the directory's bracketed given name read out
     # beside it (kyc/judiciary.py).
     full = judiciary.full_name(out.get("name"))
