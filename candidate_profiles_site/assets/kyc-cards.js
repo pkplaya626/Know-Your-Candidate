@@ -627,7 +627,11 @@
     ["cashOnHand", "Cash", "Cash on hand at the end of the period (FEC)"],
   ];
 
-  function personButton(p, attr) {
+  /* A person in a race block, opening their profile; in their own dialog
+   * (*self*: their ids, a member's filing for this seat among them) their
+   * name alone, so no one is listed as a link to themselves (PROFILES-02). */
+  function personButton(p, attr, self) {
+    if (self && self[p.id]) return '<span class="money-self">' + KYC.escapeHtml(p.name) + "</span>";
     return '<button type="button" class="link-button" ' + (attr || "data-id") + '="' +
       KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>";
   }
@@ -662,7 +666,7 @@
       '" target="_blank" rel="noopener noreferrer">FEC</a></span>';
   }
 
-  function moneyRow(p, max, attr) {
+  function moneyRow(p, max, attr, self) {
     var bars = "";
     var any = false;
     MONEY.forEach(function (spec) {
@@ -683,7 +687,7 @@
         "</span>"
       // No figure: the absence in its own words (rule 19), never a $0 bar.
       : '<span class="money-none">' + KYC.renderField(p, "receipts") + "</span>";
-    return '<li class="money-row"><span class="money-who">' + personButton(p, attr) + " " +
+    return '<li class="money-row"><span class="money-who">' + personButton(p, attr, self) + " " +
       partyChip(p) + "</span>" + body + outsideLine(p) + "</li>";
   }
 
@@ -713,7 +717,7 @@
           "scale. Raised includes loans and transfers. Campaigns report through different " +
           "days; each row says which. Exact figures are on each profile.</p>" +
           '<ul class="money-rows">' + shown.map(function (p) {
-            return moneyRow(p, max, opts.attr);
+            return moneyRow(p, max, opts.attr, opts.self);
           }).join("") + "</ul>" +
           (below.length ? '<p class="race-note">On the ballot with no FEC filing over $5,000: ' +
             below.join(", ") + ".</p>" : "");
@@ -803,12 +807,12 @@
     ["site", "Campaign site"],
   ];
 
-  function compareTable(race, people, attr) {
+  function compareTable(race, people, attr, self) {
     var shown = ballotPeople(race, people);
     return '<div class="compare-scroll"><table class="compare-table"><thead><tr>' +
       '<th scope="col"><span class="sr-only">Compared</span></th>' +
       shown.map(function (p) {
-        return '<th scope="col">' + personButton(p, attr) + "</th>";
+        return '<th scope="col">' + personButton(p, attr, self) + "</th>";
       }).join("") + "</tr></thead><tbody>" +
       COMPARE_ROWS.map(function (row) {
         return '<tr><th scope="row">' + KYC.escapeHtml(row[1]) + "</th>" +
@@ -826,7 +830,7 @@
     // Always drawn when opened: a table per race is markup no one asked for.
     return fold("race-compare", "Compare the ballot", { lazy: true },
       (opts.scope || "race") + ":compare:" + race.id,
-      function () { return compareTable(race, people, opts.attr); });
+      function () { return compareTable(race, people, opts.attr, opts.self); });
   }
 
   // One listener for every page that draws a race: a details element's

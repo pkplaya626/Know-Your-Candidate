@@ -43,6 +43,8 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
+| `… seats` | Each seat's last election, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
+| `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
 | `… results` | Read each state's primary results from Wikipedia: who is still in |
@@ -67,7 +69,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (2357 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (2381 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1154,6 +1156,22 @@ Chris Coons showed $4,168,081 (2025-26) beside challengers measured from
 | `financeElection` | The election an election-period total is for: 2026 for anyone on this year's ballot, 2028 or 2030 for a senator not up this year |
 | `fundingBreakdown`, `funding_sources` | What the receipts were, by kind: Individual, PACs, Party, Self-funded (the candidate's own contributions; "Self-funded (incl. loans)" when a loan from the candidate is in it), Bank and other loans, Transfers from other committees (the campaign's other committees) and Other (offsets and other receipts). Each share is of total receipts, or of `fundingBase` where a negative adjustment brought the receipts below the parts. A record cached before loans and transfers were read has no breakdown until `finance` reads it again |
 | `fundingBase` | The sum the funding shares are of, where it is not the receipts figure: the positive parts, when an adjustment the FEC deducts (a negative category) brought the net receipts below them. The page says so beside the split |
+| `outsideSpending` | Independent expenditures for and against this candidate in the 2025-26 cycle, from `outside`: `{support, oppose, supportCommittees, opposeCommittees, supportTop, opposeTop, asOf, cycle, url}`. Each side is its own total, never a net; `*Top` are the three committees that spent most on that side, as the FEC names them; `asOf` the day the FEC's processed filings were read; `url` the FEC's table for the candidate id. Only rows whose candidate id is the profile's and whose office and state are the profile's (rule 20) |
+
+### Outside spending
+
+`python build_profile_site.py outside` reads the FEC's independent
+expenditures by candidate (`/schedules/schedule_e/by_candidate/`, the
+2025-26 cycle) for every candidate id a profile carries, forty ids a
+request at the key's pace (rule 37). A batch over a page is split, and one
+candidate's rows over a page are read a side at a time, sorted on the
+committee, and counted (rule 36). The cache, `data/outside_spending.json`,
+holds each id's committees by side. The build attaches them only where the
+id's own office and state are the profile's; a row filed for another seat is
+an `outside-attribution` error, and nothing is ever matched by name. The
+FEC processes filings days to weeks after they are made, so the latest
+spending - reported in 24- and 48-hour reports - is often not in these
+totals, and the page says so beside them.
 
 A coverage end the filer gave that is still to come ("through 2026-12-31" in
 October) is shown "as filed", and `validate` lists it
@@ -1387,7 +1405,34 @@ Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 | `senateClass` / `special` | The Senate seat's class, and whether it is a special election, from the record |
 | `results.sourceUrl` | Where the race's statuses were read: the Wikipedia results page the cache names (by its title), or the Secretary of State's Candidate Inquiry for a ballot read from a qualified list. The race head links it ("Results: Wikipedia, read Oct. 17, 2026"), and every status says whose word it is ("per Wikipedia's results page"), never "the published results", which read as a certified count |
 
+| `lastElection` | The seat's last election, from `seats` (`kyc/seat_history.py`): `{year, date, kind, candidates: [{name, party, votes, share}], others, othersShare, total, margin, checkedBy}` - the winner and runner-up as the Clerk of the House's statistics count them, shares of the votes cast for a candidate (blank and void ballots excluded), the margin of the votes. `kind` is `general`, `runoff` (Georgia's 2021 runoff), `rcv-final` (Maine's final ranked-choice round) or `unopposed` (with the Clerk's `note`); `rankedChoice: "first-choices"` where the counts are first choices (Alaska). `checkedBy` is `"mit"` or the Wikipedia article checked against. `{redrawn: true, year}` for a district redrawn for 2026, which carries no 2024 figure (rule 90); `{withheld, year}` where no second source agrees. The sources' titles and addresses are `kycBuildMeta.lastElectionSources`, by year |
+
 `incumbentIds` comes from the record too: the person who held the seat, sitting or former, never whoever sits in it now. Every race of the record exists, whoever points at it.
+
+### The seat's last election
+
+`python build_profile_site.py seats` reads the Clerk of the House's
+"Statistics of the Presidential and Congressional Election" for 2020, 2022
+and 2024 from its PDF: every House seat's 2024 result, and each Senate
+seat's latest election to the term on the ballot (Oklahoma's class II seat
+was last elected in 2022's special, Nebraska's in 2024's). The FEC's own
+compilation for 2024 was not published when this was built. Each result is
+shown only where a second compilation names the same winner and runner-up
+in that order with counts within 1%: MIT Election Data and Science Lab's
+Senate returns, and for the House each state's 2024 Wikipedia page (MIT's
+House file sits behind a download form asking for a name and an email).
+What no second source confirms is withheld and says so. A district redrawn
+for 2026 shows no 2024 result: it says the old lines' election was other
+voters' and links where its area came from.
+
+Each race block, on the state pages, in the grid's races view and in the
+profile dialog, shows under its people the campaigns' money as bars on one
+scale (raised including loans, spent, cash on hand, each row with its own
+through-date), the last election folded, and "Compare the ballot": party,
+offices held, money, the campaign's own platform headings with where they
+came from, and its site. The grid's sort menu orders races closest first by
+one market's prices - Kalshi's or Polymarket's, the gap between its two
+highest, never a blend of the two.
 
 ## State pages
 

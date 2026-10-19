@@ -461,9 +461,9 @@
     // What the race is fought with and over, as the race's own section
     // shows it (KYC.cards), with this person among the rest.
     var everyone = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(Boolean);
-    html += KYC.cards.moneyBlock(race, everyone, { open: true, attr: "data-goto" }) +
+    html += KYC.cards.moneyBlock(race, everyone, { open: true, attr: "data-goto", self: self }) +
       KYC.cards.lastTimeBlock(race) +
-      KYC.cards.compareBlock(race, everyone, { attr: "data-goto", scope: "dialog" });
+      KYC.cards.compareBlock(race, everyone, { attr: "data-goto", scope: "dialog", self: self });
     panel.hidden = false;
     target.innerHTML = redrawnNote(item, race) + html;
   }

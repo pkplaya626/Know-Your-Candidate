@@ -1234,10 +1234,6 @@
       return "The races view lists races closest first by " + KYC.odds.sourceName(source) +
         "’s prices: the gap between its two highest. Market prices, not polls or a forecast.";
     }
-    if (source && state.view === "grid") {
-      return "Cards by how close " + KYC.odds.sourceName(source) + "’s prices put their race: " +
-        "market prices, not polls or a forecast. People in races it does not price come last.";
-    }
     return SORT_NOTES[state.view] || "";
   }
 

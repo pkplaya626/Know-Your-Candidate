@@ -52,6 +52,8 @@ data/oge_disclosures.json   ──┤   (the executive's financial reports: Offi
 data/tribal_leaders.json    ──┤   (every tribal government and its leader: BIA Tribal Leaders Directory)
 data/local_sites.json       ──┤   (each local government's listed website, opened: localgov --check-sites)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
+data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
+data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/profiles.js   (profiles, races, build meta)
@@ -113,7 +115,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
-  `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`
+  `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
+  `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
   they *are* hand-editable. `stategov.js` is generated from the last five,
   with `kyc/ballot2026.py`: which state offices and legislative seats are on
@@ -167,18 +170,20 @@ python build_profile_site.py vacancies        # vacancies in the federal courts,
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
 python build_profile_site.py tribes           # every tribal government and its leader (BIA Tribal Leaders Directory)
+python build_profile_site.py seats            # each seat's last election (the Clerk's statistics; checked against MIT or Wikipedia)
+python build_profile_site.py outside          # outside spending for and against each candidate (FEC Schedule E, by candidate id)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 1743 tests, no dependencies
-npm install && npm test                       # 2357 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 1776 tests, no dependencies
+npm install && npm test                       # 2381 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `seats`, `outside` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1490,6 +1495,47 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     was checked for and is withheld, and said, once the roster names
     someone else. Every build lists the confirmed officers still shown
     without one.
+
+90. **A past result belongs to the lines it was fought on, is read from
+    the official count, and is checked before it is shown; money is
+    attributed by id and shown as filed.** The 2026-10-17 audit found no
+    past result, no outside spending and no money beside a race anywhere
+    (RACES-15, PERSONA-11/12, VISUALS-20/33). `kyc/seat_history.py`
+    reads the Clerk of the House's "Statistics of the Presidential and
+    Congressional Election" (2024 for the House; 2020, 2022 and 2024 for
+    the Senate, the latest election to a term ending when the seat's
+    does: Oklahoma's class II seat was last elected in 2022's special,
+    not 2020) from its PDF. Each file numbers its accented letters
+    afresh (0x83 is "é" in 2020 and "í" in 2024), so the decoder reads
+    the file's own /Differences and fails on any byte it does not name.
+    A block whose names and counts do not pair is an error, never
+    guessed: the page number follows a page's last count, a fusion line
+    names a party and no one ("Conservative, Common Sense"), a runoff's
+    counts are footnoted (Georgia's January 5, 2021 runoff) and shown as
+    the runoff's, Maine's final ranked-choice round and Alaska's first
+    choices say which they are, and an unopposed name has no count and a
+    footnote saying why. A result is shown only where a second
+    compilation names the same winner and runner-up, in that order, with
+    counts within 1% (MIT's Senate returns; for the House, whose MIT file
+    sits behind a form asking for a name and an email, each state's 2024
+    Wikipedia page) - a lead, rule 50 - and the page says what was
+    checked; the cache keeps every difference. A district in
+    `districts.REDRAWN` shows no 2024 figure: its 2024 election was other
+    voters', and the race says so and links where its area came from.
+    `kyc/outside.py` reads independent expenditures from the FEC's
+    by-candidate totals for the 2025-26 cycle (an election-period read gave
+    Jon Ossoff the January 2021 runoff's spending), by the profile's own
+    candidate ids at the key's pace (rule 37), one side at a time where
+    one candidate's rows run past a page (sorted on committee and side
+    together, the API repeated 12 of 101 rows). A row counts only where its
+    id's office and state are the profile's (`outside-attribution` is an
+    error), never by name; each side is its own total, never a net, and
+    says the FEC's processed filings trail the 24- and 48-hour reports.
+    A race's money is its campaigns' own totals as bars in neutral ink on
+    one scale, the party only in the name chip, each row with its own
+    through-date. Closest races are ordered by one market's prices, the
+    gap between its two highest, never a blend (rule 40). In the grid's
+    races view every new fold is drawn when opened (GRID-14's budget).
 
 ## District maps
 

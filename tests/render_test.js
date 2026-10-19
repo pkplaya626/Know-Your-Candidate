@@ -620,7 +620,7 @@ async function testDirectory() {
       panel.querySelector(`[data-sort="${key}"]`).click();
       return panel.querySelector('[aria-checked="true"]').getAttribute("data-sort") === key;
     });
-    check("every order offered is one the grid knows", took.length === offered.length && offered.length === 5,
+    check("every order offered is one the grid knows", took.length === offered.length && offered.length === 7,
       offered.join(" "));
     check("the cards view says nothing about races", D.getElementById("sortNote").hidden);
     D.getElementById("raceViewToggle").click();
@@ -9691,8 +9691,155 @@ async function testFrame() {
   });
 }
 
+/* Money in the race, the seat's last election, the ballot side by side,
+ * outside spending and the closest races (VISUALS-20, PERSONA-11/12,
+ * RACES-15, VISUALS-33, GRID-17; rule 90). */
+function openFold(window, details) {
+  details.open = true;
+  details.dispatchEvent(new window.Event("toggle"));
+}
+
+async function testRaceMoney() {
+  const nc = await buildPage("states/nc.html");
+  const { window, D, errors } = nc;
+  const KYC = window.KYC;
+  const races = [...D.querySelectorAll("section.race")];
+
+  suite("states/nc.html — money in the race", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const blocks = races.map((r) => r.querySelector(".race-money")).filter(Boolean);
+    check("each race with people on the ballot shows their money, open on a state page",
+      blocks.length >= races.length - 1 && blocks.every((b) => b.open), blocks.length + "/" + races.length);
+    const rows = blocks.flatMap((b) => [...b.querySelectorAll(".money-row")]);
+    const barred = rows.filter((r) => r.querySelector(".money-bar"));
+    check("a row with FEC totals draws raised, spent and cash, each labelled with its rounded figure",
+      barred.length > 0 && barred.every((r) => r.querySelectorAll(".money-bar").length >= 2 &&
+        [...r.querySelectorAll(".money-value")].every((v) => /^-?\$[\d.]+[KMB]?$/.test(v.textContent))),
+      barred.length + " rows");
+    check("every row with figures says through when (campaigns file on different days)",
+      barred.every((r) => /^FEC, through [A-Z][a-z]+\.? \d{1,2}, 20\d\d$/.test(
+        r.querySelector(".money-asof").textContent)));
+    check("the bars are neutral ink: no party colour on a bar, the party only in its chip",
+      rows.every((r) => !r.querySelector(".money-bars [class*='party']")) &&
+        rows.every((r) => !!r.querySelector(".money-who .party-chip")));
+    const scaled = blocks.every((b) => {
+      const widths = [...b.querySelectorAll(".money-fill")].map((f) => parseFloat(f.style.width));
+      return !widths.length || (Math.max(...widths) === 100 && widths.every((w) => w >= 0 && w <= 100));
+    });
+    check("one scale per race: its largest figure is the full bar", scaled);
+    check("raised is labelled as including loans", blocks.every((b) =>
+      /Raised includes loans and transfers/.test(b.textContent)));
+    const outside = D.querySelectorAll(".money-outside");
+    check("outside groups' spending is each side as filed, dated and linked to the FEC, never netted",
+      [...outside].every((o) => /^Outside groups spent \$[\d.]+[KMB]? (supporting|opposing)/.test(o.textContent) &&
+        /processed when read on/.test(o.textContent) && /fec\.gov/.test(o.querySelector("a").href) &&
+        !/\bnet\b/i.test(o.textContent)), outside.length + " lines");
+  });
+
+  suite("states/nc.html — the seat's last election", () => {
+    const senate = D.querySelector('section.race[id^="race-S-NC"] .race-last');
+    check("the Senate seat's last election is under its race, folded",
+      !!senate && !senate.open && /^Last time \(20\d\d\): .+ won by \d+\.\d points$/.test(
+        senate.querySelector("summary").textContent), senate && senate.textContent.slice(0, 80));
+    if (senate) {
+      openFold(window, senate);
+      const text = senate.textContent;
+      check("it gives each share of the votes cast for a candidate, cites the Clerk and its check",
+        /\d+\.\d%/.test(text) && /votes cast for a candidate/.test(text) &&
+          /Statistics of the Presidential and Congressional Election/.test(text) &&
+          /checked against/.test(text), text.slice(0, 300));
+    }
+    // North Carolina redrew its House map for 2026: no 2024 figure is
+    // carried onto a new district (rule 90).
+    const house = [...D.querySelectorAll('section.race[id^="race-H-NC"] .race-last')];
+    check("a redrawn district says so and shows no 2024 result",
+      house.length > 0 && house.every((d) => {
+        openFold(window, d);
+        return /redrawn since 2024/.test(d.querySelector("summary").textContent) &&
+          /not shown/.test(d.textContent) && !/\d+\.\d%/.test(d.textContent);
+      }));
+  });
+
+  suite("states/nc.html — compare the ballot", () => {
+    const fold = D.querySelector('section.race[id^="race-S-NC"] .race-compare');
+    check("a race with two or more on the ballot has a comparison, drawn only when opened",
+      !!fold && !fold.querySelector("table"));
+    if (fold) {
+      openFold(window, fold);
+      const table = fold.querySelector("table.compare-table");
+      const heads = table ? [...table.querySelectorAll("thead th")].slice(1) : [];
+      const rows = table ? [...table.querySelectorAll("tbody th")].map((th) => th.textContent) : [];
+      check("one column per person on the ballot, each opening their profile",
+        heads.length >= 2 && heads.every((th) => th.querySelector("[data-id]")), heads.length);
+      check("party, offices, money, platform and site, and never net worth",
+        rows.join("|") === "Party|Public offices held|Campaign money|Platform, in the campaign’s words|Campaign site" &&
+          !/net worth:/i.test(table.textContent.replace(/No net worth/, "")), rows.join("|"));
+      check("its money carries the FEC's date", /FEC, through/.test(table.textContent));
+    }
+  });
+
+  const grid = await buildPage("index.html", { hash: "#/?view=race" });
+  await settle(100);
+  suite("index.html — the races view draws a race's folds when opened", () => {
+    const results = grid.D.getElementById("results");
+    const money = results.querySelector(".race-money[data-fold]");
+    check("money and last results are folded and empty until opened (GRID-14's budget)",
+      !!money && !money.open && !money.querySelector(".money-row") &&
+        !results.querySelector(".race-last[data-fold] .last-table"));
+    if (money) {
+      openFold(grid.window, money);
+      check("opening one draws it", !!money.querySelector(".money-row"));
+    }
+    check("the sort menu offers closest races by each market, never both blended",
+      !!grid.D.querySelector('[data-sort="close-kalshi"]') &&
+        !!grid.D.querySelector('[data-sort="close-polymarket"]') &&
+        /Kalshi prices/.test(grid.D.querySelector('[data-sort="close-kalshi"]').textContent));
+  });
+
+  const close = await buildPage("index.html", { hash: "#/?view=race&sort=close-kalshi" });
+  await settle(100);
+  suite("index.html — closest races first, by one market's prices", () => {
+    const K = close.window.KYC;
+    const ids = [...close.D.querySelectorAll("#results section.race")].map((s) => s.id.replace(/^race-/, ""));
+    const byId = Object.fromEntries(close.window.kycRaces.map((r) => [r.id, r]));
+    const gaps = ids.map((id) => K.odds.gap(byId[id], "kalshi"));
+    const priced = gaps.filter(Boolean).map((g) => g.gap);
+    const firstNull = gaps.findIndex((g) => !g);
+    check("the races Kalshi prices come first, smallest gap first",
+      priced.length > 20 && priced.every((g, i) => i === 0 || g >= priced[i - 1]) &&
+        (firstNull === -1 || gaps.slice(firstNull).every((g) => !g)), priced.slice(0, 5).join(","));
+    const lead = close.D.querySelector("#results .race-lead");
+    check("each says it is a market price, not a poll or a forecast",
+      !!lead && /Kalshi’s two highest prices: \d+% and \d+%/.test(lead.textContent) &&
+        /not a poll/.test(lead.textContent), lead && lead.textContent);
+    check("the races Kalshi does not price follow under a heading that says so",
+      firstNull === -1 || /No usable Kalshi market/.test(close.D.getElementById("results").textContent));
+    check("the view's line says what the order is", /closest first by Kalshi/.test(
+      close.D.getElementById("resultsLabel").textContent));
+  });
+
+  suite("index.html — a profile's outside spending", () => {
+    const person = close.window.legislatorsData.find((p) => p.outsideSpending &&
+      p.outsideSpending.support && p.outsideSpending.oppose);
+    check("some profile has outside spending on both sides", !!person);
+    if (!person) return;
+    K_open(close.window, person.id);
+    const panel = close.D.getElementById("profileModalOutside");
+    check("the dialog lists each side's committees as filed, with the FEC's caveat",
+      !!panel && !panel.hidden && /Supporting \$/.test(panel.textContent) &&
+        /Opposing \$/.test(panel.textContent) && /24- and 48-hour reports/.test(panel.textContent) &&
+        !/\bnet\b(?! )/.test(panel.querySelector(".outside-sides").textContent),
+      panel && panel.textContent.slice(0, 200));
+  });
+}
+
+function K_open(window, id) {
+  window.KYC.profile.open(id);
+}
+
 (async function main() {
   const only = process.argv[2];
+  if (!only || only === "money") await testRaceMoney();
   if (!only || only === "guide") await testGuide();
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
