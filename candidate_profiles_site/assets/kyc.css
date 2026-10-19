@@ -4663,6 +4663,52 @@ button.local-county-link {
 .tp-key { margin: var(--s-2) 0 0; font-size: var(--t-xs); color: var(--text-muted); }
 .tp-dot-key { position: static; display: inline-block; margin: 0 var(--s-1) 0 0; vertical-align: 1px; }
 
+/* Each state's local governments by kind, as one bar (pages.local_bar). */
+.lg-bar { display: flex; gap: 2px; height: 8px; margin: var(--s-1) 0 0; min-width: 8rem; max-width: 100%; }
+.lg-seg { display: inline-block; flex: 0 1 auto; min-width: 2px; height: 100%; border-radius: 2px; }
+.lg-county { background: var(--cat-1); }
+.lg-municipal { background: var(--cat-2); }
+.lg-township { background: var(--cat-3); }
+.lg-school { background: var(--cat-5); }
+.lg-special { background: var(--cat-4); }
+.lg-none { display: block; white-space: normal; margin-top: 2px; font-size: var(--t-xs); font-weight: 400; color: var(--text-muted); }
+.lg-key { display: flex; flex-wrap: wrap; gap: var(--s-1) var(--s-3); margin: 0 0 var(--s-2);
+  font-size: var(--t-xs); color: var(--text-muted); }
+.lg-key-item { display: inline-flex; align-items: center; gap: var(--s-1); }
+.lg-key .lg-seg { width: 10px; height: 10px; flex: none; }
+
+/* A state's government at a glance (KYC.stategov.glance): three boxes,
+ * stacked on a phone. Party colour only for who holds a seat. */
+.state-glance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--s-3);
+  margin: 0 0 var(--s-4);
+}
+.glance-box {
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  font-size: var(--t-sm);
+}
+.glance-box p { margin: 0 0 var(--s-1); }
+.glance-kind {
+  font-size: var(--t-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.glance-label { display: block; font-weight: 700; color: var(--text); }
+.glance-mark { display: block; font-size: var(--t-xs); font-weight: 600; color: var(--text-muted); }
+.glance-who { font-size: var(--t-md); }
+.glance-list { margin: 0 0 var(--s-1); padding: 0; list-style: none; display: grid; gap: var(--s-2); }
+.glance-facts { display: block; font-size: var(--t-xs); color: var(--text-muted); }
+.glance-bar { margin: var(--s-1) 0; height: 10px; }
+.bb-n { background-color: color-mix(in srgb, var(--text-muted) 45%, var(--surface-1)); }
+.glance-control { font-weight: 600; }
+
 /* The federal courts as a ladder (kyc-federal.js courtLadder): every rung a
  * link to its court, in neutral ink. */
 .court-ladder { margin: 0 0 var(--s-5); }

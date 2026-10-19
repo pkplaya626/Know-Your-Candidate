@@ -592,6 +592,8 @@
       html.push(
         '<section class="state-section" id="state-government">',
         '<h2 class="state-heading">' + govHeading(info) + "</h2>",
+        // The three branches at a glance, the details under them (VISUALS-28).
+        KYC.stategov.glance ? KYC.stategov.glance(code) : "",
         '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
         "</section>"
       );

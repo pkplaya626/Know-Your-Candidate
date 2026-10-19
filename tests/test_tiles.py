@@ -134,5 +134,41 @@ class TestSeatsUp(unittest.TestCase):
         self.assertNotIn("houseTiles", built, "laid out only when the build names its root")
 
 
+class TestLocalBar(unittest.TestCase):
+    """The counties directory's bar per state (VISUALS-32, rule 49)."""
+
+    KINDS = [("county", "County governments", ""), ("municipal", "Municipal governments", ""),
+             ("township", "Town and township governments", ""),
+             ("school", "Independent school districts", ""), ("special", "Special districts", "")]
+
+    def test_a_kind_the_state_does_not_have_is_a_word_never_a_zero_part(self):
+        from kyc.pages import local_bar
+        hawaii = {"county": 3, "municipal": 1, "school": None, "special": 17, "total": 21, "township": None}
+        html = local_bar("Hawaii", hawaii, self.KINDS)
+        self.assertEqual(html.count('class="lg-seg'), 3)
+        self.assertNotIn("lg-township", html)
+        self.assertIn("None: town and township governments, independent school districts", html)
+        self.assertIn('aria-label="Hawaii: 21 local governments: 3 county governments, 1 municipal '
+                      'governments, 17 special districts; none of:', html)
+
+    def test_the_parts_are_shares_of_the_total(self):
+        from kyc.pages import local_bar
+        html = local_bar("X", {"county": 1, "municipal": 3, "total": 4}, self.KINDS[:2])
+        self.assertIn("width:25.000%", html)
+        self.assertIn("width:75.000%", html)
+        self.assertEqual(local_bar("X", {"total": 0}, self.KINDS), "")
+
+    def test_the_directory_draws_a_bar_for_every_state_it_counts(self):
+        import json
+        from kyc import pages
+        with open(os.path.join(ROOT, "candidate_profiles_site", "data", "census_governments.json"),
+                  encoding="utf-8") as handle:
+            census = json.load(handle)
+        html = pages.render_counties_index("example.org", census=census)
+        counted = [c for c, v in census["states"].items() if v.get("total") and c != "DC"]
+        self.assertEqual(html.count('class="lg-bar"'), len(counted))
+        self.assertIn('class="lg-key"', html)
+
+
 if __name__ == "__main__":
     unittest.main()
