@@ -35,6 +35,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."
 
 import fetch_district_maps as maps  # noqa: E402
 from kyc.geo import FIPS_TO_STATE  # noqa: E402
+from kyc.statelegs import MAP_MAX_TOLERANCE_M, MAP_TOLERANCE_M, map_tolerance_m  # noqa: E402
 
 CENSUS_2025 = "https://www2.census.gov/geo/tiger/GENZ2025/shp/"
 CHAMBER_URL = CENSUS_2025 + "cb_2025_{fips}_{layer}_500k.zip"
@@ -42,24 +43,16 @@ OUT_DIR = "legislative_maps"
 VINTAGE = "U.S. Census Bureau, 2025 cartographic boundary files (1:500,000)"
 FALLBACK_URL = "https://www2.census.gov/geo/tiger/GENZ2024/shp/cb_2024_{fips}_{layer}_500k.zip"
 FALLBACK_VINTAGE = "U.S. Census Bureau, 2024 cartographic boundary files (1:500,000)"
-# Legislative districts are far smaller than congressional ones - a Boston
-# house district is a few kilometres across - so they keep more detail: 120 m,
-# rising with the state's size (an eight-thousandth of its diagonal), so
-# Alaska's coast does not cost what Massachusetts's districts need.
-TOLERANCE_M = 120.0
-MAX_TOLERANCE_M = 300.0
+# The tolerance lives in kyc/statelegs.py, so the build can say how far the
+# drawn lines may stray from the Census Bureau's (kyc/legislature.py).
+TOLERANCE_M = MAP_TOLERANCE_M
+MAX_TOLERANCE_M = MAP_MAX_TOLERANCE_M
 
 
 def tolerance_for(items):
-    import math
-    lons = [p[0] for _, rings in items for r in rings for p in r]
-    lats = [p[1] for _, rings in items for r in rings for p in r]
-    mid = math.radians((min(lats) + max(lats)) / 2)
-    width = (max(lons) - min(lons)) * 111320.0 * math.cos(mid)
-    height = (max(lats) - min(lats)) * 110574.0
-    # Capped: Alaska's Aleutians cross the 180th meridian, so its "width"
-    # spans the globe, and Anchorage's districts are a few kilometres across.
-    return min(MAX_TOLERANCE_M, max(TOLERANCE_M, math.hypot(width, height) / 8000.0))
+    return map_tolerance_m([p for _, rings in items for r in rings for p in r])
+
+
 UNICAMERAL = ("NE",)
 
 

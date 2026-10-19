@@ -27,6 +27,15 @@ from .pages import state_name
 
 FOLDER = "legislature"
 
+
+def line_error_km(tolerance_m, unit_km):
+    """How far a legislature page's drawn line may lie from the Census
+    Bureau's, in kilometres, rounded up to 10 m: the Douglas-Peucker
+    *tolerance_m* the tool simplified at, plus the path data's rounding to
+    half of ``10 ** -geo._PRECISION`` map units on each axis."""
+    rounding = math.hypot(0.5, 0.5) * 10 ** -geo._PRECISION * unit_km
+    return math.ceil((tolerance_m / 1000.0 + rounding) * 100 - 1e-9) / 100
+
 # States whose lines changed after the Census captured them (it holds the
 # districts set for the 2024 elections), checked on 2026-10-05. A map that
 # silently drew the wrong lines would look entirely normal, so the page says
@@ -756,6 +765,12 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
 
     lonlat = [p for chamber in chambers for g in shapes[chamber].values()
               for ring in geo.geometry_rings(g, arcs) for p in ring]
+    # How far the drawn lines may stray from the Census Bureau's: the
+    # simplification tools/fetch_legislative_maps.py applied (from the upper
+    # chamber's extent, as it measured it) and the rounding of the path data
+    # to geo._PRECISION, on both axes.
+    tolerance_m = statelegs.map_tolerance_m(
+        [p for g in shapes["upper"].values() for ring in geo.geometry_rings(g, arcs) for p in ring])
     albers = D.projection_for(code, lonlat)
     raw_arcs = [[albers.raw(lon, lat) for lon, lat in arc] for arc in arcs]
     raw = {chamber: {i: geo.geometry_rings(g, raw_arcs) for i, g in shapes[chamber].items()}
@@ -834,6 +849,12 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         "page": page_path(code),
         "viewBox": viewbox,
         "unitKm": round(D.EARTH_RADIUS_KM / fit.k, 6),
+        # Added to the margin "Find who represents me" places a reader with
+        # (kyc-findrep.js): these lines are coarser than the lookup files'.
+        "lineErrorKm": line_error_km(tolerance_m, D.EARTH_RADIUS_KM / fit.k),
+        # Where a reader's location falls on these districts, placed on the
+        # device by "Find who represents me" (kyc-findrep.js).
+        "projection": D.projection_payload(albers, fit),
         "counties": D._counties(topo, raw_arcs, fit),
         "places": towns,
         "chambers": out_chambers,
