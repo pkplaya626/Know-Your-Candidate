@@ -9691,8 +9691,245 @@ async function testFrame() {
   });
 }
 
+/* ================================================================ charts
+ * Audit 2026-10-17, VISUALS-21 to -35: pictures of the build's own figures,
+ * drawn as boxes and page text (rule 46), never in a party's colour where
+ * the thing is not a party's. */
+const width = (el) => parseFloat(el.style.width);
+const noSvgText = (el) => !el.querySelector("svg text");
+
+async function testCharts() {
+  {
+    const { window, D, errors } = await buildPage("map.html");
+    await settle(100);
+    const meta = window.kycBuildMeta;
+    const KYC = window.KYC;
+    suite("charts — the balance of power (VISUALS-21)", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const bars = D.querySelectorAll(".balance-bar-slot .balance-bar");
+      check("the sidebar draws a bar under each chamber's counts", bars.length === 2, String(bars.length));
+      ["senate", "house"].forEach((chamber) => {
+        const bar = D.querySelector(`.balance-bar-slot [data-chamber="${chamber}"]`);
+        const seats = chamber === "senate" ? 100 : meta.house.seats;
+        const sum = [...bar.querySelectorAll(".bb-seg")].reduce((n, s) => n + width(s), 0);
+        check(`the ${chamber} bar's parts are the whole chamber`, Math.abs(sum - 100) < 0.01, String(sum));
+        const r = [...bar.querySelectorAll(".bb-r")].reduce((n, s) => n + width(s), 0);
+        check(`the ${chamber}'s Republican part is its seats' share`,
+          Math.abs(r - 100 * meta[chamber].R / seats) < 0.01, `${r} for ${meta[chamber].R}`);
+        check(`independents are a part of their own in the ${chamber}, never folded into a party`,
+          !meta[chamber].I || !!bar.querySelector(".bb-i"));
+        check(`a tick marks half the ${chamber}'s seats`, !!bar.querySelector(".bb-half"));
+        check(`the ${chamber} bar says what it draws in words`,
+          /Republicans?/.test(bar.querySelector(".bb-track").getAttribute("aria-label") || ""));
+      });
+      const senate = D.querySelector('.balance-bar-slot [data-chamber="senate"]');
+      const up = meta.senate.up;
+      if (up) {
+        const hatched = (cls) => [...senate.querySelectorAll(".bb-up." + cls)].reduce((n, s) => n + width(s), 0);
+        check("each party's Senate seats on the 2026 ballot are hatched, in its own colour",
+          Math.abs(hatched("bb-r") - up.R) < 0.01 && Math.abs(hatched("bb-d") - up.D) < 0.01 &&
+            Math.abs(hatched("bb-i") - up.I) < 0.01, JSON.stringify(up));
+        check("the hatched seats are the races' seats", up.total === meta.election.senateSeatsUp ||
+          up.total <= meta.election.senateSeatsUp, `${up.total} of ${meta.election.senateSeatsUp}`);
+      } else {
+        check("nothing is hatched once the Congress the cycle elects sits", !senate.querySelector(".bb-up"));
+      }
+      check("the House bar hatches nothing: every seat is on the ballot, and says so",
+        !D.querySelector('.balance-bar-slot [data-chamber="house"] .bb-up'));
+      check("the map's Senate view carries the Senate's bar",
+        !D.getElementById("mapBalance").hidden && !!D.querySelector('#mapBalance [data-chamber="senate"]'));
+    });
+
+    suite("charts — the House as one square per seat (VISUALS-27)", () => {
+      D.querySelector('[data-mode="house"]').click();
+      check("the House view offers a choice of layout", !!D.querySelector('#mapBalance [data-layout="tiles"]'));
+      D.querySelector('#mapBalance [data-layout="tiles"]').click();
+      const tiles = D.getElementById("mapTiles");
+      check("the squares replace the map", D.getElementById("mapStage").hidden && !tiles.hidden);
+      check("the address says so", /layout=tiles/.test(window.location.hash), window.location.hash);
+      const squares = tiles.querySelectorAll(".ht-seat");
+      check("one square per voting seat", squares.length === meta.house.seats, String(squares.length));
+      const buttons = tiles.querySelectorAll(".ht-state");
+      check("every state with a vote has a block, each a button named in words",
+        buttons.length === Object.keys(meta.houseTiles.states).length &&
+          [...buttons].every((b) => /seats?, /.test(b.getAttribute("aria-label"))));
+      check("every code above a block is page text, not SVG text", noSvgText(tiles) &&
+        [...tiles.querySelectorAll(".ht-code")].every((c) => /^[A-Z]{2}$/.test(c.textContent)));
+      if (oldCongressSits(window)) {
+        // Who sits, counted from the profiles: the squares draw the same.
+        const seated = window.legislatorsData.filter((p) => KYC.seated(p) && /House/.test(p.chamber) &&
+          meta.houseTiles.states[p.state]);
+        const count = (cls) => tiles.querySelectorAll(".ht-seat.ht-" + cls).length;
+        check("each square is the party of whoever sits for it",
+          count("r") === seated.filter((p) => KYC.partyKey(p) === "r").length &&
+            count("d") === seated.filter((p) => KYC.partyKey(p) === "d").length,
+          `${count("r")} R, ${count("d")} D`);
+        check("an empty seat is an outlined square, as many as the chamber's vacancies",
+          count("vacant") === (meta.house.vacant || 0), `${count("vacant")} vs ${meta.house.vacant}`);
+      }
+      tiles.querySelector('.ht-state[data-state="TX"]').click();
+      check("a tap on a state's block picks it, as on the map",
+        /state=TX/.test(window.location.hash) &&
+          tiles.querySelector('.ht-state[data-state="TX"]').getAttribute("aria-pressed") === "true");
+      D.querySelector('[data-mode="senate"]').click();
+      check("the Senate view is the map again", !D.getElementById("mapStage").hidden && tiles.hidden &&
+        !/layout=/.test(window.location.hash));
+    });
+  }
+
+  {
+    const { window, D } = await buildPage("states/index.html");
+    await settle(50);
+    const meta = window.kycBuildMeta;
+    suite("charts — the states as a grid of links (VISUALS-35)", () => {
+      const tiles = [...D.querySelectorAll(".tile-picker .tp-tile")];
+      check("every state and territory page has a tile",
+        tiles.length === Object.keys(meta.states).filter((c) => meta.stateGrid[c]).length &&
+          tiles.length === Object.keys(meta.states).length, String(tiles.length));
+      check("each tile links to its state's page and names the state for a screen reader",
+        tiles.every((a) => a.getAttribute("href").endsWith(a.dataset.state.toLowerCase() + ".html") &&
+          a.querySelector(".sr-only").textContent.indexOf(meta.states[a.dataset.state].name) === 0));
+      const senate = new Set(window.kycRaces.filter((r) => r.chamber === "Senate").map((r) => r.state));
+      check("a dot marks exactly the states with a Senate race in 2026",
+        tiles.every((a) => !!a.querySelector(".tp-dot") === senate.has(a.dataset.state)));
+      check("no tile is drawn in a party's colour", tiles.every((a) => !/party-/.test(a.className)));
+    });
+  }
+
+  {
+    const { window, D } = await buildPage("states/tx.html");
+    await settle(50);
+    suite("charts — a state's districts as a navigator (VISUALS-27)", () => {
+      const races = window.kycRaces.filter((r) => r.state === "TX" && r.chamber === "House");
+      const links = [...D.querySelectorAll(".district-tiles a")];
+      check("a square per House race", links.length === races.length, `${links.length} of ${races.length}`);
+      check("each square jumps to its race on the page",
+        links.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))));
+      check("the squares are neutral: a race is not a party's",
+        links.every((a) => !/party-|ht-[rd]/.test(a.className)));
+    });
+    suite("charts — the state government at a glance (VISUALS-28)", () => {
+      const glance = D.querySelector("#state-government .state-glance");
+      check("three boxes: executive, legislature, highest courts",
+        !!glance && glance.querySelectorAll(".glance-box").length === 3);
+      const gov = window.kycStateGov.states.TX;
+      check("the governor named as the roster names them", glance.textContent.indexOf(gov.governor.name) !== -1);
+      const bars = glance.querySelectorAll(".glance-bar");
+      check("a bar per chamber, each the whole chamber",
+        bars.length === 2 && [...bars].every((b) =>
+          Math.abs([...b.querySelectorAll(".bb-seg")].reduce((n, s) => n + width(s), 0) - 100) < 0.01));
+      check("the courts' box carries no party", !glance.querySelectorAll(".glance-box")[2]
+        .querySelector('[class*="party-"], .bb-seg'));
+      check("the ballot mark is the office's, never the holder's (rule 79)",
+        !/Abbott[^.]*on the Nov 3/.test(glance.textContent) && /This office (is|was) on the Nov 3/.test(glance.textContent));
+    });
+  }
+
+  {
+    const { window, D } = await buildPage("federal/index.html");
+    await settle(50);
+    suite("charts — the federal courts as a ladder (VISUALS-29)", () => {
+      const courts = window.kycFederal.courts;
+      const nodes = [...D.querySelectorAll(".court-ladder .cl-node")];
+      const appeals = courts.filter((c) => c.kind === "appeals");
+      check("the Supreme Court over every court of appeals", nodes.length === appeals.length + 1,
+        String(nodes.length));
+      check("every rung opens its court's page", nodes.every((a) =>
+        fs.existsSync(path.join(SITE, "courts", a.getAttribute("href").replace("../courts/", "")))));
+      const subs = [...D.querySelectorAll(".court-ladder a.cl-sub")];
+      check("each circuit's district courts jump to their table on the page",
+        subs.length > 0 && subs.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))));
+      const trial = courts.filter((c) => c.kind === "district" || c.kind === "territorial");
+      check("the count of district courts is the courts' own",
+        D.querySelector(".cl-total").textContent.indexOf(trial.length + " district courts") === 0);
+    });
+  }
+
+  {
+    const { window, D } = await buildPage("courts/ca9.html");
+    await settle(50);
+    suite("charts — a court's bench by year (VISUALS-30)", () => {
+      const fig = D.querySelector(".bench-timeline");
+      const judges = (window.kycCourt.ca9.judges || []).filter((j) => j.status !== "senior" && !j.listedSenior);
+      const dated = judges.filter((j) => (j.seats || []).some((s) => s.court === "ca9" && s.commissioned));
+      check("a dot per active judge with a commission", !!fig && fig.querySelectorAll(".bt-dot").length === dated.length,
+        `${fig && fig.querySelectorAll(".bt-dot").length} of ${dated.length}`);
+      check("a row per appointing President, named in page text", !!fig &&
+        [...fig.querySelectorAll(".bt-name")].filter((n) => n.textContent).length ===
+          new Set(dated.map((j) => j.seats.filter((s) => s.court === "ca9")[0].appointedBy)).size);
+      check("one neutral ink: no party anywhere in it", !!fig && !fig.querySelector('[class*="party-"]'));
+    });
+  }
+
+  {
+    const { D } = await buildPage("counties/index.html");
+    suite("charts — local governments by kind (VISUALS-32)", () => {
+      const rows = [...D.querySelectorAll("tbody tr")];
+      check("a bar under every state's name", rows.length > 0 && rows.every((tr) => tr.querySelector(".lg-bar")));
+      const hawaii = rows.find((tr) => /Hawaii/.test(tr.querySelector("th").textContent));
+      check("a kind the state has none of is a word under the bar, never a zero-length part (rule 49)",
+        !!hawaii && !hawaii.querySelector(".lg-township") && /None: .*town/.test(hawaii.textContent));
+    });
+  }
+
+  {
+    const { window, D } = await buildPage("index.html");
+    await settle(50);
+    const KYC = window.KYC;
+    suite("charts — funding sources as one bar (VISUALS-24)", () => {
+      const who = window.legislatorsData.find((p) => p.fundingBreakdown && !p.fundingBase &&
+        Object.keys(p.fundingBreakdown).length >= 3);
+      KYC.profile.open(who.id);
+      const bar = D.querySelector("#profileModalFunding .funding-bar");
+      const parts = Object.values(who.fundingBreakdown).filter((v) => v > 0);
+      check("a part per kind of receipt", !!bar && bar.querySelectorAll(".fs-seg").length === parts.length);
+      const sum = bar ? [...bar.querySelectorAll(".fs-seg")].reduce((n, s) => n + width(s), 0) : 0;
+      check("the parts are shares of what the shares are of, never more", sum <= 100.01 && sum > 95, String(sum));
+      check("each share named beside a swatch of its tone",
+        D.querySelectorAll("#profileModalFunding .funding-part .fs-swatch").length === parts.length);
+      check("never a party's colour", !bar.querySelector('[class*="party-"], [class*="odds-seg"]'));
+      KYC.profile.close();
+    });
+
+    suite("charts — polling averages as dots (VISUALS-34)", () => {
+      const odds = window.kycOdds || { races: {} };
+      const raceIds = Object.keys(odds.races).filter((id) => (odds.races[id].polls || {}).rows &&
+        odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
+      let checked = 0;
+      let inOrder = 0;
+      raceIds.forEach((id) => {
+        const race = (window.kycRaces || []).find((r) => r.id === id);
+        if (!race) return;
+        const box = D.createElement("div");
+        box.innerHTML = KYC.odds.render(race, {});
+        const rows = box.querySelectorAll(".poll-row");
+        if (rows.length !== odds.races[id].polls.rows.length) return;
+        checked += 1;
+        // The key's order against the first coherent market's, by party.
+        const market = (box.querySelector(".odds-market .odds-legend") || { querySelectorAll: () => [] });
+        const marketParties = [...market.querySelectorAll(".odds-dot")].map((d) => d.className.match(/odds-seg-(\w)/)[1])
+          .filter((p) => p !== "i");
+        const keyParties = [...box.querySelectorAll(".poll-key .poll-dot")].map((d) => d.className.match(/odds-seg-(\w)/)[1])
+          .filter((p) => p !== "i");
+        const firstOf = (list) => list.filter((p, i) => list.indexOf(p) === i);
+        const m = firstOf(marketParties);
+        const k = firstOf(keyParties);
+        if (m.length < 2 || k.length < 2 || marketParties.length !== m.length || keyParties.length !== k.length) {
+          inOrder += 1;
+          return;
+        }
+        if (m.filter((p) => k.indexOf(p) !== -1).join() === k.filter((p) => m.indexOf(p) !== -1).join()) inOrder += 1;
+      });
+      check("every race with polling averages draws a dot row per aggregator", checked === raceIds.length &&
+        checked > 0, `${checked} of ${raceIds.length}`);
+      check("the candidates come in the market bars' order", inOrder === checked, `${inOrder} of ${checked}`);
+    });
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
+  if (!only || only === "charts") await testCharts();
   if (!only || only === "guide") await testGuide();
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
