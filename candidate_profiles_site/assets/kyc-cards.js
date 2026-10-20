@@ -330,10 +330,13 @@
   }
 
   /* The badge as the race's head draws it; *shared* marks one that every
-   * race on the page shares, which a phone says once above the races. */
-  function headBadgeHtml(b, shared) {
-    if (b.html) return b.html;
-    var cls = "badge " + b.cls + (shared ? " badge-shared" : "");
+   * race on the page shares, which a phone says once above the races, and
+   * *inRow* one a folded race's row repeats, which the opened race's head
+   * then leaves to the row above it (two "1 challenger on the ballot", one
+   * under the other, on CA-2). */
+  function headBadgeHtml(b, shared, inRow) {
+    if (b.html) return inRow ? b.html.replace(/class="badge /, 'class="badge badge-in-row ') : b.html;
+    var cls = "badge " + b.cls + (shared ? " badge-shared" : "") + (inRow ? " badge-in-row" : "");
     var title = b.title ? ' title="' + KYC.escapeAttr(b.title) + '"' : "";
     return b.href
       ? '<a class="' + cls + '" href="' + KYC.escapeAttr(b.href) + '"' + title + ">" +
@@ -426,6 +429,16 @@
    * folded race's row shows (raceRow): one sentence, from the record. */
   var NO_MEMBER = "No sitting member: the seat is vacant.";
 
+  /* A holder the primary settled out of their seat's race, as their card
+   * gives it: its status words, and the other office they are on the
+   * ballot for (KYC.otherOffice, past tense after Election Day). */
+  function holderOut(holder) {
+    var spec = KYC.standing(holder, "card");
+    var other = KYC.otherOffice(holder);
+    return holder.name + ": " + (spec ? spec.label : "Not running for re-election") +
+      (other ? " · " + other.text : "") + ".";
+  }
+
   function openSeatWhy(race) {
     var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
     // The record names who held the seat even when they have no profile.
@@ -446,7 +459,10 @@
           " and is not on the November ballot." :
       holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
       holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
-      KYC.offBallot(holder.raceStatus) ? holder.name + " is not on the November ballot." :
+      // Out of this seat's race, in their own card's words: never "not on
+      // the November ballot", which Byron Donalds is, for governor, and a
+      // retiring member's card says "Not running for re-election" (rule 61).
+      KYC.offBallot(holder.raceStatus) ? holderOut(holder) :
       // An appointee was never elected to the seat, so is not "not seeking
       // re-election" (rule 61): the words their own card gives.
       holder.appointed ? holder.name + " was appointed to the seat and is not running in 2026." :
@@ -494,8 +510,9 @@
         "the November ballot is not known here."));
     } else if (race.contested) {
       var running = race.candidateCount + unprofiled;
-      // With nobody holding the seat on the ballot, nobody is challenging.
-      var word = race.openSeat ? "candidate" : "challenger";
+      // With nobody holding the seat on the ballot, nobody is challenging:
+      // an open seat, or one nobody held when the race was set (FL-20).
+      var word = race.openSeat || !(race.incumbentIds || []).length ? "candidate" : "challenger";
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
         (race.settled ? " on the ballot" : "")));
     } else if (race.settled && res) {
@@ -538,8 +555,10 @@
    *  every race on the page shares. */
   function raceBadges(race, opts) {
     var shared = (opts && opts.shared) || {};
+    var inRow = !!(opts && opts.inRow);
     return raceBadgeItems(race).map(function (b) {
-      return headBadgeHtml(b, sameBadge(shared[b.key], b));
+      var same = sameBadge(shared[b.key], b);
+      return headBadgeHtml(b, same, inRow && !same && !!ROW_BADGES[b.key]);
     }).join("");
   }
 
@@ -635,7 +654,7 @@
         // One who has left since says until when, as the Senate view's
         // "Held the seat until" does (rule 67).
         out.push(KYC.seated(p) ? "Held by " + p.name + (spec ? " (" + spec.label + ")" : "") + "."
-          : p.formerMember ? "Held by " + p.name + " until " + p.formerMember.left + "."
+          : p.formerMember ? "Held by " + p.name + " until " + KYC.dateWords(p.formerMember.left) + "."
           : p.name + " held this seat in the 2026 race.");
       });
     }
@@ -677,12 +696,17 @@
     });
     var u = unprofiledNames(race);
     var parties = ((race.results || {}).otherParties) || {};
+    // Credited as the section's own note credits them (rules 64, 77), and
+    // in the qualified list's words on an open primary's seat.
+    var noProfileLabel = ((race.results || {}).fromQualifiedList ? "Also on the Nov 3 ballot "
+      : "Also on the November ballot ") + KYC.ballotSource(race) + ", no profile here";
     u.none.forEach(function (n) {
       var abbr = parties[n] ? KYC.partyAbbr({ party: parties[n] }) : "";
-      add(ballot, "Also on the November ballot, no profile here", n + (abbr ? " (" + abbr + ")" : ""));
+      add(ballot, noProfileLabel, n + (abbr ? " (" + abbr + ")" : ""));
     });
     u.maybe.forEach(function (m) {
-      add(ballot, "Also named, may be a profile here under another spelling", m.name);
+      add(ballot, "Also named " + KYC.ballotSource(race) + ", may be a profile here under another spelling",
+        m.name);
     });
     return { ballot: ballot, unsettled: unsettled };
   }
@@ -708,8 +732,13 @@
    *  it folds. */
   function raceRow(race, split, fold) {
     var who = rowPeople(race, split);
+    // An outcome the people's own label already gives ("Awaiting result:
+    // ...") is not said a second time.
+    var said = function (b) {
+      return b.key === "outcome" && who.ballot.some(function (g) { return g[0] === b.text; });
+    };
     var badges = raceBadgeItems(race).filter(function (b) {
-      return ROW_BADGES[b.key] && !sameBadge((fold.shared || {})[b.key], b);
+      return ROW_BADGES[b.key] && !sameBadge((fold.shared || {})[b.key], b) && !said(b);
     }).map(function (b) {
       // Inside a button: the words, never a link.
       return b.html || '<span class="badge ' + KYC.escapeAttr(b.cls.replace(/ ?badge-link/, "")) + '">' +
@@ -795,7 +824,7 @@
       compareBlock(race, people, { scope: opts.scope });
     var inner = [
       '<div class="race-head"><h3 class="race-title">',
-      KYC.escapeHtml(title), link, "</h3>", raceBadges(race, { shared: (opts.fold || {}).shared }),
+      KYC.escapeHtml(title), link, "</h3>", raceBadges(race, { shared: (opts.fold || {}).shared, inRow: !!opts.fold }),
       '<button type="button" class="btn race-share" data-share-race="' + KYC.escapeAttr(race.id) +
         '" aria-label="' + KYC.escapeAttr("Copy link to " + race.label) + '">' +
         KYC.icon("share") + " Copy link</button>",

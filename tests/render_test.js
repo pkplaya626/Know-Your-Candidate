@@ -10597,7 +10597,7 @@ async function testFormerIncumbent() {
     check("the seat block leads with its winner, who holds it now, then who held it",
       ids[0] === race.winnerId && ids[1] === holder.id, ids.join(","));
     check("saying so", !!block && /Holds the seat \(won it in 2026\)/.test(block.textContent) &&
-      /Held the seat until 2026-12-08/.test(block.textContent));
+      /Held the seat until Dec\. 8, 2026/.test(block.textContent));
     const running = block && block.querySelector(".senate-running");
     check("the winner is never listed as running for it",
       !running || !running.querySelector('.card[data-id="' + race.winnerId + '"]'));
@@ -14296,6 +14296,28 @@ function readRow(section) {
   };
 }
 
+/* The Find your race select's House options against who sits for each
+ * district now, read from the people (district, chamber, seated), never
+ * from the race record: "District 3 · held by Kevin Kiley" once Ami Bera
+ * sits there. Returns the problems found. */
+function houseOptionProblems(window, D) {
+  const KYC = window.KYC;
+  const out = [];
+  [...D.querySelectorAll('#raceJumpSelect optgroup[label="U.S. House"] option')].forEach((o) => {
+    const race = KYC.races().filter((r) => "race-" + r.id === o.value)[0];
+    if (!race) return out.push(o.value + ": no race");
+    const sitting = KYC.people().filter((p) => KYC.seated(p) && /House/.test(p.chamber || "") &&
+      p.state === race.state && (parseInt(p.district, 10) || 0) === Number(race.district || 0)).map((p) => p.name);
+    const m = / · held by (.+)$/.exec(o.textContent);
+    const said = m ? m[1].split(" and ") : [];
+    if (said.join("|") !== sitting.join("|")) {
+      out.push(o.value + ": says " + JSON.stringify(said) + ", sitting " + JSON.stringify(sitting));
+    }
+    if (!sitting.length && / · held by /.test(o.textContent)) out.push(o.value + ": a holder for an empty seat");
+  });
+  return out;
+}
+
 /* Each race's row against its own section, on one built page: the same
  * people under the same words, the same count, and the holder clause the
  * section's own "Held by" line gives. Returns the problems found. */
@@ -14329,6 +14351,16 @@ function rowProblems(window, D) {
       y[0] === x[0] && (y[1] === x[1] || y[1].indexOf(x[1] + " (") === 0 || y[1].indexOf(x[1] + " –") === 0)));
     if (!same(want, got)) say("ballot " + JSON.stringify(got) + " against cards " + JSON.stringify(want));
     if (!same(apart, gotApart)) say("unsettled " + JSON.stringify(gotApart) + " against " + JSON.stringify(apart));
+    // Dates in words, as the row's other dates are ("until 2026-12-08").
+    if (/\b\d{4}-\d{2}-\d{2}\b/.test(row.text)) say("a date not in words: " + row.held);
+    // A name with no profile is credited as the section credits it (rules 64, 77).
+    row.ballot.filter((g) => /^Also /.test(g.label)).forEach((g) => {
+      if (g.label.indexOf(KYC.ballotSource(race)) === -1) say("uncredited: " + g.label);
+    });
+    // Nobody held the seat, so nobody challenges (FL-20).
+    if (!(race.incumbentIds || []).length && row.badges.some((b) => /challenger/.test(b))) {
+      say("challengers to nobody: " + row.badges.join("|"));
+    }
     // The results' names with no profile here, every one of them.
     const others = ((race.results || {}).otherNominees || []);
     const named = [].concat(...row.ballot.filter((g) => /^Also /.test(g.label)).map((g) => g.names));
@@ -14395,15 +14427,27 @@ async function testStatePhone() {
       [...select.querySelectorAll("optgroup")].map((g) => g.label).join("|") === "Statewide|U.S. House|This page");
     const house = [...select.querySelectorAll('optgroup[label="U.S. House"] option')];
     const houseRaces = KYC.races().filter((r) => r.state === "CA" && r.chamber === "House");
-    check("every House race is in it once, by district, with who holds the seat now (rule 27)",
+    check("every House race is in it once, by district",
       house.length === houseRaces.length && house.every((o) => {
         const race = houseRaces.filter((r) => "race-" + r.id === o.value)[0];
-        const holder = race && race.incumbentIds.map(KYC.byId).filter(KYC.seated)[0];
-        return race && o.textContent.indexOf("District " + race.district) === 0 &&
-          (!holder || o.textContent.endsWith("held by " + holder.name));
+        return race && o.textContent.indexOf("District " + race.district) === 0;
       }), house.slice(0, 3).map((o) => o.textContent).join(" | "));
+    // Who sits for the district now, as the delegation lists them (rule
+    // 27): never the frozen record's incumbent, who from January 3 may sit
+    // in the Senate or for another district (rule 67). On the january
+    // rehearsal the record's names put Barry Moore on AL-1 and Kevin Kiley
+    // on CA-3 (PR #126 review).
+    const holderProblems = [].concat(...PAGES.map((st) => houseOptionProblems(built[st].window, built[st].D)));
+    check("every House option names whoever sits for that district now, and only them (rules 27, 67)",
+      holderProblems.length === 0, holderProblems.slice(0, 4).join(" || "));
     check("every option names a place on the page",
       [...select.querySelectorAll("option")].every((o) => !o.value || !!D.getElementById(o.value)));
+    const values = [...select.querySelectorAll("option")].map((o) => o.value).filter(Boolean);
+    check("and each place once: a section the Statewide group offers is not offered again under This page",
+      PAGES.every((st) => {
+        const vs = [...built[st].D.querySelectorAll("#raceJumpSelect option")].map((o) => o.value).filter(Boolean);
+        return new Set(vs).size === vs.length;
+      }) && values.indexOf("state-government") !== -1, values.filter((v) => !/^race-/.test(v)).join(","));
     check("the voting block is offered by its own heading's words",
       !!select.querySelector('option[value="voting"]') &&
         select.querySelector('option[value="voting"]').textContent === D.getElementById("votingHead").textContent.trim());
@@ -14419,6 +14463,14 @@ async function testStatePhone() {
     check("and the statewide questions by their section's name",
       [...line.querySelectorAll("a")].some((a) => a.textContent === KYC.ballot.measuresName("CA") &&
         a.getAttribute("href") === "#measures"));
+    // Texas's line read as the whole statewide ballot, without its
+    // comptroller or railroad commissioner (PR #126 review).
+    check("the line says it is what this site covers, and that the ballot may hold more",
+      PAGES.every((st) => {
+        const l = built[st].D.querySelector(".find-race-statewide");
+        return !l || (/^Of what this site covers, the Nov 3, 2026 ballot holds statewide: /.test(l.textContent) &&
+          l.textContent.endsWith("It may also hold " + KYC.ballot.unlisted + "."));
+      }), line.textContent);
     check("the header's links follow the block; the section chips give way to the select",
       block.nextElementSibling.classList.contains("state-links") && D.querySelector(".state-parts").hidden);
   });
@@ -14446,6 +14498,15 @@ async function testStatePhone() {
       const head = [...s.querySelectorAll(".race-head .badge")].map((b) => b.textContent);
       return readRow(s).badges.every((b) => head.indexOf(b) !== -1);
     }));
+    // CA-2 opened read "1 challenger on the ballot" twice, one under the
+    // other (PR #126 review): the head leaves those to the row, folded.
+    check("and the opened head leaves those to the row above it", sections.every((s) => {
+      const said = readRow(s).badges;
+      return [...s.querySelectorAll(".race-head .badge")].every((b) =>
+        b.classList.contains("badge-in-row") === (said.indexOf(b.textContent) !== -1 &&
+          !b.classList.contains("badge-shared")));
+    }) && /\.races-folded \.badge-in-row \{ display: none; \}/.test(
+      fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")));
   });
 
   suite("a folded row and its race's section never disagree (rules 12, 62, 63, 73, 74)", () => {
@@ -14482,6 +14543,32 @@ async function testStatePhone() {
         vacant.length > 0 && vacant.every((s) => /^Vacant since /.test(readRow(s).held)),
         vacant.map((s) => readRow(s).held).join(" | "));
     }
+    // Byron Donalds is on Florida's ballot, for governor; a retiring
+    // member's card says "Not running for re-election" (rule 61). The row
+    // made the Open seat hover's "is not on the November ballot" visible.
+    const outRows = rowsWhere((r, s, w) => {
+      const h = r.openSeat && !r.holderMoved && r.incumbentIds.map(w.KYC.byId).filter(Boolean)[0];
+      return !!h && !h.contestLabel && !h.alsoRunningSeat && !(h.raceRole === "winner" && h.raceId !== r.id) &&
+        w.KYC.offBallot(h.raceStatus);
+    });
+    const outWords = (s) => {
+      const b = all.filter((x) => x.D.contains(s))[0];
+      const r = b.window.KYC.races().filter((x) => x.id === s.getAttribute("data-race"))[0];
+      const h = b.window.KYC.byId(r.incumbentIds[0]);
+      const other = b.window.KYC.otherOffice(h);
+      return h.name + ": " + b.window.KYC.standing(h, "card").label + (other ? " · " + other.text : "") + ".";
+    };
+    check("a holder out of their seat's race reads in their card's words, row and Open seat hover alike (rule 61)",
+      (!oldCongressSits(window) || outRows.length > 0) && outRows.every((s) => {
+        const open = [...s.querySelectorAll(".race-head .badge")].filter((b) => b.textContent === "Open seat")[0];
+        return readRow(s).held.indexOf(outWords(s)) !== -1 && !!open && open.getAttribute("title") === outWords(s);
+      }), outRows.length + " rows: " + outRows.slice(0, 2).map((s) => readRow(s).held).join(" | "));
+    const otherOffice = outRows.filter((s) => / · .*(nominee|Nominee)/.test(outWords(s)));
+    check("an other office's nominee among them names that office, as their card does",
+      !oldCongressSits(window) || otherOffice.length > 0, otherOffice.map((s) => readRow(s).held).join(" | "));
+    const notOn = rowsWhere(() => true).filter((s) => / is not on the November ballot/.test(readRow(s).held));
+    check("no row says a holder \"is not on the November ballot\"", notOn.length === 0,
+      notOn.slice(0, 3).map((s) => readRow(s).held).join(" | "));
     const listed = rowsWhere((r) => !!(r.results && r.results.fromQualifiedList));
     // Once the new Congress sits, a member it seated reads as their own
     // card does (rule 68): the list's own words are asked only before.
@@ -14512,6 +14599,13 @@ async function testStatePhone() {
     check("no row reads a pre-count \"Advanced to November\" for anyone still awaiting a result",
       rows.every((r) => !r.ballot.some((g) => g.label === "Advanced to November")),
       rows.map((r) => r.ballot.map((g) => g.label).join("/")).slice(0, 3).join(" | "));
+    check("no row says its outcome twice, as its people's label and again as a badge",
+      rows.every((r) => !r.badges.some((b) => r.ballot.some((g) => g.label === b))),
+      rows.filter((r) => r.badges.some((b) => r.ballot.some((g) => g.label === b))).slice(0, 2).map((r) => r.text).join(" | "));
+    const pastLine = after.D.querySelector(".find-race-statewide").textContent;
+    check("the statewide line is in the past tense from the day after (rule 84)",
+      /^Of what this site covers, the Nov 3, 2026 ballot held statewide: /.test(pastLine) &&
+        pastLine.endsWith("It may also have held " + after.window.KYC.ballot.unlisted + "."), pastLine);
   });
   after.window.close();
 
@@ -14529,6 +14623,15 @@ async function testStatePhone() {
   first.querySelector("[data-race-close]").click();
   const closedFocus = !isOpen(first) && D.activeElement === first.querySelector(".race-row");
   const select = D.getElementById("raceJumpSelect");
+  // How each jump scrolls: at once, never animated (PR #126 review: a
+  // smooth scroll past the delegation's growing cards stopped CA-40's jump
+  // 850px short, below the screen).
+  const scrolls = [];
+  const realScroll = window.Element.prototype.scrollIntoView;
+  window.Element.prototype.scrollIntoView = function (opts) {
+    scrolls.push(opts && typeof opts === "object" ? opts.behavior || "auto" : "auto");
+    if (realScroll) realScroll.call(this, opts);
+  };
   select.value = mid.id;
   select.dispatchEvent(new window.Event("change", { bubbles: true }));
   const bySelect = isOpen(mid) && D.activeElement === mid.querySelector(".race-row") && select.value === "" &&
@@ -14562,6 +14665,10 @@ async function testStatePhone() {
   answer.click();
   const byAnswer = isOpen(mid) && window.location.hash === "";
   answer.remove();
+  const statewideLink = D.querySelector(".find-race-statewide a.state-jump");
+  statewideLink.click();
+  window.Element.prototype.scrollIntoView = realScroll;
+  const instant = scrolls.length >= 4 && scrolls.every((b) => b === "auto");
   mid.querySelector("[data-race-close]").click();
   // Opening a profile and closing it leaves the page as it was (rule 45).
   mid.querySelector(".race-row").click();
@@ -14597,6 +14704,8 @@ async function testStatePhone() {
     check("a pick from the list opened with Alt+Down jumps at once", listPicks);
     check("a district square opens its race, leaving the address alone", byTile);
     check("the lookup's link to a race on this page opens it, leaving the address alone", byAnswer);
+    check("every jump - select, square, lookup, statewide line, Close - scrolls at once, never animated",
+      instant, scrolls.join(","));
     check("opening and closing a profile keeps the open race and its nodes (rule 45)", profileOpen && kept);
     check("Open all opens every race and Fold all folds them", allOpen && allFolded);
     check("the browser's find-in-page opening a race marks its row open", byFind);
@@ -14615,9 +14724,29 @@ async function testStatePhone() {
   input.dispatchEvent(new window.Event("input"));
   await settle(200);
   const cleared = !sections.some((s) => s.hidden) && !sections.some(isOpen);
+  // A name only the row gives - the results' with no profile here - keeps
+  // that row; a turned tablet keeps the search (PR #126 review).
+  const rowOnly = sections.filter((s) => readRow(s).ballot.some((g) => /^Also on/.test(g.label)))[0];
+  const rowName = rowOnly && readRow(rowOnly).ballot.filter((g) => /^Also on/.test(g.label))[0].names[0]
+    .replace(/ \(.*$/, "");
+  input.value = rowName || "";
+  input.dispatchEvent(new window.Event("input"));
+  await settle(200);
+  const keptRow = !!rowOnly && !rowOnly.hidden && sections.some((s) => s.hidden);
+  const hiddenBefore = sections.map((s) => s.hidden).join();
+  turn(window, false);
+  const wideShown = !sections.some((s) => s.hidden);
+  turn(window, true);
+  const heldOnTurn = sections.map((s) => s.hidden).join() === hiddenBefore;
+  input.value = "";
+  input.dispatchEvent(new window.Event("input"));
+  await settle(200);
   suite("states/ca.html on a phone — the page's search", () => {
     check("a search opens the races holding a match and hides those holding none", searched);
     check("clearing it shows every row and folds back what it opened", cleared);
+    check("a name only a row gives keeps that row in view", keptRow, rowName);
+    check("a turned tablet keeps the search: every race shown wide, the same rows back narrow",
+      wideShown && heldOnTurn);
   });
 
   // A tablet turned past 1000px is the desktop page, and back.

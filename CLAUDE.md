@@ -2074,7 +2074,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     states, on the campaign clock and after Election Day. Every way to a race
     (a link, a square, the select, the lookup's answer) opens it; a turned
     tablet moves the borrowed parts, never redraws them. 1000px and wider,
-    the page is as it was.
+    the page is as it was. The review found three things the rows made
+    visible. The select named each district's holder from the frozen
+    record, so on the January rehearsal it put Barry Moore on AL-1 after he
+    went to the Senate; it now names whoever sits for that district, as the
+    delegation does (rules 27, 67). The open seat's hover said "Byron
+    Donalds is not on the November ballot", which rule 61 forbids; a
+    holder out of the race now reads in their card's words, with the
+    other office they are running for. And a smooth scroll past the
+    delegation's cards (content-visibility) stopped every jump 500-950px
+    short of its race, so every jump on the page now scrolls at once.
 
 ## District maps
 

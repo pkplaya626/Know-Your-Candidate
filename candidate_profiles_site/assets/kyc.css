@@ -5574,6 +5574,7 @@ button.local-county-link {
 .find-race-lookup .findrep { margin: 0; }
 .find-race-statewide { margin: 0; font-size: var(--t-sm); line-height: 1.6; }
 .find-race-kicker { font-weight: 700; }
+.find-race-more { color: var(--text-muted); }
 .race-fold-bar {
   display: flex;
   flex-wrap: wrap;
@@ -5637,6 +5638,8 @@ button.local-county-link {
 /* The row is the race's heading; the section's own title would say it twice. */
 .races-folded .race-body .race-title { display: none; }
 .races-folded .badge-shared { display: none; }
+/* A badge the race's row above already gives (kyc-cards headBadgeHtml). */
+.races-folded .badge-in-row { display: none; }
 .race-close-row { margin: var(--s-3) 0 0; }
 .race-close { min-height: 44px; }
 .race-close-icon { transform: rotate(-90deg); }

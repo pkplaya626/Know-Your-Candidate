@@ -58,31 +58,48 @@
 
   /** The block itself, drawn hidden: foldLayout shows it on a phone and
    *  moves the district squares and "Find who represents you" into it.
-   *  Every word in it is a heading's, a race's or a table's elsewhere on
-   *  the page (rules 48, 75): never typed here. */
-  function findRaceBlock(info, senateRaces, houseRaces, measures, parts) {
+   *  The names in it are a heading's, a race's or a table's elsewhere on
+   *  the page (rules 48, 75). *seated*: the state's sitting House members,
+   *  the delegation's own list. */
+  function findRaceBlock(info, senateRaces, houseRaces, measures, parts, seated) {
     var opt = function (id, text) {
       return '<option value="' + KYC.escapeAttr(id) + '">' + KYC.escapeHtml(text) + "</option>";
     };
     var vacancies = {};
     (info.vacancies || []).forEach(function (v) { vacancies[v.district] = true; });
+    // Who sits for each district now, as the House delegation lists them
+    // (rule 27): never the frozen record's incumbent, who from January 3
+    // may sit in the Senate or for another district (rule 67).
+    var sitting = {};
+    (seated || []).forEach(function (p) {
+      var n = p.districtNum === null || p.districtNum === undefined ? 0 : p.districtNum;
+      (sitting[n] || (sitting[n] = [])).push(p.name);
+    });
     var offices = KYC.stategov && KYC.stategov.ballotOffices ? KYC.stategov.ballotOffices(code) : null;
     var statewide = senateRaces.map(function (race) { return ["race-" + race.id, districtLabel(race)]; })
       .concat(offices ? [["state-government", govHeading(info) + ": " + offices]] : [])
       .concat(measures ? [["measures", KYC.ballot.measuresName(code)]] : []);
     var house = houseRaces.map(function (race) {
-      // Who holds the seat now (rule 27), as the House delegation lists them.
-      var holder = race.incumbentIds.map(KYC.byId).filter(KYC.seated)[0];
-      var who = holder ? " · held by " + holder.name : vacancies[race.district] ? " · vacant" : "";
+      var names = sitting[race.district || 0];
+      var who = names ? " · held by " + names.join(" and ") : vacancies[race.district] ? " · vacant" : "";
       return opt("race-" + race.id, districtLabel(race) + who);
     }).join("");
-    // The page's own sections, by the names their jump chips give them;
-    // the voting block's is added once it is drawn (foldLayout).
-    var here = parts.map(function (p) { return opt(p[0], p[1]); }).join("");
+    // The page's own sections, by the names their jump chips give them,
+    // less those the Statewide group already offers; the voting block's is
+    // added once it is drawn (foldLayout).
+    var listed = {};
+    statewide.forEach(function (s) { listed[s[0]] = true; });
+    var here = parts.filter(function (p) { return !listed[p[0]]; })
+      .map(function (p) { return opt(p[0], p[1]); }).join("");
     var line = statewide.map(function (s) {
       return '<a class="state-jump" href="#' + KYC.escapeAttr(s[0]) + '">' +
         KYC.escapeHtml(s[0] === "state-government" ? offices : s[1]) + "</a>";
     }).join(" · ");
+    // Only what this site covers, and said so (as officesAlso does): the
+    // line read as the whole statewide ballot, without Texas's comptroller
+    // or California's controller. In the past tense from the day after
+    // Election Day (rule 84).
+    var past = KYC.electionStatus(2026).phase === "post-election";
     return '<section class="state-section find-race" id="find-race" aria-labelledby="findRaceHead" hidden>' +
       '<h2 class="state-heading" id="findRaceHead">Find your race</h2>' +
       '<div class="race-jump find-race-jump"><label for="raceJumpSelect">Jump to a race or section</label>' +
@@ -93,8 +110,10 @@
       (house ? '<optgroup label="U.S. House">' + house + "</optgroup>" : "") +
       '<optgroup label="This page" data-this-page>' + here + "</optgroup></select></div>" +
       '<div class="find-race-tiles"></div><div class="find-race-lookup"></div>' +
-      (line ? '<p class="find-race-statewide"><span class="find-race-kicker">Statewide on the Nov 3, ' +
-        "2026 ballot:</span> " + line + "</p>" : "") +
+      (line ? '<p class="find-race-statewide"><span class="find-race-kicker">Of what this site covers, ' +
+        "the Nov 3, 2026 ballot " + (past ? "held" : "holds") + " statewide:</span> " + line +
+        '. <span class="find-race-more">It may also ' + (past ? "have held " : "hold ") +
+        KYC.escapeHtml(KYC.ballot.unlisted) + ".</span></p>" : "") +
       "</section>";
   }
 
@@ -182,6 +201,9 @@
       section.hidden = false;
       showBody(section, !phone || !!fold.opened[section.getAttribute("data-race")]);
     });
+    // A search in the box holds on a turned tablet: the two layouts must
+    // not disagree about what it shows.
+    searchRaces(searchQuery());
     openAllWords();
   }
 
@@ -215,15 +237,17 @@
 
   /** Bring *id* into view - a race opened first where the page folds -
    *  and put the reader there: on a race's row, or on the section. */
-  function goTo(id, how) {
+  function goTo(id) {
     var target = doc.getElementById(id);
     if (!target) return null;
     var section = target.closest ? target.closest("section.race-foldable") : null;
     if (section && fold && fold.phone) setOpen(section, true, "reader");
-    // Animated only where the page folds, and never for a reader who asked
-    // for less motion (TECH-16); a desktop's jump is as it was.
-    var behavior = how === "load" || !(fold && fold.phone) ? "auto" : KYC.scrollBehavior();
-    if (target.scrollIntoView) target.scrollIntoView({ block: "start", behavior: behavior });
+    // At once, never animated: a smooth scroll's end is worked out before
+    // it starts, and the delegation's cards above the races grow as they
+    // render on the way past (content-visibility), so a phone's jump to
+    // CA-40 stopped 850px short, below the screen (PR #126 review). The
+    // address's own #race- link was always instant and always landed.
+    if (target.scrollIntoView) target.scrollIntoView({ block: "start", behavior: "auto" });
     var focus = section && fold && fold.phone ? section.querySelector(".race-row") : target;
     if (focus.focus) {
       if (focus === target && !target.hasAttribute("tabindex")) target.setAttribute("tabindex", "-1");
@@ -244,7 +268,7 @@
       var id = select.value;
       if (!id) return;
       select.value = "";
-      goTo(id, "reader");
+      goTo(id);
     };
     select.addEventListener("keydown", function (event) {
       // Alt+Down, F4 and Space open the list itself, where a pick is a
@@ -484,7 +508,7 @@
       senateRaces.length + houseRaces.length ? ["races", "2026 races"] : null,
       measures ? ["measures", KYC.ballot.measuresName(code)] : null,
     ].filter(Boolean);
-    if (foldable) html.push(findRaceBlock(info, senateRaces, houseRaces, measures, parts));
+    if (foldable) html.push(findRaceBlock(info, senateRaces, houseRaces, measures, parts, house));
     if (parts.length > 1) {
       html.push('<nav class="toolbar jump-row state-parts" aria-label="On this page">' +
         parts.map(function (p) {
@@ -760,11 +784,13 @@
   /* --------------------------------------------------------------- chrome */
 
   /* Where the races fold, the page search opens the races holding someone
-   * it matches and hides the rows of those that hold no one; cleared, it
-   * folds back only the races it opened. A desktop's races are not hidden,
-   * as before. */
+   * it matches, keeps the rows whose own words match (a holder running
+   * elsewhere, a name the results give with no profile here) and hides the
+   * rest; cleared, it folds back only the races it opened. A desktop's
+   * races are not hidden, as before. */
   function searchRaces(q) {
     if (!fold || !fold.phone) return;
+    var folded = KYC.foldText(q || "");
     raceSections().forEach(function (section) {
       var id = section.getAttribute("data-race");
       if (!q) {
@@ -776,10 +802,17 @@
         var cell = c.parentNode && c.parentNode.classList.contains("card-cell") ? c.parentNode : c;
         return !cell.hidden;
       });
-      section.hidden = !hit;
+      var row = section.querySelector(".race-row");
+      var named = !hit && !!row && KYC.foldText(row.textContent).indexOf(folded) !== -1;
+      section.hidden = !hit && !named;
       if (hit && !fold.opened[id]) setOpen(section, true, "search");
       if (!hit && fold.opened[id] === "search") setOpen(section, false);
     });
+  }
+
+  function searchQuery() {
+    var input = el("stateSearch");
+    return input ? input.value.trim().toLowerCase() : "";
   }
 
   function initSearch() {
@@ -829,7 +862,8 @@
       if (close) {
         var closing = close.closest("section.race-foldable");
         setOpen(closing, false);
-        if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: KYC.scrollBehavior() });
+        // At once, as every jump on this page is (goTo).
+        if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: "auto" });
         closing.querySelector(".race-row").focus({ preventScroll: true });
         return;
       }
@@ -848,7 +882,7 @@
         var id = jump ? jump.getAttribute("href").slice(1) : link.hash.slice(1);
         if (doc.getElementById(id)) {
           event.preventDefault();
-          goTo(id, "reader");
+          goTo(id);
         }
         return;
       }
