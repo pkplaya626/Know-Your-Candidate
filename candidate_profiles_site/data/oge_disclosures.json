@@ -668,6 +668,17 @@
    "documents": [
     {
      "amended": false,
+     "date": "2026-10-19",
+     "kind": "annual",
+     "label": "Annual (2026) (Pending Final OGE Disposition)",
+     "office": true,
+     "request": true,
+     "title": "Secretary",
+     "url": null,
+     "year": 2026
+    },
+    {
+     "amended": false,
      "date": "2025-05-17",
      "kind": "certification",
      "label": "Certification of Ethics Agreement Compliance",
@@ -2003,6 +2014,6 @@
   "Doug Burgum: Nominee 278 of 2025-01-15 names Burgum, Doug, not Burgum, Douglas J; not linked",
   "Doug Collins: Annual (2026) of 2026-06-25 names Collins, Douglas A, not Collins, Doug; not linked"
  ],
- "read": "2026-10-19",
+ "read": "2026-10-20",
  "source": "https://extapps2.oge.gov/201/Presiden.nsf/"
 }
