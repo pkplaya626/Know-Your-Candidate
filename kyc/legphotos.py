@@ -1478,10 +1478,10 @@ def problems(cache, by_state):
                         f"{who}: {entry['bytes']:,} bytes, {entry['width']}x{entry['height']}, over the caps"))
         if entry.get("seatKeyed"):
             why = ("" if entry.get("holderSince") and entry.get("lastModifiedAt")
-                   else "without the member's arrival date or the file's own")
+                   else "it carries no arrival date for the member, or no stamp of its own")
             why = why or seat_problem(entry, pid, {}) or batch_problem(entry, found)
             if why:
-                out.append(("error", "legislator-photo-seat", f"{who}: a seat-keyed file shown {why}"))
+                out.append(("error", "legislator-photo-seat", f"{who}: a seat-keyed file is shown, but {why}"))
         shown.setdefault(entry["image"], []).append(who)
         try:
             age = (today - datetime.date.fromisoformat(entry["read"])).days
