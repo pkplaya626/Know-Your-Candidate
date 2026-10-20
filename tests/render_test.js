@@ -7691,7 +7691,19 @@ async function testLegislatures() {
           credit.querySelector("a").getAttribute("href") === p.imageCredit.page,
           credit ? credit.innerHTML : "no credit line");
         check("the photograph is the one the credit names", card.querySelector(".leg-photo").getAttribute("src") === p.image);
+        // A photograph that does not load takes its credit with it (the
+        // reviewers of PR #125): a card never credits what it does not show.
+        card.querySelector(".leg-photo").dispatchEvent(new window.Event("error"));
+        check("a portrait that fails to load takes its credit with it",
+          !card.querySelector(".leg-photo") && !card.querySelector(".leg-credit"));
       }
+      /* An Open States portrait the legislature's own host serves is
+       * credited to it as well: Vermont's two-member districts showed one
+       * credited and one not, from the same folder. */
+      const hosted = everyone.filter((p) => p.image && /^https:\/\/([a-z0-9-]+\.)*legmt\.gov\//.test(p.image));
+      check("every portrait served by the legislature is credited to it",
+        hosted.every((p) => p.imageCredit && p.imageCredit.by === "Montana Legislature"),
+        hosted.filter((p) => !p.imageCredit).map((p) => p.name).join(", "));
       const plain = everyone.find((p) => p.image && !p.imageCredit);
       if (plain) {
         const id = Object.keys(state.chambers.upper.members).find((k) =>

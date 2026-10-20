@@ -73,6 +73,12 @@ class TestNames(unittest.TestCase):
         self.assertTrue(legphotos.names_member("Deborah \"Debbie\" Dolgin", "Debbie Dolgin"))
         # A templated alt with only the surname does not name the member.
         self.assertFalse(legphotos.names_member("Representative Boyles Photo", "Nathan Boyles"))
+        # An article or a possessive's "s" is no initial (the reviewers of
+        # PR #125); an initial written as one is.
+        self.assertFalse(legphotos.names_member("A photo of Representative Smith", "Andy Smith"))
+        self.assertFalse(legphotos.names_member("Representative Smith's office", "Sarah Smith"))
+        self.assertTrue(legphotos.names_member("Rep. A. Smith", "Andy Smith"))
+        self.assertTrue(legphotos.names_member("Senator S Smith", "Sarah Smith"))
 
     def test_only_the_legislatures_hosts_and_never_a_party(self):
         self.assertTrue(legphotos.official_host("NJ", "https://pub.njleg.state.nj.us/x.jpg"))
@@ -245,17 +251,40 @@ class TestRecipes(unittest.TestCase):
             legislature.pages_for = original
         self.assertEqual(out[barron["id"]]["candidate"]["renditions"], [src])
 
+    @staticmethod
+    def ohio_card(name, district, image=None):
+        # The directory's markup as served on 2026-10-19.
+        return ('<div class="media-container media-container-portrait last-item-row-1  democrat ">'
+                '<a target="_self" href="x"><div class="media-thumbnail"><div class="media-overlay-caption">'
+                f'<div class="media-overlay-caption-text-line-1">{name}</div>'
+                f'<div class="media-overlay-caption-text-line-2">District {district} '
+                "<span class='vertical-bar'>&nbsp;</span> D</div></div>"
+                + (f'<div style="background-image:url({image})" class="media-thumbnail-image" ></div>'
+                   if image else "")
+                + '</div></a></div><div class="media-grid-clear-row-1 "></div>')
+
     def test_ohio_lists_a_vacant_seat_as_nobody(self):
-        house = ('<div class="caption-text-line-1">Vacant</div><div>District 89 | </div>'
-                 '<div style="background-image:url(/assets/people/headshots/medium/0.jpg)"></div>'
-                 '<div class="caption-text-line-1">Brian Stewart</div><div>District 12 | R</div>'
-                 '<div style="background-image:url(/assets/people/headshots/medium/2955.jpg)"></div>')
+        house = (self.ohio_card("Vacant", 89, "/assets/people/headshots/medium/0.jpg")
+                 + self.ohio_card("Brian Stewart", 12, "/assets/people/headshots/medium/2955.jpg"))
         http = FakeHttp({"https://ohiohouse.gov/members/directory": (200, house, {})})
         out = legphotos.read_ohio(http, "OH", [rec("D.J. Swearingen", district="89"),
                                                rec("Brian Stewart", district="12")])
         self.assertIn("vacant", out["ocd-person/d.j.-swearingen"]["refused"])
+        # The legislature's word that the roster's member has left is kept
+        # for the build to say (rules 16 and 51).
+        self.assertIn("vacant", out["ocd-person/d.j.-swearingen"]["notSeated"])
         cand = out["ocd-person/brian-stewart"]["candidate"]
         self.assertEqual(cand["renditions"][0], "https://ohiohouse.gov/assets/people/headshots/small/2955.jpg")
+
+    def test_an_ohio_card_without_a_headshot_never_takes_the_next_cards(self):
+        house = (self.ohio_card("Ann Lee", 3)
+                 + self.ohio_card("Brian Stewart", 12, "/assets/people/headshots/medium/2955.jpg"))
+        http = FakeHttp({"https://ohiohouse.gov/members/directory": (200, house, {})})
+        out = legphotos.read_ohio(http, "OH", [rec("Ann Lee", district="3"),
+                                               rec("Brian Stewart", district="12")])
+        self.assertNotIn("ocd-person/ann-lee", out)
+        self.assertEqual(out["ocd-person/brian-stewart"]["candidate"]["renditions"][-1],
+                         "https://ohiohouse.gov/assets/people/headshots/medium/2955.jpg")
 
 
 class TestMemberPage(unittest.TestCase):
@@ -366,6 +395,54 @@ class TestMemberPage(unittest.TestCase):
         self.assertEqual(images, ["https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Mosley13.jpg"])
         self.assertTrue(seat_keyed)
 
+    def test_kentuckys_seat_files_are_seat_keyed(self):
+        # Kentucky numbers its Senate seats from 101 (senate137.jpg on
+        # ?DistrictNumber=137 is seat 37) and its House files house<n>.jpg.
+        html = ('<title>Senator Gary Clemons (D)</title>'
+                '<img src="/Legislators%20Thumbnail%20Images/senate137.jpg" alt="Gary Clemons photo">')
+        url = "https://legislature.ky.gov/Legislators/Pages/Legislator-Profile.aspx?DistrictNumber=137"
+        doc = legphotos.parse_page(html)
+        images, _, seat_keyed = legphotos.pick_member_image(
+            "KY", rec("Gary Clemons", chamber="upper", district="37"), doc, url)
+        self.assertEqual(images, ["https://legislature.ky.gov/Legislators%20Thumbnail%20Images/senate137.jpg"])
+        self.assertTrue(seat_keyed)
+        self.assertTrue(legphotos.seat_key("senate137", "37", "KY", "upper"))
+        self.assertFalse(legphotos.seat_key("senate137", "37", "KY", "lower"))
+        self.assertFalse(legphotos.seat_key("senate137", "37"))
+        for key in ("house12", "rep12", "sen12", "senate12", "hd012", "assembly_12"):
+            self.assertTrue(legphotos.seat_key(key, "12"), key)
+        self.assertFalse(legphotos.seat_key("house12", "2"))
+
+    def test_a_page_for_a_former_member_gives_no_photograph(self):
+        # New Mexico heads a departed member's page "Former Representative"
+        # and redirects their sponsor code to Former_Legislator.
+        reeb = rec("Andi Reeb", district="64", links=["https://www.nmlegis.gov/Members/Legislator?SponCode=HREEB"])
+        page = ('<title>Former Representative Andrea Reeb - (R)</title>'
+                '<img src="/Images/Legislators/HA/HREEB.jpg" alt="Reeb">')
+        for url, answered in ((reeb["links"][0], reeb["links"][0]),
+                              (reeb["links"][0], "https://www.nmlegis.gov/Members/Former_Legislator?SponCode=HREEB")):
+            http = FakeHttp({url: (200, page if answered == url else page.replace("Former ", ""), {})})
+            original_get = http.get
+
+            def get(u, limit=None, browser=False, original_get=original_get, answered=answered):
+                ans = original_get(u, limit, browser)
+                ans.url = answered
+                return ans
+            http.get = get
+            original = legislature.pages_for
+            legislature.pages_for = lambda code, roster, year: (
+                {r["id"]: {"url": r["links"][0], "kind": "member"} for r in roster}, 0)
+            try:
+                out = legphotos.read_member_pages(http, "NM", [reeb])
+            finally:
+                legislature.pages_for = original
+            self.assertIn("refused", out[reeb["id"]], answered)
+            self.assertIn("former", out[reeb["id"]]["notSeated"].lower())
+        # A sitting member's page is read as before.
+        self.assertEqual(legphotos.former_page(legphotos.parse_page("<title>Senator Natalie Figueroa</title>"),
+                                               "https://www.nmlegis.gov/Members/Legislator?SponCode=SFIGU",
+                                               "Natalie Figueroa"), "")
+
     def test_one_file_on_two_members_pages_is_neithers(self):
         album = '<img src="/FileStores/Web/Imaging/Member/shared.jpg" alt="Photo of Representative {}">'
         a = rec("Nathan Boyles", district="3", links=["https://www.flhouse.gov/details.aspx?MemberId=5063"])
@@ -463,6 +540,37 @@ class TestSettle(unittest.TestCase):
         again = self.settle(table, self.candidate(url, seatKeyed=True), record=member, seat_files=shown)
         self.assertIn("Old Member", again["withheld"])
 
+    def test_a_host_that_dates_files_by_its_deploys_is_undated(self):
+        # California's Assembly answers one Last-Modified for every seat's
+        # file: the deploy's, not the photograph's.
+        url = "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_02.jpg"
+        entry = {"image": url, "seatKeyed": True, "holderSince": "2024-12-02",
+                 "lastModified": "2026-09-30", "lastModifiedAt": "2026-09-30T18:09:20"}
+        self.assertIn("deploy", legphotos.seat_problem(entry, "ocd-person/x", {}))
+
+    def test_seat_files_copied_together_are_dated_only_near_the_arrival(self):
+        # Louisiana's House wrote some fifty seat files within twenty
+        # seconds on 2024-05-15, for members seated since 2016 and 2020.
+        def seat(n, at, since):
+            return {"image": f"https://house.louisiana.gov/H_Reps/RepPics/rep{n}.jpg", "seatKeyed": True,
+                    "holderSince": since, "lastModified": at[:10], "lastModifiedAt": at, "state": "LA",
+                    "name": f"Member {n}", "chamber": "lower", "district": str(n)}
+        people = {"a": seat(1, "2024-05-15T19:58:45", "2020-01-13"),
+                  "b": seat(2, "2024-05-15T19:58:50", "2024-01-08"),
+                  "c": seat(3, "2024-05-15T19:59:02", "2016-01-11"),
+                  "d": seat(4, "2025-10-13T14:02:00", "2025-09-01")}
+        found = legphotos.batches(people)
+        self.assertIn("a copy", legphotos.batch_problem(people["a"], found))
+        self.assertIn("a copy", legphotos.batch_problem(people["c"], found))
+        # The copy fell near this member's arrival: a new member's
+        # photograph going up.
+        self.assertEqual(legphotos.batch_problem(people["b"], found), "")
+        # A file written on its own is dated by its own stamp.
+        self.assertEqual(legphotos.batch_problem(people["d"], found), "")
+        # Two files together are not a batch.
+        del people["c"]
+        self.assertEqual(legphotos.batch_problem(people["a"], legphotos.batches(people)), "")
+
     def test_an_undated_seat_keyed_file_is_withheld(self):
         url = "https://www.legmt.gov/rep1.jpg"
         entry = self.settle({url: image(200, 250)}, self.candidate(url, seatKeyed=True))
@@ -540,6 +648,39 @@ class TestRefreshAndBuild(unittest.TestCase):
         self.assertNotIn("image", out)
         self.assertEqual(dropped, {"oversized": 1})
         self.assertEqual(legphotos.report(photos, {"IN": [member]}), {"oversized": {"IN": 1}})
+
+    def test_a_seat_file_read_for_another_seat_is_not_shown(self):
+        member = rec("Neil Duram", district="4")
+        seat = self.entry(seatKeyed=True, chamber="lower", district="3", holderSince="2025-01-06",
+                          lastModified="2025-02-01", lastModifiedAt="2025-02-01T10:00:00")
+        self.assertIsNone(legphotos.entry_for(member, {"people": {member["id"]: seat}}))
+        self.assertIsNotNone(legphotos.entry_for(member, {"people": {member["id"]: dict(seat, district="4")}}))
+
+    def test_a_portrait_the_legislature_serves_is_credited_to_it(self):
+        member = rec("Matt Birong", image="https://legislature.vermont.gov/Documents/Legislators/Birong.Matt.jpg",
+                     links=["https://legislature.vermont.gov/people/single/2026/40396"])
+        page = {"url": member["links"][0], "kind": "member"}
+        out = legislature._person(member, "VT", 2026, pages={member["id"]: page}, photos={"people": {}})
+        self.assertEqual(out["imageCredit"], {"by": "Vermont General Assembly", "page": member["links"][0]})
+        # Off the legislature's host, no credit is claimed for it.
+        other = dict(member, image="https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/x.jpg")
+        out = legislature._person(other, "VT", 2026, pages={member["id"]: page}, photos={"people": {}})
+        self.assertNotIn("imageCredit", out)
+
+    def test_the_build_names_a_member_the_legislature_says_has_left(self):
+        member = rec("D.J. Swearingen", district="89")
+        cache = {"people": {member["id"]: {"withheld": "the chamber's directory lists the seat as vacant",
+                                           "notSeated": "the chamber's directory lists the seat as vacant",
+                                           "read": TODAY}}}
+        found = [(level, c, m) for level, c, m in legphotos.problems(cache, {"OH": [member]})]
+        self.assertEqual([(level, c) for level, c, _ in found], [("warn", "legislator-not-seated")])
+        self.assertIn("Swearingen", found[0][2])
+
+    def test_one_photograph_shown_for_two_members_fails_the_build(self):
+        a, b = rec("Neil Duram"), rec("Pat Duram", pid="ocd-person/pat")
+        cache = {"people": {a["id"]: self.entry(), b["id"]: self.entry(name="Pat Duram")}}
+        found = [c for level, c, _ in legphotos.problems(cache, {"MT": [a, b]}) if level == "error"]
+        self.assertEqual(found, ["legislator-photo-shared"])
 
     def test_validate_fails_a_photograph_without_its_evidence_weight_or_host(self):
         member = rec("Neil Duram")

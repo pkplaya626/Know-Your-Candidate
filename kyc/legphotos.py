@@ -159,13 +159,30 @@ def surname_joined(name):
 
 
 def names_member(text, name):
-    """*text* carries the member's surname and a given name or initial."""
+    """*text* carries the member's surname and a given name or initial. An
+    initial counts only written as one - a letter and a full stop ("J.
+    Smith"), or a capital standing alone before the surname ("J Smith") -
+    never the article "A" or a possessive's "s" ("A photo of Representative
+    Smith" names no Andy; the reviewers of PR #125)."""
     if not names_surname(text, name):
         return False
     have = set(words(text))
     given = given_words(name)
-    return (any(_same_given(g, w) for g in given for w in have)
-            or any(g[:1] in have for g in given if g))
+    if any(_same_given(g, w) for g in given for w in have):
+        return True
+    return any(g[:1] in initials(text, name) for g in given if g)
+
+
+def initials(text, name):
+    """The letters *text* writes as initials (lower case): a letter and a
+    full stop, or a capital alone directly before the surname."""
+    plain = unicodedata.normalize("NFKD", text or "").encode("ascii", "ignore").decode()
+    out = {m.lower() for m in re.findall(r"(?<![A-Za-z])([A-Za-z])\.", plain)}
+    sur = surname_joined(name)
+    for m in re.finditer(r"(?<![A-Za-z'’])([A-Z])\s+([A-Za-z'’-]+)", plain):
+        if re.sub(r"[^a-z]", "", m.group(2).lower()) == sur:
+            out.add(m.group(1).lower())
+    return out
 
 
 def names_in_full(text, name):
@@ -315,16 +332,23 @@ def weigh(http, url):
         out["sha"] = hashlib.sha256(ans.body).hexdigest()[:16]
     modified = _http_date(ans.headers.get("last-modified"))
     if modified:
-        out["lastModified"] = modified
+        out["lastModified"] = modified[:10]
+        out["lastModifiedAt"] = modified
     return out
 
 
 def _http_date(value):
+    """An HTTP date as ISO 8601 to the second, in UTC."""
     import email.utils
     try:
-        return email.utils.parsedate_to_datetime(value).date().isoformat() if value else None
+        when = email.utils.parsedate_to_datetime(value) if value else None
     except (TypeError, ValueError):
         return None
+    if when is None:
+        return None
+    if when.tzinfo is not None:
+        when = when.astimezone(datetime.timezone.utc).replace(tzinfo=None)
+    return when.isoformat(timespec="seconds")
 
 
 def over_caps(weight):
@@ -712,6 +736,23 @@ def read_indiana(http, code, records, roster=None, year=0):
     return out
 
 
+def ohio_cards(text):
+    """``[(name, district, background path or "")]``, one per card of an
+    Ohio directory, each read inside its own ``media-container``: a card
+    with no headshot never takes the next card's (the reviewers of PR
+    #125)."""
+    out = []
+    for chunk in re.split(r'<div\s+class="media-container\b', text)[1:]:
+        name = re.search(r'caption-text-line-1">([^<]+)</div>', chunk)
+        district = re.search(r"District (\d+)", chunk)
+        if not name or not district:
+            continue
+        background = re.search(r"background-image:\s*url\(([^)]+)\)", chunk)
+        out.append((html.unescape(name.group(1)).strip(), district.group(1),
+                    background.group(1).strip("'\" ") if background else ""))
+    return out
+
+
 def read_ohio(http, code, records, roster=None, year=0):
     """Each chamber's member directory: a card per member gives the name,
     "District N" and the headshot as its background. The directory's
@@ -722,10 +763,10 @@ def read_ohio(http, code, records, roster=None, year=0):
         ans = http.get(host + "/members/directory")
         if ans.status != 200:
             continue
-        for m in re.finditer(r'caption-text-line-1">([^<]+)</div>.*?District (\d+).*?'
-                             r'background-image:url\(([^)]+)\)', ans.text(), re.S):
-            cards[(chamber, m.group(2))] = (html.unescape(m.group(1)).strip(), host,
-                                            host + m.group(3).strip("'\""))
+        for card in ohio_cards(ans.text()):
+            theirs, district, background = card
+            cards[(chamber, district)] = (theirs, host,
+                                          host + background if background else "")
     out = {}
     for r in records:
         card = cards.get((r["chamber"], _record_district(r)))
@@ -733,8 +774,11 @@ def read_ohio(http, code, records, roster=None, year=0):
             continue
         theirs, host, medium = card
         if theirs.lower() == "vacant":
-            out[r["id"]] = {"refused": "the chamber's directory lists the seat as vacant"}
+            why = "the chamber's directory lists the seat as vacant"
+            out[r["id"]] = {"refused": why, "notSeated": why}
             continue
+        if not medium:
+            continue                  # a card with no headshot concludes nothing
         if not names_surname(theirs, r["name"]):
             out[r["id"]] = {"refused": f"the directory names {theirs} for the district"}
             continue
@@ -797,6 +841,12 @@ def read_member_pages(http, code, records, roster=None, year=0):
         if ans.status != 200:
             continue
         doc = parse_page(ans.text())
+        gone = former_page(doc, ans.url or url, r["name"])
+        if gone:
+            # The legislature's own word that the member has left: no
+            # photograph from it, and the build names them (rules 16, 51).
+            out[r["id"]] = {"refused": gone, "notSeated": gone}
+            continue
         picked = pick_member_image(code, r, doc, ans.url or url, others)
         if not picked:
             continue
@@ -817,13 +867,35 @@ def read_member_pages(http, code, records, roster=None, year=0):
     # (the checker of 2026-10-19).
     claimed = {}
     for pid, outcome in out.items():
-        for image in outcome["candidate"]["renditions"]:
+        for image in (outcome.get("candidate") or {}).get("renditions") or ():
             claimed.setdefault(image, []).append(pid)
     for image, pids in claimed.items():
         if len(pids) > 1:
             for pid in pids:
                 out[pid] = {"refused": f"{image} is offered on {len(pids)} members' pages"}
     return out
+
+
+_FORMER_TITLE = re.compile(r"\b(former|retired|past|late)\s+(state\s+)?(representative|senator|delegate|"
+                           r"assembly\s*(wo)?man|assembly\s*member|assemblymember|legislator|member|"
+                           r"rep|sen)\b", re.I)
+_FORMER_ADDRESS = re.compile(r"former|past[_-]?(member|legislator)", re.I)
+
+
+def former_page(doc, url, name):
+    """Why the member page says its member has left, or ``""``: an address
+    for former members (New Mexico redirects a departed member's sponsor
+    code to ``Former_Legislator``), or a title or heading calling the
+    member "Former Representative" and the like. Andi Reeb's card took a
+    photograph from a page headed "Former Representative Andrea Reeb" while
+    Open States still listed her (the reviewers of PR #125)."""
+    parts = urllib.parse.urlsplit(url or "")
+    if _FORMER_ADDRESS.search(parts.path + "?" + parts.query):
+        return f"the legislature's page for them is a former member's ({url})"
+    for text in [doc.title] + list(doc.headings):
+        if _FORMER_TITLE.search(text or "") and names_surname(text, name):
+            return f"the legislature's page for them is headed \"{text}\""
+    return ""
 
 
 _LIKENESS_ALT = re.compile(r"\b(photo|picture|headshot|portrait|image)\b", re.I)
@@ -898,7 +970,8 @@ def pick_member_image(code, record, doc, page_url, others=()):
     named_page = any(names_member(t, name) for t in [doc.title] + doc.headings)
     in_text = named_page or names_in_full(getattr(doc, "text", ""), name)
     district = _digits(record.get("district"))
-    keys = {k for k in page_keys(page_url) if not seat_key(k, district)}
+    chamber = record.get("chamber")
+    keys = {k for k in page_keys(page_url) if not seat_key(k, district, code, chamber)}
     first, second = {}, {}
     seat_files = set()
     for img in doc.images:
@@ -925,7 +998,7 @@ def pick_member_image(code, record, doc, page_url, others=()):
             continue                  # another member's surname and not theirs
         filename = urllib.parse.unquote(absolute.rsplit("/", 1)[-1])
         in_file = names_surname(" ".join(fwords), name)
-        by_seat = ((not in_file and any(seat_key(k, district) for k in fkeys))
+        by_seat = ((not in_file and any(seat_key(k, district, code, chamber) for k in fkeys))
                    or seat_and_surname(absolute, name, district))
         if names_member(alt, name):
             first.setdefault(absolute, f"alt \"{alt}\"")
@@ -958,12 +1031,24 @@ _NOT_A_LIKENESS = re.compile(r"\b(map|maps|logo|seal|banner|flag|icon|chart|sign
                              r"building|district\s+\d+\s+map)\b", re.I)
 
 
-def seat_key(key, district):
+_SEAT_WORDS = r"(?:[a-z]{0,3}|dist|district|seat|house|senate|assembly|member|assemblymember)"
+
+
+def seat_key(key, district, code=None, chamber=None):
     """*key* names the seat, not the member: the district's number, bare or
-    after a chamber's letters or the word for a district ("02", "s14",
-    "hd105", Nebraska's "dist01")."""
-    m = re.fullmatch(r"(?:[a-z]{0,2}|dist|district|seat)0*(\d+)", (key or "").lower())
-    return bool(m and district and m.group(1) == district)
+    after a chamber's letters or words or the word for a district ("02",
+    "s14", "hd105", "rep12", "house12", Nebraska's "dist01"). Kentucky
+    numbers its Senate seats from 101 on its pages and files
+    (``senate137.jpg`` on ``?DistrictNumber=137`` is seat 37): the
+    reviewers of PR #125 found its two photographs taken undated."""
+    key = (key or "").lower()
+    m = re.fullmatch(_SEAT_WORDS + r"[_-]?0*(\d+)", key)
+    if m and district and m.group(1) == district:
+        return True
+    if code == "KY" and district and chamber in (None, "upper"):
+        m = re.fullmatch(r"(?:senate|s)?1(\d\d)", key)
+        return bool(m and str(int(m.group(1))) == district)
+    return False
 
 
 def file_words_raw(url):
@@ -1094,7 +1179,8 @@ def settle(http, code, record, candidate, previous_files, today, starts):
         if abs(original["width"] / original["height"] - chosen["width"] / chosen["height"]) > 0.02:
             return dict(base, withheld="the smaller rendition is not the same shape as the page's file")
     entry = dict(base, image=chosen["image"],
-                 **{k: chosen[k] for k in ("bytes", "width", "height", "sha", "lastModified") if k in chosen})
+                 **{k: chosen[k] for k in ("bytes", "width", "height", "sha", "lastModified",
+                                           "lastModifiedAt") if k in chosen})
     if candidate.get("seatKeyed"):
         entry["seatKeyed"] = True
         since = holder_since(http, code, record["id"], record["chamber"], starts)
@@ -1102,8 +1188,81 @@ def settle(http, code, record, candidate, previous_files, today, starts):
             entry["holderSince"] = since
         why = seat_problem(entry, record["id"], previous_files)
         if why:
-            return dict(entry, withheld=why, image=None)
+            return dict(entry, withheld=why, image=None, offered=entry["image"])
     return entry
+
+
+# Hosts whose Last-Modified is a deploy's time, not a file's: a seat-keyed
+# file there cannot be dated (``seat_problem``).
+UNDATED_SEAT_HOSTS = {
+    # Read 2026-10-19 (the reviewers of PR #125): assembly_member_01, 03,
+    # 10, 32, 44, 63 and 79 .jpg all answer "Last-Modified: Wed, 30 Sep
+    # 2026 18:09:20 GMT", for members seated from 2022 to 2025.
+    "webapi.assembly.ca.gov": "every assembly_member_NN.jpg answered one Last-Modified, "
+                              "30 Sep 2026 18:09:20 GMT, read 2026-10-19",
+}
+
+# Seat files on one host written within BATCH_SECONDS of each other, at
+# least BATCH_FILES of them, were copied together (a site's migration or a
+# deploy), and the stamp is the copy's, not the photograph's: Louisiana's
+# House wrote some fifty within twenty seconds on 2024-05-15, its Senate
+# its files on 2024-05-13, for members seated since 2016 and 2020. Such a
+# stamp dates a file only when the copy fell near the member's arrival
+# (``SEAT_MARGIN_DAYS`` before to ``BATCH_GRACE_DAYS`` after): a
+# legislature putting up its new members' photographs.
+BATCH_SECONDS = 120
+BATCH_FILES = 3
+BATCH_GRACE_DAYS = 180
+
+
+def _stamp(entry):
+    at = entry.get("lastModifiedAt")
+    try:
+        return datetime.datetime.fromisoformat(at) if at else None
+    except ValueError:
+        return None
+
+
+def batches(people):
+    """``{(host, lastModifiedAt): n}`` for every seat-keyed file in
+    *people* (shown, or withheld with the file it offered) whose stamp has
+    ``BATCH_FILES`` or more of the host's seat files, itself among them,
+    within ``BATCH_SECONDS``."""
+    by_host = {}
+    for entry in (people or {}).values():
+        url = entry.get("image") or entry.get("offered")
+        when = _stamp(entry)
+        if entry.get("seatKeyed") and url and when:
+            host = (urllib.parse.urlsplit(url).hostname or "").lower()
+            by_host.setdefault(host, {})[url] = when
+    out = {}
+    for host, files in by_host.items():
+        stamps = sorted(files.values())
+        for when in set(stamps):
+            near = sum(1 for other in stamps if abs((other - when).total_seconds()) <= BATCH_SECONDS)
+            if near >= BATCH_FILES:
+                out[(host, when.isoformat(timespec="seconds"))] = near
+    return out
+
+
+def batch_problem(entry, found):
+    """Why a seat-keyed file's stamp, a batch copy's, does not date it
+    against the member's arrival, or ``""``."""
+    when = _stamp(entry)
+    host = (urllib.parse.urlsplit(entry.get("image") or entry.get("offered") or "").hostname or "").lower()
+    if not when or (host, when.isoformat(timespec="seconds")) not in found:
+        return ""
+    n = found[(host, when.isoformat(timespec="seconds"))]
+    since = entry.get("holderSince")
+    try:
+        arrived = datetime.date.fromisoformat(since)
+    except (TypeError, ValueError):
+        arrived = None
+    if arrived and (arrived - datetime.timedelta(days=SEAT_MARGIN_DAYS) <= when.date()
+                    <= arrived + datetime.timedelta(days=BATCH_GRACE_DAYS)):
+        return ""
+    return (f"{host} wrote {n} of its seat files within {BATCH_SECONDS} seconds of {when.date()}, "
+            f"a copy and not the photograph's date, and the member arrived {since or 'on a day not known'}")
 
 
 def seat_problem(entry, person_id, seat_files):
@@ -1112,6 +1271,10 @@ def seat_problem(entry, person_id, seat_files):
     if shown and shown.get("holder") != person_id and shown.get("sha") == entry.get("sha"):
         return f"the seat's file has not changed since it showed {shown.get('name')}"
     since, modified = entry.get("holderSince"), entry.get("lastModified")
+    host = (urllib.parse.urlsplit(entry.get("image") or "").hostname or "").lower()
+    if host in UNDATED_SEAT_HOSTS:
+        return (f"the file is keyed by seat and {host} dates its files by a deploy "
+                f"({UNDATED_SEAT_HOSTS[host]}), so it cannot be dated against the member's arrival")
     if not since or not modified:
         return "the file is keyed by seat and cannot be dated against the member's arrival"
     arrived = datetime.date.fromisoformat(since) - datetime.timedelta(days=SEAT_MARGIN_DAYS)
@@ -1199,6 +1362,8 @@ def refresh(by_state, previous, codes=None, http=None, today=None, force=False, 
                 settled[r["id"]] = {"name": r["name"], "chamber": r["chamber"], "district": r["district"],
                                     "withheld": outcome["refused"], "read": today,
                                     "credit": legislature_name(code)}
+                if outcome.get("notSeated"):
+                    settled[r["id"]]["notSeated"] = outcome["notSeated"]
                 continue
             entry = settle(http, code, r, outcome["candidate"], seat_files, today, starts)
             if entry is not None:
@@ -1206,6 +1371,7 @@ def refresh(by_state, previous, codes=None, http=None, today=None, force=False, 
         return code, settled, records
 
     report = {}
+    shown_now = set()
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         for code, settled, records in pool.map(run, sorted(todo)):
             counts = report.setdefault(code, {"shown": 0, "oversized": 0, "withheld": 0, "kept": 0, "none": 0})
@@ -1217,6 +1383,7 @@ def refresh(by_state, previous, codes=None, http=None, today=None, force=False, 
                 people[r["id"]] = dict(entry, state=code)
                 if entry.get("image"):
                     counts["shown"] += 1
+                    shown_now.add(r["id"])
                     if entry.get("seatKeyed") and entry.get("sha"):
                         seat_files[entry["image"]] = {"holder": r["id"], "name": r["name"],
                                                       "sha": entry["sha"], "read": today}
@@ -1228,6 +1395,16 @@ def refresh(by_state, previous, codes=None, http=None, today=None, force=False, 
     # were shown with stay, so a successor is never shown their photograph.
     current = {r["id"] for records in by_state.values() for r in records}
     people = {pid: e for pid, e in people.items() if pid in current}
+    found = batches(people)
+    for pid, entry in list(people.items()):
+        why = entry.get("seatKeyed") and entry.get("image") and batch_problem(entry, found)
+        if why:
+            people[pid] = dict(entry, withheld=why, image=None, offered=entry["image"])
+            counts = report.setdefault(entry.get("state"), {"shown": 0, "oversized": 0, "withheld": 0,
+                                                            "kept": 0, "none": 0})
+            if pid in shown_now:
+                counts["shown"] -= 1
+                counts["withheld"] += 1
     return {"people": people, "seatFiles": seat_files}, report
 
 
@@ -1241,7 +1418,17 @@ def entry_for(record, cache):
         return None
     if not names_surname(entry.get("evidence"), record["name"]):
         return None
+    if entry.get("seatKeyed") and not same_seat(entry, record):
+        # A seat's file read for the seat the member held before is not
+        # theirs once they sit for another (the reviewers of PR #125).
+        return None
     return entry
+
+
+def same_seat(entry, record):
+    """*entry* was read for *record*'s chamber and district."""
+    return (entry.get("chamber") == record.get("chamber")
+            and _record_district(entry) == _record_district(record))
 
 
 def problems(cache, by_state):
@@ -1253,6 +1440,20 @@ def problems(cache, by_state):
     records = {r["id"]: (code, r) for code, rows in (by_state or {}).items() for r in rows}
     today = datetime.date.today()
     stale = []
+    found = batches((cache or {}).get("people") or {})
+    shown = {}
+    # The legislature's own word that someone the roster seats has left
+    # (a directory's "Vacant", a page headed "Former Representative"): the
+    # roster may be stale for them (rules 16 and 51), so it is said.
+    gone = []
+    for pid, entry in sorted(((cache or {}).get("people") or {}).items()):
+        if pid in records and entry.get("notSeated"):
+            code, record = records[pid]
+            gone.append(f"{code} {record['name']} ({record['chamber']} {record['district']}): "
+                        f"{entry['notSeated']}")
+    for line in gone:
+        out.append(("warn", "legislator-not-seated",
+                    f"the roster seats {line}; check the roster (run 'statelegs')"))
     for pid, entry in sorted(((cache or {}).get("people") or {}).items()):
         if pid not in records or not entry.get("image") or entry.get("withheld") or entry.get("oversized"):
             continue
@@ -1275,15 +1476,24 @@ def problems(cache, by_state):
         if entry["bytes"] > MAX_PORTRAIT_BYTES or max(entry["width"], entry["height"]) > MAX_PORTRAIT_PX:
             out.append(("error", "legislator-photo-heavy",
                         f"{who}: {entry['bytes']:,} bytes, {entry['width']}x{entry['height']}, over the caps"))
-        if entry.get("seatKeyed") and not entry.get("holderSince"):
-            out.append(("error", "legislator-photo-seat",
-                        f"{who}: a seat-keyed file shown without the member's arrival date"))
+        if entry.get("seatKeyed"):
+            why = ("" if entry.get("holderSince") and entry.get("lastModifiedAt")
+                   else "without the member's arrival date or the file's own")
+            why = why or seat_problem(entry, pid, {}) or batch_problem(entry, found)
+            if why:
+                out.append(("error", "legislator-photo-seat", f"{who}: a seat-keyed file shown {why}"))
+        shown.setdefault(entry["image"], []).append(who)
         try:
             age = (today - datetime.date.fromisoformat(entry["read"])).days
         except ValueError:
             age = STALE_DAYS + 1
         if age > STALE_DAYS:
             stale.append(who)
+    for image, whose in sorted(shown.items()):
+        if len(whose) > 1:
+            # One file offered as two members' photograph is neither's.
+            out.append(("error", "legislator-photo-shared",
+                        f"{image} is shown for {len(whose)} members: {', '.join(whose)}"))
     if stale:
         out.append(("warn", "legislator-photo-stale",
                     f"{len(stale)} legislator photograph(s) not confirmed for {STALE_DAYS} days "

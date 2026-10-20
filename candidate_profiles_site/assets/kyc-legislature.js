@@ -317,7 +317,13 @@
     // broken image: one listener for every portrait (rule 13).
     doc.addEventListener("error", function (event) {
       var img = event.target;
-      if (img && img.classList && img.classList.contains("leg-photo")) img.remove();
+      if (!img || !img.classList || !img.classList.contains("leg-photo")) return;
+      // Its credit goes with it: a card never credits a photograph it
+      // does not show (rule 87).
+      var card = img.closest(".leg-person");
+      var credit = card && card.querySelector(".leg-credit");
+      if (credit) credit.remove();
+      img.remove();
     }, true);
     el("legRoster").addEventListener("click", function (event) {
       var row = event.target.closest("[data-region]");

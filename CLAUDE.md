@@ -2101,7 +2101,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     times running (Maine's) is not asked again that run, and pages drawn by
     script (Georgia, South Dakota, Utah) are listed by the command as
     unread, never as unpictured (rule 8). Each card credits
-    `Photo: <legislature>`, linked to the page.
+    `Photo: <legislature>`, linked to the page, and so does an Open
+    States portrait the legislature's own host serves: in Vermont's
+    two-seat districts one card was credited and its neighbour, from the
+    same folder, was not. The review of the first build found more:
+    - A date is only a file's when the server keeps one. California's
+      Assembly answers every `assembly_member_NN.jpg` with one deploy's
+      Last-Modified (`UNDATED_SEAT_HOSTS`), and Louisiana's House rewrote
+      some fifty seat files within twenty seconds on 2024-05-15, for
+      members seated since 2016. Seat files a host wrote together
+      (`batches`) date a file only when the copy fell near the member's
+      arrival, and a shown seat file must carry the full stamp.
+    - Kentucky keys its files by seat too (`house12.jpg`, Senate
+      `senate137.jpg` for seat 37), and `seat_key` missed them; a chamber's
+      word before the number is a seat now. A seat file is shown only for
+      the chamber and district it was read for.
+    - The legislature saying a member has left is not a photo problem:
+      New Mexico's page for Andi Reeb is headed "Former Representative",
+      Ohio's directory lists D.J. Swearingen's seat as vacant, and Open
+      States seats both. Such a page gives no photograph, and `build`
+      warns `legislator-not-seated` so the roster is checked (rules 16,
+      51).
+    - One file shown for two members fails the build, across runs and
+      recipes, and an initial counts only when written as one: "A photo of
+      Representative Smith" names no Andy.
 
 ## District maps
 

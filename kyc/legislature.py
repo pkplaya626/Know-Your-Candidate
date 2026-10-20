@@ -736,6 +736,16 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
     if kind == "openstates":
         # Loaded over https, as the page is; 'statelegs' checked that copy.
         out["image"] = statelegs.secure(image)
+        # A portrait the legislature itself serves is credited to it like
+        # the ones legphotos reads (rule 87): in a district of two, one
+        # credited and one not read as coming from two places (the
+        # reviewers of PR #125). Linked to the member's own page only.
+        if legphotos.official_host(code, out["image"]):
+            credit = {"by": legphotos.legislature_name(code)}
+            if (page and page["kind"] == "member" and not page.get("session")
+                    and legphotos.official_host(code, page["url"])):
+                credit["page"] = page["url"]
+            out["imageCredit"] = credit
     elif kind == "legislature":
         own = legphotos.entry_for(record, photos)
         out["image"] = own["image"]
