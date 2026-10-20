@@ -5146,6 +5146,34 @@ button.local-county-link {
 .chip-clear { padding: var(--s-1) var(--s-3); }
 .chip-clear { background: transparent; border-color: var(--border); }
 
+/* Offices, places, bodies, courts and ballot questions the search names,
+ * each a link to its page, grouped by kind (kyc-search.js, rule 97). */
+.search-answers {
+  margin: 0 0 var(--s-4);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.search-answers[hidden] { display: none; }
+.answer-group + .answer-group { margin-top: var(--s-4); padding-top: var(--s-3); border-top: 1px solid var(--border); }
+.answer-group-title { margin: 0; font-size: var(--t-md); font-weight: 700; }
+.answer-title { margin: var(--s-3) 0 0; font-size: var(--t-sm); font-weight: 700; }
+.answer-note { margin: var(--s-1) 0 0; font-size: var(--t-xs); color: var(--text-muted); line-height: 1.45; }
+.answer-note a, .answer-row a { color: var(--accent); text-decoration: none; }
+.answer-list { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-2); }
+.answer-row { font-size: var(--t-sm); line-height: 1.45; overflow-wrap: anywhere; }
+.answer-row > a:first-child { font-weight: 700; }
+.answer-detail { color: var(--text-muted); }
+.answer-holder { color: var(--text); font-weight: 600; }
+.answer-row .btn { margin-right: var(--s-1); }
+/* Every state's governor, a court's justices: columns, not a page of rows. */
+.answer-compact { grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: var(--s-1) var(--s-3); }
+.answer-compact .answer-row { font-size: var(--t-xs); }
+@media (hover: hover) {
+  .answer-note a:hover, .answer-row a:hover { text-decoration: underline; }
+}
+
 /* Officials the search finds who are not candidates, and members who have
  * left: links, set apart from the profiles (GRID-07, GRID-08). */
 .official-results {

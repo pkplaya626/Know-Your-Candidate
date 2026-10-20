@@ -2019,6 +2019,14 @@
   var NAME_FIELDS = ["name"];
   var OFFICE_FIELDS = ["state", "party", "district", "officeLabel", "contestLabel"];
 
+  /* A seat's title before a name, as a reader writes it: "Senator Warren",
+   * "Rep. Crockett", "Congressman Davidson", "Delegate Norton" (rule 97).
+   * Read off the query, never added to a profile's text: there "Con" and
+   * "Sen", typed on the way to a name, matched every sitting member. The
+   * title says the chamber and nothing else - the data hold no one's sex,
+   * so "Congresswoman Smith" is every sitting House member named Smith. */
+  var SEAT_TITLE = /^(?:(senators?|sens?)|(representatives?|reps?|congress ?(?:man|woman|member|person)|delegates?|resident commissioner)) (.+)$/;
+
   function searchTiers(item) {
     if (item.__tiers) return item.__tiers;
     var names = [item.name].concat(item.aliases || []).filter(Boolean).map(String);
@@ -2137,6 +2145,32 @@
    * "TX-35", "texas district 35", "ny14", "AZ at large" are a race, and
    * "TX-3" is never TX-30 to TX-39; "Kansas" is Kansas's people, not
    * everyone whose text mentions it (GRID-03, GRID-04). */
+  /* The short forms a reader writes a state's name in ("Calif.", "Tex.",
+   * "Mass."), with whether one alone is the state. A word that is also an
+   * English word or the start of a name ("Miss", "Wash", "Del", "Mont" of
+   * Montgomery, "Tenn" of Tenney) names the state only beside an office or
+   * a court ("Ill. governor", "D. Del.", kyc-search.js), never typed alone:
+   * there it is a name being typed. */
+  var STATE_ABBREVIATIONS = {
+    ala: ["AL", false], ariz: ["AZ", true], ark: ["AR", false], cal: ["CA", false],
+    calif: ["CA", true], colo: ["CO", false], conn: ["CT", false], del: ["DE", false],
+    fla: ["FL", true], haw: ["HI", false], ill: ["IL", false], ind: ["IN", false],
+    kan: ["KS", false], kans: ["KS", true], mass: ["MA", false], mich: ["MI", false],
+    minn: ["MN", false], miss: ["MS", false], mont: ["MT", false], neb: ["NE", false],
+    nebr: ["NE", true], nev: ["NV", false], okla: ["OK", true], ore: ["OR", false],
+    oreg: ["OR", true], penn: ["PA", false], penna: ["PA", true], tenn: ["TN", false],
+    tex: ["TX", false], wash: ["WA", false], wis: ["WI", false], wisc: ["WI", true],
+    wyo: ["WY", true], "w va": ["WV", true], wva: ["WV", true], "n mex": ["NM", true],
+    "n dak": ["ND", true], "s dak": ["SD", true], "n car": ["NC", true], "s car": ["SC", true],
+  };
+
+  /** The state a short form names ("calif" -> "CA"), or null; *alone*
+   *  asks only for the forms that name it typed on their own. */
+  function stateAbbreviation(word, alone) {
+    var hit = STATE_ABBREVIATIONS[word];
+    return hit && (!alone || hit[1]) ? hit[0] : null;
+  }
+
   var stateByName = null;
   function stateNames() {
     if (stateByName === null) {
@@ -2148,7 +2182,15 @@
       if (states.DC) {
         ["washington dc", "washington d c", "d c"].forEach(function (n) { stateByName[n] = "DC"; });
       }
-      if (states.VI) stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
+      if (states.VI) {
+        stateByName["us virgin islands"] = stateByName["u s virgin islands"] = "VI";
+        stateByName["virgin islands"] = "VI";
+      }
+      if (states.MP) stateByName["northern marianas"] = stateByName["mariana islands"] = "MP";
+      Object.keys(STATE_ABBREVIATIONS).forEach(function (word) {
+        var code = stateAbbreviation(word, true);
+        if (code && states[code]) stateByName[word] = code;
+      });
     }
     return stateByName;
   }
@@ -2171,6 +2213,14 @@
       function () { return { chamber: "Senate" }; }],
     [/^(?:us |u s )?(?:house|representatives?|reps?|house delegation|house members)$/,
       function () { return { chamber: "House" }; }],
+    // "Ohio congressman", "Texas congresswomen" (rule 97): who sits for the
+    // state in the House, as a reader says it - the members, never the
+    // people running against them (rule 27).
+    [/^(?:us |u s )?(?:congress ?(?:man|woman|men|women|person|people|member|members))$/,
+      function () { return { chamber: "House", seated: true }; }],
+    // "Ohio delegation", "Ohio members of Congress": both chambers' members.
+    [/^(?:(?:us |u s )?congressional delegation|delegation|members of congress|congress)$/,
+      function () { return { seated: true }; }],
   ];
 
   /** *query* read as a place: `{state, chamber, district, any}` (any: a
@@ -2264,6 +2314,9 @@
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
     var name = stateName(place.state);
+    if (place.seated) {
+      return name + "’s sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
+    }
     if (place.chamber === "Senate") return name + "’s Senate seats";
     if (place.chamber === "House") return name + "’s House seats";
     return name;
@@ -2279,6 +2332,10 @@
     var q = searchFold(query);
     var terms = q ? q.split(" ").map(wordStart) : [];
     var exact = q;
+    // "Senator Warren": a sitting senator named Warren first (SEAT_TITLE).
+    var titled = !place && SEAT_TITLE.exec(q);
+    var title = titled ? { chamber: titled[1] ? "Senate" : "House",
+      terms: titled[3].split(" ").map(wordStart), exact: titled[3] } : null;
     var seat = null;
     if (place && place.district !== undefined) {
       seat = new Set();
@@ -2289,7 +2346,7 @@
     }
     var two = place && /^[a-z]{2}$/.test(q);
     compiled = { query: query, place: place, seat: seat, terms: terms, exact: exact,
-                 two: two, label: placeLabel(place), note: seatNote(place) };
+                 two: two, title: title, label: placeLabel(place), note: seatNote(place) };
     return compiled;
   }
 
@@ -2306,6 +2363,9 @@
       return -1;
     }
     if (item.state !== place.state) return -1;
+    if (place.seated) {
+      return seated(item) && (!place.chamber || String(item.chamber).indexOf(place.chamber) !== -1) ? 1 : -1;
+    }
     if (!place.chamber) return 1;
     var running = item.isCandidate ? item.raceId : item.contestRaceId;
     var prefix = place.chamber === "Senate" ? "S-" : "H-";
@@ -2332,6 +2392,14 @@
       // A postal code is a state, not the start of a name ("in", "me").
       if (c.two) return exact ? 2 : -1;
       return c.terms.every(function (t) { return t.test(tiers.name); }) ? 2 : -1;
+    }
+    // A sitting member of the chamber the title names, by name; anyone
+    // else only as the whole query finds them.
+    if (c.title && seated(item) && String(item.chamber).indexOf(c.title.chamber) !== -1) {
+      if (tiers.names.some(function (n) {
+        return n === c.title.exact || joinInitials(n) === joinInitials(c.title.exact);
+      })) return 0;
+      if (c.title.terms.every(function (t) { return t.test(tiers.name); })) return 1;
     }
     if (exact) return 0;
     var every = function (text) { return c.terms.every(function (t) { return t.test(text); }); };
@@ -3365,6 +3433,7 @@
     searchFold: searchFold,
     nameScore: nameScore,
     stateNamed: stateNamed,
+    stateAbbreviation: stateAbbreviation,
     loadData: loadData,
     people: people,
     races: races,

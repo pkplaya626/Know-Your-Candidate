@@ -29,6 +29,10 @@ STATEGOV_FILE = os.path.join(DATA_DIR, "stategov.js")
 # The statewide questions on each jurisdiction's ballot (kyc/ballot_measures.py),
 # for Your ballot and the state pages.
 MEASURES_FILE = os.path.join(DATA_DIR, "measures.js")
+# The home search's places and bodies (kyc/search_index.py, rule 97):
+# legislatures, counties, committees and tribal governments, loaded the first
+# time a query is typed.
+SEARCH_FILE = os.path.join(DATA_DIR, "search.js")
 # One file per state: its legislative districts and who sits for them.
 LEGISLATURE_DIR = os.path.join(DATA_DIR, "legislature")
 # The federal executive and courts: one file for the hub, one per court.
@@ -73,6 +77,9 @@ PAGE_REQUIREMENTS = {
         "assets/kyc-profile.js",
         "assets/kyc-findrep.js",
         "assets/kyc-senate.js",
+        # The search's answers about offices, places and bodies (rule 97),
+        # which the grid draws above its cards.
+        "assets/kyc-search.js",
         "assets/kyc-directory.js",
     ),
     "map.html": (
@@ -990,6 +997,26 @@ def write_measures(payload, root="."):
         + 'window.kycMeasuresMeta = {"signature":"' + measures_signature(payload) + '"};\n'
     )
     return path, _atomic_write(path, text)
+
+
+def write_search(payload, root="."):
+    """Emit ``candidate_profiles_site/data/search.js``: the home search's
+    index of places and bodies (kyc/search_index.py, rule 97), rewritten
+    only when its signature changes."""
+    path = os.path.join(root, SEARCH_FILE)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    text = (
+        _BANNER.format(source="kyc/search_index.py: the county maps, the committee rosters, "
+                              "the Tribal Leaders Directory", built=build_timestamp())
+        + f"window.kycSearch = {_json(payload)};\n"
+        + 'window.kycSearchMeta = {"signature":"' + search_signature(payload) + '"};\n'
+    )
+    return path, _atomic_write(path, text)
+
+
+def search_signature(payload):
+    """Content hash of the search index, excluding the build time."""
+    return hashlib.sha256(_json(payload).encode("utf-8")).hexdigest()
 
 
 def measures_signature(payload):

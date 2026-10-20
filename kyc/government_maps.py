@@ -251,6 +251,16 @@ LEGISLATURE_NAME = {
     "ND": "Legislative Assembly", "OR": "Legislative Assembly",
 }
 
+def legislature_title(code):
+    """The legislature page's title, the body's own name (rule 75):
+    "Virginia General Assembly", "Massachusetts General Court", "Nebraska
+    Legislature". The page and the search index both name it from here."""
+    from .pages import state_name
+    if code == "NE":
+        return "Nebraska Legislature"
+    return f"{state_name(code)} {LEGISLATURE_NAME.get(code, 'Legislature')}"
+
+
 NO_LINE_ITEM_VETO = ("IN", "NV", "NH", "NC", "RI", "VT")
 
 
