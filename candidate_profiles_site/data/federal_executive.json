@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-19",
+ "asOf": "2026-10-20",
  "changes": {
   "offices": {
    "agriculture": {
@@ -1316,7 +1316,7 @@
     "wikidata": "Q1658460"
    }
   },
-  "read": "2026-10-19",
+  "read": "2026-10-20",
   "since": "2025-01-20",
   "sources": {
    "senate": "https://www.senate.gov/legislative/votes_new.htm",
@@ -1324,7 +1324,7 @@
    "wikipedia": "https://en.wikipedia.org/"
   }
  },
- "fetched": "2026-10-19T18:09:58+00:00",
+ "fetched": "2026-10-20T13:36:43+00:00",
  "offices": [
   {
    "body": "Department of State",
@@ -1964,8 +1964,7 @@
    "holder": {
     "name": "Lee Zeldin",
     "page": {
-     "status": "confirmed",
-     "url": "https://www.epa.gov/aboutepa/epa-administrator"
+     "status": "unreadable"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/02/Lee-Zeldin.jpg",
     "photoSet": [

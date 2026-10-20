@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-19T18:31:59+00:00",
+ "fetched": "2026-10-20T13:52:15+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -10,8 +10,8 @@
   "http://www.elections.alaska.gov/Core/AKVoteEarly.php": "unknown",
   "http://www.elections.ny.gov/VotingAbsentee.html": "unknown",
   "http://www.elections.virginia.gov/casting-a-ballot/absentee-voting/": "live",
-  "http://www.maine.gov/portal/government/edemocracy/voter_lookup.php": "unknown",
-  "http://www.maine.gov/sos/cec/elec/voter-info/absent.html": "unknown",
+  "http://www.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
+  "http://www.maine.gov/sos/cec/elec/voter-info/absent.html": "live",
   "http://www.mvp.sos.ga.gov/": "unknown",
   "http://www.sos.ca.gov/elections/polling-place/": "live",
   "http://www.sos.mo.gov/elections/pollingplacelookup/": "live",
@@ -243,8 +243,8 @@
   "https://www.elections.virginia.gov/resultsreports/election-results/": "live",
   "https://www.in.gov/sos/elections/voter-information/ways-to-vote/absentee-voting": "live",
   "https://www.kdor.ks.gov/Apps/VoterReg/Default.aspx": "live",
-  "https://www.maine.gov/sos/cec/elec/voter-info/votreg.html": "unknown",
-  "https://www.maine.gov/sos/elections-voting/election-results-data": "unknown",
+  "https://www.maine.gov/sos/cec/elec/voter-info/votreg.html": "live",
+  "https://www.maine.gov/sos/elections-voting/election-results-data": "live",
   "https://www.michigan.gov/sos/elections/election-results-and-data": "live",
   "https://www.michigan.gov/sos/elections/voting/absentee-voting": "live",
   "https://www.michigan.gov/sos/elections/voting/register-to-vote": "live",
@@ -281,7 +281,7 @@
   "https://www.sos.mn.gov/elections-voting/whats-on-my-ballot": "live",
   "https://www.sos.mo.gov/elections/goVoteMissouri/register": "live",
   "https://www.sos.mo.gov/elections/govotemissouri/howtovote#Absentee": "live",
-  "https://www.sos.mo.gov/elections/results": "unknown",
+  "https://www.sos.mo.gov/elections/results": "live",
   "https://www.sos.ms.gov/elections-voting/election-results": "live",
   "https://www.sos.ms.gov/elections-voting/voter-registration-information": "live",
   "https://www.sos.ms.gov/yall-vote/absentee-voting-information": "live",
@@ -317,7 +317,7 @@
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
   "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "live"
  },
- "linksChecked": "2026-10-19",
+ "linksChecked": "2026-10-20",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
