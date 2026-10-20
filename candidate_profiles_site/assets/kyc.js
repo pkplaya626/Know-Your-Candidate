@@ -2003,14 +2003,13 @@
   var NAME_FIELDS = ["name"];
   var OFFICE_FIELDS = ["state", "party", "district", "officeLabel", "contestLabel"];
 
-  /* The words a seat's holder is called by: a delegate or the Resident
-   * Commissioner by the place's own title (rule 75). */
-  function seatTitles(item) {
-    if (String(item.chamber).indexOf("Senate") !== -1) return "Senator";
-    var title = ((meta().states || {})[item.state] || {}).delegateTitle;
-    if (title) return title;
-    return "Representative Congressman Congresswoman Congressmember";
-  }
+  /* A seat's title before a name, as a reader writes it: "Senator Warren",
+   * "Rep. Crockett", "Congressman Davidson", "Delegate Norton" (rule 97).
+   * Read off the query, never added to a profile's text: there "Con" and
+   * "Sen", typed on the way to a name, matched every sitting member. The
+   * title says the chamber and nothing else - the data hold no one's sex,
+   * so "Congresswoman Smith" is every sitting House member named Smith. */
+  var SEAT_TITLE = /^(?:(senators?|sens?)|(representatives?|reps?|congress ?(?:man|woman|member|person)|delegates?|resident commissioner)) (.+)$/;
 
   function searchTiers(item) {
     if (item.__tiers) return item.__tiers;
@@ -2025,10 +2024,6 @@
     // congress-legislators): "Speaker" found only a "motivational speaker"
     // in a challenger's text, never the Speaker (GRID-05).
     if (seated(item)) (item.leadership || []).forEach(function (t) { office.push(String(t)); });
-    // The seat's title, as a reader puts it before a name: "Senator
-    // Warren", "Rep. Crockett", "Congressman Davidson" found nobody by the
-    // office (rule 97). A seated member's only: a candidate holds no seat.
-    if (seated(item)) office.push(seatTitles(item));
     var body = [];
     SEARCH_FIELDS.forEach(function (field) {
       if (NAME_FIELDS.indexOf(field) !== -1 || OFFICE_FIELDS.indexOf(field) !== -1) return;
@@ -2202,13 +2197,14 @@
       function () { return { chamber: "Senate" }; }],
     [/^(?:us |u s )?(?:house|representatives?|reps?|house delegation|house members)$/,
       function () { return { chamber: "House" }; }],
-    // "Ohio congressman", "Texas congresswomen" (rule 97): the state's seats
-    // in the House, as a reader says them.
+    // "Ohio congressman", "Texas congresswomen" (rule 97): who sits for the
+    // state in the House, as a reader says it - the members, never the
+    // people running against them (rule 27).
     [/^(?:us |u s )?(?:congress ?(?:man|woman|men|women|person|people|member|members))$/,
-      function () { return { chamber: "House" }; }],
-    // "Ohio delegation", "Ohio members of Congress": both chambers.
+      function () { return { chamber: "House", seated: true }; }],
+    // "Ohio delegation", "Ohio members of Congress": both chambers' members.
     [/^(?:(?:us |u s )?congressional delegation|delegation|members of congress|congress)$/,
-      function () { return {}; }],
+      function () { return { seated: true }; }],
   ];
 
   /** *query* read as a place: `{state, chamber, district, any}` (any: a
@@ -2302,6 +2298,9 @@
       return place.any ? "district " + seat + " in every state" : place.state + "-" + seat;
     }
     var name = stateName(place.state);
+    if (place.seated) {
+      return name + "’s sitting " + (place.chamber === "House" ? "House members" : "members of Congress");
+    }
     if (place.chamber === "Senate") return name + "’s Senate seats";
     if (place.chamber === "House") return name + "’s House seats";
     return name;
@@ -2317,6 +2316,10 @@
     var q = searchFold(query);
     var terms = q ? q.split(" ").map(wordStart) : [];
     var exact = q;
+    // "Senator Warren": a sitting senator named Warren first (SEAT_TITLE).
+    var titled = !place && SEAT_TITLE.exec(q);
+    var title = titled ? { chamber: titled[1] ? "Senate" : "House",
+      terms: titled[3].split(" ").map(wordStart), exact: titled[3] } : null;
     var seat = null;
     if (place && place.district !== undefined) {
       seat = new Set();
@@ -2327,7 +2330,7 @@
     }
     var two = place && /^[a-z]{2}$/.test(q);
     compiled = { query: query, place: place, seat: seat, terms: terms, exact: exact,
-                 two: two, label: placeLabel(place), note: seatNote(place) };
+                 two: two, title: title, label: placeLabel(place), note: seatNote(place) };
     return compiled;
   }
 
@@ -2344,6 +2347,9 @@
       return -1;
     }
     if (item.state !== place.state) return -1;
+    if (place.seated) {
+      return seated(item) && (!place.chamber || String(item.chamber).indexOf(place.chamber) !== -1) ? 1 : -1;
+    }
     if (!place.chamber) return 1;
     var running = item.isCandidate ? item.raceId : item.contestRaceId;
     var prefix = place.chamber === "Senate" ? "S-" : "H-";
@@ -2370,6 +2376,14 @@
       // A postal code is a state, not the start of a name ("in", "me").
       if (c.two) return exact ? 2 : -1;
       return c.terms.every(function (t) { return t.test(tiers.name); }) ? 2 : -1;
+    }
+    // A sitting member of the chamber the title names, by name; anyone
+    // else only as the whole query finds them.
+    if (c.title && seated(item) && String(item.chamber).indexOf(c.title.chamber) !== -1) {
+      if (tiers.names.some(function (n) {
+        return n === c.title.exact || joinInitials(n) === joinInitials(c.title.exact);
+      })) return 0;
+      if (c.title.terms.every(function (t) { return t.test(tiers.name); })) return 1;
     }
     if (exact) return 0;
     var every = function (text) { return c.terms.every(function (t) { return t.test(text); }); };

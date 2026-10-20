@@ -240,11 +240,30 @@
     return (off && off.title) || STATE_OFFICES[key];
   }
 
+  /** The state's record of *key* on the 2026 ballot, or null. */
+  function ballotItem(code, key) {
+    return (((gov()[code] || {}).ballot2026 || {}).offices || {})[key] || null;
+  }
+
+  /** Whether *key* is on *code*'s Nov 3, 2026 ballot: one test for every
+   *  count of it (rule 73). Arizona's lieutenant governor, an office no one
+   *  holds yet, is on it for the first time. */
+  function onBallot(code, key) {
+    var item = ballotItem(code, key);
+    return !!(item && item.up);
+  }
+
+  /** "Arizona", "The District of Columbia": a place opening a sentence. */
+  function PlaceWords(code) {
+    var w = placeWords(code);
+    return w.charAt(0).toUpperCase() + w.slice(1);
+  }
+
   /** The office's 2026 line: on the ballot or not, as the state's record
    *  says, and the candidates its election office lists, labelled as the
    *  list's (rule 79: who is not running is a source's word, never ours). */
   function ballotLine(code, key, full) {
-    var item = (((gov()[code] || {}).ballot2026 || {}).offices || {})[key];
+    var item = ballotItem(code, key);
     if (!item) return "";
     if (!item.up) {
       if (item.next && item.next.year) return "Next on the ballot in " + esc(item.next.year) + ".";
@@ -257,33 +276,65 @@
       out += " " + esc(hs.text) + (hs.cite ? " (" + esc(hs.cite) + ")" : "") + ".";
     }
     var list = item.candidates;
-    if (!list || !list.candidates) return out;
+    // As the state page says it (kyc-stategov.js): a list not read is said
+    // so, and a list that is not the state's own says that too.
+    if (!list || !list.candidates) {
+      return out + (full ? " Its candidates are not listed here: no election office’s list of them " +
+        "has been read." : "");
+    }
     var printed = list.candidates.filter(function (c) { return !c.writeIn; });
     var writeIns = list.candidates.length - printed.length;
+    var notState = list.notStateList ? " Not the state’s own list. " + esc(list.notStateList) + "." : "";
     if (!full) {
       return esc(plural(printed.length, "candidate", "candidates")) + " on " +
-        esc(list.source || "the election office's list") + ".";
+        esc(list.source || "the election office’s list") + "." + notState;
     }
-    return out + " " + (past() ? "Candidates who were on it" : "Candidates on it") + ", as " +
+    return out + notState + " " + (past() ? "Candidates who were on it" : "Candidates on it") + ", as " +
       (list.url ? '<a href="' + KYC.escapeAttr(list.url) + '" target="_blank" rel="noopener noreferrer">' +
-        esc(list.source || list.by || "the election office's list") + "</a>"
-        : esc(list.source || list.by || "the election office's list")) + " lists them: " +
+        esc(list.source || list.by || "the election office’s list") + "</a>"
+        : esc(list.source || list.by || "the election office’s list")) + " lists them: " +
       printed.map(function (c) {
         return esc(c.name) + (c.party ? " (" + esc(c.party) + ")" : "");
       }).join(", ") + (writeIns ? "; and " + esc(plural(writeIns, "certified write-in candidate",
         "certified write-in candidates")) : "") + ".";
   }
 
-  /** The holder's row for one state's office. */
+  /** The holder's row for one state's office. A row is titled as an office
+   *  only where the place has it (rule 75): the District has a mayor, not
+   *  a governor, and an office this site does not list is not named as
+   *  though its page held it. */
   function officeRow(code, key, full) {
     var info = gov()[code];
-    var title = officeTitle(code, key) + ", " + KYC.stateName(code);
     var href = statePage(code, "state-government");
-    if (!info) return row(link(href, title), "This site lists no state officers here.");
+    var word = STATE_OFFICES[key].toLowerCase();
+    if (!info) {
+      return row(link(statePage(code), PlaceWords(code) + "’s page"), esc(code === "DC"
+        ? (key === "governor" || key === "lt"
+          ? "The District of Columbia has an elected mayor and a council of 13, not a governor and legislature."
+          : "This site does not list the District of Columbia’s officers.")
+        : "This site does not list " + placeWords(code) + "’s officers."));
+    }
     var off = info[key];
-    if (off && off.none) {
-      return row(link(href, title), esc(KYC.stateName(code) + " has no such office; its page says who " +
-        "does its work."));
+    if (!off) {
+      return row(link(href, PlaceWords(code) + "’s page"), esc("This site lists no " + word + " for " +
+        placeWords(code) + "; its page lists the officers it does."));
+    }
+    var title = officeTitle(code, key) + ", " + KYC.stateName(code);
+    if (off.none) {
+      var successor = off.successor && off.successor.name
+        ? " First in line to succeed the governor" + (onBallot(code, key) ? " until then" : "") + ": " +
+          off.successor.title + " " + off.successor.name + "." : "";
+      // A new office, first elected on Nov 3 (Arizona's lieutenant
+      // governor): no one holds it yet, and its race is shown.
+      if (onBallot(code, key)) {
+        var item = ballotItem(code, key);
+        return row(link(href, title) + ":", esc("No one holds this office yet" +
+          (item.note ? ": " + item.note : "") + "." + successor) +
+          (full === false ? "" : " " + ballotLine(code, key, full)));
+      }
+      return row(link(href, PlaceWords(code) + "’s page"), esc(PlaceWords(code) + " has no " + word +
+        (key === "sos" && off.electionChief ? "; the lieutenant governor’s office runs its elections." : ".") +
+        successor));
     }
     var holder = namedHolder(off)
       ? '<span class="answer-holder">' + esc(off.name) + "</span>"
@@ -291,7 +342,10 @@
     return row(link(href, title) + ":", holder + (full === false ? "" : ". " + ballotLine(code, key, full)));
   }
 
-  /** Every state's holder of *key*, compactly. */
+  /** Every state's holder of *key*, compactly: an acting officer, or an
+   *  office called otherwise ("Secretary of the Commonwealth"), with the
+   *  title the page gives them, so no acting officer reads as the holder;
+   *  and a new office no one holds yet, which is on the ballot. */
   function everyState(key) {
     var states = gov();
     var codes = Object.keys(states).sort(function (a, b) {
@@ -301,11 +355,19 @@
     var rows = [];
     codes.forEach(function (code) {
       var off = states[code][key];
-      if (!off || off.none) return;
-      var item = ((states[code].ballot2026 || {}).offices || {})[key];
-      if (item && item.up) up += 1;
-      rows.push(row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":",
-        namedHolder(off) ? esc(off.name) : "not named here"));
+      var ballot = onBallot(code, key);
+      if (!off || (off.none && !ballot)) return;
+      if (ballot) up += 1;
+      var detail;
+      if (off.none) {
+        detail = esc("no one holds this office yet; first elected on Nov 3, 2026");
+      } else if (namedHolder(off)) {
+        detail = esc(off.name) + (off.title && off.title !== STATE_OFFICES[key]
+          ? " (" + esc(off.title) + ")" : "");
+      } else {
+        detail = "not named here";
+      }
+      rows.push(row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":", detail));
     });
     return { rows: rows, up: up };
   }
@@ -331,26 +393,28 @@
       return out;
     }
     var all = everyState(key);
+    var was = past();
     if (found.race) {
-      var codes = Object.keys(gov()).filter(function (code) {
-        var item = ((gov()[code].ballot2026 || {}).offices || {})[key];
-        return item && item.up;
-      }).sort(function (a, b) { return KYC.stateName(a).localeCompare(KYC.stateName(b)); });
+      var codes = Object.keys(gov()).filter(function (code) { return onBallot(code, key); })
+        .sort(function (a, b) { return KYC.stateName(a).localeCompare(KYC.stateName(b)); });
       out.push(block("offices", name + " races on the Nov 3, 2026 ballot",
         codes.map(function (code) {
           return row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":",
             ballotLine(code, key, false));
-        }), { compact: true, note: esc(plural(codes.length, "state or territory elects", "states and territories elect") +
-          " this office on Nov 3, 2026, as each state's own record says. Type a state with the office (" ) +
-          searchLink("Ohio " + name.toLowerCase()) + ") for its candidates." }));
+        }), { compact: true, note: esc(plural(codes.length,
+          was ? "state or territory elected" : "state or territory elects",
+          was ? "states and territories elected" : "states and territories elect") +
+          " this office on Nov 3, 2026, as each state’s own record says. Type a state with the office (") +
+          searchLink("Ohio " + name.toLowerCase()) + esc(") to see its candidates.") }));
       return out;
     }
-    out.push(block("offices", (key === "ag" || key === "sos" ? "Each state's " + name.toLowerCase() : name + "s"),
+    out.push(block("offices", (key === "ag" || key === "sos" ? "Each state’s " + name.toLowerCase() : name + "s"),
       all.rows, { compact: true,
-        note: esc("Who holds the office in each state and territory, as each state's page lists them; " +
-          all.up + " of these offices are on the Nov 3, 2026 ballot. Type a state with it (") +
-          searchLink(KYC.stateName("TX") + " " + name.toLowerCase()) + esc(") for that state's, and " +
-          "its candidates.") }));
+        note: esc("Each state’s and territory’s " + name.toLowerCase() + ", as its page lists them, " +
+          "with the title it gives an acting officer. " + plural(all.up, "of these offices", "of these offices") +
+          (all.up === 1 ? (was ? " was" : " is") : (was ? " were" : " are")) + " on the Nov 3, 2026 ballot. " +
+          "Type a state with the office (") +
+          searchLink(KYC.stateName("TX") + " " + name.toLowerCase()) + esc(") to see who holds it there and its 2026 race, if it has one.") }));
     return out;
   }
 
@@ -361,6 +425,10 @@
     labor: ["dol"], hhs: ["hhs"], hud: ["hud"], transportation: ["dot"], energy: ["doe"],
     homeland: ["dhs"], epa: ["epa"], omb: ["omb"], ustr: ["ustr"], dni: ["dni", "odni"],
     cia: ["cia"], sba: ["sba"], treasury: [], state: [] };
+  /* Short names that are also a word or a name ("Doe", "dot", "hud"): the
+   * department only typed in capitals ("DOE") or with "secretary" or
+   * "department", or a search for a surname answers with a Cabinet post. */
+  var WORDLIKE = { doe: 1, dot: 1, hud: 1, dol: 1 };
 
   var FED_FILLER = { secretary: 1, secretaries: 1, sec: 1, secy: 1, department: 1, dept: 1,
     of: 1, the: 1, us: 1, united: 1, states: 1, federal: 1, administrator: 1, director: 1,
@@ -400,12 +468,12 @@
     }
     if (VICE.test(p)) {
       return [block("offices", "", [personRow("Vice President of the United States", d.vicePresident)],
-        { note: p === "president of the senate" ? esc("The Vice President is the Senate's president.") : "" })];
+        { note: p === "president of the senate" ? esc("The Vice President is the Senate’s president.") : "" })];
     }
     if (CABINET.test(p)) {
       var rows = [personRow("President", d.president), personRow("Vice President", d.vicePresident)]
         .concat((d.offices || []).map(federalRow)).filter(Boolean);
-      return [block("offices", "The President's Cabinet", rows,
+      return [block("offices", "The President’s Cabinet", rows,
         { compact: true, more: link(root() + "federal/index.html#cabinet", "The federal government page") +
           " says who each is and how they came to the post." })];
     }
@@ -416,7 +484,8 @@
       var h = office.holder || {};
       var text = " " + words([office.office, office.body, h.title].join(" ")).join(" ") + " ";
       var acronym = (ACRONYMS[office.key] || []).some(function (a) {
-        return words2.length === 1 && words2[0] === a;
+        return words2.length === 1 && words2[0] === a &&
+          (!WORDLIKE[a] || cue || capitalised(ctx.raw, a.toUpperCase()));
       });
       if (acronym) return true;
       var all = words2.every(function (w) { return text.indexOf(" " + w + " ") !== -1; });
@@ -438,8 +507,30 @@
     republicans: "republican" };
   var PRINCIPAL = /^(Speaker|President Pro Tempore|(House |Senate )?(Majority|Minority) (Leader|Whip))\b/;
 
+  /* "Texas House speaker", "speaker of the Ohio House", "Nebraska majority
+   * leader": this site names no state legislature's leaders (it has no
+   * source for them), so the answer is the chamber's page, and says so. */
+  function stateLeaders(ctx) {
+    var rest = trim(ctx.rest).filter(function (w) { return !FILLER[w]; });
+    if (!rest.some(function (w) { return LEADER_CUE[w] && w !== "leadership"; })) return [];
+    var known = { house: 1, senate: 1, assembly: 1, delegates: 1, representatives: 1, legislature: 1,
+      state: 1, majority: 1, minority: 1, floor: 1, president: 1, pro: 1, assistant: 1, deputy: 1,
+      democratic: 1, democrat: 1, democrats: 1, dem: 1, dems: 1, republican: 1, republicans: 1,
+      gop: 1, caucus: 1, party: 1, general: 1, lower: 1, upper: 1, chamber: 1 };
+    if (!rest.every(function (w) { return LEADER_CUE[w] || known[w]; })) return [];
+    if (!have("search")) { ctx.wants.push("search"); return []; }
+    var chamber = rest.indexOf("senate") !== -1 || rest.indexOf("upper") !== -1 ? "upper"
+      : rest.some(function (w) { return w === "house" || w === "assembly" || w === "delegates" ||
+        w === "representatives" || w === "lower"; }) ? "lower" : null;
+    var out = legislatureRows(ctx, chamber);
+    // Said under the chamber's row, which names it first.
+    out[0].more = esc("This site does not name the leaders of state legislatures: it has no source " +
+      "for them. The " + (chamber ? "chamber’s" : "legislature’s") + " page lists who sits for each district.");
+    return out;
+  }
+
   function leaders(ctx) {
-    if (ctx.state) return [];
+    if (ctx.state) return stateLeaders(ctx);
     if (!ctx.ws.some(function (w) { return LEADER_CUE[w]; })) return [];
     var ws = ctx.ws.filter(function (w) { return !FILLER[w] && w !== "congressional" && w !== "congress" &&
       w !== "party" && w !== "us"; })
@@ -486,7 +577,7 @@
     if (!senate && !house && !delegate && !commissioner) return [];
     if (ctx.zip) {
       return [block("offices", "", [row(zipButton(ctx.zip), esc("Your members of Congress and your " +
-        "state legislators, by the ZIP code's districts."))])];
+        "state legislators, by the ZIP code’s districts."))])];
     }
     if (ctx.state) {
       // "Maryland delegate": a member of its House of Delegates.
@@ -516,14 +607,14 @@
         { note: esc("The District of Columbia and the territories each send one member to the House, " +
           "who votes in committee but not on the floor.") +
           (delegate && also.length ? " " + esc("A delegate in ") + andList(also) +
-            esc(" is a member of the state's House of Delegates.") : "") })];
+            esc(" is a member of the state’s House of Delegates.") : "") })];
     }
     var note = senate
       ? esc("Each state elects two U.S. senators. ") +
         link("#/?role=member&chamber=Senate", "Every sitting senator") + " · " +
         link("#/?view=senate", "the Senate by the year each seat is next decided") +
         esc(". Type a state with it (") + searchLink("Ohio senators") + esc(") for its two.")
-      : esc("Each state's House members are elected by district. ") +
+      : esc("Each state’s House members are elected by district. ") +
         link("#/?role=member&chamber=House", "Every sitting House member") +
         esc(". Your own is found by ZIP code, under Find who represents you, or type a state (") +
         searchLink("Ohio representatives") + esc(") or a district (") + searchLink("OH-3") + esc(").");
@@ -547,7 +638,7 @@
     var name = KYC.stateName(ctx.state);
     if (!leg) {
       return [block("places", "", [row(link(statePage(ctx.state), name),
-        esc("This site has no page for " + name + "'s legislature."))])];
+        esc("This site has no page for " + name + "’s legislature."))])];
     }
     var href = root() + "legislature/" + ctx.state.toLowerCase() + ".html";
     var what = leg[0];
@@ -556,10 +647,11 @@
       what = name + " " + (chamber === "lower" ? leg[2] : leg[1]);
     }
     var rows = [row(link(href, what), esc(chamber && !leg[1]
-      ? "Nebraska's Legislature has one chamber; its members are called senators."
+      ? "Nebraska’s Legislature has one chamber; its members are called senators."
       : (chamber ? "A chamber of the " + leg[0] + ": its districts on a map, and who sits for each."
+        : !leg[1] ? "One chamber: its districts on a map, and who sits for each."
         : "Its Senate and " + (leg[2] || "House") + " districts on a map, and who sits for each.")))];
-    if (ctx.zip) rows.push(row(zipButton(ctx.zip), esc("Your state legislators by the ZIP code's districts.")));
+    if (ctx.zip) rows.push(row(zipButton(ctx.zip), esc("Your state legislators by the ZIP code’s districts.")));
     return [block("places", "", rows)];
   }
 
@@ -586,14 +678,14 @@
       var out = legislatureRows(ctx, chamber);
       // "Texas House" is also Texas's seats in the U.S. House: the cards.
       if (chamber && !legislator && /^(?:house|senate|house of representatives)$/.test(p)) {
-        out[0].note = esc("The state legislature's chamber. " + KYC.stateName(ctx.state) +
-          "'s seats in the U.S. " + (chamber === "upper" ? "Senate" : "House") + " are the cards below.");
+        out[0].note = esc("The state legislature’s chamber. " + KYC.stateName(ctx.state) +
+          "’s seats in the U.S. " + (chamber === "upper" ? "Senate" : "House") + " are the cards below.");
       }
       return out;
     }
     if (ctx.zip && legislator) {
       return [block("places", "", [row(zipButton(ctx.zip),
-        esc("Your state legislators by the ZIP code's districts."))])];
+        esc("Your state legislators by the ZIP code’s districts."))])];
     }
     var pick = function (test) {
       return Object.keys(legs).filter(function (code) { return test(legs[code]); }).sort()
@@ -652,20 +744,23 @@
       // The District and the territories have no county page here.
       return [block("offices", "Local offices", [], { note: esc("This site names no local officials, " +
         "and has no county page for " + placeWords(ctx.state) + ". ") +
-        link(statePage(ctx.state), KYC.stateName(ctx.state) + "'s page") + esc(" lists what it does cover.") })];
+        link(statePage(ctx.state), PlaceWords(ctx.state) + "’s page") + esc(" lists what it does cover.") })];
     }
     if (counties.length === 1) {
-      where = link(counties[0].href, counties[0].name.replace(/,.*$/, "") + "'s page");
+      where = link(counties[0].href, counties[0].name.replace(/,.*$/, "") + "’s page");
     } else if (ctx.state && (index().counties || {})[ctx.state]) {
       where = link(root() + "counties/" + ctx.state.toLowerCase() + ".html", KYC.stateName(ctx.state) +
-        "'s county page");
+        "’s county page");
     } else {
-      where = link(root() + "counties/index.html", "Each state's county page");
+      where = link(root() + "counties/index.html", "Each state’s county page");
     }
+    // Most local governments have no website in the Census listing, and a
+    // listed one is linked only once checked (rule 78).
     return [block("offices", "Local offices", [], { note: esc("This site names no local officials: no " +
       "mayors, councils, county officers, sheriffs or school boards. ") + where +
       esc(" lists every local government the Census Bureau records there (cities, towns, school " +
-        "districts and others), each with its own website, where its officials are named.") })];
+        "districts and others), with its website where the Census listing gives one, checked before " +
+        "it is linked.") })];
   }
 
   /* ---------------------------------------------------------- counties */
@@ -701,10 +796,41 @@
 
   /** The counties *ctx* names, `[{code, fips, name, href}]`, and the
    *  answer's blocks. */
+  /* "Texas county judge", "Ohio county commissioner": the state's local
+   * offices, never Texas County, Missouri or Ohio County, Kentucky. */
+  var COUNTY_OFFICE = /^(?:county|parish|borough) (?:commissioners?|commission|executives?|judges?|clerks?|treasurers?|assessors?|attorneys?|sheriffs?|officials?|officers?|offices?|governments?|boards?|councils?)\b/;
+
+  /** The counties named *ws* exactly, `[{code, fips, name, href}]`. */
+  function countiesNamed(ws, code) {
+    return (countyIndex()[countyKey(phrase(ws))] || []).filter(function (c) {
+      return !code || c.code === code;
+    });
+  }
+
+  function countyBlocks(found) {
+    found = found.map(function (c) {
+      return { code: c.code, fips: c.fips, name: c.name + ", " + KYC.stateName(c.code),
+               href: root() + "counties/" + c.code.toLowerCase() + ".html#/?county=" + encodeURIComponent(c.fips) };
+    }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+    if (!found.length) return { found: [], blocks: [] };
+    return { found: found, blocks: [block("places", found.length > 1 ? plural(found.length, "county", "counties") +
+      " of that name" : "", found.slice(0, LIMIT * 3).map(function (c) {
+        return row(link(c.href, c.name), esc("its local governments on a map, with the website the " +
+          "Census listing gives, where it gives one, checked before it is linked."));
+      }), { compact: found.length > 4 })] };
+  }
+
   function counties(ctx) {
     var at = -1;
     for (var i = 0; i < ctx.ws.length; i++) if (COUNTY_CUE[ctx.ws[i]]) { at = i; break; }
-    if (at < 0) return { found: [], blocks: [] };
+    if (at < 0) {
+      // A county's name alone ("Dallas"), only where no profile answers it:
+      // a surname is the usual one-word search, and many are counties'.
+      var bare = trim(ctx.ws);
+      if (!ctx.alone || !bare.length || bare.length > 3) return { found: [], blocks: [] };
+      if (!have("search")) { ctx.wants.push("search"); return { found: [], blocks: [] }; }
+      return countyBlocks(ctx.state ? countiesNamed(trim(ctx.rest), ctx.state) : countiesNamed(bare, null));
+    }
     if (!have("search")) { ctx.wants.push("search"); return { found: [], blocks: [] }; }
     var before = trim(ctx.ws.slice(0, at));
     var after = ctx.ws.slice(at + 1);
@@ -712,11 +838,11 @@
     var listOf = function (code) {
       if (code && (index().counties || {})[code]) {
         return { found: [], blocks: [block("places", "", [row(link(root() + "counties/" + code.toLowerCase() + ".html",
-          KYC.stateName(code) + "'s counties and local governments"), esc("every county on a map, and every " +
+          KYC.stateName(code) + "’s counties and local governments"), esc("every county on a map, and every " +
           "local government in each."))])] };
       }
       return { found: [], blocks: [block("places", "", [row(link(root() + "counties/index.html",
-        "Counties and local governments"), esc("each state's counties, and every local government in each."))])] };
+        "Counties and local governments"), esc("each state’s counties, and every local government in each."))])] };
     };
     // "Texas counties" is Texas's list; "Texas County" is a county (in
     // Missouri, and in Oklahoma).
@@ -726,6 +852,8 @@
     }
     // "County judge", "county commissioners": the local offices' answer.
     if (!before.length && LOCAL.test(phrase(ctx.ws))) return { found: [], blocks: [] };
+    if (wholeState && wholeState.at === 0 && wholeState.len === before.length &&
+        COUNTY_OFFICE.test(phrase(ctx.ws.slice(at)))) return { found: [], blocks: [] };
     var tries = [];
     // "Cook County, IL", "Travis County Texas commissioner": the state after.
     var stateAfter = findState(after, ctx.raw);
@@ -746,25 +874,16 @@
     var kindOf = new RegExp(" " + COUNTY_CUE[ctx.ws[at]] + "$", "i");
     var sameKind = found.filter(function (c) { return kindOf.test(c.name); });
     if (sameKind.length) found = sameKind;
-    found = found.map(function (c) {
-      return { code: c.code, fips: c.fips, name: c.name + ", " + KYC.stateName(c.code),
-               href: root() + "counties/" + c.code.toLowerCase() + ".html#/?county=" + encodeURIComponent(c.fips) };
-    }).sort(function (a, b) { return a.name.localeCompare(b.name); });
-    if (found.length) {
-      return { found: found, blocks: [block("places", found.length > 1 ? plural(found.length, "county", "counties") +
-        " of that name" : "", found.slice(0, LIMIT * 3).map(function (c) {
-          return row(link(c.href, c.name), esc("its local governments, each with its website, on a map."));
-        }), { compact: found.length > 4 })] };
-    }
+    if (found.length) return countyBlocks(found);
     // "Counties", "Texas county": the state's page, or every state's.
     var code = (stateAfter || wholeState || {}).code || ctx.state;
     if (!before.length || (wholeState && wholeState.at === 0 && wholeState.len === before.length)) {
       return listOf(code);
     }
     return { found: [], blocks: [block("places", "", [], { note: esc("No county called " +
-      phrase(before) + (stateAfter ? " in " + KYC.stateName(stateAfter.code) : "") + " is on this site's " +
+      phrase(before) + (stateAfter ? " in " + KYC.stateName(stateAfter.code) : "") + " is on this site’s " +
       "county pages, which cover the 50 states. ") + link(root() + "counties/index.html",
-      "Every state's counties") + "." })] };
+      "Every state’s counties") + "." })] };
   }
 
   /* ------------------------------------------------------- committees */
@@ -792,7 +911,7 @@
     if (!ws.length) {
       if (!cue) return [];
       return [block("places", "", [row(link(root() + "government/congress.html#committees",
-        "Congress's committees"), esc("each with its chair and minority lead."))])];
+        "Congress’s committees"), esc("each with its chair and minority lead."))])];
     }
     if (!have("search")) { ctx.wants.push("search"); return []; }
     var rows = (index().committees || []).filter(function (c) {
@@ -833,15 +952,16 @@
     var cue = ctx.ws.some(function (w) { return TRIBE_CUE[w]; });
     var ws = ctx.ws.filter(function (w) { return !FILLER[w]; });
     if (!ws.length) return [];
-    if (!cue && ws.length < 2) return [];
+    // One word with no cue ("Cherokee") only where no profile answers it.
+    if (!cue && ws.length < 2 && !ctx.alone) return [];
     var rest = trim(ctx.rest).filter(function (w) { return !FILLER[w]; });
     if (cue && rest.every(function (w) { return TRIBE_GENERAL[w]; })) {
       if (!ctx.state) {
         return [block("places", "", [row(link(root() + "government/tribal.html", "Tribal governments"),
-          esc("how tribal nations govern themselves, and each government's leader, by state."))])];
+          esc("how tribal nations govern themselves, and each government’s leader, by state."))])];
       }
       return [block("places", "", [row(link(tribalHref(ctx.state), "Tribal governments listed in " +
-        KYC.stateName(ctx.state)), esc("each with its leader, as the BIA's directory lists them."))])];
+        KYC.stateName(ctx.state)), esc("each with its leader, as the BIA’s directory lists them."))])];
     }
     if (!have("search")) { ctx.wants.push("search"); return []; }
     var all = index().tribes || {};
@@ -851,7 +971,7 @@
       all[code].forEach(function (t) {
         var name = words(t[0]);
         var text = " " + name.join(" ") + " ";
-        if (phrase(name) === q || ((cue || ws.length >= 2) &&
+        if (phrase(name) === q || ((cue || ws.length >= 2 || ctx.alone) &&
             ws.every(function (w) { return text.indexOf(" " + w + " ") !== -1; }))) {
           hits.push({ code: code, t: t });
         }
@@ -865,7 +985,7 @@
         : "no leader listed";
       return row(link(tribalHref(h.code), t[0]), esc("listed in " + KYC.stateName(h.code) +
         (t[4] ? ", under " + t[4] : "") + "; ") + leader);
-    }), { note: esc("As the Bureau of Indian Affairs' Tribal Leaders Directory lists them, with the " +
+    }), { note: esc("As the Bureau of Indian Affairs’ Tribal Leaders Directory lists them, with the " +
       "leader it names."), more: hits.length > LIMIT ? esc((hits.length - LIMIT) + " more on the " +
       "tribal governments page.") : "" })];
   }
@@ -976,7 +1096,7 @@
           return row(link(officialHref(j.id), j.name), esc(((j.justice && j.justice.role) || "Justice")));
         })), { compact: true }));
       }
-      out.push(block("courts", "", [], { note: esc("Each state's highest court is on its state's page: type " +
+      out.push(block("courts", "", [], { note: esc("Each state’s highest court is on its state’s page: type " +
         "the state with it (") + searchLink("Ohio Supreme Court") + esc(").") }));
       return out;
     }
@@ -994,17 +1114,30 @@
             esc("this site names no members of its highest court."))]));
           return out;
         }
-        var detail = /chief/.test(r)
-          ? (hc.chief ? "Chief justice: " + hc.chief + ", as the court's own page names its chief." :
-            "The court's own page names no chief justice.")
-          : plural((hc.members || []).length, "member listed", "members listed") + " by the court" +
-            (hc.seats ? ", of " + hc.seats + " seats" : "") + ".";
+        // What the state page says (kyc-stategov.js courtBlock): a court
+        // whose roster could not be read is said so, and nothing about who
+        // sits on it or who is chief (rules 19 and 57).
+        var chiefTitle = hc.word === "judges"
+          ? (/Criminal/.test(hc.name) ? "Presiding Judge" : "Chief Judge") : "Chief Justice";
+        var members = hc.members || [];
+        var detail;
+        if (hc.unreadable || !members.length) {
+          detail = (hc.unreadable || "This site has not read the court’s roster") +
+            ", so its members are not listed here.";
+        } else if (/chief|presiding/.test(r)) {
+          detail = hc.chief ? chiefTitle + ": " + hc.chief + ", as the court’s roster names its chief."
+            : "The court’s roster, as read, lists no " + chiefTitle.toLowerCase() + ".";
+        } else {
+          var short = (hc.seats || 0) - members.length;
+          detail = plural(members.length, "member", "members") + " listed by the court" +
+            (hc.seats ? ", of " + hc.seats + " seats" + (short > 0 ? "; " + short + " with nobody listed" : "") : "") + ".";
+        }
         var typedName = r.replace(/^state /, "");
         var otherName = /^(?:supreme court|court of appeals|supreme judicial court)$/.test(typedName) &&
           phrase(words(hc.name)) !== typedName;
         out.push(block("courts", "", [row(link(statePage(ctx.state, "state-government"),
-          KYC.stateName(ctx.state) + "'s highest court, the " + hc.name), esc(detail))],
-          { note: otherName ? esc(KYC.stateName(ctx.state) + "'s highest court is its " + hc.name + ". A court " +
+          KYC.stateName(ctx.state) + "’s highest court, the " + hc.name), esc(detail))],
+          { note: otherName ? esc(KYC.stateName(ctx.state) + "’s highest court is its " + hc.name + ". A court " +
             "called what you typed, if " + placeWords(ctx.state) + " has one, is a lower court this site " +
             "does not cover.") : "" }));
         return out;
@@ -1035,7 +1168,8 @@
         var byId = courtsById();
         var id = ord === "dc" ? "cadc" : ord === "fc" ? "cafc" : ord ? "ca" + ord : null;
         if (id && byId[id]) {
-          out.push(block("courts", "", [courtRow(byId[id])], { note: byId[id].states && byId[id].states.length
+          // Said under the court's row, which names it first.
+          out.push(block("courts", "", [courtRow(byId[id])], { more: byId[id].states && byId[id].states.length
             ? esc("It hears appeals from the federal courts in " + andList(byId[id].states.map(placeWords)) + ".")
             : "" }));
           return out;
@@ -1048,7 +1182,7 @@
           });
           if (mine.length) {
             out.push(block("courts", "", mine.map(courtRow), { note: esc("The federal court of appeals for " +
-              KYC.stateName(ctx.state) + ". A state's own circuit courts, where it has them, are trial " +
+              KYC.stateName(ctx.state) + ". A state’s own circuit courts, where it has them, are trial " +
               "courts this site does not cover.") }));
           }
           return out;
@@ -1080,7 +1214,7 @@
       if (!district) return out;
       if (!district.list.length) {
         out.push(block("courts", "", [], { note: esc(KYC.stateName(district.code) + " has no federal district " +
-          "court of its own on this site's list.") }));
+          "court of its own on this site’s list.") }));
         return out;
       }
       out.push(block("courts", district.list.length > 1 ? "Federal district courts in " + KYC.stateName(district.code) : "",
@@ -1099,7 +1233,7 @@
       });
       if (here.length) {
         out.push(block("courts", "Federal courts for " + KYC.stateName(ctx.state), here.map(courtRow), {
-          note: esc("Each court's page lists its judges. " + KYC.stateName(ctx.state) + "'s own highest court is on ") +
+          note: esc("Each court’s page lists its judges. " + KYC.stateName(ctx.state) + "’s own highest court is on ") +
             link(statePage(ctx.state, "state-government"), "its state page") + "." }));
       }
       return out;
@@ -1122,15 +1256,15 @@
         row(link(root() + "federal/index.html#courts", "Find a federal judge by name"),
           esc("every sitting federal judge, on the federal page.")),
       ], { note: esc("The federal page lists " + (fed().judges ? fed().judges.toLocaleString() + " " : "") +
-        "sitting federal judges, too many to list here. Try a judge's name, a court (") +
+        "sitting federal judges, too many to list here. Try a judge’s name, a court (") +
         searchLink("Fifth Circuit") + ", " + searchLink("Eastern District of Texas") + ", " +
-        searchLink("Supreme Court") + esc("), or a state's courts (") + searchLink("Texas federal courts") +
+        searchLink("Supreme Court") + esc("), or a state’s courts (") + searchLink("Texas federal courts") +
         ", " + searchLink("Ohio Supreme Court") + esc(").") })];
     }
     if (secretary) {
       return [block("narrow", "", [], { note: esc("Try the department (") + searchLink("Secretary of Labor") +
         ", " + searchLink("Treasury Secretary") + esc("), the whole ") + searchLink("Cabinet") +
-        esc(", or a state's officer (") + searchLink("Ohio secretary of state") + esc(").") })];
+        esc(", or a state’s officer (") + searchLink("Ohio secretary of state") + esc(").") })];
     }
     return [block("narrow", "", [], { note: esc("Try an office (") + searchLink("governor") + ", " +
       searchLink("Texas AG") + ", " + searchLink("Speaker") + ", " + searchLink("Cabinet") +
@@ -1183,28 +1317,47 @@
     if (!kinds.length && !ids.length) return [];
     if (!have("measures")) { ctx.wants.push("measures"); return []; }
     var all = global.kycMeasures || {};
+    var was = past();
+    // Only a list the site read answers for a question (rule 19): where it
+    // found no official list (`has` null), it says nothing of what is or
+    // is not on the ballot, as the state's page does (kyc-ballot.js).
     var codes = (ctx.state ? [ctx.state] : Object.keys(all)).filter(function (c) { return all[c]; });
+    var listed = codes.filter(function (c) { return all[c].has === true; }).sort(function (a, b) {
+      return KYC.stateName(a).localeCompare(KYC.stateName(b));
+    });
+    var unread = Object.keys(all).filter(function (c) { return all[c] && all[c].has !== true && all[c].has !== false; })
+      .sort(function (a, b) { return KYC.stateName(a).localeCompare(KYC.stateName(b)); });
+    var stateRec = ctx.state ? all[ctx.state] : null;
+    var noList = function (code) {
+      return esc("This site " + (was ? "did not find" : "has not found") + " an official list of " + placeWords(code) + "’s statewide " +
+        "questions on the Nov 3, 2026 ballot, and does not say there " + (was ? "were" : "are") + " none. ") +
+        link(statePage(code, "measures"), PlaceWords(code) + "’s page") + esc(" links its election office.");
+    };
+    if (ctx.state && (!stateRec || (stateRec.has !== true && stateRec.has !== false))) {
+      return [block("measures", "", [], { note: noList(ctx.state) })];
+    }
     if (!ids.length) {
       // "ballot measures", "Ohio issues", "propositions": a state's list.
       var strong = qs.some(function (w) { return w === "proposition" || w === "initiative" || w === "referendum"; });
       if (!ctx.state && !ballotWord && !strong) return [];
       if (qs.some(function (w) { return !MEASURE_KIND[w] && w !== "state" && w !== "constitutional"; })) return [];
-      var listed = codes.filter(function (c) { return all[c].has === true; }).sort(function (a, b) {
-        return KYC.stateName(a).localeCompare(KYC.stateName(b));
-      });
       if (ctx.state) {
-        var rec = all[ctx.state];
         return [block("measures", "", [row(link(statePage(ctx.state, "measures"), KYC.stateName(ctx.state) +
-          "'s ballot questions"), esc(rec && rec.has === true ? plural((rec.measures || []).length, "question", "questions") +
-          " on the Nov 3, 2026 ballot." : "its page says what its election office lists."))])];
+          "’s ballot questions"), esc(stateRec.has === true
+            ? plural((stateRec.measures || []).length, "statewide question", "statewide questions") +
+              " on the Nov 3, 2026 ballot."
+            : "No statewide question " + (was ? "was" : "is") + " on the Nov 3, 2026 ballot; its page " +
+              "cites the election office for it."))])];
       }
       return [block("measures", "Statewide questions on the Nov 3, 2026 ballot", listed.map(function (c) {
         return row(link(statePage(c, "measures"), KYC.stateName(c)), esc(plural((all[c].measures || []).length, "question", "questions")));
       }), { compact: true, note: esc("As each election office lists them. Type a state with it (") +
-        searchLink("Missouri Amendment 3") + esc(") for one question.") })];
+        searchLink("Missouri Amendment 3") + esc(") for one question."),
+        more: unread.length ? esc("This site " + (was ? "did not find" : "has not found") + " an official list for " +
+          andList(unread.map(placeWords)) + ".") : "" })];
     }
     var hits = [];
-    codes.forEach(function (code) {
+    listed.forEach(function (code) {
       (all[code].measures || []).forEach(function (m, i) {
         var dw = measureWords(m.designation);
         var set = {};
@@ -1219,23 +1372,28 @@
       // A code that names no question ("cd 7", "pa 7") is not a question.
       if (!kinds.length) return [];
       var kindWord = kinds[0];
-      var withKind = codes.filter(function (c) {
+      var withKind = listed.filter(function (c) {
         return (all[c].measures || []).some(function (m) { return measureWords(m.designation).indexOf(kindWord) !== -1; });
       });
+      var verb = was ? "was" : "is";
       return [block("measures", "", [], { note: esc("No statewide question on a Nov 3, 2026 ballot " +
-        (ctx.state ? "in " + KYC.stateName(ctx.state) + " " : "") + "is called “" + phrase(trim(ctx.state ? ctx.rest : ctx.ws)) +
-        "”, as the election offices list them.") + (ctx.state
-          ? " " + link(statePage(ctx.state, "measures"), KYC.stateName(ctx.state) + "'s questions") + "."
-          : withKind.length ? " " + esc("Questions called a " + kindWord + " are on the ballot in ") +
-            withKind.map(function (c) { return link(statePage(c, "measures"), KYC.stateName(c)); }).join(", ") + "." : "") })];
+        (ctx.state ? "in " + KYC.stateName(ctx.state) + " " : "") + verb + " called “" +
+        phrase(trim(ctx.state ? ctx.rest : ctx.ws)) + "”, as the election offices " + (was ? "listed" : "list") + " them.") + (ctx.state
+          ? " " + link(statePage(ctx.state, "measures"), KYC.stateName(ctx.state) + "’s questions") + "."
+          : (withKind.length ? " " + esc("Questions called a " + kindWord + " " + (was ? "were" : "are") +
+              " on the ballot in ") +
+            andList(withKind.map(function (c) { return link(statePage(c, "measures"), KYC.stateName(c)); })) + "." : "") +
+            (unread.length ? " " + esc("This site " + (was ? "did not find" : "has not found") + " an official list for " +
+              andList(unread.map(placeWords)) + ".") : "")) })];
     }
     hits.sort(function (a, b) { return KYC.stateName(a.code).localeCompare(KYC.stateName(b.code)) || a.i - b.i; });
     return [block("measures", "", hits.slice(0, LIMIT).map(function (h) {
       var about = h.m.title || h.m.text || "";
       if (about.length > 160) about = about.slice(0, 157).replace(/\s+\S*$/, "") + "…";
       return row(link(measureAnchor(h.code, h.i), h.m.designation + ", " + KYC.stateName(h.code)), esc(about));
-    }), { note: esc((past() ? "On the Nov 3, 2026 ballot" : "On the Nov 3, 2026 ballot") +
-      ", as each election office lists them; each links to its state's page, with its text and source."),
+    }), { note: esc((was ? "On the Nov 3, 2026 ballot, as each election office listed them" :
+      "On the Nov 3, 2026 ballot, as each election office lists them") +
+      "; each links to its state’s page, with its text and source."),
       more: hits.length > LIMIT ? esc((hits.length - LIMIT) + " more: add a state to the search.") : "" })];
   }
 
@@ -1244,14 +1402,17 @@
   var memo = { q: null };
 
   /** The answers to *query* (as typed: its capitals tell "OH" from "oh"):
-   *  `{html, wants: [[file, global]], count}`. */
-  function answer(query) {
+   *  `{html, wants: [[file, global]], count}`. *opts.alone*: no profile
+   *  answers the query, so a bare name may be a county's or a tribe's. */
+  function answer(query, opts) {
     var raw = String(query || "");
+    var alone = !!(opts && opts.alone);
     var zip = zipOf(raw);
     // A ZIP code in the query is the lookup's ("state senator 43215"), not
     // a word to match.
     var ws = words(raw.replace(/\b\d{5}(?:-\d{4})?\b/g, " "));
-    var key = raw + "|" + Object.keys(FILES).map(function (k) { return have(k) ? 1 : 0; }).join("");
+    var key = raw + "|" + (alone ? 1 : 0) + "|" +
+      Object.keys(FILES).map(function (k) { return have(k) ? 1 : 0; }).join("");
     if (memo.q === key) return memo.result;
     var result = { html: "", wants: [], count: 0 };
     if (!ws.length || /^\d{5}(?:-?\d{4})?$/.test(raw.trim())) {
@@ -1260,7 +1421,7 @@
     }
     var found = findState(ws, raw);
     var ctx = {
-      raw: raw, ws: ws, zip: zip, wants: [],
+      raw: raw, ws: ws, zip: zip, wants: [], alone: alone,
       state: found ? found.code : null, stateFound: found,
       rest: found ? without(ws, found.at, found.len) : ws,
     };

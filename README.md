@@ -216,19 +216,26 @@ answer a link to the page about it:
 | | "President", "VP", "Cabinet", "Secretary of Labor", "HHS" | The official's dialog on the federal page (never a profile) |
 | | "Speaker", "majority leader", "whip", "president pro tem" | The holder's profile, from congress-legislators' posts in this Congress |
 | | "senators", "congressman", "delegate", "state senator 43215" | The Senate view, the sitting members, the lookup by ZIP code |
-| | "mayor", "sheriff", "school board" | A note that this site names no local officials, and the county pages that list each local government's website |
+| | "Senator Warren", "Rep. Crockett", "Ohio delegation", "Ohio congressman" | The grid: that chamber's sitting members by name first; a state's sitting members alone |
+| | "mayor", "sheriff", "school board", "Texas county judge" | A note that this site names no local officials, and the county pages that list each local government, with its website where the Census listing gives one and the site's check did not withdraw it |
 | Places and bodies | "Travis County", "Cook County, IL", "Orleans Parish" | The county page, at that county (`#/?county=<Census code>`) |
 | | "Texas House", "Ohio Senate", "General Assembly", "General Court" | The legislature page, at that chamber |
+| | "Texas House speaker", "Ohio Senate majority leader" | The legislature page, at that chamber, and a note that this site names no state legislature's leaders |
 | | "Armed Services", "Judiciary Committee", "ways and means" | The committee's row in the Congress guide, with its chair and minority lead |
-| | "Cherokee Nation", "Oklahoma tribes" | The tribal governments page, at that state's list |
+| | "Cherokee Nation", "Oklahoma tribes"; "Cherokee" or "Dallas" alone where no profile answers | The tribal governments page, at that state's list; the counties of that name |
 | Courts | "Supreme Court", "chief justice", "Fifth Circuit", "S.D.N.Y.", "Eastern District of Texas", "Texas federal courts", "Ohio Supreme Court" | The court's page, a justice's dialog, or the state page's highest court |
 | Ballot questions | "Proposition 1", "Missouri Amendment 3", "SQ 845", "ballot measures" | The question on its state's page (`#measure-<ST>-<n>`) |
 
 A word too broad to answer ("judge", with 1,461 sitting federal judges)
 suggests narrower searches instead. Abbreviations readers write are read
-(AG, SoS, Lt. Gov., Rep., Sen., SCOTUS, S.D.N.Y., Calif., Tex.); a
-two-letter code that is also a word ("oh", "in", "va") is a state only typed
-in capitals. Nothing is matched fuzzily: "Govenor of Ohio" names nobody.
+(AG, SoS, Lt. Gov., Rep., Sen., SCOTUS, S.D.N.Y., Calif., Tex.); in the
+answers, a two-letter code that is also a word ("oh", "in", "va") beside
+another word is a state only typed in capitals, as "DOE" is the Department
+of Energy and "Doe" a surname. Nothing is matched fuzzily: "Govenor of
+Ohio" names nobody. An answer says only what the site read: a state court
+whose roster could not be read says so, and names no members or chief; a
+ballot with no official list found answers no question about it; an acting
+officer is shown with the title the state page gives them.
 What no file a page already loads holds - each legislature by its own name,
 each state's counties by Census code, the guide's committees and who leads
 them, the tribal governments - is `data/search.js` (`kyc/search_index.py`),

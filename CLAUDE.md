@@ -2014,17 +2014,47 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     holder (rule 79). Nobody outside Congress becomes a profile (rule 27).
     A word is matched whole: "Proposition 50" is not Proposition 5, and
     "3.5%" in North Carolina's question title is not "Amendment 3". A short
-    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but a
-    two-letter code that is a word ("oh", "in", "va") is a state only typed
-    in capitals (rule 5), "DNC" is not North Carolina's courts, and "Mich"
-    alone is a name being typed, not Michigan. No fuzzy match: "Govenor of
-    Ohio" names nobody, since a near spelling can put one person's office on
-    another (rule 3). A word too broad ("judge": 1,461 judges) suggests
-    narrower searches; a local office ("mayor") says this site names no
-    local officials and links the county pages. "Texas House" is the state's
-    chamber and its U.S. House seats both: the answer says the cards are the
-    latter. Measured on a 4x and 6x throttled phone, a keystroke costs what
-    it did before (rule 45).
+    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but in
+    the answers a two-letter code that is a word ("oh", "in", "va") beside
+    another word is a state only typed in capitals (rule 5), and changing
+    only the capitals redraws them; the grid still reads a code typed alone
+    as the state. "DNC" is not North Carolina's courts, "Doe" is not the
+    Department of Energy (only "DOE" is), and "Mich" alone is a name being
+    typed, not Michigan. No fuzzy match: "Govenor of Ohio" names nobody,
+    since a near spelling can put one person's office on another (rule 3).
+    A word too broad ("judge": 1,461 judges) suggests narrower searches; a
+    local office ("mayor") says this site names no local officials and links
+    the county pages, which hold a website only where the Census listing
+    gives one and its check did not withdraw it (rule 78); "Texas county
+    judge" is Texas's local offices, never Texas County, Missouri. A state
+    legislature's leader ("Texas House speaker") is the chamber's page and
+    the words that this site names no legislature's leaders. "Texas House"
+    is the state's chamber and its U.S. House seats both: the answer says
+    the cards are the latter. A seat's title before a name ("Senator
+    Warren", "Rep. Crockett") is read off the query and ranks that
+    chamber's sitting members by the name; it is never added to a profile's
+    text, where "Con" typed on the way to a name matched every member. "Ohio
+    delegation" and "Ohio congressman" ask who represents the state, so
+    they list its sitting members alone (rule 27).
+
+    The review of the first version found the answers saying what the site
+    never read, each now refused and tested over every case in the data:
+    Alabama's Supreme Court, whose site could not be read, was "0 members
+    listed by the court" and its page "names no chief justice" (rules 19,
+    57: it says why, as the state page does); Maine's and Pennsylvania's
+    ballots, for which no official list was found, held "no statewide
+    question called Question 1" (only a list read answers a question); the
+    every-state list named Hawaii's acting lieutenant governor as its
+    holder (the title the page gives is shown); Arizona's new lieutenant
+    governor, on the ballot for the first time, was "no such office", and
+    "33 on the ballot" sat beside "34 elect it" (one test, `onBallot`, for
+    every count: rule 73); "DC governor" and "Puerto Rico attorney general"
+    were titled as offices the page holds (rule 75); and a court the
+    answers named was offered again as a judge sharing its name ("Court"),
+    since a query the answers read drops surname-only namesakes. Notes that
+    count the ballot are in the past tense from the day after the election.
+    Measured on a 4x and 6x throttled phone, a keystroke costs what it did
+    before (rule 45).
 
 ## District maps
 

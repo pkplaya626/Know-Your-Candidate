@@ -448,13 +448,12 @@
         "(lost a primary, withdrew, or not on the ballot) " + (hiddenOut === 1 ? "matches" : "match") +
         " and " + (hiddenOut === 1 ? "is" : "are") + " hidden.") + outToggle();
     }
-    if (officials) {
-      html += " " + KYC.escapeHtml("The people found below are listed elsewhere on the site, " +
-        "each linked to the page about them.");
-    }
-    if (answers) {
-      html += " " + KYC.escapeHtml("The offices, places and bodies found below are each " +
-        "linked to the page about them.");
+    if (officials || answers) {
+      html += " " + KYC.escapeHtml(officials && answers
+        ? "The people, offices and places found below are each linked to the page about them."
+        : officials ? "The people found below are listed elsewhere on the site, each linked to " +
+          "the page about them."
+        : "The offices, places and bodies found below are each linked to the page about them.");
     }
     return html + KYC.escapeHtml(zipWords());
   }
@@ -840,7 +839,10 @@
       }
       var s;
       if (place) {
-        s = !place.chamber && place.district === undefined && row.state === place.state ? 1 : -1;
+        // A state's officers answer the state's name, not its members of
+        // Congress ("Ohio delegation").
+        s = !place.chamber && !place.seated && place.district === undefined &&
+          row.state === place.state ? 1 : -1;
       } else {
         s = KYC.nameScore(officialQuery(state.q), [row.name, row.alt]);
       }
@@ -972,6 +974,13 @@
     if (!state.q) { box.hidden = true; box.innerHTML = ""; return false; }
     wantOfficials();
     var hits = bestHits(officialMatches(), departedMatches());
+    // A query the answers read as an office, a court or a place ("Ohio
+    // Supreme Court") is not a surname: a judge named Court beside the
+    // court asked for answered the same query twice, two ways.
+    if (answersFor().count) {
+      var whole = function (h) { return h.score < 2; };
+      hits = { found: hits.found.filter(whole), gone: hits.gone.filter(whole) };
+    }
     var found = hits.found;
     var gone = hits.gone;
     if (!found.length && !gone.length) { box.hidden = true; box.innerHTML = ""; return false; }
@@ -1014,7 +1023,15 @@
   function answersArrived() {
     if (!listDrawn) return;
     if (!visible.length || state.view === "senate") render();
-    else renderAnswers();
+    else { renderOfficials(); renderAnswers(); }
+  }
+
+  /** The answers to what was typed (memoised in kyc-search.js). A bare
+   *  word is tried as a county's or a tribe's name only when no profile
+   *  answers it. */
+  function answersFor() {
+    if (!state.q || !KYC.answers) return { html: "", wants: [], count: 0 };
+    return KYC.answers.answer(typed(), { alone: !visible.length });
   }
 
   /** Draws the answers the query names; true when there are any. */
@@ -1022,7 +1039,7 @@
     var box = doc.getElementById("searchAnswers");
     if (!box || !KYC.answers) return false;
     if (!state.q) { box.hidden = true; box.innerHTML = ""; return false; }
-    var found = KYC.answers.answer(typed());
+    var found = answersFor();
     wantAnswers(found.wants);
     if (!found.html) { box.hidden = true; box.innerHTML = ""; return false; }
     if (box.innerHTML !== found.html) box.innerHTML = found.html;
@@ -1305,9 +1322,21 @@
 
   function initSearch() {
     var input = doc.getElementById("searchInput");
+    var raw = input.value.trim();
     var run = function () {
       var q = input.value.toLowerCase().trim();
-      if (q === state.q) return;
+      if (q === state.q) {
+        // Only the capitals changed: the grid reads the query folded, but
+        // the answers read "IN governor" as Indiana's and "in governor" as
+        // every state's (rule 97), and the results line quotes the query
+        // as typed, so both are drawn again.
+        if (input.value.trim() !== raw) {
+          raw = input.value.trim();
+          if (listDrawn) render();
+        }
+        return;
+      }
+      raw = input.value.trim();
       state.q = q;
       apply();
       // Searching from 800px down the list left the reader among the
