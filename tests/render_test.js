@@ -11667,6 +11667,44 @@ async function testFederalAudit() {
         parseInt(x.trim().split(" ")[1], 10)).filter((w) => w > 0);
       check("the dialog's srcset stops at the first size a 2x screen needs",
         widths.length > 0 && widths.filter((w) => w >= 232).length <= 1, widths.join(" "));
+      // PR #127's review: the note says the route the links came by.
+      const note = [...body.querySelectorAll("p.faint")].map((x) => x.textContent).join(" ");
+      check("the links' note names the item carrying the FJC id, for a judge found that way",
+        withLinks.judge.linkVia ||
+        /through the Wikidata item that carries this judge’s Federal Judicial Center id/.test(note), note);
+    });
+  }
+
+  // A judge no Wikidata item carries, found through the one article whose
+  // {{FJC Bio}} names their nid: the note must not claim an item carries
+  // the id (the review of PR #127 found it did for sixteen judges).
+  const viaBio = (() => {
+    for (const c of hubPage.window.kycFederal.courts) {
+      if (!c.listed || c.kind === "supreme") continue;
+      const file = path.join(SITE, "data", "judiciary", c.id + ".js");
+      if (!fs.existsSync(file)) continue;
+      const m = /^window\.kycCourt\[[^\]]+\] = (.*);$/m.exec(fs.readFileSync(file, "utf8"));
+      if (!m) continue;
+      let data;
+      try { data = JSON.parse(m[1]); } catch (e) { continue; }
+      const j = data.judges.find((x) => x.linkVia === "fjc-bio" && (x.wikipedia || x.wikidata));
+      if (j) return { court: c.id, judge: j };
+    }
+    return null;
+  })();
+  if (viaBio) {
+    const page = await buildPage("courts/" + viaBio.court + ".html",
+      { hash: "#/official/" + encodeURIComponent(viaBio.judge.id) });
+    await settle(50);
+    suite("a judge found through {{FJC Bio}} says so beside their links (PR #127)", () => {
+      const { D: doc, errors: errs } = page;
+      check("no page errors", errs.length === 0, errs.join(" | "));
+      const body = doc.getElementById("officialModalBody");
+      const note = [...body.querySelectorAll("p.faint")].map((x) => x.textContent).join(" ");
+      check("the note names the article citing their FJC record", /\{\{FJC Bio\}\} template/.test(note) &&
+        /no Wikidata item carries the id/.test(note), note);
+      check("and never claims an item carries the id",
+        !/item that carries this judge’s Federal Judicial Center id/.test(note), note);
     });
   }
 }

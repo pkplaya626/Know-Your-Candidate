@@ -226,6 +226,21 @@
       KYC.escapeHtml(text) + "</a>";
   }
 
+  // Where a judge's Wikipedia and Wikidata links came from, by the route
+  // the pipeline recorded (kyc/judge_links.py): the item that carries the
+  // FJC id, or - where no item does - the one article whose {{FJC Bio}}
+  // cites the judge's FJC record, and that article's item.
+  function linksNote(judge) {
+    if (judge.linkVia === "fjc-bio") {
+      return "Wikipedia through the one article that cites this judge’s Federal Judicial " +
+        "Center record by its id (its {{FJC Bio}} template), and Wikidata through that " +
+        "article’s item, since no Wikidata item carries the id; checked to carry their " +
+        "surname and year of birth; never a search by name.";
+    }
+    return "Wikipedia and Wikidata through the Wikidata item that carries this judge’s " +
+      "Federal Judicial Center id, checked to carry their surname; never a search by name.";
+  }
+
   function panel(icon, title, body) {
     return '<section class="panel"><h3 class="panel-head">' + KYC.icon(icon) + " " +
       KYC.escapeHtml(title) + "</h3>" + body + "</section>";
@@ -613,9 +628,7 @@
         (judge.wikidata ? linkChip("https://www.wikidata.org/wiki/" + encodeURIComponent(judge.wikidata),
           "Wikidata") : "") +
         (c && c.site ? linkChip(c.site, "The court’s website") : "") + "</div>" +
-        (judge.wikipedia || judge.wikidata ? '<p class="faint">Wikipedia and Wikidata through the ' +
-          "Wikidata item that carries this judge’s Federal Judicial Center id, checked to carry " +
-          "their surname; never a search by name.</p>" : "")) +
+        (judge.wikipedia || judge.wikidata ? '<p class="faint">' + linksNote(judge) + "</p>" : "")) +
       "</div>";
     el("officialModalSource").textContent = "Federal Judicial Center, Biographical Directory of " +
       "Article III Federal Judges, as of " + KYC.dateWords((federal().asOf || {}).judiciary || "");

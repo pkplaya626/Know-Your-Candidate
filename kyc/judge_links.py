@@ -17,7 +17,10 @@ The chain is ids, never a name:
    found through the English Wikipedia article whose ``{{FJC Bio}}``
    template carries their nid: a search on the id, never on a name, taken
    only when exactly one article answers and its template names that very
-   nid. The article's own Wikidata item is then checked like any other.
+   nid. The article's own Wikidata item is then checked like any other,
+   and the entry says so (``linkVia``), for the page's note on where the
+   links came from. A search that answers no article or several is
+   reported; one that fails keeps the judge's last entry (rule 8).
 
 A name search would find a stranger - "Michael Smith" is several judges -
 so there is none (rules 24, 32). What the join finds is still checked:
@@ -39,8 +42,8 @@ so there is none (rules 24, 32). What the join finds is still checked:
   near-square hearing stills pass; a group photograph, a courthouse or a
   16:9 frame is wider), not one ``overrides.NOT_A_PORTRAIT`` lists, and
   not one whose licence ``overrides.PORTRAIT_LICENCE_DOUBTS`` holds for a
-  person to decide. Where the item has no single portrait, two sources
-  must agree on one (the research of 2026-10-19, checked by a second
+  person to decide. Where the item has no single portrait, one is taken
+  only by these routes (the research of 2026-10-19, checked by a second
   reader):
 
   - an item with two images: the one its own article shows in its
@@ -52,7 +55,8 @@ so there is none (rules 24, 32). What the join finds is still checked:
     A crop without that statement is not taken: Don Willett's depicts a
     microphone, and is cut from a rally photograph with its banner in view;
   - an item with no image: its article's infobox image, where the
-    article's lead image (PageImages) is the same file.
+    article's lead image (PageImages) is the same file - one source, the
+    article, read twice; an article with no lead image gives nothing.
 
 A photograph is used only at sizes Wikimedia itself serves of that one
 file (rule 42), up to the widest a page draws (``SHOWN_STEPS``), and only
@@ -69,7 +73,9 @@ reported and shown as nothing: a judge without a portrait or an article is
 the directory's record alone. A read that fails keeps the last cache
 (rule 8); a judge's page that cannot be read is tried again on the next
 run, and a portrait whose file could not be measured, weighed or matched
-keeps the last one read of the same file.
+keeps the last one read of the same file. A portrait kept so is asked
+again of the overrides (``held_back``), and the build fails any portrait
+they withhold.
 """
 
 import datetime
@@ -618,8 +624,37 @@ def _born_from(born, said):
     return ("Wikidata and the article" if born and said else "Wikidata" if born else "the article")
 
 
+def held_back(portrait):
+    """Why a portrait must not be shown, from the overrides a person keeps,
+    or None. Asked of every portrait kept from an earlier read as well as of
+    every new one: a doubt added after a file was first read withholds it on
+    the next run, whatever that run could read."""
+    from . import overrides
+    url = source_url((portrait or {}).get("source"))
+    if not url:
+        return None
+    if url in overrides.NOT_A_PORTRAIT:
+        return f"{url} is in overrides.NOT_A_PORTRAIT"
+    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
+    if url in doubts:
+        return f"{url} is in overrides.PORTRAIT_LICENCE_DOUBTS ({doubts[url][1]})"
+    return None
+
+
+def _keep(last_entry, name, problems):
+    """*last_entry* as kept from the last read, without a portrait the
+    overrides now withhold (said in *problems*)."""
+    entry = dict(last_entry)
+    why = held_back(entry.get("portrait"))
+    if why:
+        del entry["portrait"]
+        problems.append(f"{name}: {why}; the kept portrait is not shown")
+    return entry
+
+
 def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=None,
-         crops=None, bio=None, weights=None, wanted=None, report=None, today=None):
+         crops=None, bio=None, weights=None, wanted=None, report=None, today=None,
+         bio_missed=None):
     """``({nid: {"wikidata", "wikipedia"?, "portrait"?}}, problems)``.
 
     *judges* is ``{id: record}`` (judiciary.json's), *slugs* ``{nid:
@@ -633,15 +668,20 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     ``judges``. A rendition not yet weighed is added to *wanted*. *report*,
     when given, receives ``oversized`` (the judges left out because their
     file is offered only over the caps) and ``doubted`` (the
-    ``PORTRAIT_LICENCE_DOUBTS`` entries met).
+    ``PORTRAIT_LICENCE_DOUBTS`` entries met). *bio_missed* is ``{nid:
+    why}`` for a judge no item carries whose ``{{FJC Bio}}`` search was
+    read and settled nothing (no article, or several).
 
     A size, an article or a weight that could not be read concludes
     nothing (rule 8): the last portrait read of the same file is kept, and
-    a judge whose page was not read keeps the last entry whole."""
+    a judge whose page was not read keeps the last entry whole - as does a
+    judge no item carries whose ``{{FJC Bio}}`` search is neither in *bio*
+    nor in *bio_missed*, since that search was not read."""
     from . import overrides
     from .portraits import thumb_set, title_is_about
 
     articles, crops, bio = articles or {}, crops or {}, bio or {}
+    bio_missed = bio_missed or {}
     weights, credits = weights or {}, credits or {}
     today = today or datetime.date.today().isoformat()
     doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
@@ -650,18 +690,29 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
         nid = judge.get("nid") or judge["id"].replace("fjc-", "")
         slug = slugs.get(nid)
         last_entry = (previous or {}).get(nid) or {}
+        name = judge.get("name") or ""
         if not slug:
             # The FJC page was never read for an id: nothing concluded.
             if last_entry:
-                out[nid] = last_entry
+                out[nid] = _keep(last_entry, name, problems)
             continue
         items, via = wikidata.get(slug_key(slug)), None
         if items is None:
+            if nid in bio_missed:
+                problems.append(f"{name}: no Wikidata item carries the FJC id {slug}, and "
+                                f"{bio_missed[nid]}; nothing linked")
+                continue
             if nid not in bio:
+                # The {{FJC Bio}} search was not read: nothing concluded (rule 8).
+                problems.append(f"{name}: no Wikidata item carries the FJC id {slug}, and the "
+                                f"search for an article whose {{{{FJC Bio}}}} names nid {nid} "
+                                "was not read; "
+                                + ("the last entry is kept" if last_entry else "nothing linked"))
+                if last_entry:
+                    out[nid] = _keep(last_entry, name, problems)
                 continue
             qid, item, via = bio[nid]
             items = {qid: item}
-        name = judge.get("name") or ""
         if len(items) != 1:
             problems.append(f"{name}: {len(items)} Wikidata items carry the FJC id {slug}; none used")
             continue
@@ -681,7 +732,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
         elif item["articles"]:
             problems.append(f"{name}: {qid} has {len(item['articles'])} English articles; none linked")
         if via and title != via:
-            problems.append(f"{name}: the article carrying {{{{FJC Bio|{nid}}}}} is {via!r}, but its "
+            problems.append(f"{name}: the article carrying {{{{FJC Bio|nid={nid}}}}} is {via!r}, but its "
                             f"item {qid} links {title!r}; not used")
             continue
         if article and article.get("fjcBio") and nid not in article["fjcBio"]:
@@ -703,7 +754,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                             f"article {title!r} was not read; "
                             + ("the last entry is kept" if last_entry else "nothing used"))
             if last_entry:
-                out[nid] = last_entry
+                out[nid] = _keep(last_entry, name, problems)
             continue
         if not born and not said:
             problems.append(f"{name}: Wikidata {qid} for {slug} gives no year of birth"
@@ -716,23 +767,30 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                             + f"the directory {year or 'none'}; not used")
             continue
         entry = {"wikidata": qid}
+        if via:
+            # The page says how the article was found: by the template that
+            # cites this judge's FJC record, not by an item carrying the id.
+            entry["linkVia"] = "fjc-bio"
         linked = bool(title) and title_is_about(title, last)
         if title and linked:
             entry["wikipedia"] = title
         elif title:
             problems.append(f"{name}: the article {title!r} does not carry the surname; not linked")
 
-        who = (f"the English Wikipedia article {via!r} carries {{{{FJC Bio|{nid}}}}} and its "
-               f"Wikidata item is {qid}" if via else
+        who = (f"the English Wikipedia article {via!r} carries {{{{FJC Bio|nid={nid}}}}} and "
+               f"its Wikidata item is {qid}" if via else
                f"Wikidata {qid} carries the FJC id {slug} of fjc.gov/node/{nid}")
         who += f"; born {year} by {_born_from(born, said)}, as the directory"
 
         # ---- which file, by which route
         images = sorted(item["images"])
-        art_image = None
+        # The infobox's file, where the article's lead image (PageImages)
+        # does not name another; *led* where the lead names this very file.
+        art_image = led = None
         if article and linked and article.get("image"):
             if not article.get("lead") or article["lead"] == article["image"]:
                 art_image = file_ref(article["image"])
+            led = article.get("lead") == article["image"]
         possible = set(images) | ({art_image} if art_image else set())
         for ref in images:
             for crop in crops.get(ref_name(ref)) or []:
@@ -774,10 +832,13 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                 unsure = f"{name}: {qid} has {len(images)} images and its article was not read"
             else:
                 why = f"{name}: {qid} has {len(images)} images; none shown"
-        elif art_image:
+        elif art_image and led:
             candidate = ("article", art_image,
                          f"the item has no image; its article {title!r} shows this file in its "
                          f"infobox and leads with it")
+        elif art_image:
+            why = (f"{name}: the item has no image, and its article {title!r} gives no lead "
+                   f"image to confirm its infobox's {ref_name(art_image)!r}; not shown")
         elif title and linked and title not in articles:
             unsure = f"{name}: the article {title!r} was not read"
 
@@ -832,7 +893,10 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
         elif unsure:
             kept = last_entry.get("portrait")
             sources = {file_page(commons_url(r)) for r in possible if commons_url(r)}
-            if kept and kept.get("evidence") and kept.get("source") in sources:
+            if kept and kept.get("evidence") and kept.get("source") in sources \
+                    and held_back(kept):
+                problems.append(f"{unsure}; the last portrait read, {held_back(kept)}, is not shown")
+            elif kept and kept.get("evidence") and kept.get("source") in sources:
                 entry["portrait"] = kept
                 problems.append(f"{unsure}; the last portrait read is kept")
             else:
@@ -980,10 +1044,12 @@ def _last_weights(previous, sizes):
 
 
 def find_by_fjc_bio(nids, read, live, log=None):
-    """``{nid: article title}`` for each judge whose id exactly one English
-    Wikipedia article's ``{{FJC Bio}}`` carries. A search that fails
-    concludes nothing for that judge (rule 8)."""
-    out = {}
+    """``(found, missed)``: ``{nid: article title}`` for each judge whose id
+    exactly one English Wikipedia article's ``{{FJC Bio}}`` carries, and
+    ``{nid: why}`` for each whose search answered no article or several. A
+    search that fails is in neither: it concludes nothing for that judge
+    (rule 8), and :func:`join` keeps their last entry."""
+    out, missed = {}, {}
     for nid in sorted(nids):
         try:
             titles = fjc_bio_titles(nid, read, live)
@@ -993,9 +1059,15 @@ def find_by_fjc_bio(nids, read, live, log=None):
             continue
         if len(titles) == 1:
             out[nid] = titles[0]
+        elif titles:
+            missed[nid] = (f"{len(titles)} English Wikipedia articles answer the search for "
+                           f"{{{{FJC Bio}}}} naming {nid} ({', '.join(sorted(titles)[:4])})")
+        else:
+            missed[nid] = f"no English Wikipedia article's {{{{FJC Bio}}}} names nid {nid}"
     if log and nids:
-        log(f"    {len(nids)} judges no Wikidata item carries; {len(out)} found by {{{{FJC Bio}}}}")
-    return out
+        log(f"    {len(nids)} judges no Wikidata item carries; {len(out)} found by {{{{FJC Bio}}}}, "
+            f"{len(missed)} settled nothing, {len(nids) - len(out) - len(missed)} not read")
+    return out, missed
 
 
 def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, log=print,
@@ -1018,14 +1090,30 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
             sitting.update(wikidata[slug_key(slugs[nid])])
     # A judge whose id no item carries: the article whose {{FJC Bio}} does.
     homeless = sorted(n for n in nids if n in slugs and slug_key(slugs[n]) not in wikidata)
-    by_bio = find_by_fjc_bio(homeless, reader, live, log)
+    by_bio, bio_missed = find_by_fjc_bio(homeless, reader, live, log)
     titles = {article_title(a) for i in sitting.values() if len(i["articles"]) == 1
               for a in i["articles"]} | set(by_bio.values())
     articles = fetch_articles(titles, reader, live, log)
-    found = {nid: (articles[t]["item"], t) for nid, t in by_bio.items()
-             if t in articles and nid in articles[t]["fjcBio"] and articles[t].get("item")}
+    found = {}
+    for nid, t in by_bio.items():
+        # The article was read (a failed read raises): what it lacks is a
+        # finding, and said.
+        if t not in articles:
+            bio_missed[nid] = f"the article the search found, {t!r}, is not on the wiki"
+        elif nid not in articles[t]["fjcBio"]:
+            bio_missed[nid] = (f"the article the search found, {t!r}, names nid {nid} but not as "
+                               f"its {{{{FJC Bio}}}}'s nid=")
+        elif not articles[t].get("item"):
+            bio_missed[nid] = f"the article {t!r}, whose {{{{FJC Bio}}}} names it, has no Wikidata item"
+        else:
+            found[nid] = (articles[t]["item"], t)
     items = fetch_items([q for q, _ in found.values()], reader, live)
-    bio = {nid: (q, items[q], t) for nid, (q, t) in found.items() if q in items}
+    bio = {}
+    for nid, (q, t) in found.items():
+        if q in items:
+            bio[nid] = (q, items[q], t)
+        else:
+            bio_missed[nid] = f"the item of the article {t!r}, {q}, is not on Wikidata"
     # Their items' articles are the same articles, already read.
     everyone = list(sitting.items()) + [(q, i) for q, i, _t in bio.values()]
     refs = set()
@@ -1066,7 +1154,8 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
     args = (judges, slugs, wikidata, sizes, previous.get("judges"), credits)
     for _ in range(len(SHOWN_STEPS) + 1):
         wanted = set()
-        join(*args, articles=articles, crops=crops, bio=bio, weights=weights, wanted=wanted)
+        join(*args, articles=articles, crops=crops, bio=bio, weights=weights, wanted=wanted,
+             bio_missed=bio_missed)
         todo = sorted(wanted - set(weights) - tried)
         if not todo:
             break
@@ -1076,7 +1165,7 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
         tried |= set(todo)
     report = {}
     joined, problems = join(*args, articles=articles, crops=crops, bio=bio, weights=weights,
-                            report=report)
+                            report=report, bio_missed=bio_missed)
     cache = {"read": datetime.date.today().isoformat(),
              "sources": {"fjc": "https://www.fjc.gov/history/judges",
                          "wikidata": "https://www.wikidata.org/wiki/Property:P2736",
@@ -1127,6 +1216,14 @@ def problems(cache):
         out.append(("error", "judge-portrait-heavy",
                     f"{len(heavy)} judges' portraits are over {CAP_BYTES // 1000} KB or {CAP_PX}px",
                     [f"FJC {nid}" for nid in heavy]))
+    # A file a person withheld (NOT_A_PORTRAIT, PORTRAIT_LICENCE_DOUBTS)
+    # never reaches a page, however the cache came to hold it.
+    withheld = sorted(f"FJC {nid}: {held_back(entry['portrait'])}" for nid, entry in judges.items()
+                      if entry.get("portrait") and held_back(entry["portrait"]))
+    if withheld:
+        out.append(("error", "judge-portrait-overridden",
+                    f"{len(withheld)} judges' portraits are files the overrides withhold; run "
+                    "'judiciary --links-only'", withheld))
     if cache.get("oversized"):
         out.append(("warn", "judge-portraits-oversized",
                     f"{len(cache['oversized'])} judges' photographs left out: Wikimedia offers "

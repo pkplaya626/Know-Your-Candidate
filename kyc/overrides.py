@@ -654,10 +654,25 @@ NOT_A_PORTRAIT = {
 }
 
 # Commons files a judge's route reaches (kyc/judge_links.py) whose licence
-# the second reader of the 2026-10-19 photo research doubted, keyed on the
-# upload URL: (date, what the file's page says). Each is withheld - and
-# reported - until a person reads the file's page and decides; delete the
-# entry to show it, or move it to NOT_A_PORTRAIT to refuse it for good.
+# is in doubt, keyed on the upload URL: (date, what the file's page says).
+# Each is withheld - and reported - until a person reads the file's page and
+# decides; delete the entry to show it, or move it to NOT_A_PORTRAIT to
+# refuse it for good.
+#
+# One test, applied to every portrait alike: Commons' licence tag stands
+# unless the file's page or its name points to someone else as its author or
+# source - a studio's code, a university's credit, another website - or the
+# page names no author at all. A
+# court's own photograph tagged PD-USGov-Judiciary (or PD-USGov, author the
+# court) stands, as it does for the 491 court-credited portraits shown on
+# 2026-10-19, and so does an uploader's {{own}} work with nothing on its page
+# that says otherwise. The review of PR #127 found the first list doubting
+# two D.C. court photographs (Mehta, Sooknanan), two {{own}} uploads
+# (Arias-Marxuach, Carreno-Coll), a Southern District of Florida photograph
+# (Marra, author the court, "work of the Federal Government") and the
+# Supreme Court photographer's portrait of Justice Jackson
+# ({{PD-USGov-SCOTUS}}) on grounds that every shown portrait of their kind
+# would fail; those were dropped (read 2026-10-19).
 PORTRAIT_LICENCE_DOUBTS = {
     "https://upload.wikimedia.org/wikipedia/commons/f/fc/Richard_C._Wesley_(cropped).jpg":
         ("2026-10-19", "CC BY-SA 4.0 on a photograph credited 'Photo courtesy of the "
@@ -669,23 +684,7 @@ PORTRAIT_LICENCE_DOUBTS = {
         ("2026-10-19", "'own work' by an uploader, of a file carrying a studio's code "
                        "(VLF22561r)"),
     "https://upload.wikimedia.org/wikipedia/commons/6/62/Header_NA_Yoon_US-Senate-Collection.jpg":
-        ("2026-10-19", "public domain, from the Senate Press Gallery, author unknown"),
-    "https://upload.wikimedia.org/wikipedia/commons/7/75/Kenneth-marra.png":
-        ("2026-10-19", "public domain, but taken from stetnews.org and credited 'copyright U.S. "
-                       "District Court, Southern District of Florida'"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/b7/Hon._Ra%C3%BAl_M._Arias-Marxuach.jpg":
-        ("2026-10-19", "'own work' CC BY-SA, named like the court's own Hon-* portrait files"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/38/Hon-Silvia-Carreno-Coll.jpg":
-        ("2026-10-19", "'own work' CC BY-SA, named like the court's own Hon-* portrait files"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/bb/Judge_Sparkle_Sooknanan_(cropped).jpg":
-        ("2026-10-19", "a dcd.uscourts.gov photograph tagged public domain by its uploader; "
-                       "the courts' sites state no licence"),
-    "https://upload.wikimedia.org/wikipedia/commons/6/6c/Mehta_A.jpg":
-        ("2026-10-19", "a dcd.uscourts.gov photograph tagged public domain by its uploader; "
-                       "the courts' sites state no licence"),
-    "https://upload.wikimedia.org/wikipedia/commons/d/d6/Ketanji_Brown_Jackson_official_SCOTUS_portrait.jpg":
-        ("2026-10-19", "the Court's own photograph (Fred Schilling), which the Court says may not "
-                       "be reproduced without its prior approval"),
+        ("2026-10-19", "public domain, from the Senate Press Gallery, author {{Unknown}}"),
 }
 
 # A member's official issues page whose list `members` reads but that is not

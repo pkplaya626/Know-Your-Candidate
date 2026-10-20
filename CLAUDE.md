@@ -1397,19 +1397,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     percent-encoded (`p%C3%A9rez-myrna`), and the reader took only plain
     letters, so ten judges' pages were "unread" on every run. A judge no
     item carries is found by the one article whose `{{FJC Bio}}` names
-    their nid, a search on the id. An item with no year of birth is
-    checked by its article's year, and the two must agree where both
-    give one. Where the item has no single portrait, two id-tied sources
-    must agree:
+    their nid, a search on the id; the dialog then says the links came
+    that way (`linkVia`), not through an item carrying the id, and a
+    search that fails keeps the judge's last entry (rule 8). An item with
+    no year of birth is checked by its article's year, and the two must
+    agree where both give one. Where the item has no single portrait,
+    only these routes take one:
     - two images: the one the item's own article shows;
     - a wide hearing still: a Commons crop `{{Extracted from}}` that file
       and depicting the item alone (P180); Don Willett's depicts a
       microphone and shows a rally's banner;
     - no image: the article's infobox image, if its lead image is the
-      same file.
-    A file whose licence the research's checker doubted waits in
-    `overrides.PORTRAIT_LICENCE_DOUBTS` for a person. The courts' sites
-    and supremecourt.gov restrict reuse and are no route. A photograph
+      same file; an article with no lead image gives nothing.
+    A licence doubt is one test for every portrait: Commons' tag stands
+    unless the file points to another author or source (a studio's code,
+    a university's credit, another website) or names no author. The
+    first list withheld two D.C. court photographs while 491 court
+    photographs under the same tag were shown. What fails waits in
+    `overrides.PORTRAIT_LICENCE_DOUBTS` for a person, and a portrait kept
+    from an earlier read is asked of it again. A photograph
     is shown only at Wikimedia's own sizes up to the 250px a page draws,
     its largest weighed and within 300 KB and 1,200px. A file offered
     only over that is left out and counted (`judge-portraits-oversized`),

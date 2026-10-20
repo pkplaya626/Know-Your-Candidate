@@ -294,9 +294,11 @@ class TestTheJoin(unittest.TestCase):
                 self.assertTrue(url.startswith("https://upload.wikimedia.org/"), (nid, url))
 
 
-def article(title="Ann Example", born="1960", image=None, lead=None, fjc_bio=(), item="Q1"):
+def article(title="Ann Example", born="1960", image=None, lead=..., fjc_bio=(), item="Q1"):
+    """An article as read; its lead image is its infobox's unless *lead*
+    says otherwise (None: the article gives no lead image)."""
     return {"title": title, "item": item, "born": born, "image": image,
-            "lead": lead if lead is not None else image, "fjcBio": sorted(fjc_bio)}
+            "lead": image if lead is ... else lead, "fjcBio": sorted(fjc_bio)}
 
 
 def ref(name):
@@ -314,7 +316,8 @@ class TestThePhotoRoutes(unittest.TestCase):
     CREDIT = TestTheJoin.CREDIT
 
     def run_join(self, item, files, articles=None, crops=None, bio=None, slugs=None,
-                 weights=None, judge=JUDGE, previous=None, report=None, wanted=None):
+                 weights=None, judge=JUDGE, previous=None, report=None, wanted=None,
+                 bio_missed=None):
         """*files* is ``{file name: (width, height)}``."""
         sizes = {up(n): s for n, s in files.items()}
         if weights is None:
@@ -325,7 +328,7 @@ class TestThePhotoRoutes(unittest.TestCase):
                        wd(item) if item else {}, sizes, previous,
                        {up(n): self.CREDIT for n in files}, articles=articles or {},
                        crops=crops or {}, bio=bio or {}, weights=weights, report=report,
-                       wanted=wanted, today="2026-10-19")
+                       wanted=wanted, today="2026-10-19", bio_missed=bio_missed)
 
     # ---- the slug's percent-encoding
 
@@ -547,6 +550,12 @@ class TestThePhotoRoutes(unittest.TestCase):
         joined, _ = self.run_join(item, {name: (742, 912)},
                                   articles={"Ann Example": article(image=name, lead="Courthouse.jpg")})
         self.assertNotIn("portrait", joined["100"])
+        # An article that gives no lead image confirms nothing: the infobox
+        # alone is not the route, and the evidence would not be true.
+        joined, problems = self.run_join(item, {name: (742, 912)},
+                                         articles={"Ann Example": article(image=name, lead=None)})
+        self.assertNotIn("portrait", joined["100"])
+        self.assertIn("gives no lead image", problems[0])
         # An article whose title is not theirs gives nothing.
         item = entity("Q1", "example-ann", article="Protests in 2026")
         joined, _ = self.run_join(item, {name: (742, 912)},
@@ -631,7 +640,17 @@ class TestThePhotoRoutes(unittest.TestCase):
         self.assertEqual(problems, [])
         self.assertEqual(joined["100"]["wikidata"], "Q5")
         self.assertEqual(joined["100"]["wikipedia"], "Ann Example")
-        self.assertIn("{{FJC Bio|100}}", joined["100"]["portrait"]["evidence"])
+        # The evidence quotes the template as it was matched: its nid=.
+        self.assertIn("{{FJC Bio|nid=100}}", joined["100"]["portrait"]["evidence"])
+        # The entry says how it was found, for the page's note.
+        self.assertEqual(joined["100"]["linkVia"], "fjc-bio")
+        out = federal_build._judge({"id": "fjc-100", "name": "Ann B. Example"}, {"judges": joined})
+        self.assertEqual(out["linkVia"], "fjc-bio")
+        # A judge found through the item carrying their id has no such mark.
+        item = entity("Q1", "example-ann", images=[name], article="Ann Example")
+        joined_by_id, _ = self.run_join(item, {name: (400, 500)},
+                                        articles={"Ann Example": article(item="Q1")})
+        self.assertNotIn("linkVia", joined_by_id["100"])
         # An item that carries another judge's FJC id is someone else's.
         joined, problems = self.run_join(None, {name: (400, 500)}, articles=articles,
                                          bio=self.bio(slugs=["other-judge"]))
@@ -651,9 +670,37 @@ class TestThePhotoRoutes(unittest.TestCase):
             hits = {"100": ["Ann Example"], "200": ["A", "B"], "300": []}[query["srsearch"][-4:-1]]
             return json.dumps({"query": {"search": [{"title": t} for t in hits]}})
 
-        self.assertEqual(jl.find_by_fjc_bio(["100", "200", "300"], read, live=False),
-                         {"100": "Ann Example"})
+        found, missed = jl.find_by_fjc_bio(["100", "200", "300"], read, live=False)
+        self.assertEqual(found, {"100": "Ann Example"})
+        # No article, or several, is said - never silently nothing.
+        self.assertEqual(sorted(missed), ["200", "300"])
+        self.assertIn("2 English Wikipedia articles", missed["200"])
+        self.assertIn("no English Wikipedia article", missed["300"])
         self.assertEqual(asked[0], 'hastemplate:"FJC Bio" insource:"100"')
+
+    def test_a_failed_fjc_bio_search_keeps_the_last_entry(self):
+        """Rule 8: a judge found only through {{FJC Bio}} keeps their links
+        and portrait when the next run's search for them cannot be read."""
+        name = "Ann Example.jpg"
+        articles = {"Ann Example": article(fjc_bio=["100"], item="Q5")}
+        first, _ = self.run_join(None, {name: (400, 500)}, articles=articles, bio=self.bio())
+        self.assertIn("portrait", first["100"])
+
+        def read(url):
+            raise OSError("timed out")
+
+        found, missed = jl.find_by_fjc_bio(["100"], read, live=False)
+        self.assertEqual((found, missed), ({}, {}))
+        joined, problems = self.run_join(None, {}, previous=first, bio={}, bio_missed=missed)
+        self.assertEqual(joined["100"], first["100"])
+        self.assertIn("was not read; the last entry is kept", problems[0])
+        # A search that was read and found nothing is a finding: said, and
+        # nothing linked.
+        joined, problems = self.run_join(None, {}, previous=first, bio={},
+                                         bio_missed={"100": "no English Wikipedia article's "
+                                                            "{{FJC Bio}} names nid 100"})
+        self.assertEqual(joined, {})
+        self.assertIn("no Wikidata item carries the FJC id example-ann", problems[0])
 
     def test_an_article_naming_another_judges_id_is_refused(self):
         """A page that names someone else is not theirs, whatever its title."""
@@ -668,7 +715,7 @@ class TestThePhotoRoutes(unittest.TestCase):
 
     def test_a_doubted_licence_is_withheld_and_said(self):
         from kyc import overrides
-        name = "Mehta A.jpg"
+        name = "Richard C. Wesley (cropped).jpg"
         self.assertIn(up(name), overrides.PORTRAIT_LICENCE_DOUBTS)
         report = {}
         joined, problems = self.run_join(entity("Q1", "example-ann", images=[name]),
@@ -676,6 +723,35 @@ class TestThePhotoRoutes(unittest.TestCase):
         self.assertNotIn("portrait", joined["100"])
         self.assertIn("PORTRAIT_LICENCE_DOUBTS", problems[0])
         self.assertEqual(report["doubted"], [up(name)])
+
+    def test_a_kept_portrait_is_asked_of_the_overrides_again(self):
+        """A doubt or a refusal added after a file was read withholds it,
+        even on a run that could not read that judge again (rule 8 keeps
+        what was read; it does not keep what a person withdrew)."""
+        from kyc import overrides
+        name = "Richard C. Wesley (cropped).jpg"
+        url = up(name)
+        kept = {"wikidata": "Q1", "portrait": {
+            "url": url, "set": [[120, url]], "credit": "Wikimedia Commons",
+            "source": jl.file_page(url), "licence": "CC BY-SA 4.0", "route": "item",
+            "evidence": "Wikidata Q1 carries the FJC id", "read": "2026-10-01",
+            "bytes": 20_000, "width": 120, "height": 150}}
+        self.assertIn(url, overrides.PORTRAIT_LICENCE_DOUBTS)
+        # The FJC page was not read this time: the entry is kept, the file not.
+        joined, problems = self.run_join(None, {}, slugs={}, previous={"100": kept})
+        self.assertEqual(joined["100"], {"wikidata": "Q1"})
+        self.assertIn("PORTRAIT_LICENCE_DOUBTS", problems[0])
+        # A wide frame whose crops were not read: the last portrait is not kept either.
+        item = entity("Q1", "example-ann", images=[name])
+        joined, problems = jl.join({"fjc-100": JUDGE}, {"100": "example-ann"}, wd(item),
+                                   {url: (1600, 900)}, {"100": kept}, today="2026-10-19")
+        self.assertNotIn("portrait", joined["100"])
+        self.assertIn("is not shown", problems[0])
+        # And a cache that holds one anyway fails the build.
+        found = jl.problems({"judges": {"100": kept}})
+        self.assertIn("judge-portrait-overridden", [code for _l, code, _m, _d in found])
+        self.assertEqual([lvl for lvl, code, _m, _d in found
+                          if code == "judge-portrait-overridden"], ["error"])
 
     def test_the_committed_portraits_carry_their_record_within_the_caps(self):
         from kyc import overrides
@@ -691,6 +767,11 @@ class TestThePhotoRoutes(unittest.TestCase):
             self.assertLessEqual(portrait["bytes"], jl.CAP_BYTES, nid)
             self.assertLessEqual(max(w for w, _u in portrait["set"]), jl.SHOWN_STEPS[-1], nid)
             self.assertNotIn(jl.source_url(portrait["source"]), overrides.PORTRAIT_LICENCE_DOUBTS)
+            self.assertNotIn(jl.source_url(portrait["source"]), overrides.NOT_A_PORTRAIT)
+            # The evidence quotes {{FJC Bio}} as it was matched, by nid=.
+            self.assertNotRegex(portrait["evidence"], r"\{\{FJC Bio\|\d", nid)
+            if "FJC Bio" in portrait["evidence"]:
+                self.assertEqual(entry.get("linkVia"), "fjc-bio", nid)
 
 
 class TestTheTerritorialCourts(unittest.TestCase):

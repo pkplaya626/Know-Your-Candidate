@@ -2267,15 +2267,22 @@ shows none (`justice-portraits`). Every other judge's portrait is the image
 of the Wikidata item that carries their FJC id (above), never one found by
 name; the shape and surname checks withhold what is not a likeness, and the
 `judiciary` run lists each one withheld. Where the item has no single
-portrait, two sources tied to the judge by id must agree on one:
+portrait, one is taken only by these routes, each tied to the judge by id:
 
 - two images: the one the item's own article shows in its infobox;
 - a wide hearing still: a Commons crop that says it was extracted from that
   very file and depicts the item alone;
-- no image: the article's infobox image, if the article also leads with it.
+- no image: the article's infobox image, if the article also leads with it
+  (an article with no lead image gives nothing).
 
 A judge whose FJC id no item carries is found through the one article whose
-`{{FJC Bio}}` names their nid. A photograph is used only at Wikimedia's own
+`{{FJC Bio}}` names their nid; the entry carries `linkVia: "fjc-bio"`, and
+the dialog's note on the links says they came that way. A search that fails
+keeps the judge's last entry; one that answers no article or several is
+reported. A Commons file whose licence is in doubt by one test - its page or
+name points to another author or source, or names no author - is withheld in
+`overrides.PORTRAIT_LICENCE_DOUBTS`, kept portraits included, and the build
+fails a portrait the overrides withhold (`judge-portrait-overridden`). A photograph is used only at Wikimedia's own
 sizes, up to the 250px a page draws. Its largest size is weighed and must be
 within 300 KB and 1,200px; a file offered only over that is left out and
 counted. Each portrait in `judge_links.json` records its `route`, the

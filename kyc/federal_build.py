@@ -108,6 +108,11 @@ def _judge(record, links=None):
         out["wikidata"] = joined["wikidata"]
     if joined.get("wikipedia"):
         out["wikipedia"] = joined["wikipedia"]
+    # How the article was found, for the dialog's note on its source: the
+    # one article whose {{FJC Bio}} names the judge's nid, where no
+    # Wikidata item carries their FJC id.
+    if joined.get("linkVia") and (out.get("wikipedia") or out.get("wikidata")):
+        out["linkVia"] = joined["linkVia"]
     # The Court's own portrait of a justice stands; the Commons one is for
     # everyone the Court does not photograph.
     if joined.get("portrait") and not out.get("portrait"):
