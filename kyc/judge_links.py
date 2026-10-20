@@ -784,6 +784,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
 
         # ---- which file, by which route
         images = sorted(item["images"])
+        official = getattr(overrides, "JUSTICE_PORTRAITS", {}).get(nid)
         # The infobox's file, where the article's lead image (PageImages)
         # does not name another; *led* where the lead names this very file.
         art_image = led = None
@@ -796,7 +797,14 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
             for crop in crops.get(ref_name(ref)) or []:
                 possible.add(file_ref(crop["file"]))
         candidate, why, unsure = None, None, None
-        if len(images) == 1:
+        if official:
+            # A justice's official portrait as Commons holds it, whatever
+            # the item's image is (the owner's decision of 2026-10-20).
+            possible.add(file_ref(official[0]))
+            candidate = ("official", file_ref(official[0]),
+                         f"overrides.JUSTICE_PORTRAITS names this file, by {official[1]}, as "
+                         f"{official[3]} (checked {official[2]})")
+        elif len(images) == 1:
             ref = images[0]
             url = commons_url(ref)
             size = sizes.get(url) if url else None
@@ -862,6 +870,12 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                        f"not shown as a portrait")
             elif credit_problem(name, url, credits.get(url)):
                 why = credit_problem(name, url, credits.get(url))
+            elif route == "official" and credits[url].get("by") != official[1]:
+                # The file is the Court's portrait only as long as Commons
+                # still credits whom the entry was checked against.
+                why = (f"{name}: Commons names {credits[url].get('by') or 'no author'} as the "
+                       f"author of {url}, not {official[1]!r} as overrides.JUSTICE_PORTRAITS "
+                       f"recorded on {official[2]}; not shown")
             else:
                 steps, kept = renditions(url, size[0]), None
                 for i in range(len(steps) - 1, -1, -1):
@@ -1113,6 +1127,8 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
             limit=None):
     """Read what is missing and join it; returns the cache written, or
     raises :class:`JudgeLinksError` and leaves the committed one."""
+    from . import overrides
+
     previous = load_cache(root) or {}
     live = read is None
     reader = read or _get
@@ -1143,7 +1159,8 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
             bio_missed[nid] = f"the item of the article {t!r}, {q}, is not on Wikidata"
     # Their items' articles are the same articles, already read.
     everyone = list(sitting.items()) + [(q, i) for q, i, _t in bio.values()]
-    refs = set()
+    # A justice's official portrait, whatever their item's image is.
+    refs = {file_ref(entry[0]) for entry in getattr(overrides, "JUSTICE_PORTRAITS", {}).values()}
     for _qid, item in everyone:
         refs |= item["images"]
         for url in item["articles"]:
@@ -1268,11 +1285,39 @@ def problems(cache):
                     f"{len(cache['problems'])} judges' Wikipedia links, Wikidata items or portraits "
                     f"are withheld by the checks in kyc/judge_links.py (read {cache.get('read')})",
                     list(cache["problems"])))
+    # A justice's official portrait the table names but the read does not
+    # hold, as that file credited to that author: the Court's own stands.
+    unheld = sorted(f"FJC {nid}: {entry[0]}" for nid, entry
+                    in getattr(overrides, "JUSTICE_PORTRAITS", {}).items()
+                    if not official_portrait(cache, nid))
+    if unheld:
+        out.append(("warn", "justice-portrait-unread",
+                    f"{len(unheld)} justices' official portraits in overrides.JUSTICE_PORTRAITS "
+                    "are not what the judges' read holds, so the Court's own stands; run "
+                    "'judiciary --links-only'", unheld))
     if cache.get("unread"):
         out.append(("warn", "judge-links-unread",
                     f"{cache['unread']} judges' FJC pages could not be read for their id; "
                     f"'judiciary' tries them again", []))
     return out
+
+
+def official_portrait(cache, nid):
+    """A sitting justice's official portrait as the judges' read took it from
+    Commons (``overrides.JUSTICE_PORTRAITS``): the cached portrait when it is
+    that very file and Commons credited the author recorded there, else
+    ``None`` - and the Court's own portrait stands."""
+    from . import overrides
+
+    official = getattr(overrides, "JUSTICE_PORTRAITS", {}).get(nid)
+    portrait = for_judge(cache, nid).get("portrait") or {}
+    if not official or not portrait or held_back(portrait):
+        return None
+    if portrait.get("source") != file_page(commons_url(file_ref(official[0]))):
+        return None
+    if portrait.get("by") != official[1] or not portrait.get("licence"):
+        return None
+    return portrait
 
 
 def for_judge(cache, nid):

@@ -1424,8 +1424,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     only over that is left out and counted (`judge-portraits-oversized`),
     never resized or copied here. Each portrait records its route, the
     evidence naming the judge, the day read and its weight, and the
-    build fails one without them. A vacancy's judge is found on its court by surname *and*
-    first given name (`vacancies.judge_of`): two of the list's departing
+    build fails one without them. A justice's portrait is the Court's
+    official one as Commons holds it, credited to its photographer
+    (`overrides.JUSTICE_PORTRAITS`, the owner's decision of 2026-10-20):
+    the Court's photographs page asks for approval before publication, and
+    the site loaded all nine from supremecourt.gov. The table names the
+    file and the author it was checked against, since a Wikidata item's
+    image need not be the Court's: Sotomayor's is a 2009 White House
+    photograph, and Commons held no official portrait of hers, so the
+    Court's own stands for her and the page says so. A file Commons credits
+    to anyone else is not the Court's (`justice-portrait-unread`). A
+    vacancy's judge is found on its court by surname *and* first given name (`vacancies.judge_of`): two of the list's departing
     judges are not in the directory, and a surname alone would have moved
     a colleague of that name to senior status. The
     territorial courts'

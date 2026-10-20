@@ -112,6 +112,33 @@ class TestTheBuild(unittest.TestCase):
         self.assertEqual(len(scotus["members"]), federal_courts.SUPREME_COURT_SEATS)
         self.assertFalse({j["id"] for j in scotus["members"]} & {j["id"] for j in scotus["retired"]})
 
+    def test_a_justices_portrait_is_the_official_one_commons_holds_else_the_courts(self):
+        """The owner's decision of 2026-10-20: the Court's official portraits
+        as Wikimedia Commons holds them, credited to their photographers;
+        the Court's own only for a justice Commons holds none of."""
+        from kyc import judge_links, overrides
+
+        links = judge_links.load_cache(ROOT)
+        held = 0
+        for justice in self.payload["supremeCourt"]["members"]:
+            nid = justice["id"].replace("fjc-", "")
+            portrait = justice.get("portrait") or {}
+            official = judge_links.official_portrait(links, nid)
+            if official:
+                held += 1
+                self.assertEqual(portrait["source"], official["source"], justice["name"])
+                self.assertEqual((portrait["by"], portrait["licence"]),
+                                 (overrides.JUSTICE_PORTRAITS[nid][1], official["licence"]))
+                self.assertNotIn("supremecourt.gov", portrait["url"])
+            elif portrait:
+                # Never another Commons file passed off as the Court's
+                # portrait: Sotomayor's item shows a 2009 White House photo.
+                self.assertEqual(portrait["credit"], judiciary.PORTRAIT_CREDIT, justice["name"])
+                self.assertIn("supremecourt.gov", portrait["url"])
+        if links and links.get("read", "") >= "2026-10-20":
+            # Read on 2026-10-20: eight of the nine, all but Sotomayor.
+            self.assertGreaterEqual(held, len(overrides.JUSTICE_PORTRAITS) - 1)
+
 
 class TestTheFiles(unittest.TestCase):
     """Each file is rewritten only when what it says changed, and verify

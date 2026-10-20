@@ -701,7 +701,27 @@
     return (j.justice && j.justice.oath) || (j.courtService && j.courtService.oath) || "";
   }
 
-  /** A justice as a card: the Court's own portrait, role, appointment. */
+  /** Where the justices' portraits come from: the Court's official
+   *  portraits as Wikimedia Commons holds them, each credited to its
+   *  photographer in the justice's dialog; the Court's own, from its site,
+   *  for a justice Commons holds none of (overrides.JUSTICE_PORTRAITS). */
+  function portraitsLine(members) {
+    var commons = members.filter(function (j) { return j.portrait && j.portrait.licence; });
+    var court = members.filter(function (j) { return j.portrait && !j.portrait.licence; });
+    if (!commons.length && !court.length) return "";
+    var names = court.map(function (j) { return esc(j.name); });
+    var whose = names.length > 1
+      ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names[0];
+    var fromCourt = court.length
+      ? source(court[0].portrait.source, "the Court’s own site") : "";
+    if (!commons.length) return " Portraits: from " + fromCourt + ".";
+    return " Portraits: the Court’s official portraits as Wikimedia Commons holds them, each " +
+      "credited to its photographer in the justice’s details" +
+      (court.length ? "; " + whose + "’s from " + fromCourt + ", which Commons does not hold" : "") +
+      ".";
+  }
+
+  /** A justice as a card: their official portrait, role, appointment. */
   function justiceCard(j) {
     var seat = (j.seats || [])[0] || {};
     return '<li class="fed-card fed-justice">' + portrait(j) +
@@ -766,11 +786,8 @@
       '<p class="guide-lede">Its members as ' + source(d.sources.judiciary.supremeCourt,
         "the Court lists them") + ", with each justice’s appointment from the Federal " +
       "Judicial Center’s directory, as of " + day(asOf.judiciary) + ". " +
-      '<a href="../courts/scotus.html">The Court’s page</a>.' +
-      ((scotus.members || []).some(function (j) { return j.portrait; })
-        ? " Portraits: " + source((scotus.members.filter(function (j) { return j.portrait; })[0]
-            .portrait || {}).source, "Collection of the Supreme Court of the United States") + "."
-        : "") + "</p>" +
+      '<a href="../courts/scotus.html">The Court’s page</a>.' + portraitsLine(scotus.members || []) +
+      "</p>" +
       '<ul class="fed-cards">' + (scotus.members || []).map(justiceCard).join("") + "</ul>" +
       ((scotus.retired || []).length
         ? table("Retired justices, listed apart: they are not members of the Court",

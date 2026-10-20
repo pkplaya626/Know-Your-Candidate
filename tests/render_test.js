@@ -10740,6 +10740,16 @@ async function testFederal() {
     check("each justice the Court pictures is pictured", d.supremeCourt.members.every((j, i) =>
       !j.portrait || (justices[i].querySelector("img.fed-photo") || {}).getAttribute &&
         justices[i].querySelector("img.fed-photo").getAttribute("src") === j.portrait.url));
+    // The owner's decision of 2026-10-20: the Court's official portraits as
+    // Wikimedia Commons holds them; the Court's own named apart, never all
+    // credited to its Collection over files that are Commons'.
+    const scotusLede = D.querySelector("#supreme-court .guide-lede").textContent;
+    const fromCourt = d.supremeCourt.members.filter((j) => j.portrait && !j.portrait.licence);
+    check("the portraits are said to be the official ones Commons holds, the Court's own named apart",
+      (!d.supremeCourt.members.some((j) => j.portrait && j.portrait.licence) ||
+        /official portraits as Wikimedia Commons holds them/.test(scotusLede)) &&
+      fromCourt.every((j) => scotusLede.indexOf(j.name + "’s from the Court’s own site") !== -1),
+      scotusLede);
     const sized = [...D.querySelectorAll("#cabinet img.fed-photo, #executive img.fed-photo")];
     // A srcset is read by its "url widthw" pairs: the URLs hold commas.
     const urlsOf = (img) => [...(img.getAttribute("srcset") || "").matchAll(/(\S+)\s+\d+w/g)]
@@ -11075,6 +11085,12 @@ async function testFederal() {
     const meta = D.getElementById("officialModalMeta").textContent;
     check("a justice is shown with who appointed them, never a party",
       /Appointed by/.test(meta) && !PARTY_WORDS.test(meta), meta);
+    if (justice.portrait && justice.portrait.licence) {
+      const credit = D.getElementById("officialModalPhotoCredit").textContent;
+      check("a justice's Commons portrait is credited to its photographer and licence (rule 87)",
+        credit.indexOf(justice.portrait.by) !== -1 && credit.indexOf(justice.portrait.licence) !== -1,
+        credit);
+    }
     check("and links to the Federal Judicial Center's page",
       !!modal.querySelector('a[href^="https://www.fjc.gov/node/"]'));
     // The directory's career field holds roles held now ("-present"): the

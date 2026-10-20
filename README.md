@@ -2257,8 +2257,8 @@ appointed by a president, by name.
   office's own page names the holder, since when they have held it and whom
   they followed;
 - every change in the Cabinet since the term began (below);
-- the Supreme Court as cards with the Court's own portraits, with retired
-  justices listed apart;
+- the Supreme Court as cards with the justices' official portraits, with
+  retired justices listed apart;
 - a map of the states by federal judicial circuit, and every federal court,
   the courts of appeals and then each circuit's district courts, with a
   search of every sitting judge.
@@ -2269,12 +2269,24 @@ The Cabinet's portraits are the White House's. Its originals run to 6.5 MB,
 so each card draws from the sizes the White House serves of that one file,
 read from the srcset on its Cabinet page (`photoSet`, rule 42). Those URLs
 contain commas (`?resize=428,600`), so the srcset is read by its "url width"
-pairs, never split on commas. The justices' portraits are the Court's own,
-from its biographies page, credited to the Collection of the Supreme Court
-of the United States. Each is joined only to the nine justices already
-joined to the directory, since the page also pictures retired justices, and
-only when its caption's title agrees with the justice's role. Any failure
-shows none (`justice-portraits`). Every other judge's portrait is the image
+pairs, never split on commas. A justice's portrait is the Court's official
+portrait as Wikimedia Commons holds it, credited to its photographer and
+licence as the file's page gives them (the owner's decision of 2026-10-20:
+the Court's photographs page asks for approval before its images are
+published, and the portraits are its staff photographers' work).
+`overrides.JUSTICE_PORTRAITS` names each justice's file and the author it
+was checked against; the judges' read takes that file for them, by every
+check a judge's portrait passes (`route: "official"`), and the federal
+pages show it only while it is that file credited to that author
+(`judge_links.official_portrait`). A justice the table does not name keeps
+the Court's own portrait, from its biographies page, credited to the
+Collection of the Supreme Court of the United States - Sonia Sotomayor,
+whose Wikidata image is a 2009 White House photograph - and the page says
+whose portraits are the Court's own. The Court's own pictures are joined
+only to the nine justices already joined to the directory, since the page
+also pictures retired justices, and only when its caption's title agrees
+with the justice's role. Any failure shows none (`justice-portraits`); a
+table entry the read does not hold is a warning (`justice-portrait-unread`). Every other judge's portrait is the image
 of the Wikidata item that carries their FJC id (above), never one found by
 name; the shape and surname checks withhold what is not a likeness, and the
 `judiciary` run lists each one withheld. Where the item has no single

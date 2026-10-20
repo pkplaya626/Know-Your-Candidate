@@ -113,9 +113,16 @@ def _judge(record, links=None):
     # Wikidata item carries their FJC id.
     if joined.get("linkVia") and (out.get("wikipedia") or out.get("wikidata")):
         out["linkVia"] = joined["linkVia"]
-    # The Court's own portrait of a justice stands; the Commons one is for
-    # everyone the Court does not photograph.
-    if joined.get("portrait") and not out.get("portrait"):
+    # A sitting justice's official portrait as Wikimedia Commons holds it,
+    # credited to its photographer (overrides.JUSTICE_PORTRAITS, the owner's
+    # decision of 2026-10-20); the Court's own stands only where Commons
+    # holds none the read reached. Any other Commons portrait is for the
+    # judges the Court does not photograph.
+    official = judge_links.official_portrait(links, record["id"].replace("fjc-", "")) \
+        if record.get("justice") else None
+    if official:
+        out["portrait"] = {k: v for k, v in official.items() if k in judge_links.PAGE_KEYS}
+    elif joined.get("portrait") and not out.get("portrait"):
         # What the page draws and credits; the route, evidence and weight
         # stay in the cache's record.
         out["portrait"] = {k: v for k, v in joined["portrait"].items()

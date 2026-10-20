@@ -688,6 +688,45 @@ PORTRAIT_LICENCE_DOUBTS = {
         ("2026-10-19", "public domain, from the Senate Press Gallery, author {{Unknown}}"),
 }
 
+# Each sitting justice's official portrait as Wikimedia Commons holds it,
+# keyed on the FJC nid: (the Commons file, its author as the file's page
+# names it, the day read, what shows it is the Court's own). The owner's
+# decision of 2026-10-20: the Court's photographs page says its images "may
+# not be reproduced for publication (print or web) without prior approval";
+# the official portraits are its staff photographers' work, and Commons holds
+# the same portraits, so a justice's portrait is taken from Commons, credited
+# to its photographer, wherever this table names it. The judges' read
+# (kyc/judge_links.py) takes this file for the justice, by the same checks as
+# any judge's, and the federal pages show it only while Commons still names
+# the author recorded here; otherwise the Court's own portrait stands.
+# Sonia Sotomayor is not here: her Wikidata item's image is a 2009 White
+# House photograph, not the Court's portrait, and Commons held no official
+# portrait of hers when read on 2026-10-20, so the Court's own stands.
+_SCOTUS_STAFF = ("the Court's official portrait, by its staff photographer, as the Court's "
+                 "Collection credits it")
+JUSTICE_PORTRAITS = {
+    "1391841": ("Official roberts CJ.jpg", "Steve Petteway", "2026-10-20",
+                _SCOTUS_STAFF + "; the Chief Justice's official portrait"),
+    "1388686": ("Clarence Thomas official SCOTUS portrait.jpg",
+                "Steve Petteway, Collection of the Supreme Court of the United States",
+                "2026-10-20", _SCOTUS_STAFF),
+    "1377101": ("Justice Alito official.jpg", "Steve Petteway", "2026-10-20", _SCOTUS_STAFF),
+    "1393281": ("Elena Kagan Official SCOTUS Portrait (2013).jpg",
+                "Steve Petteway, Collection of the Supreme Court of the United States",
+                "2026-10-20", _SCOTUS_STAFF + "; Commons tags it CC BY-SA 3.0, and the tag "
+                "stands (rule 82): shown with that licence"),
+    "1392461": ("Associate Justice Neil Gorsuch Official Portrait.jpg",
+                "Franz Jantzen, Collection of the Supreme Court of the United States",
+                "2026-10-20", _SCOTUS_STAFF),
+    "1392406": ("Associate Justice Brett Kavanaugh Official Portrait.jpg",
+                "The Collection of the Supreme Court of the United States", "2026-10-20",
+                "the Court's official portrait, credited to the Court's Collection"),
+    "3979311": ("Amy Coney Barrett official portrait.jpg", "United States Supreme Court",
+                "2026-10-20", "the Court's official portrait, credited to the Court"),
+    "1394151": ("Ketanji Brown Jackson official SCOTUS portrait.jpg",
+                "Fred Schilling / United States Supreme Court", "2026-10-20", _SCOTUS_STAFF),
+}
+
 # A member's official issues page whose list `members` reads but that is not
 # the page's list of issues, keyed on bioguide id: (date checked, the page
 # read, what it shows). The rules take a page's links or one level of its
