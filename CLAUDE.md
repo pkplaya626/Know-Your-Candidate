@@ -1389,7 +1389,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     items' years disagreed with the directory's on the first full read.
     What disagrees, or cannot be checked, gives nothing; a size Commons
     did not answer for keeps the last portrait read of the same file
-    (rule 8). A vacancy's judge is found on its court by surname *and*
+    (rule 8). 482 of 1,463 judges had no portrait on 2026-10-19, and the
+    research found why. The FJC writes an accented judge's slug
+    percent-encoded (`p%C3%A9rez-myrna`), and the reader took only plain
+    letters, so ten judges' pages were "unread" on every run. A judge no
+    item carries is found by the one article whose `{{FJC Bio}}` names
+    their nid, a search on the id. An item with no year of birth is
+    checked by its article's year, and the two must agree where both
+    give one. Where the item has no single portrait, two id-tied sources
+    must agree:
+    - two images: the one the item's own article shows;
+    - a wide hearing still: a Commons crop `{{Extracted from}}` that file
+      and depicting the item alone (P180); Don Willett's depicts a
+      microphone and shows a rally's banner;
+    - no image: the article's infobox image, if its lead image is the
+      same file.
+    A file whose licence the research's checker doubted waits in
+    `overrides.PORTRAIT_LICENCE_DOUBTS` for a person. The courts' sites
+    and supremecourt.gov restrict reuse and are no route. A photograph
+    is shown only at Wikimedia's own sizes up to the 250px a page draws,
+    its largest weighed and within 300 KB and 1,200px. A file offered
+    only over that is left out and counted (`judge-portraits-oversized`),
+    never resized or copied here. Each portrait records its route, the
+    evidence naming the judge, the day read and its weight, and the
+    build fails one without them. A vacancy's judge is found on its court by surname *and*
     first given name (`vacancies.judge_of`): two of the list's departing
     judges are not in the directory, and a surname alone would have moved
     a colleague of that name to senior status. The

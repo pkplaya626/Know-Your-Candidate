@@ -653,6 +653,41 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
+# Commons files a judge's route reaches (kyc/judge_links.py) whose licence
+# the second reader of the 2026-10-19 photo research doubted, keyed on the
+# upload URL: (date, what the file's page says). Each is withheld - and
+# reported - until a person reads the file's page and decides; delete the
+# entry to show it, or move it to NOT_A_PORTRAIT to refuse it for good.
+PORTRAIT_LICENCE_DOUBTS = {
+    "https://upload.wikimedia.org/wikipedia/commons/f/fc/Richard_C._Wesley_(cropped).jpg":
+        ("2026-10-19", "CC BY-SA 4.0 on a photograph credited 'Photo courtesy of the "
+                       "University of Albany', with no permission recorded"),
+    "https://upload.wikimedia.org/wikipedia/commons/6/6b/Higginbotham_Patrick_E.jpg":
+        ("2026-10-19", "public domain on the uploader's reasoning that 'it must be his official "
+                       "portrait'; taken from innsofcourt.org"),
+    "https://upload.wikimedia.org/wikipedia/commons/7/7d/Rufe,_Hon_CynthiaVLF22561r_web2.jpg":
+        ("2026-10-19", "'own work' by an uploader, of a file carrying a studio's code "
+                       "(VLF22561r)"),
+    "https://upload.wikimedia.org/wikipedia/commons/6/62/Header_NA_Yoon_US-Senate-Collection.jpg":
+        ("2026-10-19", "public domain, from the Senate Press Gallery, author unknown"),
+    "https://upload.wikimedia.org/wikipedia/commons/7/75/Kenneth-marra.png":
+        ("2026-10-19", "public domain, but taken from stetnews.org and credited 'copyright U.S. "
+                       "District Court, Southern District of Florida'"),
+    "https://upload.wikimedia.org/wikipedia/commons/b/b7/Hon._Ra%C3%BAl_M._Arias-Marxuach.jpg":
+        ("2026-10-19", "'own work' CC BY-SA, named like the court's own Hon-* portrait files"),
+    "https://upload.wikimedia.org/wikipedia/commons/3/38/Hon-Silvia-Carreno-Coll.jpg":
+        ("2026-10-19", "'own work' CC BY-SA, named like the court's own Hon-* portrait files"),
+    "https://upload.wikimedia.org/wikipedia/commons/b/bb/Judge_Sparkle_Sooknanan_(cropped).jpg":
+        ("2026-10-19", "a dcd.uscourts.gov photograph tagged public domain by its uploader; "
+                       "the courts' sites state no licence"),
+    "https://upload.wikimedia.org/wikipedia/commons/6/6c/Mehta_A.jpg":
+        ("2026-10-19", "a dcd.uscourts.gov photograph tagged public domain by its uploader; "
+                       "the courts' sites state no licence"),
+    "https://upload.wikimedia.org/wikipedia/commons/d/d6/Ketanji_Brown_Jackson_official_SCOTUS_portrait.jpg":
+        ("2026-10-19", "the Court's own photograph (Fred Schilling), which the Court says may not "
+                       "be reproduced without its prior approval"),
+}
+
 # A member's official issues page whose list `members` reads but that is not
 # the page's list of issues, keyed on bioguide id: (date checked, the page
 # read, what it shows). The rules take a page's links or one level of its

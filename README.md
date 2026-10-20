@@ -2224,7 +2224,23 @@ only when its caption's title agrees with the justice's role. Any failure
 shows none (`justice-portraits`). Every other judge's portrait is the image
 of the Wikidata item that carries their FJC id (above), never one found by
 name; the shape and surname checks withhold what is not a likeness, and the
-`judiciary` run lists each one withheld.
+`judiciary` run lists each one withheld. Where the item has no single
+portrait, two sources tied to the judge by id must agree on one:
+
+- two images: the one the item's own article shows in its infobox;
+- a wide hearing still: a Commons crop that says it was extracted from that
+  very file and depicts the item alone;
+- no image: the article's infobox image, if the article also leads with it.
+
+A judge whose FJC id no item carries is found through the one article whose
+`{{FJC Bio}}` names their nid. A photograph is used only at Wikimedia's own
+sizes, up to the 250px a page draws. Its largest size is weighed and must be
+within 300 KB and 1,200px; a file offered only over that is left out and
+counted. Each portrait in `judge_links.json` records its `route`, the
+`evidence` naming the judge beside it, the day `read`, and the `bytes`,
+`width` and `height` of its largest size. The build fails a portrait without
+them (`judge-portrait-unevidenced`). `judiciary --links-only` reads just
+these for the committed directory.
 
 ### Changes in the Cabinet
 
