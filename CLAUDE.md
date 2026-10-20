@@ -184,6 +184,7 @@ python build_profile_site.py voting           # each state's official voting pag
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
                                               # the territorial courts' judges from their own sites; judges' Wikidata links
+python build_profile_site.py judiciary --links-only  # only the judges' articles and portraits (rule 82), for the committed directory
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
@@ -197,8 +198,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2057 tests, no dependencies
-npm install && npm test                       # 3231 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2081 tests, no dependencies
+npm install && npm test                       # 3235 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1391,7 +1392,37 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     items' years disagreed with the directory's on the first full read.
     What disagrees, or cannot be checked, gives nothing; a size Commons
     did not answer for keeps the last portrait read of the same file
-    (rule 8). A vacancy's judge is found on its court by surname *and*
+    (rule 8). 482 of 1,463 judges had no portrait on 2026-10-19, and the
+    research found why. The FJC writes an accented judge's slug
+    percent-encoded (`p%C3%A9rez-myrna`), and the reader took only plain
+    letters, so ten judges' pages were "unread" on every run. A judge no
+    item carries is found by the one article whose `{{FJC Bio}}` names
+    their nid, a search on the id; the dialog then says the links came
+    that way (`linkVia`), not through an item carrying the id, and a
+    search that fails keeps the judge's last entry (rule 8). An item with
+    no year of birth is checked by its article's year, and the two must
+    agree where both give one. Where the item has no single portrait,
+    only these routes take one:
+    - two images: the one the item's own article shows;
+    - a wide hearing still: a Commons crop `{{Extracted from}}` that file
+      and depicting the item alone (P180); Don Willett's depicts a
+      microphone and shows a rally's banner;
+    - no image: the article's infobox image, if its lead image is the
+      same file; an article with no lead image gives nothing.
+    A licence doubt is one test for every portrait: Commons' tag stands
+    unless the file points to an author who is neither its uploader nor
+    a government office (a studio's code, a university's credit, a
+    private site's photograph guessed official) or names no author. The
+    first list withheld two D.C. court photographs while 491 court
+    photographs under the same tag were shown. What fails waits in
+    `overrides.PORTRAIT_LICENCE_DOUBTS` for a person, and a portrait kept
+    from an earlier read is asked of it again. A photograph
+    is shown only at Wikimedia's own sizes up to the 250px a page draws,
+    its largest weighed and within 300 KB and 1,200px. A file offered
+    only over that is left out and counted (`judge-portraits-oversized`),
+    never resized or copied here. Each portrait records its route, the
+    evidence naming the judge, the day read and its weight, and the
+    build fails one without them. A vacancy's judge is found on its court by surname *and*
     first given name (`vacancies.judge_of`): two of the list's departing
     judges are not in the directory, and a surname alone would have moved
     a colleague of that name to senior status. The

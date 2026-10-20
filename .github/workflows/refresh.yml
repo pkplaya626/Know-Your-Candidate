@@ -227,7 +227,10 @@ jobs:
       # Every sitting federal judge, from the Federal Judicial Center's
       # nightly directory, and the Supreme Court as the Court lists it
       # (kyc/judiciary.py). A source that cannot be read, or reads short,
-      # keeps the committed cache and stops nothing else in this run.
+      # keeps the committed cache and stops nothing else in this run. The
+      # judges' articles and portraits follow (kyc/judge_links.py): Wikidata,
+      # Wikipedia and Commons a request a second, and each new photograph's
+      # largest size weighed once, a request a second.
       - name: Refresh the federal judiciary
         continue-on-error: true
         run: python build_profile_site.py judiciary

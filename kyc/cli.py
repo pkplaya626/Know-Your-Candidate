@@ -2049,7 +2049,8 @@ def _judiciary(args):
     from . import federal_courts, judiciary
 
     previous = judiciary.load_cache(args.root)
-    if args.check:
+    links_only = getattr(args, "links_only", False)
+    if args.check or links_only:
         cache = previous
         if not cache:
             print(f"[error] no {judiciary.CACHE_PATH}; run 'judiciary'", file=sys.stderr)
@@ -2091,7 +2092,8 @@ def _judiciary(args):
             print(f"           - {line}")
         failed += level == "error"
     if not args.check:
-        print(f"[ok] wrote {judiciary.save_cache(cache, args.root)}")
+        if not links_only:
+            print(f"[ok] wrote {judiciary.save_cache(cache, args.root)}")
         # Each judge's Wikipedia article and portrait, joined through the
         # FJC id on Wikidata (kyc/judge_links.py). A failure keeps the last
         # links and does not fail the refresh (rule 8).
@@ -2103,7 +2105,8 @@ def _judiciary(args):
         else:
             print(f"  judge links: {len(links['judges'])} judges on Wikidata, "
                   f"{sum(1 for j in links['judges'].values() if j.get('portrait'))} portraits, "
-                  f"{len(links['problems'])} withheld; {links['unread']} FJC pages to read again")
+                  f"{len(links['problems'])} withheld, {len(links.get('oversized') or [])} "
+                  f"offered only over the size caps; {links['unread']} FJC pages to read again")
             for line in links["problems"][:10]:
                 print(f"           - {line}")
             print(f"[ok] wrote {judge_links.CACHE_PATH}")
@@ -2471,6 +2474,9 @@ def build_parser():
                                  "Supreme Court as the Court lists it")
     jud.add_argument("--check", action="store_true",
                      help="report the committed cache; make no network call")
+    jud.add_argument("--links-only", action="store_true",
+                     help="read only the judges' Wikipedia articles and portraits "
+                          "(kyc/judge_links.py), for the committed directory")
 
     og = add("oge", help="financial disclosures of the President, the Vice President and the "
                          "Cabinet, from the Office of Government Ethics")
