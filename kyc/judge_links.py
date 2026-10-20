@@ -15,9 +15,9 @@ The chain is ids, never a name:
    label, its image (P18) and its English Wikipedia article.
 3. A judge whose slug no item carries yet - the year's appointees - is
    found through the English Wikipedia article whose ``{{FJC Bio}}``
-   template carries their nid: a search on the id, never on a name, taken
-   only when exactly one article answers and its template names that very
-   nid. The article's own Wikidata item is then checked like any other,
+   template carries their nid: a search on the id, never on a name, whose
+   answers are each read and taken only when exactly one carries that very
+   nid as its ``nid=`` (the search also finds a list that cites the id). The article's own Wikidata item is then checked like any other,
    and the entry says so (``linkVia``), for the page's note on where the
    links came from. A search that answers no article or several is
    reported; one that fails keeps the judge's last entry (rule 8).
@@ -1043,12 +1043,20 @@ def _last_weights(previous, sizes):
     return out
 
 
+# The most articles one judge's id search may answer and still be read: the
+# search matches the id anywhere in a page's source (a list of appointments
+# cites it too), and each answer is then read for its own {{FJC Bio|nid=}}.
+BIO_TITLES = 5
+
+
 def find_by_fjc_bio(nids, read, live, log=None):
-    """``(found, missed)``: ``{nid: article title}`` for each judge whose id
-    exactly one English Wikipedia article's ``{{FJC Bio}}`` carries, and
-    ``{nid: why}`` for each whose search answered no article or several. A
-    search that fails is in neither: it concludes nothing for that judge
-    (rule 8), and :func:`join` keeps their last entry."""
+    """``(answers, missed)``: ``{nid: [article titles]}`` for each judge
+    whose id search answered one to ``BIO_TITLES`` articles - which of them
+    carries the nid as its ``{{FJC Bio}}``'s ``nid=`` is
+    :func:`settle_fjc_bio`'s to say - and ``{nid: why}`` for each it
+    answered with none or too many. A search that fails is in neither: it
+    concludes nothing for that judge (rule 8), and :func:`join` keeps their
+    last entry."""
     out, missed = {}, {}
     for nid in sorted(nids):
         try:
@@ -1057,17 +1065,48 @@ def find_by_fjc_bio(nids, read, live, log=None):
             if log:
                 log(f"    [warn] FJC Bio search for {nid}: {exc}")
             continue
-        if len(titles) == 1:
-            out[nid] = titles[0]
+        if 0 < len(titles) <= BIO_TITLES:
+            out[nid] = sorted(titles)
         elif titles:
             missed[nid] = (f"{len(titles)} English Wikipedia articles answer the search for "
-                           f"{{{{FJC Bio}}}} naming {nid} ({', '.join(sorted(titles)[:4])})")
+                           f"{{{{FJC Bio}}}} naming {nid} ({', '.join(sorted(titles)[:4])}, ...)")
         else:
             missed[nid] = f"no English Wikipedia article's {{{{FJC Bio}}}} names nid {nid}"
     if log and nids:
-        log(f"    {len(nids)} judges no Wikidata item carries; {len(out)} found by {{{{FJC Bio}}}}, "
-            f"{len(missed)} settled nothing, {len(nids) - len(out) - len(missed)} not read")
+        log(f"    {len(nids)} judges no Wikidata item carries; {len(out)} answered by the "
+            f"{{{{FJC Bio}}}} search, {len(missed)} not, {len(nids) - len(out) - len(missed)} not read")
     return out, missed
+
+
+def settle_fjc_bio(answers, articles, missed):
+    """``{nid: (item, title)}`` for each judge exactly one of whose answers,
+    as read, carries their nid as its ``{{FJC Bio}}``'s ``nid=`` and has a
+    Wikidata item; every other judge's reason goes into *missed*. The
+    articles were read (a failed read raises), so what they lack is a
+    finding."""
+    found = {}
+    for nid, titles in answers.items():
+        carrying = [t for t in titles if t in articles and nid in articles[t]["fjcBio"]]
+        if len(carrying) > 1:
+            # A list may cite many judges' records; a judge's own article
+            # cites theirs alone. Where two cite only this judge, nobody is
+            # chosen: on 2026-10-20 "Donald Trump judicial appointment
+            # controversies" cited Justin D. Smith's record alone, beside
+            # his own article, and he is reported, not linked.
+            alone = [t for t in carrying if articles[t]["fjcBio"] == [nid]]
+            carrying = alone if len(alone) == 1 else carrying
+        if len(carrying) > 1:
+            missed[nid] = (f"{len(carrying)} English Wikipedia articles carry {{{{FJC Bio|nid={nid}}}}} "
+                           f"({', '.join(carrying)})")
+        elif not carrying:
+            missed[nid] = (f"no article the search answered ({', '.join(titles)}) carries "
+                           f"{{{{FJC Bio|nid={nid}}}}}")
+        elif not articles[carrying[0]].get("item"):
+            missed[nid] = (f"the article {carrying[0]!r}, whose {{{{FJC Bio}}}} names nid {nid}, "
+                           "has no Wikidata item")
+        else:
+            found[nid] = (articles[carrying[0]]["item"], carrying[0])
+    return found
 
 
 def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, log=print,
@@ -1092,21 +1131,9 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
     homeless = sorted(n for n in nids if n in slugs and slug_key(slugs[n]) not in wikidata)
     by_bio, bio_missed = find_by_fjc_bio(homeless, reader, live, log)
     titles = {article_title(a) for i in sitting.values() if len(i["articles"]) == 1
-              for a in i["articles"]} | set(by_bio.values())
+              for a in i["articles"]} | {t for ts in by_bio.values() for t in ts}
     articles = fetch_articles(titles, reader, live, log)
-    found = {}
-    for nid, t in by_bio.items():
-        # The article was read (a failed read raises): what it lacks is a
-        # finding, and said.
-        if t not in articles:
-            bio_missed[nid] = f"the article the search found, {t!r}, is not on the wiki"
-        elif nid not in articles[t]["fjcBio"]:
-            bio_missed[nid] = (f"the article the search found, {t!r}, names nid {nid} but not as "
-                               f"its {{{{FJC Bio}}}}'s nid=")
-        elif not articles[t].get("item"):
-            bio_missed[nid] = f"the article {t!r}, whose {{{{FJC Bio}}}} names it, has no Wikidata item"
-        else:
-            found[nid] = (articles[t]["item"], t)
+    found = settle_fjc_bio(by_bio, articles, bio_missed)
     items = fetch_items([q for q, _ in found.values()], reader, live)
     bio = {}
     for nid, (q, t) in found.items():

@@ -667,16 +667,49 @@ class TestThePhotoRoutes(unittest.TestCase):
         def read(url):
             query = dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(url).query))
             asked.append(query["srsearch"])
-            hits = {"100": ["Ann Example"], "200": ["A", "B"], "300": []}[query["srsearch"][-4:-1]]
+            hits = {"100": ["Ann Example"], "200": list("ABCDEF"), "300": [],
+                    "400": ["Ann Example (judge)", "Appointment controversies"]}[query["srsearch"][-4:-1]]
             return json.dumps({"query": {"search": [{"title": t} for t in hits]}})
 
-        found, missed = jl.find_by_fjc_bio(["100", "200", "300"], read, live=False)
-        self.assertEqual(found, {"100": "Ann Example"})
-        # No article, or several, is said - never silently nothing.
+        found, missed = jl.find_by_fjc_bio(["100", "200", "300", "400"], read, live=False)
+        self.assertEqual(found, {"100": ["Ann Example"],
+                                 "400": ["Ann Example (judge)", "Appointment controversies"]})
+        # No article, or too many to read, is said - never silently nothing.
         self.assertEqual(sorted(missed), ["200", "300"])
-        self.assertIn("2 English Wikipedia articles", missed["200"])
+        self.assertIn("6 English Wikipedia articles", missed["200"])
         self.assertIn("no English Wikipedia article", missed["300"])
         self.assertEqual(asked[0], 'hastemplate:"FJC Bio" insource:"100"')
+
+    def test_of_the_articles_the_search_answers_the_one_whose_fjc_bio_names_the_nid(self):
+        """The search matches the id anywhere in a page's source. Each
+        answer is read, and only an article whose {{FJC Bio|nid=}} names
+        the judge is theirs; two that name them alone name nobody (Justin
+        D. Smith's search answered his article and a page on appointment
+        controversies citing only his record, 2026-10-20)."""
+        answers = {"400": ["Ann Example (judge)", "Appointment controversies"]}
+        articles = {"Ann Example (judge)": article(title="Ann Example (judge)", fjc_bio=["400"],
+                                                   item="Q9"),
+                    "Appointment controversies": article(title="Appointment controversies",
+                                                         fjc_bio=["7"], item="Q8")}
+        missed = {}
+        self.assertEqual(jl.settle_fjc_bio(answers, articles, missed),
+                         {"400": ("Q9", "Ann Example (judge)")})
+        self.assertEqual(missed, {})
+        # A list citing this judge among others gives way to the article
+        # that cites them alone.
+        articles["Appointment controversies"]["fjcBio"] = ["400", "7"]
+        self.assertEqual(jl.settle_fjc_bio(answers, articles, missed),
+                         {"400": ("Q9", "Ann Example (judge)")})
+        # Two articles citing this judge alone name nobody.
+        articles["Appointment controversies"]["fjcBio"] = ["400"]
+        self.assertEqual(jl.settle_fjc_bio(answers, articles, missed), {})
+        self.assertIn("2 English Wikipedia articles carry {{FJC Bio|nid=400}}", missed["400"])
+        # None of them carrying it as nid= is said, not passed over.
+        missed = {}
+        self.assertEqual(jl.settle_fjc_bio({"400": ["Appointment controversies"]},
+                                           {"Appointment controversies": article(fjc_bio=[])},
+                                           missed), {})
+        self.assertIn("carries {{FJC Bio|nid=400}}", missed["400"])
 
     def test_a_failed_fjc_bio_search_keeps_the_last_entry(self):
         """Rule 8: a judge found only through {{FJC Bio}} keeps their links

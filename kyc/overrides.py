@@ -660,9 +660,10 @@ NOT_A_PORTRAIT = {
 # refuse it for good.
 #
 # One test, applied to every portrait alike: Commons' licence tag stands
-# unless the file's page or its name points to someone else as its author or
-# source - a studio's code, a university's credit, another website - or the
-# page names no author at all. A
+# unless the file's page or its name points to an author who is neither its
+# uploader nor a government office - a studio's code, a university's credit,
+# a private site's photograph guessed to be official - or the page names no
+# author at all. A
 # court's own photograph tagged PD-USGov-Judiciary (or PD-USGov, author the
 # court) stands, as it does for the 491 court-credited portraits shown on
 # 2026-10-19, and so does an uploader's {{own}} work with nothing on its page
