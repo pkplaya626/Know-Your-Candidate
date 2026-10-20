@@ -182,6 +182,7 @@ python build_profile_site.py voting           # each state's official voting pag
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
                                               # the territorial courts' judges from their own sites; judges' Wikidata links
+python build_profile_site.py judiciary --links-only  # only the judges' articles and portraits (rule 82), for the committed directory
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
@@ -195,7 +196,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2048 tests, no dependencies
+python -m unittest discover tests             # 2069 tests, no dependencies
 npm install && npm test                       # 3089 real-DOM checks (needs jsdom)
 ```
 

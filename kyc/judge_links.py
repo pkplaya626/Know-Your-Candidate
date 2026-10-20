@@ -90,7 +90,10 @@ CACHE_PATH = os.path.join("candidate_profiles_site", "data", "judge_links.json")
 API_URL = "https://www.wikidata.org/w/api.php"
 ENWIKI_API = "https://en.wikipedia.org/w/api.php"
 COMMONS_API = "https://commons.wikimedia.org/w/api.php"
-USER_AGENT = "know-your-candidate/2.1 (open-source civic data project)"
+# Wikimedia's user-agent policy asks for a way to reach the maker, and its
+# image servers refuse a request without one (rule 42).
+USER_AGENT = ("know-your-candidate/2.1 (https://github.com/pkplaya626/Know-Your-Candidate; "
+              "open-source civic data project)")
 # The FJC's pages, a request at a time (rule 37: pace to the source).
 NODE_GAP = 1.0
 API_GAP = 1.0
@@ -379,7 +382,11 @@ def surname(judge):
 _REFS = re.compile(r"<ref[^>]*>.*?</ref>|<ref[^>]*/>|<!--.*?-->", re.S | re.I)
 _YEAR = re.compile(r"\b(1[89]\d\d|20[0-2]\d)\b")
 _BORN_LEAD = re.compile(r"\(\s*born\b[^()]{0,60}?\b(1[89]\d\d|20[0-2]\d)\b", re.I)
-_FJC_BIO = re.compile(r"\{\{\s*FJC[ _]Bio\s*\|\s*(?:nid\s*=\s*)?(\d+)", re.I)
+# The template's ``nid=`` is the FJC's node id; a positional value is the
+# directory's retired judge id ("{{FJC Bio|261|nid=1378271}}"), which the
+# first reader took for the nid and refused 82 judges' own articles over.
+_FJC_BIO = re.compile(r"\{\{\s*FJC[ _]Bio\b([^{}]*)\}\}", re.I)
+_NID = re.compile(r"\|\s*nid\s*=\s*(\d+)", re.I)
 _FILE_LINK = re.compile(r"\[\[\s*(?:File|Image)\s*:\s*([^|\]]+)", re.I)
 _IMAGE_FILE = re.compile(r"\.(?:jpe?g|png|webp|gif|tiff?|svg)$", re.I)
 
@@ -407,7 +414,7 @@ def article_facts(text):
     linked = _FILE_LINK.search(raw)
     name = file_name((linked.group(1) if linked else raw.split("|")[0].split("\n")[0]).strip())
     return {"born": born, "image": name if _IMAGE_FILE.search(name) else None,
-            "fjcBio": sorted(set(_FJC_BIO.findall(text)))}
+            "fjcBio": sorted({nid for body in _FJC_BIO.findall(text) for nid in _NID.findall(body)})}
 
 
 def _query(endpoint, params, read, live):
@@ -886,20 +893,71 @@ def credit_portraits(cache, info_of=None, log=print):
     return credited, withdrawn
 
 
-def weigh(urls, log=print, gap=WEIGH_GAP):
-    """``{url: {"bytes", "width", "height", "weighed"}}`` for each
-    rendition, read one a second (``portraits.measure``); one that could not
-    be read is left out and asked about again (rule 8)."""
-    from .portraits import measure
+def measure(url, timeout=30):
+    """``({"bytes", "width", "height"} or None, retry-after seconds or
+    None)`` for one Wikimedia rendition, from its first 64 KB and the total
+    its server reports - read again to 512 KB where a JPEG's metadata runs
+    past 64 KB before its dimensions (four Northern District of California
+    originals do). Wikimedia refuses an image request whose user agent
+    names no way to reach its maker ("does not comply with our robot
+    policy", HTTP 429): the first full run weighed 102 of 1,055 that way."""
+    found, wait = _measure(url, 65535, timeout)
+    if found is None and wait is None:
+        time.sleep(WEIGH_GAP)
+        found, wait = _measure(url, 524287, timeout)
+    return found, wait
 
+
+def _measure(url, span_end, timeout):
+    from .portraits import image_size
+
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT,
+                                                   "Range": f"bytes=0-{span_end}"})
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            if not (response.headers.get("Content-Type") or "").startswith("image/"):
+                return None, None
+            head = response.read(span_end + 1)
+            span = response.headers.get("Content-Range") or ""
+            total = int(span.rsplit("/", 1)[1]) if "/" in span and span.rsplit("/", 1)[1].isdigit() \
+                else int(response.headers.get("Content-Length") or 0) if response.status == 200 else 0
+    except urllib.error.HTTPError as exc:
+        wait = exc.headers.get("Retry-After") if exc.headers else None
+        return None, (float(wait) if wait and wait.isdigit() else 60.0) if exc.code == 429 else None
+    except Exception:  # noqa: BLE001 - inconclusive (rule 8)
+        return None, None
+    size = image_size(head)
+    if not total or not size:
+        return None, None
+    return {"bytes": total, "width": size[0], "height": size[1]}, None
+
+
+def weigh(urls, log=print, gap=WEIGH_GAP, measure_one=None, trip=5):
+    """``{url: {"bytes", "width", "height", "weighed"}}`` for each
+    rendition, read one a second; one that could not be read is left out
+    and asked about again (rule 8). A 429 waits out its ``Retry-After``;
+    after *trip* of them in a row the run stops weighing rather than keep
+    the burst going (rule 42)."""
+    live = measure_one is None
+    measure_one = measure_one or measure
     today = datetime.date.today().isoformat()
-    out = {}
+    out, refused = {}, 0
     for i, url in enumerate(urls):
-        if i:
+        if i and live:
             time.sleep(gap)
-        found = measure(url)
+        found, wait = measure_one(url)
         if found and found.get("bytes"):
             out[url] = dict(found, weighed=today)
+            refused = 0
+        elif wait is not None:
+            refused += 1
+            if refused >= trip:
+                if log:
+                    log(f"    [warn] Wikimedia refused {trip} in a row; {len(urls) - i - 1} "
+                        f"photographs wait for the next run")
+                break
+            if live:
+                time.sleep(min(wait, 120.0))
         if log and (i + 1) % 100 == 0:
             log(f"    {i + 1} of {len(urls)} photographs weighed")
     return out

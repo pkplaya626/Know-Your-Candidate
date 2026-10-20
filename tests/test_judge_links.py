@@ -448,6 +448,26 @@ class TestThePhotoRoutes(unittest.TestCase):
             finally:
                 jl.fetch_wikidata = original
 
+    def test_weighing_stops_when_wikimedia_keeps_refusing(self):
+        """Wikimedia answered every rendition of the first full run with 429
+        ("does not comply with our robot policy"): its user agent named no
+        way to reach the project. One that does, and a run that stops after
+        a few refusals in a row rather than keep the burst going."""
+        self.assertIn("https://github.com/", jl.USER_AGENT)
+        asked = []
+
+        def refused(url):
+            asked.append(url)
+            return None, 10.0
+
+        self.assertEqual(jl.weigh([f"u{i}" for i in range(20)], log=None, measure_one=refused), {})
+        self.assertEqual(len(asked), 5)
+        # One read that fails is asked about again next run; the rest are weighed.
+        answers = {"a": ({"bytes": 9000, "width": 250, "height": 300}, None), "b": (None, None)}
+        got = jl.weigh(["a", "b"], log=None, measure_one=lambda u: answers[u])
+        self.assertEqual(list(got), ["a"])
+        self.assertEqual(got["a"]["bytes"], 9000)
+
     # ---- two images: the one the article shows
 
     def test_two_images_give_the_one_the_article_shows(self):
@@ -538,7 +558,7 @@ class TestThePhotoRoutes(unittest.TestCase):
     def test_the_article_is_read_for_its_year_image_and_fjc_id(self):
         text = ("{{Infobox judge\n| name = Ann Example\n| image = [[File:Ann_Example.png|250px]]"
                 "\n| birth_date = {{birth date and age|1960|5|1}}<ref>x 1999</ref>\n}}\n"
-                "'''Ann Example''' (born 1960) is a judge.\n== Links ==\n{{FJC Bio|100}}\n")
+                "'''Ann Example''' (born 1960) is a judge.\n== Links ==\n{{FJC Bio|nid=100}}\n")
         self.assertEqual(jl.article_facts(text),
                          {"born": "1960", "image": "Ann Example.png", "fjcBio": ["100"]})
         lead = "{{Infobox officeholder\n| image = Ann Example.jpg\n}}\nAnn Example (born May 1, 1961) ...\n"
@@ -546,6 +566,10 @@ class TestThePhotoRoutes(unittest.TestCase):
         self.assertEqual(jl.article_facts(lead)["image"], "Ann Example.jpg")
         self.assertIsNone(jl.article_facts("{{Infobox judge\n| image = <!-- none -->\n}}")["image"])
         self.assertEqual(jl.article_facts("{{FJC Bio|nid=1389371}}")["fjcBio"], ["1389371"])
+        # The positional value is the directory's retired id, not the nid:
+        # read as one, it refused 82 judges' own articles.
+        self.assertEqual(jl.article_facts("{{FJC Bio|261|nid=1378271}}")["fjcBio"], ["1378271"])
+        self.assertEqual(jl.article_facts("{{FJC Bio|261}}")["fjcBio"], [])
 
     def test_articles_are_read_in_batches_through_redirects(self):
         def read(url):
