@@ -504,19 +504,10 @@
     });
   }
 
-  /** A person's party, in brackets after the name: D and R, I for an
-   *  independent, and any other party by its own name. The colour bucket
-   *  (KYC.partyKey) folds every third party into "i", and the answer
-   *  called the Libertarian Ted Brown "(I)" beside a ballot page that
-   *  names him Libertarian (PR #118 review). */
+  /** A person's party, in brackets after the name (KYC.partyAbbr, which a
+   *  state page's race rows use too). */
   function partyLetter(p) {
-    var key = KYC.partyKey(p);
-    if (key === "d") return "D";
-    if (key === "r") return "R";
-    if (key !== "i") return "";
-    var party = String((p && p.party) || "").trim();
-    if (!party || party === "Other") return "";
-    return party === "Independent" ? "I" : party;
+    return KYC.partyAbbr(p);
   }
 
   /** A person's name, linked to their profile on this page. */

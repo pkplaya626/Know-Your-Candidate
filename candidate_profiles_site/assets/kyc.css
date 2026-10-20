@@ -376,7 +376,11 @@ svg.district-map,
    .money-grid or `display: flex` on .empty-state silently won over [hidden]
    and both showed an empty box. Every element the page hides uses the
    `hidden` property, so the rule has to win outright. */
-[hidden] { display: none !important; }
+/* Except a folded race's section (kyc-state.js), hidden until found: the
+ * browser's own rule draws it with content-visibility: hidden, which its
+ * find-in-page can still search and open. display: none would hide it from
+ * find; a browser without until-found hides it all the same. */
+[hidden]:not([hidden="until-found" i]) { display: none !important; }
 
 .skip-link {
   position: absolute;
@@ -1330,6 +1334,7 @@ a.badge-link {
 /* After the people now, not under the heading: keep it off the dashed
  * "no longer in this race" box above it. */
 .race > .odds,
+.race-body > .odds,
 .senate-seat > .odds { margin-top: var(--s-3); }
 .odds-subhead {
   margin: 0;
@@ -5554,6 +5559,90 @@ button.local-county-link {
 @media (hover: hover) {
   .dt-seat:hover { border-color: var(--accent); background: var(--surface-3); }
 }
+
+/* A big state's page on a phone (kyc-state.js, VISUALS-15): "Find your
+ * race" under the summary, and each race folded to one row over its
+ * section. The script shows these only below 1000px; nothing here applies
+ * to a page it has not folded. */
+.find-race { display: grid; gap: var(--s-3); }
+.find-race .state-heading { margin: 0; }
+.find-race-jump { display: grid; gap: var(--s-1); margin: 0; }
+.find-race-jump .select { width: 100%; min-height: 48px; font-size: 16px; }
+.find-race-tiles:empty,
+.find-race-lookup:empty { display: none; }
+.find-race-tiles .district-tiles.jump-row { margin-bottom: 0; }
+.find-race-lookup .findrep { margin: 0; }
+.find-race-statewide { margin: 0; font-size: var(--t-sm); line-height: 1.6; }
+.find-race-kicker { font-weight: 700; }
+.find-race-more { color: var(--text-muted); }
+.race-fold-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2) var(--s-3);
+  margin: 0 0 var(--s-3);
+}
+.race-shared { margin: 0; font-size: var(--t-sm); color: var(--text-muted); }
+.race-shared .badge { margin: 0 var(--s-1) var(--s-1) 0; }
+.race-open-all { min-height: 44px; }
+.race-row-title { margin: 0; font-size: inherit; font-weight: inherit; }
+.race-row {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  gap: var(--s-3);
+  align-items: start;
+  width: 100%;
+  min-height: 56px;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.race-row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (hover: hover) {
+  .race-row:hover { border-color: var(--border-strong); }
+}
+.race-row-num {
+  font-size: var(--t-xl);
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.race-row-num.is-word { font-size: var(--t-sm); line-height: 1.6; }
+.race-row-main { display: grid; gap: var(--s-1); min-width: 0; font-size: var(--t-sm); line-height: 1.45; }
+.race-row-held { font-weight: 600; }
+.race-row-ballot,
+.race-row-unsettled { color: var(--text-muted); }
+.race-row-label { font-weight: 600; color: var(--text); }
+.race-row-badges { display: flex; flex-wrap: wrap; gap: var(--s-1); }
+.race-row-chevron { margin-top: 2px; transition: transform 0.15s ease; }
+.race-row[aria-expanded="true"] .race-row-chevron { transform: rotate(90deg); }
+@media (prefers-reduced-motion: reduce) {
+  .race-row-chevron { transition: none; }
+}
+/* Folded, a race is its row: drawn as it is, with no placeholder height,
+ * so a jump lands where it aims (a 400px placeholder per row put CA-27
+ * thousands of pixels from its row). */
+.races-folded .race {
+  content-visibility: visible;
+  contain-intrinsic-size: none;
+  margin-bottom: var(--s-2);
+}
+.races-folded .race.is-open { margin-bottom: var(--s-5); }
+.races-folded .race.is-open .race-body { padding: var(--s-3) var(--s-1) 0; }
+/* The row is the race's heading; the section's own title would say it twice. */
+.races-folded .race-body .race-title { display: none; }
+.races-folded .badge-shared { display: none; }
+/* A badge the race's row above already gives (kyc-cards headBadgeHtml). */
+.races-folded .badge-in-row { display: none; }
+.race-close-row { margin: var(--s-3) 0 0; }
+.race-close { min-height: 44px; }
+.race-close-icon { transform: rotate(-90deg); }
 
 /* The states as a grid of links (KYC.statePicker). */
 .tile-picker { margin: 0 0 var(--s-4); }
