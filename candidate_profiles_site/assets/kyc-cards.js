@@ -688,7 +688,9 @@
   function groupsHtml(cls, groups) {
     return groups.map(function (g) {
       return '<span class="' + cls + '"><span class="race-row-label">' + KYC.escapeHtml(g[0]) +
-        ":</span> " + KYC.escapeHtml(g[1].join(", ")) + ".</span> ";
+        ":</span> " + g[1].map(function (name) {
+          return '<span class="race-row-name">' + KYC.escapeHtml(name) + "</span>";
+        }).join(", ") + ".</span> ";
     }).join("");
   }
 
@@ -1379,6 +1381,7 @@
     sharedBadges: sharedBadges,
     holderWords: holderWords,
     rowPeople: rowPeople,
+    raceRow: raceRow,
     raceSection: raceSection,
     racePeople: racePeople,
     heldByLine: heldByLine,

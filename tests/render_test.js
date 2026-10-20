@@ -12837,7 +12837,9 @@ async function testBallot() {
       if (!section) return differ.push(id + ": no section");
       // The ballot lists those on it first and those whose ballot status
       // is not known apart (PR #115 review), each in the section's order.
-      const theirCards = [...section.querySelectorAll(":scope > .card-grid .card")];
+      // A race that can fold keeps its section in a body under its row.
+      const theirCards = [...section.querySelectorAll(":scope > .card-grid .card, " +
+        ":scope > .race-body > .card-grid .card")];
       const theirs = theirCards.map((n) => n.querySelector(".card-name").textContent);
       const listed = [...c.li.querySelectorAll(".ballot-people:not(.ballot-unsure) .ballot-person .link-button")]
         .map((n) => n.textContent);
@@ -13708,6 +13710,410 @@ async function testPeopleSplit() {
   }
 }
 
+/* ======================================== a big state's page on a phone */
+
+/* Below 1000px a state with more than four races opens with "Find your
+ * race" and folds each race to one row over its section (VISUALS-15,
+ * TECH-14): California's page was about 92 screens once drawn, its district
+ * squares 13,900px down. *phone* is the width the page is drawn at; a
+ * change listener lets a suite turn the tablet. */
+function phoneWidth(window, phone) {
+  const media = { phone, listeners: [] };
+  window.__media = media;
+  window.matchMedia = (query) => ({
+    media: query,
+    get matches() { return /max-width: 999/.test(query) ? media.phone : false; },
+    addEventListener(type, fn) { media.listeners.push(fn); },
+    removeEventListener() {},
+    addListener(fn) { media.listeners.push(fn); },
+    removeListener() {},
+  });
+}
+
+function turn(window, phone) {
+  window.__media.phone = phone;
+  window.__media.listeners.forEach((fn) => fn({ matches: phone }));
+}
+
+/* What a folded race's row says, read back: its holder line, the names it
+ * groups under each label, the unsettled filers, and its badges. */
+function readRow(section) {
+  const row = section.querySelector(".race-row");
+  const groups = (cls) => [...row.querySelectorAll("." + cls)].map((g) => ({
+    label: g.querySelector(".race-row-label").textContent.replace(/:$/, ""),
+    names: [...g.querySelectorAll(".race-row-name")].map((n) => n.textContent),
+  }));
+  return {
+    row,
+    held: (row.querySelector(".race-row-held") || { textContent: "" }).textContent,
+    ballot: groups("race-row-ballot"),
+    unsettled: groups("race-row-unsettled"),
+    badges: [...row.querySelectorAll(".race-row-badges .badge")].map((b) => b.textContent),
+    text: row.textContent.replace(/\s+/g, " "),
+  };
+}
+
+/* Each race's row against its own section, on one built page: the same
+ * people under the same words, the same count, and the holder clause the
+ * section's own "Held by" line gives. Returns the problems found. */
+function rowProblems(window, D) {
+  const KYC = window.KYC;
+  const out = [];
+  [...D.querySelectorAll("section.race-foldable")].forEach((section) => {
+    const id = section.getAttribute("data-race");
+    const race = KYC.races().filter((r) => r.id === id)[0];
+    const row = readRow(section);
+    const say = (what) => out.push(id + ": " + what);
+    // Everyone on the November ballot whose card is in the race, under
+    // their card's own words; the unsettled apart (rule 62).
+    const grid = section.querySelector(".race-body > .card-grid");
+    const people = [...grid.querySelectorAll(".card")].map((c) => KYC.byId(c.getAttribute("data-id")));
+    const want = [];
+    const apart = [];
+    people.forEach((p) => {
+      const spec = KYC.standing(p, "card");
+      if (spec && spec.unknown) apart.push([spec.label, p.name]);
+      else if (spec) want.push([spec.label, p.name]);
+      else if (p.isCandidate) want.push(["2026 challenger", p.name]);
+    });
+    const flat = (groups) => [].concat(...groups.map((g) => g.names.map((n) => [g.label, n])));
+    const got = flat(row.ballot).filter((x) => !/^Also /.test(x[0]));
+    const gotApart = flat(row.unsettled);
+    const same = (a, b) => a.length === b.length && a.every((x, i) => b.some((y) =>
+      y[0] === x[0] && (y[1] === x[1] || y[1].indexOf(x[1] + " (") === 0 || y[1].indexOf(x[1] + " –") === 0)));
+    if (!same(want, got)) say("ballot " + JSON.stringify(got) + " against cards " + JSON.stringify(want));
+    if (!same(apart, gotApart)) say("unsettled " + JSON.stringify(gotApart) + " against " + JSON.stringify(apart));
+    // The results' names with no profile here, every one of them.
+    const others = ((race.results || {}).otherNominees || []);
+    const named = [].concat(...row.ballot.filter((g) => /^Also /.test(g.label)).map((g) => g.names));
+    if (others.length !== named.length || !others.every((n) => named.some((m) => m === n || m.indexOf(n + " (") === 0))) {
+      say("no-profile names " + JSON.stringify(named) + " against " + JSON.stringify(others));
+    }
+    // The count is the head's own badge (rule 73), and the names fit it.
+    const headCount = [...section.querySelectorAll(".race-head .badge")].map((b) => b.textContent)
+      .filter((t) => /(challenger|candidate)s? on the ballot$|^\d+ (challenger|candidate)s?$|^No challenger|filed|Nobody/.test(t));
+    if (!row.badges.some((b) => headCount.indexOf(b) !== -1)) say("count " + row.badges.join("|") + " against " + headCount.join("|"));
+    const m = /^(\d+) (challenger|candidate)s? on the ballot$/.exec(headCount[0] || "");
+    if (m) {
+      const holders = got.filter((x) => people.some((p) => race.incumbentIds.indexOf(p.id) !== -1 &&
+        (x[1] === p.name || x[1].indexOf(p.name + " (") === 0 || x[1].indexOf(p.name + " –") === 0)));
+      if (got.length + named.length - holders.length !== Number(m[1])) {
+        say("names " + (got.length + named.length) + " less " + holders.length + " holder(s) against " + m[0]);
+      }
+    }
+    // The holder clause: the section's own "Held by" line, word for word.
+    section.querySelectorAll(".race-body > .race-held").forEach((line) => {
+      const contact = line.querySelector(".card-contact");
+      const words = line.textContent.replace(contact ? contact.textContent : "", "").trim();
+      if (row.held.indexOf(words) === -1) say("held " + JSON.stringify(row.held) + " against " + JSON.stringify(words));
+    });
+    // An open seat says so first, in the badge's words, unless the seat is
+    // empty and its vacancy says more; an appointee is never "re-election".
+    const open = !!section.querySelector(".race-head .badge-warn[title]") &&
+      [...section.querySelectorAll(".race-head .badge")].some((b) => b.textContent === "Open seat");
+    const vacancy = race.chamber === "House" && KYC.vacancyOf(race.state, race.district || 0);
+    if (open && !vacancy && row.held.indexOf("Open seat.") !== 0) say("open seat not said: " + row.held);
+    if (vacancy && !race.incumbentIds.length && row.held.indexOf(KYC.vacancyNote(vacancy)) === -1) {
+      say("vacancy not said: " + row.held);
+    }
+    if (race.incumbent && race.incumbent.appointed && /re-election/.test(row.held)) say("appointee: " + row.held);
+    // An all-party primary has no nominee (rule 74).
+    if (/top-(two|four)/.test(race.primaryKind || "") && /Nominee|Renominated|Won the primary/.test(row.text)) {
+      say("all-party primary: " + row.text);
+    }
+  });
+  return out;
+}
+
+async function testStatePhone() {
+  const PAGES = ["ca", "tx", "fl", "ny", "la", "ok", "wa", "il", "ga", "al"];
+  const built = {};
+  for (const st of PAGES) {
+    built[st] = await buildPage("states/" + st + ".html", { setup: (w) => phoneWidth(w, true) });
+  }
+  const { window, D, errors } = built.ca;
+  const KYC = window.KYC;
+  const block = D.getElementById("find-race");
+  const races = D.getElementById("races");
+  const sections = [...D.querySelectorAll("section.race-foldable")];
+
+  suite("states/ca.html on a phone — Find your race, under the summary (VISUALS-15, TECH-14)", () => {
+    check("no page errors on any folded page", PAGES.every((st) => !built[st].errors.length),
+      PAGES.map((st) => built[st].errors.join(" | ")).join(" "));
+    check("the block is shown, directly after the title and summary",
+      !!block && !block.hidden && block.previousElementSibling.classList.contains("state-hero"));
+    const select = D.getElementById("raceJumpSelect");
+    check("a labelled native select jumps to a race or section",
+      !!select && D.querySelector('label[for="raceJumpSelect"]').textContent === "Jump to a race or section");
+    check("its groups are Statewide, U.S. House and This page",
+      [...select.querySelectorAll("optgroup")].map((g) => g.label).join("|") === "Statewide|U.S. House|This page");
+    const house = [...select.querySelectorAll('optgroup[label="U.S. House"] option')];
+    const houseRaces = KYC.races().filter((r) => r.state === "CA" && r.chamber === "House");
+    check("every House race is in it once, by district, with who holds the seat now (rule 27)",
+      house.length === houseRaces.length && house.every((o) => {
+        const race = houseRaces.filter((r) => "race-" + r.id === o.value)[0];
+        const holder = race && race.incumbentIds.map(KYC.byId).filter(KYC.seated)[0];
+        return race && o.textContent.indexOf("District " + race.district) === 0 &&
+          (!holder || o.textContent.endsWith("held by " + holder.name));
+      }), house.slice(0, 3).map((o) => o.textContent).join(" | "));
+    check("every option names a place on the page",
+      [...select.querySelectorAll("option")].every((o) => !o.value || !!D.getElementById(o.value)));
+    check("the voting block is offered by its own heading's words",
+      !!select.querySelector('option[value="voting"]') &&
+        select.querySelector('option[value="voting"]').textContent === D.getElementById("votingHead").textContent.trim());
+    check("the district squares are moved into the block",
+      !!block.querySelector(".find-race-tiles .district-tiles") && !races.querySelector(".district-tiles"));
+    check("Find who represents you is moved into it, keeping its id, once",
+      D.querySelectorAll("#findrep").length === 1 && !!block.querySelector(".find-race-lookup #findrep"));
+    const line = block.querySelector(".find-race-statewide");
+    const offices = KYC.stategov.ballotOffices("CA");
+    check("the statewide line names the state offices in the State government table's words",
+      !!line && !!offices && [...line.querySelectorAll("a")].some((a) =>
+        a.textContent === offices && a.getAttribute("href") === "#state-government"), line && line.textContent);
+    check("and the statewide questions by their section's name",
+      [...line.querySelectorAll("a")].some((a) => a.textContent === KYC.ballot.measuresName("CA") &&
+        a.getAttribute("href") === "#measures"));
+    check("the header's links follow the block; the section chips give way to the select",
+      block.nextElementSibling.classList.contains("state-links") && D.querySelector(".state-parts").hidden);
+  });
+
+  suite("states/ca.html on a phone — every race one row over its section", () => {
+    check("every race folds", sections.length === KYC.races().filter((r) => r.state === "CA").length &&
+      races.classList.contains("races-folded"));
+    check("each row is a heading's button that names the section it controls", sections.every((s) => {
+      const b = s.querySelector("h3.race-row-title > button.race-row");
+      const body = s.querySelector(".race-body");
+      return !!b && !s.querySelector(".race-row-title").hidden && b.getAttribute("aria-controls") === body.id;
+    }));
+    check("folded, each section stays in the page, hidden until found", sections.every((s) =>
+      s.querySelector(".race-body").getAttribute("hidden") === "until-found" &&
+      s.querySelector(".race-row").getAttribute("aria-expanded") === "false" &&
+      s.querySelectorAll(".race-body .card").length > 0));
+    const shared = D.querySelector(".race-shared");
+    const sharedWords = [...shared.querySelectorAll(".badge")].map((b) => b.textContent);
+    check("the badges every race shares are said once above the rows",
+      !!shared && sharedWords.length > 0 && sharedWords.every((w) => sections.every((s) =>
+        [...s.querySelectorAll(".race-head .badge-shared")].some((b) => b.textContent === w))), sharedWords.join(" | "));
+    check("and no row repeats them",
+      sections.every((s) => !readRow(s).badges.some((b) => sharedWords.indexOf(b) !== -1)));
+    check("a row's badges are its head's (rule 73)", sections.every((s) => {
+      const head = [...s.querySelectorAll(".race-head .badge")].map((b) => b.textContent);
+      return readRow(s).badges.every((b) => head.indexOf(b) !== -1);
+    }));
+  });
+
+  suite("a folded row and its race's section never disagree (rules 12, 62, 63, 73, 74)", () => {
+    PAGES.forEach((st) => {
+      const problems = rowProblems(built[st].window, built[st].D);
+      check(`states/${st}.html: each row names its section's people, in their cards' words, and its count`,
+        problems.length === 0 && built[st].D.querySelectorAll("section.race-foldable").length > 4,
+        problems.slice(0, 4).join(" || "));
+    });
+    // The cases the rows were written for, wherever the data holds them:
+    // the old Congress's members running elsewhere exist only while it sits
+    // (rule 68).
+    const all = PAGES.map((st) => built[st]);
+    const rowsWhere = (test) => [].concat(...all.map((b) => [...b.D.querySelectorAll("section.race-foldable")]
+      .filter((s) => test(b.window.KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0], s, b.window))));
+    if (oldCongressSits(window)) {
+      const moved = rowsWhere((r, s) => !!s.querySelector(".race-body > .race-held"));
+      check("a holder running elsewhere is named as the section names them, never on this ballot",
+        moved.length > 0 && moved.every((s) => {
+          const row = readRow(s);
+          const holder = /^(?:Open seat\. )?Held by (.+?), who /.exec(row.held);
+          return holder && !row.ballot.some((g) => g.names.some((n) => n.indexOf(holder[1] + " (") === 0));
+        }), moved.length + " rows");
+      const renumbered = rowsWhere((r) => !!r.holderMoved);
+      check("a renumbered member's old seat says where they run under the new map",
+        renumbered.length > 0 && renumbered.every((s) => /under the state’s new district map/.test(readRow(s).held)));
+      const appointed = rowsWhere((r) => !!(r.incumbent && r.incumbent.appointed));
+      check("an appointee's seat is never \"re-election\" (rule 61)",
+        appointed.length > 0 && appointed.every((s) => !/re-election/.test(readRow(s).held)),
+        appointed.map((s) => readRow(s).held).join(" | "));
+      const vacant = rowsWhere((r, s, w) => r.chamber === "House" && !r.incumbentIds.length &&
+        !!w.KYC.vacancyOf(r.state, r.district || 0));
+      check("an empty seat says when and why it is vacant",
+        vacant.length > 0 && vacant.every((s) => /^Vacant since /.test(readRow(s).held)),
+        vacant.map((s) => readRow(s).held).join(" | "));
+    }
+    const listed = rowsWhere((r) => !!(r.results && r.results.fromQualifiedList));
+    check("Louisiana's qualified list reads as the list's words, never a nominee (rule 64)",
+      listed.every((s) => !/Nominee|Renominated|Advanced/.test(readRow(s).text) &&
+        readRow(s).ballot.every((g) => /^On the Nov 3 ballot$|^Also /.test(g.label) || g.label === "2026 challenger")),
+      listed.map((s) => readRow(s).ballot.map((g) => g.label).join("/")).join(" | "));
+    const allParty = rowsWhere((r) => r.primaryKind === "top-two");
+    check("a top-two primary's people advanced, never \"nominee\" (rule 74)",
+      allParty.length > 0 && allParty.every((s) => readRow(s).ballot.every((g) =>
+        /^Advanced to November$|^Also /.test(g.label))),
+      allParty.map((s) => readRow(s).ballot.map((g) => g.label).join("/")).filter((t) => !/^(Advanced|Also)/.test(t)).slice(0, 3).join(" | "));
+    const unsettled = rowsWhere((r) => !!r.ballotUnknown);
+    check("a filer the results do not settle is listed apart, never on the ballot (rule 62)",
+      unsettled.every((s) => readRow(s).unsettled.length > 0 &&
+        readRow(s).unsettled.every((g) => g.label !== "On the November ballot")), unsettled.length + " rows");
+  });
+
+  // Reading the rows after Election Day: the same table words them.
+  const after = await buildPage("states/ca.html", { now: "2026-11-05T09:00:00",
+    setup: (w) => phoneWidth(w, true) });
+  suite("states/ca.html on a phone after Election Day — rows in the result's words (rule 63)", () => {
+    const problems = rowProblems(after.window, after.D);
+    check("each row still names its section's people in their cards' words", problems.length === 0,
+      problems.slice(0, 3).join(" || "));
+    const rows = [...after.D.querySelectorAll("section.race-foldable")].map(readRow);
+    check("no row reads a pre-count \"Advanced to November\" for anyone still awaiting a result",
+      rows.every((r) => !r.ballot.some((g) => g.label === "Advanced to November")),
+      rows.map((r) => r.ballot.map((g) => g.label).join("/")).slice(0, 3).join(" | "));
+  });
+  after.window.close();
+
+  /* What a reader does with it. */
+  const pick = (id) => D.getElementById("race-" + id);
+  const isOpen = (s) => s.querySelector(".race-row").getAttribute("aria-expanded") === "true" &&
+    !s.querySelector(".race-body").hasAttribute("hidden");
+  const first = sections[0];
+  const mid = sections[Math.floor(sections.length / 2)];
+  first.querySelector(".race-row").click();
+  const opened = isOpen(first) && first.classList.contains("is-open");
+  first.querySelector(".race-row").click();
+  const folded = !isOpen(first) && first.querySelector(".race-body").getAttribute("hidden") === "until-found";
+  first.querySelector(".race-row").click();
+  first.querySelector("[data-race-close]").click();
+  const closedFocus = !isOpen(first) && D.activeElement === first.querySelector(".race-row");
+  const select = D.getElementById("raceJumpSelect");
+  select.value = mid.id;
+  select.dispatchEvent(new window.Event("change", { bubbles: true }));
+  const bySelect = isOpen(mid) && D.activeElement === mid.querySelector(".race-row") && select.value === "" &&
+    sections.filter(isOpen).length === 1;
+  // Arrow keys on a closed select change it as they go: no jump until Enter.
+  const other = sections[1];
+  select.dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+  select.value = other.id;
+  select.dispatchEvent(new window.Event("change", { bubbles: true }));
+  const arrowsWait = !isOpen(other);
+  select.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+  const enterJumps = isOpen(other);
+  mid.querySelector("[data-race-close]").click();
+  other.querySelector("[data-race-close]").click();
+  const tile = D.querySelector(".find-race-tiles .dt-seat");
+  const tiled = D.getElementById(tile.getAttribute("href").slice(1));
+  tile.click();
+  const byTile = isOpen(tiled) && window.location.hash === "";
+  tiled.querySelector("[data-race-close]").click();
+  // The lookup's answer links a race by the page's own address.
+  const answer = D.createElement("a");
+  answer.href = KYC.stateUrl("CA") + "#" + mid.id;
+  D.getElementById("findrep").appendChild(answer);
+  answer.click();
+  const byAnswer = isOpen(mid) && window.location.hash === "";
+  answer.remove();
+  mid.querySelector("[data-race-close]").click();
+  // Opening a profile and closing it leaves the page as it was (rule 45).
+  mid.querySelector(".race-row").click();
+  const card = mid.querySelector(".race-body .card");
+  card.click();
+  await settle(60);
+  const profileOpen = KYC.profile.isOpen();
+  KYC.profile.close();
+  await settle(60);
+  const kept = isOpen(mid) && pick(mid.getAttribute("data-race")) === mid && mid.querySelector(".race-body .card") === card;
+  mid.querySelector("[data-race-close]").click();
+  // Open all, and fold all again.
+  const all = D.querySelector("[data-race-open-all]");
+  all.click();
+  const allOpen = sections.every(isOpen) && /^Fold all/.test(all.textContent);
+  all.click();
+  const allFolded = !sections.some(isOpen) && /^Open all/.test(all.textContent);
+  // The browser's find opens what it found (beforematch), print opens all.
+  const found = sections[3].querySelector(".race-body");
+  found.removeAttribute("hidden");
+  found.dispatchEvent(new window.Event("beforematch", { bubbles: true }));
+  const byFind = sections[3].querySelector(".race-row").getAttribute("aria-expanded") === "true";
+  sections[3].querySelector("[data-race-close]").click();
+  window.dispatchEvent(new window.Event("beforeprint"));
+  const printed = sections.every(isOpen);
+  window.dispatchEvent(new window.Event("afterprint"));
+  const unprinted = !sections.some(isOpen);
+  suite("states/ca.html on a phone — every way to a race opens it", () => {
+    check("a row's button opens its race in place, and folds it again", opened && folded);
+    check("Close folds the race and puts the reader back on its row", closedFocus);
+    check("a pick in the select opens that race alone and lands on its row", bySelect);
+    check("arrow keys through a closed select do not jump; Enter does", arrowsWait && enterJumps);
+    check("a district square opens its race, leaving the address alone", byTile);
+    check("the lookup's link to a race on this page opens it, leaving the address alone", byAnswer);
+    check("opening and closing a profile keeps the open race and its nodes (rule 45)", profileOpen && kept);
+    check("Open all opens every race and Fold all folds them", allOpen && allFolded);
+    check("the browser's find-in-page opening a race marks its row open", byFind);
+    check("printing opens every race and folds back what it opened", printed && unprinted);
+  });
+
+  // The page search opens the races holding a match and hides the rest.
+  const input = D.getElementById("stateSearch");
+  const person = KYC.byId(mid.querySelector(".race-body .card").getAttribute("data-id"));
+  input.value = person.name;
+  input.dispatchEvent(new window.Event("input"));
+  await settle(200);
+  const searched = isOpen(mid) && sections.some((s) => s.hidden) &&
+    sections.filter((s) => !s.hidden).every((s) => isOpen(s));
+  input.value = "";
+  input.dispatchEvent(new window.Event("input"));
+  await settle(200);
+  const cleared = !sections.some((s) => s.hidden) && !sections.some(isOpen);
+  suite("states/ca.html on a phone — the page's search", () => {
+    check("a search opens the races holding a match and hides those holding none", searched);
+    check("clearing it shows every row and folds back what it opened", cleared);
+  });
+
+  // A tablet turned past 1000px is the desktop page, and back.
+  mid.querySelector(".race-row").click();
+  turn(window, false);
+  const wide = block.hidden && !races.classList.contains("races-folded") &&
+    sections.every((s) => s.querySelector(".race-row-title").hidden && !s.querySelector(".race-body").hasAttribute("hidden")) &&
+    D.getElementById("findrep").nextElementSibling === D.getElementById("voting") &&
+    !!races.querySelector(".district-tiles") && !D.querySelector(".state-parts").hidden &&
+    !!D.querySelector(".state-hero .state-links");
+  turn(window, true);
+  const narrow = !block.hidden && !!block.querySelector("#findrep") && isOpen(mid) &&
+    sections.filter(isOpen).length === 1;
+  suite("states/ca.html — a turned tablet moves the parts, never redraws them", () => {
+    check("past 1000px every race is open and every part back where the desktop has it", wide);
+    check("back under it the page folds again, keeping the race the reader had open", narrow);
+  });
+  PAGES.forEach((st) => built[st].window.close());
+
+  // A race reached by a link from another page opens on arrival.
+  const linked = await buildPage("states/tx.html", { hash: "#race-H-TX-07-2026",
+    setup: (w) => phoneWidth(w, true) });
+  const target = linked.D.getElementById("race-H-TX-07-2026");
+  suite("states/tx.html#race-… on a phone — a shared race's link opens it", () => {
+    check("the linked race is open and the rest folded", !!target && isOpen(target) &&
+      [...linked.D.querySelectorAll("section.race-foldable")].filter(isOpen).length === 1);
+    check("and the fragment is dropped from the address", linked.window.location.hash === "");
+  });
+  linked.window.close();
+
+  // Desktop is unchanged; a state with four races or fewer never folds.
+  const wideCa = await buildPage("states/ca.html", { setup: (w) => phoneWidth(w, false) });
+  const small = await buildPage("states/ut.html", { setup: (w) => phoneWidth(w, true) });
+  suite("states/ca.html at 1000px and wider, and a small state on a phone — as before", () => {
+    const W = wideCa.D;
+    check("no fold: the block hidden, every row hidden, every race open",
+      W.getElementById("find-race").hidden && !W.getElementById("races").classList.contains("races-folded") &&
+      [...W.querySelectorAll("section.race-foldable")].every((s) => s.querySelector(".race-row-title").hidden &&
+        !s.querySelector(".race-body").hasAttribute("hidden") && s.querySelector(".race-close-row").hidden));
+    check("every head keeps all its badges, the shared ones too",
+      [...W.querySelectorAll(".race-head")].every((h) => h.querySelectorAll(".badge-shared").length > 0) &&
+        W.querySelector(".race-fold-bar").hidden);
+    check("the parts stay where they were: lookup before voting, squares with the races, chips shown",
+      W.getElementById("findrep").nextElementSibling === W.getElementById("voting") &&
+      !!W.querySelector("#races .district-tiles") && !W.querySelector(".state-parts").hidden);
+    const races = small.window.KYC.races().filter((r) => r.state === "UT").length;
+    check("a state with four races or fewer never folds", races <= 4 && !small.D.getElementById("find-race") &&
+      !small.D.querySelector("section.race-foldable"), races + " races");
+  });
+  wideCa.window.close();
+  small.window.close();
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -13740,6 +14146,7 @@ async function testPeopleSplit() {
   if (!only || only === "index.html") await testDrawerBack();
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
+  if (!only || only === "states" || only === "statephone") await testStatePhone();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
 if (!only || only === "states") await testCertifiedBallots();
