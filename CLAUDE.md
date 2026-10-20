@@ -2087,6 +2087,35 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Measured on a 4x and 6x throttled phone, a keystroke costs what it did
     before (rule 45).
 
+99. **On a phone a big state's races are rows, and a row says what its race
+    says.** California's page was 92 screens once drawn, its district
+    squares 13,900px down, every race's head repeating "Primary held June 2"
+    and "Top-two primary" (VISUALS-15, measured at 390px, CPU 4x). Below
+    1000px a state with more than four races opens with "Find your race"
+    and folds each race to an `<h3><button aria-expanded>` row
+    (`KYC.cards.raceRow`) over its section, which stays in the page as
+    `hidden="until-found"` so find-in-page and the page's search reach it;
+    the stylesheet's `[hidden]` rule exempts it, since `display: none` would
+    hide it from find. A row's words come from the race's own helpers only:
+    the holder clause its "Held by" line uses (`heldByWhat`), the open seat's
+    badge (`openSeatWhy`), the vacancy record, each person's card words
+    (`KYC.standing`), the results' unprofiled names, and the head's own count
+    badge (rule 73); the unsettled are listed apart (rule 62).
+    `rowProblems` in the render suite holds every row to its section on ten
+    states, on the campaign clock and after Election Day. Every way to a race
+    (a link, a square, the select, the lookup's answer) opens it; a turned
+    tablet moves the borrowed parts, never redraws them. 1000px and wider,
+    the page is as it was. The review found three things the rows made
+    visible. The select named each district's holder from the frozen
+    record, so on the January rehearsal it put Barry Moore on AL-1 after he
+    went to the Senate; it now names whoever sits for that district, as the
+    delegation does (rules 27, 67). The open seat's hover said "Byron
+    Donalds is not on the November ballot", which rule 61 forbids; a
+    holder out of the race now reads in their card's words, with the
+    other office they are running for. And a smooth scroll past the
+    delegation's cards (content-visibility) stopped every jump 500-950px
+    short of its race, so every jump on the page now scrolls at once.
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from

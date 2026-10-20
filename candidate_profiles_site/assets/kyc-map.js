@@ -604,7 +604,7 @@
     }
     if (former.length) {
       html += '<p class="panel-subhead">' +
-        (mode === "senate2026" ? "Held the seat until " + former[0].formerMember.left
+        (mode === "senate2026" ? "Held the seat until " + KYC.dateWords(former[0].formerMember.left)
           : "Left office") +
         " <span>" + former.length + "</span></p>" + former.map(personRow).join("");
     }
