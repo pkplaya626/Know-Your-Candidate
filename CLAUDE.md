@@ -198,7 +198,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 2057 tests, no dependencies
-npm install && npm test                       # 3231 real-DOM checks (needs jsdom)
+npm install && npm test                       # 3289 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2055,6 +2055,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     count the ballot are in the past tense from the day after the election.
     Measured on a 4x and 6x throttled phone, a keystroke costs what it did
     before (rule 45).
+
+99. **On a phone a big state's races are rows, and a row says what its race
+    says.** California's page was 92 screens once drawn, its district
+    squares 13,900px down, every race's head repeating "Primary held June 2"
+    and "Top-two primary" (VISUALS-15, measured at 390px, CPU 4x). Below
+    1000px a state with more than four races opens with "Find your race"
+    and folds each race to an `<h3><button aria-expanded>` row
+    (`KYC.cards.raceRow`) over its section, which stays in the page as
+    `hidden="until-found"` so find-in-page and the page's search reach it;
+    the stylesheet's `[hidden]` rule exempts it, since `display: none` would
+    hide it from find. A row's words come from the race's own helpers only:
+    the holder clause its "Held by" line uses (`heldByWhat`), the open seat's
+    badge (`openSeatWhy`), the vacancy record, each person's card words
+    (`KYC.standing`), the results' unprofiled names, and the head's own count
+    badge (rule 73); the unsettled are listed apart (rule 62).
+    `rowProblems` in the render suite holds every row to its section on ten
+    states, on the campaign clock and after Election Day. Every way to a race
+    (a link, a square, the select, the lookup's answer) opens it; a turned
+    tablet moves the borrowed parts, never redraws them. 1000px and wider,
+    the page is as it was.
 
 ## District maps
 

@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3231 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3289 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -194,7 +194,7 @@ commits on its own.
 | `assets/kyc-search.js` | The search's answers about government: offices and who holds them, places, bodies, courts, ballot questions (rule 97) |
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
-| `assets/kyc-state.js` | A state's page, and the directory of states |
+| `assets/kyc-state.js` | A state's page (folded to one row per race on a phone), and the directory of states |
 | `assets/kyc-usmap.js` | The map of the states, drawn once for the partisan map and the guide's maps |
 | `assets/kyc-guide.js` | The guide's pages: their maps, and what they show from the data (who leads each committee) |
 | `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts, counties), with labels, close-ups and an optional layer of dots |
@@ -490,6 +490,14 @@ The two directories:
 - The state filter lists states by name, and a filtered state is one click
   from its own page. Race headers, the profile dialog and the map panel link
   to the state page too; a state page has a jump row for its districts.
+- On a phone (below 1000px), a state with more than four races opens with
+  **Find your race** under its summary: a select of every race and section,
+  the district squares, the ZIP lookup and the statewide offices and
+  questions on the ballot. Each race folds to one row - who holds the seat,
+  everyone on the November ballot in their cards' status words, the filers
+  the results do not settle, and the head's count - over its section, which
+  stays in the page hidden until found. A link, a square or a pick opens the
+  race; **Open all** opens them all. 1000px and wider, the page is unchanged.
 - Cards, rows and map states open the same profile dialog everywhere; a
   `#/profile/<id>` link opens it on whichever page it is pasted into.
 - The dialog ends with **In this race**: everyone else contesting the same
