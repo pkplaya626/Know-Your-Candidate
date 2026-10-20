@@ -7663,6 +7663,60 @@ async function testLegislatures() {
     const shape = D.querySelector(`#legMap .district-statewide [data-region="${id}"]`);
     shape.dispatchEvent(new window.MouseEvent("click", { bubbles: true }));
   };
+  /* STATEGOV-13, the photo research of 2026-10-19: 132 of Montana's 150
+   * legislators had no portrait from Open States; the Legislature's own
+   * roster has one for each. A photograph from a legislature's own record
+   * is credited to it, linked to the page it was read from (rule 87). */
+  {
+    const { window, D, errors } = await buildPage("legislature/mt.html");
+    const state = window.kycLegislature.MT;
+    suite("legislature/mt.html — the legislature's own photographs, credited", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const everyone = [].concat(...Object.values(state.chambers.upper.members), state.unplaced);
+      const credited = everyone.filter((p) => p.imageCredit);
+      check("every credited photograph is the legislature's, from its own host",
+        credited.every((p) => /^https:\/\/(www\.)?legmt\.gov\//.test(p.image) &&
+          p.imageCredit.by === "Montana Legislature" && /legmt\.gov/.test(p.imageCredit.page)),
+        credited.filter((p) => !/legmt\.gov/.test(p.image)).map((p) => p.name).join(", "));
+      const p = credited[0];
+      if (p) {
+        const id = Object.keys(state.chambers.upper.members).find((k) =>
+          state.chambers.upper.members[k].includes(p));
+        pick(D, window, id);
+        const card = [...D.querySelectorAll("#legPanelBody .leg-person")].find((el) =>
+          el.textContent.includes(p.name));
+        const credit = card && card.querySelector(".leg-credit");
+        check("the card says whose photograph it is, linked to its page",
+          !!credit && credit.textContent === "Photo: Montana Legislature" &&
+          credit.querySelector("a").getAttribute("href") === p.imageCredit.page,
+          credit ? credit.innerHTML : "no credit line");
+        check("the photograph is the one the credit names", card.querySelector(".leg-photo").getAttribute("src") === p.image);
+        // A photograph that does not load takes its credit with it (the
+        // reviewers of PR #125): a card never credits what it does not show.
+        card.querySelector(".leg-photo").dispatchEvent(new window.Event("error"));
+        check("a portrait that fails to load takes its credit with it",
+          !card.querySelector(".leg-photo") && !card.querySelector(".leg-credit"));
+      }
+      /* An Open States portrait the legislature's own host serves is
+       * credited to it as well: Vermont's two-member districts showed one
+       * credited and one not, from the same folder. */
+      const hosted = everyone.filter((p) => p.image && /^https:\/\/([a-z0-9-]+\.)*legmt\.gov\//.test(p.image));
+      check("every portrait served by the legislature is credited to it",
+        hosted.every((p) => p.imageCredit && p.imageCredit.by === "Montana Legislature"),
+        hosted.filter((p) => !p.imageCredit).map((p) => p.name).join(", "));
+      const plain = everyone.find((p) => p.image && !p.imageCredit);
+      if (plain) {
+        const id = Object.keys(state.chambers.upper.members).find((k) =>
+          state.chambers.upper.members[k].includes(plain));
+        if (id) {
+          pick(D, window, id);
+          const card = [...D.querySelectorAll("#legPanelBody .leg-person")].find((el) =>
+            el.textContent.includes(plain.name));
+          check("a card with no recorded credit prints no credit line", !card.querySelector(".leg-credit"));
+        }
+      }
+    });
+  }
   {
     const { window, D, errors, sources } = await buildPage("legislature/tx.html");
     const state = window.kycLegislature.TX;
@@ -7717,7 +7771,7 @@ async function testLegislatures() {
       check("no member carries the source's raw link list", everyone.every((p) => !p.links && !p.social));
       if (withPage) {
         const body = card(withPage);
-        const links = [...body.querySelectorAll(".leg-person a[href^='http']")];
+        const links = [...body.querySelectorAll(".leg-person .leg-page a[href^='http']")];
         check("a card links one official page, labelled, never a raw address",
           links.length === body.querySelectorAll(".leg-person").length &&
           links.every((a) => a.textContent === "Official page"), links.map((a) => a.textContent).join(" | "));
