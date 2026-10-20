@@ -124,10 +124,22 @@ def given_words(name):
 
 def names_surname(text, name):
     """Every word of the member's surname is a word of *text* (a hyphenated
-    or two-word surname is matched by its words)."""
+    or two-word surname is matched by its words), or the surname's letters
+    run together are one ("OLaughlin18.jpg" for Cindy O'Laughlin)."""
     sur = surname_words(name)
     have = set(words(text))
-    return bool(sur) and sur <= have
+    if not sur:
+        return False
+    return sur <= have or (len(sur) > 1 and surname_joined(name) in have)
+
+
+def surname_joined(name):
+    """The surname's letters, run together: "O'Laughlin" -> "olaughlin"."""
+    from .legislature import _SUFFIXES
+    parts = [p for p in (name or "").split() if p]
+    while parts and set(words(parts[-1])) <= _SUFFIXES:
+        parts.pop()
+    return "".join(words(parts[-1])) if parts else ""
 
 
 def names_member(text, name):
@@ -207,7 +219,12 @@ class Http:
             if wait > 0:
                 time.sleep(wait)
             try:
-                return self._get(url, limit, browser)
+                answer = self._get(url, limit, browser)
+                if answer.status is None:
+                    # One dropped connection is not an answer (rule 8): once more.
+                    time.sleep(self.pause * 3)
+                    answer = self._get(url, limit, browser)
+                return answer
             finally:
                 self._last[host] = time.monotonic()
                 self.requests += 1
@@ -710,12 +727,8 @@ def read_colorado(http, code, records, roster=None, year=0):
 def read_member_pages(http, code, records, roster=None, year=0):
     """Any other state: the member's own page on the legislature's site
     (``legislature.page_for``: never a caucus's, a past session's or another
-    member's), and on it the one image the legislature names as theirs:
-    alt text carrying their given name and surname, or a file name carrying
-    their surname on a page whose title, heading or the image's alt names
-    them. A templated alt that names only the surname is not enough (the
-    Florida House's album photograph, alt-texted with each page's member).
-    Two candidates that disagree conclude nothing."""
+    member's), and on it the photograph the legislature names as theirs
+    (``pick_member_image``)."""
     from . import legislature
     roster = roster if roster is not None else records
     pages, _ = legislature.pages_for(code, roster, year)
@@ -730,41 +743,132 @@ def read_member_pages(http, code, records, roster=None, year=0):
         if ans.status != 200:
             continue
         doc = parse_page(ans.text())
-        named_page = any(names_surname(t, r["name"]) for t in [doc.title] + doc.headings)
-        mine = surname_words(r["name"])
-        picks = []
-        for img in doc.images:
-            src = (img.get("src") or img.get("data-src") or "").strip()
-            if not src or src.startswith("data:"):
-                continue
-            absolute = urllib.parse.urljoin(ans.url or url, src)
-            if not absolute.startswith("http") or not official_host(code, absolute):
-                continue
-            alt = img.get("alt") or img.get("title") or ""
-            fwords = set(file_words(absolute))
-            by_alt = names_member(alt, r["name"])
-            by_file = mine <= fwords and (named_page or names_surname(alt, r["name"]))
-            # Another member's surname and not theirs: someone else's photograph.
-            if not by_alt and (fwords & (others - mine)):
-                continue
-            if by_alt or by_file:
-                why = (f"alt \"{alt.strip()}\"" if by_alt else
-                       f"file \"{urllib.parse.unquote(absolute.rsplit('/', 1)[-1])}\" on a page "
-                       f"naming them")
-                picks.append((absolute, why))
-        distinct = {}
-        for absolute, why in picks:
-            distinct.setdefault(absolute.split("#")[0], why)
-        if len(distinct) != 1:
+        picked = pick_member_image(code, r, doc, ans.url or url, others)
+        if not picked:
             continue
-        (image, why), = distinct.items()
-        out[r["id"]] = {"candidate": {
+        images, why, seat_keyed = picked
+        title = doc.title if names_surname(doc.title, r["name"]) else next(
+            (h for h in doc.headings if names_surname(h, r["name"])), "")
+        candidate = {
             "page": url,
-            "evidence": why + (f"; page \"{doc.title}\"" if doc.title and named_page else ""),
-            "renditions": [image],
+            "evidence": why + (f"; page \"{title}\"" if title else ""),
+            "renditions": images,
             "key": "member page",
-        }}
+        }
+        if seat_keyed:
+            candidate["seatKeyed"] = True
+        out[r["id"]] = {"candidate": candidate}
     return out
+
+
+_LIKENESS_ALT = re.compile(r"\b(photo|picture|headshot|portrait|image)\b", re.I)
+
+
+def page_keys(url):
+    """The keys a member page's address carries for its member: query
+    values and path segments of three or more letters and digits
+    ("HHABI" in ?SponCode=HHABI, "1003" in /Biography/H/1003)."""
+    parts = urllib.parse.urlsplit(url)
+    keys = [v for _, v in urllib.parse.parse_qsl(parts.query)]
+    keys += [s for s in parts.path.split("/") if s]
+    return {k.lower() for k in keys
+            if (re.fullmatch(r"[A-Za-z0-9]{3,}", k) and not k.isalpha() or re.fullmatch(r"[A-Z]{4,}\d*", k))
+            and not re.fullmatch(r"(19|20)\d\d", k)}
+
+
+def _file_keys(url):
+    path = urllib.parse.unquote(urllib.parse.urlsplit(url).path).lower()
+    segments = [s for s in path.split("/") if s]
+    stem = re.sub(r"\.\w+$", "", segments[-1]) if segments else ""
+    return set(segments) | {stem} | set(re.split(r"[^a-z0-9]+", stem))
+
+
+def pick_member_image(code, record, doc, page_url, others=()):
+    """``([image urls], evidence, seat-keyed)`` for the one photograph a
+    member page names as *record*'s, or ``None``.
+
+    First choice, any image the legislature ties to the member:
+    - alt text carrying their given name and surname;
+    - a file name carrying their surname, on a page whose title or heading
+      names them;
+    - a file named by the member's own key in the page's address (New
+      Mexico's ``HHABI.jpg`` on ``?SponCode=HHABI``, Florida's
+      ``cutout/5063.png`` on ``?MemberId=5063``), with their surname in its
+      alt or the page's title or heading.
+    Several such images are the member's alternatives (New York's headshot
+    and header headshot); none of another member's surname is taken.
+    Only where there is none: a single image whose alt is a likeness of a
+    member of their surname ("Photo of Representative Torres") on a page
+    naming them in full. Florida's album photograph carries such an alt on
+    every page; it is never taken while the page has a first choice.
+    A file named by the member's district number and not their name is
+    keyed by the seat (California's ``assembly_member_02.jpg``, New York's
+    ``115.jpg``) and is dated like any seat-keyed file."""
+    name = record["name"]
+    mine = surname_words(name)
+    named_page = any(names_member(t, name) for t in [doc.title] + doc.headings)
+    district = _digits(record.get("district"))
+    keys = {k for k in page_keys(page_url) if not seat_key(k, district)}
+    first, second = {}, {}
+    seat_files = set()
+    for img in doc.images:
+        src = (img.get("src") or img.get("data-src") or "").strip()
+        if not src or src.startswith("data:"):
+            continue
+        absolute = urllib.parse.urljoin(page_url, src).split("#")[0]
+        # A cache-buster stamped at each request ("?20261019095335", the
+        # Pennsylvania House) is not part of the file's address.
+        absolute = re.sub(r"\?\d{8,}$", "", absolute)
+        if not absolute.startswith("http") or not official_host(code, absolute):
+            continue
+        alt = (img.get("alt") or img.get("title") or "").strip()
+        if _NOT_A_LIKENESS.search(alt) or _NOT_A_LIKENESS.search(file_words_raw(absolute)):
+            continue                  # a district map, a seal, a banner
+        fwords = set(file_words(absolute))
+        fkeys = _file_keys(absolute)
+        mentions = names_surname(alt, name) or named_page
+        if not names_member(alt, name) and (fwords & (set(others) - mine)):
+            continue                  # another member's surname and not theirs
+        filename = urllib.parse.unquote(absolute.rsplit("/", 1)[-1])
+        in_file = names_surname(" ".join(fwords), name)
+        by_seat = not in_file and any(seat_key(k, district) for k in fkeys)
+        if names_member(alt, name):
+            first.setdefault(absolute, f"alt \"{alt}\"")
+        elif in_file and mentions:
+            first.setdefault(absolute, f"file \"{filename}\" on a page naming them")
+        elif keys & fkeys and mentions:
+            key = sorted(keys & fkeys)[0]
+            first.setdefault(absolute, f"file \"{filename}\" named by the page's own key for "
+                                       f"the member ({key})" + (f", alt \"{alt}\"" if alt else ""))
+        elif by_seat and names_surname(alt, name):
+            first.setdefault(absolute, f"file \"{filename}\" named by the seat, alt \"{alt}\"")
+        elif named_page and names_surname(alt, name) and _LIKENESS_ALT.search(alt):
+            second.setdefault(absolute, f"alt \"{alt}\" on a page naming them")
+        else:
+            continue
+        if by_seat:
+            seat_files.add(absolute)
+    chosen = first or (second if len(second) == 1 else {})
+    if not chosen:
+        return None
+    images = list(chosen)
+    return images, "; ".join(dict.fromkeys(chosen.values())), bool(seat_files & set(images))
+
+
+_NOT_A_LIKENESS = re.compile(r"\b(map|maps|logo|seal|banner|flag|icon|chart|signature|capitol|"
+                             r"building|district\s+\d+\s+map)\b", re.I)
+
+
+def seat_key(key, district):
+    """*key* names the seat, not the member: the district's number, bare or
+    after a chamber's letters ("02", "s14", "hd105")."""
+    m = re.fullmatch(r"[a-z]{0,2}0*(\d+)", (key or "").lower())
+    return bool(m and district and m.group(1) == district)
+
+
+def file_words_raw(url):
+    path = urllib.parse.unquote(urllib.parse.urlsplit(url).path)
+    return re.sub(r"\.\w+$", "", path.rsplit("/", 1)[-1])
 
 
 RECIPES = {

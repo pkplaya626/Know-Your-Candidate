@@ -1111,7 +1111,8 @@ def write_legislature(maps, root="."):
             continue
         text = (
             _BANNER.format(source=f"legislative_maps/{code.lower()}.json, "
-                                  "data/state_legislators.json (Open States)",
+                                  "data/state_legislators.json (Open States), "
+                                  "data/legislator_photos.json (the legislatures)",
                            built=build_timestamp())
             + f"window.kycLegislature = {_json({code: payload})};\n"
             + 'window.kycLegislatureMeta = {"signature":"' + signature + '"};\n'
