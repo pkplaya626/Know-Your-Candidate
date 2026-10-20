@@ -1884,6 +1884,22 @@
     return "party-" + partyKey(item);
   }
 
+  /** A person's party, in brackets after the name: D and R, I for an
+   *  independent, and any other party by its own name. The colour bucket
+   *  (partyKey) folds every third party into "i", and the lookup's answer
+   *  called the Libertarian Ted Brown "(I)" beside a ballot page that
+   *  names him Libertarian (PR #118 review). One for the lookup and a
+   *  state page's race rows (rule 12). */
+  function partyAbbr(p) {
+    var key = partyKey(p);
+    if (key === "d") return "D";
+    if (key === "r") return "R";
+    if (key !== "i") return "";
+    var party = String((p && p.party) || "").trim();
+    if (!party || party === "Other") return "";
+    return party === "Independent" ? "I" : party;
+  }
+
   /* ------------------------------------------------------------- hatches */
 
   /* "Split" and "none" are told apart from the colours around them by a
@@ -3280,6 +3296,7 @@
     platformItems: platformItems,
     partyKey: partyKey,
     partyClass: partyClass,
+    partyAbbr: partyAbbr,
     hatchDefs: hatchDefs,
     hatchVars: hatchVars,
     svgFill: svgFill,

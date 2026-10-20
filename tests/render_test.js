@@ -665,8 +665,10 @@ async function testShared(page) {
     // the bare [hidden] attribute and the page shows an empty box - which is
     // exactly what the "Cash on hand" tile did.
     const css = fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8");
+    // All but a folded race's section, hidden until found (kyc-state.js):
+    // display: none would hide it from the browser's find-in-page.
     check("[hidden] wins over component display rules",
-      /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/.test(css));
+      /\[hidden\](:not\(\[hidden="until-found" i\]\))?\s*\{[^}]*display:\s*none\s*!important/.test(css));
     check("the page hides with the property, not a class", (() => {
       const js = ["kyc.js", "kyc-odds.js", "kyc-cards.js", "kyc-profile.js", "kyc-senate.js", "kyc-directory.js", "kyc-map.js", "kyc-state.js", "kyc-districts.js"]
         .filter((f) => fs.existsSync(path.join(SITE, "assets", f)))
@@ -3339,7 +3341,9 @@ async function testStates() {
     const senators = members.filter((p) => /Senate/.test(p.chamber));
     // Of the people on the page, the senators come first (rule 27); the
     // short block of voting links above them is about no one.
-    const heads = [...content.querySelectorAll(".state-heading")].filter((h) => !h.closest("#voting"));
+    // Nor is a phone's "Find your race", which lists no one (VISUALS-15).
+    const heads = [...content.querySelectorAll(".state-heading")]
+      .filter((h) => !h.closest("#voting") && !h.closest("#find-race"));
     check("senators come first", /senators/i.test(heads[0].textContent), heads[0].textContent);
     // On a phone the races began eleven screens down; the page now says
     // where each part starts, and every link lands on a section.
