@@ -37,6 +37,7 @@ data/enrichment.json        ──┤
 data/odds.json              ──┤
 data/census_governments.json ─┤
 data/state_legislators.json ──┤
+data/legislator_photos.json ──┤   (portraits Open States lacks, from each legislature: kyc/legphotos.py)
 data/executives.json        ──┤   (every governor, from the NGA)
 data/statewide_officers.json ─┤   (lieutenant governors, secretaries of state, attorneys general)
 data/courts.json            ──┤   (each state's highest court, from the courts)
@@ -125,7 +126,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `odds.js` or `districts/*.js` by hand. `portraits.json`, `finance.json`, `fec_field.json`,
   `disclosures.json`, `primary_results.json`, `committees.json`,
   `campaigns.json`, `enrichment.json`, `odds.json`,
-  `census_governments.json`, `state_legislators.json`, `executives.json`,
+  `census_governments.json`, `state_legislators.json`, `legislator_photos.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `statewide_candidates.json`, `ballot_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
@@ -175,6 +176,7 @@ python build_profile_site.py enrich           # fill gaps; check every campaign 
 python build_profile_site.py odds             # market prices and polling averages (writes odds.js)
 python build_profile_site.py census           # local governments by state (Census of Governments)
 python build_profile_site.py statelegs        # every state legislator (Open States), matched to districts
+python build_profile_site.py legphotos       # their portraits Open States lacks, from each legislature's own records
 python build_profile_site.py localgov         # every local government (Census listing), checked
 python build_profile_site.py localgov --check-sites  # open every listed local website; resumes (rule 78)
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
@@ -203,7 +205,7 @@ npm install && npm test                       # 3235 real-DOM checks (needs jsdo
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `localgov`, `executives`,
+`campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
 `officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
@@ -2115,6 +2117,73 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     other office they are running for. And a smooth scroll past the
     delegation's cards (content-visibility) stopped every jump 500-950px
     short of its race, so every jump on the page now scrolls at once.
+100. **A legislator's portrait is the legislature's, named beside them,
+    and a seat's file is dated before it is believed.** 1,022 of 7,323
+    state legislators had no portrait (audit 2026-10-17, STATEGOV-13;
+    the photo research of 2026-10-19): Open States stored none, a search
+    thumbnail, or an address the legislature had since moved. Most
+    legislatures publish one all the same. `kyc/legphotos.py` reads it
+    only from a page or record the legislature serves for that member,
+    reached by its own key for them or by chamber and district with the
+    surname agreeing, and only where the legislature names them beside the
+    image - the record naming the file (Montana's roster, New Jersey's
+    `PictureText`, Indiana's lpid), the alt text with their given name,
+    the file name with their surname, or the member's own key from the
+    page's address (the file's own name, never a folder's: Florida keeps
+    member-uploaded event photographs under a folder named by the member's
+    id). A templated alt naming only a surname is no evidence: the Florida
+    House alt-texts one album photograph with each page's member, so
+    nothing is taken from an album or a gallery, and one file offered on
+    two members' pages is neither's. The page is the member's own, for
+    their chamber: New Mexico's sponsor code opens with it ("HFIGU",
+    "SFIGU"), and five senators were read from their House pages, headed
+    "Former Representative", until `legislature.chamber_of` read it. The
+    words are kept as `evidence`, and `build` fails a shown
+    entry without them, whose evidence does not carry the member's
+    surname, off the legislature's host, or over the caps. A file keyed by
+    the seat (Louisiana's `rep<n>.jpg`, Connecticut's `legpics/<code>`,
+    California's `assembly_member_02.jpg`, Nebraska's `dist01.jpg`, and
+    Missouri's Senate `Mosley13.jpg`, surname and seat together, which a
+    successor of the same surname would inherit) can still be the predecessor's:
+    it is shown only when the server dates it on or after the member's
+    arrival less `SEAT_MARGIN_DAYS` (members-elect are photographed), and
+    never while the file is unchanged since it showed someone else
+    (`seatFiles`). Connecticut's Melissa Osborne is withheld that way: the
+    file is from 2023 and her record from 2025. Only a rendition the source
+    itself offers within 300 KB and 1,200 px is used - no resizing and no
+    image service (owner, 2026-10-19) - so 17 of Indiana's 30 and most of
+    Vermont's are left out and `build` counts them; a landscape frame is
+    not a portrait (rule 38). No party caucus's photograph (Michigan, rule
+    87), and no archived copy of a file the legislature stopped serving:
+    Kansas's pages name a file that answers 404, and are read again each
+    run so a restored file is shown. A host that answers nothing three
+    times running (Maine's) is not asked again that run, and pages drawn by
+    script (Georgia, South Dakota, Utah) are listed by the command as
+    unread, never as unpictured (rule 8). Each card credits
+    `Photo: <legislature>`, linked to the page, and so does an Open
+    States portrait the legislature's own host serves: in Vermont's
+    two-seat districts one card was credited and its neighbour, from the
+    same folder, was not. The review of the first build found more:
+    - A date is only a file's when the server keeps one. California's
+      Assembly answers every `assembly_member_NN.jpg` with one deploy's
+      Last-Modified (`UNDATED_SEAT_HOSTS`), and Louisiana's House rewrote
+      some fifty seat files within twenty seconds on 2024-05-15, for
+      members seated since 2016. Seat files a host wrote together
+      (`batches`) date a file only when the copy fell near the member's
+      arrival, and a shown seat file must carry the full stamp.
+    - Kentucky keys its files by seat too (`house12.jpg`, Senate
+      `senate137.jpg` for seat 37), and `seat_key` missed them; a chamber's
+      word before the number is a seat now. A seat file is shown only for
+      the chamber and district it was read for.
+    - The legislature saying a member has left is not a photo problem:
+      New Mexico's page for Andi Reeb is headed "Former Representative",
+      Ohio's directory lists D.J. Swearingen's seat as vacant, and Open
+      States seats both. Such a page gives no photograph, and `build`
+      warns `legislator-not-seated` so the roster is checked (rules 16,
+      51).
+    - One file shown for two members fails the build, across runs and
+      recipes, and an initial counts only when written as one: "A photo of
+      Representative Smith" names no Andy.
 
 ## District maps
 

@@ -203,6 +203,14 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py statelegs
 
+      # The portraits of the legislators Open States has none for, read from
+      # each legislature's own pages and records (kyc/legphotos.py), after
+      # the roster they are matched to. A read that fails keeps the last
+      # good photograph and stops nothing else in this run (rule 8).
+      - name: Refresh the state legislators' portraits
+        continue-on-error: true
+        run: python build_profile_site.py legphotos
+
       - name: Refresh the state high courts
         continue-on-error: true
         run: python build_profile_site.py courts
