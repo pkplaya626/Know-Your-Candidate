@@ -14480,9 +14480,12 @@ async function testStatePhone() {
         vacant.map((s) => readRow(s).held).join(" | "));
     }
     const listed = rowsWhere((r) => !!(r.results && r.results.fromQualifiedList));
+    // Once the new Congress sits, a member it seated reads as their own
+    // card does (rule 68): the list's own words are asked only before.
     check("Louisiana's qualified list reads as the list's words, never a nominee (rule 64)",
       listed.every((s) => !/Nominee|Renominated|Advanced/.test(readRow(s).text) &&
-        readRow(s).ballot.every((g) => /^On the Nov 3 ballot$|^Also /.test(g.label) || g.label === "2026 challenger")),
+        (!oldCongressSits(window) || readRow(s).ballot.every((g) =>
+          /^On the Nov 3 ballot$|^Also /.test(g.label) || g.label === "2026 challenger"))),
       listed.map((s) => readRow(s).ballot.map((g) => g.label).join("/")).join(" | "));
     const allParty = rowsWhere((r) => r.primaryKind === "top-two");
     check("a top-two primary's people advanced, never \"nominee\" (rule 74)",
