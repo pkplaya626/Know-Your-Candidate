@@ -1917,7 +1917,9 @@ def _officers(args):
     ag = cache.get("ag", {})
     confirmed = sum(1 for row in ag.values() if row.get("name") and not row.get("unconfirmed"))
     print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page; "
-          f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph")
+          f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph; "
+          f"{sum(1 for row in ag.values() if row.get('photoOversized'))} left out because the "
+          "office offers it only above the caps")
     for problem in cache.pop("agProblems", officers.ag_problems(ag)):
         print(f"  [warn] {problem}")
     if not args.check:

@@ -408,6 +408,13 @@ def build(root="."):
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
+    # A photograph the office offers only above the caps is left out, never
+    # resized (the owner's decision of 2026-10-19), and the build says how
+    # many: the association's card may stand in (OFFICER_PHOTOS).
+    heavy = sorted(c for c, row in officer_cache.get("ag", {}).items() if row.get("photoOversized"))
+    if heavy:
+        problems.append(f"{len(heavy)} attorneys general's own office photographs left out, "
+                        f"offered only above the caps ({', '.join(heavy)})")
     # A roster typed in from a court's page is held to what a read one is
     # (courts.read_court refuses it): one that does not fit its court stops
     # the build. Age is a warning: a person must read the page again.
