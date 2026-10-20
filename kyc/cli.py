@@ -36,6 +36,7 @@ from . import federal as federal_mod
 from . import judiciary as judiciary_mod
 from . import vacancies as vacancies_mod
 from . import ballot_measures as measures_mod
+from . import search_index as search_index_mod
 
 
 def _load(args):
@@ -489,6 +490,19 @@ def _build(args):
         guide_path, guide_size = emit.write_government(guide_maps, args.root)
         print(f"[ok] wrote {guide_path} ({guide_size / 1024:.0f} KB)")
 
+    # The home search's places and bodies (rule 97): rewritten only when
+    # what it says changed. One that would answer wrongly is not written.
+    search_payload = _search_index(args.root, local_maps, profiles, summary)
+    search_wrong = search_index_mod.problems(search_payload)
+    if search_wrong:
+        print(f"[error] search index: {'; '.join(search_wrong[:5])}; "
+              f"{emit.SEARCH_FILE} not written", file=sys.stderr)
+        return 2
+    search_file = os.path.join(args.root, emit.SEARCH_FILE)
+    if emit.read_signature(path=search_file) != emit.search_signature(search_payload):
+        s_path, s_size = emit.write_search(search_payload, args.root)
+        print(f"[ok] wrote {s_path} ({s_size / 1024:.0f} KB)")
+
     # The sitemap and the share pages (rule 96) are written with the rest.
     written = emit.write_state_pages(profiles, args.root, summary=summary, races=race_list)
     maps = [w for w in written
@@ -617,6 +631,15 @@ def _outside_and_seats(root, profiles, race_list, record=None, snapshot=None):
     shown = seat_history.apply(race_list, history, record=record, snapshot=snapshot)
     problems = outside.problems(spending, refused) + seat_history.problems(history, race_list)
     return {"outside_spending": applied, "last_elections": shown}, problems
+
+
+def _search_index(root, local_maps, profiles, summary):
+    """The home search's places and bodies (kyc/search_index.py, rule 97):
+    the county maps' names, the committee table the Congress guide shows,
+    and the tribal governments the guide's map lists."""
+    from . import tribes
+    return search_index_mod.build(local_maps, profiles, (summary or {}).get("committees"),
+                                  tribes.load_cache(root))
 
 
 def _departed(root, snapshot, profiles):
@@ -1539,6 +1562,22 @@ def _verify(args):
                             + ", ".join(os.path.basename(p) for p, _ in stale_local[:5]))
         else:
             print(f"  ok  {emit.LOCAL_DIR}: every state matches its counties and listing")
+
+    # The home search's places and bodies (rule 97): the committed file is
+    # what the maps, the rosters and the directory say now.
+    if local_maps is not None:
+        search_payload = _search_index(args.root, local_maps, profiles, summary)
+        search_committed = emit.read_signature(path=os.path.join(args.root, emit.SEARCH_FILE))
+        search_wrong = search_index_mod.problems(search_payload)
+        if search_wrong:
+            problems.append(f"search index: {search_wrong[0]}")
+        elif search_committed is None:
+            problems.append(f"{emit.SEARCH_FILE} is missing or carries no signature")
+        elif search_committed != emit.search_signature(search_payload):
+            problems.append(f"{emit.SEARCH_FILE} is stale")
+        else:
+            print(f"  ok  {emit.SEARCH_FILE} matches the county maps, the committee rosters and "
+                  f"the tribal directory ({search_committed[:16]}...)")
 
     from . import stategov
     try:

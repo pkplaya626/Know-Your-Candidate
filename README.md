@@ -71,7 +71,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3089 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3231 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -191,6 +191,7 @@ commits on its own.
 | `assets/kyc-profile.js` | The profile dialog, shared by both pages |
 | `assets/kyc-cards.js` | Profile cards and race sections, shared by the grid and the state pages |
 | `assets/kyc-senate.js` | The grid's Senate view: every seat by the year it is next decided, with the candidates for each 2026 seat |
+| `assets/kyc-search.js` | The search's answers about government: offices and who holds them, places, bodies, courts, ballot questions (rule 97) |
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
 | `assets/kyc-state.js` | A state's page, and the directory of states |
@@ -200,6 +201,47 @@ commits on its own.
 | `assets/kyc-legislature.js` | A state's legislature page: chambers, districts, members |
 | `assets/kyc-local.js` | A state's counties page: every county and every local government in it, and every city and town |
 | `assets/kyc-stategov.js` | Governors, legislatures and trifectas: the map's three state views and every state page's section |
+
+### What the search answers
+
+The header's search finds people by name, a state or a district, answers a
+ZIP code with the lookup, and lists officials who are not candidates apart
+from the cards. It also answers what a reader types about government
+(`assets/kyc-search.js`, rule 97), above the cards, grouped by kind, each
+answer a link to the page about it:
+
+| Kind | Examples | Leads to |
+|---|---|---|
+| Offices | "governor" (every state's), "Ohio governor", "Texas AG", "Lt. Gov.", "Ohio SoS", "candidates for governor" | The state page's government section, with the holder and, where the office is on the Nov 3, 2026 ballot, the election office's candidate list, labelled as its |
+| | "President", "VP", "Cabinet", "Secretary of Labor", "HHS" | The official's dialog on the federal page (never a profile) |
+| | "Speaker", "majority leader", "whip", "president pro tem" | The holder's profile, from congress-legislators' posts in this Congress |
+| | "senators", "congressman", "delegate", "state senator 43215" | The Senate view, the sitting members, the lookup by ZIP code |
+| | "Senator Warren", "Rep. Crockett", "Ohio delegation", "Ohio congressman" | The grid: that chamber's sitting members by name first; a state's sitting members alone |
+| | "mayor", "sheriff", "school board", "Texas county judge" | A note that this site names no local officials, and the county pages that list each local government, with its website where the Census listing gives one and the site's check did not withdraw it |
+| Places and bodies | "Travis County", "Cook County, IL", "Orleans Parish" | The county page, at that county (`#/?county=<Census code>`) |
+| | "Texas House", "Ohio Senate", "General Assembly", "General Court" | The legislature page, at that chamber |
+| | "Texas House speaker", "Ohio Senate majority leader" | The legislature page, at that chamber, and a note that this site names no state legislature's leaders |
+| | "Armed Services", "Judiciary Committee", "ways and means" | The committee's row in the Congress guide, with its chair and minority lead |
+| | "Cherokee Nation", "Oklahoma tribes"; "Cherokee" or "Dallas" alone where no profile answers | The tribal governments page, at that state's list; the counties of that name |
+| Courts | "Supreme Court", "chief justice", "Fifth Circuit", "S.D.N.Y.", "Eastern District of Texas", "Texas federal courts", "Ohio Supreme Court" | The court's page, a justice's dialog, or the state page's highest court |
+| Ballot questions | "Proposition 1", "Missouri Amendment 3", "SQ 845", "ballot measures" | The question on its state's page (`#measure-<ST>-<n>`) |
+
+A word too broad to answer ("judge", with 1,461 sitting federal judges)
+suggests narrower searches instead. Abbreviations readers write are read
+(AG, SoS, Lt. Gov., Rep., Sen., SCOTUS, S.D.N.Y., Calif., Tex.); in the
+answers, a two-letter code that is also a word ("oh", "in", "va") beside
+another word is a state only typed in capitals, as "DOE" is the Department
+of Energy and "Doe" a surname. Nothing is matched fuzzily: "Govenor of
+Ohio" names nobody. An answer says only what the site read: a state court
+whose roster could not be read says so, and names no members or chief; a
+ballot with no official list found answers no question about it; an acting
+officer is shown with the title the state page gives them.
+What no file a page already loads holds - each legislature by its own name,
+each state's counties by Census code, the guide's committees and who leads
+them, the tribal governments - is `data/search.js` (`kyc/search_index.py`),
+generated, signed and checked by `verify`. It, `stategov.js`, `federal.js`
+and the judges' index load the first time a query is typed, and
+`measures.js` only when a query names a ballot question.
 
 Every view has a URL: `#/profile/<id>` for a person,
 `#/?state=TX&chamber=Senate` for a filtered list, so any view can be linked and

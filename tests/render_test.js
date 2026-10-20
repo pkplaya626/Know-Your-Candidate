@@ -9751,13 +9751,26 @@ async function testSearchAndFilters() {
   typeInto(lazy.window, lazy.D, "zzz");
   await settle(250);
   suite("search — the officials' data comes on demand", () => {
-    // The officials' files; the votes' are the profile dialog's (testVotes).
+    // The officials' files and the search's places and bodies (rule 97);
+    // the votes' are the profile dialog's (testVotes).
     const srcs = [...template.content.querySelectorAll("script")].map((s) => s.getAttribute("src"))
       .filter((s) => !/^data\/(votes|people)\//.test(s));
-    check("the page names each file with its version", srcs.length === 3 &&
+    check("the page names each file with its version", srcs.length === 5 &&
       srcs.every((s) => /^data\/[a-z/]+\.js\?v=[0-9a-f]{10}$/.test(s)), srcs.join(" "));
     const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
-    check("and fetches them when a query is typed", srcs.every((s) => added.indexOf(s) !== -1), added.join(" "));
+    const typed = srcs.filter((s) => !/^data\/measures\.js/.test(s));
+    check("and fetches them when a query is typed", typed.length === 4 &&
+      typed.every((s) => added.indexOf(s) !== -1), added.join(" "));
+    // The ballot questions are fetched only when a query names one.
+    check("but not the ballot questions, which no query named",
+      !added.some((s) => /^data\/measures\.js/.test(s)), added.join(" "));
+  });
+  typeInto(lazy.window, lazy.D, "Proposition 1");
+  await settle(250);
+  suite("search — the ballot questions come when a query names one (rule 97)", () => {
+    const added = [...lazy.D.querySelectorAll("head script[src]")].slice(before).map((s) => s.getAttribute("src"));
+    check("data/measures.js is fetched, from its stamped address",
+      added.some((s) => /^data\/measures\.js\?v=[0-9a-f]{10}$/.test(s)), added.join(" "));
   });
 
   // TECH-03: a query typed before the profiles arrived is kept.
@@ -9771,6 +9784,536 @@ async function testSearchAndFilters() {
       /“Warren”/.test(early.D.getElementById("resultsLabel").textContent),
       early.window.location.hash);
   });
+}
+
+/* The search answers what a reader types about government (rule 97):
+ * an office and who holds it, a place, a body, a court, a ballot question,
+ * each a link to the page about it, grouped by kind, above the cards. The
+ * owner asked for it on 2026-10-19; "governor" found only challengers whose
+ * text mentioned the word (GRID-07). */
+function loadAnswers(window) {
+  loadOfficials(window);
+  ["search.js", "measures.js"].forEach((file) => {
+    window.eval(fs.readFileSync(path.join(SITE, "data", file), "utf8"));
+  });
+}
+
+async function testSearchAnswers() {
+  const { window, D, errors } = await buildPage("index.html");
+  await settle(50);
+  const KYC = window.KYC;
+  loadAnswers(window);
+  const gov = window.kycStateGov.states;
+  const fed = window.kycFederal;
+  const index = window.kycSearch;
+  const box = () => D.getElementById("searchAnswers");
+  const text = () => box().textContent.replace(/\s+/g, " ");
+  const hrefs = () => [...box().querySelectorAll("a")].map((a) => a.getAttribute("href"));
+  const label = () => D.getElementById("resultsLabel").textContent.replace(/\s+/g, " ");
+  const cards = () => [...D.querySelectorAll("#results .card")].map((c) => KYC.byId(c.getAttribute("data-id")));
+  const ask = async (q) => { typeInto(window, D, q); await settle(200); };
+  // Nobody outside Congress is a profile (rule 27): a profile link in the
+  // answers names a sitting member, and no card is drawn in them.
+  const onlyMembers = () => !box().querySelector(".card") && hrefs().filter((h) => /^#\/profile\//.test(h))
+    .every((h) => KYC.seated(KYC.byId(decodeURIComponent(h.split("/").pop()))));
+  const named = (off) => KYC.answers.namedHolder(off);
+
+  await ask("governor");
+  suite("search answers — 'governor' alone lists every state's, compactly", () => {
+    const want = Object.keys(gov).filter((c) => named(gov[c].governor));
+    const links = hrefs().filter((h) => /^states\/[a-z]{2}\.html#state-government$/.test(h));
+    check("shown, under Offices", !box().hidden && /^Offices/.test(box().querySelector(".answer-group-title").textContent));
+    check("a row for each state whose governor its page names, each linked to it",
+      want.length > 40 && links.length === want.length && want.every((c) =>
+        text().indexOf(gov[c].governor.name) !== -1), `${links.length} of ${want.length}`);
+    check("as a compact list", !!box().querySelector(".answer-compact"));
+    check("never as profiles", onlyMembers());
+  });
+
+  const ohio = gov.OH;
+  await ask("Ohio governor");
+  suite("search answers — 'Ohio governor' is Ohio's, with its 2026 race", () => {
+    check("names the holder, linked to Ohio's page", named(ohio.governor) &&
+      text().indexOf(ohio.governor.name) !== -1 && hrefs().indexOf("states/oh.html#state-government") !== -1,
+      text().slice(0, 200));
+    check("and no other state's governor", !Object.keys(gov).some((c) => c !== "OH" &&
+      named(gov[c].governor) && text().indexOf(gov[c].governor.name) !== -1));
+    const item = ohio.ballot2026.offices.governor;
+    const printed = ((item.candidates || {}).candidates || []).filter((c) => !c.writeIn);
+    check("the race is labelled as the election office's list",
+      !item.up || (/on the Nov 3, 2026 ballot/.test(text()) && /lists them/.test(text()) &&
+        printed.every((c) => text().indexOf(c.name) !== -1)), text().slice(0, 400));
+  });
+  const ohioText = text();
+  await ask("governor of Ohio");
+  suite("search answers — 'governor of Ohio' reads the same", () => {
+    check("the same answer", text() === ohioText);
+  });
+
+  await ask("Texas AG");
+  suite("search answers — 'Texas AG' is Texas's attorney general", () => {
+    check("named, linked to Texas's page", !named(gov.TX.ag) ||
+      (text().indexOf(gov.TX.ag.name) !== -1 && hrefs().indexOf("states/tx.html#state-government") !== -1),
+      text().slice(0, 200));
+    check("never the U.S. Attorney General when a state is named",
+      !hrefs().some((h) => /federal\/index\.html#\/official\//.test(h)));
+  });
+
+  await ask("attorney general");
+  suite("search answers — 'attorney general' alone", () => {
+    const office = fed.offices.find((o) => o.key === "justice");
+    check("the U.S. Attorney General first, in their own dialog, never a profile",
+      !office.holder || hrefs()[0] === "federal/index.html#/official/" + encodeURIComponent(office.holder.id),
+      hrefs()[0]);
+    check("then every state's, compactly", !!box().querySelector(".answer-compact"));
+  });
+
+  await ask("Calif. governor");
+  suite("search answers — an abbreviation a reader writes ('Calif.')", () => {
+    check("is California", !named(gov.CA.governor) || text().indexOf(gov.CA.governor.name) !== -1,
+      text().slice(0, 120));
+  });
+
+  // A misspelling is not fuzzily matched to anyone (rule 3).
+  await ask("Govenor of Ohio");
+  suite("search answers — a misspelling names nobody", () => {
+    check("no answer", box().hidden, text().slice(0, 120));
+    check("and no official named for it", D.getElementById("officialResults").hidden ||
+      D.getElementById("officialResults").textContent.indexOf(ohio.governor.name) === -1);
+  });
+  await ask("Texsa AG");
+  suite("search answers — a misspelled state is no state", () => {
+    check("nobody's attorney general", !Object.keys(gov).some((c) => named(gov[c].ag) &&
+      text().indexOf(gov[c].ag.name) !== -1), text().slice(0, 160));
+  });
+
+  const speaker = KYC.people().find((p) => KYC.seated(p) && (p.leadership || []).indexOf("Speaker of the House") !== -1);
+  await ask("Speaker");
+  suite("search answers — 'Speaker' is the Speaker of the House", () => {
+    if (!speaker) { check("no Speaker recorded in this Congress yet (rule 68)", box().hidden || true); return; }
+    check("linked to their profile", hrefs().indexOf("#/profile/" + encodeURIComponent(speaker.id)) !== -1 &&
+      /Speaker of the House:/.test(text()), text());
+    check("only members of Congress are profiles", onlyMembers());
+  });
+
+  const labor = fed.offices.find((o) => o.key === "labor");
+  for (const q of ["Secretary of Labor", "labor secretary"]) {
+    await ask(q);
+    suite(`search answers — '${q}'`, () => {
+      check("the office's holder, in the federal page's dialog", !labor.holder ||
+        hrefs().indexOf("federal/index.html#/official/" + encodeURIComponent(labor.holder.id)) !== -1,
+        hrefs().join(" "));
+      check("never a profile (rule 27)", !hrefs().some((h) => /^#\/profile\//.test(h)));
+    });
+  }
+  await ask("labor");
+  suite("search answers — a department's word alone is not its secretary", () => {
+    check("no office answered", box().hidden || !/Secretary of Labor/.test(text()), text().slice(0, 120));
+  });
+
+  await ask("Cabinet");
+  suite("search answers — 'Cabinet' lists every office and its holder", () => {
+    const held = fed.offices.filter((o) => o.holder && o.holder.id);
+    check("each holder linked to their dialog", held.length > 10 && held.every((o) =>
+      hrefs().indexOf("federal/index.html#/official/" + encodeURIComponent(o.holder.id)) !== -1));
+  });
+
+  await ask("senators");
+  suite("search answers — 'senators' alone explains, and points to the Senate view and the lookup", () => {
+    check("the Senate view", hrefs().indexOf("#/?view=senate") !== -1, hrefs().join(" "));
+    check("Find who represents you", !!box().querySelector("[data-findrep-reveal]"));
+  });
+  await ask("Ohio congressman");
+  suite("search — 'Ohio congressman' is who sits for Ohio in the House (rule 27)", () => {
+    check("the grid says so", /Ohio’s sitting House members/.test(label()), label());
+    check("and shows Ohio's sitting House members only, no challenger", cards().length > 0 &&
+      cards().every((p) => p.state === "OH" && KYC.seated(p) && /House/.test(p.chamber)),
+      cards().filter((p) => !KYC.seated(p)).map((p) => p.name).join(", "));
+  });
+  for (const q of ["Ohio delegation", "Ohio members of Congress"]) {
+    await ask(q);
+    suite(`search — '${q}' asks who represents Ohio, not who is running (rule 27)`, () => {
+      check("the grid says so", /Ohio’s sitting members of Congress/.test(label()), label());
+      check("both chambers' sitting members, and nobody else", cards().length > 0 &&
+        cards().every((p) => p.state === "OH" && KYC.seated(p)) &&
+        cards().some((p) => p.chamber === "Senate") && cards().some((p) => /House/.test(p.chamber)),
+        cards().filter((p) => !KYC.seated(p)).map((p) => p.name).join(", "));
+    });
+  }
+  // A seat's title is read off the query, never added to a profile's text:
+  // "Con", typed on the way to a name, ranked every sitting member by the
+  // word "Congressman" (PR #124 review).
+  await ask("Con");
+  suite("search — a title typed in part does not rank every member", () => {
+    check("the first cards are named Con...", cards().length > 0 &&
+      cards().slice(0, 3).every((p) => /(^|[^a-z])con/i.test(KYC.searchFold(p.name))),
+      cards().slice(0, 3).map((p) => p.name).join(", "));
+    // Ranked by office (2) only where the office's own words start so:
+    // Connecticut's members do.
+    const byTitle = KYC.people().filter((p) => KYC.seated(p) && p.state !== "CT" &&
+      !/(^|[^a-z])con/.test(KYC.searchFold([p.name, p.officeLabel, p.contestLabel, p.party, p.district]
+        .concat(p.aliases || [], p.leadership || []).join(" "))) &&
+      KYC.queryScore(p, "Con") === 2);
+    check("and no sitting member is ranked by a title's letters", byTitle.length === 0,
+      byTitle.slice(0, 3).map((p) => p.name).join(", "));
+  });
+  const houseSmiths = KYC.people().filter((p) => KYC.seated(p) && /House/.test(p.chamber) &&
+    / smith$/.test(KYC.searchFold(p.name)));
+  await ask("Congresswoman Smith");
+  suite("search — 'Congresswoman Smith' is the sitting House members named Smith first", () => {
+    if (!houseSmiths.length) { check("no sitting House member named Smith (nothing to test)", true); return; }
+    check("each of them, before anyone else", cards().slice(0, houseSmiths.length).every((p) =>
+      houseSmiths.indexOf(p) !== -1), cards().slice(0, houseSmiths.length + 1).map((p) => p.name).join(", "));
+  });
+  const senator = KYC.people().find((p) => KYC.seated(p) && p.chamber === "Senate" &&
+    KYC.people().filter((o) => o.name.split(" ").pop() === p.name.split(" ").pop()).length === 1);
+  await ask("Senator " + senator.name.split(" ").pop());
+  suite("search — 'Senator <surname>' finds the senator by the seat's title", () => {
+    check(`'Senator ${senator.name.split(" ").pop()}' finds ${senator.name}`, cards()[0] === senator,
+      cards().slice(0, 3).map((p) => p && p.name).join(", "));
+  });
+
+  await ask("state senator 43215");
+  suite("search answers — a state legislator and a ZIP code ask the lookup", () => {
+    check("a button asks the ZIP code", !!box().querySelector('[data-findrep-zip="43215"]'), text());
+  });
+  await ask("Texas House");
+  suite("search answers — 'Texas House' is the legislature's chamber", () => {
+    check("linked to its lower chamber's map", hrefs().indexOf("legislature/tx.html#/?chamber=lower") !== -1,
+      hrefs().join(" "));
+    check("named as the legislature names it", text().indexOf("Texas House of Representatives") !== -1);
+    check("and the cards stay Texas's seats in the U.S. House", cards().length > 0 &&
+      cards().every((p) => p.state === "TX") && /U\.S\. House are the cards below/.test(text()));
+  });
+  await ask("General Court");
+  suite("search answers — a legislature by the name its constitution gives it (rule 75)", () => {
+    check("Massachusetts's and New Hampshire's", hrefs().indexOf("legislature/ma.html") !== -1 &&
+      hrefs().indexOf("legislature/nh.html") !== -1 && /Massachusetts General Court/.test(text()));
+  });
+
+  await ask("Fifth Circuit");
+  suite("search answers — 'Fifth Circuit' is its court's page", () => {
+    check("courts/ca5.html", hrefs().indexOf("courts/ca5.html") !== -1, hrefs().join(" "));
+    check("under Courts", /Courts/.test(box().querySelector(".answer-group-title").textContent));
+  });
+  for (const [q, id] of [["S.D.N.Y.", "ny-s"], ["Eastern District of Texas", "tx-e"], ["5th Cir.", "ca5"],
+      ["D.C. Circuit", "cadc"], ["D. Mass.", "ma"]]) {
+    await ask(q);
+    suite(`search answers — '${q}'`, () => {
+      check(`is courts/${id}.html, alone`, hrefs().filter((h) => /^courts\//.test(h)).join(" ") === `courts/${id}.html`,
+        hrefs().join(" "));
+    });
+  }
+  await ask("DNC");
+  suite("search answers — 'DNC' is not North Carolina's district courts", () => {
+    check("no court", !hrefs().some((h) => /^courts\//.test(h)), hrefs().join(" "));
+  });
+  await ask("Supreme Court");
+  suite("search answers — 'Supreme Court' is the nine, in their dialogs", () => {
+    const members = fed.supremeCourt.members;
+    check("the court's page and each justice", hrefs().indexOf("courts/scotus.html") !== -1 &&
+      members.every((j) => hrefs().indexOf("federal/index.html#/official/" + encodeURIComponent(j.id)) !== -1));
+  });
+  await ask("Ohio Supreme Court");
+  suite("search answers — a state's highest court is on its state page", () => {
+    check("Ohio's", !ohio.court || (hrefs().indexOf("states/oh.html#state-government") !== -1 &&
+      text().indexOf(ohio.court.name) !== -1), text());
+  });
+  await ask("judge");
+  suite("search answers — 'judge' alone is too broad to list", () => {
+    check("narrower searches are suggested", /Narrower searches/.test(text()) &&
+      hrefs().indexOf("#/?q=Fifth%20Circuit") !== -1, text().slice(0, 200));
+    check("and no judge is listed", !hrefs().some((h) => /#\/official\/|^courts\//.test(h)), hrefs().join(" "));
+    check("the federal page's judge search is linked", hrefs().indexOf("federal/index.html#courts") !== -1);
+  });
+
+  const travis = (index.counties.TX || []).find((c) => c[1] === "Travis County");
+  await ask("Travis County");
+  suite("search answers — 'Travis County' is its county page", () => {
+    check("the case exists to test", !!travis);
+    check("linked by its Census code", hrefs().indexOf("counties/tx.html#/?county=" + travis[0]) !== -1,
+      hrefs().join(" "));
+  });
+  await ask("Cook County, IL");
+  suite("search answers — a county and its state", () => {
+    const cook = index.counties.IL.find((c) => c[1] === "Cook County");
+    check("Illinois's only", hrefs().join(" ") === "counties/il.html#/?county=" + cook[0], hrefs().join(" "));
+  });
+  await ask("Texas counties");
+  suite("search answers — a state's counties are its county page, not Texas County", () => {
+    check("counties/tx.html", hrefs().indexOf("counties/tx.html") !== -1 &&
+      !hrefs().some((h) => /county=/.test(h)), hrefs().join(" "));
+  });
+  await ask("mayor");
+  suite("search answers — a local office says this site names none, and where to look", () => {
+    check("said, and the county pages linked", /names no local officials/.test(text()) &&
+      hrefs().indexOf("counties/index.html") !== -1, text().slice(0, 200));
+  });
+  await ask("DC mayor");
+  suite("search answers — a local office where there is no county page", () => {
+    check("the District's own page, never the county pages", hrefs().join(" ") === "states/dc.html" &&
+      /no county page for the District of Columbia/.test(text()), hrefs().join(" ") + " | " + text());
+  });
+
+  const committee = (index.committees || []).find((c) => / Armed Services$/.test(c[1]));
+  await ask("Armed Services");
+  suite("search answers — 'Armed Services' is the committees' rows in the Congress guide", () => {
+    if (!committee) { check("no rosters yet (a new Congress, rule 68)", true); return; }
+    const guide = fs.readFileSync(path.join(SITE, "government", "congress.html"), "utf8");
+    const links = hrefs().filter((h) => /^government\/congress\.html#committee-/.test(h));
+    check("each chamber's", links.length === 2, links.join(" "));
+    check("each row is on the guide's page", links.every((h) => guide.indexOf(`id="${h.split("#")[1]}"`) !== -1));
+    check("its leaders are members' profiles", onlyMembers());
+  });
+  await ask("education");
+  suite("search answers — one word of a committee's longer name is not the committee", () => {
+    check("no committee", !hrefs().some((h) => /committee-/.test(h)), hrefs().join(" "));
+  });
+
+  const tribe = Object.keys(index.tribes || {}).map((c) => [c, (index.tribes[c] || [])
+    .find((t) => t[0] === "Cherokee Nation")]).find((x) => x[1]);
+  await ask("Cherokee Nation");
+  suite("search answers — a tribal government, on its state's list", () => {
+    check("the case exists to test", !!tribe);
+    check("linked to the tribal page's list for its state",
+      hrefs().indexOf(`government/tribal.html#/?state=${tribe[0]}&mode=tribes`) !== -1, hrefs().join(" "));
+  });
+
+  await ask("Proposition 50");
+  suite("search answers — 'Proposition 50' names no 2026 question", () => {
+    check("said so, under Ballot questions", /Ballot questions/.test(text()) &&
+      /No statewide question on a Nov 3, 2026 ballot/.test(text()), text());
+    check("and never Proposition 5", !hrefs().some((h) => /#measure-/.test(h)), hrefs().join(" "));
+  });
+  const measures = window.kycMeasures;
+  const moAt = ((measures.MO || {}).measures || []).findIndex((m) => m.designation === "Amendment 3");
+  await ask("Missouri Amendment 3");
+  suite("search answers — 'Missouri Amendment 3' is the question on Missouri's page", () => {
+    if (moAt < 0) { check("Missouri lists no Amendment 3 (nothing to test)", true); return; }
+    check("linked to the question itself", hrefs().join(" ") === `states/mo.html#measure-MO-${moAt}`,
+      hrefs().join(" "));
+  });
+  await ask("Amendment 3");
+  suite("search answers — a question's number is matched whole", () => {
+    // North Carolina's "...MAXIMUM INCOME TAX RATE OF 3.5%" is not Amendment 3.
+    const wrong = Object.keys(measures).some((c) => (measures[c].measures || []).some((m, i) =>
+      /3\.5/.test(m.designation) && hrefs().indexOf(`states/${c.toLowerCase()}.html#measure-${c}-${i}`) !== -1));
+    check("no question numbered otherwise", !wrong && hrefs().length > 0, hrefs().join(" "));
+  });
+
+  // The empty grid says where the answers are.
+  await ask("Federal Circuit");
+  suite("search answers — the answers only: no 'Nothing matches' under them", () => {
+    if (cards().length) { check("profiles also match (nothing to test)", true); return; }
+    check("the line says the answers are below", /offices, places and bodies found below/.test(label()), label());
+    check("and the empty state is hidden", D.getElementById("noResults").hidden);
+  });
+  await ask("");
+  suite("search answers — an empty box answers nothing", () => {
+    check("hidden", box().hidden);
+  });
+
+  /* PR #124 review: what the answers say must be what the site read. */
+  // A court whose roster could not be read is said so, and nothing about
+  // its members or its chief (rules 19 and 57).
+  for (const code of Object.keys(gov).filter((c) => gov[c].court && gov[c].court.unreadable)) {
+    const name = KYC.stateName(code);
+    for (const q of [`${name} Supreme Court`, `${name} chief justice`]) {
+      await ask(q);
+      suite(`search answers — '${q}': a court whose roster was not read`, () => {
+        check("says why, as its state page does", text().indexOf(gov[code].court.unreadable) !== -1 &&
+          /members are not listed here/.test(text()), text().slice(0, 300));
+        check("and claims no count of members and no chief",
+          !/members? listed by the court|names no chief|lists no chief/.test(text()), text().slice(0, 300));
+      });
+    }
+  }
+  // A place whose list of ballot questions was never found answers no
+  // question, by name or as a list (rule 19).
+  const noListRead = Object.keys(measures).filter((c) => measures[c] && measures[c].has !== true &&
+    measures[c].has !== false);
+  for (const code of noListRead) {
+    for (const q of [`${KYC.stateName(code)} Question 1`, `${KYC.stateName(code)} ballot questions`]) {
+      await ask(q);
+      suite(`search answers — '${q}': no official list was found`, () => {
+        check("says so", /has not found an official list/.test(text()) && /does not say there are none/.test(text()),
+          text().slice(0, 300));
+        check("and never that no question is called that", !/No statewide question/.test(text()), text().slice(0, 300));
+      });
+    }
+  }
+  await ask("Proposition 50");
+  suite("search answers — a question named nowhere: the places with no list read are named", () => {
+    check("each of them", !noListRead.length || noListRead.every((c) => text().indexOf(KYC.stateName(c)) !== -1) &&
+      /has not found an official list for/.test(text()), text());
+    const inList = (/Questions called a proposition are on the ballot in ([^.]*)\./.exec(text()) || [])[1] || "";
+    check("and the states with such questions are a list with 'and'", !/,/.test(inList) || / and [A-Z]/.test(inList),
+      inList);
+  });
+
+  // Every state's officer: an acting officer, or an office called
+  // otherwise, carries the title its page gives them, and a new office
+  // first elected on Nov 3 is listed and counted (rule 73).
+  for (const [key, q] of [["governor", "governor"], ["lt", "lieutenant governor"], ["ag", "attorney general"],
+      ["sos", "secretary of state"]]) {
+    await ask(q);
+    const rowsText = [...box().querySelectorAll(".answer-compact .answer-row")].map((li) => li.textContent);
+    const listed = text();
+    suite(`search answers — '${q}': each state's officer as its page titles them`, () => {
+      const acting = Object.keys(gov).filter((c) => named(gov[c][key]) && /Acting|Interim/.test(gov[c][key].title || ""));
+      check("an acting officer is never shown as the holder", acting.every((c) =>
+        rowsText.some((t) => t.indexOf(gov[c][key].name + " (" + gov[c][key].title + ")") !== -1)),
+        acting.map((c) => c + " " + gov[c][key].name).join(", "));
+      const fresh = Object.keys(gov).filter((c) => gov[c][key] && gov[c][key].none &&
+        ((gov[c].ballot2026 || {}).offices || {})[key] && gov[c].ballot2026.offices[key].up);
+      check("a new office no one holds yet is listed", fresh.every((c) =>
+        rowsText.some((t) => t.indexOf(KYC.stateName(c) + ":") === 0 && /no one holds this office yet/.test(t))));
+      const up = Object.keys(gov).filter((c) => ((gov[c].ballot2026 || {}).offices || {})[key] &&
+        gov[c].ballot2026.offices[key].up).length;
+      check("the count on the ballot is the races' count", listed.indexOf(up + " of these offices") !== -1 ||
+        (up === 1 && listed.indexOf("1 of these offices") !== -1), `${up}: ${listed.slice(0, 260)}`);
+    });
+    await ask(q + " races");
+    suite(`search answers — '${q} races' counts as '${q}' does`, () => {
+      const races = [...box().querySelectorAll(".answer-compact .answer-row")].length;
+      check("one count", listed.indexOf(races + " of these offices") !== -1, `${races}: ${listed.slice(0, 260)}`);
+    });
+  }
+  for (const code of Object.keys(gov).filter((c) => gov[c].lt && gov[c].lt.none &&
+      ((gov[c].ballot2026 || {}).offices || {}).lt && gov[c].ballot2026.offices.lt.up)) {
+    const q = KYC.stateName(code) + " lieutenant governor race";
+    await ask(q);
+    suite(`search answers — '${q}': a new office on the ballot for the first time`, () => {
+      const item = gov[code].ballot2026.offices.lt;
+      const printed = ((item.candidates || {}).candidates || []).filter((c) => !c.writeIn);
+      check("no one holds it yet, and it is on the ballot", /No one holds this office yet/.test(text()) &&
+        /on the Nov 3, 2026 ballot/.test(text()) && !/has no such office/.test(text()), text().slice(0, 300));
+      check("with the candidates its list names", printed.every((c) => text().indexOf(c.name) !== -1));
+      check("and a list that is not the state's own says so", !item.candidates || !item.candidates.notStateList ||
+        /Not the state’s own list/.test(text()));
+    });
+  }
+  // An office a place does not have, or this site does not list, is not
+  // titled as though the page held it (rule 75).
+  await ask("DC governor");
+  suite("search answers — 'DC governor': the District has no governor", () => {
+    check("said in the District's own words", /The District of Columbia has an elected mayor/.test(text()), text());
+    check("and no row is titled as its governor", !/Governor, District of Columbia/.test(text()));
+  });
+  const missing = Object.keys(gov).filter((c) => !gov[c].ag)[0];
+  if (missing) {
+    await ask(KYC.stateName(missing) + " attorney general");
+    suite(`search answers — '${KYC.stateName(missing)} attorney general': an office this site does not list`, () => {
+      check("is said not to be listed", /lists no attorney general for/.test(text()), text());
+      check("and is not titled as an office its page holds",
+        !/^Attorney General,/.test(box().querySelector(".answer-row").textContent), text());
+    });
+  }
+  // A state legislature's leaders: the chamber's page, and why no name.
+  await ask("Texas House speaker");
+  suite("search answers — 'Texas House speaker': the chamber, and that no leader is named here", () => {
+    check("the Texas House's page", hrefs().indexOf("legislature/tx.html#/?chamber=lower") !== -1, hrefs().join(" "));
+    check("says this site names no state legislative leaders", /does not name the leaders of state legislatures/.test(text()));
+    check("said after the chamber is named",
+      text().indexOf("Texas House of Representatives") < text().indexOf("does not name"), text().slice(0, 200));
+  });
+  // A court's row is named before the note about it.
+  await ask("Fifth Circuit");
+  suite("search answers — the circuit's note follows its row", () => {
+    check("row, then note", text().indexOf("Fifth Circuit") < text().indexOf("It hears appeals"), text().slice(0, 200));
+  });
+  // A court the answers name is not also answered by a judge's surname.
+  await ask("Ohio Supreme Court");
+  suite("search answers — 'Ohio Supreme Court' answers once, not also with a judge named Court", () => {
+    const officials = D.getElementById("officialResults");
+    check("no surname-only namesake beside the court", officials.hidden ||
+      !/shares the surname alone/.test(officials.textContent), officials.textContent.slice(0, 200));
+    check("and one sentence about what is found below", (label().match(/found below/g) || []).length <= 1, label());
+  });
+  // Local governments' websites: only where the Census gives one, checked
+  // (rule 78).
+  await ask("mayor");
+  suite("search answers — a local office never says every government has a website", () => {
+    check("worded as the county pages hold them", !/each with its own website|where its officials are named/.test(text()) &&
+      /where the Census listing gives one/.test(text()), text());
+  });
+  // A state's local office is the state's, never a county named for it.
+  for (const [q, code] of [["Texas county judge", "tx"], ["Ohio county commissioner", "oh"]]) {
+    await ask(q);
+    suite(`search answers — '${q}' is the state's local offices`, () => {
+      check("its county page", hrefs().indexOf(`counties/${code}.html`) !== -1, hrefs().join(" "));
+      check("and no county named for the state", !hrefs().some((h) => /county=/.test(h)), hrefs().join(" "));
+    });
+  }
+  // Short names that are words: only in capitals, or with a cue.
+  await ask("Doe");
+  suite("search answers — 'Doe' is a surname, not the Department of Energy", () => {
+    check("no office", box().hidden || !/Secretary of Energy/.test(text()), text().slice(0, 120));
+  });
+  await ask("DOE");
+  suite("search answers — 'DOE' in capitals is the department", () => {
+    const energy = fed.offices.find((o) => o.key === "energy");
+    check("its secretary", !energy || !energy.holder || /Secretary of Energy/.test(text()), text().slice(0, 120));
+  });
+  // Only the capitals changed: the answers are drawn again (rule 97).
+  await ask("in governor");
+  await ask("IN governor");
+  suite("search answers — 'in governor' then 'IN governor' is Indiana's", () => {
+    check("Indiana's governor alone", !named(gov.IN.governor) || (text().indexOf(gov.IN.governor.name) !== -1 &&
+      !box().querySelector(".answer-compact")), text().slice(0, 200));
+    check("and the line quotes it as typed", /“IN governor”/.test(label()), label());
+  });
+  // A bare name no profile answers may be a tribe's or a county's.
+  await ask("Cherokee");
+  suite("search answers — 'Cherokee', where no profile answers it", () => {
+    if (cards().length) { check("a profile answers it (nothing to test)", true); return; }
+    check("the tribal governments of that name", tribe && hrefs().indexOf(`government/tribal.html#/?state=${tribe[0]}&mode=tribes`) !== -1,
+      hrefs().join(" "));
+  });
+  check("no errors", errors.length === 0, errors.join("\n"));
+
+  // From the day after the election, the race is in the past tense.
+  const voted = await buildPage("index.html", { now: "2026-11-05T09:00:00" });
+  await settle(50);
+  loadAnswers(voted.window);
+  typeInto(voted.window, voted.D, "Ohio governor");
+  await settle(200);
+  suite("search answers after Election Day — the race in the past tense", () => {
+    const t = voted.D.getElementById("searchAnswers").textContent;
+    check("was on the ballot", !ohio.ballot2026.offices.governor.up ||
+      /was on the Nov 3, 2026 ballot/.test(t) && /Candidates who were on it/.test(t), t.slice(0, 300));
+  });
+  // Every note that counts the ballot is in the past tense too (rules 63, 84).
+  for (const [q, past, now] of [["governor", /offices were on the Nov 3, 2026 ballot/, /offices are on/],
+      ["governor races", /elected this office on Nov 3, 2026/, /elect this office/],
+      ["Proposition 50", /was called/, /is called/]]) {
+    typeInto(voted.window, voted.D, q);
+    await settle(200);
+    suite(`search answers after Election Day — '${q}' in the past tense`, () => {
+      const t = voted.D.getElementById("searchAnswers").textContent;
+      check("past", past.test(t) && !now.test(t), t.slice(0, 300));
+    });
+  }
+  const someQuestion = Object.keys(measures).find((c) => measures[c].has === true && (measures[c].measures || []).length);
+  if (someQuestion) {
+    const m = measures[someQuestion].measures[0];
+    typeInto(voted.window, voted.D, KYC.stateName(someQuestion) + " " + m.designation);
+    await settle(200);
+    suite("search answers after Election Day — a ballot question in the past tense", () => {
+      const t = voted.D.getElementById("searchAnswers").textContent;
+      check("as each election office listed them", /listed them/.test(t), t.slice(0, 300));
+    });
+  }
+
+  // The state page addresses each question, as the answers link it.
+  if (moAt >= 0) {
+    const mo = await buildPage("states/mo.html");
+    await settle(50);
+    suite("a state page addresses each ballot question (rule 97)", () => {
+      check(`#measure-MO-${moAt} is Amendment 3`, !!mo.D.getElementById(`measure-MO-${moAt}`) &&
+        /Amendment 3/.test(mo.D.getElementById(`measure-MO-${moAt}`).querySelector(".measure-name").textContent));
+    });
+  }
 }
 
 /* The federal page's judge search, as readers name judges (FEDERAL-02). */
@@ -13723,6 +14266,7 @@ async function testPeopleSplit() {
   if (!only || only === "index.html") await testPhoneMenus();
   if (!only || only === "index.html") await testBootSurvivesAFailure();
   if (!only || only === "index.html" || only === "search") await testSearchAndFilters();
+  if (!only || only === "index.html" || only === "search") await testSearchAnswers();
   if (!only || only === "federal" || only === "search") await testJudgeSearch();
   if (!only || only === "index.html") await testReseatedSpecial();
   if (!only || only === "index.html") await testFormerIncumbent();

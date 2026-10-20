@@ -68,6 +68,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/stategov.js   (governors, chamber control, trifectas)
                                              data/measures.js   (the statewide questions: kyc/ballot_measures.py)
+                                             data/search.js     (the search's places and bodies: kyc/search_index.py)
                                              data/legislature/*.js (one state legislature per state)
                                              data/local/*.js    (one state's counties and governments)
                                              data/courtcounties.js (each county's federal district court)
@@ -98,6 +99,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-cards.js
                                              assets/kyc-profile.js
                                              assets/kyc-senate.js
+                                             assets/kyc-search.js
                                              assets/kyc-directory.js
                                              assets/kyc-map.js
                                              assets/kyc-state.js
@@ -196,8 +198,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2069 tests, no dependencies
-npm install && npm test                       # 3089 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2078 tests, no dependencies
+npm install && npm test                       # 3231 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2008,6 +2010,75 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     copy it. A shared race opens its state page at the race and holds it
     there while the page above it draws (`kyc-state.js` `holdPlace`, until
     the reader moves): it once landed 3,000px short on a phone.
+
+97. **The search answers what a reader types about government, from the
+    data the page about it shows, and never guesses.** "governor", "Texas
+    AG", "Secretary of Labor", "Travis County", "Texas House", "Fifth
+    Circuit" and "Missouri Amendment 3" found nobody, or a challenger whose
+    text held the word (GRID-07; the owner's request of 2026-10-19).
+    `assets/kyc-search.js` reads such a query and answers above the cards,
+    grouped by kind (offices, places and bodies, courts, ballot questions),
+    each answer a link to the page about it: the state page's government
+    section, an official's dialog, a court's page, a county by its Census
+    code, a legislature's chamber, a committee's row in the Congress guide
+    (`#committee-<code>`), a question on its state page
+    (`#measure-<ST>-<n>`). Its data is what those pages read
+    (`stategov.js`, `federal.js`, `measures.js`, the profiles' leadership
+    posts, rule 68) and `data/search.js` (`kyc/search_index.py`) for what
+    none of them holds: the legislatures by their own names
+    (`government_maps.legislature_title`, the legislature page's title),
+    the county maps' names, the guide's committees with their leads by
+    `pages.committee_leads`, the tribal directory's governments. It is
+    generated, signed, stamped and compared by `verify` (rules 18, 76), and
+    loaded only when a query is typed; `measures.js` only when one names a
+    question. An office says who holds it only where the state's page names
+    them (`KYC.answers.namedHolder`, one test for the answers and the
+    "Other officials" block), and its 2026 race only as the election
+    office's list, labelled as such, with what a cited source says of the
+    holder (rule 79). Nobody outside Congress becomes a profile (rule 27).
+    A word is matched whole: "Proposition 50" is not Proposition 5, and
+    "3.5%" in North Carolina's question title is not "Amendment 3". A short
+    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but in
+    the answers a two-letter code that is a word ("oh", "in", "va") beside
+    another word is a state only typed in capitals (rule 5), and changing
+    only the capitals redraws them; the grid still reads a code typed alone
+    as the state. "DNC" is not North Carolina's courts, "Doe" is not the
+    Department of Energy (only "DOE" is), and "Mich" alone is a name being
+    typed, not Michigan. No fuzzy match: "Govenor of Ohio" names nobody,
+    since a near spelling can put one person's office on another (rule 3).
+    A word too broad ("judge": 1,461 judges) suggests narrower searches; a
+    local office ("mayor") says this site names no local officials and links
+    the county pages, which hold a website only where the Census listing
+    gives one and its check did not withdraw it (rule 78); "Texas county
+    judge" is Texas's local offices, never Texas County, Missouri. A state
+    legislature's leader ("Texas House speaker") is the chamber's page and
+    the words that this site names no legislature's leaders. "Texas House"
+    is the state's chamber and its U.S. House seats both: the answer says
+    the cards are the latter. A seat's title before a name ("Senator
+    Warren", "Rep. Crockett") is read off the query and ranks that
+    chamber's sitting members by the name; it is never added to a profile's
+    text, where "Con" typed on the way to a name matched every member. "Ohio
+    delegation" and "Ohio congressman" ask who represents the state, so
+    they list its sitting members alone (rule 27).
+
+    The review of the first version found the answers saying what the site
+    never read, each now refused and tested over every case in the data:
+    Alabama's Supreme Court, whose site could not be read, was "0 members
+    listed by the court" and its page "names no chief justice" (rules 19,
+    57: it says why, as the state page does); Maine's and Pennsylvania's
+    ballots, for which no official list was found, held "no statewide
+    question called Question 1" (only a list read answers a question); the
+    every-state list named Hawaii's acting lieutenant governor as its
+    holder (the title the page gives is shown); Arizona's new lieutenant
+    governor, on the ballot for the first time, was "no such office", and
+    "33 on the ballot" sat beside "34 elect it" (one test, `onBallot`, for
+    every count: rule 73); "DC governor" and "Puerto Rico attorney general"
+    were titled as offices the page holds (rule 75); and a court the
+    answers named was offered again as a judge sharing its name ("Court"),
+    since a query the answers read drops surname-only namesakes. Notes that
+    count the ballot are in the past tense from the day after the election.
+    Measured on a 4x and 6x throttled phone, a keystroke costs what it did
+    before (rule 45).
 
 ## District maps
 

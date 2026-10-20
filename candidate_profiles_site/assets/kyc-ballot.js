@@ -605,7 +605,9 @@
     var links = [];
     if (m.guide) links.push(link(m.guide, "Its page in the voter guide"));
     links.push(link(m.source, "Source") + " (read " + esc(KYC.dateWords(read)) + ")");
-    return '<li class="measure">' +
+    // Addressed by its place in the record, so the home search links the
+    // question itself (kyc-search.js, rule 97).
+    return '<li class="measure" id="' + KYC.escapeAttr("measure-" + code + "-" + i) + '">' +
       "<h" + level + ' class="measure-name">' + esc(m.designation) +
         (m.title ? ' <span class="measure-title">' + esc(m.title) + "</span>" : "") +
       "</h" + level + ">" +
