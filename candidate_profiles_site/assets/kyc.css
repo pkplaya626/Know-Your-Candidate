@@ -4634,6 +4634,8 @@ html.has-zip .ballot-result { min-height: 100vh; }
 .leg-links { font-size: var(--t-xs); overflow-wrap: anywhere; }
 .leg-contact a,
 .leg-links a { color: var(--accent); }
+.leg-credit { font-size: var(--t-xs); color: var(--text-muted); overflow-wrap: anywhere; }
+.leg-credit a { color: inherit; }
 
 .leg-roster {
   display: grid;

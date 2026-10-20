@@ -133,6 +133,9 @@
       // One page, never the dump of every page Open States read (LINKS-04,
       // STATEGOV-16), labelled as what it is (pageLink).
       pageLink(p) +
+      // Whose photograph it is, where the legislature's own record gave it
+      // (rule 87: kyc/legphotos.py).
+      (p.image && p.imageCredit ? '<p class="leg-credit">' + KYC.photoCreditHtml(p.imageCredit) + "</p>" : "") +
       "</div></article>";
   }
 

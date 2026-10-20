@@ -20,7 +20,7 @@ import re
 import unicodedata
 import urllib.parse
 
-from . import ballot2026, geo, statelegs
+from . import ballot2026, geo, legphotos, statelegs
 from . import districts as D
 from .government_maps import LOWER_CHAMBER, SEATS, STATES
 from .pages import state_name
@@ -377,6 +377,12 @@ def chamber_of(code, url, names=()):
     for key, value in urllib.parse.parse_qsl(parts.query):
         if key.lower() == "chamber" and value.lower() in ("h", "s"):
             found.add("lower" if value.lower() == "h" else "upper")
+        # New Mexico's sponsor code opens with its chamber: "HFIGU" is
+        # Natalie Figueroa's House page, now headed "Former Representative",
+        # "SFIGU" her Senate one (2026-10-19: five senators were linked to
+        # their House pages, and their House photographs taken from them).
+        if code == "NM" and key.lower() == "sponcode" and value[:1].lower() in ("h", "s"):
+            found.add("lower" if value[:1].lower() == "h" else "upper")
         for word in set(_words(value)) - set(names):
             if word in _QUERY_TITLES:
                 found.add(_QUERY_TITLES[word])
@@ -690,13 +696,16 @@ def pages_for(code, roster, year):
     return pages, withheld
 
 
-def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pages=None):
+def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pages=None,
+            photos=None):
     """What the page shows of one legislator: their party and the other
     ballot lines they were elected on, the district office's phone labelled
     as such, one page about them (``member_page``; *pages*, from
     ``pages_for``, where the state's roster has been read whole), and a
     portrait that is neither a search engine's thumbnail nor a file the
-    source confirmed missing."""
+    source confirmed missing - or, where Open States has none of those, the
+    one the legislature itself publishes for them (*photos*, the
+    ``legphotos`` cache), credited to the legislature (rule 87)."""
     keep = ("id", "name", "partyKey", "district", "email", "tribalSeat", "unicameral")
     out = {k: record[k] for k in keep if k in record}
     out["party"] = party_name(record.get("party"))
@@ -723,20 +732,43 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
         if page.get("session"):
             out["pageSession"] = page["session"]
     image = record.get("image")
-    if image and search_thumbnail(image):
-        if dropped is not None:
-            dropped["thumbnail"] = dropped.get("thumbnail", 0) + 1
-    elif image and record.get("imageStatus") == "broken":
-        if dropped is not None:
-            dropped["broken"] = dropped.get("broken", 0) + 1
-    elif image:
+    kind = photo_kind(record, photos)
+    if kind == "openstates":
         # Loaded over https, as the page is; 'statelegs' checked that copy.
         out["image"] = statelegs.secure(image)
+    elif kind == "legislature":
+        own = legphotos.entry_for(record, photos)
+        out["image"] = own["image"]
+        out["imageCredit"] = {"by": own["credit"], "page": own["page"]}
+    if dropped is not None and kind not in ("openstates", "legislature", "none"):
+        dropped[kind] = dropped.get(kind, 0) + 1
     return out
 
 
+def photo_kind(record, photos=None):
+    """Which portrait a card shows, or why none: "openstates" (Open States's
+    own, checked by 'statelegs'), "legislature" (the legislature's, from
+    the ``legphotos`` cache, where Open States has no usable one),
+    "oversized" (the legislature offers only a file over the caps),
+    "thumbnail" (Open States's is a search engine's), "broken" (confirmed
+    missing) or "none"."""
+    image = record.get("image")
+    if legphotos.open_states_image_ok(record):
+        return "openstates"
+    if legphotos.entry_for(record, photos):
+        return "legislature"
+    entry = ((photos or {}).get("people") or {}).get(record["id"]) or {}
+    if entry.get("oversized"):
+        return "oversized"
+    if image and search_thumbnail(image):
+        return "thumbnail"
+    if image and record.get("imageStatus") == "broken":
+        return "broken"
+    return "none"
+
+
 def build_state(code, root=".", places=None, roster=None, control=None, fetched="",
-                dropped=None):
+                dropped=None, photos=None):
     """One state's legislature page data. *control* is the state's entry in
     ``stategov.build``'s payload: its chambers' counts and who runs them;
     *fetched* the roster's date; *dropped* counts the portraits left off."""
@@ -746,7 +778,7 @@ def build_state(code, root=".", places=None, roster=None, control=None, fetched=
         dropped["sharedPage"] = withheld
 
     def person(record):
-        return _person(record, code, year, dropped=dropped, pages=pages)
+        return _person(record, code, year, dropped=dropped, pages=pages, photos=photos)
 
     topo = statelegs.load_map(code, root)
     if not topo:
@@ -887,6 +919,7 @@ def build(root=".", codes=None, dropped=None):
     except stategov.StateGovError as exc:
         raise LegislatureError(str(exc)) from exc
     places = D.load_places(root)
+    photos = legphotos.load_cache(root)
     out = {}
     for code in codes or STATES:
         roster = cache["states"].get(code) or []
@@ -895,7 +928,7 @@ def build(root=".", codes=None, dropped=None):
             statelegs.match(code, roster, topo)
         counts = {} if dropped is None else dropped.setdefault(code, {})
         out[code] = build_state(code, root, places, roster, control.get(code),
-                                cache.get("fetched", ""), counts)
+                                cache.get("fetched", ""), counts, photos)
     return out
 
 
@@ -1143,7 +1176,10 @@ def link_report(root="."):
     """``{what: {code: n}}``: what the legislature pages leave off or label
     otherwise, counted from the roster alone so ``build --check`` can say
     it: portraits that are a search engine's thumbnail ("thumbnail") or
-    confirmed missing ("broken"), members with no page ("noPage"), a page
+    confirmed missing ("broken") with none from the legislature in their
+    place, portraits shown from the legislature's own records
+    ("legislature") and left out because it offers only a file over the
+    caps ("oversized"), members with no page ("noPage"), a page
     on a caucus's site only ("caucus"), and pages withheld because two
     members were given one ("sharedPage")."""
     cache = statelegs.load_cache(root)
@@ -1152,6 +1188,7 @@ def link_report(root="."):
     fetched = cache.get("fetched", "")
     year = int(fetched[:4]) if fetched[:4].isdigit() else 0
     out = {}
+    photos = legphotos.load_cache(root)
 
     def add(what, code):
         out.setdefault(what, {})[code] = out.get(what, {}).get(code, 0) + 1
@@ -1161,11 +1198,9 @@ def link_report(root="."):
         if withheld:
             out.setdefault("sharedPage", {})[code] = withheld
         for r in roster:
-            image = r.get("image")
-            if image and search_thumbnail(image):
-                add("thumbnail", code)
-            elif image and r.get("imageStatus") == "broken":
-                add("broken", code)
+            kind = photo_kind(r, photos)
+            if kind not in ("openstates", "none"):
+                add(kind, code)
             page = pages.get(r["id"])
             if not page:
                 add("noPage", code)
