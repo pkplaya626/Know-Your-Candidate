@@ -267,3 +267,86 @@ def lighter_form(url, weight, weigh):
         if found and not too_heavy(found) and same_shape(weight, found):
             return form, found
     return None
+
+
+# The widest a card needs: a 165px card on a 2x screen.
+CARD_WIDTH = 330
+
+
+def parse_srcset(srcset, base=""):
+    """``[(url, width)]`` from an ``<img srcset>``, each address resolved
+    against *base*; a candidate with no width descriptor has width 0.
+
+    Parsed the way the HTML standard does, not by splitting on commas: an
+    address is a run of characters up to whitespace, and Wix's carry
+    commas of their own ("/v1/fill/w_432,h_681,al_c/...")."""
+    import urllib.parse
+
+    out, text, i = [], str(srcset or ""), 0
+    while i < len(text):
+        while i < len(text) and (text[i].isspace() or text[i] == ","):
+            i += 1
+        start = i
+        while i < len(text) and not text[i].isspace():
+            i += 1
+        url = text[start:i]
+        descriptors = ""
+        if url.endswith(","):
+            url = url.rstrip(",")
+        else:
+            start = i
+            while i < len(text) and text[i] != ",":
+                i += 1
+            descriptors = text[start:i]
+        if not url:
+            continue
+        width = 0
+        for descriptor in descriptors.split():
+            if descriptor.endswith("w") and descriptor[:-1].isdigit():
+                width = int(descriptor[:-1])
+        out.append((urllib.parse.urljoin(base, url), width))
+    return out
+
+
+def offered_forms(offered):
+    """The renditions a page's own srcset offers of one image, in the order
+    they are tried: the narrowest at least :data:`CARD_WIDTH` wide first,
+    then the narrower ones, widest first."""
+    sized = sorted({(int(width), url) for url, width in offered or () if width})
+    wide = [url for width, url in sized if width >= CARD_WIDTH]
+    narrow = [url for width, url in reversed(sized) if width < CARD_WIDTH]
+    return wide + narrow
+
+
+def own_lighter_form(url, weight, weigh, offered=(), tries=4):
+    """``(form, its weight)``: a rendition of *url* that its source itself
+    offers, within the caps and the same picture scaled, or ``None``.
+
+    The owner's decision of 2026-10-19: a photograph is shown only where its
+    source offers a version within 300 KB and 1,200px - no resizing, no
+    image service, no copy of our own. What the source offers is a
+    rendition its own page lists (*offered*, the image's ``srcset``:
+    WordPress's "-683x1024" files) or one its own image host serves
+    (:func:`host_resized`: Squarespace's fixed widths; imgix or Photon only
+    for a file the site already serves from them). Never Photon fetching a
+    file from another host (:func:`photon_form`), which is the image service
+    the decision rules out; an image offered only oversized is left out."""
+    forms = [form for form in offered_forms(offered) if form != url]
+    for width in SMALLER_WIDTHS:
+        form = host_resized(url, width)
+        if form and form not in forms:
+            forms.append(form)
+    for form in forms[:tries]:
+        found = weigh(form)
+        if found and not too_heavy(found) and same_shape(weight, found):
+            return form, found
+    return None
+
+
+def service_form(portrait, original):
+    """True when *portrait* is *original* fetched and scaled by Photon, an
+    image service the site itself does not use (:func:`photon_form`): what
+    the decision of 2026-10-19 rules out. A file the site serves from
+    Photon itself (a Jetpack site) is the site's own."""
+    return host_of(portrait) in PHOTON_HOSTS and bool(original) \
+        and host_of(original) not in PHOTON_HOSTS
