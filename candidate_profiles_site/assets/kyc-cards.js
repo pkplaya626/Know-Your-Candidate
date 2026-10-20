@@ -668,7 +668,11 @@
     split.running.forEach(function (p) {
       var spec = KYC.standing(p, "card");
       if (spec && spec.unknown) return add(unsettled, spec.label, rowName(p));
-      var label = spec ? spec.label : p.isCandidate ? SEAT_BADGES.challenger.label : "";
+      // A member seated since in the seat this race decided (rule 67), with
+      // no result read for them yet, in the Senate view's words for them.
+      var label = spec ? spec.label : p.isCandidate ? SEAT_BADGES.challenger.label
+        : p.raceRole === "winner" && KYC.seated(p) && race.year ? "Holds the seat (won it in " + race.year + ")"
+        : "";
       if (label) add(ballot, label, rowName(p));
     });
     var u = unprofiledNames(race);

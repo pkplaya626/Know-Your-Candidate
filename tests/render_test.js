@@ -14318,6 +14318,9 @@ function rowProblems(window, D) {
       if (spec && spec.unknown) apart.push([spec.label, p.name]);
       else if (spec) want.push([spec.label, p.name]);
       else if (p.isCandidate) want.push(["2026 challenger", p.name]);
+      // Seated since as the race's winner, before a result is read for them
+      // (the December rehearsals; rule 67): the Senate view's words.
+      else if (p.raceRole === "winner" && KYC.seated(p)) want.push(["Holds the seat (won it in " + race.year + ")", p.name]);
     });
     const flat = (groups) => [].concat(...groups.map((g) => g.names.map((n) => [g.label, n])));
     const got = flat(row.ballot).filter((x) => !/^Also /.test(x[0]));
