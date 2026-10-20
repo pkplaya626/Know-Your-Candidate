@@ -148,7 +148,8 @@ def assign_credits(profiles):
         if first == PLACEHOLDER:
             profile.pop("photoCredit", None)
             continue
-        if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site") \
+        if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site",
+                                          "wikidata-fec", "state-legislature") \
                 and profile.get("photoCredit"):
             credited += 1
             continue

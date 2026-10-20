@@ -1324,6 +1324,46 @@ def check_future_coverage(profiles, today=None):
                   f"{today.isoformat()}; shown as filed", found)]
 
 
+def check_photo_evidence(profiles, portraits=None, enrichment=None):
+    """A photograph reached through a page - a campaign's (rule 38), a
+    legislature's or a Wikidata item (``nominee_photos``) - carries in its
+    cache the page that ties it to the person, the words that name them
+    beside it, the day it was read and its bytes and pixel size, within the
+    caps (the owner's decision of 2026-10-19). One shown without them fails:
+    the cache cannot say why it is this person's."""
+    from . import nominee_photos
+    from .photos import too_heavy
+    from .portraits import profile_key
+
+    portraits, enrichment = portraits or {}, enrichment or {}
+    people = enrichment.get("people") or {}
+    found = []
+    for p in profiles:
+        source, shown = p.get("photoSource"), (p.get("photos") or [None])[0]
+        if source in nominee_photos.ROUTES:
+            record = portraits.get(profile_key(p)) or {}
+            found += nominee_photos.problems({profile_key(p): record})
+        elif source == "campaign-site":
+            entry = people.get(p.get("id")) or {}
+            record = next((r for r in (entry.get("site"), entry.get("listed"))
+                           if r and r.get("portrait") == shown), {})
+            weight = record.get("portraitWeight") or {}
+            missing = [f for f in ("portraitPage", "portraitEvidence", "portraitRead")
+                       if not record.get(f)]
+            if not all(weight.get(k) for k in ("bytes", "width", "height")):
+                missing.append("weight")
+            elif too_heavy(weight):
+                missing.append("a size within the caps")
+            if missing:
+                found.append(f"{p['name']} (campaign-site): no {', '.join(missing)}")
+    if not found:
+        return []
+    return [Issue("error", "photo-unevidenced",
+                  f"{len(found)} photographs are shown without the page, the words naming the "
+                  "person, the day read or the size their cache must record; run 'enrich' or "
+                  "'portraits' to read them again", sorted(found))]
+
+
 def check_portrait_overrides(enrichment):
     """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
 
@@ -1659,7 +1699,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None, voting_dates=None, statewide=None, measures=None):
+        history=None, voting_dates=None, statewide=None, measures=None, portraits=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1681,6 +1721,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment)
+    if portraits is not None:
+        issues += check_photo_evidence(profiles, portraits, enrichment)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)
