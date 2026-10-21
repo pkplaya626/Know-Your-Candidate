@@ -7181,6 +7181,12 @@
      "total": 1752402.26
     },
     {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 5,
+     "total": 181213.72
+    },
+    {
      "committee": "FLORIDA'S VOICE PAC",
      "committeeId": "C00952630",
      "count": 4,
@@ -8629,6 +8635,17 @@
     }
    ]
   },
+  "H6MI10292": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 4,
+     "total": 121124.69
+    }
+   ]
+  },
   "H6MI10326": {
    "oppose": [],
    "support": [
@@ -8694,6 +8711,12 @@
      "committeeId": "C00923417",
      "count": 2,
      "total": 294613.39
+    },
+    {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 3,
+     "total": 104881.68
     },
     {
      "committee": "DMFI PAC",
@@ -16069,12 +16092,6 @@
      "committeeId": "C00934463",
      "count": 3,
      "total": 45025.0
-    },
-    {
-     "committee": "RAVEN, JEFFERY",
-     "committeeId": "C90023417",
-     "count": 1,
-     "total": 1306.09
     }
    ],
    "support": [
@@ -17193,6 +17210,12 @@
    ],
    "support": [
     {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 3,
+     "total": 165000.0
+    },
+    {
      "committee": "DMFI PAC",
      "committeeId": "C00710848",
      "count": 3,
@@ -18220,5 +18243,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-20"
+ "read": "2026-10-21"
 }

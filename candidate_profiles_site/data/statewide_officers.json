@@ -325,9 +325,15 @@
    "office": "https://www.doj.nh.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.doj.nh.gov/sites/g/files/ehbemt721/files/inline-images/ag-john-formella-300.jpg",
+   "photoPage": "https://www.doj.nh.gov/",
+   "photoWeight": {
+    "bytes": 31318,
+    "height": 353,
+    "width": 300
+   },
    "selection": "Appointed by the governor and Executive Council",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "NJ": {
    "listedBy": "Democratic Attorneys General Association",
@@ -536,7 +542,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-20T13:22:59+00:00",
+ "fetched": "2026-10-21T13:34:34+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
