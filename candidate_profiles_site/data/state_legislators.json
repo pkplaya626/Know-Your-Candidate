@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-21T13:39:48+00:00",
+ "fetched": "2026-10-22T13:41:04+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -447,6 +447,7 @@
     "districtPhone": "907-376-3725",
     "email": "representative.steve.st.clair@akleg.gov",
     "id": "ocd-person/6692f2e6-2ad5-4b9c-a3f5-a0243c087064",
+    "image": "https://akleg.gov/images/legislators/450x600/STC.jpg",
     "links": [
      "https://www.akleg.gov/basis/Member/Detail/34?code=stc"
     ],
@@ -502,6 +503,7 @@
     "districtPhone": "907-376-3370",
     "email": "representative.garret.nelson@akleg.gov",
     "id": "ocd-person/abb33c56-f4ba-4c95-938e-658677368ca4",
+    "image": "https://akleg.gov/images/legislators/450x600/NEG.jpg",
     "links": [
      "https://www.akleg.gov/basis/Member/Detail/34?code=neg"
     ],
@@ -1605,6 +1607,9 @@
     "districtId": "011",
     "email": "heathallbright@gmail.com",
     "id": "ocd-person/de4c986e-ec06-437e-8d3d-b7ca591606bc",
+    "image": "https://alison.legislature.state.al.us/files/pdf/house/members/Allbright_11.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://alison.legislature.state.al.us/house-leaders-members?tab=1&search=Allbright"
     ],
@@ -1619,6 +1624,9 @@
     "districtId": "012",
     "email": "cindy.myrex@alhouse.gov",
     "id": "ocd-person/cbfd2b4e-f512-4176-b2f6-1df9d2d9c99c",
+    "image": "https://alison.legislature.state.al.us/files/pdf/house/members/Myrex_12.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://alison.legislature.state.al.us/house-leaders-members?tab=1&search=myrex"
     ],
@@ -1633,6 +1641,9 @@
     "districtId": "013",
     "email": "greg.barnes@alhouse.gov",
     "id": "ocd-person/319cc74b-3113-4053-8bda-0e1903227207",
+    "image": "https://alison.legislature.state.al.us/files/pdf/house/members/Barnes_13.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://alison.legislature.state.al.us/house-leaders-members?tab=1&search=barnes"
     ],
@@ -2136,6 +2147,9 @@
     "districtId": "038",
     "email": "kristin.nelson@alhouse.gov",
     "id": "ocd-person/730c7d27-9f0a-4a8b-839b-8de86f6b012e",
+    "image": "https://alison.legislature.state.al.us/files/pdf/house/members/Nelson_38.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://alison.legislature.state.al.us/house-leaders-members?tab=1&search=nelson"
     ],
@@ -2655,6 +2669,9 @@
     "districtId": "063",
     "email": "norman.crow@alhouse.gov",
     "id": "ocd-person/3a86c192-f9b1-4b58-9f5b-2119d1fe4e0d",
+    "image": "https://alison.legislature.state.al.us/files/pdf/house/members/Crow_63.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://alison.legislature.state.al.us/house-leaders-members?tab=1&search=crow"
     ],
@@ -6017,7 +6034,7 @@
     "district": "90",
     "districtId": "090",
     "districtPhone": "870-403-6287",
-    "email": "richard@richardwomack.com",
+    "email": "richard.womack@arkansashouse.org",
     "id": "ocd-person/f2b10588-1d21-4f8f-b313-d668bf58d967",
     "image": "https://www.arkleg.state.ar.us/Content/photos/2023/House/436_sm.jpg",
     "imageChecked": "2026-10-17",
@@ -6043,7 +6060,7 @@
     "district": "91",
     "districtId": "091",
     "districtPhone": "501-627-3232",
-    "email": "bccci@cablelynx.com",
+    "email": "bruce.cozart@arkansashouse.org",
     "id": "ocd-person/49608f14-5f53-40fc-b662-0d48a2aa1340",
     "image": "https://www.arkleg.state.ar.us/Content/photos/2023/House/392_sm.jpg",
     "imageChecked": "2026-10-17",
@@ -6378,13 +6395,23 @@
      "https://arkleg.state.ar.us/Legislators/Detail?member=C.+Tucker",
      "https://senate.arkansas.gov/senators/582",
      "https://senate.arkansas.gov/senators/clarke-tucker/",
+     "https://www.arkleg.state.ar.us/assembly/2019/2019R/Pages/MemberProfile.aspx?member=Tucker",
+     "https://www.arkleg.state.ar.us/Bills/FTPDocument?path=%2FAssembly%2F2021%2FMember%20Profiles%2FSenator+Tucker+-+Senate+Bio.pdf",
      "https://www.arkleg.state.ar.us/Bills/FTPDocument?path=%2FAssembly%2F2023%2FMember%20Profiles%2FSenator+Tucker+-+Senator+Bio.pdf",
      "https://www.arkleg.state.ar.us/Home/FTPDocument?path=%2FAssembly%2F2023%2FMember%20Profiles%2FSenator+Tucker+-+Senator+Bio.pdf",
-     "https://www.arkleg.state.ar.us/Legislators/Detail?member=C.+Tucker&ddBienniumSession=2023%2F2023R"
+     "https://www.arkleg.state.ar.us/Legislators/Detail?member=C.+Tucker&ddBienniumSession=2021%2F2021R",
+     "https://www.arkleg.state.ar.us/Legislators/Detail?member=C.+Tucker&ddBienniumSession=2023%2F2023R",
+     "https://www.arkleg.state.ar.us/Legislators/Document?id=&filename=Senator+Tucker+-+Senate+Bio.pdf&source=Member+Profiles&ddBienniumSession=2021",
+     "https://www.clarketucker.com/"
     ],
     "name": "Clarke Tucker",
     "party": "Democratic",
     "partyKey": "D",
+    "social": {
+     "facebook": "TuckerForStateSenate",
+     "instagram": "clarketuckerforstatesenate",
+     "twitter": "clarketucker"
+    },
     "state": "AR"
    },
    {
@@ -6758,6 +6785,7 @@
      "https://arkleg.state.ar.us/Legislators/Detail?member=B.+King",
      "https://senate.arkansas.gov/senators/629",
      "https://senate.arkansas.gov/senators/bryan-king/",
+     "https://www.arkleg.state.ar.us/assembly/2019/2019R/Pages/MemberProfile.aspx?member=B.King",
      "https://www.arkleg.state.ar.us/Bills/FTPDocument?path=%2FAssembly%2F2023%2FMember%20Profiles%2FSenator+King+-+Senator+Bio.pdf",
      "https://www.arkleg.state.ar.us/Home/FTPDocument?path=%2FAssembly%2F2023%2FMember%20Profiles%2FSenator+King+-+Senator+Bio.pdf",
      "https://www.arkleg.state.ar.us/Legislators/Detail?member=B.+King&ddBienniumSession=2023%2F2023R"
@@ -11402,6 +11430,9 @@
     "districtId": "014",
     "email": "ava.flanell.house@coleg.gov",
     "id": "ocd-person/af9e96aa-fb8b-49bb-96d8-e6c2c1ceb2b5",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBNEJUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--5304bfc622fea842363e0fa2e5cbcb23d63aa5cf/Rep%20Flanell.jpeg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/ava-flanell",
      "https://www.coloradohouserepublicans.com/ava-flanell"
@@ -11739,6 +11770,9 @@
     "districtId": "029",
     "email": "lori.goldstein.house@coleg.gov",
     "id": "ocd-person/8de5b6ec-a488-4f1f-b96d-d78b90cb7fe7",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBOHhTQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--c9f2d149165dbada9f3390e8d08ed879dc90f881/Goldstein,-Lori.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/lori-goldstein"
     ],
@@ -11820,6 +11854,9 @@
     "districtId": "033",
     "email": "kenny.nguyen.house@coleg.gov",
     "id": "ocd-person/f84befdc-bf1b-4b0b-92df-27155caf403f",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBd2hWQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--f9b1ecc716972f212d3b5fa44d7984f6a797f367/Nguyen,-Kenny.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/kenny-nguyen"
     ],
@@ -11903,6 +11940,9 @@
     "districtId": "037",
     "email": "chad.clifford.house@coleg.gov",
     "id": "ocd-person/faaae748-7c57-47df-bdf7-1811e0a61458",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMmxUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--440e192273c07cd1802c3f80053294b1fc1466f0/Clifford,%20Chad.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/chad-clifford"
     ],
@@ -12373,6 +12413,9 @@
     "districtId": "058",
     "email": "larry.suckla.house@coleg.gov",
     "id": "ocd-person/a2745e24-bcf2-40f8-aa77-fad08d873ab1",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMUpUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--4b9d44adbd15e44548363ced61b10a873a3a90db/Suckla,%20Larry%20Don.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/larry-don-suckla",
      "https://www.coloradohouserepublicans.com/larry-don-suckla"
@@ -12509,6 +12552,9 @@
     "districtId": "064",
     "email": "scott.slaugh.house@coleg.gov",
     "id": "ocd-person/cba33581-a61a-41c5-9773-c949f2b06d0a",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMzVUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--0e6191fb1cd75d1bcd0669b7105c3d347e0d598d/Slaugh,-Scott.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "broken",
     "links": [
      "https://leg.colorado.gov/legislators/scott-slaugh",
      "https://www.coloradohouserepublicans.com/scott-slaugh"
@@ -12777,6 +12823,9 @@
     "districtId": "017",
     "email": "katie.wallace.senate@coleg.gov",
     "id": "ocd-person/f0fa561d-39cf-48f3-ae8c-84b4d30d2662",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBOVpTQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--ccec530ad3acc81ebd2174a2e748819018094813/wallace%20katie.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/katie-wallace"
     ],
@@ -13312,6 +13361,9 @@
     "districtId": "009",
     "email": "lynda.zamorawilson.senate@coleg.gov",
     "id": "ocd-person/e5055578-02cb-435c-9fe0-b877318e3b1b",
+    "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBL2hTQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--d9f490eb4c61fa8d40c93bf6264c05d3e4471de6/Zamora%20Wilson.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://leg.colorado.gov/legislators/lynda-zamora-wilson",
      "https://www.coloradosenaterepublicans.com/zamorawilson/"
@@ -18810,6 +18862,9 @@
     "districtPhone": "850-750-4470",
     "email": "nathan.boyles@flhouse.gov",
     "id": "ocd-person/7fa0c00f-c006-401c-88e7-06485e394c34",
+    "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/5063.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.flhouse.gov/Sections/Representatives/custom/details.aspx?MemberId=5063",
      "https://www.flhouse.gov/Sections/Representatives/details.aspx?MemberId=5063"
@@ -18867,6 +18922,9 @@
     "districtPhone": "321-497-8200",
     "email": "brian.hodgers@flhouse.gov",
     "id": "ocd-person/4737f2dc-8241-4329-85fc-59a9c405d7b6",
+    "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/5064.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.flhouse.gov/Sections/Representatives/custom/details.aspx?MemberId=5064&LegislativeTermId=91",
      "https://www.flhouse.gov/Sections/Representatives/details.aspx?MemberId=5064"
@@ -19046,6 +19104,9 @@
     "districtPhone": "407-557-4530",
     "email": "rashon.young@flhouse.gov",
     "id": "ocd-person/ff372569-d6f5-4bd0-8d36-569a7458f3e2",
+    "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/5065.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.flhouse.gov/Sections/Representatives/custom/details.aspx?MemberId=5065"
     ],
@@ -20112,6 +20173,9 @@
     "districtPhone": "561-903-1310",
     "email": "rob.long@flhouse.gov",
     "id": "ocd-person/50be2c32-37ea-4b93-9525-21d7b6f0b463",
+    "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/5067.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.flhouse.gov/Sections/Representatives/details.aspx?MemberId=5067"
     ],
@@ -20413,6 +20477,9 @@
     "districtPhone": "813-281-2538",
     "email": "nathan.brian.web@flsenate.gov",
     "id": "ocd-person/528bc47a-e8c7-4a28-9923-aba1deefd976",
+    "image": "https://www.flsenate.gov/PublishedContent/Senators/2024-2026/Photos/s14_5606.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.flsenate.gov/Senators/S14"
     ],
@@ -21235,6 +21302,7 @@
     "districtId": "106",
     "email": "akbar.ali@house.ga.gov",
     "id": "ocd-person/938f2479-c51f-446a-87f0-76d4f07c61e5",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/ali-akbar-5089.jpg",
     "links": [
      "https://www.legis.ga.gov/members/house/5089"
     ],
@@ -21541,6 +21609,7 @@
     "districtId": "121",
     "email": "eric.gisler@house.ga.gov",
     "id": "ocd-person/abece831-30a8-4cf8-94ff-d41f7f48197f",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/gisler-eric-5091.jpg",
     "links": [
      "https://www.legis.ga.gov/members/house/5091"
     ],
@@ -21629,6 +21698,7 @@
     "districtId": "126",
     "email": "lc.myles@house.ga.gov",
     "id": "ocd-person/1d9bb111-bf4f-4e4f-aa63-a2f6a94b566c",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/myles-lc-5079.jpg",
     "links": [
      "https://www.legis.ga.gov/members/house/5079"
     ],
@@ -22659,6 +22729,7 @@
     "districtId": "177",
     "email": "alvin.payton@house.ga.gov",
     "id": "ocd-person/8aa7ee05-bf64-4c51-8821-ad905d25741b",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/payton-alvin-5096.jpg",
     "links": [
      "https://www.legis.ga.gov/members/house/5096?session=1034"
     ],
@@ -22839,6 +22910,7 @@
     "districtId": "023",
     "email": "bill.fincher@house.ga.gov",
     "id": "ocd-person/f2444048-8c14-45b2-b700-37f7899fa5bb",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/fincher-bill-5092.jpg",
     "links": [
      "https://www.legis.ga.gov/members/house/5092"
     ],
@@ -24587,6 +24659,7 @@
     "districtId": "021",
     "email": "jason.dickerson@senate.ga.gov",
     "id": "ocd-person/584267b0-e40b-4d6e-a7fe-4c076eb6214c",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/dickerson-jason-5088.jpg",
     "links": [
      "https://www.legis.ga.gov/members/senate/5088",
      "https://www.legis.ga.gov/members/senate/5088?session=1033"
@@ -24622,6 +24695,7 @@
     "districtId": "023",
     "email": "max.burns@senate.ga.gov",
     "id": "ocd-person/918888ac-edc7-4178-9133-d058f0f21010",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/burns-max-4979.jpg",
     "links": [
      "https://www.legis.ga.gov/members/senate",
      "https://www.legis.ga.gov/members/senate/4979",
@@ -24866,6 +24940,7 @@
     "districtId": "035",
     "email": "jaha.howard@senate.ga.gov",
     "id": "ocd-person/fcd57129-480c-4fba-a0d1-7fb369706611",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/howard-jaha-5090.jpg",
     "links": [
      "https://www.legis.ga.gov/members/senate/5090"
     ],
@@ -25329,6 +25404,7 @@
     "districtId": "007",
     "email": "adrienne.whitecarden@senate.ga.gov",
     "id": "ocd-person/3cfc8d4f-68d4-44b2-81f4-a162465e1aed",
+    "image": "https://www.legis.ga.gov/api/images/default-source/portraits/carden-adrienne-white-5097.jpg",
     "links": [
      "https://www.legis.ga.gov/members/senate/5097"
     ],
@@ -32545,6 +32621,7 @@
     "districtId": "118",
     "email": "doody@ilhousegop.org",
     "id": "ocd-person/4f34a22a-48e9-4439-8cab-cf5360cd8433",
+    "image": "https://cdn.ilga.gov/assets/img/members/{781888B6-A82C-4735-AA93-B3A0B03E3047}.jpg",
     "links": [
      "https://www.ilga.gov/House/Members/Details/3464"
     ],
@@ -36914,6 +36991,9 @@
     "districtId": "042",
     "email": "h42@iga.in.gov",
     "id": "ocd-person/fb16b382-4ca4-47c2-abaf-3c6e72f5a780",
+    "image": "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Yocum_2025_Main_List.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://iga.in.gov/legislative/2026/legislators/legislator_tim_yocum_1",
      "https://www.indianahouserepublicans.com/members/general/tim-yocum/"
@@ -37977,6 +38057,9 @@
     "districtId": "009",
     "email": "h9@iga.in.gov",
     "id": "ocd-person/74acd892-bd86-453a-8a48-87954ad68c19",
+    "image": "https://images.squarespace-cdn.com/content/v1/67053bf75db0691cef71e461/ab302452-6386-4a50-98d4-829e331bc755/Novak_Randy-081-s.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://iga.in.gov/legislative/2025/legislators/legislator_randy_novak_1",
      "https://iga.in.gov/legislative/2026/legislators/legislator_randy_novak_1",
@@ -51295,8 +51378,8 @@
     "districtId": "025",
     "email": "kent.roberson@house.maryland.gov",
     "id": "ocd-person/a6771d68-fa3d-4ced-a613-3543f54fe153",
-    "image": "https://mgaleg.maryland.gov/2024RS/images/roberson01.jpg",
-    "imageChecked": "2026-10-17",
+    "image": "https://mgaleg.maryland.gov/2026RS/images/roberson01.jpg",
+    "imageChecked": "2026-10-22",
     "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/roberson01"
@@ -69489,7 +69572,6 @@
     "chamber": "lower",
     "district": "28",
     "districtId": "028",
-    "districtPhone": "406-648-7494",
     "email": "eric.albus@legmt.gov",
     "id": "ocd-person/3d8ef86d-689a-40ed-a09d-2f612a7ecf6a",
     "image": "https://www.legmt.gov/wp-content/uploads/sites/3/2025/03/1293-400x500.jpg",
@@ -69579,7 +69661,7 @@
      "https://leg.mt.gov/legislator-information/roster/individual/7591",
      "https://legislators.legmt.gov/#/legislator/4"
     ],
-    "name": "Frank Smith",
+    "name": "Frank J. Smith",
     "party": "Democratic",
     "partyKey": "D",
     "state": "MT"
@@ -72522,6 +72604,9 @@
     "districtId": "119",
     "email": "anna.ferguson@ncleg.gov",
     "id": "ocd-person/5ca31513-814c-44b9-9206-aae55c05d056",
+    "image": "https://www.ncleg.gov/Members/MemberImage/H/1003/Low",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.ncleg.gov/Members/Biography/H/1003"
     ],
@@ -73162,6 +73247,9 @@
     "districtId": "040",
     "email": "phillip.rubin@ncleg.gov",
     "id": "ocd-person/efae51b3-e547-46c0-87df-4ac35c0c60de",
+    "image": "https://www.ncleg.gov/Members/MemberImage/H/844/Low",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.ncleg.gov/Members/Biography/H/844"
     ],
@@ -73293,6 +73381,9 @@
     "districtId": "047",
     "email": "john.lowery@ncleg.gov",
     "id": "ocd-person/7d07a14d-a5dc-46a9-8277-85fee42921a1",
+    "image": "https://www.ncleg.gov/Members/MemberImage/H/1001/Low",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.ncleg.gov/Members/Biography/H/1001"
     ],
@@ -73581,6 +73672,9 @@
     "districtId": "060",
     "email": "amanda.cook@ncleg.gov",
     "id": "ocd-person/5f309927-de7a-4fd4-930b-a369dd10fec8",
+    "image": "https://www.ncleg.gov/Members/MemberImage/H/1002/Low",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.ncleg.gov/Members/Biography/H/1002"
     ],
@@ -74219,6 +74313,9 @@
     "districtId": "090",
     "email": "dan.kiger@ncleg.gov",
     "id": "ocd-person/443b38b0-1881-443c-ba43-70ffb1d7a9ea",
+    "image": "https://www.ncleg.gov/Members/MemberImage/H/1004/Low",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.ncleg.gov/Members/Biography/H/1004"
     ],
@@ -74924,6 +75021,9 @@
     "districtId": "034",
     "email": "chris.measmer@ncleg.gov",
     "id": "ocd-person/9dfc9308-ec16-4da8-b5c7-8a9cc55df534",
+    "image": "https://www.ncleg.gov/Members/MemberImage/S/455/Low",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.ncleg.gov/Members/Biography/S/455"
     ],
@@ -75840,6 +75940,9 @@
     "districtId": "020",
     "email": "drustebakke@ndlegis.gov",
     "id": "ocd-person/62c94736-93a5-43a9-af8d-5a37b65159c6",
+    "image": "https://ndlegis.gov/sites/default/files/person/photo/rustebakke.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://ndlegis.gov/biography/dave-rustebakke"
     ],
@@ -75953,6 +76056,9 @@
     "districtId": "023",
     "email": "denehring@ndlegis.gov",
     "id": "ocd-person/4e998af9-35f0-457c-8f37-b2fdaa914dbd",
+    "image": "https://ndlegis.gov/sites/default/files/person/photo/denehring.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://ndlegis.gov/biography/dennis-nehring"
     ],
@@ -76115,6 +76221,9 @@
     "districtId": "027",
     "email": "tbrown@ndlegis.gov",
     "id": "ocd-person/1e04adce-2d55-4b2a-bf7b-8a2977cd05f9",
+    "image": "https://ndlegis.gov/sites/default/files/person/photo/tbrown.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://ndlegis.gov/biography/tj-brown"
     ],
@@ -76514,6 +76623,9 @@
     "districtId": "036",
     "email": "tdressler@ndlegis.gov",
     "id": "ocd-person/573043a9-0df8-41f8-a3e3-18a72c38aac6",
+    "image": "https://ndlegis.gov/sites/default/files/person/photo/tdressler.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://ndlegis.gov/biography/ty-dressler"
     ],
@@ -78067,6 +78179,9 @@
     "districtId": "001",
     "email": "bhallstrom@leg.ne.gov",
     "id": "ocd-person/cc0182c9-3cfe-46b1-8fd2-03e90385c6d5",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist01/highres/dist01.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=1"
     ],
@@ -78153,6 +78268,9 @@
     "districtId": "013",
     "email": "aspivey@leg.ne.gov",
     "id": "ocd-person/03ee8938-314f-4db4-ac76-9507d85fc03c",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist13/highres/dist13.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=13",
      "https://www.ashleifornebraska.com/"
@@ -78239,6 +78357,9 @@
     "districtId": "017",
     "email": "glen.meyer@leg.ne.gov",
     "id": "ocd-person/dae0883f-3a53-4873-99df-b0e10ea64066",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist17/highres/dist17.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=17"
     ],
@@ -78384,6 +78505,9 @@
     "districtId": "023",
     "email": "jstorm@leg.ne.gov",
     "id": "ocd-person/356c7606-4eaa-4494-83a5-68dbaf3e77f6",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist23/highres/dist23.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=23"
     ],
@@ -78465,6 +78589,9 @@
     "districtId": "027",
     "email": "jprokop@leg.ne.gov",
     "id": "ocd-person/dda3cdbe-5e52-439e-ac68-02588b6d7cab",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist27/highres/dist27.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://jasonprokop.com",
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=27"
@@ -78529,6 +78656,9 @@
     "districtId": "003",
     "email": "victor.rountree@leg.ne.gov",
     "id": "ocd-person/1e43a5b4-e63c-434a-977c-592174c2c635",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist03/highres/dist03.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=3"
     ],
@@ -78734,6 +78864,9 @@
     "districtId": "039",
     "email": "tony.sorrentino@leg.ne.gov",
     "id": "ocd-person/7093e661-0dbc-4c75-91e0-09a3e171caf1",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist39/highres/dist39.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=39"
     ],
@@ -78828,6 +78961,9 @@
     "districtId": "043",
     "email": "tanya.storer@leg.ne.gov",
     "id": "ocd-person/70751bb8-56af-4fd1-b2dc-21943dc7bb2d",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist43/highres/dist43.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=43"
     ],
@@ -78914,6 +79050,9 @@
     "districtId": "047",
     "email": "paul.strommen@leg.ne.gov",
     "id": "ocd-person/0ae0ba8c-757e-459f-aecc-4a0501a25cbb",
+    "image": "https://www.nebraskalegislature.gov/media/images/senators/dist47/highres/dist47.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nebraskalegislature.gov/senators/landing-pages/index.php?District=47"
     ],
@@ -88468,7 +88607,8 @@
     "id": "ocd-person/5dcef6ac-7dbe-4c65-a53b-670c89a615e7",
     "links": [
      "https://www.njleg.state.nj.us/legislative-roster/406/senator-cryan",
-     "https://www.njsendems.org/senators/joseph-cryan/"
+     "https://www.njsendems.org/senators/joseph-cryan/",
+     "http://www.njleg.state.nj.us/members/bio.asp?Leg=204"
     ],
     "name": "Joe Cryan",
     "party": "Democratic",
@@ -88648,6 +88788,7 @@
     "email": "senburzichelli@njleg.org",
     "id": "ocd-person/1b726d76-851a-487b-a6e6-42ee4fa5c050",
     "links": [
+     "https://www.njleg.state.nj.us/api/legislatorData/legislatorBio/458",
      "https://www.njleg.state.nj.us/legislative-roster/458/senator-burzichelli",
      "https://www.njsendems.org/179/John-J-Burzichelli"
     ],
@@ -92781,6 +92922,9 @@
     "districtPhone": "518-562-1986",
     "email": "cashmanm@nyassembly.gov",
     "id": "ocd-person/2b850a01-7bc1-4602-a0e4-46663e477060",
+    "image": "https://nyassembly.gov/write/upload/member_files/115/headshot/115.jpg?hst=1770151964",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://assembly.state.ny.us/mem/Michael-Cashman/"
     ],
@@ -93454,6 +93598,9 @@
     "districtPhone": "716-839-4691",
     "email": "bolognap@nyassembly.gov",
     "id": "ocd-person/4a510afe-84a6-4b0c-ac8d-13bebadfff78",
+    "image": "https://nyassembly.gov/write/upload/member_files/144/headshot/144.jpg?hst=1747845755",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nyassembly.gov/mem/Paul-A-Bologna"
     ],
@@ -94079,6 +94226,9 @@
     "districtPhone": "718-545-3889",
     "email": "morenod@nyassembly.gov",
     "id": "ocd-person/6c065b35-fb5f-42fe-95e8-663c823d5386",
+    "image": "https://nyassembly.gov/write/upload/member_files/036/headshot/036.jpg?hst=1770241970",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nyassembly.gov/mem/Diana-C-Moreno"
     ],
@@ -94959,6 +95109,9 @@
     "districtPhone": "212-979-9696",
     "email": "powersk@nyassembly.gov",
     "id": "ocd-person/c99b7832-4dae-4ad3-b94a-41b50f99fd8f",
+    "image": "https://nyassembly.gov/write/upload/member_files/074/headshot/074.jpg?hst=1770303450",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://nyassembly.gov/mem/Keith-Powers"
     ],
@@ -101731,6 +101884,8 @@
     "email": "rep.kevinmannix@oregonlegislature.gov",
     "id": "ocd-person/af99b8a9-452f-44e0-8404-83dfe05dbfd7",
     "image": "https://www.oregonlegislature.gov/mannix/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/mannix"
     ],
@@ -101849,6 +102004,8 @@
     "email": "rep.kenhelm@oregonlegislature.gov",
     "id": "ocd-person/3770e09c-3492-4388-8047-e3dc83f026f3",
     "image": "https://www.oregonlegislature.gov/helm/PublishingImages/HD18-784-Edit.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/helm"
     ],
@@ -101931,6 +102088,8 @@
     "email": "rep.nathansosa@oregonlegislature.gov",
     "id": "ocd-person/5615af6a-5232-45e0-b85b-bcb41e08391e",
     "image": "https://www.oregonlegislature.gov/sosa/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/sosa"
     ],
@@ -102418,6 +102577,8 @@
     "email": "rep.mattbunch@oregonlegislature.gov",
     "id": "ocd-person/fe73a3b7-97cd-43cc-bf41-26a952a9ee8f",
     "image": "https://www.oregonlegislature.gov/bunch/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/bunch"
     ],
@@ -102598,6 +102759,8 @@
     "email": "rep.kimwallan@oregonlegislature.gov",
     "id": "ocd-person/a2e34475-ba6f-41af-bf61-83c7160d6c10",
     "image": "https://www.oregonlegislature.gov/wallan/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/wallan"
     ],
@@ -102616,6 +102779,8 @@
     "email": "rep.markowens@oregonlegislature.gov",
     "id": "ocd-person/f73d5af2-f2b6-47d0-a55a-84ac528343ff",
     "image": "https://www.oregonlegislature.gov/owens/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/owens"
     ],
@@ -102821,6 +102986,8 @@
     "email": "sen.janeensollman@oregonlegislature.gov",
     "id": "ocd-person/9d3f5669-f452-4926-91ec-a74a4c4a48e5",
     "image": "https://www.oregonlegislature.gov/sollman/PublishingImages/Pages/staff/alteza_films-66_43format.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/sollman"
     ],
@@ -103030,6 +103197,8 @@
     "email": "sen.kaysejama@oregonlegislature.gov",
     "id": "ocd-person/7532bf1f-c85e-4683-a401-ca87af088e5e",
     "image": "https://www.oregonlegislature.gov/Jama/PublishingImages/member_photo.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/jama",
      "https://www.oregonlegislature.gov/Jama"
@@ -103177,6 +103346,8 @@
     "email": "sen.mikemclane@oregonlegislature.gov",
     "id": "ocd-person/f0091fb4-4207-4663-be23-7c9e77994048",
     "image": "http://www.oregonlegislature.gov/house/MemberPhotos/mclane.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.oregonlegislature.gov/mclane"
     ],
@@ -111756,6 +111927,9 @@
     "districtId": "109",
     "email": "tiffanyspannwilder@schouse.gov",
     "id": "ocd-person/e7352f8b-8faf-42e3-8216-b480056968c0",
+    "image": "https://www.scstatehouse.gov/images/members/1742897519.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.scstatehouse.gov/member.php?code=1742897519"
     ],
@@ -112232,6 +112406,9 @@
     "districtId": "021",
     "email": "diannemitchell@schouse.gov",
     "id": "ocd-person/65b53c25-26eb-4478-9ddc-b46e29c20543",
+    "image": "https://www.scstatehouse.gov/images/members/1344175976.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.scstatehouse.gov/member.php?code=1344175976"
     ],
@@ -112795,6 +112972,9 @@
     "district": "50",
     "districtId": "050",
     "id": "ocd-person/d38909c5-fdcb-4230-8380-498f6f8cc510",
+    "image": "https://www.scstatehouse.gov/images/members/1645738439.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.scstatehouse.gov/member.php?code=1645738439"
     ],
@@ -113522,6 +113702,9 @@
     "districtId": "088",
     "email": "johnlastinger@schouse.gov",
     "id": "ocd-person/708261ba-00bd-4cef-bd7e-bd80de59b101",
+    "image": "https://www.scstatehouse.gov/images/members/1066761236.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.scstatehouse.gov/member.php?code=1066761236"
     ],
@@ -113926,6 +114109,9 @@
     "districtId": "019",
     "email": "tameikaisaacdevine@scsenate.gov",
     "id": "ocd-person/51410bac-c642-4cd8-9935-dd87b16a6972",
+    "image": "https://www.scstatehouse.gov/images/members/0477840852.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://www.scstatehouse.gov/member.php?code=0477840852"
     ],
@@ -123149,6 +123335,9 @@
     "districtPhone": "801-518-3407",
     "email": "jarthur@le.utah.gov",
     "id": "ocd-person/b5f1d356-e619-413b-8b9a-fec2d3d48362",
+    "image": "https://le.utah.gov/images/legislator/ARTHUJ.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://house.utleg.gov/rep/ARTHUJ/"
     ],
@@ -123393,6 +123582,9 @@
     "districtId": "051",
     "email": "lhansen@le.utah.gov",
     "id": "ocd-person/72df7728-0455-4b7b-9432-745f4365d99e",
+    "image": "https://le.utah.gov/images/legislator/LHANSEN.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://house.utleg.gov/rep/LHANSEN/"
     ],
@@ -123472,6 +123664,9 @@
     "districtPhone": "801-520-6773",
     "email": "kchevrier@le.utah.gov",
     "id": "ocd-person/d428d2ed-8644-459a-b374-7535561a1482",
+    "image": "https://le.utah.gov/images/legislator/CHEVRK.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://house.utleg.gov/rep/CHEVRK/"
     ],
@@ -124114,6 +124309,9 @@
     "districtPhone": "801-598-4734",
     "email": "ebuss@le.utah.gov",
     "id": "ocd-person/f5149921-03c9-4420-bb21-9b54c19e0c65",
+    "image": "https://le.utah.gov/images/legislator/BUSSEM.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://senate.utah.gov/sen/BUSSEM/"
     ],
@@ -127709,7 +127907,8 @@
      "https://lis.virginia.gov/cgi-bin/legp604.exe?191+mbr+S82",
      "https://lis.virginia.gov/cgi-bin/legp604.exe?201+mbr+S82",
      "https://lis.virginia.gov/cgi-bin/legp604.exe?221+mbr+S82",
-     "https://lis.virginia.gov/cgi-bin/legp604.exe?241+mbr+S82"
+     "https://lis.virginia.gov/cgi-bin/legp604.exe?241+mbr+S82",
+     "https://senatorbillstanley.com/"
     ],
     "name": "Bill Stanley",
     "party": "Republican",
@@ -127913,6 +128112,9 @@
     "districtId": "A-R",
     "email": "jcasey@leg.state.vt.us",
     "id": "ocd-person/6fd23933-f800-459e-a608-bf8690dbf5f9",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Casey,James.png",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://legislature.vermont.gov/people/single/2026/40398"
     ],
@@ -134821,6 +135023,9 @@
     "districtId": "044",
     "email": "rep.roe@legis.wisconsin.gov",
     "id": "ocd-person/92eb51fb-7865-4b2f-8ea1-c56b5f287b5c",
+    "image": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2889.jpg",
+    "imageChecked": "2026-10-22",
+    "imageStatus": "ok",
     "links": [
      "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2889"
     ],

@@ -57,10 +57,10 @@
   {
    "candidate_id": "H0AR03055",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "2397116.29",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2410732.19",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1620935.59,
+   "disbursements": 1668235.49,
    "district_number": 3,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -69,7 +69,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 2302158.22,
+   "receipts": 2363074.02,
    "state": "AR"
   },
   {
@@ -78,7 +78,7 @@
    "cash_on_hand_end_period": "318971.94",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 536768.64,
+   "disbursements": 541768.64,
    "district_number": 9,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -87,7 +87,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 764143.6,
+   "receipts": 769143.6,
    "state": "AZ"
   },
   {
@@ -957,7 +957,7 @@
   {
    "candidate_id": "H0IL15129",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "938364.91",
+   "cash_on_hand_end_period": "940054.71",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
    "disbursements": 1483988.15,
@@ -969,7 +969,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1776096.72,
+   "receipts": 1777786.52,
    "state": "IL"
   },
   {
@@ -1029,10 +1029,10 @@
   {
    "candidate_id": "H0IN05326",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "854343.42",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "514921.94",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1482331.6,
+   "disbursements": 1935845.4,
    "district_number": 5,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -1041,7 +1041,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 2078624.84,
+   "receipts": 2192717.16,
    "state": "IN"
   },
   {
@@ -2920,7 +2920,7 @@
    "candidate_id": "H2CA18171",
    "candidate_status": "C",
    "cash_on_hand_end_period": "8494.44",
-   "coverage_end_date": "2026-06-30",
+   "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
    "disbursements": 15792.59,
    "district_number": 18,
@@ -3981,10 +3981,10 @@
   {
    "candidate_id": "H2GA12121",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1444061.62",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1464864.66",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 937935.84,
+   "disbursements": 975580.08,
    "district_number": 12,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -3993,7 +3993,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1207040.8,
+   "receipts": 1265488.08,
    "state": "GA"
   },
   {
@@ -4053,10 +4053,10 @@
   {
    "candidate_id": "H2HI02128",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "526103.93",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "449674.45",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1105587.61,
+   "disbursements": 1205991.98,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -4065,7 +4065,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 1315033.46,
+   "receipts": 1339008.35,
    "state": "HI"
   },
   {
@@ -4647,10 +4647,10 @@
   {
    "candidate_id": "H2MA09072",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "485043.17",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "493968.79",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1631512.42,
+   "disbursements": 1647457.8,
    "district_number": 8,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -4659,7 +4659,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 1027831.73,
+   "receipts": 1052702.73,
    "state": "MA"
   },
   {
@@ -4827,10 +4827,10 @@
   {
    "candidate_id": "H2MI12198",
    "candidate_status": "N",
-   "cash_on_hand_end_period": "7273.25",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "7769.12",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 3193.65,
+   "disbursements": 3249.83,
    "district_number": 12,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -4839,7 +4839,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1450.0,
+   "receipts": 2002.05,
    "state": "MI"
   },
   {
@@ -5691,10 +5691,10 @@
   {
    "candidate_id": "H2NY06116",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "769158.07",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "765124.94",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 2370761.9,
+   "disbursements": 2402835.03,
    "district_number": 6,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -5703,7 +5703,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 2171034.16,
+   "receipts": 2199074.16,
    "state": "NY"
   },
   {
@@ -5889,10 +5889,10 @@
   {
    "candidate_id": "H2OH03125",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "2753415.35",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2731736.69",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1406739.53,
+   "disbursements": 1434993.08,
    "district_number": 3,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -5901,7 +5901,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 1447581.38,
+   "receipts": 1454156.27,
    "state": "OH"
   },
   {
@@ -5926,7 +5926,7 @@
    "candidate_id": "H2OH05070",
    "candidate_status": "C",
    "cash_on_hand_end_period": "130.11",
-   "coverage_end_date": "2026-06-30",
+   "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2026-04-01",
    "disbursements": 10769.89,
    "district_number": 5,
@@ -7168,7 +7168,7 @@
    "candidate_id": "H2VI00082",
    "candidate_status": "C",
    "cash_on_hand_end_period": "10708.68",
-   "coverage_end_date": "2026-09-30",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
    "disbursements": 713207.9,
    "district_number": 0,
@@ -7635,10 +7635,10 @@
   {
    "candidate_id": "H4AZ01194",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "491965.62",
+   "cash_on_hand_end_period": "510965.62",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 4638441.09,
+   "disbursements": 4612441.09,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -7647,7 +7647,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 5038604.81,
+   "receipts": 5031604.81,
    "state": "AZ"
   },
   {
@@ -8752,7 +8752,7 @@
    "candidate_id": "H4CO05071",
    "candidate_status": "N",
    "cash_on_hand_end_period": "201.27",
-   "coverage_end_date": "2026-09-30",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
    "disbursements": 8.73,
    "district_number": 5,
@@ -10371,7 +10371,7 @@
   {
    "candidate_id": "H4LA06211",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "239444.18",
+   "cash_on_hand_end_period": "440253.87",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
    "disbursements": 484259.06,
@@ -11343,10 +11343,10 @@
   {
    "candidate_id": "H4MS02068",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1358478.76",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1282156.34",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1195730.5,
+   "disbursements": 1272252.92,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -11355,7 +11355,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 928045.03,
+   "receipts": 928245.03,
    "state": "MS"
   },
   {
@@ -11505,10 +11505,10 @@
   {
    "candidate_id": "H4NC08066",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "534516.64",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "411263.59",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 739688.75,
+   "disbursements": 934993.46,
    "district_number": 8,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -11517,7 +11517,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1166672.67,
+   "receipts": 1238724.33,
    "state": "NC"
   },
   {
@@ -11560,9 +11560,9 @@
    "candidate_id": "H4NC10146",
    "candidate_status": "C",
    "cash_on_hand_end_period": "1294.84",
-   "coverage_end_date": "2026-09-30",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 58708.35,
+   "disbursements": 64593.35,
    "district_number": 10,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -11571,7 +11571,7 @@
    "office": "H",
    "party": "LIB",
    "party_full": "LIBERTARIAN PARTY",
-   "receipts": 42741.55,
+   "receipts": 48626.55,
    "state": "NC"
   },
   {
@@ -11595,10 +11595,10 @@
   {
    "candidate_id": "H4NC12100",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "493958.26",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "483996.68",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 544626.04,
+   "disbursements": 572787.62,
    "district_number": 12,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -11607,7 +11607,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 465174.93,
+   "receipts": 483374.93,
    "state": "NC"
   },
   {
@@ -11919,10 +11919,10 @@
   {
    "candidate_id": "H4NJ10135",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "4758.19",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2292.59",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 3898.14,
+   "disbursements": 6638.74,
    "district_number": 10,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -11931,7 +11931,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 8656.33,
+   "receipts": 8931.33,
    "state": "NJ"
   },
   {
@@ -12711,10 +12711,10 @@
   {
    "candidate_id": "H4OK06056",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "575352.68",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "570473.65",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1082852.51,
+   "disbursements": 1102896.54,
    "district_number": 3,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -12723,7 +12723,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1039919.93,
+   "receipts": 1055084.93,
    "state": "OK"
   },
   {
@@ -12945,10 +12945,10 @@
   {
    "candidate_id": "H4PA13298",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "26628.87",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "25091.68",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 75324.74,
+   "disbursements": 83377.82,
    "district_number": 13,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -12957,7 +12957,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 101192.38,
+   "receipts": 107708.27,
    "state": "PA"
   },
   {
@@ -13755,10 +13755,10 @@
   {
    "candidate_id": "H4UT02296",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "314385.40",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "359561.43",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 1382538.27,
+   "disbursements": 1400154.51,
    "district_number": 3,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -13767,7 +13767,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1589902.24,
+   "receipts": 1652694.51,
    "state": "UT"
   },
   {
@@ -14151,10 +14151,10 @@
   {
    "candidate_id": "H4WA08147",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "5043.77",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "4876.80",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-04-01",
-   "disbursements": 10525.0,
+   "disbursements": 70425.49,
    "district_number": 7,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -14163,7 +14163,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 11810.81,
+   "receipts": 71544.33,
    "state": "WA"
   },
   {
@@ -15717,10 +15717,10 @@
   {
    "candidate_id": "H6AZ02221",
    "candidate_status": "N",
-   "cash_on_hand_end_period": "2316.09",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2335.16",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-04-01",
-   "disbursements": 1901.54,
+   "disbursements": 1918.47,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -15729,7 +15729,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 4217.63,
+   "receipts": 4253.63,
    "state": "AZ"
   },
   {
@@ -18163,6 +18163,24 @@
    "state": "CA"
   },
   {
+   "candidate_id": "H6CA13215",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 13,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-21",
+   "name": "SOLOMON, GAVIN",
+   "office": "H",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "CA"
+  },
+  {
    "candidate_id": "H6CA14064",
    "candidate_status": "N",
    "cash_on_hand_end_period": "0.00",
@@ -19606,7 +19624,7 @@
    "candidate_id": "H6CA30201",
    "candidate_status": "C",
    "cash_on_hand_end_period": "0.00",
-   "coverage_end_date": "2026-09-30",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
    "disbursements": 8632.41,
    "district_number": 30,
@@ -19930,7 +19948,7 @@
    "candidate_id": "H6CA33114",
    "candidate_status": "N",
    "cash_on_hand_end_period": "520.51",
-   "coverage_end_date": "2026-09-30",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-07-01",
    "disbursements": 200.0,
    "district_number": 33,
@@ -23816,7 +23834,7 @@
   },
   {
    "candidate_id": "H6FL01143",
-   "candidate_status": "N",
+   "candidate_status": "C",
    "cash_on_hand_end_period": "736.64",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
@@ -24517,6 +24535,24 @@
    "state": "FL"
   },
   {
+   "candidate_id": "H6FL02414",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 2,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-20",
+   "name": "SOLOMON, GAVIN",
+   "office": "H",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "FL"
+  },
+  {
    "candidate_id": "H6FL03099",
    "candidate_status": "C",
    "cash_on_hand_end_period": "45810.63",
@@ -25203,10 +25239,10 @@
   {
    "candidate_id": "H6FL06365",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "3623.77",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1699.42",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-08-05",
-   "disbursements": 60787.79,
+   "disbursements": 65269.61,
    "district_number": 16,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -25215,7 +25251,7 @@
    "office": "H",
    "party": "NPA",
    "party_full": "NO PARTY AFFILIATION",
-   "receipts": 64411.56,
+   "receipts": 66969.03,
    "state": "FL"
   },
   {
@@ -26733,10 +26769,10 @@
   {
    "candidate_id": "H6FL16158",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "352780.25",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "261139.07",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-04-01",
-   "disbursements": 398837.0,
+   "disbursements": 615224.22,
    "district_number": 16,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -26745,7 +26781,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 751617.25,
+   "receipts": 876363.29,
    "state": "FL"
   },
   {
@@ -26841,10 +26877,10 @@
   {
    "candidate_id": "H6FL18204",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "-796.31",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "-1516.29",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-06-10",
-   "disbursements": 28725.11,
+   "disbursements": 31220.09,
    "district_number": 18,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -26853,7 +26889,7 @@
    "office": "H",
    "party": "NPA",
    "party_full": "NO PARTY AFFILIATION",
-   "receipts": 27928.8,
+   "receipts": 29703.8,
    "state": "FL"
   },
   {
@@ -28191,10 +28227,10 @@
   {
    "candidate_id": "H6FL26058",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "132008.76",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "109989.78",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 428587.81,
+   "disbursements": 489536.92,
    "district_number": 26,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -28203,7 +28239,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 560596.57,
+   "receipts": 599526.7,
    "state": "FL"
   },
   {
@@ -29955,7 +29991,7 @@
   {
    "candidate_id": "H6GA13104",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "759.91",
+   "cash_on_hand_end_period": "1939.91",
    "coverage_end_date": "2026-06-30",
    "coverage_start_date": "2025-07-01",
    "disbursements": 906482.64,
@@ -29967,7 +30003,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 908342.55,
+   "receipts": 908422.55,
    "state": "GA"
   },
   {
@@ -30963,10 +30999,10 @@
   {
    "candidate_id": "H6IA02260",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "13112.27",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "11317.89",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-10-01",
-   "disbursements": 24811.82,
+   "disbursements": 26910.09,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -30975,7 +31011,7 @@
    "office": "H",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 37988.12,
+   "receipts": 38292.01,
    "state": "IA"
   },
   {
@@ -31161,10 +31197,10 @@
   {
    "candidate_id": "H6IA04217",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "68996.16",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "41976.25",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 176251.55,
+   "disbursements": 217264.44,
    "district_number": 4,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -31173,7 +31209,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 245247.71,
+   "receipts": 259240.69,
    "state": "IA"
   },
   {
@@ -33067,6 +33103,24 @@
    "state": "IL"
   },
   {
+   "candidate_id": "H6IL09400",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 9,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-20",
+   "name": "SOLOMON, GAVIN",
+   "office": "H",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "IL"
+  },
+  {
    "candidate_id": "H6IL10168",
    "candidate_status": "C",
    "cash_on_hand_end_period": "198.96",
@@ -33099,6 +33153,24 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
+   "receipts": 0.0,
+   "state": "IL"
+  },
+  {
+   "candidate_id": "H6IL10184",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 10,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-20",
+   "name": "SOLOMON, GAVIN",
+   "office": "H",
+   "party": "W",
+   "party_full": "WRITE-IN",
    "receipts": 0.0,
    "state": "IL"
   },
@@ -34113,10 +34185,10 @@
   {
    "candidate_id": "H6IN06230",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "29591.91",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "26537.98",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 55866.67,
+   "disbursements": 65028.04,
    "district_number": 6,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -34125,7 +34197,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 85967.67,
+   "receipts": 91566.02,
    "state": "IN"
   },
   {
@@ -36165,10 +36237,10 @@
   {
    "candidate_id": "H6LA05325",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "33286.07",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "31050.56",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-07-01",
-   "disbursements": 22057.75,
+   "disbursements": 39996.59,
    "district_number": 5,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -36177,16 +36249,16 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 55343.82,
+   "receipts": 71047.15,
    "state": "LA"
   },
   {
    "candidate_id": "H6LA05333",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "33286.07",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "31050.56",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-07-01",
-   "disbursements": 22057.75,
+   "disbursements": 39996.59,
    "district_number": 5,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -36195,7 +36267,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 55343.82,
+   "receipts": 71047.15,
    "state": "LA"
   },
   {
@@ -36903,10 +36975,10 @@
   {
    "candidate_id": "H6MA09214",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "239.67",
+   "cash_on_hand_end_period": "293.45",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 44292.98,
+   "disbursements": 44295.2,
    "district_number": 9,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -36915,7 +36987,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 44532.65,
+   "receipts": 44588.65,
    "state": "MA"
   },
   {
@@ -37095,6 +37167,24 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
+   "receipts": 0.0,
+   "state": "MD"
+  },
+  {
+   "candidate_id": "H6MD02328",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 2,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-21",
+   "name": "NGULA, EMMANUEL",
+   "office": "H",
+   "party": "DEM",
+   "party_full": "DEMOCRATIC PARTY",
    "receipts": 0.0,
    "state": "MD"
   },
@@ -38433,10 +38523,10 @@
   {
    "candidate_id": "H6MI03198",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "115133.19",
+   "cash_on_hand_end_period": "118489.63",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 742277.02,
+   "disbursements": 738920.58,
    "district_number": 3,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -40287,10 +40377,10 @@
   {
    "candidate_id": "H6MN07338",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1028.04",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "984.36",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-10-01",
-   "disbursements": 61481.76,
+   "disbursements": 61525.44,
    "district_number": 7,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -40395,10 +40485,10 @@
   {
    "candidate_id": "H6MN08161",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "414.92",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "399.93",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 27466.29,
+   "disbursements": 27481.28,
    "district_number": 8,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -41349,10 +41439,10 @@
   {
    "candidate_id": "H6MP01027",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "6834.84",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "9254.84",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 21141.27,
+   "disbursements": 22321.27,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -41361,7 +41451,7 @@
    "office": "H",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 27876.11,
+   "receipts": 31476.11,
    "state": "MP"
   },
   {
@@ -41547,7 +41637,7 @@
   {
    "candidate_id": "H6MS03228",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "31066.74",
+   "cash_on_hand_end_period": "31091.74",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-07-01",
    "disbursements": 177116.34,
@@ -41559,7 +41649,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 208183.28,
+   "receipts": 208208.28,
    "state": "MS"
   },
   {
@@ -41835,10 +41925,10 @@
   {
    "candidate_id": "H6MT02150",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "2129.37",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "668.84",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 27089.45,
+   "disbursements": 28854.45,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -41847,7 +41937,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 30654.02,
+   "receipts": 30958.49,
    "state": "MT"
   },
   {
@@ -42537,10 +42627,10 @@
   {
    "candidate_id": "H6NC09200",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "534516.64",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "411263.59",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 739688.75,
+   "disbursements": 934993.46,
    "district_number": 8,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -42549,7 +42639,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1166672.67,
+   "receipts": 1238724.33,
    "state": "NC"
   },
   {
@@ -42967,6 +43057,24 @@
    "state": "NC"
   },
   {
+   "candidate_id": "H6NC11339",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 11,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-21",
+   "name": "SOLOMON, GAVIN",
+   "office": "H",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "NC"
+  },
+  {
    "candidate_id": "H6NC12097",
    "candidate_status": "N",
    "cash_on_hand_end_period": "0.00",
@@ -43017,7 +43125,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 28703.76,
+   "receipts": 31703.76,
    "state": "NC"
   },
   {
@@ -43113,10 +43221,10 @@
   {
    "candidate_id": "H6NC13244",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "33521.30",
-   "coverage_end_date": "2026-03-31",
+   "cash_on_hand_end_period": "29240.11",
+   "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 16495.6,
+   "disbursements": 28013.79,
    "district_number": 13,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -43125,7 +43233,7 @@
    "office": "H",
    "party": "GRE",
    "party_full": "GREEN PARTY",
-   "receipts": 50016.9,
+   "receipts": 57253.9,
    "state": "NC"
   },
   {
@@ -43905,10 +44013,10 @@
   {
    "candidate_id": "H6NH02287",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "9595.90",
-   "coverage_end_date": "2026-08-19",
+   "cash_on_hand_end_period": "95.03",
+   "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 169816.32,
+   "disbursements": 179473.35,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -45651,10 +45759,10 @@
   {
    "candidate_id": "H6NV01315",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "332.70",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "350.07",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-04-01",
-   "disbursements": 86918.58,
+   "disbursements": 86993.88,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -45663,7 +45771,7 @@
    "office": "H",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 87251.28,
+   "receipts": 87343.95,
    "state": "NV"
   },
   {
@@ -46587,10 +46695,10 @@
   {
    "candidate_id": "H6NY01217",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "2972.41",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2631.22",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-04-01",
-   "disbursements": 2481.75,
+   "disbursements": 2838.92,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -46599,16 +46707,16 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 5454.16,
+   "receipts": 5470.14,
    "state": "NY"
   },
   {
    "candidate_id": "H6NY01225",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "2972.41",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2631.22",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-04-01",
-   "disbursements": 2481.75,
+   "disbursements": 2838.92,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -46617,7 +46725,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 5454.16,
+   "receipts": 5470.14,
    "state": "NY"
   },
   {
@@ -47685,10 +47793,10 @@
   {
    "candidate_id": "H6NY12172",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "278092.45",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "309209.29",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 3162669.13,
+   "disbursements": 3184764.31,
    "district_number": 12,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -47697,7 +47805,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 3440761.58,
+   "receipts": 3493973.6,
    "state": "NY"
   },
   {
@@ -51179,7 +51287,7 @@
    "candidate_status": "C",
    "cash_on_hand_end_period": "5412.46",
    "coverage_end_date": "2026-10-14",
-   "coverage_start_date": "2026-04-01",
+   "coverage_start_date": "2026-03-10",
    "disbursements": 11616.21,
    "district_number": 1,
    "has_raised_funds": true,
@@ -53535,10 +53643,10 @@
   {
    "candidate_id": "H6SC01342",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "5885.50",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "3660.08",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 109506.55,
+   "disbursements": 111831.97,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -53547,7 +53655,7 @@
    "office": "H",
    "party": "LIB",
    "party_full": "LIBERTARIAN PARTY",
-   "receipts": 115392.05,
+   "receipts": 115492.05,
    "state": "SC"
   },
   {
@@ -53787,10 +53895,10 @@
   {
    "candidate_id": "H6SC04171",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "30989.13",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "50464.65",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-10-01",
-   "disbursements": 68857.26,
+   "disbursements": 79614.91,
    "district_number": 4,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -53799,7 +53907,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 100496.39,
+   "receipts": 130729.56,
    "state": "SC"
   },
   {
@@ -55875,10 +55983,10 @@
   {
    "candidate_id": "H6TX02079",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "911338.20",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "928299.88",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 899438.54,
+   "disbursements": 918916.66,
    "district_number": 36,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -55887,7 +55995,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1164574.09,
+   "receipts": 1201013.89,
    "state": "TX"
   },
   {
@@ -57207,10 +57315,10 @@
   {
    "candidate_id": "H6TX14181",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "5102.17",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "4754.11",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-11-10",
-   "disbursements": 35516.36,
+   "disbursements": 38564.42,
    "district_number": 14,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -57219,7 +57327,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 36703.19,
+   "receipts": 39403.19,
    "state": "TX"
   },
   {
@@ -59745,10 +59853,10 @@
   {
    "candidate_id": "H6TX32217",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "27871.52",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "8745.17",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-10-01",
-   "disbursements": 122598.43,
+   "disbursements": 151633.9,
    "district_number": 32,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -59757,7 +59865,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 150469.95,
+   "receipts": 160379.07,
    "state": "TX"
   },
   {
@@ -60609,10 +60717,10 @@
   {
    "candidate_id": "H6UT01160",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "48753.03",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "47879.29",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-08-01",
-   "disbursements": 84385.17,
+   "disbursements": 100795.47,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -60621,7 +60729,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 138381.77,
+   "receipts": 153918.33,
    "state": "UT"
   },
   {
@@ -61887,10 +61995,10 @@
   {
    "candidate_id": "H6VA04129",
    "candidate_status": "N",
-   "cash_on_hand_end_period": "1200.86",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1508.86",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-07-01",
-   "disbursements": 27.23,
+   "disbursements": 41.01,
    "district_number": 4,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -61899,7 +62007,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1228.09,
+   "receipts": 1549.87,
    "state": "VA"
   },
   {
@@ -64101,10 +64209,10 @@
   {
    "candidate_id": "H6WA07458",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1767955.73",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1753240.92",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 3096286.36,
+   "disbursements": 3180450.73,
    "district_number": 7,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -64113,7 +64221,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 2851517.32,
+   "receipts": 2920966.88,
    "state": "WA"
   },
   {
@@ -66045,10 +66153,10 @@
   {
    "candidate_id": "H8FL06148",
    "candidate_status": "N",
-   "cash_on_hand_end_period": "628329.93",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "627594.86",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 926781.19,
+   "disbursements": 927516.26,
    "district_number": 6,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -66477,10 +66585,10 @@
   {
    "candidate_id": "H8KY02031",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1675403.47",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1447295.54",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 4588069.13,
+   "disbursements": 4905596.15,
    "district_number": 2,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -66489,7 +66597,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 5897228.16,
+   "receipts": 5986647.25,
    "state": "KY"
   },
   {
@@ -68367,10 +68475,10 @@
   {
    "candidate_id": "S2TX00106",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "495970.00",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "496092.37",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2021-01-01",
-   "disbursements": 14402738.93,
+   "disbursements": 14403258.01,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
@@ -68379,7 +68487,7 @@
    "office": "S",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 14265248.24,
+   "receipts": 14265889.69,
    "state": "TX"
   },
   {
@@ -68871,10 +68979,10 @@
   {
    "candidate_id": "S4OR00156",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "152.84",
+   "cash_on_hand_end_period": "179.59",
    "coverage_end_date": "2026-06-30",
    "coverage_start_date": "2023-01-01",
-   "disbursements": 14264.59,
+   "disbursements": 14237.84,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -69105,10 +69213,10 @@
   {
    "candidate_id": "S4WV00357",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "85.45",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "7.89",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 511873.37,
+   "disbursements": 511960.93,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -69117,7 +69225,7 @@
    "office": "S",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 511958.82,
+   "receipts": 511968.82,
    "state": "WV"
   },
   {
@@ -69573,10 +69681,10 @@
   {
    "candidate_id": "S6AL00518",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "11259.58",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "10707.89",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 105627.27,
+   "disbursements": 117862.27,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -69585,7 +69693,7 @@
    "office": "S",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 116886.85,
+   "receipts": 128570.16,
    "state": "AL"
   },
   {
@@ -69977,6 +70085,24 @@
    "has_raised_funds": false,
    "incumbent_challenge": null,
    "last_f2_date": "2026-10-20",
+   "name": "SOLOMON, GAVIN",
+   "office": "S",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "CA"
+  },
+  {
+   "candidate_id": "S6CA01186",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 0,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-21",
    "name": "SOLOMON, GAVIN",
    "office": "S",
    "party": "W",
@@ -70449,6 +70575,24 @@
    "office": "S",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
+   "receipts": 0.0,
+   "state": "DC"
+  },
+  {
+   "candidate_id": "S6DC00089",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 0,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-20",
+   "name": "SOLOMON, GAVIN",
+   "office": "S",
+   "party": "W",
+   "party_full": "WRITE-IN",
    "receipts": 0.0,
    "state": "DC"
   },
@@ -71463,10 +71607,10 @@
   {
    "candidate_id": "S6GA00390",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1159314.47",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1149075.46",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 9693572.36,
+   "disbursements": 9711339.18,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -71475,7 +71619,7 @@
    "office": "S",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 10249716.29,
+   "receipts": 10257244.1,
    "state": "GA"
   },
   {
@@ -71625,10 +71769,10 @@
   {
    "candidate_id": "S6IA00181",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "9560.62",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "9035.08",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2024-01-01",
-   "disbursements": 73401.57,
+   "disbursements": 74632.11,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -71637,7 +71781,7 @@
    "office": "S",
    "party": "LIB",
    "party_full": "LIBERTARIAN PARTY",
-   "receipts": 82962.19,
+   "receipts": 83667.19,
    "state": "IA"
   },
   {
@@ -71859,10 +72003,10 @@
   {
    "candidate_id": "S6ID00146",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "369109.62",
+   "cash_on_hand_end_period": "395407.40",
    "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 1271518.58,
+   "disbursements": 1333768.68,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -71871,7 +72015,7 @@
    "office": "S",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 1632335.28,
+   "receipts": 1720883.16,
    "state": "ID"
   },
   {
@@ -72523,6 +72667,24 @@
    "state": "IL"
   },
   {
+   "candidate_id": "S6IL00763",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 0,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-20",
+   "name": "SOLOMON, GAVIN",
+   "office": "S",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "IL"
+  },
+  {
    "candidate_id": "S6IN00233",
    "candidate_status": "N",
    "cash_on_hand_end_period": "0.00",
@@ -73108,7 +73270,7 @@
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
-   "last_f2_date": "2025-12-03",
+   "last_f2_date": "2026-10-21",
    "name": "BOOKER, CHARLES",
    "office": "S",
    "party": "DEM",
@@ -75045,10 +75207,10 @@
   {
    "candidate_id": "S6MT00261",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "7896.03",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2684.12",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 254479.28,
+   "disbursements": 259691.19,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -75567,10 +75729,10 @@
   {
    "candidate_id": "S6NC00563",
    "candidate_status": "N",
-   "cash_on_hand_end_period": "3726.63",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "2996.04",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 26038.01,
+   "disbursements": 26976.16,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -75579,7 +75741,7 @@
    "office": "S",
    "party": "GRE",
    "party_full": "GREEN PARTY",
-   "receipts": 28023.28,
+   "receipts": 28230.84,
    "state": "NC"
   },
   {
@@ -75615,6 +75777,24 @@
    "office": "S",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
+   "receipts": 0.0,
+   "state": "NC"
+  },
+  {
+   "candidate_id": "S6NC00605",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 0,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-21",
+   "name": "SOLOMON, GAVIN",
+   "office": "S",
+   "party": "W",
+   "party_full": "WRITE-IN",
    "receipts": 0.0,
    "state": "NC"
   },
@@ -75784,8 +75964,8 @@
    "candidate_id": "S6NE00210",
    "candidate_status": "N",
    "cash_on_hand_end_period": "0.00",
-   "coverage_end_date": null,
-   "coverage_start_date": null,
+   "coverage_end_date": "2026-09-30",
+   "coverage_start_date": "2026-07-01",
    "disbursements": 0.0,
    "district_number": 0,
    "has_raised_funds": false,
@@ -76899,10 +77079,10 @@
   {
    "candidate_id": "S6OK04163",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "27221.37",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "24101.59",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 80709.93,
+   "disbursements": 92788.73,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -76911,7 +77091,7 @@
    "office": "S",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 106994.96,
+   "receipts": 115953.98,
    "state": "OK"
   },
   {
@@ -78970,7 +79150,7 @@
    "candidate_id": "S6VA00143",
    "candidate_status": "C",
    "cash_on_hand_end_period": "0.00",
-   "coverage_end_date": "2026-09-30",
+   "coverage_end_date": "2026-10-16",
    "coverage_start_date": "2024-11-01",
    "disbursements": 155692.92,
    "district_number": 0,
@@ -79311,10 +79491,10 @@
   {
    "candidate_id": "S6WV00204",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "740.52",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1250.19",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-04-01",
-   "disbursements": 57924.64,
+   "disbursements": 64037.02,
    "district_number": null,
    "has_raised_funds": true,
    "incumbent_challenge": null,
@@ -79323,7 +79503,7 @@
    "office": "S",
    "party": "CON",
    "party_full": "CONSTITUTION PARTY",
-   "receipts": 58665.16,
+   "receipts": 65287.21,
    "state": "WV"
   },
   {
@@ -79705,6 +79885,6 @@
    "state": "WY"
   }
  ],
- "count": 4428,
+ "count": 4438,
  "cycle": 2026
 }
