@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-22T13:41:04+00:00",
+ "fetched": "2026-10-23T13:20:26+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -18500,7 +18500,6 @@
     "chamber": "lower",
     "district": "13",
     "districtId": "013",
-    "districtPhone": "904-667-0340",
     "email": "angela.nixon@flhouse.gov",
     "id": "ocd-person/66c3a112-3008-4332-a6b0-8990a7d992d5",
     "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/4766.jpg",
@@ -18681,7 +18680,6 @@
     "chamber": "lower",
     "district": "21",
     "districtId": "021",
-    "districtPhone": "352-663-1140",
     "email": "yvonne.hinson@flhouse.gov",
     "id": "ocd-person/0f5d2710-6b7c-4444-8a45-ea3e917805ba",
     "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/4768.jpg",
@@ -19555,7 +19553,6 @@
     "chamber": "lower",
     "district": "62",
     "districtId": "062",
-    "districtPhone": "727-629-6820",
     "email": "michele.rayner@flhouse.gov",
     "id": "ocd-person/9b6f17f5-ec19-4302-8a45-2b40175bb39b",
     "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/4781.jpg",
@@ -19597,7 +19594,6 @@
     "chamber": "lower",
     "district": "64",
     "districtId": "064",
-    "districtPhone": "813-726-1070",
     "email": "susan.valdes@flhouse.gov",
     "id": "ocd-person/811dfa67-2615-4d45-9cf9-bd1a587a34fe",
     "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/4752.jpg",
@@ -20006,7 +20002,7 @@
     "chamber": "lower",
     "district": "83",
     "districtId": "083",
-    "districtPhone": "863-462-5019",
+    "districtPhone": "863-304-9508",
     "email": "kaylee.tuck@flhouse.gov",
     "id": "ocd-person/43356d29-3396-423e-9286-f7bd1e52ebde",
     "image": "https://www.flhouse.gov/FileStores/Web/Imaging/Member/4776.jpg",
@@ -39673,9 +39669,9 @@
     "districtId": "121",
     "email": "mike.storm@house.ks.gov",
     "id": "ocd-person/daab06b2-f8a1-4ef4-96b4-3826ab4a3905",
-    "image": "https://www.kslegislature.gov/static/li_pics/rep_storm_mike_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "image": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Mike_Storm.jpeg",
+    "imageChecked": "2026-10-23",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_storm_mike_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_storm_mike_1/"
@@ -96738,7 +96734,7 @@
      "https://www.nysenate.gov/senators/pamela-helming/contact"
     ],
     "name": "Pam Helming",
-    "party": "Republican/Conservative/Independence",
+    "party": "Republican/Conservative",
     "partyKey": "R",
     "social": {
      "twitter": "SenatorHelming"
