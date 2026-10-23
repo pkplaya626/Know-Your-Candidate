@@ -22,10 +22,10 @@
    "office": "https://www.alabamaag.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://www.alabamaag.gov/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
+   "photo": "https://live-al-ago.pantheonsite.io/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
    "photoPage": "https://www.alabamaag.gov/",
    "photoWeight": {
-    "bytes": 8784,
+    "bytes": 10190,
     "height": 300,
     "width": 283
    },
@@ -290,11 +290,12 @@
    "title": "Attorney General"
   },
   "NC": {
-   "disputed": [
-    "Dan Bishop (R)",
-    "Jeff Jackson (D)"
-   ],
-   "office": "https://ncdoj.gov/"
+   "listedBy": "Democratic Attorneys General Association",
+   "name": "Jeff Jackson",
+   "office": "https://ncdoj.gov/",
+   "party": "D",
+   "partyKey": "D",
+   "title": "Attorney General"
   },
   "ND": {
    "listedBy": "Republican Attorneys General Association",
@@ -542,7 +543,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-22T13:35:46+00:00",
+ "fetched": "2026-10-23T13:12:49+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",

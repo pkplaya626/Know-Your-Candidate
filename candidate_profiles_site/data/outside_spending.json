@@ -1,5 +1,5 @@
 {
- "asked": 2619,
+ "asked": 2620,
  "candidates": {
   "H0AL01055": {
    "oppose": [],
@@ -107,6 +107,12 @@
      "committeeId": "C00815753",
      "count": 4,
      "total": 104048.34
+    },
+    {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 4,
+     "total": 90200.0
     },
     {
      "committee": "ALAMEDA COUNTY DEMOCRATIC CENTRAL COMMITTEE",
@@ -1060,6 +1066,12 @@
      "committeeId": "C00948653",
      "count": 1,
      "total": 125000.0
+    },
+    {
+     "committee": "907 INITIATIVE INC.",
+     "committeeId": "C90023581",
+     "count": 4,
+     "total": 47812.58
     }
    ],
    "support": [
@@ -1728,6 +1740,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 6,
+     "total": 285125.91
+    },
+    {
      "committee": "WELCOMEPAC",
      "committeeId": "C00786830",
      "count": 3,
@@ -2272,8 +2290,8 @@
     {
      "committee": "JOBS AND DEMOCRACY PAC",
      "committeeId": "C00928374",
-     "count": 5,
-     "total": 1612658.36
+     "count": 6,
+     "total": 1621658.36
     },
     {
      "committee": "ARTICLE ONE PAC",
@@ -2618,7 +2636,14 @@
      "total": 341.19
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 4,
+     "total": 134013.14
+    }
+   ]
   },
   "H2OH01194": {
    "oppose": [],
@@ -2770,6 +2795,12 @@
      "committeeId": "C00492140",
      "count": 9,
      "total": 345417.12
+    },
+    {
+     "committee": "UNITY IN ACTION PAC",
+     "committeeId": "C00954040",
+     "count": 1,
+     "total": 1091.8
     }
    ],
    "support": []
@@ -2884,6 +2915,12 @@
      "total": 684375.34
     },
     {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 229500.0
+    },
+    {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
      "count": 18,
@@ -2912,11 +2949,24 @@
      "committeeId": "C00817122",
      "count": 3,
      "total": 574.25
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
     }
    ]
   },
   "H2PA17103": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "SEIU COPE (SERVICE EMPLOYEES INTERNATIONAL UNION COMMITTEE ON POLITICAL EDUCATION)",
@@ -2951,7 +3001,14 @@
    ]
   },
   "H2PA18200": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "WORKING FAMILIES PARTY PAC",
@@ -3178,6 +3235,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 5,
+     "total": 260293.12
+    },
     {
      "committee": "CLEARPATH ACTION FUND, INC.",
      "committeeId": "C00608943",
@@ -4697,6 +4760,12 @@
      "total": 2992.46
     },
     {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    },
+    {
      "committee": "API PA VOTES",
      "committeeId": "C00761064",
      "count": 1,
@@ -4766,8 +4835,26 @@
     }
    ]
   },
-  "H4PA13199": {
+  "H4PA12068": {
    "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
+  },
+  "H4PA13199": {
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -4778,7 +4865,14 @@
    ]
   },
   "H4PA13298": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -5273,6 +5367,12 @@
      "total": 99403.87
     },
     {
+     "committee": "AANHPI RISING TIDE",
+     "committeeId": "C00891028",
+     "count": 1,
+     "total": 2364.31
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 6,
@@ -5681,6 +5781,12 @@
   },
   "H6CA14163": {
    "oppose": [
+    {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 4,
+     "total": 210300.0
+    },
     {
      "committee": "PROGRESSIVE PROMISE",
      "committeeId": "C00897926",
@@ -7309,13 +7415,19 @@
     {
      "committee": "PAVC PAC",
      "committeeId": "C00895698",
-     "count": 7,
-     "total": 63250.0
+     "count": 10,
+     "total": 98400.0
     }
    ]
   },
   "H6FL19129": {
    "oppose": [
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 15000.0
+    },
     {
      "committee": "LOVE AMERICA UPHOLD FREEDOM PAC",
      "committeeId": "C00894071",
@@ -7338,6 +7450,12 @@
      "committeeId": "C00819508",
      "count": 2,
      "total": 16500.0
+    },
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 12533.0
     }
    ],
    "support": []
@@ -7348,8 +7466,8 @@
     {
      "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
      "committeeId": "C00657866",
-     "count": 9,
-     "total": 2205925.75
+     "count": 13,
+     "total": 2389743.57
     },
     {
      "committee": "LOVE AMERICA UPHOLD FREEDOM PAC",
@@ -7555,16 +7673,16 @@
      "total": 1752402.26
     },
     {
+     "committee": "FLORIDA'S VOICE PAC",
+     "committeeId": "C00952630",
+     "count": 20,
+     "total": 271755.0
+    },
+    {
      "committee": "EQUALITY PAC",
      "committeeId": "C00550970",
      "count": 5,
      "total": 181213.72
-    },
-    {
-     "committee": "FLORIDA'S VOICE PAC",
-     "committeeId": "C00952630",
-     "count": 4,
-     "total": 22100.0
     }
    ]
   },
@@ -7621,7 +7739,7 @@
      "committee": "AMERICAN PACT",
      "committeeId": "C00837443",
      "count": 7,
-     "total": 221250.0
+     "total": 226250.0
     }
    ],
    "support": [
@@ -7817,6 +7935,18 @@
   "H6HI01311": {
    "oppose": [],
    "support": [
+    {
+     "committee": "FUTURE PROGRESS",
+     "committeeId": "C00746628",
+     "count": 3,
+     "total": 100000.0
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 312.48
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -8635,8 +8765,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 3,
-     "total": 21617.0
+     "count": 5,
+     "total": 23194.55
     }
    ]
   },
@@ -9003,8 +9133,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 4,
-     "total": 5642.43
+     "count": 5,
+     "total": 6370.41
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -9240,6 +9370,12 @@
      "total": 173167.53
     },
     {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 2,
+     "total": 150000.0
+    },
+    {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
      "committeeId": "C00453704",
      "count": 2,
@@ -9254,8 +9390,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 4,
-     "total": 11442.43
+     "count": 5,
+     "total": 12170.41
     },
     {
      "committee": "UNITY & JUSTICE FUND",
@@ -9322,6 +9458,12 @@
      "committeeId": "C00513176",
      "count": 2,
      "total": 144000.0
+    },
+    {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 2,
+     "total": 71432.21
     },
     {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
@@ -9987,6 +10129,12 @@
   },
   "H6NH01321": {
    "oppose": [
+    {
+     "committee": "FUTURE PROGRESS",
+     "committeeId": "C00746628",
+     "count": 5,
+     "total": 598025.0
+    },
     {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
@@ -10706,8 +10854,8 @@
     {
      "committee": "JOBS AND DEMOCRACY PAC",
      "committeeId": "C00928374",
-     "count": 114,
-     "total": 15026937.99
+     "count": 115,
+     "total": 15034048.24
     },
     {
      "committee": "YOU CAN PUSH BACK",
@@ -11013,6 +11161,12 @@
      "total": 1561.53
     },
     {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 1250.0
+    },
+    {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 1,
@@ -11069,6 +11223,12 @@
      "committeeId": "C00881011",
      "count": 5,
      "total": 4458.2
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 1800.0
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -11153,6 +11313,12 @@
      "committeeId": "C00848739",
      "count": 3,
      "total": 10609.34
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -11224,6 +11390,12 @@
      "committeeId": "C00576215",
      "count": 1,
      "total": 5627.6
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -11300,6 +11472,17 @@
     }
    ]
   },
+  "H6PA04169": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ]
+  },
   "H6PA07147": {
    "oppose": [],
    "support": [
@@ -11348,6 +11531,12 @@
      "committeeId": "C00924159",
      "count": 5,
      "total": 8840.0
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -11524,7 +11713,14 @@
      "total": 158.05
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ]
   },
   "H6PA08293": {
    "oppose": [
@@ -11533,6 +11729,12 @@
      "committeeId": "C00737411",
      "count": 2,
      "total": 56040.25
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -11614,6 +11816,17 @@
     }
    ]
   },
+  "H6PA11099": {
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
+   "support": []
+  },
   "H6PA12097": {
    "oppose": [],
    "support": [
@@ -11637,7 +11850,14 @@
    ]
   },
   "H6PA15181": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -11646,6 +11866,28 @@
      "total": 1359.32
     }
    ]
+  },
+  "H6PA16320": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
+  },
+  "H6PA16379": {
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
+   "support": []
   },
   "H6SC01227": {
    "oppose": [],
@@ -12144,8 +12386,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 3,
-     "total": 13944.57
+     "count": 4,
+     "total": 14658.88
     },
     {
      "committee": "THE EQUITY ALLIANCE FUND ACTION PAC",
@@ -14222,6 +14464,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 4,
+     "total": 60567.83
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 2,
@@ -14468,6 +14716,12 @@
      "total": 1040248.81
     },
     {
+     "committee": "FUTURE PROGRESS",
+     "committeeId": "C00746628",
+     "count": 5,
+     "total": 602025.0
+    },
+    {
      "committee": "DMFI PAC",
      "committeeId": "C00710848",
      "count": 1,
@@ -14623,7 +14877,14 @@
    ]
   },
   "H8PA04116": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -14654,10 +14915,24 @@
      "total": 530.59
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
   },
   "H8PA06087": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -14674,7 +14949,14 @@
    ]
   },
   "H8PA07200": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -14699,7 +14981,25 @@
      "total": 981.18
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
+  },
+  "H8PA13125": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
   },
   "H8PA15195": {
    "oppose": [
@@ -14752,7 +15052,14 @@
      "total": 197.19
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ]
   },
   "H8PA18199": {
    "oppose": [
@@ -14763,7 +15070,14 @@
      "total": 741.71
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
   },
   "H8SC04250": {
    "oppose": [],
@@ -15530,6 +15844,18 @@
      "total": 120000.0
     },
     {
+     "committee": "907 INITIATIVE INC.",
+     "committeeId": "C90023581",
+     "count": 4,
+     "total": 89660.42
+    },
+    {
+     "committee": "907 INITIATIVE ACTION",
+     "committeeId": "C00888065",
+     "count": 2,
+     "total": 71400.0
+    },
+    {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
      "count": 1,
@@ -15765,6 +16091,12 @@
   },
   "S4MI00595": {
    "oppose": [
+    {
+     "committee": "DEFEND THE VOTE",
+     "committeeId": "C00764233",
+     "count": 4,
+     "total": 4592975.88
+    },
     {
      "committee": "WINSENATE",
      "committeeId": "C00865444",
@@ -17170,6 +17502,12 @@
      "total": 489664.76
     },
     {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 5,
+     "total": 372026.35
+    },
+    {
      "committee": "COMMON DEFENSE ACTION FUND",
      "committeeId": "C00620021",
      "count": 1,
@@ -17180,12 +17518,6 @@
      "committeeId": "C00606962",
      "count": 10,
      "total": 159232.59
-    },
-    {
-     "committee": "AMERICAN PRIORITIES (AP)",
-     "committeeId": "C00932723",
-     "count": 2,
-     "total": 154028.47
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -17226,8 +17558,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 3,
-     "total": 8942.43
+     "count": 4,
+     "total": 9670.41
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -17284,8 +17616,8 @@
     {
      "committee": "AMERICAN PRIORITIES (AP)",
      "committeeId": "C00932723",
-     "count": 2,
-     "total": 204177.27
+     "count": 3,
+     "total": 306174.09
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -17382,6 +17714,12 @@
      "committeeId": "C00739771",
      "count": 2,
      "total": 1000000.0
+    },
+    {
+     "committee": "MINNESOTA FORWARD",
+     "committeeId": "C00935999",
+     "count": 8,
+     "total": 398849.38
     }
    ],
    "support": [
@@ -17394,8 +17732,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 6,
-     "total": 31773.74
+     "count": 8,
+     "total": 33837.78
     },
     {
      "committee": "CLEAR VOICE MINNESOTA",
@@ -17993,6 +18331,12 @@
      "total": 165000.0
     },
     {
+     "committee": "DEFEND THE VOTE",
+     "committeeId": "C00764233",
+     "count": 1,
+     "total": 100000.0
+    },
+    {
      "committee": "DMFI PAC",
      "committeeId": "C00710848",
      "count": 3,
@@ -18032,6 +18376,12 @@
      "committeeId": "C00687103",
      "count": 39,
      "total": 2881618.81
+    },
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 229500.0
     },
     {
      "committee": "TURNING POINT PAC INC.",
@@ -18121,6 +18471,12 @@
      "committeeId": "C00490375",
      "count": 1,
      "total": 10917.64
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 6550.0
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -19038,5 +19394,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-22"
+ "read": "2026-10-23"
 }
