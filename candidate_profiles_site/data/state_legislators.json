@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-23T13:20:26+00:00",
+ "fetched": "2026-10-24T12:39:35+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -448,6 +448,8 @@
     "email": "representative.steve.st.clair@akleg.gov",
     "id": "ocd-person/6692f2e6-2ad5-4b9c-a3f5-a0243c087064",
     "image": "https://akleg.gov/images/legislators/450x600/STC.jpg",
+    "imageChecked": "2026-10-24",
+    "imageStatus": "ok",
     "links": [
      "https://www.akleg.gov/basis/Member/Detail/34?code=stc"
     ],
@@ -504,6 +506,8 @@
     "email": "representative.garret.nelson@akleg.gov",
     "id": "ocd-person/abb33c56-f4ba-4c95-938e-658677368ca4",
     "image": "https://akleg.gov/images/legislators/450x600/NEG.jpg",
+    "imageChecked": "2026-10-24",
+    "imageStatus": "ok",
     "links": [
      "https://www.akleg.gov/basis/Member/Detail/34?code=neg"
     ],

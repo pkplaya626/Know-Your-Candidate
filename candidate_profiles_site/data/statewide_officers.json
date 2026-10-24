@@ -22,10 +22,10 @@
    "office": "https://www.alabamaag.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://live-al-ago.pantheonsite.io/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
+   "photo": "https://www.alabamaag.gov/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
    "photoPage": "https://www.alabamaag.gov/",
    "photoWeight": {
-    "bytes": 10190,
+    "bytes": 8784,
     "height": 300,
     "width": 283
    },
@@ -326,15 +326,9 @@
    "office": "https://www.doj.nh.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://www.doj.nh.gov/sites/g/files/ehbemt721/files/inline-images/ag-john-formella-300.jpg",
-   "photoPage": "https://www.doj.nh.gov/",
-   "photoWeight": {
-    "bytes": 31318,
-    "height": 353,
-    "width": 300
-   },
    "selection": "Appointed by the governor and Executive Council",
-   "title": "Attorney General"
+   "unconfirmed": true,
+   "unreadable": true
   },
   "NJ": {
    "listedBy": "Democratic Attorneys General Association",
@@ -467,8 +461,7 @@
    "party": "R",
    "partyKey": "R",
    "selection": "Appointed by the state Supreme Court",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "TX": {
    "listedBy": "Republican Attorneys General Association",
@@ -543,7 +536,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-23T13:12:49+00:00",
+ "fetched": "2026-10-24T12:34:10+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
