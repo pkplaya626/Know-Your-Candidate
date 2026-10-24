@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-23T13:39:30+00:00",
+ "fetched": "2026-10-24T12:59:32+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -17,8 +17,8 @@
   "http://www.sos.mo.gov/elections/pollingplacelookup/": "live",
   "https://akelections.maps.arcgis.com/apps/webappviewer/index.html?id=579890d66c7e40ae9f7cc227d76669b1": "live",
   "https://app.mt.gov/voterinfo/": "live",
-  "https://app.sos.nh.gov/viphome": "live",
-  "https://app.sos.nh.gov/voterinformation": "live",
+  "https://app.sos.nh.gov/viphome": "unknown",
+  "https://app.sos.nh.gov/voterinformation": "unknown",
   "https://app.vivote.gov/lookup": "live",
   "https://apps.dcboe.org/VRS": "live",
   "https://apps.sos.wv.gov/Elections/Voter/AmIRegisteredToVote": "live",
@@ -112,7 +112,7 @@
   "https://sos.ks.gov/elections/voter-information.html": "live",
   "https://sos.nebraska.gov/elections/early-voting": "live",
   "https://sos.nebraska.gov/elections/registering-vote": "live",
-  "https://sos.nh.gov/elections/voters/absentee-ballots/": "live",
+  "https://sos.nh.gov/elections/voters/absentee-ballots/": "unknown",
   "https://sos.oregon.gov/elections/pages/historical-data.aspx": "live",
   "https://sos.oregon.gov/elections/pages/myvote.aspx": "live",
   "https://sos.oregon.gov/elections/pages/registration.aspx?lang=en": "live",
@@ -287,8 +287,8 @@
   "https://www.sos.ms.gov/yall-vote/absentee-voting-information": "live",
   "https://www.sos.nd.gov/elections/election-results": "live",
   "https://www.sos.nd.gov/elections/voter": "live",
-  "https://www.sos.nh.gov/elections/elections/election-results": "live",
-  "https://www.sos.nh.gov/elections/voters/register-vote": "live",
+  "https://www.sos.nh.gov/elections/elections/election-results": "unknown",
+  "https://www.sos.nh.gov/elections/voters/register-vote": "unknown",
   "https://www.sos.nm.gov/voting-and-elections/election-results/": "live",
   "https://www.sos.nm.gov/voting-and-elections/voter-information-portal/absentee-and-early-voting/": "live",
   "https://www.sos.nm.gov/voting-and-elections/voter-information-portal/voter-registration-information/": "live",
@@ -315,9 +315,9 @@
   "https://www.votetexas.gov/register-to-vote/index.html": "live",
   "https://www.votetexas.gov/voting/early-voting.html": "live",
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
-  "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "live"
+  "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "unknown"
  },
- "linksChecked": "2026-10-23",
+ "linksChecked": "2026-10-24",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",

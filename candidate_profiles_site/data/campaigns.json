@@ -4034,6 +4034,16 @@
   "url": "https://blau4congress.com",
   "website": "BLAU4CONGRESS.COM"
  },
+ "H6CO02206": {
+  "committee_id": "C00943555",
+  "fetched": "2026-10-24T12:25:25+00:00",
+  "found": true,
+  "last_file_date": "2026-10-22",
+  "name": "KELLEY DENNISON FOR CONGRESS",
+  "person": "Kelley Anne Dennison",
+  "url": null,
+  "website": null
+ },
  "H6CO03253": {
   "committee_id": "C00941526",
   "fetched": "2026-09-13T22:19:03+00:00",
@@ -6553,6 +6563,16 @@
   "person": "Mark Cohen",
   "url": "https://www.markfornebraska.org",
   "website": "WWW.MARKFORNEBRASKA.ORG"
+ },
+ "H6NE03206": {
+  "committee_id": "C00938340",
+  "fetched": "2026-10-24T12:25:25+00:00",
+  "found": true,
+  "last_file_date": "2026-10-22",
+  "name": "BUDKE FOR CONGRESS",
+  "person": "MacEy Budke",
+  "url": null,
+  "website": null
  },
  "H6NH01321": {
   "committee_id": "C00906446",
