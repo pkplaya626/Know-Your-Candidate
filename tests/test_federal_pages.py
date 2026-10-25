@@ -112,6 +112,64 @@ class TestTheBuild(unittest.TestCase):
         self.assertEqual(len(scotus["members"]), federal_courts.SUPREME_COURT_SEATS)
         self.assertFalse({j["id"] for j in scotus["members"]} & {j["id"] for j in scotus["retired"]})
 
+    def test_a_justices_portrait_is_the_official_one_commons_holds_else_the_courts(self):
+        """The owner's decision of 2026-10-20: the Court's official portraits
+        as Wikimedia Commons holds them, credited to their photographers;
+        the Court's own only for a justice Commons holds none of."""
+        from kyc import judge_links, overrides
+
+        links = judge_links.load_cache(ROOT)
+        held = 0
+        for justice in self.payload["supremeCourt"]["members"]:
+            nid = justice["id"].replace("fjc-", "")
+            portrait = justice.get("portrait") or {}
+            official = judge_links.official_portrait(links, nid)
+            if official:
+                held += 1
+                self.assertEqual(portrait["source"], official["source"], justice["name"])
+                self.assertEqual((portrait["by"], portrait["licence"]),
+                                 (overrides.JUSTICE_PORTRAITS[nid][1], official["licence"]))
+                self.assertNotIn("supremecourt.gov", portrait["url"])
+            elif portrait:
+                # Never another Commons file passed off as the Court's
+                # portrait: Sotomayor's item shows a 2009 White House photo,
+                # so only the table's file is ever hers.
+                self.assertEqual(portrait["credit"], judiciary.PORTRAIT_CREDIT, justice["name"])
+                self.assertIn("supremecourt.gov", portrait["url"])
+        if links and links.get("read", "") >= "2026-10-25":
+            # Read on 2026-10-25: all nine, Sotomayor's and Kagan's
+            # official portraits by the table's files.
+            self.assertGreaterEqual(held, len(overrides.JUSTICE_PORTRAITS))
+
+
+class TestAJusticesFallback(unittest.TestCase):
+    """A justice the table names whose official file the read did not take
+    as recorded keeps the Court's own portrait, and is marked so the page
+    says the read did not confirm the file - never that Commons does not
+    hold it (the PR #133 review)."""
+
+    RECORD = {"id": "fjc-100", "name": "Ann B. Example", "justice": {"role": "Associate Justice"},
+              "portrait": {"url": "https://www.supremecourt.gov/about/justice_pictures/Example.jpg",
+                           "credit": judiciary.PORTRAIT_CREDIT}}
+
+    def test_an_unconfirmed_official_file_keeps_the_courts_and_says_so(self):
+        from unittest import mock
+        from kyc import overrides
+        entry = ("Ann Example official portrait.jpg", "Steve Petteway", "2026-10-20", "official")
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+            out = federal_build._judge(dict(self.RECORD), {"judges": {}})
+        self.assertIn("supremecourt.gov", out["portrait"]["url"])
+        self.assertTrue(out.get("portraitUnconfirmed"))
+        # A justice the table does not name: the Court's own, unmarked.
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {}, clear=True):
+            out = federal_build._judge(dict(self.RECORD), {"judges": {}})
+        self.assertNotIn("portraitUnconfirmed", out)
+        # A judge who is not a justice is never marked.
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+            out = federal_build._judge({k: v for k, v in self.RECORD.items() if k != "justice"},
+                                       {"judges": {}})
+        self.assertNotIn("portraitUnconfirmed", out)
+
 
 class TestTheFiles(unittest.TestCase):
     """Each file is rewritten only when what it says changed, and verify

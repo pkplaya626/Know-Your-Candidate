@@ -319,6 +319,15 @@ def author_of(fragment):
     name of the photographer ..."), a bare address or a file name; a phrase
     said twice is said once."""
     raw = _HIDDEN.sub(" ", str(fragment or ""))
+    # A link whose words are only "source" or a footnote says of no one who
+    # made the file: Sotomayor's official portrait's author read
+    # "Collection of the Supreme Court of the United States, Steve Petteway
+    # source", the last word a link to a newspaper. A link to a user's page
+    # is a person, whatever their name ("User:Link"), and stays (the PR
+    # #133 review). CREDIT_FORM is not moved for it: no cached credit
+    # carries such a word (every "by" read 2026-10-25).
+    raw = re.sub(r"<a\b(?![^>]*href=\"[^\"]*(?:User|Benutzer|Utilisateur)(?::|%3A))[^>]*>"
+                 r"\s*(?:source|link|here|\[\d+\])\s*</a>", " ", raw, flags=re.I)
     items = re.findall(r"<li\b[^>]*>(.*?)</li>", raw, re.I | re.S) or [raw]
     out = []
     for item in items:

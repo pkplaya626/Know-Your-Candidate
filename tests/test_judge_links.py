@@ -786,6 +786,111 @@ class TestThePhotoRoutes(unittest.TestCase):
         self.assertEqual([lvl for lvl, code, _m, _d in found
                           if code == "judge-portrait-overridden"], ["error"])
 
+    # ---- a justice's official portrait (the owner's decision of 2026-10-20)
+
+    OFFICIAL = "Ann Example official portrait.jpg"
+    STAFF = "Steve Petteway, Collection of the Supreme Court of the United States"
+
+    def official_join(self, author, images=("Ann Example in robe, 2009.jpg",)):
+        """Join with the judge named in a JUSTICE_PORTRAITS entry for
+        :attr:`OFFICIAL`, whose Commons page names *author*; the item's own
+        image is another file."""
+        from unittest import mock
+        from kyc import overrides
+        files = {self.OFFICIAL: (2400, 3000)}
+        files.update({n: (2480, 3100) for n in images})
+        credits = {up(n): dict(self.CREDIT, by=author, licence="Public domain", licenceUrl=None)
+                   for n in files}
+        weights = {}
+        for n, s in files.items():
+            weights.update(light(up(n), s))
+        entry = (self.OFFICIAL, self.STAFF, "2026-10-20", "the Court's official portrait")
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+            joined, problems = jl.join(
+                {"fjc-100": JUDGE}, {"100": "example-ann"},
+                wd(entity("Q1", "example-ann", images=list(images))),
+                {up(n): s for n, s in files.items()}, None, credits, weights=weights,
+                today="2026-10-20")
+            official = jl.official_portrait({"judges": joined}, "100")
+            found = jl.problems({"judges": joined})
+        return joined, problems, official, found
+
+    def test_a_justice_takes_the_courts_portrait_commons_holds_not_the_items_image(self):
+        joined, problems, official, found = self.official_join(self.STAFF)
+        self.assertEqual(problems, [])
+        portrait = joined["100"]["portrait"]
+        self.assertEqual(portrait["source"], jl.file_page(up(self.OFFICIAL)))
+        self.assertEqual(portrait["route"], "official")
+        self.assertIn("JUSTICE_PORTRAITS", portrait["evidence"])
+        # Credited to its photographer as Commons names them (rule 87).
+        self.assertEqual((portrait["by"], portrait["licence"]), (self.STAFF, "Public domain"))
+        self.assertIs(official, portrait)
+        self.assertNotIn("justice-portrait-unread", [code for _l, code, _m, _d in found])
+
+    def test_an_official_file_commons_credits_to_someone_else_is_not_the_courts(self):
+        joined, problems, official, found = self.official_join("An Uploader")
+        self.assertNotIn("portrait", joined["100"])
+        self.assertIn("JUSTICE_PORTRAITS recorded", problems[0])
+        self.assertIsNone(official)
+        self.assertIn("justice-portrait-unread", [code for _l, code, _m, _d in found])
+
+    def test_a_refresh_sizes_and_credits_the_official_file_whatever_the_items_image(self):
+        """refresh() asks Commons for each JUSTICE_PORTRAITS file as well as
+        the item's own images: without it the official file is never sized,
+        and the justice keeps the last portrait or shows none (the PR #133
+        review found no test would notice)."""
+        import tempfile
+        from unittest import mock
+        from kyc import overrides
+        item_image = "Ann Example in robe, 2009.jpg"
+        asked = []
+
+        def sizes_of(urls):
+            asked.extend(urls)
+            return {u: {"width": 400, "height": 500, "extmetadata": {
+                "Artist": {"value": self.STAFF}, "LicenseShortName": {"value": "Public domain"}}}
+                for u in urls}
+
+        def weigh_of(urls):
+            return {u: {"bytes": 20_000, "width": 250, "height": 312} for u in urls}
+
+        entry = (self.OFFICIAL, self.STAFF, "2026-10-20", "the Court's official portrait")
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, os.path.dirname(jl.CACHE_PATH)))
+            jl.save_cache({"slugs": {"100": "example-ann"}, "judges": {}}, root)
+            original = jl.fetch_wikidata
+            jl.fetch_wikidata = lambda *a, **k: wd(entity("Q1", "example-ann", images=[item_image]))
+            try:
+                with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+                    cache = jl.refresh({"judges": {"fjc-100": JUDGE}}, root, read=lambda url: "{}",
+                                       sizes_of=sizes_of, weigh_of=weigh_of, log=None)
+                    self.assertIn(up(self.OFFICIAL), asked)
+                    portrait = cache["judges"]["100"]["portrait"]
+                    self.assertEqual(portrait["route"], "official")
+                    self.assertEqual(portrait["source"], jl.file_page(up(self.OFFICIAL)))
+                    self.assertIsNotNone(jl.official_portrait(cache, "100"))
+            finally:
+                jl.fetch_wikidata = original
+
+    def test_a_cached_portrait_of_another_file_is_not_the_official_one(self):
+        """The read before the table held the item's image (Sotomayor's 2009
+        White House photograph); it is never passed off as the Court's."""
+        from unittest import mock
+        from kyc import overrides
+        other = up("Ann Example in robe, 2009.jpg")
+        cache = {"judges": {"100": {"portrait": {
+            "url": other, "set": [[120, other]], "credit": "Wikimedia Commons",
+            "source": jl.file_page(other), "by": self.STAFF, "licence": "CC BY 3.0",
+            "route": "item", "evidence": "Wikidata Q1", "read": "2026-10-20",
+            "bytes": 20_000, "width": 120, "height": 150}}}}
+        entry = (self.OFFICIAL, self.STAFF, "2026-10-20", "the Court's official portrait")
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+            self.assertIsNone(jl.official_portrait(cache, "100"))
+            # The same file, credited as recorded, is.
+            same = dict(cache["judges"]["100"]["portrait"], source=jl.file_page(up(self.OFFICIAL)))
+            self.assertIsNotNone(jl.official_portrait({"judges": {"100": {"portrait": same}}}, "100"))
+        self.assertIsNone(jl.official_portrait(cache, "100"))      # no entry, no official portrait
+
     def test_the_committed_portraits_carry_their_record_within_the_caps(self):
         from kyc import overrides
         cache = jl.load_cache(ROOT) or {}

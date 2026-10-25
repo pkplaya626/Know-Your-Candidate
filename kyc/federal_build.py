@@ -102,7 +102,7 @@ def _judge(record, links=None):
             "career", "otherNominations", "fjc", "justice", "retiredJustice", "courtService",
             "portrait")
     out = {k: record[k] for k in keep if record.get(k) not in (None, [], "")}
-    from . import judge_links
+    from . import judge_links, overrides
     joined = judge_links.for_judge(links, record["id"].replace("fjc-", ""))
     if joined.get("wikidata"):
         out["wikidata"] = joined["wikidata"]
@@ -113,9 +113,22 @@ def _judge(record, links=None):
     # Wikidata item carries their FJC id.
     if joined.get("linkVia") and (out.get("wikipedia") or out.get("wikidata")):
         out["linkVia"] = joined["linkVia"]
-    # The Court's own portrait of a justice stands; the Commons one is for
-    # everyone the Court does not photograph.
-    if joined.get("portrait") and not out.get("portrait"):
+    # A sitting justice's official portrait as Wikimedia Commons holds it,
+    # credited to its photographer (overrides.JUSTICE_PORTRAITS, the owner's
+    # decision of 2026-10-20). The Court's own stands for a justice the
+    # table names no file for, and for one whose named file the read did
+    # not take as recorded (the same file, credited to the same author,
+    # with a licence: ``judge_links.official_portrait``), which the page
+    # then says (``portraitUnconfirmed``) rather than that Commons holds
+    # none (the PR #133 review). Any other Commons portrait is for the
+    # judges the Court does not photograph.
+    nid = record["id"].replace("fjc-", "")
+    official = judge_links.official_portrait(links, nid) if record.get("justice") else None
+    if official:
+        out["portrait"] = {k: v for k, v in official.items() if k in judge_links.PAGE_KEYS}
+    elif record.get("justice") and nid in getattr(overrides, "JUSTICE_PORTRAITS", {}):
+        out["portraitUnconfirmed"] = True
+    elif joined.get("portrait") and not out.get("portrait"):
         # What the page draws and credits; the route, evidence and weight
         # stay in the cache's record.
         out["portrait"] = {k: v for k, v in joined["portrait"].items()

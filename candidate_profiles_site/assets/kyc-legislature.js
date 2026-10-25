@@ -133,6 +133,9 @@
       // One page, never the dump of every page Open States read (LINKS-04,
       // STATEGOV-16), labelled as what it is (pageLink).
       pageLink(p) +
+      // Whose photograph it is, where the legislature's own record gave it
+      // (rule 87: kyc/legphotos.py).
+      (p.image && p.imageCredit ? '<p class="leg-credit">' + KYC.photoCreditHtml(p.imageCredit) + "</p>" : "") +
       "</div></article>";
   }
 
@@ -314,7 +317,13 @@
     // broken image: one listener for every portrait (rule 13).
     doc.addEventListener("error", function (event) {
       var img = event.target;
-      if (img && img.classList && img.classList.contains("leg-photo")) img.remove();
+      if (!img || !img.classList || !img.classList.contains("leg-photo")) return;
+      // Its credit goes with it: a card never credits a photograph it
+      // does not show (rule 87).
+      var card = img.closest(".leg-person");
+      var credit = card && card.querySelector(".leg-credit");
+      if (credit) credit.remove();
+      img.remove();
     }, true);
     el("legRoster").addEventListener("click", function (event) {
       var row = event.target.closest("[data-region]");
