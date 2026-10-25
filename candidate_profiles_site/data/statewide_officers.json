@@ -45,7 +45,20 @@
    "office": "https://www.azag.gov/",
    "party": "D",
    "partyKey": "D",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png?w=330&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png",
+     "why": "338 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://www.azag.gov/",
+   "photoWeight": {
+    "bytes": 96350,
+    "height": 330,
+    "width": 330
+   },
    "title": "Attorney General"
   },
   "CA": {
@@ -54,7 +67,20 @@
    "office": "https://www.oag.ca.gov/",
    "party": "D",
    "partyKey": "D",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg",
+     "why": "6039 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://www.oag.ca.gov/",
+   "photoWeight": {
+    "bytes": 17820,
+    "height": 750,
+    "width": 499
+   },
    "title": "Attorney General"
   },
   "CO": {
@@ -101,7 +127,20 @@
    "office": "https://www.myfloridalegal.com/",
    "party": "R",
    "partyKey": "R",
-   "photoOversized": true,
+   "photo": "https://www.myfloridalegal.com/sites/default/files/ag_james_uthmeier_large.jpg",
+   "photoHeavy": [
+    {
+     "kept": true,
+     "url": "https://www.myfloridalegal.com/sites/default/files/ag_james_uthmeier_large.jpg",
+     "why": "2354 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://www.myfloridalegal.com/ag-bio",
+   "photoWeight": {
+    "bytes": 2354056,
+    "height": 2596,
+    "width": 1730
+   },
    "title": "Attorney General"
   },
   "GA": {
@@ -125,7 +164,20 @@
    "office": "https://ag.hawaii.gov/",
    "party": "D",
    "partyKey": "D",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/ag.hawaii.gov/wp-content/uploads/2025/08/AG-Anne-Lopez-scaled.jpg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://ag.hawaii.gov/wp-content/uploads/2025/08/AG-Anne-Lopez-scaled.jpg",
+     "why": "1922x2560px, over 1200px"
+    }
+   ],
+   "photoPage": "https://ag.hawaii.gov/contact-us/",
+   "photoWeight": {
+    "bytes": 19114,
+    "height": 665,
+    "width": 500
+   },
    "selection": "Appointed by the governor",
    "title": "Attorney General"
   },
@@ -354,7 +406,20 @@
    "office": "https://www.njoag.gov/",
    "party": "D",
    "partyKey": "D",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg",
+     "why": "426 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://www.njoag.gov/about/meet-attorney-general-davenport/",
+   "photoWeight": {
+    "bytes": 17610,
+    "height": 625,
+    "width": 500
+   },
    "selection": "Appointed by the governor",
    "title": "Attorney General"
   },
@@ -440,7 +505,20 @@
    "office": "https://www.attorneygeneral.gov/",
    "party": "R",
    "partyKey": "R",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg",
+     "why": "407 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://www.attorneygeneral.gov/the-office/meet-the-attorney-general/",
+   "photoWeight": {
+    "bytes": 19272,
+    "height": 590,
+    "width": 500
+   },
    "title": "Attorney General"
   },
   "RI": {
@@ -472,7 +550,20 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg",
+     "why": "13724 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://atg.sd.gov/OurOffice/bio.aspx",
+   "photoWeight": {
+    "bytes": 23622,
+    "height": 749,
+    "width": 500
+   },
    "title": "Attorney General"
   },
   "TN": {
@@ -543,7 +634,20 @@
    "office": "https://www.atg.wa.gov/",
    "party": "D",
    "partyKey": "D",
-   "photoOversized": true,
+   "photo": "https://agportal-s3bucket.s3.us-west-2.amazonaws.com/Nick%20Brown-011_Crop.jpg?VersionId=yFiSPPHQUbK6b92TGGqZkMLtKli3LW4y",
+   "photoHeavy": [
+    {
+     "kept": true,
+     "url": "https://agportal-s3bucket.s3.us-west-2.amazonaws.com/Nick%20Brown-011_Crop.jpg?VersionId=yFiSPPHQUbK6b92TGGqZkMLtKli3LW4y",
+     "why": "579 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://www.atg.wa.gov/about-nick-brown",
+   "photoWeight": {
+    "bytes": 579253,
+    "height": 2041,
+    "width": 2093
+   },
    "title": "Attorney General"
   },
   "WI": {
@@ -560,7 +664,20 @@
    "office": "https://ago.wv.gov/",
    "party": "R",
    "partyKey": "R",
-   "photoOversized": true,
+   "photo": "https://i0.wp.com/ago.wv.gov/sites/default/files/2025-09/AG%20McCuskey%20pic.jpeg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://ago.wv.gov/sites/default/files/2025-09/AG%20McCuskey%20pic.jpeg",
+     "why": "1779 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://ago.wv.gov/about-us/meet-attorney-general-jb-mccuskey",
+   "photoWeight": {
+    "bytes": 29620,
+    "height": 625,
+    "width": 500
+   },
    "title": "Attorney General"
   },
   "WY": {

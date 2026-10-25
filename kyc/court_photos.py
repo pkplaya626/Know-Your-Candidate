@@ -476,16 +476,21 @@ def refused_offered(cache):
 
 
 def counts(cache):
-    """``{"members", "shown", "heavy", "none", "unknown", "shape"}`` over
-    every read court, for the build's report: *heavy* the photographs shown
-    though offered only above the caps (rule 87)."""
-    out = {"members": 0, "shown": 0, "heavy": 0, "none": 0, "unknown": 0, "shape": 0}
+    """``{"members", "shown", "smaller", "heavy", "none", "unknown",
+    "shape"}`` over every read court, for the build's report: of the
+    photographs the court offers only above the caps (rule 87), *smaller*
+    those shown smaller from the same file, *heavy* those shown at full
+    size."""
+    out = {"members": 0, "shown": 0, "smaller": 0, "heavy": 0, "none": 0, "unknown": 0,
+           "shape": 0}
     for code, read in ((cache or {}).get("courts") or {}).items():
         out["members"] += len(read.get("members") or ())
         shown = for_page(code, read)
         out["shown"] += len(shown)
-        out["heavy"] += sum(1 for name in shown
-                            if official_photos.heavy_of((read.get("photos") or {}).get(name)))
+        for name in shown:
+            said = official_photos.heavy_of((read.get("photos") or {}).get(name))
+            if said:
+                out["heavy" if said.get("kept") else "smaller"] += 1
         for why in (read.get("photoMisses") or {}).values():
             if why in out:
                 out[why] += 1

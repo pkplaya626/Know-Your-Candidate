@@ -1846,7 +1846,8 @@ def _courts(args):
     from . import court_photos
     seen = court_photos.counts({"courts": read})
     print(f"  photographs: {seen['shown']} of {seen['members']} justices from their court's own "
-          f"pages ({seen['heavy']} of them offered only above the caps, shown and said); "
+          f"pages ({seen['smaller']} shown smaller and {seen['heavy']} at full size, offered "
+          "only above the caps); "
           f"{seen['unknown']} could not be read; {seen['none'] + seen['shape']} with none that "
           "passes")
     if not args.check:
@@ -1945,7 +1946,7 @@ def _ballotphotos(args):
     seen = statewide_photos.counts(cache)
     print(f"  {seen['shown']} statewide candidates' photographs cached ("
           + ", ".join(f"{n} {route}" for route, n in sorted(seen["routes"].items()))
-          + f"); {seen['heavy']} of them offered only above the caps, shown and said; "
+          + f"); {seen['heavy']} of them at full size, offered only above the caps; "
           f"{seen['withheld']} withheld by a person's list or the licence test")
     for line in problems:
         print(f"  [warn] {line}")

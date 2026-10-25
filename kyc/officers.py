@@ -563,7 +563,7 @@ BIO_PAGES = {
     "HI": ("https://ag.hawaii.gov/about-us/", _BIO_FOUND, "Anne Lopez",
            "the department's 'About us' page, on Attorney General Anne Lopez"),
     "MD": ("https://oag.maryland.gov/our-office/Pages/about-the-attorney-general.aspx",
-           _BIO_FOUND, "Anthony G. Brown", "the office's 'About the Attorney General' page"),
+           _BIO_FOUND, "Anthony Brown", "the office's 'About the Attorney General' page"),
     "MI": ("https://www.michigan.gov/ag/team-listing-page/attorney-general-dana-nessel",
            _BIO_FOUND, "Dana Nessel", "the department's team page for Attorney General Dana Nessel"),
     "PA": ("https://www.attorneygeneral.gov/the-office/meet-the-attorney-general/", _BIO_FOUND,

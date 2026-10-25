@@ -132,7 +132,7 @@ class TestTheSizeThePageOffers(unittest.TestCase):
         read = {"members": ["Kari Gray"], "photos": {"Kari Gray": found}}
         self.assertEqual(list(court_photos.for_page("XX", read)), ["Kari Gray"])
         seen = court_photos.counts({"courts": {"XX": read}})
-        self.assertEqual((seen["shown"], seen["heavy"]), (1, 1))
+        self.assertEqual((seen["shown"], seen["heavy"], seen["smaller"]), (1, 1, 0))
 
     def test_a_heavy_file_is_taken_smaller_where_the_same_picture_is_served(self):
         page = '<img src="/kari-gray.jpg" alt="Justice Kari Gray">'
@@ -230,6 +230,21 @@ class TestEveryCachedPhotographIsWhole(unittest.TestCase):
         members = {c: r.get("members") or [] for c, r in (cache.get("courts") or {}).items()}
         errors, _ = court_photos.curated_problems(members)
         self.assertEqual(errors, [])
+
+    def test_the_committed_cache_leaves_no_one_out_for_their_weight(self):
+        """The owner's decision of 2026-10-25 (rule 87): 27 justices whose
+        court's page ties a photograph to them drew empty circles for its
+        weight alone. No read may say "oversized" again, and every heavy
+        record reaches the page."""
+        from kyc import courts
+        cache = courts.load_cache(".") or {}
+        for code, read in (cache.get("courts") or {}).items():
+            with self.subTest(code=code):
+                self.assertNotIn("oversized", (read.get("photoMisses") or {}).values())
+                shown = court_photos.for_page(code, read)
+                for name, rec in (read.get("photos") or {}).items():
+                    if official_photos.heavy_of(rec) and not official_photos.held_back(rec):
+                        self.assertIn(name, shown)
 
     def test_the_page_is_given_only_a_whole_record(self):
         read = {"members": ["Kari Gray", "Lynne Boomgaarden"], "photos": {

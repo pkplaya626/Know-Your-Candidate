@@ -416,7 +416,11 @@ _NASS_CARD = ("NASS's roster card names {} beside this photograph, filed as {} i
 # confirmed the holder's name (rule 56), and a photograph is given only to a
 # confirmed one. Maryland's, Michigan's, Tennessee's and Texas's offices'
 # own pages give theirs (officers.BIO_PAGES and the page the front page
-# links).
+# links). So, since 2026-10-25, do Arizona's, California's, Hawaii's, New
+# Jersey's, Pennsylvania's, South Dakota's and West Virginia's: each offers
+# its photograph only above the caps, and Photon serves the same file
+# smaller (rule 87), so their cards were dropped. Florida's and Washington's
+# offices' files are served no smaller, so the cards below go first there.
 _NAAG_ROSTER = "https://www.naag.org/find-my-ag/"
 _NAAG_BY = "National Association of Attorneys General"
 
@@ -470,16 +474,6 @@ OFFICER_PHOTOS = {
         "NAAG's Find my AG card reads \"Tim Griffin Arkansas\" beside this photograph, the "
         "card's own 225x300 size (ag-AG-Griffin-1-225x300.png, uploaded 2022-11); a single "
         "head-and-shoulders portrait."),
-    ("AZ", "ag"): _naag_card(
-        "Kris Mayes", "2022/11/ag-AZ-Mayes-225x300.png", (44003, 225, 300),
-        "NAAG's Find my AG card reads \"Kris Mayes Arizona\" beside this photograph, the card's"
-        " own 225x300 size (ag-AZ-Mayes-225x300.png, uploaded 2022-11); a single head-and-"
-        "shoulders portrait."),
-    ("CA", "ag"): _naag_card(
-        "Rob Bonta", "2021/04/ag-CA-Bonta-225x300.jpg", (11835, 225, 300),
-        "NAAG's Find my AG card reads \"Rob Bonta California\" beside this photograph, the "
-        "card's own 225x300 size (ag-CA-Bonta-225x300.jpg, uploaded 2021-04); a single head-"
-        "and-shoulders portrait."),
     ("DE", "ag"): _naag_card(
         "Kathy Jennings", "2020/09/ag-DE-jennings-225x300.jpg", (11201, 225, 300),
         "NAAG's Find my AG card reads \"Kathy Jennings Delaware\" beside this photograph, the "
@@ -490,12 +484,6 @@ OFFICER_PHOTOS = {
         "NAAG's Find my AG card reads \"James Uthmeier Florida\" beside this photograph, the "
         "card's own 225x300 size (ag-FL-Uthmeier-James-225x300.png, uploaded 2025-01); a "
         "single head-and-shoulders portrait."),
-    ("HI", "ag"): _naag_card(
-        "Anne Lopez", "2023/01/ag-HI-Lopez-2024-225x300.jpg", (13459, 225, 300),
-        "NAAG's Find my AG card reads \"Anne E. Lopez Hawaii\" beside this photograph, the "
-        "card's own 225x300 size (ag-HI-Lopez-2024-225x300.jpg, uploaded 2023-01); a single "
-        "head-and-shoulders portrait. The card's 'Anne E. Lopez' is the office's 'Anne Lopez'"
-        " with her middle initial."),
     ("IA", "ag"): _naag_card(
         "Brenna Bird", "2022/11/ag-IA-Bird-225x300.png", (95965, 225, 300),
         "NAAG's Find my AG card reads \"Brenna Bird Iowa\" beside this photograph, the card's "
@@ -536,11 +524,6 @@ OFFICER_PHOTOS = {
         "NAAG's Find my AG card reads \"Mike Hilgers Nebraska\" beside this photograph, the "
         "card's own 300x298 size (Mike-Hilgers-AG-600px-headshot-300x298.png, uploaded "
         "2022-11); a single head-and-shoulders portrait."),
-    ("NJ", "ag"): _naag_card(
-        "Jennifer Davenport", "2026/01/ag-NJ-Davenport-Jennifer-225x300.png", (28332, 225, 300),
-        "NAAG's Find my AG card reads \"Jennifer Davenport New Jersey\" beside this photograph,"
-        " the card's own 225x300 size (ag-NJ-Davenport-Jennifer-225x300.png, uploaded "
-        "2026-01); a single head-and-shoulders portrait."),
     ("NY", "ag"): _naag_card(
         "Letitia James", "2020/09/ag-NY-james2-225x300.jpg", (7901, 225, 300),
         "NAAG's Find my AG card reads \"Letitia A. James New York\" beside this photograph, the"
@@ -552,20 +535,10 @@ OFFICER_PHOTOS = {
         "NAAG's Find my AG card reads \"Gentner Drummond Oklahoma\" beside this photograph, the"
         " card's own 225x300 size (ag-OK-Drummond-225x300.png, uploaded 2022-11); a single "
         "head-and-shoulders portrait."),
-    ("PA", "ag"): _naag_card(
-        "Dave Sunday", "2025/01/ag-PA-Sunday-2025-225x300.jpg", (11777, 225, 300),
-        "NAAG's Find my AG card reads \"Dave Sunday Pennsylvania\" beside this photograph, the "
-        "card's own 225x300 size (ag-PA-Sunday-2025-225x300.jpg, uploaded 2025-01); a single "
-        "head-and-shoulders portrait."),
     ("SC", "ag"): _naag_card(
         "Alan Wilson", "2020/09/ag-SC-Wilson_new-225x300.jpg", (6382, 225, 300),
         "NAAG's Find my AG card reads \"Alan Wilson South Carolina\" beside this photograph, "
         "the card's own 225x300 size (ag-SC-Wilson_new-225x300.jpg, uploaded 2020-09); a "
-        "single head-and-shoulders portrait."),
-    ("SD", "ag"): _naag_card(
-        "Marty Jackley", "2022/11/ag-SD-Jackley-Marty-225x300.png", (25894, 225, 300),
-        "NAAG's Find my AG card reads \"Marty Jackley South Dakota\" beside this photograph, "
-        "the card's own 225x300 size (ag-SD-Jackley-Marty-225x300.png, uploaded 2022-11); a "
         "single head-and-shoulders portrait."),
     ("UT", "ag"): _naag_card(
         "Derek Brown", "2025/01/ag-UT-Brown-Derek-225x300.png", (30412, 225, 300),
@@ -587,13 +560,6 @@ OFFICER_PHOTOS = {
         "NAAG's Find my AG card reads \"Josh Kaul Wisconsin\" beside this photograph, the "
         "card's own 225x300 size (ag-WI-kaul-225x300.jpg, uploaded 2020-09); a single head-"
         "and-shoulders portrait."),
-    ("WV", "ag"): _naag_card(
-        "J.B. McCuskey", "2025/01/ag-WA-McCusker-225x300.png", (31422, 225, 300),
-        "NAAG's Find my AG card reads \"John B. McCuskey West Virginia\" beside this "
-        "photograph, the card's own 225x300 size (ag-WA-McCusker-225x300.png, uploaded "
-        "2025-01); a single head-and-shoulders portrait. NAAG files it as ag-WA-McCusker; the"
-        " card names John B. McCuskey of West Virginia, whom his office's own pages call J.B."
-        " and John B. McCuskey ('Office of the WV Attorney General John B. McCuskey')."),
     ("WY", "ag"): _naag_card(
         "Keith Kautz", "2025/07/ag-WY-Kautz-Keith-2025-225x300.png", (29024, 225, 300),
         "NAAG's Find my AG card reads \"Keith Kautz Wyoming\" beside this photograph, the "

@@ -8858,6 +8858,13 @@ async function testStateGov() {
         member.querySelector(".gov-photo-credit").textContent ===
           "Photo: " + court.name + " of " + window.KYC.stateName("GA") &&
         member.querySelector(".gov-photo-credit a").getAttribute("href") === "https://court.example/bio");
+    // One credit implementation for every photograph (rule 12, PR #135
+    // review): the justices' line is KYC.photoCreditHtml's, as a
+    // candidate's is.
+    check("a justice's credit is KYC.photoCreditHtml's own line",
+      !!member && member.querySelector(".gov-photo-credit").innerHTML ===
+        window.KYC.photoCreditHtml({ by: court.name + " of " + window.KYC.stateName("GA"),
+          page: "https://court.example/bio" }));
     check("the justice's name and title still read first",
       !!member && member.querySelector(".gov-court-name").textContent.indexOf(court.members[0]) === 0);
     // A photograph that fails to load takes its credit with it.

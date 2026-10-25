@@ -712,9 +712,9 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
 
 def counts(cache):
     """``{"shown", "heavy", "withheld", "routes": {route: n}}`` over the
-    cache: *heavy* the photographs shown though offered only above the caps
-    (rule 87), *withheld* those a person's list or the licence test keeps
-    off the page."""
+    cache: *heavy* the photographs shown at full size though offered only
+    above the caps (rule 87), *withheld* those a person's list or the
+    licence test keeps off the page."""
     out = {"shown": 0, "heavy": 0, "withheld": 0, "routes": {}}
     for k, rec in ((cache or {}).get("photos") or {}).items():
         if "photo" not in rec:
@@ -723,7 +723,7 @@ def counts(cache):
             out["withheld"] += 1
             continue
         out["shown"] += 1
-        out["heavy"] += bool(official_photos.heavy_of(rec))
+        out["heavy"] += bool((official_photos.heavy_of(rec) or {}).get("kept"))
         out["routes"][rec.get("route") or "?"] = out["routes"].get(rec.get("route") or "?", 0) + 1
     return out
 
@@ -836,7 +836,7 @@ def attach(code, office, rows, listed, holder, status, cache):
     holder line ``statewide.holder_status`` settled. A photograph offered
     only above the caps is shown all the same (rule 87); one a person's
     list or the licence test withholds is not (:func:`withheld_why`).
-    Returns how many of those shown are heavy."""
+    Returns how many of those shown are at full size though heavy."""
     from .statewide import display_name
     photos = (cache or {}).get("photos") or {}
     by_shown = {}
@@ -861,7 +861,7 @@ def attach(code, office, rows, listed, holder, status, cache):
         if not rec or "photo" not in rec or _problems_of({"photos": {name: rec}}) \
                 or withheld_why(k, rec):
             continue
-        heavy += bool(official_photos.heavy_of(rec))
+        heavy += bool((official_photos.heavy_of(rec) or {}).get("kept"))
         row["photo"] = rec["photo"]
         if rec.get("route") == "wikipedia":
             row["photoCredit"] = rec.get("credit")

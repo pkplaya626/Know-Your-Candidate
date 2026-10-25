@@ -495,7 +495,11 @@ class TestOfficerPhotos(unittest.TestCase):
                 self.assertTrue(card.endswith(" " + state_name(code)), card)
                 self.assertIn(photo["name"].split()[-1], card)
                 self.assertLessEqual(max(photo["weight"]["width"], photo["weight"]["height"]), 300)
-        self.assertIn("ag-WA-McCusker", naag[("WV", "ag")]["photo"])
+                # The file's own name is never the evidence: no entry's
+                # state comes from it (West Virginia's card, filed
+                # "ag-WA-McCusker", was dropped on 2026-10-25 once its
+                # office's own photograph was shown smaller, rule 87).
+                self.assertNotIn("card reads \"" + photo["photo"], photo["evidence"])
 
     def test_no_headshot_or_photograph_is_shown_uncredited(self):
         payload, _ = stategov.build(ROOT)

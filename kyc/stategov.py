@@ -303,11 +303,13 @@ def court_photo_problems(court_cache):
         raise StateGovError("courts.json photographs: " + "; ".join(errors))
     warnings.extend(withheld)
     seen = court_photos.counts(court_cache)
-    if seen["heavy"]:
-        # Shown all the same (rule 87; the owner's decision of 2026-10-25),
-        # until rule 101's copies serve them lighter.
-        warnings.append(f"{seen['heavy']} justices' photographs shown though their court "
-                        "offers them only above the caps")
+    if seen["smaller"] or seen["heavy"]:
+        # Shown all the same (rule 87; the owner's decision of 2026-10-25):
+        # smaller from the same file where a resizer serves it, else at
+        # full size until rule 101's copies serve it lighter.
+        warnings.append(f"{seen['smaller'] + seen['heavy']} justices' photographs are offered "
+                        f"by their court only above the caps: {seen['smaller']} shown smaller "
+                        f"from the same file, {seen['heavy']} at full size")
     return warnings
 
 
@@ -525,8 +527,8 @@ def build(root="."):
     problems.extend(unpictured(states))
     if candidates_heavy:
         # Shown all the same (rule 87; the owner's decision of 2026-10-25).
-        problems.append(f"{candidates_heavy} statewide candidates' photographs shown though "
-                        "their source offers them only above the caps")
+        problems.append(f"{candidates_heavy} statewide candidates' photographs shown at full "
+                        "size: their source offers them only above the caps")
     problems.extend(statewide_photos.withheld(photo_cache))
     problems.extend(court_photo_problems(court_cache))
     problems.extend(stale_name_forms(states))
