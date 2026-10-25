@@ -74,7 +74,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3324 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3367 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1245,7 +1245,8 @@ bytes and pixel size; `validate` fails a shown one without them
 (`photo-unevidenced`). Washington's voters' guide and Alaska's and Oregon's
 pamphlets print candidates' photographs, but only base64 inside JSON or
 inside PDFs, so there is no file to link; an unmodified hosted copy, which
-the owner allowed on 2026-10-25, waits for the site's store of copies. The page offers a srcset no size wider than a 2x screen
+the owner allowed on 2026-10-25, waits for a follow-up to the site's store
+of copies, which copies only files with an address of their own. The page offers a srcset no size wider than a 2x screen
 needs for the width it draws, so a 165px card stops at the 330px file and a
 judge's 116px portrait at the 250px one.
 
@@ -1259,8 +1260,11 @@ was some 300 MB on a phone. `photocopies` weighs every non-Wikimedia
 portrait address the build shows - the legislators' (`data/legislature/`,
 only those on the legislature's own host or a government's: a copy of a
 news site's, a campaign's or a party's photograph is not hosted here),
-the White House's (`data/federal.js`), the governors' and statewide
-officers' (`data/stategov.js`) and the profiles' first portraits - and
+the White House's (`data/federal.js`), the governors', statewide
+officers', justices' and statewide candidates' (`data/stategov.js`; a
+justice's or a candidate's only on a government's host or the court's own,
+or the holder's office photograph the holder's card shows) and the
+profiles' first portraits - and
 draws each heavy one once in headless Chrome, scaled down (never up) to
 just cover three times the largest box a page draws that kind in:
 
@@ -1270,6 +1274,7 @@ just cover three times the largest box a page draws that kind in:
 | Federal official | 116x145 (the dialog; the hub's card is 72x90) | 348x435 |
 | Governor | 72x72 (`.gov-portrait`) | 216x216 |
 | Statewide officer | 40x40 (`.gov-officer-photo`) | 120x120 |
+| Justice, statewide candidate | 32x32 (`.gov-photo`) | 96x96 |
 | Profile | 180x225 (a card at its widest) | 540x675 |
 
 A copy is a JPEG at quality 0.86 under `candidate_profiles_site/photos/`,
@@ -2180,7 +2185,7 @@ the day, its bytes and size):
    Washington's VoteWA (base64 in the page), Alaska's statements (encrypted
    PDFs) and Oregon's pamphlet (JPEG 2000) have no address of their own;
    they wait for the follow-up the owner allowed on 2026-10-25, which hosts
-   unmodified copies once rule 101's copies (feature/photo-copies) land;
+   unmodified copies (rule 101's copies are of files with an address);
 4. the race's own Wikipedia article ("2026 Kansas gubernatorial
    election"), the link it gives the candidate, matched on given name and
    surname within that race and never on a one-word name, the article

@@ -1,5 +1,9 @@
 {
  "boxes": {
+  "candidate": [
+   96,
+   96
+  ],
   "federal": [
    348,
    435
@@ -7,6 +11,10 @@
   "governor": [
    216,
    216
+  ],
+  "justice": [
+   96,
+   96
   ],
   "legislator": [
    168,
@@ -56,11 +64,13 @@
    "gone": 0,
    "height": 813,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Mon, 27 Jan 2025 20:31:32 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:VT:ag:Charity R. Clark",
     "officer:VT:ag:Charity Clark"
    ],
    "width": 581
@@ -1072,41 +1082,34 @@
    "sha256": "5386b3cc3e3f3d685990c3a3ec3042a136df4017068722490d1ad01a8cc93629",
    "width": 900
   },
-  "https://angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-876x1024.png": {
-   "bytes": 1330007,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 72178,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "6eb235e07ac221aa3d76.jpg",
-    "for": [
-     "person:FEC_H8CA29100"
-    ],
-    "from": [
-     876,
-     1024
-    ],
-    "height": 675,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "6eb235e07ac221aa3d76d29f5f2c759550a5b2ce4c6cd8e65a12019fffbbc2f9",
-    "width": 577
-   },
+  "https://angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-257x300.png": {
+   "bytes": 122954,
    "gone": 0,
-   "height": 1024,
+   "height": 300,
    "kinds": [
     "person"
    ],
-   "lastModified": "Tue, 08 Sep 2026 17:34:03 GMT",
+   "lastModified": "Tue, 08 Sep 2026 17:34:01 GMT",
    "read": "2026-10-25",
    "records": [
     "person:FEC_H8CA29100"
    ],
-   "sha256": "b50f5bddeb5b3a180bbb055fc8d770ad06feb03c027fd7a2822bd77aea62e7f9",
-   "width": 876
+   "width": 257
+  },
+  "https://api.isc.idaho.gov/uploads/Images/Page_Images/1776539631327-brody_2025.webp": {
+   "bytes": 201706,
+   "etag": "W/\"313ea-19da2037d98\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat, 18 Apr 2026 19:13:51 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:ID:court:Robyn M. Brody"
+   ],
+   "width": 800
   },
   "https://apps.dlas.virginia.gov/senatepics/newbiopics/DeSteph08.jpg": {
    "bytes": 404686,
@@ -1639,6 +1642,20 @@
     "legislator:VA:ocd-person/f747c790-f609-4da1-b125-73f1807e1430"
    ],
    "width": 262
+  },
+  "https://ariasforcongress.us/assets/victor-current-portrait.jpg": {
+   "bytes": 84862,
+   "etag": "\"b4f6e9c6fb9c44accb41e4db8f440658\"",
+   "gone": 0,
+   "height": 1000,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6FL19277"
+   ],
+   "width": 800
   },
   "https://arkleg.state.ar.us/Content/photos/2025/House/566_sm.jpg": {
    "bytes": 36544,
@@ -5490,6 +5507,43 @@
    ],
    "width": 593
   },
+  "https://assets.nationbuilder.com/marysilva4congress/pages/29/attachments/original/1709837614/Mary_Silva_-_8.jpg?1709837614": {
+   "bytes": 1007239,
+   "copy": {
+    "box": [
+     540,
+     675
+    ],
+    "bytes": 66585,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "ff626e7467ef98da12e2.jpg",
+    "for": [
+     "person:FEC_H4WA01282"
+    ],
+    "from": [
+     1898,
+     2657
+    ],
+    "height": 756,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "ff626e7467ef98da12e27bb1c11759fc23ec5b2665369bdffcae9351b60ca2f2",
+    "width": 540
+   },
+   "etag": "\"4fbabe8b01c5313b3cc45175a8a59d4b\"",
+   "gone": 0,
+   "height": 2657,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Thu, 07 Mar 2024 18:53:35 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H4WA01282"
+   ],
+   "sha256": "90cfc82ff591f259cf1bf6188b5dcebe4cfebb319b3297148192de81f1acd01c",
+   "width": 1898
+  },
   "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997": {
    "bytes": 306579,
    "copy": {
@@ -5533,12 +5587,27 @@
    "gone": 0,
    "height": 1152,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Wed, 14 May 2025 19:27:19 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:ND:ag:Drew Wrigley",
     "officer:ND:ag:Drew Wrigley"
+   ],
+   "width": 768
+  },
+  "https://aurora4pa.com/wp-content/uploads/2026/04/aurora-stuski-768x1024.jpeg": {
+   "bytes": 84494,
+   "gone": 0,
+   "height": 1024,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6PA04169"
    ],
    "width": 768
   },
@@ -6138,6 +6207,21 @@
     "legislator:AZ:ocd-person/d19ab410-5bc3-4160-b279-765e25d959ab"
    ],
    "width": 874
+  },
+  "https://bengsforsouthdakota.com/wp-content/uploads/2026/09/brian-bengs-candid.jpg": {
+   "bytes": 71986,
+   "etag": "\"6abe617b-11932\"",
+   "gone": 0,
+   "height": 772,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Thu, 01 Oct 2026 13:34:51 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:CAND_44"
+   ],
+   "width": 577
   },
   "https://berkeleyca.gov/sites/default/files/elected-office-holder/portrait.jpg": {
    "bytes": 157347,
@@ -10888,42 +10972,20 @@
    "sha256": "e473fac239ce07860252c80c673c68c8b4b1fb5591a9e5286ed827aa1a3feb75",
    "width": 4009
   },
-  "https://bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09.jpg": {
-   "bytes": 97312,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 52020,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "4726794b408efc67571a.jpg",
-    "for": [
-     "person:FEC_H6CA24345"
-    ],
-    "from": [
-     1638,
-     2048
-    ],
-    "height": 675,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "4726794b408efc67571a0939edf89161bcd9386532775beb929b0439191e74a4",
-    "width": 540
-   },
-   "etag": "\"45a0ef0-17c20-65bb6f048e1f1\"",
+  "https://bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09-480x600.jpg": {
+   "bytes": 21304,
+   "etag": "\"45a0497-5338-65bb6eef77484\"",
    "gone": 0,
-   "height": 2048,
+   "height": 600,
    "kinds": [
     "person"
    ],
-   "lastModified": "Fri, 18 Sep 2026 00:25:33 GMT",
+   "lastModified": "Fri, 18 Sep 2026 00:25:11 GMT",
    "read": "2026-10-25",
    "records": [
     "person:FEC_H6CA24345"
    ],
-   "sha256": "648f4e58284df54f7de5083927326e8c7be007e06158024dde61e08556541ecf",
-   "width": 1638
+   "width": 480
   },
   "https://brianburnett.houserepublicans.wa.gov/wp-content/uploads/2025/01/Rep-Burnett_Brian-2025_900x1200.jpg": {
    "bytes": 715600,
@@ -15571,42 +15633,20 @@
    "sha256": "1fd2bf787b191a851721015bcf9f9479bbe3f3fc59832812aff8ea1fc05ea806",
    "width": 500
   },
-  "https://cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped.png": {
-   "bytes": 1690722,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 72115,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "b142a42835ae9cfd4898.jpg",
-    "for": [
-     "person:FEC_H6WA08167"
-    ],
-    "from": [
-     1254,
-     1097
-    ],
-    "height": 675,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "b142a42835ae9cfd48985f1fb5b7aadfa8348e78a63e63b813e9b4667bcd49d6",
-    "width": 772
-   },
-   "etag": "\"f2408b97987bb64f293dc1f87aace9cb\"",
+  "https://cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped-p-500.png": {
+   "bytes": 109792,
+   "etag": "\"9c8a1e9f6c5d998bc321bfa02126e74a\"",
    "gone": 0,
-   "height": 1097,
+   "height": 437,
    "kinds": [
     "person"
    ],
-   "lastModified": "Wed, 20 May 2026 04:56:50 GMT",
+   "lastModified": "Wed, 20 May 2026 04:56:53 GMT",
    "read": "2026-10-25",
    "records": [
     "person:FEC_H6WA08167"
    ],
-   "sha256": "7513de9271dfae517d65a581b15f54df2d934e21afbffe5fece9690f520c5877",
-   "width": 1254
+   "width": 500
   },
   "https://cga.ct.gov/legpics/008.png?ver=": {
    "bytes": 93811,
@@ -15823,43 +15863,6 @@
     "legislator:CT:ocd-person/ca8be710-988a-4415-bc37-6d3a92d1afcd"
    ],
    "width": 231
-  },
-  "https://chelseyhockettforcongress.com/images/chelsey.jpg": {
-   "bytes": 713891,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 75218,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "8599d210f38861203303.jpg",
-    "for": [
-     "person:FEC_H6TX05189"
-    ],
-    "from": [
-     2160,
-     3240
-    ],
-    "height": 810,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "8599d210f3886120330331e087dba79fb387e82badb47847a3029e64a7c59770",
-    "width": 540
-   },
-   "etag": "\"920664-ae4a3-6511db2ec5c80\"",
-   "gone": 0,
-   "height": 3240,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Wed, 06 May 2026 03:24:18 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6TX05189"
-   ],
-   "sha256": "b6fe821baa7ca6b2ca34e6f5d1e31af0b5b02bbdd075a58ae44e573a32f9f3d8",
-   "width": 2160
   },
   "https://clerk.house.gov/images/members/A000055.jpg": {
    "bytes": 46264,
@@ -22462,6 +22465,276 @@
    ],
    "width": 200
   },
+  "https://courts.delaware.gov/supreme/agency/img/supreme_seitz_2023.jpg": {
+   "bytes": 16204,
+   "etag": "\"887d45cc71d0d91:0\"",
+   "gone": 0,
+   "height": 190,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 16 Aug 2023 18:45:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:DE:court:Collins J. Seitz, Jr."
+   ],
+   "width": 150
+  },
+  "https://courts.delaware.gov/supreme/agency/img/supreme_traynor.jpg": {
+   "bytes": 28072,
+   "etag": "\"03258c8c3ad31:0\"",
+   "gone": 0,
+   "height": 190,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 01 Aug 2017 12:43:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:DE:court:Gary F. Traynor"
+   ],
+   "width": 150
+  },
+  "https://courts.delaware.gov/supreme/agency/img/supreme_zurn_2026.jpg": {
+   "bytes": 5398,
+   "etag": "\"a1b6896c7e56dd1:0\"",
+   "gone": 0,
+   "height": 225,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 07 Oct 2026 17:08:07 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:DE:court:Morgan T. Zurn"
+   ],
+   "width": 150
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/judge_Isheethumbnail.jpg": {
+   "bytes": 3597,
+   "etag": "\"6414bd7f8f8dc1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 10 Jun 2026 16:47:36 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:David M. Ishee"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justice_king_thumbnail.jpg": {
+   "bytes": 20835,
+   "etag": "\"6486fcf8ceaad51:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 04 Dec 2019 18:16:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:Leslie D. King"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justicebranning_thumbnail.jpg": {
+   "bytes": 5407,
+   "etag": "\"622ebf934ccbdb1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 22 May 2025 19:06:09 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:Jenifer B. Branning"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justicecoleman_thumbnail.jpg": {
+   "bytes": 6000,
+   "etag": "\"d18ff03be1db1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 19 Jun 2025 17:02:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:Josiah D. Coleman"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justicerandolph_thumbnail.jpg": {
+   "bytes": 5970,
+   "etag": "\"b2616ec44e52db1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 19 Dec 2024 19:46:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:Michael K. Randolph"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justicesullivan_thumbnail.jpg": {
+   "bytes": 6099,
+   "etag": "\"414c2c3f4ccbdb1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 22 May 2025 19:03:47 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:David P. Sullivan"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justicetollison_thumbnail.jpg": {
+   "bytes": 5703,
+   "etag": "\"ab7abccad63bdd1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 03 Sep 2026 19:02:40 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:Amanda Jones Tollison"
+   ],
+   "width": 108
+  },
+  "https://courts.ms.gov/appellatecourts/sc/bios/justicewilson_thumbnail.jpg": {
+   "bytes": 6904,
+   "etag": "\"407adc9f202bdd1:0\"",
+   "gone": 0,
+   "height": 142,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 13 Aug 2026 12:38:21 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MS:court:Celeste Embrey Wilson"
+   ],
+   "width": 108
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/baker_new1.jpg": {
+   "bytes": 104579,
+   "etag": "\"4bc921f34f62d31:0\"",
+   "gone": 0,
+   "height": 400,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 20 Nov 2017 22:36:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:Beth Baker"
+   ],
+   "width": 300
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/bidegaray-tmb.jpg": {
+   "bytes": 4075,
+   "etag": "\"0d6d878c4b3db1:0\"",
+   "gone": 0,
+   "height": 120,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 22 Apr 2025 20:23:56 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:Katherine M. Bidegaray"
+   ],
+   "width": 80
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/gustafson.jpg": {
+   "bytes": 38967,
+   "etag": "\"729f6852c5d1d31:0\"",
+   "gone": 0,
+   "height": 450,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 11 Apr 2018 18:45:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:Ingrid Gustafson"
+   ],
+   "width": 300
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/mckinnon.jpg": {
+   "bytes": 2217,
+   "etag": "\"feedcd5e4b8d21:0\"",
+   "gone": 0,
+   "height": 100,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 06 Sep 2016 14:31:35 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:Laurie McKinnon"
+   ],
+   "width": 80
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/ricemug.jpg": {
+   "bytes": 38074,
+   "etag": "\"dac0995c7cf1d01:0\"",
+   "gone": 0,
+   "height": 314,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 17 Sep 2015 19:09:22 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:James A. Rice"
+   ],
+   "width": 226
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/shea-tmb.jpg": {
+   "bytes": 31242,
+   "etag": "\"4485994287d01:0\"",
+   "gone": 0,
+   "height": 100,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 05 May 2015 14:44:48 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:James Jeremiah Shea"
+   ],
+   "width": 80
+  },
+  "https://courts.mt.gov/external/supreme/bios/images/swanson.jpg": {
+   "bytes": 19461,
+   "etag": "\"0d8c9f28a3db1:0\"",
+   "gone": 0,
+   "height": 352,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 01 Apr 2025 17:08:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:MT:court:Cory Swanson"
+   ],
+   "width": 235
+  },
   "https://da.mdah.ms.gov/series-files/legislature/composites/2016/500/house-of-representatives/2016_2020HousePhotos/Tracy.Arnold.jpg": {
    "bytes": 87160,
    "gone": 0,
@@ -25308,6 +25581,21 @@
     "person:FEC_S6DE00206"
    ],
    "width": 447
+  },
+  "https://flowersformaryland.com/wp-content/uploads/2023/10/berney-flowers-2023-600x729.jpg": {
+   "bytes": 60971,
+   "etag": "\"68c72ff4-ee2b\"",
+   "gone": 0,
+   "height": 729,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 14 Sep 2025 21:13:24 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H4MD03149"
+   ],
+   "width": 600
   },
   "https://flsenate.gov/PublishedContent/Senators/2022-2024/Photos/s02_5389.jpg": {
    "bytes": 62663,
@@ -31773,6 +32061,96 @@
    "sha256": "a74c5fc620cfe66ad2bf7db908eef03bbc5f0df67f4766ff8419db9005bc8a2d",
    "width": 900
   },
+  "https://i0.wp.com/ag.hawaii.gov/wp-content/uploads/2025/08/AG-Anne-Lopez-scaled.jpg?w=500&ssl=1": {
+   "bytes": 19114,
+   "etag": "\"c05b97b5d7f9f78a\"",
+   "gone": 0,
+   "height": 665,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:27:50 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:HI:ag:Anne Lopez"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/ago.wv.gov/sites/default/files/2025-09/AG%20McCuskey%20pic.jpeg?w=500&ssl=1": {
+   "bytes": 29620,
+   "etag": "\"a459e8180e195ebe\"",
+   "gone": 0,
+   "height": 625,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:28:21 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:WV:ag:J.B. McCuskey"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/chelseyhockettforcongress.com/images/chelsey.jpg?w=500&ssl=1": {
+   "bytes": 34180,
+   "etag": "\"100fb5d7ea8bddf8\"",
+   "gone": 0,
+   "height": 750,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 18 Oct 2026 22:33:05 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6TX05189"
+   ],
+   "width": 499
+  },
+  "https://i0.wp.com/dontracyforil.com/wp-content/uploads/2026/07/tracy-headshot-final.jpg?resize=236%2C377&ssl=1": {
+   "bytes": 10390,
+   "etag": "\"d3723849d5557849\"",
+   "gone": 0,
+   "height": 377,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 08:58:55 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:CAND_34"
+   ],
+   "width": 236
+  },
+  "https://i0.wp.com/fellerforcongress.com/feller-portrait.png?w=500&ssl=1": {
+   "bytes": 239276,
+   "etag": "\"9f4c5bef9cf3b2c9\"",
+   "gone": 0,
+   "height": 665,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:00:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6WA02228"
+   ],
+   "width": 499
+  },
+  "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1": {
+   "bytes": 12010,
+   "etag": "\"bcca3005a94cc181\"",
+   "gone": 0,
+   "height": 500,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:02:40 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6NV01331"
+   ],
+   "width": 500
+  },
   "https://i0.wp.com/nlga.us/wp-content/uploads/2025/04/Burt-Jones-scaled-e1682542209640.jpeg?resize=150%2C150&ssl=1": {
    "bytes": 2084,
    "etag": "\"e0df8b63d65de363\"",
@@ -31839,11 +32217,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:33:31 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:VT:lt:John S. Rodgers",
     "officer:VT:lt:John Rodgers"
    ],
    "width": 150
@@ -31884,11 +32264,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:33:34 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:ID:lt:Scott Bedke",
     "officer:ID:lt:Scott Bedke"
    ],
    "width": 150
@@ -31959,11 +32341,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 17 Oct 2026 14:31:38 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:MD:lt:Aruna Miller",
     "officer:MD:lt:Aruna Miller"
    ],
    "width": 150
@@ -31974,11 +32358,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Wed, 14 Oct 2026 00:32:38 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:PA:lt:Austin Davis",
     "officer:PA:lt:Austin Davis"
    ],
    "width": 150
@@ -31989,11 +32375,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sun, 25 Oct 2026 10:30:32 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:TX:lt:Dan Patrick",
     "officer:TX:lt:Dan Patrick"
    ],
    "width": 150
@@ -32139,11 +32527,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Thu, 08 Oct 2026 02:13:08 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:MA:lt:Kimberley Driscoll",
     "officer:MA:lt:Kim Driscoll"
    ],
    "width": 150
@@ -32169,11 +32559,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 17 Oct 2026 14:31:14 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:AR:lt:Leslie Rutledge",
     "officer:AR:lt:Leslie Rutledge"
    ],
    "width": 150
@@ -32289,11 +32681,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 17 Oct 2026 02:02:48 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:RI:lt:Sabina Matos",
     "officer:RI:lt:Sabina Matos"
    ],
    "width": 150
@@ -32319,11 +32713,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 17 Oct 2026 14:31:54 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NV:lt:Stavros Anthony",
     "officer:NV:lt:Stavros Anthony"
    ],
    "width": 150
@@ -32334,11 +32730,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 17 Oct 2026 14:31:20 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:CT:lt:Susan Bysiewicz",
     "officer:CT:lt:Susan Bysiewicz"
    ],
    "width": 150
@@ -32349,11 +32747,13 @@
    "gone": 0,
    "height": 150,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 17 Oct 2026 14:32:04 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:SD:lt:Tony Venhuizen",
     "officer:SD:lt:Tony Venhuizen"
    ],
    "width": 150
@@ -32484,14 +32884,138 @@
    "gone": 0,
    "height": 300,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:34:14 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NE:lt:Joe Kelly",
     "officer:NE:lt:Joe Kelly"
    ],
    "width": 280
+  },
+  "https://i0.wp.com/projectduecourse.org/RPH_Candidate_Photo.jpg?w=330&ssl=1": {
+   "bytes": 162038,
+   "etag": "\"d2789687268f1501\"",
+   "gone": 0,
+   "height": 438,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:00:37 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6OK05301"
+   ],
+   "width": 330
+  },
+  "https://i0.wp.com/rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg?w=500&ssl=1": {
+   "bytes": 14094,
+   "etag": "\"f0d20fa03c458a2b\"",
+   "gone": 0,
+   "height": 666,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 18 Oct 2026 22:33:10 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6WI08205"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/rudyforuscongress.com/wp-content/uploads/2025/05/IMG_5517-scaled.jpg?w=800&ssl=1": {
+   "bytes": 62598,
+   "etag": "\"c8665ab93af133d0\"",
+   "gone": 0,
+   "height": 1101,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Fri, 04 Sep 2026 10:38:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H2CA00153"
+   ],
+   "width": 799
+  },
+  "https://i0.wp.com/vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg?w=500&ssl=1": {
+   "bytes": 29086,
+   "etag": "\"b3d64b569cb5640c\"",
+   "gone": 0,
+   "height": 888,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:00:34 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6CA52163"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg?w=500&ssl=1": {
+   "bytes": 19272,
+   "etag": "\"05d60165b8067795\"",
+   "gone": 0,
+   "height": 590,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:27:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:PA:ag:Dave Sunday"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png?w=330&ssl=1": {
+   "bytes": 96350,
+   "etag": "\"2a67927f85e7bb84\"",
+   "gone": 0,
+   "height": 330,
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:27:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:ag:Kris Mayes",
+    "officer:AZ:ag:Kris Mayes"
+   ],
+   "width": 330
+  },
+  "https://i0.wp.com/www.moniqueforcongress.com/images/despain-large.png?w=330&ssl=1": {
+   "bytes": 147294,
+   "etag": "\"023f427460e27731\"",
+   "gone": 0,
+   "height": 524,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:00:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6OR04260"
+   ],
+   "width": 330
+  },
+  "https://i0.wp.com/www.nancymannion.com/img/Nancy-Mannion-Main.png?w=500&ssl=1": {
+   "bytes": 178798,
+   "etag": "\"0ec8c0a5919dd227\"",
+   "gone": 0,
+   "height": 595,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:00:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6PA11099"
+   ],
+   "width": 500
   },
   "https://i0.wp.com/www.nga.org/wp-content/uploads/2018/01/Governor-Ivey-2019-Headshot-scaled.jpg?w=500&ssl=1": {
    "bytes": 34912,
@@ -32544,11 +33068,13 @@
    "gone": 0,
    "height": 750,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:34:20 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:VT:governor:Phil Scott",
     "governor:VT:Phil Scott"
    ],
    "width": 500
@@ -32589,11 +33115,13 @@
    "gone": 0,
    "height": 500,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:34:23 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:IL:governor:JB Pritzker",
     "governor:IL:JB Pritzker"
    ],
    "width": 500
@@ -32754,11 +33282,13 @@
    "gone": 0,
    "height": 750,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:34:38 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:CT:governor:Ned Lamont",
     "governor:CT:Ned Lamont"
    ],
    "width": 500
@@ -32799,11 +33329,13 @@
    "gone": 0,
    "height": 500,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 19 Oct 2026 03:16:13 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NV:governor:Joseph Lombardo",
     "governor:NV:Joe Lombardo"
    ],
    "width": 500
@@ -32814,11 +33346,13 @@
    "gone": 0,
    "height": 549,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:34:41 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:OR:governor:Tina Kotek",
     "governor:OR:Tina Kotek"
    ],
    "width": 500
@@ -32829,11 +33363,13 @@
    "gone": 0,
    "height": 330,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 19 Oct 2026 03:30:35 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:PA:governor:Josh Shapiro",
     "governor:PA:Josh Shapiro"
    ],
    "width": 330
@@ -32844,11 +33380,13 @@
    "gone": 0,
    "height": 500,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:03:54 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:AZ:governor:Katie Hobbs",
     "governor:AZ:Katie Hobbs"
    ],
    "width": 500
@@ -32859,11 +33397,13 @@
    "gone": 0,
    "height": 500,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Sun, 25 Oct 2026 11:34:46 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:MD:governor:Wes Moore",
     "governor:MD:Wes Moore"
    ],
    "width": 500
@@ -32919,11 +33459,13 @@
    "gone": 0,
    "height": 500,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 19 Oct 2026 20:36:18 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:SD:governor:Larry Rhoden",
     "governor:SD:Larry Rhoden"
    ],
    "width": 500
@@ -32964,11 +33506,13 @@
    "gone": 0,
    "height": 500,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 19 Oct 2026 05:23:00 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NH:governor:Kelly Ayotte",
     "governor:NH:Kelly Ayotte"
    ],
    "width": 500
@@ -32987,6 +33531,38 @@
     "governor:VA:Abigail Spanberger"
    ],
    "width": 500
+  },
+  "https://i0.wp.com/www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg?w=500&ssl=1": {
+   "bytes": 17610,
+   "etag": "\"1b2d142c8ad49a06\"",
+   "gone": 0,
+   "height": 625,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:27:57 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:NJ:ag:Jennifer Davenport"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg?w=500&ssl=1": {
+   "bytes": 17820,
+   "etag": "\"1e978e4a8925b100\"",
+   "gone": 0,
+   "height": 750,
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:27:46 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:CA:ag:Rob Bonta",
+    "officer:CA:ag:Rob Bonta"
+   ],
+   "width": 499
   },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_blake_johnson_1.jpg": {
    "bytes": 114487,
@@ -33799,6 +34375,19 @@
    ],
    "width": 500
   },
+  "https://images.squarespace-cdn.com/content/v1/6862a998f72d105f9d938b41/b163a071-e297-4345-9ad9-1909800dd2a8/Jeffrey-Walter-17.PNG?format=500w": {
+   "bytes": 179744,
+   "gone": 0,
+   "height": 700,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6IL11166"
+   ],
+   "width": 500
+  },
   "https://images.squarespace-cdn.com/content/v1/6879022f5686401f7b648b84/1d7e216d-6a81-439a-9f1a-d5e78df398fd/Amanda-Hollowell_Headshot_Silo.png?format=500w": {
    "bytes": 261414,
    "gone": 0,
@@ -33824,6 +34413,19 @@
     "person:FEC_H6PA14200"
    ],
    "width": 300
+  },
+  "https://images.squarespace-cdn.com/content/v1/68f7b7fa74d2410763d13e33/b45f3b0c-a9a5-475b-8359-988eae0e2a12/Montavon+official+photo+%281%29.jpg": {
+   "bytes": 126218,
+   "gone": 0,
+   "height": 1121,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H4FL17060"
+   ],
+   "width": 1200
   },
   "https://images.squarespace-cdn.com/content/v1/693c3ee95bff1a362a266abf/3c7175b3-7440-4496-bd80-c46ba66628c1/Singer+Proofs-91.jpg?format=500w": {
    "bytes": 28360,
@@ -33851,6 +34453,41 @@
    ],
    "width": 500
   },
+  "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png": {
+   "bytes": 479272,
+   "copy": {
+    "box": [
+     540,
+     675
+    ],
+    "bytes": 81682,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "5ebf94c044a22025dbf7.jpg",
+    "for": [
+     "person:FEC_H6TX13159"
+    ],
+    "from": [
+     678,
+     1150
+    ],
+    "height": 916,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "5ebf94c044a22025dbf72df3f0b77d9aa27bb45918a88b35896766a519da5db7",
+    "width": 540
+   },
+   "gone": 0,
+   "height": 1150,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6TX13159"
+   ],
+   "sha256": "459ea92e2c35040ea0c9b8efe621d38cba29594f9aee3a58a36e368769b17fc3",
+   "width": 678
+  },
   "https://images.squarespace-cdn.com/content/v1/699ca62672f2f441420897e9/109e6ee2-7b4c-447f-b2b9-e666e5780825/Shane+Lewis+Marine+Photo.jpg": {
    "bytes": 15408,
    "gone": 0,
@@ -33877,42 +34514,86 @@
    ],
    "width": 500
   },
-  "https://joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-847x1024.png": {
-   "bytes": 499208,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 39049,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "46d660f604e7a2eb53a5.jpg",
-    "for": [
-     "person:FEC_H6CA25219"
-    ],
-    "from": [
-     847,
-     1024
-    ],
-    "height": 675,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "46d660f604e7a2eb53a51c2ae8c08fa8a2828ce3bdf4031eafdff711c2ea437a",
-    "width": 558
-   },
-   "etag": "\"67f40b4e-bb35b\"",
+  "https://jenanelson.com/wp-content/uploads/2025/09/jena-nelson-headshot-new-271x300.png": {
+   "bytes": 119585,
+   "etag": "\"68cdb103-1d321\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Fri, 19 Sep 2025 19:37:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6OK05293"
+   ],
+   "width": 271
+  },
+  "https://jerseyjustin4senate.org/wp-content/uploads/2024/02/D70_8732-Web-684x1024.webp": {
+   "bytes": 43284,
+   "etag": "\"a914-65aad69b57357\"",
    "gone": 0,
    "height": 1024,
    "kinds": [
     "person"
    ],
-   "lastModified": "Mon, 07 Apr 2025 17:28:46 GMT",
+   "lastModified": "Fri, 04 Sep 2026 19:38:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:CAND_40"
+   ],
+   "width": 684
+  },
+  "https://joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-248x300.png": {
+   "bytes": 48308,
+   "etag": "\"67f40b4b-1190f\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Mon, 07 Apr 2025 17:28:43 GMT",
    "read": "2026-10-25",
    "records": [
     "person:FEC_H6CA25219"
    ],
-   "sha256": "76147620a3408c2f0b3d0a54025b01c5df2284a5c14a00311618cf76fce27c42",
-   "width": 847
+   "width": 248
+  },
+  "https://jonnyutah4congress.com/images/hero/jonny-landing-page-image.webp?v=1": {
+   "bytes": 221864,
+   "copy": {
+    "box": [
+     540,
+     675
+    ],
+    "bytes": 75330,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "e2bf9d46c982c5ebeda0.jpg",
+    "for": [
+     "person:FEC_H6UT02424"
+    ],
+    "from": [
+     1134,
+     1509
+    ],
+    "height": 719,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "e2bf9d46c982c5ebeda0e068c834ba07b25dc261ad038e925d9d198a99086392",
+    "width": 540
+   },
+   "etag": "\"bb09cf28004418625d126e6a34dbf9f6-ssl\"",
+   "gone": 0,
+   "height": 1509,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6UT02424"
+   ],
+   "sha256": "8b360eeae57bb9698af8bcdbcf28a2fc848cf862ee9aab256c99d5ea3bafc7d0",
+   "width": 1134
   },
   "https://law.alaska.gov/img/Mills.jpg": {
    "bytes": 28072,
@@ -54003,6 +54684,33 @@
    ],
    "width": 170
   },
+  "https://media.base44.com/images/public/69fcfad11a04d0a611264e35/8fd4e522f__D6A9689.jpg": {
+   "bytes": 50726,
+   "gone": 0,
+   "height": 1024,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H4TX14111"
+   ],
+   "width": 683
+  },
+  "https://melissaforcongress.com/wp-content/uploads/2023/09/Melissa-Headshot-480x720.jpg": {
+   "bytes": 75865,
+   "gone": 0,
+   "height": 720,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Wed, 13 Sep 2023 21:17:14 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H4TX38011"
+   ],
+   "width": 480
+  },
   "https://memdata.virginiageneralassembly.gov/images/display_image/H0056": {
    "bytes": 724744,
    "copy": {
@@ -58749,6 +59457,21 @@
    ],
    "width": 250
   },
+  "https://mikeklein4congress.com/wp-content/uploads/2026/04/Klein-photo.png": {
+   "bytes": 245318,
+   "etag": "\"69e0ea6a-4c70a\"",
+   "gone": 0,
+   "height": 720,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Thu, 16 Apr 2026 13:55:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6FL03149"
+   ],
+   "width": 480
+  },
   "https://montgomerytn.gov/storage/departments/commission/commissioner/Commissioners-Sept-2022/MichaelLankford.jpg": {
    "bytes": 31108,
    "etag": "\"6a960190-7984\"",
@@ -58959,16 +59682,108 @@
    ],
    "width": 140
   },
+  "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/18.Freudenberg.jpg?h=f79d79ee&itok=fhaEGVTv": {
+   "bytes": 7073,
+   "etag": "\"66856237-1ba1\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 03 Jul 2024 14:37:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NE:court:John R. Freudenberg"
+   ],
+   "width": 200
+  },
+  "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/18.Papik_.jpg?h=f6baa413&itok=RsEnMX2H": {
+   "bytes": 6190,
+   "etag": "\"66856246-182e\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 03 Jul 2024 14:37:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NE:court:Jonathan J. Papik"
+   ],
+   "width": 200
+  },
+  "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/Bergevin-2024_0.jpg?h=f95f79eb&itok=WrKi5RwE": {
+   "bytes": 5504,
+   "etag": "\"67b88d95-1580\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 21 Feb 2025 14:28:37 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NE:court:Jason M. Bergevin"
+   ],
+   "width": 200
+  },
+  "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/Funke_robe-2018.jpg?h=526dba2c&itok=jZ7WZCu2": {
+   "bytes": 5116,
+   "etag": "\"673623da-13fc\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 14 Nov 2024 16:22:50 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NE:court:Jeffrey J. Funke"
+   ],
+   "width": 200
+  },
+  "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/Stacy.jpg?h=26e2f474&itok=ZM7axA2O": {
+   "bytes": 7981,
+   "etag": "\"66b4c6ba-1f2d\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 08 Aug 2024 13:23:06 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NE:court:Stephanie F. Stacy"
+   ],
+   "width": 200
+  },
+  "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/cassel.jpg?h=7ce96cc7&itok=x14WIHl7": {
+   "bytes": 5469,
+   "etag": "\"65fa8630-155d\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 20 Mar 2024 06:46:08 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NE:court:William B. Cassel"
+   ],
+   "width": 200
+  },
   "https://nmdoj.gov/wp-content/uploads/2023/12/DSC071201-e1702312591459-996x1024-1-292x300.png": {
    "bytes": 38635,
    "gone": 0,
    "height": 300,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Sat, 15 Jun 2024 22:39:57 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NM:ag:Raul Torrez",
     "officer:NM:ag:Raúl Torrez"
    ],
    "width": 292
@@ -59120,6 +59935,23 @@
    ],
    "sha256": "c0867c4ad0ff24f8a59142e5942f39d1ba3ee45e612930b584fd5b452004dd67",
    "width": 1333
+  },
+  "https://oag.maryland.gov/our-office/PublishingImages/AttorneyGeneral.jpg": {
+   "bytes": 61235,
+   "etag": "\"{101E52EA-4A8A-432A-B0D1-404EC8EE27F5},2pub\"",
+   "gone": 0,
+   "height": 240,
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "lastModified": "Thu, 10 Apr 2025 18:04:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:MD:ag:Anthony G. Brown",
+    "officer:MD:ag:Anthony Brown"
+   ],
+   "width": 192
   },
   "https://ohiohouse.gov/assets/people/headshots/medium/3053.jpg": {
    "bytes": 304840,
@@ -59492,6 +60324,111 @@
     "legislator:OH:ocd-person/a57f6c78-ac58-4f7d-870e-0d8052984cd9"
    ],
    "width": 288
+  },
+  "https://oksc.oscn.net/uploads/8x10_Justice-Combs-160x200.jpg": {
+   "bytes": 19815,
+   "etag": "\"74bcbd998b36d91:0\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:Douglas L. Combs"
+   ],
+   "width": 160
+  },
+  "https://oksc.oscn.net/uploads/JamesEdmondson-168x200.jpg": {
+   "bytes": 15130,
+   "etag": "\"fd71d958b36d91:0\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:51 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:James E. Edmondson"
+   ],
+   "width": 168
+  },
+  "https://oksc.oscn.net/uploads/JamesWinchester-168x200.jpg": {
+   "bytes": 17165,
+   "etag": "\"e086f3948b36d91:0\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:51 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:James R. Winchester"
+   ],
+   "width": 168
+  },
+  "https://oksc.oscn.net/uploads/NomaGurich-1-168x200.jpg": {
+   "bytes": 20147,
+   "etag": "\"7370b3948b36d91:0\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:50 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:Noma Gurich"
+   ],
+   "width": 168
+  },
+  "https://oksc.oscn.net/uploads/darby-240x300.jpg": {
+   "bytes": 23259,
+   "etag": "\"4d995c978b36d91:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:55 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:Richard Darby"
+   ],
+   "width": 240
+  },
+  "https://oksc.oscn.net/uploads/kane-240x300.jpg": {
+   "bytes": 23892,
+   "etag": "\"3e7213998b36d91:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:M. John Kane IV"
+   ],
+   "width": 240
+  },
+  "https://oksc.oscn.net/uploads/rowe-1-240x300.jpg": {
+   "bytes": 7071,
+   "etag": "\"d34aea998b36d91:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 01 Feb 2023 22:21:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:court:Dustin P. Rowe"
+   ],
+   "width": 240
   },
   "https://oksenate.gov/sites/default/files/1200px-DarcyJech_0.jpg": {
    "bytes": 257790,
@@ -60670,57 +61607,37 @@
    ],
    "width": 465
   },
+  "https://piaforcongress.com/ignition/resources/img/Pia-Dandiya-for-Congress-pia-portrait.webp": {
+   "bytes": 42430,
+   "etag": "\"a5be-65c33ce475468\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Thu, 24 Sep 2026 05:23:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6FL21059"
+   ],
+   "width": 957
+  },
   "https://portal.ct.gov/-/media/ag/about-the-ag/agtong-headshot.png?rev=4a0632a1575241d28bb665b018292c1b&la=en&h=185&w=200&hash=967A32323799CA3E2102ABB9309E36C1": {
    "bytes": 44010,
    "etag": "8381e063e09c456aa7c15d4bf50b93e8",
    "gone": 0,
    "height": 185,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Tue, 14 Feb 2023 13:24:42 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:CT:ag:William Tong",
     "officer:CT:ag:William Tong"
    ],
    "width": 200
-  },
-  "https://projectduecourse.org/RPH_Candidate_Photo.jpg": {
-   "bytes": 582546,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 74900,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "bcbc7b9b70f8eb04a1ef.jpg",
-    "for": [
-     "person:FEC_H6OK05301"
-    ],
-    "from": [
-     768,
-     1020
-    ],
-    "height": 717,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "bcbc7b9b70f8eb04a1ef1358264d1aabb6428a24d41f946244d80e0e759ccac7",
-    "width": 540
-   },
-   "etag": "\"b2394007799ac0da65bbc655edb06df1\"",
-   "gone": 0,
-   "height": 1020,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Tue, 20 Oct 2026 01:26:00 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6OK05301"
-   ],
-   "sha256": "9576ff962e3c447c24941de53523b6f0588de7ea62dd27cfb36a0d5d526a2133",
-   "width": 768
   },
   "https://pub.njleg.gov/publications/members/abdelaziz_al_2025.jpg": {
    "bytes": 71839,
@@ -62447,6 +63364,21 @@
    ],
    "width": 250
   },
+  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699e2c87152195f76cb97e6c/8fe141e97_CLOSEUP1.jpg": {
+   "bytes": 120276,
+   "etag": "\"56464ba3f9ac180c85850d17e76c8eb8\"",
+   "gone": 0,
+   "height": 1024,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Thu, 26 Feb 2026 00:32:09 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6IA01213"
+   ],
+   "width": 868
+  },
   "https://rachelgrage.com/_ipx/w_400&f_webp/images/rg.png": {
    "bytes": 18984,
    "etag": "\"22134988\"",
@@ -62489,43 +63421,6 @@
     "officer:RI:ag:Peter Neronha"
    ],
    "width": 260
-  },
-  "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg": {
-   "bytes": 245825,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 56970,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "41a42e0c4e85c5e9173e.jpg",
-    "for": [
-     "person:FEC_H6WI08205"
-    ],
-    "from": [
-     1536,
-     2048
-    ],
-    "height": 720,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "41a42e0c4e85c5e9173e72fd08b5558f0bfc0e566f35b299c5cc52865bd823e8",
-    "width": 540
-   },
-   "etag": "\"3c041-6938d613-6734d77429e9b323;;;\"",
-   "gone": 0,
-   "height": 2048,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Wed, 10 Dec 2025 02:08:19 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6WI08205"
-   ],
-   "sha256": "fb02ff6775412d5d8d348ea52c7924bd89f1e78b5639f4bb5e3f92b692d47eb0",
-   "width": 1536
   },
   "https://rickedmonds.com/wp-content/uploads/2026/06/rick-edmonds-headshot-Thumb.jpg": {
    "bytes": 19908,
@@ -62606,40 +63501,6 @@
     "person:FEC_H4ME01160"
    ],
    "width": 263
-  },
-  "https://run.imgix.net/f9df0b31-2ce0-4b8a-9a5d-4765b3afb86b/ab4b5c88-afea-4c83-9eb7-311e7cead6a6/ab4b5c88-afea-4c83-9eb7-311e7cead6a6.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C777%2C3648%2C3648&auto=compress%2Cformat&fit=fillmax&w=2048&q=75&s=cb469615bb857ebbc21f8c8780cda69b": {
-   "bytes": 563893,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 61900,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "fa20d851a9ff54ce4a7c.jpg",
-    "for": [
-     "person:FEC_H6AZ05240"
-    ],
-    "from": [
-     2048,
-     2048
-    ],
-    "height": 675,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "fa20d851a9ff54ce4a7ced751df606d3e5ac474db71d23371fe56ba70bd1d582",
-    "width": 675
-   },
-   "gone": 0,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Fri, 23 Oct 2026 14:06:28 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6AZ05240"
-   ],
-   "sha256": "0af709d267ad6a7132c2d5ff361e9fde00162cc37fee992c4657cd5743f5f0bb"
   },
   "https://scstatehouse.gov/images/members/0002272727.jpg": {
    "bytes": 10706,
@@ -63037,12 +63898,14 @@
    "gone": 0,
    "height": 153,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Thu, 05 Dec 2024 19:36:30 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:SC:ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab"
+    "legislator:SC:ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab",
+    "person:FEC_H6SC05202"
    ],
    "width": 125
   },
@@ -66879,6 +67742,17 @@
     "person:FEC_H6NJ06286"
    ]
   },
+  "https://static.wixstatic.com/media/71f2e5_c8325d924542483d953c55f55e0ec3aa~mv2.jpg/v1/fill/w_378,h_681,al_c,q_80,enc_avif,quality_auto/71f2e5_c8325d924542483d953c55f55e0ec3aa~mv2.jpg": {
+   "bytes": 22910,
+   "gone": 0,
+   "kinds": [
+    "person"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6MT02150"
+   ]
+  },
   "https://static.wixstatic.com/media/7d9660_bda4c45919f84546afe8accaab2636d2~mv2.png/v1/crop/x_535,y_0,w_836,h_1080/fill/w_471,h_608,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Kelly%20Esti%20Headshot%208_edited.png": {
    "bytes": 26314,
    "gone": 0,
@@ -66949,6 +67823,30 @@
    "sha256": "b0f4aeb09b428f078ea6b1130360826d85a149f7c834f841c1bb254f736dbd35",
    "width": 900
   },
+  "https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/styles/large/public/2023-01/Justice%20Kelli%20Evans.png?itok=FjJ_04VJ": {
+   "bytes": 16469,
+   "etag": "\"tCZQ8tynA/JiZnNzVkWE17qzFJO02iaqHWqv00kF40s\"",
+   "gone": 0,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:CA:court:Kelli M. Evans"
+   ]
+  },
+  "https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/styles/large/public/2023-04/GLiu_040323.png?itok=RDC_v92i": {
+   "bytes": 9488,
+   "etag": "\"8+sLb6ZiKctSqQg6JFEsTZXdyhVH3FktFULulZQdpL0\"",
+   "gone": 0,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:CA:court:Goodwin H. Liu"
+   ]
+  },
   "https://tedbrown.org/website/images/ted-headshot-2026.jpg": {
    "bytes": 10815,
    "etag": "\"66a8676ea8f10c736c109160f560314a\"",
@@ -66977,6 +67875,111 @@
     "person:FEC_H6MN08179"
    ],
    "width": 940
+  },
+  "https://ujs.sd.gov/media/1iceheld/devaney-website.jpg?width=345&height=345&v=1dca7f5225627d0": {
+   "bytes": 39220,
+   "etag": "\"1dca7f524c5b534\"",
+   "gone": 0,
+   "height": 345,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 27 Feb 2026 14:27:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SD:court:Patricia J. DeVaney"
+   ],
+   "width": 345
+  },
+  "https://ujs.sd.gov/media/bqvoglr1/jensen-website.jpg?width=345&height=345&v=1dca7f62b8608b0": {
+   "bytes": 42552,
+   "etag": "\"1dca7f62e026eb8\"",
+   "gone": 0,
+   "height": 345,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 27 Feb 2026 14:34:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SD:court:Steven R. Jensen"
+   ],
+   "width": 345
+  },
+  "https://ujs.sd.gov/media/litjiags/gusinsky-website.jpg?width=345&height=345&v=1dca66aca7c7310": {
+   "bytes": 35866,
+   "etag": "\"1dca66accfa359a\"",
+   "gone": 0,
+   "height": 345,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 25 Feb 2026 15:24:15 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SD:court:Robert Gusinsky"
+   ],
+   "width": 345
+  },
+  "https://ujs.sd.gov/media/pmed0rsj/myren-website.jpg?width=345&height=345&v=1dca66a1a1fad20": {
+   "bytes": 36892,
+   "etag": "\"1dca66a1e56e91c\"",
+   "gone": 0,
+   "height": 345,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 25 Feb 2026 15:19:22 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SD:court:Scott P. Myren"
+   ],
+   "width": 345
+  },
+  "https://ujs.sd.gov/media/y0mak2i3/salter-website.jpg?width=345&height=345&v=1dca7f7f11750b0": {
+   "bytes": 28794,
+   "etag": "\"1dca7f7f2688e7a\"",
+   "gone": 0,
+   "height": 345,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 27 Feb 2026 14:47:08 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SD:court:Mark E. Salter"
+   ],
+   "width": 345
+  },
+  "https://voterguide.sos.ca.gov/img/lt-governor/ma.jpg": {
+   "bytes": 19278,
+   "etag": "\"6f66f14cae8d58fff712ab20ebaab147\"",
+   "gone": 0,
+   "height": 290,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 16 Sep 2026 00:19:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:CA:lt:Fiona Ma"
+   ],
+   "width": 207
+  },
+  "https://voterguide.sos.ca.gov/img/sos/wagner.jpg": {
+   "bytes": 15350,
+   "etag": "\"174613c33d29a6698e0ed8a199d5e2f9\"",
+   "gone": 0,
+   "height": 290,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 16 Sep 2026 00:19:46 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:CA:sos:Donald P. (Don) Wagner"
+   ],
+   "width": 207
   },
   "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_04.jpg": {
    "bytes": 204080,
@@ -67798,11 +68801,13 @@
    "gone": 0,
    "height": 200,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "lastModified": "Thu, 17 Apr 2025 19:09:47 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:MN:ag:Keith Ellison",
     "officer:MN:ag:Keith Ellison"
    ],
    "width": 134
@@ -67818,6 +68823,111 @@
    "records": [
     "officer:AL:ag:Steve Marshall"
    ]
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2019-06/JusticeWomack.jpg?itok=ucjmWHfd": {
+   "bytes": 5893,
+   "etag": "\"1705-58c168f209680\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 24 Jun 2019 19:10:02 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Shawn A. Womack"
+   ],
+   "width": 210
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2019-06/Rhonda%20Wood.jpg?itok=pWkGascy": {
+   "bytes": 7779,
+   "etag": "\"1e63-58c16b86eedc0\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 24 Jun 2019 19:21:35 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Rhonda K. Wood"
+   ],
+   "width": 210
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2021-01/justice-webb.jpg?itok=iiMtAH-f": {
+   "bytes": 6539,
+   "etag": "\"198b-5b9f95749c180\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 28 Jan 2021 17:37:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Barbara Webb"
+   ],
+   "width": 210
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2025-01/Justice_Karen_R_Baker.jpg?itok=eyKJUxVH": {
+   "bytes": 7412,
+   "etag": "\"1cf4-62aba055906ce\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 02 Jan 2025 14:31:42 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Karen R. Baker"
+   ],
+   "width": 210
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2025-04/Justice_Bronni_Court_Portrait.jpg?itok=wiDTgtnW": {
+   "bytes": 6671,
+   "etag": "\"1a0f-633dacc1b864f\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 28 Apr 2025 18:24:40 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Nicholas Bronni"
+   ],
+   "width": 210
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2025-04/Justice_Hiland_Court_Portrait.jpg?itok=p97iGBop": {
+   "bytes": 6359,
+   "etag": "\"18d7-633dac90e9765\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 28 Apr 2025 18:23:49 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Cody Hiland"
+   ],
+   "width": 210
+  },
+  "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2026-10/Justice%20Hudson-014.jpg?itok=sD0N-eAm": {
+   "bytes": 7697,
+   "etag": "\"1e11-65d5802080766\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 08 Oct 2026 18:00:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AR:court:Courtney Rae Hudson"
+   ],
+   "width": 210
   },
   "https://www.arkleg.state.ar.us/Content/photos/2023/House/357_sm.jpg": {
    "bytes": 42028,
@@ -69612,6 +70722,222 @@
     "legislator:CA:ocd-person/1509d608-4d2b-4ebc-be73-b4cd6c06b7c6"
    ],
    "width": 120
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2302": {
+   "bytes": 11411,
+   "gone": 0,
+   "height": 291,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Thu, 26 Mar 2026 23:53:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:sos:Alexander Kolodin"
+   ],
+   "width": 233
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2366": {
+   "bytes": 50602,
+   "gone": 0,
+   "height": 832,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Tue, 28 Apr 2026 23:15:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:governor:Teri Ann Hourihan"
+   ],
+   "width": 666
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2427": {
+   "bytes": 126899,
+   "gone": 0,
+   "height": 1000,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 01 Apr 2026 09:48:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:ag:Warren Petersen"
+   ],
+   "width": 799
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2460": {
+   "bytes": 13470,
+   "gone": 0,
+   "height": 370,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Sat, 18 Apr 2026 08:48:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:governor:Risa Lombardo"
+   ],
+   "width": 296
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2469": {
+   "bytes": 5920,
+   "gone": 0,
+   "height": 220,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Tue, 07 Apr 2026 06:10:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:sos:Duwayne Collier"
+   ],
+   "width": 176
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2634": {
+   "bytes": 63074,
+   "gone": 0,
+   "height": 870,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Fri, 14 Aug 2026 05:13:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:lt:Angela Harrolle Mohan"
+   ],
+   "width": 696
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2635": {
+   "bytes": 49696,
+   "gone": 0,
+   "height": 1000,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Sat, 08 Aug 2026 05:21:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:lt:Lisa Castillo"
+   ],
+   "width": 752
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2640": {
+   "bytes": 61013,
+   "gone": 0,
+   "height": 894,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 12 Aug 2026 06:11:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:lt:John Giles"
+   ],
+   "width": 715
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2642": {
+   "bytes": 72487,
+   "gone": 0,
+   "height": 955,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Thu, 13 Aug 2026 07:04:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:lt:Sine Kerr"
+   ],
+   "width": 764
+  },
+  "https://www.azcourts.gov/portals/0/63/Images/Beene.png": {
+   "bytes": 255181,
+   "etag": "\"0a35c616049da1:0\"",
+   "gone": 0,
+   "height": 440,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 17 Jan 2024 16:15:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AZ:court:James P. Beene"
+   ],
+   "width": 320
+  },
+  "https://www.azcourts.gov/portals/0/63/Images/Bolick.png": {
+   "bytes": 197636,
+   "etag": "\"0a35c616049da1:0\"",
+   "gone": 0,
+   "height": 440,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 17 Jan 2024 16:15:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AZ:court:Clint Bolick"
+   ],
+   "width": 320
+  },
+  "https://www.azcourts.gov/portals/0/63/Images/King.png": {
+   "bytes": 229801,
+   "etag": "\"0a35c616049da1:0\"",
+   "gone": 0,
+   "height": 440,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 17 Jan 2024 16:15:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AZ:court:Kathryn H. King"
+   ],
+   "width": 320
+  },
+  "https://www.azcourts.gov/portals/0/63/Images/Lopez.png": {
+   "bytes": 194409,
+   "etag": "\"0a35c616049da1:0\"",
+   "gone": 0,
+   "height": 440,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 17 Jan 2024 16:15:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AZ:court:John R. Lopez IV"
+   ],
+   "width": 320
+  },
+  "https://www.azcourts.gov/portals/0/63/Images/Montgomery.png": {
+   "bytes": 298337,
+   "etag": "\"0a35c616049da1:0\"",
+   "gone": 0,
+   "height": 440,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 17 Jan 2024 16:15:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AZ:court:William G. Montgomery"
+   ],
+   "width": 320
+  },
+  "https://www.azcourts.gov/portals/0/63/Images/Timmer.png": {
+   "bytes": 199217,
+   "etag": "\"0a35c616049da1:0\"",
+   "gone": 0,
+   "height": 440,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 17 Jan 2024 16:15:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:AZ:court:Ann A. Scott Timmer"
+   ],
+   "width": 320
   },
   "https://www.azleg.gov/alisImages/MemberPhotos/49leg/House/MONTENEGRO.gif": {
    "bytes": 12526,
@@ -74595,6 +75921,411 @@
    ],
    "width": 400
   },
+  "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Berkenkotter.JPG?itok=Sh7A9em7": {
+   "bytes": 70154,
+   "etag": "\"6602d0fb-1120a\"",
+   "gone": 0,
+   "height": 354,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 26 Mar 2024 13:43:23 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:CO:court:Maria E. Berkenkotter"
+   ],
+   "width": 264
+  },
+  "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Boatright.JPG?itok=LNacHVhk": {
+   "bytes": 39090,
+   "etag": "\"65f1d735-98b2\"",
+   "gone": 0,
+   "height": 354,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 13 Mar 2024 16:41:25 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:CO:court:Brian D. Boatright"
+   ],
+   "width": 264
+  },
+  "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Gabriel.JPG?itok=h5fJq8nY": {
+   "bytes": 60162,
+   "etag": "\"65f32c90-eb02\"",
+   "gone": 0,
+   "height": 354,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 14 Mar 2024 16:57:52 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:CO:court:Richard L. Gabriel"
+   ],
+   "width": 264
+  },
+  "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Hood.JPG?itok=C3WkoI_6": {
+   "bytes": 60905,
+   "etag": "\"65c3e919-ede9\"",
+   "gone": 0,
+   "height": 354,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 07 Feb 2024 20:33:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:CO:court:William W. Hood, III"
+   ],
+   "width": 264
+  },
+  "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Marquez.jpg?itok=LJrA8alU": {
+   "bytes": 52722,
+   "etag": "\"6602d11f-cdf2\"",
+   "gone": 0,
+   "height": 354,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 26 Mar 2024 13:43:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:CO:court:Monica M. Márquez"
+   ],
+   "width": 264
+  },
+  "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-10/Blanco.jpg?itok=aphSNq7z": {
+   "bytes": 64508,
+   "etag": "\"66225058-fbfc\"",
+   "gone": 0,
+   "height": 354,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 19 Apr 2024 11:07:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:CO:court:Susan Blanco"
+   ],
+   "width": 264
+  },
+  "https://www.congress.gov/img/member/b001243_200.jpg": {
+   "bytes": 6682,
+   "etag": "\"1a1a-5c68800448037-gzip\"",
+   "gone": 0,
+   "height": 225,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 07 Jul 2021 12:51:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:TN:governor:Marsha Blackburn"
+   ],
+   "width": 180
+  },
+  "https://www.congress.gov/img/member/b001302_200.jpg": {
+   "bytes": 8290,
+   "etag": "\"2062-5c687fa5f9c49-gzip\"",
+   "gone": 0,
+   "height": 263,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 07 Jul 2021 12:50:07 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AZ:governor:Andy Biggs"
+   ],
+   "width": 175
+  },
+  "https://www.congress.gov/img/member/d000032_200.jpg": {
+   "bytes": 8520,
+   "etag": "\"2148-5c687fdf427e1-gzip\"",
+   "gone": 0,
+   "height": 219,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 07 Jul 2021 12:51:07 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:FL:governor:Byron Donalds"
+   ],
+   "width": 175
+  },
+  "https://www.congress.gov/img/member/j000307_200.jpg": {
+   "bytes": 8904,
+   "etag": "\"22c8-5f3073042cf50-gzip\"",
+   "gone": 0,
+   "height": 219,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Tue, 24 Jan 2023 19:04:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:MI:governor:John James"
+   ],
+   "width": 175
+  },
+  "https://www.congress.gov/img/member/k000367_200.jpg": {
+   "bytes": 6224,
+   "etag": "\"1850-5c687fd781a82-gzip\"",
+   "gone": 0,
+   "height": 225,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 07 Jul 2021 12:50:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:MN:governor:Amy Klobuchar"
+   ],
+   "width": 180
+  },
+  "https://www.congress.gov/img/member/p000610_200.jpg": {
+   "bytes": 8578,
+   "etag": "\"2182-5ae7d4a1a87e2-gzip\"",
+   "gone": 0,
+   "height": 219,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Fri, 04 Sep 2020 14:00:20 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:VI:governor:Stacey E. Plaskett"
+   ],
+   "width": 175
+  },
+  "https://www.congress.gov/img/member/t000278_200.jpg": {
+   "bytes": 7923,
+   "etag": "\"1ef3-5c687fe0f236c-gzip\"",
+   "gone": 0,
+   "height": 250,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 07 Jul 2021 12:51:08 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:AL:governor:Tommy Tuberville"
+   ],
+   "width": 200
+  },
+  "https://www.courts.wa.gov/images/Gonzalez2025.png": {
+   "bytes": 52925,
+   "etag": "\"daf084703e8ddb1:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 04 Mar 2025 19:48:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Steven C. González"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/GordonMcCloud2017.png": {
+   "bytes": 55612,
+   "etag": "\"0bea20d06dd21:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Jan 2017 19:06:22 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Sheryl Gordon McCloud"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/JusticeAngelis.png": {
+   "bytes": 42841,
+   "etag": "\"79a15bf8b9c3dc1:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 03 Apr 2026 22:34:01 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Theodore J. Angelis"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/JusticeMelody2025.png": {
+   "bytes": 46593,
+   "etag": "\"fcfc620e584dc1:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 13 Jan 2026 23:33:20 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Colleen M. Melody"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/JusticeStephens2025.png": {
+   "bytes": 45001,
+   "etag": "\"43408f91bf63db1:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat, 11 Jan 2025 00:27:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Debra L. Stephens"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/JusticeWhitener.jpg": {
+   "bytes": 44979,
+   "etag": "\"b657d2677d1ed61:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 29 Apr 2020 23:25:01 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:G. Helen Whitener"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/Mungia2025.png": {
+   "bytes": 51631,
+   "etag": "\"4fa9afa42f5edb1:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 03 Jan 2025 22:34:25 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Salvador A. Mungia"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/supreme/Johnson2016.jpg": {
+   "bytes": 38474,
+   "etag": "\"a2c93f9af7dd61:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 08 Apr 2020 22:46:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Charles W. Johnson"
+   ],
+   "width": 140
+  },
+  "https://www.courts.wa.gov/images/supreme/MontoyaLewis.jpg": {
+   "bytes": 38988,
+   "etag": "\"f6d9109f8dd61:0\"",
+   "gone": 0,
+   "height": 197,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 08 Apr 2020 22:50:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WA:court:Raquel Montoya-Lewis"
+   ],
+   "width": 140
+  },
+  "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2024-03/BunnApproved.jpg?itok=J8bg3MW7": {
+   "bytes": 13737,
+   "etag": "\"6a85dbe4-35a9\"",
+   "gone": 0,
+   "height": 406,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 19 Aug 2026 16:37:56 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WV:court:C. Haley Bunn"
+   ],
+   "width": 290
+  },
+  "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2024-03/Wooton2020.jpg?itok=dt8679em": {
+   "bytes": 8379,
+   "etag": "\"6a96e20c-20bb\"",
+   "gone": 0,
+   "height": 296,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 01 Sep 2026 14:32:44 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WV:court:William R. Wooton"
+   ],
+   "width": 290
+  },
+  "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2025-01/TrumpHeadshot.jpg?itok=WhuVG4cg": {
+   "bytes": 12311,
+   "etag": "\"6a96e2ea-3017\"",
+   "gone": 0,
+   "height": 406,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 01 Sep 2026 14:36:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WV:court:Charles S. Trump, IV"
+   ],
+   "width": 290
+  },
+  "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2026-07/Flaniganheadshot626.jpg?itok=SMMy-Ibs": {
+   "bytes": 13275,
+   "etag": "\"6a96eda9-33db\"",
+   "gone": 0,
+   "height": 436,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 01 Sep 2026 15:22:17 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WV:court:James W. Flanigan"
+   ],
+   "width": 290
+  },
+  "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2026-07/Kirkpatrick.jpg?itok=5wMPEMdi": {
+   "bytes": 13702,
+   "etag": "\"6a96edbb-3586\"",
+   "gone": 0,
+   "height": 436,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 01 Sep 2026 15:22:35 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:WV:court:H.L. Kirkpatrick"
+   ],
+   "width": 290
+  },
   "https://www.cranstonri.gov/_resources/common/userfiles/image/IMG-0103.JPG": {
    "bytes": 97869,
    "etag": "\"b52d272cf69bda1:0\"",
@@ -76115,6 +77846,141 @@
     "legislator:FL:ocd-person/528bc47a-e8c7-4a28-9923-aba1deefd976"
    ],
    "width": 185
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2019/02/Bethel0945_8x10-200x250.jpg": {
+   "bytes": 27402,
+   "etag": "\"6b0a-581a40d584df2\"",
+   "gone": 0,
+   "height": 250,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 11 Feb 2019 20:21:22 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Charles J. Bethel"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2019/02/Ellington0983_8x10-200x250.jpg": {
+   "bytes": 27871,
+   "etag": "\"6cdf-581a415381705\"",
+   "gone": 0,
+   "height": 250,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 11 Feb 2019 20:23:34 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:John J. Ellington"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2021/01/j_lagrua-200x323.jpg": {
+   "bytes": 40540,
+   "etag": "\"9e5c-5b8e0d020aba9\"",
+   "gone": 0,
+   "height": 323,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 14 Jan 2021 18:56:27 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Shawn Ellen LaGrua"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2021/11/JusticeColvin0688_8x10-200x250.jpg": {
+   "bytes": 27176,
+   "etag": "\"6a28-5d16260b966df\"",
+   "gone": 0,
+   "height": 250,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 22 Nov 2021 15:35:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Verda M. Colvin"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2021/11/McMillian2472_8x10-200x250.jpg": {
+   "bytes": 28279,
+   "etag": "\"6e77-5d162de4cb558\"",
+   "gone": 0,
+   "height": 250,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 22 Nov 2021 16:10:50 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Carla Wong McMillian"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2023/04/j_pinson_web_edit-200x221.jpg": {
+   "bytes": 11497,
+   "etag": "\"2ce9-5f8999c0af3db\"",
+   "gone": 0,
+   "height": 221,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 05 Apr 2023 16:51:55 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Andrew A. Pinson"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2023/04/j_warren_web_edit-200x208.jpg": {
+   "bytes": 10876,
+   "etag": "\"2a7c-5f899bff5aade\"",
+   "gone": 0,
+   "height": 208,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 05 Apr 2023 17:01:57 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Sarah Hawkins Warren"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2025/07/IMAGE_2-200x296.jpeg": {
+   "bytes": 19415,
+   "etag": "\"4bd7-63a9e2f93ec38\"",
+   "gone": 0,
+   "height": 296,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 23 Jul 2025 20:02:17 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Benjamin A. Land"
+   ],
+   "width": 200
+  },
+  "https://www.gasupreme.us/wp-content/uploads/2025/11/Chief-Justice-Peterson-200x259.jpg": {
+   "bytes": 12170,
+   "etag": "\"2f8a-64301f8ab120b\"",
+   "gone": 0,
+   "height": 259,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 07 Nov 2025 14:26:46 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:GA:court:Nels S.D. Peterson"
+   ],
+   "width": 200
   },
   "https://www.gencourt.state.nh.us/house/images/memberpics/373142.jpg": {
    "bytes": 20437,
@@ -79448,6 +81314,284 @@
    ],
    "width": 327
   },
+  "https://www.in.gov/courts/supreme/images/goff.jpg": {
+   "bytes": 89523,
+   "etag": "W/dot:90f256f0-d2b6-4bff-8cf9-95ea880c978a:1781146716000:89523",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 11 Jun 2026 02:58:36 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IN:court:Christopher M. Goff"
+   ],
+   "width": 300
+  },
+  "https://www.in.gov/courts/supreme/images/massa.jpg": {
+   "bytes": 88449,
+   "etag": "W/dot:e637ba3a-b9bb-4855-918a-3ffced19a1e9:1781146801000:88449",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 11 Jun 2026 03:00:01 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IN:court:Mark S. Massa"
+   ],
+   "width": 300
+  },
+  "https://www.in.gov/courts/supreme/images/molter.jpg": {
+   "bytes": 40220,
+   "etag": "W/dot:8714f26d-33f1-4e2a-92f7-1ba6688a7574:1781146858000:40220",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 11 Jun 2026 03:00:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IN:court:Derek R. Molter"
+   ],
+   "width": 300
+  },
+  "https://www.in.gov/courts/supreme/images/rush.jpg": {
+   "bytes": 84711,
+   "etag": "W/dot:72930833-c40d-4ef3-9eaf-fe7b5752ce91:1781146826000:84711",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 11 Jun 2026 03:00:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IN:court:Loretta H. Rush"
+   ],
+   "width": 300
+  },
+  "https://www.in.gov/courts/supreme/images/slaughter.jpg": {
+   "bytes": 93874,
+   "etag": "W/dot:b771db73-4c04-4e33-8344-2a66bd2ba0a1:1781147011000:93874",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 11 Jun 2026 03:03:31 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IN:court:Geoffrey G. Slaughter"
+   ],
+   "width": 300
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/Chief_Justice_Susan_Christensen_web_90B912835E0E7.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1800,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat Oct  3 02:33:43 2026",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:Susan Christensen"
+   ],
+   "width": 107
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/J_May_website_A8AC15EE628CC.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1300,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat Oct  3 02:34:10 2026",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:David May"
+   ],
+   "width": 107
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/Justice_Christopher_McDonald_web_8AAB946804A8C.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1718,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat Oct  3 02:33:47 2026",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:Christopher McDonald"
+   ],
+   "width": 107
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/Justice_Dana_Oxley_web_3CF35263E46B0.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1824,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat Oct  3 02:33:50 2026",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:Dana Oxley"
+   ],
+   "width": 107
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/Justice_Edward_Mansfield_web_05614E16A17E1.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1458,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat Oct  3 02:33:44 2026",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:Edward M. Mansfield"
+   ],
+   "width": 107
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/Justice_Matthew_McDermott_web_666DD36609AD3.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1466,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat, 03 Oct 2026 02:34:03 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:Matthew McDermott"
+   ],
+   "width": 107
+  },
+  "https://www.iowacourts.gov/media/staffdirectory/Justice_Thomas_Waterman_web_F73D3E8B033AF.jpg?dimensions=107x150&format=webp": {
+   "bytes": 1510,
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sat Oct  3 02:33:44 2026",
+   "read": "2026-10-25",
+   "records": [
+    "justice:IA:court:Thomas D. Waterman"
+   ],
+   "width": 107
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Biles-Dan-Justice-Supreme-Court.jpg?ext=.jpg": {
+   "bytes": 24752,
+   "etag": "\"8eaaa1c3d3ddc1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 14 Oct 2025 19:02:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:Dan Biles"
+   ],
+   "width": 640
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Rosen-Eric-Justice-Supreme-Court.jpg?ext=.jpg": {
+   "bytes": 85339,
+   "etag": "\"18809b1c3d3ddc1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 14 Oct 2025 19:02:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:Eric S. Rosen"
+   ],
+   "width": 640
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Standridge-Melissa-Taylor-Justice-Supreme-Court.jpg?ext=.jpg": {
+   "bytes": 34568,
+   "etag": "\"80d341c3d3ddc1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 14 Oct 2025 19:02:38 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:Melissa Taylor Standridge"
+   ],
+   "width": 640
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Stegall-Caleb-Justice-Supreme-Court.jpg?ext=.jpg": {
+   "bytes": 30054,
+   "etag": "\"b653bd1c3d3ddc1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 14 Oct 2025 19:02:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:Caleb Stegall"
+   ],
+   "width": 640
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Wall-KJ-Justice-Supreme-Court.jpg?ext=.jpg": {
+   "bytes": 24010,
+   "etag": "\"9e2c451c3d3ddc1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 14 Oct 2025 19:02:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:K.J. Wall"
+   ],
+   "width": 640
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Walsh-Larkin-Justice-Supreme-Court.jpg?ext=.jpg": {
+   "bytes": 99589,
+   "etag": "\"9c1f591c3d3ddc1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 14 Oct 2025 19:02:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:Larkin Walsh"
+   ],
+   "width": 640
+  },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/jayaram-k-christopher-justice-supreme-court.jpg?ext=.jpg": {
+   "bytes": 41962,
+   "etag": "\"347ba22be60dd1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 20 Oct 2026 18:09:23 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KS:court:K. Christopher Jayaram"
+   ],
+   "width": 640
+  },
   "https://www.kslegislature.gov/static/li_pics/rep_amyx_mike_1.jpg": {
    "gone": 1,
    "kinds": [
@@ -79512,6 +81656,96 @@
    "records": [
     "legislator:KS:ocd-person/549c712e-1cc1-4ca7-9ef7-b09bb36d7229"
    ]
+  },
+  "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Debra_Hembree_Lambert_Portrait.jpg": {
+   "bytes": 131844,
+   "etag": "\"{0503C909-EDED-4235-9634-AA264583B1EB},4\"",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 13 Nov 2025 16:17:17 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KY:court:Debra Hembree Lambert"
+   ],
+   "width": 300
+  },
+  "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Kelly_Thompson_Portrait.jpg": {
+   "bytes": 99385,
+   "etag": "\"{CA28916D-49AF-482B-A395-EB4726297959},12\"",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 30 Jun 2025 15:19:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KY:court:Kelly Thompson"
+   ],
+   "width": 300
+  },
+  "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Michelle_Keller_Portrait.jpg": {
+   "bytes": 117169,
+   "etag": "\"{79ABF22A-402F-49CC-B3E6-BB86DF3AF626},12\"",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 30 Jun 2025 15:02:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KY:court:Michelle M. Keller"
+   ],
+   "width": 300
+  },
+  "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Pamela_R._Goodwine_Portrait.jpg": {
+   "bytes": 111045,
+   "etag": "\"{93E03F30-84E0-4B68-BF49-BAC123485E53},3\"",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 30 Jun 2025 15:01:51 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KY:court:Pamela R. Goodwine"
+   ],
+   "width": 300
+  },
+  "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Robert_B_Conley_Portrait.jpg": {
+   "bytes": 104260,
+   "etag": "\"{19E2F34B-082F-426C-ABAB-CE701282EDC2},11\"",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 30 Jun 2025 14:46:15 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KY:court:Robert B. Conley"
+   ],
+   "width": 300
+  },
+  "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Shea_Nickell_Portrait.jpg": {
+   "bytes": 105069,
+   "etag": "\"{B965AB6A-D2DF-40E7-93AA-56FD5ED9D198},11\"",
+   "gone": 0,
+   "height": 420,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 30 Jun 2025 15:18:52 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:KY:court:C. Shea Nickell"
+   ],
+   "width": 300
   },
   "https://www.leg.state.nv.us/Session/36th2025Special/legislators/Assembly/Images/Backus.Shea.368.jpg": {
    "bytes": 4780535,
@@ -97104,78 +99338,253 @@
    ],
    "width": 220
   },
-  "https://www.moniqueforcongress.com/images/despain-large.png": {
-   "bytes": 1290134,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 66674,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "edc16654f3cdfbd80623.jpg",
-    "for": [
-     "person:FEC_H6OR04260"
-    ],
-    "from": [
-     755,
-     1200
-    ],
-    "height": 858,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "edc16654f3cdfbd806234ffd597c08dceefa1c1090ec1e1482b62ca6c62d1963",
-    "width": 540
-   },
-   "etag": "\"0670d8a71f6074f617169bd6e442db72\"",
+  "https://www.michigan.gov/ag/-/media/Project/Websites/AG/headshots/AG_Dana_Nessel_press.jpg?rev=67d9b803e48f4a9a8a80a68f5889c674&mw=320&hash=66AED384DD4F7BCBC7F692352D3949E3": {
+   "bytes": 18633,
+   "etag": "0b7579978f6247c59652b14f435b20c5",
    "gone": 0,
-   "height": 1200,
+   "height": 480,
    "kinds": [
-    "person"
+    "officer"
    ],
+   "lastModified": "Mon, 15 Nov 2021 15:33:18 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6OR04260"
+    "officer:MI:ag:Dana Nessel"
    ],
-   "sha256": "cbcd9ba973eda93c5153d87697295fe5f96d52dba23a91caf122b2b6471a4d94",
-   "width": 755
+   "width": 320
   },
-  "https://www.nancymannion.com/img/Nancy-Mannion-Main.png": {
-   "bytes": 375634,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 37326,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "ec40561f15ddbfd22fb4.jpg",
-    "for": [
-     "person:FEC_H6PA11099"
-    ],
-    "from": [
-     504,
-     600
-    ],
-    "height": 600,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "ec40561f15ddbfd22fb41011b510b8d9f9b6a59cdbcf136534be004c268fc52b",
-    "width": 504
-   },
-   "etag": "\"2259f186bb2cdd1:0\"",
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-DE-jennings-225x300.jpg": {
+   "bytes": 11201,
+   "etag": "\"68592c93-2bc1\"",
    "gone": 0,
-   "height": 600,
+   "height": 300,
    "kinds": [
-    "person"
+    "candidate",
+    "officer"
    ],
-   "lastModified": "Sat, 15 Aug 2026 13:39:42 GMT",
+   "lastModified": "Mon, 23 Jun 2025 10:29:39 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6PA11099"
+    "candidate:DE:ag:Kathy Jennings",
+    "officer:DE:ag:Kathy Jennings"
    ],
-   "sha256": "46b5dcee7b66bdc56dbb9c3cb81e29c571f069229dd199be9098166445c46298",
-   "width": 504
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-IL-raoul-2-225x300.jpg": {
+   "bytes": 10604,
+   "etag": "\"68592c93-296c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "lastModified": "Mon, 23 Jun 2025 10:29:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:IL:ag:Kwame Raoul",
+    "officer:IL:ag:Kwame Raoul"
+   ],
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-ME-Frey-Aaron-2025-225x300.png": {
+   "bytes": 20774,
+   "etag": "\"692db1a6-5126\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Mon, 01 Dec 2025 15:17:58 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:ME:ag:Aaron Frey"
+   ],
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-MS-Fitch-2024-225x300.jpg": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:MS:ag:Lynn Fitch"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-NY-james2-225x300.jpg": {
+   "bytes": 7901,
+   "etag": "\"68592c94-1edd\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "lastModified": "Mon, 23 Jun 2025 10:29:40 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:NY:ag:Letitia A. James",
+    "officer:NY:ag:Letitia James"
+   ],
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-SC-Wilson_new-225x300.jpg": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:SC:ag:Alan Wilson"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2020/09/ag-WI-kaul-225x300.jpg": {
+   "bytes": 8850,
+   "etag": "\"68592c94-2292\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "lastModified": "Mon, 23 Jun 2025 10:29:40 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "candidate:WI:ag:Josh Kaul",
+    "officer:WI:ag:Josh Kaul"
+   ],
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2022/11/Mike-Hilgers-AG-600px-headshot-300x298.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "records": [
+    "candidate:NE:ag:Mike Hilgers",
+    "officer:NE:ag:Mike Hilgers"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2022/11/ag-AG-Griffin-1-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "records": [
+    "candidate:AR:ag:Tim Griffin",
+    "officer:AR:ag:Tim Griffin"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2022/11/ag-IA-Bird-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "records": [
+    "candidate:IA:ag:Brenna Bird",
+    "officer:IA:ag:Brenna Bird"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2022/11/ag-ID-Labrador-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "records": [
+    "candidate:ID:ag:Raul R. Labrador",
+    "officer:ID:ag:Raúl Labrador"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2022/11/ag-KS-Kobach-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "records": [
+    "candidate:KS:ag:Kris Kobach",
+    "officer:KS:ag:Kris Kobach"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2022/11/ag-OK-Drummond-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:OK:ag:Gentner Drummond"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2025/01/ag-FL-Uthmeier-James-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "candidate",
+    "officer"
+   ],
+   "records": [
+    "candidate:FL:ag:James Uthmeier",
+    "officer:FL:ag:James Uthmeier"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2025/01/ag-NC-Jackson-Jeff-2025-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:NC:ag:Jeff Jackson"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2025/01/ag-UT-Brown-Derek-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:UT:ag:Derek Brown"
+   ]
+  },
+  "https://www.naag.org/wp-content/uploads/2025/01/ag-WA-Brown-Nick-225x300.png": {
+   "bytes": 19311,
+   "etag": "\"68592bba-4b6f\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:02 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:WA:ag:Nick Brown"
+   ],
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2025/07/ag-WY-Kautz-Keith-2025-225x300.png": {
+   "bytes": 29024,
+   "etag": "\"68935faf-7160\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Wed, 06 Aug 2025 13:59:11 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:WY:ag:Keith Kautz"
+   ],
+   "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2026/01/ag-VA-jones-jay-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:VA:ag:Jay Jones"
+   ]
   },
   "https://www.nass.org/sites/default/files/styles/secretary/public/2019-01/co-jena-griswold-2019.png?itok=mtQEM8aG": {
    "bytes": 15349,
@@ -97242,10 +99651,12 @@
    "etag": "\"Ln+j/utS1R4Bp0TtZJ0n3BLOR2OTfw5f2Hg0mxFyxoQ\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:CA:sos:Shirley N. Weber",
     "officer:CA:sos:Shirley Weber"
    ]
   },
@@ -97266,10 +99677,12 @@
    "etag": "\"db3Crn80+/NN6XPrDluykk7dk3vQtHe6Y95eGNMVscs\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:SC:sos:Mark Hammond",
     "officer:SC:sos:Mark Hammond"
    ]
   },
@@ -97314,10 +99727,12 @@
    "etag": "\"4fJa04JS/ApS4OnlLFduHj4fHjY2fj689l98ena2ZTE\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:ID:sos:Phil McGrane",
     "officer:ID:sos:Phil McGrane"
    ]
   },
@@ -97326,10 +99741,12 @@
    "etag": "\"sCTGQ8V4Jm0oxmuiFNET4/5FsbR/rcHmRFpIONZcVbk\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:IL:sos:Alexi Giannoulias",
     "officer:IL:sos:Alexi Giannoulias"
    ]
   },
@@ -97338,10 +99755,12 @@
    "etag": "\"Fh2dTcWhyLVqMSgEEafFh9eI4qvINPXerF3NpEAb2rk\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:ND:sos:Michael Howe",
     "officer:ND:sos:Michael Howe"
    ]
   },
@@ -97362,10 +99781,12 @@
    "etag": "\"CGvGGA8FXBs2ZnEUULVGNu0XNNVv6Sedfujzojco9OA\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:MA:sos:William Francis Galvin",
     "officer:MA:sos:William Galvin"
    ]
   },
@@ -97386,10 +99807,12 @@
    "etag": "\"mIrZCz0dhCz9d7us/cN7MK7pgVVZ5foqVMWDZOgy8Fk\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:RI:sos:Gregg Amore",
     "officer:RI:sos:Gregg Amore"
    ]
   },
@@ -97422,10 +99845,12 @@
    "etag": "\"LEWU94/yMwJyq44sddS1KNgQxcVVnNU7B64opOYe/vA\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:VT:sos:Sarah Copeland Hanzas",
     "officer:VT:sos:Sarah Copeland Hanzas"
    ]
   },
@@ -97470,10 +99895,12 @@
    "etag": "\"wg7mrKt47amcMHnXbOL/Hc+34oJOWu9Bp2Gr800VZzA\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:CT:sos:Stephanie Thomas",
     "officer:CT:sos:Stephanie Thomas"
    ]
   },
@@ -97506,10 +99933,12 @@
    "etag": "\"//1QY4yPN9KkTBn3IXxh5xGug2RjTAb0E/ftv1rY60o\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:AZ:sos:Adrian Fontes",
     "officer:AZ:sos:Adrian Fontes"
    ]
   },
@@ -97518,10 +99947,12 @@
    "etag": "\"6VcxTlFUkzvVVNKEVj3Vnsr8adNE6tb4kjZHY0jxLlg\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:MN:sos:Steve Simon",
     "officer:MN:sos:Steve Simon"
    ]
   },
@@ -97662,10 +100093,12 @@
    "etag": "\"9IKjAyx7yR6WlSwNq5qO21OyqnRz9n01oaU5FXnlm1s\"",
    "gone": 0,
    "kinds": [
+    "candidate",
     "officer"
    ],
    "read": "2026-10-25",
    "records": [
+    "candidate:IA:sos:Paul D. Pate",
     "officer:IA:sos:Paul Pate"
    ]
   },
@@ -97753,6 +100186,96 @@
     "legislator:NY:ocd-person/ee6af720-d32a-4744-a62c-deba9747d733"
    ],
    "width": 122
+  },
+  "https://www.nccourts.gov/assets/styles/320x480/s3/2018-06/newby.jpg?VersionId=mVcffY4kCzR_jFzJZRzVLoV2zmdPx4xa&itok=xYSGCMJV": {
+   "bytes": 13466,
+   "etag": "\"007829da44406238efc2e7230a0cf544\"",
+   "gone": 0,
+   "height": 480,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Mar 2026 13:41:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NC:court:Paul Newby"
+   ],
+   "width": 320
+  },
+  "https://www.nccourts.gov/assets/styles/320x480/s3/2021-08/Justice-Anita-Earls.jpg?VersionId=kQi.PI_9bb90nHBU9ICliQ4fhGkvMo5n&itok=X7CrrZNi": {
+   "bytes": 15035,
+   "etag": "\"c0eb91310809401a3e629ea855730934\"",
+   "gone": 0,
+   "height": 480,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Mar 2026 13:41:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NC:court:Anita Earls"
+   ],
+   "width": 320
+  },
+  "https://www.nccourts.gov/assets/styles/320x480/s3/2023-02/Justice-Philip-Berger-Jr-2023.jpg?VersionId=TGUXgyU7oYlzusmfLW6h2RvmU8xi5.EI&itok=1qkSx3OQ": {
+   "bytes": 12976,
+   "etag": "\"d64079422edc0a73456f1121af5d1342\"",
+   "gone": 0,
+   "height": 480,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Mar 2026 13:41:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NC:court:Philip Berger Jr."
+   ],
+   "width": 320
+  },
+  "https://www.nccourts.gov/assets/styles/320x480/s3/2023-03/Justice-Richard-Dietz-3628.jpg?VersionId=_F5nu98ntoF0zmK10gxW8Twt6b.qCVzg&itok=N0-StujR": {
+   "bytes": 20086,
+   "etag": "\"53b2028d268b9c78281a5464bf900857\"",
+   "gone": 0,
+   "height": 480,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Mar 2026 13:41:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NC:court:Richard Dietz"
+   ],
+   "width": 320
+  },
+  "https://www.nccourts.gov/assets/styles/320x480/s3/2023-03/Justice-Tamara-Barringer-3594.jpg?VersionId=iBZ16C6ZCHZKKNUrpFBmA.1W74vslzqt&itok=-GQH8zar": {
+   "bytes": 19009,
+   "etag": "\"0a257094f3cfe5f4c58a264005102bd7\"",
+   "gone": 0,
+   "height": 480,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Mar 2026 13:41:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NC:court:Tamara Barringer"
+   ],
+   "width": 320
+  },
+  "https://www.nccourts.gov/assets/styles/320x480/s3/2023-03/Justice-Trey-Allen-3640.jpg?VersionId=eIDH464VVXiv6YBeKZ9mwxkPomvd.I55&itok=DV_1AEql": {
+   "bytes": 21576,
+   "etag": "\"1bd8cdfc0bcfeced6b15b3b9795414ed\"",
+   "gone": 0,
+   "height": 480,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 13 Mar 2026 13:41:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NC:court:Trey Allen"
+   ],
+   "width": 320
   },
   "https://www.ncleg.gov/Members/MemberImage/H/1001/Low": {
    "bytes": 42931,
@@ -99586,6 +102109,66 @@
     "legislator:NC:ocd-person/f276e61a-c569-4924-b302-caeda17a306a"
    ],
    "width": 386
+  },
+  "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/DouglasABahr-small.jpg": {
+   "bytes": 9428,
+   "etag": "\"a32746bcdc37d91:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 03 Feb 2023 14:35:17 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:ND:court:Douglas A. Bahr"
+   ],
+   "width": 200
+  },
+  "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/Justice-Lisa-Fair-McEvers-small.jpg": {
+   "bytes": 12328,
+   "etag": "\"b52b5723d893d91:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 31 May 2023 15:54:09 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:ND:court:Lisa K. Fair McEvers"
+   ],
+   "width": 200
+  },
+  "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/jerodtufte-small-2026.png": {
+   "bytes": 31405,
+   "etag": "\"7648dcd3f9e9dc1:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 22 May 2026 14:46:52 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:ND:court:Jerod E. Tufte"
+   ],
+   "width": 200
+  },
+  "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/jonjjensen-small.png": {
+   "bytes": 46674,
+   "etag": "\"e0725bedc693d41:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 14 Dec 2018 16:06:09 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:ND:court:Jon J. Jensen"
+   ],
+   "width": 200
   },
   "https://www.ndlegis.gov/sites/default/files/styles/member_list_photo/public/person/photo/amarschall2023.jpg?itok=hxGY-yV_": {
    "bytes": 24393,
@@ -102758,11 +105341,13 @@
    "gone": 0,
    "height": 400,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Fri, 17 Apr 2020 04:08:36 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:TX:governor:Greg Abbott",
     "governor:TX:Greg Abbott"
    ],
    "width": 400
@@ -102833,11 +105418,13 @@
    "gone": 0,
    "height": 400,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 07 Mar 2022 14:26:39 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:ID:governor:Brad Little",
     "governor:ID:Brad Little"
    ],
    "width": 400
@@ -102908,11 +105495,13 @@
    "gone": 0,
    "height": 400,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Wed, 25 Aug 2021 00:28:22 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NY:governor:Kathy C. Hochul",
     "governor:NY:Kathy Hochul"
    ],
    "width": 400
@@ -102923,11 +105512,13 @@
    "gone": 0,
    "height": 400,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 05 Dec 2022 21:12:45 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:HI:governor:Josh Green",
     "governor:HI:Josh Green"
    ],
    "width": 400
@@ -102938,11 +105529,13 @@
    "gone": 0,
    "height": 482,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Mon, 25 Aug 2025 14:23:45 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:AR:governor:Sarah Huckabee Sanders",
     "governor:AR:Sarah Huckabee Sanders"
    ],
    "width": 462
@@ -102953,11 +105546,13 @@
    "gone": 0,
    "height": 502,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Tue, 10 Mar 2026 15:18:19 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:NE:governor:Jim Pillen",
     "governor:NE:Jim Pillen"
    ],
    "width": 502
@@ -102968,11 +105563,13 @@
    "gone": 0,
    "height": 570,
    "kinds": [
+    "candidate",
     "governor"
    ],
    "lastModified": "Thu, 23 Feb 2023 19:52:03 GMT",
    "read": "2026-10-25",
    "records": [
+    "candidate:MA:governor:Maura Healey",
     "governor:MA:Maura Healey"
    ],
    "width": 569
@@ -103081,6 +105678,90 @@
     "governor:NJ:Mikie Sherrill"
    ],
    "width": 750
+  },
+  "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/JusticePatterson.jpg?itok=mVFkqAdz&cb=2733f3bc": {
+   "bytes": 16598,
+   "gone": 0,
+   "height": 540,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 04 Sep 2026 08:35:18 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NJ:court:Anne M. Patterson"
+   ],
+   "width": 360
+  },
+  "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/JusticeRabner.jpg?itok=9sG4wBuC&cb=14438635": {
+   "bytes": 18226,
+   "gone": 0,
+   "height": 540,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 03 Sep 2026 07:51:42 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NJ:court:Stuart Rabner"
+   ],
+   "width": 360
+  },
+  "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/fasciale_sm.jpg?itok=bVkj7CY-&cb=3598076d": {
+   "bytes": 20835,
+   "gone": 0,
+   "height": 540,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 07 Sep 2026 16:23:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NJ:court:Douglas M. Fasciale"
+   ],
+   "width": 360
+  },
+  "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/john-hoffman.jpg?itok=XIimH1mH&cb=c196c1c4": {
+   "bytes": 20066,
+   "gone": 0,
+   "height": 540,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 07 Sep 2026 21:40:15 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NJ:court:John Jay Hoffman"
+   ],
+   "width": 360
+  },
+  "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/justice_wainer_apter.jpg?itok=iBLoq8kB&cb=f3dc3b82": {
+   "bytes": 20842,
+   "gone": 0,
+   "height": 540,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 07 Sep 2026 16:23:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NJ:court:Rachel Wainer Apter"
+   ],
+   "width": 360
+  },
+  "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/michael_noriega.jpg?itok=V4To35XH&cb=89ee0bf9": {
+   "bytes": 21334,
+   "gone": 0,
+   "height": 540,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Mon, 07 Sep 2026 16:23:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:NJ:court:Michael Noriega"
+   ],
+   "width": 360
   },
   "https://www.njleg.state.nj.us/members/memberphotos/greenstein_color.jpg": {
    "bytes": 59648,
@@ -104010,12 +106691,14 @@
    "gone": 0,
    "height": 375,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Sun, 16 Feb 2025 00:32:07 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:NM:ocd-person/dc968f82-503e-4246-9124-b880fd6ae3ae"
+    "legislator:NM:ocd-person/dc968f82-503e-4246-9124-b880fd6ae3ae",
+    "person:FEC_H6NM03083"
    ],
    "width": 300
   },
@@ -106189,6 +108872,66 @@
     "officer:OH:ag:Andy Wilson"
    ],
    "width": 253
+  },
+  "https://www.okcca.net/wp-content/uploads/2019/08/hudson-robert-l-240x300.jpg": {
+   "bytes": 27328,
+   "etag": "\"46513223c63dd1:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 23 Oct 2026 22:16:21 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:criminalCourt:Robert L. Hudson"
+   ],
+   "width": 240
+  },
+  "https://www.okcca.net/wp-content/uploads/2019/08/lumpkin-gary-l-210x300.jpg": {
+   "bytes": 22537,
+   "etag": "\"f676ad213c63dd1:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 23 Oct 2026 22:16:20 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:criminalCourt:Gary L. Lumpkin"
+   ],
+   "width": 210
+  },
+  "https://www.okcca.net/wp-content/uploads/2019/08/rowland-scott-240x300.jpg": {
+   "bytes": 21692,
+   "etag": "\"3984b0213c63dd1:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 23 Oct 2026 22:16:20 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:criminalCourt:Scott Rowland"
+   ],
+   "width": 240
+  },
+  "https://www.okcca.net/wp-content/uploads/2022/10/william-musseman-200x300.jpg": {
+   "bytes": 8030,
+   "etag": "\"c023b5223c63dd1:0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 23 Oct 2026 22:16:22 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OK:criminalCourt:William J. Musseman"
+   ],
+   "width": 200
   },
   "https://www.oregonlegislature.gov/Jama/PublishingImages/member_photo.jpg": {
    "bytes": 17045,
@@ -112562,6 +115305,36 @@
    ],
    "width": 200
   },
+  "https://www.sccourts.org/media/gtxbevpt/hill.jpg?cc=0.29588182632050136,0.12688221154901447,0.3102059086839749,0.5715004339368019&width=220&height=220&v=1da7bd6126ef3d0": {
+   "bytes": 10356,
+   "etag": "\"1dd4af354baa8f4\"",
+   "gone": 0,
+   "height": 220,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 23 Sep 2026 00:34:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SC:court:D. Garrison Hill"
+   ],
+   "width": 220
+  },
+  "https://www.sccourts.org/media/wqxf5voz/justice_james.jpg?cc=0,0.02571748339942641,0,0.26011334993390695&width=220&height=220&v=1db522f00a0a470": {
+   "bytes": 43385,
+   "etag": "\"1dd4af6d52e19f9\"",
+   "gone": 0,
+   "height": 220,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 23 Sep 2026 00:59:49 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:SC:court:George C. James, Jr."
+   ],
+   "width": 220
+  },
   "https://www.scstatehouse.gov/images/members/0193181795.jpg": {
    "bytes": 48771,
    "etag": "\"6abd1e5d-be83\"",
@@ -115441,12 +118214,14 @@
    "gone": 0,
    "height": 300,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Tue, 12 Jan 2021 15:25:14 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:MO:ocd-person/e4811e7a-7df7-4275-917d-8bdcc2778fb1"
+    "legislator:MO:ocd-person/e4811e7a-7df7-4275-917d-8bdcc2778fb1",
+    "person:FEC_H2MO04199"
    ],
    "width": 200
   },
@@ -115743,6 +118518,179 @@
    "records": [
     "legislator:NY:ocd-person/60b6c2ff-a1ce-46a1-b484-affd805bc297"
    ]
+  },
+  "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/HawkinsDanielR.jpg": {
+   "bytes": 24702,
+   "gone": 0,
+   "height": 437,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 18:57:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OH:court:Daniel R. Hawkins"
+   ],
+   "width": 350
+  },
+  "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/JosephDeters.jpg": {
+   "bytes": 29868,
+   "gone": 0,
+   "height": 437,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 18:57:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OH:court:Joseph T. Deters"
+   ],
+   "width": 350
+  },
+  "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/ShanahanMeganE.jpg": {
+   "bytes": 24508,
+   "gone": 0,
+   "height": 437,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 18:57:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OH:court:Megan E. Shanahan"
+   ],
+   "width": 350
+  },
+  "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/brunner_highres.jpg": {
+   "bytes": 25907,
+   "gone": 0,
+   "height": 437,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 18:57:30 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OH:court:Jennifer Brunner"
+   ],
+   "width": 350
+  },
+  "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/fischer_highres.jpg": {
+   "bytes": 29168,
+   "gone": 0,
+   "height": 437,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 18:57:31 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OH:court:Patrick F. Fischer"
+   ],
+   "width": 350
+  },
+  "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/kennedy_highres.jpg": {
+   "bytes": 29624,
+   "gone": 0,
+   "height": 437,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 18:57:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:OH:court:Sharon L. Kennedy"
+   ],
+   "width": 350
+  },
+  "https://www.texasattorneygeneral.gov/sites/default/files/inline-images/ken_paxton_bio_thumb.jpg": {
+   "bytes": 9622,
+   "gone": 0,
+   "height": 394,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Thu, 07 Jun 2018 15:25:53 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:TX:ag:Ken Paxton"
+   ],
+   "width": 262
+  },
+  "https://www.txcourts.gov/media/1460028/justice-john-p-devine-webjpg.jpg": {
+   "bytes": 41194,
+   "etag": "\"6a988de3344cdd1:0\"",
+   "gone": 0,
+   "height": 527,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Thu, 24 Sep 2026 14:56:33 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:TX:court:John Phillip Devine"
+   ],
+   "width": 367
+  },
+  "https://www.txcourts.gov/media/1460030/chief-justice-jimmy-blacklock-web.jpg": {
+   "bytes": 104265,
+   "etag": "\"59614a871f51dd1:0\"",
+   "gone": 0,
+   "height": 950,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 30 Sep 2026 21:06:14 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:TX:court:Jimmy Blacklock"
+   ],
+   "width": 630
+  },
+  "https://www.txcourts.gov/media/1461169/brett-busby.png": {
+   "bytes": 148777,
+   "etag": "\"98916b19e1cdc1:0\"",
+   "gone": 0,
+   "height": 400,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Tue, 02 Sep 2025 13:32:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:TX:court:Brett Busby"
+   ],
+   "width": 267
+  },
+  "https://www.txcourts.gov/media/1461570/justice-kyle-hawkins.jpg": {
+   "bytes": 49738,
+   "etag": "\"26dfe357f053dc1:0\"",
+   "gone": 0,
+   "height": 473,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 12 Nov 2025 16:21:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:TX:court:Kyle D. Hawkins"
+   ],
+   "width": 300
+  },
+  "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_1059132425_co_140928646.coreimg.jpeg/1790198234035/bell-m.jpeg": {
+   "bytes": 72147,
+   "etag": "\"119d3-65c2d01d0aa80\"",
+   "gone": 0,
+   "height": 963,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Wed, 23 Sep 2026 21:17:14 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "justice:UT:court:Matthew L. Bell"
+   ],
+   "width": 722
   },
   "https://www.whitehouse.gov/wp-content/uploads/2025/06/President-Donald-Trump-Official-Presidential-Portrait.png": {
    "bytes": 2084362,
@@ -116418,6 +119366,97 @@
    ],
    "sha256": "b672582729f6b55f725a62f633e0080f6ec8a2cc90f1cd15597e61fc82cc653a",
    "width": 2880
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/crawfordlg.jpg": {
+   "bytes": 214244,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Susan M. Crawford"
+   ],
+   "width": 450
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/dalletlg.jpg": {
+   "bytes": 104906,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Rebecca Frank Dallet"
+   ],
+   "width": 450
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/hagedornlg.jpg": {
+   "bytes": 209198,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Brian Hagedorn"
+   ],
+   "width": 450
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/karofskylg.jpg": {
+   "bytes": 78846,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Jill J. Karofsky"
+   ],
+   "width": 450
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/protasiewiczlg.jpg": {
+   "bytes": 124659,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Janet C. Protasiewicz"
+   ],
+   "width": 450
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/taylorlg.jpg": {
+   "bytes": 167008,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Chris Taylor"
+   ],
+   "width": 450
+  },
+  "https://www.wicourts.gov/courts/supreme/justices/images/zieglerlg.jpg": {
+   "bytes": 212005,
+   "gone": 0,
+   "height": 550,
+   "kinds": [
+    "justice"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "justice:WI:court:Annette Kingsland Ziegler"
+   ],
+   "width": 450
   },
   "https://www.wvlegislature.gov/images/members/2019/house/bartlett_t.jpg": {
    "bytes": 93341,
