@@ -184,6 +184,60 @@ class TestWikidataByFecId(unittest.TestCase):
         self.assertEqual(nominee_photos._article_title(
             "https://en.wikipedia.org/wiki/Fred_Wellman"), "Fred Wellman")
 
+    def test_a_place_named_after_a_state_is_no_tie_to_it(self):
+        """The verifier of PR #134 crafted these: a namesake's item with a
+        bot-added id and no year of birth, whose office or election names
+        the state's word for a city, a country, D.C. or another state's
+        town, was taken as tied to the state. A tie is a label of a whole
+        shape with the state in its slot (rule 5)."""
+        probes = (
+            ("KS", dict(office="Mayor of Kansas City, Missouri")),
+            ("MO", dict(office="Mayor of Kansas City, Missouri")),
+            ("GA", dict(office="United States Ambassador to Georgia")),
+            ("GA", dict(office="member of the Parliament of Georgia")),
+            ("WA", dict(office="member of the Council of the District of Columbia",
+                        district="Washington, D.C.")),
+            ("WA", dict(office="member of the Washington House of Representatives",
+                        district="Washington, D.C.")),
+            ("IN", dict(office="Mayor of Indiana, Pennsylvania")),
+            ("NY", dict(election="2026 New York City Council election")),
+            ("IA", dict(office="Mayor of Iowa City")),
+            ("VA", dict(office="member of the West Virginia Senate")),
+            ("VA", dict(office="Mayor of Virginia Beach")),
+            ("TX", dict(office="United States representative",
+                        district="Oklahoma's 1st congressional district")),
+            ("MO", dict(election="2026 Missouri gubernatorial election")),
+        )
+        for state, extra in probes:
+            extra.setdefault("election", None)
+            profile = nominee(state=state, name="John Williams", filedName="WILLIAMS, JOHN",
+                              birthdate="No data")
+            choice, why = nominee_photos.wikidata_choice(
+                profile, [row(label="John Williams", **extra)])
+            self.assertIsNone(choice, (state, extra))
+            self.assertIn("nothing on the item but the id", why)
+        # The shapes the state's own offices and races take still tie.
+        for state, extra in (
+                ("KS", dict(office="member of the Kansas House of Representatives")),
+                ("MO", dict(office="Missouri State Senate")),
+                ("GA", dict(office="Secretary of State of Georgia")),
+                ("GA", dict(office="United States senator", district="Georgia")),
+                ("WA", dict(office="Washington State Treasurer")),
+                ("NY", dict(office="United States representative",
+                            district="New York's 12th congressional district")),
+                ("AK", dict(office="United States representative",
+                            district="Alaska's at-large congressional district")),
+                ("NY", dict(election="2026 United States House of Representatives "
+                                     "elections in New York")),
+                ("OH", dict(election="2026 United States Senate special election in Ohio")),
+                ("TX", dict(election=ELECTION))):
+            extra.setdefault("election", None)
+            profile = nominee(state=state, name="John Williams", filedName="WILLIAMS, JOHN",
+                              birthdate="No data")
+            choice, why = nominee_photos.wikidata_choice(
+                profile, [row(label="John Williams", **extra)])
+            self.assertTrue(choice, (state, extra, why))
+
     def test_an_item_with_nothing_but_the_id_gives_nothing(self):
         for rows in ([row(election=None)],
                      [row(election="2024 Texas's 1st congressional district election")],
@@ -414,6 +468,23 @@ class TestStateLegislature(unittest.TestCase):
                                           url=member.get("image") or IMAGE_URL)
             self.assertIsNone(record, member)
             self.assertEqual(counts["legislature"], 0)
+        # An "oversized" legphotos entry's file was offered before the
+        # checks a seat-keyed file needs (legphotos.settle), so it is not
+        # yet known to be theirs: not shown, for that and not its weight.
+        offered = "https://www.nmlegis.gov/Images/Legislators/House/district63.jpg"
+        photos_cache = {"people": {"ocd-person/zamora": {
+            "oversized": True, "offered": offered, "credit": "New Mexico Legislature",
+            "page": PAGE_URL, "evidence": 'file "district63.jpg" named by the seat',
+            "read": "2026-10-19", "chamber": "lower", "district": "63",
+            "bytes": 1_900_000, "width": 1200, "height": 1500}}}
+        record, counts = self.resolve(roster=roster_with(image=None), photos=photos_cache,
+                                      url=offered)
+        self.assertIsNone(record)
+        self.assertEqual(counts["legislature"], 0)
+        image, _credit, why = nominee_photos.card_photo(
+            dict(ZAMORA, image=None), "NM", {"kind": "member", "url": PAGE_URL}, photos_cache)
+        self.assertIsNone(image)
+        self.assertIn("oversized", why)
 
     def test_a_wide_frame_or_a_refused_file_is_not_shown(self):
         record, _ = self.resolve(body=jpeg(600, 400))

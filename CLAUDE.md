@@ -400,7 +400,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
       evidenced `overrides.PORTRAIT_NAME_FORMS` entry), and a second tie of
       the item's own - a year of birth the profile's agrees with, else a
       2026 candidacy in their state (P3602), an office held for it (P39,
-      or its electoral district, P768), an official website (P856) that
+      or its electoral district, P768), each a label of a whole shape with
+      the state in its slot, never the state's name found in it ("Mayor of
+      Kansas City, Missouri" is not an office for Kansas, "Ambassador to
+      Georgia" is the country's: rule 5), an official website (P856) that
       is their campaign's, or an English article that is the one their
       ballot page links. An id is not proof on its own (rule 82): the
       first version took the surname alone - "John Andrews" passed for
@@ -412,9 +415,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     - for a nominee who sits in their state's legislature, the photograph
       this site's legislature page shows on that member's card
       (`legislature.card_photo`, one implementation, rule 12): only on the
-      legislature's own host and credited to it, never a caucus's (rule 51:
-      Sean McCann's is on senatedems.com, and he has none), never a file
-      Open States gives two members. The first version read the member's
+      legislature's own host and credited to it, never a caucus's (rule 87,
+      as rule 100 says: Sean McCann's is on senatedems.com, and he has
+      none), never a file Open States gives two members, and never an
+      "oversized" legphotos entry, whose file was offered before the
+      checks a seat-keyed file needs (it waits for those and for rule
+      101's copies, not for its weight). The first version read the member's
       page again by rules of its own, which skipped legphotos' safeguards.
       That member is found by the chamber their own article's corroborated
       record of offices gives (rule 69) and the same first and last name

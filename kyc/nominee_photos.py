@@ -348,6 +348,63 @@ def states_named(text):
     return found
 
 
+# A tie to a state is a label of one of these whole shapes, with the state's
+# name in its slot and no other state named - never the state's name found
+# anywhere in it: "Mayor of Kansas City, Missouri" is not an office for
+# Kansas, "United States Ambassador to Georgia" is the country's, a district
+# "Washington, D.C." is not Washington's, "Mayor of Indiana, Pennsylvania"
+# is not Indiana's, and the "2026 New York City Council election" is no race
+# for Congress (rule 5; the verifier of PR #134).
+_ORDINAL = r"(?:\d+(?:st|nd|rd|th)|at-large)"
+_ELECTIONS = (
+    r"2026 United States (?:House of Representatives|Senate)(?: special)? elections? in {s}",
+    r"2026 {s}'s " + _ORDINAL + r" congressional district(?: special)? election",
+)
+_CHAMBERS = (r"(?:House of Representatives|House of Delegates|House|Senate|State Senate|"
+             r"Assembly|State Assembly|General Assembly|Legislature)")
+_STATEWIDE = (r"(?:Governor|Lieutenant Governor|Attorney General|Secretary of State|"
+              r"State Treasurer|Treasurer|State Auditor|Auditor|Comptroller|Controller)")
+_OFFICES = (
+    r"(?:[Mm]ember of the )?{s} " + _CHAMBERS,
+    _STATEWIDE + r" of {s}",
+    r"{s} " + _STATEWIDE,
+)
+_US_SENATOR = re.compile(r"(?i)United States senator|member of the United States Senate")
+_CONGRESSIONAL = r"{s}'s " + _ORDINAL + r" congressional district"
+
+
+def _shaped(text, state, shapes):
+    """*text* is wholly one of *shapes* with *state* in its slot, and names
+    no other state."""
+    text = (text or "").strip()
+    if not text or not state or states_named(text) != {state}:
+        return False
+    return any(re.fullmatch(shape.replace("{s}", re.escape(state)), text) for shape in shapes)
+
+
+def candidacy_for(election, state):
+    """*election* is a 2026 election for Congress in *state*."""
+    return _shaped(election, state, _ELECTIONS)
+
+
+def office_for(office, district, state):
+    """An office held (P39) for *state*: its electoral district (P768) is
+    one of the state's congressional districts, or the state itself for a
+    United States senator; else its own label is the state's legislature
+    or one of its statewide offices. A district that names another state
+    or another place ("Washington, D.C.") refuses whatever the office
+    says."""
+    office, district = (office or "").strip(), (district or "").strip()
+    if district:
+        if _shaped(district, state, (_CONGRESSIONAL,)):
+            return True
+        if district == state and _US_SENATOR.fullmatch(office):
+            return True
+        if district != state and (states_named(district) != {state} or "," in district):
+            return False
+    return _shaped(office, state, _OFFICES)
+
+
 def _site_host(url):
     return host_of(url or "").removeprefix("www.")
 
@@ -355,8 +412,8 @@ def _site_host(url):
 def second_tie(profile, rows):
     """``(tie, why)``: what on the item, besides the FEC id, ties it to this
     person - a year of birth the profile's agrees with, a 2026 candidacy in
-    their state (P3602), an office held for their state (P39: its label, or
-    its electoral district's, P768, names the state), an official website
+    their state (P3602, ``candidacy_for``), an office held for their state
+    (P39 with its electoral district, P768, ``office_for``), an official website
     (P856) that is their campaign's site, or an English article that is the
     one their ballot page links (rule 33) - or ``None`` and why not. A year
     that disagrees is a refusal whatever else the item says."""
@@ -370,12 +427,12 @@ def second_tie(profile, rows):
         return f"its year of birth, {born}, is the profile's", ""
     state = state_name(profile.get("state"))
     for election in sorted({r.get("election") for r in rows if r.get("election")}):
-        if "2026" in election and state in states_named(election):
+        if candidacy_for(election, state):
             return f"its candidacy in election (P3602) is \"{election}\"", ""
     offices = sorted({(r.get("office") or "", r.get("district") or "") for r in rows
                       if r.get("office")})
     for office, district in offices:
-        if state in states_named(office) or state in states_named(district):
+        if office_for(office, district, state):
             held = f"{office} ({district})" if district else office
             return f"it holds an office for {state} (P39): \"{held}\"", ""
     campaign = _site_host(profile.get("campaignSite"))
@@ -548,8 +605,19 @@ def card_photo(member, code, page=None, photos=None):
     shown = shown_on_card(member, code, page, photos)
     image, credit = shown.get("image"), shown.get("imageCredit")
     if not image:
+        # An "oversized" entry is not shown here for a reason that is not
+        # its weight: legphotos.settle stops at the first sign a file is
+        # over the caps, before the checks a seat-keyed file needs (dated
+        # on or after the member's arrival, not the file a predecessor
+        # showed), so its "offered" file is unchecked as theirs - Nebraska's
+        # "dist13.jpg" is named by the seat. It waits for those checks and
+        # the copies of feature/photo-copies (rule 101); no nominee on the
+        # ballot was affected on 2026-10-25.
         return None, None, f"the legislature page shows no photograph of them ({shown['kind']})"
     if not credit or not legphotos.official_host(code, image):
+        # A party caucus's photograph is the party's (rule 87, as rule 100
+        # says of Michigan): Sean McCann's card shows senatedems.com's file,
+        # uncredited, and his profile does not.
         return None, None, "the photograph the card shows is not on the legislature's own host"
     if shown["kind"] == "legislature":
         entry = legphotos.entry_for(member, photos) or {}

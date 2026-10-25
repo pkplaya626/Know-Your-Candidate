@@ -1217,15 +1217,19 @@ description page, where the item's label ends in their surname and carries
 one of their given names as the profile or their filing writes it (a
 nickname only through an evidenced `overrides.PORTRAIT_NAME_FORMS` entry),
 and the item ties itself to them a second way (a year of birth that agrees,
-a 2026 candidacy or an office held in their state, their campaign's site as
-its official website, or the article their ballot page links); every FEC id
+a 2026 candidacy for Congress or an office held in their state, read as a
+label of a whole shape with the state in its slot - "Mayor of Kansas City,
+Missouri" is no office for Kansas - their campaign's site as its official
+website, or the article their ballot page links); every FEC id
 the profile holds is asked, and ids on two items give nothing. The srcset
 offers the 500px size only once it is weighed within the caps. A nominee who sits in their state's legislature -
 the chamber their own article's corroborated record of offices gives, the
 same first and last name in it and nobody else - gets the photograph the
 site's legislature page shows on that member's card, on the legislature's
-own host, withheld once the roster seats someone else or the card shows
-another file; a heavy one is shown smaller through Photon where it serves
+own host (a party caucus's file, as Michigan's, is not: rule 87),
+withheld once the roster seats someone else or the card shows another
+file, and not taken from an "oversized" legphotos entry, offered before a
+seat-keyed file's checks; a heavy one is shown smaller through Photon where it serves
 the file. Either route refuses a frame wider than tall not named a
 headshot, and a file in `NOT_A_PORTRAIT` or `PORTRAIT_LICENCE_DOUBTS`. A
 person looking at a photograph judges it by one test: the candidate alone,
