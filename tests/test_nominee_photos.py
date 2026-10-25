@@ -1,7 +1,6 @@
 """Portraits of the people on the November ballot by the routes
 ``kyc/nominee_photos.py`` adds: Wikidata by the person's own FEC id, and the
-state legislature's own page for a sitting member of it (rule 24, the owner's
-decision of 2026-10-19).
+state legislature's photograph of a sitting member of it (rule 24).
 
 Standard library only, no network:
 
@@ -15,17 +14,17 @@ import unittest.mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from kyc import nominee_photos, photos, portraits, validate  # noqa: E402
-
-JPEG = (b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00"
-        b"\xff\xc0\x00\x11\x08" + (440).to_bytes(2, "big") + (330).to_bytes(2, "big")
-        + b"\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01" + b"\x00" * 64)
+from kyc import legislature, nominee_photos, overrides, photos, portraits, validate  # noqa: E402
 
 
 def jpeg(width, height):
     return (b"\xff\xd8\xff\xe0\x00\x10JFIF\x00\x01\x01\x00\x00\x01\x00\x01\x00\x00"
             b"\xff\xc0\x00\x11\x08" + height.to_bytes(2, "big") + width.to_bytes(2, "big")
             + b"\x03\x01\x22\x00\x02\x11\x01\x03\x11\x01" + b"\x00" * 64)
+
+
+JPEG = jpeg(330, 440)
+ELECTION = "2026 Texas's 1st congressional district election"
 
 
 def nominee(**extra):
@@ -37,8 +36,10 @@ def nominee(**extra):
     return profile
 
 
-def row(item="Q139698851", label="Yolanda Prince", image="Yolanda%20Prince.jpg", birth=None):
+def row(item="Q139698851", label="Yolanda Prince", image="Yolanda%20Prince.jpg", birth=None,
+        election=ELECTION, website=None):
     return {"item": item, "label": label, "human": True, "birth": birth,
+            "election": election, "website": website,
             "image": "http://commons.wikimedia.org/wiki/Special:FilePath/" + image if image else None}
 
 
@@ -48,6 +49,7 @@ INFO = {"width": 4266, "height": 5689, "descriptionurl":
         "thumburl": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/"
                     "330px-Yolanda_Prince.jpg?utm_source=commons.wikimedia.org",
         "extmetadata": {"LicenseShortName": {"value": "CC0"}, "Artist": {"value": "WikiBunny2K1"}}}
+THUMB = INFO["thumburl"].split("?")[0]
 
 
 class Getter:
@@ -66,13 +68,24 @@ def image(body):
     return (200, {"Content-Type": "image/jpeg", "Content-Length": str(len(body))}, body)
 
 
+def resolve_wikidata(cache, rows=None, getter=None, profile=None):
+    with unittest.mock.patch.object(nominee_photos, "wikidata_items",
+                                    return_value={"H6TX01352": rows or [row()]}), \
+            unittest.mock.patch.object(nominee_photos, "commons_file", return_value=INFO):
+        return nominee_photos.resolve_all([profile or nominee()], cache,
+                                          getter=getter or Getter({THUMB: image(JPEG)}),
+                                          log=lambda *a: None)
+
+
 class TestWikidataByFecId(unittest.TestCase):
-    """An item carrying the person's own FEC candidate id (P1839)."""
+    """An item carrying the person's own FEC candidate id (P1839), and a
+    second tie of its own (rule 82: an id is not proof on its own)."""
 
     def test_the_one_item_with_the_id_gives_its_image(self):
         choice, why = nominee_photos.wikidata_choice(nominee(), [row()])
         self.assertEqual(choice, {"item": "Q139698851", "label": "Yolanda Prince",
-                                  "file": "Yolanda Prince.jpg"})
+                                  "file": "Yolanda Prince.jpg",
+                                  "tie": f'its candidacy in election (P3602) is "{ELECTION}"'})
 
     def test_an_item_naming_someone_else_or_two_items_or_another_birth_year_give_nothing(self):
         for rows, birthdate in (([row(label="Yolanda Adams")], ""),
@@ -84,87 +97,151 @@ class TestWikidataByFecId(unittest.TestCase):
             self.assertIsNone(choice, rows)
             self.assertTrue(why)
 
+    def test_a_namesake_with_another_given_name_gives_nothing(self):
+        """The reviewers' probe: "Robert Williams" carrying John Andrew
+        Williams's FEC id passed on the surname alone, and none of the
+        three nominees pictured had a birth date to compare."""
+        drew = nominee(name="John Andrew Williams", state="KY")
+        ky = "2026 United States House of Representatives elections in Kentucky"
+        for label, fits in (('John "Drew" Williams', True), ("Drew Williams", True),
+                            ("J. Andrew Williams", True), ("John Williams", True),
+                            ("Robert Williams", False), ("Robert Andrew Williams", False),
+                            ("Williams", False)):
+            choice, why = nominee_photos.wikidata_choice(
+                drew, [row(label=label, election=ky, birth="1961-02-03T00:00:00Z")])
+            self.assertEqual(bool(choice), fits, (label, why))
+            if not fits:
+                self.assertIn("given name" if " " in label else "", why)
+
+    def test_an_item_with_nothing_but_the_id_gives_nothing(self):
+        for rows in ([row(election=None)],
+                     [row(election="2024 Texas's 1st congressional district election")],
+                     [row(election="2026 United States House of Representatives elections in "
+                                   "Oklahoma")]):
+            choice, why = nominee_photos.wikidata_choice(nominee(), rows)
+            self.assertIsNone(choice, rows)
+            self.assertIn("nothing on the item but the id", why)
+        # West Virginia is not Virginia (rule 5).
+        choice, _ = nominee_photos.wikidata_choice(
+            nominee(state="VA"),
+            [row(election="2026 United States House of Representatives elections in "
+                          "West Virginia")])
+        self.assertIsNone(choice)
+        # A year of birth the profile's agrees with, or the campaign's own
+        # site as the item's official website, is a tie.
+        choice, _ = nominee_photos.wikidata_choice(
+            nominee(birthdate="1970-05-02"), [row(election=None, birth="1970-05-02T00:00:00Z")])
+        self.assertIn("year of birth", choice["tie"])
+        choice, _ = nominee_photos.wikidata_choice(
+            nominee(campaignSite="https://www.prince4congress.com"),
+            [row(election=None, website="https://prince4congress.com/")])
+        self.assertIn("official website", choice["tie"])
+
+    def test_every_one_of_the_persons_ids_is_asked_and_two_items_refused(self):
+        profile = nominee(otherFecIds=["H6TX01999"])
+        cache = {}
+        items = {"H6TX01352": [row(image=None)], "H6TX01999": [row()]}
+        with unittest.mock.patch.object(nominee_photos, "wikidata_items", return_value=items), \
+                unittest.mock.patch.object(nominee_photos, "commons_file", return_value=INFO):
+            nominee_photos.resolve_all([profile], cache, getter=Getter({THUMB: image(JPEG)}),
+                                       log=lambda *a: None)
+        record = cache[portraits.profile_key(profile)]
+        self.assertEqual(record["url"], THUMB)      # the first id's row had no image
+        self.assertIn(record["fec"], ("H6TX01352", "H6TX01999"))
+        # The person's ids on two items: one of them is someone else's (rule 25).
+        cache = {}
+        items = {"H6TX01352": [row()], "H6TX01999": [row(item="Q2")]}
+        with unittest.mock.patch.object(nominee_photos, "wikidata_items", return_value=items), \
+                unittest.mock.patch.object(nominee_photos, "commons_file", return_value=INFO):
+            nominee_photos.resolve_all([profile], cache, getter=Getter({THUMB: image(JPEG)}),
+                                       log=lambda *a: None)
+        self.assertEqual(cache, {})
+
     def test_resolved_at_a_standard_width_with_its_licence_and_evidence(self):
         cache = {}
-        thumb = INFO["thumburl"].split("?")[0]
-        getter = Getter({thumb: image(JPEG)})
         nominee_photos.resolve_all([nominee()], cache, sparql=lambda q: [],
-                                   api=lambda params, endpoint: {}, getter=getter,
-                                   log=lambda *a: None)
+                                   api=lambda params, endpoint: {},
+                                   getter=Getter({THUMB: image(JPEG)}), log=lambda *a: None)
         self.assertEqual(cache, {})                    # no item: nothing
-        with unittest.mock.patch.object(nominee_photos, "wikidata_items",
-                                        return_value={"H6TX01352": [row()]}), \
-                unittest.mock.patch.object(nominee_photos, "commons_file", return_value=INFO):
-            counts = nominee_photos.resolve_all([nominee()], cache, getter=getter,
-                                                log=lambda *a: None)
+        counts = resolve_wikidata(cache)
         self.assertEqual(counts["wikidata"], 1)
         record = cache[portraits.profile_key(nominee())]
-        self.assertEqual(record["url"], thumb)         # no tracking query, 330px
+        self.assertEqual(record["url"], THUMB)         # no tracking query, 330px
         self.assertEqual(record["via"], "wikidata-fec")
         self.assertEqual((record["bytes"], record["shownWidth"], record["shownHeight"]),
                          (len(JPEG), 330, 440))
         self.assertIn("H6TX01352 (P1839)", record["evidence"])
+        self.assertIn(ELECTION, record["evidence"])    # the second tie, said
+        self.assertEqual(record["original"], INFO["url"])
         self.assertEqual(record["page"], "https://www.wikidata.org/wiki/Q139698851")
         self.assertEqual(record["credit"]["licence"], "CC0")
         self.assertTrue(all("Special:FilePath" not in u for _, u in record["set"]))
         self.assertTrue(portraits.route_ok(nominee(), record))
-        # Another person's FEC id, or a renamed profile, does not carry it.
+        # Another person's FEC id, or a renamed profile, does not carry it;
+        # nor a record from before the second tie was asked.
         self.assertFalse(portraits.route_ok(nominee(fecCandidateId="H6TX09999"), record))
         self.assertFalse(portraits.route_ok(nominee(name="Jane Doe"), record))
+        self.assertFalse(portraits.route_ok(nominee(name="Rena Prince"), dict(
+            record, label="Robert Prince")))
+        self.assertFalse(portraits.route_ok(nominee(), dict(record, tie=None)))
         profile = nominee()
         portraits.apply_cache([profile], cache)
         self.assertEqual(profile["photoSource"], "wikidata-fec")
-        self.assertEqual(profile["photos"][0], thumb)
+        self.assertEqual(profile["photos"][0], THUMB)
         self.assertEqual(profile["photoCredit"]["licence"], "CC0")
         self.assertEqual(validate.check_photo_sets([profile]), [])
 
+    def test_a_file_a_person_refused_or_a_wide_frame_is_not_shown(self):
+        """No override reached these routes in the first version (the
+        reviewers): NOT_A_PORTRAIT and PORTRAIT_LICENCE_DOUBTS now do."""
+        cache = {}
+        resolve_wikidata(cache)
+        record = cache[portraits.profile_key(nominee())]
+        for table in ("NOT_A_PORTRAIT", "PORTRAIT_LICENCE_DOUBTS"):
+            with unittest.mock.patch.dict(getattr(overrides, table),
+                                          {INFO["url"]: ("2026-10-25", "a crowd")}):
+                self.assertFalse(portraits.route_ok(nominee(), record), table)
+                again = {}
+                resolve_wikidata(again)
+                self.assertEqual(again, {}, table)
+        wide = {}
+        resolve_wikidata(wide, getter=Getter({THUMB: image(jpeg(330, 220))}))
+        self.assertEqual(wide, {})
+
     def test_the_srcset_offers_its_widest_size_only_once_weighed_within_the_caps(self):
-        thumb = INFO["thumburl"].split("?")[0]
-        wide = thumb.replace("/330px-", "/500px-")
+        wide = THUMB.replace("/330px-", "/500px-")
         for answer, offered in ((image(jpeg(500, 667)), True),
                                 (image(jpeg(500, 667) + b"\x00" * 400_000), False),
                                 ((None, {}, b""), False)):
             cache = {}
-            with unittest.mock.patch.object(nominee_photos, "wikidata_items",
-                                            return_value={"H6TX01352": [row()]}), \
-                    unittest.mock.patch.object(nominee_photos, "commons_file",
-                                               return_value=INFO):
-                nominee_photos.resolve_all([nominee()], cache, log=lambda *a: None,
-                                           getter=Getter({thumb: image(JPEG), wide: answer}))
+            resolve_wikidata(cache, getter=Getter({THUMB: image(JPEG), wide: answer}))
             record = cache[portraits.profile_key(nominee())]
-            self.assertEqual(record["url"], thumb)
+            self.assertEqual(record["url"], THUMB)
             self.assertEqual(wide in [u for _, u in record["set"]], offered, answer[0])
             self.assertEqual(max(w for w, _ in record["set"]), 500 if offered else 330)
 
     def test_a_file_gone_takes_the_record_away(self):
         key = portraits.profile_key(nominee())
         cache = {key: {"via": "wikidata-fec", "url": "https://example.org/x.jpg"}}
-        thumb = INFO["thumburl"].split("?")[0]
-        with unittest.mock.patch.object(nominee_photos, "wikidata_items",
-                                        return_value={"H6TX01352": [row()]}), \
-                unittest.mock.patch.object(nominee_photos, "commons_file", return_value=INFO):
-            nominee_photos.resolve_all([nominee()], cache, log=lambda *a: None,
-                                       getter=Getter({thumb: (404, {}, b"")}))
+        resolve_wikidata(cache, getter=Getter({THUMB: (404, {}, b"")}))
         self.assertIsNone(cache[key]["url"])
 
-    def test_an_image_offered_only_oversized_is_left_out_and_counted(self):
+    def test_a_heavy_image_is_shown_and_said(self):
+        """Never the silhouette for its weight (rule 87, the owner's
+        decision of 2026-10-25)."""
         cache = {}
-        thumb = INFO["thumburl"].split("?")[0]
         heavy = jpeg(330, 440) + b"\x00" * 400_000
-        with unittest.mock.patch.object(nominee_photos, "wikidata_items",
-                                        return_value={"H6TX01352": [row()]}), \
-                unittest.mock.patch.object(nominee_photos, "commons_file", return_value=INFO):
-            counts = nominee_photos.resolve_all([nominee()], cache,
-                                                getter=Getter({thumb: image(heavy)}),
-                                                log=lambda *a: None)
-        self.assertEqual(counts["leftOut"], 1)
+        counts = resolve_wikidata(cache, getter=Getter({THUMB: image(heavy)}))
+        self.assertEqual(counts["heavy"], 1)
         record = cache[portraits.profile_key(nominee())]
-        self.assertIsNone(record["url"])
-        self.assertIn("over 300 KB", record["leftOut"]["why"])
+        self.assertEqual(record["url"], THUMB)
+        self.assertIn("over 300 KB", record["heavy"])
         profile = nominee()
         portraits.apply_cache([profile], cache)
-        self.assertEqual(profile["photos"], ["placeholder"])
-        self.assertEqual(nominee_photos.left_out([profile], cache), 1)
+        self.assertEqual(profile["photos"][0], THUMB)
+        self.assertEqual(nominee_photos.heavy_shown([profile], cache), 1)
+        self.assertEqual(nominee_photos.problems(cache), [])
+        self.assertEqual(len(nominee_photos.problems({"k": dict(record, heavy=None)})), 1)
 
     def test_a_failed_read_keeps_the_last_good_record(self):
         good = {"via": "wikidata-fec", "url": "https://upload.wikimedia.org/x.jpg", "name": "Y"}
@@ -180,19 +257,14 @@ HISTORY = {"people": {"FEC_H6NM03083": {
     "asked": "Martin R. Zamora", "wikipedia": "Martin R. Zamora", "offices": [
         {"office": "Member of the New Mexico House of Representatives", "open": True,
          "where": "New Mexico", "agree": "year-off"}]}}}
-ROSTER = {"states": {"NM": [
-    {"id": "ocd-person/zamora", "name": "Martin Zamora", "chamber": "lower", "district": "63",
-     "state": "NM", "image": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
-     "links": ["https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO"]},
-    {"id": "ocd-person/other", "name": "Ana Garcia", "chamber": "lower", "district": "62",
-     "state": "NM", "links": ["https://www.nmlegis.gov/Members/Legislator?SponCode=HGARC"]}]}}
-PAGE = ("<html><head><title>Representative Martin R. Zamora</title></head><body>"
-        "<h1>Representative Martin R. Zamora (R)</h1>"
-        '<img src="../Images/seal.png" alt="New Mexico Legislature seal">'
-        '<img src="../Images/Legislators/House/HZAMO.jpg" alt="Zamora">'
-        "<p>District 63, Clovis</p></body></html>")
 PAGE_URL = "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO"
 IMAGE_URL = "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg"
+ZAMORA = {"id": "ocd-person/zamora", "name": "Martin Zamora", "chamber": "lower",
+          "district": "63", "state": "NM", "image": IMAGE_URL, "links": [PAGE_URL]}
+ROSTER = {"fetched": "2026-10-24T12:00:00+00:00", "states": {"NM": [
+    ZAMORA,
+    {"id": "ocd-person/other", "name": "Ana Garcia", "chamber": "lower", "district": "62",
+     "state": "NM", "links": ["https://www.nmlegis.gov/Members/Legislator?SponCode=HGARC"]}]}}
 
 
 def zamora(**extra):
@@ -201,18 +273,24 @@ def zamora(**extra):
                    wikipediaVia="election-page", **extra)
 
 
+def roster_with(**member):
+    return {"fetched": ROSTER["fetched"],
+            "states": {"NM": [dict(ZAMORA, **member)] + ROSTER["states"]["NM"][1:]}}
+
+
 class TestStateLegislature(unittest.TestCase):
     """A nominee who sits in their state's legislature, by the record of
-    offices their own article gives and the legislature's roster."""
+    offices their own article gives and the legislature's roster: shown the
+    photograph this site's legislature page shows on their card."""
 
-    def resolve(self, page=PAGE, body=None, history=HISTORY, roster=ROSTER):
+    def resolve(self, body=None, history=HISTORY, roster=ROSTER, photos=None, url=IMAGE_URL):
         cache = {}
-        getter = Getter({PAGE_URL: (200, {"Content-Type": "text/html"}, page.encode()),
-                         IMAGE_URL: image(body or jpeg(300, 375))})
+        getter = Getter({url: image(body or jpeg(300, 375))})
         with unittest.mock.patch.object(nominee_photos, "wikidata_items", return_value={}):
             counts = nominee_photos.resolve_all([zamora()], cache, history=history,
                                                 legislators=roster, getter=getter,
-                                                log=lambda *a: None)
+                                                legislator_photos=photos, log=lambda *a: None)
+        self.assertNotIn(PAGE_URL, getter.asked)       # the card's choice, never a re-read page
         return cache.get(portraits.profile_key(zamora())), counts
 
     def test_the_legislatures_own_photograph_of_its_member(self):
@@ -220,52 +298,87 @@ class TestStateLegislature(unittest.TestCase):
         self.assertEqual(counts["legislature"], 1)
         self.assertEqual(record["url"], IMAGE_URL)
         self.assertEqual(record["page"], PAGE_URL)
-        self.assertIn('alt text "Zamora"', record["evidence"])
+        self.assertEqual(record["evidence"], "the file Open States lists for Martin Zamora "
+                                             "(ocd-person/zamora), served by the New Mexico "
+                                             "Legislature")
         self.assertEqual((record["width"], record["height"]), (300, 375))
         self.assertEqual(record["credit"], {"by": "New Mexico Legislature", "page": PAGE_URL})
+        # The very photograph the legislature page's card shows (rule 12).
+        card = legislature.card_photo(ZAMORA, "NM", {"kind": "member", "url": PAGE_URL})
+        self.assertEqual((card["image"], card["imageCredit"]), (record["url"], record["credit"]))
         profile = zamora()
         portraits.apply_cache([profile], {portraits.profile_key(profile): record},
-                              legislators=ROSTER)
+                              legislators=ROSTER, legislator_photos={"people": {}})
         self.assertEqual(profile["photoSource"], "state-legislature")
         self.assertEqual(profile["photoCredit"]["by"], "New Mexico Legislature")
         self.assertEqual(validate.check_photo_evidence(
             [profile], {portraits.profile_key(profile): record}), [])
 
-    def test_a_page_whose_image_names_someone_else_gives_nothing(self):
-        other = PAGE.replace('src="../Images/Legislators/House/HZAMO.jpg" alt="Zamora"',
-                             'src="../Images/Legislators/House/HGARC.jpg" alt="Garcia"')
-        roster = {"states": {"NM": [dict(ROSTER["states"]["NM"][0], image=None),
-                                    ROSTER["states"]["NM"][1]]}}
-        record, counts = self.resolve(page=other, roster=roster)
+    def test_the_legislatures_own_record_where_open_states_has_none(self):
+        own = "https://www.nmlegis.gov/Images/Legislators/House/HZAMO-2025.jpg"
+        photos_cache = {"people": {"ocd-person/zamora": {
+            "image": own, "credit": "New Mexico Legislature", "page": PAGE_URL,
+            "evidence": 'alt text "Representative Martin R. Zamora"', "read": "2026-10-19",
+            "chamber": "lower", "district": "63"}}}
+        record, _ = self.resolve(roster=roster_with(image=None), photos=photos_cache, url=own)
+        self.assertEqual(record["url"], own)
+        self.assertIn('alt text "Representative Martin R. Zamora"', record["evidence"])
+        profile = zamora()
+        cache = {portraits.profile_key(profile): record}
+        self.assertTrue(portraits.route_ok(profile, record, roster_with(image=None), photos_cache))
+        # Once the card shows another file, the nominee is not shown this one.
+        moved = {"people": {"ocd-person/zamora": dict(photos_cache["people"]["ocd-person/zamora"],
+                                                      image=own + "?v=2")}}
+        portraits.apply_cache([profile], cache, legislators=roster_with(image=None),
+                              legislator_photos=moved)
+        self.assertEqual(profile["photos"], ["placeholder"])
+
+    def test_a_file_the_card_does_not_show_or_off_the_legislatures_host_gives_nothing(self):
+        for member in ({"image": None},                                   # nothing listed
+                       {"imageShared": True},                             # another member's too
+                       {"image": "https://senatedems.example/zamora.jpg"},  # a caucus's host
+                       {"image": "https://www.bing.com/th?id=OIP.zamora"}):  # a search's
+            record, counts = self.resolve(roster=roster_with(**member),
+                                          url=member.get("image") or IMAGE_URL)
+            self.assertIsNone(record, member)
+            self.assertEqual(counts["legislature"], 0)
+
+    def test_a_wide_frame_or_a_refused_file_is_not_shown(self):
+        record, _ = self.resolve(body=jpeg(600, 400))
         self.assertIsNone(record)
-        self.assertEqual(counts["legislature"], 0)
-        url, why = nominee_photos.image_on_page(PAGE.replace("Zamora", "Garcia"), PAGE_URL,
-                                                "Martin Zamora", IMAGE_URL)
-        self.assertIsNone(url)
-        self.assertEqual(why, "the page does not name them")
+        record, _ = self.resolve()
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                      {IMAGE_URL: ("2026-10-25", "a group photograph")}):
+            self.assertFalse(portraits.route_ok(zamora(), record, ROSTER))
+            self.assertIsNone(self.resolve()[0])
+        # A file named a headshot may be square or wider (rule 38).
+        self.assertFalse(nominee_photos.wide_frame("https://x.gov/zamora-headshot.jpg",
+                                                   {"width": 600, "height": 400}))
 
     def test_no_corroborated_seat_or_two_of_the_name_give_nothing(self):
         bare = {"people": {"FEC_H6NM03083": dict(HISTORY["people"]["FEC_H6NM03083"],
                                                  offices=[])}}
         self.assertIsNone(self.resolve(history=bare)[0])
         twin = {"states": {"NM": ROSTER["states"]["NM"] + [
-            dict(ROSTER["states"]["NM"][0], id="ocd-person/twin", district="7")]}}
+            dict(ZAMORA, id="ocd-person/twin", district="7")]}}
         member, why = nominee_photos.legislator_for(zamora(), HISTORY, twin)
         self.assertIsNone(member)
         # A name in another state is never theirs (rule 3).
-        elsewhere = {"states": {"AZ": [dict(ROSTER["states"]["NM"][0], state="AZ")]}}
+        elsewhere = {"states": {"AZ": [dict(ZAMORA, state="AZ")]}}
         self.assertIsNone(nominee_photos.legislator_for(zamora(), HISTORY, elsewhere)[0])
 
-    def test_a_photograph_offered_only_oversized_is_left_out(self):
+    def test_a_heavy_photograph_is_shown_and_said(self):
+        """Nevada's 3.9 MB headshot of Carrie Buck was left out; it is
+        shown, at full size, and counted (rule 87)."""
         record, counts = self.resolve(body=jpeg(2964, 2964) + b"\x00" * 3_900_000)
-        self.assertIsNone(record["url"])
-        self.assertEqual(counts["leftOut"], 1)
-        self.assertIn("over 300 KB", record["leftOut"]["why"])
+        self.assertEqual(record["url"], IMAGE_URL)
+        self.assertEqual(counts["heavy"], 1)
+        self.assertIn("over 300 KB", record["heavy"])
+        self.assertEqual(nominee_photos.problems({"k": record}), [])
 
     def test_withheld_once_the_roster_seats_someone_else(self):
         record, _ = self.resolve()
-        moved = {"states": {"NM": [dict(ROSTER["states"]["NM"][0], id="ocd-person/new",
-                                        name="Pat Lee")]}}
+        moved = {"states": {"NM": [dict(ZAMORA, id="ocd-person/new", name="Pat Lee")]}}
         profile = zamora()
         portraits.apply_cache([profile], {portraits.profile_key(profile): record},
                               legislators=moved)

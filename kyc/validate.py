@@ -1328,9 +1328,9 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None):
     """A photograph reached through a page - a campaign's (rule 38), a
     legislature's or a Wikidata item (``nominee_photos``) - carries in its
     cache the page that ties it to the person, the words that name them
-    beside it, the day it was read and its bytes and pixel size, within the
-    caps (the owner's decision of 2026-10-19). One shown without them fails:
-    the cache cannot say why it is this person's."""
+    beside it, the day it was read and its bytes and pixel size, and a note
+    where it is over the caps and shown at full size (rule 87). One shown
+    without them fails: the cache cannot say why it is this person's."""
     from . import nominee_photos
     from .photos import too_heavy
     from .portraits import profile_key
@@ -1353,8 +1353,8 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None):
                        if not record.get(f)]
             if not all(weight.get(k) for k in ("bytes", "width", "height")):
                 missing.append("weight")
-            elif too_heavy(weight):
-                missing.append("a size within the caps")
+            elif too_heavy(weight) and not (record.get("portraitHeavy") or [{}])[0].get("kept"):
+                missing.append("note that it is over the caps")
             if missing:
                 found.append(f"{p['name']} (campaign-site): no {', '.join(missing)}")
     if not found:

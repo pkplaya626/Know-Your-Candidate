@@ -159,7 +159,7 @@ def _build(args):
     if cache:
         # A legislature's photograph stands while its roster seats them.
         stats["portraits"] = portraits.apply_cache(profiles, cache,
-                                                   legislators=_legislators(args.root))
+                                                   **_legislature(args.root))
         print(f"  portraits: {stats['portraits']}/{len(profiles)} verified "
               f"({100 * stats['portraits'] / max(len(profiles), 1):.0f}%)")
     else:
@@ -178,16 +178,16 @@ def _build(args):
     else:
         print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
               "articles and campaign sites")
-    # The owner's decision of 2026-10-19: a photograph is shown only where
-    # its source offers it within the caps; one offered only oversized is
-    # left out, and said here.
+    # A candidate's portrait offered only over the caps is shown at full
+    # size and said here (rule 87; the owner's decision of 2026-10-25):
+    # never the silhouette for its weight.
     from . import nominee_photos, photos as photos_mod
-    oversized = ((stats.get("enriched") or {}).get("portrait_oversized", 0)
-                 + nominee_photos.left_out(profiles, cache or {}))
-    stats["portraits_left_out"] = oversized
-    print(f"  portraits left out, offered by their source only over "
+    heavy = ((stats.get("enriched") or {}).get("portrait_heavy", 0)
+             + nominee_photos.heavy_shown(profiles, cache or {}))
+    stats["portraits_heavy"] = heavy
+    print(f"  candidates' portraits shown at full size, offered by their source only over "
           f"{photos_mod.MAX_PORTRAIT_BYTES // 1000} KB or {photos_mod.MAX_PORTRAIT_PX}px: "
-          f"{oversized}")
+          f"{heavy}")
     # Whose photograph each portrait is, once every source has had its say.
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
@@ -585,6 +585,14 @@ def _legislators(root):
     return statelegs.load_cache(root) or None
 
 
+def _legislature(root):
+    """``portraits.apply_cache``'s keywords for a nominee's portrait from
+    their legislature: the roster that must still seat them, and the
+    ``legphotos`` cache the card that must still show the file reads."""
+    from . import legphotos
+    return {"legislators": _legislators(root), "legislator_photos": legphotos.load_cache(root)}
+
+
 def _portraits(args):
     raw = _load(args)
     if raw is None:
@@ -611,8 +619,10 @@ def _portraits(args):
     from . import history as history_mod
     from . import nominee_photos
     try:
+        kw = _legislature(args.root)
         nominee_photos.resolve_all(profiles, cache, history=history_mod.load_cache(args.root),
-                                   legislators=_legislators(args.root))
+                                   legislators=kw["legislators"],
+                                   legislator_photos=kw["legislator_photos"])
         portraits.save_cache(cache, args.root)
     except Exception as exc:                     # never the refresh's end
         print(f"  [warn] nominee portraits stopped: {exc}; the cache is as it was")
@@ -877,7 +887,7 @@ def _enrich(args):
         # campaign-site portrait is taken only where none came by id or link.
         withheld = enrich.withhold_links(profiles, cache)
         portraits.apply_cache(profiles, portraits.load_cache(args.root),
-                              legislators=_legislators(args.root))
+                              **_legislature(args.root))
         filled = enrich.apply_cache(profiles, cache, as_of=_age_date(stats))
         if withheld:
             filled["wikipedia_withheld"] += withheld
@@ -892,7 +902,7 @@ def _enrich(args):
         if args.render:
             enrich.withhold_links(profiles, cache)
             portraits.apply_cache(profiles, portraits.load_cache(args.root),
-                                  legislators=_legislators(args.root))
+                                  **_legislature(args.root))
             try:
                 if enrich.render_portraits(profiles, cache, root=args.root, limit=args.render):
                     enrich.save_cache(cache, args.root)
@@ -1499,8 +1509,7 @@ def _verify(args):
     enrichment = enrich.load_cache(args.root)
     enrich.withhold_links(profiles, enrichment)
     cache = portraits.load_cache(args.root)
-    stats["portraits"] = (portraits.apply_cache(profiles, cache,
-                                                legislators=_legislators(args.root))
+    stats["portraits"] = (portraits.apply_cache(profiles, cache, **_legislature(args.root))
                           if cache else 0)
     enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
     from .photos import assign_credits

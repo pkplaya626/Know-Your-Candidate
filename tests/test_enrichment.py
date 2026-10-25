@@ -1749,7 +1749,8 @@ class TestPortraitWeights(unittest.TestCase):
                                  offers={heavy: [(small, 329), (offered, 500), (heavy, 876)]})
         self.assertEqual(record["portrait"], offered)
         self.assertEqual(record["portraitWeight"]["bytes"], 160_000)
-        self.assertEqual(record["portraitHeavy"], [{"url": heavy, "why": "1300 KB, over 300 KB"}])
+        self.assertEqual(record["portraitHeavy"],
+                         [{"url": heavy, "why": "1300 KB, over 300 KB", "kept": False}])
 
     def test_names_run_together_in_an_alt_text_name_them(self):
         """Brian James Miller's Wix portrait carries no name in its file,
@@ -1797,7 +1798,7 @@ class TestPortraitWeights(unittest.TestCase):
             counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
                                         as_of=TestApplyEnrichment.AS_OF)
             self.assertEqual(profile["photos"], ["placeholder"])
-            self.assertEqual(counts["portrait_oversized"], 0)    # refused, not left out
+            self.assertEqual(counts["portrait_heavy"], 0)        # refused, not shown heavy
             stale = [u for issue in validate.check_portrait_overrides(
                 {"people": {"x": {"site": site}}}) for u in issue.detail]
             self.assertNotIn(heavy, stale)
@@ -1825,9 +1826,9 @@ class TestPortraitWeights(unittest.TestCase):
             with mock.patch.object(enrich, "portrait_check",
                                    side_effect=lambda u, h: weights.get(u, (True, {
                                        "bytes": 9_000, "width": 500, "height": 625}))) as check:
-                self.assertIsNone(enrich.take_portrait(record, [(heavy, True)]))
+                self.assertEqual(enrich.take_portrait(record, [(heavy, True)]), heavy)
             self.assertEqual([c.args[0] for c in check.call_args_list], [heavy])
-            self.assertTrue(record["portraitHeavy"][0]["leftOut"])
+            self.assertTrue(record["portraitHeavy"][0]["kept"])
         # Squarespace's fixed widths are the host's own renditions of every
         # upload, as Wikimedia's are.
         square = "https://images.squarespace-cdn.com/content/v1/a/b/Smith.jpg"
@@ -1835,32 +1836,36 @@ class TestPortraitWeights(unittest.TestCase):
             square, {"bytes": 900_000, "width": 1600, "height": 2000},
             lambda u: {"bytes": 50_000, "width": 500, "height": 625}))
 
-    def test_an_image_offered_only_oversized_is_left_out_and_counted(self):
-        """Never scaled by Photon, never shown at full size: the first
-        version did both, and the decision of 2026-10-19 rules out both."""
-        heavy = "https://smith.com/wp-content/uploads/smith-big.png"
-        weights = {heavy: (True, {"bytes": 1_300_000, "width": 876, "height": 1024})}
+    def test_a_nominees_only_likeness_is_not_withheld_for_its_weight(self):
+        """Eleven November nominees showed the silhouette once their only
+        portrait was refused as heavy; the reviewer's diff found them. The
+        first version of PR #134 left six more out again (Michael J. Quirk's
+        306 KB PNG among them), and its reviewers found those: a heavy one
+        with no rendition offered is shown at full size and said, and an
+        image service is still never asked for a width."""
+        heavy = "https://cdn.example.com/a/smith.png?v=3"     # no resizer, a query string
+        weights = {heavy: (True, {"bytes": 306_579, "width": 800, "height": 913})}
         record = {}
         with mock.patch.object(enrich, "portrait_check",
                                side_effect=lambda u, h: weights.get(u, (True, {
                                    "bytes": 9_000, "width": 500, "height": 584}))) as check:
-            self.assertIsNone(enrich.take_portrait(record, [(heavy, True)]))
-        # Photon was never asked.
-        self.assertEqual([c.args[0] for c in check.call_args_list], [heavy])
-        self.assertNotIn("portrait", record)
+            self.assertEqual(enrich.take_portrait(record, [(heavy, True)]), heavy)
+        self.assertEqual([c.args[0] for c in check.call_args_list], [heavy])   # Photon never asked
+        self.assertEqual(record["portrait"], heavy)
         self.assertEqual(record["portraitHeavy"],
-                         [{"url": heavy, "why": "1300 KB, over 300 KB", "leftOut": True}])
-        site = dict(TestApplyEnrichment.SAFE_SITE, portraitHeavy=record["portraitHeavy"])
-        site.pop("portrait")
+                         [{"url": heavy, "why": "306 KB, over 300 KB", "kept": True}])
+        site = dict(TestApplyEnrichment.SAFE_SITE, portrait=heavy,
+                    portraitWeight=weights[heavy][1], portraitHeavy=record["portraitHeavy"])
         profile = _challenger(campaignSite="https://janesmith.com")
         counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
                                     as_of=TestApplyEnrichment.AS_OF)
-        self.assertEqual(profile["photos"], ["placeholder"])
-        self.assertEqual(counts["portrait_oversized"], 1)
+        self.assertEqual(profile["photos"][0], heavy)
+        self.assertEqual(counts["portrait_heavy"], 1)
 
-    def test_a_portrait_an_image_service_scaled_or_kept_heavy_is_not_shown(self):
-        """What the cache held before the decision: Photon's scaling of a
-        campaign's 713 KB file, and a 306 KB PNG shown at full size."""
+    def test_a_portrait_an_image_service_scaled_is_not_shown_and_a_heavy_one_is(self):
+        """What the cache held before the decision of 2026-10-19: Photon's
+        scaling of a campaign's 713 KB file is not shown (measure_portraits
+        takes the original again); a 306 KB PNG at full size is."""
         original = "https://chelseyhockett.example/images/chelsey.jpg"
         photon = "https://i0.wp.com/chelseyhockett.example/images/chelsey.jpg?w=500&ssl=1"
         scaled = dict(TestApplyEnrichment.SAFE_SITE, portrait=photon,
@@ -1869,12 +1874,12 @@ class TestPortraitWeights(unittest.TestCase):
                                       "kept": False}])
         heavy = dict(TestApplyEnrichment.SAFE_SITE,
                      portraitWeight={"bytes": 306_579, "width": 800, "height": 913})
-        for site in (scaled, heavy):
+        for site, shown in ((scaled, False), (heavy, True)):
             profile = _challenger(campaignSite="https://janesmith.com")
             counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
                                         as_of=TestApplyEnrichment.AS_OF)
-            self.assertEqual(profile["photos"], ["placeholder"])
-            self.assertEqual(counts["portrait_oversized"], 1)
+            self.assertEqual(profile["photos"] != ["placeholder"], shown)
+            self.assertEqual(counts["portrait_heavy"], int(shown))
         # A site that serves its own files from Photon (Jetpack) offers them.
         own = "https://i0.wp.com/smith.com/wp-content/uploads/smith.jpg?w=500&ssl=1"
         self.assertFalse(photos.service_form(own, own))
@@ -1889,8 +1894,8 @@ class TestPortraitWeights(unittest.TestCase):
         record = {}
         with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
             enrich.take_portrait(record, [(heavy, True)])
-        self.assertNotIn("portrait", record)
-        self.assertTrue(record["portraitHeavy"][0]["leftOut"])
+        self.assertEqual(record["portrait"], heavy)
+        self.assertTrue(record["portraitHeavy"][0]["kept"])
 
     def test_smaller_forms_come_from_the_same_file(self):
         big = ("https://images.squarespace-cdn.com/content/v1/abc/def/Jane+Smith+Headshot.png"
@@ -1945,7 +1950,7 @@ class TestPortraitWeights(unittest.TestCase):
             self.assertEqual(enrich.measure_portraits(cache, log=lambda *a: None), 1)
         record = cache["people"]["FEC_H6XX01001"]["site"]
         self.assertEqual(record["portrait"], offered)
-        self.assertNotIn("leftOut", record["portraitHeavy"][0])
+        self.assertFalse(record["portraitHeavy"][0]["kept"])
 
     def test_a_photon_form_in_the_cache_is_taken_again_from_what_the_source_offers(self):
         original = "https://smith.com/images/smith.jpg"
@@ -1959,8 +1964,8 @@ class TestPortraitWeights(unittest.TestCase):
                 mock.patch.object(enrich.time, "sleep"):
             enrich.measure_portraits(cache, log=lambda *a: None)
         record = cache["people"]["FEC_H6XX01001"]["site"]
-        self.assertNotIn("portrait", record)
-        self.assertTrue(record["portraitHeavy"][0]["leftOut"])
+        self.assertEqual(record["portrait"], original)            # the original, never Photon's
+        self.assertTrue(record["portraitHeavy"][0]["kept"])
 
     def test_a_gzipped_image_is_read_through_its_encoding(self):
         """Missouri's attorney general's headshot came gzipped and read as
