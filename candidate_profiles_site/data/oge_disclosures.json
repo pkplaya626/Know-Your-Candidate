@@ -376,14 +376,14 @@
      "year": null
     },
     {
-     "amended": false,
+     "amended": true,
      "date": "2026-06-19",
      "kind": "ethics",
-     "label": "Ethics Agreement",
+     "label": "Ethics Agreement (Amended 10/19/2026)",
      "office": true,
      "request": false,
      "title": "Director",
-     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/55C74E394C2DEF6785258E1B002DE998/$FILE/Clayton%2C%20Walter%20Joseph%20%20finalEA.pdf",
+     "url": "https://extapps2.oge.gov/201/Presiden.nsf/PAS+Index/55C74E394C2DEF6785258E1B002DE998/$FILE/Clayton%2C%20Walter%20Joseph%20%20AMENDED%20EA.pdf",
      "year": null
     }
    ],
@@ -2014,6 +2014,6 @@
   "Doug Burgum: Nominee 278 of 2025-01-15 names Burgum, Doug, not Burgum, Douglas J; not linked",
   "Doug Collins: Annual (2026) of 2026-06-25 names Collins, Douglas A, not Collins, Doug; not linked"
  ],
- "read": "2026-10-20",
+ "read": "2026-10-24",
  "source": "https://extapps2.oge.gov/201/Presiden.nsf/"
 }

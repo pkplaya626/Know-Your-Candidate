@@ -132,12 +132,14 @@ class TestTheBuild(unittest.TestCase):
                 self.assertNotIn("supremecourt.gov", portrait["url"])
             elif portrait:
                 # Never another Commons file passed off as the Court's
-                # portrait: Sotomayor's item shows a 2009 White House photo.
+                # portrait: Sotomayor's item shows a 2009 White House photo,
+                # so only the table's file is ever hers.
                 self.assertEqual(portrait["credit"], judiciary.PORTRAIT_CREDIT, justice["name"])
                 self.assertIn("supremecourt.gov", portrait["url"])
-        if links and links.get("read", "") >= "2026-10-20":
-            # Read on 2026-10-20: eight of the nine, all but Sotomayor.
-            self.assertGreaterEqual(held, len(overrides.JUSTICE_PORTRAITS) - 1)
+        if links and links.get("read", "") >= "2026-10-25":
+            # Read on 2026-10-25: all nine, Sotomayor's and Kagan's
+            # official portraits by the table's files.
+            self.assertGreaterEqual(held, len(overrides.JUSTICE_PORTRAITS))
 
 
 class TestTheFiles(unittest.TestCase):

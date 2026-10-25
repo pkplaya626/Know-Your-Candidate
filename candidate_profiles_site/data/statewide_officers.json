@@ -290,11 +290,12 @@
    "title": "Attorney General"
   },
   "NC": {
-   "disputed": [
-    "Dan Bishop (R)",
-    "Jeff Jackson (D)"
-   ],
-   "office": "https://ncdoj.gov/"
+   "listedBy": "Democratic Attorneys General Association",
+   "name": "Jeff Jackson",
+   "office": "https://ncdoj.gov/",
+   "party": "D",
+   "partyKey": "D",
+   "title": "Attorney General"
   },
   "ND": {
    "listedBy": "Republican Attorneys General Association",
@@ -460,8 +461,7 @@
    "party": "R",
    "partyKey": "R",
    "selection": "Appointed by the state Supreme Court",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "TX": {
    "listedBy": "Republican Attorneys General Association",
@@ -536,7 +536,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-20T13:22:59+00:00",
+ "fetched": "2026-10-24T12:34:10+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",

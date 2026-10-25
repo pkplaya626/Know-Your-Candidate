@@ -699,9 +699,10 @@ PORTRAIT_LICENCE_DOUBTS = {
 # (kyc/judge_links.py) takes this file for the justice, by the same checks as
 # any judge's, and the federal pages show it only while Commons still names
 # the author recorded here; otherwise the Court's own portrait stands.
-# Sonia Sotomayor is not here: her Wikidata item's image is a 2009 White
-# House photograph, not the Court's portrait, and Commons held no official
-# portrait of hers when read on 2026-10-20, so the Court's own stands.
+# Sonia Sotomayor's Wikidata item's image is a 2009 White House photograph,
+# not the Court's portrait, and Elena Kagan's is a 2013 upload of hers tagged
+# CC BY-SA 3.0: each entry below names the Court's own portrait as Commons
+# holds it, in the public domain (both read 2026-10-25).
 _SCOTUS_STAFF = ("the Court's official portrait, by its staff photographer, as the Court's "
                  "Collection credits it")
 JUSTICE_PORTRAITS = {
@@ -711,10 +712,14 @@ JUSTICE_PORTRAITS = {
                 "Steve Petteway, Collection of the Supreme Court of the United States",
                 "2026-10-20", _SCOTUS_STAFF),
     "1377101": ("Justice Alito official.jpg", "Steve Petteway", "2026-10-20", _SCOTUS_STAFF),
-    "1393281": ("Elena Kagan Official SCOTUS Portrait (2013).jpg",
+    "1388091": ("Sonia Sotomayor in SCOTUS robe.jpg",
+                "Collection of the Supreme Court of the United States, Steve Petteway",
+                "2026-10-25", _SCOTUS_STAFF + "; public domain, its source Oyez; the item's "
+                "image is a 2009 White House photograph by Stacey Ilyse"),
+    "1393281": ("Elena Kagan official SCOTUS portrait.jpg",
                 "Steve Petteway, Collection of the Supreme Court of the United States",
-                "2026-10-20", _SCOTUS_STAFF + "; Commons tags it CC BY-SA 3.0, and the tag "
-                "stands (rule 82): shown with that licence"),
+                "2026-10-25", _SCOTUS_STAFF + "; public domain, its source Oyez; the item's "
+                "image, 'Elena Kagan Official SCOTUS Portrait (2013).jpg', is tagged CC BY-SA 3.0"),
     "1392461": ("Associate Justice Neil Gorsuch Official Portrait.jpg",
                 "Franz Jantzen, Collection of the Supreme Court of the United States",
                 "2026-10-20", _SCOTUS_STAFF),

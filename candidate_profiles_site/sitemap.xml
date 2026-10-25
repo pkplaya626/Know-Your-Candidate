@@ -7466,6 +7466,11 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://candidates.radicalrelay.us/p/FEC_H6CO02206.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://candidates.radicalrelay.us/p/FEC_H6CO03212.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.3</priority>
@@ -10746,6 +10751,11 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://candidates.radicalrelay.us/p/FEC_H6NE03206.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
     <loc>https://candidates.radicalrelay.us/p/FEC_H6NH01321.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.3</priority>
@@ -11597,6 +11607,11 @@
   </url>
   <url>
     <loc>https://candidates.radicalrelay.us/p/FEC_H6NY25208.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://candidates.radicalrelay.us/p/FEC_H6NY26131.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.3</priority>
   </url>

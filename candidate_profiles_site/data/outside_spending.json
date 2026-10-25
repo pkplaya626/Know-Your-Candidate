@@ -1,5 +1,5 @@
 {
- "asked": 2619,
+ "asked": 2622,
  "candidates": {
   "H0AL01055": {
    "oppose": [],
@@ -18,8 +18,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 40,
-     "total": 784.11
+     "count": 44,
+     "total": 817.36
     }
    ]
   },
@@ -109,6 +109,12 @@
      "total": 104048.34
     },
     {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 4,
+     "total": 90200.0
+    },
+    {
      "committee": "ALAMEDA COUNTY DEMOCRATIC CENTRAL COMMITTEE",
      "committeeId": "C00375279",
      "count": 12,
@@ -185,8 +191,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 74,
-     "total": 5983.52
+     "count": 81,
+     "total": 370154.57
     }
    ]
   },
@@ -213,7 +219,20 @@
    ]
   },
   "H0FL13158": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 2,
+     "total": 828557.46
+    },
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 3,
+     "total": 93331.9
+    }
+   ],
    "support": [
     {
      "committee": "LATINOS FOR CONSERVATIVE VALUES",
@@ -230,8 +249,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 8,
-     "total": 660.38
+     "count": 14,
+     "total": 1122.26
     },
     {
      "committee": "FREEDOM CAUCUS FUND",
@@ -276,8 +295,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 73,
-     "total": 41806.52
+     "count": 77,
+     "total": 41836.27
     },
     {
      "committee": "HOUSE FREEDOM ACTION",
@@ -430,8 +449,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 53,
-     "total": 9321.01
+     "count": 57,
+     "total": 9492.01
     },
     {
      "committee": "ILLINOIS AGRICULTURAL ASSOCIATION ACTIVATOR POLITICAL INVOLVEMENT FUND (FED) 'ACTIVATOR'/'ILLINOIS FARM BUREAU ACTIVATOR'",
@@ -494,10 +513,22 @@
   "H0MI02094": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 5,
+     "total": 1764059.13
+    },
+    {
      "committee": "LCV VICTORY FUND",
      "committeeId": "C00486845",
      "count": 15,
      "total": 990134.1
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 2,
+     "total": 375338.0
     },
     {
      "committee": "SOMOS PAC",
@@ -575,7 +606,14 @@
      "total": 171.13
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "MINNESOTA CITIZENS CONCERNED FOR LIFE, INC. FEDERAL PAC",
+     "committeeId": "C00129171",
+     "count": 1,
+     "total": 285.64
+    }
+   ]
   },
   "H0NC02125": {
    "oppose": [],
@@ -601,6 +639,12 @@
   },
   "H0NJ07261": {
    "oppose": [
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 2,
+     "total": 378426.0
+    },
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
@@ -712,8 +756,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 34,
-     "total": 13797.3
+     "count": 37,
+     "total": 13824.55
     }
    ]
   },
@@ -723,8 +767,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 33,
-     "total": 406.96
+     "count": 36,
+     "total": 434.21
     }
    ]
   },
@@ -774,6 +818,12 @@
   },
   "H0TX15124": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 13,
+     "total": 1860297.62
+    },
     {
      "committee": "AB PAC",
      "committeeId": "C00492140",
@@ -847,8 +897,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 42,
-     "total": 439.81
+     "count": 45,
+     "total": 472.06
     }
    ]
   },
@@ -923,6 +973,12 @@
   "H0WI03175": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 12,
+     "total": 1847152.79
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
@@ -977,6 +1033,12 @@
      "committeeId": "C00523241",
      "count": 1,
      "total": 20000.0
+    },
+    {
+     "committee": "TURNING POINT PAC INC.",
+     "committeeId": "C00814152",
+     "count": 1,
+     "total": 569.67
     }
    ]
   },
@@ -994,10 +1056,22 @@
   "H2AK01083": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 5,
+     "total": 607153.62
+    },
+    {
      "committee": "CORNERSTONE FOUNDERS PAC",
      "committeeId": "C00948653",
      "count": 1,
      "total": 125000.0
+    },
+    {
+     "committee": "907 INITIATIVE INC.",
+     "committeeId": "C90023581",
+     "count": 4,
+     "total": 47812.58
     }
    ],
    "support": [
@@ -1006,6 +1080,12 @@
      "committeeId": "C00836221",
      "count": 2,
      "total": 508142.4
+    },
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 70,
+     "total": 371997.58
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
@@ -1022,14 +1102,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 48,
-     "total": 8248.68
-    },
-    {
-     "committee": "FREEDOM CAUCUS FUND",
-     "committeeId": "C00552851",
-     "count": 63,
-     "total": 5197.24
+     "count": 54,
+     "total": 8663.61
     }
    ]
   },
@@ -1067,16 +1141,16 @@
    ],
    "support": [
     {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 98,
+     "total": 535569.47
+    },
+    {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
      "count": 16,
      "total": 23935.88
-    },
-    {
-     "committee": "FREEDOM CAUCUS FUND",
-     "committeeId": "C00552851",
-     "count": 90,
-     "total": 23080.18
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -1093,13 +1167,25 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 48,
-     "total": 8301.12
+     "count": 54,
+     "total": 8938.1
     }
    ]
   },
   "H2AZ02360": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 34,
+     "total": 1974608.63
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 552500.0
+    },
     {
      "committee": "YOUTH SAVE DEMOCRACY PAC",
      "committeeId": "C00832493",
@@ -1111,12 +1197,6 @@
      "committeeId": "C90017492",
      "count": 7,
      "total": 4258.82
-    },
-    {
-     "committee": "HMP",
-     "committeeId": "C00495028",
-     "count": 1,
-     "total": 4250.0
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -1249,10 +1329,28 @@
   "H2CA20094": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 20,
+     "total": 2456775.47
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 2,
+     "total": 796213.0
+    },
+    {
      "committee": "314 ACTION FUND",
      "committeeId": "C00633248",
      "count": 4,
      "total": 436700.0
+    },
+    {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 4,
+     "total": 103609.2
     },
     {
      "committee": "AMERICAN PRIORITIES (AP)",
@@ -1618,6 +1716,12 @@
      "committeeId": "C00859660",
      "count": 1,
      "total": 250000.0
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 23075.88
     }
    ]
   },
@@ -1636,10 +1740,22 @@
    "oppose": [],
    "support": [
     {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 6,
+     "total": 285125.91
+    },
+    {
      "committee": "WELCOMEPAC",
      "committeeId": "C00786830",
      "count": 3,
      "total": 44876.64
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 27435.08
     },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
@@ -1669,6 +1785,12 @@
   },
   "H2IA03119": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 7,
+     "total": 753923.89
+    },
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
@@ -1874,6 +1996,12 @@
   "H2MI07123": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 12,
+     "total": 2046411.92
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
@@ -1970,6 +2098,12 @@
      "committeeId": "C00819508",
      "count": 1,
      "total": 42000.0
+    },
+    {
+     "committee": "MINNESOTA CITIZENS CONCERNED FOR LIFE, INC. FEDERAL PAC",
+     "committeeId": "C00129171",
+     "count": 1,
+     "total": 285.64
     }
    ]
   },
@@ -2026,8 +2160,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 49,
-     "total": 12914.49
+     "count": 52,
+     "total": 12941.74
     }
    ]
   },
@@ -2043,8 +2177,20 @@
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
+     "count": 6,
+     "total": 109476.33
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 100000.0
+    },
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
      "count": 2,
-     "total": 27859.53
+     "total": 97850.0
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -2144,8 +2290,8 @@
     {
      "committee": "JOBS AND DEMOCRACY PAC",
      "committeeId": "C00928374",
-     "count": 5,
-     "total": 1612658.36
+     "count": 6,
+     "total": 1621658.36
     },
     {
      "committee": "ARTICLE ONE PAC",
@@ -2454,6 +2600,18 @@
   "H2NY17162": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 10,
+     "total": 473782.56
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 174960.0
+    },
+    {
      "committee": "NEW YORKERS FOR A RETURN TO FAIR AND HONEST GOVERNMENT",
      "committeeId": "C00943811",
      "count": 1,
@@ -2478,7 +2636,14 @@
      "total": 341.19
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 4,
+     "total": 134013.14
+    }
+   ]
   },
   "H2OH01194": {
    "oppose": [],
@@ -2523,6 +2688,18 @@
   "H2OH09031": {
    "oppose": [],
    "support": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 7,
+     "total": 239060.32
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 4,
+     "total": 53596.93
+    },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
@@ -2600,6 +2777,17 @@
     }
    ]
   },
+  "H2OH15228": {
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 173469.89
+    }
+   ],
+   "support": []
+  },
   "H2OH16051": {
    "oppose": [
     {
@@ -2607,6 +2795,12 @@
      "committeeId": "C00492140",
      "count": 9,
      "total": 345417.12
+    },
+    {
+     "committee": "UNITY IN ACTION PAC",
+     "committeeId": "C00954040",
+     "count": 1,
+     "total": 1091.8
     }
    ],
    "support": []
@@ -2617,8 +2811,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 36,
-     "total": 460.21
+     "count": 39,
+     "total": 487.46
     }
    ]
   },
@@ -2671,6 +2865,12 @@
   "H2PA04135": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 6,
+     "total": 765554.64
+    },
+    {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
      "count": 42,
@@ -2709,6 +2909,18 @@
    ],
    "support": [
     {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 96,
+     "total": 684375.34
+    },
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 229500.0
+    },
+    {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
      "count": 18,
@@ -2721,12 +2933,6 @@
      "total": 32490.63
     },
     {
-     "committee": "FREEDOM CAUCUS FUND",
-     "committeeId": "C00552851",
-     "count": 89,
-     "total": 30706.04
-    },
-    {
      "committee": "SENATE CONSERVATIVES ACTION",
      "committeeId": "C00524181",
      "count": 1,
@@ -2735,19 +2941,32 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 48,
-     "total": 8324.11
+     "count": 54,
+     "total": 9031.19
     },
     {
      "committee": "GOA VICTORY FUND",
      "committeeId": "C00817122",
      "count": 3,
      "total": 574.25
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
     }
    ]
   },
   "H2PA17103": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "SEIU COPE (SERVICE EMPLOYEES INTERNATIONAL UNION COMMITTEE ON POLITICAL EDUCATION)",
@@ -2782,7 +3001,14 @@
    ]
   },
   "H2PA18200": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "WORKING FAMILIES PARTY PAC",
@@ -2841,8 +3067,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 78,
-     "total": 517526.36
+     "count": 79,
+     "total": 517531.36
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
@@ -2911,6 +3137,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 5,
+     "total": 173706.82
+    },
+    {
      "committee": "NATIONAL ASSOCIATION OF REALTORS POLITICAL ACTION COMMITTEE",
      "committeeId": "C00030718",
      "count": 3,
@@ -2972,6 +3204,24 @@
   "H2VA02064": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 14,
+     "total": 1307847.39
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 3,
+     "total": 921966.56
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 200000.0
+    },
+    {
      "committee": "ABLE DEMS PAC",
      "committeeId": "C00838052",
      "count": 1,
@@ -2985,6 +3235,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 5,
+     "total": 260293.12
+    },
     {
      "committee": "CLEARPATH ACTION FUND, INC.",
      "committeeId": "C00608943",
@@ -3075,6 +3331,12 @@
      "committeeId": "C00844530",
      "count": 1,
      "total": 100000.0
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 15235.15
     }
    ]
   },
@@ -3129,16 +3391,16 @@
      "total": 127442.35
     },
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 4,
+     "total": 127281.3
+    },
+    {
      "committee": "HEALTHCARE FOR ACTION PAC",
      "committeeId": "C00822536",
      "count": 2,
      "total": 17522.6
-    },
-    {
-     "committee": "PROGRESSIVE TURNOUT PROJECT",
-     "committeeId": "C00580068",
-     "count": 1,
-     "total": 11454.35
     },
     {
      "committee": "SEIU COPE (SERVICE EMPLOYEES INTERNATIONAL UNION COMMITTEE ON POLITICAL EDUCATION)",
@@ -3191,8 +3453,21 @@
    ]
   },
   "H4AZ02184": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 1,
+     "total": 111229.04
+    }
+   ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 47325.39
+    },
     {
      "committee": "WESTERN STATES REGIONAL COUNCIL OF CARPENTERS LEGISLATIVE IMPROVEMENT CMTE UNITED BROTHERHOOD OF CARPENTERS & JOINERS OF AMERICA",
      "committeeId": "C00285593",
@@ -3639,6 +3914,12 @@
   },
   "H4CO08034": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 19,
+     "total": 2276246.22
+    },
     {
      "committee": "TRUST BRIGADE",
      "committeeId": "C00914689",
@@ -4115,6 +4396,12 @@
   "H4NC01137": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 9,
+     "total": 2765014.52
+    },
+    {
      "committee": "1ST CONSERVATIVE FUND NC",
      "committeeId": "C00935767",
      "count": 10,
@@ -4276,6 +4563,12 @@
    ],
    "support": [
     {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 29,
+     "total": 594250.44
+    },
+    {
      "committee": "CLUB FOR GROWTH ACTION",
      "committeeId": "C00487470",
      "count": 18,
@@ -4286,12 +4579,6 @@
      "committeeId": "C00830463",
      "count": 7,
      "total": 162799.76
-    },
-    {
-     "committee": "FREEDOM CAUCUS FUND",
-     "committeeId": "C00552851",
-     "count": 22,
-     "total": 87345.32
     },
     {
      "committee": "TURNING POINT PAC INC.",
@@ -4361,6 +4648,12 @@
   "H4OH09169": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 13,
+     "total": 1677499.69
+    },
+    {
      "committee": "AMERICAN RESOLVE PAC INC.",
      "committeeId": "C00887729",
      "count": 3,
@@ -4408,6 +4701,18 @@
   "H4PA08124": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 14,
+     "total": 1231377.52
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 2,
+     "total": 860274.0
+    },
+    {
      "committee": "AB PAC",
      "committeeId": "C00492140",
      "count": 11,
@@ -4437,6 +4742,12 @@
   "H4PA10104": {
    "oppose": [
     {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 1,
+     "total": 115960.31
+    },
+    {
      "committee": "HOUSE FREEDOM ACTION",
      "committeeId": "C00662221",
      "count": 1,
@@ -4447,6 +4758,12 @@
      "committeeId": "C00685693",
      "count": 3,
      "total": 2992.46
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     },
     {
      "committee": "API PA VOTES",
@@ -4518,8 +4835,26 @@
     }
    ]
   },
-  "H4PA13199": {
+  "H4PA12068": {
    "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
+  },
+  "H4PA13199": {
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -4530,7 +4865,14 @@
    ]
   },
   "H4PA13298": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -4546,8 +4888,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 34,
-     "total": 6355.91
+     "count": 37,
+     "total": 6388.16
     }
    ]
   },
@@ -4604,8 +4946,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 27,
-     "total": 42071.2
+     "count": 35,
+     "total": 631579.59
     },
     {
      "committee": "GOA VICTORY FUND",
@@ -4627,14 +4969,14 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 43,
-     "total": 1443.02
+     "count": 48,
+     "total": 1528.02
     },
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 7,
-     "total": 647.88
+     "count": 13,
+     "total": 1181.61
     },
     {
      "committee": "TEXAS ALLIANCE FOR LIFE FED PAC",
@@ -4734,8 +5076,8 @@
     {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
-     "count": 2,
-     "total": 90000.0
+     "count": 3,
+     "total": 170000.0
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -4800,6 +5142,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 88699.98
+    },
+    {
      "committee": "WELCOMEPAC",
      "committeeId": "C00786830",
      "count": 3,
@@ -4848,7 +5196,14 @@
    ]
   },
   "H6AK01092": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 1,
+     "total": 122107.5
+    }
+   ],
    "support": [
     {
      "committee": "WHEEL DOG PAC",
@@ -4938,7 +5293,14 @@
    ]
   },
   "H6AZ05190": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 2,
+     "total": 794162.5
+    }
+   ],
    "support": [
     {
      "committee": "AMERICAN MISSION",
@@ -4955,8 +5317,8 @@
     {
      "committee": "TURNING POINT PAC INC.",
      "committeeId": "C00814152",
-     "count": 1,
-     "total": 2697.06
+     "count": 2,
+     "total": 5847.44
     }
    ]
   },
@@ -4990,14 +5352,26 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 42,
-     "total": 1570.16
+     "count": 47,
+     "total": 1811.21
     }
    ]
   },
   "H6AZ06099": {
    "oppose": [],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 99403.87
+    },
+    {
+     "committee": "AANHPI RISING TIDE",
+     "committeeId": "C00891028",
+     "count": 1,
+     "total": 2364.31
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
@@ -5310,6 +5684,12 @@
    ],
    "support": [
     {
+     "committee": "LEADERS WE DESERVE",
+     "committeeId": "C00843110",
+     "count": 9,
+     "total": 347838.24
+    },
+    {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
      "committeeId": "C00490375",
      "count": 2,
@@ -5401,6 +5781,12 @@
   },
   "H6CA14163": {
    "oppose": [
+    {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 4,
+     "total": 210300.0
+    },
     {
      "committee": "PROGRESSIVE PROMISE",
      "committeeId": "C00897926",
@@ -6110,6 +6496,12 @@
   "H6CA49128": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 22,
+     "total": 2736000.16
+    },
+    {
      "committee": "48TH ACCOUNTABILITY PROJECT",
      "committeeId": "C00942169",
      "count": 35,
@@ -6267,7 +6659,14 @@
    ]
   },
   "H6CO04202": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 1,
+     "total": 79027.73
+    }
+   ],
    "support": [
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -6284,6 +6683,18 @@
      "committeeId": "C00492140",
      "count": 9,
      "total": 259705.3
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 233280.0
+    },
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 3,
+     "total": 232472.04
     }
    ],
    "support": [
@@ -6738,8 +7149,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 18,
-     "total": 25724.25
+     "count": 21,
+     "total": 25751.5
     },
     {
      "committee": "FREEDOM'S DEFENSE FUND",
@@ -6834,6 +7245,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 40575.64
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -6859,8 +7276,21 @@
    ]
   },
   "H6FL11126": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 1,
+     "total": 91926.72
+    }
+   ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 77575.29
+    },
     {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
@@ -6898,13 +7328,50 @@
    ]
   },
   "H6FL13312": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 200000.0
+    }
+   ],
    "support": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 2,
+     "total": 40500.0
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 24337.67
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 8,
      "total": 1350.96
+    }
+   ]
+  },
+  "H6FL14237": {
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 2,
+     "total": 608160.0
+    }
+   ],
+   "support": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 7,
+     "total": 583568.74
     }
    ]
   },
@@ -6948,13 +7415,19 @@
     {
      "committee": "PAVC PAC",
      "committeeId": "C00895698",
-     "count": 7,
-     "total": 63250.0
+     "count": 10,
+     "total": 98400.0
     }
    ]
   },
   "H6FL19129": {
    "oppose": [
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 15000.0
+    },
     {
      "committee": "LOVE AMERICA UPHOLD FREEDOM PAC",
      "committeeId": "C00894071",
@@ -6977,6 +7450,12 @@
      "committeeId": "C00819508",
      "count": 2,
      "total": 16500.0
+    },
+    {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 12533.0
     }
    ],
    "support": []
@@ -6987,8 +7466,8 @@
     {
      "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
      "committeeId": "C00657866",
-     "count": 9,
-     "total": 2205925.75
+     "count": 13,
+     "total": 2389743.57
     },
     {
      "committee": "LOVE AMERICA UPHOLD FREEDOM PAC",
@@ -7042,6 +7521,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 25053.97
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
@@ -7142,7 +7627,14 @@
    ]
   },
   "H6FL23188": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 5,
+     "total": 879053.04
+    }
+   ],
    "support": [
     {
      "committee": "DEFENDING OUR VALUES PAC",
@@ -7183,8 +7675,14 @@
     {
      "committee": "FLORIDA'S VOICE PAC",
      "committeeId": "C00952630",
-     "count": 4,
-     "total": 22100.0
+     "count": 20,
+     "total": 271755.0
+    },
+    {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 5,
+     "total": 181213.72
     }
    ]
   },
@@ -7241,7 +7739,7 @@
      "committee": "AMERICAN PACT",
      "committeeId": "C00837443",
      "count": 7,
-     "total": 221250.0
+     "total": 226250.0
     }
    ],
    "support": [
@@ -7438,6 +7936,18 @@
    "oppose": [],
    "support": [
     {
+     "committee": "FUTURE PROGRESS",
+     "committeeId": "C00746628",
+     "count": 3,
+     "total": 100000.0
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 312.48
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -7449,10 +7959,22 @@
    "oppose": [],
    "support": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 2,
+     "total": 104679.34
+    },
+    {
      "committee": "PROJECT 218",
      "committeeId": "C00871368",
      "count": 2,
      "total": 53203.02
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 10400.0
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -7471,10 +7993,22 @@
   "H6IA02237": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 12,
+     "total": 1367066.42
+    },
+    {
      "committee": "AB PAC",
      "committeeId": "C00492140",
      "count": 18,
      "total": 675186.25
+    },
+    {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 2,
+     "total": 57187.07
     }
    ],
    "support": [
@@ -7487,8 +8021,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 48,
-     "total": 8128.11
+     "count": 54,
+     "total": 8609.19
     }
    ]
   },
@@ -7502,6 +8036,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 20350.0
+    },
     {
      "committee": "WELCOMEPAC",
      "committeeId": "C00786830",
@@ -8094,7 +8634,14 @@
    ]
   },
   "H6KY06192": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 2,
+     "total": 240000.0
+    }
+   ],
    "support": [
     {
      "committee": "CONSERVATIVES FOR AMERICAN EXCELLENCE INC.",
@@ -8122,8 +8669,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 34,
-     "total": 780.91
+     "count": 38,
+     "total": 809.41
     }
    ]
   },
@@ -8218,8 +8765,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 3,
-     "total": 21617.0
+     "count": 5,
+     "total": 23194.55
     }
    ]
   },
@@ -8360,7 +8907,14 @@
    ]
   },
   "H6ME02148": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 7,
+     "total": 2114988.86
+    }
+   ],
    "support": [
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -8384,6 +8938,12 @@
      "committeeId": "C00950345",
      "count": 4,
      "total": 50200.0
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 14535.38
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -8424,7 +8984,14 @@
    ]
   },
   "H6MI01226": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 3,
+     "total": 352653.41
+    }
+   ],
    "support": [
     {
      "committee": "NATIONAL ASSOCIATION OF REALTORS POLITICAL ACTION COMMITTEE",
@@ -8443,6 +9010,12 @@
   "H6MI04204": {
    "oppose": [],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 11846.5
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
@@ -8540,16 +9113,28 @@
      "total": 242460.0
     },
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 140519.89
+    },
+    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 11,
      "total": 29616.36
     },
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 10011.67
+    },
+    {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 4,
-     "total": 5642.43
+     "count": 5,
+     "total": 6370.41
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -8579,6 +9164,24 @@
      "committeeId": "C00949248",
      "count": 4,
      "total": 499999.87
+    },
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 5,
+     "total": 175056.8
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 1,
+     "total": 153003.5
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 40049.44
     },
     {
      "committee": "IN UNION USA",
@@ -8629,6 +9232,17 @@
     }
    ]
   },
+  "H6MI10292": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 4,
+     "total": 121124.69
+    }
+   ]
+  },
   "H6MI10326": {
    "oppose": [],
    "support": [
@@ -8653,6 +9267,18 @@
   },
   "H6MI10359": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 175718.76
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 1,
+     "total": 153003.5
+    },
     {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
@@ -8694,6 +9320,12 @@
      "committeeId": "C00923417",
      "count": 2,
      "total": 294613.39
+    },
+    {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 3,
+     "total": 104881.68
     },
     {
      "committee": "DMFI PAC",
@@ -8738,6 +9370,12 @@
      "total": 173167.53
     },
     {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 2,
+     "total": 150000.0
+    },
+    {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
      "committeeId": "C00453704",
      "count": 2,
@@ -8752,8 +9390,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 4,
-     "total": 11442.43
+     "count": 5,
+     "total": 12170.41
     },
     {
      "committee": "UNITY & JUSTICE FUND",
@@ -8786,6 +9424,12 @@
    ],
    "support": [
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 21009.63
+    },
+    {
      "committee": "TAKEACTION MN FEDERAL FUND",
      "committeeId": "C00738815",
      "count": 45,
@@ -8816,6 +9460,12 @@
      "total": 144000.0
     },
     {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 2,
+     "total": 71432.21
+    },
+    {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
      "committeeId": "C00490375",
      "count": 2,
@@ -8844,6 +9494,17 @@
      "committeeId": "C00633248",
      "count": 5,
      "total": 2460000.0
+    }
+   ]
+  },
+  "H6MN02263": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "MINNESOTA CITIZENS CONCERNED FOR LIFE, INC. FEDERAL PAC",
+     "committeeId": "C00129171",
+     "count": 1,
+     "total": 285.64
     }
    ]
   },
@@ -8879,6 +9540,17 @@
      "committeeId": "C00742205",
      "count": 14,
      "total": 2324.02
+    }
+   ]
+  },
+  "H6MN04293": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "MINNESOTA CITIZENS CONCERNED FOR LIFE, INC. FEDERAL PAC",
+     "committeeId": "C00129171",
+     "count": 1,
+     "total": 285.64
     }
    ]
   },
@@ -8985,8 +9657,14 @@
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
-     "count": 6,
-     "total": 253505.04
+     "count": 10,
+     "total": 342184.73
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 67500.0
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -9008,7 +9686,14 @@
    ]
   },
   "H6MT01152": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 1,
+     "total": 67500.0
+    }
+   ],
    "support": [
     {
      "committee": "AMERICAN MISSION",
@@ -9144,8 +9829,8 @@
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
-     "count": 2,
-     "total": 20371.1
+     "count": 6,
+     "total": 65256.84
     },
     {
      "committee": "SURJ PAC",
@@ -9181,6 +9866,12 @@
   },
   "H6NC11321": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 1399255.24
+    },
     {
      "committee": "SD 2026",
      "committeeId": "C00935015",
@@ -9279,6 +9970,12 @@
      "committeeId": "C00562777",
      "count": 3,
      "total": 50000.0
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 47997.34
     },
     {
      "committee": "LGBTQ CONNECTION PAC",
@@ -9399,6 +10096,12 @@
   "H6NE02208": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 15,
+     "total": 1367378.05
+    },
+    {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
      "count": 20,
@@ -9425,7 +10128,20 @@
    ]
   },
   "H6NH01321": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "FUTURE PROGRESS",
+     "committeeId": "C00746628",
+     "count": 5,
+     "total": 598025.0
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 5,
+     "total": 320433.69
+    }
+   ],
    "support": [
     {
      "committee": "ARTICLE ONE PAC",
@@ -9455,6 +10171,17 @@
      "committeeId": "C00953810",
      "count": 4,
      "total": 69000.0
+    }
+   ]
+  },
+  "H6NH01420": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "TURNING POINT PAC INC.",
+     "committeeId": "C00814152",
+     "count": 1,
+     "total": 1873.45
     }
    ]
   },
@@ -9529,6 +10256,12 @@
      "committeeId": "C00931774",
      "count": 8,
      "total": 253656.16
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 119352.11
     },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
@@ -9850,8 +10583,26 @@
     }
    ]
   },
+  "H6NM02127": {
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 3,
+     "total": 204000.0
+    }
+   ],
+   "support": []
+  },
   "H6NV02362": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 1,
+     "total": 82334.23
+    }
+   ],
    "support": [
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -10103,8 +10854,8 @@
     {
      "committee": "JOBS AND DEMOCRACY PAC",
      "committeeId": "C00928374",
-     "count": 114,
-     "total": 15026937.99
+     "count": 115,
+     "total": 15034048.24
     },
     {
      "committee": "YOU CAN PUSH BACK",
@@ -10354,14 +11105,14 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 59,
-     "total": 1084.77
+     "count": 64,
+     "total": 1148.02
     },
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 7,
-     "total": 620.63
+     "count": 13,
+     "total": 1107.71
     }
    ]
   },
@@ -10392,6 +11143,12 @@
      "total": 198019.35
     },
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 4,
+     "total": 97697.52
+    },
+    {
      "committee": "OHIO CITIZEN ACTION",
      "committeeId": "C90021726",
      "count": 2,
@@ -10402,6 +11159,12 @@
      "committeeId": "C00909994",
      "count": 4,
      "total": 1561.53
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 1250.0
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -10460,6 +11223,12 @@
      "committeeId": "C00881011",
      "count": 5,
      "total": 4458.2
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 1800.0
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -10544,9 +11313,21 @@
      "committeeId": "C00848739",
      "count": 3,
      "total": 10609.34
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 21803.07
+    },
     {
      "committee": "SENIORS EMPOWERING AN EFFECTIVE DEMOCRACY (SEED-PAC)",
      "committeeId": "C00934059",
@@ -10609,6 +11390,12 @@
      "committeeId": "C00576215",
      "count": 1,
      "total": 5627.6
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -10685,6 +11472,17 @@
     }
    ]
   },
+  "H6PA04169": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ]
+  },
   "H6PA07147": {
    "oppose": [],
    "support": [
@@ -10733,6 +11531,12 @@
      "committeeId": "C00924159",
      "count": 5,
      "total": 8840.0
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -10785,10 +11589,22 @@
      "total": 30559.95
     },
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 30281.38
+    },
+    {
      "committee": "SENIORS EMPOWERING AN EFFECTIVE DEMOCRACY (SEED-PAC)",
      "committeeId": "C00934059",
      "count": 4,
      "total": 24592.37
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 23285.26
     },
     {
      "committee": "BLUE MAJORITY PROJECT",
@@ -10885,13 +11701,26 @@
   "H6PA08277": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 10,
+     "total": 422451.21
+    },
+    {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
      "count": 2,
      "total": 158.05
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ]
   },
   "H6PA08293": {
    "oppose": [
@@ -10900,6 +11729,12 @@
      "committeeId": "C00737411",
      "count": 2,
      "total": 56040.25
+    },
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
     }
    ],
    "support": [
@@ -10908,6 +11743,12 @@
      "committeeId": "C00786830",
      "count": 5,
      "total": 103357.82
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 41302.96
     },
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -10975,6 +11816,17 @@
     }
    ]
   },
+  "H6PA11099": {
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
+   "support": []
+  },
   "H6PA12097": {
    "oppose": [],
    "support": [
@@ -10998,7 +11850,14 @@
    ]
   },
   "H6PA15181": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -11007,6 +11866,28 @@
      "total": 1359.32
     }
    ]
+  },
+  "H6PA16320": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
+  },
+  "H6PA16379": {
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
+   "support": []
   },
   "H6SC01227": {
    "oppose": [],
@@ -11505,8 +12386,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 3,
-     "total": 13944.57
+     "count": 4,
+     "total": 14658.88
     },
     {
      "committee": "THE EQUITY ALLIANCE FUND ACTION PAC",
@@ -11605,8 +12486,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 48,
-     "total": 5914.03
+     "count": 54,
+     "total": 6324.06
     }
    ]
   },
@@ -11640,8 +12521,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 22,
-     "total": 50713.11
+     "count": 27,
+     "total": 50909.41
     },
     {
      "committee": "TURNING POINT PAC INC.",
@@ -11652,8 +12533,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 35,
-     "total": 5248.14
+     "count": 41,
+     "total": 5638.67
     },
     {
      "committee": "MONTGOMERY COUNTY FIRST PAC",
@@ -11854,8 +12735,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 49,
-     "total": 8492.66
+     "count": 55,
+     "total": 8930.24
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
@@ -11951,6 +12832,12 @@
    ],
    "support": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 264618.6
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 5,
@@ -12008,6 +12895,12 @@
      "committeeId": "C00871368",
      "count": 2,
      "total": 56219.13
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 53099.88
     },
     {
      "committee": "BLUE BATTLEGROUND PROJECT",
@@ -12266,6 +13159,28 @@
     }
    ]
   },
+  "H6TX23273": {
+   "oppose": [
+    {
+     "committee": "FREEDOM CAUCUS FUND",
+     "committeeId": "C00552851",
+     "count": 2,
+     "total": 173252.23
+    }
+   ],
+   "support": []
+  },
+  "H6TX28124": {
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 8,
+     "total": 471765.87
+    }
+   ],
+   "support": []
+  },
   "H6TX30245": {
    "oppose": [],
    "support": [
@@ -12330,8 +13245,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 21,
-     "total": 17086.85
+     "count": 25,
+     "total": 17101.6
     },
     {
      "committee": "TEXAS ALLIANCE FOR LIFE FED PAC",
@@ -12342,7 +13257,14 @@
    ]
   },
   "H6TX34080": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 20,
+     "total": 2628269.51
+    }
+   ],
    "support": [
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
@@ -12426,6 +13348,12 @@
   "H6TX35087": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 1,
+     "total": 39392.0
+    },
+    {
      "committee": "PROTECT AND SERVE PAC",
      "committeeId": "C00716704",
      "count": 1,
@@ -12486,6 +13414,12 @@
      "committeeId": "C00710848",
      "count": 6,
      "total": 163437.55
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 47287.11
     }
    ]
   },
@@ -12594,8 +13528,14 @@
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
-     "count": 1,
-     "total": 15311.7
+     "count": 6,
+     "total": 132523.7
+    },
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 4,
+     "total": 20208.49
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -12624,8 +13564,8 @@
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
-     "count": 1,
-     "total": 17537.3
+     "count": 6,
+     "total": 210256.75
     },
     {
      "committee": "DMFI PAC",
@@ -12638,6 +13578,17 @@
      "committeeId": "C00802389",
      "count": 9,
      "total": 133.26
+    }
+   ]
+  },
+  "H6VA09136": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "RURAL AMERICA RISING",
+     "committeeId": "C00893529",
+     "count": 2,
+     "total": 2400.0
     }
    ]
   },
@@ -12730,6 +13681,12 @@
   },
   "H6WA03275": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 8,
+     "total": 472335.61
+    },
     {
      "committee": "TOGETHER FOR WORKING PEOPLE",
      "committeeId": "C00926675",
@@ -12846,6 +13803,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 4,
+     "total": 211711.96
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
@@ -13383,6 +14346,12 @@
      "total": 658890.7
     },
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 3,
+     "total": 96656.73
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
@@ -13458,8 +14427,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 37,
-     "total": 6339.07
+     "count": 40,
+     "total": 6366.32
     }
    ]
   },
@@ -13494,6 +14463,12 @@
   "H8IL14174": {
    "oppose": [],
    "support": [
+    {
+     "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
+     "committeeId": "C00173153",
+     "count": 4,
+     "total": 60567.83
+    },
     {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
@@ -13590,8 +14565,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 59,
-     "total": 16581.23
+     "count": 62,
+     "total": 16643.48
     }
    ]
   },
@@ -13655,7 +14630,14 @@
      "total": 554.87
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "MINNESOTA CITIZENS CONCERNED FOR LIFE, INC. FEDERAL PAC",
+     "committeeId": "C00129171",
+     "count": 1,
+     "total": 285.64
+    }
+   ]
   },
   "H8MO01143": {
    "oppose": [
@@ -13716,22 +14698,28 @@
     {
      "committee": "VPP",
      "committeeId": "C00692319",
-     "count": 5,
-     "total": 233589.45
+     "count": 6,
+     "total": 336784.91
     }
    ],
    "support": [
     {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
-     "count": 10,
-     "total": 2015574.57
+     "count": 15,
+     "total": 2336008.26
     },
     {
      "committee": "SERVANT-LEADER FUND, INC.",
      "committeeId": "C00899427",
      "count": 12,
      "total": 1040248.81
+    },
+    {
+     "committee": "FUTURE PROGRESS",
+     "committeeId": "C00746628",
+     "count": 5,
+     "total": 602025.0
     },
     {
      "committee": "DMFI PAC",
@@ -13889,7 +14877,14 @@
    ]
   },
   "H8PA04116": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -13920,10 +14915,24 @@
      "total": 530.59
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
   },
   "H8PA06087": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -13940,7 +14949,14 @@
    ]
   },
   "H8PA07200": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ],
    "support": [
     {
      "committee": "API PA VOTES",
@@ -13965,10 +14981,34 @@
      "total": 981.18
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
+  },
+  "H8PA13125": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
   },
   "H8PA15195": {
    "oppose": [
+    {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 11,
+     "total": 556259.93
+    },
     {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
@@ -14012,7 +15052,14 @@
      "total": 197.19
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.94
+    }
+   ]
   },
   "H8PA18199": {
    "oppose": [
@@ -14023,7 +15070,14 @@
      "total": 741.71
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
+     "committeeId": "C00172361",
+     "count": 1,
+     "total": 22.95
+    }
+   ]
   },
   "H8SC04250": {
    "oppose": [],
@@ -14146,8 +15200,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 34,
-     "total": 1139.51
+     "count": 38,
+     "total": 1169.76
     },
     {
      "committee": "TEXAS ALLIANCE FOR LIFE FED PAC",
@@ -14241,6 +15295,12 @@
   "H8VA01147": {
    "oppose": [
     {
+     "committee": "HMP",
+     "committeeId": "C00495028",
+     "count": 16,
+     "total": 1723125.74
+    },
+    {
      "committee": "LCV VICTORY FUND",
      "committeeId": "C00486845",
      "count": 15,
@@ -14266,8 +15326,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 49,
-     "total": 6815.78
+     "count": 52,
+     "total": 6848.03
     }
    ]
   },
@@ -14380,6 +15440,12 @@
      "total": 2500.0
     },
     {
+     "committee": "TURNING POINT PAC INC.",
+     "committeeId": "C00814152",
+     "count": 1,
+     "total": 575.87
+    },
+    {
      "committee": "DEMOCRATIC FUTURE PAC",
      "committeeId": "C00934273",
      "count": 1,
@@ -14450,8 +15516,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 134,
-     "total": 204229.6
+     "count": 144,
+     "total": 233028.82
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14467,8 +15533,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 97,
-     "total": 57319.49
+     "count": 100,
+     "total": 57320.94
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14522,16 +15588,16 @@
      "total": 275000.0
     },
     {
+     "committee": "SENATE CONSERVATIVES FUND",
+     "committeeId": "C00448696",
+     "count": 150,
+     "total": 236027.34
+    },
+    {
      "committee": "WINNING RIGHT PAC",
      "committeeId": "C00930495",
      "count": 5,
      "total": 220000.0
-    },
-    {
-     "committee": "SENATE CONSERVATIVES FUND",
-     "committeeId": "C00448696",
-     "count": 140,
-     "total": 208182.57
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14547,8 +15613,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 117,
-     "total": 65450.91
+     "count": 123,
+     "total": 65722.49
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14564,8 +15630,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 111,
-     "total": 49037.64
+     "count": 117,
+     "total": 49410.17
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14598,8 +15664,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 119,
-     "total": 69754.41
+     "count": 125,
+     "total": 70013.84
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14700,8 +15766,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 117,
-     "total": 65955.98
+     "count": 123,
+     "total": 66233.71
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -14770,6 +15836,24 @@
      "committeeId": "C00492140",
      "count": 9,
      "total": 1046651.2
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 2,
+     "total": 120000.0
+    },
+    {
+     "committee": "907 INITIATIVE INC.",
+     "committeeId": "C90023581",
+     "count": 4,
+     "total": 89660.42
+    },
+    {
+     "committee": "907 INITIATIVE ACTION",
+     "committeeId": "C00888065",
+     "count": 2,
+     "total": 71400.0
     },
     {
      "committee": "INDIVISIBLE ACTION",
@@ -15008,6 +16092,12 @@
   "S4MI00595": {
    "oppose": [
     {
+     "committee": "DEFEND THE VOTE",
+     "committeeId": "C00764233",
+     "count": 4,
+     "total": 4592975.88
+    },
+    {
      "committee": "WINSENATE",
      "committeeId": "C00865444",
      "count": 4,
@@ -15018,6 +16108,12 @@
      "committeeId": "C00707844",
      "count": 5,
      "total": 1753178.0
+    },
+    {
+     "committee": "GIFFORDS PAC",
+     "committeeId": "C00540443",
+     "count": 3,
+     "total": 1028000.0
     },
     {
      "committee": "LCV VICTORY FUND",
@@ -15095,8 +16191,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 63,
-     "total": 156.7
+     "count": 66,
+     "total": 159.2
     }
    ]
   },
@@ -15139,6 +16235,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 47997.34
+    },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
@@ -15194,8 +16296,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 110,
-     "total": 32505.05
+     "count": 116,
+     "total": 32777.13
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -15389,8 +16491,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 97,
-     "total": 358109.1
+     "count": 107,
+     "total": 386208.96
     },
     {
      "committee": "FELLOWSHIP PAC",
@@ -15489,8 +16591,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 125,
-     "total": 204144.76
+     "count": 135,
+     "total": 232840.96
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -15576,8 +16678,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 36,
-     "total": 60657.83
+     "count": 46,
+     "total": 90367.54
     },
     {
      "committee": "CLUB FOR GROWTH ACTION",
@@ -15638,6 +16740,12 @@
      "committeeId": "C00418897",
      "count": 40,
      "total": 9756436.14
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 43722.38
     },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
@@ -15703,6 +16811,12 @@
   },
   "S6IA00314": {
    "oppose": [
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 6,
+     "total": 6475183.03
+    },
     {
      "committee": "AB PAC",
      "committeeId": "C00492140",
@@ -16069,12 +17183,6 @@
      "committeeId": "C00934463",
      "count": 3,
      "total": 45025.0
-    },
-    {
-     "committee": "RAVEN, JEFFERY",
-     "committeeId": "C90023417",
-     "count": 1,
-     "total": 1306.09
     }
    ],
    "support": [
@@ -16146,6 +17254,12 @@
      "committeeId": "C00738674",
      "count": 2,
      "total": 169520.34
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 2,
+     "total": 120000.0
     },
     {
      "committee": "AFSCME WORKING FAMILIES FUND",
@@ -16275,6 +17389,12 @@
      "total": 87881.75
     },
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 1,
+     "total": 14535.38
+    },
+    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 2,
@@ -16382,6 +17502,12 @@
      "total": 489664.76
     },
     {
+     "committee": "AMERICAN PRIORITIES (AP)",
+     "committeeId": "C00932723",
+     "count": 5,
+     "total": 372026.35
+    },
+    {
      "committee": "COMMON DEFENSE ACTION FUND",
      "committeeId": "C00620021",
      "count": 1,
@@ -16394,12 +17520,6 @@
      "total": 159232.59
     },
     {
-     "committee": "AMERICAN PRIORITIES (AP)",
-     "committeeId": "C00932723",
-     "count": 2,
-     "total": 154028.47
-    },
-    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 22,
@@ -16410,6 +17530,12 @@
      "committeeId": "C00879080",
      "count": 3,
      "total": 57721.63
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 2,
+     "total": 51895.94
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -16432,8 +17558,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 3,
-     "total": 8942.43
+     "count": 4,
+     "total": 9670.41
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -16490,8 +17616,8 @@
     {
      "committee": "AMERICAN PRIORITIES (AP)",
      "committeeId": "C00932723",
-     "count": 2,
-     "total": 204177.27
+     "count": 3,
+     "total": 306174.09
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -16588,6 +17714,12 @@
      "committeeId": "C00739771",
      "count": 2,
      "total": 1000000.0
+    },
+    {
+     "committee": "MINNESOTA FORWARD",
+     "committeeId": "C00935999",
+     "count": 8,
+     "total": 398849.38
     }
    ],
    "support": [
@@ -16600,8 +17732,8 @@
     {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
-     "count": 6,
-     "total": 31773.74
+     "count": 8,
+     "total": 33837.78
     },
     {
      "committee": "CLEAR VOICE MINNESOTA",
@@ -16949,6 +18081,12 @@
      "total": 166248.51
     },
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 6,
+     "total": 156599.78
+    },
+    {
      "committee": "CAROLINA FEDERATION",
      "committeeId": "C90019910",
      "count": 10,
@@ -16959,12 +18097,6 @@
      "committeeId": "C90020231",
      "count": 24,
      "total": 38316.0
-    },
-    {
-     "committee": "PROGRESSIVE TURNOUT PROJECT",
-     "committeeId": "C00580068",
-     "count": 2,
-     "total": 35940.93
     },
     {
      "committee": "PLANNED PARENTHOOD VOTES NORTH CAROLINA",
@@ -17193,6 +18325,18 @@
    ],
    "support": [
     {
+     "committee": "EQUALITY PAC",
+     "committeeId": "C00550970",
+     "count": 3,
+     "total": 165000.0
+    },
+    {
+     "committee": "DEFEND THE VOTE",
+     "committeeId": "C00764233",
+     "count": 1,
+     "total": 100000.0
+    },
+    {
      "committee": "DMFI PAC",
      "committeeId": "C00710848",
      "count": 3,
@@ -17234,10 +18378,16 @@
      "total": 2881618.81
     },
     {
+     "committee": "PROTECT FREEDOM POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00657866",
+     "count": 1,
+     "total": 229500.0
+    },
+    {
      "committee": "TURNING POINT PAC INC.",
      "committeeId": "C00814152",
-     "count": 1,
-     "total": 5570.0
+     "count": 7,
+     "total": 88869.2
     }
    ]
   },
@@ -17287,6 +18437,12 @@
    ],
    "support": [
     {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 4,
+     "total": 144386.79
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 18,
@@ -17315,6 +18471,12 @@
      "committeeId": "C00490375",
      "count": 1,
      "total": 10917.64
+    },
+    {
+     "committee": "INDIVISIBLE ACTION",
+     "committeeId": "C00678839",
+     "count": 1,
+     "total": 6550.0
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -17367,6 +18529,12 @@
      "committeeId": "C90011172",
      "count": 1,
      "total": 1000000.0
+    },
+    {
+     "committee": "VOTEVETS",
+     "committeeId": "C00418897",
+     "count": 2,
+     "total": 120000.0
     },
     {
      "committee": "INDIVISIBLE ACTION",
@@ -17468,8 +18636,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 48,
-     "total": 78902.97
+     "count": 58,
+     "total": 107048.82
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -17638,8 +18806,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 4,
-     "total": 73380.89
+     "count": 5,
+     "total": 73383.39
     },
     {
      "committee": "PALMETTO FIRST PAC",
@@ -17708,16 +18876,16 @@
      "total": 500000.0
     },
     {
+     "committee": "SENATE CONSERVATIVES FUND",
+     "committeeId": "C00448696",
+     "count": 35,
+     "total": 80516.13
+    },
+    {
      "committee": "SENATE CONSERVATIVES ACTION",
      "committeeId": "C00524181",
      "count": 6,
      "total": 48305.9
-    },
-    {
-     "committee": "SENATE CONSERVATIVES FUND",
-     "committeeId": "C00448696",
-     "count": 25,
-     "total": 44648.9
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
@@ -17808,6 +18976,12 @@
      "committeeId": "C00909994",
      "count": 38,
      "total": 102470.35
+    },
+    {
+     "committee": "PROGRESSIVE TURNOUT PROJECT",
+     "committeeId": "C00580068",
+     "count": 3,
+     "total": 94314.39
     },
     {
      "committee": "LATINO VICTORY FUND",
@@ -17984,8 +19158,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 63,
-     "total": 104206.62
+     "count": 73,
+     "total": 132465.16
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -18018,8 +19192,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 116,
-     "total": 60655.11
+     "count": 122,
+     "total": 60914.49
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -18155,8 +19329,8 @@
     {
      "committee": "SENATE CONSERVATIVES FUND",
      "committeeId": "C00448696",
-     "count": 107,
-     "total": 50653.22
+     "count": 109,
+     "total": 50659.47
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -18220,5 +19394,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-20"
+ "read": "2026-10-24"
 }

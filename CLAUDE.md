@@ -200,8 +200,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2081 tests, no dependencies
-npm install && npm test                       # 3235 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2136 tests, no dependencies
+npm install && npm test                       # 3314 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1431,8 +1431,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the site loaded all nine from supremecourt.gov. The table names the
     file and the author it was checked against, since a Wikidata item's
     image need not be the Court's: Sotomayor's is a 2009 White House
-    photograph, and Commons held no official portrait of hers, so the
-    Court's own stands for her and the page says so. A file Commons credits
+    photograph and Kagan's a CC BY-SA upload, so the table names the
+    public-domain copy of each one's official portrait (read 2026-10-25),
+    and the Court's own stands only for a justice it does not name. A
+    credit drops a link whose words name no one ("source"): Sotomayor's
+    read "Steve Petteway source". A file Commons credits
     to anyone else is not the Court's (`justice-portrait-unread`). A
     vacancy's judge is found on its court by surname *and* first given name (`vacancies.judge_of`): two of the list's departing
     judges are not in the directory, and a surname alone would have moved

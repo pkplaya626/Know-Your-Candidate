@@ -72,7 +72,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3235 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3314 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2280,9 +2280,11 @@ check a judge's portrait passes (`route: "official"`), and the federal
 pages show it only while it is that file credited to that author
 (`judge_links.official_portrait`). A justice the table does not name keeps
 the Court's own portrait, from its biographies page, credited to the
-Collection of the Supreme Court of the United States - Sonia Sotomayor,
-whose Wikidata image is a 2009 White House photograph - and the page says
-whose portraits are the Court's own. The Court's own pictures are joined
+Collection of the Supreme Court of the United States, and the page says
+whose portraits are the Court's own. Today the table names all nine:
+Sonia Sotomayor's Wikidata image is a 2009 White House photograph and
+Elena Kagan's a CC BY-SA upload, so theirs name the public-domain copy of
+each one's official portrait. The Court's own pictures are joined
 only to the nine justices already joined to the directory, since the page
 also pictures retired justices, and only when its caption's title agrees
 with the justice's role. Any failure shows none (`justice-portraits`); a

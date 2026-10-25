@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-20T13:52:15+00:00",
+ "fetched": "2026-10-24T12:59:32+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -106,8 +106,8 @@
   "https://silverstateelection.nv.gov/": "live",
   "https://sos.iowa.gov/elections/voterreg/pollingplace/search.aspx": "unknown",
   "https://sos.iowa.gov/elections/voterreg/regtovote/search.aspx": "unknown",
-  "https://sos.iowa.gov/voters/absentee-voting": "live",
-  "https://sos.iowa.gov/voters/voter-registration": "live",
+  "https://sos.iowa.gov/voters/absentee-voting": "unknown",
+  "https://sos.iowa.gov/voters/voter-registration": "unknown",
   "https://sos.ks.gov/elections/election-results.html": "live",
   "https://sos.ks.gov/elections/voter-information.html": "live",
   "https://sos.nebraska.gov/elections/early-voting": "live",
@@ -315,9 +315,9 @@
   "https://www.votetexas.gov/register-to-vote/index.html": "live",
   "https://www.votetexas.gov/voting/early-voting.html": "live",
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
-  "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "live"
+  "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "unknown"
  },
- "linksChecked": "2026-10-20",
+ "linksChecked": "2026-10-24",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
