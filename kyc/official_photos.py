@@ -3,16 +3,26 @@ images a page offers and the words beside each, a photograph's weight read
 from the file, the size chosen from what the page itself offers, and the
 record each cached photograph must carry.
 
-The owner's decision of 2026-10-19: a photograph is used only where its
-source itself offers a version within the caps (``photos.MAX_PORTRAIT_BYTES``
-and ``MAX_PORTRAIT_PX``, about 300 KB and 1,200px). Nothing is resized here,
-no image service is asked and no copy is committed: a photograph its source
-offers only above the caps is left out, and counted (``OVERSIZED``).
+Weight is rule 87's, as for every other portrait (the owner's decision of
+2026-10-25, "more content is better than strict rules", which replaced the
+brief of 2026-10-19 that left out anything offered only above the caps): of
+the sizes a source offers, the narrowest within the caps
+(``photos.MAX_PORTRAIT_BYTES`` and ``MAX_PORTRAIT_PX``, about 300 KB and
+1,200px) is taken; where every size is over them, the same file smaller
+from its host's own resizer or Photon (``photos.lighter_form``, weighed and
+checked to be the same shape); and where neither serves it, the file itself
+is shown all the same and said (``portraitHeavy``). A photograph a route ties
+to the person is never left out for its weight. Smaller copies made here of
+what is shown heavy are rule 101's (feature/photo-copies), keyed by the
+photograph's address, which the record keeps.
 
 A record names the photograph's address, the page it was read on, the words
 on that page that name the person beside it (``evidence``), the day it was
 read and its bytes and pixel size. ``record_problems`` says what one lacks;
-the build fails a shown photograph that lacks any of it.
+the build fails a shown photograph that lacks any of it. ``held_back`` asks
+the lists a person keeps - ``overrides.NOT_A_PORTRAIT`` (rule 38) and
+``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82) - of every record, read or
+kept from an earlier read.
 """
 
 import datetime
@@ -35,8 +45,8 @@ PACE = 1.0
 _LAST = {}
 _PACE_LOCK = threading.Lock()
 
-# Why a photograph was not taken, as the build counts them.
-OVERSIZED = "oversized"     # offered only above the caps: left out, counted
+# Why a photograph was not taken, as the build counts them. Weight is
+# never one (rule 87): a heavy photograph is shown and said.
 UNKNOWN = "unknown"         # could not be read (rule 8): the last one is kept
 NONE = "none"               # nothing on the page passed
 
@@ -223,18 +233,33 @@ def portrait_shaped(weight, widest=1.0):
         return False
 
 
-def choose(sizes, measure=weigh, widest=1.0):
-    """``(url, weight, why)``: of the sizes a page offers (``[(width,
-    url)]``), the narrowest at least ``PREFERRED_WIDTH`` wide that is within
-    the caps, else the widest narrower one that is; why there is none -
-    ``OVERSIZED`` when every size read is over the caps, ``UNKNOWN`` when
-    one could not be read, ``"shape"`` when the file is not portrait-shaped,
-    ``NONE`` when none is an image. Each size is read, never assumed from
-    its label."""
+def _weight_of(measure):
+    """*measure* (``(verdict, weight)``) as ``photos.lighter_form`` asks:
+    the weight of an image, else ``None``."""
+    def weight_of(url):
+        verdict, weight = measure(url)
+        return weight if verdict else None
+    return weight_of
+
+
+def choose(sizes, measure=weigh, widest=1.0, lighter=None):
+    """``(url, weight, why, heavy)``: of the sizes a page offers
+    (``[(width, url)]``), the narrowest at least ``PREFERRED_WIDTH`` wide
+    that is within the caps, else the widest narrower one that is. Where
+    every size read is over the caps, the lightest of them is taken (rule
+    87): smaller from its host's resizer or Photon where one serves the same
+    picture (*lighter*, ``photos.lighter_form``), else as it is; *heavy* is
+    then ``[{"url": the file, "why": its weight, "kept": shown at full
+    size}]`` (``portraitHeavy``), and ``None`` otherwise. Why there is none
+    - ``UNKNOWN`` when a size could not be read, ``"shape"`` when the file
+    is not portrait-shaped, ``NONE`` when none is an image. Each size is
+    read, never assumed from its label."""
+    if lighter is None:
+        from .photos import lighter_form as lighter
     order = [s for s in sizes if s[0] >= PREFERRED_WIDTH] + \
         sorted((s for s in sizes if 0 < s[0] < PREFERRED_WIDTH), reverse=True) + \
         [s for s in sizes if not s[0]]
-    unknown = heavy = False
+    unknown, heavy = False, []
     for _width, url in order:
         verdict, weight = measure(url)
         if verdict is None:
@@ -243,12 +268,23 @@ def choose(sizes, measure=weigh, widest=1.0):
         if not verdict or not weight:
             continue
         if not portrait_shaped(weight, widest):
-            return None, weight, "shape"
+            return None, weight, "shape", None
         if too_heavy(weight):
-            heavy = True
+            heavy.append((url, weight))
             continue
-        return url, weight, ""
-    return None, None, UNKNOWN if unknown else OVERSIZED if heavy else NONE
+        return url, weight, "", None
+    if heavy:
+        # Never left out for its weight (the owner's decision of
+        # 2026-10-25): the lightest size offered, smaller where the same
+        # picture is served smaller, else shown as it is and said.
+        url, weight = min(heavy, key=lambda s: ((s[1].get("bytes") or 0),
+                                                max(s[1]["width"], s[1]["height"])))
+        found = lighter(url, weight, _weight_of(measure))
+        said = [{"url": url, "why": too_heavy(weight), "kept": not found}]
+        if found:
+            return found[0], found[1], "", said
+        return url, weight, "", said
+    return None, None, UNKNOWN if unknown else NONE, None
 
 
 # ---------------------------------------------------------------- records
@@ -280,11 +316,60 @@ def record_problems(rec, where):
         datetime.date.fromisoformat(str(rec.get("read") or ""))
     except ValueError:
         out.append(f"{where}: the day it was read is not a date")
+    # Weight never disqualifies (rule 87, the owner's decision of
+    # 2026-10-25), but a heavy photograph is said: one over the caps that
+    # does not say so would be shown with nothing to tell a copy to make.
     weight = {k: rec.get(k) for k in ("bytes", "width", "height")}
-    if all(isinstance(v, int) for v in weight.values()) and too_heavy(weight):
-        out.append(f"{where}: the photograph is {too_heavy(weight)}; only a size its source "
-                   "offers within the caps is shown")
+    if all(isinstance(v, int) for v in weight.values()) and too_heavy(weight) \
+            and not heavy_of(rec):
+        out.append(f"{where}: the photograph is {too_heavy(weight)} and does not say so "
+                   "(portraitHeavy)")
+    for said in rec.get("portraitHeavy") or ():
+        if not (isinstance(said, dict) and str(said.get("url") or "").startswith("https://")):
+            out.append(f"{where}: portraitHeavy does not name the heavy file's https address")
     return out
+
+
+def heavy_of(rec):
+    """The heavy file *rec* says it stands for (``portraitHeavy``), or
+    ``None``: ``{"url", "why", "kept"}``."""
+    said = (rec or {}).get("portraitHeavy") or []
+    return said[0] if said and isinstance(said[0], dict) else None
+
+
+def commons_upload(rec):
+    """The Commons upload address of a record taken from Wikimedia Commons
+    (its credit's file page), or ``None``: what the overrides key a Commons
+    file on."""
+    page = ((rec or {}).get("credit") or {}).get("page") or ""
+    if "/wiki/File:" not in page:
+        return None
+    from .judge_links import source_url
+    return source_url(page)
+
+
+def addresses(rec):
+    """Every address *rec* stands for: the photograph shown, the heavy file
+    it was made smaller from, and its Commons upload."""
+    out = [(rec or {}).get("photo"), (heavy_of(rec) or {}).get("url"), commons_upload(rec)]
+    return [u for u in out if u]
+
+
+def held_back(rec):
+    """Why a person's lists withhold *rec*, or ``None``: a file in
+    ``overrides.NOT_A_PORTRAIT`` (rule 38: someone looked, and it is not a
+    likeness) or ``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82: its licence
+    waits for a person). One test for every route, asked of a record read
+    now and of one kept from an earlier read (rule 8), as
+    ``judge_links.held_back`` asks it of a judge's."""
+    from . import overrides
+    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
+    for url in addresses(rec):
+        if url in overrides.NOT_A_PORTRAIT:
+            return f"{url} is in overrides.NOT_A_PORTRAIT"
+        if url in doubts:
+            return f"{url} is in overrides.PORTRAIT_LICENCE_DOUBTS ({doubts[url][1]})"
+    return None
 
 
 CAPS_WORDS = f"{MAX_PORTRAIT_BYTES // 1000} KB or {MAX_PORTRAIT_PX:,}px"

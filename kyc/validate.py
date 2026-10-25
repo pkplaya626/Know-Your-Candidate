@@ -1324,15 +1324,18 @@ def check_future_coverage(profiles, today=None):
                   f"{today.isoformat()}; shown as filed", found)]
 
 
-def check_portrait_overrides(enrichment):
+def check_portrait_overrides(enrichment, elsewhere=()):
     """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
 
     Once the site drops the image, the entry guards nothing; once its URL is
-    mistyped, it never did.
+    mistyped, it never did. *elsewhere* is what the other routes that ask
+    the list reached (a court's page, a statewide candidate's guide or
+    Commons file: ``court_photos.refused_offered``,
+    ``statewide_photos.doubted``).
     """
     if not enrichment:
         return []
-    offered = set()
+    offered = set(elsewhere or ())
     for entry in (enrichment.get("people") or {}).values():
         for key in ("site", "listed"):
             record = entry.get(key) or {}
@@ -1659,7 +1662,7 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None, voting_dates=None, statewide=None, measures=None):
+        history=None, voting_dates=None, statewide=None, measures=None, photo_routes=()):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1680,7 +1683,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_pay(profiles, snapshot)
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
-    issues += check_portrait_overrides(enrichment)
+    issues += check_portrait_overrides(enrichment, photo_routes)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)

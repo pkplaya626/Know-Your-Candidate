@@ -110,14 +110,53 @@ class TestTheBioPage(unittest.TestCase):
         self.assertEqual(court_photos.bio_pages(ROSTER, page, ["Steven Ecker"]), {})
 
 
+def no_lighter(url, weight, weigh):
+    return None
+
+
 class TestTheSizeThePageOffers(unittest.TestCase):
-    def test_an_image_offered_only_above_the_caps_is_left_out(self):
+    def test_an_image_offered_only_above_the_caps_is_shown_and_said(self):
+        # The owner's decision of 2026-10-25 (rule 87): a photograph the
+        # court's page ties to the justice is never left out for its
+        # weight. Texas's Court of Criminal Appeals drew nine empty circles.
         page = '<img src="/kari-gray.jpg" alt="Justice Kari Gray">'
         measure = measure_from({"https://courts.example.gov/kari-gray.jpg": HEAVY})
         found, why = court_photos.photo_for("Kari Gray", ["Kari Gray"], [(ROSTER, page)],
-                                            measure=measure)
-        self.assertIsNone(found)
-        self.assertEqual(why, official_photos.OVERSIZED)
+                                            measure=measure, lighter=no_lighter)
+        self.assertEqual(why, "")
+        self.assertEqual(found["photo"], "https://courts.example.gov/kari-gray.jpg")
+        self.assertEqual(found["portraitHeavy"], [{
+            "url": "https://courts.example.gov/kari-gray.jpg", "why": "3511 KB, over 300 KB",
+            "kept": True}])
+        self.assertEqual(official_photos.record_problems(found, "x"), [])
+        read = {"members": ["Kari Gray"], "photos": {"Kari Gray": found}}
+        self.assertEqual(list(court_photos.for_page("XX", read)), ["Kari Gray"])
+        seen = court_photos.counts({"courts": {"XX": read}})
+        self.assertEqual((seen["shown"], seen["heavy"]), (1, 1))
+
+    def test_a_heavy_file_is_taken_smaller_where_the_same_picture_is_served(self):
+        page = '<img src="/kari-gray.jpg" alt="Justice Kari Gray">'
+        heavy = "https://courts.example.gov/kari-gray.jpg"
+        small = "https://i0.wp.com/courts.example.gov/kari-gray.jpg?w=500&ssl=1"
+        measure = measure_from({heavy: HEAVY, small: {"bytes": 40_000, "width": 500,
+                                                      "height": 667}})
+        found, _ = court_photos.photo_for("Kari Gray", ["Kari Gray"], [(ROSTER, page)],
+                                          measure=measure)
+        self.assertEqual(found["photo"], small)
+        self.assertEqual(found["bytes"], 40_000)
+        self.assertEqual(found["portraitHeavy"][0]["url"], heavy)
+        self.assertFalse(found["portraitHeavy"][0]["kept"])
+
+    def test_the_lightest_of_several_heavy_sizes(self):
+        page = ('<img src="/gray.jpg" srcset="/gray-big.jpg 1920w, /gray-mid.jpg 900w" '
+                'alt="Justice Kari Gray">')
+        measure = measure_from({"https://courts.example.gov/gray-big.jpg": HEAVY,
+                                "https://courts.example.gov/gray-mid.jpg":
+                                    {"bytes": 900_000, "width": 900, "height": 1200},
+                                "https://courts.example.gov/gray.jpg": HEAVY})
+        found, _ = court_photos.photo_for("Kari Gray", ["Kari Gray"], [(ROSTER, page)],
+                                          measure=measure, lighter=no_lighter)
+        self.assertEqual(found["photo"], "https://courts.example.gov/gray-mid.jpg")
 
     def test_a_smaller_size_the_page_offers_is_taken(self):
         page = ('<img src="/gray.jpg" srcset="/gray-240x300.jpg 240w, /gray.jpg 1920w" '
@@ -162,9 +201,23 @@ class TestEveryCachedPhotographIsWhole(unittest.TestCase):
     def test_a_record_without_its_evidence_or_weight_is_refused(self):
         rec = official_photos.record("https://courts.example.gov/a.jpg", ROSTER, "", SMALL)
         self.assertTrue(official_photos.record_problems(rec, "x"))
+        # Weight never disqualifies, but a heavy record must say it is.
         rec = official_photos.record("https://courts.example.gov/a.jpg", ROSTER, "alt 'A'",
                                      HEAVY)
-        self.assertTrue(any("caps" in p for p in official_photos.record_problems(rec, "x")))
+        self.assertTrue(any("portraitHeavy" in p for p in official_photos.record_problems(rec, "x")))
+        rec["portraitHeavy"] = [{"url": rec["photo"], "why": "3511 KB", "kept": True}]
+        self.assertEqual(official_photos.record_problems(rec, "x"), [])
+
+    def test_a_read_record_that_lacks_its_evidence_stops_the_build(self):
+        # Dropped from the page without a word, it read as a court with no
+        # photograph of that justice (rule 87; PR #135 review).
+        from kyc import stategov
+        cache = {"courts": {"WY": {"members": ["Kari Gray"], "photos": {"Kari Gray": {
+            "photo": "https://courts.example.gov/a.jpg", "page": ROSTER}}}}}
+        errors, _ = court_photos.read_problems(cache)
+        self.assertTrue(errors)
+        with self.assertRaises(stategov.StateGovError):
+            stategov.court_photo_problems(cache)
 
     def test_the_committed_cache_and_overrides_carry_every_field(self):
         from kyc import courts
@@ -186,6 +239,75 @@ class TestEveryCachedPhotographIsWhole(unittest.TestCase):
         shown = court_photos.for_page("WY", read)
         self.assertEqual(list(shown), ["Kari Gray"])
         self.assertEqual(shown["Kari Gray"]["page"], ROSTER)
+
+
+class TestAPersonsListsHoldForEveryRoute(unittest.TestCase):
+    """NOT_A_PORTRAIT and PORTRAIT_LICENCE_DOUBTS are asked of a justice's
+    photograph as of every other (rules 38 and 82)."""
+
+    def setUp(self):
+        from kyc import overrides
+        self.overrides = overrides
+        self.url = "https://courts.example.gov/gray.jpg"
+        overrides.NOT_A_PORTRAIT[self.url] = ("2026-10-25", "a test: a group photograph")
+
+    def tearDown(self):
+        del self.overrides.NOT_A_PORTRAIT[self.url]
+
+    def test_an_image_a_person_refused_is_not_read(self):
+        page = '<img src="/gray.jpg" alt="Justice Kari Gray">'
+        found, why = court_photos.photo_for("Kari Gray", ["Kari Gray"], [(ROSTER, page)],
+                                            measure=measure_from({self.url: SMALL}))
+        self.assertIsNone(found)
+        self.assertEqual(why, "not-a-portrait")
+
+    def test_a_cached_record_a_person_refused_since_is_not_shown(self):
+        read = {"members": ["Kari Gray"], "photos": {"Kari Gray": official_photos.record(
+            self.url, ROSTER, "alt 'Justice Kari Gray'", SMALL)}}
+        self.assertEqual(court_photos.for_page("WY", read), {})
+        _, withheld = court_photos.read_problems({"courts": {"WY": read}})
+        self.assertEqual(len(withheld), 1)
+
+    def test_nor_is_one_kept_from_an_earlier_read(self):
+        before = {"XX": {"photos": {"Kari Gray": official_photos.record(
+            self.url, ROSTER, "alt 'Justice Kari Gray'", SMALL, read="2026-10-19")}}}
+        courts = {"XX": {"members": ["Kari Gray"]}}
+        from kyc import courts as court_module
+        court_module.COURTS["XX"] = {"url": ROSTER}
+        try:
+            problems = court_photos.add_justice_photos(
+                courts, {"XX": '<img src="/gray2.jpg" alt="Justice Kari Gray">'}, before,
+                get=lambda url, **k: "", pause=0,
+                measure=measure_from({"https://courts.example.gov/gray2.jpg": None}))
+        finally:
+            del court_module.COURTS["XX"]
+        self.assertNotIn("photos", courts["XX"])
+        self.assertEqual(courts["XX"]["photoMisses"], {"Kari Gray": "withheld"})
+        self.assertTrue(any("withheld" in p for p in problems))
+
+    def test_a_licence_doubt_withholds_a_record_too(self):
+        doubts = self.overrides.PORTRAIT_LICENCE_DOUBTS
+        url = "https://courts.example.gov/doubted.jpg"
+        doubts[url] = ("2026-10-25", "a test")
+        try:
+            rec = official_photos.record(url, ROSTER, "alt 'Justice Kari Gray'", SMALL)
+            self.assertIn("PORTRAIT_LICENCE_DOUBTS", official_photos.held_back(rec))
+        finally:
+            del doubts[url]
+
+
+class TestASurnameThatIsAlsoAWord(unittest.TestCase):
+    def test_a_month_in_a_file_name_is_not_justice_may(self):
+        # PR #135 review: "may" is a filler word, so any file carrying the
+        # month passed as Iowa Justice David May's portrait.
+        members = ["David May", "Susan Christensen"]
+        self.assertFalse(court_photos.judge("David May", members,
+                                            image(ROSTER + "/IMG_May_2024.jpg"))[0])
+        self.assertTrue(court_photos.judge("David May", members, image(
+            ROSTER + "/J_May_website.jpg", "Image of David May. View David May's profile",
+            "David May"))[0])
+        self.assertTrue(court_photos.judge("David May", members,
+                                           image(ROSTER + "/x.jpg", "Justice May"))[0])
 
 
 if __name__ == "__main__":

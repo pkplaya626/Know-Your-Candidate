@@ -6,7 +6,7 @@ court's recipe reads (``courts.COURTS``) or from the one page that roster
 links from that justice's own name - or, where the roster lists a row per
 justice, from the "Bio" link in that justice's row (West Virginia, Montana).
 Never from a search, never from an address built from a name (rule 24):
-Montana's ``/bios/Rice`` is not linked from its roster, and is not read.
+only an address the roster itself links is read.
 
 An image is that justice's when every word the page gives it - its alt
 text, its title, its caption and its file name - says so:
@@ -28,12 +28,16 @@ misspelt alt text, a nickname, a file named by initials - is an evidenced
 ``overrides.JUSTICE_PHOTOS`` entry: the page's own words, the day read and
 the file's weight, held to the same record as a read one.
 
-Only a size the page itself offers is taken (the owner's decision of
-2026-10-19: no image service, no resizing), the narrowest at least 160px
-wide that is within the caps; one offered only above them is left out and
-counted. A photograph that could not be read keeps the last one read of the
-same justice (rule 8). The page credits each court's photographs to the
-court.
+Of the sizes the page offers, the narrowest at least 160px wide within
+the caps is taken; one offered only above them is shown all the same, smaller
+from its host's resizer or Photon where the same picture is served smaller,
+and said (``portraitHeavy``, rule 87: the owner's decision of 2026-10-25 that
+nothing a route ties to the person is left out for its weight). A photograph
+that could not be read keeps the last one read of the same justice (rule 8).
+Every record, read or kept, is asked of the lists a person keeps
+(``official_photos.held_back``: ``NOT_A_PORTRAIT``,
+``PORTRAIT_LICENCE_DOUBTS``). The page credits each court's photographs to
+the court.
 """
 
 import html
@@ -170,7 +174,18 @@ def judge(name, members, image, place_words=()):
     raw = [_plain(f) for f in fields]
     split = [_split(f) for f in fields]
     flat = [t for field in raw for t in field] + [t for field in split for t in field]
-    found = family in flat or any(_compound(t, pieces, family) for t in flat if len(t) > len(family))
+    if family in FILLER:
+        # A surname that is also a month or a title ("May") counts only
+        # beside a given name, an initial of one or a title, in a field's own
+        # words: "IMG_May_2024" is a date, "David May" and "Justice May" are
+        # the justice.
+        given = set(words[:-1])
+        before = given | {w[0] for w in given if w} | {"justice", "judge", "honorable", "hon"}
+        found = any(t == family and i and field[i - 1] in before
+                    for field in raw + split for i, t in enumerate(field))
+    else:
+        found = family in flat or any(_compound(t, pieces, family)
+                                      for t in flat if len(t) > len(family))
     if not found:
         return False, "no surname in its words"
     for other in members:
@@ -271,14 +286,20 @@ def bio_pages(roster_url, page, members):
     return found
 
 
-def photo_for(name, members, pages, place_words=(), measure=None):
+def photo_for(name, members, pages, place_words=(), measure=None, lighter=None,
+              refused=None):
     """``(record, why)`` for one member: the first image on *pages*
     (``[(url, html)]``, the roster first) whose words are theirs
-    (:func:`judge`) at a size the page offers within the caps
-    (``official_photos.choose``); or ``None`` and why not."""
+    (:func:`judge`), at the size ``official_photos.choose`` takes - one
+    offered only above the caps is shown all the same and said
+    (``portraitHeavy``); or ``None`` and why not. An image any of whose
+    sizes is in *refused* (``overrides.NOT_A_PORTRAIT``) is passed over and
+    named in the record's ``notPortraits``."""
     measure = measure or official_photos.weigh
+    if refused is None:
+        from .overrides import NOT_A_PORTRAIT as refused
     why_not = official_photos.NONE
-    tried = set()
+    tried, passed_over = set(), []
     for page_url, page in pages:
         for image in official_photos.images(page_url, page):
             if image["src"] in tried:
@@ -287,15 +308,23 @@ def photo_for(name, members, pages, place_words=(), measure=None):
             ok, _ = judge(name, members, image, place_words)
             if not ok:
                 continue
-            url, weight, why = official_photos.choose(image["offered"], measure)
+            known = [u for u in [image["src"]] + [u for _, u in image["offered"]] if u in refused]
+            if known:
+                passed_over.append(known[0])
+                why_not = "not-a-portrait"
+                continue
+            url, weight, why, heavy = official_photos.choose(image["offered"], measure,
+                                                             lighter=lighter)
             if url:
                 said = "; ".join(f"{k} {image[k]!r}" for k in ("alt", "title", "caption")
                                  if image.get(k))
                 evidence = (f"On the court's page {page_url}: "
                             + (said + "; " if said else "")
                             + f"file {official_photos.file_name(image['src'])!r}")
-                return official_photos.record(url, page_url, evidence, weight), ""
-            if why in (official_photos.UNKNOWN, official_photos.OVERSIZED):
+                return official_photos.record(url, page_url, evidence, weight,
+                                              portraitHeavy=heavy,
+                                              notPortraits=passed_over), ""
+            if why == official_photos.UNKNOWN:
                 why_not = why
     return None, why_not
 
@@ -342,11 +371,26 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
                 continue
             why = misses.get(name) or why
             if why == official_photos.UNKNOWN and name in before:
+                # Kept from the last read (rule 8), but asked again of the
+                # lists a person keeps: a file refused since is not kept.
+                held = official_photos.held_back(before[name])
+                if held:
+                    problems.append(f"{code}: {name}'s photograph could not be read, and the "
+                                    f"last one read is withheld: {held}")
+                    misses[name] = "withheld"
+                    continue
                 photos[name] = before[name]
                 problems.append(f"{code}: {name}'s photograph could not be read; the last one "
                                 "read is kept")
                 continue
             misses[name] = why
+        for name in sorted(photos):
+            heavy = official_photos.heavy_of(photos[name])
+            if heavy:
+                problems.append(f"{code}: {name}'s photograph is offered only at "
+                                f"{heavy['why']} ({heavy['url']}); "
+                                + ("shown at full size and said" if heavy["kept"]
+                                   else "shown smaller from the same file"))
         for name in sorted(set(photos) | set(before)):
             was, now = (before.get(name) or {}).get("photo"), (photos.get(name) or {}).get("photo")
             if was != now and now:
@@ -383,29 +427,65 @@ def curated_problems(members_of):
     return errors, warnings
 
 
+def _fit(rec, name):
+    """Whether *rec* may reach the page: it carries what ties it to the
+    justice (``official_photos.record_problems``) and no list a person
+    keeps withholds it (``official_photos.held_back``)."""
+    return not official_photos.record_problems(rec, name) and not official_photos.held_back(rec)
+
+
 def for_page(code, read):
     """``{name: {"photo", "page"}}``: what the page shows of a court's
     photographs - the read ones, and an evidenced override's for a member
-    the read found none of."""
+    the read found none of. A record that is unfit never reaches it, and
+    :func:`read_problems` says so to the build."""
     shown = {}
     members = (read or {}).get("members") or []
     for name, rec in ((read or {}).get("photos") or {}).items():
-        if name in members and not official_photos.record_problems(rec, name):
+        if name in members and _fit(rec, name):
             shown[name] = {"photo": rec["photo"], "page": rec["page"]}
     for (court, name), rec in curated().items():
-        if court == code and name in members and name not in shown \
-                and not official_photos.record_problems(rec, name):
+        if court == code and name in members and name not in shown and _fit(rec, name):
             shown[name] = {"photo": rec["photo"], "page": rec["page"]}
     return shown
 
 
+def read_problems(cache):
+    """``(errors, withheld)`` over every read court's cached photographs:
+    a record that lacks what ties it to the justice - its page, evidence,
+    day or weight - is an error the build stops on (rule 87), never
+    dropped without a word; one a person's list withholds is said."""
+    errors, withheld = [], []
+    for code, read in sorted(((cache or {}).get("courts") or {}).items()):
+        for name, rec in sorted((read.get("photos") or {}).items()):
+            errors.extend(official_photos.record_problems(rec, f"courts {code} {name}"))
+            held = official_photos.held_back(rec)
+            if held:
+                withheld.append(f"courts {code} {name}: {held}")
+    return errors, withheld
+
+
+def refused_offered(cache):
+    """Every image a court's read passed over as ``NOT_A_PORTRAIT``: what
+    keeps an entry for a justice's image from reading as stale."""
+    out = set()
+    for read in ((cache or {}).get("courts") or {}).values():
+        for rec in (read.get("photos") or {}).values():
+            out.update(rec.get("notPortraits") or ())
+    return out
+
+
 def counts(cache):
-    """``{"shown", "oversized", "none", "unknown", "members"}`` over every
-    read court, for the build's report."""
-    out = {"members": 0, "shown": 0, "oversized": 0, "none": 0, "unknown": 0, "shape": 0}
+    """``{"members", "shown", "heavy", "none", "unknown", "shape"}`` over
+    every read court, for the build's report: *heavy* the photographs shown
+    though offered only above the caps (rule 87)."""
+    out = {"members": 0, "shown": 0, "heavy": 0, "none": 0, "unknown": 0, "shape": 0}
     for code, read in ((cache or {}).get("courts") or {}).items():
         out["members"] += len(read.get("members") or ())
-        out["shown"] += len(for_page(code, read))
+        shown = for_page(code, read)
+        out["shown"] += len(shown)
+        out["heavy"] += sum(1 for name in shown
+                            if official_photos.heavy_of((read.get("photos") or {}).get(name)))
         for why in (read.get("photoMisses") or {}).values():
             if why in out:
                 out[why] += 1

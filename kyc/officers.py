@@ -534,31 +534,68 @@ def _office_text(url, pause):
 # - it is head-and-shoulders shaped (``enrich.portrait_check``) and no
 #   heavier than a campaign's may be (``photos.too_heavy``), or a size of
 #   the same file the page itself offers (its ``srcset``, a ``<picture>``'s
-#   ``<source>``) is. Nothing is resized for it: no image service, no
-#   resizer address the page does not give (the owner's decision of
-#   2026-10-19). A photograph the office offers only above the caps is left
-#   out, and counted (``"oversized"``): California's is a 6 MB original,
-#   West Virginia's 3.2 MB.
+#   ``<source>``) is, or its host's resizer or Photon serves the same file
+#   smaller (``photos.lighter_form``, weighed and checked to be the same
+#   shape). Where none is, the office's file is kept all the same and said
+#   (``photoHeavy``, rule 87; the owner's decision of 2026-10-25 that
+#   nothing a route ties to the person is left out for its weight):
+#   California's is a 6 MB original, West Virginia's 3.2 MB. The state page
+#   then shows NAAG's lighter card where one is recorded (both are tied to
+#   the person: ``stategov.officer_photos``), else the office's own, heavy.
 #
 # A size that could not be read concludes nothing (rule 8): the last
 # photograph read of the same person is kept.
 #
 # Where the office's front page links no biography the reader can find,
 # ``BIO_PAGES`` names the office's own page about its attorney general, as
-# found by hand (research of 2026-10-19). The page's address is all that is
-# typed in: the image on it is taken by the same words test as any other.
+# found by hand: (the page, the day it was found, the holder it was found
+# for, what the page shows). The page's address is all that is typed in:
+# the image on it is taken by the same words test as any other. Several
+# addresses carry the holder's name, so an entry goes stale with a change of
+# holder; :func:`bio_page_problems` says so when the cache's confirmed
+# holder is not the entry's, or the page gave them no photograph.
+_BIO_FOUND = "2026-10-19"
 BIO_PAGES = {
-    "AZ": "https://www.azag.gov/kris-mayes",
-    "CA": "https://www.oag.ca.gov/about",
-    "HI": "https://ag.hawaii.gov/about-us/",
-    "MD": "https://oag.maryland.gov/our-office/Pages/about-the-attorney-general.aspx",
-    "MI": "https://www.michigan.gov/ag/team-listing-page/attorney-general-dana-nessel",
-    "PA": "https://www.attorneygeneral.gov/the-office/meet-the-attorney-general/",
-    "SD": "https://atg.sd.gov/OurOffice/bio.aspx",
-    "TX": "https://www.texasattorneygeneral.gov/about-office",
-    "WA": "https://www.atg.wa.gov/about-nick-brown",
-    "WV": "https://ago.wv.gov/about-us/meet-attorney-general-jb-mccuskey",
+    "AZ": ("https://www.azag.gov/kris-mayes", _BIO_FOUND, "Kris Mayes",
+           "the office's page about Attorney General Kris Mayes"),
+    "CA": ("https://www.oag.ca.gov/about", _BIO_FOUND, "Rob Bonta",
+           "the office's 'About' page, on Attorney General Rob Bonta"),
+    "HI": ("https://ag.hawaii.gov/about-us/", _BIO_FOUND, "Anne Lopez",
+           "the department's 'About us' page, on Attorney General Anne Lopez"),
+    "MD": ("https://oag.maryland.gov/our-office/Pages/about-the-attorney-general.aspx",
+           _BIO_FOUND, "Anthony G. Brown", "the office's 'About the Attorney General' page"),
+    "MI": ("https://www.michigan.gov/ag/team-listing-page/attorney-general-dana-nessel",
+           _BIO_FOUND, "Dana Nessel", "the department's team page for Attorney General Dana Nessel"),
+    "PA": ("https://www.attorneygeneral.gov/the-office/meet-the-attorney-general/", _BIO_FOUND,
+           "Dave Sunday", "the office's 'Meet the Attorney General' page"),
+    "SD": ("https://atg.sd.gov/OurOffice/bio.aspx", _BIO_FOUND, "Marty Jackley",
+           "the office's biography of Attorney General Marty Jackley"),
+    "TX": ("https://www.texasattorneygeneral.gov/about-office", _BIO_FOUND, "Ken Paxton",
+           "the office's 'About the office' page, on Attorney General Ken Paxton"),
+    "WA": ("https://www.atg.wa.gov/about-nick-brown", _BIO_FOUND, "Nick Brown",
+           "the office's 'About Nick Brown' page"),
+    "WV": ("https://ago.wv.gov/about-us/meet-attorney-general-jb-mccuskey", _BIO_FOUND,
+           "J.B. McCuskey", "the office's 'Meet Attorney General JB McCuskey' page"),
 }
+
+
+def bio_page_problems(rows):
+    """One line per ``BIO_PAGES`` entry gone stale: the confirmed holder is
+    no longer the one it was found for, or the read gave that holder no
+    photograph of the office's own (the page may have moved). A person reads
+    the office's site again and moves or drops the entry."""
+    out = []
+    for code, (url, found, holder, _what) in sorted(BIO_PAGES.items()):
+        row = (rows or {}).get(code) or {}
+        if row.get("unconfirmed") or row.get("disputed") or not row.get("name"):
+            continue
+        if row["name"] != holder:
+            out.append(f"{code}: officers.BIO_PAGES names {url} for {holder} (found {found}); "
+                       f"the office now confirms {row['name']}: read its site again")
+        elif not row.get("photo"):
+            out.append(f"{code}: officers.BIO_PAGES's {url} (found {found}) gave {holder} no "
+                       "photograph of the office's own: read its site again")
+    return out
 
 _LIKENESS = re.compile(r"\b(?:headshot|head shot|portrait|official photo|official headshot|"
                        r"photo of|photograph of|picture of|image of)\b")
@@ -732,23 +769,28 @@ def likeness_candidates(name, code, pages):
     return found
 
 
-def ag_photo(name, code, pages, check=None, refused=()):
+def ag_photo(name, code, pages, check=None, refused=(), lighter=None):
     """``(photo, why)``: ``{"photo", "photoPage", "photoWeight"}`` from the
     office's own *pages* (``[(url, html)]``), or ``None`` and why not -
     ``"none"`` when no image passed, ``"unknown"`` when one could not be
-    read (rule 8), ``"oversized"`` when the one that passed is offered only
-    above the caps (``photos.too_heavy``). Only the sizes the page itself
-    offers are tried, never a resizer's (the owner's decision of
-    2026-10-19). *check* is ``enrich.portrait_check``."""
+    read (rule 8). Of the sizes the page offers the first within the caps
+    (``photos.too_heavy``) is taken; where every size is over them, the
+    same file smaller from its host's resizer or Photon (*lighter*,
+    ``photos.lighter_form``), else the file itself - never left out for its
+    weight (rule 87) - with ``photoHeavy``: ``[{"url", "why", "kept"}]``.
+    *check* is ``enrich.portrait_check``."""
     from .photos import too_heavy
     if check is None:
         from .enrich import portrait_check as check
+    if lighter is None:
+        from .photos import lighter_form as lighter
 
-    unknown = oversized = False
+    unknown = False
     for urls, page_url, hinted in likeness_candidates(name, code, pages):
-        heavy = False
+        heavy = []
         for url in urls:
             if url in refused:
+                heavy = []
                 break
             shape, weight = check(url, hinted)
             if not weight:
@@ -761,14 +803,22 @@ def ag_photo(name, code, pages, check=None, refused=()):
             width, height = weight["width"], weight["height"]
             if not (min(width, height) >= 120
                     and 0.5 <= width / height <= (1.35 if hinted else 1.0)):
-                heavy = False
+                heavy = []
                 break                         # the file's shape is every size's
             if too_heavy(weight):
-                heavy = True
+                heavy.append((url, weight))
                 continue
             return {"photo": url, "photoPage": page_url, "photoWeight": weight}, ""
-        oversized = oversized or heavy
-    return None, "unknown" if unknown else "oversized" if oversized else "none"
+        if heavy:
+            url, weight = min(heavy, key=lambda s: (s[1].get("bytes") or 0))
+            found = lighter(url, weight, lambda u: check(u, hinted)[1])
+            said = [{"url": url, "why": too_heavy(weight), "kept": not found}]
+            if found:
+                return {"photo": found[0], "photoPage": page_url, "photoWeight": found[1],
+                        "photoHeavy": said}, ""
+            return {"photo": url, "photoPage": page_url, "photoWeight": weight,
+                    "photoHeavy": said}, ""
+    return None, "unknown" if unknown else "none"
 
 
 _BIO_LABEL = re.compile(r"^(?:about|meet|biography of)(?: the)? (?:attorney general|ag)\b|"
@@ -828,7 +878,8 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
         if not found:
             more = []
             seen = {url for url, _ in read}
-            wanted = [BIO_PAGES[code]] if code in BIO_PAGES and BIO_PAGES[code] not in seen else []
+            bio = BIO_PAGES[code][0] if code in BIO_PAGES else None
+            wanted = [bio] if bio and bio not in seen else []
             for url in wanted + [u for u in bio_links(row["name"], read) if u not in wanted]:
                 time.sleep(pause)
                 try:
@@ -839,24 +890,25 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                 again, why_again = ag_photo(row["name"], code, more, check=check,
                                             refused=overrides.NOT_A_PORTRAIT)
                 found = again
-                why = next((w for w in ("unknown", "oversized") if w in (why, why_again)),
-                           why_again)
+                why = "unknown" if "unknown" in (why, why_again) else why_again
         time.sleep(pause)
         old = (previous or {}).get(code) or {}
         row.pop("photoOversized", None)
-        if not found and why == "unknown" and old.get("photo") and old.get("name") == row["name"]:
-            found = {k: old[k] for k in ("photo", "photoPage", "photoWeight") if old.get(k)}
+        row.pop("photoHeavy", None)
+        if not found and why == "unknown" and old.get("photo") and old.get("name") == row["name"] \
+                and old["photo"] not in overrides.NOT_A_PORTRAIT:
+            found = {k: old[k] for k in ("photo", "photoPage", "photoWeight", "photoHeavy")
+                     if old.get(k)}
             problems.append(f"{code}: {row['name']}'s photograph could not be read; "
                             "the last one read is kept")
         if found:
             row.update(found)
-        elif why == "oversized":
-            # Left out, and counted: the office offers it only above the
-            # caps, and nothing here makes it smaller (the owner's decision
-            # of 2026-10-19).
-            row["photoOversized"] = True
-            problems.append(f"{code}: the office offers {row['name']}'s photograph only above "
-                            "300 KB or 1,200px; left out")
+            heavy = (found.get("photoHeavy") or [None])[0]
+            if heavy:
+                problems.append(f"{code}: the office offers {row['name']}'s photograph only at "
+                                f"{heavy['why']} ({heavy['url']}); "
+                                + ("kept at full size and said" if heavy["kept"]
+                                   else "taken smaller from the same file"))
         else:
             problems.append(f"{code}: the office's own pages show no photograph of "
                             f"{row['name']} that passes the checks")

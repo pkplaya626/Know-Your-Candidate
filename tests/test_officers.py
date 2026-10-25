@@ -439,24 +439,58 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
                             {"bytes": 400_000, "width": 300, "height": 375},
                             "https://ag.example.gov/u/Ellison-headshot.jpg":
                             {"bytes": 4_000_000, "width": 2000, "height": 2500}})
-        # Offered only above the caps: left out, and said so - never made
-        # smaller by an image service (the owner's decision of 2026-10-19).
-        self.assertEqual(officers.ag_photo("Keith Ellison", "MN", [page], check=heavy),
-                         (None, "oversized"))
+        # Offered only above the caps: the lightest size, kept and said -
+        # never left out for its weight (rule 87, the owner's decision of
+        # 2026-10-25).
+        photo, why = officers.ag_photo("Keith Ellison", "MN", [page], check=heavy,
+                                       lighter=lambda url, weight, weigh: None)
+        self.assertEqual(why, "")
+        self.assertEqual(photo["photo"], "https://ag.example.gov/u/Ellison-headshot-300x375.jpg")
+        self.assertTrue(photo["photoHeavy"][0]["kept"])
 
-    def test_only_the_sizes_the_page_offers_are_tried(self):
+    def test_a_heavy_file_is_tried_through_its_hosts_resizer_or_photon(self):
         """California's portrait is a 6 MB original with no smaller size on
-        the page: Photon would have served one, and no resizer is asked."""
-        asked = []
-
-        def check(url, hinted):
-            asked.append(url)
-            return True, {"bytes": 6_040_317, "width": 3349, "height": 5025}
+        the page: main's rule 87 step - the host's resizer, then Photon,
+        weighed and checked to be the same shape - is tried before the file
+        is kept heavy (PR #135 review)."""
+        original = "https://www.oag.ca.gov/files/ag-bonta-official-2.jpg"
+        photon = "https://i0.wp.com/www.oag.ca.gov/files/ag-bonta-official-2.jpg?w=500&ssl=1"
+        table = {original: {"bytes": 6_040_317, "width": 3349, "height": 5025},
+                 photon: {"bytes": 45_000, "width": 500, "height": 750}}
         page = ("https://www.oag.ca.gov/about", '<img src="/files/ag-bonta-official-2.jpg" '
                 'alt="Attorney General Rob Bonta">')
-        self.assertEqual(officers.ag_photo("Rob Bonta", "CA", [page], check=check),
-                         (None, "oversized"))
-        self.assertEqual(asked, ["https://www.oag.ca.gov/files/ag-bonta-official-2.jpg"])
+        photo, why = officers.ag_photo("Rob Bonta", "CA", [page], check=self.weigh(table))
+        self.assertEqual(why, "")
+        self.assertEqual(photo["photo"], photon)
+        self.assertEqual(photo["photoHeavy"], [{"url": original, "why": "6040 KB, over 300 KB",
+                                                "kept": False}])
+        # Where Photon serves nothing, the office's own file is kept, heavy.
+        del table[photon]
+        photo, _ = officers.ag_photo("Rob Bonta", "CA", [page], check=self.weigh(table))
+        self.assertEqual(photo["photo"], original)
+        self.assertTrue(photo["photoHeavy"][0]["kept"])
+
+    def test_naags_lighter_card_goes_before_the_offices_heavy_file(self):
+        """Both are tied to the person; the lighter goes first. An office
+        photograph within the caps is still the office's own."""
+        from kyc import overrides, stategov
+        ((code, office), card), = [(k, v) for k, v in overrides.OFFICER_PHOTOS.items()
+                                   if k[1] == "ag"][:1]
+        heavy = {"name": card["name"], "photo": "https://ag.example.gov/big.jpg",
+                 "photoBy": "the office's website", "photoPage": "https://ag.example.gov/",
+                 "photoHeavy": [{"url": "https://ag.example.gov/big.jpg", "why": "6 MB",
+                                 "kept": True}]}
+        entry = {office: dict(heavy)}
+        problems = stategov.officer_photos(code, entry)
+        self.assertEqual(entry[office]["photo"], card["photo"])
+        self.assertNotIn("photoHeavy", entry[office])
+        self.assertFalse([p for p in problems if "may be unneeded" in p])
+        light = dict(heavy, photoHeavy=[{"url": "https://ag.example.gov/big.jpg", "why": "6 MB",
+                                         "kept": False}])
+        entry = {office: light}
+        problems = stategov.officer_photos(code, entry)
+        self.assertEqual(entry[office]["photo"], "https://ag.example.gov/big.jpg")
+        self.assertTrue([p for p in problems if "may be unneeded" in p])
 
     def test_a_picture_elements_sources_are_its_sizes(self):
         """Michigan's page offers the portrait at 320px only in a
@@ -498,9 +532,21 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         rows = {"TX": {"name": "Ken Paxton"}}
         officers.add_ag_photos(rows, {"TX": [("https://www.texasattorneygeneral.gov/",
                                               "<p>Home</p>")]}, check=check, pause=0, get=get)
-        self.assertEqual(got, [officers.BIO_PAGES["TX"]])
-        self.assertEqual(rows["TX"]["photoPage"], officers.BIO_PAGES["TX"])
-        self.assertNotIn("photoOversized", rows["TX"])
+        self.assertEqual(got, [officers.BIO_PAGES["TX"][0]])
+        self.assertEqual(rows["TX"]["photoPage"], officers.BIO_PAGES["TX"][0])
+        self.assertNotIn("photoHeavy", rows["TX"])
+
+    def test_a_biography_page_entry_says_when_it_has_gone_stale(self):
+        """PR #135 review: several addresses carry the holder's name, and
+        Arizona's attorney general is on the November ballot."""
+        url, _, holder, _ = officers.BIO_PAGES["AZ"]
+        self.assertEqual(officers.bio_page_problems({"AZ": {"name": holder, "photo": "x"}}), [])
+        self.assertTrue(officers.bio_page_problems({"AZ": {"name": "Rodney Glassman"}}))
+        self.assertTrue(officers.bio_page_problems({"AZ": {"name": holder}}))
+        for code, entry in officers.BIO_PAGES.items():
+            with self.subTest(code=code):
+                self.assertEqual(len(entry), 4)
+                self.assertTrue(entry[0].startswith("https://"))
 
     def test_a_landscape_or_tiny_image_is_not_a_portrait(self):
         page = ("https://ag.example.gov/", '<img src="/u/Jones-headshot.jpg" alt="">')

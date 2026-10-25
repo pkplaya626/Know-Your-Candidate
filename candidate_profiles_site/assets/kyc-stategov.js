@@ -696,8 +696,9 @@
               : NO_SMALL_PHOTO) +
             '<span class="gov-court-text"><span class="gov-court-name">' + KYC.escapeHtml(name) +
             (name === court.chief ? ' <span class="faint">' + chiefTitle + "</span>" : "") + "</span>" +
-            (shot ? '<span class="gov-photo-credit">Photo: ' + link(shot.page, whose) +
-              "</span>" : "") + "</span></li>";
+            (shot ? '<span class="gov-photo-credit">' +
+              KYC.photoCreditHtml({ by: whose, page: shot.page }) + "</span>" : "") +
+            "</span></li>";
         }).join("") + "</ul>" +
         '<p class="faint">' + members.length + " of " + court.seats + " seats" +
         (short > 0 ? "; " + short + " with nobody listed by the court" : "") +

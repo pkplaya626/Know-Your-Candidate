@@ -1225,10 +1225,13 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
     return cache
 
 
-def problems(cache):
+def problems(cache, elsewhere=()):
     """What a build says about the cache: ``[(level, code, message,
     detail)]`` - every link and portrait the checks withheld, the judges'
-    pages still to be read, and any portrait shown without its record."""
+    pages still to be read, and any portrait shown without its record.
+    *elsewhere* is the files other routes reach (a statewide candidate's
+    Commons file): a ``PORTRAIT_LICENCE_DOUBTS`` entry one of them stands
+    for is not stale."""
     if not cache:
         return []
     from . import overrides
@@ -1275,7 +1278,7 @@ def problems(cache):
                     list(cache["oversized"])))
     if "doubted" in cache:
         stale = sorted(set(getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {}))
-                       - set(cache["doubted"]))
+                       - set(cache["doubted"]) - set(elsewhere))
         if stale:
             out.append(("warn", "judge-licence-doubt-stale",
                         f"{len(stale)} overrides.PORTRAIT_LICENCE_DOUBTS entries name no file a "

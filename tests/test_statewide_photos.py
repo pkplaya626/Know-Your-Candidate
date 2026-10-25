@@ -10,6 +10,10 @@ SMALL = {"bytes": 38_361, "width": 330, "height": 436}
 HEAVY = {"bytes": 3_000_000, "width": 2000, "height": 2600}
 
 
+def no_lighter(url, weight, weigh):
+    return None
+
+
 def measure_from(table):
     def measure(url):
         value = table.get(url, False)
@@ -78,28 +82,51 @@ class TestTheOfficialGuides(unittest.TestCase):
                 '<h2>Gloria Romero | DEMOCRATIC</h2></div>')
         self.assertEqual(sp.parse_california(page, "lt"), [])
 
-    def test_a_guide_photograph_offered_only_above_the_caps_is_left_out(self):
+    def test_a_guide_photograph_offered_only_above_the_caps_is_shown_and_said(self):
+        """The owner's decision of 2026-10-25 (rule 87): never left out for
+        its weight; smaller from the same file where Photon serves it."""
         lists = {"CA": {"ag": [{"name": "Michael E. Gates"}]}}
         page = ('<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
                 'alt="Michael E. Gates"><h2>Michael E. Gates | REPUBLICAN</h2></div>')
         url = "https://voterguide.sos.ca.gov/img/gates.jpg"
         records, _, _ = sp.read_guides(lists, measure=measure_from({url: HEAVY}), pause=0,
                                        get=lambda u: page)
-        self.assertEqual(records, {"CA|ag|Michael E. Gates": {"missing": official_photos.OVERSIZED,
-                                                               "route": "guide"}})
+        rec = records["CA|ag|Michael E. Gates"]
+        self.assertEqual(rec["photo"], url)
+        self.assertEqual(rec["portraitHeavy"][0], {"url": url, "why": "3000 KB, over 300 KB",
+                                                   "kept": True})
+        self.assertEqual(official_photos.record_problems(rec, "x"), [])
+        smaller = "https://i0.wp.com/voterguide.sos.ca.gov/img/gates.jpg?w=500&ssl=1"
+        records, _, _ = sp.read_guides(lists, measure=measure_from({
+            url: HEAVY, smaller: {"bytes": 50_000, "width": 500, "height": 650}}), pause=0,
+            get=lambda u: page)
+        rec = records["CA|ag|Michael E. Gates"]
+        self.assertEqual(rec["photo"], smaller)
+        self.assertFalse(rec["portraitHeavy"][0]["kept"])
         records, _, _ = sp.read_guides(lists, measure=measure_from({url: SMALL}), pause=0,
                                        get=lambda u: page)
         rec = records["CA|ag|Michael E. Gates"]
         self.assertEqual(rec["photo"], url)
+        self.assertNotIn("portraitHeavy", rec)
         self.assertEqual(rec["by"], sp.CA_BY)
         self.assertEqual(official_photos.record_problems(rec, "x"), [])
+
+    def test_a_guide_photograph_a_person_refused_is_not_used(self):
+        lists = {"CA": {"ag": [{"name": "Michael E. Gates"}]}}
+        page = ('<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
+                'alt="Michael E. Gates"><h2>Michael E. Gates | REPUBLICAN</h2></div>')
+        url = "https://voterguide.sos.ca.gov/img/gates.jpg"
+        records, problems, _ = sp.read_guides(lists, measure=measure_from({url: SMALL}), pause=0,
+                                              get=lambda u: page, refused={url: ("x", "y")})
+        self.assertEqual(records, {})
+        self.assertTrue(any("NOT_A_PORTRAIT" in p for p in problems))
 
 
 class TestTheRacesOwnArticle(unittest.TestCase):
     ARTICLE = {"title": "Ty Masterson", "missing": False, "fragment": None,
                "image": "Ty Masterson 2025.jpg", "disambiguation": False}
     COMMONS = {"info": {"width": 614, "height": 864,
-                        "url": ("https://upload.wikimedia.org/wikipedia/commons/a/ab/Ty_Masterson_2025.jpg"
+                        "url": ("https://upload.wikimedia.org/wikipedia/commons/2/24/Ty_Masterson_2025.jpg"
                                 "?utm_source=commons.wikimedia.org&utm_content=original"),
                         "descriptionurl": "https://commons.wikimedia.org/wiki/File:Ty_Masterson_2025.jpg",
                         "extmetadata": {"Artist": {"value": "Jane Photographer"},
@@ -157,17 +184,85 @@ class TestTheRacesOwnArticle(unittest.TestCase):
                          (None, "public-domain-unsupported"))
         self.assertEqual(sp.licence_basis(["Category:PD US Congress"]), "PD US Congress")
 
-    def test_a_photograph_offered_only_above_the_caps_is_left_out(self):
-        rec, why = self.photo({"name": "Ty Masterson"}, measure=lambda u: (True, HEAVY))
-        self.assertIsNone(rec)
-        self.assertEqual(why, official_photos.OVERSIZED)
+    def test_a_photograph_offered_only_above_the_caps_is_shown_and_said(self):
+        with mock.patch("kyc.photos.lighter_form", no_lighter):
+            rec, why = self.photo({"name": "Ty Masterson"}, measure=lambda u: (True, HEAVY))
+        self.assertEqual(why, "")
+        self.assertTrue(rec["portraitHeavy"][0]["kept"])
+        self.assertEqual(official_photos.record_problems(rec, "x"), [])
 
     def test_a_refused_file_is_never_taken(self):
+        """One list for every route (rule 38): NOT_A_PORTRAIT, keyed on the
+        Commons upload address as for a judge's portrait."""
+        upload = "https://upload.wikimedia.org/wikipedia/commons/2/24/Ty_Masterson_2025.jpg"
         with mock.patch.object(sp, "_resolve", return_value=dict(self.ARTICLE)), \
                 mock.patch.object(sp, "_commons", return_value=self.COMMONS):
             self.assertEqual(sp.wiki_photo("KS", "governor", {"name": "Ty Masterson"},
-                                           self.LINKS, "x", refused={"File:Ty Masterson 2025.jpg"}),
+                                           self.LINKS, "x", refused={upload: ("x", "y")}),
                              (None, "not-a-portrait"))
+        from kyc import overrides
+        overrides.NOT_A_PORTRAIT[upload] = ("2026-10-25", "a test")
+        try:
+            rec, _ = self.photo({"name": "Ty Masterson"})
+            self.assertIsNone(rec)
+            # And a record cached before the entry was made is withheld.
+            del overrides.NOT_A_PORTRAIT[upload]
+            rec, _ = self.photo({"name": "Ty Masterson"})
+            overrides.NOT_A_PORTRAIT[upload] = ("2026-10-25", "a test")
+            self.assertIn("NOT_A_PORTRAIT", sp.withheld_why("KS|governor|Ty Masterson", rec))
+            self.assertIn(upload, sp.doubted({"photos": {"k": rec}}))
+        finally:
+            overrides.NOT_A_PORTRAIT.pop(upload, None)
+
+    def test_a_licence_doubt_withholds_the_file(self):
+        upload = "https://upload.wikimedia.org/wikipedia/commons/2/24/Ty_Masterson_2025.jpg"
+        from kyc import overrides
+        rec, _ = self.photo({"name": "Ty Masterson"})
+        overrides.PORTRAIT_LICENCE_DOUBTS[upload] = ("2026-10-25", "a test")
+        try:
+            self.assertIn("PORTRAIT_LICENCE_DOUBTS",
+                          sp.withheld_why("KS|governor|Ty Masterson", rec))
+        finally:
+            del overrides.PORTRAIT_LICENCE_DOUBTS[upload]
+
+    def test_rule_82s_one_test_for_a_declared_licence(self):
+        """PR #135 review: public domain on an uploader's word was refused
+        while CC0 and "Copyrighted free use" on the same word were taken."""
+        doubt = sp.licence_doubt
+        # No author named at all (David Jolly's file).
+        self.assertTrue(doubt({"by": None, "licence": "Public domain", "basis": "PD US Congress"},
+                              "David Jolly (cropped).jpg"))
+        # An official portrait under a user account's own CC0 (Kris Kobach's).
+        self.assertTrue(doubt({"by": "WilliamJHendrixKS", "licence": "CC0"},
+                              "Kris Kobach official portrait, 2024 (cropped).jpg"))
+        # Public domain with no basis recorded.
+        self.assertTrue(doubt({"by": "Someone", "licence": "Public domain"}, "A B.jpg"))
+        # A government office's own release stands, as does a campaign's
+        # CC0 of a file that does not call itself official.
+        self.assertEqual(doubt({"by": "Zach Pippin, Office of the Governor of South Carolina",
+                                "licence": "CC0"}, "Mark Hammond cropped.jpg"), "")
+        self.assertEqual(doubt({"by": "Maryland State Government", "licence": "Attribution"},
+                               "Aruna Miller Official Portrait.jpg"), "")
+        self.assertEqual(doubt({"by": "Rob Sand for Governor", "licence": "CC0"},
+                               "Rob Sand campaign headshot (cropped 1).jpg"), "")
+        self.assertTrue(doubt({"by": "Rob Sand for Governor", "licence": "CC0"},
+                              "Rob Sand official portrait.jpg"))
+        self.assertEqual(doubt({"by": "Jane Photographer", "licence": "CC BY-SA 4.0"},
+                               "Ty Masterson 2025.jpg"), "")
+
+    def test_a_doubted_licence_is_not_read_and_a_cached_one_is_withheld(self):
+        commons = dict(self.COMMONS, info=dict(self.COMMONS["info"], extmetadata={
+            "Artist": {"value": "SomeUser"}, "LicenseShortName": {"value": "CC0"}}))
+        article = dict(self.ARTICLE, image="Ty Masterson official portrait.jpg")
+        self.assertEqual(self.photo({"name": "Ty Masterson"}, commons=commons, article=article),
+                         (None, "licence-doubt"))
+
+    def test_an_event_crop_is_refused(self):
+        """PR #135 review: an editor's crop of "Nevada Attorney General Aaron
+        Ford addresses the United Nations Human Rights Committee"."""
+        self.assertFalse(sp.file_ok("Nevada Attorney General Aaron Ford addresses the United "
+                                    "Nations Human Rights Committee, October 17-18, 2023 1 "
+                                    "(cropped).jpg", "Aaron D. Ford"))
 
 
 class TestThePage(unittest.TestCase):
@@ -196,17 +291,22 @@ class TestThePage(unittest.TestCase):
                   {})
         self.assertNotIn("photo", rows[1])
 
-    def test_a_cached_photograph_with_its_credit_and_the_left_out_counted(self):
+    def test_a_cached_photograph_with_its_credit_and_a_heavy_one_shown_and_counted(self):
         rows = self.rows()
         rec = official_photos.record("https://www.azcleanelections.gov/Custom/Picture/2427",
                                      sp.AZ_LIST, "the list pairs Picture/2427 with 'Andy Biggs'",
                                      SMALL, by=sp.AZ_BY, route="guide")
-        cache = {"photos": {"AZ|governor|Andy Biggs": rec,
-                            "AZ|governor|Alice Novoa": {"missing": official_photos.OVERSIZED}}}
-        left_out = sp.attach("AZ", "governor", rows, self.LISTED, None, None, cache)
-        self.assertEqual(left_out, 1)
+        heavy = official_photos.record(
+            "https://www.azcleanelections.gov/Custom/Picture/99", sp.AZ_LIST,
+            "the list pairs Picture/99 with 'Alice Novoa'", HEAVY, by=sp.AZ_BY, route="guide",
+            portraitHeavy=[{"url": "https://www.azcleanelections.gov/Custom/Picture/99",
+                            "why": "3000 KB, over 300 KB", "kept": True}])
+        cache = {"photos": {"AZ|governor|Andy Biggs": rec, "AZ|governor|Alice Novoa": heavy}}
+        shown_heavy = sp.attach("AZ", "governor", rows, self.LISTED, None, None, cache)
+        self.assertEqual(shown_heavy, 1)
         self.assertEqual(rows[0]["photoCredit"], {"by": sp.AZ_BY, "page": sp.AZ_LIST})
-        self.assertNotIn("photo", rows[2])
+        self.assertEqual(rows[2]["photo"], "https://www.azcleanelections.gov/Custom/Picture/99")
+        self.assertEqual(sp.counts(cache)["heavy"], 1)
 
     def test_a_cached_photograph_without_its_evidence_is_never_shown(self):
         rows = self.rows()
@@ -217,10 +317,12 @@ class TestThePage(unittest.TestCase):
         self.assertNotIn("photo", rows[0])
         self.assertTrue(sp.problems(cache))
 
-    def test_a_commons_file_with_no_author_says_so_and_is_kept(self):
-        """David Jolly's file names no author: the credit says "author not
-        recorded on Commons" and links the file (rule 87), so the record is
-        whole; an official guide's record without whose it is is not."""
+    def test_a_commons_file_with_no_author_is_whole_but_withheld(self):
+        """David Jolly's file names no author: the record is whole (rule 87:
+        the credit would say "author not recorded on Commons"), but rule
+        82's one test doubts a file that names no author, so the page does
+        not show it; an official guide's record without whose it is is not
+        whole."""
         rec = official_photos.record(
             "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/J.jpg/250px-J.jpg",
             "https://en.wikipedia.org/wiki/2026_Florida_gubernatorial_election",
@@ -229,6 +331,11 @@ class TestThePage(unittest.TestCase):
                     "page": "https://commons.wikimedia.org/wiki/File:J.jpg",
                     "via": "Wikimedia Commons"})
         self.assertEqual(sp.problems({"photos": {"FL|governor|David Jolly": rec}}), [])
+        self.assertIn("names no author", sp.withheld_why("FL|governor|David Jolly", rec))
+        rows = [{"name": "David Jolly"}]
+        sp.attach("FL", "governor", rows, {"candidates": [{"name": "David Jolly"}]}, None, None,
+                  {"photos": {"FL|governor|David Jolly": rec}})
+        self.assertNotIn("photo", rows[0])
         guide = official_photos.record("https://www.azcleanelections.gov/Custom/Picture/1",
                                        sp.AZ_LIST, "the list pairs Picture/1 with 'A B'", SMALL,
                                        route="guide")

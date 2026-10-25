@@ -280,7 +280,8 @@ def _build(args):
                           statewide=statewide_mod.load(args.root),
                           # {} when the cache is missing, so validate's
                           # error says so under --check too (PR #120 review).
-                          measures=measures_mod.load(args.root) or {})
+                          measures=measures_mod.load(args.root) or {},
+                          photo_routes=_photo_routes(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -292,8 +293,10 @@ def _build(args):
         issues.append(validate.Issue(level, code, message, detail))
     # What the judges' Wikipedia and portrait join withheld (kyc/judge_links.py):
     # said by every build, not only by the refresh that found it.
-    from . import judge_links as judge_links_mod
-    for level, code, message, detail in judge_links_mod.problems(judge_links_mod.load_cache(args.root)):
+    from . import judge_links as judge_links_mod, statewide_photos as statewide_photos_mod
+    for level, code, message, detail in judge_links_mod.problems(
+            judge_links_mod.load_cache(args.root),
+            elsewhere=statewide_photos_mod.doubted(statewide_photos_mod.load_cache(args.root))):
         issues.append(validate.Issue(level, code, message, detail))
     # The roll calls (kyc/rollcalls.py): votes given to nobody, and why.
     from . import rollcalls
@@ -1810,8 +1813,8 @@ def _courts(args):
         # (rule 8): a timeout is not a court with no members.
         old = courts.load_cache(args.root) or {}
         before = old.get("courts", {})
-        # Each justice's photograph from the court's own pages (rule 87),
-        # a size the page offers within the caps or none.
+        # Each justice's photograph from the court's own pages (rule 87):
+        # a heavy one is shown all the same and said.
         from . import court_photos
         problems.extend(court_photos.add_justice_photos(read, pages, before))
         for code in sorted(set(courts.COURTS) - set(read)):
@@ -1843,7 +1846,7 @@ def _courts(args):
     from . import court_photos
     seen = court_photos.counts({"courts": read})
     print(f"  photographs: {seen['shown']} of {seen['members']} justices from their court's own "
-          f"pages; {seen['oversized']} left out, offered only above the caps; "
+          f"pages ({seen['heavy']} of them offered only above the caps, shown and said); "
           f"{seen['unknown']} could not be read; {seen['none'] + seen['shape']} with none that "
           "passes")
     if not args.check:
@@ -1883,6 +1886,14 @@ def _voting(args):
     for line in voting.stale_overrides(cache):
         print(f"  [stale override] {line}")
     return 0
+
+
+def _photo_routes(root):
+    """The images the court and statewide photograph routes reached or
+    passed over, for validate's ``NOT_A_PORTRAIT`` staleness check."""
+    from . import court_photos, courts, statewide_photos
+    return (court_photos.refused_offered(courts.load_cache(root))
+            | statewide_photos.doubted(statewide_photos.load_cache(root)))
 
 
 def _tribes(args):
@@ -1934,7 +1945,8 @@ def _ballotphotos(args):
     seen = statewide_photos.counts(cache)
     print(f"  {seen['shown']} statewide candidates' photographs cached ("
           + ", ".join(f"{n} {route}" for route, n in sorted(seen["routes"].items()))
-          + f"); {seen['oversized']} left out, offered only above the caps")
+          + f"); {seen['heavy']} of them offered only above the caps, shown and said; "
+          f"{seen['withheld']} withheld by a person's list or the licence test")
     for line in problems:
         print(f"  [warn] {line}")
     for line in errors:
@@ -1977,8 +1989,8 @@ def _officers(args):
     confirmed = sum(1 for row in ag.values() if row.get("name") and not row.get("unconfirmed"))
     print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page; "
           f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph; "
-          f"{sum(1 for row in ag.values() if row.get('photoOversized'))} left out because the "
-          "office offers it only above the caps")
+          f"{sum(1 for row in ag.values() if row.get('photoHeavy'))} of them offered only above "
+          "the caps (kept, and said)")
     for problem in cache.pop("agProblems", officers.ag_problems(ag)):
         print(f"  [warn] {problem}")
     if not args.check:

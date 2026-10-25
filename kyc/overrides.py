@@ -396,8 +396,10 @@ _NASS_CARD = ("NASS's roster card names {} beside this photograph, filed as {} i
 
 
 # An attorney general's photograph is read by the pipeline from the
-# office's own pages (officers.add_ag_photos). Where those show none within
-# the caps, it is the National Association of Attorneys General's: its "Find
+# office's own pages (officers.add_ag_photos). Where those show none, or one
+# offered only above the caps that no resizer serves smaller (rule 87: the
+# office's file is then kept, heavy, and this lighter card goes first), it is
+# the National Association of Attorneys General's: its "Find
 # my AG" roster puts each attorney general's name and state on a card beside
 # the photograph. naag.org answers a script and a headless browser with a
 # Cloudflare challenge, so the roster was read by a person in a windowed
@@ -802,12 +804,17 @@ def article_alias(profile_id):
     return entry[0] if entry else None
 
 
-# Images on a campaign's own site that `enrich` would take as the candidate's
-# portrait but that are not one, keyed on the image URL: (date checked, what it
-# shows). Its rules turn away logos, share cards, merchandise and most group
-# shots by file name and shape; these passed both, and only a look tells. The
-# weekly refresh re-reads every site, so a correction made by editing the
-# cache would not last. validate reports an entry no cached site offers.
+# Images that a route would take as a person's portrait but that are not one,
+# keyed on the image URL: (date checked, what it shows). One list for every
+# route (rule 38): a campaign's own site (`enrich`), an attorney general's
+# office (officers.add_ag_photos), a court's page (court_photos), a statewide
+# candidate's guide or Commons file (statewide_photos, keyed on the Commons
+# upload address), each through official_photos.held_back for a record kept
+# from an earlier read. The rules turn away logos, share cards, merchandise
+# and most group shots by file name and shape; these passed both, and only a
+# look tells. The refreshes re-read every source, so a correction made by
+# editing a cache would not last. validate reports an entry no cached route
+# offers.
 NOT_A_PORTRAIT = {
     "https://kaileebuller.com/wp-content/uploads/2026/03/Buller.jpg":
         ("2026-10-02", "a family photograph: four people in the snow"),
@@ -815,16 +822,9 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a hunting scene; no face at card size"),
 }
 
-# Commons files a statewide candidate's article or race page leads with that
-# kyc/statewide_photos.py would take but that a person looked at and refused:
-# an editor's crop of a group photograph, in which the editor - not the
-# photograph's source - chose the face (the checker's finding of
-# 2026-10-19). Keyed "File:<name>": (date looked at, what it shows).
-COMMONS_NOT_A_PORTRAIT = {
-}
-
-# Commons files a judge's route reaches (kyc/judge_links.py) whose licence
-# is in doubt, keyed on the upload URL: (date, what the file's page says).
+# Commons files a judge's route (kyc/judge_links.py) or a statewide
+# candidate's (kyc/statewide_photos.py) reaches whose licence is in doubt,
+# keyed on the upload URL: (date, what the file's page says).
 # Each is withheld - and reported - until a person reads the file's page and
 # decides; delete the entry to show it, or move it to NOT_A_PORTRAIT to
 # refuse it for good.
@@ -856,6 +856,20 @@ PORTRAIT_LICENCE_DOUBTS = {
                        "(VLF22561r)"),
     "https://upload.wikimedia.org/wikipedia/commons/6/62/Header_NA_Yoon_US-Senate-Collection.jpg":
         ("2026-10-19", "public domain, from the Senate Press Gallery, author {{Unknown}}"),
+    # Statewide candidates' (PR #135's review, 2026-10-25). The test above
+    # finds Jolly's (no author) and Kobach's ("official portrait" under a
+    # user's CC0) by itself (statewide_photos.licence_doubt); these three a
+    # person must read.
+    "https://upload.wikimedia.org/wikipedia/commons/8/89/Allen_Headshot_-_Pikes_Peak_background_(cropped).jpg":
+        ("2026-10-25", "CC0 by the user account 'Koncurrentkat' on a studio-style headshot "
+                       "against a backdrop ('Pikes Peak background'), with nothing on the page "
+                       "showing the uploader took it"),
+    "https://upload.wikimedia.org/wikipedia/commons/2/27/Ra%C3%BAl_Torrez_(cropped_2).jpg":
+        ("2026-10-25", "CC0 by the user account 'LandofEnchantment Pics', with nothing on the "
+                       "page showing the account took the photograph"),
+    "https://upload.wikimedia.org/wikipedia/commons/9/94/Paul_Pate_(cropped).jpeg":
+        ("2026-10-25", "'Copyrighted free use', author 'Iowa General Assembly', with no "
+                       "permission or statute recorded behind the tag"),
 }
 
 # Each sitting justice's official portrait as Wikimedia Commons holds it,
@@ -1172,7 +1186,8 @@ LEADERSHIP_TITLES = {
 # the page's own words beside it and the day. Keyed (court, the name as the
 # court's roster gives it); each is the record a read photograph carries
 # (official_photos.record: the file, its page, the evidence, the day, its
-# bytes and pixel size), at a size the page itself offers within the caps.
+# bytes and pixel size), with portraitHeavy where it is over the caps (rule
+# 87: shown all the same and said).
 # Not shown once the court no longer lists the justice, and the build says
 # so.
 def _justice_photo(photo, page, evidence, weight, read):

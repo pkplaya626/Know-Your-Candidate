@@ -328,11 +328,23 @@
     "N. Christopher Griffiths",
     "Morgan T. Zurn"
    ],
-   "photoMisses": {
-    "Abigail M. LeGrow": "oversized",
-    "N. Christopher Griffiths": "oversized"
-   },
    "photos": {
+    "Abigail M. LeGrow": {
+     "bytes": 24386,
+     "evidence": "On the court's page https://courts.delaware.gov/supreme/justices.aspx: alt 'Justice Abigail M. LeGrow portrait'; file 'supreme_legrow.jpg'",
+     "height": 700,
+     "page": "https://courts.delaware.gov/supreme/justices.aspx",
+     "photo": "https://i0.wp.com/courts.delaware.gov/supreme/agency/img/supreme_legrow.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://courts.delaware.gov/supreme/agency/img/supreme_legrow.jpg",
+       "why": "479 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
     "Collins J. Seitz, Jr.": {
      "bytes": 16204,
      "evidence": "On the court's page https://courts.delaware.gov/supreme/justices.aspx: alt 'Justice Collins J. Seitz, Jr. portrait'; file 'supreme_seitz_2023.jpg'",
@@ -359,6 +371,22 @@
      "photo": "https://courts.delaware.gov/supreme/agency/img/supreme_zurn_2026.jpg",
      "read": "2026-10-25",
      "width": 150
+    },
+    "N. Christopher Griffiths": {
+     "bytes": 22004,
+     "evidence": "On the court's page https://courts.delaware.gov/supreme/justices.aspx: alt 'Justice N. Christopher Griffiths portrait'; file 'supreme_griffiths.jpg'",
+     "height": 700,
+     "page": "https://courts.delaware.gov/supreme/justices.aspx",
+     "photo": "https://i0.wp.com/courts.delaware.gov/supreme/agency/img/supreme_griffiths.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://courts.delaware.gov/supreme/agency/img/supreme_griffiths.jpg",
+       "why": "505 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
     }
    },
    "read": "2026-10-25",
@@ -601,13 +629,71 @@
     "Colleen D. Zahn",
     "Cynthia K.C. Meyer"
    ],
-   "photoMisses": {
-    "Colleen D. Zahn": "oversized",
-    "Cynthia K.C. Meyer": "oversized",
-    "G. Richard Bevan": "oversized",
-    "Gregory W. Moeller": "oversized"
-   },
    "photos": {
+    "Colleen D. Zahn": {
+     "bytes": 34766,
+     "evidence": "On the court's page https://isc.idaho.gov/about-the-courts/sc-justices: alt 'Justice Colleen D. Zahn'; file '1776539691229-Justice_Zahn_web.webp'",
+     "height": 750,
+     "page": "https://isc.idaho.gov/about-the-courts/sc-justices",
+     "photo": "https://i0.wp.com/api.isc.idaho.gov/uploads/Images/Page_Images/1776539691229-Justice_Zahn_web.webp?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://api.isc.idaho.gov/uploads/Images/Page_Images/1776539691229-Justice_Zahn_web.webp",
+       "why": "669 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Cynthia K.C. Meyer": {
+     "bytes": 15102,
+     "evidence": "On the court's page https://isc.idaho.gov/about-the-courts/sc-justices: alt 'Justice Cynthia K.C. Meyer'; file '1776539717044-Meyer9741-web.webp'",
+     "height": 636,
+     "page": "https://isc.idaho.gov/about-the-courts/sc-justices",
+     "photo": "https://i0.wp.com/api.isc.idaho.gov/uploads/Images/Page_Images/1776539717044-Meyer9741-web.webp?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://api.isc.idaho.gov/uploads/Images/Page_Images/1776539717044-Meyer9741-web.webp",
+       "why": "1000x1273px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "G. Richard Bevan": {
+     "bytes": 154444,
+     "evidence": "On the court's page https://isc.idaho.gov/about-the-courts/sc-justices: alt 'Justice G. Richard Bevan'; file '1775503832197-bevan.png'",
+     "height": 403,
+     "page": "https://isc.idaho.gov/about-the-courts/sc-justices",
+     "photo": "https://i0.wp.com/api.isc.idaho.gov/uploads/Images/1775503832197-bevan.png?w=330&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://api.isc.idaho.gov/uploads/Images/1775503832197-bevan.png",
+       "why": "723 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 330
+    },
+    "Gregory W. Moeller": {
+     "bytes": 15676,
+     "evidence": "On the court's page https://isc.idaho.gov/about-the-courts/sc-justices: alt 'Justice Gregory W. Moeller'; file '1776539662401-Moeller.webp'",
+     "height": 750,
+     "page": "https://isc.idaho.gov/about-the-courts/sc-justices",
+     "photo": "https://i0.wp.com/api.isc.idaho.gov/uploads/Images/Page_Images/1776539662401-Moeller.webp?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://api.isc.idaho.gov/uploads/Images/Page_Images/1776539662401-Moeller.webp",
+       "why": "2987 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
     "Robyn M. Brody": {
      "bytes": 201706,
      "evidence": "On the court's page https://isc.idaho.gov/about-the-courts/sc-justices: alt 'Chief Justice Robyn M. Brody'; file '1776539631327-brody_2025.webp'",
@@ -1322,9 +1408,6 @@
     "Douglas A. Bahr",
     "Mark A. Friese"
    ],
-   "photoMisses": {
-    "Mark A. Friese": "oversized"
-   },
    "photos": {
     "Douglas A. Bahr": {
      "bytes": 9428,
@@ -1361,6 +1444,22 @@
      "photo": "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/Justice-Lisa-Fair-McEvers-small.jpg",
      "read": "2026-10-25",
      "width": 200
+    },
+    "Mark A. Friese": {
+     "bytes": 13944,
+     "evidence": "On the court's page https://www.ndcourts.gov/supreme-court/justices/mark-a-friese: alt 'A photo of justice mark a friese'; file 'Justice-Mark-A-Friese.jpg'",
+     "height": 666,
+     "page": "https://www.ndcourts.gov/supreme-court/justices/mark-a-friese",
+     "photo": "https://i0.wp.com/www.ndcourts.gov/Media/Default/SupremeCourt/justices/Justice-Mark-A-Friese.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/Justice-Mark-A-Friese.jpg",
+       "why": "2679 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 499
     }
    },
    "read": "2026-10-25",
@@ -1960,13 +2059,6 @@
     "James P. Sullivan",
     "Kyle D. Hawkins"
    ],
-   "photoMisses": {
-    "Debra Lehrmann": "oversized",
-    "Evan A. Young": "oversized",
-    "James P. Sullivan": "oversized",
-    "Jane Bland": "oversized",
-    "Rebeca Aizpuru Huddle": "oversized"
-   },
    "photos": {
     "Brett Busby": {
      "bytes": 148777,
@@ -1976,6 +2068,70 @@
      "photo": "https://www.txcourts.gov/media/1461169/brett-busby.png",
      "read": "2026-10-25",
      "width": 267
+    },
+    "Debra Lehrmann": {
+     "bytes": 29118,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice Debra Lehrmann'; file 'justice-debra-lehrmann-web.jpg'",
+     "height": 784,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1452363/justice-debra-lehrmann-web.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1452363/justice-debra-lehrmann-web.jpg",
+       "why": "901 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Evan A. Young": {
+     "bytes": 278120,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice Evan A. Young'; file 'justice-evan-a-young.jpg'",
+     "height": 750,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1460005/justice-evan-a-young.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1460005/justice-evan-a-young.jpg",
+       "why": "1338 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "James P. Sullivan": {
+     "bytes": 21844,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice James P. Sullivan'; file 'justice-james-p-sullivan-2025-web.jpg'",
+     "height": 750,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1460010/justice-james-p-sullivan-2025-web.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1460010/justice-james-p-sullivan-2025-web.jpg",
+       "why": "326 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Jane Bland": {
+     "bytes": 20100,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice Jane Bland'; file 'justice-jane-bland-2025-web.jpg'",
+     "height": 792,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1460006/justice-jane-bland-2025-web.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1460006/justice-jane-bland-2025-web.jpg",
+       "why": "349 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 499
     },
     "Jimmy Blacklock": {
      "bytes": 104265,
@@ -2003,6 +2159,22 @@
      "photo": "https://www.txcourts.gov/media/1461570/justice-kyle-hawkins.jpg",
      "read": "2026-10-25",
      "width": 300
+    },
+    "Rebeca Aizpuru Huddle": {
+     "bytes": 20530,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice Rebeca Aizpuru Huddle'; file 'rah042921.jpg'",
+     "height": 859,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1450011/rah042921.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1450011/rah042921.jpg",
+       "why": "889x1528px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
     }
    },
    "read": "2026-10-25",
@@ -2023,16 +2195,151 @@
     "Lee Finley",
     "Gina G. Parker"
    ],
-   "photoMisses": {
-    "Bert Richardson": "oversized",
-    "David J. Schenck": "oversized",
-    "David Newell": "oversized",
-    "Gina G. Parker": "oversized",
-    "Jesse F. McClure, III": "oversized",
-    "Kevin Yeary": "oversized",
-    "Lee Finley": "oversized",
-    "Mary Lou Keel": "oversized",
-    "Scott Walker": "oversized"
+   "photos": {
+    "Bert Richardson": {
+     "bytes": 17940,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Bert Richardson'; file 'richardson.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462535/richardson.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462535/richardson.jpg",
+       "why": "2541 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "David J. Schenck": {
+     "bytes": 12206,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Presiding Judge David J. Schenck'; file 'schenck.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462536/schenck.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462536/schenck.jpg",
+       "why": "2438 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "David Newell": {
+     "bytes": 16092,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge David Newell'; file 'newell.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462533/newell.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462533/newell.jpg",
+       "why": "2144 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Gina G. Parker": {
+     "bytes": 12574,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Gina G. Parker'; file 'parker.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462534/parker.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462534/parker.jpg",
+       "why": "1834 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Jesse F. McClure, III": {
+     "bytes": 14036,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Jesse F. McClure, III'; file 'mcclure.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462532/mcclure.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462532/mcclure.jpg",
+       "why": "2254 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Kevin Yeary": {
+     "bytes": 8824,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Kevin Yeary'; file 'yeary.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462538/yeary.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462538/yeary.jpg",
+       "why": "2522 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 499
+    },
+    "Lee Finley": {
+     "bytes": 10922,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Lee Finley'; file 'finley.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462530/finley.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462530/finley.jpg",
+       "why": "1845 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Mary Lou Keel": {
+     "bytes": 14690,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Mary Lou Keel'; file 'keel.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462531/keel.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462531/keel.jpg",
+       "why": "2277 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Scott Walker": {
+     "bytes": 9786,
+     "evidence": "On the court's page https://www.txcourts.gov/cca/about-the-court/judges/: alt 'Photo of Judge Scott Walker'; file 'walker.jpg'",
+     "height": 625,
+     "page": "https://www.txcourts.gov/cca/about-the-court/judges/",
+     "photo": "https://i0.wp.com/www.txcourts.gov/media/1462537/walker.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.txcourts.gov/media/1462537/walker.jpg",
+       "why": "2770 KB, over 300 KB"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 499
+    }
    },
    "read": "2026-10-25",
    "seats": 9,
@@ -2051,14 +2358,57 @@
     "Matthew L. Bell"
    ],
    "photoMisses": {
-    "Jay T. Jorgensen": "oversized",
-    "Jill M. Pohlman": "oversized",
-    "John Nielsen": "oversized",
-    "Michael R. Menssen": "none",
-    "Paige Petersen": "oversized",
-    "Stephen P. Dent": "oversized"
+    "Michael R. Menssen": "none"
    },
    "photos": {
+    "Jay T. Jorgensen": {
+     "bytes": 10854,
+     "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'jorgensen-j-hires.jpeg'",
+     "height": 625,
+     "page": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html",
+     "photo": "https://i0.wp.com/www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_1059132425_co.coreimg.jpeg/1790652581071/jorgensen-j-hires.jpeg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_1059132425_co.coreimg.jpeg/1790652581071/jorgensen-j-hires.jpeg",
+       "why": "1280x1600px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Jill M. Pohlman": {
+     "bytes": 13824,
+     "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'pohlman-j-hires.jpeg'",
+     "height": 625,
+     "page": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html",
+     "photo": "https://i0.wp.com/www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_copy_18960607.coreimg.jpeg/1789594460036/pohlman-j-hires.jpeg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_copy_18960607.coreimg.jpeg/1789594460036/pohlman-j-hires.jpeg",
+       "why": "1280x1600px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "John Nielsen": {
+     "bytes": 14132,
+     "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'nielsen-j-hires.jpeg'",
+     "height": 625,
+     "page": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html",
+     "photo": "https://i0.wp.com/www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_1059132425.coreimg.jpeg/1789594681885/nielsen-j-hires.jpeg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_1059132425.coreimg.jpeg/1789594681885/nielsen-j-hires.jpeg",
+       "why": "1280x1600px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
     "Matthew L. Bell": {
      "bytes": 72147,
      "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'bell-m.jpeg'",
@@ -2067,6 +2417,38 @@
      "photo": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_1059132425_co_140928646.coreimg.jpeg/1790198234035/bell-m.jpeg",
      "read": "2026-10-25",
      "width": 722
+    },
+    "Paige Petersen": {
+     "bytes": 11796,
+     "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'petersen-p-hires.jpeg'",
+     "height": 750,
+     "page": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html",
+     "photo": "https://i0.wp.com/www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_copy_18960607_266683664.coreimg.jpeg/1789594604587/petersen-p-hires.jpeg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_copy_18960607_266683664.coreimg.jpeg/1789594604587/petersen-p-hires.jpeg",
+       "why": "1280x1920px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    },
+    "Stephen P. Dent": {
+     "bytes": 13290,
+     "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'dent-s-hires.jpeg'",
+     "height": 625,
+     "page": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html",
+     "photo": "https://i0.wp.com/www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_1059132425_co.coreimg.jpeg/1790631836193/dent-s-hires.jpeg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_1059132425_co.coreimg.jpeg/1790631836193/dent-s-hires.jpeg",
+       "why": "1280x1600px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
     }
    },
    "read": "2026-10-25",
@@ -2373,16 +2755,33 @@
     "Bridget Hill"
    ],
    "photoMisses": {
-    "Bridget Hill": "oversized",
     "John G. Fenn": "none",
     "Kari Gray": "none",
     "Lynne Boomgaarden": "none",
     "Robert C. Jarosh": "none"
+   },
+   "photos": {
+    "Bridget Hill": {
+     "bytes": 11542,
+     "evidence": "On the court's page https://www.wyocourts.gov/supreme-court/: file 'Justice-Bridget-Hill-scaled-e1751407581719.jpg'",
+     "height": 542,
+     "page": "https://www.wyocourts.gov/supreme-court/",
+     "photo": "https://i0.wp.com/www.wyocourts.gov/app/uploads/2025/01/Justice-Bridget-Hill-scaled-e1751407581719.jpg?w=500&ssl=1",
+     "portraitHeavy": [
+      {
+       "kept": false,
+       "url": "https://www.wyocourts.gov/app/uploads/2025/01/Justice-Bridget-Hill-scaled-e1751407581719.jpg",
+       "why": "1707x1852px, over 1200px"
+      }
+     ],
+     "read": "2026-10-25",
+     "width": 500
+    }
    },
    "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.wyocourts.gov/supreme-court/"
   }
  },
- "fetched": "2026-10-25T09:41:51+00:00"
+ "fetched": "2026-10-25T14:25:30+00:00"
 }
