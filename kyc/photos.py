@@ -260,14 +260,10 @@ def same_shape(original, smaller):
 
 def lighter_form(url, weight, weigh):
     """``(form, its weight)``: the widest of :func:`smaller_forms` of *url*
-    that is within the caps (:func:`too_heavy`) and is the same picture
-    scaled (:func:`same_shape` against *weight*, the original's), or
-    ``None``. *weigh* reads a URL's weight, ``None`` when it cannot."""
-    for form in smaller_forms(url):
-        found = weigh(form)
-        if found and not too_heavy(found) and same_shape(weight, found):
-            return form, found
-    return None
+    within the caps and the same picture scaled, or ``None``
+    (:func:`lighter_rendition` with no page to offer renditions: a
+    governor's headshot)."""
+    return lighter_rendition(url, weight, weigh)
 
 
 # The widest a card needs: a 165px card on a 2x screen.
@@ -319,38 +315,27 @@ def offered_forms(offered):
     return wide + narrow
 
 
-def own_lighter_form(url, weight, weigh, offered=(), tries=4):
-    """``(form, its weight)``: a rendition of *url* that its source itself
-    offers, within the caps and the same picture scaled, or ``None``.
+def lighter_rendition(url, weight, weigh, offered=(), tries=5):
+    """``(form, its weight)``: the first rendition of *url* within the caps
+    that is the same picture scaled (:func:`same_shape` against *weight*,
+    the original's), or ``None``. *weigh* reads a URL's weight, ``None``
+    when it cannot.
 
-    The owner's decision of 2026-10-19: a photograph is shown only where its
-    source offers a version within 300 KB and 1,200px - no resizing, no
-    image service, no copy of our own. What the source offers is a
-    rendition its own page lists (*offered*, the image's ``srcset``:
-    WordPress's "-683x1024" files, Wix's "w_432,h_681" ones) or one of the
-    fixed widths Squarespace's image host makes of every upload, as
-    Wikimedia does (rule 42). Never a width asked of a resizer - imgix or
-    Photon scaling a file to order, :func:`photon_form` fetching one from
-    another host - which is the image service the decision rules out,
-    unless the page itself lists that rendition; an image offered only
-    oversized is left out."""
+    Tried in this order: a rendition the image's own page lists (*offered*,
+    its ``srcset``: WordPress's "-683x1024" files, Wix's "w_432,h_681"
+    ones), then its host's own resizer or Photon (:func:`smaller_forms`),
+    as rule 87 had it before the brief of 2026-10-19 ruled the resizers
+    out. The owner's decision of 2026-10-25 ("more content is better than
+    strict rules") put them back: Photon fetches that very file and scales
+    it, so it is the same photograph (rule 42), and what comes back is
+    weighed and checked for shape before it is used. Where none serves it
+    the caller shows the original all the same and says so (rule 87)."""
     forms = [form for form in offered_forms(offered) if form != url]
-    if host_of(url) == "images.squarespace-cdn.com":
-        for width in SMALLER_WIDTHS:
-            form = host_resized(url, width)
-            if form and form not in forms:
-                forms.append(form)
+    for form in smaller_forms(url):
+        if form not in forms:
+            forms.append(form)
     for form in forms[:tries]:
         found = weigh(form)
         if found and not too_heavy(found) and same_shape(weight, found):
             return form, found
     return None
-
-
-def service_form(portrait, original):
-    """True when *portrait* is *original* fetched and scaled by Photon, an
-    image service the site itself does not use (:func:`photon_form`): what
-    the decision of 2026-10-19 rules out. A file the site serves from
-    Photon itself (a Jetpack site) is the site's own."""
-    return host_of(portrait) in PHOTON_HOSTS and bool(original) \
-        and host_of(original) not in PHOTON_HOSTS

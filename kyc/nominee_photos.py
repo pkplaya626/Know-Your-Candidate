@@ -12,11 +12,16 @@ through something the person is already tied to here, never a name:
   Wikidata is not proof on its own (rule 82: Judge Whaley's FJC id sat on a
   basketball player's item), so the item must also be a human, the only
   item any of the person's ids is on, and its English label must carry
-  their surname *and* a given name that fits theirs ("John \"Drew\"
-  Williams" for "John Andrew Williams"; never "Robert Williams"). And it
-  must carry a second tie of its own: a year of birth the profile's agrees
-  with, else a 2026 candidacy in the person's state (P3602) or an official
-  website (P856) that is their campaign's site. A year that disagrees
+  their surname *and* one of their given names as the profile or their
+  filing writes it ("John \"Drew\" Williams" for "John Andrew Williams",
+  "WILLIAMS, JOHN ANDREW"; never "Robert Williams", and never a nickname
+  - "Drew Williams" - but through an evidenced
+  ``overrides.PORTRAIT_NAME_FORMS`` entry). And it must carry a second tie
+  of its own: a year of birth the profile's agrees with, else a 2026
+  candidacy in the person's state (P3602), an office held for that state
+  (P39, by its label or its electoral district, P768), an official
+  website (P856) that is their campaign's site, or an English article that
+  is the one their ballot page links (rule 33). A year that disagrees
   refuses it. The file is shown at Wikimedia's standard width (rule 42),
   credited from its own description page (rule 87), and never reached
   through ``Special:FilePath`` (a name).
@@ -38,14 +43,16 @@ Either route refuses a frame wider than tall unless its file is named a
 headshot or portrait (rule 38), and a file a person refused in
 ``overrides.NOT_A_PORTRAIT`` or ``PORTRAIT_LICENCE_DOUBTS``.
 
-A photograph over the caps (300 KB, 1,200 px) is shown all the same, at full
-size, and said (``heavy``): the owner's decision of 2026-10-25 ("more
-content is better than strict rules") put coverage before weight, and a
-smaller copy is the copies' job (rule 101), never a reason for the
+A photograph over the caps (300 KB, 1,200 px) is shown smaller from the same
+file where Wikimedia's standard widths, its host's resizer or Photon serve it
+(rule 87), else at full size, and said either way (``heavy``): the owner's
+decision of 2026-10-25 ("more content is better than strict rules") put
+coverage before weight, and its weight is never a reason for the
 silhouette. Washington's online voters' guide serves its photographs only
 base64-encoded inside a JSON answer, and Alaska's and Oregon's pamphlets
 only inside PDFs (``ELECTION_OFFICES``): there is no file to link, so they
-wait for the copy store a hosted copy would need.
+wait for the store of copies a hosted, unmodified copy needs (the owner
+allowed one on 2026-10-25).
 
 Every record keeps the page that ties the photograph to the person, the
 words that name them (``evidence``), the day it was read, and its bytes and
@@ -63,7 +70,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from .photos import host_of, too_heavy
+from .photos import host_of, lighter_rendition, too_heavy
 
 WIKIDATA = "wikidata-fec"
 LEGISLATURE = "state-legislature"
@@ -84,7 +91,8 @@ UA = {"User-Agent": "know-your-candidate/2.1 (https://candidates.radicalrelay.us
 # the research of 2026-10-19 (research/photos/nominees.json) and its check.
 # The owner's decision of 2026-10-25 allows hosting an unmodified official
 # image that has no address of its own; that waits for the site's one store
-# of copies (rule 101), not a second one here (rule 12).
+# of copies, being built apart, not a second one here (rule 12). Not ruled
+# out: waiting.
 ELECTION_OFFICES = {
     "WA": "the online voters' guide (election 899) serves each photograph only "
           "base64-encoded inside candidate.ashx's JSON, never as a file",
@@ -115,21 +123,75 @@ def today():
     return datetime.date.today().isoformat()
 
 
-def given_fits(label, name):
-    """A given name of *label* fits *name*'s: the label's first given name
-    fits one of the person's, or the person's first fits one of the label's
-    - exactly, as a listed nickname, or as a prefix of two letters or more
-    (``results._given_fits``). "John \"Drew\" Williams" fits "John Andrew
-    Williams"; "Robert Williams" and "Robert Andrew Williams" do not."""
-    from .results import _given_fits, _tokens
+def given_names(profile):
+    """The given names the profile and the person's own filing write for
+    them (``filedName``, "WILLIAMS, JOHN ANDREW"), folded, without initials:
+    ``{"john", "andrew"}``. The surname is not among them."""
+    from .candidates import display_name
+    from .results import _tokens
 
-    mine, theirs = _tokens(name)[:-1], _tokens(label)[:-1]
-    mine = [w for w in mine if len(w) > 1]
-    theirs = [w for w in theirs if len(w) > 1]
-    if not mine or not theirs:
+    out = set()
+    for name in (profile.get("name"), display_name(profile.get("filedName"))):
+        words = _tokens(name or "")
+        out.update(w for w in words[:-1] if len(w) > 1)
+    return out
+
+
+def given_fits(label, profile):
+    """The item's *label* carries one of the person's own given names
+    (:func:`given_names`), exactly: its first given name is one of theirs,
+    or their first is among its given names. "John \"Drew\" Williams" fits
+    "John Andrew Williams"; "Robert Williams", "Robert Andrew Williams" and
+    the nickname "Drew Williams" do not. No nickname table and no prefix
+    (``results._given_fits`` allows both, for a ballot's spelling of a
+    filing already tied to the race): here the label is all that ties a
+    Wikidata item to the person besides the id, so a nickname counts only
+    through an evidenced ``overrides.PORTRAIT_NAME_FORMS`` entry naming
+    that very label for this profile."""
+    from . import overrides
+    from .results import _tokens
+
+    entry = getattr(overrides, "PORTRAIT_NAME_FORMS", {}).get(profile.get("id")) or {}
+    if entry.get("label") and entry["label"] == label and entry.get("evidence"):
+        return True
+    theirs = [w for w in _tokens(label or "")[:-1] if len(w) > 1]
+    mine = given_names(profile)
+    first = [w for w in _tokens(profile.get("name") or "")[:-1] if len(w) > 1][:1]
+    if not theirs or not mine:
         return False
-    return (any(_given_fits(theirs[0], w) for w in mine)
-            or any(_given_fits(mine[0], w) for w in theirs))
+    return theirs[0] in mine or bool(first and first[0] in theirs)
+
+
+def surnames(profile):
+    """The surname words the profile and the filing write: the profile
+    name's last word, and every word of the filing's surname ("GOMEZ
+    NORIEGA, VALENTINA" gives both), hyphens parting words."""
+    from .results import _tokens
+
+    out = set()
+    words = _tokens(str(profile.get("name") or "").replace("-", " "))
+    if len(words) > 1:
+        out.add(words[-1])
+    filed = str(profile.get("filedName") or "")
+    if "," in filed:
+        out.update(w for w in _tokens(filed.split(",", 1)[0].replace("-", " ") + " x")[:-1]
+                   if len(w) > 1)
+    return out
+
+
+def label_names(label, profile):
+    """``""`` when the item's *label* ends in the person's surname (as the
+    profile or the filing writes it: "John Andrews" is not "John Andrew
+    Williams", though "andrew" is in it) and carries a given name of theirs
+    (:func:`given_fits`), else why not."""
+    from .results import _tokens
+
+    words = _tokens(str(label or "").replace("-", " "))
+    if len(words) < 2 or words[-1] not in surnames(profile):
+        return f"the item's label {label!r} does not end in their surname"
+    if not given_fits(label, profile):
+        return f"the item's label {label!r} carries no given name of theirs"
+    return ""
 
 
 def refused_file(*urls):
@@ -220,15 +282,18 @@ def weigh(url, getter=None):
 def wikidata_items(ids, sparql=None):
     """``{fec id: [row]}`` for every Wikidata item carrying one of *ids* as
     its FEC candidate id (P1839); each row ``{"item", "label", "image",
-    "birth", "human", "election", "website"}`` (an item with several of a
-    statement gives a row for each). One query a hundred ids."""
+    "birth", "human", "election", "website", "office", "district",
+    "article"}`` (an item with several of a statement gives a row for
+    each; ``article`` is its English Wikipedia title). One query a hundred
+    ids."""
     import json
 
     out = {}
     ids = sorted(set(ids))
     for i in range(0, len(ids), 100):
         values = " ".join(f'"{x}"' for x in ids[i:i + 100])
-        query = ("SELECT ?item ?fec ?label ?img ?birth ?human ?election ?site WHERE { "
+        query = ("SELECT ?item ?fec ?label ?img ?birth ?human ?election ?site ?office "
+                 "?district ?article WHERE { "
                  "VALUES ?fec { %s } "
                  "?item wdt:P1839 ?fec . OPTIONAL { ?item wdt:P18 ?img } "
                  "OPTIONAL { ?item wdt:P569 ?birth } "
@@ -236,7 +301,12 @@ def wikidata_items(ids, sparql=None):
                  "OPTIONAL { ?item wdt:P31 ?human FILTER(?human = wd:Q5) } "
                  "OPTIONAL { ?item wdt:P3602 ?el . ?el rdfs:label ?election "
                  "FILTER(LANG(?election) = \"en\") } "
-                 "OPTIONAL { ?item wdt:P856 ?site } }" % values)
+                 "OPTIONAL { ?item wdt:P856 ?site } "
+                 "OPTIONAL { ?item p:P39 ?held . ?held ps:P39 ?pos . ?pos rdfs:label ?office "
+                 "FILTER(LANG(?office) = \"en\") OPTIONAL { ?held pq:P768 ?dist . "
+                 "?dist rdfs:label ?district FILTER(LANG(?district) = \"en\") } } "
+                 "OPTIONAL { ?article schema:about ?item ; "
+                 "schema:isPartOf <https://en.wikipedia.org/> } }" % values)
         if sparql:
             bindings = sparql(query)
         else:
@@ -251,8 +321,16 @@ def wikidata_items(ids, sparql=None):
                 "item": row["item"].rsplit("/", 1)[-1], "label": row.get("label"),
                 "image": row.get("img"), "birth": row.get("birth"),
                 "human": bool(row.get("human")), "election": row.get("election"),
-                "website": row.get("site")})
+                "website": row.get("site"), "office": row.get("office"),
+                "district": row.get("district"), "article": _article_title(row.get("article"))})
     return out
+
+
+def _article_title(url):
+    """"Fred Wellman" from ``https://en.wikipedia.org/wiki/Fred_Wellman``."""
+    if not url or "/wiki/" not in url:
+        return None
+    return urllib.parse.unquote(url.split("/wiki/", 1)[1]).replace("_", " ")
 
 
 def states_named(text):
@@ -277,9 +355,11 @@ def _site_host(url):
 def second_tie(profile, rows):
     """``(tie, why)``: what on the item, besides the FEC id, ties it to this
     person - a year of birth the profile's agrees with, a 2026 candidacy in
-    their state (P3602), or an official website (P856) that is their
-    campaign's site - or ``None`` and why not. A year that disagrees is a
-    refusal whatever else the item says."""
+    their state (P3602), an office held for their state (P39: its label, or
+    its electoral district's, P768, names the state), an official website
+    (P856) that is their campaign's site, or an English article that is the
+    one their ballot page links (rule 33) - or ``None`` and why not. A year
+    that disagrees is a refusal whatever else the item says."""
     from .pages import state_name
 
     births = {(r.get("birth") or "")[:4] for r in rows if r.get("birth")}
@@ -292,21 +372,29 @@ def second_tie(profile, rows):
     for election in sorted({r.get("election") for r in rows if r.get("election")}):
         if "2026" in election and state in states_named(election):
             return f"its candidacy in election (P3602) is \"{election}\"", ""
+    offices = sorted({(r.get("office") or "", r.get("district") or "") for r in rows
+                      if r.get("office")})
+    for office, district in offices:
+        if state in states_named(office) or state in states_named(district):
+            held = f"{office} ({district})" if district else office
+            return f"it holds an office for {state} (P39): \"{held}\"", ""
     campaign = _site_host(profile.get("campaignSite"))
     for site in sorted({r.get("website") for r in rows if r.get("website")}):
         if campaign and _site_host(site) == campaign:
             return f"its official website (P856) is the campaign's, {site}", ""
+    linked = profile.get("wikipedia")
+    for article in sorted({r.get("article") for r in rows if r.get("article")}):
+        if linked and profile.get("wikipediaVia") == "election-page" and article == linked:
+            return f"its English article is the one their ballot page links, \"{article}\"", ""
     return None, ("nothing on the item but the id ties it to them: no year of birth to "
-                  f"compare, no 2026 candidacy in {state}, no official website that is "
-                  "their campaign's")
+                  f"compare, no 2026 candidacy or office for {state}, no official website "
+                  "that is their campaign's, no article their ballot page links")
 
 
 def wikidata_choice(profile, rows):
     """``(choice, why)``: the one item and image *rows* give this profile,
     or ``None`` and why not. *rows* are every row of every one of the
     person's FEC ids: ids on two items are refused (rule 25)."""
-    from .portraits import title_is_about
-
     items = {r["item"] for r in rows}
     if len(items) != 1:
         return None, f"the person's FEC ids are on {len(items)} Wikidata items"
@@ -316,10 +404,9 @@ def wikidata_choice(profile, rows):
     if len(images) != 1:
         return None, ("the item has no image" if not images else "the item has two images")
     label = next((r["label"] for r in rows if r.get("label")), "")
-    if not label or not title_is_about(label, profile["name"]):
-        return None, f"the item's label {label!r} does not carry the surname"
-    if not given_fits(label, profile["name"]):
-        return None, f"the item's label {label!r} carries another given name"
+    why = label_names(label, profile)
+    if why:
+        return None, why
     tie, why = second_tie(profile, rows)
     if not tie:
         return None, why
@@ -474,17 +561,26 @@ def card_photo(member, code, page=None, photos=None):
     return image, credit, evidence
 
 
-def legislature_record(profile, member, page, image, credit, evidence, weight):
-    """The portrait cache record for a legislature route."""
+def legislature_record(profile, member, page, image, credit, evidence, weight, lighter=None):
+    """The portrait cache record for a legislature route. *image* is the
+    file the card shows (``original``); *lighter* is ``(form, its weight)``
+    where the file is over the caps and a resizer serves it smaller
+    (``photos.lighter_rendition``), and it is then the address shown."""
+    shown, shown_weight = lighter or (image, weight)
     record = {
         "via": LEGISLATURE, "name": profile["name"], "page": page, "evidence": evidence,
         "read": today(), "state": member.get("state") or profile["state"],
         "chamber": member.get("chamber"), "district": member.get("district"),
         "legislator": member.get("id"), "legislatorName": member.get("name"),
-        "credit": dict(credit), "url": image, "bytes": weight["bytes"],
-        "width": weight["width"], "height": weight["height"]}
+        "credit": dict(credit), "url": shown, "original": image,
+        "bytes": shown_weight["bytes"], "width": shown_weight["width"],
+        "height": shown_weight["height"]}
     if too_heavy(weight):
-        record["heavy"] = too_heavy(weight)
+        # Said either way (rule 87): shown smaller, or at full size.
+        record["heavy"] = too_heavy(weight) + ("; shown smaller from the same file"
+                                               if lighter else "")
+        if lighter:
+            record["originalWeight"] = dict(weight)
     return record
 
 
@@ -514,8 +610,6 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
     profile now; ``portraits.route_ok`` asks here for these routes by name.
     *legislators* (the roster) and *legislator_photos* (the ``legphotos``
     cache) are checked where given: the card must still show this file."""
-    from .portraits import title_is_about
-
     if not record.get("url"):
         return True
     if not (record.get("page") and record.get("evidence") and record.get("read")):
@@ -526,9 +620,8 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
                                   "height": record.get("shownHeight") or record.get("height")}):
         return False
     if record.get("via") == WIKIDATA:
-        label = record.get("label") or ""
         return (record.get("fec") in fec_ids(profile) and bool(record.get("tie"))
-                and title_is_about(label, profile["name"]) and given_fits(label, profile["name"]))
+                and not label_names(record.get("label") or "", profile))
     if record.get("via") == LEGISLATURE:
         if record.get("state") != profile.get("state"):
             return False
@@ -540,7 +633,7 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
         if legislator_photos is None:
             return True
         image, _credit, _why = card_photo(member, record["state"], None, legislator_photos)
-        return image == record["url"]
+        return image == (record.get("original") or record["url"])
     return False
 
 
@@ -686,8 +779,12 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 log(f"    [skip] {profile['name']}: the card links no page of theirs on the "
                     "legislature's own site")
                 continue
+            # Over the caps: its host's resizer or Photon, the same file
+            # scaled (rule 87); else shown at full size and said.
+            lighter = (lighter_rendition(image, weight, lambda u: weigh(u, getter) or None)
+                       if too_heavy(weight) else None)
             new = legislature_record(profile, member, credit["page"], image, credit, evidence,
-                                     weight)
+                                     weight, lighter)
             cache[key] = new
             counts["legislature"] += 1
             counts["heavy"] += bool(new.get("heavy"))

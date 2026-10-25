@@ -37,9 +37,10 @@ def nominee(**extra):
 
 
 def row(item="Q139698851", label="Yolanda Prince", image="Yolanda%20Prince.jpg", birth=None,
-        election=ELECTION, website=None):
+        election=ELECTION, website=None, office=None, district=None, article=None):
     return {"item": item, "label": label, "human": True, "birth": birth,
-            "election": election, "website": website,
+            "election": election, "website": website, "office": office,
+            "district": district, "article": article,
             "image": "http://commons.wikimedia.org/wiki/Special:FilePath/" + image if image else None}
 
 
@@ -100,18 +101,88 @@ class TestWikidataByFecId(unittest.TestCase):
     def test_a_namesake_with_another_given_name_gives_nothing(self):
         """The reviewers' probe: "Robert Williams" carrying John Andrew
         Williams's FEC id passed on the surname alone, and none of the
-        three nominees pictured had a birth date to compare."""
-        drew = nominee(name="John Andrew Williams", state="KY")
+        three nominees pictured had a birth date to compare. The label must
+        carry a given name as the profile or the filing writes it - no
+        nickname table, no prefix - and a nickname only by an evidenced
+        entry."""
+        drew = nominee(id="FEC_H6KY01169", name="John Andrew Williams", state="KY",
+                       filedName="WILLIAMS, JOHN ANDREW", birthdate="No data")
         ky = "2026 United States House of Representatives elections in Kentucky"
-        for label, fits in (('John "Drew" Williams', True), ("Drew Williams", True),
-                            ("J. Andrew Williams", True), ("John Williams", True),
-                            ("Robert Williams", False), ("Robert Andrew Williams", False),
-                            ("Williams", False)):
-            choice, why = nominee_photos.wikidata_choice(
-                drew, [row(label=label, election=ky, birth="1961-02-03T00:00:00Z")])
+        for label, fits in (('John "Drew" Williams', True), ("J. Andrew Williams", True),
+                            ("John Williams", True), ("Andrew Williams", True),
+                            ("Drew Williams", False), ("Jo Williams", False),
+                            ("Jack Williams", False), ("Robert Williams", False),
+                            ("Robert Andrew Williams", False), ("Williams", False),
+                            ("John Andrews", False)):
+            choice, why = nominee_photos.wikidata_choice(drew, [row(label=label, election=ky)])
             self.assertEqual(bool(choice), fits, (label, why))
             if not fits:
-                self.assertIn("given name" if " " in label else "", why)
+                self.assertIn("label", why)
+        # A nickname the item uses stands only by an evidenced entry naming
+        # that very label for this profile.
+        entry = {"FEC_H6KY01169": {"label": "Drew Williams", "evidence": "his campaign's site "
+                                   "calls him Drew (read 2026-10-25)"}}
+        with unittest.mock.patch.dict(overrides.PORTRAIT_NAME_FORMS, entry):
+            choice, _ = nominee_photos.wikidata_choice(drew, [row(label="Drew Williams", election=ky)])
+            self.assertTrue(choice)
+            choice, _ = nominee_photos.wikidata_choice(
+                nominee(name="Drew Smith Williams", state="KY", id="FEC_H6KY09999"),
+                [row(label="Robert Williams", election=ky)])
+            self.assertIsNone(choice)
+        # The filing's own given names count: a profile written "Bob Smith"
+        # filed as "SMITH, ROBERT" is the item "Robert Smith", and the
+        # reverse; a prefix ("Rob") is not.
+        bob = nominee(name="Bob Smith", filedName="SMITH, ROBERT", state="TX")
+        for label, fits in (("Robert Smith", True), ("Bob Smith", True), ("Rob Smith", False),
+                            ("Robert Smithers", False), ("Bob Smith Jr.", True)):
+            choice, why = nominee_photos.wikidata_choice(bob, [row(label=label)])
+            self.assertEqual(bool(choice), fits, (label, why))
+        # A double surname the filing writes: either word ends the label.
+        vgn = nominee(name="Valentina Gomez Noriega", filedName="GOMEZ NORIEGA, VALENTINA")
+        for label, fits in (("Valentina Gomez", True), ("Valentina Gomez Noriega", True),
+                            ("Valentina Noriega", True), ("Valentina Garcia", False)):
+            choice, why = nominee_photos.wikidata_choice(vgn, [row(label=label)])
+            self.assertEqual(bool(choice), fits, (label, why))
+
+    def test_a_bot_added_id_on_a_namesake_with_no_tie_gives_nothing(self):
+        """A crafted case: an item labelled with the person's very name that
+        carries their FEC id - as a bot adds one - and nothing else of
+        theirs, no birth year to compare (the profile has none), a 2024
+        candidacy, an office in another state, someone else's website and
+        another article, is not taken: the id is not proof on its own
+        (rule 82), and neither is a name."""
+        profile = nominee(birthdate="No data", campaignSite="https://prince4congress.com",
+                          wikipedia="Yolanda Prince", wikipediaVia="election-page")
+        rows = [row(election="2024 Texas's 1st congressional district election",
+                    office="member of the Louisiana House of Representatives",
+                    website="https://yolandaprince-art.example/",
+                    article="Yolanda Prince (artist)")]
+        choice, why = nominee_photos.wikidata_choice(profile, rows)
+        self.assertIsNone(choice)
+        self.assertIn("nothing on the item but the id", why)
+        # Through resolve_all, it leaves no record.
+        cache = {}
+        resolve_wikidata(cache, rows=rows, profile=profile)
+        self.assertEqual(cache, {})
+
+    def test_an_office_for_their_state_or_the_article_their_ballot_links_is_a_tie(self):
+        choice, _ = nominee_photos.wikidata_choice(
+            nominee(), [row(election=None, office="member of the Texas House of Representatives")])
+        self.assertIn("office for Texas", choice["tie"])
+        choice, _ = nominee_photos.wikidata_choice(
+            nominee(), [row(election=None, office="United States representative",
+                            district="Texas's 1st congressional district")])
+        self.assertIn("Texas's 1st congressional district", choice["tie"])
+        linked = nominee(wikipedia="Yolanda Prince", wikipediaVia="election-page")
+        choice, _ = nominee_photos.wikidata_choice(
+            linked, [row(election=None, article="Yolanda Prince")])
+        self.assertIn("ballot page links", choice["tie"])
+        # An article the profile holds by any other way is no tie.
+        choice, _ = nominee_photos.wikidata_choice(
+            nominee(wikipedia="Yolanda Prince"), [row(election=None, article="Yolanda Prince")])
+        self.assertIsNone(choice)
+        self.assertEqual(nominee_photos._article_title(
+            "https://en.wikipedia.org/wiki/Fred_Wellman"), "Fred Wellman")
 
     def test_an_item_with_nothing_but_the_id_gives_nothing(self):
         for rows in ([row(election=None)],
@@ -183,6 +254,7 @@ class TestWikidataByFecId(unittest.TestCase):
         self.assertFalse(portraits.route_ok(nominee(name="Jane Doe"), record))
         self.assertFalse(portraits.route_ok(nominee(name="Rena Prince"), dict(
             record, label="Robert Prince")))
+        self.assertFalse(portraits.route_ok(nominee(), dict(record, label="Yo Prince")))
         self.assertFalse(portraits.route_ok(nominee(), dict(record, tie=None)))
         profile = nominee()
         portraits.apply_cache([profile], cache)
@@ -369,12 +441,35 @@ class TestStateLegislature(unittest.TestCase):
 
     def test_a_heavy_photograph_is_shown_and_said(self):
         """Nevada's 3.9 MB headshot of Carrie Buck was left out; it is
-        shown, at full size, and counted (rule 87)."""
+        shown, at full size where no resizer serves it smaller, and counted
+        (rule 87)."""
         record, counts = self.resolve(body=jpeg(2964, 2964) + b"\x00" * 3_900_000)
         self.assertEqual(record["url"], IMAGE_URL)
         self.assertEqual(counts["heavy"], 1)
         self.assertIn("over 300 KB", record["heavy"])
         self.assertEqual(nominee_photos.problems({"k": record}), [])
+
+    def test_a_heavy_photograph_is_shown_smaller_from_the_same_file(self):
+        """Rule 87 for every route: Photon serves the card's very file
+        scaled, and the record shows that, with the file the card shows kept
+        as its original, so it still stands only while the card shows it."""
+        photon = "https://i0.wp.com/www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg?w=500&ssl=1"
+        cache = {}
+        getter = Getter({IMAGE_URL: image(jpeg(2964, 2964) + b"\x00" * 3_900_000),
+                         photon: image(jpeg(500, 500))})
+        with unittest.mock.patch.object(nominee_photos, "wikidata_items", return_value={}):
+            nominee_photos.resolve_all([zamora()], cache, history=HISTORY, legislators=ROSTER,
+                                       getter=getter, log=lambda *a: None)
+        record = cache[portraits.profile_key(zamora())]
+        self.assertEqual((record["url"], record["original"]), (photon, IMAGE_URL))
+        self.assertEqual((record["width"], record["height"]), (500, 500))
+        self.assertIn("shown smaller", record["heavy"])
+        self.assertEqual(nominee_photos.problems({"k": record}), [])
+        self.assertTrue(portraits.route_ok(zamora(), record, ROSTER, {"people": {}}))
+        # A card that shows another file no longer carries it.
+        self.assertFalse(portraits.route_ok(zamora(), record,
+                                            roster_with(image=IMAGE_URL + "?v=2"),
+                                            {"people": {}}))
 
     def test_withheld_once_the_roster_seats_someone_else(self):
         record, _ = self.resolve()

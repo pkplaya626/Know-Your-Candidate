@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .photos import campaign_credit, own_lighter_form, parse_srcset, service_form, too_heavy
+from .photos import campaign_credit, lighter_rendition, parse_srcset, too_heavy
 from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
 
@@ -309,7 +309,7 @@ class _Page(html.parser.HTMLParser):
         super().__init__(convert_charrefs=True)
         self.title, self.meta, self.images, self.links, self.headings = "", {}, [], [], []
         # Each image's own srcset, by its src: the renditions the page
-        # itself offers of it (photos.own_lighter_form).
+        # itself offers of it (photos.lighter_rendition).
         self.srcsets = {}
         self.text, self._size = [], 0
         self._open, self._buffer, self._href, self._skip = None, [], None, 0
@@ -1084,7 +1084,7 @@ def look_for_portrait(record, profile, page, final, pause=1.0):
 
 
 def _weigh(url):
-    """An image's weight, for ``photos.own_lighter_form``; ``None`` unread."""
+    """An image's weight, for ``photos.lighter_rendition``; ``None`` unread."""
     return portrait_check(url, True)[1]
 
 
@@ -1094,17 +1094,17 @@ _PORTRAIT_FIELDS = ("portrait", "portraitWeight", "portraitHeavy", "portraitForm
 
 def lighten(record, picture, weight, offered=()):
     """Put *picture* in *record* as its portrait: as it is when within the
-    caps, else a rendition of it the source itself offers
-    (``photos.own_lighter_form``: its page's srcset, its image host's own
-    widths), else at full size. Returns what was taken.
+    caps, else a lighter rendition of the same file
+    (``photos.lighter_rendition``: one its page's srcset lists, its host's
+    own resizer, or Photon), else at full size. Returns what was taken.
 
-    A heavy file with no rendition offered is still taken - a nominee's
+    A heavy file with no lighter rendition is still taken - a nominee's
     only likeness is not withheld for its weight; eleven were, and showed
     the silhouette beside an opponent's photograph, and the first version
-    of PR #134 left six more out again - and the weight is said in
-    ``portraitHeavy`` either way (``kept``: shown at full size). A width is
-    never asked of an image service (imgix, Photon): a smaller copy is the
-    copies' to make (rule 101)."""
+    of PR #134 left six more out again under the brief of 2026-10-19 - and
+    the weight is said in ``portraitHeavy`` either way (``kept``: shown at
+    full size). The owner's decision of 2026-10-25 relaxed that brief: a
+    weight cap costs coverage and guards no fact about a person."""
     why = too_heavy(weight)
     record.pop("portraitForms", None)
     if not why:
@@ -1115,7 +1115,7 @@ def lighten(record, picture, weight, offered=()):
         else:
             record.pop("portraitWeight", None)
         return picture
-    found = own_lighter_form(picture, weight, _weigh, offered)
+    found = lighter_rendition(picture, weight, _weigh, offered)
     record["portraitHeavy"] = [{"url": picture, "why": why, "kept": not found}]
     if offered:
         record["portraitForms"] = [[url, width] for url, width in offered]
@@ -1125,9 +1125,9 @@ def lighten(record, picture, weight, offered=()):
 
 def take_portrait(record, pictures, tries=3, offers=None):
     """Put the first of *pictures* that is head-and-shoulders shaped in
-    *record*, with its measured weight, in a lighter rendition its source
-    offers when it is too heavy (:func:`lighten`). *offers* maps an image
-    to the renditions its page lists."""
+    *record*, with its measured weight, in a lighter rendition of it when it
+    is too heavy (:func:`lighten`). *offers* maps an image to the
+    renditions its page lists."""
     for key in _PORTRAIT_FIELDS:
         record.pop(key, None)
     for picture, hinted in pictures[:tries]:
@@ -1142,13 +1142,12 @@ def measure_portraits(cache, log=print, pause=1.0):
     and take a lighter rendition of one that is too heavy (:func:`lighten`).
     Returns how many were weighed.
 
-    Only the image and the renditions its page listed are fetched, never the
-    site: a picture is chosen by the full read (``_read_one``), which first
-    checks that the page names the candidate (rule 38) and is not spam or
-    parking (rule 39). A heavy one kept at full size is weighed again each
-    run, and so is one an earlier version had Photon scale
-    (``service_form``) or left out for its weight: the original is shown
-    again, in a form its source offers where there is one."""
+    Only the image and its renditions are fetched, never the site: a
+    picture is chosen by the full read (``_read_one``), which first checks
+    that the page names the candidate (rule 38) and is not spam or parking
+    (rule 39). A heavy one kept at full size is weighed again each run, and
+    so is one an earlier version left out for its weight (``leftOut``):
+    it is shown again, lighter where it can be."""
     people = (cache or {}).get("people") or {}
     weighed = 0
     for entry in people.values():
@@ -1156,8 +1155,7 @@ def measure_portraits(cache, log=print, pause=1.0):
             record = entry.get(key) or {}
             heavy = (record.get("portraitHeavy") or [{}])[0].get("url")
             shown = record.get("portrait")
-            if (shown and "portraitWeight" in record and not too_heavy(record["portraitWeight"])
-                    and not service_form(shown, heavy)):
+            if shown and "portraitWeight" in record and not too_heavy(record["portraitWeight"]):
                 continue
             picture = heavy or shown
             if not picture:
@@ -1640,17 +1638,13 @@ def take_campaign_portrait(profile, entry, site, counts):
 
 def campaign_portrait(site):
     """The portrait a campaign-site record shows, or ``None``: not on
-    ``NOT_A_PORTRAIT``, nor a rendition of a file that is, and not a file
-    an image service scaled for us (``photos.service_form``), which an
-    earlier version took and ``measure_portraits`` replaces with the
-    original. One over the caps is shown (:func:`lighten`)."""
+    ``NOT_A_PORTRAIT``, nor a rendition of a file that is. One over the caps
+    is shown all the same (:func:`lighten`, rule 87)."""
     picture = (site or {}).get("portrait")
     heavy = (site or {}).get("portraitHeavy") and site["portraitHeavy"][0].get("url")
     # A rendition of a refused image is that image: the entry names the file
     # the page draws, the cache may hold a smaller form its srcset lists.
     if not picture or picture in overrides.NOT_A_PORTRAIT or heavy in overrides.NOT_A_PORTRAIT:
-        return None
-    if service_form(picture, heavy):
         return None
     return picture
 

@@ -1189,23 +1189,22 @@ A portrait not on Wikimedia is one file at one size, so its weight is
 recorded when it is found: `bytes`, `width` and `height` in the portrait
 cache for the House Clerk's (50-100 KB, 335px), `portraitWeight` in the
 enrichment cache for a campaign's, `headshotWeight` in the executives cache
-for a governor's NGA headshot. A governor's headshot over 300 KB or 1,200px
+for a governor's NGA headshot. A photograph over 300 KB or 1,200px
 (`photos.MAX_PORTRAIT_BYTES`, `MAX_PORTRAIT_PX`) is shown smaller from the
-same file (`photos.lighter_form`): its host's own resizer (Squarespace,
-imgix) or WordPress.com's Photon (`i0.wp.com/<host>/<path>?w=500`), at 500px
-or 330px, once that copy is weighed, within the caps and the same shape as
-the original; 33 of the 55 governors' headshots are shown through Photon
-(`headshotSmall`). A candidate's photograph over the caps is shown in a size
-its source itself offers within them where there is one - a rendition its
-page's `srcset` lists (`portraitForms`), or one of the fixed widths
-Squarespace's image host makes of every upload (`photos.own_lighter_form`) -
-never a width asked of imgix or Photon. Where none is offered it is shown at
-full size all the same (`portraitHeavy` with `kept: true`; `heavy` in the
-portrait cache), since a weight cap is no reason for the silhouette (the
-owner's decision of 2026-10-25), and the build prints how many: "candidates'
-portraits shown at full size, offered by their source only over 300 KB or
-1200px". Only a challenger takes a campaign's photograph: a sitting member's
-comes by their bioguide id.
+same file (`photos.lighter_rendition`), by every route alike - a governor's,
+a campaign's, a legislature's: a rendition its page's `srcset` lists
+(`portraitForms`), else its host's own resizer (Squarespace, imgix) or
+WordPress.com's Photon (`i0.wp.com/<host>/<path>?w=500`), at 500px or 330px,
+once that copy is weighed, within the caps and the same shape as the
+original; 33 of the 55 governors' headshots are shown through Photon
+(`headshotSmall`). Where none serves it, it is shown at full size all the
+same (`portraitHeavy` with `kept: true`; `heavy` in the portrait cache),
+since a weight cap is no reason for the silhouette (the owner's decision of
+2026-10-25, which relaxed a brief of 2026-10-19 that had ruled resizers
+out), and the build prints how many: "candidates' portraits shown at full
+size, which no resizer serves under 300 KB or 1200px". Only a challenger
+takes a campaign's photograph: a sitting member's comes by their bioguide
+id.
 
 The people on the November ballot have three routes besides the article
 their ballot page links (`kyc/nominee_photos.py`, `enrich`). The campaign's
@@ -1214,23 +1213,31 @@ a headless Chrome draws it (`enrich --render N`, forty sites a run, for a
 site that draws its images with JavaScript or answers a script with a bot
 wall). A Wikidata item carrying the person's own FEC candidate id (P1839)
 gives its image (P18) at Wikimedia's 330px width, credited from the file's
-description page, where the item's label carries their surname and a given
-name that fits theirs and the item ties itself to them a second way (a year
-of birth that agrees, a 2026 candidacy in their state, or their campaign's
-site as its official website); the srcset offers the 500px size only once it
-is weighed within the caps. A nominee who sits in their state's legislature -
+description page, where the item's label ends in their surname and carries
+one of their given names as the profile or their filing writes it (a
+nickname only through an evidenced `overrides.PORTRAIT_NAME_FORMS` entry),
+and the item ties itself to them a second way (a year of birth that agrees,
+a 2026 candidacy or an office held in their state, their campaign's site as
+its official website, or the article their ballot page links); every FEC id
+the profile holds is asked, and ids on two items give nothing. The srcset
+offers the 500px size only once it is weighed within the caps. A nominee who sits in their state's legislature -
 the chamber their own article's corroborated record of offices gives, the
 same first and last name in it and nobody else - gets the photograph the
 site's legislature page shows on that member's card, on the legislature's
 own host, withheld once the roster seats someone else or the card shows
-another file. Either route refuses a frame wider than tall not named a
-headshot, and a file in `NOT_A_PORTRAIT` or `PORTRAIT_LICENCE_DOUBTS`. Each record keeps the page, the words naming the person
+another file; a heavy one is shown smaller through Photon where it serves
+the file. Either route refuses a frame wider than tall not named a
+headshot, and a file in `NOT_A_PORTRAIT` or `PORTRAIT_LICENCE_DOUBTS`. A
+person looking at a photograph judges it by one test: the candidate alone,
+their face brow to chin at least a tenth of the 4:5 card's height (6.5px
+of the 65px phone card), is a likeness; anything else goes in
+`NOT_A_PORTRAIT` with what was seen. Each record keeps the page, the words naming the person
 beside the image (`evidence`, `portraitEvidence`), the day read and the
 bytes and pixel size; `validate` fails a shown one without them
 (`photo-unevidenced`). Washington's voters' guide and Alaska's and Oregon's
 pamphlets print candidates' photographs, but only base64 inside JSON or
-inside PDFs, so there is no file to link; a hosted copy waits for the site's
-store of copies. The page offers a srcset no size wider than a 2x screen
+inside PDFs, so there is no file to link; an unmodified hosted copy, which
+the owner allowed on 2026-10-25, waits for the site's store of copies. The page offers a srcset no size wider than a 2x screen
 needs for the width it draws, so a 165px card stops at the 330px file and a
 judge's 116px portrait at the 250px one.
 

@@ -185,7 +185,7 @@ def _build(args):
     heavy = ((stats.get("enriched") or {}).get("portrait_heavy", 0)
              + nominee_photos.heavy_shown(profiles, cache or {}))
     stats["portraits_heavy"] = heavy
-    print(f"  candidates' portraits shown at full size, offered by their source only over "
+    print(f"  candidates' portraits shown at full size, which no resizer serves under "
           f"{photos_mod.MAX_PORTRAIT_BYTES // 1000} KB or {photos_mod.MAX_PORTRAIT_PX}px: "
           f"{heavy}")
     # Whose photograph each portrait is, once every source has had its say.
