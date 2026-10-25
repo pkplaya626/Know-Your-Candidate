@@ -8862,25 +8862,25 @@
   "width": 422
  },
  "person:carrie buck|NV|H": {
+  "bytes": 3918638,
   "chamber": "upper",
   "credit": {
    "by": "Nevada Legislature",
    "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5"
   },
   "district": "5",
-  "evidence": "the file the roster lists for them, on their page (alt text \"legislator image\"), which names Carrie Buck",
-  "leftOut": {
-   "url": "https://www.leg.state.nv.us/Session/84th2027/legislators/Senators/Images/Buck.Carrie.387.jpg",
-   "why": "3918 KB, over 300 KB"
-  },
+  "evidence": "the file Open States lists for Carrie Buck (ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1), served by the Nevada Legislature",
+  "heavy": "3918 KB, over 300 KB",
+  "height": 2964,
   "legislator": "ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
   "legislatorName": "Carrie Buck",
   "name": "Carrie Buck",
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
   "read": "2026-10-25",
   "state": "NV",
-  "url": null,
-  "via": "state-legislature"
+  "url": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
+  "via": "state-legislature",
+  "width": 2964
  },
  "person:casey crabtree|SD|H": {
   "name": "Casey Crabtree",
@@ -10982,13 +10982,14 @@
    "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
    "nonFree": false
   },
-  "evidence": "Wikidata Q131344046 (\"Fred Wellman\") carries FEC candidate id H6MO02343 (P1839) and the image File:Fred Wellman, August 2025.png (P18)",
+  "evidence": "Wikidata Q131344046 (\"Fred Wellman\") carries FEC candidate id H6MO02343 (P1839) and the image File:Fred Wellman, August 2025.png (P18); its candidacy in election (P3602) is \"2026 United States House of Representatives elections in Missouri\"",
   "fec": "H6MO02343",
   "file": "File:Fred Wellman, August 2025.png",
   "height": 400,
   "item": "Q131344046",
   "label": "Fred Wellman",
   "name": "Fred Wellman",
+  "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
   "read": "2026-10-25",
   "set": [
@@ -11007,6 +11008,7 @@
   ],
   "shownHeight": 400,
   "shownWidth": 300,
+  "tie": "its candidacy in election (P3602) is \"2026 United States House of Representatives elections in Missouri\"",
   "url": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "via": "wikidata-fec",
   "width": 300
@@ -12799,13 +12801,14 @@
    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
    "nonFree": false
   },
-  "evidence": "Wikidata Q136086044 (\"John \"Drew\" Williams\") carries FEC candidate id H6KY01169 (P1839) and the image File:John Drew Williams Headshot.jpg (P18)",
+  "evidence": "Wikidata Q136086044 (\"John \"Drew\" Williams\") carries FEC candidate id H6KY01169 (P1839) and the image File:John Drew Williams Headshot.jpg (P18); its candidacy in election (P3602) is \"2026 United States House of Representatives elections in Kentucky\"",
   "fec": "H6KY01169",
   "file": "File:John Drew Williams Headshot.jpg",
   "height": 5496,
   "item": "Q136086044",
   "label": "John \"Drew\" Williams",
   "name": "John Andrew Williams",
+  "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
   "read": "2026-10-25",
   "set": [
@@ -12828,6 +12831,7 @@
   ],
   "shownHeight": 332,
   "shownWidth": 330,
+  "tie": "its candidacy in election (P3602) is \"2026 United States House of Representatives elections in Kentucky\"",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/John_Drew_Williams_Headshot.jpg/330px-John_Drew_Williams_Headshot.jpg",
   "via": "wikidata-fec",
   "width": 5464
@@ -14849,7 +14853,7 @@
    "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO"
   },
   "district": "63",
-  "evidence": "the file the roster lists for them, on their page (alt text \"Zamora\"), which names Martin Zamora",
+  "evidence": "the file Open States lists for Martin Zamora (ocd-person/dc968f82-503e-4246-9124-b880fd6ae3ae), served by the New Mexico Legislature",
   "height": 375,
   "legislator": "ocd-person/dc968f82-503e-4246-9124-b880fd6ae3ae",
   "legislatorName": "Martin Zamora",
@@ -16970,7 +16974,7 @@
    "page": "https://www.senate.mo.gov/Senators/Member?id=5"
   },
   "district": "31",
-  "evidence": "the file the roster lists for them, on their page (alt text \"Senator Brattin\"), which names Rick Brattin",
+  "evidence": "the file Open States lists for Rick Brattin (ocd-person/e4811e7a-7df7-4275-917d-8bdcc2778fb1), served by the Missouri General Assembly",
   "height": 300,
   "legislator": "ocd-person/e4811e7a-7df7-4275-917d-8bdcc2778fb1",
   "legislatorName": "Rick Brattin",
@@ -18859,7 +18863,7 @@
    "page": "https://scstatehouse.gov/member.php?code=0356818139"
   },
   "district": "15",
-  "evidence": "the file the roster lists for them, on their page (alt text \"Senator Wes Climer photo\"), which names Wes Climer",
+  "evidence": "the file Open States lists for Wes Climer (ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab), served by the South Carolina General Assembly",
   "height": 153,
   "legislator": "ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab",
   "legislatorName": "Wes Climer",
@@ -18867,7 +18871,7 @@
   "page": "https://scstatehouse.gov/member.php?code=0356818139",
   "read": "2026-10-25",
   "state": "SC",
-  "url": "https://www.scstatehouse.gov/images/members/0356818139.jpg",
+  "url": "https://scstatehouse.gov/images/members/0356818139.jpg",
   "via": "state-legislature",
   "width": 125
  },
@@ -19062,13 +19066,14 @@
    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
    "nonFree": false
   },
-  "evidence": "Wikidata Q139698851 (\"Yolanda Prince\") carries FEC candidate id H6TX01352 (P1839) and the image File:Yolanda Prince.jpg (P18)",
+  "evidence": "Wikidata Q139698851 (\"Yolanda Prince\") carries FEC candidate id H6TX01352 (P1839) and the image File:Yolanda Prince.jpg (P18); its candidacy in election (P3602) is \"2026 Texas's 1st congressional district election\"",
   "fec": "H6TX01352",
   "file": "File:Yolanda Prince.jpg",
   "height": 5689,
   "item": "Q139698851",
   "label": "Yolanda Prince",
   "name": "Yolanda Rena Prince",
+  "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
   "read": "2026-10-25",
   "set": [
@@ -19091,6 +19096,7 @@
   ],
   "shownHeight": 440,
   "shownWidth": 330,
+  "tie": "its candidacy in election (P3602) is \"2026 Texas's 1st congressional district election\"",
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/330px-Yolanda_Prince.jpg",
   "via": "wikidata-fec",
   "width": 4267

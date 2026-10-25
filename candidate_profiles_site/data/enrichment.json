@@ -6037,14 +6037,22 @@
      "Digital Privacy & Surveillance"
     ],
     "issuesUrl": "https://www.marysilvaforcongress.com/issues",
+    "portrait": "https://assets.nationbuilder.com/marysilva4congress/pages/29/attachments/original/1709837614/Mary_Silva_-_8.jpg?1709837614",
+    "portraitEvidence": "file name \"Mary_Silva_-_8.jpg\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://assets.nationbuilder.com/marysilva4congress/pages/29/attachments/original/1709837614/Mary_Silva_-_8.jpg?1709837614",
       "why": "1007 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://www.marysilvaforcongress.com/",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 1007239,
+     "height": 2657,
+     "width": 1898
+    },
     "reason": "moved to marysilvaforcongress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -6889,12 +6897,8 @@
   "FEC_H6CA26241": {
    "checked": "2026-10-25",
    "drawn": {
-    "portraitHeavy": [
-     {
-      "leftOut": true,
-      "url": "https://samgallucci.com/assets/samfamily-BetoMA7c.webp",
-      "why": "1314x1536px, over 1200px"
-     }
+    "notPortraits": [
+     "https://samgallucci.com/assets/samfamily-BetoMA7c.webp"
     ],
     "read": "2026-10-25",
     "reason": "ok",
@@ -7215,13 +7219,22 @@
   "FEC_H6CA52163": {
    "checked": "2026-10-25",
    "drawn": {
+    "portrait": "https://vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg",
+    "portraitEvidence": "alt text \"Jeff Belle\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg",
       "why": "404 KB, over 300 KB"
      }
     ],
+    "portraitPage": "https://www.belleforcongress.com/",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 404433,
+     "height": 2144,
+     "width": 1206
+    },
     "read": "2026-10-25",
     "reason": "ok",
     "safe": true,
@@ -8008,14 +8021,22 @@
      "Immigration: The Proof Congress Is Broken"
     ],
     "issuesUrl": "https://www.michaelquirkforcongress.com/issues",
+    "portrait": "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997",
+    "portraitEvidence": "alt text \"Michael Quirk Tint\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997",
       "why": "306 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://www.michaelquirkforcongress.com/",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 306579,
+     "height": 913,
+     "width": 800
+    },
     "reason": "moved to michaelquirkforcongress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -8678,14 +8699,9 @@
    "checked": "2026-10-25",
    "listed": {
     "final": "https://mcgowanforiowa.com/",
-    "portraitHeavy": [
-     {
-      "leftOut": true,
-      "url": "https://irp.cdn-website.com/a2163ddd/dms3rep/multi/opt/MCGOWAN-BIO-1406h.png",
-      "why": "1090x1410px, over 1200px"
-     }
+    "notPortraits": [
+     "https://irp.cdn-website.com/a2163ddd/dms3rep/multi/opt/MCGOWAN-BIO-1406h.png"
     ],
-    "portraitPage": "https://mcgowanforiowa.com/about",
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -9567,14 +9583,22 @@
      "Foreign Policy and International Diplomacy"
     ],
     "issuesUrl": "https://www.laurenjewett.com/issues",
+    "portrait": "https://laurenjewett.com/images/campaign/lauren-jewett-jefferson.png",
+    "portraitEvidence": "file name \"lauren-jewett-jefferson.png\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://laurenjewett.com/images/campaign/lauren-jewett-jefferson.png",
       "why": "1407 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://www.laurenjewett.com/about",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 1407093,
+     "height": 1431,
+     "width": 1217
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12406,14 +12430,22 @@
     "description": "Independent candidate Robert P. Henri is running for Congress to force votes on major reforms Americans already support and hold lawmakers accountable if they fail to follow through.",
     "final": "https://projectduecourse.org/",
     "issuesUrl": "https://projectduecourse.org/issues",
+    "portrait": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
+    "portraitEvidence": "alt text \"Robert P. Henri\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
       "why": "582 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://projectduecourse.org/",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 582546,
+     "height": 1020,
+     "width": 768
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12467,14 +12499,22 @@
      "National Security and Foreign Policy"
     ],
     "issuesUrl": "https://www.moniqueforcongress.com/issues/",
+    "portrait": "https://www.moniqueforcongress.com/images/despain-large.png",
+    "portraitEvidence": "file name \"despain-large.png\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://www.moniqueforcongress.com/images/despain-large.png",
       "why": "1290 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://www.moniqueforcongress.com",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 1290134,
+     "height": 1200,
+     "width": 755
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12721,14 +12761,22 @@
      "Voting Rights"
     ],
     "issuesUrl": "https://www.nancymannion.com/Priorities/",
+    "portrait": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
+    "portraitEvidence": "alt text \"Nancy Mannion\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
       "why": "375 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://www.nancymannion.com",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 375634,
+     "height": 600,
+     "width": 504
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -13035,14 +13083,22 @@
      "Second Amendment"
     ],
     "issuesUrl": "https://martyjackley.com/issues",
+    "portrait": "https://martyjackley.com/uploads/MartyJackleyHeadshot_web.jpg",
+    "portraitEvidence": "alt text \"Attorney General Marty Jackley\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://martyjackley.com/uploads/MartyJackleyHeadshot_web.jpg",
       "why": "900x1349px, over 1200px"
      }
     ],
     "portraitPage": "https://martyjackley.com/about",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 122068,
+     "height": 1349,
+     "width": 900
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -13466,14 +13522,22 @@
      "Upholding Humane Foreign Policy"
     ],
     "issuesUrl": "https://chelseyhockettforcongress.com/issues.html",
+    "portrait": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
+    "portraitEvidence": "alt text \"Chelsey Hockett\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
       "why": "713 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://chelseyhockettforcongress.com",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 713891,
+     "height": 3240,
+     "width": 2160
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -13604,6 +13668,8 @@
      "PEOPLE FIRST in Education"
     ],
     "issuesUrl": "https://www.marknair.com/platform",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png",
+    "portraitEvidence": "file name \"About+Mark+Nair.png\"",
     "portraitForms": [
      [
       "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png?format=100w",
@@ -13636,12 +13702,18 @@
     ],
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png",
       "why": "479 KB, over 300 KB"
      }
     ],
     "portraitPage": "https://www.marknair.com/about-mark",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 479272,
+     "height": 1150,
+     "width": 678
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -13954,14 +14026,9 @@
     "description": "Greg Stoker is an anti-war former U.S. Army Ranger running for congress and neighbor who refuses corporate and foreign-influenced money.",
     "final": "https://www.stokerfortexas.com",
     "issuesUrl": "https://www.stokerfortexas.com/issues",
-    "portraitHeavy": [
-     {
-      "leftOut": true,
-      "url": "https://assets.nationbuilder.com/themes/69d46ee99be3286671f3d5a8/attachments/original/1776836856/11089a203ea7bb260717a77ab963cb40942791be.png?1776836856",
-      "why": "2046 KB, over 300 KB"
-     }
+    "notPortraits": [
+     "https://assets.nationbuilder.com/themes/69d46ee99be3286671f3d5a8/attachments/original/1776836856/11089a203ea7bb260717a77ab963cb40942791be.png?1776836856"
     ],
-    "portraitPage": "https://www.stokerfortexas.com/about",
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -14093,13 +14160,22 @@
   "FEC_H6UT02424": {
    "checked": "2026-10-25",
    "drawn": {
+    "portrait": "https://jonnyutah4congress.com/images/hero/jonny-landing-page-image.webp?v=1",
+    "portraitEvidence": "alt text \"Jonny Larsen\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://jonnyutah4congress.com/images/hero/jonny-landing-page-image.webp?v=1",
       "why": "1134x1509px, over 1200px"
      }
     ],
+    "portraitPage": "https://jonnyutah4congress.com",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 221864,
+     "height": 1509,
+     "width": 1134
+    },
     "read": "2026-10-25",
     "reason": "ok",
     "safe": true,
@@ -14425,13 +14501,22 @@
   "FEC_H6WA02228": {
    "checked": "2026-10-25",
    "drawn": {
+    "portrait": "https://fellerforcongress.com/feller-portrait.png",
+    "portraitEvidence": "alt text \"Edwin Feller\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://fellerforcongress.com/feller-portrait.png",
       "why": "969 KB, over 300 KB"
      }
     ],
+    "portraitPage": "https://fellerforcongress.com",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 969444,
+     "height": 1080,
+     "width": 810
+    },
     "read": "2026-10-25",
     "reason": "ok",
     "safe": true,
@@ -14801,14 +14886,22 @@
      "Supreme Court Reform"
     ],
     "issuesUrl": "https://rickcrosson.com/priorities/",
+    "portrait": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
+    "portraitEvidence": "alt text \"Rick Crosson — photo 2\"",
     "portraitHeavy": [
      {
-      "leftOut": true,
+      "kept": true,
       "url": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
       "why": "1536x2048px, over 1200px"
      }
     ],
     "portraitPage": "https://rickcrosson.com/",
+    "portraitRead": "2026-10-25",
+    "portraitWeight": {
+     "bytes": 245825,
+     "height": 2048,
+     "width": 1536
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,

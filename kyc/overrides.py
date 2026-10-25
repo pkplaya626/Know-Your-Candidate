@@ -680,6 +680,13 @@ NOT_A_PORTRAIT = {
         ("2026-10-25", "two people: Shaun Finnie with someone else ('Selme-Finnie')"),
     "https://jordanjherrera.com/wp-content/uploads/2025/05/Jordan_Herrera_IMG_9126-768x1024.jpeg":
         ("2026-10-25", "Jordan Herrera: seated in a military vehicle's hatch, a small figure in the frame"),
+    # Found once heavy portraits were shown again (PR #134 review), and looked at.
+    "https://samgallucci.com/assets/samfamily-BetoMA7c.webp":
+        ("2026-10-25", "Sam Gallucci: a family photograph, seventeen people on a beach"),
+    "https://irp.cdn-website.com/a2163ddd/dms3rep/multi/opt/MCGOWAN-BIO-1406h.png":
+        ("2026-10-25", "Chris McGowan: a page of biography text under the campaign's logo"),
+    "https://assets.nationbuilder.com/themes/69d46ee99be3286671f3d5a8/attachments/original/1776836856/11089a203ea7bb260717a77ab963cb40942791be.png?1776836856":
+        ("2026-10-25", "Greg Stoker: a halftone street scene, several people holding signs"),
 }
 
 # Commons files a judge's route reaches (kyc/judge_links.py) whose licence

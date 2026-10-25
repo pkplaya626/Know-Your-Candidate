@@ -392,29 +392,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     each taught to `route_ok` by name, so a cached portrait from any other
     route is still refused:
     - a Wikidata item carrying the person's own FEC candidate id (P1839)
-      and an image (P18): a human, the only item with that id, its label
-      carrying the surname, its year of birth agreeing where both give one
-      (rule 82), the file resolved on Commons (never `Special:FilePath`)
+      and an image (P18): a human, the only item any of the person's ids
+      is on, its label carrying the surname *and* a given name that fits
+      theirs, and a second tie of the item's own - a year of birth the
+      profile's agrees with, else a 2026 candidacy in their state (P3602)
+      or an official website (P856) that is their campaign's. An id is not
+      proof on its own (rule 82): the first version took the surname
+      alone, and none of the three nominees it pictured had a birth date
+      to compare, so a namesake's item carrying a bot-added id would have
+      passed. The file is resolved on Commons (never `Special:FilePath`)
       and credited from its own page (rule 87);
-    - for a nominee who sits in their state's legislature, the image the
-      legislature's own page for them draws, never a caucus's (rule 51:
-      Sean McCann's is on senatedems.com, and he has none). That member is
-      found by the chamber their own article's corroborated record of
-      offices gives (rule 69) and the same first and last name in it,
-      nobody else's, and the photograph is withheld once the roster seats
-      someone else: "Sen22.jpg" shows whoever holds the seat.
-    The owner's decision of 2026-10-19 holds for both and for the
-    campaign's (rule 38): a photograph is shown only where its source
-    itself offers a version within 300 KB and 1,200px - no resizing, no
-    image service, no copy of our own - and one offered only oversized
-    is left out and counted (Nevada's 3.9 MB headshot of Carrie Buck).
-    So the election offices that print candidates' photographs
-    (Washington's voters' guide, Alaska's and Oregon's pamphlets) are not
-    routes: they serve them only base64 inside JSON or inside PDFs, and
-    each office's terms grant no reuse (`ELECTION_OFFICES`). Every record
-    keeps the page, the words naming the person beside the image, the day
-    read and its bytes and size, and `validate` fails a shown one without
-    them (`photo-unevidenced`).
+    - for a nominee who sits in their state's legislature, the photograph
+      this site's legislature page shows on that member's card
+      (`legislature.card_photo`, one implementation, rule 12): only on the
+      legislature's own host and credited to it, never a caucus's (rule 51:
+      Sean McCann's is on senatedems.com, and he has none), never a file
+      Open States gives two members. The first version read the member's
+      page again by rules of its own, which skipped legphotos' safeguards.
+      That member is found by the chamber their own article's corroborated
+      record of offices gives (rule 69) and the same first and last name
+      in it, nobody else's, and the photograph is withheld once the roster
+      seats someone else or the card shows another file: "Sen22.jpg" shows
+      whoever holds the seat.
+    Either route refuses a frame wider than tall unless its file is named
+    a headshot or portrait (rule 38), and any file in
+    `overrides.NOT_A_PORTRAIT` or `PORTRAIT_LICENCE_DOUBTS`: the first
+    version gave a person no way to withdraw one. A photograph over the
+    caps is shown at full size and said (rule 87). The election offices
+    that print candidates' photographs (Washington's voters' guide,
+    Alaska's and Oregon's pamphlets) serve them only base64 inside JSON or
+    inside PDFs, with no file to link; hosting a copy waits for the site's
+    one store of copies (`ELECTION_OFFICES`). Every record keeps the page,
+    the words naming the person, the day read and its bytes and size, and
+    `validate` fails a shown one without them (`photo-unevidenced`).
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
@@ -565,9 +575,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     draws, wherever it is hosted (a site builder's CDN serves the site's
     files), and the cache keeps that page, the words that named them
     (`portraitEvidence`: an alt text naming them, else the file name) and
-    the day. A heavy one is taken only in a rendition the page itself lists
-    (its `srcset`) or one of Squarespace's fixed widths, never a width
-    asked of a resizer (rule 87). A curated row takes its campaign's
+    the day. A heavy one is taken in a rendition the page itself lists
+    (its `srcset`) or one of Squarespace's fixed widths where there is one,
+    never a width asked of a resizer, and otherwise at full size (rule
+    87). A family photograph, a page of biography text and a halftone
+    street scene came back with the heavy ones and are refused in
+    `NOT_A_PORTRAIT`; a single person who fills the frame, posed by a
+    tractor or speaking in a park, is the campaign's likeness of them and
+    stays. A curated row takes its campaign's
     portrait as a filer does: Brian Bengs's sat in the cache while his
     profile showed the silhouette. A sitting member never does: their
     portrait comes by their bioguide id. Issue headings come from one heading level of a page
@@ -1661,15 +1676,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     same file - its host's own resizer, or WordPress.com's Photon, which
     fetches that very address and scales it (rule 42) - once the smaller
     copy is weighed and found the same shape (`photos.lighter_form`). A
-    candidate's is held to the owner's decision of 2026-10-19: shown only
-    in a size its source itself offers within the caps - a rendition its
-    page's srcset lists, Squarespace's fixed widths, Wikimedia's standard
-    ones with the widest a srcset offers weighed too
-    (`photos.own_lighter_form`, `nominee_photos`) - never a width asked of
-    imgix or Photon, never at full size: the first version had shown
-    eleven nominees' portraits through Photon and one at full size. One
-    offered only oversized is left out (`portraitHeavy` `leftOut`,
-    `leftOut` in the portrait cache), and the build prints how many. The House
+    candidate's is shown in a size its source itself offers within the
+    caps where there is one - a rendition its page's srcset lists,
+    Squarespace's fixed widths, Wikimedia's standard ones with the widest
+    a srcset offers weighed too (`photos.own_lighter_form`,
+    `nominee_photos`) - never a width asked of imgix or Photon (the owner's
+    decision of 2026-10-19). Where none is offered it is shown all the
+    same, at full size, and said (`portraitHeavy` `kept`, `heavy` in the
+    portrait cache; the build prints how many): withholding them left
+    eleven November nominees with the silhouette beside an opponent's
+    photograph, and the first version of PR #134 left six more out again
+    (Michael J. Quirk's PNG was 6 KB over), with Nevada's headshot of
+    Carrie Buck. The owner's decision of 2026-10-25 ("more content is
+    better than strict rules") settled it: a weight cap costs coverage and
+    guards no fact about a person, so a smaller copy is the copies' job
+    (rule 101), never a reason for the silhouette. The House
     Clerk's are only weighed; every one is within the caps. A server that
     gzips an image is read through it (Missouri's attorney general's
     headshot read as "not an image"). No srcset offers a size wider than

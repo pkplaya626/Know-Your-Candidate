@@ -1348,6 +1348,22 @@ class TestDrawnCampaignPages(unittest.TestCase):
             issues = validate.check_photo_evidence([profile], {}, bare)
             self.assertEqual([i.code for i in issues], ["photo-unevidenced"], field)
 
+    def test_a_drawn_page_records_the_images_a_person_refused(self):
+        """Sam Gallucci's drawn page gave a family photograph of seventeen;
+        refused in NOT_A_PORTRAIT, the drawn read must say it still offers
+        it, or validate calls the entry stale."""
+        home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        cache = self.cache()
+        with mock.patch.dict(enrich.overrides.NOT_A_PORTRAIT, {self.WIX: ("2026-10-25", "x")}):
+            found, drawn = self.run_render(
+                {"https://www.miller4montana.com": home}, cache,
+                {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+            self.assertEqual(found, 0)
+            self.assertEqual(drawn["notPortraits"], [self.WIX])
+            self.assertNotIn(self.WIX, [u for issue in validate.check_portrait_overrides(cache)
+                                        for u in issue.detail])
+
     def test_the_browser_is_given_a_few_pages_a_run(self):
         """The reader gives a browser run fifteen minutes; forty sites in one
         run would outlast it and read none."""

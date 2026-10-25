@@ -1242,7 +1242,12 @@ def _drawn_read(profile, url, markup, today):
     record = {"url": url, "safe": verdict, "reason": reason, "read": today}
     if verdict is not SAFE:
         return record, page
-    pictures = [p for p in portrait(page, url, profile) if p[0] not in overrides.NOT_A_PORTRAIT]
+    found = portrait(page, url, profile)
+    pictures = [p for p in found if p[0] not in overrides.NOT_A_PORTRAIT]
+    # Kept so validate can tell a NOT_A_PORTRAIT entry still means something.
+    refused = [u for u, _ in found if u in overrides.NOT_A_PORTRAIT]
+    if refused:
+        record["notPortraits"] = refused
     if take_portrait(record, pictures, offers=page_forms(page, url)):
         original = (record.get("portraitHeavy") or [{}])[0].get("url") or record["portrait"]
         record.update(portraitPage=url, portraitEvidence=evidence_of(page, url, original, profile),

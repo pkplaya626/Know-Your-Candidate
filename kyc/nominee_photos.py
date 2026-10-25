@@ -680,8 +680,14 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 if record.get("via") == LEGISLATURE:
                     cache[key] = _unresolved(profile)
                 continue
-            new = legislature_record(profile, member, credit.get("page") or page["url"], image,
-                                     credit, evidence, weight)
+            if not credit.get("page"):
+                # Credited, and linked to their own page on the legislature's
+                # site (rule 87), or not shown.
+                log(f"    [skip] {profile['name']}: the card links no page of theirs on the "
+                    "legislature's own site")
+                continue
+            new = legislature_record(profile, member, credit["page"], image, credit, evidence,
+                                     weight)
             cache[key] = new
             counts["legislature"] += 1
             counts["heavy"] += bool(new.get("heavy"))
