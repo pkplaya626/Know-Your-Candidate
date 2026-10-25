@@ -629,16 +629,8 @@ def held_back(portrait):
     or None. Asked of every portrait kept from an earlier read as well as of
     every new one: a doubt added after a file was first read withholds it on
     the next run, whatever that run could read."""
-    from . import overrides
-    url = source_url((portrait or {}).get("source"))
-    if not url:
-        return None
-    if url in overrides.NOT_A_PORTRAIT:
-        return f"{url} is in overrides.NOT_A_PORTRAIT"
-    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
-    if url in doubts:
-        return f"{url} is in overrides.PORTRAIT_LICENCE_DOUBTS ({doubts[url][1]})"
-    return None
+    from .photos import refused
+    return refused(source_url((portrait or {}).get("source"))) or None
 
 
 def _keep(last_entry, name, problems):

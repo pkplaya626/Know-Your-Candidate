@@ -1324,6 +1324,47 @@ def check_future_coverage(profiles, today=None):
                   f"{today.isoformat()}; shown as filed", found)]
 
 
+def check_photo_evidence(profiles, portraits=None, enrichment=None):
+    """A photograph reached through a page - a campaign's (rule 38), a
+    legislature's or a Wikidata item (``nominee_photos``) - carries in its
+    cache the page that ties it to the person, the words that name them
+    beside it, the day it was read and its bytes and pixel size, and a note
+    where it is over the caps and shown at full size (rule 87). One shown
+    without them fails: the cache cannot say why it is this person's."""
+    from . import nominee_photos
+    from .photos import too_heavy
+    from .portraits import profile_key
+
+    portraits, enrichment = portraits or {}, enrichment or {}
+    people = enrichment.get("people") or {}
+    found = []
+    for p in profiles:
+        source, shown = p.get("photoSource"), (p.get("photos") or [None])[0]
+        if source in nominee_photos.ROUTES:
+            record = portraits.get(profile_key(p)) or {}
+            found += nominee_photos.problems({profile_key(p): record})
+        elif source == "campaign-site":
+            entry = people.get(p.get("id")) or {}
+            record = next((r for r in (entry.get("site"), entry.get("listed"),
+                                       entry.get("drawn"))
+                           if r and r.get("portrait") == shown), {})
+            weight = record.get("portraitWeight") or {}
+            missing = [f for f in ("portraitPage", "portraitEvidence", "portraitRead")
+                       if not record.get(f)]
+            if not all(weight.get(k) for k in ("bytes", "width", "height")):
+                missing.append("weight")
+            elif too_heavy(weight) and not (record.get("portraitHeavy") or [{}])[0].get("kept"):
+                missing.append("note that it is over the caps")
+            if missing:
+                found.append(f"{p['name']} (campaign-site): no {', '.join(missing)}")
+    if not found:
+        return []
+    return [Issue("error", "photo-unevidenced",
+                  f"{len(found)} photographs are shown without the page, the words naming the "
+                  "person, the day read or the size their cache must record; run 'enrich' or "
+                  "'portraits' to read them again", sorted(found))]
+
+
 def check_portrait_overrides(enrichment, elsewhere=()):
     """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
 
@@ -1337,15 +1378,24 @@ def check_portrait_overrides(enrichment, elsewhere=()):
         return []
     offered = set(elsewhere or ())
     for entry in (enrichment.get("people") or {}).values():
-        for key in ("site", "listed"):
+        for key in ("site", "listed", "drawn"):
             record = entry.get(key) or {}
-            offered.update([record.get("portrait")] + list(record.get("notPortraits") or []))
+            offered.update([record.get("portrait")] + list(record.get("notPortraits") or [])
+                           + [h.get("url") for h in record.get("portraitHeavy") or []])
     stale = sorted(u for u in overrides.NOT_A_PORTRAIT if u not in offered)
-    if not stale:
-        return []
-    return [Issue("warn", "stale-portrait-override",
-                  f"{len(stale)} NOT_A_PORTRAIT entries match no image a cached site offers",
-                  stale)]
+    issues = []
+    if stale:
+        issues.append(Issue("warn", "stale-portrait-override",
+                            f"{len(stale)} NOT_A_PORTRAIT entries match no image a cached "
+                            "site offers", stale))
+    unused = sorted(f"{pid}: {entry['url']}" for pid, entry in overrides.CAMPAIGN_PORTRAITS.items()
+                    if entry["url"] not in offered)
+    if unused:
+        issues.append(Issue("warn", "stale-campaign-portrait",
+                            f"{len(unused)} CAMPAIGN_PORTRAITS entries name no portrait a cached "
+                            "site gives: the page no longer draws it, or the site no longer "
+                            "reads as the campaign's", unused))
+    return issues
 
 
 def check_odds(races, odds, today=None):
@@ -1662,7 +1712,8 @@ def check_voting_links(cache):
 def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campaigns=None,
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
-        history=None, voting_dates=None, statewide=None, measures=None, photo_routes=()):
+        history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
+        photo_routes=()):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1684,6 +1735,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment, photo_routes)
+    if portraits is not None:
+        issues += check_photo_evidence(profiles, portraits, enrichment)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)

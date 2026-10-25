@@ -1224,6 +1224,199 @@ class TestCampaignPortraits(unittest.TestCase):
         self.assertIsNone(enrich.image_size(b"not an image"))
 
 
+class TestAboutPagePortraits(unittest.TestCase):
+    """The research of 2026-10-19: of thirty nominees' campaign sites with no
+    portrait on the home page, four had one on their About page. The About
+    page is read with the home page's rules (rule 38) and must itself name
+    the candidate."""
+
+    PROFILE = {"id": "FEC_H6OK05293", "name": "Jena Nelson"}
+    TEXT = "<p>" + "Jena Nelson is a teacher running for Congress in Oklahoma. " * 12 + "</p>"
+    HOME = ("<html><head><title>Jena Nelson for Congress</title></head><body>"
+            "<h1>Jena Nelson</h1>" + TEXT +
+            '<a href="/about/">About</a><a href="https://other.org/about">About us</a>'
+            "</body></html>")
+    ABOUT = ("<html><head><title>About Jena</title></head><body><h1>Meet Jena Nelson</h1>"
+             + TEXT +
+             '<img src="/wp-content/uploads/jena-nelson-headshot-new.png" '
+             'srcset="/wp-content/uploads/jena-nelson-headshot-new-271x300.png 271w, '
+             '/wp-content/uploads/jena-nelson-headshot-new-462x512.png 462w, '
+             '/wp-content/uploads/jena-nelson-headshot-new.png 800w" '
+             'alt="Jena Nelson headshot"></body></html>')
+
+    def read(self, about_markup, weights, about_final="https://jenanelson.com/about/"):
+        pages = {"https://jenanelson.com/": ("https://jenanelson.com/", 200, self.HOME),
+                 "https://jenanelson.com/about/": (about_final, 200, about_markup)}
+        with mock.patch.object(enrich, "fetch", side_effect=lambda u: pages[u]) as fetched, \
+                mock.patch.object(enrich, "portrait_check",
+                                  side_effect=lambda u, h: weights.get(u, (None, None))), \
+                mock.patch.object(enrich.time, "sleep"):
+            record = enrich._read_one(self.PROFILE, "https://jenanelson.com/", extract=True)
+        return record, [c.args[0] for c in fetched.call_args_list]
+
+    def test_the_about_page_gives_the_portrait_in_a_size_it_offers(self):
+        big = "https://jenanelson.com/wp-content/uploads/jena-nelson-headshot-new.png"
+        offered = "https://jenanelson.com/wp-content/uploads/jena-nelson-headshot-new-462x512.png"
+        record, fetched = self.read(self.ABOUT, {
+            big: (True, {"bytes": 1_169_826, "width": 800, "height": 887}),
+            offered: (True, {"bytes": 240_000, "width": 462, "height": 512})})
+        self.assertEqual(fetched, ["https://jenanelson.com/", "https://jenanelson.com/about/"])
+        self.assertEqual(record["portrait"], offered)
+        self.assertEqual(record["portraitPage"], "https://jenanelson.com/about/")
+        self.assertEqual(record["portraitEvidence"], 'alt text "Jena Nelson headshot"')
+        self.assertTrue(record["portraitRead"])
+
+    def test_an_about_page_that_names_someone_else_gives_nothing(self):
+        other = self.ABOUT.replace("Jena Nelson", "Tom Cole").replace("Meet Jena", "Meet Tom")
+        record, _ = self.read(other, {})
+        self.assertNotIn("portrait", record)
+
+    def test_an_about_page_on_another_host_is_not_read(self):
+        record, _ = self.read(self.ABOUT, {}, about_final="https://elsewhere.example/about/")
+        self.assertNotIn("portrait", record)
+
+    def test_only_an_about_or_meet_link_on_the_sites_own_host_is_followed(self):
+        page = _page('<a href="https://other.org/about">About</a><a href="/donate">Donate</a>'
+                     '<a href="/issues">Issues</a><a href="/meet-jena/">Meet Jena</a>')
+        self.assertEqual(enrich.about_link(page, "https://www.jenanelson.com/"),
+                         "https://www.jenanelson.com/meet-jena/")
+        self.assertIsNone(enrich.about_link(_page('<a href="/news/about-our-rally">Rally</a>'),
+                                            "https://jenanelson.com/"))
+
+
+class TestDrawnCampaignPages(unittest.TestCase):
+    """A site that draws its images with JavaScript, or answers a script
+    with a bot wall, is read once more as a headless browser draws it - by
+    every rule of the static read (rule 38)."""
+
+    PROFILE = {"id": "FEC_H6MT02001", "name": "Brian James Miller", "isCandidate": True,
+               "source": "fec-field", "raceStatus": "nominee", "photos": ["placeholder"]}
+    TEXT = "<p>" + "Brian Miller is running for Congress in Montana's 2nd district. " * 12 + "</p>"
+    WIX = ("https://static.wixstatic.com/media/ab12~mv2.jpg/v1/fill/w_432,h_681,al_c,q_85/"
+           "BrianMiller-5.jpg")
+
+    def cache(self, safe=None, status=202):
+        return {"people": {"FEC_H6MT02001": {"name": "Brian James Miller", "site": {
+            "url": "https://www.miller4montana.com", "safe": safe, "status": status,
+            "reason": f"HTTP {status}"}}}}
+
+    def run_render(self, pages, cache, weights):
+        def reader(wanted):
+            return {code: pages[url] for code, url in wanted.items() if url in pages}, []
+        with mock.patch.object(enrich, "portrait_check",
+                               side_effect=lambda u, h: weights.get(u, (None, None))):
+            found = enrich.render_portraits([self.PROFILE], cache, reader=reader,
+                                            log=lambda *a: None,
+                                            today=__import__("datetime").date(2026, 10, 20))
+        return found, cache["people"]["FEC_H6MT02001"].get("drawn")
+
+    def test_a_drawn_home_page_gives_the_portrait_named_for_them(self):
+        home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        found, drawn = self.run_render(
+            {"https://www.miller4montana.com": home}, self.cache(),
+            {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+        self.assertEqual(found, 1)
+        self.assertEqual(drawn["portrait"], self.WIX)
+        self.assertEqual(drawn["portraitEvidence"], 'alt text "Brian Miller"')
+        profile = dict(self.PROFILE, campaignSite="https://www.miller4montana.com")
+        counts = enrich.apply_cache([profile], self.cache())
+        profile2 = dict(self.PROFILE, campaignSite="https://www.miller4montana.com")
+        cache = self.cache()
+        cache["people"]["FEC_H6MT02001"]["drawn"] = drawn
+        enrich.apply_cache([profile2], cache)
+        self.assertEqual(profile["photos"], ["placeholder"])
+        self.assertEqual(counts["portrait"], 0)
+        self.assertEqual(profile2["photos"][0], self.WIX)
+        self.assertEqual(profile2["photoSource"], "campaign-site")
+
+    def test_validate_reads_a_drawn_portraits_evidence_and_fails_one_without(self):
+        home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        cache = self.cache()
+        _found, drawn = self.run_render(
+            {"https://www.miller4montana.com": home}, cache,
+            {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+        profile = dict(self.PROFILE, campaignSite="https://www.miller4montana.com")
+        enrich.apply_cache([profile], cache)
+        self.assertEqual(profile["photoSource"], "campaign-site")
+        self.assertEqual(validate.check_photo_evidence([profile], {}, cache), [])
+        for field in ("portraitEvidence", "portraitWeight"):
+            bare = {"people": {"FEC_H6MT02001": dict(cache["people"]["FEC_H6MT02001"],
+                                                      drawn={k: v for k, v in drawn.items()
+                                                             if k != field})}}
+            issues = validate.check_photo_evidence([profile], {}, bare)
+            self.assertEqual([i.code for i in issues], ["photo-unevidenced"], field)
+
+    def test_a_drawn_page_records_the_images_a_person_refused(self):
+        """Sam Gallucci's drawn page gave a family photograph of seventeen;
+        refused in NOT_A_PORTRAIT, the drawn read must say it still offers
+        it, or validate calls the entry stale."""
+        home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        cache = self.cache()
+        with mock.patch.dict(enrich.overrides.NOT_A_PORTRAIT, {self.WIX: ("2026-10-25", "x")}):
+            found, drawn = self.run_render(
+                {"https://www.miller4montana.com": home}, cache,
+                {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+            self.assertEqual(found, 0)
+            self.assertEqual(drawn["notPortraits"], [self.WIX])
+            self.assertNotIn(self.WIX, [u for issue in validate.check_portrait_overrides(cache)
+                                        for u in issue.detail])
+
+    def test_the_browser_is_given_a_few_pages_a_run(self):
+        """The reader gives a browser run fifteen minutes; forty sites in one
+        run would outlast it and read none."""
+        people = [dict(self.PROFILE, id=f"FEC_H6MT020{i:02d}", name=f"Brian Miller{i}")
+                  for i in range(30)]
+        cache = {"people": {p["id"]: {"site": {"url": f"https://site{i}.example", "safe": None,
+                                                 "status": 202}}
+                            for i, p in enumerate(people)}}
+        runs = []
+
+        def reader(pages):
+            runs.append(len(pages))
+            return {}, []
+        enrich.render_portraits(people, cache, reader=reader, limit=30, log=lambda *a: None)
+        self.assertEqual(sum(runs), 30)
+        self.assertLessEqual(max(runs), enrich.RENDER_BATCH)
+
+    def test_the_drawn_about_page_is_read_when_the_home_page_has_none(self):
+        home = ("<html><head><title>Brian Miller</title></head><body>" + self.TEXT
+                + '<a href="/about">About</a></body></html>')
+        about = ("<html><head><title>About Brian</title></head><body>" + self.TEXT
+                 + f'<img src="{self.WIX}" alt="BrianMiller-5.jpg"></body></html>')
+        found, drawn = self.run_render(
+            {"https://www.miller4montana.com": home,
+             "https://www.miller4montana.com/about": about}, self.cache(),
+            {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+        self.assertEqual(found, 1)
+        self.assertEqual(drawn["url"], "https://www.miller4montana.com")
+        self.assertEqual(drawn["portraitPage"], "https://www.miller4montana.com/about")
+
+    def test_a_drawn_page_that_names_someone_else_gives_nothing(self):
+        home = ("<html><head><title>Ryan Zinke</title></head><body>"
+                + self.TEXT.replace("Brian Miller", "Ryan Zinke")
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        found, drawn = self.run_render({"https://www.miller4montana.com": home}, self.cache(),
+                                       {self.WIX: (True, {"bytes": 47_000, "width": 432,
+                                                          "height": 681})})
+        self.assertEqual(found, 0)
+        self.assertIsNot(drawn["safe"], True)
+        self.assertNotIn("portrait", drawn)
+
+    def test_a_page_the_browser_cannot_read_keeps_the_last_drawn_read(self):
+        cache = self.cache()
+        cache["people"]["FEC_H6MT02001"]["drawn"] = {"url": "https://www.miller4montana.com",
+                                                     "read": "2026-09-01", "safe": True}
+        found, drawn = self.run_render({}, cache, {})
+        self.assertEqual(found, 0)
+        self.assertEqual(drawn["read"], "2026-09-01")
+        # A site the static read refused is never drawn.
+        refused = self.cache(safe=False, status=200)
+        self.assertEqual(enrich.render_wanted([self.PROFILE], refused), [])
+
+
 class TestApplyEnrichment(unittest.TestCase):
     AS_OF = __import__("datetime").date(2026, 9, 30)
 
@@ -1271,11 +1464,34 @@ class TestApplyEnrichment(unittest.TestCase):
     def test_an_existing_portrait_and_a_members_photo_are_never_replaced(self):
         pictured = _challenger(campaignSite="https://janesmith.com", photoSource="wikipedia",
                                photos=["https://upload.wikimedia.org/jane.jpg"])
-        roster = _challenger(campaignSite="https://janesmith.com", source=None)
+        member = _challenger(campaignSite="https://janesmith.com", source=None,
+                             isCandidate=False, chamber="House")
         enrich.apply_cache([pictured], self.cache(site=self.SAFE_SITE), as_of=self.AS_OF)
-        enrich.apply_cache([roster], self.cache(site=self.SAFE_SITE), as_of=self.AS_OF)
+        enrich.apply_cache([member], self.cache(site=self.SAFE_SITE), as_of=self.AS_OF)
         self.assertEqual(pictured["photos"], ["https://upload.wikimedia.org/jane.jpg"])
-        self.assertNotIn("photoSource", roster)
+        self.assertNotIn("photoSource", member)
+
+    def test_a_curated_candidate_takes_their_campaigns_portrait_too(self):
+        """Rule 24 is for curated rows as much as filers: Brian Bengs's own
+        campaign portrait sat in the cache while his profile showed the
+        silhouette, because only FEC filers were given one."""
+        curated = _challenger(id="CAND_44", campaignSite="https://janesmith.com", source=None)
+        enrich.apply_cache([curated], {"people": {"CAND_44": {"site": self.SAFE_SITE}}},
+                           as_of=self.AS_OF)
+        self.assertEqual(curated["photoSource"], "campaign-site")
+        self.assertEqual(curated["photos"][0], self.SAFE_SITE["portrait"])
+
+    def test_a_members_campaign_photograph_never_goes_before_their_own(self):
+        """A member's portrait comes by their bioguide id (rule 24); their
+        campaign's is never put at the head of that chain."""
+        clerk = "https://clerk.house.gov/images/members/S000001.jpg"
+        member = _challenger(id="S000001", isCandidate=False, bioguide="S000001",
+                             source=None, campaignSite="https://janesmith.com",
+                             photos=[clerk, "placeholder"])
+        enrich.apply_cache([member], {"people": {"S000001": {"site": self.SAFE_SITE}}},
+                           as_of=self.AS_OF)
+        self.assertEqual(member["photos"][0], clerk)
+        self.assertNotEqual(member.get("photoSource"), "campaign-site")
 
     def test_an_election_page_site_is_linked_only_when_it_checked_out(self):
         listed = dict(self.SAFE_SITE, url="https://smith2026.com")
@@ -1524,6 +1740,19 @@ class TestPhotoCredits(unittest.TestCase):
         self.assertEqual(profile["photoCredit"], {"by": "the campaign's website (janesmith.com)",
                                                   "page": "https://janesmith.com"})
 
+    def test_the_credit_names_the_host_of_the_page_it_links(self):
+        """Michael J. Quirk's filed address redirects to another host, where
+        his portrait is: the credit read "michaelquirk4congress.com" and
+        linked michaelquirkforcongress.com."""
+        profile = _challenger(campaignSite="https://janesmith.com")
+        site = dict(TestApplyEnrichment.SAFE_SITE,
+                    portraitPage="https://www.janesmithforcongress.com/about")
+        enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
+                           as_of=TestApplyEnrichment.AS_OF)
+        self.assertEqual(profile["photoCredit"],
+                         {"by": "the campaign's website (janesmithforcongress.com)",
+                          "page": "https://www.janesmithforcongress.com/about"})
+
 
 class TestPortraitWeights(unittest.TestCase):
     """TECH-13: a 1.3 MB campaign PNG was downloaded for a 165px card."""
@@ -1534,44 +1763,168 @@ class TestPortraitWeights(unittest.TestCase):
         self.assertIn("KB", photos.too_heavy({"bytes": 1_330_007, "width": 876, "height": 1024}))
         self.assertIn("px", photos.too_heavy({"bytes": 90_000, "width": 1638, "height": 2048}))
 
-    def test_a_heavy_picture_is_taken_lighter_and_said(self):
+    def test_a_heavy_picture_is_taken_in_a_rendition_its_page_offers(self):
+        """A rendition the image's own srcset lists is tried first - here
+        WordPress's own "-500x584" file - before any resizer."""
         heavy = "https://smith.com/wp-content/uploads/smith-big.png"
-        photon = "https://i0.wp.com/smith.com/wp-content/uploads/smith-big.png?w=500&ssl=1"
+        small = "https://smith.com/wp-content/uploads/smith-big-329x384.png"
+        offered = "https://smith.com/wp-content/uploads/smith-big-500x584.png"
         weights = {heavy: (True, {"bytes": 1_300_000, "width": 876, "height": 1024}),
-                   photon: (True, {"bytes": 160_000, "width": 500, "height": 584})}
+                   offered: (True, {"bytes": 160_000, "width": 500, "height": 584})}
         record = {}
         with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
-            enrich.take_portrait(record, [(heavy, True)])
-        self.assertEqual(record["portrait"], photon)
+            enrich.take_portrait(record, [(heavy, True)],
+                                 offers={heavy: [(small, 329), (offered, 500), (heavy, 876)]})
+        self.assertEqual(record["portrait"], offered)
         self.assertEqual(record["portraitWeight"]["bytes"], 160_000)
         self.assertEqual(record["portraitHeavy"],
                          [{"url": heavy, "why": "1300 KB, over 300 KB", "kept": False}])
 
+    def test_names_run_together_in_an_alt_text_name_them(self):
+        """Brian James Miller's Wix portrait carries no name in its file,
+        and its alt text runs his names together."""
+        page = enrich.parse_page('<img src="https://static.wixstatic.com/media/71f2e5~mv2.jpg/v1/'
+                                 'fill/w_432,h_681/71f2e5~mv2.jpg" alt="BrianMiller-5.jpg">'
+                                 '<img src="/a.jpg" alt="MillerTime">')
+        profile = _challenger(name="Brian James Miller")
+        found = enrich.portrait(page, "https://www.miller4congress.com/about-5", profile)
+        self.assertEqual([u for u, _ in found],
+                         ["https://static.wixstatic.com/media/71f2e5~mv2.jpg/v1/fill/w_432,h_681/"
+                          "71f2e5~mv2.jpg"])
+        self.assertEqual(enrich.evidence_of(page, "https://www.miller4congress.com/", found[0][0],
+                                            profile), 'alt text "BrianMiller-5.jpg"')
+
+    def test_a_portrait_a_person_looked_at_is_taken_only_from_the_page_that_draws_it(self):
+        url = "https://janesmith.com/img/D70_8732-684x1024.webp"
+        entry = {"url": url, "page": "https://janesmith.com/", "read": "2026-10-25",
+                 "evidence": "alt text \"jane smith for senate\"; one woman (looked at)"}
+        page = enrich.parse_page(f'<img src="{url}" alt="jane smith for senate">')
+        profile = _challenger()
+        with mock.patch.dict(enrich.overrides.CAMPAIGN_PORTRAITS, {profile["id"]: entry}):
+            self.assertEqual(enrich.portrait(page, "https://janesmith.com/", profile), [(url, True)])
+            self.assertEqual(enrich.evidence_of(page, "https://janesmith.com/", url, profile),
+                             entry["evidence"])
+            # Another person's profile, or a page that does not draw it, gets nothing.
+            self.assertEqual(enrich.portrait(page, "https://janesmith.com/",
+                                             _challenger(id="H6TX09999")), [])
+            self.assertEqual(enrich.portrait(enrich.parse_page('<img src="/x.jpg">'),
+                                             "https://janesmith.com/", profile), [])
+            stale = validate.check_portrait_overrides({"people": {}})
+            self.assertIn("stale-campaign-portrait", [i.code for i in stale])
+
+    def test_a_rendition_of_a_refused_image_is_refused(self):
+        """NOT_A_PORTRAIT names the file the page draws; the cache may hold a
+        smaller form its srcset lists (imgix's w=640 of the rally photograph
+        whose w=2048 is refused) - which is the same image."""
+        heavy = "https://run.imgix.net/a/b.jpg?w=2048&s=1"
+        small = "https://run.imgix.net/a/b.jpg?w=640&s=2"
+        site = dict(TestApplyEnrichment.SAFE_SITE, portrait=small,
+                    portraitWeight={"bytes": 60_000, "width": 640, "height": 853},
+                    portraitHeavy=[{"url": heavy, "why": "885 KB, over 300 KB"}])
+        with mock.patch.dict(enrich.overrides.NOT_A_PORTRAIT, {heavy: ("2026-10-25", "a rally")}):
+            profile = _challenger(campaignSite="https://janesmith.com")
+            counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
+                                        as_of=TestApplyEnrichment.AS_OF)
+            self.assertEqual(profile["photos"], ["placeholder"])
+            self.assertEqual(counts["portrait_heavy"], 0)        # refused, not shown heavy
+            stale = [u for issue in validate.check_portrait_overrides(
+                {"people": {"x": {"site": site}}}) for u in issue.detail]
+            self.assertNotIn(heavy, stale)
+
+    def test_the_evidence_is_the_words_that_named_them(self):
+        """An alt text that does not name them ("Hero image") is no evidence
+        beside a file name that does."""
+        page = enrich.parse_page('<img src="/img/jane-smith-headshot.jpg" alt="Hero image">'
+                                 '<img src="/img/b.jpg" alt="Jane Smith speaking">')
+        base = "https://janesmith.com/"
+        self.assertEqual(enrich.evidence_of(page, base, base + "img/jane-smith-headshot.jpg",
+                                            _challenger()),
+                         'file name "jane-smith-headshot.jpg"')
+        self.assertEqual(enrich.evidence_of(page, base, base + "img/b.jpg", _challenger()),
+                         'alt text "Jane Smith speaking"')
+
+    def test_a_heavy_picture_is_tried_at_its_hosts_resizer_then_photon(self):
+        """Rule 87 as main had it, which the owner's decision of 2026-10-25
+        put back after the brief of 2026-10-19 had ruled resizers out: a
+        heavy file with no rendition on its page is asked of its host's own
+        resizer (imgix here), else of Photon, which fetches that very file
+        and scales it; what comes back is weighed and checked for shape."""
+        imgix = "https://smith.imgix.net/smith.jpg?w=2048"
+        plain = "https://smith.com/wp-content/uploads/smith.jpg"
+        for heavy, smaller in ((imgix, "https://smith.imgix.net/smith.jpg?w=500"),
+                               (plain, "https://i0.wp.com/smith.com/wp-content/uploads/smith.jpg"
+                                       "?w=500&ssl=1")):
+            weights = {heavy: (True, {"bytes": 900_000, "width": 2048, "height": 2560})}
+            record = {}
+            with mock.patch.object(enrich, "portrait_check",
+                                   side_effect=lambda u, h: weights.get(u, (True, {
+                                       "bytes": 39_000, "width": 500, "height": 625}))) as check:
+                self.assertEqual(enrich.take_portrait(record, [(heavy, True)]), smaller)
+            self.assertEqual([c.args[0] for c in check.call_args_list], [heavy, smaller])
+            self.assertEqual(record["portraitWeight"]["bytes"], 39_000)
+            self.assertFalse(record["portraitHeavy"][0]["kept"])
+            self.assertEqual(record["portraitHeavy"][0]["url"], heavy)
+        # Squarespace's fixed widths are the host's own renditions of every
+        # upload, as Wikimedia's are.
+        square = "https://images.squarespace-cdn.com/content/v1/a/b/Smith.jpg"
+        self.assertTrue(photos.lighter_rendition(
+            square, {"bytes": 900_000, "width": 1600, "height": 2000},
+            lambda u: {"bytes": 50_000, "width": 500, "height": 625}))
+
     def test_a_nominees_only_likeness_is_not_withheld_for_its_weight(self):
         """Eleven November nominees showed the silhouette once their only
-        portrait was refused as heavy; the reviewer's diff found them."""
+        portrait was refused as heavy; the reviewer's diff found them. The
+        first version of PR #134 left six more out again under the brief of
+        2026-10-19 (Michael J. Quirk's 306 KB PNG among them), and its
+        reviewers found those: a heavy one that no resizer serves smaller is
+        shown at full size and said (the owner's decision of 2026-10-25)."""
         heavy = "https://cdn.example.com/a/smith.png?v=3"     # no resizer, a query string
-        weights = {heavy: (True, {"bytes": 306_000, "width": 800, "height": 913})}
+        weights = {heavy: (True, {"bytes": 306_579, "width": 800, "height": 913})}
         record = {}
-        with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
-            enrich.take_portrait(record, [(heavy, True)])
+        with mock.patch.object(enrich, "portrait_check",
+                               side_effect=lambda u, h: weights.get(u, (True, {
+                                   "bytes": 9_000, "width": 500, "height": 584}))) as check:
+            self.assertEqual(enrich.take_portrait(record, [(heavy, True)]), heavy)
+        # Photon drops a query string, which could name another file, so
+        # nothing smaller is asked of it.
+        self.assertEqual([c.args[0] for c in check.call_args_list], [heavy])
         self.assertEqual(record["portrait"], heavy)
-        self.assertTrue(record["portraitHeavy"][0]["kept"])
+        self.assertEqual(record["portraitHeavy"],
+                         [{"url": heavy, "why": "306 KB, over 300 KB", "kept": True}])
         site = dict(TestApplyEnrichment.SAFE_SITE, portrait=heavy,
-                    portraitWeight=weights[heavy][1])
+                    portraitWeight=weights[heavy][1], portraitHeavy=record["portraitHeavy"])
         profile = _challenger(campaignSite="https://janesmith.com")
         counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
                                     as_of=TestApplyEnrichment.AS_OF)
         self.assertEqual(profile["photos"][0], heavy)
         self.assertEqual(counts["portrait_heavy"], 1)
 
-    def test_a_resizer_answering_with_another_picture_is_not_taken(self):
-        heavy = "https://smith.com/smith.jpg"
+    def test_photons_scaling_is_shown_and_so_is_a_heavy_original(self):
+        """Photon's scaling of a campaign's 713 KB file (Chelsey Hockett's,
+        on main before the brief of 2026-10-19) is the same photograph and
+        is shown, and not counted heavy; a 306 KB PNG no resizer serves is
+        shown at full size and counted."""
+        original = "https://chelseyhockett.example/images/chelsey.jpg"
+        photon = "https://i0.wp.com/chelseyhockett.example/images/chelsey.jpg?w=500&ssl=1"
+        scaled = dict(TestApplyEnrichment.SAFE_SITE, portrait=photon,
+                      portraitWeight={"bytes": 34_180, "width": 499, "height": 750},
+                      portraitHeavy=[{"url": original, "why": "713 KB, over 300 KB",
+                                      "kept": False}])
+        heavy = dict(TestApplyEnrichment.SAFE_SITE,
+                     portraitWeight={"bytes": 306_579, "width": 800, "height": 913})
+        for site, counted in ((scaled, 0), (heavy, 1)):
+            profile = _challenger(campaignSite="https://janesmith.com")
+            counts = enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
+                                        as_of=TestApplyEnrichment.AS_OF)
+            self.assertEqual(profile["photos"][0], site["portrait"])
+            self.assertEqual(counts["portrait_heavy"], counted)
+
+    def test_a_rendition_answering_with_another_picture_is_not_taken(self):
+        heavy = "https://images.squarespace-cdn.com/content/v1/a/b/Smith.jpg"
         weights = {heavy: (True, {"bytes": 900_000, "width": 1600, "height": 2000}),
                    # A square "image not found" card, not the portrait scaled.
-                   photos.photon_form(heavy, 500): (True, {"bytes": 9_000, "width": 500,
-                                                           "height": 500}),
-                   photos.photon_form(heavy, 330): (False, None)}
+                   heavy + "?format=500w": (True, {"bytes": 9_000, "width": 500, "height": 500}),
+                   heavy + "?format=300w": (False, None)}
         record = {}
         with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]):
             enrich.take_portrait(record, [(heavy, True)])
@@ -1603,21 +1956,50 @@ class TestPortraitWeights(unittest.TestCase):
         self.assertFalse(photos.same_shape({"width": 400, "height": 500},
                                            {"width": 400, "height": 500}))
 
+    def test_a_srcset_is_read_the_way_the_standard_reads_it(self):
+        """Wix's addresses carry commas of their own."""
+        wix = ("https://static.wixstatic.com/media/a~mv2.jpg/v1/fill/w_432,h_681,al_c/a.jpg 1x, "
+               "https://static.wixstatic.com/media/a~mv2.jpg/v1/fill/w_864,h_1362,al_c/a.jpg 2x")
+        self.assertEqual([u.rsplit("/", 2)[1] for u, _ in photos.parse_srcset(wix)],
+                         ["w_432,h_681,al_c", "w_864,h_1362,al_c"])
+        self.assertEqual(photos.parse_srcset("/a-300x400.jpg 300w,/a-768x1024.jpg 768w",
+                                             "https://smith.com/about/"),
+                         [("https://smith.com/a-300x400.jpg", 300),
+                          ("https://smith.com/a-768x1024.jpg", 768)])
+        self.assertEqual(photos.offered_forms([("s", 150), ("m", 384), ("l", 768), ("x", 0)]),
+                         ["m", "l", "s"])
+
     def test_a_portrait_refused_for_its_weight_is_weighed_again_and_never_read_from_the_site(self):
         heavy = "https://smith.com/wp-content/uploads/smith.png"
-        photon = photos.photon_form(heavy, 500)
+        offered = "https://smith.com/wp-content/uploads/smith-500x584.png"
         cache = {"people": {"FEC_H6XX01001": {"name": "Jane Smith", "site": {
             "url": "https://smith.com", "safe": True,
-            "portraitHeavy": [{"url": heavy, "why": "1330 KB, over 300 KB"}]}}}}
+            "portraitForms": [[offered, 500]],
+            "portraitHeavy": [{"url": heavy, "why": "1330 KB, over 300 KB", "leftOut": True}]}}}}
         weights = {heavy: (True, {"bytes": 1_330_000, "width": 876, "height": 1024}),
-                   photon: (True, {"bytes": 120_000, "width": 500, "height": 584})}
+                   offered: (True, {"bytes": 120_000, "width": 500, "height": 584})}
         with mock.patch.object(enrich, "portrait_check", side_effect=lambda u, h: weights[u]), \
                 mock.patch.object(enrich, "fetch", side_effect=AssertionError("site read")), \
                 mock.patch.object(enrich.time, "sleep"):
             self.assertEqual(enrich.measure_portraits(cache, log=lambda *a: None), 1)
         record = cache["people"]["FEC_H6XX01001"]["site"]
-        self.assertEqual(record["portrait"], photon)
+        self.assertEqual(record["portrait"], offered)
         self.assertFalse(record["portraitHeavy"][0]["kept"])
+
+    def test_a_photon_form_within_the_caps_is_not_weighed_again(self):
+        """What a resizer served within the caps stands; only a heavy one
+        kept at full size is weighed again each run."""
+        original = "https://smith.com/images/smith.jpg"
+        photon = "https://i0.wp.com/smith.com/images/smith.jpg?w=500&ssl=1"
+        cache = {"people": {"FEC_H6XX01001": {"name": "Jane Smith", "site": {
+            "url": "https://smith.com", "safe": True, "portrait": photon,
+            "portraitWeight": {"bytes": 34_180, "width": 499, "height": 750},
+            "portraitHeavy": [{"url": original, "why": "713 KB, over 300 KB", "kept": False}]}}}}
+        with mock.patch.object(enrich, "portrait_check",
+                               side_effect=AssertionError("weighed again")), \
+                mock.patch.object(enrich.time, "sleep"):
+            self.assertEqual(enrich.measure_portraits(cache, log=lambda *a: None), 0)
+        self.assertEqual(cache["people"]["FEC_H6XX01001"]["site"]["portrait"], photon)
 
     def test_a_gzipped_image_is_read_through_its_encoding(self):
         """Missouri's attorney general's headshot came gzipped and read as
@@ -1711,7 +2093,9 @@ class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
             if profile.get("photoSource") == "campaign-site" or profile.get("campaignQuote"):
                 self.assertTrue(enrich.running(profile), profile["name"])
             if profile.get("photoSource") == "campaign-site":
-                self.assertEqual(profile.get("source"), "fec-field", profile["name"])
+                # A filer or a curated row; never a sitting member.
+                self.assertTrue(profile.get("source") == "fec-field"
+                                or profile["id"].startswith("CAND_"), profile["name"])
                 self.assertTrue(profile["photos"][0].startswith("https://"), profile["name"])
 
     def test_no_portrait_is_reached_by_a_name(self):
@@ -1721,7 +2105,13 @@ class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
         singer's photograph."""
         by_id = {p["id"]: p for p in self.profiles}
         self.assertEqual(validate.check_guessed_photos(self.profiles), [])
-        self.assertEqual(by_id["CAND_40"]["photos"], ["placeholder"])
+        # New Jersey's nominee shows no guess: only a portrait his own
+        # campaign's page draws (rule 38), or the silhouette.
+        murphy = by_id["CAND_40"]
+        self.assertTrue(murphy["photos"][0] == "placeholder"
+                        or (murphy["photoSource"] == "campaign-site"
+                            and "jerseyjustin4senate.org/" in murphy["photos"][0]),
+                        murphy["photos"])
         self.assertFalse([u for u in by_id["G000553"]["photos"] if "wikipedia.org/wiki/" in u])
         # Oregon's nominee has the photograph of the article his ballot page
         # links ("David Brock Smith"), checked to be about him (rule 33).
@@ -1770,7 +2160,7 @@ class TestPortraitOverrides(unittest.TestCase):
 
     def test_an_entry_no_site_offers_any_more_is_reported(self):
         issues = validate.check_portrait_overrides({"people": {}})
-        self.assertEqual([i.code for i in issues], ["stale-portrait-override"])
+        self.assertIn("stale-portrait-override", [i.code for i in issues])
 
 
 class TestPeopleDataAudit(unittest.TestCase):

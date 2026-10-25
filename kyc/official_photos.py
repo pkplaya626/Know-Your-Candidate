@@ -361,15 +361,9 @@ def held_back(rec):
     likeness) or ``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82: its licence
     waits for a person). One test for every route, asked of a record read
     now and of one kept from an earlier read (rule 8), as
-    ``judge_links.held_back`` asks it of a judge's."""
-    from . import overrides
-    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
-    for url in addresses(rec):
-        if url in overrides.NOT_A_PORTRAIT:
-            return f"{url} is in overrides.NOT_A_PORTRAIT"
-        if url in doubts:
-            return f"{url} is in overrides.PORTRAIT_LICENCE_DOUBTS ({doubts[url][1]})"
-    return None
+    ``judge_links.held_back`` asks it of a judge's (``photos.refused``)."""
+    from .photos import refused
+    return refused(*addresses(rec)) or None
 
 
 CAPS_WORDS = f"{MAX_PORTRAIT_BYTES // 1000} KB or {MAX_PORTRAIT_PX:,}px"

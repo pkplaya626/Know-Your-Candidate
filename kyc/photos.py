@@ -111,6 +111,28 @@ def too_heavy(weight):
     return ""
 
 
+def refused(*urls):
+    """Why the lists a person keeps withhold one of *urls*, or ``""``:
+    ``overrides.NOT_A_PORTRAIT`` (rule 38: someone looked, and it is not a
+    likeness) or ``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82: its licence
+    waits for a person). One test for every route that asks both - a
+    nominee's (``nominee_photos``), an official's or a statewide
+    candidate's (``official_photos.held_back``) and a judge's
+    (``judge_links.held_back``) - asked of a record read now and of one
+    kept from an earlier read (rule 8)."""
+    from . import overrides
+
+    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
+    for url in urls:
+        if not url:
+            continue
+        for table, name in ((overrides.NOT_A_PORTRAIT, "NOT_A_PORTRAIT"),
+                            (doubts, "PORTRAIT_LICENCE_DOUBTS")):
+            if url in table:
+                return f"{url} is in overrides.{name} ({table[url][1]})"
+    return ""
+
+
 def host_of(url):
     import urllib.parse
     try:
@@ -148,7 +170,8 @@ def assign_credits(profiles):
         if first == PLACEHOLDER:
             profile.pop("photoCredit", None)
             continue
-        if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site") \
+        if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site",
+                                          "wikidata-fec", "state-legislature") \
                 and profile.get("photoCredit"):
             credited += 1
             continue
@@ -259,10 +282,81 @@ def same_shape(original, smaller):
 
 def lighter_form(url, weight, weigh):
     """``(form, its weight)``: the widest of :func:`smaller_forms` of *url*
-    that is within the caps (:func:`too_heavy`) and is the same picture
-    scaled (:func:`same_shape` against *weight*, the original's), or
-    ``None``. *weigh* reads a URL's weight, ``None`` when it cannot."""
+    within the caps and the same picture scaled, or ``None``
+    (:func:`lighter_rendition` with no page to offer renditions: a
+    governor's headshot)."""
+    return lighter_rendition(url, weight, weigh)
+
+
+# The widest a card needs: a 165px card on a 2x screen.
+CARD_WIDTH = 330
+
+
+def parse_srcset(srcset, base=""):
+    """``[(url, width)]`` from an ``<img srcset>``, each address resolved
+    against *base*; a candidate with no width descriptor has width 0.
+
+    Parsed the way the HTML standard does, not by splitting on commas: an
+    address is a run of characters up to whitespace, and Wix's carry
+    commas of their own ("/v1/fill/w_432,h_681,al_c/...")."""
+    import urllib.parse
+
+    out, text, i = [], str(srcset or ""), 0
+    while i < len(text):
+        while i < len(text) and (text[i].isspace() or text[i] == ","):
+            i += 1
+        start = i
+        while i < len(text) and not text[i].isspace():
+            i += 1
+        url = text[start:i]
+        descriptors = ""
+        if url.endswith(","):
+            url = url.rstrip(",")
+        else:
+            start = i
+            while i < len(text) and text[i] != ",":
+                i += 1
+            descriptors = text[start:i]
+        if not url:
+            continue
+        width = 0
+        for descriptor in descriptors.split():
+            if descriptor.endswith("w") and descriptor[:-1].isdigit():
+                width = int(descriptor[:-1])
+        out.append((urllib.parse.urljoin(base, url), width))
+    return out
+
+
+def offered_forms(offered):
+    """The renditions a page's own srcset offers of one image, in the order
+    they are tried: the narrowest at least :data:`CARD_WIDTH` wide first,
+    then the narrower ones, widest first."""
+    sized = sorted({(int(width), url) for url, width in offered or () if width})
+    wide = [url for width, url in sized if width >= CARD_WIDTH]
+    narrow = [url for width, url in reversed(sized) if width < CARD_WIDTH]
+    return wide + narrow
+
+
+def lighter_rendition(url, weight, weigh, offered=(), tries=5):
+    """``(form, its weight)``: the first rendition of *url* within the caps
+    that is the same picture scaled (:func:`same_shape` against *weight*,
+    the original's), or ``None``. *weigh* reads a URL's weight, ``None``
+    when it cannot.
+
+    Tried in this order: a rendition the image's own page lists (*offered*,
+    its ``srcset``: WordPress's "-683x1024" files, Wix's "w_432,h_681"
+    ones), then its host's own resizer or Photon (:func:`smaller_forms`),
+    as rule 87 had it before the brief of 2026-10-19 ruled the resizers
+    out. The owner's decision of 2026-10-25 ("more content is better than
+    strict rules") put them back: Photon fetches that very file and scales
+    it, so it is the same photograph (rule 42), and what comes back is
+    weighed and checked for shape before it is used. Where none serves it
+    the caller shows the original all the same and says so (rule 87)."""
+    forms = [form for form in offered_forms(offered) if form != url]
     for form in smaller_forms(url):
+        if form not in forms:
+            forms.append(form)
+    for form in forms[:tries]:
         found = weigh(form)
         if found and not too_heavy(found) and same_shape(weight, found):
             return form, found
