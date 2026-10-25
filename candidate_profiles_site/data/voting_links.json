@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-24T12:59:32+00:00",
+ "fetched": "2026-10-25T13:45:31+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -11,7 +11,7 @@
   "http://www.elections.ny.gov/VotingAbsentee.html": "unknown",
   "http://www.elections.virginia.gov/casting-a-ballot/absentee-voting/": "live",
   "http://www.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
-  "http://www.maine.gov/sos/cec/elec/voter-info/absent.html": "live",
+  "http://www.maine.gov/sos/cec/elec/voter-info/absent.html": "unknown",
   "http://www.mvp.sos.ga.gov/": "unknown",
   "http://www.sos.ca.gov/elections/polling-place/": "live",
   "http://www.sos.mo.gov/elections/pollingplacelookup/": "live",
@@ -317,7 +317,7 @@
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
   "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "unknown"
  },
- "linksChecked": "2026-10-24",
+ "linksChecked": "2026-10-25",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
