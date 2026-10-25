@@ -13,7 +13,7 @@ from its host's own resizer or Photon (``photos.lighter_form``, weighed and
 checked to be the same shape); and where neither serves it, the file itself
 is shown all the same and said (``portraitHeavy``). A photograph a route ties
 to the person is never left out for its weight. Smaller copies made here of
-what is shown heavy are rule 101's (feature/photo-copies), keyed by the
+what is shown heavy are rule 101's (kyc/photocopies.py), keyed by the
 photograph's address, which the record keeps.
 
 A record names the photograph's address, the page it was read on, the words

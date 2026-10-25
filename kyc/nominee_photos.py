@@ -90,9 +90,9 @@ UA = {"User-Agent": "know-your-candidate/2.1 (https://candidates.radicalrelay.us
 # What each state's election office offers, and why it is not a route yet:
 # the research of 2026-10-19 (research/photos/nominees.json) and its check.
 # The owner's decision of 2026-10-25 allows hosting an unmodified official
-# image that has no address of its own; that waits for the site's one store
-# of copies, being built apart, not a second one here (rule 12). Not ruled
-# out: waiting.
+# image that has no address of its own; that waits for a follow-up to the
+# site's one store of copies (kyc/photocopies.py, which copies only a file
+# with an address), not a second one here (rule 12). Not ruled out: waiting.
 ELECTION_OFFICES = {
     "WA": "the online voters' guide (election 899) serves each photograph only "
           "base64-encoded inside candidate.ashx's JSON, never as a file",
@@ -603,8 +603,9 @@ def card_photo(member, code, page=None, photos=None):
         # over the caps, before the checks a seat-keyed file needs (dated
         # on or after the member's arrival, not the file a predecessor
         # showed), so its "offered" file is unchecked as theirs - Nebraska's
-        # "dist13.jpg" is named by the seat. It waits for those checks and
-        # the copies of feature/photo-copies (rule 101); no nominee on the
+        # "dist13.jpg" is named by the seat. It waits for those checks,
+        # which legphotos now makes before it takes a heavy file and rule
+        # 101's copies show it smaller (rule 100); no nominee on the
         # ballot was affected on 2026-10-25.
         return None, None, f"the legislature page shows no photograph of them ({shown['kind']})"
     if not credit or not legphotos.official_host(code, image):

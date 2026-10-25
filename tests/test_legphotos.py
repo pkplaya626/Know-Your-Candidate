@@ -498,15 +498,26 @@ class TestSettle(unittest.TestCase):
         self.assertEqual(entry["credit"], "Montana Legislature")
         self.assertEqual(entry["read"], TODAY)
 
-    def test_a_file_offered_only_over_the_caps_is_left_out(self):
+    def test_a_file_offered_only_over_the_caps_is_taken_marked_heavy(self):
+        # Rule 101 (the owner, 2026-10-25): shown as a smaller copy made
+        # here, after the checks a heavy file used to skip.
         big = "https://www.legmt.gov/big.jpg"
         entry = self.settle({big: image(3000, 4200, 2_500_000)}, self.candidate(big))
-        self.assertTrue(entry["oversized"])
-        self.assertNotIn("image", entry)
-        self.assertEqual(entry["offered"], big)
+        self.assertNotIn("oversized", entry)
+        self.assertEqual((entry["image"], entry["heavy"]), (big, True))
+        # The lightest of several heavy renditions.
+        bigger = "https://www.legmt.gov/bigger.jpg"
+        entry = self.settle({bigger: image(3000, 4200, 6_000_000), big: image(3000, 4200, 2_500_000)},
+                            self.candidate(bigger, big))
+        self.assertEqual(entry["image"], big)
         # Too many pixels, however light.
         wide = "https://www.legmt.gov/wide.jpg"
-        self.assertTrue(self.settle({wide: image(1200, 1600, 90_000)}, self.candidate(wide))["oversized"])
+        self.assertTrue(self.settle({wide: image(1200, 1600, 90_000)}, self.candidate(wide))["heavy"])
+        # Checked as theirs like any other: a landscape frame is still not a
+        # portrait (rule 38).
+        land = "https://www.legmt.gov/land.jpg"
+        self.assertIn("landscape", self.settle({land: image(4000, 3000, 2_000_000)},
+                                               self.candidate(land))["withheld"])
         # A smaller rendition the source offers is taken instead.
         small = "https://www.legmt.gov/small.jpg"
         entry = self.settle({big: image(3000, 4200, 2_500_000), small: image(400, 500, 30_000)},
@@ -545,6 +556,46 @@ class TestSettle(unittest.TestCase):
         shown = {url: {"holder": "ocd-person/old", "name": "Old Member", "sha": entry["sha"]}}
         again = self.settle(table, self.candidate(url, seatKeyed=True), record=member, seat_files=shown)
         self.assertIn("Old Member", again["withheld"])
+
+    def test_a_heavy_seat_file_unchanged_since_it_showed_another_is_withheld(self):
+        # A file over the caps is read only to the byte cap (rule 101): it is
+        # told apart by its first bytes and its length, so a seat's heavy
+        # file that has not changed since it showed the predecessor is still
+        # never shown, or copied, as the successor's (the reviewers of PR
+        # #137 broke the fingerprint and no test noticed).
+        url = "https://www.legmt.gov/rep1.jpg"
+        modified = "Thu, 06 Mar 2025 10:00:00 GMT"
+        yaml = "id: x\nroles:\n- start_date: 2025-01-08\n  type: lower\n  district: '1'\n"
+        github = {"https://api.github.com/repos/openstates/people/contents/data/mt/legislature":
+                  (200, [{"name": "Neil-Duram-" + "a" * 36 + ".yml", "download_url": "https://raw/y.yml"}], {}),
+                  "https://raw/y.yml": (200, yaml, {})}
+        heavy = image(3000, 4200, 2_500_000, modified=modified)
+        table = dict(github, **{url: heavy})
+        a = rec("Pat Old", pid="ocd-person/" + "b" * 36)
+        b = rec("Neil Duram", pid="ocd-person/" + "a" * 36)
+        first = self.settle(table, self.candidate(url, seatKeyed=True), record=b)
+        self.assertTrue(first["heavy"])
+        self.assertTrue(first["sha"].startswith("h"))
+        # Read twice, the same bytes give the same fingerprint.
+        self.assertEqual(self.settle(table, self.candidate(url, seatKeyed=True), record=b)["sha"],
+                         first["sha"])
+        shown = {url: {"holder": a["id"], "name": "Pat Old", "sha": first["sha"]}}
+        again = self.settle(table, self.candidate(url, seatKeyed=True), record=b, seat_files=shown)
+        self.assertIn("has not changed since it showed Pat Old", again["withheld"])
+        self.assertFalse(again.get("image"))
+        # New bytes within what is read, dated after B arrived: B's.
+        body = bytearray(heavy[1])
+        body[1000] = 0x7F
+        changed = self.settle(dict(github, **{url: (200, bytes(body), heavy[2])}),
+                              self.candidate(url, seatKeyed=True), record=b, seat_files=shown)
+        self.assertNotEqual(changed["sha"], first["sha"])
+        self.assertEqual(changed["image"], url)
+        # A new length past what is read is a new file too.
+        longer = image(3000, 4200, 2_600_000, modified=modified)
+        grown = self.settle(dict(github, **{url: longer}), self.candidate(url, seatKeyed=True),
+                            record=b, seat_files=shown)
+        self.assertNotEqual(grown["sha"], first["sha"])
+        self.assertEqual(grown["image"], url)
 
     def test_a_host_that_dates_files_by_its_deploys_is_undated(self):
         # California's Assembly answers one Last-Modified for every seat's
@@ -640,7 +691,8 @@ class TestRefreshAndBuild(unittest.TestCase):
         # Open States's own portrait stands where it has one.
         out = legislature._person(dict(member, image="https://x.gov/n.jpg"), "MT", 2026, photos=photos)
         self.assertEqual(out["image"], "https://x.gov/n.jpg")
-        self.assertNotIn("imageCredit", out)
+        # Said to be where Open States found it, never whose it is (PR #137).
+        self.assertEqual(out["imageCredit"], {"host": "x.gov", "listedBy": "Open States"})
         # Evidence for another person is never shown on this one.
         wrong = {"people": {member["id"]: self.entry(evidence="the roster: Pat Smith")}}
         self.assertNotIn("image", legislature._person(member, "MT", 2026, photos=wrong))
@@ -668,10 +720,13 @@ class TestRefreshAndBuild(unittest.TestCase):
         page = {"url": member["links"][0], "kind": "member"}
         out = legislature._person(member, "VT", 2026, pages={member["id"]: page}, photos={"people": {}})
         self.assertEqual(out["imageCredit"], {"by": "Vermont General Assembly", "page": member["links"][0]})
-        # Off the legislature's host, no credit is claimed for it.
+        # Off the legislature's host, no one is credited with it: the card
+        # says only where Open States found it (the reviewers of PR #137:
+        # "Photo: <host>" read as whose photograph it is).
         other = dict(member, image="https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/x.jpg")
         out = legislature._person(other, "VT", 2026, pages={member["id"]: page}, photos={"people": {}})
-        self.assertNotIn("imageCredit", out)
+        self.assertEqual(out["imageCredit"], {"host": "s3.amazonaws.com", "listedBy": "Open States"})
+        self.assertNotIn("by", out["imageCredit"])
 
     def test_the_build_names_a_member_the_legislature_says_has_left(self):
         member = rec("D.J. Swearingen", district="89")

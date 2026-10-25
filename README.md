@@ -47,6 +47,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
 | `… seats` | Each seat's last election, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
+| `… photocopies` | Weigh every portrait the build shows outside Wikimedia (a ranged GET, one request a second per host) and make a smaller copy, in headless Chrome, of each over 300 KB or 1,200 px, writing `photos/<hash>.jpg` and `data/photo_copies.json` (`--check` reports the copies and what is left; `--limit N`, oldest first; `--max-minutes M`, a time budget for the whole run: the weighing stops early enough to leave the copy maker its share, is saved before Chrome starts, and Chrome starts no copy past the deadline; `--force` reads again what was read in the last 7 days). See [Smaller copies of heavy portraits](#smaller-copies-of-heavy-portraits) |
 | `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
@@ -73,13 +74,13 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3324 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3367 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
-`campaigns`, `enrich`, `odds`, `votes` and `congress` touch the network, with
+`campaigns`, `enrich`, `odds`, `votes`, `photocopies` and `congress` touch the network, with
 the other refresh commands listed above. `build` and
 `verify` are fully offline and read the committed caches and snapshot.
 
@@ -133,6 +134,7 @@ CI asserts that a rebuild changes nothing.
 | `overrides.py` | Hand-curated corrections (statuses, 2026 Senate seats) |
 | `photos.py` | Runtime portrait fallback chain (safety net) |
 | `portraits.py` | Build-time portrait resolution and checking |
+| `photocopies.py` | Smaller copies of the heavy portraits the site shows, made in headless Chrome (`tools/make_photo_copies.mjs`), and the checks on them (the `photocopies` command, rule 101) |
 | `fec.py` | Campaign finance from the OpenFEC API |
 | `voteview.py` | DW-NOMINATE ideology scores: the first dimension, worded on its own left-right scale (never a party's name) with the Congress the score is from |
 | `profiles.py` | Assemble profiles; derive 2026 election flags and field provenance |
@@ -1163,6 +1165,7 @@ URL, and `validate` fails a `photoSet` that names another file.
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
 | `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id) or `state-legislature` (the legislature's own page for a nominee who sits in it) |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
+| `photoCopy` | `{src, of, ofBytes}`: the smaller copy this site made of the first entry, `of` being that entry's address and `ofBytes` its weight, `src` the copy under `photos/` from the site's root, stamped with its hash. Only for a credited portrait over 300 KB or 1,200px, and only for the person the copy was made for; the page loads it in the first entry's place and falls back to the original (rule 101) |
 | `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page). Absent for the silhouette |
 
 ### Credits and weights
@@ -1242,9 +1245,65 @@ bytes and pixel size; `validate` fails a shown one without them
 (`photo-unevidenced`). Washington's voters' guide and Alaska's and Oregon's
 pamphlets print candidates' photographs, but only base64 inside JSON or
 inside PDFs, so there is no file to link; an unmodified hosted copy, which
-the owner allowed on 2026-10-25, waits for the site's store of copies. The page offers a srcset no size wider than a 2x screen
+the owner allowed on 2026-10-25, waits for a follow-up to the site's store
+of copies, which copies only files with an address of their own. The page offers a srcset no size wider than a 2x screen
 needs for the width it draws, so a 165px card stops at the 330px file and a
 judge's 116px portrait at the 250px one.
+
+### Smaller copies of heavy portraits
+
+Where a portrait the site already shows is over 300 KB or 1,200px and its
+host offers nothing smaller, the site shows a smaller copy it made itself
+(rule 101; the owner's decision of 2026-10-25). The legislature pages drew
+the Oklahoma Senate's 9-12.5 MB portraits in a 56x70 box; one chamber's list
+was some 300 MB on a phone. `photocopies` weighs every non-Wikimedia
+portrait address the build shows - the legislators' (`data/legislature/`,
+only those on the legislature's own host or a government's: a copy of a
+news site's, a campaign's or a party's photograph is not hosted here),
+the White House's (`data/federal.js`), the governors', statewide
+officers', justices' and statewide candidates' (`data/stategov.js`; a
+justice's or a candidate's only on a government's host or the court's own,
+or the holder's office photograph the holder's card shows) and the
+profiles' first portraits - and
+draws each heavy one once in headless Chrome, scaled down (never up) to
+just cover three times the largest box a page draws that kind in:
+
+| Kind | Largest box (CSS px, `kyc.css`) | Copy covers |
+|---|---|---|
+| Legislator | 56x70 (`.leg-photo`) | 168x210 |
+| Federal official | 116x145 (the dialog; the hub's card is 72x90) | 348x435 |
+| Governor | 72x72 (`.gov-portrait`) | 216x216 |
+| Statewide officer | 40x40 (`.gov-officer-photo`) | 120x120 |
+| Justice, statewide candidate | 32x32 (`.gov-photo`) | 96x96 |
+| Profile | 180x225 (a card at its widest) | 540x675 |
+
+A copy is a JPEG at quality 0.86 under `candidate_profiles_site/photos/`,
+named by its own sha256; `data/photo_copies.json` (hand-editable) records
+for each original the records that show it, its bytes, pixels, sha256,
+ETag, Last-Modified and the day read, and its copy's file, hash, bytes,
+pixels, box, Chrome version and quality, the original's pixels as drawn
+(`from`), and the people it was made for (`for`). A copy is never remade
+while the original's hash is unchanged, so a rebuild needs only the
+committed files; an original that changes is read again and recopied, its
+old copy withdrawn at once; one answering 404 or 410 twice loses its copy.
+A copy is shown only for a person in its `for`: an address that now shows
+someone else (a seat's file passed to a successor) shows the original until
+the file is read again whole, at once, and is the very file copied; a
+legislature's own photograph only where the file read is the one
+`legphotos` weighed. The record keeps its original (`image`, `photo`,
+`headshot`, `photos[0]`) and gains `photoCopy: {src, of, ofBytes}`; the
+credit line stays the original's and adds "a smaller copy made by this site
+of the original file (12.4 MB)", linked to it. A copy that fails to load
+gives way to the original (a White House photograph to the White House's
+own smallest size of it), and the note goes. On 2026-10-25 the first runs
+weighed 7,491 of 7,716 addresses (Maine's host resets every connection from
+this machine) and made 1,557 copies; the review then kept to official
+hosts, leaving 1,409 - 1,383 legislators' (36 of them members `legphotos`
+used to leave out as offered only heavier files), 15 of the White House's
+and 11 campaign portraits - for some 2.4 GB of originals, in 14.0 MB. The
+refresh runs a batch after every step that sets a portrait, before the
+rebuild; the people it reads are the last build's, so a campaign portrait
+set in the same refresh is copied by the next.
 
 Set `"pinned": true` on a cache entry to stop the resolver overwriting a
 hand-corrected URL.
@@ -1860,8 +1919,8 @@ audit 2026-10-17):
 | Party, and "Also on the ... line" | Open States' party label, split at "/": New York's and Connecticut's fusion lines are not parties, so "Democratic/Working Families" counts as Democratic | `party_name`, `fusion_lines` |
 | District office phone, capitol phone and address | Open States' `district_voice`, `capitol_voice`, `capitol_address`, labelled as which office; the bulk export carries no capitol phone today | `_person` |
 | One page, labelled as what it is | The member's page on a host of `LEGISLATURE_HOSTS` ("Official page"); never a file, a party caucus's page on the legislature's host, a past numbered General Assembly or Legislature (Illinois's `GA=`, Arizona's `legislature=`, Delaware's `/AssemblyMember/150/`), a page whose address names another member and not them (Rhode Island's roster links some twenty members to one colleague's page), a page for the other chamber, or one keyed to another district (`districts_in`: Kentucky's `DistrictNumber=`, Louisiana's `H_Reps/members?ID=`, Texas's `?district=`, California's `sdNN`, Florida's `/Senators/sNN`), which shows whoever holds that seat now - Open States keeps a senator's old House pages. A page chosen for two members is neither's. Where only the legislature's list of their bills is linked (Connecticut), "Bills on the legislature's site"; where only a past session's page is (33 in Indiana, 9 in Hawaii), it is shown with its session, a fallback, never as current; where the legislature's site has nothing, their page on a party caucus's site (`CAUCUS_SITES`: every Michigan legislator's), "Party caucus page: <caucus>", or the chamber's member list (Alabama's ALISON). Alabama's old ALIS pages are not used: they time out. A member with none says so on the card, and `build` and `build --check` count each kind | `member_page`, `pages_for` |
-| Portrait | Open States' image, unless it is a search engine's thumbnail (gstatic, googleusercontent) or `statelegs` confirmed it missing - a GET answered 404 or 410 (never HEAD, which Massachusetts answers 404 for portraits it serves). A 200 that is not an image, a refusal, a throttle or a timeout concludes nothing (rule 8); each answer stands 14 days. `statelegs --images-only` checks again without refetching the roster | `check_portrait`, `check_images` |
-| Portrait where Open States has none (`image`, `imageCredit`) | The legislature's own: Montana's roster API, New Jersey's bio records, Oklahoma's House pages, Louisiana's and Connecticut's seat pages, Indiana's IGA records, Ohio's directories, Colorado's list, and any other state's member page (for their own chamber) where the image's alt, file name or the member's own key in the page's address names them - never an album's or a gallery's photograph, nor one file offered on two members' pages. Only a rendition the legislature offers within 300 KB and 1,200 px; a member offered only heavier files is left without one and counted. A seat-keyed file (by district, or by surname and district, Kentucky's `senate1NN` among them) is shown only when dated on or after the member's arrival and only for the seat it was read for; a host that stamps its files by a deploy (California's Assembly), or a batch of seat files copied together long after the member arrived (Louisiana's of May 2024), does not date it. A page that calls the member former (New Mexico's `Former_Legislator`) or a directory listing their seat as vacant gives no photograph, and `build` names them for the roster to be checked. Michigan (party caucuses' photographs only) is not read; Kansas's pages name files that answer 404 and are read again each run; pages drawn by script are listed as unread. Credited `Photo: <legislature>`, linked to the page it was read from; Open States' own portrait is credited the same way, linked to the member's page, when the legislature serves it | rule 100, `legphotos` |
+| Portrait | Open States' image, unless it is a search engine's thumbnail (gstatic, googleusercontent) or `statelegs` confirmed it missing - a GET answered 404 or 410 (never HEAD, which Massachusetts answers 404 for portraits it serves). A 200 that is not an image, a refusal, a throttle or a timeout concludes nothing (rule 8); each answer stands 14 days. `statelegs --images-only` checks again without refetching the roster. Off the legislature's own host, credited to no one: "Photo: from (the host), as listed by Open States". Over 300 KB or 1,200 px and on the legislature's or a government's host, shown as the smaller copy this site made of it (`photoCopy`) | `check_portrait`, `check_images`, rule 101 |
+| Portrait where Open States has none (`image`, `imageCredit`) | The legislature's own: Montana's roster API, New Jersey's bio records, Oklahoma's House pages, Louisiana's and Connecticut's seat pages, Indiana's IGA records, Ohio's directories, Colorado's list, and any other state's member page (for their own chamber) where the image's alt, file name or the member's own key in the page's address names them - never an album's or a gallery's photograph, nor one file offered on two members' pages. Only a rendition the legislature itself offers, the lightest within 300 KB and 1,200 px where there is one; where it offers only heavier files, the lightest of them, marked `heavy`, checked like any other and shown as the smaller copy `photocopies` makes (rule 101; such members were left without one until 2026-10-25). A seat-keyed file (by district, or by surname and district, Kentucky's `senate1NN` among them) is shown only when dated on or after the member's arrival and only for the seat it was read for; a host that stamps its files by a deploy (California's Assembly), or a batch of seat files copied together long after the member arrived (Louisiana's of May 2024), does not date it. A page that calls the member former (New Mexico's `Former_Legislator`) or a directory listing their seat as vacant gives no photograph, and `build` names them for the roster to be checked. Michigan (party caucuses' photographs only) is not read; Kansas's pages name files that answer 404 and are read again each run; pages drawn by script are listed as unread. Credited `Photo: <legislature>`, linked to the page it was read from; Open States' own portrait is credited the same way, linked to the member's page, when the legislature serves it | rule 100, `legphotos` |
 | Seats by party, majority, coalition note | The state page's own count (`stategov.chamber`) and note (`stategov.COALITIONS`); a different answer is a build error | `_count` |
 | One square per seat | The same count: Republicans from the left and Democrats from the right, as the counts beside them read, nobody listed as an outline, a tick above and below at half the seats (none for Nebraska's nonpartisan chamber). Also on every state page and the directory, with one key each (`KYC.seatStrip`, `KYC.seatKey`) | rules 51, 73 |
 | Seats on the Nov 3 ballot, and which districts | `ballot2026`'s record, read into districts only where its list or rule names exactly as many seats as it says are up; the term only where that record states one. A district the record names for a special election for the rest of a term (Kansas Senate 24 and 25, Nebraska 41, New Mexico Senate 33, Colorado Senate 17, 21, 29 and 31, ...) is marked `special` and its panel says first that it is on the ballot; a special naming no district on the map fails the build. The record is quoted only where it says more than "all" or "none" | `seats_up`, `specials`, `term_years` |
@@ -2126,7 +2185,7 @@ the day, its bytes and size):
    Washington's VoteWA (base64 in the page), Alaska's statements (encrypted
    PDFs) and Oregon's pamphlet (JPEG 2000) have no address of their own;
    they wait for the follow-up the owner allowed on 2026-10-25, which hosts
-   unmodified copies once rule 101's copies (feature/photo-copies) land;
+   unmodified copies (rule 101's copies are of files with an address);
 4. the race's own Wikipedia article ("2026 Kansas gubernatorial
    election"), the link it gives the candidate, matched on given name and
    surname within that race and never on a one-word name, the article

@@ -266,11 +266,15 @@
       : key === "lt" ? ", running with " + KYC.escapeHtml(person.runningMate) + " for governor"
       : ", with " + KYC.escapeHtml(person.runningMate) + " for lieutenant governor";
     var name = person.record ? link(person.record, person.name) : KYC.escapeHtml(person.name);
-    var credit = person.photo ? KYC.photoCreditHtml(person.photoCredit) : "";
+    // The smaller copy this site made of a heavy one, credited as the
+    // original with the copy said (rule 101: KYC.photoAttrs, KYC.copyCredit).
+    var credit = person.photo
+      ? KYC.photoCreditHtml(KYC.copyCredit(person.photoCredit, person.photo, person.photoCopy)) : "";
     var photo = !pictured ? ""
       : person.photo && credit
-        ? '<img class="gov-photo gov-candidate-photo" src="' + KYC.escapeAttr(person.photo) +
-          '" alt="" width="32" height="32" loading="lazy" decoding="async">'
+        ? '<img class="gov-photo gov-candidate-photo" ' +
+          KYC.photoAttrs(person.photo, person.photoCopy) +
+          ' alt="" width="32" height="32" loading="lazy" decoding="async">'
         : NO_SMALL_PHOTO;
     return '<li class="gov-candidate' + (pictured ? " gov-pictured" : "") + '">' + photo +
       '<span class="gov-candidate-text"><span class="gov-candidate-name"' +
@@ -624,8 +628,10 @@
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
       // A holder without a photograph keeps the photograph's column, an
       // empty circle, so the names line up down the card (STATEGOV-13).
-      body = (off.photo ? '<img class="gov-officer-photo" src="' + KYC.escapeAttr(off.photo) +
-          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : NO_PHOTO) +
+      // The smaller copy this site made of a heavy one, or the photograph
+      // itself (rule 101: KYC.photoAttrs).
+      body = (off.photo ? '<img class="gov-officer-photo" ' + KYC.photoAttrs(off.photo, off.photoCopy) +
+          ' alt="" width="40" height="40" loading="lazy" decoding="async">' : NO_PHOTO) +
         '<p class="gov-officer-name">' + who(off) + "</p>" +
         (off.title.toLowerCase() !== label.toLowerCase()
           ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
@@ -691,13 +697,15 @@
           var shot = photos[name];
           return '<li class="gov-court-member' + (pictured ? " gov-pictured" : "") + '">' +
             (!pictured ? ""
-              : shot ? '<img class="gov-photo gov-court-photo" src="' + KYC.escapeAttr(shot.photo) +
-                '" alt="" width="32" height="32" loading="lazy" decoding="async">'
+              : shot ? '<img class="gov-photo gov-court-photo" ' +
+                KYC.photoAttrs(shot.photo, shot.photoCopy) +
+                ' alt="" width="32" height="32" loading="lazy" decoding="async">'
               : NO_SMALL_PHOTO) +
             '<span class="gov-court-text"><span class="gov-court-name">' + KYC.escapeHtml(name) +
             (name === court.chief ? ' <span class="faint">' + chiefTitle + "</span>" : "") + "</span>" +
             (shot ? '<span class="gov-photo-credit">' +
-              KYC.photoCreditHtml({ by: whose, page: shot.page }) + "</span>" : "") +
+              KYC.photoCreditHtml(KYC.copyCredit({ by: whose, page: shot.page }, shot.photo,
+                shot.photoCopy)) + "</span>" : "") +
             "</span></li>";
         }).join("") + "</ul>" +
         '<p class="faint">' + members.length + " of " + court.seats + " seats" +
@@ -730,8 +738,8 @@
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join(" · ");
     var html = '<div class="gov-card">' +
       (gov.headshot
-        ? '<img class="gov-portrait" src="' + KYC.escapeAttr(gov.headshot) +
-          '" alt="" width="72" height="72" loading="lazy" decoding="async">'
+        ? '<img class="gov-portrait" ' + KYC.photoAttrs(gov.headshot, gov.photoCopy) +
+          ' alt="" width="72" height="72" loading="lazy" decoding="async">'
         : "") +
       '<div class="gov-who">' +
       officeLine("gov-role", "Governor", officeMark(code, "governor")) + openSeat(code, "governor") +
@@ -803,7 +811,8 @@
    *  association, or the office whose page it was taken from. */
   function photoSources(s) {
     var gov = s.governor || {};
-    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage]];
+    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage,
+      gov.headshot && KYC.copyOf(gov.headshot, gov.photoCopy)]];
     [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
       .forEach(function (pair) {
         var off = pair[1] || {};
@@ -811,11 +820,22 @@
         // branch) credits one.
         var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
           off.vacant || off.none || off.notMember);
-        rows.push([pair[0], drawn && off.photoBy, off.photoPage]);
+        rows.push([pair[0], drawn && off.photoBy, off.photoPage,
+          drawn && KYC.copyOf(off.photo, off.photoCopy)]);
       });
+    // A smaller copy this site made of a heavy one says so, and links the
+    // original (rule 101), as the credit line under a portrait does; the
+    // note goes if the copy fails and the original is drawn
+    // (KYC.retryOriginal removes every note naming that original).
     var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
+      var copy = row[3];
       return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
-        (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1]));
+        (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1])) +
+        (copy ? '<span class="photo-copy-note" data-copy-of="' + KYC.escapeAttr(copy.of) +
+          '"> (a smaller copy made by this site of ' +
+          link(copy.of, "the original file" +
+            (copy.ofBytes ? " (" + KYC.weightWords(copy.ofBytes) + ")" : "")) + ")</span>"
+          : "");
     });
     return said.length ? " Photographs: " + said.join("; ") + "." : "";
   }
@@ -838,6 +858,8 @@
    * broken image. Error events do not bubble, so this listens on capture. */
   global.document.addEventListener("error", function (event) {
     var img = event.target;
+    // A copy that fails falls back to its original first (rule 101).
+    if (img && img.tagName === "IMG" && KYC.retryOriginal(img, event)) return;
     if (img && img.classList && img.classList.contains("gov-officer-photo")) {
       // The row keeps its column, as a holder never pictured does.
       var holder = global.document.createElement("span");

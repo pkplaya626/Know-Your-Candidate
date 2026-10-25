@@ -265,7 +265,7 @@ def image_sizes(urls, log=None):
 # description page is the record of who made it and on what terms, so the
 # credit is read from it - never typed in - and stored with the portrait.
 
-_CREDIT_FIELDS = "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree"
+_CREDIT_FIELDS = "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree|DateTimeOriginal"
 
 # Which reading of a file's description page a stored credit is. A credit
 # read by an earlier form is read again: the first printed Commons' hidden
@@ -358,6 +358,16 @@ def licence_name(code):
     return LICENCE_NAMES.get(code, code) if code else None
 
 
+def year_of(text):
+    """The year a file's description page dates it to, where it names
+    exactly one four-digit year ("2005", "2017-05-25 11:50:06", "21 August
+    2009, per metadata"), else ``None``: a date Commons does not give is
+    never guessed (rule 101's justices' years)."""
+    # "the 1990s" is a decade, not a year.
+    years = set(re.findall(r"(?<!\d)(1[89]\d\d|20\d\d)(?!\d|'?s\b)", plain_text(text) or ""))
+    return int(years.pop()) if len(years) == 1 else None
+
+
 def credit_of(info):
     """The credit a Commons file's own description page gives it:
     ``{"by", "licence", "licenceUrl", "file", "attribution", "nonFree",
@@ -377,6 +387,10 @@ def credit_of(info):
         "attribution": (field("AttributionRequired") or "").lower() == "true",
         "nonFree": (field("NonFree") or "").lower() == "true",
         "form": CREDIT_FORM,
+        # When the photograph was taken, as the file's page dates it: read
+        # with the author and licence, shown only for a justice's official
+        # portrait (judge_links), whose year a reader needs to know.
+        "year": year_of((meta.get("DateTimeOriginal") or {}).get("value")),
     }
 
 

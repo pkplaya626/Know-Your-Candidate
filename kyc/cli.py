@@ -178,19 +178,23 @@ def _build(args):
     else:
         print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
               "articles and campaign sites")
-    # A candidate's portrait offered only over the caps is shown at full
-    # size and said here (rule 87; the owner's decision of 2026-10-25):
-    # never the silhouette for its weight.
+    # A candidate's portrait offered only over the caps is shown all the
+    # same and said here (rule 87; the owner's decision of 2026-10-25):
+    # never the silhouette for its weight. Where this site made a smaller
+    # copy of it (rule 101) the copy is drawn; the copies' line says how many.
     from . import nominee_photos, photos as photos_mod
     heavy = ((stats.get("enriched") or {}).get("portrait_heavy", 0)
              + nominee_photos.heavy_shown(profiles, cache or {}))
     stats["portraits_heavy"] = heavy
-    print(f"  candidates' portraits shown at full size, which no resizer serves under "
-          f"{photos_mod.MAX_PORTRAIT_BYTES // 1000} KB or {photos_mod.MAX_PORTRAIT_PX}px: "
-          f"{heavy}")
-    # Whose photograph each portrait is, once every source has had its say.
+    print(f"  candidates' portraits no resizer serves under "
+          f"{photos_mod.MAX_PORTRAIT_BYTES // 1000} KB or {photos_mod.MAX_PORTRAIT_PX}px, "
+          f"shown all the same (at full size, or as this site's copy): {heavy}")
+    # Whose photograph each portrait is, once every source has had its say;
+    # then the smaller copy of a heavy one this site made (rule 101).
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
+    from . import photocopies
+    stats["photo_copies"] = photocopies.apply_people(profiles, photocopies.load(args.root))
     # The offices each person has held, by id; a challenger's only while
     # their profile links the article they were read from (rule 20).
     from . import history as history_mod
@@ -333,6 +337,28 @@ def _build(args):
     for level, code, message in legphotos.problems(
             legphotos.load_cache(args.root), (statelegs.load_cache(args.root) or {}).get("states")):
         issues.append(validate.Issue(level, code, message, ""))
+    # The smaller copies of heavy portraits (rule 101): every file under
+    # photos/ in the manifest with its hash, within its size.
+    from . import photocopies
+    for level, code, message in photocopies.problems(photocopies.load(args.root), args.root):
+        issues.append(validate.Issue(level, code, message, ""))
+    if args.check:
+        # And each copy shown only for its own original and record, credited,
+        # with what is left to weigh or copy (rule 101), where a reviewer
+        # runs the documented validate-only command (the reviewers of PR
+        # #137); a writing build checks the same after it builds.
+        try:
+            copies_shown = photocopies.gather(args.root, people=profiles)
+        except Exception as exc:  # noqa: BLE001 - reported, never silent
+            issues.append(validate.Issue("error", "photo-copy-unchecked",
+                                         f"the records showing copies could not be built: {exc}", ""))
+        else:
+            for level, code, message in photocopies.problems(
+                    photocopies.load(args.root), args.root, copies_shown, files=False):
+                issues.append(validate.Issue(level, code, message, ""))
+            if not args.json:
+                print(f"  smaller copies of heavy portraits: "
+                      f"{photocopies.stats(photocopies.load(args.root), copies_shown)}")
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -509,6 +535,18 @@ def _build(args):
     print(f"[ok] federal government: {len(fed_payload['offices'])} Cabinet offices, "
           f"{fed_payload['judges']:,} judges on {len(fed_courts)} courts; "
           f"{len(fed_written)} file(s) rewritten")
+
+    # Each copy shown only for its own original, credited; and what is left
+    # to weigh or copy, by kind (rule 101: never silent).
+    shown = photocopies.Shown().add_legislatures(legislatures, legphotos.load_cache(args.root))
+    shown.add_people(profiles).add_stategov(state_gov).add_federal(fed_payload)
+    copy_issues = photocopies.problems(photocopies.load(args.root), args.root, shown, files=False)
+    for level, code, message in copy_issues:
+        print(f"  [{'error' if level == 'error' else 'warn'}] {code}: {message}",
+              file=sys.stderr if level == "error" else sys.stdout)
+    print(f"[ok] smaller copies of heavy portraits: {photocopies.stats(photocopies.load(args.root), shown)}")
+    if any(level == "error" for level, _, _ in copy_issues):
+        return 2
 
     # The guide's maps: rewritten only when what they say changed.
     from . import government_maps
@@ -1517,6 +1555,8 @@ def _verify(args):
     enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
+    from . import photocopies
+    stats["photo_copies"] = photocopies.apply_people(profiles, photocopies.load(args.root))
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
                             snapshot=legislators.load_snapshot(args.root))
@@ -1650,8 +1690,10 @@ def _verify(args):
                   f"the tribal directory ({search_committed[:16]}...)")
 
     from . import stategov
+    gov_built = None
     try:
-        gov_expected = emit.stategov_signature(stategov.build(args.root)[0])
+        gov_built = stategov.build(args.root)[0]
+        gov_expected = emit.stategov_signature(gov_built)
     except stategov.StateGovError as exc:
         gov_expected = None
         problems.append(str(exc))
@@ -1777,6 +1819,20 @@ def _verify(args):
             print(f"  ok  {name}: {note}")
         else:
             problems.append(f"{name}: {note}")
+
+    # The smaller copies of heavy portraits (rule 101): each on disk with its
+    # hash, and each shown only in place of its own original, credited.
+    from . import photocopies
+    from . import legphotos
+    shown = photocopies.Shown().add_legislatures(legislatures, legphotos.load_cache(args.root))
+    shown.add_people(profiles).add_stategov(gov_built).add_federal(fed[0] if fed else None)
+    copy_errors = [(code, message) for level, code, message in photocopies.problems(
+        photocopies.load(args.root), args.root, shown) if level == "error"]
+    for code, message in copy_errors:
+        problems.append(f"{code}: {message}")
+    if not copy_errors:
+        print(f"  ok  {photocopies.PHOTOS_DIR}: every copy is in {photocopies.CACHE_PATH} with "
+              f"its hash, and shown only for its own original")
 
     if problems:
         print("\n[error] the committed site is not self-consistent:", file=sys.stderr)
@@ -2409,6 +2465,28 @@ def _statelegs(args):
     return 0
 
 
+def _photocopies(args):
+    """Weigh every portrait the build shows outside Wikimedia and make a
+    smaller copy of each over the caps, in headless Chrome (rule 101,
+    kyc/photocopies.py)."""
+    from . import photocopies
+    if args.check:
+        issues = photocopies.problems(photocopies.load(args.root), args.root,
+                                      photocopies.gather(args.root))
+        for level, code, message in issues:
+            print(f"  [{level}] {code}: {message}")
+        return 1 if any(level == "error" for level, _, _ in issues) else 0
+    report = photocopies.run(args.root, limit=args.limit, max_minutes=args.max_minutes,
+                             force=args.force)
+    print("  " + ", ".join(f"{n} {k}" for k, n in report.items()))
+    issues = photocopies.problems(photocopies.load(args.root), args.root,
+                                  photocopies.gather(args.root))
+    for level, code, message in issues:
+        print(f"  [{level}] {code}: {message}")
+    print(f"[ok] wrote {photocopies.CACHE_PATH}")
+    return 1 if any(level == "error" for level, _, _ in issues) else 0
+
+
 def _legphotos(args):
     """Portraits of the state legislators Open States has none for, from
     each legislature's own pages and records (kyc/legphotos.py)."""
@@ -2738,6 +2816,18 @@ def build_parser():
     photos.add_argument("--force", action="store_true",
                         help="read again entries younger than legphotos.RECHECK_DAYS")
 
+    copies = add("photocopies", help="weigh the portraits shown and make smaller copies of the "
+                                     "heavy ones in headless Chrome (rule 101)")
+    copies.add_argument("--check", action="store_true",
+                        help="report the committed copies and what is left; no network")
+    copies.add_argument("--limit", type=int, default=None,
+                        help="read at most N addresses, oldest first")
+    copies.add_argument("--max-minutes", type=float, default=None,
+                        help="read no new address after this many minutes, then make the copies, "
+                             "save and stop (it resumes)")
+    copies.add_argument("--force", action="store_true",
+                        help="read again addresses read in the last photocopies.RECHECK_DAYS")
+
     census = add("census", help="count each state's local governments (Census of Governments)")
     census.add_argument("--check", action="store_true",
                         help="report the committed cache; make no network call")
@@ -2773,6 +2863,8 @@ def main(argv=None):
         return _geo(args)
     if args.command == "legphotos":
         return _legphotos(args)
+    if args.command == "photocopies":
+        return _photocopies(args)
     if args.command == "census":
         return _census(args)
     if args.command == "statelegs":

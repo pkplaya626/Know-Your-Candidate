@@ -20,7 +20,7 @@ import re
 import unicodedata
 import urllib.parse
 
-from . import ballot2026, geo, legphotos, statelegs
+from . import ballot2026, geo, legphotos, photocopies, statelegs
 from . import districts as D
 from .government_maps import LOWER_CHAMBER, SEATS, STATES
 from .pages import state_name
@@ -761,6 +761,14 @@ def card_photo(record, code="", page=None, photos=None):
                     and legphotos.official_host(code, page["url"])):
                 credit["page"] = page["url"]
             out["imageCredit"] = credit
+        else:
+            # Any other is said to be where Open States found it, never
+            # "Photo: <host>": a host is not whose photograph it is (a news
+            # site, an image CDN; the reviewers of PR #137). The same words
+            # on every such card, whether the page shows the file or a
+            # smaller copy of it (rule 101).
+            out["imageCredit"] = {"host": photocopies.host_of(out["image"]),
+                                  "listedBy": "Open States"}
     elif out["kind"] == "legislature":
         own = legphotos.entry_for(record, photos)
         out["image"] = own["image"]
@@ -947,6 +955,8 @@ def build(root=".", codes=None, dropped=None):
         raise LegislatureError(str(exc)) from exc
     places = D.load_places(root)
     photos = legphotos.load_cache(root)
+    # The smaller copies this site made of the heavy ones (rule 101).
+    copies = photocopies.load(root)
     out = {}
     for code in codes or STATES:
         roster = cache["states"].get(code) or []
@@ -956,6 +966,7 @@ def build(root=".", codes=None, dropped=None):
         counts = {} if dropped is None else dropped.setdefault(code, {})
         out[code] = build_state(code, root, places, roster, control.get(code),
                                 cache.get("fetched", ""), counts, photos)
+        photocopies.apply_legislature(out[code], copies, code, photos)
     return out
 
 

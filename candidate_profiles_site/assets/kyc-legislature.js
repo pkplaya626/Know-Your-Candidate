@@ -119,8 +119,10 @@
     if (p.email) contact.push('<a href="mailto:' + KYC.escapeAttr(p.email) + '">' +
       KYC.escapeHtml(p.email) + "</a>");
     return '<article class="leg-person">' +
-      (p.image ? '<img class="leg-photo" src="' + KYC.escapeAttr(p.image) +
-        '" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : "") +
+      // The smaller copy this site made of a heavy portrait, or the
+      // portrait itself (rule 101: KYC.photoAttrs).
+      (p.image ? '<img class="leg-photo" ' + KYC.photoAttrs(p.image, p.photoCopy) +
+        ' alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">' : "") +
       '<div class="leg-who"><p class="leg-name">' + KYC.escapeHtml(p.name) + "</p>" +
       '<p class="leg-party ' + KYC.escapeAttr("party-" + ({ D: "d", R: "r", I: "i" }[p.partyKey] || "vacant")) +
       '">' + KYC.escapeHtml(p.party) + "</p>" +
@@ -135,7 +137,8 @@
       pageLink(p) +
       // Whose photograph it is, where the legislature's own record gave it
       // (rule 87: kyc/legphotos.py).
-      (p.image && p.imageCredit ? '<p class="leg-credit">' + KYC.photoCreditHtml(p.imageCredit) + "</p>" : "") +
+      (p.image && p.imageCredit ? '<p class="leg-credit">' +
+        KYC.photoCreditHtml(KYC.copyCredit(p.imageCredit, p.image, p.photoCopy)) + "</p>" : "") +
       "</div></article>";
   }
 
@@ -318,9 +321,16 @@
     doc.addEventListener("error", function (event) {
       var img = event.target;
       if (!img || !img.classList || !img.classList.contains("leg-photo")) return;
+      var card = img.closest(".leg-person");
+      // A copy this site made that fails gives way to its original, and the
+      // credit stops calling it a copy (rule 101).
+      if (KYC.retryOriginal(img, event)) {
+        var note = card && card.querySelector(".photo-copy-note");
+        if (note) note.remove();
+        return;
+      }
       // Its credit goes with it: a card never credits a photograph it
       // does not show (rule 87).
-      var card = img.closest(".leg-person");
       var credit = card && card.querySelector(".leg-credit");
       if (credit) credit.remove();
       img.remove();
