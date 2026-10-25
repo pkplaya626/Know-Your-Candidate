@@ -13,8 +13,12 @@ but offers no image address to link:
   candidate list; the statement's heading names the office and the
   candidate, and the page draws one photograph.
 * **Oregon's State Voters' Pamphlet** is one PDF book per county, each page
-  two candidates in two columns, the photograph beside the name. Its images
-  are JPEG 2000, which no browser draws (``ELSEWHERE``).
+  two candidates in two columns, the photograph at the head of each under
+  the office's heading, the name beside it in large type. Its images are
+  JPEG 2000, which no browser draws: each is decoded losslessly here
+  (:mod:`kyc.jpx`, standard library only - the reversible coding gives back
+  every pixel as coded, and on 2026-10-25 they matched Chrome's own PDF
+  renderer one for one) and kept as a PNG (method "decoded").
 
 On 2026-10-25 the owner allowed this site to host such official photographs
 as unmodified copies, credited and sourced ("more content is better than
@@ -39,9 +43,9 @@ picture this site made, not the guide's.
 last build showed with no photograph (the November ballot's people in these
 states, and the statewide candidates), writes each joined photograph's bytes
 to ``photos/`` named by their hash and lists it in rule 101's manifest
-(``data/photo_copies.json``, ``hosted``: method "unmodified", the guide's
-page and the JSON or PDF address, sha256, bytes, pixel size, the day read and
-whom it shows), and keeps the join here, in ``data/guide_photos.json``, with
+(``data/photo_copies.json``, ``hosted``: its method, the guide's page and the
+JSON or PDF address, sha256, bytes, pixel size, the day read and whom it
+shows; for a decoded one, the codestream's hash and the decoder), and keeps the join here, in ``data/guide_photos.json``, with
 the guide's words and the day read. The build shows it only where no other
 route gives the person a photograph, and only while the join still holds.
 A guide that cannot be read keeps its last photographs (rule 8).
