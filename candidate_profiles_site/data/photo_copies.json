@@ -78174,13 +78174,19 @@
    "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/37A.gif?v=112221": {
-   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "bytes": 206928,
+   "etag": "\"3419959f4235db1:0\"",
+   "gone": 0,
+   "height": 675,
    "kinds": [
     "legislator"
    ],
+   "lastModified": "Tue, 12 Nov 2024 20:36:59 GMT",
+   "read": "2026-10-25",
    "records": [
     "legislator:MN:ocd-person/d32d0b31-20af-4068-a5bd-42fd0a072ded"
-   ]
+   ],
+   "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/37B.gif": {
    "bytes": 223908,
