@@ -2788,8 +2788,11 @@ async function testStates() {
       /^In surname order, not ballot order\. (Names are written [^.]*\. )?Source: the Georgia Secretary of State’s list of November candidates \(read /.test(source.textContent) &&
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
-    check("no portrait, no profile link, no money (rules 24, 25, 27)",
-      !block.querySelector("img, a[href*='#/profile/']") && !/\$/.test(block.textContent));
+    // A photograph only by rule 91's routes, each with whose it is beside it.
+    check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
+      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
+        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-candidate-photo") &&
+          /^Photo: ./.test((img.parentNode.querySelector(".gov-photo-credit") || {}).textContent || "")));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -8811,13 +8814,94 @@ async function testStateGov() {
     check("says the territory has none", /The territory has no secretary of state/.test(text), text.slice(0, 300));
   });
 
+  /* A photograph beside a statewide candidate and a justice, each with
+   * whose it is (rules 87 and 91; STATEGOV-13). Drawn from a copy of
+   * Georgia's own record with one photograph given, so the check holds
+   * whoever the caches picture today. */
+  const gaPhotos = await buildPage("states/ga.html");
+  suite("state pages — candidates' and justices' photographs, each credited", () => {
+    const { window } = gaPhotos;
+    const sg = window.kycStateGov.states.GA;
+    const item = sg.ballot2026.offices.governor;
+    const list = item && item.candidates && item.candidates.candidates;
+    const court = sg.court;
+    if (!list || !court || !court.members || !court.members.length) {
+      check("Georgia lists its governor's candidates and its justices", false);
+      return;
+    }
+    const saved = JSON.stringify({ list, photos: court.photos || null });
+    const printed = list.filter((p) => !p.writeIn);
+    printed.forEach((p) => { delete p.photo; delete p.photoCredit; });
+    printed[0].photo = "https://commons.example/thumb/250px-A.jpg";
+    printed[0].photoCredit = { by: "Jane Photographer", licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0", page: "https://commons.example/A",
+      via: "Wikimedia Commons" };
+    if (printed[1]) {
+      printed[1].photo = "https://www.azcleanelections.gov/Custom/Picture/2427";
+      printed[1].photoCredit = { by: "Arizona Citizens Clean Elections Commission",
+        page: "https://www.azcleanelections.gov/Custom/CandidateList?location=" };
+    }
+    court.photos = {};
+    court.photos[court.members[0]] = { photo: "https://court.example/j.jpg", page: "https://court.example/bio" };
+    const box = window.document.createElement("div");
+    box.innerHTML = window.KYC.stategov.render("GA", { links: false });
+    // The governor's list: the card's first (the other offices' lists picture no one here).
+    const block = box.querySelector(".gov-candidates");
+    const rows = [...block.querySelectorAll(".gov-candidate-list:not(.gov-writein-list) .gov-candidate")];
+    const first = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[0].name);
+    check("a candidate's photograph is drawn beside their name",
+      !!first && !!first.querySelector('img.gov-candidate-photo[src="' + printed[0].photo + '"]'));
+    check("with whose it is: author, licence and Commons",
+      !!first && /^Photo: Jane Photographer, CC BY-SA 4\.0, via Wikimedia Commons$/.test(
+        first.querySelector(".gov-photo-credit").textContent), first && first.textContent);
+    if (printed[1]) {
+      const second = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[1].name);
+      check("an official guide's photograph names the guide, linked to its page",
+        !!second && !!second.querySelector('.gov-photo-credit a[href^="https://www.azcleanelections.gov/"]'));
+    }
+    const bare = rows.filter((li) => !li.querySelector("img"));
+    check("a candidate without one keeps the column, an empty circle, and no credit",
+      bare.every((li) => li.querySelector(".gov-photo-none") && !li.querySelector(".gov-photo-credit")),
+      bare.length);
+    check("no photograph is ever drawn without its credit",
+      [...box.querySelectorAll("img.gov-photo")].every((img) =>
+        img.parentNode.querySelector(".gov-photo-credit")));
+    const member = box.querySelector(".gov-court-member");
+    check("a justice's photograph is credited to the court, linked to the page it was read on",
+      !!member && !!member.querySelector('img.gov-court-photo') &&
+        member.querySelector(".gov-photo-credit").textContent ===
+          "Photo: " + court.name + " of " + window.KYC.stateName("GA") &&
+        member.querySelector(".gov-photo-credit a").getAttribute("href") === "https://court.example/bio");
+    // One credit implementation for every photograph (rule 12, PR #135
+    // review): the justices' line is KYC.photoCreditHtml's, as a
+    // candidate's is.
+    check("a justice's credit is KYC.photoCreditHtml's own line",
+      !!member && member.querySelector(".gov-photo-credit").innerHTML ===
+        window.KYC.photoCreditHtml({ by: court.name + " of " + window.KYC.stateName("GA"),
+          page: "https://court.example/bio" }));
+    check("the justice's name and title still read first",
+      !!member && member.querySelector(".gov-court-name").textContent.indexOf(court.members[0]) === 0);
+    // A photograph that fails to load takes its credit with it.
+    window.document.body.appendChild(box);
+    const img = box.querySelector("img.gov-candidate-photo");
+    img.dispatchEvent(new window.Event("error"));
+    check("a photograph that fails to load leaves the circle and no credit",
+      !!first && !first.querySelector("img") && !!first.querySelector(".gov-photo-none") &&
+        !first.querySelector(".gov-photo-credit"));
+    box.remove();
+    // Put the record back as it was for the suites after this one.
+    const back = JSON.parse(saved);
+    list.splice(0, list.length, ...back.list);
+    if (back.photos) court.photos = back.photos; else delete court.photos;
+  });
+
   const tx = await buildPage("states/tx.html");
   const al = await buildPage("states/al.html");
   const ut = await buildPage("states/ut.html");
   suite("state pages — each state's highest court", () => {
     const court = tx.window.kycStateGov.states.TX.court;
     const section = tx.D.getElementById("state-government");
-    const names = [...section.querySelectorAll(".gov-court-member")].map((li) => li.textContent);
+    const names = [...section.querySelectorAll(".gov-court-name")].map((li) => li.textContent);
     check("the court's members are listed, as the court lists them",
       court.members.every((m) => names.some((n) => n.indexOf(m) === 0)), names.join("; "));
     check("the chief comes first, marked as chief", /Chief Justice$/.test(names[0]) &&
@@ -8846,7 +8930,7 @@ async function testStateGov() {
   suite("state pages — a court read by hand, or from a dated roster file", () => {
     const court = ny.window.kycStateGov.states.NY.court;
     const nyText = ny.D.getElementById("state-government").textContent;
-    const nyNames = [...ny.D.querySelectorAll("#state-government .gov-court-member")].map((li) => li.textContent);
+    const nyNames = [...ny.D.querySelectorAll("#state-government .gov-court-name")].map((li) => li.textContent);
     check("New York's judges are listed, with the chief judge first",
       !!court && court.members.length > 0 && nyNames.length === court.members.length &&
       nyNames[0].indexOf(court.chief) === 0 && /Chief Judge$/.test(nyNames[0]), nyNames.join("; "));

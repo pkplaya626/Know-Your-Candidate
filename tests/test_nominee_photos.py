@@ -588,5 +588,35 @@ class TestRoutesByName(unittest.TestCase):
             self.assertEqual(profile["photoCredit"], credit)
 
 
+class EveryRouteAsksBothLists(unittest.TestCase):
+    """PRs #134 and #135 each built a check against NOT_A_PORTRAIT and
+    PORTRAIT_LICENCE_DOUBTS; merged, every route asks the one test,
+    ``photos.refused`` (rule 12), and a campaign site's reader asks both
+    lists where it had asked one."""
+
+    def test_one_test_for_every_route(self):
+        from kyc import enrich, judge_links, official_photos
+
+        page = "https://commons.wikimedia.org/wiki/File:Someone_Official.jpg"
+        upload = judge_links.source_url(page)
+        for table in ("NOT_A_PORTRAIT", "PORTRAIT_LICENCE_DOUBTS"):
+            with unittest.mock.patch.dict(getattr(overrides, table),
+                                          {upload: ("2026-10-25", "a crowd")}):
+                why = photos.refused(upload)
+                self.assertIn(table, why)
+                self.assertEqual(nominee_photos.refused_file(None, upload), why)
+                self.assertEqual(judge_links.held_back({"source": page}), why)
+                self.assertEqual(official_photos.held_back(
+                    {"photo": upload, "credit": {"page": page}}), why)
+                self.assertIsNone(enrich.campaign_portrait({"portrait": upload}))
+                self.assertIsNone(enrich.campaign_portrait(
+                    {"portrait": "https://example.org/small.jpg",
+                     "portraitHeavy": [{"url": upload}]}))
+        self.assertEqual(photos.refused(upload, None), "")
+        self.assertIsNone(judge_links.held_back({"source": page}))
+        self.assertIsNone(official_photos.held_back({"photo": upload}))
+        self.assertEqual(enrich.campaign_portrait({"portrait": upload}), upload)
+
+
 if __name__ == "__main__":
     unittest.main()

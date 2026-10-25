@@ -196,18 +196,11 @@ def label_names(label, profile):
 
 def refused_file(*urls):
     """Why a person refused one of *urls* (``NOT_A_PORTRAIT``,
-    ``PORTRAIT_LICENCE_DOUBTS``), or ``""``."""
-    from . import overrides
+    ``PORTRAIT_LICENCE_DOUBTS``), or ``""``: ``photos.refused``, the one
+    test every route asks."""
+    from .photos import refused
 
-    for url in urls:
-        if not url:
-            continue
-        for table, name in ((overrides.NOT_A_PORTRAIT, "NOT_A_PORTRAIT"),
-                            (getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {}),
-                             "PORTRAIT_LICENCE_DOUBTS")):
-            if url in table:
-                return f"{url} is in overrides.{name} ({table[url][1]})"
-    return ""
+    return refused(*urls)
 
 
 def wide_frame(url, weight):

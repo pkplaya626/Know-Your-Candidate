@@ -4920,6 +4920,31 @@ button.local-county-link {
 .gov-candidate { padding: 1px 0; overflow-wrap: anywhere; }
 .gov-candidate-name { font-weight: 600; color: var(--text); }
 .gov-candidate-party { color: var(--text-muted); }
+/* A candidate or a justice with a photograph: a 32px circle beside the
+ * name, whose it is under it; the rest of that list keep the column. */
+.gov-pictured {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: var(--s-2);
+  align-items: start;
+  padding: 3px 0;
+}
+.gov-photo {
+  display: block;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 20%;
+  background: var(--surface-3);
+}
+.gov-photo-none { background: none; border: 1px dashed var(--border); box-sizing: border-box; }
+.gov-photo-credit {
+  display: block;
+  font-size: var(--t-xs);
+  font-weight: 400;
+  color: var(--text-muted);
+}
 .gov-candidates-uncertified,
 .gov-candidates-none { color: var(--text-muted); }
 .gov-candidates-source { font-size: var(--t-xs); }

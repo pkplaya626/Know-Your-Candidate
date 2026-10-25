@@ -255,22 +255,34 @@
    * form on hover (`printed`); the party in words, never the list's code;
    * a write-in's "party" that says only that it is a write-in dropped. A
    * candidate with a record of their own (Pennsylvania's lieutenant
-   * governors) is linked to it. */
-  function candidateRow(person, key) {
+   * governors) is linked to it. A photograph, where one reached the
+   * candidate by a route tied to them (kyc/statewide_photos.py), sits
+   * beside the name with whose it is under it (rule 87); in a list where
+   * any candidate has one, the rest keep its column, an empty circle. */
+  function candidateRow(person, key, pictured) {
     // A joint ticket: the governor's list names the running mate for
     // lieutenant governor, and the lieutenant governor's the governor.
     var mate = !person.runningMate ? ""
       : key === "lt" ? ", running with " + KYC.escapeHtml(person.runningMate) + " for governor"
       : ", with " + KYC.escapeHtml(person.runningMate) + " for lieutenant governor";
     var name = person.record ? link(person.record, person.name) : KYC.escapeHtml(person.name);
-    return '<li class="gov-candidate"><span class="gov-candidate-name"' +
+    var credit = person.photo ? KYC.photoCreditHtml(person.photoCredit) : "";
+    var photo = !pictured ? ""
+      : person.photo && credit
+        ? '<img class="gov-photo gov-candidate-photo" src="' + KYC.escapeAttr(person.photo) +
+          '" alt="" width="32" height="32" loading="lazy" decoding="async">'
+        : NO_SMALL_PHOTO;
+    return '<li class="gov-candidate' + (pictured ? " gov-pictured" : "") + '">' + photo +
+      '<span class="gov-candidate-text"><span class="gov-candidate-name"' +
       (person.printed ? ' title="' + KYC.escapeAttr("The list prints: " + person.printed) + '"' : "") +
       ">" + name + "</span>" +
       (person.surnameOnly ? ' <span class="faint">(the list gives a surname only)</span>' : "") +
       (person.party ? ' <span class="gov-candidate-party">(' + KYC.escapeHtml(person.party) + ")</span>" : "") +
       mate +
       (person.ballotName ? '<span class="faint">; printed on the ballot as “' +
-        KYC.escapeHtml(person.ballotName) + "”</span>" : "") + "</li>";
+        KYC.escapeHtml(person.ballotName) + "”</span>" : "") +
+      (photo && credit ? '<span class="gov-photo-credit">' + credit + "</span>" : "") +
+      "</span></li>";
   }
 
   /** Where the state's own returns are, after the election: this site does
@@ -286,10 +298,11 @@
    *  November 3 ballot, under the office (rule 91): each name and party as
    *  the list prints them, the running mate on a joint ticket, write-in
    *  candidates apart, credited to the list and the day it was read. No
-   *  portrait, money or platform, and no link to a profile: nothing on the
-   *  list says a candidate is the person of the same name elsewhere on this
-   *  site (rule 25). After the election it is in the past tense and points
-   *  to the state's results. */
+   *  money or platform, and no link to a profile: nothing on the list says
+   *  a candidate is the person of the same name elsewhere on this site
+   *  (rule 25). A photograph only by the routes rule 91 names, with whose
+   *  it is beside it. After the election it is in the past tense and
+   *  points to the state's results. */
   function candidatesBlock(code, key) {
     var item = ballotItem(code, key);
     if (!item || !item.up) return "";
@@ -306,7 +319,8 @@
     }
     var printed = list.candidates.filter(function (p) { return !p.writeIn; });
     var writeIns = list.candidates.filter(function (p) { return p.writeIn; });
-    var row = function (p) { return candidateRow(p, key); };
+    var pictured = list.candidates.some(function (p) { return p.photo && p.photoCredit; });
+    var row = function (p) { return candidateRow(p, key, pictured && !p.writeIn); };
     // The document is named as what it is - "the Florida Division of
     // Elections’ candidate listing", "Clark County Registrar of Voters’
     // notice of general election" - and called certified only where its
@@ -648,7 +662,7 @@
   /** A state's court of last resort: who sits on it, as the court lists
    * them, or why its roster could not be read. No party: a justice is not
    * a party's officeholder. */
-  function courtBlock(court) {
+  function courtBlock(court, code) {
     if (!court) return "";
     var chiefTitle = court.word === "judges"
       ? (/Criminal/.test(court.name) ? "Presiding Judge" : "Chief Judge") : "Chief Justice";
@@ -665,10 +679,27 @@
         return (b === court.chief) - (a === court.chief);
       });
       var short = court.seats - members.length;
-      body = '<ul class="gov-court">' + members.map(function (name) {
-        return '<li class="gov-court-member">' + KYC.escapeHtml(name) +
-          (name === court.chief ? ' <span class="faint">' + chiefTitle + "</span>" : "") + "</li>";
-      }).join("") + "</ul>" +
+      // A justice's photograph from the court's own pages (court_photos),
+      // credited to the court and linked to the page it was read on.
+      var photos = court.photos || {};
+      var pictured = members.some(function (name) { return photos[name]; });
+      // The court by its whole name: "Supreme Court" alone reads as the
+      // nation's.
+      var whose = court.name + (code ? " of " + KYC.stateName(code) : "");
+      body = '<ul class="gov-court' + (pictured ? " gov-court-pictured" : "") + '">' +
+        members.map(function (name) {
+          var shot = photos[name];
+          return '<li class="gov-court-member' + (pictured ? " gov-pictured" : "") + '">' +
+            (!pictured ? ""
+              : shot ? '<img class="gov-photo gov-court-photo" src="' + KYC.escapeAttr(shot.photo) +
+                '" alt="" width="32" height="32" loading="lazy" decoding="async">'
+              : NO_SMALL_PHOTO) +
+            '<span class="gov-court-text"><span class="gov-court-name">' + KYC.escapeHtml(name) +
+            (name === court.chief ? ' <span class="faint">' + chiefTitle + "</span>" : "") + "</span>" +
+            (shot ? '<span class="gov-photo-credit">' +
+              KYC.photoCreditHtml({ by: whose, page: shot.page }) + "</span>" : "") +
+            "</span></li>";
+        }).join("") + "</ul>" +
         '<p class="faint">' + members.length + " of " + court.seats + " seats" +
         (short > 0 ? "; " + short + " with nobody listed by the court" : "") +
         (court.chief ? "" : "; the court lists no " + chiefTitle.toLowerCase()) + ". " +
@@ -738,7 +769,7 @@
       }
       html += '<p class="gov-trifecta">' + KYC.escapeHtml(trifectaText(s.trifecta)) + ".</p>";
     }
-    html += courtBlock(s.court) + courtBlock(s.criminalCourt) + federalCourtsBlock(s.federalCourts, code);
+    html += courtBlock(s.court, code) + courtBlock(s.criminalCourt, code) + federalCourtsBlock(s.federalCourts, code);
     if (opts && opts.links && s.upper) {
       var lower = code.toLowerCase();
       html += '<p class="gov-pages">' +
@@ -800,6 +831,8 @@
 
   /* The empty circle a named officer's row shows without a photograph. */
   var NO_PHOTO = '<span class="gov-officer-photo gov-officer-nophoto" aria-hidden="true"></span>';
+  /* The same, for a candidate or a justice in a list where others have one. */
+  var NO_SMALL_PHOTO = '<span class="gov-photo gov-photo-none" aria-hidden="true"></span>';
 
   /* An NGA headshot that fails to load leaves the card without one, not a
    * broken image. Error events do not bubble, so this listens on capture. */
@@ -811,6 +844,15 @@
       holder.className = "gov-officer-photo gov-officer-nophoto";
       holder.setAttribute("aria-hidden", "true");
       img.replaceWith(holder);
+    } else if (img && img.classList && img.classList.contains("gov-photo")) {
+      // A candidate's or a justice's: the circle stays, and so does no credit
+      // for a photograph not shown.
+      var none = global.document.createElement("span");
+      none.className = "gov-photo gov-photo-none";
+      none.setAttribute("aria-hidden", "true");
+      var credit = img.parentNode && img.parentNode.querySelector(".gov-photo-credit");
+      if (credit) credit.remove();
+      img.replaceWith(none);
     } else if (img && img.classList && img.classList.contains("gov-portrait")) {
       img.remove();
     }

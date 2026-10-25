@@ -629,16 +629,8 @@ def held_back(portrait):
     or None. Asked of every portrait kept from an earlier read as well as of
     every new one: a doubt added after a file was first read withholds it on
     the next run, whatever that run could read."""
-    from . import overrides
-    url = source_url((portrait or {}).get("source"))
-    if not url:
-        return None
-    if url in overrides.NOT_A_PORTRAIT:
-        return f"{url} is in overrides.NOT_A_PORTRAIT"
-    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
-    if url in doubts:
-        return f"{url} is in overrides.PORTRAIT_LICENCE_DOUBTS ({doubts[url][1]})"
-    return None
+    from .photos import refused
+    return refused(source_url((portrait or {}).get("source"))) or None
 
 
 def _keep(last_entry, name, problems):
@@ -1225,10 +1217,13 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
     return cache
 
 
-def problems(cache):
+def problems(cache, elsewhere=()):
     """What a build says about the cache: ``[(level, code, message,
     detail)]`` - every link and portrait the checks withheld, the judges'
-    pages still to be read, and any portrait shown without its record."""
+    pages still to be read, and any portrait shown without its record.
+    *elsewhere* is the files other routes reach (a statewide candidate's
+    Commons file): a ``PORTRAIT_LICENCE_DOUBTS`` entry one of them stands
+    for is not stale."""
     if not cache:
         return []
     from . import overrides
@@ -1275,7 +1270,7 @@ def problems(cache):
                     list(cache["oversized"])))
     if "doubted" in cache:
         stale = sorted(set(getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {}))
-                       - set(cache["doubted"]))
+                       - set(cache["doubted"]) - set(elsewhere))
         if stale:
             out.append(("warn", "judge-licence-doubt-stale",
                         f"{len(stale)} overrides.PORTRAIT_LICENCE_DOUBTS entries name no file a "

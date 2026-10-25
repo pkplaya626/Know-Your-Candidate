@@ -43,6 +43,7 @@ from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
 from .photos import campaign_credit, lighter_rendition, parse_srcset, too_heavy
+from .photos import refused as withheld_by_a_person
 from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
 
@@ -1641,13 +1642,14 @@ def take_campaign_portrait(profile, entry, site, counts):
 
 def campaign_portrait(site):
     """The portrait a campaign-site record shows, or ``None``: not on
-    ``NOT_A_PORTRAIT``, nor a rendition of a file that is. One over the caps
-    is shown all the same (:func:`lighten`, rule 87)."""
+    ``NOT_A_PORTRAIT`` or ``PORTRAIT_LICENCE_DOUBTS`` (``photos.refused``,
+    the one test every route asks), nor a rendition of a file that is. One
+    over the caps is shown all the same (:func:`lighten`, rule 87)."""
     picture = (site or {}).get("portrait")
     heavy = (site or {}).get("portraitHeavy") and site["portraitHeavy"][0].get("url")
     # A rendition of a refused image is that image: the entry names the file
     # the page draws, the cache may hold a smaller form its srcset lists.
-    if not picture or picture in overrides.NOT_A_PORTRAIT or heavy in overrides.NOT_A_PORTRAIT:
+    if not picture or withheld_by_a_person(picture, heavy):
         return None
     return picture
 

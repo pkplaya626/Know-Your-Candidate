@@ -111,6 +111,28 @@ def too_heavy(weight):
     return ""
 
 
+def refused(*urls):
+    """Why the lists a person keeps withhold one of *urls*, or ``""``:
+    ``overrides.NOT_A_PORTRAIT`` (rule 38: someone looked, and it is not a
+    likeness) or ``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82: its licence
+    waits for a person). One test for every route that asks both - a
+    nominee's (``nominee_photos``), an official's or a statewide
+    candidate's (``official_photos.held_back``) and a judge's
+    (``judge_links.held_back``) - asked of a record read now and of one
+    kept from an earlier read (rule 8)."""
+    from . import overrides
+
+    doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
+    for url in urls:
+        if not url:
+            continue
+        for table, name in ((overrides.NOT_A_PORTRAIT, "NOT_A_PORTRAIT"),
+                            (doubts, "PORTRAIT_LICENCE_DOUBTS")):
+            if url in table:
+                return f"{url} is in overrides.{name} ({table[url][1]})"
+    return ""
+
+
 def host_of(url):
     import urllib.parse
     try:

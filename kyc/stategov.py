@@ -244,7 +244,9 @@ def headshot(gov):
 
 def officer_photos(code, entry):
     """Apply ``overrides.OFFICER_PHOTOS`` to one state's offices, in place:
-    a photograph for a holder whose roster has none, while the roster names
+    a photograph for a holder whose roster has none - or whose office offers
+    its own only above the caps, the lighter card going first - while the
+    roster names
     the person the entry was checked for. Returns a problem for each entry
     that no longer fits - the office changed hands, or the roster now has a
     photograph of its own - so a stale one is never shown (rule 87)."""
@@ -265,14 +267,50 @@ def officer_photos(code, entry):
                             f"the roster names {name or 'no confirmed holder'}, so no "
                             "photograph is shown")
             continue
-        if holder.get(field):
+        heavy = (holder.get("photoHeavy") or [{}])[0].get("kept")
+        if holder.get(field) and not heavy:
             problems.append(f"{code} {office}: the roster now has a photograph of {name}; "
                             "overrides.OFFICER_PHOTOS may be unneeded")
             continue
+        # Both are tied to the person (rule 87): where the office offers its
+        # own only above the caps and nothing serves it smaller, the
+        # association's lighter card goes first.
         holder[field] = photo["photo"]
         holder[by_field] = photo["by"]
         holder[page_field] = photo["page"]
+    # Whether the office's file is heavy is the build's to say, not the
+    # page's: stategov.js carries the photograph and whose it is.
+    for holder in entry.values():
+        if isinstance(holder, dict):
+            holder.pop("photoHeavy", None)
     return problems
+
+
+def court_photo_problems(court_cache):
+    """The justices' photographs: a read or an evidenced override's record
+    that lacks what ties it to the justice stops the build (rule 87: never
+    dropped from the page without a word); one a person's list withholds,
+    one whose justice the court no longer lists, and the count shown though
+    offered only above the caps, are said."""
+    from . import court_photos
+    members = {code: read.get("members") or []
+               for code, read in ((court_cache or {}).get("courts") or {}).items()}
+    errors, warnings = court_photos.curated_problems(members)
+    if errors:
+        raise StateGovError("overrides.JUSTICE_PHOTOS: " + "; ".join(errors))
+    errors, withheld = court_photos.read_problems(court_cache)
+    if errors:
+        raise StateGovError("courts.json photographs: " + "; ".join(errors))
+    warnings.extend(withheld)
+    seen = court_photos.counts(court_cache)
+    if seen["smaller"] or seen["heavy"]:
+        # Shown all the same (rule 87; the owner's decision of 2026-10-25):
+        # smaller from the same file where a resizer serves it, else at
+        # full size until rule 101's copies serve it lighter.
+        warnings.append(f"{seen['smaller'] + seen['heavy']} justices' photographs are offered "
+                        f"by their court only above the caps: {seen['smaller']} shown smaller "
+                        f"from the same file, {seen['heavy']} at full size")
+    return warnings
 
 
 def unpictured(states):
@@ -392,6 +430,14 @@ def build(root="."):
     unfit = statewide.problems(lists)
     if unfit:
         raise StateGovError(f"{statewide.CACHE_PATH}: " + "; ".join(unfit))
+    # The candidates' photographs (kyc/statewide_photos.py): optional, but a
+    # cached one without what ties it to the person stops the build (rule 87).
+    from . import statewide_photos
+    photo_cache = statewide_photos.load_cache(root) or {}
+    unfit = statewide_photos.problems(photo_cache)
+    if unfit:
+        raise StateGovError(f"{statewide_photos.CACHE_PATH}: " + "; ".join(unfit))
+    candidates_heavy = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
                                  (ncsl, NCSL_CACHE, "executives"),
@@ -408,6 +454,17 @@ def build(root="."):
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
+    problems.extend(officers.bio_page_problems(officer_cache.get("ag", {})))
+    # A photograph the office offers only above the caps is kept, heavy
+    # (rule 87; the owner's decision of 2026-10-25): shown where nothing
+    # lighter ties to the person, the association's card first where there
+    # is one (officer_photos). The build says how many.
+    heavy = sorted(c for c, row in officer_cache.get("ag", {}).items()
+                   if (row.get("photoHeavy") or [{}])[0].get("kept"))
+    if heavy:
+        problems.append(f"{len(heavy)} attorneys general's own office photographs are offered "
+                        f"only above the caps ({', '.join(heavy)}); the association's card "
+                        "goes first where one is recorded, else the office's is shown heavy")
     # A roster typed in from a court's page is held to what a read one is
     # (courts.read_court refuses it): one that does not fit its court stops
     # the build. Age is a warning: a person must read the page again.
@@ -453,6 +510,9 @@ def build(root="."):
                     item["candidates"] = statewide.for_page(
                         code, listed, status.get("name") if status and status["why"] == "listed"
                         else None)
+                    candidates_heavy += statewide_photos.attach(
+                        code, key, item["candidates"]["candidates"], listed, holder, status,
+                        photo_cache)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
@@ -465,6 +525,12 @@ def build(root="."):
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
     problems.extend(unpictured(states))
+    if candidates_heavy:
+        # Shown all the same (rule 87; the owner's decision of 2026-10-25).
+        problems.append(f"{candidates_heavy} statewide candidates' photographs shown at full "
+                        "size: their source offers them only above the caps")
+    problems.extend(statewide_photos.withheld(photo_cache))
+    problems.extend(court_photo_problems(court_cache))
     problems.extend(stale_name_forms(states))
     payload = {
         "states": states,

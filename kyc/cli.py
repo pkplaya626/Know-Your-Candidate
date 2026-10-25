@@ -293,7 +293,8 @@ def _build(args):
                           # {} when the cache is missing, so validate's
                           # error says so under --check too (PR #120 review).
                           measures=measures_mod.load(args.root) or {},
-                          portraits=portraits.load_cache(args.root))
+                          portraits=portraits.load_cache(args.root),
+                          photo_routes=_photo_routes(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -305,8 +306,10 @@ def _build(args):
         issues.append(validate.Issue(level, code, message, detail))
     # What the judges' Wikipedia and portrait join withheld (kyc/judge_links.py):
     # said by every build, not only by the refresh that found it.
-    from . import judge_links as judge_links_mod
-    for level, code, message, detail in judge_links_mod.problems(judge_links_mod.load_cache(args.root)):
+    from . import judge_links as judge_links_mod, statewide_photos as statewide_photos_mod
+    for level, code, message, detail in judge_links_mod.problems(
+            judge_links_mod.load_cache(args.root),
+            elsewhere=statewide_photos_mod.doubted(statewide_photos_mod.load_cache(args.root))):
         issues.append(validate.Issue(level, code, message, detail))
     # The roll calls (kyc/rollcalls.py): votes given to nobody, and why.
     from . import rollcalls
@@ -1859,11 +1862,16 @@ def _courts(args):
             return 2
         read, problems = cache["courts"], []
     else:
-        read, problems = courts.fetch(root=args.root)
+        pages = {}
+        read, problems = courts.fetch(root=args.root, pages=pages)
         # A court that could not be read this time keeps its last good read
         # (rule 8): a timeout is not a court with no members.
         old = courts.load_cache(args.root) or {}
         before = old.get("courts", {})
+        # Each justice's photograph from the court's own pages (rule 87):
+        # a heavy one is shown all the same and said.
+        from . import court_photos
+        problems.extend(court_photos.add_justice_photos(read, pages, before))
         for code in sorted(set(courts.COURTS) - set(read)):
             if code in before:
                 # With the day it was read, which this run's save does not
@@ -1890,6 +1898,13 @@ def _courts(args):
     print(f"  {len(read)} courts read; {len(curated)} read by hand from the court's own page "
           f"({', '.join(sorted(curated))}); {len(courts.UNREADABLE)} cannot be read at all"
           + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
+    from . import court_photos
+    seen = court_photos.counts({"courts": read})
+    print(f"  photographs: {seen['shown']} of {seen['members']} justices from their court's own "
+          f"pages ({seen['smaller']} shown smaller and {seen['heavy']} at full size, offered "
+          "only above the caps); "
+          f"{seen['unknown']} could not be read; {seen['none'] + seen['shape']} with none that "
+          "passes")
     if not args.check:
         print(f"[ok] wrote {courts.save_cache(read, args.root)}")
     return 2 if unfit else 0
@@ -1929,6 +1944,14 @@ def _voting(args):
     return 0
 
 
+def _photo_routes(root):
+    """The images the court and statewide photograph routes reached or
+    passed over, for validate's ``NOT_A_PORTRAIT`` staleness check."""
+    from . import court_photos, courts, statewide_photos
+    return (court_photos.refused_offered(courts.load_cache(root))
+            | statewide_photos.doubted(statewide_photos.load_cache(root)))
+
+
 def _tribes(args):
     """Every tribal government and its leader, as the BIA's Tribal Leaders
     Directory lists them (kyc/tribes.py), for the guide's tribal map."""
@@ -1951,6 +1974,43 @@ def _tribes(args):
           f"(source: {cache.get('source')})")
     for line in tribes.problems(cache):
         print(f"  [warn] {line}")
+    return 0
+
+
+def _ballotphotos(args):
+    """A photograph beside each statewide candidate, by the routes in
+    kyc/statewide_photos.py (rules 24, 33, 87 and 91)."""
+    import json as _json
+    from . import statewide, statewide_photos
+    previous = statewide_photos.load_cache(args.root)
+    if args.check:
+        if not previous:
+            print(f"[error] no {statewide_photos.CACHE_PATH}; run 'ballotphotos'", file=sys.stderr)
+            return 2
+        cache, problems = previous, []
+    else:
+        lists = statewide.load(args.root)
+        if lists is None:
+            print(f"[error] no {statewide.CACHE_PATH}", file=sys.stderr)
+            return 2
+        with open(os.path.join(args.root, "congress_snapshot.json"), encoding="utf-8") as handle:
+            snapshot = _json.load(handle)
+        cache, problems = statewide_photos.fetch(lists, snapshot, previous,
+                                                 wikipedia=not args.no_wikipedia)
+    errors = statewide_photos.problems(cache)
+    seen = statewide_photos.counts(cache)
+    print(f"  {seen['shown']} statewide candidates' photographs cached ("
+          + ", ".join(f"{n} {route}" for route, n in sorted(seen["routes"].items()))
+          + f"); {seen['heavy']} of them at full size, offered only above the caps; "
+          f"{seen['withheld']} withheld by a person's list or the licence test")
+    for line in problems:
+        print(f"  [warn] {line}")
+    for line in errors:
+        print(f"  [error] {line}", file=sys.stderr)
+    if errors:
+        return 2
+    if not args.check:
+        print(f"[ok] wrote {statewide_photos.save_cache(cache, args.root)}")
     return 0
 
 
@@ -1984,7 +2044,9 @@ def _officers(args):
     ag = cache.get("ag", {})
     confirmed = sum(1 for row in ag.values() if row.get("name") and not row.get("unconfirmed"))
     print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page; "
-          f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph")
+          f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph; "
+          f"{sum(1 for row in ag.values() if row.get('photoHeavy'))} of them offered only above "
+          "the caps (kept, and said)")
     for problem in cache.pop("agProblems", officers.ag_problems(ag)):
         print(f"  [warn] {problem}")
     if not args.check:
@@ -2573,6 +2635,15 @@ def build_parser():
     courts_cmd.add_argument("--check", action="store_true",
                             help="report the committed cache; make no network call")
 
+    photos_cmd = add("ballotphotos", help="photographs of the statewide candidates: the holder's "
+                                         "office photograph, members by bioguide id, the "
+                                         "official guides, the race's own Wikipedia article")
+    photos_cmd.add_argument("--check", action="store_true",
+                            help="report the committed cache; make no network call")
+    photos_cmd.add_argument("--no-wikipedia", action="store_true",
+                            help="read only the official guides and members; keep the "
+                                 "Wikipedia photographs last read")
+
     tribes_cmd = add("tribes", help="every tribal government and its leader (BIA Tribal Leaders "
                                     "Directory)")
     tribes_cmd.add_argument("--check", action="store_true",
@@ -2737,6 +2808,8 @@ def main(argv=None):
         return _voting(args)
     if args.command == "tribes":
         return _tribes(args)
+    if args.command == "ballotphotos":
+        return _ballotphotos(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":
