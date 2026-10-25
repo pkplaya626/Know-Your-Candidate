@@ -1137,6 +1137,18 @@ async function testDirectory() {
       KYC.profile.close();
     }
 
+    // A nominee who sits in their state's legislature: its own photograph,
+    // credited to the legislature by its name and linked to their page.
+    const legislature = shown.find((p) => p.photoSource === "state-legislature");
+    if (legislature) {
+      KYC.profile.open(legislature.id);
+      check("a legislature's photograph is credited to it by name, linked to the member's page",
+        line().textContent === "Photo: " + legislature.photoCredit.by &&
+          !!line().querySelector('a[href="' + legislature.photoCredit.page + '"]'),
+        line().textContent);
+      KYC.profile.close();
+    }
+
     const silhouette = window.legislatorsData.find((p) => (p.photos || [])[0] === "placeholder");
     if (silhouette) {
       KYC.profile.open(silhouette.id);
@@ -1926,9 +1938,11 @@ async function testDirectoryAsync() {
     const quoted = window.legislatorsData.find((p) => p.campaignQuote);
     check("built profiles carry campaign descriptions", !!quoted);
     const pictured = window.legislatorsData.filter((p) => p.photoSource === "campaign-site");
-    check("a portrait from a campaign site is only ever a filed candidate's",
-      pictured.every((p) => p.source === "fec-field" && p.isCandidate),
-      pictured.filter((p) => p.source !== "fec-field").map((p) => p.id).join(","));
+    // A challenger's, filed or curated (Brian Bengs's sat unused in the
+    // cache); never a sitting member's, whose portrait comes by their id.
+    check("a portrait from a campaign site is only ever a challenger's",
+      pictured.every((p) => p.isCandidate && !p.bioguide),
+      pictured.filter((p) => !p.isCandidate || p.bioguide).map((p) => p.id).join(","));
   });
 
   suite("index.html — in this race", () => {
@@ -11837,7 +11851,8 @@ async function testSharePages() {
         (sizes.length ? sizes.indexOf(url) !== -1
           : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
               (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
-            (p.photoSource === "campaign-site" && !!p.photoCredit)));
+            ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature") &&
+              !!p.photoCredit)));
       if (!ok || /Special:/.test(url)) images.push(`${p.id}: ${url}`);
       if (!/social-card/.test(url)) photos += 1;
     });

@@ -640,6 +640,27 @@ def article_alias(profile_id):
     return entry[0] if entry else None
 
 
+# A portrait a person looked at on a campaign's own page, which the reader's
+# words test cannot take (rule 38), keyed on the profile id: {"url": the file
+# the page draws, "page", "read": the day it was looked at, "evidence": what
+# the page says beside it}. The reader still takes it only from that
+# campaign's site read as theirs (rules 38, 39), only while the page draws
+# that very file, only portrait-shaped and within the caps (the owner's
+# decision of 2026-10-19); validate reports an entry no read site offers.
+# The 2026-10-19 photo research's check found two genuine likenesses refused:
+# Brian James Miller's, whose alt text runs his names together
+# ("BrianMiller-5.jpg"), which the reader now reads, and Justin Murphy's,
+# whose alt text names the campaign ("for senate") as a wordmark's does.
+CAMPAIGN_PORTRAITS = {
+    "CAND_40": {
+        "url": "https://jerseyjustin4senate.org/wp-content/uploads/2024/02/D70_8732-Web-684x1024.webp",
+        "page": "https://jerseyjustin4senate.org/",
+        "read": "2026-10-25",
+        "evidence": "alt text \"justin murphy for senate\" on the campaign's home page; one man in "
+                    "a suit, 684x1024, 43 KB (looked at 2026-10-25)"},
+}
+
+
 # Images on a campaign's own site that `enrich` would take as the candidate's
 # portrait but that are not one, keyed on the image URL: (date checked, what it
 # shows). Its rules turn away logos, share cards, merchandise and most group
@@ -651,6 +672,14 @@ NOT_A_PORTRAIT = {
         ("2026-10-02", "a family photograph: four people in the snow"),
     "https://rickbrattin.com/wp-content/uploads/2026/02/Brattin-extended-scaled.png":
         ("2026-10-02", "a hunting scene; no face at card size"),
+    "https://run.imgix.net/f9df0b31-2ce0-4b8a-9a5d-4765b3afb86b/ab4b5c88-afea-4c83-9eb7-311e7cead6a6/ab4b5c88-afea-4c83-9eb7-311e7cead6a6.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C777%2C3648%2C3648&auto=compress%2Cformat&fit=fillmax&w=2048&q=75&s=cb469615bb857ebbc21f8c8780cda69b":
+        ("2026-10-25", "Elizabeth Lee: a rally - speaking through a megaphone in a crowd, no face at card size"),
+    "https://run.imgix.net/744b9e51-6fcd-4260-a2b5-35da9e4ad0b4/19462903-8b50-4a50-9e43-b99bb2febeed/19462903-8b50-4a50-9e43-b99bb2febeed.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C0%2C4024%2C6048&auto=compress%2Cformat&fit=fillmax&w=2048&q=75&s=0c9c30e09b5531bbdff48c00dd0dfda7":
+        ("2026-10-25", "Michaela Barnett: a festival stall - holding up a T-shirt under a county party's banner"),
+    "https://shaunfinnieforcongress.com/wp-content/uploads/2026/05/Selme-Finnie-img.jpg":
+        ("2026-10-25", "two people: Shaun Finnie with someone else ('Selme-Finnie')"),
+    "https://jordanjherrera.com/wp-content/uploads/2025/05/Jordan_Herrera_IMG_9126-768x1024.jpeg":
+        ("2026-10-25", "Jordan Herrera: seated in a military vehicle's hatch, a small figure in the frame"),
 }
 
 # Commons files a judge's route reaches (kyc/judge_links.py) whose licence

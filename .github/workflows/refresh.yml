@@ -114,7 +114,11 @@ jobs:
           rm reconcile.log
 
       # A member with no portrait shows a silhouette. Resolving here means the
-      # PR arrives complete rather than needing a second pass.
+      # PR arrives complete rather than needing a second pass. The people on
+      # the ballot with none are looked for on Wikidata by their own FEC id
+      # and, for a sitting state legislator, on the legislature's own page
+      # (kyc/nominee_photos.py); a source that cannot be read keeps what it
+      # gave before and stops nothing.
       #
       # On a schedule the `inputs` context is empty, so the old condition
       # `inputs.portraits != false` compared null with false - and portraits
@@ -296,6 +300,10 @@ jobs:
       # and a read of every linked campaign site, so a domain that lapses into
       # a gambling page is caught by the next run rather than by a reader.
       # Anyone read in the last six days is skipped. No API key involved.
+      # Then up to forty sites with no portrait anywhere are drawn in a
+      # headless Chrome and read again by the same rules (images a script
+      # draws, bot walls a browser passes); no Chrome, or a page it cannot
+      # read, keeps the last drawn read and stops nothing.
       - name: Fill gaps from candidates' articles and campaign sites
         run: python build_profile_site.py enrich
 

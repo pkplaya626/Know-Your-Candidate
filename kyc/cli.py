@@ -151,7 +151,9 @@ def _build(args):
     withheld = enrich.withhold_links(profiles, enrichment)
     cache = portraits.load_cache(args.root)
     if cache:
-        stats["portraits"] = portraits.apply_cache(profiles, cache)
+        # A legislature's photograph stands while its roster seats them.
+        stats["portraits"] = portraits.apply_cache(profiles, cache,
+                                                   legislators=_legislators(args.root))
         print(f"  portraits: {stats['portraits']}/{len(profiles)} verified "
               f"({100 * stats['portraits'] / max(len(profiles), 1):.0f}%)")
     else:
@@ -170,6 +172,16 @@ def _build(args):
     else:
         print("  [warn] no enrichment cache; run 'enrich' to read candidates' "
               "articles and campaign sites")
+    # The owner's decision of 2026-10-19: a photograph is shown only where
+    # its source offers it within the caps; one offered only oversized is
+    # left out, and said here.
+    from . import nominee_photos, photos as photos_mod
+    oversized = ((stats.get("enriched") or {}).get("portrait_oversized", 0)
+                 + nominee_photos.left_out(profiles, cache or {}))
+    stats["portraits_left_out"] = oversized
+    print(f"  portraits left out, offered by their source only over "
+          f"{photos_mod.MAX_PORTRAIT_BYTES // 1000} KB or {photos_mod.MAX_PORTRAIT_PX}px: "
+          f"{oversized}")
     # Whose photograph each portrait is, once every source has had its say.
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
@@ -274,7 +286,8 @@ def _build(args):
                           statewide=statewide_mod.load(args.root),
                           # {} when the cache is missing, so validate's
                           # error says so under --check too (PR #120 review).
-                          measures=measures_mod.load(args.root) or {})
+                          measures=measures_mod.load(args.root) or {},
+                          portraits=portraits.load_cache(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -554,6 +567,12 @@ def _fetch(args):
     return 0
 
 
+def _legislators(root):
+    """The state legislators' roster (``statelegs``), or ``None``."""
+    from . import statelegs
+    return statelegs.load_cache(root) or None
+
+
 def _portraits(args):
     raw = _load(args)
     if raw is None:
@@ -573,6 +592,18 @@ def _portraits(args):
     cache, _summary = portraits.resolve_all(
         profiles, root=args.root, refresh=args.refresh
     )
+    # Two more routes for the people on the ballot with none: Wikidata by
+    # their own FEC id, and their state legislature's page for a sitting
+    # member of it (kyc/nominee_photos.py). A source that cannot be read
+    # keeps what it gave before and stops nothing (rule 8).
+    from . import history as history_mod
+    from . import nominee_photos
+    try:
+        nominee_photos.resolve_all(profiles, cache, history=history_mod.load_cache(args.root),
+                                   legislators=_legislators(args.root))
+        portraits.save_cache(cache, args.root)
+    except Exception as exc:                     # never the refresh's end
+        print(f"  [warn] nominee portraits stopped: {exc}; the cache is as it was")
     unresolved = sorted(
         record.get("name", key) for key, record in cache.items()
         if not record.get("url")
@@ -833,7 +864,8 @@ def _enrich(args):
         # As in build: a withheld link delivers no portrait (rule 33), and a
         # campaign-site portrait is taken only where none came by id or link.
         withheld = enrich.withhold_links(profiles, cache)
-        portraits.apply_cache(profiles, portraits.load_cache(args.root))
+        portraits.apply_cache(profiles, portraits.load_cache(args.root),
+                              legislators=_legislators(args.root))
         filled = enrich.apply_cache(profiles, cache, as_of=_age_date(stats))
         if withheld:
             filled["wikipedia_withheld"] += withheld
@@ -842,6 +874,18 @@ def _enrich(args):
         cache, _counts = enrich.resolve_all(profiles, root=args.root, refresh=args.refresh,
                                             limit=args.limit,
                                             only_unreachable=args.unreachable)
+        # The sites whose portrait only a browser draws, for the people with
+        # none by any other route (enrich.render_portraits). No Chrome, or a
+        # page it cannot read, keeps the last drawn read and stops nothing.
+        if args.render:
+            enrich.withhold_links(profiles, cache)
+            portraits.apply_cache(profiles, portraits.load_cache(args.root),
+                                  legislators=_legislators(args.root))
+            try:
+                if enrich.render_portraits(profiles, cache, root=args.root, limit=args.render):
+                    enrich.save_cache(cache, args.root)
+            except Exception as exc:                 # never the refresh's end
+                print(f"  [warn] drawn campaign pages stopped: {exc}")
         print(f"\n[ok] enrichment cache: {enrich.CACHE_PATH}")
     found = enrich.problems(profiles, cache)
     for title, lines in (("withdrawn as hijacked or parked", found["withdrawn"]),
@@ -1443,7 +1487,9 @@ def _verify(args):
     enrichment = enrich.load_cache(args.root)
     enrich.withhold_links(profiles, enrichment)
     cache = portraits.load_cache(args.root)
-    stats["portraits"] = portraits.apply_cache(profiles, cache) if cache else 0
+    stats["portraits"] = (portraits.apply_cache(profiles, cache,
+                                                legislators=_legislators(args.root))
+                          if cache else 0)
     enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
@@ -2413,6 +2459,9 @@ def build_parser():
                       help="read at most N people this run")
     rich.add_argument("--refresh", action="store_true",
                       help="read everyone again, not just those read over six days ago")
+    rich.add_argument("--render", type=int, default=enrich.RENDER_LIMIT, metavar="N",
+                      help="draw at most N campaign sites with no portrait in a headless "
+                           "browser and read them again (0: none)")
     rich.add_argument("--unreachable", action="store_true",
                       help="read again only the committee sites the last read could not reach")
 
