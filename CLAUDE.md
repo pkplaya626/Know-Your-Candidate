@@ -60,6 +60,7 @@ data/record_2026.json       ──┤   (the frozen 2026 race set: record --free
 data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
 data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
+data/photo_copies.json      ──┤   (each heavy portrait's original and its copy: photocopies, rule 101)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/people/meta.js (the build's figures and signature)
                                              data/people/index.js (everyone's cards and search fields, every race)
@@ -90,6 +91,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
+                                             photos/*.jpg       (smaller copies of heavy portraits, by hash: photocopies)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
                                              ├──> index.html    (grid, races, profiles)
@@ -195,18 +197,19 @@ python build_profile_site.py tribes           # every tribal government and its 
 python build_profile_site.py votes            # every roll call of the Congress (House Clerk, Senate LIS); resumes (rule 89)
 python build_profile_site.py seats            # each seat's last election (the Clerk's statistics; checked against MIT or Wikipedia)
 python build_profile_site.py outside          # outside spending for and against each candidate (FEC Schedule E, by candidate id)
+python build_profile_site.py photocopies      # weigh every portrait shown outside Wikimedia; copy the heavy ones in headless Chrome (rule 101)
 python tools/fetch_legislative_maps.py        # state senate and house boundaries (Census, network)
 python tools/fetch_local_maps.py              # every incorporated place and county subdivision, for the county pages (Census, network)
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2140 tests, no dependencies
-npm install && npm test                       # 3315 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2164 tests, no dependencies
+npm install && npm test                       # 3342 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -594,7 +597,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `portraits` fetches only the smallest, slowly: the first run fetched
     every size, and a burst gets 429 for everything from that address. The
     page falls back to the plain URL when a size fails, and
-    `validate.check_photo_sets` fails a set that names another file. The
+    `validate.check_photo_sets` fails a set that names another file. A
+    smaller copy this site made of a heavy original (rule 101) is one size
+    and stands alone, never in a srcset beside the original's sizes. The
     project's old image host,
     theunitedstates.io, lapsed into a parking network; nothing links it now
     (rule 35).
@@ -1618,8 +1623,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     that very address and scales it (rule 42) - once the smaller copy is
     weighed and found the same shape (`photos.lighter_form`). Where
     neither serves it, it is shown all the same and said
-    (`portraitHeavy`): withholding them left eleven November nominees
-    with the silhouette beside an opponent's photograph. The House
+    (`portraitHeavy`) until the site has made a smaller copy of it itself
+    (rule 101, the owner, 2026-10-25): withholding them left eleven
+    November nominees with the silhouette beside an opponent's
+    photograph. The House
     Clerk's are only weighed; every one is within the caps. A server that
     gzips an image is read through it (Missouri's attorney general's
     headshot read as "not an image"). No srcset offers a size wider than
@@ -2169,9 +2176,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     never while the file is unchanged since it showed someone else
     (`seatFiles`). Connecticut's Melissa Osborne is withheld that way: the
     file is from 2023 and her record from 2025. Only a rendition the source
-    itself offers within 300 KB and 1,200 px is used - no resizing and no
-    image service (owner, 2026-10-19) - so 17 of Indiana's 30 and most of
-    Vermont's are left out and `build` counts them; a landscape frame is
+    itself offers within 300 KB and 1,200 px is taken - no image service
+    (owner, 2026-10-19) - so 17 of Indiana's 30 and most of Vermont's are
+    left out and `build` counts them: `legphotos` stops its checks (a
+    landscape frame, a seat file's date) at the weight, so those files
+    were never checked as theirs. A portrait the card does show, its or
+    Open States's, that is over the caps is shown as a smaller copy made
+    here (rule 101: the owner relaxed "no resizing" on 2026-10-25); a
+    landscape frame is
     not a portrait (rule 38). No party caucus's photograph (Michigan, rule
     87), and no archived copy of a file the legislature stopped serving:
     Kansas's pages name a file that answers 404, and are read again each
@@ -2214,6 +2226,70 @@ Each of these was a shipped defect found by measurement. Do not undo them.
       the hosts the legislature's pages name for its files
       (`EXTRA_PHOTO_HOSTS`: New Jersey's pub.njleg.gov, Ohio's
       legislature.ohio.gov), or a district's two cards disagree again.
+
+101. **A heavy portrait is shown as a smaller copy made here, of exactly
+    the photograph the page already shows.** The legislature pages drew
+    every portrait straight from its host in a 56x70 box: the Oklahoma
+    Senate's run 9 to 12.5 MB each (one chamber's list was some 300 MB on
+    a phone), Connecticut's House Democrats' 4 to 8 MB, the White House's
+    up to 3.5 MB (measured 2026-10-25). The owner's decision that day,
+    "more content is better than strict rules", relaxes only what cost
+    weight or coverage - rule 87's "shown all the same" and rule 100's "no
+    resizing" - and nothing that guards whose photograph it is. So
+    `photocopies` (`kyc/photocopies.py`) copies only an address a record
+    already shows by a route the rules allow (a legislator's `image`, the
+    White House's `photo`, an NGA headshot, an officer's `photo`, a
+    profile's first portrait), never a Wikimedia file (rule 42): no new
+    route, no search, no address built from a name. It weighs each with a
+    ranged GET (HEAD lies, rule 51), one request a second to each host,
+    and copies those over 300 KB or 1,200 px: the downloaded file drawn
+    once in headless Chrome (`tools/make_photo_copies.mjs`, served to it
+    from 127.0.0.1) with the browser's decoder and EXIF orientation, white
+    under transparency, smoothing "high", scaled down - never up - to just
+    cover three times the largest CSS box a page draws that kind in
+    (`BOXES`, read back from `kyc.css` by the tests; phones are DPR 3), a
+    JPEG at 0.86. Nothing is cropped, retouched or sharpened. A copy
+    lives under `photos/` named by its own hash and is listed in
+    `data/photo_copies.json` (hand-editable) with its original's bytes,
+    pixels, sha256, ETag, Last-Modified and day read, and how it was made.
+    It is never made again while the original's sha256 is unchanged:
+    Chrome versions encode differently and the build must stay
+    reproducible from committed files (rule 18). An original that changes
+    is read again, and its old copy is withdrawn at once, before the new
+    one is made, so no copy of a predecessor's photograph outlives its
+    file (rule 100's seat files); one answering 404 or 410 twice is gone
+    and its copy with it; a refusal, a reset, a truncated file Chrome
+    cannot decode (two of Georgia's stop at exactly 1 MB) concludes
+    nothing (rule 8), and Maine's host, which refuses this machine's TLS,
+    is listed as unweighed, never as light. A run is a batch, oldest
+    first, inside a time budget (rule 78), and the refresh runs one after
+    every step that sets a portrait. The record keeps its original and
+    gains `photoCopy: {src, of}`; every page draws it through one helper
+    (`KYC.photoSrc` / `photoAttrs` / `portraitSrc`, from `KYC.siteRoot()`
+    at any depth, stamped `?v=` with the copy's hash, rule 76), and a copy
+    that fails to load gives way to its original (`KYC.retryOriginal`,
+    one listener's word for every module's). The credit stays the
+    original's, adding "a smaller copy made by this site of the original
+    file", linked to it (`KYC.copyCredit`); where a card credited no one -
+    an Open States portrait off the legislature's host - the copy is
+    credited to the host that served it, "via Open States", since the
+    page no longer loads it from there. A share page unfurls with the copy
+    at its absolute address on the one hostname (rule 21). `verify` and
+    `build` fail a file under `photos/` the manifest does not list, a
+    listed copy missing or not its hash, a copy larger than its box or
+    than its original, of a light or a Wikimedia file, shown for another
+    address than its own or without a credit; `build` counts the
+    originals still over the caps with no copy, and those not yet
+    weighed, by kind. The first run weighed 7,448 of 7,638 addresses and
+    made 1,521 copies (1,495 legislators', 15 of the White House's, 11 of
+    campaigns'): 2.4 GB of originals became 15.2 MB. The legislators
+    `legphotos` left out as offered only over the caps stay out: their
+    files were never checked as theirs (rule 100). The same day's photo
+    research found five of the justices' official portraits on Commons
+    older than the Court's current ones; the credit says the year
+    Commons' `DateTimeOriginal` gives ("Official portrait, 2005"), read
+    with the author and licence, and nothing where Commons names no single
+    year (`portraits.year_of`, `judge_links.dated`).
 
 ## District maps
 
