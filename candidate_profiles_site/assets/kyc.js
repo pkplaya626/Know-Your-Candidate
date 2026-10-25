@@ -1003,10 +1003,59 @@
   }
 
   /** First URL worth trying for a profile, already resolved to the
-   *  silhouette when there is nothing to try. */
+   *  silhouette when there is nothing to try: the smaller copy this site
+   *  made of a heavy first portrait (rule 101), else the portrait. */
   function portraitSrc(item) {
     var first = item && item.photos && item.photos[0];
-    return !first || first === "placeholder" ? SILHOUETTE : first;
+    if (!first || first === "placeholder") return SILHOUETTE;
+    return photoSrc(first, item.photoCopy);
+  }
+
+  /* ---------------------------------------------------------- photo copies */
+
+  /** The copy of *url* the build made (``photoCopy``: ``{src, of}``), when
+   *  it is the copy of that very address, or null. */
+  function copyOf(url, copy) {
+    return copy && copy.src && url && copy.of === url ? copy : null;
+  }
+
+  /** Where an <img> loads a portrait from: the smaller copy this site made
+   *  of a heavy original (rule 101), from the site's root at any depth, or
+   *  the original's own address. One helper for every portrait (rule 12). */
+  function photoSrc(url, copy) {
+    var own = copyOf(url, copy);
+    return own ? siteRoot() + own.src : url || "";
+  }
+
+  /** The attributes of a portrait <img>, escaped: its src (``photoSrc``) and,
+   *  for a copy, the original it falls back to if the copy fails to load. */
+  function photoAttrs(url, copy) {
+    var own = copyOf(url, copy);
+    return 'src="' + escapeAttr(photoSrc(url, copy)) + '"' +
+      (own ? ' data-photo-original="' + escapeAttr(url) + '"' : "");
+  }
+
+  /** *credit* for a portrait the page shows as its copy: the original's
+   *  credit, saying it is a smaller copy made here (``photoCreditHtml``). */
+  function copyCredit(credit, url, copy) {
+    if (!credit || !copyOf(url, copy)) return credit;
+    var out = {};
+    Object.keys(credit).forEach(function (k) { out[k] = credit[k]; });
+    out.copyOf = url;
+    return out;
+  }
+
+  /** A copy that fails to load is replaced by its original, once; true
+   *  when it was (or another listener already did so for this *event*). */
+  function retryOriginal(img, event) {
+    if (event && event.kycRetried) return true;
+    var original = img && img.getAttribute("data-photo-original");
+    if (!original) return false;
+    img.removeAttribute("data-photo-original");
+    img.removeAttribute("srcset");
+    if (event) event.kycRetried = true;
+    img.src = original;
+    return true;
   }
 
   /** Has the build found a portrait for *item* (rule 24: none is guessed)? */
@@ -1034,6 +1083,8 @@
   function portraitSrcset(item, sizes) {
     var set = item && item.photoSet;
     if (!set || !set.length || portraitSrc(item) === SILHOUETTE) return "";
+    // A copy is one size, made for the largest box it is drawn in.
+    if (copyOf(item.photos[0], item.photoCopy)) return "";
     return cappedSrcset(set, sizes);
   }
 
@@ -1059,9 +1110,11 @@
    *  <img>, escaped. *sizes* is the width it is drawn at, e.g. "38px". */
   function portraitAttrs(item, sizes) {
     var set = portraitSrcset(item, sizes);
+    var first = item && item.photos && item.photos[0];
+    var copy = copyOf(first, item && item.photoCopy);
     return 'src="' + escapeAttr(portraitSrc(item)) + '"' + (set
       ? ' srcset="' + escapeAttr(set) + '" sizes="' + escapeAttr(sizes) + '"'
-      : "");
+      : "") + (copy ? ' data-photo-original="' + escapeAttr(first) + '"' : "");
   }
 
   /** A small round portrait for a row - the map's panel, a profile's race -
@@ -1082,13 +1135,16 @@
    *  element, so a srcset left by the last profile must go. */
   function setPortrait(img, item, sizes) {
     var set = portraitSrcset(item, sizes);
+    var first = item && item.photos && item.photos[0];
     img.setAttribute("data-photo-idx", "0");
     img.removeAttribute("srcset");
     img.removeAttribute("sizes");
+    img.removeAttribute("data-photo-original");
     if (set) {
       img.setAttribute("sizes", sizes);
       img.setAttribute("srcset", set);
     }
+    if (copyOf(first, item && item.photoCopy)) img.setAttribute("data-photo-original", first);
     img.src = portraitSrc(item);
   }
 
@@ -1109,7 +1165,12 @@
     var src = img.getAttribute("src") || "";
     if (!src || src === SILHOUETTE) return null;
     var at = parseInt(img.getAttribute("data-photo-idx") || "0", 10);
-    if (!at) return item.photoCredit || null;
+    if (!at) {
+      // The copy this site made, or its original once the copy failed.
+      var first = (item.photos || [])[0];
+      return (src === photoSrc(first, item.photoCopy)
+        ? copyCredit(item.photoCredit, first, item.photoCopy) : item.photoCredit) || null;
+    }
     var table = (global.kycBuildMeta && global.kycBuildMeta.photoCredits) || {};
     var by = table[hostOf((item.photos || [])[at])];
     return by ? { by: by } : null;
@@ -1133,6 +1194,13 @@
     if (credit.licence) parts.push(anchor(credit.licenceUrl, credit.licence));
     var line = parts.length ? "Photo: " + parts.join(", ") : "Photo";
     if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
+    // When it was taken, where the source dates it ("Official portrait, 2005").
+    if (credit.dated) line = escapeHtml(credit.dated) + ". " + line;
+    // A smaller copy this site made of a heavy original (rule 101): whose
+    // photograph it is stays the original's, and the original is linked.
+    if (credit.copyOf) {
+      line += "; a smaller copy made by this site of " + anchor(credit.copyOf, "the original file");
+    }
     return line;
   }
 
@@ -1144,6 +1212,8 @@
       function (event) {
         var img = event.target;
         if (!img || img.tagName !== "IMG") return;
+        // A copy that fails falls back to its original first (rule 101).
+        if (retryOriginal(img, event)) return;
         var id = img.getAttribute("data-profile");
         if (id) handleImageFallback(img, id);
       },
@@ -3414,6 +3484,10 @@
     shownPhotoCredit: shownPhotoCredit,
     cappedSrcset: cappedSrcset,
     photoCreditHtml: photoCreditHtml,
+    photoSrc: photoSrc,
+    photoAttrs: photoAttrs,
+    copyCredit: copyCredit,
+    retryOriginal: retryOriginal,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,
     // behaviour

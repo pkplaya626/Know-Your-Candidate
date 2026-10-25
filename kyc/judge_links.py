@@ -121,7 +121,7 @@ CAP_BYTES = 300_000
 CAP_PX = 1200
 FILEPATH = "http://commons.wikimedia.org/wiki/Special:FilePath/"
 # What a page shows of a portrait; the rest is the record behind it.
-PAGE_KEYS = ("url", "set", "credit", "source", "by", "licence", "licenceUrl",
+PAGE_KEYS = ("url", "set", "credit", "source", "by", "licence", "licenceUrl", "year",
              "authorUnrecorded")
 # What every portrait must carry (rule 87, and the owner's 2026-10-19 rule).
 RECORD_KEYS = ("source", "route", "evidence", "read", "bytes", "width", "height")
@@ -606,6 +606,16 @@ def credit_fields(credit):
     return out
 
 
+def dated(credit):
+    """A justice's official portrait's year, as its Commons page dates it:
+    ``{"year": 2005}``, or ``{"yearUnstated": True}`` where the page gives no
+    single four-digit year - then none is shown, never guessed. Five of the
+    nine are older than the Court's current portraits (Roberts 2005, Thomas
+    2007, Alito 2006, Sotomayor 2009, Gorsuch 2017: the photo research of
+    2026-10-25), and a reader should see that the photograph is not new."""
+    return {"year": credit["year"]} if credit.get("year") else {"yearUnstated": True}
+
+
 def credit_problem(name, url, credit):
     """Why a Commons file may not be shown with a credit, or ``""``."""
     if not credit or not credit.get("licence"):
@@ -898,6 +908,8 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                         "bytes": weight["bytes"], "width": weight["width"],
                         "height": weight["height"], "file": list(size),
                     }, **credit_fields(credits[url]))
+                    if route == "official":
+                        portrait.update(dated(credits[url]))
                 elif not unsure:
                     oversized.append(name)
                     why = (f"{name}: Wikimedia offers {url} only over {CAP_BYTES // 1000} KB or "
@@ -931,6 +943,12 @@ def files_read(infos):
     return sizes, {url: credit_of(info) for url, info in infos.items()}
 
 
+def undated(portrait):
+    """A justice's official portrait whose year has not been read."""
+    return (portrait.get("route") == "official" and "year" not in portrait
+            and not portrait.get("yearUnstated"))
+
+
 def credit_portraits(cache, info_of=None, log=print):
     """Give each portrait in *cache* that carries no licence its file's
     author and licence, read from the file's Commons page; a portrait whose
@@ -947,7 +965,8 @@ def credit_portraits(cache, info_of=None, log=print):
     todo = {nid: entry["portrait"] for nid, entry in judges.items()
             if (entry.get("portrait") or {}).get("credit") == "Wikimedia Commons"
             and (not entry["portrait"].get("licence")
-                 or entry["portrait"].get("creditForm") != CREDIT_FORM)}
+                 or entry["portrait"].get("creditForm") != CREDIT_FORM
+                 or undated(entry["portrait"]))}
     if not todo:
         return 0, 0
     if log:
@@ -964,9 +983,11 @@ def credit_portraits(cache, info_of=None, log=print):
             cache.setdefault("problems", []).append(why)
             withdrawn += 1
         else:
-            for key in ("by", "authorUnrecorded", "licenceUrl"):
+            for key in ("by", "authorUnrecorded", "licenceUrl", "year", "yearUnstated"):
                 portrait.pop(key, None)
             portrait.update(credit_fields(credit))
+            if portrait.get("route") == "official":
+                portrait.update(dated(credit))
             credited += 1
     return credited, withdrawn
 

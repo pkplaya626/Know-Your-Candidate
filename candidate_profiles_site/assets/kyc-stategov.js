@@ -610,8 +610,10 @@
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
       // A holder without a photograph keeps the photograph's column, an
       // empty circle, so the names line up down the card (STATEGOV-13).
-      body = (off.photo ? '<img class="gov-officer-photo" src="' + KYC.escapeAttr(off.photo) +
-          '" alt="" width="40" height="40" loading="lazy" decoding="async">' : NO_PHOTO) +
+      // The smaller copy this site made of a heavy one, or the photograph
+      // itself (rule 101: KYC.photoAttrs).
+      body = (off.photo ? '<img class="gov-officer-photo" ' + KYC.photoAttrs(off.photo, off.photoCopy) +
+          ' alt="" width="40" height="40" loading="lazy" decoding="async">' : NO_PHOTO) +
         '<p class="gov-officer-name">' + who(off) + "</p>" +
         (off.title.toLowerCase() !== label.toLowerCase()
           ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
@@ -699,8 +701,8 @@
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join(" · ");
     var html = '<div class="gov-card">' +
       (gov.headshot
-        ? '<img class="gov-portrait" src="' + KYC.escapeAttr(gov.headshot) +
-          '" alt="" width="72" height="72" loading="lazy" decoding="async">'
+        ? '<img class="gov-portrait" ' + KYC.photoAttrs(gov.headshot, gov.photoCopy) +
+          ' alt="" width="72" height="72" loading="lazy" decoding="async">'
         : "") +
       '<div class="gov-who">' +
       officeLine("gov-role", "Governor", officeMark(code, "governor")) + openSeat(code, "governor") +
@@ -772,7 +774,8 @@
    *  association, or the office whose page it was taken from. */
   function photoSources(s) {
     var gov = s.governor || {};
-    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage]];
+    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage,
+      gov.headshot && gov.photoCopy && gov.photoCopy.of === gov.headshot && gov.headshot]];
     [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
       .forEach(function (pair) {
         var off = pair[1] || {};
@@ -780,11 +783,16 @@
         // branch) credits one.
         var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
           off.vacant || off.none || off.notMember);
-        rows.push([pair[0], drawn && off.photoBy, off.photoPage]);
+        rows.push([pair[0], drawn && off.photoBy, off.photoPage,
+          drawn && off.photoCopy && off.photoCopy.of === off.photo && off.photo]);
       });
+    // A smaller copy this site made of a heavy one says so, and links the
+    // original (rule 101), as the credit line under a portrait does.
     var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
       return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
-        (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1]));
+        (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1])) +
+        (row[3] ? " (a smaller copy made by this site of " + link(row[3], "the original file") + ")"
+          : "");
     });
     return said.length ? " Photographs: " + said.join("; ") + "." : "";
   }
@@ -805,6 +813,8 @@
    * broken image. Error events do not bubble, so this listens on capture. */
   global.document.addEventListener("error", function (event) {
     var img = event.target;
+    // A copy that fails falls back to its original first (rule 101).
+    if (img && img.tagName === "IMG" && KYC.retryOriginal(img, event)) return;
     if (img && img.classList && img.classList.contains("gov-officer-photo")) {
       // The row keeps its column, as a holder never pictured does.
       var holder = global.document.createElement("span");

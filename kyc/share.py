@@ -358,12 +358,14 @@ def ballot_source(race):
 
 # ------------------------------------------------------------ portraits
 
-def og_photo(person):
+def og_photo(person, host=None):
     """The share image of *person*: a photograph that reached the profile
     by a sourced route (rule 24), or None for the site's card. Only the
     sizes of the article's own file (``photoSet``, rule 42), the House
     Clerk's portrait, or a campaign's own portrait with its credit - never
-    a URL from a fallback chain."""
+    a URL from a fallback chain. A heavy portrait the site made a smaller
+    copy of (rule 101) is shared as that copy, at its absolute address on
+    the site's one hostname (rule 21)."""
     sizes = [s for s in person.get("photoSet") or []
              if isinstance(s, (list, tuple)) and len(s) == 2 and _https(s[1])]
     if sizes:
@@ -377,6 +379,9 @@ def og_photo(person):
     if source in ("clerk.house.gov", "cross-link") and urlparse(url).hostname == "clerk.house.gov":
         return url
     if source == "campaign-site" and person.get("photoCredit"):
+        copy = person.get("photoCopy") or {}
+        if host and copy.get("of") == url and copy.get("src"):
+            return f"https://{host}/{copy['src']}"
         return url
     return None
 
@@ -578,7 +583,7 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
     if race:
         body.append(f'<p>{_e(_race_link_words(person, race, by_id, races_by_id, post))}: '
                     f'<a href="../{_e(race_path(race["id"]))}">{_e(race_name(race))}</a></p>')
-    photo = og_photo(person)
+    photo = og_photo(person, host)
     return _page(
         host, profile_path(alias or pid),
         canonical_path=profile_path(pid),

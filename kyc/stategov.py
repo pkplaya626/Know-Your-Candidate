@@ -486,6 +486,10 @@ def build(root="."):
                            "", ballot2026.REVIEWED],
         },
     }
+    # The headshots and officers' photographs, as the smaller copies this
+    # site made of the heavy ones (rule 101).
+    from . import photocopies
+    photocopies.apply_stategov(payload, photocopies.load(root))
     return payload, problems
 
 

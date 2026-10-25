@@ -90,6 +90,16 @@
     if (!person) return null;
     // No size wider than a 2x screen needs at *px* (KYC.cappedSrcset).
     var drawn = (px || 116) + "px";
+    if (person.photo && person.photoCopy) {
+      // The smaller copy this site made of a heavy original (rule 101): one
+      // size, made for the dialog's box at three times its pixels.
+      return {
+        src: KYC.photoSrc(person.photo, person.photoCopy),
+        srcset: "",
+        original: person.photo,
+        credit: KYC.copyCredit({ by: "The White House" }, person.photo, person.photoCopy),
+      };
+    }
     if (person.photo) {
       var sizes = person.photoSet || [];
       return {
@@ -110,7 +120,10 @@
                srcset: KYC.cappedSrcset(set, drawn),
                credit: p.licence
                  ? { by: p.by, licence: p.licence, licenceUrl: p.licenceUrl, page: p.source,
-                     via: "Wikimedia Commons", authorUnrecorded: !!p.authorUnrecorded }
+                     via: "Wikimedia Commons", authorUnrecorded: !!p.authorUnrecorded,
+                     // A justice's official portrait says when it was taken,
+                     // where Commons dates it (several are 2005-2017).
+                     dated: p.year ? "Official portrait, " + p.year : "" }
                  : { by: p.credit, page: p.source } };
     }
     return null;
@@ -122,6 +135,7 @@
     var p = picture(person, px);
     if (!p) return "";
     return '<img class="' + KYC.escapeAttr(className) + '" src="' + KYC.escapeAttr(p.src) + '"' +
+      (p.original ? ' data-photo-original="' + KYC.escapeAttr(p.original) + '"' : "") +
       (p.srcset ? ' srcset="' + KYC.escapeAttr(p.srcset) + '" sizes="' + px + 'px"' : "") +
       ' alt="" width="' + px + '" height="' + Math.round(px * 1.25) +
       '" loading="lazy" decoding="async">';
@@ -667,6 +681,8 @@
     if (pic) {
       photo.srcset = pic.srcset;
       photo.sizes = pic.srcset ? "116px" : "";
+      if (pic.original) photo.setAttribute("data-photo-original", pic.original);
+      else photo.removeAttribute("data-photo-original");
       photo.src = pic.src;
       photo.alt = person.name;
     } else {

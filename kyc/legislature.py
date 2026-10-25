@@ -20,7 +20,7 @@ import re
 import unicodedata
 import urllib.parse
 
-from . import ballot2026, geo, legphotos, statelegs
+from . import ballot2026, geo, legphotos, photocopies, statelegs
 from . import districts as D
 from .government_maps import LOWER_CHAMBER, SEATS, STATES
 from .pages import state_name
@@ -934,6 +934,8 @@ def build(root=".", codes=None, dropped=None):
         raise LegislatureError(str(exc)) from exc
     places = D.load_places(root)
     photos = legphotos.load_cache(root)
+    # The smaller copies this site made of the heavy ones (rule 101).
+    copies = photocopies.load(root)
     out = {}
     for code in codes or STATES:
         roster = cache["states"].get(code) or []
@@ -943,6 +945,7 @@ def build(root=".", codes=None, dropped=None):
         counts = {} if dropped is None else dropped.setdefault(code, {})
         out[code] = build_state(code, root, places, roster, control.get(code),
                                 cache.get("fetched", ""), counts, photos)
+        photocopies.apply_legislature(out[code], copies, code)
     return out
 
 

@@ -370,6 +370,10 @@ def build(root="."):
     payload["succession"], trouble = succession(payload, executive,
                                                 legislators.load_snapshot(root))
     problems += trouble
+    # The White House's photographs, as the smaller copies this site made
+    # of the heavy ones (rule 101).
+    from . import photocopies
+    photocopies.apply_federal(payload, photocopies.load(root))
     _check_ids(payload, per_court)
     return payload, per_court, search, problems
 
