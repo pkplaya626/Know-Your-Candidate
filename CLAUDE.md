@@ -44,6 +44,7 @@ data/courts.json            ──┤   (each state's highest court, from the co
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
+data/statewide_photos.json  ──┤   (those candidates' photographs, by the routes rule 91 names: ballotphotos)
 data/ballot_measures.json   ──┤   (each jurisdiction's statewide questions, from its own list: hand-edited, kyc/ballot_measures.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
@@ -128,7 +129,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `legislator_photos.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
-  `statewide_candidates.json`, `ballot_measures.json`,
+  `statewide_candidates.json`, `statewide_photos.json`, `ballot_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
@@ -181,7 +182,8 @@ python build_profile_site.py localgov         # every local government (Census l
 python build_profile_site.py localgov --check-sites  # open every listed local website; resumes (rule 78)
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
-python build_profile_site.py courts           # each state's highest court, from the court's own roster
+python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
+python build_profile_site.py ballotphotos     # the statewide candidates' photographs (official guides, members, the race's Wikipedia article)
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
@@ -200,13 +202,13 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2140 tests, no dependencies
-npm install && npm test                       # 3315 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2182 tests, no dependencies
+npm install && npm test                       # 3322 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `ballotphotos`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -1625,12 +1627,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     headshot read as "not an image"). No srcset offers a size wider than
     a 2x screen needs, the officials' dialog's included. A state officer's photograph
     comes only from their office or their association's roster, matched by
-    state, never a search. No attorney general had one: NAAG's member
-    pages answer every script and a headless browser with a Cloudflare
-    challenge, and a party association's photograph is the party's. So
+    state, never a search. No attorney general had one (STATEGOV-13): a
+    party association's photograph is the party's. So
     `officers.add_ag_photos` reads the office's own pages - those that
-    confirmed the name (rule 56), and the attorney general's page they
-    link - and takes only an image carrying the surname as a word, or in
+    confirmed the name (rule 56), the attorney general's page they link,
+    and where the front page links none the office's own page about its
+    attorney general (`officers.BIO_PAGES`, an address typed in, the image
+    on it tested like any other) - and takes only an image carrying the surname as a word, or in
     run-together words of the holder's name and title
     ("AgLizMurrillHeadshot"), with no other first name before it, whose
     words say it is a likeness ("headshot", "photo of") or are nothing but
@@ -1646,6 +1649,37 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     was checked for and is withheld, and said, once the roster names
     someone else. Every build lists the confirmed officers still shown
     without one.
+
+    The owner's decision of 2026-10-19 holds for the attorneys general,
+    the state justices and the statewide candidates: a photograph is shown
+    only at a size its own source offers within those caps - one its
+    page's `srcset` or `<picture>` lists, a Commons standard width - never
+    resized, never through Photon or any image service, never a copy
+    committed here (`kyc/official_photos.py`). One its source offers only
+    above the caps is left out, and the build counts them: nine attorneys
+    general's own offices offer theirs only so (California's is a 6 MB
+    original). Their association's card stands in there: NAAG's "Find my
+    AG" roster names each attorney general and the state beside the
+    photograph at WordPress's own 225x300. naag.org answers a script and
+    a headless browser with a Cloudflare challenge, so a person reads it
+    in a windowed Chrome (`tools/read_naag_cards.mjs`) and records each
+    card in `OFFICER_PHOTOS` on its state and name, never its file's:
+    West Virginia's is "ag-WA-McCusker". A holder whose name the office
+    has not confirmed gets none. A state justice's photograph comes from
+    the roster the court's recipe reads (rule 57) or the one page the
+    roster links from that justice's own name or row - never an address
+    built from a name: Montana's `/bios/Rice` is linked from nowhere -
+    and only where every word the page gives the image (its alt text,
+    title, caption and file name) is theirs and none says a scene
+    (`court_photos.judge`). Two Connecticut justices' own pages carry a
+    former justice's alt text, "Justice Christine E. Keller"; Oklahoma's
+    Edmondson page shows him "pinned by his brother". An official portrait
+    those words refuse is an evidenced `overrides.JUSTICE_PHOTOS` entry.
+    The state page credits each to the court, linked to the page it was
+    read on. Every photograph on these routes is cached with that page,
+    the words naming the person beside it, the day read, its bytes and
+    pixel size; `official_photos.record_problems` fails one without them,
+    and a read that concludes nothing keeps the last (rule 8).
 
 88. **A colour that carries meaning is checked as a colour-blind reader
     sees it, and is never the only cue.** The 2026-10-17 audit ran the
@@ -1814,10 +1848,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Sanders"), the list's form kept beside them; a party the list
     abbreviates is spelled out from its key or statute
     (`statewide.PARTY_CODES`), and an unexplained code fails the build.
-    Write-ins apart, listed by surname and said to be; no portrait, money
-    or platform, never a profile (rule 27), never joined to one by a name
-    (rule 25): a sitting member a list names is a build warning
-    (`statewide-member-unnoted`) until an evidenced
+    Write-ins apart, listed by surname and said to be; no money or
+    platform, never a profile (rule 27), never joined to one by a name
+    (rule 25). A photograph since the owner's decision of 2026-10-19, by
+    these routes in this order and no other (`kyc/statewide_photos.py`,
+    `ballotphotos`), credited beside the name: the office photograph the
+    card already shows, for the one candidate the holder line settles as
+    its holder; a member of Congress's own, by bioguide id, through an
+    evidenced `OTHER_OFFICE_NOMINEES` entry; an official guide's (Arizona's
+    Clean Elections Commission's list, California's voter guide, each
+    pairing the picture with the name - by block and alt text, never by
+    nearness: California's image precedes its heading, and a reader that
+    took the next image gave Rob Bonta Michael Gates's face; Alaska's
+    encrypted statements would need a copy kept, so are not read); and
+    the race's own Wikipedia article, its title built from the race, its
+    link matched on given name and surname within that race (Danielle
+    Ford is not Aaron Ford, whose article the same page links) and never
+    on a one-word name, then checked as rule 33's are, the race's infobox
+    image beside the nominee before the article's lead. A Commons file
+    public domain on an uploader's word alone ("PD-author", or no PD
+    category) is refused, as are a scene and an editor's crop of a group
+    a person has looked at (`overrides.COMMONS_NOT_A_PORTRAIT`). A running
+    mate is matched only beside their own ticket's nominee
+    (`running_mateN` beside `nomineeN`). A sitting member a list names is a
+    build warning (`statewide-member-unnoted`) until an evidenced
     `OTHER_OFFICE_NOMINEES` entry says so on their profile - Amy
     Klobuchar was on Minnesota's governor ballot while hers said nothing.
     The holder line is read from the list for the roster's holder at build
