@@ -816,7 +816,9 @@ PORTRAIT_NAME_FORMS = {}
 # would not last. validate reports an entry no cached route offers.
 #
 # One test for every image a person looks at (rule 38, the review of PR
-# #134): a photograph of the candidate alone whose face, brow to chin, is at
+# #134): a photograph of the candidate alone - nobody else in the frame, even
+# in the background or in part (the owner, 2026-10-25: "probably better to
+# leave out background people") - whose face, brow to chin, is at
 # least a tenth of the height of the 4:5 card that crops it from the top -
 # 6.5px of the state pages' 65px phone card, where eyes and a mouth can be
 # made out - is a likeness and is shown ("more content", the owner's
