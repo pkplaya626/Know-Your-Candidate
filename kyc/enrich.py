@@ -42,7 +42,7 @@ from concurrent.futures import ThreadPoolExecutor
 from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
-from .photos import campaign_credit, lighter_form, too_heavy
+from .photos import campaign_credit, lighter_rendition, parse_srcset, too_heavy
 from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
 
@@ -308,6 +308,9 @@ class _Page(html.parser.HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.title, self.meta, self.images, self.links, self.headings = "", {}, [], [], []
+        # Each image's own srcset, by its src: the renditions the page
+        # itself offers of it (photos.lighter_rendition).
+        self.srcsets = {}
         self.text, self._size = [], 0
         self._open, self._buffer, self._href, self._skip = None, [], None, 0
 
@@ -325,6 +328,9 @@ class _Page(html.parser.HTMLParser):
         elif tag == "img":
             src = a.get("src") or a.get("data-src") or a.get("data-lazy-src") or ""
             self.images.append((src, a.get("alt", "")))
+            srcset = a.get("srcset") or a.get("data-srcset") or a.get("data-lazy-srcset")
+            if src and srcset:
+                self.srcsets.setdefault(src, srcset)
         elif tag == "a":
             self._open, self._buffer, self._href = "a", [], a.get("href", "")
         elif tag in self._HEADINGS:
@@ -858,6 +864,7 @@ def portrait(page, base, profile):
         return []
     first = (_words(profile["name"]) or [""])[0]
     person = set(_words(profile["name"]))
+    chosen = (overrides.CAMPAIGN_PORTRAITS.get(profile.get("id")) or {}).get("url")
     scored = []
     images = [(page.meta.get("og:image", ""), ""), (page.meta.get("twitter:image", ""), "")]
     for src, alt in images + page.images:
@@ -866,6 +873,10 @@ def portrait(page, base, profile):
             continue
         url = urllib.parse.urljoin(base, src)
         if not url.startswith("https://"):
+            continue
+        if url == chosen:
+            # Looked at by a person, and drawn by this very page.
+            scored.append((9, url, True))
             continue
         path = urllib.parse.unquote(urllib.parse.urlsplit(url).path)
         if not re.search(r"\.(?:jpe?g|png|webp)$", path, re.I):
@@ -878,10 +889,13 @@ def portrait(page, base, profile):
         hinted = _hinted(name_words) or _hinted(alt_words)
         if words & _BRANDING and not hinted:
             continue
-        in_file = surname in name_words or any(
-            w.startswith(first) and w.endswith(surname) and len(w) <= len(first + surname)
-            for w in name_words if first)
-        in_alt = surname in alt_words
+        def run_together(words):
+            # "BrianMiller-5.jpg": the first name and surname as one word.
+            return any(w.startswith(first) and w.endswith(surname)
+                       and len(w) <= len(first + surname) for w in words if first)
+
+        in_file = surname in name_words or run_together(name_words)
+        in_alt = surname in alt_words or run_together(alt_words)
         if not (in_file or in_alt):
             continue
         # Whatever named them must be about little else: "ellman_website_
@@ -895,6 +909,69 @@ def portrait(page, base, profile):
         if url not in (u for _, u, _ in scored):
             scored.append((score, url, hinted))
     return [(u, hinted) for _, u, hinted in sorted(scored, key=lambda row: -row[0])]
+
+
+def evidence_of(page, base, url, profile=None):
+    """What on *page* names the person beside the image at *url*: its alt
+    text, else its file name - the words :func:`portrait` took it by, kept
+    with the portrait so a reader of the cache can see why (rule 24)."""
+    surname = fold(surname_of(profile["name"])) if profile else ""
+    chosen = overrides.CAMPAIGN_PORTRAITS.get((profile or {}).get("id")) or {}
+    if chosen.get("url") == url:
+        return chosen["evidence"]
+    images = [(page.meta.get("og:image", ""), ""), (page.meta.get("twitter:image", ""), "")]
+    alts = [alt for src, alt in images + page.images
+            if src and urllib.parse.urljoin(base, src.strip()) == url and alt.strip()]
+    name = urllib.parse.unquote(os.path.basename(urllib.parse.urlsplit(url).path))
+    if surname:
+        # The words that named them: an alt text that does not ("Hero
+        # image") is no evidence, even beside a file name that does.
+        first = (_words(profile["name"]) or [""])[0]
+        naming = [alt for alt in alts if surname in _words(alt) or any(
+            w.startswith(first) and w.endswith(surname) for w in _words(alt))]
+        if naming:
+            return f'alt text "{" ".join(naming[0].split())[:120]}"'
+        return f'file name "{name[:120]}"'
+    if alts:
+        return f'alt text "{" ".join(alts[0].split())[:120]}"'
+    return f'file name "{name[:120]}"'
+
+
+def page_forms(page, base):
+    """``{image url: [(rendition url, width)]}``: the renditions the page's
+    own ``srcset`` offers of each image it draws."""
+    out = {}
+    for src, srcset in page.srcsets.items():
+        url = urllib.parse.urljoin(base, src.strip())
+        forms = [(u, w) for u, w in parse_srcset(srcset, base) if u.startswith("https://")]
+        if forms:
+            out.setdefault(url, forms)
+    return out
+
+
+# A link to the page where a campaign says who the candidate is. Their
+# portrait is often there and not on the home page: of thirty nominees'
+# sites with none on the home page, the research of 2026-10-19 found one on
+# the About page of four.
+_ABOUT_TEXT = re.compile(r"^(?:about(?:\s+\w+){0,2}|meet\s+\w+(?:\s+\w+)?|(?:my|her|his|our)\s+story|"
+                         r"biography|bio|who\s+is\s+\w+(?:\s+\w+)?\??|get\s+to\s+know\s+\w+)$", re.I)
+_ABOUT_PATH = re.compile(r"^/(?:about|meet|bio|biography|who-is|get-to-know|my-story)"
+                         r"(?:[-_][\w-]*)?/?$", re.I)
+
+
+def about_link(page, base):
+    """The address of the campaign's About or Meet page on its own host, or
+    ``None``: a link whose path or words say it is one ("/about", "Meet
+    Jena"), never another site's page."""
+    host = host_of(base)
+    for href, text in page.links:
+        url = urllib.parse.urljoin(base, (href or "").strip()).split("#", 1)[0]
+        parts = urllib.parse.urlsplit(url)
+        if parts.scheme != "https" or host_of(url) != host or parts.path in ("", "/"):
+            continue
+        if _ABOUT_PATH.search(parts.path) or _ABOUT_TEXT.search(" ".join(text.split())):
+            return url
+    return None
 
 
 def other_form(url):
@@ -961,93 +1038,279 @@ def _read_one(profile, url, pause=1.0, extract=True, rivals=()):
             items = issue_headings(issues_page, profile["name"], rivals)
             if items:
                 record["issues"] = items
-    pictures = portrait(page, final, profile)
-    # Kept so validate can tell a NOT_A_PORTRAIT entry still means something.
-    refused = [u for u, _ in pictures if u in overrides.NOT_A_PORTRAIT]
-    if refused:
-        record["notPortraits"] = refused
-    take_portrait(record, [p for p in pictures if p[0] not in refused])
+    look_for_portrait(record, profile, page, final, pause)
     return record
 
 
+def look_for_portrait(record, profile, page, final, pause=1.0):
+    """Put the campaign's portrait of the candidate in *record*: from the
+    page read (*page*, at *final*), or else from the campaign's About or
+    Meet page on the same host (:func:`about_link`), which must itself read
+    as the campaign's and name the candidate (:func:`assess`, rule 38).
+
+    The record keeps the page the image was on (``portraitPage``), the
+    words that named them beside it (``portraitEvidence``) and the day it
+    was read (``portraitRead``). A portrait over the caps is taken in a
+    rendition its source offers, else at full size, and said in
+    ``portraitHeavy`` (:func:`lighten`)."""
+    refused_all = []
+    where, base = page, final
+    for step in ("home", "about"):
+        if step == "about":
+            about = about_link(page, final)
+            if not about:
+                break
+            time.sleep(pause)
+            about_final, about_status, about_markup = fetch(about)
+            where, base = parse_page(about_markup), about_final
+            verdict, _reason = assess(profile, about, about_final, about_status, where)
+            if verdict is not SAFE or host_of(about_final) != host_of(final):
+                break
+        pictures = portrait(where, base, profile)
+        # Kept so validate can tell a NOT_A_PORTRAIT entry still means something.
+        refused = [u for u, _ in pictures if u in overrides.NOT_A_PORTRAIT]
+        refused_all += [u for u in refused if u not in refused_all]
+        taken = take_portrait(record, [p for p in pictures if p[0] not in refused],
+                              offers=page_forms(where, base))
+        if taken:
+            original = (record.get("portraitHeavy") or [{}])[0].get("url") or taken
+            record["portraitPage"] = base
+            record["portraitEvidence"] = evidence_of(where, base, original, profile)
+            record["portraitRead"] = datetime.date.today().isoformat()
+            break
+    if refused_all:
+        record["notPortraits"] = refused_all
+    return record.get("portrait")
+
+
 def _weigh(url):
-    """An image's weight, for ``photos.lighter_form``; ``None`` unread."""
+    """An image's weight, for ``photos.lighter_rendition``; ``None`` unread."""
     return portrait_check(url, True)[1]
 
 
-def lighten(record, picture, weight):
-    """Put *picture* in *record* as its portrait, at a lighter form of the
-    same file when it is too heavy (``photos.lighter_form``: the host's own
-    resizer, or Photon). A heavy file with no lighter form is still taken -
-    a nominee's only likeness is not withheld for its weight; eleven were,
-    and showed the silhouette beside an opponent's photograph - and the
-    weight is said in ``portraitHeavy`` either way (TECH-13)."""
+_PORTRAIT_FIELDS = ("portrait", "portraitWeight", "portraitHeavy", "portraitForms",
+                    "portraitPage", "portraitEvidence", "portraitRead")
+
+
+def lighten(record, picture, weight, offered=()):
+    """Put *picture* in *record* as its portrait: as it is when within the
+    caps, else a lighter rendition of the same file
+    (``photos.lighter_rendition``: one its page's srcset lists, its host's
+    own resizer, or Photon), else at full size. Returns what was taken.
+
+    A heavy file with no lighter rendition is still taken - a nominee's
+    only likeness is not withheld for its weight; eleven were, and showed
+    the silhouette beside an opponent's photograph, and the first version
+    of PR #134 left six more out again under the brief of 2026-10-19 - and
+    the weight is said in ``portraitHeavy`` either way (``kept``: shown at
+    full size). The owner's decision of 2026-10-25 relaxed that brief: a
+    weight cap costs coverage and guards no fact about a person."""
     why = too_heavy(weight)
-    if why:
-        found = lighter_form(picture, weight, _weigh)
-        record["portraitHeavy"] = [{"url": picture, "why": why,
-                                    "kept": not found}]
-        if found:
-            picture, weight = found
-    else:
+    record.pop("portraitForms", None)
+    if not why:
         record.pop("portraitHeavy", None)
-    record["portrait"] = picture
-    if weight:
-        record["portraitWeight"] = weight
-    return picture
+        record["portrait"] = picture
+        if weight:
+            record["portraitWeight"] = weight
+        else:
+            record.pop("portraitWeight", None)
+        return picture
+    found = lighter_rendition(picture, weight, _weigh, offered)
+    record["portraitHeavy"] = [{"url": picture, "why": why, "kept": not found}]
+    if offered:
+        record["portraitForms"] = [[url, width] for url, width in offered]
+    record["portrait"], record["portraitWeight"] = found or (picture, weight)
+    return record["portrait"]
 
 
-def take_portrait(record, pictures, tries=3):
+def take_portrait(record, pictures, tries=3, offers=None):
     """Put the first of *pictures* that is head-and-shoulders shaped in
-    *record*, with its measured weight, lightened if it is too heavy
-    (:func:`lighten`)."""
-    record.pop("portrait", None)
-    record.pop("portraitWeight", None)
-    record.pop("portraitHeavy", None)
+    *record*, with its measured weight, in a lighter rendition of it when it
+    is too heavy (:func:`lighten`). *offers* maps an image to the
+    renditions its page lists."""
+    for key in _PORTRAIT_FIELDS:
+        record.pop(key, None)
     for picture, hinted in pictures[:tries]:
         verdict, weight = portrait_check(picture, hinted)
         if verdict is True:
-            return lighten(record, picture, weight)
+            return lighten(record, picture, weight, (offers or {}).get(picture, ()))
     return None
 
 
 def measure_portraits(cache, log=print, pause=1.0):
     """Weigh each cached campaign-site portrait that has no recorded weight,
-    and lighten one that is too heavy (:func:`lighten`). Returns how many
-    were weighed.
+    and take a lighter rendition of one that is too heavy (:func:`lighten`).
+    Returns how many were weighed.
 
-    Only the image is fetched, never the site: a picture is chosen by the
-    full read (``_read_one``), which first checks that the page names the
-    candidate (rule 38) and is not spam or parking (rule 39). A record whose
-    picture an earlier run refused for its weight alone (``portraitHeavy``
-    with no ``portrait``) has that same picture weighed again and taken,
-    lightened where it can be."""
+    Only the image and its renditions are fetched, never the site: a
+    picture is chosen by the full read (``_read_one``), which first checks
+    that the page names the candidate (rule 38) and is not spam or parking
+    (rule 39). A heavy one kept at full size is weighed again each run, and
+    so is one an earlier version left out for its weight (``leftOut``):
+    it is shown again, lighter where it can be."""
     people = (cache or {}).get("people") or {}
     weighed = 0
     for entry in people.values():
-        for key in ("site", "listed"):
+        for key in ("site", "listed", "drawn"):
             record = entry.get(key) or {}
-            refused = record.get("portraitHeavy") or []
-            if record.get("portrait"):
-                # A heavy one kept at full size is tried again each run.
-                if "portraitWeight" in record and not too_heavy(record["portraitWeight"]):
-                    continue
-                picture = record["portrait"]
-            elif refused:
-                picture = refused[0]["url"]
-            else:
+            heavy = (record.get("portraitHeavy") or [{}])[0].get("url")
+            shown = record.get("portrait")
+            if shown and "portraitWeight" in record and not too_heavy(record["portraitWeight"]):
+                continue
+            picture = heavy or shown
+            if not picture:
                 continue
             time.sleep(pause)
             weight = _weigh(picture)
             if not weight:
                 continue                       # could not tell: kept (rule 8)
             weighed += 1
-            lighten(record, picture, weight)
+            kept = {k: record[k] for k in ("portraitPage", "portraitEvidence", "portraitRead")
+                    if k in record}
+            offered = [tuple(form) for form in record.get("portraitForms") or ()]
+            lighten(record, picture, weight, offered)
+            record.update(kept)
             if record.get("portraitHeavy"):
                 state = ("kept at full size" if record["portraitHeavy"][0]["kept"]
                          else "taken smaller")
                 log(f"    {entry.get('name')}: {picture} is {too_heavy(weight)}; {state}")
     return weighed
+
+
+# ------------------------------------------------------------ drawn pages
+#
+# Many campaign sites draw their images with JavaScript (Wix, Squarespace's
+# lazy loading, site builders' galleries), and some answer a script with a
+# bot wall (HTTP 202 or 403) that a browser passes: the research of
+# 2026-10-19 found a nominee's headshot on the About page only as the page
+# was drawn. These pages are read once more in a headless Chrome of our own
+# (``tools/read_court_pages.mjs``, the courts' reader), with every rule of
+# the static read: the drawn page must read as the campaign's and name the
+# candidate, and the image must be named for them and shaped like a portrait
+# (rule 38), within the caps or in a size the page offers.
+
+RENDER_LIMIT = 40          # sites drawn a run: about 10 seconds each
+RENDER_DAYS = 14           # a drawn read stands this long
+RENDER_BATCH = 12          # pages a browser run
+
+
+def _code(i):
+    """A page code the browser reader accepts (letters only)."""
+    letters = ""
+    i += 1
+    while i:
+        i, rest = divmod(i - 1, 26)
+        letters = chr(65 + rest) + letters
+    return "CAMPAIGN-" + letters
+
+
+def render_wanted(profiles, cache, today=None, limit=RENDER_LIMIT):
+    """``[(profile, key, site record)]``: the people still running with no
+    portrait by any route whose site's static read found none - it read as
+    theirs, or could not tell (a bot wall) - and that no drawn read covers
+    from the last :data:`RENDER_DAYS` days. Most recently unread first."""
+    people = (cache or {}).get("people") or {}
+    today = today or datetime.date.today()
+    cutoff = (today - datetime.timedelta(days=RENDER_DAYS)).isoformat()
+    out = []
+    for profile in profiles:
+        if not running(profile) or profile.get("photoSource"):
+            continue
+        entry = people.get(profile.get("id")) or {}
+        for key in ("site", "listed"):
+            record = entry.get(key) or {}
+            url = record.get("working") or record.get("url") or ""
+            if (not url.startswith("https://") or record.get("safe") is False
+                    or record.get("portrait") or record.get("portraitHeavy")
+                    or overrides.blocked_campaign_host(url)):
+                continue
+            drawn = entry.get("drawn") or {}
+            if drawn.get("url") == url and drawn.get("read", "") >= cutoff:
+                continue
+            out.append((profile, key, url, drawn.get("read", "")))
+            break
+    out.sort(key=lambda row: row[3])
+    return [(p, key, url) for p, key, url, _read in out[:limit]]
+
+
+def _drawn_read(profile, url, markup, today):
+    """A drawn page's record: its verdict, and a portrait from it."""
+    page = parse_page(markup)
+    verdict, reason = assess(profile, url, url, 200, page)
+    record = {"url": url, "safe": verdict, "reason": reason, "read": today}
+    if verdict is not SAFE:
+        return record, page
+    found = portrait(page, url, profile)
+    pictures = [p for p in found if p[0] not in overrides.NOT_A_PORTRAIT]
+    # Kept so validate can tell a NOT_A_PORTRAIT entry still means something.
+    refused = [u for u, _ in found if u in overrides.NOT_A_PORTRAIT]
+    if refused:
+        record["notPortraits"] = refused
+    if take_portrait(record, pictures, offers=page_forms(page, url)):
+        original = (record.get("portraitHeavy") or [{}])[0].get("url") or record["portrait"]
+        record.update(portraitPage=url, portraitEvidence=evidence_of(page, url, original, profile),
+                      portraitRead=today)
+    return record, page
+
+
+def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, reader=None,
+                     today=None):
+    """Read the sites :func:`render_wanted` names as a browser draws them -
+    the home page, then its About page when the home page has no portrait -
+    and keep what each gives as the person's ``drawn`` record. Returns how
+    many portraits were found. No Chrome, or a page the browser could not
+    read, keeps every earlier drawn record (rule 8)."""
+    from .courts import read_with_browser
+
+    one_run = reader or (lambda pages: read_with_browser(pages, root=root))
+
+    def reader(pages):
+        # A few pages a browser run: the reader gives a run fifteen minutes,
+        # and a slow site takes most of a minute to load and settle.
+        found, problems, codes = {}, [], sorted(pages)
+        for i in range(0, len(codes), RENDER_BATCH):
+            got, said = one_run({c: pages[c] for c in codes[i:i + RENDER_BATCH]})
+            found.update(got)
+            problems += said
+        return found, problems
+
+    today = (today or datetime.date.today()).isoformat()
+    people = cache.setdefault("people", {})
+    wanted = render_wanted(profiles, cache, limit=limit)
+    if not wanted:
+        return 0
+    log(f"  enrich: drawing {len(wanted)} campaign site(s) in a headless browser ...")
+    homes = {_code(i): url for i, (_p, _k, url) in enumerate(wanted)}
+    drawn, problems = reader(homes)
+    for line in problems[:5]:
+        log(f"    [drawn] {line}")
+    found, abouts = 0, {}
+    for i, (profile, _key, url) in enumerate(wanted):
+        markup = drawn.get(_code(i))
+        if markup is None:
+            continue                                     # kept as it was (rule 8)
+        record, page = _drawn_read(profile, url, markup, today)
+        people.setdefault(profile["id"], {})["drawn"] = record
+        if record.get("portrait"):
+            found += 1
+        elif record["safe"] is SAFE:
+            about = about_link(page, url)
+            if about:
+                abouts[_code(i)] = (profile, url, about)
+    if abouts:
+        more, problems = reader({code: about for code, (_p, _u, about) in abouts.items()})
+        for line in problems[:5]:
+            log(f"    [drawn] {line}")
+        for code, (profile, url, about) in abouts.items():
+            if more.get(code) is None:
+                continue
+            record, _page = _drawn_read(profile, about, more[code], today)
+            if record.get("portrait"):
+                record["url"] = url                      # the site it stands for
+                people[profile["id"]]["drawn"] = record
+                found += 1
+    log(f"  enrich: {found} portrait(s) found on drawn pages")
+    return found
 
 
 # --------------------------------------------------------------------- cache
@@ -1314,6 +1577,10 @@ def apply_cache(profiles, cache, as_of=None):
             profile["campaignSiteVia"] = "election-page"
             shown = listed
         if not shown or shown.get("safe") is not True:
+            # A site whose static read could not tell (a bot wall) may still
+            # give the portrait a browser drew from it, read by every rule.
+            if shown and shown.get("safe") is None and not profile.get("photoSource"):
+                take_campaign_portrait(profile, entry, shown, counts)
             continue
         if shown.get("description"):
             profile["campaignQuote"] = shown["description"]
@@ -1323,20 +1590,66 @@ def apply_cache(profiles, cache, as_of=None):
         if shown.get("issues") and fill_field(profile, "platforms", "; ".join(shown["issues"]),
                                               "campaign-site"):
             counts["issues"] += 1
-        if shown.get("portrait") and too_heavy(shown.get("portraitWeight")):
-            # No lighter form of it was found (lighten): shown all the same,
-            # lazily, and counted for the build's report (TECH-13).
-            counts["portrait_heavy"] += 1
-        if shown.get("portrait") and not profile.get("photoSource") \
-                and profile.get("source") == "fec-field" \
-                and shown["portrait"] not in overrides.NOT_A_PORTRAIT:
-            photos = [u for u in profile.get("photos") or [] if u != shown["portrait"]]
-            profile["photos"] = [shown["portrait"]] + photos
-            profile["photo_url"] = shown["portrait"]
-            profile["photoSource"] = "campaign-site"
-            profile["photoCredit"] = campaign_credit(profile.get("campaignSite"))
-            counts["portrait"] += 1
+        if not profile.get("photoSource"):
+            take_campaign_portrait(profile, entry, shown, counts)
     return counts
+
+
+def portrait_record(entry, site):
+    """The record a profile's campaign portrait comes from: the site's own
+    read when it found one, else the drawn
+    read of that same site (:func:`render_portraits`) when it read as the
+    campaign's."""
+    if site.get("portrait") or site.get("portraitHeavy"):
+        return site
+    drawn = (entry or {}).get("drawn") or {}
+    if drawn.get("safe") is True and drawn.get("url") in (site.get("url"), site.get("working")):
+        return drawn
+    return site
+
+
+def take_campaign_portrait(profile, entry, site, counts):
+    """Put the campaign's portrait at the head of *profile*'s chain, from
+    :func:`portrait_record`; count one shown at full size over the caps.
+    Only for a challenger: a member's portrait comes by their bioguide id
+    (rule 24), and a campaign's photograph is never put in front of it."""
+    if not profile.get("isCandidate") or profile.get("bioguide"):
+        return False
+    record = portrait_record(entry, site)
+    picture = campaign_portrait(record)
+    if picture is None:
+        return False
+    if too_heavy(record.get("portraitWeight")):
+        # No lighter rendition is offered: shown all the same, lazily, and
+        # counted for the build's report (TECH-13, rule 87).
+        counts["portrait_heavy"] += 1
+    # A curated row is a candidate as much as a filer (rule 24): Brian
+    # Bengs's own campaign portrait sat in this cache while his profile
+    # showed the silhouette, because only FEC filers were given one.
+    photos = [u for u in profile.get("photos") or [] if u != picture]
+    profile["photos"] = [picture] + photos
+    profile["photo_url"] = picture
+    profile["photoSource"] = "campaign-site"
+    # The credit names the host of the page it links, the one the image
+    # was on: a filed address that redirects (michaelquirk4congress.com to
+    # michaelquirkforcongress.com) read as one site and linked another.
+    page = record.get("portraitPage") or profile.get("campaignSite")
+    profile["photoCredit"] = campaign_credit(page)
+    counts["portrait"] += 1
+    return True
+
+
+def campaign_portrait(site):
+    """The portrait a campaign-site record shows, or ``None``: not on
+    ``NOT_A_PORTRAIT``, nor a rendition of a file that is. One over the caps
+    is shown all the same (:func:`lighten`, rule 87)."""
+    picture = (site or {}).get("portrait")
+    heavy = (site or {}).get("portraitHeavy") and site["portraitHeavy"][0].get("url")
+    # A rendition of a refused image is that image: the entry names the file
+    # the page draws, the cache may hold a smaller form its srcset lists.
+    if not picture or picture in overrides.NOT_A_PORTRAIT or heavy in overrides.NOT_A_PORTRAIT:
+        return None
+    return picture
 
 
 def problems(profiles, cache):
