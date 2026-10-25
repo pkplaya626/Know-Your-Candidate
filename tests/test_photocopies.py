@@ -198,6 +198,38 @@ class TestRun(unittest.TestCase):
         self.assertIsNone(photocopies.current(self.cache(), HEAVY))
         self.assertEqual(self.photos(), [])
 
+    def test_a_changed_original_that_cannot_be_downloaded_loses_its_copy(self):
+        # A seat-keyed file (rule 100) whose size changed may be a
+        # successor's photograph: a download that then fails must not leave
+        # the predecessor's copy shown until the next run.
+        self.net.jpeg(HEAVY, 9_000_000)
+        s = shown((HEAVY, "legislator"))
+        self.run_once(s)
+        self.net.jpeg(HEAVY, 8_000_000, etag='"new"')
+
+        def refused(url, headers=None):
+            raise OSError("connection reset")
+        report = photocopies.run(self.root, shown=s, maker=self.chrome, prober=self.net.prober,
+                                 fetcher=refused, log=lambda *_: None, force=True)
+        self.assertIsNone(photocopies.current(self.cache(), HEAVY))
+        self.assertEqual((report["removed"], report["errors"]), (1, 1))
+        self.assertEqual(self.photos(), [])
+        # Read again whole the next day, it is copied anew.
+        self.run_once(s)
+        self.assertIsNotNone(photocopies.current(self.cache(), HEAVY))
+
+    def test_moving_validators_on_the_same_file_keep_the_copy(self):
+        # The same bytes under a new ETag (a server whose machines disagree):
+        # the copy is withdrawn while it is read, and given back on the hash.
+        self.net.jpeg(HEAVY, 9_000_000)
+        s = shown((HEAVY, "legislator"))
+        self.run_once(s)
+        first = self.cache()["originals"][HEAVY]["copy"]
+        self.net.files[HEAVY] = self.net.files[HEAVY][:3] + ('"other-node"',)
+        report = self.run_once(s)
+        self.assertEqual((report["kept"], report["removed"], self.chrome.calls), (1, 0, 1))
+        self.assertEqual(self.cache()["originals"][HEAVY]["copy"], first)
+
     def test_gone_twice_takes_the_copy_away_and_a_failure_concludes_nothing(self):
         self.net.jpeg(HEAVY, 9_000_000)
         s = shown((HEAVY, "legislator"))

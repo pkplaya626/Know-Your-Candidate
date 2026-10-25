@@ -771,6 +771,14 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
                 continue
             same = bool(entry.get("copy")) and _unchanged(entry, read)
             with lock:
+                # A file that may have changed loses its copy at once, before
+                # it is downloaded again: a seat-keyed address (rule 100) can
+                # now be a successor's photograph, and a failed download must
+                # not leave the predecessor's copy shown. The copy comes back
+                # only if the file read again has the very same hash.
+                held = None
+                if entry.get("copy") and not same:
+                    held = (entry.pop("copy"), entry.get("sha256"))
                 for key in ("bytes", "width", "height", "etag", "lastModified"):
                     if read.get(key):
                         entry[key] = read[key]
@@ -781,7 +789,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
                 entry.pop("error", None)
             if not heavy(entry):
                 with lock:
-                    if entry.pop("copy", None):
+                    if entry.pop("copy", None) or held:
                         report["removed"] += 1
                         log(f"  {url}: now within the caps; its copy is removed")
                     entry.pop("sha256", None)
@@ -796,6 +804,9 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
             data = read.get("data")
             if data is None:
                 if out_of_time():
+                    if held:
+                        with lock:
+                            report["removed"] += 1
                     break
                 time.sleep(PAUSE)
                 last = time.monotonic()
@@ -805,16 +816,26 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
                     with lock:
                         entry["error"] = f"download: {type(exc).__name__}: {str(exc)[:100]}"
                         report["errors"] += 1
+                        if held:
+                            report["removed"] += 1
+                            log(f"  {url}: changed, and could not be read again; its copy is "
+                                f"withdrawn until it is")
                     continue
             sha = hashlib.sha256(data).hexdigest()
             with lock:
+                if held and held[1] == sha and covers(held[0], box):
+                    # The very file the copy was made of (a server whose
+                    # validators move between its machines): the copy stands.
+                    entry["copy"] = held[0]
+                    report["kept"] += 1
+                    continue
                 if (entry.get("copy") and entry.get("sha256") == sha
                         and covers(entry["copy"], box)):
                     report["kept"] += 1
                     continue
                 # A copy of another file than the one the address serves now
                 # is never shown, even until the new copy is made.
-                if entry.pop("copy", None) and entry.get("sha256") not in (None, sha):
+                if (entry.pop("copy", None) or held) and entry.get("sha256") not in (None, sha):
                     report["removed"] += 1
                 entry["sha256"] = sha
                 if len(data) != entry.get("bytes"):
