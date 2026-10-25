@@ -1284,6 +1284,88 @@ class TestAboutPagePortraits(unittest.TestCase):
                                             "https://jenanelson.com/"))
 
 
+class TestDrawnCampaignPages(unittest.TestCase):
+    """A site that draws its images with JavaScript, or answers a script
+    with a bot wall, is read once more as a headless browser draws it - by
+    every rule of the static read (rule 38)."""
+
+    PROFILE = {"id": "FEC_H6MT02001", "name": "Brian James Miller", "isCandidate": True,
+               "source": "fec-field", "raceStatus": "nominee", "photos": ["placeholder"]}
+    TEXT = "<p>" + "Brian Miller is running for Congress in Montana's 2nd district. " * 12 + "</p>"
+    WIX = ("https://static.wixstatic.com/media/ab12~mv2.jpg/v1/fill/w_432,h_681,al_c,q_85/"
+           "BrianMiller-5.jpg")
+
+    def cache(self, safe=None, status=202):
+        return {"people": {"FEC_H6MT02001": {"name": "Brian James Miller", "site": {
+            "url": "https://www.miller4montana.com", "safe": safe, "status": status,
+            "reason": f"HTTP {status}"}}}}
+
+    def run_render(self, pages, cache, weights):
+        def reader(wanted):
+            return {code: pages[url] for code, url in wanted.items() if url in pages}, []
+        with mock.patch.object(enrich, "portrait_check",
+                               side_effect=lambda u, h: weights.get(u, (None, None))):
+            found = enrich.render_portraits([self.PROFILE], cache, reader=reader,
+                                            log=lambda *a: None,
+                                            today=__import__("datetime").date(2026, 10, 20))
+        return found, cache["people"]["FEC_H6MT02001"].get("drawn")
+
+    def test_a_drawn_home_page_gives_the_portrait_named_for_them(self):
+        home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        found, drawn = self.run_render(
+            {"https://www.miller4montana.com": home}, self.cache(),
+            {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+        self.assertEqual(found, 1)
+        self.assertEqual(drawn["portrait"], self.WIX)
+        self.assertEqual(drawn["portraitEvidence"], 'alt text "Brian Miller"')
+        profile = dict(self.PROFILE, campaignSite="https://www.miller4montana.com")
+        counts = enrich.apply_cache([profile], self.cache())
+        profile2 = dict(self.PROFILE, campaignSite="https://www.miller4montana.com")
+        cache = self.cache()
+        cache["people"]["FEC_H6MT02001"]["drawn"] = drawn
+        enrich.apply_cache([profile2], cache)
+        self.assertEqual(profile["photos"], ["placeholder"])
+        self.assertEqual(counts["portrait"], 0)
+        self.assertEqual(profile2["photos"][0], self.WIX)
+        self.assertEqual(profile2["photoSource"], "campaign-site")
+
+    def test_the_drawn_about_page_is_read_when_the_home_page_has_none(self):
+        home = ("<html><head><title>Brian Miller</title></head><body>" + self.TEXT
+                + '<a href="/about">About</a></body></html>')
+        about = ("<html><head><title>About Brian</title></head><body>" + self.TEXT
+                 + f'<img src="{self.WIX}" alt="BrianMiller-5.jpg"></body></html>')
+        found, drawn = self.run_render(
+            {"https://www.miller4montana.com": home,
+             "https://www.miller4montana.com/about": about}, self.cache(),
+            {self.WIX: (True, {"bytes": 47_000, "width": 432, "height": 681})})
+        self.assertEqual(found, 1)
+        self.assertEqual(drawn["url"], "https://www.miller4montana.com")
+        self.assertEqual(drawn["portraitPage"], "https://www.miller4montana.com/about")
+
+    def test_a_drawn_page_that_names_someone_else_gives_nothing(self):
+        home = ("<html><head><title>Ryan Zinke</title></head><body>"
+                + self.TEXT.replace("Brian Miller", "Ryan Zinke")
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        found, drawn = self.run_render({"https://www.miller4montana.com": home}, self.cache(),
+                                       {self.WIX: (True, {"bytes": 47_000, "width": 432,
+                                                          "height": 681})})
+        self.assertEqual(found, 0)
+        self.assertIsNot(drawn["safe"], True)
+        self.assertNotIn("portrait", drawn)
+
+    def test_a_page_the_browser_cannot_read_keeps_the_last_drawn_read(self):
+        cache = self.cache()
+        cache["people"]["FEC_H6MT02001"]["drawn"] = {"url": "https://www.miller4montana.com",
+                                                     "read": "2026-09-01", "safe": True}
+        found, drawn = self.run_render({}, cache, {})
+        self.assertEqual(found, 0)
+        self.assertEqual(drawn["read"], "2026-09-01")
+        # A site the static read refused is never drawn.
+        refused = self.cache(safe=False, status=200)
+        self.assertEqual(enrich.render_wanted([self.PROFILE], refused), [])
+
+
 class TestApplyEnrichment(unittest.TestCase):
     AS_OF = __import__("datetime").date(2026, 9, 30)
 

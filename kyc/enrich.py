@@ -1178,6 +1178,125 @@ def measure_portraits(cache, log=print, pause=1.0):
     return weighed
 
 
+# ------------------------------------------------------------ drawn pages
+#
+# Many campaign sites draw their images with JavaScript (Wix, Squarespace's
+# lazy loading, site builders' galleries), and some answer a script with a
+# bot wall (HTTP 202 or 403) that a browser passes: the research of
+# 2026-10-19 found a nominee's headshot on the About page only as the page
+# was drawn. These pages are read once more in a headless Chrome of our own
+# (``tools/read_court_pages.mjs``, the courts' reader), with every rule of
+# the static read: the drawn page must read as the campaign's and name the
+# candidate, and the image must be named for them and shaped like a portrait
+# (rule 38), within the caps or in a size the page offers.
+
+RENDER_LIMIT = 40          # sites drawn a run: about 10 seconds each
+RENDER_DAYS = 14           # a drawn read stands this long
+
+
+def _code(i):
+    """A page code the browser reader accepts (letters only)."""
+    letters = ""
+    i += 1
+    while i:
+        i, rest = divmod(i - 1, 26)
+        letters = chr(65 + rest) + letters
+    return "CAMPAIGN-" + letters
+
+
+def render_wanted(profiles, cache, today=None, limit=RENDER_LIMIT):
+    """``[(profile, key, site record)]``: the people still running with no
+    portrait by any route whose site's static read found none - it read as
+    theirs, or could not tell (a bot wall) - and that no drawn read covers
+    from the last :data:`RENDER_DAYS` days. Most recently unread first."""
+    people = (cache or {}).get("people") or {}
+    today = today or datetime.date.today()
+    cutoff = (today - datetime.timedelta(days=RENDER_DAYS)).isoformat()
+    out = []
+    for profile in profiles:
+        if not running(profile) or profile.get("photoSource"):
+            continue
+        entry = people.get(profile.get("id")) or {}
+        for key in ("site", "listed"):
+            record = entry.get(key) or {}
+            url = record.get("working") or record.get("url") or ""
+            if (not url.startswith("https://") or record.get("safe") is False
+                    or record.get("portrait") or record.get("portraitHeavy")
+                    or overrides.blocked_campaign_host(url)):
+                continue
+            drawn = entry.get("drawn") or {}
+            if drawn.get("url") == url and drawn.get("read", "") >= cutoff:
+                continue
+            out.append((profile, key, url, drawn.get("read", "")))
+            break
+    out.sort(key=lambda row: row[3])
+    return [(p, key, url) for p, key, url, _read in out[:limit]]
+
+
+def _drawn_read(profile, url, markup, today):
+    """A drawn page's record: its verdict, and a portrait from it."""
+    page = parse_page(markup)
+    verdict, reason = assess(profile, url, url, 200, page)
+    record = {"url": url, "safe": verdict, "reason": reason, "read": today}
+    if verdict is not SAFE:
+        return record, page
+    pictures = [p for p in portrait(page, url, profile) if p[0] not in overrides.NOT_A_PORTRAIT]
+    if take_portrait(record, pictures, offers=page_forms(page, url)):
+        original = (record.get("portraitHeavy") or [{}])[0].get("url") or record["portrait"]
+        record.update(portraitPage=url, portraitEvidence=evidence_of(page, url, original),
+                      portraitRead=today)
+    return record, page
+
+
+def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, reader=None,
+                     today=None):
+    """Read the sites :func:`render_wanted` names as a browser draws them -
+    the home page, then its About page when the home page has no portrait -
+    and keep what each gives as the person's ``drawn`` record. Returns how
+    many portraits were found. No Chrome, or a page the browser could not
+    read, keeps every earlier drawn record (rule 8)."""
+    from .courts import read_with_browser
+
+    reader = reader or (lambda pages: read_with_browser(pages, root=root))
+    today = (today or datetime.date.today()).isoformat()
+    people = cache.setdefault("people", {})
+    wanted = render_wanted(profiles, cache, limit=limit)
+    if not wanted:
+        return 0
+    log(f"  enrich: drawing {len(wanted)} campaign site(s) in a headless browser ...")
+    homes = {_code(i): url for i, (_p, _k, url) in enumerate(wanted)}
+    drawn, problems = reader(homes)
+    for line in problems[:5]:
+        log(f"    [drawn] {line}")
+    found, abouts = 0, {}
+    for i, (profile, _key, url) in enumerate(wanted):
+        markup = drawn.get(_code(i))
+        if markup is None:
+            continue                                     # kept as it was (rule 8)
+        record, page = _drawn_read(profile, url, markup, today)
+        people.setdefault(profile["id"], {})["drawn"] = record
+        if record.get("portrait"):
+            found += 1
+        elif record["safe"] is SAFE:
+            about = about_link(page, url)
+            if about:
+                abouts[_code(i)] = (profile, url, about)
+    if abouts:
+        more, problems = reader({code: about for code, (_p, _u, about) in abouts.items()})
+        for line in problems[:5]:
+            log(f"    [drawn] {line}")
+        for code, (profile, url, about) in abouts.items():
+            if more.get(code) is None:
+                continue
+            record, _page = _drawn_read(profile, about, more[code], today)
+            if record.get("portrait"):
+                record["url"] = url                      # the site it stands for
+                people[profile["id"]]["drawn"] = record
+                found += 1
+    log(f"  enrich: {found} portrait(s) found on drawn pages")
+    return found
+
+
 # --------------------------------------------------------------------- cache
 
 def load_cache(root="."):
@@ -1442,6 +1561,10 @@ def apply_cache(profiles, cache, as_of=None):
             profile["campaignSiteVia"] = "election-page"
             shown = listed
         if not shown or shown.get("safe") is not True:
+            # A site whose static read could not tell (a bot wall) may still
+            # give the portrait a browser drew from it, read by every rule.
+            if shown and shown.get("safe") is None and not profile.get("photoSource"):
+                take_campaign_portrait(profile, entry, shown, counts)
             continue
         if shown.get("description"):
             profile["campaignQuote"] = shown["description"]
@@ -1451,26 +1574,46 @@ def apply_cache(profiles, cache, as_of=None):
         if shown.get("issues") and fill_field(profile, "platforms", "; ".join(shown["issues"]),
                                               "campaign-site"):
             counts["issues"] += 1
-        if profile.get("photoSource"):
-            continue
-        picture = campaign_portrait(shown)
-        if picture is None:
-            if left_out(shown):
-                # Found, named for them, and offered only oversized: left
-                # out and counted for the build's report (2026-10-19).
-                counts["portrait_oversized"] += 1
-            continue
-        # A curated row is a candidate as much as a filer (rule 24): Brian
-        # Bengs's own campaign portrait sat in this cache while his profile
-        # showed the silhouette, because only FEC filers were given one.
-        photos = [u for u in profile.get("photos") or [] if u != picture]
-        profile["photos"] = [picture] + photos
-        profile["photo_url"] = picture
-        profile["photoSource"] = "campaign-site"
-        profile["photoCredit"] = dict(campaign_credit(profile.get("campaignSite")),
-                                      page=shown.get("portraitPage") or profile.get("campaignSite"))
-        counts["portrait"] += 1
+        if not profile.get("photoSource"):
+            take_campaign_portrait(profile, entry, shown, counts)
     return counts
+
+
+def portrait_record(entry, site):
+    """The record a profile's campaign portrait comes from: the site's own
+    read when it found one (or left one out as oversized), else the drawn
+    read of that same site (:func:`render_portraits`) when it read as the
+    campaign's."""
+    if site.get("portrait") or site.get("portraitHeavy"):
+        return site
+    drawn = (entry or {}).get("drawn") or {}
+    if drawn.get("safe") is True and drawn.get("url") in (site.get("url"), site.get("working")):
+        return drawn
+    return site
+
+
+def take_campaign_portrait(profile, entry, site, counts):
+    """Put the campaign's portrait at the head of *profile*'s chain, from
+    :func:`portrait_record`; count one left out for its size."""
+    record = portrait_record(entry, site)
+    picture = campaign_portrait(record)
+    if picture is None:
+        if left_out(record):
+            # Found, named for them, and offered only oversized: left out
+            # and counted for the build's report (2026-10-19).
+            counts["portrait_oversized"] += 1
+        return False
+    # A curated row is a candidate as much as a filer (rule 24): Brian
+    # Bengs's own campaign portrait sat in this cache while his profile
+    # showed the silhouette, because only FEC filers were given one.
+    photos = [u for u in profile.get("photos") or [] if u != picture]
+    profile["photos"] = [picture] + photos
+    profile["photo_url"] = picture
+    profile["photoSource"] = "campaign-site"
+    profile["photoCredit"] = dict(campaign_credit(profile.get("campaignSite")),
+                                  page=record.get("portraitPage") or profile.get("campaignSite"))
+    counts["portrait"] += 1
+    return True
 
 
 def campaign_portrait(site):

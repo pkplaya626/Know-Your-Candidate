@@ -383,7 +383,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     name, `portraits.route_ok` refuses a cached portrait that did not come
     by one of these routes (it is applied after the results, which carry
     the ballot link), and `validate` fails on any `Special:FilePath` or
-    `Special:Redirect` URL in any profile's chain.
+    `Special:Redirect` URL in any profile's chain. Two routes reach the
+    people on the November ballot (`kyc/nominee_photos.py`), each taught to
+    `route_ok` by name: a Wikidata item carrying the person's own FEC
+    candidate id (P1839) and an image (P18) - a human, the only item with
+    that id, its label carrying the surname and its year of birth agreeing
+    where both give one (rule 82) - shown at Wikimedia's 330px width; and,
+    for a nominee who sits in their state's legislature, the image the
+    legislature's own page for them draws (never a caucus's, rule 51). That
+    member is found by the chamber their own article's corroborated record
+    of offices gives (rule 69) and the same first and last name in it,
+    nobody else's, and the photograph is withheld once the roster seats
+    someone else: "Sen22.jpg" shows whoever holds the seat. The election
+    offices that print candidates' photographs (Washington's voters' guide,
+    Alaska's and Oregon's pamphlets) offer them only inside JSON or PDFs,
+    so there is no file to link (`ELECTION_OFFICES`). Every record keeps the
+    page, the words naming the person beside the image, the day read and
+    its bytes and size, and `validate` fails a shown one without them
+    (`photo-unevidenced`).
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
@@ -523,7 +540,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     family photographs, every one carrying the right name. What passes
     every rule and is still not a likeness goes in
     `overrides.NOT_A_PORTRAIT`, because the weekly re-read undoes an edit
-    to the cache. Issue headings come from one heading level of a page
+    to the cache. Where the home page has none, the campaign's About or
+    Meet page on its own host is read by the same rules, and must itself
+    name the candidate (four of thirty nominees' sites without one had it
+    there); a site that draws its images with JavaScript, or answers a
+    script with a bot wall, is drawn in the courts' headless Chrome
+    (`render_portraits`, forty a run) and read by them again. A curated row
+    takes its campaign's portrait as a filer does: Brian Bengs's sat in the
+    cache while his profile showed the silhouette. Issue headings come from one heading level of a page
     that is not a ballot-question page ("Tyler votes NO" under a measure is
     not his platform), and never a line naming anyone else in the race -
     "Rob Wittman has allowed healthcare prices to skyrocket" is an attack
@@ -1561,13 +1585,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     than fail the build. A portrait not on Wikimedia is weighed when
     found: one campaign's was a 5 MB PNG for a 165px card, and 27 of the
     NGA's governors' headshots weighed 320 KB to 7.6 MB for a 40px
-    circle. Over 300 KB or 1,200px it is shown smaller from the same file
-    - its host's own resizer, or WordPress.com's Photon, which fetches
-    that very address and scales it (rule 42) - once the smaller copy is
-    weighed and found the same shape (`photos.lighter_form`). Where
-    neither serves it, it is shown all the same and said
-    (`portraitHeavy`): withholding them left eleven November nominees
-    with the silhouette beside an opponent's photograph. The House
+    circle. Over 300 KB or 1,200px a governor's is shown smaller from the
+    same file - its host's own resizer, or WordPress.com's Photon, which
+    fetches that very address and scales it (rule 42) - once the smaller
+    copy is weighed and found the same shape (`photos.lighter_form`). A
+    candidate's is held to the owner's decision of 2026-10-19: shown only
+    in a size its source itself offers within the caps - a rendition its
+    page's srcset lists, or its image host's own widths
+    (`photos.own_lighter_form`) - never Photon scaling another host's file,
+    never at full size; one offered only oversized is left out
+    (`portraitHeavy` `leftOut`), and the build prints how many. The House
     Clerk's are only weighed; every one is within the caps. A server that
     gzips an image is read through it (Missouri's attorney general's
     headshot read as "not an image"). No srcset offers a size wider than

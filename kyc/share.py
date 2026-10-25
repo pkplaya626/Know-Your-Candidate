@@ -362,8 +362,8 @@ def og_photo(person):
     """The share image of *person*: a photograph that reached the profile
     by a sourced route (rule 24), or None for the site's card. Only the
     sizes of the article's own file (``photoSet``, rule 42), the House
-    Clerk's portrait, or a campaign's own portrait with its credit - never
-    a URL from a fallback chain."""
+    Clerk's portrait, a campaign's or a state legislature's own portrait
+    with its credit - never a URL from a fallback chain."""
     sizes = [s for s in person.get("photoSet") or []
              if isinstance(s, (list, tuple)) and len(s) == 2 and _https(s[1])]
     if sizes:
@@ -376,7 +376,7 @@ def og_photo(person):
         return None
     if source in ("clerk.house.gov", "cross-link") and urlparse(url).hostname == "clerk.house.gov":
         return url
-    if source == "campaign-site" and person.get("photoCredit"):
+    if source in ("campaign-site", "state-legislature") and person.get("photoCredit"):
         return url
     return None
 

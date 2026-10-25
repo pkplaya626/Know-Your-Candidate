@@ -8862,9 +8862,25 @@
   "width": 422
  },
  "person:carrie buck|NV|H": {
+  "chamber": "upper",
+  "credit": {
+   "by": "Nevada Legislature",
+   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5"
+  },
+  "district": "5",
+  "evidence": "the file the roster lists for them, on their page (alt text \"legislator image\"), which names Carrie Buck",
+  "leftOut": {
+   "url": "https://www.leg.state.nv.us/Session/84th2027/legislators/Senators/Images/Buck.Carrie.387.jpg",
+   "why": "3918 KB, over 300 KB"
+  },
+  "legislator": "ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
+  "legislatorName": "Carrie Buck",
   "name": "Carrie Buck",
+  "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
+  "read": "2026-10-20",
+  "state": "NV",
   "url": null,
-  "via": "unresolved"
+  "via": "state-legislature"
  },
  "person:casey crabtree|SD|H": {
   "name": "Casey Crabtree",
@@ -12727,6 +12743,50 @@
   "via": "wikipedia",
   "width": 1224
  },
+ "person:john andrew williams|KY|H": {
+  "bytes": 10718,
+  "credit": {
+   "attribution": false,
+   "by": "EPalmer221",
+   "file": "https://commons.wikimedia.org/wiki/File:John_Drew_Williams_Headshot.jpg",
+   "form": 2,
+   "licence": "CC0",
+   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "nonFree": false
+  },
+  "evidence": "Wikidata Q136086044 (\"John \"Drew\" Williams\") carries FEC candidate id H6KY01169 (P1839) and the image File:John Drew Williams Headshot.jpg (P18)",
+  "fec": "H6KY01169",
+  "file": "File:John Drew Williams Headshot.jpg",
+  "height": 5496,
+  "item": "Q136086044",
+  "label": "John \"Drew\" Williams",
+  "name": "John Andrew Williams",
+  "page": "https://www.wikidata.org/wiki/Q136086044",
+  "read": "2026-10-20",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/John_Drew_Williams_Headshot.jpg/120px-John_Drew_Williams_Headshot.jpg"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/John_Drew_Williams_Headshot.jpg/250px-John_Drew_Williams_Headshot.jpg"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/John_Drew_Williams_Headshot.jpg/330px-John_Drew_Williams_Headshot.jpg"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/John_Drew_Williams_Headshot.jpg/500px-John_Drew_Williams_Headshot.jpg"
+   ]
+  ],
+  "shownHeight": 332,
+  "shownWidth": 330,
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/John_Drew_Williams_Headshot.jpg/330px-John_Drew_Williams_Headshot.jpg",
+  "via": "wikidata-fec",
+  "width": 5464
+ },
  "person:john braun|WA|H": {
   "credit": {
    "attribution": true,
@@ -14737,9 +14797,24 @@
   "width": 584
  },
  "person:martin r zamora|NM|H": {
+  "bytes": 40633,
+  "chamber": "lower",
+  "credit": {
+   "by": "New Mexico Legislature",
+   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO"
+  },
+  "district": "63",
+  "evidence": "the file the roster lists for them, on their page (alt text \"Zamora\"), which names Martin Zamora",
+  "height": 375,
+  "legislator": "ocd-person/dc968f82-503e-4246-9124-b880fd6ae3ae",
+  "legislatorName": "Martin Zamora",
   "name": "Martin R Zamora",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
+  "read": "2026-10-20",
+  "state": "NM",
+  "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
+  "via": "state-legislature",
+  "width": 300
  },
  "person:marty jackley|SD|H": {
   "credit": {
@@ -16843,9 +16918,24 @@
   "width": 3744
  },
  "person:rick brattin|MO|H": {
+  "bytes": 8959,
+  "chamber": "upper",
+  "credit": {
+   "by": "Missouri General Assembly",
+   "page": "https://www.senate.mo.gov/Senators/Member?id=5"
+  },
+  "district": "31",
+  "evidence": "alt text \"Senator Brattin\" on their page",
+  "height": 300,
+  "legislator": "ocd-person/e4811e7a-7df7-4275-917d-8bdcc2778fb1",
+  "legislatorName": "Rick Brattin",
   "name": "Rick Brattin",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://www.senate.mo.gov/Senators/Member?id=5",
+  "read": "2026-10-20",
+  "state": "MO",
+  "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
+  "via": "state-legislature",
+  "width": 200
  },
  "person:robert c. white jr.|DC|H": {
   "credit": {
@@ -18717,9 +18807,24 @@
   "via": "unresolved"
  },
  "person:wes climer|SC|H": {
+  "bytes": 29430,
+  "chamber": "upper",
+  "credit": {
+   "by": "South Carolina General Assembly",
+   "page": "https://scstatehouse.gov/member.php?code=0356818139"
+  },
+  "district": "15",
+  "evidence": "the file the roster lists for them, on their page (alt text \"Senator Wes Climer photo\"), which names Wes Climer",
+  "height": 153,
+  "legislator": "ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab",
+  "legislatorName": "Wes Climer",
   "name": "Wes Climer",
-  "url": null,
-  "via": "unresolved"
+  "page": "https://scstatehouse.gov/member.php?code=0356818139",
+  "read": "2026-10-20",
+  "state": "SC",
+  "url": "https://www.scstatehouse.gov/images/members/0356818139.jpg",
+  "via": "state-legislature",
+  "width": 125
  },
  "person:wesley hunt|TX|S": {
   "credit": {
@@ -18900,6 +19005,50 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Rep._Yadira_Caraveo_-_118th_Congress.jpg/960px-Rep._Yadira_Caraveo_-_118th_Congress.jpg",
   "via": "wikipedia",
   "width": 3360
+ },
+ "person:yolanda rena prince|TX|H": {
+  "bytes": 43108,
+  "credit": {
+   "attribution": false,
+   "by": "WikiBunny2K1",
+   "file": "https://commons.wikimedia.org/wiki/File:Yolanda_Prince.jpg",
+   "form": 2,
+   "licence": "CC0",
+   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "nonFree": false
+  },
+  "evidence": "Wikidata Q139698851 (\"Yolanda Prince\") carries FEC candidate id H6TX01352 (P1839) and the image File:Yolanda Prince.jpg (P18)",
+  "fec": "H6TX01352",
+  "file": "File:Yolanda Prince.jpg",
+  "height": 5689,
+  "item": "Q139698851",
+  "label": "Yolanda Prince",
+  "name": "Yolanda Rena Prince",
+  "page": "https://www.wikidata.org/wiki/Q139698851",
+  "read": "2026-10-20",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/120px-Yolanda_Prince.jpg"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/250px-Yolanda_Prince.jpg"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/330px-Yolanda_Prince.jpg"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/500px-Yolanda_Prince.jpg"
+   ]
+  ],
+  "shownHeight": 440,
+  "shownWidth": 330,
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/330px-Yolanda_Prince.jpg",
+  "via": "wikidata-fec",
+  "width": 4267
  },
  "person:zuhdi jasser|AZ|H": {
   "credit": {

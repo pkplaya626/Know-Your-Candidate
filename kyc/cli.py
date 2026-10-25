@@ -874,6 +874,18 @@ def _enrich(args):
         cache, _counts = enrich.resolve_all(profiles, root=args.root, refresh=args.refresh,
                                             limit=args.limit,
                                             only_unreachable=args.unreachable)
+        # The sites whose portrait only a browser draws, for the people with
+        # none by any other route (enrich.render_portraits). No Chrome, or a
+        # page it cannot read, keeps the last drawn read and stops nothing.
+        if args.render:
+            enrich.withhold_links(profiles, cache)
+            portraits.apply_cache(profiles, portraits.load_cache(args.root),
+                                  legislators=_legislators(args.root))
+            try:
+                if enrich.render_portraits(profiles, cache, root=args.root, limit=args.render):
+                    enrich.save_cache(cache, args.root)
+            except Exception as exc:                 # never the refresh's end
+                print(f"  [warn] drawn campaign pages stopped: {exc}")
         print(f"\n[ok] enrichment cache: {enrich.CACHE_PATH}")
     found = enrich.problems(profiles, cache)
     for title, lines in (("withdrawn as hijacked or parked", found["withdrawn"]),
@@ -2444,6 +2456,9 @@ def build_parser():
                       help="read at most N people this run")
     rich.add_argument("--refresh", action="store_true",
                       help="read everyone again, not just those read over six days ago")
+    rich.add_argument("--render", type=int, default=enrich.RENDER_LIMIT, metavar="N",
+                      help="draw at most N campaign sites with no portrait in a headless "
+                           "browser and read them again (0: none)")
     rich.add_argument("--unreachable", action="store_true",
                       help="read again only the committee sites the last read could not reach")
 
