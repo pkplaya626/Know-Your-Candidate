@@ -1215,8 +1215,12 @@
     var line = parts.length ? "Photo: " + parts.join(", ") : "Photo";
     if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
     if (credit.listedBy) line += ", as listed by " + escapeHtml(credit.listedBy);
-    // When it was taken, where the source dates it ("Official portrait, 2005").
-    if (credit.dated) line = escapeHtml(credit.dated) + ". " + line;
+    // When it was taken, where the source dates it: a justice's "Official
+    // portrait, 2005", any other Commons file's own single year
+    // ("Photograph, 1983"), never a guessed or an upload year.
+    var dated = credit.dated ||
+      (/^\d{4}$/.test(String(credit.year || "")) ? "Photograph, " + credit.year : "");
+    if (dated) line = escapeHtml(dated) + ". " + line;
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.
     if (credit.copyOf) {

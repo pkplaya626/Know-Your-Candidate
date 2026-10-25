@@ -269,8 +269,11 @@ _CREDIT_FIELDS = "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree
 
 # Which reading of a file's description page a stored credit is. A credit
 # read by an earlier form is read again: the first printed Commons' hidden
-# duplicate spans, uploaders' sentences and file names as authors.
-CREDIT_FORM = 2
+# duplicate spans, uploaders' sentences and file names as authors; the
+# second carried no year, which every Commons credit now says where the
+# file's page gives a single one (form 3, 2026-10-25: Tad Jude's decades-old
+# black-and-white legislature portrait read as current).
+CREDIT_FORM = 3
 
 # Licence codes Commons gives where the licence has a name.
 LICENCE_NAMES = {
@@ -1027,6 +1030,13 @@ def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
             # else: it is not shown here.
             profile["photoSource"] = None
             continue
+        if held_back(record):
+            # A file a person looked at and refused (rule 38: someone else
+            # in the frame, even in the background), or whose licence waits
+            # for a person, by every route alike - a member's article
+            # portrait as much as a nominee's (photos.refused).
+            profile["photoSource"] = None
+            continue
         if wikimedia_file(url) and not (record.get("credit") or {}).get("licence"):
             # Its credit has not been read yet (Commons did not answer): it
             # waits for the next run rather than show uncredited or hold the
@@ -1047,6 +1057,24 @@ def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
     return hits
 
 
+def addresses(record):
+    """Every address a portrait cache *record* stands for: the file shown,
+    the original it was made smaller from, and its Commons upload (what the
+    overrides key a Commons file on, ``judge_links.source_url``)."""
+    from .judge_links import source_url
+    page = ((record or {}).get("credit") or {}).get("file") or ""
+    out = [(record or {}).get("url"), (record or {}).get("original"),
+           source_url(page) if "/wiki/File:" in page else None]
+    return [u for u in out if u]
+
+
+def held_back(record):
+    """Why the lists a person keeps withhold a portrait cache *record*, or
+    ``""`` (``photos.refused``, the one test every route asks)."""
+    from .photos import refused
+    return refused(*addresses(record))
+
+
 def commons_credit(credit):
     """What the page prints for a Commons file: its author, its licence and
     the file's page, as the file's description page records them - or, with
@@ -1055,6 +1083,11 @@ def commons_credit(credit):
     out = {"by": credit.get("by"), "licence": credit.get("licence"),
            "licenceUrl": credit.get("licenceUrl"), "page": credit.get("file"),
            "via": "Wikimedia Commons"}
+    # The year the file's own page dates it to, where it gives a single one
+    # (``year_of``); never a guessed or an upload year. The page prints it
+    # (``KYC.photoCreditHtml``: "Photograph, 1983").
+    if credit.get("year"):
+        out["year"] = credit["year"]
     if credit.get("attribution") and not credit.get("by"):
         # The licence asks for the author and the page names none: the line
         # says so, and links the file's page (rule 87).

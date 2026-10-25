@@ -690,17 +690,25 @@ class TestJusticesYears(unittest.TestCase):
         self.assertEqual(portraits.credit_of(info)["year"], 2007)
         self.assertIn("DateTimeOriginal", portraits._CREDIT_FIELDS)
 
-    def test_only_an_official_portrait_carries_it_and_none_is_guessed(self):
+    def test_every_commons_portrait_is_dated_and_none_is_guessed(self):
+        # The owner's brief of 2026-10-25 gave every Commons photograph the
+        # year its file's page gives, not only the justices' official ones
+        # (Tad Jude's 1981 legislature portrait read as current).
         self.assertEqual(judge_links.dated({"year": 2005}), {"year": 2005})
         self.assertEqual(judge_links.dated({"year": None}), {"yearUnstated": True})
         self.assertIn("year", judge_links.PAGE_KEYS)
+        # The page words a justice's official portrait apart (kyc-official.js).
+        self.assertIn("route", judge_links.PAGE_KEYS)
         cache = judge_links.load_cache(ROOT)
         official = [e["portrait"] for e in cache["judges"].values()
                     if (e.get("portrait") or {}).get("route") == "official"]
         self.assertEqual(len(official), 9)
-        self.assertTrue(all("year" in p or p.get("yearUnstated") for p in official))
-        self.assertFalse(any("year" in e.get("portrait", {}) for e in cache["judges"].values()
-                             if (e.get("portrait") or {}).get("route") != "official"))
+        shown = [e["portrait"] for e in cache["judges"].values() if e.get("portrait")]
+        self.assertTrue(all("year" in p or p.get("yearUnstated") for p in shown))
+        self.assertTrue(all(p.get("creditForm") == portraits.CREDIT_FORM for p in shown
+                            if p.get("credit") == "Wikimedia Commons"))
+        # Only a single four-digit year the page gives is ever carried.
+        self.assertTrue(all(isinstance(p["year"], int) for p in shown if "year" in p))
 
     def test_a_portrait_read_before_the_year_was_is_read_again(self):
         cache = {"judges": {"1": {"portrait": {

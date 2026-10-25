@@ -1329,11 +1329,21 @@ def save_cache(cache, root="."):
 
 
 def open_states_image_ok(record):
-    """Open States' own portrait for *record* is shown (legislature._person)."""
+    """Open States' own portrait for *record* is shown (legislature._person):
+    not a search's thumbnail, missing, another member's too, or a file a
+    person refused (``photos.refused``, rule 38: someone else in the frame
+    - Connecticut's House Democrats' photographs of Gregg Haddad and Henry
+    Genga at their desks in the chamber, colleagues beside and behind)."""
     from .legislature import search_thumbnail
+    from .photos import refused
     image = record.get("image")
     return (bool(image) and not search_thumbnail(image) and record.get("imageStatus") != "broken"
-            and not record.get("imageShared"))
+            and not record.get("imageShared") and not refused(image, _secure(image)))
+
+
+def _secure(url):
+    """*url* as the page loads it, over https (``statelegs.secure``)."""
+    return "https://" + url[len("http://"):] if (url or "").startswith("http://") else url
 
 
 def needing(by_state, codes=None, unread=False):

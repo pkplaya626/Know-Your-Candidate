@@ -769,7 +769,7 @@ def likeness_candidates(name, code, pages):
     return found
 
 
-def ag_photo(name, code, pages, check=None, refused=(), lighter=None):
+def ag_photo(name, code, pages, check=None, refused=None, lighter=None, passed_over=None):
     """``(photo, why)``: ``{"photo", "photoPage", "photoWeight"}`` from the
     office's own *pages* (``[(url, html)]``), or ``None`` and why not -
     ``"none"`` when no image passed, ``"unknown"`` when one could not be
@@ -778,8 +778,11 @@ def ag_photo(name, code, pages, check=None, refused=(), lighter=None):
     same file smaller from its host's resizer or Photon (*lighter*,
     ``photos.lighter_form``), else the file itself - never left out for its
     weight (rule 87) - with ``photoHeavy``: ``[{"url", "why", "kept"}]``.
-    *check* is ``enrich.portrait_check``."""
-    from .photos import too_heavy
+    *check* is ``enrich.portrait_check``. An image a person refused
+    (``photos.not_a_portrait``; *refused* stands in for
+    ``overrides.NOT_A_PORTRAIT`` in a test) is passed over and appended to
+    *passed_over*."""
+    from .photos import not_a_portrait, too_heavy
     if check is None:
         from .enrich import portrait_check as check
     if lighter is None:
@@ -789,7 +792,7 @@ def ag_photo(name, code, pages, check=None, refused=(), lighter=None):
     for urls, page_url, hinted in likeness_candidates(name, code, pages):
         heavy = []
         for url in urls:
-            if url in refused:
+            if not_a_portrait(url, passed_over=passed_over, table=refused):
                 heavy = []
                 break
             shape, weight = check(url, hinted)
@@ -865,7 +868,7 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
     none, the attorney general's own page they link (:func:`bio_links`) is
     read too. *previous* is the last cache's rows. Returns the problems to
     report."""
-    from . import overrides
+    from .photos import not_a_portrait
 
     get = get or _get
     problems = []
@@ -873,8 +876,10 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
         if not row.get("name") or row.get("unconfirmed") or row.get("disputed"):
             continue
         read = list(pages.get(code) or [])
-        found, why = ag_photo(row["name"], code, read, check=check,
-                              refused=overrides.NOT_A_PORTRAIT)
+        # What a person refused is kept on the row (``notPortraits``) so
+        # validate can tell a NOT_A_PORTRAIT entry still means something.
+        passed_over = []
+        found, why = ag_photo(row["name"], code, read, check=check, passed_over=passed_over)
         if not found:
             more = []
             seen = {url for url, _ in read}
@@ -888,19 +893,22 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                     why = "unknown"
             if more:
                 again, why_again = ag_photo(row["name"], code, more, check=check,
-                                            refused=overrides.NOT_A_PORTRAIT)
+                                            passed_over=passed_over)
                 found = again
                 why = "unknown" if "unknown" in (why, why_again) else why_again
         time.sleep(pause)
         old = (previous or {}).get(code) or {}
         row.pop("photoOversized", None)
         row.pop("photoHeavy", None)
+        row.pop("notPortraits", None)
         if not found and why == "unknown" and old.get("photo") and old.get("name") == row["name"] \
-                and old["photo"] not in overrides.NOT_A_PORTRAIT:
+                and not not_a_portrait(old["photo"], passed_over=passed_over):
             found = {k: old[k] for k in ("photo", "photoPage", "photoWeight", "photoHeavy")
                      if old.get(k)}
             problems.append(f"{code}: {row['name']}'s photograph could not be read; "
                             "the last one read is kept")
+        if passed_over:
+            row["notPortraits"] = passed_over
         if found:
             row.update(found)
             heavy = (found.get("photoHeavy") or [None])[0]
@@ -1078,7 +1086,12 @@ NLGA_BY = "National Lieutenant Governors Association"
 
 
 def _credited(person, by):
-    """*person* with whose photograph it is, when it has one (rule 87)."""
+    """*person* with whose photograph it is, when it has one (rule 87) and
+    no person has refused it (``photos.refused``: Massachusetts's NASS card
+    of William Galvin shows people walking behind him)."""
+    from .photos import refused
+    if person.get("photo") and refused(person["photo"]):
+        del person["photo"]
     if person.get("photo"):
         person["photoBy"] = by
     return person
@@ -1106,6 +1119,13 @@ def for_state(code, cache, disputes):
         out["ag"] = dict(cache["ag"][code])
         out["ag"].pop("photoWeight", None)
         out["ag"].pop("photoOversized", None)
+        out["ag"].pop("notPortraits", None)
+        from .photos import refused
+        if out["ag"].get("photo") and refused(out["ag"]["photo"]):
+            # A file a person refused since it was read (rule 38: someone
+            # else in the frame) is not shown, whatever the cache holds.
+            for field in ("photo", "photoPage", "photoHeavy"):
+                out["ag"].pop(field, None)
         if out["ag"].get("photo"):
             # The office's own photograph, from the page it was read on.
             host = urllib.parse.urlsplit(out["ag"].get("photoPage") or "").hostname or ""

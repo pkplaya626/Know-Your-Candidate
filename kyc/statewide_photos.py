@@ -200,14 +200,15 @@ def parse_california(page, office):
     return out
 
 
-def read_guides(lists, measure=None, pause=1.0, get=None, refused=None):
+def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_over=None):
     """``(records, problems, unknown)`` for Arizona's and California's
     guides: ``{key: record}`` for each candidate a guide pictures and the
-    list names, ``unknown`` the keys a read concluded nothing about."""
+    list names, ``unknown`` the keys a read concluded nothing about. A file
+    a person refused (``photos.not_a_portrait``; *refused* stands in for
+    ``overrides.NOT_A_PORTRAIT`` in a test) is appended to *passed_over*."""
+    from .photos import not_a_portrait
     get = get or _get
     measure = measure or official_photos.weigh
-    if refused is None:
-        from .overrides import NOT_A_PORTRAIT as refused
     records, problems, unknown = {}, [], set()
     sources = []
     if "AZ" in lists:
@@ -238,7 +239,7 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None):
                 continue
             time.sleep(pause)
             k = key(code, office, hit["name"])
-            if url in refused:
+            if not_a_portrait(url, passed_over=passed_over, table=refused):
                 problems.append(f"{k}: {url} is in overrides.NOT_A_PORTRAIT; not used")
                 continue
             chosen, weight, why, heavy = official_photos.choose([(0, url)], measure, widest=1.0)
@@ -533,7 +534,8 @@ def ticket_links(office, candidate, links):
     return [link for link in links if not link[3]]
 
 
-def wiki_photo(code, office, candidate, links, race_title, refused=None, measure=None):
+def wiki_photo(code, office, candidate, links, race_title, refused=None, measure=None,
+               passed_over=None):
     """``(record, why)`` for one candidate through the race's article
     (*links*, :func:`race_links`). *refused* is ``overrides.NOT_A_PORTRAIT``,
     keyed on the Commons upload address."""
@@ -566,9 +568,8 @@ def wiki_photo(code, office, candidate, links, race_title, refused=None, measure
     if not info or not info.get("width"):
         return None, official_photos.UNKNOWN
     upload = (info.get("url") or "").split("?", 1)[0]
-    if refused is None:
-        from .overrides import NOT_A_PORTRAIT as refused
-    if upload in refused:
+    from .photos import not_a_portrait
+    if not_a_portrait(upload, passed_over=passed_over, table=refused):
         return None, "not-a-portrait"
     credit = credit_of(info)
     if credit.get("nonFree") or not credit.get("licence"):
@@ -593,11 +594,49 @@ def wiki_photo(code, office, candidate, links, race_title, refused=None, measure
                 if infobox_image else "leads with File:" + file_name))
     return official_photos.record(
         chosen, page, words, weight, by=credit.get("by"), route="wikipedia",
-        credit=dict(commons_credit(credit), basis=basis) if basis else commons_credit(credit),
+        credit=dated_credit(dict(commons_credit(credit), basis=basis) if basis
+                            else commons_credit(credit), credit),
         article=resolved, portraitHeavy=heavy), ""
 
 
-def read_wikipedia(lists, refused=None, measure=None, log=print):
+def dated_credit(shown, credit):
+    """*shown*, a Commons credit as the page prints it, with the year the
+    file's own page dates it to (``portraits.year_of``), or
+    ``yearUnstated`` where it gives no single one - so it is not asked
+    again, and no year is guessed."""
+    shown = {k: v for k, v in shown.items() if k not in ("year", "yearUnstated")}
+    if (credit or {}).get("year"):
+        shown["year"] = credit["year"]
+    else:
+        shown["yearUnstated"] = True
+    return shown
+
+
+def date_credits(cache, info_of=None, log=print):
+    """Give each Commons record in *cache* whose credit has not been dated
+    (read before credits carried a year) the year its file's page gives,
+    in place; returns how many were read. A file the read does not answer
+    for is asked again next run (rule 8)."""
+    from .portraits import credit_of, file_info
+    info_of = info_of or file_info
+    todo = {k: rec for k, rec in ((cache or {}).get("photos") or {}).items()
+            if rec.get("route") == "wikipedia" and official_photos.commons_upload(rec)
+            and not {"year", "yearUnstated"} & set(rec.get("credit") or {})}
+    if not todo:
+        return 0
+    infos = info_of([official_photos.commons_upload(rec) for rec in todo.values()])
+    done = 0
+    for rec in todo.values():
+        info = infos.get(official_photos.commons_upload(rec))
+        if info:
+            rec["credit"] = dated_credit(rec["credit"], credit_of(info))
+            done += 1
+    if log:
+        log(f"  statewide photographs: {done} of {len(todo)} Commons credits dated")
+    return done
+
+
+def read_wikipedia(lists, refused=None, measure=None, log=print, passed_over=None):
     """``(records, problems, unknown, misses)`` through each race's own
     article, for every printed candidate of every office listed."""
     records, problems, unknown, misses = {}, [], set(), {}
@@ -624,7 +663,8 @@ def read_wikipedia(lists, refused=None, measure=None, log=print):
                     continue
                 k = key(code, office, person["name"])
                 try:
-                    found, why = wiki_photo(code, office, person, links, title, refused, measure)
+                    found, why = wiki_photo(code, office, person, links, title, refused, measure,
+                                            passed_over=passed_over)
                 except Exception as exc:
                     found, why = None, official_photos.UNKNOWN
                     problems.append(f"{k}: {exc}")
@@ -657,14 +697,17 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
     problems = []
     records, more, unknown = read_members(lists, snapshot)
     problems += more
-    guides, more, unknown_g = read_guides(lists)
+    # What a person refused (photos.not_a_portrait), kept in the cache so
+    # validate can tell a NOT_A_PORTRAIT entry still means something.
+    passed_over = []
+    guides, more, unknown_g = read_guides(lists, passed_over=passed_over)
     problems += more
     unknown |= unknown_g
     for k, rec in guides.items():
         records.setdefault(k, rec)
     misses = {}
     if wikipedia:
-        wiki, more, unknown_w, misses = read_wikipedia(lists, log=log)
+        wiki, more, unknown_w, misses = read_wikipedia(lists, log=log, passed_over=passed_over)
         problems += more
         unknown |= unknown_w
         for k, rec in wiki.items():
@@ -704,9 +747,13 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
         if unfit:
             problems.append(f"{unfit[0]}; not kept")
             del records[k]
+    # A record kept from a read before credits carried a year is dated.
+    date_credits({"photos": records}, log=log)
     cache = {"read": datetime.date.today().isoformat(),
              "photos": {k: records[k] for k in sorted(records)},
              "misses": {k: misses[k] for k in sorted(misses)}}
+    if passed_over:
+        cache["notPortraits"] = sorted(passed_over)
     return cache, problems
 
 
@@ -761,7 +808,7 @@ def doubted(cache):
     """The ``PORTRAIT_LICENCE_DOUBTS`` and ``NOT_A_PORTRAIT`` entries a
     cached record stands for: what keeps those entries from reading as
     stale to the judges' and the campaign sites' checks."""
-    out = set()
+    out = set((cache or {}).get("notPortraits") or ())
     for rec in ((cache or {}).get("photos") or {}).values():
         out.update(official_photos.addresses(rec))
     return out

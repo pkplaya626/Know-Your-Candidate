@@ -883,12 +883,17 @@ def photo_kind(record, photos=None):
     "sharedImage" (Open States gives the same file to another member,
     ``statelegs.mark_shared_images``), "thumbnail" (Open States's is a
     search engine's), "broken" (confirmed
-    missing) or "none"."""
+    missing), "notAPortrait" (a file a person refused, ``photos.refused``)
+    or "none"."""
+    from .photos import refused
     image = record.get("image")
     if legphotos.open_states_image_ok(record):
         return "openstates"
-    if legphotos.entry_for(record, photos):
+    own = legphotos.entry_for(record, photos)
+    if own and not refused(own.get("image")):
         return "legislature"
+    if (image and refused(image, statelegs.secure(image))) or own:
+        return "notAPortrait"
     entry = ((photos or {}).get("people") or {}).get(record["id"]) or {}
     if entry.get("oversized"):
         return "oversized"
