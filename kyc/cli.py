@@ -60,6 +60,8 @@ def _legislature_links(root):
     for kind, why, warn in (
             ("thumbnail", "legislator portraits left off, image-search thumbnails", True),
             ("broken", "legislator portraits left off, confirmed missing", True),
+            ("sharedImage", "legislator portraits left off, one Open States file given to two "
+                            "members (statelegs.mark_shared_images)", True),
             ("legislature", "legislator portraits from the legislature's own records "
                             "(legphotos), where Open States has none", False),
             ("oversized", "legislator portraits left out, the legislature offering only a file "

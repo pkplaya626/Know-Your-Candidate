@@ -72,7 +72,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3314 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3315 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2281,10 +2281,17 @@ pages show it only while it is that file credited to that author
 (`judge_links.official_portrait`). A justice the table does not name keeps
 the Court's own portrait, from its biographies page, credited to the
 Collection of the Supreme Court of the United States, and the page says
-whose portraits are the Court's own. Today the table names all nine:
+whose portraits are the Court's own; so does a justice whose named file
+the read did not take as recorded (`justice-portrait-unread`), and the page
+says the read did not confirm it (`portraitUnconfirmed`), not that Commons
+holds none. Today the table names all nine:
 Sonia Sotomayor's Wikidata image is a 2009 White House photograph and
 Elena Kagan's a CC BY-SA upload, so theirs name the public-domain copy of
-each one's official portrait. The Court's own pictures are joined
+each one's official portrait. Commons holds the Court's official portraits,
+some of them earlier ones than the Court now shows: Roberts's is of 2005,
+Alito's 2006, Thomas's 2007, Sotomayor's 2009 (the Court's biographies page
+shows one of 2025), Kagan's 2010, Gorsuch's 2017, Kavanaugh's 2018,
+Barrett's 2021 and Jackson's 2022 (each file's date, read 2026-10-25). The Court's own pictures are joined
 only to the nine justices already joined to the directory, since the page
 also pictures retired justices, and only when its caption's title agrees
 with the justice's role. Any failure shows none (`justice-portraits`); a

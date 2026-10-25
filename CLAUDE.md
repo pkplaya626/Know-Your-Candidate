@@ -200,8 +200,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2136 tests, no dependencies
-npm install && npm test                       # 3314 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2140 tests, no dependencies
+npm install && npm test                       # 3315 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1432,11 +1432,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     file and the author it was checked against, since a Wikidata item's
     image need not be the Court's: Sotomayor's is a 2009 White House
     photograph and Kagan's a CC BY-SA upload, so the table names the
-    public-domain copy of each one's official portrait (read 2026-10-25),
-    and the Court's own stands only for a justice it does not name. A
-    credit drops a link whose words name no one ("source"): Sotomayor's
-    read "Steve Petteway source". A file Commons credits
-    to anyone else is not the Court's (`justice-portrait-unread`). A
+    public-domain copy of each one's official portrait (read 2026-10-25).
+    Commons holds the Court's official portraits, not always the ones the
+    Court shows now: Roberts's is of 2005, Alito's 2006, Thomas's 2007,
+    Sotomayor's 2009 (the Court shows one of 2025) and Kagan's 2010. The
+    Court's own stands for a justice the table does not name, and for one
+    whose named file the read did not take as recorded - another author,
+    an unread size, weight or credit, a licence doubt
+    (`justice-portrait-unread`) - and the page then says this site's read
+    did not confirm it (`portraitUnconfirmed`), never that Commons does
+    not hold it. A credit drops a link whose words name no one ("source"),
+    never a link to a user's page: Sotomayor's read "Steve Petteway
+    source". A file Commons credits to anyone else is not the Court's. A
     vacancy's judge is found on its court by surname *and* first given name (`vacancies.judge_of`): two of the list's departing
     judges are not in the directory, and a surname alone would have moved
     a colleague of that name to senior status. The
@@ -2196,6 +2203,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     - One file shown for two members fails the build, across runs and
       recipes, and an initial counts only when written as one: "A photo of
       Representative Smith" names no Andy.
+    - The same holds of Open States's own files, which the credit above
+      made the legislature's word: it gave Arkansas's Ashley Hudson the
+      file the Arkansas General Assembly serves for Andrew Collins, and her
+      card showed his face over "Photo: Arkansas General Assembly". A file
+      it gives two members of one legislature is shown for neither
+      (`statelegs.mark_shared_images`, in memory, never written to the
+      cache), `build` warns `legislator-openstates-photo-shared`, and
+      `legphotos` reads each one's own (PR #133 review). The credit names
+      the hosts the legislature's pages name for its files
+      (`EXTRA_PHOTO_HOSTS`: New Jersey's pub.njleg.gov, Ohio's
+      legislature.ohio.gov), or a district's two cards disagree again.
 
 ## District maps
 

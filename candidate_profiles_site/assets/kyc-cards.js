@@ -662,9 +662,12 @@
   }
 
   /* A person in a row: their name, party and any ballot line not their
-   * party's, as their card gives them. */
-  function rowName(p) {
+   * party's, as their card gives them. Under a group label that already
+   * says write-in, a party filed as "Write-in" is not said again (Texas's
+   * Senate row read "Write-in candidate: Bradford Winston Hall (Write-in)"). */
+  function rowName(p, label) {
     var abbr = KYC.partyAbbr(p);
+    if (/^write-?in$/i.test(abbr) && /write-?in/i.test(label || "")) abbr = "";
     var line = KYC.ballotLine(p);
     return p.name + (abbr ? " (" + abbr + ")" : "") + (line ? " – " + line + " line" : "");
   }
@@ -686,13 +689,13 @@
     };
     split.running.forEach(function (p) {
       var spec = KYC.standing(p, "card");
-      if (spec && spec.unknown) return add(unsettled, spec.label, rowName(p));
+      if (spec && spec.unknown) return add(unsettled, spec.label, rowName(p, spec.label));
       // A member seated since in the seat this race decided (rule 67), with
       // no result read for them yet, in the Senate view's words for them.
       var label = spec ? spec.label : p.isCandidate ? SEAT_BADGES.challenger.label
         : p.raceRole === "winner" && KYC.seated(p) && race.year ? "Holds the seat (won it in " + race.year + ")"
         : "";
-      if (label) add(ballot, label, rowName(p));
+      if (label) add(ballot, label, rowName(p, label));
     });
     var u = unprofiledNames(race);
     var parties = ((race.results || {}).otherParties) || {};
@@ -716,9 +719,17 @@
    * kind where they differ from the page's other races. */
   var ROW_BADGES = { outcome: true, count: true, primary: true, kind: true, runoff: true };
 
+  /* A group's label over more than one name: a label that names one
+   * person ("Write-in candidate", "2026 challenger") is made plural; the
+   * status words ("Lost primary", "On the November ballot") need nothing. */
+  function groupLabel(label, count) {
+    return count > 1 && /(candidate|challenger)$/.test(label) ? label + "s" : label;
+  }
+
   function groupsHtml(cls, groups) {
     return groups.map(function (g) {
-      return '<span class="' + cls + '"><span class="race-row-label">' + KYC.escapeHtml(g[0]) +
+      return '<span class="' + cls + '"><span class="race-row-label">' +
+        KYC.escapeHtml(groupLabel(g[0], g[1].length)) +
         ":</span> " + g[1].map(function (name) {
           return '<span class="race-row-name">' + KYC.escapeHtml(name) + "</span>";
         }).join(", ") + ".</span> ";

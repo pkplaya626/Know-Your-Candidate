@@ -694,11 +694,17 @@ PORTRAIT_LICENCE_DOUBTS = {
 # decision of 2026-10-20: the Court's photographs page says its images "may
 # not be reproduced for publication (print or web) without prior approval";
 # the official portraits are its staff photographers' work, and Commons holds
-# the same portraits, so a justice's portrait is taken from Commons, credited
-# to its photographer, wherever this table names it. The judges' read
-# (kyc/judge_links.py) takes this file for the justice, by the same checks as
-# any judge's, and the federal pages show it only while Commons still names
-# the author recorded here; otherwise the Court's own portrait stands.
+# them, so a justice's portrait is taken from Commons, credited to its
+# photographer, wherever this table names it. Commons holds the Court's
+# official portraits, not always the ones it shows now: by each file's date,
+# Roberts's is of 2005, Alito's 2006, Thomas's 2007, Sotomayor's 2009 (the
+# Court's biographies page shows one of 2025), Kagan's 2010, Gorsuch's 2017,
+# Kavanaugh's 2018, Barrett's 2021, Jackson's 2022 (read 2026-10-25; whether
+# a newer public-domain copy should replace one is the owner's call). The
+# judges' read (kyc/judge_links.py) takes this file for the justice, by the
+# same checks as any judge's, and the federal pages show it only while
+# Commons still names the author recorded here; otherwise the Court's own
+# portrait stands, and the page says the read did not confirm the file.
 # Sonia Sotomayor's Wikidata item's image is a 2009 White House photograph,
 # not the Court's portrait, and Elena Kagan's is a 2013 upload of hers tagged
 # CC BY-SA 3.0: each entry below names the Court's own portrait as Commons

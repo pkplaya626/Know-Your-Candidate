@@ -704,21 +704,33 @@
   /** Where the justices' portraits come from: the Court's official
    *  portraits as Wikimedia Commons holds them, each credited to its
    *  photographer in the justice's dialog; the Court's own, from its site,
-   *  for a justice Commons holds none of (overrides.JUSTICE_PORTRAITS). */
+   *  for a justice the table names no Commons file for
+   *  (overrides.JUSTICE_PORTRAITS), and for one whose named file this
+   *  site's read did not confirm (`portraitUnconfirmed`): Commons holds it,
+   *  and "Commons does not hold" would be false of them. */
   function portraitsLine(members) {
     var commons = members.filter(function (j) { return j.portrait && j.portrait.licence; });
     var court = members.filter(function (j) { return j.portrait && !j.portrait.licence; });
     if (!commons.length && !court.length) return "";
-    var names = court.map(function (j) { return esc(j.name); });
-    var whose = names.length > 1
-      ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names[0];
     var fromCourt = court.length
       ? source(court[0].portrait.source, "the Court’s own site") : "";
     if (!commons.length) return " Portraits: from " + fromCourt + ".";
+    var list = function (group) {
+      var names = group.map(function (j) { return esc(j.name); });
+      return names.length > 1
+        ? names.slice(0, -1).join(", ") + " and " + names[names.length - 1] : names[0];
+    };
+    var unheld = court.filter(function (j) { return !j.portraitUnconfirmed; });
+    var unconfirmed = court.filter(function (j) { return j.portraitUnconfirmed; });
+    var parts = [];
+    if (unheld.length) parts.push(list(unheld) + "’s from " + fromCourt + ", which Commons does not hold");
+    if (unconfirmed.length) {
+      parts.push(list(unconfirmed) + "’s from " + fromCourt + ", since this site’s read of Commons " +
+        "did not confirm " + (unconfirmed.length > 1 ? "their" : "the") + " official file");
+    }
     return " Portraits: the Court’s official portraits as Wikimedia Commons holds them, each " +
       "credited to its photographer in the justice’s details" +
-      (court.length ? "; " + whose + "’s from " + fromCourt + ", which Commons does not hold" : "") +
-      ".";
+      (parts.length ? "; " + parts.join("; ") : "") + ".";
   }
 
   /** A justice as a card: their official portrait, role, appointment. */

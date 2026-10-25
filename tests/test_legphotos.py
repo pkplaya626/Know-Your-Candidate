@@ -86,6 +86,12 @@ class TestNames(unittest.TestCase):
         self.assertFalse(legphotos.official_host("MI", "https://gophouse.org/x.jpg"))
         self.assertFalse(legphotos.official_host("IN", "https://www.indianahouserepublicans.com/x.jpg"))
         self.assertFalse(legphotos.official_host("NJ", "https://njleg.state.nj.us.evil.com/x.jpg"))
+        # New Jersey's newer file host and Ohio's legislature site, which
+        # the legislatures' own pages name (the PR #133 review).
+        self.assertTrue(legphotos.official_host("NJ", "https://pub.njleg.gov/publications/members/x.jpg"))
+        self.assertTrue(legphotos.official_host(
+            "OH", "https://www.legislature.ohio.gov/assets/people/x/headshots/x.jpg"))
+        self.assertFalse(legphotos.official_host("NJ", "https://pub.njleg.gov.evil.com/x.jpg"))
 
     def test_the_credit_is_the_legislatures_own_name(self):
         self.assertEqual(legphotos.legislature_name("MT"), "Montana Legislature")
@@ -681,6 +687,59 @@ class TestRefreshAndBuild(unittest.TestCase):
         cache = {"people": {a["id"]: self.entry(), b["id"]: self.entry(name="Pat Duram")}}
         found = [c for level, c, _ in legphotos.problems(cache, {"MT": [a, b]}) if level == "error"]
         self.assertEqual(found, ["legislator-photo-shared"])
+
+    def test_one_open_states_file_for_two_members_is_shown_for_neither(self):
+        # Open States gave Arkansas's Ashley Hudson (House 75) the file the
+        # legislature serves for Andrew Collins (House 73), and the card
+        # credited a man's portrait to the Arkansas General Assembly as
+        # hers (the PR #133 review).
+        from kyc import statelegs
+        image = "https://www.arkleg.state.ar.us/Content/photos/2023/House/566_sm.jpg"
+        hudson = rec("Ashley Hudson", district="75", image=image)
+        collins = rec("Andrew Collins", district="73", image=image.replace("https://", "http://"))
+        other = rec("Pat Smith", district="1", image="https://www.arkleg.state.ar.us/Content/photos/x.jpg")
+        states = statelegs.mark_shared_images({"AR": [hudson, collins, other]})
+        self.assertTrue(hudson["imageShared"] and collins["imageShared"])
+        self.assertNotIn("imageShared", other)
+        self.assertFalse(legphotos.open_states_image_ok(hudson))
+        self.assertTrue(legphotos.open_states_image_ok(other))
+        dropped = {}
+        out = legislature._person(hudson, "AR", 2026, dropped=dropped, photos={"people": {}})
+        self.assertNotIn("image", out)
+        self.assertNotIn("imageCredit", out)
+        self.assertEqual(dropped, {"sharedImage": 1})
+        # The legislature's own photograph of her, read by legphotos,
+        # stands in its place.
+        own = self.entry(name="Ashley Hudson", image="https://arkleg.state.ar.us/Content/photos/2025/House/597_sm.jpg",
+                         page="https://arkleg.state.ar.us/Legislators/Detail?member=Hudson",
+                         evidence="alt \"Photo of Representative Hudson\"", credit="Arkansas General Assembly")
+        out = legislature._person(hudson, "AR", 2026, photos={"people": {hudson["id"]: own}})
+        self.assertEqual(out["image"], own["image"])
+        # It is said, and the flag never reaches the committed cache.
+        found = [c for level, c, _ in legphotos.problems({"people": {}}, states) if level == "warn"]
+        self.assertIn("legislator-openstates-photo-shared", found)
+        self.assertIn(hudson, legphotos.needing(states)["AR"])
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, os.path.dirname(statelegs.CACHE_PATH)))
+            statelegs.save_cache(states, tmp, fetched="2026-10-25T00:00:00+00:00")
+            with open(os.path.join(tmp, statelegs.CACHE_PATH), encoding="utf-8") as handle:
+                self.assertNotIn("imageShared", handle.read())
+            self.assertTrue(any(r.get("imageShared") for r in statelegs.load_cache(tmp)["states"]["AR"]))
+
+    def test_no_committed_open_states_portrait_is_shown_for_two_members(self):
+        from kyc import statelegs
+        roster = statelegs.load_cache(ROOT)
+        if not roster:
+            self.skipTest("no state_legislators.json")
+        photos = legphotos.load_cache(ROOT)
+        seen = {}
+        for code, rows in roster["states"].items():
+            for r in rows:
+                out = legislature._person(r, code, 2026, photos=photos, pages={})
+                if out.get("image"):
+                    seen.setdefault(out["image"].lower(), []).append(f"{code} {r['name']}")
+        self.assertEqual({k: v for k, v in seen.items() if len(v) > 1}, {})
 
     def test_validate_fails_a_photograph_without_its_evidence_weight_or_host(self):
         member = rec("Neil Duram")

@@ -10748,7 +10748,12 @@ async function testFederal() {
     check("the portraits are said to be the official ones Commons holds, the Court's own named apart",
       (!d.supremeCourt.members.some((j) => j.portrait && j.portrait.licence) ||
         /official portraits as Wikimedia Commons holds them/.test(scotusLede)) &&
-      fromCourt.every((j) => scotusLede.indexOf(j.name + "’s from the Court’s own site") !== -1),
+      fromCourt.every((j) => scotusLede.indexOf(j.name + "’s from the Court’s own site") !== -1) &&
+      // Commons holds a file the table names; when the read did not
+      // confirm it, the line never says Commons does not hold it (the PR
+      // #133 review).
+      (!fromCourt.some((j) => j.portraitUnconfirmed) || /did not confirm/.test(scotusLede)) &&
+      (fromCourt.some((j) => !j.portraitUnconfirmed) || !/Commons does not hold/.test(scotusLede)),
       scotusLede);
     const sized = [...D.querySelectorAll("#cabinet img.fed-photo, #executive img.fed-photo")];
     // A srcset is read by its "url widthw" pairs: the URLs hold commas.
@@ -14453,8 +14458,21 @@ function rowProblems(window, D) {
       else if (p.raceRole === "winner" && KYC.seated(p)) want.push(["Holds the seat (won it in " + race.year + ")", p.name]);
     });
     const flat = (groups) => [].concat(...groups.map((g) => g.names.map((n) => [g.label, n])));
-    const got = flat(row.ballot).filter((x) => !/^Also /.test(x[0]));
-    const gotApart = flat(row.unsettled);
+    // A label naming one person is plural over more than one ("Write-in
+    // candidates", "2026 challengers"; the PR #133 review); the status
+    // words are not.
+    const one = (label) => label.replace(/(candidate|challenger)s$/, "$1");
+    const got = flat(row.ballot).filter((x) => !/^Also /.test(x[0])).map((x) => [one(x[0]), x[1]]);
+    const gotApart = flat(row.unsettled).map((x) => [one(x[0]), x[1]]);
+    row.ballot.concat(row.unsettled).forEach((g) => {
+      if (/(candidate|challenger)s?$/.test(g.label) && /s$/.test(g.label) !== (g.names.length > 1)) {
+        say("a label in the wrong number: " + g.label + " over " + g.names.length);
+      }
+      // A write-in group does not say "Write-in" again of each name.
+      if (/write-in/i.test(g.label) && g.names.some((n) => /\(Write-?in\)/i.test(n))) {
+        say("write-in said twice: " + g.names.join(", "));
+      }
+    });
     const same = (a, b) => a.length === b.length && a.every((x, i) => b.some((y) =>
       y[0] === x[0] && (y[1] === x[1] || y[1].indexOf(x[1] + " (") === 0 || y[1].indexOf(x[1] + " –") === 0)));
     if (!same(want, got)) say("ballot " + JSON.stringify(got) + " against cards " + JSON.stringify(want));
@@ -14628,6 +14646,15 @@ async function testStatePhone() {
     // the old Congress's members running elsewhere exist only while it sits
     // (rule 68).
     const all = PAGES.map((st) => built[st]);
+    // Texas's Senate row read "Write-in candidate: Bradford Winston Hall
+    // (Write-in), Jade Simmons (I)" (the PR #133 review).
+    const writeIns = [].concat(...all.map((b) => [...b.D.querySelectorAll("section.race-foldable")]
+      .map(readRow))).filter((row) => row.ballot.concat(row.unsettled)
+      .some((g) => /write-in/i.test(g.label) && g.names.length > 1));
+    check("a group of write-ins is labelled in the plural, and says write-in once (where the data holds one)",
+      writeIns.every((row) => row.ballot.concat(row.unsettled).every((g) => !/write-in/i.test(g.label) ||
+        (/s$/.test(g.label) === (g.names.length > 1) && !g.names.some((n) => /\(Write-?in\)/i.test(n))))),
+      writeIns.map((r) => r.text).slice(0, 2).join(" || "));
     const rowsWhere = (test) => [].concat(...all.map((b) => [...b.D.querySelectorAll("section.race-foldable")]
       .filter((s) => test(b.window.KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0], s, b.window))));
     if (oldCongressSits(window)) {

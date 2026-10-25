@@ -834,6 +834,44 @@ class TestThePhotoRoutes(unittest.TestCase):
         self.assertIsNone(official)
         self.assertIn("justice-portrait-unread", [code for _l, code, _m, _d in found])
 
+    def test_a_refresh_sizes_and_credits_the_official_file_whatever_the_items_image(self):
+        """refresh() asks Commons for each JUSTICE_PORTRAITS file as well as
+        the item's own images: without it the official file is never sized,
+        and the justice keeps the last portrait or shows none (the PR #133
+        review found no test would notice)."""
+        import tempfile
+        from unittest import mock
+        from kyc import overrides
+        item_image = "Ann Example in robe, 2009.jpg"
+        asked = []
+
+        def sizes_of(urls):
+            asked.extend(urls)
+            return {u: {"width": 400, "height": 500, "extmetadata": {
+                "Artist": {"value": self.STAFF}, "LicenseShortName": {"value": "Public domain"}}}
+                for u in urls}
+
+        def weigh_of(urls):
+            return {u: {"bytes": 20_000, "width": 250, "height": 312} for u in urls}
+
+        entry = (self.OFFICIAL, self.STAFF, "2026-10-20", "the Court's official portrait")
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, os.path.dirname(jl.CACHE_PATH)))
+            jl.save_cache({"slugs": {"100": "example-ann"}, "judges": {}}, root)
+            original = jl.fetch_wikidata
+            jl.fetch_wikidata = lambda *a, **k: wd(entity("Q1", "example-ann", images=[item_image]))
+            try:
+                with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+                    cache = jl.refresh({"judges": {"fjc-100": JUDGE}}, root, read=lambda url: "{}",
+                                       sizes_of=sizes_of, weigh_of=weigh_of, log=None)
+                    self.assertIn(up(self.OFFICIAL), asked)
+                    portrait = cache["judges"]["100"]["portrait"]
+                    self.assertEqual(portrait["route"], "official")
+                    self.assertEqual(portrait["source"], jl.file_page(up(self.OFFICIAL)))
+                    self.assertIsNotNone(jl.official_portrait(cache, "100"))
+            finally:
+                jl.fetch_wikidata = original
+
     def test_a_cached_portrait_of_another_file_is_not_the_official_one(self):
         """The read before the table held the item's image (Sotomayor's 2009
         White House photograph); it is never passed off as the Court's."""

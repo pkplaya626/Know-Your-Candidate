@@ -142,6 +142,35 @@ class TestTheBuild(unittest.TestCase):
             self.assertGreaterEqual(held, len(overrides.JUSTICE_PORTRAITS))
 
 
+class TestAJusticesFallback(unittest.TestCase):
+    """A justice the table names whose official file the read did not take
+    as recorded keeps the Court's own portrait, and is marked so the page
+    says the read did not confirm the file - never that Commons does not
+    hold it (the PR #133 review)."""
+
+    RECORD = {"id": "fjc-100", "name": "Ann B. Example", "justice": {"role": "Associate Justice"},
+              "portrait": {"url": "https://www.supremecourt.gov/about/justice_pictures/Example.jpg",
+                           "credit": judiciary.PORTRAIT_CREDIT}}
+
+    def test_an_unconfirmed_official_file_keeps_the_courts_and_says_so(self):
+        from unittest import mock
+        from kyc import overrides
+        entry = ("Ann Example official portrait.jpg", "Steve Petteway", "2026-10-20", "official")
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+            out = federal_build._judge(dict(self.RECORD), {"judges": {}})
+        self.assertIn("supremecourt.gov", out["portrait"]["url"])
+        self.assertTrue(out.get("portraitUnconfirmed"))
+        # A justice the table does not name: the Court's own, unmarked.
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {}, clear=True):
+            out = federal_build._judge(dict(self.RECORD), {"judges": {}})
+        self.assertNotIn("portraitUnconfirmed", out)
+        # A judge who is not a justice is never marked.
+        with mock.patch.dict(overrides.JUSTICE_PORTRAITS, {"100": entry}, clear=True):
+            out = federal_build._judge({k: v for k, v in self.RECORD.items() if k != "justice"},
+                                       {"judges": {}})
+        self.assertNotIn("portraitUnconfirmed", out)
+
+
 class TestTheFiles(unittest.TestCase):
     """Each file is rewritten only when what it says changed, and verify
     names a stale one (rule 18)."""

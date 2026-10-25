@@ -87,8 +87,16 @@ BROWSER_UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebK
 
 # Hosts that serve a legislature's files without being its pages' host:
 # Oklahoma's House keeps its uploads on a CloudFront distribution its own
-# pages name (read 2026-10-19).
+# pages name (read 2026-10-19). New Jersey's Office of Legislative
+# Services serves its members' photographs from pub.njleg.gov, which both
+# www.njleg.state.nj.us and www.njleg.gov name for them, and Ohio's House
+# names www.legislature.ohio.gov ("Ohio Legislature"), whose files hold
+# Open States's Ohio portraits (both read 2026-10-25): without them 49 New
+# Jersey and 99 Ohio cards went uncredited beside credited colleagues in
+# one district (the PR #133 review).
 EXTRA_PHOTO_HOSTS = {
+    "NJ": ("pub.njleg.gov",),
+    "OH": ("legislature.ohio.gov",),
     "OK": ("dgbf0g52sf9l0.cloudfront.net",),
 }
 
@@ -1313,7 +1321,8 @@ def open_states_image_ok(record):
     """Open States' own portrait for *record* is shown (legislature._person)."""
     from .legislature import search_thumbnail
     image = record.get("image")
-    return bool(image) and not search_thumbnail(image) and record.get("imageStatus") != "broken"
+    return (bool(image) and not search_thumbnail(image) and record.get("imageStatus") != "broken"
+            and not record.get("imageShared"))
 
 
 def needing(by_state, codes=None, unread=False):
@@ -1454,6 +1463,14 @@ def problems(cache, by_state):
     for line in gone:
         out.append(("warn", "legislator-not-seated",
                     f"the roster seats {line}; check the roster (run 'statelegs')"))
+    # One Open States file given to two members is shown for neither
+    # (statelegs.mark_shared_images); said, so a person can tell Open States.
+    shared = sorted(f"{code} {r['name']} ({r['chamber']} {r['district']})"
+                    for code, rows in (by_state or {}).items() for r in rows if r.get("imageShared"))
+    if shared:
+        out.append(("warn", "legislator-openstates-photo-shared",
+                    f"{len(shared)} legislators' Open States portrait is a file it also gives "
+                    f"another member, so it is shown for neither: " + ", ".join(shared[:8])))
     for pid, entry in sorted(((cache or {}).get("people") or {}).items()):
         if pid not in records or not entry.get("image") or entry.get("withheld") or entry.get("oversized"):
             continue

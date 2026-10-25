@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-20T03:55:36+00:00",
+ "fetched": "2026-10-25T10:06:47+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -881,6 +881,24 @@
    "sha": "fa26b41911c86090",
    "state": "PA",
    "width": 300
+  },
+  "ocd-person/0e0e799b-70de-4472-b289-4a0c2aba3a26": {
+   "bytes": 33220,
+   "chamber": "lower",
+   "credit": "Arkansas General Assembly",
+   "district": "75",
+   "evidence": "alt \"Photo of Representative Hudson\" on a page naming them; page \"Representative Ashley Hudson (D) - Arkansas State Legislature\"",
+   "height": 536,
+   "image": "https://arkleg.state.ar.us/Content/photos/2025/House/597_sm.jpg",
+   "key": "member page",
+   "lastModified": "2025-01-31",
+   "lastModifiedAt": "2025-01-31T14:40:02",
+   "name": "Ashley Hudson",
+   "page": "https://arkleg.state.ar.us/Legislators/Detail?member=Hudson",
+   "read": "2026-10-25",
+   "sha": "98fd1136187bafb4",
+   "state": "AR",
+   "width": 429
   },
   "ocd-person/0e901294-3718-49df-9922-0ac4503acee2": {
    "bytes": 34001,
@@ -4536,6 +4554,24 @@
    "sha": "3b873095958b8a77",
    "state": "SC",
    "width": 125
+  },
+  "ocd-person/5143965d-c539-411e-8a15-74ebbcbb7cd7": {
+   "bytes": 36544,
+   "chamber": "lower",
+   "credit": "Arkansas General Assembly",
+   "district": "73",
+   "evidence": "alt \"Photo of Representative Collins\" on a page naming them; page \"Representative Andrew Collins (D) - Arkansas State Legislature\"",
+   "height": 536,
+   "image": "https://arkleg.state.ar.us/Content/photos/2025/House/566_sm.jpg",
+   "key": "member page",
+   "lastModified": "2025-01-31",
+   "lastModifiedAt": "2025-01-31T14:40:02",
+   "name": "Andrew Collins",
+   "page": "https://arkleg.state.ar.us/Legislators/Detail?member=A.+Collins",
+   "read": "2026-10-25",
+   "sha": "7e42acaa54c889ca",
+   "state": "AR",
+   "width": 429
   },
   "ocd-person/51492780-1440-4625-b487-63640ee2b11d": {
    "bytes": 8022,

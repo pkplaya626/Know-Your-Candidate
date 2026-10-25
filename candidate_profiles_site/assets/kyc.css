@@ -5638,11 +5638,23 @@ button.local-county-link {
 }
 .races-folded .race.is-open { margin-bottom: var(--s-5); }
 .races-folded .race.is-open .race-body { padding: var(--s-3) var(--s-1) 0; }
-/* The row is the race's heading; the section's own title would say it twice. */
-.races-folded .race-body .race-title { display: none; }
-.races-folded .badge-shared { display: none; }
-/* A badge the race's row above already gives (kyc-cards headBadgeHtml). */
-.races-folded .badge-in-row { display: none; }
+/* The row is the race's heading; the section's own title would say it
+ * twice. On screen only: printed, every race is opened (kyc-state.js
+ * beforeprint) and the rows, the fold bar and "Find your race" are left
+ * off, so each race prints once under its own title and badges (the PR
+ * #133 review: Florida at 390px printed 49 pages against 43). */
+@media screen {
+  .races-folded .race-body .race-title { display: none; }
+  .races-folded .badge-shared { display: none; }
+  /* A badge the race's row above already gives (kyc-cards headBadgeHtml). */
+  .races-folded .badge-in-row { display: none; }
+}
+@media print {
+  .race-row-title,
+  .race-fold-bar,
+  .race-close-row,
+  .find-race { display: none !important; }
+}
 .race-close-row { margin: var(--s-3) 0 0; }
 .race-close { min-height: 44px; }
 .race-close-icon { transform: rotate(-90deg); }

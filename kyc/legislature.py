@@ -760,7 +760,9 @@ def photo_kind(record, photos=None):
     own, checked by 'statelegs'), "legislature" (the legislature's, from
     the ``legphotos`` cache, where Open States has no usable one),
     "oversized" (the legislature offers only a file over the caps),
-    "thumbnail" (Open States's is a search engine's), "broken" (confirmed
+    "sharedImage" (Open States gives the same file to another member,
+    ``statelegs.mark_shared_images``), "thumbnail" (Open States's is a
+    search engine's), "broken" (confirmed
     missing) or "none"."""
     image = record.get("image")
     if legphotos.open_states_image_ok(record):
@@ -770,6 +772,8 @@ def photo_kind(record, photos=None):
     entry = ((photos or {}).get("people") or {}).get(record["id"]) or {}
     if entry.get("oversized"):
         return "oversized"
+    if image and record.get("imageShared"):
+        return "sharedImage"
     if image and search_thumbnail(image):
         return "thumbnail"
     if image and record.get("imageStatus") == "broken":
