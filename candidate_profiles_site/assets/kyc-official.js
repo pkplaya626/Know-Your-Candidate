@@ -83,7 +83,7 @@
   }
 
   /** An official's picture: the White House's photo with the sizes it
-   *  serves of that one file (rule 42), or a justice's official portrait.
+   *  serves of that one file (rule 42), or a judge's or justice's portrait.
    *  ``{src, srcset, credit}``, or null; ``credit`` is the one-line
    *  credit ``KYC.photoCreditHtml`` prints (rule 87). */
   function picture(person, px) {
@@ -101,8 +101,9 @@
     if (person.portrait && person.portrait.url) {
       // A judge's from Wikimedia Commons, through the FJC id (rule 42:
       // only sizes of that one file), credited with its author and licence
-      // as the file's description page gives them; a justice's, the Court's
-      // own, credited to the Court (rule 87).
+      // as the file's description page gives them - a justice's official
+      // portrait too; one Commons does not hold, the Court's own, credited
+      // to the Court (rule 87).
       var p = person.portrait;
       var set = p.set || [];
       return { src: p.url,

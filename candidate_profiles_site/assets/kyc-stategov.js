@@ -141,13 +141,22 @@
   function ballotList(code) {
     var b = ballot(code);
     if (!b) return null;
+    var chambers = ["upper", "lower"].map(function (w) { return b.chambers[w]; })
+      .filter(function (c) { return c && c.up; }).map(seatsUp);
+    return [ballotOffices(code), andList(chambers)].filter(Boolean).join("; ");
+  }
+
+  /** The statewide offices alone, in the same words: "the governor,
+   *  lieutenant governor and attorney general"; "" when none is elected,
+   *  null when the state is not covered. A state page's "Statewide on the
+   *  Nov 3, 2026 ballot" line names them (kyc-state.js). */
+  function ballotOffices(code) {
+    var b = ballot(code);
+    if (!b) return null;
     var offices = ["governor", "lt", "ag", "sos"].filter(function (k) {
       return b.offices[k] && b.offices[k].up;
     }).map(function (k) { return BALLOT_WORD[k]; });
-    var chambers = ["upper", "lower"].map(function (w) { return b.chambers[w]; })
-      .filter(function (c) { return c && c.up; }).map(seatsUp);
-    return [offices.length ? "the " + andList(offices) : "", andList(chambers)]
-      .filter(Boolean).join("; ");
+    return offices.length ? "the " + andList(offices) : "";
   }
 
   /** A mark beside an office or chamber: on the November 3 ballot or not,
@@ -932,6 +941,7 @@
   KYC.stategov = {
     modes: ["governor", "lt", "ag", "sos", "legislature", "trifecta", "governor2026"],
     ballotList: ballotList,
+    ballotOffices: ballotOffices,
     listsCandidates: listsCandidates,
     // The office's ballot mark, holder line and candidates, as the state
     // page shows them, for the Your ballot page too (kyc-ballot.js, rule 12).

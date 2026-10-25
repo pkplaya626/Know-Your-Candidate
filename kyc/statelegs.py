@@ -364,7 +364,9 @@ def save_cache(by_state, root=".", fetched=None):
         "source": SOURCE,
         "url": OPENSTATES_URL.format(st="<st>"),
         "fetched": fetched or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
-        "states": {code: sorted(by_state[code], key=lambda r: (r["chamber"], r["district"], r["name"]))
+        "states": {code: sorted(({k: v for k, v in r.items() if k != "imageShared"}
+                                 for r in by_state[code]),
+                                key=lambda r: (r["chamber"], r["district"], r["name"]))
                    for code in sorted(by_state)},
     }
     path = os.path.join(root, CACHE_PATH)
@@ -381,7 +383,31 @@ def load_cache(root="."):
     if not os.path.exists(path):
         return None
     with open(path, encoding="utf-8") as handle:
-        return json.load(handle)
+        cache = json.load(handle)
+    mark_shared_images(cache.get("states") or {})
+    return cache
+
+
+def mark_shared_images(by_state):
+    """Mark ``imageShared`` (in memory only; ``save_cache`` drops it) on
+    every record whose Open States portrait is the same file as another
+    member's of that legislature. One file offered as two members'
+    photograph is neither's, as ``legphotos.problems`` already holds for
+    the legislature's own: on 2026-10-25 Open States gave Arkansas
+    Representative Ashley Hudson (House 75) the file the legislature
+    serves for Andrew Collins (House 73), a man's portrait, and the card
+    credited it to the Arkansas General Assembly (the PR #133 review)."""
+    for records in by_state.values():
+        seen = {}
+        for r in records:
+            r.pop("imageShared", None)
+            if r.get("image"):
+                seen.setdefault(secure(r["image"]).strip().lower(), []).append(r)
+        for group in seen.values():
+            if len(group) > 1:
+                for r in group:
+                    r["imageShared"] = True
+    return by_state
 
 
 # ------------------------------------------------------------------- report

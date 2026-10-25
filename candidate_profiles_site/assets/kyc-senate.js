@@ -185,7 +185,7 @@
     }
     if (holder.length) {
       var role = KYC.seated(seat.holder) ? "Holds the seat"
-        : seat.holder.formerMember ? "Held the seat until " + seat.holder.formerMember.left
+        : seat.holder.formerMember ? "Held the seat until " + KYC.dateWords(seat.holder.formerMember.left)
         : "Held the seat";
       row.push('<div class="senate-side senate-holder"><p class="senate-role">' +
                KYC.escapeHtml(role) + "</p>" + cards(holder) + "</div>");

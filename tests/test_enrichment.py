@@ -1422,6 +1422,15 @@ class TestPhotoCredits(unittest.TestCase):
         self.assertEqual(author("en:United States District Court for the Southern District "
                                 "of Ohio"),
                          "United States District Court for the Southern District of Ohio")
+        # A link labelled "source" names no one (Sotomayor's official portrait).
+        self.assertEqual(author('Collection of the Supreme Court of the United States, Steve '
+                                'Petteway <a rel="nofollow" class="external text" '
+                                'href="http://www.nydailynews.com/x.html">source</a>'),
+                         "Collection of the Supreme Court of the United States, Steve Petteway")
+        # A user's page is a person, whatever their name (the PR #133 review).
+        self.assertEqual(author('<a href="//commons.wikimedia.org/wiki/User:Link" '
+                                'title="User:Link">Link</a>'), "Link")
+        self.assertEqual(author('<a href="/wiki/User:Here">here</a>'), "here")
         self.assertEqual(portraits.licence_name("PDM-owner"), "Public Domain Mark")
         self.assertEqual(portraits.licence_name("CC BY-SA 4.0"), "CC BY-SA 4.0")
 

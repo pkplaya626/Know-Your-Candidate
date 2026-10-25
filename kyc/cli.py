@@ -60,6 +60,12 @@ def _legislature_links(root):
     for kind, why, warn in (
             ("thumbnail", "legislator portraits left off, image-search thumbnails", True),
             ("broken", "legislator portraits left off, confirmed missing", True),
+            ("sharedImage", "legislator portraits left off, one Open States file given to two "
+                            "members (statelegs.mark_shared_images)", True),
+            ("legislature", "legislator portraits from the legislature's own records "
+                            "(legphotos), where Open States has none", False),
+            ("oversized", "legislator portraits left out, the legislature offering only a file "
+                          "over 300 KB or 1,200 px (legphotos)", False),
             ("sharedPage", "legislator pages withheld, the same page given to two members", True),
             ("noPage", "legislators with no page to link, on the legislature's site or a caucus's "
                        "(legislature.LEGISLATURE_HOSTS, CAUCUS_SITES)", False),
@@ -305,6 +311,12 @@ def _build(args):
     # race or seat is filed under another state would be missing from it.
     for problem in emit.split_problems(profiles, race_list):
         issues.append(validate.Issue("error", "people-split", problem, ""))
+    # The state legislators' portraits taken from the legislatures' own
+    # records: each with its evidence, weight and credit (kyc/legphotos.py).
+    from . import legphotos, statelegs
+    for level, code, message in legphotos.problems(
+            legphotos.load_cache(args.root), (statelegs.load_cache(args.root) or {}).get("states")):
+        issues.append(validate.Issue(level, code, message, ""))
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -2280,6 +2292,52 @@ def _statelegs(args):
     return 0
 
 
+def _legphotos(args):
+    """Portraits of the state legislators Open States has none for, from
+    each legislature's own pages and records (kyc/legphotos.py)."""
+    from . import legphotos, statelegs
+    roster = statelegs.load_cache(args.root)
+    if not roster:
+        print(f"[error] no {statelegs.CACHE_PATH}; run 'statelegs'", file=sys.stderr)
+        return 2
+    by_state = roster["states"]
+    previous = legphotos.load_cache(args.root)
+    if args.check:
+        cache = previous
+    else:
+        codes = {c.upper() for c in args.state} if args.state else None
+        fetched = roster.get("fetched") or ""
+        year = int(fetched[:4]) if fetched[:4].isdigit() else 0
+        cache, counts = legphotos.refresh(by_state, previous, codes=codes, year=year,
+                                          force=args.force)
+        for code, c in sorted(counts.items()):
+            if any(c.values()):
+                print(f"  {code}: {c['shown']} shown, {c['oversized']} offered only over the caps, "
+                      f"{c['withheld']} withheld, {c['kept']} kept from the last read, "
+                      f"{c['none']} not found")
+    for code, why in sorted(legphotos.NOT_READ.items()):
+        print(f"  {code}: not read: {why}")
+    for code, why in sorted(legphotos.SCRIPT_DRAWN.items()):
+        print(f"  {code}: as last seen, {why}: a member with no entry there is unread, not unpictured")
+    report = legphotos.report(cache, by_state)
+    need = sum(len(v) for v in legphotos.needing(by_state, unread=True).values())
+    for kind, words in (("legislature", "shown from the legislature's own records"),
+                        ("oversized", "left out: the legislature offers only a file over "
+                                      "300 KB or 1,200 px"),
+                        ("withheld", "withheld")):
+        found = report.get(kind) or {}
+        print(f"  {sum(found.values())} of {need} members without an Open States portrait {words}"
+              + (" (" + ", ".join(f"{c} {n}" for c, n in sorted(found.items())) + ")" if found else ""))
+    issues = legphotos.problems(cache, by_state)
+    for level, code, message in issues:
+        print(f"  [{level}] {code}: {message}", file=sys.stderr if level == "error" else sys.stdout)
+    if args.check:
+        return 1 if any(level == "error" for level, _, _ in issues) else 0
+    path = legphotos.save_cache(cache, args.root)
+    print(f"[ok] wrote {path}")
+    return 0
+
+
 def _census(args):
     """The Census of Governments' counts of local governments, by state, for
     the guide's local map (kyc/census.py)."""
@@ -2543,6 +2601,14 @@ def build_parser():
     legs.add_argument("--images-only", action="store_true",
                       help="check the committed roster's portraits again; do not refetch it")
 
+    photos = add("legphotos", help="state legislators' portraits from each legislature's own records")
+    photos.add_argument("--check", action="store_true",
+                        help="report the committed cache; make no network call")
+    photos.add_argument("--state", action="append", metavar="ST",
+                        help="read only this state (repeatable)")
+    photos.add_argument("--force", action="store_true",
+                        help="read again entries younger than legphotos.RECHECK_DAYS")
+
     census = add("census", help="count each state's local governments (Census of Governments)")
     census.add_argument("--check", action="store_true",
                         help="report the committed cache; make no network call")
@@ -2576,6 +2642,8 @@ def main(argv=None):
         return _fetch(args)
     if args.command == "geo":
         return _geo(args)
+    if args.command == "legphotos":
+        return _legphotos(args)
     if args.command == "census":
         return _census(args)
     if args.command == "statelegs":

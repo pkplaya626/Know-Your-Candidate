@@ -33,6 +33,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… field --check` | Report the field from the committed cache; no network |
 | `… census` | Count each state's local governments from the Census of Governments (`--check` reads the cache) |
 | `… statelegs` | Every state legislator from Open States, matched to the district maps, each portrait checked (`--check` re-matches the cache; `--images-only` checks the portraits again without refetching; `--no-images` skips them) |
+| `… legphotos` | The portraits of the legislators Open States has none for, from each legislature's own pages and records, writing `data/legislator_photos.json` (`--check` reports the cache; `--state ST` reads one state; `--force` reads entries younger than 14 days again) |
 | `… localgov` | Every local government from the Census listing, checked against the published counts |
 | `… localgov --check-sites` | Open every website the listing gives a local government - many hosts at once, one request at a time per host - and record what each is now in `data/local_sites.json` (hand-editable; a stopped run resumes; `--recheck VERDICT` looks again at one kind, `--states`, `--limit`, and `--max-minutes`, a time budget after which it opens nothing new, saves and stops) |
 | `… executives` | Every governor from the NGA, and NCSL's count of each legislature's parties (`--check` reports the caches) |
@@ -71,7 +72,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3235 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3315 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -147,6 +148,7 @@ CI asserts that a rebuild changes nothing.
 | `government_maps.py` | What the guide's maps say about each state, every value with its source |
 | `census.py` | The Census of Governments' counts of local governments by state (the `census` command) |
 | `statelegs.py` | Every state legislator, from Open States, matched to a Census district (the `statelegs` command) |
+| `legphotos.py` | The legislators' portraits Open States lacks, from each legislature's own records, with the words that name the member beside each (the `legphotos` command) |
 | `legislature.py` | Each state's legislature page data: projected districts, close-ups and the members in each |
 | `localgov.py` | Every local government, county by county, from the Census listing (the `localgov` command), and the listing's abbreviations written out |
 | `localsites.py` | Whether each local government's listed website still is one (the `localgov --check-sites` command), and what the build withdraws |
@@ -194,7 +196,7 @@ commits on its own.
 | `assets/kyc-search.js` | The search's answers about government: offices and who holds them, places, bodies, courts, ballot questions (rule 97) |
 | `assets/kyc-directory.js` | The grid: filtering, sorting, races |
 | `assets/kyc-map.js` | The map: rendering, modes, delegation panel |
-| `assets/kyc-state.js` | A state's page, and the directory of states |
+| `assets/kyc-state.js` | A state's page (folded to one row per race on a phone), and the directory of states |
 | `assets/kyc-usmap.js` | The map of the states, drawn once for the partisan map and the guide's maps |
 | `assets/kyc-guide.js` | The guide's pages: their maps, and what they show from the data (who leads each committee) |
 | `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts, counties), with labels, close-ups and an optional layer of dots |
@@ -490,6 +492,14 @@ The two directories:
 - The state filter lists states by name, and a filtered state is one click
   from its own page. Race headers, the profile dialog and the map panel link
   to the state page too; a state page has a jump row for its districts.
+- On a phone (below 1000px), a state with more than four races opens with
+  **Find your race** under its summary: a select of every race and section,
+  the district squares, the ZIP lookup and the statewide offices and
+  questions on the ballot. Each race folds to one row - who holds the seat,
+  everyone on the November ballot in their cards' status words, the filers
+  the results do not settle, and the head's count - over its section, which
+  stays in the page hidden until found. A link, a square or a pick opens the
+  race; **Open all** opens them all. 1000px and wider, the page is unchanged.
 - Cards, rows and map states open the same profile dialog everywhere; a
   `#/profile/<id>` link opens it on whichever page it is pasted into.
 - The dialog ends with **In this race**: everyone else contesting the same
@@ -1807,6 +1817,7 @@ audit 2026-10-17):
 | District office phone, capitol phone and address | Open States' `district_voice`, `capitol_voice`, `capitol_address`, labelled as which office; the bulk export carries no capitol phone today | `_person` |
 | One page, labelled as what it is | The member's page on a host of `LEGISLATURE_HOSTS` ("Official page"); never a file, a party caucus's page on the legislature's host, a past numbered General Assembly or Legislature (Illinois's `GA=`, Arizona's `legislature=`, Delaware's `/AssemblyMember/150/`), a page whose address names another member and not them (Rhode Island's roster links some twenty members to one colleague's page), a page for the other chamber, or one keyed to another district (`districts_in`: Kentucky's `DistrictNumber=`, Louisiana's `H_Reps/members?ID=`, Texas's `?district=`, California's `sdNN`, Florida's `/Senators/sNN`), which shows whoever holds that seat now - Open States keeps a senator's old House pages. A page chosen for two members is neither's. Where only the legislature's list of their bills is linked (Connecticut), "Bills on the legislature's site"; where only a past session's page is (33 in Indiana, 9 in Hawaii), it is shown with its session, a fallback, never as current; where the legislature's site has nothing, their page on a party caucus's site (`CAUCUS_SITES`: every Michigan legislator's), "Party caucus page: <caucus>", or the chamber's member list (Alabama's ALISON). Alabama's old ALIS pages are not used: they time out. A member with none says so on the card, and `build` and `build --check` count each kind | `member_page`, `pages_for` |
 | Portrait | Open States' image, unless it is a search engine's thumbnail (gstatic, googleusercontent) or `statelegs` confirmed it missing - a GET answered 404 or 410 (never HEAD, which Massachusetts answers 404 for portraits it serves). A 200 that is not an image, a refusal, a throttle or a timeout concludes nothing (rule 8); each answer stands 14 days. `statelegs --images-only` checks again without refetching the roster | `check_portrait`, `check_images` |
+| Portrait where Open States has none (`image`, `imageCredit`) | The legislature's own: Montana's roster API, New Jersey's bio records, Oklahoma's House pages, Louisiana's and Connecticut's seat pages, Indiana's IGA records, Ohio's directories, Colorado's list, and any other state's member page (for their own chamber) where the image's alt, file name or the member's own key in the page's address names them - never an album's or a gallery's photograph, nor one file offered on two members' pages. Only a rendition the legislature offers within 300 KB and 1,200 px; a member offered only heavier files is left without one and counted. A seat-keyed file (by district, or by surname and district, Kentucky's `senate1NN` among them) is shown only when dated on or after the member's arrival and only for the seat it was read for; a host that stamps its files by a deploy (California's Assembly), or a batch of seat files copied together long after the member arrived (Louisiana's of May 2024), does not date it. A page that calls the member former (New Mexico's `Former_Legislator`) or a directory listing their seat as vacant gives no photograph, and `build` names them for the roster to be checked. Michigan (party caucuses' photographs only) is not read; Kansas's pages name files that answer 404 and are read again each run; pages drawn by script are listed as unread. Credited `Photo: <legislature>`, linked to the page it was read from; Open States' own portrait is credited the same way, linked to the member's page, when the legislature serves it | rule 100, `legphotos` |
 | Seats by party, majority, coalition note | The state page's own count (`stategov.chamber`) and note (`stategov.COALITIONS`); a different answer is a build error | `_count` |
 | One square per seat | The same count: Republicans from the left and Democrats from the right, as the counts beside them read, nobody listed as an outline, a tick above and below at half the seats (none for Nebraska's nonpartisan chamber). Also on every state page and the directory, with one key each (`KYC.seatStrip`, `KYC.seatKey`) | rules 51, 73 |
 | Seats on the Nov 3 ballot, and which districts | `ballot2026`'s record, read into districts only where its list or rule names exactly as many seats as it says are up; the term only where that record states one. A district the record names for a special election for the rest of a term (Kansas Senate 24 and 25, Nebraska 41, New Mexico Senate 33, Colorado Senate 17, 21, 29 and 31, ...) is marked `special` and its panel says first that it is on the ballot; a special naming no district on the map fails the build. The record is quoted only where it says more than "all" or "none" | `seats_up`, `specials`, `term_years` |
@@ -2246,8 +2257,8 @@ appointed by a president, by name.
   office's own page names the holder, since when they have held it and whom
   they followed;
 - every change in the Cabinet since the term began (below);
-- the Supreme Court as cards with the Court's own portraits, with retired
-  justices listed apart;
+- the Supreme Court as cards with the justices' official portraits, with
+  retired justices listed apart;
 - a map of the states by federal judicial circuit, and every federal court,
   the courts of appeals and then each circuit's district courts, with a
   search of every sitting judge.
@@ -2258,12 +2269,33 @@ The Cabinet's portraits are the White House's. Its originals run to 6.5 MB,
 so each card draws from the sizes the White House serves of that one file,
 read from the srcset on its Cabinet page (`photoSet`, rule 42). Those URLs
 contain commas (`?resize=428,600`), so the srcset is read by its "url width"
-pairs, never split on commas. The justices' portraits are the Court's own,
-from its biographies page, credited to the Collection of the Supreme Court
-of the United States. Each is joined only to the nine justices already
-joined to the directory, since the page also pictures retired justices, and
-only when its caption's title agrees with the justice's role. Any failure
-shows none (`justice-portraits`). Every other judge's portrait is the image
+pairs, never split on commas. A justice's portrait is the Court's official
+portrait as Wikimedia Commons holds it, credited to its photographer and
+licence as the file's page gives them (the owner's decision of 2026-10-20:
+the Court's photographs page asks for approval before its images are
+published, and the portraits are its staff photographers' work).
+`overrides.JUSTICE_PORTRAITS` names each justice's file and the author it
+was checked against; the judges' read takes that file for them, by every
+check a judge's portrait passes (`route: "official"`), and the federal
+pages show it only while it is that file credited to that author
+(`judge_links.official_portrait`). A justice the table does not name keeps
+the Court's own portrait, from its biographies page, credited to the
+Collection of the Supreme Court of the United States, and the page says
+whose portraits are the Court's own; so does a justice whose named file
+the read did not take as recorded (`justice-portrait-unread`), and the page
+says the read did not confirm it (`portraitUnconfirmed`), not that Commons
+holds none. Today the table names all nine:
+Sonia Sotomayor's Wikidata image is a 2009 White House photograph and
+Elena Kagan's a CC BY-SA upload, so theirs name the public-domain copy of
+each one's official portrait. Commons holds the Court's official portraits,
+some of them earlier ones than the Court now shows: Roberts's is of 2005,
+Alito's 2006, Thomas's 2007, Sotomayor's 2009 (the Court's biographies page
+shows one of 2025), Kagan's 2010, Gorsuch's 2017, Kavanaugh's 2018,
+Barrett's 2021 and Jackson's 2022 (each file's date, read 2026-10-25). The Court's own pictures are joined
+only to the nine justices already joined to the directory, since the page
+also pictures retired justices, and only when its caption's title agrees
+with the justice's role. Any failure shows none (`justice-portraits`); a
+table entry the read does not hold is a warning (`justice-portrait-unread`). Every other judge's portrait is the image
 of the Wikidata item that carries their FJC id (above), never one found by
 name; the shape and surname checks withhold what is not a likeness, and the
 `judiciary` run lists each one withheld. Where the item has no single
