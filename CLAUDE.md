@@ -207,8 +207,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2336 tests, no dependencies
-npm install && npm test                       # 3381 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2352 tests, no dependencies
+npm install && npm test                       # 3385 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -462,9 +462,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     guide prints it (Bill Hill's statement holds a CMYK JPEG with an Adobe
     marker, drawn inverted; Oregon's colour ones), and anything the
     likeness test refuses (a frame wider than tall, `photos.refused`) give
-    none. Every record keeps the page,
+    none. A person's refusal is keyed on an address that names one
+    candidate - the hosted file, Washington's candidate page, Alaska's
+    statement PDF - never one the race shares (Washington's
+    `candidate.ashx`, an Oregon page of two columns or its county book),
+    which would withdraw the other column's photograph
+    (`guide_photos.own_addresses`). A guide that answers in a shape it no
+    longer reads - an index with none of the races, a list with no row or
+    statement link for an office, a statement record with no photograph
+    field, a statement PDF the reader cannot parse - concludes nothing
+    (rules 8 and 36): the review of PR #138 found that one changed heading
+    tag would have sent thirteen people back to the silhouette and deleted
+    their files. Every record keeps the page,
     the words naming the person, the day read and its bytes and size, and
-    `validate` fails a shown one without them (`photo-unevidenced`).
+    `validate` fails a shown one without them (`photo-unevidenced`), read
+    from the build's own caches. The words are the page's: two runs of
+    type that abut are one word (`pdfread.page_text`, by the font's
+    widths), or Kreiss-Tomkins's heading was cached as "Registered Demo
+    crat".
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
@@ -1705,9 +1720,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     its own description page (`extmetadata`), never typed in; a non-free
     file is not shown. Both dialogs print the credit under the name, a
     government photograph names its host, a campaign's its website, an
-    election office's guide's the guide ("Photo: Washington Secretary of
-    State, voters' guide", linked to the candidate's page in it, though the
-    file is hosted here: `kyc/guide_photos.py`), and a
+    election office's guide's where it was found ("Photo: from the
+    Washington Secretary of State's voters' guide", linked to the
+    candidate's page in it, though the file is hosted here:
+    `kyc/guide_photos.py`; the candidates submit these photographs, and
+    "Photo: Washington Secretary of State" read as the office's own), a
+    file this site decoded says so ("converted by this site to PNG from the
+    pamphlet's JPEG 2000 image, pixel for pixel", `credit.converted`), and a
     fallback that loads instead is credited by its own host.
     `validate` fails a shown photograph with no credit and a Commons one
     with no recorded licence, a judge's (`judge_links`, read with the
@@ -2555,7 +2574,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     reversible 5/3 coding decoded losslessly by `kyc/jpx.py`, standard
     library only, and written as a PNG with the codestream's hash and the
     decoder named - its pixels matched Chrome's own PDF renderer, PDFium,
-    one for one on every photograph shown, 2026-10-25), the guide's page
+    one for one on every photograph shown, 2026-10-25, and a test decodes
+    one pamphlet codestream, kept in `tests/fixtures`, to the very pixels
+    hosted for him), the guide's page
     and the JSON or PDF address, sha256, bytes, pixel size, the day read
     and whom it shows (`for`). The checks run both ways: a file under
     `photos/` the manifest does not list, a listed file missing or not the
@@ -2563,10 +2584,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     when or for whom, a record showing a hosted file the manifest does not
     hold for it, or showing it with no credit, fails `verify`, `build` and
     `build --check`. Every page addresses it from the site's root at any
-    depth (`KYC.photoHref`). One over the caps (John Duresky's 4.2 MB) is
-    shown as a smaller copy made from that file the way every copy is
-    made, at once by `guidephotos` rather than at the next refresh, and a
-    copy that fails gives way to the hosted file. Of the 20 nominees and
+    depth (`KYC.photoHref`). Three over the caps (John Duresky's 4.2 MB;
+    Dave Bronson's and Candi English's, over 1,200px) are shown as smaller
+    copies made from that file the way every copy is made, at once by
+    `guidephotos` rather than at the next refresh, and a copy that fails
+    gives way to the hosted file. A decoded file's credit says this site
+    converted it, as a copy's says it is one (rule 87). Of the 20 nominees and
     statewide candidates in the three states who showed no photograph on
     2026-10-25, 18 have one: Bill Hill's statement holds a CMYK JPEG no
     browser draws as printed (rule 24), and the pamphlet pictures no Jason

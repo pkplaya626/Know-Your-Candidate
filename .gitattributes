@@ -25,3 +25,4 @@ us_atlas_states_topo.json                 linguist-vendored=true -diff
 *.png       binary
 *.jpg       binary
 *.ico       binary
+*.jp2       binary

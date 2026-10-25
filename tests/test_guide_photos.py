@@ -309,6 +309,37 @@ class TestPdfRead(unittest.TestCase):
         self.assertEqual(pdfread.page_text(read).split("\n")[:2],
                          ["Governor", "Treg Taylor, Registered Republican"])
 
+    def test_runs_that_abut_are_one_word_and_runs_apart_are_two(self):
+        # Alaska's statements set "Registered Demo" and "crat" as two runs
+        # (Kreiss-Tomkins's); the cache quoted "Registered Demo crat".
+        runs = [(50, "Registered Demo"), (50 + 15 * 5, "crat"), (200, "Next"),
+                (200 + 4 * 5 + 1, "word")]
+        body = "".join(f"BT /F1 10 Tf 1 0 0 1 {x} 700 Tm ({t}) Tj ET\n" for x, t in runs)
+        body += "BT /F2 10 Tf 1 0 0 1 50 650 Tm (Plain) Tj ET\nBT /F2 10 Tf 1 0 0 1 75 650 Tm (font) Tj ET\n"
+        widths = " ".join(["500"] * 95)
+        objects = {
+            1: b"<< /Type /Pages /Kids [2 0 R] /Count 1 >>",
+            2: b"<< /Type /Page /Parent 1 0 R /MediaBox [0 0 504 720] /Contents 3 0 R "
+               b"/Resources << /Font << /F1 4 0 R /F2 6 0 R >> >> >>",
+            4: f"<< /Type /Font /Subtype /TrueType /BaseFont /Arial /FirstChar 32 "
+               f"/LastChar 126 /Widths [{widths}] >>".encode(),
+            5: b"<< /Type /Catalog /Pages 1 0 R >>",
+            6: b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+        }
+        out = b"%PDF-1.4\n"
+        for num in sorted(objects):
+            out += f"{num} 0 obj\n".encode() + objects[num] + b"\nendobj\n"
+        stream = body.encode()
+        out += b"3 0 obj\n<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + \
+            b"\nendstream\nendobj\ntrailer\n<< /Root 5 0 R >>\n%%EOF\n"
+        doc = pdfread.Document(out)
+        read = pdfread.read_page(doc, doc.pages()[0])
+        self.assertEqual(read["ends"][:2], [125.0, 145.0])
+        # "Next" ends at 220 and "word" starts at 221: a tenth of the type
+        # apart, one word; a font with no widths keeps its runs apart.
+        self.assertEqual(pdfread.page_text(read).split("\n"),
+                         ["Registered Democrat Nextword", "Plain font"])
+
     def test_an_encrypted_file_is_not_read(self):
         with self.assertRaises(pdfread.PDFError):
             pdfread.Document(pdf(["Governor"], [], encrypt=True))
@@ -384,7 +415,7 @@ class TestWashington(Root):
         self.assertEqual(rec["from"], guide_photos.WA_RECORD.format(race="186950"))
         self.assertIn("'John Duresky' (Prefers Democratic Party), U.S. Representative, "
                       "Congressional District 4", rec["evidence"])
-        self.assertEqual(rec["by"], "Washington Secretary of State, voters' guide")
+        self.assertEqual(rec["by"], "from the Washington Secretary of State's voters' guide")
         with open(os.path.join(self.root, photocopies.PHOTOS_DIR, name), "rb") as handle:
             self.assertEqual(handle.read(), duresky)
         entry = photocopies.load(self.root)["hosted"][name]
@@ -594,7 +625,7 @@ class TestThePage(Root):
                                 guides, manifest)
         self.assertEqual(rows[0]["photo"], "photos/" + name)
         self.assertEqual(rows[0]["photoCredit"]["by"],
-                         "Alaska Division of Elections, Official Election Pamphlet")
+                         "from the Alaska Division of Elections' Official Election Pamphlet")
         self.assertNotIn("photo", rows[1])
         # The list no longer prints that name for the office: not shown.
         rows = [{"name": "Treg Taylor Jr."}]
@@ -770,7 +801,7 @@ class TestTheCommittedCache(unittest.TestCase):
                                                     "https://elections.alaska.gov/",
                                                     "https://sos.oregon.gov/")), key)
 
-    def test_every_decoded_photograph_is_its_sources_pixels(self):
+    def test_every_decoded_photograph_names_its_source_and_every_other_is_unmodified(self):
         cache = guide_photos.load_cache(self.ROOT)
         manifest = photocopies.load(self.ROOT)
         for key, rec in (cache.get("photos") or {}).items():
@@ -782,6 +813,226 @@ class TestTheCommittedCache(unittest.TestCase):
                     "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/"), key)
             else:
                 self.assertEqual(entry["method"], "unmodified", key)
+
+
+    def test_a_pamphlet_photograph_hosted_is_the_decode_of_its_codestream(self):
+        """One photograph's own codestream (David Russ's, Book 14 page 36,
+        tests/fixtures/jpx_or_pamphlet_russ.jp2) decodes to exactly the
+        pixels of the PNG hosted for him: what the hash in the manifest says
+        is checked here, offline, not only once against PDFium."""
+        from kyc import jpx
+        with open(RUSS_JPX, "rb") as handle:
+            source = handle.read()
+        cache = guide_photos.load_cache(self.ROOT)
+        rec = cache["photos"]["person:FEC_H2OR01240"]
+        self.assertEqual(rec["sourceSha256"], hashlib.sha256(source).hexdigest())
+        entry = photocopies.load(self.ROOT)["hosted"][rec["photo"][len("photos/"):]]
+        self.assertEqual(entry["sourceSha256"], rec["sourceSha256"])
+        with open(os.path.join(self.ROOT, "candidate_profiles_site", rec["photo"]), "rb") as handle:
+            hosted = handle.read()
+        self.assertEqual(hashlib.sha256(hosted).hexdigest(), rec["sha256"])
+        self.assertEqual(jpx.png_pixels(hosted), jpx.decode(source))
+
+
+RUSS_JPX = os.path.join(os.path.dirname(__file__), "fixtures", "jpx_or_pamphlet_russ.jp2")
+
+
+class TestAGuideOfAnotherShape(Root):
+    """A guide that answers but whose page has changed its layout concludes
+    nothing (rules 8 and 36): the last photographs are kept, and their files
+    stay, rather than thirteen people going back to the silhouette (the
+    review of PR #138)."""
+
+    def kept(self, pages):
+        cache, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d"),
+                                             "1601899": jpeg(seed=b"f")}))
+        guide_photos.save_cache(cache, self.root)
+        self.assertEqual(len(cache["photos"]), 2)
+        again, problems = self.fetch(pages)
+        self.assertEqual(sorted(again["photos"]), sorted(cache["photos"]))
+        self.assertTrue(any("kept" in p for p in problems), problems)
+        for rec in again["photos"].values():
+            self.assertTrue(os.path.exists(os.path.join(self.root, "candidate_profiles_site",
+                                                        rec["photo"])))
+        self.assertEqual(sorted(photocopies.load(self.root)["hosted"]),
+                         sorted(r["photo"][len("photos/"):] for r in cache["photos"].values()))
+        return problems
+
+    def test_washingtons_index_with_no_races(self):
+        pages = self.wa_pages({})
+        pages[guide_photos.WA_INDEX] = json.dumps({"Categories": []}).encode()
+        problems = self.kept(pages)
+        self.assertTrue(any("index has no race for H-WA-04-2026" in p for p in problems), problems)
+
+    def test_washingtons_index_with_no_names(self):
+        pages = self.wa_pages({})
+        pages[guide_photos.WA_INDEX] = wa_index([("186950", 4, [("1601895", None, "")]),
+                                                 ("186952", 6, [])])
+        self.kept(pages)
+
+    def test_washingtons_statements_with_no_photograph_field(self):
+        pages = self.wa_pages({})
+        for race, people in (("186950", [("1601894", "Amanda McKinney"),
+                                         ("1601895", "John Duresky")]),
+                             ("186952", [("1601899", "Teresa Fox")])):
+            pages[guide_photos.WA_RECORD.format(race=race)] = json.dumps(
+                [{"statement": {"RaceID": race, "BallotID": b, "BallotName": n,
+                                "Image": "x"}} for b, n in people]).encode()
+        self.kept(pages)
+
+    def test_washingtons_empty_answer(self):
+        pages = self.wa_pages({})
+        for race in ("186950", "186952"):
+            pages[guide_photos.WA_RECORD.format(race=race)] = b"[]"
+        self.kept(pages)
+
+    def test_a_guide_that_prints_no_photograph_for_them_is_a_conclusion(self):
+        # The fields are there and Duresky's is empty: the guide no longer
+        # prints one, and the hosted file goes (not rule 8's case).
+        cache, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d")}))
+        guide_photos.save_cache(cache, self.root)
+        again, problems = self.fetch(self.wa_pages({}))
+        self.assertEqual(again["photos"], {})
+        self.assertTrue(any("prints no photograph for John Duresky" in p for p in problems))
+
+
+class TestAlaskasListOfAnotherShape(unittest.TestCase):
+    def setUp(self):
+        self.alaska = TestAlaska()
+        self.alaska.setUp()
+
+    def read(self, page=None, **more):
+        pages = self.alaska.pages(**more)
+        if page is not None:
+            pages[guide_photos.AK_LIST] = page.encode()
+        wanted = {"S-AK-2026": [self.alaska.jr],
+                  "AK|governor": [{"key": "candidate:AK:governor:Treg Taylor",
+                                   "name": "Taylor, Treg"}]}
+        return guide_photos.read_alaska(wanted, getter=Getter(pages))
+
+    def test_a_list_whose_sections_are_not_found_concludes_nothing(self):
+        page = AK_PAGE.replace("<h4>", "<h3>").replace("</h4>", "</h3>")
+        photos, problems, unread = self.read(page)
+        self.assertEqual(photos, {})
+        self.assertEqual(unread, {"S-AK-2026", "AK|governor"})
+        self.assertTrue(any("has no row for the office" in p for p in problems), problems)
+
+    def test_a_list_that_links_no_statement_concludes_nothing(self):
+        page = AK_PAGE.replace("Candidate Statement", "Candidate Letter") \
+            .replace("Governor Statement", "Governor Letter")
+        photos, problems, unread = self.read(page)
+        self.assertEqual(photos, {})
+        self.assertEqual(unread, {"S-AK-2026", "AK|governor"})
+        self.assertTrue(any("links no statement" in p for p in problems), problems)
+
+    def test_a_statement_this_reader_cannot_parse_concludes_nothing(self):
+        photos, problems, unread = self.read(**{
+            "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen.pdf":
+                b"%PDF-1.7\nnot a document"})
+        self.assertNotIn("person:FEC_S6AK00326", photos)
+        self.assertIn("person:FEC_S6AK00326", unread)
+        self.assertIn("candidate:AK:governor:Treg Taylor", photos)
+
+    def test_the_list_as_it_is_concludes(self):
+        photos, _problems, unread = self.read()
+        self.assertEqual(unread, set())
+        self.assertEqual(sorted(photos), ["candidate:AK:governor:Treg Taylor",
+                                          "person:FEC_S6AK00326"])
+
+
+class TestARefusalNamesOnePhotograph(Root):
+    """A person's NOT_A_PORTRAIT or PORTRAIT_LICENCE_DOUBTS entry is keyed on
+    an address that names one candidate: never Washington's candidate.ashx
+    (the whole race), an Oregon page (two columns) or its book (a county's
+    every candidate)."""
+
+    def test_oregon_on_the_hosted_file_alone(self):
+        kahl = TestOregon.kahl(self)
+        cache, _ = guide_photos.fetch(self.root, profiles=[kahl], stategov={},
+                                      getter=Getter(TestOregon.pages(self)), log=lambda *a: None)
+        key = "person:FEC_H6OR01308"
+        rec = cache["photos"][key]
+        manifest = photocopies.load(self.root)
+        words = guide_photos.person_words(kahl)
+        self.assertEqual(guide_photos.own_addresses("OR", rec["page"], rec["photo"]),
+                         (rec["photo"],))
+        self.assertIsNotNone(guide_photos.shown_record(cache, key, words, manifest=manifest))
+        for shared in (rec["page"], rec["from"]):
+            with mock.patch.dict("kyc.overrides.NOT_A_PORTRAIT",
+                                 {shared: ("2026-10-25", "the other column's photograph")}):
+                self.assertIsNotNone(
+                    guide_photos.shown_record(cache, key, words, manifest=manifest), shared)
+        with mock.patch.dict("kyc.overrides.NOT_A_PORTRAIT",
+                             {rec["photo"]: ("2026-10-25", "not a likeness")}):
+            self.assertIsNone(guide_photos.shown_record(cache, key, words, manifest=manifest))
+
+    def test_washington_on_the_candidates_page_or_the_file_never_the_race(self):
+        cache, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d"),
+                                             "1601899": jpeg(seed=b"f")}))
+        manifest = photocopies.load(self.root)
+        key = "person:FEC_H6WA04190"
+        rec = cache["photos"][key]
+        words = guide_photos.person_words(self.people()[0])
+        with mock.patch.dict("kyc.overrides.NOT_A_PORTRAIT",
+                             {rec["from"]: ("2026-10-25", "the opponent's photograph")}):
+            self.assertIsNotNone(guide_photos.shown_record(cache, key, words, manifest=manifest))
+            fresh, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d")}))
+            self.assertIn(key, fresh["photos"])
+        with mock.patch.dict("kyc.overrides.PORTRAIT_LICENCE_DOUBTS",
+                             {rec["photo"]: ("2026-10-25", "a studio's credit")}):
+            self.assertIsNone(guide_photos.shown_record(cache, key, words, manifest=manifest))
+
+
+class TestTheCredit(unittest.TestCase):
+    def test_it_says_where_the_photograph_was_found_and_a_decoded_one_says_so(self):
+        wa = {"state": "WA", "by": "Washington Secretary of State, voters' guide",
+              "page": "https://voter.votewa.gov/g#/candidates/1/2", "method": "unmodified"}
+        self.assertEqual(guide_photos.credit(wa), {
+            "by": "from the Washington Secretary of State's voters' guide", "page": wa["page"]})
+        ak = {"state": "AK", "by": "x", "page": "https://elections.alaska.gov/doc/oep/2026/A.pdf"}
+        self.assertEqual(guide_photos.credit(ak)["by"],
+                         "from the Alaska Division of Elections' Official Election Pamphlet")
+        self.assertNotIn("converted", guide_photos.credit(ak))
+        oregon = {"state": "OR", "by": "x", "method": "decoded",
+                  "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/B.pdf#page=3"}
+        self.assertEqual(guide_photos.credit(oregon)["converted"],
+                         "converted by this site to PNG from the pamphlet's JPEG 2000 image, "
+                         "pixel for pixel")
+
+    def test_the_committed_records_credit_the_guide_in_its_words(self):
+        cache = guide_photos.load_cache(TestTheCommittedCache.ROOT)
+        manifest = photocopies.load(TestTheCommittedCache.ROOT)
+        for key, rec in cache["photos"].items():
+            self.assertEqual(rec["by"], guide_photos.GUIDES[rec["state"]]["credit"], key)
+            entry = manifest["hosted"][rec["photo"][len("photos/"):]]
+            self.assertEqual(entry["by"], rec["by"], key)
+            self.assertEqual("converted" in guide_photos.credit(rec),
+                             entry["method"] == "decoded", key)
+
+
+class TestTheBuildsCheck(Root):
+    """validate's check of a profile shown with a guide's photograph reads
+    the cache and manifest the build read, from the build's root, once."""
+
+    def test_a_profile_shown_with_no_record_fails(self):
+        from kyc import validate
+        cache, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d")}))
+        manifest = photocopies.load(self.root)
+        people = self.people()
+        self.assertEqual(guide_photos.apply_people(people, cache, manifest), 1)
+        shown = [p for p in people if p.get("photoSource") == guide_photos.ROUTE]
+        self.assertEqual(validate.check_photo_evidence(shown, {}, {}, cache, manifest), [])
+        # No cache given (or read from another folder): no record of it.
+        issues = validate.check_photo_evidence(shown, {}, {}, None, manifest)
+        self.assertEqual([i.code for i in issues], ["photo-unevidenced"])
+        self.assertIn("no record of the guide's photograph", str(issues[0].detail or issues[0]))
+        # A record of another file than the one shown.
+        other = dict(shown[0], photos=["photos/ffffffffffffffffffff.jpg"])
+        self.assertEqual([i.code for i in validate.check_photo_evidence(
+            [other], {}, {}, cache, manifest)], ["photo-unevidenced"])
+        # The manifest does not hold the file for them.
+        self.assertEqual([i.code for i in validate.check_photo_evidence(
+            shown, {}, {}, cache, {"hosted": {}})], ["photo-unevidenced"])
 
 
 if __name__ == "__main__":

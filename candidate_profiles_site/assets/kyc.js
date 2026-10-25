@@ -1240,6 +1240,12 @@
     if (credit.listedBy) line += ", as listed by " + escapeHtml(credit.listedBy);
     // When it was taken, where the source dates it ("Official portrait, 2005").
     if (credit.dated) line = escapeHtml(credit.dated) + ". " + line;
+    // A file this site decoded from the guide's (Oregon's JPEG 2000, which
+    // no browser draws) is not the guide's own file, and says so, as a
+    // smaller copy does (rule 101; kyc/guide_photos.py).
+    if (credit.converted) {
+      line += '<span class="photo-converted-note">; ' + escapeHtml(credit.converted) + "</span>";
+    }
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.
     if (credit.copyOf) {

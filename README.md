@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3381 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3385 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1167,7 +1167,7 @@ URL, and `validate` fails a `photoSet` that names another file.
 | `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id), `state-legislature` (the legislature's own page for a nominee who sits in it) or `election-guide` (the election office's own guide, the file hosted here: the first entry is then `photos/<hash>.jpg` or `.png`, from the site's root) |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
 | `photoCopy` | `{src, of, ofBytes}`: the smaller copy this site made of the first entry, `of` being that entry's address and `ofBytes` its weight, `src` the copy under `photos/` from the site's root, stamped with its hash. Only for a credited portrait over 300 KB or 1,200px, and only for the person the copy was made for; the page loads it in the first entry's place and falls back to the original (rule 101) |
-| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page). Absent for the silhouette |
+| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page); an election office's guide's, by where it was found (`by: "from the Washington Secretary of State's voters' guide"`, `page` the candidate's page in it), with `converted` where this site decoded the file (Oregon's JPEG 2000, as PNG). Absent for the silhouette |
 
 ### Credits and weights
 
@@ -1254,8 +1254,12 @@ profile or the office's list (a short form only through an evidenced
 the race. The file is the very bytes the guide holds, or for Oregon the
 pixels of its JPEG 2000 decoded losslessly by `kyc/jpx.py` (checked pixel
 for pixel against Chrome's own PDF renderer) and written as PNG; it is
-credited to the guide and linked to the candidate's page in it ("Photo:
-Washington Secretary of State, voters' guide"). A PDF page drawing two
+credited to the guide where it was found and linked to the candidate's
+page in it ("Photo: from the Washington Secretary of State's voters'
+guide"), and a decoded one adds that this site converted it to PNG. A guide
+that answers in a shape the reader no longer knows (no race, no row, no
+statement link, no photograph field) concludes nothing, and the last
+photographs are kept. A PDF page drawing two
 images or none, and Bill Hill's CMYK statement photograph, which a browser
 draws inverted, give none. The page offers a srcset no size wider than a 2x screen
 needs for the width it draws, so a 165px card stops at the 330px file and a

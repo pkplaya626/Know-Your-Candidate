@@ -306,7 +306,9 @@ def _build(args):
                           # error says so under --check too (PR #120 review).
                           measures=measures_mod.load(args.root) or {},
                           portraits=portraits.load_cache(args.root),
-                          photo_routes=_photo_routes(args.root))
+                          photo_routes=_photo_routes(args.root),
+                          guides=guide_photos.load_cache(args.root),
+                          photo_manifest=photocopies.load(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):

@@ -1330,19 +1330,25 @@ def check_future_coverage(profiles, today=None):
                   f"{today.isoformat()}; shown as filed", found)]
 
 
-def check_photo_evidence(profiles, portraits=None, enrichment=None):
+def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
+                         manifest=None):
     """A photograph reached through a page - a campaign's (rule 38), a
     legislature's or a Wikidata item (``nominee_photos``) - carries in its
     cache the page that ties it to the person, the words that name them
     beside it, the day it was read and its bytes and pixel size, and a note
     where it is over the caps and shown at full size (rule 87). One shown
-    without them fails: the cache cannot say why it is this person's."""
+    without them fails: the cache cannot say why it is this person's.
+    *guides* and *manifest* are the build's guide-photograph cache and
+    photos/ manifest (kyc/guide_photos.py, kyc/photocopies.py), read once
+    from the build's root by the caller; without them a profile shown with
+    a guide's photograph has no record, and fails."""
     from . import nominee_photos
     from .photos import too_heavy
     from .portraits import profile_key
 
     portraits, enrichment = portraits or {}, enrichment or {}
     people = enrichment.get("people") or {}
+    guide_records = (guides or {}).get("photos") or {}
     found = []
     for p in profiles:
         source, shown = p.get("photoSource"), (p.get("photos") or [None])[0]
@@ -1352,11 +1358,12 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None):
         elif source == "election-guide":
             # The guide's page, its words naming the person, the day read and
             # the file hosted for them (kyc/guide_photos.py).
-            from . import guide_photos, photocopies
+            from . import guide_photos
             from .photocopies import key_of
             key = key_of("person", p)
-            record = (guide_photos.load_cache().get("photos") or {}).get(key) or {}
-            unsound = guide_photos.record_problems(key, record, photocopies.load())
+            record = guide_records.get(key) or {}
+            unsound = guide_photos.record_problems(key, record, manifest or {}) \
+                if record else []
             if not record or unsound or record.get("photo") != shown:
                 found.append(f"{p['name']} (election-guide): "
                              + ("; ".join(unsound) if unsound else
@@ -1731,7 +1738,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
         history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
-        photo_routes=()):
+        photo_routes=(), guides=None, photo_manifest=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1754,7 +1761,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment, photo_routes)
     if portraits is not None:
-        issues += check_photo_evidence(profiles, portraits, enrichment)
+        issues += check_photo_evidence(profiles, portraits, enrichment, guides,
+                                       photo_manifest)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)

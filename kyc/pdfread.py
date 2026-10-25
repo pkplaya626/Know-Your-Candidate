@@ -465,6 +465,33 @@ class _Font:
         if isinstance(unicode, Stream):
             data, _ = decode(unicode, stop_at_image=False)
             self.table, self.lengths = _cmap(data)
+        # A simple font's glyph widths (/Widths from /FirstChar, in
+        # thousandths of the font size), to know where a run of text ends;
+        # None where the font gives none (a standard font, a two-byte one).
+        self.widths, self.missing = None, 0
+        widths = doc.resolve(info.get("Widths"))
+        if not self.two_byte and isinstance(widths, list):
+            first = int(doc.resolve(info.get("FirstChar")) or 0)
+            self.widths = {first + i: float(doc.resolve(w) or 0)
+                           for i, w in enumerate(widths)}
+            described = doc.resolve(info.get("FontDescriptor")) or {}
+            self.missing = float(doc.resolve(described.get("MissingWidth")) or 0) \
+                if isinstance(described, dict) else 0
+
+    def advance(self, pieces, size, char_spacing, word_spacing, scale):
+        """How far a run shown by Tj or TJ moves the text point, in text
+        space (PDF 32000-1 9.4.4), or None where the font has no widths."""
+        if self.widths is None:
+            return None
+        tx = 0.0
+        for piece in pieces:
+            if isinstance(piece, bytes):
+                for code in piece:
+                    tx += (self.widths.get(code, self.missing) / 1000 * size + char_spacing
+                           + (word_spacing if code == 32 else 0)) * scale
+            elif isinstance(piece, (int, float)):
+                tx -= piece / 1000 * size * scale
+        return tx
 
     def text(self, raw):
         if not self.table:
@@ -492,7 +519,7 @@ def read_page(doc, page, depth=0):
     draws (``Do``), with the box - ``(x0, y0,
     x1, y1)`` in page space - the current matrix puts it in. Forms are read
     through, to a depth of eight."""
-    out = {"text": [], "images": []}
+    out = {"text": [], "images": [], "ends": []}
     contents = doc.resolve(page.get("Contents"))
     parts = contents if isinstance(contents, list) else [contents]
     data = b"\n".join(decode(doc.resolve(p), stop_at_image=False)[0]
@@ -513,6 +540,7 @@ def _run(doc, data, resources, ctm, out, depth):
     leading = 0
     font = None
     size = 1
+    char_spacing, word_spacing, scale = 0.0, 0.0, 1.0
     operands = []
     pos = 0
     n = len(data)
@@ -532,9 +560,16 @@ def _run(doc, data, resources, ctm, out, depth):
             pos = end.end() if end else n
             continue
         if op == "q":
-            stack.append(list(ctm))
+            stack.append((list(ctm), char_spacing, word_spacing, scale))
         elif op == "Q":
-            ctm = stack.pop() if stack else ctm
+            if stack:
+                ctm, char_spacing, word_spacing, scale = stack.pop()
+        elif op == "Tc" and args and isinstance(args[0], (int, float)):
+            char_spacing = float(args[0])
+        elif op == "Tw" and args and isinstance(args[0], (int, float)):
+            word_spacing = float(args[0])
+        elif op == "Tz" and args and isinstance(args[0], (int, float)):
+            scale = float(args[0]) / 100
         elif op == "cm" and len(args) == 6:
             ctm = _mul([float(a) for a in args], ctm)
         elif op == "BT":
@@ -561,6 +596,9 @@ def _run(doc, data, resources, ctm, out, depth):
             if op in ("'", '"'):
                 tlm = _mul([1, 0, 0, 1, 0, -leading], tlm)
                 tm = list(tlm)
+            if op == '"' and len(args) == 3 and all(isinstance(a, (int, float))
+                                                    for a in args[:2]):
+                word_spacing, char_spacing = float(args[0]), float(args[1])
             shown = args[-1] if args else b""
             pieces = shown if isinstance(shown, list) else [shown]
             text = "".join(font.text(p) if font else p.decode("cp1252", "replace")
@@ -577,6 +615,9 @@ def _run(doc, data, resources, ctm, out, depth):
             if text.strip():
                 drawn = abs(float(size)) * (abs(at[3]) or abs(at[2]) or 1)
                 out["text"].append((round(at[4], 1), round(at[5], 1), text, round(drawn, 1)))
+                tx = font.advance(pieces, float(size), char_spacing, word_spacing, scale) \
+                    if font else None
+                out["ends"].append(None if tx is None else round(at[0] * tx + at[4], 1))
         elif op == "Do" and args:
             target_ref = xobjects.get(str(args[0]))
             target = doc.resolve(target_ref)
@@ -601,11 +642,28 @@ def _run(doc, data, resources, ctm, out, depth):
 
 def page_text(read):
     """The words of a page read by :func:`read_page`, top to bottom and left
-    to right, one line per baseline: what a person reading it sees."""
+    to right, one line per baseline: what a person reading it sees. Two runs
+    on one line are one word where the first ends where the second starts
+    (within a fifth of the type's size): Alaska's statements set
+    "Registered Demo" and "crat" as two runs, and joined with a space the
+    cached words misquoted the page (the review of PR #138; rule 57's
+    "Keou gh"). Where a font gives no widths, runs are words."""
+    ends = read.get("ends") or []
     lines = {}
-    for x, y, text, _size in read["text"]:
-        lines.setdefault(round(y), []).append((x, text))
+    for i, (x, y, text, size) in enumerate(read["text"]):
+        end = ends[i] if i < len(ends) else None
+        lines.setdefault(round(y), []).append((x, i, text, size, end))
     out = []
     for y in sorted(lines, reverse=True):
-        out.append(" ".join(t.strip() for _x, t in sorted(lines[y])))
+        line, last = "", None
+        for x, _i, text, size, end in sorted(lines[y]):
+            if not line:
+                line = text.strip()
+            elif (last is not None and abs(x - last[0]) <= last[1] / 5
+                  and not last[2][-1:].isspace() and not text[:1].isspace()):
+                line += text.rstrip()
+            else:
+                line = line.rstrip() + " " + text.strip()
+            last = (end, size, text) if end is not None else None
+        out.append(line.strip())
     return "\n".join(line for line in out if line.strip())

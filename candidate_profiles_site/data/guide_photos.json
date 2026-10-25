@@ -4,21 +4,22 @@
  "guides": {
   "AK": {
    "by": "Alaska Division of Elections",
-   "credit": "Alaska Division of Elections, Official Election Pamphlet",
+   "credit": "from the Alaska Division of Elections' Official Election Pamphlet",
    "terms": "The elections site carries 'Copyright (c) 2026 Alaska Division of Elections'; its disclaimer grants no reuse. Hosted unmodified, credited and linked, by the owner's decision of 2026-10-25.",
    "title": "Candidates - Division of Elections: 2026 General Election (Official Candidate Statements)",
    "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
   },
   "OR": {
    "by": "Oregon Secretary of State",
-   "credit": "Oregon Secretary of State, State Voters' Pamphlet",
+   "converted": "converted by this site to PNG from the pamphlet's JPEG 2000 image, pixel for pixel",
+   "credit": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "terms": "Oregon's general terms grant no reuse; the photographs are the candidates' own submissions. The pamphlet holds each as JPEG 2000, which no browser draws: decoded losslessly here (kyc/jpx.py, the reversible 5/3 wavelet, every pixel as coded) and hosted as PNG, credited and linked to its page, by the owner's decision of 2026-10-25.",
    "title": "State Voters' Pamphlet, General Election November 3, 2026 (one book per county)",
    "url": "https://sos.oregon.gov/elections/Voters-Pamphlet/Pages/Voters-Pamphlet-English.aspx"
   },
   "WA": {
    "by": "Washington Secretary of State",
-   "credit": "Washington Secretary of State, voters' guide",
+   "credit": "from the Washington Secretary of State's voters' guide",
    "terms": "The guide's footer reads 'Copyright (c) 2026 Washington Secretary of State'; the office's web policy says third-party photographs are 'copyrighted by others' and used with their holders' permission. Hosted unmodified, credited and linked, by the owner's decision of 2026-10-25.",
    "title": "Online voters' guide, November 3, 2026 General Election",
    "url": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99"
@@ -26,7 +27,7 @@
  },
  "photos": {
   "candidate:AK:governor:Bernadette M. Wilson": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 146262,
    "evidence": "the Division of Elections' candidate list links 'Wilson, Bernadette M.''s official candidate statement, whose heading reads 'Governor' and 'Bernadette M. Wilson, Registered Republican', and the page draws one photograph (759x906, at 47,412-229,630 pt) beside it",
    "for": "candidate:AK:governor:Bernadette M. Wilson",
@@ -45,7 +46,7 @@
    "width": 759
   },
   "candidate:AK:governor:Dave Bronson": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 277994,
    "evidence": "the Division of Elections' candidate list links 'Bronson, Dave''s official candidate statement, whose heading reads 'Governor' and 'Dave Bronson, Registered Republican', and the page draws one photograph (1095x1320, at 48,412-228,630 pt) beside it",
    "for": "candidate:AK:governor:Dave Bronson",
@@ -64,9 +65,9 @@
    "width": 1095
   },
   "candidate:AK:governor:Jonathan S. “JKT” Kreiss-Tomkins": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 210718,
-   "evidence": "the Division of Elections' candidate list links 'Kreiss-Tomkins, Jonathan S. “JKT”''s official candidate statement, whose heading reads 'Governor' and 'Jonathan S. Kreiss-Tomkins “JKT”, Registered Demo crat', and the page draws one photograph (758x907, at 47,412-228,630 pt) beside it",
+   "evidence": "the Division of Elections' candidate list links 'Kreiss-Tomkins, Jonathan S. “JKT”''s official candidate statement, whose heading reads 'Governor' and 'Jonathan S. Kreiss-Tomkins “JKT”, Registered Democrat', and the page draws one photograph (758x907, at 47,412-228,630 pt) beside it",
    "for": "candidate:AK:governor:Jonathan S. “JKT” Kreiss-Tomkins",
    "from": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
    "height": 907,
@@ -83,7 +84,7 @@
    "width": 758
   },
   "candidate:AK:governor:Treg Taylor": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 66379,
    "evidence": "the Division of Elections' candidate list links 'Taylor, Treg''s official candidate statement, whose heading reads 'Governor' and 'Treg Taylor, Registered Republican', and the page draws one photograph (517x619, at 47,412-229,631 pt) beside it",
    "for": "candidate:AK:governor:Treg Taylor",
@@ -102,7 +103,7 @@
    "width": 517
   },
   "candidate:AK:lt:Candi English": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 321884,
    "evidence": "the Division of Elections' candidate list links 'English, Candi''s official candidate statement, whose heading reads 'Lieutenant Governor' and 'Candi English, Registered Republican', and the page draws one photograph (1113x1329, at 47,412-229,630 pt) beside it",
    "for": "candidate:AK:lt:Candi English",
@@ -121,7 +122,7 @@
    "width": 1113
   },
   "candidate:AK:lt:Josh Church": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 158357,
    "evidence": "the Division of Elections' candidate list links 'Church, Josh''s official candidate statement, whose heading reads 'Lieutenant Governor' and 'Josh Church, Registered Republican', and the page draws one photograph (807x973, at 48,412-228,630 pt) beside it",
    "for": "candidate:AK:lt:Josh Church",
@@ -140,7 +141,7 @@
    "width": 807
   },
   "candidate:AK:lt:Michael K. Shower": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 231634,
    "evidence": "the Division of Elections' candidate list links 'Shower, Michael K.''s official candidate statement, whose heading reads 'Lieutenant Governor' and 'Michael K. Shower, Registered Republican', and the page draws one photograph (906x1096, at 48,412-228,630 pt) beside it",
    "for": "candidate:AK:lt:Michael K. Shower",
@@ -159,7 +160,7 @@
    "width": 906
   },
   "candidate:AK:lt:Zac Johnson": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 113084,
    "evidence": "the Division of Elections' candidate list links 'Johnson, Zac''s official candidate statement, whose heading reads 'Lieutenant Governor' and 'Zac Johnson, Nonpartisan', and the page draws one photograph (1048x1080, at 47,428-229,615 pt) beside it",
    "for": "candidate:AK:lt:Zac Johnson",
@@ -178,7 +179,7 @@
    "width": 1048
   },
   "candidate:OR:governor:Brett Smith": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 76282,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "evidence": "page 34 of the State Voters' Pamphlet (the book for Baker, Grant, Harney, Lake, Malheur) heads a column 'Governor' and prints 'Brett Smith', 'Pacific Green' beside its one photograph",
@@ -199,7 +200,7 @@
    "width": 300
   },
   "person:FEC_H2OR01240": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 60683,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "evidence": "page 36 of the State Voters' Pamphlet (the book for Clackamas) heads a column 'US Representative, 6th District' and prints 'David Russ', 'Republican' beside its one photograph",
@@ -220,7 +221,7 @@
    "width": 300
   },
   "person:FEC_H4WA08147": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 66635,
    "evidence": "the voters' guide's statement for 'Nirav Sheth' (Prefers Republican Party), U.S. Representative, Congressional District 7 (ballot 1601901), carries this photograph",
    "for": "person:FEC_H4WA08147",
@@ -238,7 +239,7 @@
    "width": 418
   },
   "person:FEC_H4WA09061": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 46083,
    "evidence": "the voters' guide's statement for 'Doug Basler' (Prefers Republican Party), U.S. Representative, Congressional District 9 (ballot 1601905), carries this photograph",
    "for": "person:FEC_H4WA09061",
@@ -256,7 +257,7 @@
    "width": 361
   },
   "person:FEC_H6OR01308": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 92612,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "evidence": "page 32 of the State Voters' Pamphlet (the book for Clatsop) heads a column 'US Representative, 1st District' and prints 'Barbara J Kahl', 'Republican' beside its one photograph",
@@ -277,7 +278,7 @@
    "width": 300
   },
   "person:FEC_H6OR02322": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 74792,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "evidence": "page 32 of the State Voters' Pamphlet (the book for Baker, Grant, Harney, Lake, Malheur) heads a column 'US Representative, 2nd District' and prints 'Chris Beck', 'Democrat, Independent' beside its one photograph",
@@ -298,7 +299,7 @@
    "width": 300
   },
   "person:FEC_H6OR05242": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 80782,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "evidence": "page 35 of the State Voters' Pamphlet (the book for Clackamas) heads a column 'US Representative, 5th District' and prints 'Patti Adair', 'Republican, Libertarian' beside its one photograph",
@@ -319,7 +320,7 @@
    "width": 300
   },
   "person:FEC_H6WA04190": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 4228148,
    "evidence": "the voters' guide's statement for 'John Duresky' (Prefers Democratic Party), U.S. Representative, Congressional District 4 (ballot 1601895), carries this photograph",
    "for": "person:FEC_H6WA04190",
@@ -337,7 +338,7 @@
    "width": 2254
   },
   "person:FEC_H6WA06286": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 98722,
    "evidence": "the voters' guide's statement for 'Teresa Fox' (Prefers Republican Party), U.S. Representative, Congressional District 6 (ballot 1601899), carries this photograph",
    "for": "person:FEC_H6WA06286",
@@ -355,7 +356,7 @@
    "width": 486
   },
   "person:FEC_S6AK00326": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 185161,
    "evidence": "the Division of Elections' candidate list links 'Sullivan, Daniel J. Jr.''s official candidate statement, whose heading reads 'United States Senator' and 'Daniel J. Sullivan Jr., Registered Republican', and the page draws one photograph (751x857, at 48,419-228,624 pt) beside it",
    "for": "person:FEC_S6AK00326",

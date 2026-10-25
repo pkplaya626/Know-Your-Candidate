@@ -80,10 +80,15 @@ AK_LIST = "https://www.elections.alaska.gov/candidates/?election=26genr"
 
 # Each guide: who publishes it, the words its credit prints, and its terms
 # as the research of 2026-10-19 read them (research/photos/nominees.checked.json).
+# The credit says where the photograph was found, not whose it is: the
+# candidates submit them ("Candidates submit their statements", Washington's
+# guide; Oregon's pamphlet the same), and "Photo: Washington Secretary of
+# State" read as the office's own photograph (the review of PR #138, as rule
+# 101's "Photo: from" a host). A decoded file says this site made it.
 GUIDES = {
     "WA": {
         "by": "Washington Secretary of State",
-        "credit": "Washington Secretary of State, voters' guide",
+        "credit": "from the Washington Secretary of State's voters' guide",
         "title": "Online voters' guide, November 3, 2026 General Election",
         "url": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99",
         "terms": "The guide's footer reads 'Copyright (c) 2026 Washington Secretary of State'; "
@@ -93,7 +98,7 @@ GUIDES = {
     },
     "AK": {
         "by": "Alaska Division of Elections",
-        "credit": "Alaska Division of Elections, Official Election Pamphlet",
+        "credit": "from the Alaska Division of Elections' Official Election Pamphlet",
         "title": "Candidates - Division of Elections: 2026 General Election (Official "
                  "Candidate Statements)",
         "url": AK_LIST,
@@ -103,7 +108,9 @@ GUIDES = {
     },
     "OR": {
         "by": "Oregon Secretary of State",
-        "credit": "Oregon Secretary of State, State Voters' Pamphlet",
+        "credit": "from the Oregon Secretary of State's State Voters' Pamphlet",
+        "converted": "converted by this site to PNG from the pamphlet's JPEG 2000 image, "
+                     "pixel for pixel",
         "title": "State Voters' Pamphlet, General Election November 3, 2026 (one book per "
                  "county)",
         "url": "https://sos.oregon.gov/elections/Voters-Pamphlet/Pages/Voters-Pamphlet-English.aspx",
@@ -307,6 +314,18 @@ def unfit(weight, *addresses):
     return refused(*addresses)
 
 
+def own_addresses(code, page, photo):
+    """The addresses a person's refusal of this photograph is keyed on
+    (``photos.refused``): the hosted file, and the guide's page where that
+    page is one candidate's - Washington's candidate page, Alaska's statement
+    PDF. Never an address several candidates share: Washington's
+    ``candidate.ashx`` answers for the whole race, and an Oregon page
+    (``book#page=N``) holds two columns and its book every county's
+    candidates, so an entry keyed on either would withdraw someone else's
+    photograph (the review of PR #138)."""
+    return (photo,) if code == "OR" else (page, photo)
+
+
 def hosted_name(weight):
     ext = "png" if weight["type"] == "image/png" else "jpg"
     return f"{weight['sha256'][:20]}.{ext}"
@@ -427,8 +446,16 @@ def wa_statements(answer, race_id):
     ``candidate.ashx`` answer: each statement record carries the name, the
     race and the photograph together. A record of another race is refused."""
     out = {}
-    for item in answer or ():
+    if not answer:
+        raise GuidePhotoError(f"race {race_id}: the guide's answer holds no statement")
+    if not any("Photo" in ((item or {}).get("statement") or {}) for item in answer):
+        # No record carries the field at all: the answer's shape has changed,
+        # which says nothing about anyone's photograph (rule 8).
+        raise GuidePhotoError(f"race {race_id}: no statement carries a Photo field")
+    for item in answer:
         statement = (item or {}).get("statement") or {}
+        if not statement.get("BallotID") or not statement.get("BallotName"):
+            raise GuidePhotoError(f"race {race_id}: a statement with no ballot id or name")
         if str(statement.get("RaceID")) != race_id:
             raise GuidePhotoError(f"race {race_id}: a statement for race {statement.get('RaceID')}")
         photo = statement.get("Photo")
@@ -458,10 +485,22 @@ def read_washington(wanted, getter=get, log=print):
         problems.append(f"WA: {exc}; the last photographs read are kept")
         return photos, problems, set(races)
     for rid in races:
+        # A readable index that lists a race the general election holds
+        # without it, or without its people's names, has changed its layout:
+        # that concludes nothing (rules 8 and 36), so the last photographs
+        # read are kept.
         if rid not in index:
-            problems.append(f"WA: the guide has no race for {rid}")
+            problems.append(f"WA: the guide's index has no race for {rid}; the last "
+                            "photographs read are kept")
+            unread.add(rid)
             continue
         guide_race, entries = index[rid]
+        if not entries or not all(e["name"] and e["ballot"] not in ("", "None")
+                                  for e in entries):
+            problems.append(f"WA {rid}: the guide's index lists no candidates, or one with no "
+                            "name; the last photographs read are kept")
+            unread.add(rid)
+            continue
         people = wanted[rid]
         joined, more = join("WA", entries, people, profile_key_of, person_words)
         problems += more
@@ -513,7 +552,7 @@ def photo_record(code, race, office, name, page, source, words, data, colour_spa
     if not weight["width"]:
         return None, "its size cannot be read"
     photo = "photos/" + hosted_name(weight)
-    refusal = unfit(weight, page, source, photo)
+    refusal = unfit(weight, *own_addresses(code, page, photo))
     if refusal:
         return None, refusal
     record = {"state": code, "race": race, "office": office, "name": name, "page": page,
@@ -573,6 +612,9 @@ def ak_rows(page):
     return out
 
 
+UNREADABLE_PDF = "the PDF cannot be read"
+
+
 def ak_statement(data, office, name):
     """``(jpeg bytes, colour space, words, "")`` from one candidate statement
     PDF, or ``(None, None, None, why)``. The page's heading must name the
@@ -585,7 +627,7 @@ def ak_statement(data, office, name):
             return None, None, None, f"{len(pages)} pages, not one statement"
         read = pdfread.read_page(doc, pages[0])
     except pdfread.PDFError as exc:
-        return None, None, None, f"the PDF cannot be read ({exc})"
+        return None, None, None, f"{UNREADABLE_PDF} ({exc})"
     lines = pdfread.page_text(read).split("\n")
     if len(lines) < 2 or " ".join(lines[0].split()) != OFFICE_WORDS[office]:
         return None, None, None, (f"the statement's heading is {lines[:1]!r}, not "
@@ -650,6 +692,16 @@ def read_alaska(wanted, getter=get, log=print):
                 continue
             entries.append({"name": row["names"][slot], "pdf": row["statements"].get(slot),
                             "anchor": row["anchor"]})
+        # A readable list with no row for an office on the ballot, or whose
+        # rows link no statement, has changed its layout: it concludes
+        # nothing (rules 8 and 36), and the last photographs read are kept.
+        if not entries or not any(e["pdf"] for e in entries):
+            problems.append(f"AK {office}: the candidate list "
+                            + ("has no row for the office" if not entries
+                               else "links no statement for the office")
+                            + "; the last photographs read are kept")
+            unread.add(target)
+            continue
         people = wanted[target]
         if target.startswith("AK|"):
             joined, more = join("AK", entries, people, lambda p: p["key"],
@@ -669,6 +721,13 @@ def read_alaska(wanted, getter=get, log=print):
                 unread.add(key)
                 continue
             raw, space, words, why = ak_statement(data, office, entry["name"])
+            if why.startswith(UNREADABLE_PDF):
+                # A file this reader cannot parse says nothing about the
+                # photograph in it (rule 8).
+                problems.append(f"AK {office}: {entry['name']}'s statement: {why}; the last "
+                                "photograph read is kept")
+                unread.add(key)
+                continue
             if why:
                 problems.append(f"AK {office}: {entry['name']}'s statement: {why}; not used")
                 continue
@@ -1110,7 +1169,7 @@ def shown_record(cache, key, words, race=None, office=None, manifest=None):
     if office is not None and rec.get("office") != office:
         return None
     if unfit({"width": rec["width"], "height": rec["height"]},
-             rec["page"], rec["from"], rec["photo"]):
+             *own_addresses(rec["state"], rec["page"], rec["photo"])):
         return None
     mine = name_words(rec["name"])
     if mine not in words and evidenced_form(rec["state"], rec["name"]) != key:
@@ -1120,8 +1179,14 @@ def shown_record(cache, key, words, race=None, office=None, manifest=None):
 
 def credit(rec):
     """The credit the page prints: the guide, linked to the candidate's page
-    in it (rule 87)."""
-    return {"by": rec["by"], "page": rec["page"]}
+    in it (rule 87), in the guide's words as they now stand; and for a file
+    this site decoded, that it did (``converted``), as a smaller copy says
+    it is one (rule 101)."""
+    guide = GUIDES.get(rec.get("state")) or {}
+    out = {"by": guide.get("credit") or rec["by"], "page": rec["page"]}
+    if rec.get("method") == "decoded":
+        out["converted"] = guide.get("converted") or "converted by this site"
+    return out
 
 
 def apply_people(profiles, cache, manifest=None):

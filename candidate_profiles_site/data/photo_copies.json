@@ -31,7 +31,7 @@
  },
  "hosted": {
   "1271aa8fadf719586f7c.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 158357,
    "for": [
     "candidate:AK:lt:Josh Church"
@@ -46,7 +46,7 @@
    "width": 807
   },
   "3f11f3a06ce1188320a5.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 321884,
    "copy": {
     "box": [
@@ -82,7 +82,7 @@
    "width": 1113
   },
   "51d58cb46701d600374b.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 113084,
    "for": [
     "candidate:AK:lt:Zac Johnson"
@@ -97,7 +97,7 @@
    "width": 1048
   },
   "66ea811e6896720ac02b.png": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 80782,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "for": [
@@ -114,7 +114,7 @@
    "width": 300
   },
   "84307b6eaed61e0ed24d.png": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 74792,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "for": [
@@ -131,7 +131,7 @@
    "width": 300
   },
   "8990ce16abd8652da11d.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 185161,
    "for": [
     "person:FEC_S6AK00326"
@@ -146,7 +146,7 @@
    "width": 751
   },
   "8c34d6c5670d0ded7391.png": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 76282,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "for": [
@@ -163,7 +163,7 @@
    "width": 300
   },
   "8e7bfe692d6d6b8a2e3e.jpg": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 4228148,
    "copy": {
     "box": [
@@ -199,7 +199,7 @@
    "width": 2254
   },
   "96b6ab3f3d932a2970ab.png": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 92612,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "for": [
@@ -216,7 +216,7 @@
    "width": 300
   },
   "9e5a0b550a37e2db2b2d.jpg": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 46083,
    "for": [
     "person:FEC_H4WA09061"
@@ -231,7 +231,7 @@
    "width": 361
   },
   "b3b2f41ae57ccc6ccb0d.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 146262,
    "for": [
     "candidate:AK:governor:Bernadette M. Wilson"
@@ -246,7 +246,7 @@
    "width": 759
   },
   "b4d4590de7a799cc12bb.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 231634,
    "for": [
     "candidate:AK:lt:Michael K. Shower"
@@ -261,7 +261,7 @@
    "width": 906
   },
   "c8108e6fb86765427c8f.jpg": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 66635,
    "for": [
     "person:FEC_H4WA08147"
@@ -276,7 +276,7 @@
    "width": 418
   },
   "ce93240400345f51e575.jpg": {
-   "by": "Washington Secretary of State, voters' guide",
+   "by": "from the Washington Secretary of State's voters' guide",
    "bytes": 98722,
    "for": [
     "person:FEC_H6WA06286"
@@ -291,7 +291,7 @@
    "width": 486
   },
   "d57500fe4e8b2efaf26f.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 66379,
    "for": [
     "candidate:AK:governor:Treg Taylor"
@@ -306,7 +306,7 @@
    "width": 517
   },
   "d879b05c460beddb58ed.png": {
-   "by": "Oregon Secretary of State, State Voters' Pamphlet",
+   "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
    "bytes": 60683,
    "decoder": "kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding pass - lossless, written as PNG",
    "for": [
@@ -323,7 +323,7 @@
    "width": 300
   },
   "d8f4574d09d969ecac7d.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 277994,
    "copy": {
     "box": [
@@ -359,7 +359,7 @@
    "width": 1095
   },
   "fd2a5042d813f41e2379.jpg": {
-   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 210718,
    "for": [
     "candidate:AK:governor:Jonathan S. “JKT” Kreiss-Tomkins"
