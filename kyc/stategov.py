@@ -275,6 +275,23 @@ def officer_photos(code, entry):
     return problems
 
 
+def court_photo_problems(court_cache):
+    """The justices' photographs: an evidenced override that lacks what a
+    read photograph carries stops the build; one whose justice the court no
+    longer lists, and the count left out above the caps, are said."""
+    from . import court_photos
+    members = {code: read.get("members") or []
+               for code, read in ((court_cache or {}).get("courts") or {}).items()}
+    errors, warnings = court_photos.curated_problems(members)
+    if errors:
+        raise StateGovError("overrides.JUSTICE_PHOTOS: " + "; ".join(errors))
+    seen = court_photos.counts(court_cache)
+    if seen["oversized"]:
+        warnings.append(f"{seen['oversized']} justices' photographs left out, offered by their "
+                        "court only above the caps")
+    return warnings
+
+
 def unpictured(states):
     """One line per office naming the confirmed holders the card shows
     without a photograph (STATEGOV-13): a person's to look for one from
@@ -392,6 +409,14 @@ def build(root="."):
     unfit = statewide.problems(lists)
     if unfit:
         raise StateGovError(f"{statewide.CACHE_PATH}: " + "; ".join(unfit))
+    # The candidates' photographs (kyc/statewide_photos.py): optional, but a
+    # cached one without what ties it to the person stops the build (rule 87).
+    from . import statewide_photos
+    photo_cache = statewide_photos.load_cache(root) or {}
+    unfit = statewide_photos.problems(photo_cache)
+    if unfit:
+        raise StateGovError(f"{statewide_photos.CACHE_PATH}: " + "; ".join(unfit))
+    candidates_left_out = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
                                  (ncsl, NCSL_CACHE, "executives"),
@@ -408,6 +433,13 @@ def build(root="."):
     for code, office, theirs, ours in disputes:
         problems.append(f"{code}: NASS lists {theirs} as {office}, NLGA {ours}; neither is shown")
     problems.extend(officers.ag_problems(officer_cache.get("ag", {})))
+    # A photograph the office offers only above the caps is left out, never
+    # resized (the owner's decision of 2026-10-19), and the build says how
+    # many: the association's card may stand in (OFFICER_PHOTOS).
+    heavy = sorted(c for c, row in officer_cache.get("ag", {}).items() if row.get("photoOversized"))
+    if heavy:
+        problems.append(f"{len(heavy)} attorneys general's own office photographs left out, "
+                        f"offered only above the caps ({', '.join(heavy)})")
     # A roster typed in from a court's page is held to what a read one is
     # (courts.read_court refuses it): one that does not fit its court stops
     # the build. Age is a warning: a person must read the page again.
@@ -453,6 +485,9 @@ def build(root="."):
                     item["candidates"] = statewide.for_page(
                         code, listed, status.get("name") if status and status["why"] == "listed"
                         else None)
+                    candidates_left_out += statewide_photos.attach(
+                        code, key, item["candidates"]["candidates"], listed, holder, status,
+                        photo_cache)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))
@@ -465,6 +500,11 @@ def build(root="."):
     if missing:
         problems.append(f"no governor for {', '.join(missing)}")
     problems.extend(unpictured(states))
+    if candidates_left_out:
+        # Left out, never resized (the owner's decision of 2026-10-19).
+        problems.append(f"{candidates_left_out} statewide candidates' photographs left out, "
+                        "offered by their source only above the caps")
+    problems.extend(court_photo_problems(court_cache))
     problems.extend(stale_name_forms(states))
     payload = {
         "states": states,

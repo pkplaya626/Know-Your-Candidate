@@ -387,11 +387,18 @@ class TestThePage(unittest.TestCase):
                     continue
                 self.assertTrue(item["candidates"]["candidates"], (code, key))
                 for person in item["candidates"]["candidates"]:
-                    # The list's words only: never a portrait, a figure or a
-                    # profile id (rules 24, 25, 27).
+                    # The list's words, and a photograph only with whose it is
+                    # (rule 91, the owner's decision of 2026-10-19): never a
+                    # figure or a profile id (rules 24, 25, 27).
                     self.assertLessEqual(set(person), {"name", "party", "runningMate",
                                                        "ballotName", "writeIn", "holder",
-                                                       "printed", "surnameOnly", "record"})
+                                                       "printed", "surnameOnly", "record",
+                                                       "photo", "photoCredit"})
+                    self.assertEqual("photo" in person, bool((person.get("photoCredit") or {})
+                                                             .get("by") or (person.get(
+                                                                 "photoCredit") or {}).get(
+                                                                 "licence")), person)
+                    self.assertFalse(person.get("writeIn") and person.get("photo"), person)
                     # Never a name in capitals (rule 77), never a party code.
                     self.assertNotEqual(person["name"], person["name"].upper(), person)
                     self.assertNotIn(",", person["name"].split("(")[0], person)

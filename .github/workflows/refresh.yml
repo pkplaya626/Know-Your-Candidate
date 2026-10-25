@@ -215,6 +215,21 @@ jobs:
         continue-on-error: true
         run: python build_profile_site.py courts
 
+      # The statewide candidates' photographs (kyc/statewide_photos.py; rule
+      # 91): the official guides and members every day, the races' own
+      # Wikipedia articles on Mondays only - one request a second, about
+      # forty minutes - keeping the last read in between. A failed read
+      # keeps the last photographs and stops nothing else (rule 8).
+      - name: Refresh the statewide candidates' photographs
+        continue-on-error: true
+        timeout-minutes: 50
+        run: |
+          if [ "$(date -u +%u)" = "1" ]; then
+            python build_profile_site.py ballotphotos
+          else
+            python build_profile_site.py ballotphotos --no-wikipedia
+          fi
+
       # The President, the Vice President and the Cabinet: the White House's
       # pages, each office's own page and the Senate's roll calls
       # (kyc/federal.py). A source that cannot be read keeps the committed
