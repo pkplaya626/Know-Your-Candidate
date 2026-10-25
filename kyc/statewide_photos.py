@@ -826,7 +826,7 @@ def holder_photo(office, holder):
     return holder[field], {"by": by, "page": holder.get(field + "Page") or ""}
 
 
-def attach(code, office, rows, listed, holder, status, cache):
+def attach(code, office, rows, listed, holder, status, cache, guides=None, manifest=None):
     """Give each of the page's candidate *rows* (``statewide.for_page``)
     its photograph, in place, by the routes in order: ``photo`` and
     ``photoCredit`` (``KYC.photoCreditHtml``'s shape: whose it is, and the
@@ -836,7 +836,11 @@ def attach(code, office, rows, listed, holder, status, cache):
     holder line ``statewide.holder_status`` settled. A photograph offered
     only above the caps is shown all the same (rule 87); one a person's
     list or the licence test withholds is not (:func:`withheld_why`).
-    Returns how many of those shown are at full size though heavy."""
+    A candidate none of these routes pictures is given the election
+    office's own guide's photograph, hosted here unmodified, where *guides*
+    (``kyc/guide_photos.py``'s cache) joins one to them (the owner's
+    decision of 2026-10-25). Returns how many of those shown are at full
+    size though heavy."""
     from .statewide import display_name
     photos = (cache or {}).get("photos") or {}
     by_shown = {}
@@ -860,6 +864,12 @@ def attach(code, office, rows, listed, holder, status, cache):
         rec = photos.get(k)
         if not rec or "photo" not in rec or _problems_of({"photos": {name: rec}}) \
                 or withheld_why(k, rec):
+            if guides:
+                from . import guide_photos
+                found = guide_photos.for_row(guides, code, office, dict(row, printed=name),
+                                             manifest)
+                if found:
+                    row["photo"], row["photoCredit"] = found["photo"], guide_photos.credit(found)
             continue
         heavy += bool((official_photos.heavy_of(rec) or {}).get("kept"))
         row["photo"] = rec["photo"]

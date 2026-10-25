@@ -1215,14 +1215,20 @@ def bad_url(url):
 
 
 def check_outbound_urls(profiles):
-    """Every outbound address on a profile is one a browser can open."""
+    """Every outbound address on a profile is one a browser can open. A
+    photograph this site hosts itself (an election office's guide's, kept
+    unmodified under ``photos/``) is addressed from the site's root, and its
+    own checks are the manifest's (``photocopies.problems``)."""
+    from .photocopies import is_hosted
     from .photos import PLACEHOLDER
 
     found = []
     for p in profiles:
         urls = [(field, p.get(field)) for field in URL_FIELDS
-                if p.get(field) and p.get(field) != PLACEHOLDER]
-        urls += [("photos", u) for u in p.get("photos") or [] if u != PLACEHOLDER]
+                if p.get(field) and p.get(field) != PLACEHOLDER
+                and not (field == "photo_url" and is_hosted(p.get(field)))]
+        urls += [("photos", u) for u in p.get("photos") or []
+                 if u != PLACEHOLDER and not is_hosted(u)]
         urls += [("photoSet", size[1]) for size in p.get("photoSet") or []
                  if isinstance(size, (list, tuple)) and len(size) > 1]
         for field, url in urls:
@@ -1343,6 +1349,18 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None):
         if source in nominee_photos.ROUTES:
             record = portraits.get(profile_key(p)) or {}
             found += nominee_photos.problems({profile_key(p): record})
+        elif source == "election-guide":
+            # The guide's page, its words naming the person, the day read and
+            # the file hosted for them (kyc/guide_photos.py).
+            from . import guide_photos, photocopies
+            from .photocopies import key_of
+            key = key_of("person", p)
+            record = (guide_photos.load_cache().get("photos") or {}).get(key) or {}
+            unsound = guide_photos.record_problems(key, record, photocopies.load())
+            if not record or unsound or record.get("photo") != shown:
+                found.append(f"{p['name']} (election-guide): "
+                             + ("; ".join(unsound) if unsound else
+                                "no record of the guide's photograph it shows"))
         elif source == "campaign-site":
             entry = people.get(p.get("id")) or {}
             record = next((r for r in (entry.get("site"), entry.get("listed"),

@@ -189,11 +189,19 @@ def _build(args):
     print(f"  candidates' portraits no resizer serves under "
           f"{photos_mod.MAX_PORTRAIT_BYTES // 1000} KB or {photos_mod.MAX_PORTRAIT_PX}px, "
           f"shown all the same (at full size, or as this site's copy): {heavy}")
+    # The election office's own guide's photograph, hosted here unmodified,
+    # for a nominee no other route gives one (kyc/guide_photos.py; the
+    # owner's decision of 2026-10-25).
+    from . import guide_photos, photocopies
+    stats["guide_photos"] = guide_photos.apply_people(
+        profiles, guide_photos.load_cache(args.root), photocopies.load(args.root))
+    if stats["guide_photos"]:
+        print(f"  election offices' guides: {stats['guide_photos']} nominees' photographs "
+              "(hosted here unmodified)")
     # Whose photograph each portrait is, once every source has had its say;
     # then the smaller copy of a heavy one this site made (rule 101).
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
-    from . import photocopies
     stats["photo_copies"] = photocopies.apply_people(profiles, photocopies.load(args.root))
     # The offices each person has held, by id; a challenger's only while
     # their profile links the article they were read from (rule 20).
@@ -342,6 +350,13 @@ def _build(args):
     from . import photocopies
     for level, code, message in photocopies.problems(photocopies.load(args.root), args.root):
         issues.append(validate.Issue(level, code, message, ""))
+    # The election offices' guides' photographs (kyc/guide_photos.py): each
+    # with its page, the guide's words and the day read, and the file the
+    # manifest hosts for that person.
+    from . import guide_photos
+    for message in guide_photos.problems(guide_photos.load_cache(args.root),
+                                         photocopies.load(args.root)):
+        issues.append(validate.Issue("error", "photo-guide", message, ""))
     if args.check:
         # And each copy shown only for its own original and record, credited,
         # with what is left to weigh or copy (rule 101), where a reviewer
@@ -1553,9 +1568,11 @@ def _verify(args):
     stats["portraits"] = (portraits.apply_cache(profiles, cache, **_legislature(args.root))
                           if cache else 0)
     enrich.apply_cache(profiles, enrichment, as_of=_age_date(stats))
+    from . import guide_photos, photocopies
+    guide_photos.apply_people(profiles, guide_photos.load_cache(args.root),
+                              photocopies.load(args.root))
     from .photos import assign_credits
     stats["photo_credits"] = assign_credits(profiles)
-    from . import photocopies
     stats["photo_copies"] = photocopies.apply_people(profiles, photocopies.load(args.root))
     from . import history as history_mod
     history_mod.apply_cache(profiles, history_mod.load_cache(args.root),
@@ -1828,6 +1845,9 @@ def _verify(args):
     shown.add_people(profiles).add_stategov(gov_built).add_federal(fed[0] if fed else None)
     copy_errors = [(code, message) for level, code, message in photocopies.problems(
         photocopies.load(args.root), args.root, shown) if level == "error"]
+    from . import guide_photos
+    copy_errors += [("photo-guide", message) for message in guide_photos.problems(
+        guide_photos.load_cache(args.root), photocopies.load(args.root))]
     for code, message in copy_errors:
         problems.append(f"{code}: {message}")
     if not copy_errors:
@@ -2068,6 +2088,34 @@ def _ballotphotos(args):
     if not args.check:
         print(f"[ok] wrote {statewide_photos.save_cache(cache, args.root)}")
     return 0
+
+
+def _guidephotos(args):
+    """The election offices' guides' photographs, hosted here unmodified
+    (kyc/guide_photos.py; rules 24, 87, 91 and 101)."""
+    from . import guide_photos, photocopies
+    if args.check:
+        cache, problems = guide_photos.load_cache(args.root), []
+    else:
+        cache, problems = guide_photos.fetch(args.root)
+    errors = guide_photos.problems(cache, photocopies.load(args.root))
+    found = guide_photos.counts(cache)
+    print("  election offices' guides' photographs: "
+          + (", ".join(f"{n} {code}" for code, n in sorted(found.items())) or "none")
+          + "; not read: " + "; ".join(f"{code}, {why}"
+                                       for code, why in sorted(guide_photos.ELSEWHERE.items())))
+    for line in problems:
+        print(f"  [warn] {line}")
+    for line in errors:
+        print(f"  [error] {line}", file=sys.stderr)
+    if not args.check:
+        print(f"[ok] wrote {guide_photos.save_cache(cache, args.root)}")
+        # A heavy one is shown as a smaller copy made now, the way rule
+        # 101 makes them, not a day later.
+        report = guide_photos.copy_heavy(cache, args.root)
+        if report:
+            print(f"  smaller copies: {report}")
+    return 2 if errors else 0
 
 
 def _officers(args):
@@ -2713,6 +2761,11 @@ def build_parser():
     courts_cmd.add_argument("--check", action="store_true",
                             help="report the committed cache; make no network call")
 
+    guides_cmd = add("guidephotos", help="the election offices' guides' photographs (Washington's "
+                                         "voters' guide, Alaska's pamphlet), hosted unmodified")
+    guides_cmd.add_argument("--check", action="store_true",
+                            help="report the committed cache; make no network call")
+
     photos_cmd = add("ballotphotos", help="photographs of the statewide candidates: the holder's "
                                          "office photograph, members by bioguide id, the "
                                          "official guides, the race's own Wikipedia article")
@@ -2902,6 +2955,8 @@ def main(argv=None):
         return _tribes(args)
     if args.command == "ballotphotos":
         return _ballotphotos(args)
+    if args.command == "guidephotos":
+        return _guidephotos(args)
     if args.command == "verify":
         return _verify(args)
     if args.command == "congress":

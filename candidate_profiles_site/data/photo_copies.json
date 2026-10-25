@@ -29,6 +29,266 @@
    675
   ]
  },
+ "hosted": {
+  "1271aa8fadf719586f7c.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 158357,
+   "for": [
+    "candidate:AK:lt:Josh Church"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
+   "height": 973,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
+   "read": "2026-10-25",
+   "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
+   "type": "image/jpeg",
+   "width": 807
+  },
+  "3f11f3a06ce1188320a5.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 321884,
+   "copy": {
+    "box": [
+     96,
+     96
+    ],
+    "bytes": 4094,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "8c81c39cf1758e2f1ebe.jpg",
+    "for": [
+     "candidate:AK:lt:Candi English"
+    ],
+    "from": [
+     1113,
+     1329
+    ],
+    "height": 115,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "8c81c39cf1758e2f1ebedb2b0625908090d4f19e060bb3dbfbd488c59f445d0f",
+    "width": 96
+   },
+   "for": [
+    "candidate:AK:lt:Candi English"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
+   "height": 1329,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
+   "read": "2026-10-25",
+   "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
+   "type": "image/jpeg",
+   "width": 1113
+  },
+  "51d58cb46701d600374b.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 113084,
+   "for": [
+    "candidate:AK:lt:Zac Johnson"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
+   "height": 1080,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
+   "read": "2026-10-25",
+   "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
+   "type": "image/jpeg",
+   "width": 1048
+  },
+  "8990ce16abd8652da11d.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 185161,
+   "for": [
+    "person:FEC_S6AK00326"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
+   "height": 857,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
+   "read": "2026-10-25",
+   "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
+   "type": "image/jpeg",
+   "width": 751
+  },
+  "8e7bfe692d6d6b8a2e3e.jpg": {
+   "by": "Washington Secretary of State, voters' guide",
+   "bytes": 4228148,
+   "copy": {
+    "box": [
+     540,
+     675
+    ],
+    "bytes": 85102,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "ab84c5433d2566f33ae3.jpg",
+    "for": [
+     "person:FEC_H6WA04190"
+    ],
+    "from": [
+     2254,
+     2705
+    ],
+    "height": 675,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "ab84c5433d2566f33ae30e4d1650c0f7f4255ad7ea54d4588ef68ef45e268a01",
+    "width": 562
+   },
+   "for": [
+    "person:FEC_H6WA04190"
+   ],
+   "from": "https://voter.votewa.gov/elections/candidate.ashx?e=899&r=186950&b=0&la=en&c=XX",
+   "height": 2705,
+   "method": "unmodified",
+   "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
+   "read": "2026-10-25",
+   "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
+   "type": "image/jpeg",
+   "width": 2254
+  },
+  "9e5a0b550a37e2db2b2d.jpg": {
+   "by": "Washington Secretary of State, voters' guide",
+   "bytes": 46083,
+   "for": [
+    "person:FEC_H4WA09061"
+   ],
+   "from": "https://voter.votewa.gov/elections/candidate.ashx?e=899&r=186955&b=0&la=en&c=XX",
+   "height": 433,
+   "method": "unmodified",
+   "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
+   "read": "2026-10-25",
+   "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
+   "type": "image/jpeg",
+   "width": 361
+  },
+  "b3b2f41ae57ccc6ccb0d.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 146262,
+   "for": [
+    "candidate:AK:governor:Bernadette M. Wilson"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
+   "height": 906,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
+   "read": "2026-10-25",
+   "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
+   "type": "image/jpeg",
+   "width": 759
+  },
+  "b4d4590de7a799cc12bb.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 231634,
+   "for": [
+    "candidate:AK:lt:Michael K. Shower"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
+   "height": 1096,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
+   "read": "2026-10-25",
+   "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
+   "type": "image/jpeg",
+   "width": 906
+  },
+  "c8108e6fb86765427c8f.jpg": {
+   "by": "Washington Secretary of State, voters' guide",
+   "bytes": 66635,
+   "for": [
+    "person:FEC_H4WA08147"
+   ],
+   "from": "https://voter.votewa.gov/elections/candidate.ashx?e=899&r=186953&b=0&la=en&c=XX",
+   "height": 501,
+   "method": "unmodified",
+   "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
+   "read": "2026-10-25",
+   "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
+   "type": "image/jpeg",
+   "width": 418
+  },
+  "ce93240400345f51e575.jpg": {
+   "by": "Washington Secretary of State, voters' guide",
+   "bytes": 98722,
+   "for": [
+    "person:FEC_H6WA06286"
+   ],
+   "from": "https://voter.votewa.gov/elections/candidate.ashx?e=899&r=186952&b=0&la=en&c=XX",
+   "height": 584,
+   "method": "unmodified",
+   "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
+   "read": "2026-10-25",
+   "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
+   "type": "image/jpeg",
+   "width": 486
+  },
+  "d57500fe4e8b2efaf26f.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 66379,
+   "for": [
+    "candidate:AK:governor:Treg Taylor"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
+   "height": 619,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
+   "read": "2026-10-25",
+   "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
+   "type": "image/jpeg",
+   "width": 517
+  },
+  "d8f4574d09d969ecac7d.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 277994,
+   "copy": {
+    "box": [
+     96,
+     96
+    ],
+    "bytes": 2749,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "8d94c807ebfd2809f0e6.jpg",
+    "for": [
+     "candidate:AK:governor:Dave Bronson"
+    ],
+    "from": [
+     1095,
+     1320
+    ],
+    "height": 116,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "8d94c807ebfd2809f0e6700a3f5cd9935fe625927c498da82ee866cb180a046b",
+    "width": 96
+   },
+   "for": [
+    "candidate:AK:governor:Dave Bronson"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
+   "height": 1320,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
+   "read": "2026-10-25",
+   "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
+   "type": "image/jpeg",
+   "width": 1095
+  },
+  "fd2a5042d813f41e2379.jpg": {
+   "by": "Alaska Division of Elections, Official Election Pamphlet",
+   "bytes": 210718,
+   "for": [
+    "candidate:AK:governor:Jonathan S. “JKT” Kreiss-Tomkins"
+   ],
+   "from": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
+   "height": 907,
+   "method": "unmodified",
+   "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
+   "read": "2026-10-25",
+   "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
+   "type": "image/jpeg",
+   "width": 758
+  }
+ },
  "originals": {
   "https://ag.nv.gov/uploadedImages/agnvgov/Content/About/20210324_AGPic.jpg": {
    "bytes": 39455,

@@ -123,6 +123,10 @@ BROWSER_UA = dict(UA, **{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64
                                        "Safari/537.36"})
 
 _WIKIMEDIA = re.compile(r"(^|\.)(wikimedia|wikipedia)\.org$", re.I)
+# A photograph this site hosts itself, unmodified, because its source offers
+# no address of its own (an election office's guide, kyc/guide_photos.py):
+# named by its own hash, its address from the site's root.
+_HOSTED = re.compile(r"^photos/[0-9a-f]{20}\.(?:jpg|png)$")
 _IMAGE_MAGIC = (b"\xff\xd8\xff", b"\x89PNG", b"GIF8", b"RIFF")
 
 
@@ -148,14 +152,37 @@ def is_wikimedia(url):
     return bool(_WIKIMEDIA.search(host_of(url)))
 
 
+def is_hosted(url):
+    """Whether *url* is a photograph this site hosts as an unmodified copy
+    (``hosted`` in the manifest), by its address from the site's root."""
+    return bool(_HOSTED.match(str(url or "")))
+
+
+def hosted_entry(cache, url):
+    """The manifest's ``hosted`` entry for *url*, or None."""
+    if not is_hosted(url):
+        return None
+    return ((cache or {}).get("hosted") or {}).get(url[len(PHOTOS_URL):])
+
+
+def entry_of(cache, url):
+    """The manifest's entry for the original *url*: an address read from its
+    host (``originals``) or a file hosted here (``hosted``)."""
+    if is_hosted(url):
+        return hosted_entry(cache, url)
+    return ((cache or {}).get("originals") or {}).get(url)
+
+
 def load(root="."):
     path = os.path.join(root, CACHE_PATH)
     if not os.path.exists(path):
-        return {"originals": {}}
+        return {"originals": {}, "hosted": {}}
     with open(path, encoding="utf-8") as handle:
         cache = json.load(handle)
     if not isinstance(cache.get("originals"), dict):
         raise PhotoCopyError(f"{CACHE_PATH}: no 'originals' table")
+    if not isinstance(cache.setdefault("hosted", {}), dict):
+        raise PhotoCopyError(f"{CACHE_PATH}: 'hosted' is not a table")
     return cache
 
 
@@ -166,6 +193,8 @@ def save(cache, root="."):
         "boxes": {k: [w * DPR, h * DPR] for k, (w, h) in sorted(BOXES.items())},
         "originals": {k: cache["originals"][k] for k in sorted(cache.get("originals") or {})},
     }
+    if cache.get("hosted"):
+        payload["hosted"] = {k: cache["hosted"][k] for k in sorted(cache["hosted"])}
     os.makedirs(os.path.dirname(path), exist_ok=True)
     tmp = f"{path}.tmp"
     with open(tmp, "w", encoding="utf-8", newline="\n") as handle:
@@ -197,7 +226,7 @@ def current(cache, url, kind=None, key=None, expect=None):
     made while it showed someone else is never shown for them), and, where
     the record's own source weighed the file (*expect*, ``expected``), of
     the file that source weighed."""
-    entry = ((cache or {}).get("originals") or {}).get(url)
+    entry = entry_of(cache, url)
     if not entry or not entry.get("copy") or (entry.get("gone") or 0) >= GONE_AFTER:
         return None
     copy = entry["copy"]
@@ -277,6 +306,11 @@ def may_copy(url, kind, code="", own=()):
     (rules 38, 87)."""
     if is_wikimedia(url):
         return False
+    if is_hosted(url):
+        # An election office's own photograph, kept here unmodified (the
+        # owner's decision of 2026-10-25): its smaller copy is made from
+        # the very file the page would otherwise draw.
+        return True
     host = host_of(url)
     if kind in ("justice", "candidate"):
         return bool(host) and (bool(_GOVERNMENT_HOST.search(host)) or host in set(own or ()))
@@ -321,7 +355,7 @@ def attach(record, url, cache, kind, key=None, code="", expect=None, own=()):
             if url and may_copy(url, kind, code, own) else None)
     if copy:
         record["photoCopy"] = {"src": src(copy), "of": url}
-        weight = (cache["originals"][url].get("bytes") or 0)
+        weight = (entry_of(cache, url).get("bytes") or 0)
         if weight:
             record["photoCopy"]["ofBytes"] = weight
         return True
@@ -457,9 +491,15 @@ class Shown:
         # url -> the kinds it is shown as, where this site hosts no copy of
         # it (``may_copy``): drawn from its own host, as before.
         self.linked = {}
+        # A photograph hosted here unmodified (``hosted``): by its address
+        # from the site's root, as ``urls``.
+        self.hosted = {}
         self.issues = []
 
     def add(self, url, kind, record_id, record=None, credited=True, code="", expect=None, own=()):
+        if is_hosted(url):
+            self._add_hosted(url, kind, record_id, record, credited)
+            return
         if not url or not url.startswith(("https://", "http://")):
             return
         copy = (record or {}).get("photoCopy")
@@ -487,6 +527,22 @@ class Shown:
         slot = self.urls.setdefault(url, {"kinds": set(), "records": {}, "shows": {}})
         slot["kinds"].add(kind)
         slot["records"][record_id] = {"kind": kind, "expect": expect}
+        if copy and copy.get("of") == url:
+            slot["shows"][record_id] = (copy.get("src") or "", kind)
+
+    def _add_hosted(self, url, kind, record_id, record, credited):
+        copy = (record or {}).get("photoCopy")
+        if not credited:
+            self.issues.append(("error", "photo-hosted-uncredited",
+                                f"{record_id} shows {url}, a photograph hosted here, with no "
+                                "credit (rule 87)"))
+        if copy and copy.get("of") != url:
+            self.issues.append(("error", "photo-copy-misplaced",
+                                f"{record_id} shows the copy of {copy.get('of')} in place of "
+                                f"its own portrait, {url}"))
+        slot = self.hosted.setdefault(url, {"kinds": set(), "records": {}, "shows": {}})
+        slot["kinds"].add(kind)
+        slot["records"][record_id] = {"kind": kind, "expect": None}
         if copy and copy.get("of") == url:
             slot["shows"][record_id] = (copy.get("src") or "", kind)
 
@@ -602,16 +658,136 @@ def stats(cache, shown):
     over = [u for u in shown.urls if heavy(originals.get(u))]
     copied = [u for u in over if for_all(cache, u, shown.urls[u])]
     weight = sum(e["copy"]["bytes"] for e in originals.values() if e.get("copy"))
+    weight += sum(e["copy"]["bytes"] for e in ((cache or {}).get("hosted") or {}).values()
+                  if e.get("copy"))
     kinds = {}
     for url_kinds in shown.linked.values():
         kind = sorted(url_kinds)[0]
         kinds[kind] = kinds.get(kind, 0) + 1
     linked = ", ".join(f"{k} {n:,}" for k, n in sorted(kinds.items())) or "none"
-    return (f"{len(copied):,} of {len(over):,} portraits over the caps shown as a copy made here "
+    hosted = (cache or {}).get("hosted") or {}
+    hosted_line = ""
+    if hosted:
+        made = sum(1 for e in hosted.values() if e.get("copy"))
+        hosted_line = (f"{len(hosted):,} election offices' photographs hosted here unmodified "
+                       f"({made:,} shown as a smaller copy); ")
+    return (hosted_line +
+            f"{len(copied):,} of {len(over):,} portraits over the caps shown as a copy made here "
             f"({weight / 1e6:.1f} MB under {PHOTOS_DIR}); "
             f"{sum(1 for u in shown.urls if (originals.get(u) or {}).get('read')):,} of "
             f"{len(shown.urls):,} addresses weighed; {len(shown.linked):,} portraits on no host "
             f"this site copies from ({linked}) drawn from their own host, never copied")
+
+
+def _copy_problems(url, entry, copy, root, listed):
+    """What is wrong with *copy*, the smaller copy of *url* (*entry* the
+    manifest's entry for it), as ``[(level, code, message)]``; *listed*
+    gathers the file names the manifest gives."""
+    from .portraits import image_size
+    out = []
+    name = copy.get("file") or ""
+    listed.setdefault(name, []).append(url)
+    if is_wikimedia(url):
+        out.append(("error", "photo-copy-wikimedia", f"a copy of a Wikimedia file: {url}"))
+    if not re.fullmatch(r"[0-9a-f]{16,64}\.jpg", name):
+        out.append(("error", "photo-copy-name", f"{url}: copy file {name!r} is not named by "
+                                                 f"its hash"))
+        return out
+    path = os.path.join(root, PHOTOS_DIR, name)
+    if not os.path.exists(path):
+        out.append(("error", "photo-copy-missing", f"{url}: {PHOTOS_DIR}/{name} is not on disk"))
+        return out
+    sha = file_sha(path)
+    if sha != copy.get("sha256") or not sha.startswith(name[:-4]):
+        out.append(("error", "photo-copy-hash", f"{PHOTOS_DIR}/{name} does not have the hash "
+                                                f"its name and the manifest give"))
+    size = os.path.getsize(path)
+    if size != copy.get("bytes"):
+        out.append(("error", "photo-copy-bytes", f"{PHOTOS_DIR}/{name} is {size} bytes, the "
+                                                 f"manifest says {copy.get('bytes')}"))
+    for key in ("chrome", "quality", "made", "box", "width", "height", "for", "from"):
+        if not copy.get(key):
+            out.append(("error", "photo-copy-unrecorded",
+                        f"{url}: the copy does not record its {key}"))
+    box = copy.get("box") or [0, 0]
+    w, h = copy.get("width") or 0, copy.get("height") or 0
+    # Just covering its box: one side at the box, never both past it.
+    if min(w - box[0], h - box[1]) > 1:
+        out.append(("error", "photo-copy-oversize",
+                    f"{url}: the copy is {w}x{h}, more than its {box[0]}x{box[1]} box needs"))
+    if w > (entry.get("width") or 0) + 1 and h > (entry.get("height") or 0) + 1 \
+            and entry.get("width"):
+        out.append(("error", "photo-copy-enlarged", f"{url}: the copy is larger than the "
+                                                    f"original"))
+    if (copy.get("bytes") or 0) > COPY_MAX_BYTES or \
+            (copy.get("bytes") or 0) >= (entry.get("bytes") or 0):
+        out.append(("error", "photo-copy-heavy", f"{url}: the copy is {copy.get('bytes')} "
+                                                 f"bytes, the original {entry.get('bytes')}"))
+    # The photograph, smaller: the original's shape, to the pixel's
+    # rounding (never cropped), and the very pixels the manifest gives.
+    drawn = copy.get("from") or [0, 0]
+    if w and h and drawn[0] and drawn[1] and abs(w - drawn[0] * h / drawn[1]) > 1                 and abs(h - drawn[1] * w / drawn[0]) > 1:
+        out.append(("error", "photo-copy-shape",
+                    f"{url}: the copy is {w}x{h}, not the shape of its original "
+                    f"({drawn[0]}x{drawn[1]})"))
+    with open(path, "rb") as handle:
+        size_px = image_size(handle.read(FIRST_BYTES))
+    if size_px and tuple(size_px) != (w, h):
+        out.append(("error", "photo-copy-shape",
+                    f"{PHOTOS_DIR}/{name} is {size_px[0]}x{size_px[1]}, the manifest says "
+                    f"{w}x{h}"))
+    if not heavy(entry):
+        out.append(("error", "photo-copy-unneeded",
+                    f"{url}: copied, but the original as read is within the caps"))
+    if not entry.get("sha256"):
+        out.append(("error", "photo-copy-unrecorded", f"{url}: no hash of the original"))
+    return out
+
+
+HOSTED_METHODS = ("unmodified",)
+
+
+def _hosted_problems(name, entry, root, listed):
+    """What is wrong with a file hosted here unmodified (``hosted``): it
+    must be on disk, be the bytes its name and the manifest give, the pixel
+    size the manifest gives, and record how it was taken, from which page
+    and address, on what day and for whom."""
+    from .portraits import image_size
+    out = []
+    url = PHOTOS_URL + name
+    listed.setdefault(name, []).append(url)
+    if not is_hosted(url):
+        out.append(("error", "photo-hosted-name", f"{url} is not named by its hash"))
+        return out
+    if entry.get("method") not in HOSTED_METHODS:
+        out.append(("error", "photo-hosted-method",
+                    f"{url}: method {entry.get('method')!r}, not {' or '.join(HOSTED_METHODS)}"))
+    for key in ("page", "from", "sha256", "bytes", "width", "height", "read", "for", "by"):
+        if not entry.get(key):
+            out.append(("error", "photo-hosted-unrecorded", f"{url}: no {key} recorded"))
+    for key in ("page", "from"):
+        if entry.get(key) and not str(entry[key]).startswith("https://"):
+            out.append(("error", "photo-hosted-unrecorded",
+                        f"{url}: its {key} is not an https address"))
+    path = os.path.join(root, PHOTOS_DIR, name)
+    if not os.path.exists(path):
+        out.append(("error", "photo-hosted-missing", f"{url} is not on disk"))
+        return out
+    sha = file_sha(path)
+    if sha != entry.get("sha256") or not sha.startswith(name.rsplit(".", 1)[0]):
+        out.append(("error", "photo-hosted-hash",
+                    f"{url} does not have the hash its name and the manifest give"))
+    if os.path.getsize(path) != entry.get("bytes"):
+        out.append(("error", "photo-hosted-bytes",
+                    f"{url} is {os.path.getsize(path)} bytes, the manifest says "
+                    f"{entry.get('bytes')}"))
+    with open(path, "rb") as handle:
+        size = image_size(handle.read(HEAD_BYTES))
+    if not size or tuple(size) != (entry.get("width"), entry.get("height")):
+        out.append(("error", "photo-hosted-shape",
+                    f"{url} is {size and f'{size[0]}x{size[1]}'}, the manifest says "
+                    f"{entry.get('width')}x{entry.get('height')}"))
+    return out
 
 
 def problems(cache, root=".", shown=None, files=True):
@@ -623,66 +799,14 @@ def problems(cache, root=".", shown=None, files=True):
     out = []
     originals = (cache or {}).get("originals") or {}
     listed = {}
+    hosted = (cache or {}).get("hosted") or {}
     for url, entry in sorted(originals.items() if files else ()):
-        copy = entry.get("copy")
-        if not copy:
-            continue
-        name = copy.get("file") or ""
-        listed.setdefault(name, []).append(url)
-        if is_wikimedia(url):
-            out.append(("error", "photo-copy-wikimedia", f"a copy of a Wikimedia file: {url}"))
-        if not re.fullmatch(r"[0-9a-f]{16,64}\.jpg", name):
-            out.append(("error", "photo-copy-name", f"{url}: copy file {name!r} is not named by "
-                                                     f"its hash"))
-            continue
-        path = os.path.join(root, PHOTOS_DIR, name)
-        if not os.path.exists(path):
-            out.append(("error", "photo-copy-missing", f"{url}: {PHOTOS_DIR}/{name} is not on disk"))
-            continue
-        sha = file_sha(path)
-        if sha != copy.get("sha256") or not sha.startswith(name[:-4]):
-            out.append(("error", "photo-copy-hash", f"{PHOTOS_DIR}/{name} does not have the hash "
-                                                    f"its name and the manifest give"))
-        size = os.path.getsize(path)
-        if size != copy.get("bytes"):
-            out.append(("error", "photo-copy-bytes", f"{PHOTOS_DIR}/{name} is {size} bytes, the "
-                                                     f"manifest says {copy.get('bytes')}"))
-        for key in ("chrome", "quality", "made", "box", "width", "height", "for", "from"):
-            if not copy.get(key):
-                out.append(("error", "photo-copy-unrecorded",
-                            f"{url}: the copy does not record its {key}"))
-        box = copy.get("box") or [0, 0]
-        w, h = copy.get("width") or 0, copy.get("height") or 0
-        # Just covering its box: one side at the box, never both past it.
-        if min(w - box[0], h - box[1]) > 1:
-            out.append(("error", "photo-copy-oversize",
-                        f"{url}: the copy is {w}x{h}, more than its {box[0]}x{box[1]} box needs"))
-        if w > (entry.get("width") or 0) + 1 and h > (entry.get("height") or 0) + 1 \
-                and entry.get("width"):
-            out.append(("error", "photo-copy-enlarged", f"{url}: the copy is larger than the "
-                                                        f"original"))
-        if (copy.get("bytes") or 0) > COPY_MAX_BYTES or \
-                (copy.get("bytes") or 0) >= (entry.get("bytes") or 0):
-            out.append(("error", "photo-copy-heavy", f"{url}: the copy is {copy.get('bytes')} "
-                                                     f"bytes, the original {entry.get('bytes')}"))
-        # The photograph, smaller: the original's shape, to the pixel's
-        # rounding (never cropped), and the very pixels the manifest gives.
-        drawn = copy.get("from") or [0, 0]
-        if w and h and drawn[0] and drawn[1] and abs(w - drawn[0] * h / drawn[1]) > 1                 and abs(h - drawn[1] * w / drawn[0]) > 1:
-            out.append(("error", "photo-copy-shape",
-                        f"{url}: the copy is {w}x{h}, not the shape of its original "
-                        f"({drawn[0]}x{drawn[1]})"))
-        with open(path, "rb") as handle:
-            size_px = image_size(handle.read(FIRST_BYTES))
-        if size_px and tuple(size_px) != (w, h):
-            out.append(("error", "photo-copy-shape",
-                        f"{PHOTOS_DIR}/{name} is {size_px[0]}x{size_px[1]}, the manifest says "
-                        f"{w}x{h}"))
-        if not heavy(entry):
-            out.append(("error", "photo-copy-unneeded",
-                        f"{url}: copied, but the original as read is within the caps"))
-        if not entry.get("sha256"):
-            out.append(("error", "photo-copy-unrecorded", f"{url}: no hash of the original"))
+        if entry.get("copy"):
+            out += _copy_problems(url, entry, entry["copy"], root, listed)
+    for name, entry in sorted(hosted.items() if files else ()):
+        out += _hosted_problems(name, entry, root, listed)
+        if entry.get("copy"):
+            out += _copy_problems(PHOTOS_URL + name, entry, entry["copy"], root, listed)
     directory = os.path.join(root, PHOTOS_DIR)
     if files and os.path.isdir(directory):
         for name in sorted(os.listdir(directory)):
@@ -712,6 +836,30 @@ def problems(cache, root=".", shown=None, files=True):
             unweighed[kind] = unweighed.get(kind, 0) + 1
         elif heavy(entry) and not for_all(cache, url, slot) and (entry.get("gone") or 0) < GONE_AFTER:
             missing[kind] = missing.get(kind, 0) + 1
+    for url, slot in sorted(shown.hosted.items()):
+        entry = hosted_entry(cache, url)
+        kind = sorted(slot["kinds"])[0]
+        if not entry:
+            out.append(("error", "photo-hosted-unlisted",
+                        f"{', '.join(sorted(slot['records']))} shows {url}, which "
+                        f"{CACHE_PATH} does not list"))
+            continue
+        for record_id in sorted(slot["records"]):
+            if record_id not in (entry.get("for") or ()):
+                out.append(("error", "photo-hosted-not-theirs",
+                            f"{record_id} shows {url}, which the manifest holds for "
+                            f"{', '.join(entry.get('for') or ()) or 'no one'}"))
+        for record_id, (shows, as_kind) in sorted(slot.get("shows", {}).items()):
+            made = current(cache, url, as_kind, record_id)
+            made = src(made) if made else None
+            if shows != made:
+                out.append(("error", "photo-copy-stale",
+                            f"{record_id} shows {shows or 'a copy'} for {url}, but the manifest "
+                            f"holds {made or 'no current copy'}; rebuild"))
+        if heavy(entry) and not for_all(cache, url, slot):
+            missing[kind] = missing.get(kind, 0) + 1
+    unshown = [PHOTOS_URL + name for name in sorted(((cache or {}).get("hosted") or {}))
+               if PHOTOS_URL + name not in shown.hosted]
     for url, entry in sorted(originals.items()):
         if entry.get("copy") and url not in shown.urls:
             orphans.append(url)
@@ -729,6 +877,10 @@ def problems(cache, root=".", shown=None, files=True):
         out.append(("warning", "photo-copy-orphan",
                     f"{len(orphans)} copies whose original no record shows any more (the "
                     f"'photocopies' command removes them): {', '.join(orphans[:3])}"))
+    if unshown:
+        out.append(("warning", "photo-hosted-orphan",
+                    f"{len(unshown)} photographs hosted here that no record shows any more "
+                    f"(the 'guidephotos' command removes them): {', '.join(unshown[:3])}"))
     return out
 
 
@@ -934,6 +1086,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
     lock = threading.Lock()
     workdir = tempfile.mkdtemp(prefix="kyc-photocopies-")
     jobs = []
+    _hosted_jobs(cache, shown, root, workdir, jobs, report, log)
 
     # The weighing stops early enough to leave the copy maker its share of
     # the budget (rule 78: a step killed at its limit saves nothing).
@@ -1105,7 +1258,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
                 report["copyFailed"] += len(jobs)
                 made = None
             if made is not None:
-                _take(made, jobs, originals, root, report, log)
+                _take(made, jobs, cache, root, report, log)
         _sweep(cache, root, log)
         save(cache, root)
     finally:
@@ -1113,13 +1266,74 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
     return report
 
 
-def _take(made, jobs, originals, root, report, log):
+def _hosted_jobs(cache, shown, root, workdir, jobs, report, log):
+    """A copy job for each file hosted here (``hosted``) that is over the
+    caps and has no copy covering every kind it is shown as. The file is
+    named by its own hash, so a copy made of it is of these very bytes and
+    stands for every record that shows it; none is made of a file whose
+    bytes are not its name's."""
+    hosted = cache.setdefault("hosted", {})
+    for url, slot in sorted(shown.hosted.items()):
+        name = url[len(PHOTOS_URL):]
+        entry = hosted.get(name)
+        if not entry:
+            continue
+        records = sorted(slot["records"])
+        if not heavy(entry):
+            if entry.pop("copy", None):
+                report["removed"] += 1
+                log(f"  {url}: within the caps; its copy is removed")
+            continue
+        report["heavy"] += 1
+        box = box_for(slot["kinds"])
+        copy = entry.get("copy")
+        if copy and covers(copy, box):
+            copy["for"] = records
+            report["kept"] += 1
+            continue
+        path = os.path.join(root, PHOTOS_DIR, name)
+        if not os.path.exists(path) or file_sha(path) != entry.get("sha256"):
+            report["errors"] += 1
+            log(f"  [warn] {url}: not on disk as the manifest gives it; no copy made")
+            continue
+        jobs.append({"id": url, "in": path, "out": os.path.join(workdir, f"{len(jobs)}.jpg"),
+                     "box": box, "for": records})
+
+
+def copy_hosted(root, shown, maker=None, log=print):
+    """Make the smaller copies of the heavy files hosted here that *shown*
+    shows, now (``guidephotos`` calls it for what it has just hosted, so a
+    4 MB photograph is not drawn at full size until the next refresh);
+    returns the report."""
+    cache = load(root)
+    report = {"heavy": 0, "copied": 0, "kept": 0, "removed": 0, "errors": 0, "copyFailed": 0}
+    workdir = tempfile.mkdtemp(prefix="kyc-photocopies-")
+    jobs = []
+    try:
+        _hosted_jobs(cache, shown, root, workdir, jobs, report, log)
+        if jobs:
+            try:
+                made = (maker or make_copies)(jobs, root)
+            except (PhotoCopyError, OSError, subprocess.SubprocessError) as exc:
+                log(f"  [warn] no copies made: {exc}")
+                report["copyFailed"] += len(jobs)
+                made = None
+            if made is not None:
+                _take(made, jobs, cache, root, report, log)
+        _sweep(cache, root, log)
+        save(cache, root)
+    finally:
+        shutil.rmtree(workdir, ignore_errors=True)
+    return report
+
+
+def _take(made, jobs, cache, root, report, log):
     """Store each copy Chrome made under ``photos/``, by its own hash."""
     os.makedirs(os.path.join(root, PHOTOS_DIR), exist_ok=True)
     results = made.get("results") or {}
     for job in jobs:
         url = job["id"]
-        entry = originals[url]
+        entry = entry_of(cache, url)
         result = results.get(url) or {}
         if not result.get("ok"):
             report["copyFailed"] += 1
@@ -1143,7 +1357,7 @@ def _take(made, jobs, originals, root, report, log):
             "file": name, "sha256": sha, "bytes": len(data),
             # The records it was made for (``current``): never shown for
             # anyone else until the file is read again whole for them.
-            "for": sorted(entry.get("records") or []),
+            "for": job.get("for") or sorted(entry.get("records") or []),
             "width": result["width"], "height": result["height"],
             "box": job["box"], "chrome": made.get("chrome") or "",
             "quality": made.get("quality"), "made": today(),
@@ -1156,6 +1370,10 @@ def _take(made, jobs, originals, root, report, log):
 def _sweep(cache, root, log=print):
     """Remove every file under ``photos/`` no entry names."""
     names = {e["copy"]["file"] for e in cache["originals"].values() if e.get("copy")}
+    for name, entry in (cache.get("hosted") or {}).items():
+        names.add(name)
+        if entry.get("copy"):
+            names.add(entry["copy"]["file"])
     directory = os.path.join(root, PHOTOS_DIR)
     if not os.path.isdir(directory):
         return 0
