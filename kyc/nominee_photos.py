@@ -789,18 +789,20 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
             counts["legislature"] += 1
             counts["heavy"] += bool(new.get("heavy"))
     log(f"  nominee portraits: {counts['wikidata']} from Wikidata, {counts['legislature']} "
-        f"from a legislature ({counts['heavy']} over the caps, shown at full size), "
+        f"from a legislature ({counts['heavy']} over the caps, shown all the same), "
         f"{counts['kept']} kept from an earlier read")
     return counts
 
 
 def heavy_shown(profiles, cache):
     """How many people these routes show a photograph of that is over the
-    caps (shown at full size, ``heavy``)."""
+    caps and that no resizer served smaller (``heavy`` with no
+    ``originalWeight``): shown at full size."""
     from .portraits import profile_key
 
     return sum(1 for p in profiles if p.get("photoSource") in ROUTES
-               and (cache.get(profile_key(p)) or {}).get("heavy"))
+               and (cache.get(profile_key(p)) or {}).get("heavy")
+               and not (cache.get(profile_key(p)) or {}).get("originalWeight"))
 
 
 def problems(cache):

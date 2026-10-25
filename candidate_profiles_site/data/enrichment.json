@@ -3683,15 +3683,9 @@
      "The Constitution & Good Government"
     ],
     "issuesUrl": "https://jamieforlouisiana.com/issues",
-    "portrait": "https://jamieforlouisiana.com/assets/general/tractor-portrait.jpg",
-    "portraitEvidence": "alt text \"Jamie Davis leaning against a tractor in a Louisiana field\"",
-    "portraitPage": "https://jamieforlouisiana.com",
-    "portraitRead": "2026-10-25",
-    "portraitWeight": {
-     "bytes": 172322,
-     "height": 1080,
-     "width": 864
-    },
+    "notPortraits": [
+     "https://jamieforlouisiana.com/assets/general/tractor-portrait.jpg"
+    ],
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -7219,11 +7213,11 @@
   "FEC_H6CA52163": {
    "checked": "2026-10-25",
    "drawn": {
-    "portrait": "https://vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg",
+    "portrait": "https://i0.wp.com/vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg?w=500&ssl=1",
     "portraitEvidence": "alt text \"Jeff Belle\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg",
       "why": "404 KB, over 300 KB"
      }
@@ -7231,9 +7225,9 @@
     "portraitPage": "https://www.belleforcongress.com/",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 404433,
-     "height": 2144,
-     "width": 1206
+     "bytes": 29086,
+     "height": 888,
+     "width": 500
     },
     "read": "2026-10-25",
     "reason": "ok",
@@ -9583,22 +9577,9 @@
      "Foreign Policy and International Diplomacy"
     ],
     "issuesUrl": "https://www.laurenjewett.com/issues",
-    "portrait": "https://laurenjewett.com/images/campaign/lauren-jewett-jefferson.png",
-    "portraitEvidence": "file name \"lauren-jewett-jefferson.png\"",
-    "portraitHeavy": [
-     {
-      "kept": true,
-      "url": "https://laurenjewett.com/images/campaign/lauren-jewett-jefferson.png",
-      "why": "1407 KB, over 300 KB"
-     }
+    "notPortraits": [
+     "https://laurenjewett.com/images/campaign/lauren-jewett-jefferson.png"
     ],
-    "portraitPage": "https://www.laurenjewett.com/about",
-    "portraitRead": "2026-10-25",
-    "portraitWeight": {
-     "bytes": 1407093,
-     "height": 1431,
-     "width": 1217
-    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12430,11 +12411,11 @@
     "description": "Independent candidate Robert P. Henri is running for Congress to force votes on major reforms Americans already support and hold lawmakers accountable if they fail to follow through.",
     "final": "https://projectduecourse.org/",
     "issuesUrl": "https://projectduecourse.org/issues",
-    "portrait": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
+    "portrait": "https://i0.wp.com/projectduecourse.org/RPH_Candidate_Photo.jpg?w=330&ssl=1",
     "portraitEvidence": "alt text \"Robert P. Henri\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://projectduecourse.org/RPH_Candidate_Photo.jpg",
       "why": "582 KB, over 300 KB"
      }
@@ -12442,9 +12423,9 @@
     "portraitPage": "https://projectduecourse.org/",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 582546,
-     "height": 1020,
-     "width": 768
+     "bytes": 162038,
+     "height": 438,
+     "width": 330
     },
     "reason": "ok",
     "safe": true,
@@ -12499,11 +12480,11 @@
      "National Security and Foreign Policy"
     ],
     "issuesUrl": "https://www.moniqueforcongress.com/issues/",
-    "portrait": "https://www.moniqueforcongress.com/images/despain-large.png",
+    "portrait": "https://i0.wp.com/www.moniqueforcongress.com/images/despain-large.png?w=330&ssl=1",
     "portraitEvidence": "file name \"despain-large.png\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://www.moniqueforcongress.com/images/despain-large.png",
       "why": "1290 KB, over 300 KB"
      }
@@ -12511,9 +12492,9 @@
     "portraitPage": "https://www.moniqueforcongress.com",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 1290134,
-     "height": 1200,
-     "width": 755
+     "bytes": 147294,
+     "height": 524,
+     "width": 330
     },
     "reason": "ok",
     "safe": true,
@@ -12761,11 +12742,11 @@
      "Voting Rights"
     ],
     "issuesUrl": "https://www.nancymannion.com/Priorities/",
-    "portrait": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
+    "portrait": "https://i0.wp.com/www.nancymannion.com/img/Nancy-Mannion-Main.png?w=500&ssl=1",
     "portraitEvidence": "alt text \"Nancy Mannion\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://www.nancymannion.com/img/Nancy-Mannion-Main.png",
       "why": "375 KB, over 300 KB"
      }
@@ -12773,9 +12754,9 @@
     "portraitPage": "https://www.nancymannion.com",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 375634,
-     "height": 600,
-     "width": 504
+     "bytes": 178798,
+     "height": 595,
+     "width": 500
     },
     "reason": "ok",
     "safe": true,
@@ -13083,11 +13064,11 @@
      "Second Amendment"
     ],
     "issuesUrl": "https://martyjackley.com/issues",
-    "portrait": "https://martyjackley.com/uploads/MartyJackleyHeadshot_web.jpg",
+    "portrait": "https://i0.wp.com/martyjackley.com/uploads/MartyJackleyHeadshot_web.jpg?w=500&ssl=1",
     "portraitEvidence": "alt text \"Attorney General Marty Jackley\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://martyjackley.com/uploads/MartyJackleyHeadshot_web.jpg",
       "why": "900x1349px, over 1200px"
      }
@@ -13095,9 +13076,9 @@
     "portraitPage": "https://martyjackley.com/about",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 122068,
-     "height": 1349,
-     "width": 900
+     "bytes": 21314,
+     "height": 749,
+     "width": 500
     },
     "reason": "ok",
     "safe": true,
@@ -13522,11 +13503,11 @@
      "Upholding Humane Foreign Policy"
     ],
     "issuesUrl": "https://chelseyhockettforcongress.com/issues.html",
-    "portrait": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
+    "portrait": "https://i0.wp.com/chelseyhockettforcongress.com/images/chelsey.jpg?w=500&ssl=1",
     "portraitEvidence": "alt text \"Chelsey Hockett\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://chelseyhockettforcongress.com/images/chelsey.jpg",
       "why": "713 KB, over 300 KB"
      }
@@ -13534,9 +13515,9 @@
     "portraitPage": "https://chelseyhockettforcongress.com",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 713891,
-     "height": 3240,
-     "width": 2160
+     "bytes": 34180,
+     "height": 750,
+     "width": 499
     },
     "reason": "ok",
     "safe": true,
@@ -14501,11 +14482,11 @@
   "FEC_H6WA02228": {
    "checked": "2026-10-25",
    "drawn": {
-    "portrait": "https://fellerforcongress.com/feller-portrait.png",
+    "portrait": "https://i0.wp.com/fellerforcongress.com/feller-portrait.png?w=500&ssl=1",
     "portraitEvidence": "alt text \"Edwin Feller\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://fellerforcongress.com/feller-portrait.png",
       "why": "969 KB, over 300 KB"
      }
@@ -14513,9 +14494,9 @@
     "portraitPage": "https://fellerforcongress.com",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 969444,
-     "height": 1080,
-     "width": 810
+     "bytes": 239276,
+     "height": 665,
+     "width": 499
     },
     "read": "2026-10-25",
     "reason": "ok",
@@ -14886,11 +14867,11 @@
      "Supreme Court Reform"
     ],
     "issuesUrl": "https://rickcrosson.com/priorities/",
-    "portrait": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
+    "portrait": "https://i0.wp.com/rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg?w=500&ssl=1",
     "portraitEvidence": "alt text \"Rick Crosson — photo 2\"",
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg",
       "why": "1536x2048px, over 1200px"
      }
@@ -14898,9 +14879,9 @@
     "portraitPage": "https://rickcrosson.com/",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 245825,
-     "height": 2048,
-     "width": 1536
+     "bytes": 14094,
+     "height": 666,
+     "width": 500
     },
     "reason": "ok",
     "safe": true,

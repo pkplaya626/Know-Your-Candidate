@@ -8862,7 +8862,7 @@
   "width": 422
  },
  "person:carrie buck|NV|H": {
-  "bytes": 3918638,
+  "bytes": 33014,
   "chamber": "upper",
   "credit": {
    "by": "Nevada Legislature",
@@ -8870,17 +8870,23 @@
   },
   "district": "5",
   "evidence": "the file Open States lists for Carrie Buck (ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1), served by the Nevada Legislature",
-  "heavy": "3918 KB, over 300 KB",
-  "height": 2964,
+  "heavy": "3918 KB, over 300 KB; shown smaller from the same file",
+  "height": 500,
   "legislator": "ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
   "legislatorName": "Carrie Buck",
   "name": "Carrie Buck",
+  "original": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
+  "originalWeight": {
+   "bytes": 3918638,
+   "height": 2964,
+   "width": 2964
+  },
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
   "read": "2026-10-25",
   "state": "NV",
-  "url": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
+  "url": "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1",
   "via": "state-legislature",
-  "width": 2964
+  "width": 500
  },
  "person:casey crabtree|SD|H": {
   "name": "Casey Crabtree",
@@ -14858,6 +14864,7 @@
   "legislator": "ocd-person/dc968f82-503e-4246-9124-b880fd6ae3ae",
   "legislatorName": "Martin Zamora",
   "name": "Martin R Zamora",
+  "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
   "read": "2026-10-25",
   "state": "NM",
@@ -16979,6 +16986,7 @@
   "legislator": "ocd-person/e4811e7a-7df7-4275-917d-8bdcc2778fb1",
   "legislatorName": "Rick Brattin",
   "name": "Rick Brattin",
+  "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
   "read": "2026-10-25",
   "state": "MO",
@@ -18868,6 +18876,7 @@
   "legislator": "ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab",
   "legislatorName": "Wes Climer",
   "name": "Wes Climer",
+  "original": "https://scstatehouse.gov/images/members/0356818139.jpg",
   "page": "https://scstatehouse.gov/member.php?code=0356818139",
   "read": "2026-10-25",
   "state": "SC",
