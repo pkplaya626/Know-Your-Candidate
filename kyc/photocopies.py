@@ -318,9 +318,11 @@ class Shown:
                                     f"{record_id} shows a copy of a Wikimedia file, {url}"))
         if is_wikimedia(url):
             return
-        slot = self.urls.setdefault(url, {"kinds": set(), "records": set()})
+        slot = self.urls.setdefault(url, {"kinds": set(), "records": set(), "shows": {}})
         slot["kinds"].add(kind)
         slot["records"].add(record_id)
+        if copy and copy.get("of") == url:
+            slot["shows"][record_id] = (copy.get("src") or "", kind)
 
     def add_legislatures(self, payloads):
         for code, member in _legislators(payloads):
@@ -488,6 +490,16 @@ def problems(cache, root=".", shown=None, files=True):
     for url, slot in sorted(shown.urls.items()):
         entry = originals.get(url)
         kind = sorted(slot["kinds"])[0]
+        # A record shows exactly the copy the manifest holds for its
+        # original, made for a box that covers the kind it is drawn as:
+        # never one withdrawn, remade or made for a smaller box.
+        for record_id, (shows, as_kind) in sorted(slot.get("shows", {}).items()):
+            made = current(cache, url, as_kind)
+            made = src(made) if made else None
+            if shows != made:
+                out.append(("error", "photo-copy-stale",
+                            f"{record_id} shows {shows or 'a copy'} for {url}, but the manifest "
+                            f"holds {made or 'no current copy'}; rebuild"))
         if not entry or not entry.get("read"):
             unweighed[kind] = unweighed.get(kind, 0) + 1
         elif heavy(entry) and not current(cache, url, kind) and (entry.get("gone") or 0) < GONE_AFTER:

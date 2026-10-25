@@ -498,15 +498,26 @@ class TestSettle(unittest.TestCase):
         self.assertEqual(entry["credit"], "Montana Legislature")
         self.assertEqual(entry["read"], TODAY)
 
-    def test_a_file_offered_only_over_the_caps_is_left_out(self):
+    def test_a_file_offered_only_over_the_caps_is_taken_marked_heavy(self):
+        # Rule 101 (the owner, 2026-10-25): shown as a smaller copy made
+        # here, after the checks a heavy file used to skip.
         big = "https://www.legmt.gov/big.jpg"
         entry = self.settle({big: image(3000, 4200, 2_500_000)}, self.candidate(big))
-        self.assertTrue(entry["oversized"])
-        self.assertNotIn("image", entry)
-        self.assertEqual(entry["offered"], big)
+        self.assertNotIn("oversized", entry)
+        self.assertEqual((entry["image"], entry["heavy"]), (big, True))
+        # The lightest of several heavy renditions.
+        bigger = "https://www.legmt.gov/bigger.jpg"
+        entry = self.settle({bigger: image(3000, 4200, 6_000_000), big: image(3000, 4200, 2_500_000)},
+                            self.candidate(bigger, big))
+        self.assertEqual(entry["image"], big)
         # Too many pixels, however light.
         wide = "https://www.legmt.gov/wide.jpg"
-        self.assertTrue(self.settle({wide: image(1200, 1600, 90_000)}, self.candidate(wide))["oversized"])
+        self.assertTrue(self.settle({wide: image(1200, 1600, 90_000)}, self.candidate(wide))["heavy"])
+        # Checked as theirs like any other: a landscape frame is still not a
+        # portrait (rule 38).
+        land = "https://www.legmt.gov/land.jpg"
+        self.assertIn("landscape", self.settle({land: image(4000, 3000, 2_000_000)},
+                                               self.candidate(land))["withheld"])
         # A smaller rendition the source offers is taken instead.
         small = "https://www.legmt.gov/small.jpg"
         entry = self.settle({big: image(3000, 4200, 2_500_000), small: image(400, 500, 30_000)},

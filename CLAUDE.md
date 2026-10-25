@@ -203,7 +203,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2164 tests, no dependencies
+python -m unittest discover tests             # 2167 tests, no dependencies
 npm install && npm test                       # 3342 real-DOM checks (needs jsdom)
 ```
 
@@ -2176,14 +2176,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     never while the file is unchanged since it showed someone else
     (`seatFiles`). Connecticut's Melissa Osborne is withheld that way: the
     file is from 2023 and her record from 2025. Only a rendition the source
-    itself offers within 300 KB and 1,200 px is taken - no image service
-    (owner, 2026-10-19) - so 17 of Indiana's 30 and most of Vermont's are
-    left out and `build` counts them: `legphotos` stops its checks (a
-    landscape frame, a seat file's date) at the weight, so those files
-    were never checked as theirs. A portrait the card does show, its or
-    Open States's, that is over the caps is shown as a smaller copy made
-    here (rule 101: the owner relaxed "no resizing" on 2026-10-25); a
-    landscape frame is
+    itself offers is taken - no image service (owner, 2026-10-19) - the
+    lightest within 300 KB and 1,200 px where there is one. Where the
+    legislature offers only heavier files (17 of Indiana's 30, most of
+    Vermont's), they were left out until 2026-10-25; the first `legphotos`
+    stopped its checks (a landscape frame, a seat file's date) at the
+    weight, so they had never been checked as theirs. Now the lightest
+    offered is taken, marked `heavy`, after every check any file gets (a
+    seat file told apart by its first bytes and length, since its whole
+    hash is not read), and shown as a smaller copy made here: 36 more
+    legislators with a portrait (rule 101: the owner relaxed "no
+    resizing"). A portrait the card shows, its or Open States's, that is
+    over the caps is shown as that copy; a landscape frame is
     not a portrait (rule 38). No party caucus's photograph (Michigan, rule
     87), and no archived copy of a file the legislature stopped serving:
     Kansas's pages name a file that answers 404, and are read again each
@@ -2256,8 +2260,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Chrome versions encode differently and the build must stay
     reproducible from committed files (rule 18). An original that changes
     is read again, and its old copy is withdrawn at once, before the new
-    one is made, so no copy of a predecessor's photograph outlives its
-    file (rule 100's seat files); one answering 404 or 410 twice is gone
+    one is made and even when the file cannot then be downloaded (the
+    first version kept it until a download succeeded), so no copy of a
+    predecessor's photograph outlives its file (rule 100's seat files);
+    the copy comes back only on the very same hash, as when a server's
+    machines give one file two ETags. One answering 404 or 410 twice is gone
     and its copy with it; a refusal, a reset, a truncated file Chrome
     cannot decode (two of Georgia's stop at exactly 1 MB) concludes
     nothing (rule 8), and Maine's host, which refuses this machine's TLS,
@@ -2280,11 +2287,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     than its original, of a light or a Wikimedia file, shown for another
     address than its own or without a credit; `build` counts the
     originals still over the caps with no copy, and those not yet
-    weighed, by kind. The first run weighed 7,448 of 7,638 addresses and
-    made 1,521 copies (1,495 legislators', 15 of the White House's, 11 of
-    campaigns'): 2.4 GB of originals became 15.2 MB. The legislators
-    `legphotos` left out as offered only over the caps stay out: their
-    files were never checked as theirs (rule 100). The same day's photo
+    weighed, by kind. The first runs weighed 7,491 of 7,716 addresses and
+    made 1,557 copies of the 1,559 originals over the caps (1,531
+    legislators', 15 of the White House's, 11 of campaigns'): some 2.4 GB
+    of originals became 15.6 MB. 36 of them are legislators `legphotos`
+    used to leave out as offered only over the caps, now checked as
+    theirs and shown (rule 100). The same day's photo
     research found five of the justices' official portraits on Commons
     older than the Court's current ones; the credit says the year
     Commons' `DateTimeOriginal` gives ("Official portrait, 2005"), read

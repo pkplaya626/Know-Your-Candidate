@@ -336,6 +336,21 @@ class TestProblems(unittest.TestCase):
         self.assertEqual(sorted(c for _, c, _ in s.issues),
                          ["photo-copy-misplaced", "photo-copy-uncredited"])
 
+    def test_a_record_shows_exactly_the_manifests_copy(self):
+        good = photocopies.src(self.cache["originals"][HEAVY]["copy"])
+        s = photocopies.Shown()
+        s.add(HEAVY, "legislator", "legislator:OK:1", {"photoCopy": {"src": good, "of": HEAVY}})
+        self.assertNotIn("photo-copy-stale", self.codes(s))
+        # A copy the manifest no longer holds, or one made for a smaller box
+        # than the record is drawn in, is never shown.
+        s = photocopies.Shown()
+        s.add(HEAVY, "legislator", "legislator:OK:1",
+              {"photoCopy": {"src": "photos/0000.jpg?v=0", "of": HEAVY}})
+        self.assertIn("photo-copy-stale", self.codes(s))
+        s = photocopies.Shown()
+        s.add(HEAVY, "person", "person:1", {"photoCopy": {"src": good, "of": HEAVY}})
+        self.assertIn("photo-copy-stale", self.codes(s))
+
     def test_what_is_left_is_counted_by_kind(self):
         s = shown((HEAVY, "legislator"), (LIGHT, "officer"))
         self.cache["originals"][HEAVY].pop("copy")

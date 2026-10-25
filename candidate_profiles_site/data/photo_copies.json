@@ -27201,6 +27201,36 @@
    ],
    "width": 150
   },
+  "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2852.jpg": {
+   "bytes": 31080,
+   "etag": "\"XUtXQec8dDzTq7weN+WuMw==\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 15:43:55 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:WI:ocd-person/72aa0b66-48f0-41fd-8ac8-b33f610d97c7"
+   ],
+   "width": 150
+  },
+  "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2885.jpg": {
+   "bytes": 37612,
+   "etag": "\"lkhG4ln7qZ9FaWu0M2aqtA==\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 15:43:56 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:WI:ocd-person/a5d9287a-c3e7-4457-8faf-31024e0e9ac6"
+   ],
+   "width": 150
+  },
   "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2889.jpg": {
    "bytes": 37566,
    "etag": "\"M52Syxty6Zg4w3RAxr/iWw==\"",
@@ -36242,6 +36272,40 @@
    ],
    "width": 600
   },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_carey_hamilton_1.jpg": {
+   "bytes": 500090,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8223,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "4933f694211b65764696.jpg",
+    "from": [
+     1488,
+     2232
+    ],
+    "height": 252,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "4933f694211b65764696a86a6dc8f26200d3d34de875771578b6e249e4a07033",
+    "width": 168
+   },
+   "etag": "\"7bfd4370822c6035a3706d61f79687ba\"",
+   "gone": 0,
+   "height": 2232,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 23 Oct 2026 19:38:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/ec6a3cce-3eca-4020-8809-a7a1875e1663"
+   ],
+   "sha256": "b2309d59079b83f728b33bd9dfbcd612e4d926a49da7dbd3e9eddc1941825df2",
+   "width": 1488
+  },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_carolyn_jackson_1.jpg": {
    "bytes": 120801,
    "etag": "\"a8af5c20309ccc5f7c4522f17595de1c\"",
@@ -36271,6 +36335,74 @@
     "legislator:IN:ocd-person/17fd494d-905d-4c82-a828-6d975cbf02f3"
    ],
    "width": 300
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_cherrish_pryor_990.jpg": {
+   "bytes": 4385174,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9622,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "6d84e61934589bc08b79.jpg",
+    "from": [
+     1788,
+     2682
+    ],
+    "height": 252,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "6d84e61934589bc08b79a17a8f8a05e4b1f61334e5b20f2d6afd2009a7d1d33e",
+    "width": 168
+   },
+   "etag": "\"f805eff5caceb5692caaf362333625b2\"",
+   "gone": 0,
+   "height": 2682,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:02 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/8db4d04c-3afe-44c1-940b-7761cd035800"
+   ],
+   "sha256": "3f756eb5806e19669ddabeff8a51b6cb7238e261dbff7459d5949531717c7481",
+   "width": 1788
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_christine_campbell_1.jpg": {
+   "bytes": 143492,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9365,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "69dad3a28c77027dbb48.jpg",
+    "from": [
+     1060,
+     1325
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "69dad3a28c77027dbb48c63a854e9ec8f01dafa1ad11055ac5a57231e386b161",
+    "width": 168
+   },
+   "etag": "\"8db59392cd5505abbc930369fd97a6b7\"",
+   "gone": 0,
+   "height": 1325,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:06 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/a2b2e61b-e27c-4ead-8c81-6703ea817037"
+   ],
+   "sha256": "c8f7cfc65d3c99f7b00669333adcad0e887e587009f706fb8cfa929626c348d1",
+   "width": 1060
   },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_earl_harris_1.jpg": {
    "bytes": 133190,
@@ -36317,6 +36449,40 @@
    ],
    "width": 300
   },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_john_bartlett_942.jpg": {
+   "bytes": 1209618,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7878,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "d0617676e5b69e6311ee.jpg",
+    "from": [
+     2696,
+     3367
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "d0617676e5b69e6311eea103da1a33de4f051cadb96459d06ca8dbccf04840a4",
+    "width": 168
+   },
+   "etag": "\"8e2af985465c8fc355e066a1e929f810\"",
+   "gone": 0,
+   "height": 3367,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:50:20 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/5ceabc0e-ec47-41b5-b014-5eddcdc154f3"
+   ],
+   "sha256": "595ca63de97c308abb5cd991d9572cb033c95aa898ae03ee8ddb3a074bda4f1d",
+   "width": 2696
+  },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_justin_moed_908.jpg": {
    "bytes": 25250,
    "etag": "\"a49e18727125ea7acd329034ee55304b\"",
@@ -36332,6 +36498,244 @@
    ],
    "width": 300
   },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_kyle_miller_1.jpg": {
+   "bytes": 387398,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8717,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "64ba3db29451da78405e.jpg",
+    "from": [
+     1233,
+     1850
+    ],
+    "height": 252,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "64ba3db29451da78405ec7e960eac2e3a3e81adf5d32c519a441ef2276ad4dac",
+    "width": 168
+   },
+   "etag": "\"1ac70901de54580e3a109fc4c045662c\"",
+   "gone": 0,
+   "height": 1850,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:18 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/a67ee82c-450c-49ed-8862-f58e34a3dfbb"
+   ],
+   "sha256": "0250cc0cdb526d350a65c154f18bbd59a513bc0a4b862747a9c5bf91de15f47f",
+   "width": 1233
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_matthew_pierce_708.jpg": {
+   "bytes": 3952644,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7984,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "1170bd449cbdc64e5c7f.jpg",
+    "from": [
+     3876,
+     5186
+    ],
+    "height": 225,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "1170bd449cbdc64e5c7fa900b11b79e3d083c8019e7e0e80e9803941d50541b5",
+    "width": 168
+   },
+   "etag": "\"345d3fdfba50c46ecdc84a2aecdbc939\"",
+   "gone": 0,
+   "height": 5186,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:02 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/c66bcc9b-d5e6-478b-b11e-25be7f4e0aaa"
+   ],
+   "sha256": "a848af30a95918997de20b550dde3b3dcfb876a887479a26057da1625da2b71c",
+   "width": 3876
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_maureen_bauer_1.jpg": {
+   "bytes": 3148744,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7621,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "802b39bc600190a6b97b.jpg",
+    "from": [
+     4000,
+     5030
+    ],
+    "height": 211,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "802b39bc600190a6b97bfea98e20e1ddcfe2e2dd2e8ae488e5dc22e0dc45b353",
+    "width": 168
+   },
+   "etag": "\"fa4f28fa64f7838519af173768ee98eb\"",
+   "gone": 0,
+   "height": 5030,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:12 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/7e493895-2f49-4a56-a4a3-f888373769b5"
+   ],
+   "sha256": "fc9ea83ebd1d3cedaa6ca02d0415f058152b116f849bc17f7f19629ddee531af",
+   "width": 4000
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_mike_andrade_1.jpg": {
+   "bytes": 4606224,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7472,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "9117ef1ae12e86b87353.jpg",
+    "from": [
+     3788,
+     4698
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "9117ef1ae12e86b87353a5beaaad4cab07e886e75ef8f9574086bc470ec72d9e",
+    "width": 169
+   },
+   "etag": "\"390852f22a26a6aa2bd6f2def6f26495\"",
+   "gone": 0,
+   "height": 4698,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:52 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/14aac431-636f-483e-ac39-bf45be53af2f"
+   ],
+   "sha256": "e34f25781da2c1398cad74484d4cdb9cd24a97f971215381b53def5272a1f05b",
+   "width": 3788
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_mitch_gore_1.jpg": {
+   "bytes": 3012452,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 6801,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "4782c6a7ac1bdfba27a7.jpg",
+    "from": [
+     3774,
+     5016
+    ],
+    "height": 223,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "4782c6a7ac1bdfba27a78a1445cb04ece595155338fef446b5bcbdc8e0cffd7a",
+    "width": 168
+   },
+   "etag": "\"eb9d7a6e90fa0abea119578ae07ca127\"",
+   "gone": 0,
+   "height": 5016,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:13 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/30a1de33-efbb-41e1-bf59-bf8171089a3a"
+   ],
+   "sha256": "99a567343c46232451b518ee2ee5651744b8941ee97de9f85434fa5024d99851",
+   "width": 3774
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_philip_giaquinta_879.jpg": {
+   "bytes": 1299731,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9334,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "69df535966b3b5e398cc.jpg",
+    "from": [
+     1894,
+     2368
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "69df535966b3b5e398cc934e06be2dc00e88dbe5d9bd0d24b5473102ba3e6bba",
+    "width": 168
+   },
+   "etag": "\"134e11bf7f3a518a73b29de10c494ce6\"",
+   "gone": 0,
+   "height": 2368,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:03 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d1e89034-ef4a-4a10-b16d-16dc617dcdf1"
+   ],
+   "sha256": "5d4b6770d7a64793e42d85b1c194763ca4a64c9a3f517da89c282c57980bfdff",
+   "width": 1894
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_ragen_hatcher_1.jpg": {
+   "bytes": 298839,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8071,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "280a1943606993fd5525.jpg",
+    "from": [
+     1238,
+     1626
+    ],
+    "height": 221,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "280a1943606993fd552525a02d91d5443db6bad4eadc20cf398d3127db6c8570",
+    "width": 168
+   },
+   "etag": "\"7f79744c8ac0126b8c69587005ad1969\"",
+   "gone": 0,
+   "height": 1626,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:11 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/4c9685ab-f2a4-46e0-980a-699bb01d26cf"
+   ],
+   "sha256": "d953764109ab283f06d82c2560d6d504f8f052faf590691c1b0d1498d33f37ed",
+   "width": 1238
+  },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_renee_pack_1.jpg": {
    "bytes": 144778,
    "etag": "\"5ad01f694134f6d6d8c07b636f9a9131\"",
@@ -36346,6 +36750,40 @@
     "legislator:IN:ocd-person/8b2a92f1-4b70-4dfc-8f4f-789aca1b5e8b"
    ],
    "width": 600
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_robin_shackleford_1128.jpg": {
+   "bytes": 1782154,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9396,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "777633963bfc59ff507a.jpg",
+    "from": [
+     2370,
+     2964
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "777633963bfc59ff507a49299fb8e5f2647319377374bb210fada709e4f5e3b8",
+    "width": 168
+   },
+   "etag": "\"de6a1c76d99574d878a3b3e8b73444f8\"",
+   "gone": 0,
+   "height": 2964,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:41 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d15f8f7e-148b-47fc-858d-84ad23347f64"
+   ],
+   "sha256": "16ba3899cd089d5eec2d04b608f098ec2316c91eb33d66196bf7009cc886ad11",
+   "width": 2370
   },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_ryan_dvorak_697.jpg": {
    "bytes": 31124,
@@ -36377,6 +36815,74 @@
    ],
    "width": 300
   },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_sue_errington_866.jpg": {
+   "bytes": 1837185,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11187,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "e3f2bbe050d9e1612def.jpg",
+    "from": [
+     1458,
+     1775
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "e3f2bbe050d9e1612def846fbbdf3ad2b430c4dd28cd39cb7dc24b82b25bbdac",
+    "width": 172
+   },
+   "etag": "\"ddeb5f68ddb7084bf78cdd906ccd03e2\"",
+   "gone": 0,
+   "height": 1775,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:36 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/98feacbe-3be5-407e-a437-66d65a836a5e"
+   ],
+   "sha256": "5b4b70e2ae18f524d7512272f6a78d3b9b05f689ab09499e20b9cf8c6230403b",
+   "width": 1458
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_tonya_pfaff_1.jpg": {
+   "bytes": 808546,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9037,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "0a7885c29f35a52d092e.jpg",
+    "from": [
+     1447,
+     1889
+    ],
+    "height": 219,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "0a7885c29f35a52d092e2500b2f1efebff77cc5284c4800a68119d435809f984",
+    "width": 168
+   },
+   "etag": "\"784ba876d7cb8ab733ed52158a7c2f9b\"",
+   "gone": 0,
+   "height": 1889,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:40 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/0f97a586-0089-4eb8-86c1-40f42bc1f594"
+   ],
+   "sha256": "06f6b8da58ef8207060ad0a7853a16c84df79dfc5c1e90ded8e8c686e9d285b3",
+   "width": 1447
+  },
   "https://iga.in.gov/images/legislators/124/2026/house/legislator_vanessa_summers_231.jpg": {
    "bytes": 125273,
    "etag": "\"7ab4fe9b504240a000eb682e1a103191\"",
@@ -36406,6 +36912,74 @@
     "legislator:IN:ocd-person/86b7914b-08e6-4ac7-bcd6-b4afa4dceb09"
    ],
    "width": 155
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_victoria_garcia_wilburn_1.jpg": {
+   "bytes": 608964,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7861,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "275fec11d0a91169db65.jpg",
+    "from": [
+     1307,
+     1698
+    ],
+    "height": 218,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "275fec11d0a91169db658534e2ec9a3635bd6e986f4e536a35771a96247a3b30",
+    "width": 168
+   },
+   "etag": "\"995c832b31ea25b49c26402a0bcc94c5\"",
+   "gone": 0,
+   "height": 1698,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:01 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/58922dd9-3295-4d8f-a1ca-60356b1b4ad8"
+   ],
+   "sha256": "2d97340b67895d3a424dc11b6eb9ec82cf8b30a9afa0d60c546fa71c122560b9",
+   "width": 1307
+  },
+  "https://iga.in.gov/images/legislators/124/2026/house/legislator_wendy_dant_chesser_1.jpg": {
+   "bytes": 145543,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8604,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "0d27b3958a45c4660c22.jpg",
+    "from": [
+     1120,
+     1400
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "0d27b3958a45c4660c22eacb99681c010881f56331a2be0a52226ed90eee3129",
+    "width": 168
+   },
+   "etag": "\"307eb8a998b0c49609f346b23233e6d2\"",
+   "gone": 0,
+   "height": 1400,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Oct 2026 19:49:06 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/0761bcc1-6fbf-4a37-8b52-46c2bc6912fa"
+   ],
+   "sha256": "992ea3c55cae1eb8fd0463b9943a618d80afd4a7d53a3ad2acdd32e80c67979e",
+   "width": 1120
   },
   "https://images.bradyunited.org/production/images/Shaundelle-Brooks.jpeg?w=400&h=336&fm=webp&auto=compress&fit=crop&dm=1717513962&s=8dee64026b44a29de45f896285fc7b35": {
    "bytes": 10230,
@@ -39927,6 +40501,40 @@
    "sha256": "b4f824b392f4af6d16ec8e3fbef06b4ae686ffe725d68b1b6b7bcc1b4d898760",
    "width": 3000
   },
+  "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBK1FRQ0E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--d24fb72fd47a1f82ec8f07079959efb448e01b35/Slaugh,-Scott.jpg": {
+   "bytes": 282466,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 6507,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "1b7157acebf70965bd59.jpg",
+    "from": [
+     1049,
+     1498
+    ],
+    "height": 240,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "1b7157acebf70965bd59cd392b9c195ea69b0c6a07975844b254e85e52c64e5f",
+    "width": 168
+   },
+   "etag": "\"c706113fe78ba71d08ae1ed2aab2edd4\"",
+   "gone": 0,
+   "height": 1498,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 21 Oct 2026 00:00:50 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CO:ocd-person/cba33581-a61a-41c5-9773-c949f2b06d0a"
+   ],
+   "sha256": "1954dbde3baee7865ef8b79403af7c6acff044124352da4d64f54e53e6b53ae4",
+   "width": 1049
+  },
   "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBK1JTQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--444190d18434e86fd51db8d0f3656887bb45824b/Danielson,%20Jessie.jpg": {
    "bytes": 1931199,
    "copy": {
@@ -40418,6 +41026,40 @@
    "sha256": "5a728bb5a7c0450fb0a386a6a483a8bb2bf3f9cc8f1e2e7956081b5475a26199",
    "width": 3000
   },
+  "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBM3hUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--3f8f9f25f65f2671dfe0675931f290e90e175a48/Carson,%20John.jpg": {
+   "bytes": 2414323,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9058,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "8bf5367724633f4ba1bf.jpg",
+    "from": [
+     3000,
+     4200
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "8bf5367724633f4ba1bf465e5a2fd1ab60aa5ca3cba1323312cbca0418c7e0a3",
+    "width": 168
+   },
+   "etag": "\"31d8152635632850cdac1a702483e83b\"",
+   "gone": 0,
+   "height": 4200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 20 Mar 2026 00:02:57 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CO:ocd-person/8e95ac06-ddbb-4f6c-ba7e-854a92860be4"
+   ],
+   "sha256": "e099789b243b212a19b30ac8ffcbe71c5d7bfb7fb4c79546d94566c8ec13593a",
+   "width": 3000
+  },
   "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMCtIQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--2fb56df7ac0ddd22f63e0eb99a03b0d30e48bff5/Rep%20Bottoms%202026.jpg": {
    "bytes": 291385,
    "etag": "\"19c06ca1a7a5447a590e13f91fa7c793\"",
@@ -40567,6 +41209,40 @@
     "legislator:CO:ocd-person/a2745e24-bcf2-40f8-aa77-fad08d873ab1"
    ],
    "sha256": "daece5fcb9364ff0520bc74ebadbec4fe70defdf1a7125967750bbf95b0bbff4",
+   "width": 3000
+  },
+  "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVNZQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--eed46cd520f556886dd72ff72a8d0fea15403a53/Liston,%20Larry.jpg": {
+   "bytes": 2871394,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7729,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "c0867592bea2af746abb.jpg",
+    "from": [
+     3000,
+     4200
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "c0867592bea2af746abb9390e007cb267c56efbddb82b62addf9ded269aaec86",
+    "width": 168
+   },
+   "etag": "\"2a1f37303e080c030e418057f9fcb025\"",
+   "gone": 0,
+   "height": 4200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 09 May 2026 12:01:01 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CO:ocd-person/c9fd6b10-91a3-44ec-ac6a-48f73eee3ed1"
+   ],
+   "sha256": "be36fb3fc93b4c85524eb73b0e95114f22ae1514148160772fc1daffb977442e",
    "width": 3000
   },
   "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMVZUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--000f403a3a00241cbcadbe814acab9558e10dde4/Garcia,%20Lorena.jpg": {
@@ -41562,6 +42238,74 @@
     "legislator:CO:ocd-person/d2b25169-0772-4e97-aa9e-49f82f0f5d08"
    ],
    "sha256": "857b501ebe64397236b73e11e78dfc28292f2b318b8656de2ac7b0792bec023c",
+   "width": 3000
+  },
+  "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBeHVaQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--9261120cb2a252ec08b1af4ea0e402a145de0c62/Richardson,%20Christopher.jpg": {
+   "bytes": 2935203,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8524,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "b25c9922318fa2faf702.jpg",
+    "from": [
+     3000,
+     4200
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "b25c9922318fa2faf70252602857718ace645d1299ab4cc76994168f24a7ee54",
+    "width": 168
+   },
+   "etag": "\"185fa51212ecc20abca06ef853fc4f50\"",
+   "gone": 0,
+   "height": 4200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 10 May 2026 12:00:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CO:ocd-person/0c428ee3-a327-4906-96c9-c46da7dfd7f1"
+   ],
+   "sha256": "2abdedc27e977ad9300f884c4534fdff86e6ef721d553bb3c46913d2f3042cae",
+   "width": 3000
+  },
+  "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBeHlaQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--d1eaac721a74b1a7a767fe750a83b55564a3d01e/Soper,%20Matthew.jpg": {
+   "bytes": 2734912,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7765,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "8e378c44a944ca06c26a.jpg",
+    "from": [
+     3000,
+     4200
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "8e378c44a944ca06c26a8185b026ed60aa764b79e2fd33195f0fec0c9c3f12c6",
+    "width": 168
+   },
+   "etag": "\"8c900af5239999b573bfe222c0af0ff4\"",
+   "gone": 0,
+   "height": 4200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 10 May 2026 12:00:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CO:ocd-person/9e529237-916b-407c-a60e-abd8e0708329"
+   ],
+   "sha256": "0e5216aff56244935e657b6ff3804cb1f67050c7db8e85c1477daed12774956e",
    "width": 3000
   },
   "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBeTVUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--14b86aa8d8dc84d49199d71d5ad732b0abe8eb38/Sirota,%20Emily.jpg": {
@@ -51090,6 +51834,15 @@
    ],
    "width": 250
   },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/00f926ad-ab99-495c-bc91-f9cd389319b9_SFOSTER.jpg": {
+   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/7d5a163c-a37a-48be-9a3f-2e4b54e3fdd6"
+   ]
+  },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/00f934af-625c-437b-93c8-aa709cdce2e1_Olsen-2024.jpg": {
    "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
    "kinds": [
@@ -51099,6 +51852,79 @@
     "legislator:ME:ocd-person/df555146-b927-4268-b8cf-d3d7b0848b14"
    ]
   },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/04bf3bd0-9547-42a0-8209-65b16f7b38ff_LCOPELAND.jpg": {
+   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/61ef08d1-e345-42af-a56e-4fcd5076f0f5"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/0f6fdd8c-a278-4284-b884-7fe1a977fce3_AHEPLER.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/82b51bea-5f96-46d6-bbcf-4d973f701b27"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/10e00442-ba47-41d1-bc25-9142d9d06b69_HendersonwithTemplate.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/b61923e6-c463-4df4-95b2-117d74c030bd"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/138663c8-a52b-40ca-a64d-e982c37906c1_ARATA.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/20082672-8aa7-4d49-bad7-fe5a92d1720d"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/172a58ee-b174-4f51-966e-81f3e6cf92d3_Libby-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/5df4dc20-8fb9-432c-8844-c72a66a325d6"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/1a6215e3-a3c4-467a-9b3f-ac88d62a8a5d_McCabe-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/ec1a81b6-7c7f-4bac-99d4-ab0677e865d1"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/22812a92-6957-4e31-9542-cc9f1f34f82d_JUNDERWOOD.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/b6102f7e-216a-4632-901c-25b2b446f080"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/240b37fb-bb4f-4f98-a014-2bd1978f3428_SHAGOURY.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/43e6cd5d-1e16-4099-b46b-1b6883e679b6"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/25ff3c17-8396-410b-ba50-b3f0a14df02e_PAUL.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/76ab2f9a-14e8-4eb5-ae0e-1a26e4a3a04c"
+   ]
+  },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/2925429e-835c-40cd-8b4d-3176e74732b9_wadsnj.jpg": {
    "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
    "kinds": [
@@ -51106,6 +51932,38 @@
    ],
    "records": [
     "legislator:ME:ocd-person/bed16528-b0ae-40e0-89a0-7303b946fb71"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/2a521bce-192e-4612-be88-b70ae0e18811_Frost-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/05a89099-12b0-46b5-9f6e-002e1e621583"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/2b1ddb59-32b2-4167-bdcc-0b4b594f30cd_Collins-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/4bc2b129-52c1-4dfd-99af-dd38f620183a"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/2b62d2a3-ff6f-4dee-8ae8-528c1b02a222_SRUDNICKI.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/2c48b67e-10dd-4162-af2b-add94f3bc728"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/2c241287-f301-41ca-a81a-2c0de9487083_Matlack-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/187c138c-d84d-4813-884e-553b8a9354f1"
    ]
   },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/2c8093b5-54a4-4729-881d-dfa0a55451b2_Faircloth-S-2026.jpg": {
@@ -51141,6 +51999,22 @@
     "legislator:ME:ocd-person/76a9907f-f257-4621-b176-8e911bb8cf35"
    ]
   },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/381582f2-ad50-485e-aafb-46652020e404_losher-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/051d0089-f1cc-4523-a48d-ae98700165f8"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/3a43b124-faa4-44a5-b586-f6482735ff78_CARLOW.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/69e87146-73a0-434e-9cbb-8d7c80e7ce30"
+   ]
+  },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/506f411f-8742-4cf7-b70e-23fb22504635_Lance-2024.jpg": {
    "kinds": [
     "legislator"
@@ -51149,12 +52023,92 @@
     "legislator:ME:ocd-person/a2494f1d-e78d-4a29-b631-5c40b3fe43d8"
    ]
   },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/5530e1c4-da47-43ca-909e-8000bf322e64_msachs-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/efda26eb-c8f7-443c-a963-95419878a856"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/564c3e0a-96c6-417b-bc18-7d0f08c4a5fe_GRIFFIN.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/513edd6e-0d85-4ad6-8852-577cd5c0ee02"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/5ff90508-8a9e-47dd-9bf8-5c87f923699a_BoyerD-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/f338ea4f-b539-450c-bca4-161c427bb81a"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/6028d809-7632-4877-b380-dab6b432d435_GREENWOOD.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/abfa3321-4f0f-42a1-81ef-25b5d7bbfd3e"
+   ]
+  },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/633ecbdc-c8fb-433c-b17a-cfd59543905d_Haggan-2024.jpg": {
    "kinds": [
     "legislator"
    ],
    "records": [
     "legislator:ME:ocd-person/59048d8e-de6a-4f84-aa27-0ae867742214"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/685240ab-675f-4a56-9ecf-01c8fd7d70de_Brennan-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/b0c25078-ee4b-4638-9523-17997681a6e7"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/749ff1a1-9b20-4ba1-ad45-c7c071ec2dda_DUCHARME.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/d72eadfd-23ee-4ecb-9853-e139ea82aec3"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/79841d14-d400-4da1-8c71-b29caa6c82a7_AROEDER.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/42c79801-802e-4f3d-8917-f3f956766e50"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/7f48b5b1-9cba-448b-9e34-82e1b8f3faae_Friedmann-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/55262df3-ff33-4e9e-a504-912ac2558ede"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/80e1b7d9-c6e5-4f81-bfb6-d69fbe9a78a9_BELL.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/7777fc5c-d508-4332-aac4-ec4799cf1721"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/81a4758b-d157-44d1-8887-b24e1905c2b1_nmilliken-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/a1ab39cd-e95b-4f16-9fdc-9f7d2685fc45"
    ]
   },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/834a7b36-8074-466c-b489-a7e7894105ed_Daigle-2024.jpg": {
@@ -51181,12 +52135,92 @@
     "legislator:ME:ocd-person/81ab0331-83cd-4551-bf74-b732623c86b8"
    ]
   },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/97caf03c-8db9-4203-9c64-cd5c2652f0f4_Fecteau-2025.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/b890f601-0023-4d87-acf7-a4db5cbf2b62"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/9dc597c5-df6d-42e6-b8d6-160eb602e85a_ckessler-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/14000c75-b0e9-451c-a081-9121970897de"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/9fe47ab1-9ab5-4eff-ad9b-9ff39e7547b0_amastraccio-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/56960ccd-b154-42ae-9fb3-c323e07c23b1"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/a0fa143c-d743-41df-9bcd-9cf26549f2bd_LOOKNER.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/f6eea224-7845-41b1-8e05-030ef3d8d886"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/a6fafe97-8a10-4df9-882b-6f65a04f83dc_HALL.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/8a7d14ca-669e-4984-8a28-0086e2b9b2ae"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/a7962a5a-a130-4709-8435-ec3ce4e2ef40_BoyerM-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/0b6557f4-ce52-460b-99af-ec88b847d81a"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/a8b7350c-604d-43ec-85bc-620d6333f9a4_ACOLLAMORE.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/1e7a6a8f-7160-4bee-80d1-b1dc47b3db4f"
+   ]
+  },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/a95e40c7-2d4d-43b4-9294-4c29dced0cc4_Mingo-2024.jpg": {
    "kinds": [
     "legislator"
    ],
    "records": [
     "legislator:ME:ocd-person/28891c40-a850-4e37-a339-4f60976ab515"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/b05a1f9a-958f-4779-84f8-d9722d496e22_Terry-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/a3686503-340d-4f8b-91d3-6f8de4d8a55d"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/b886fd3d-f03e-4d3d-a8d5-8265acee515e_FredericksA-2025.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/8646c09c-1d84-4065-bcf2-8be6a8baf494"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/c58c0daa-b028-40bc-82c0-9c30be4a3340_Michell-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/bdb29bb6-c6a2-461a-8527-06ac1ba20049"
    ]
   },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/ce529467-4c75-45cf-be2a-29c267886c71_Cimino-2024.jpg": {
@@ -51197,12 +52231,44 @@
     "legislator:ME:ocd-person/ef0c0f85-eacc-4f97-9dba-d0781c40f274"
    ]
   },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/dc7af830-04c1-47fc-8436-0d3ff823ac66_Cooper-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/0e9ec0ba-18f6-4dd5-90c2-5893f0216138"
+   ]
+  },
   "https://legislature.maine.gov/house/Repository/MemberProfiles/ddd48478-638e-42c1-93e2-0353f0175cad_Harriman-S-2026.jpg": {
    "kinds": [
     "legislator"
    ],
    "records": [
     "legislator:ME:ocd-person/07984348-1057-4adf-9816-8407548bdb35"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/eb369fbd-23d5-405f-94d0-6993e7b0dbd2_jpoirie-2024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/b873e7d2-9103-47e9-8c25-df94056f728d"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/ed3b90e4-d016-4668-935f-868cc408673e_MRIELLY.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/35363ed2-34d2-4f93-bbce-2b0fe26d962e"
+   ]
+  },
+  "https://legislature.maine.gov/house/Repository/MemberProfiles/ed735d0e-737d-4388-b967-21c3b53ad275_CROCKETT.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:ME:ocd-person/3fbfa65e-661c-4b82-a754-9ae0c6956797"
    ]
   },
   "https://legislature.maine.gov/house/house/Repository/MemberProfiles/006156d6-d589-47bc-a865-871a85279134_MWALKER.jpg": {
@@ -52826,6 +53892,40 @@
    "sha256": "d0a2a4dfe634f7c20c8d22c049b728f9c01a43757352213b2b2d0eb02ccc818e",
    "width": 1440
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Corcoran,%20Timothy.jpg": {
+   "bytes": 1387417,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9258,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "6a1a6becbe0adc03480f.jpg",
+    "from": [
+     1414,
+     1414
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "6a1a6becbe0adc03480f5012d704491e4186174e484a5a70dfe8f19a6aa9fcb5",
+    "width": 210
+   },
+   "etag": "\"152b99-5f37b0e8e36ef\"",
+   "gone": 0,
+   "height": 1414,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 30 Jan 2023 13:18:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/bd42ebbc-3e03-4929-bbd8-f2fe5141d604"
+   ],
+   "sha256": "1a5b623e22d6ef0741d786be3652cf2146db2e137fa2b986a73a7b6d94971530",
+   "width": 1414
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Cordes,Mari%20021.jpg": {
    "bytes": 241570,
    "etag": "\"3afa2-62c017f624500\"",
@@ -52939,6 +54039,40 @@
    "sha256": "8ebc616576c45d4dd46df7ca4649431437129da08b50b229627180b4650046a0",
    "width": 1414
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Dolgin,Debbie%20052.jpg": {
+   "bytes": 330611,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11843,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "581491cbcc81dc9cf1ac.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "581491cbcc81dc9cf1ac0b75f4f17e341251f86670735b2db2c70b93fd034db7",
+    "width": 210
+   },
+   "etag": "\"50b73-62c00b2d21b00\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 20:16:12 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/22ae1c1b-d08d-4068-ae58-ea89fecb8a09"
+   ],
+   "sha256": "b4b070d1d5069fe5bc856be173701c5b9345648784bc22632a8d1526de62c14f",
+   "width": 1200
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Donahue.Anne.jpg": {
    "bytes": 50076,
    "etag": "\"c39c-5f3cbb8afe880\"",
@@ -53047,6 +54181,74 @@
    ],
    "sha256": "44ea8ecb67f1b8bb9bb6241c97ec9971b97daf9bb384563cc30c4b64b18425a2",
    "width": 1200
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Goldman,Leslie%20008.jpg": {
+   "bytes": 316109,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11648,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "e25c2a052b0941d41b9c.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "e25c2a052b0941d41b9c7422199c5147b5100a5f5c76f520707a3290aa07fc53",
+    "width": 210
+   },
+   "etag": "\"4d2cd-62c00d0be0480\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 20:24:34 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/90a243b6-e5b2-4f16-b19f-612508863535"
+   ],
+   "sha256": "ea2595191b425d9f267d3d663d50fcf267bb06ad08c6f1f11275468b51459867",
+   "width": 1200
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Goslant,Ken.jpg": {
+   "bytes": 1484585,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 10282,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "c6e0c78ade5f212a41f5.jpg",
+    "from": [
+     1414,
+     1414
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "c6e0c78ade5f212a41f563a5e4fd8f339cc3823aaa8bc2c199cca24aa42ced24",
+    "width": 210
+   },
+   "etag": "\"16a729-5f37b0dfbd32d\"",
+   "gone": 0,
+   "height": 1414,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 30 Jan 2023 13:18:44 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/723a6dd0-9f92-4fdf-b506-f6947a3ccfe7"
+   ],
+   "sha256": "b0ddfe1255ad2bd7616ee1057b0ac1178b8f75af0000e2ba4a75afc00e5d203c",
+   "width": 1414
   },
   "https://legislature.vermont.gov/Documents/Legislators/Greer,William%20043.jpg": {
    "bytes": 247427,
@@ -53205,6 +54407,40 @@
     "legislator:VT:ocd-person/5d4b135e-4bed-4f7f-960a-250691fca6a8"
    ],
    "width": 360
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Hart,Larry%20033.jpg": {
+   "bytes": 311950,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9904,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "aa8457b3cbb0cba7cadb.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "aa8457b3cbb0cba7cadbe6d8cba538d8667a31df3b16dcea63d8689597bf81c6",
+    "width": 210
+   },
+   "etag": "\"4c28e-62c0021071b80\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 19:35:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/c5bca102-7637-45de-90fb-183c2c024f43"
+   ],
+   "sha256": "98e6041d9adafd42f2dc6dfe43e775b37f876ebcda665991bb8e7a8ac668a129",
+   "width": 1200
   },
   "https://legislature.vermont.gov/Documents/Legislators/Hashim.Nader.jpg": {
    "bytes": 1343773,
@@ -53432,6 +54668,40 @@
    ],
    "width": 320
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Kascenska,John%20009.jpg": {
+   "bytes": 313463,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 10764,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "14b32a67147e6e0461c7.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "14b32a67147e6e0461c7657cfe67dc685de7c3ef749b761129cc3f14d22776d2",
+    "width": 210
+   },
+   "etag": "\"4c877-62c0027b41780\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 19:37:18 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/b9c3e545-5ef2-4fb2-9128-64a369608dda"
+   ],
+   "sha256": "d3ff869c9b2376f8b0203cbe27a9cd3266ed8ec87840a6c962947a686447ebd0",
+   "width": 1200
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Keyser,Chris.jpg": {
    "bytes": 266343,
    "copy": {
@@ -53559,6 +54829,40 @@
     "legislator:VT:ocd-person/b9ffa5dc-833e-4936-9d62-0b653ae44842"
    ],
    "width": 320
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Long,%20Emily.jpg": {
+   "bytes": 1573460,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11689,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "a870e272000e68b430df.jpg",
+    "from": [
+     1414,
+     1414
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "a870e272000e68b430dfef6fa30508ea7b577a2ebc72d4f5a15f5dcc9139d60d",
+    "width": 210
+   },
+   "etag": "\"180254-5f37b13748dab\"",
+   "gone": 0,
+   "height": 1414,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 30 Jan 2023 13:20:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/36bd1884-fd78-46b4-9ac3-318ca6358a67"
+   ],
+   "sha256": "7e14dc10e73a41880b43d1c332da456d33735d98681e7a8bb20b0449e0020136",
+   "width": 1414
   },
   "https://legislature.vermont.gov/Documents/Legislators/Lyons,Ginny.jpg": {
    "bytes": 58709,
@@ -53773,6 +55077,40 @@
     "legislator:VT:ocd-person/337fe4da-28df-42bf-82b1-e806bb50e8f3"
    ],
    "width": 360
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Morrow,Chris%20066.jpg": {
+   "bytes": 362194,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11291,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "325cf7f196676ff0871d.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "325cf7f196676ff0871d34d3ca2375e2a39ed74d60aad0f123b8b62850a95361",
+    "width": 210
+   },
+   "etag": "\"586d2-62c00c3458800\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 20:20:48 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/70fc16c3-0cba-429c-8616-dbcc6b9b7bf7"
+   ],
+   "sha256": "223acfcb7f4cb0f0eb0b842b756f50fb8d2be808e9cd4fb8452751ca08333672",
+   "width": 1200
   },
   "https://legislature.vermont.gov/Documents/Legislators/Mrowicki,Mike.jpg": {
    "bytes": 60602,
@@ -53996,6 +55334,74 @@
    "sha256": "3227c17a917f70c78a8d3abb9035bb91059042f7ec4f01d57bcf3487981df43f",
    "width": 1414
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Perchlik,Andrew%20008.jpg": {
+   "bytes": 302952,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 10465,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "0f065460c11a6baace98.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "0f065460c11a6baace982fec0ec01b01b11181f985d67a1fb9fb61f095e63945",
+    "width": 210
+   },
+   "etag": "\"49f68-62c0037cbf700\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 19:41:48 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/1463485e-f279-44f6-a368-f75f213dc7cd"
+   ],
+   "sha256": "14b6b285e02c96330cba3315b29cdb75e88375d5590d58df1e11bfd933e50f52",
+   "width": 1200
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Pezzo,Gayle%20015.jpg": {
+   "bytes": 356526,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 12262,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "8e0a74bb3a6e091d99fa.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "8e0a74bb3a6e091d99fab323f80b618f84f020cc4329a52943b76cac7b5770f4",
+    "width": 210
+   },
+   "etag": "\"570ae-62c01829a3e80\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 21:14:18 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/0aa1e822-d69d-4417-a26e-0ca6935b6b8b"
+   ],
+   "sha256": "6adec25cc4e36e808b861f257a979d48e5aeaff21da8c4d41e90da2e1faeaa7f",
+   "width": 1200
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Pinsonault,Sandra.JPG": {
    "bytes": 7769428,
    "copy": {
@@ -54188,6 +55594,40 @@
    "sha256": "da825a602f41f7c5208ffbcf118b9f02a2130cc86214d1293d8e6ff8d4779ffa",
    "width": 1414
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Scheu,Robin%20046.jpg": {
+   "bytes": 317558,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11902,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "659cabc0527168cd380a.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "659cabc0527168cd380a3a4ce7ae69310900490da445f6c3b8d5de31ac8b56e7",
+    "width": 210
+   },
+   "etag": "\"4d876-62c0104009380\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 20:38:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/b463b201-086b-4f98-ab96-75a136e8be35"
+   ],
+   "sha256": "d8b047503f7c2410e6a813237705e785b79778610d4affc6dea9d4017338e857",
+   "width": 1200
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Sheldon,%20Amy.jpg": {
    "bytes": 1338855,
    "copy": {
@@ -54361,6 +55801,40 @@
    ],
    "width": 320
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Torre,Dara%20001.jpg": {
+   "bytes": 3420668,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7740,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "d43d33baf9d0b212f40a.jpg",
+    "from": [
+     3820,
+     5093
+    ],
+    "height": 224,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "d43d33baf9d0b212f40a1fe79a8f07465ad5cedb712a0bc2e7afd81eb76c98b4",
+    "width": 168
+   },
+   "etag": "\"3431fc-64e007305f240\"",
+   "gone": 0,
+   "height": 5093,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 27 Mar 2026 12:14:57 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/46a9d6df-bd07-4fa4-b6b9-b91c0fa37f94"
+   ],
+   "sha256": "bc2c72a678a5b80e3225cc93e272f142d539ecdcb94bf59bb5c7c05abffcd4ea",
+   "width": 3820
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Vyhovsky,Tanya.jpg": {
    "bytes": 66687,
    "etag": "\"1047f-6309ed97bd000\"",
@@ -54499,6 +55973,40 @@
     "legislator:VT:ocd-person/ba524e3d-a578-4498-8226-6e947840c69f"
    ],
    "width": 360
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Winter,Kevin%20017.jpg": {
+   "bytes": 355730,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11829,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "153b4fb78aeaeba517a9.jpg",
+    "from": [
+     1200,
+     1200
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "153b4fb78aeaeba517a93570f7a25af472c0ff670a6871f215880a1785752dc4",
+    "width": 210
+   },
+   "etag": "\"56d92-62c006b2d0a80\"",
+   "gone": 0,
+   "height": 1200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sat, 18 Jan 2025 19:56:10 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:VT:ocd-person/c7254a9c-7d0d-499a-adad-25f869fd7406"
+   ],
+   "sha256": "3d4e15f2cf5fad7f582f98ff8295731faef0b7e4f1ed22d95e11e948100a5e5f",
+   "width": 1200
   },
   "https://legislature.vermont.gov/Documents/Legislators/Wood.Theresa.jpg": {
    "bytes": 46918,
@@ -82557,7 +84065,7 @@
    "width": 110
   },
   "https://votestephenfrank.com/wp-content/uploads/2024/05/430804199_10168719229715314_3862493250670651338_n.jpg": {
-   "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1082)>",
+   "error": "URLError: <urlopen error [Errno 11002] getaddrinfo failed>",
    "kinds": [
     "legislator"
    ],
@@ -89427,6 +90935,40 @@
    ],
    "width": 167
   },
+  "https://www.cga.ct.gov/legpics/078.png": {
+   "bytes": 317181,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9897,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "a0b65e51dd86c22c3ca3.jpg",
+    "from": [
+     400,
+     500
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "a0b65e51dd86c22c3ca3fa52675053668239028fb077820dae94ae5e84dd5e83",
+    "width": 168
+   },
+   "etag": "\"1c9752a6fdd81:0\"",
+   "gone": 0,
+   "height": 500,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 21 Nov 2022 12:37:25 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CT:ocd-person/ab33209c-a8c8-4a6e-a480-ef298eeaa74a"
+   ],
+   "sha256": "9bb3f47df46497cf9114ee666afbbb648ea64bc54f260db2e8a5c7a45f0805ba",
+   "width": 400
+  },
   "https://www.cga.ct.gov/legpics/079.png": {
    "bytes": 262687,
    "etag": "\"789ac478d34dd91:0\"",
@@ -89737,6 +91279,40 @@
     "legislator:CT:ocd-person/4e77c536-5645-4e15-99b2-00a781896717"
    ],
    "sha256": "ccf420ab7a132dd248528ac2e9ab1da63780eb67471c74b3e1a9d99645d0dbea",
+   "width": 400
+  },
+  "https://www.cga.ct.gov/legpics/131.png": {
+   "bytes": 306373,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8064,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "1a7b190ce4b7e4e0186e.jpg",
+    "from": [
+     400,
+     500
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "1a7b190ce4b7e4e0186e3b466fda720ad258e2467e944dc8cce3db3271b66dd8",
+    "width": 168
+   },
+   "etag": "\"5fab3d50e782db1:0\"",
+   "gone": 0,
+   "height": 500,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 19 Feb 2025 15:59:53 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CT:ocd-person/5e12bcd3-8cc0-4a0f-9c7c-4ecec6442948"
+   ],
+   "sha256": "c97584ec8541617f51df7af266900b1310c4bc6fc2e267fa28617e831a0bff69",
    "width": 400
   },
   "https://www.cga.ct.gov/legpics/134.png": {
@@ -95266,13 +96842,19 @@
    "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/39A.gif?v=112221": {
-   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "bytes": 208968,
+   "etag": "\"8f64e19f4235db1:0\"",
+   "gone": 0,
+   "height": 675,
    "kinds": [
     "legislator"
    ],
+   "lastModified": "Tue, 12 Nov 2024 20:37:00 GMT",
+   "read": "2026-10-25",
    "records": [
     "legislator:MN:ocd-person/0d6f7edf-eae0-441d-8089-84472ce1f36f"
-   ]
+   ],
+   "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/39B.gif?v=112221": {
    "bytes": 233630,
@@ -95470,13 +97052,19 @@
    "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/46B.gif?v=112221": {
-   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "bytes": 228897,
+   "etag": "\"d17431ce6a5dc1:0\"",
+   "gone": 0,
+   "height": 675,
    "kinds": [
     "legislator"
    ],
+   "lastModified": "Mon, 23 Feb 2026 20:55:56 GMT",
+   "read": "2026-10-25",
    "records": [
     "legislator:MN:ocd-person/ec1171fd-3b90-4137-b01d-041f905c642d"
-   ]
+   ],
+   "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/47A.gif?v=012126": {
    "bytes": 250476,
@@ -95494,13 +97082,19 @@
    "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/47B.gif?v=112221": {
-   "error": "URLError: <urlopen error _ssl.c:1064: The handshake operation timed out>",
+   "bytes": 194930,
+   "etag": "\"ab7351a04235db1:0\"",
+   "gone": 0,
+   "height": 675,
    "kinds": [
     "legislator"
    ],
+   "lastModified": "Tue, 12 Nov 2024 20:37:01 GMT",
+   "read": "2026-10-25",
    "records": [
     "legislator:MN:ocd-person/d0e94ca0-b600-4567-88ee-34a861ca38aa"
-   ]
+   ],
+   "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/48A.gif?v=112221": {
    "bytes": 198980,
@@ -95863,13 +97457,19 @@
    "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/60A.gif?v=112221": {
-   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "bytes": 272970,
+   "etag": "\"e8fe929c4235db1:0\"",
+   "gone": 0,
+   "height": 675,
    "kinds": [
     "legislator"
    ],
+   "lastModified": "Tue, 12 Nov 2024 20:36:54 GMT",
+   "read": "2026-10-25",
    "records": [
     "legislator:MN:ocd-person/e60bb3ff-5164-4d6d-9029-d2e3d2ac69a0"
-   ]
+   ],
+   "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/60B.gif?v=112221": {
    "bytes": 178778,
@@ -96037,13 +97637,19 @@
    "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/66A.gif?v=112221": {
-   "error": "URLError: <urlopen error [WinError 10054] An existing connection was forcibly closed by the remote host>",
+   "bytes": 227283,
+   "etag": "\"4235a9d4235db1:0\"",
+   "gone": 0,
+   "height": 675,
    "kinds": [
     "legislator"
    ],
+   "lastModified": "Tue, 12 Nov 2024 20:36:55 GMT",
+   "read": "2026-10-25",
    "records": [
     "legislator:MN:ocd-person/afff2a0a-1b2d-480e-a90d-8609842f0927"
-   ]
+   ],
+   "width": 525
   },
   "https://www.house.mn.gov/hinfo/memberimgls94/66B.gif?v=112221": {
    "bytes": 281613,

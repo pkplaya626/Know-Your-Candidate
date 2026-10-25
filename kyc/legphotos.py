@@ -27,12 +27,14 @@ What reaches a page (rules 24, 51 and 87, and the owner's decision of
   the member's arrival (``SEAT_MARGIN_DAYS`` before it: new members are
   photographed between the election and the swearing-in), and never again
   once the seat's holder changes while the file does not (``seatFiles``).
-- Only a rendition the source itself offers, within 300 KB and 1,200 px
-  (``photos.MAX_PORTRAIT_BYTES`` / ``MAX_PORTRAIT_PX``): no resizing and no
-  image service. A member whose legislature offers only heavier files is
-  left without one and counted (``oversized``). Of the renditions offered,
-  the smallest at least ``TARGET_WIDTH`` wide, what the card needs on a 2x
-  screen.
+- Only a rendition the source itself offers, never an image service. Of
+  the renditions within 300 KB and 1,200 px (``photos.MAX_PORTRAIT_BYTES``
+  / ``MAX_PORTRAIT_PX``), the smallest at least ``TARGET_WIDTH`` wide, what
+  the card needs on a 2x screen. A member whose legislature offers only
+  heavier files gets the lightest of them, marked ``heavy`` and checked
+  like any other, and the page shows the smaller copy ``photocopies`` makes
+  of it (rule 101, the owner's decision of 2026-10-25). Entries read before
+  then say ``oversized`` and stay off the page until read again.
 - A landscape frame is not a portrait (rule 38).
 - Each photograph is credited to the legislature, linked to the page it
   was read from (rule 87).
@@ -338,6 +340,11 @@ def weigh(http, url):
     out = {"bytes": total, "width": size[0], "height": size[1]}
     if not ans.truncated:
         out["sha"] = hashlib.sha256(ans.body).hexdigest()[:16]
+    else:
+        # A heavy file (shown as a copy, rule 101) is told apart by its
+        # first bytes and its length, so a seat's file that has not changed
+        # since it showed someone else is still caught (``seat_problem``).
+        out["sha"] = "h" + hashlib.sha256(ans.body + str(total).encode()).hexdigest()[:15]
     modified = _http_date(ans.headers.get("last-modified"))
     if modified:
         out["lastModified"] = modified[:10]
@@ -1166,16 +1173,20 @@ def settle(http, code, record, candidate, previous_files, today, starts):
             continue
         weight["image"] = url
         if over_caps(weight):
-            smallest = smallest or weight
+            if smallest is None or weight["bytes"] < smallest["bytes"]:
+                smallest = weight
             continue
         chosen = weight
         if weight["width"] >= TARGET_WIDTH:
             break
     if not chosen:
-        if smallest:
-            return dict(base, oversized=True, offered=smallest["image"],
-                        **{k: smallest[k] for k in ("bytes", "width", "height")})
-        return dict(base, withheld="the file the source names is gone")
+        if not smallest:
+            return dict(base, withheld="the file the source names is gone")
+        # Offered only over the caps: since the owner's decision of
+        # 2026-10-25 (rule 101) it is shown, as a smaller copy made here
+        # once `photocopies` has made one, after every check below - the
+        # checks a heavy file used to skip, so it is checked as theirs.
+        chosen = dict(smallest, heavy=True)
     if landscape(chosen):
         return dict(base, withheld=f"a landscape frame ({chosen['width']}x{chosen['height']})")
     same = candidate.get("sameShapeAs")
@@ -1188,7 +1199,7 @@ def settle(http, code, record, candidate, previous_files, today, starts):
             return dict(base, withheld="the smaller rendition is not the same shape as the page's file")
     entry = dict(base, image=chosen["image"],
                  **{k: chosen[k] for k in ("bytes", "width", "height", "sha", "lastModified",
-                                           "lastModifiedAt") if k in chosen})
+                                           "lastModifiedAt", "heavy") if k in chosen})
     if candidate.get("seatKeyed"):
         entry["seatKeyed"] = True
         since = holder_since(http, code, record["id"], record["chamber"], starts)
@@ -1490,9 +1501,14 @@ def problems(cache, by_state):
         if not official_host(code, entry["image"]) or not official_host(code, entry["page"]):
             out.append(("error", "legislator-photo-host",
                         f"{who}: {entry['image']} is not on the legislature's own host"))
-        if entry["bytes"] > MAX_PORTRAIT_BYTES or max(entry["width"], entry["height"]) > MAX_PORTRAIT_PX:
+        over = entry["bytes"] > MAX_PORTRAIT_BYTES or max(entry["width"], entry["height"]) > MAX_PORTRAIT_PX
+        if over and not entry.get("heavy"):
+            # A heavy file is taken only as the source's lightest, marked so
+            # (rule 101: `photocopies` shows it smaller); an unmarked one is
+            # a rendition chosen past a lighter one.
             out.append(("error", "legislator-photo-heavy",
-                        f"{who}: {entry['bytes']:,} bytes, {entry['width']}x{entry['height']}, over the caps"))
+                        f"{who}: {entry['bytes']:,} bytes, {entry['width']}x{entry['height']}, over "
+                        f"the caps and not marked as the lightest the legislature offers"))
         if entry.get("seatKeyed"):
             why = ("" if entry.get("holderSince") and entry.get("lastModifiedAt")
                    else "it carries no arrival date for the member, or no stamp of its own")
