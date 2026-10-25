@@ -669,8 +669,10 @@ def stats(cache, shown):
     hosted_line = ""
     if hosted:
         made = sum(1 for e in hosted.values() if e.get("copy"))
-        hosted_line = (f"{len(hosted):,} election offices' photographs hosted here unmodified "
-                       f"({made:,} shown as a smaller copy); ")
+        decoded = sum(1 for e in hosted.values() if e.get("method") == "decoded")
+        hosted_line = (f"{len(hosted):,} election offices' photographs hosted here "
+                       f"({len(hosted) - decoded:,} unmodified, {decoded:,} decoded losslessly "
+                       f"from JPEG 2000; {made:,} shown as a smaller copy); ")
     return (hosted_line +
             f"{len(copied):,} of {len(over):,} portraits over the caps shown as a copy made here "
             f"({weight / 1e6:.1f} MB under {PHOTOS_DIR}); "
@@ -744,7 +746,10 @@ def _copy_problems(url, entry, copy, root, listed):
     return out
 
 
-HOSTED_METHODS = ("unmodified",)
+# "unmodified": the bytes the source holds; "decoded": the pixels of an
+# image no browser draws (Oregon's JPEG 2000), decoded losslessly and
+# written as a PNG (kyc/jpx.py), with the source's hash and the decoder.
+HOSTED_METHODS = ("unmodified", "decoded")
 
 
 def _hosted_problems(name, entry, root, listed):
@@ -762,7 +767,12 @@ def _hosted_problems(name, entry, root, listed):
     if entry.get("method") not in HOSTED_METHODS:
         out.append(("error", "photo-hosted-method",
                     f"{url}: method {entry.get('method')!r}, not {' or '.join(HOSTED_METHODS)}"))
-    for key in ("page", "from", "sha256", "bytes", "width", "height", "read", "for", "by"):
+    needed = ("page", "from", "sha256", "bytes", "width", "height", "read", "for", "by")
+    if entry.get("method") == "decoded":
+        needed += ("sourceSha256", "decoder")
+        if not name.endswith(".png"):
+            out.append(("error", "photo-hosted-method", f"{url}: decoded, but not a PNG"))
+    for key in needed:
         if not entry.get(key):
             out.append(("error", "photo-hosted-unrecorded", f"{url}: no {key} recorded"))
     for key in ("page", "from"):

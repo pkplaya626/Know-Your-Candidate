@@ -486,9 +486,10 @@ class _Font:
 
 
 def read_page(doc, page, depth=0):
-    """``{"text": [(x, y, text)], "images": [{"ref", "info", "box"}]}``: every
-    piece of text the page shows, at the point its text matrix puts it in
-    page space, and every image it draws (``Do``), with the box - ``(x0, y0,
+    """``{"text": [(x, y, text, size)], "images": [{"ref", "info", "box"}]}``:
+    every piece of text the page shows, at the point its text matrix puts it
+    in page space and at the height its font is drawn, and every image it
+    draws (``Do``), with the box - ``(x0, y0,
     x1, y1)`` in page space - the current matrix puts it in. Forms are read
     through, to a depth of eight."""
     out = {"text": [], "images": []}
@@ -574,7 +575,8 @@ def _run(doc, data, resources, ctm, out, depth):
                         text += " "
             at = _mul(tm, ctm)
             if text.strip():
-                out["text"].append((round(at[4], 1), round(at[5], 1), text))
+                drawn = abs(float(size)) * (abs(at[3]) or abs(at[2]) or 1)
+                out["text"].append((round(at[4], 1), round(at[5], 1), text, round(drawn, 1)))
         elif op == "Do" and args:
             target_ref = xobjects.get(str(args[0]))
             target = doc.resolve(target_ref)
@@ -601,7 +603,7 @@ def page_text(read):
     """The words of a page read by :func:`read_page`, top to bottom and left
     to right, one line per baseline: what a person reading it sees."""
     lines = {}
-    for x, y, text in read["text"]:
+    for x, y, text, _size in read["text"]:
         lines.setdefault(round(y), []).append((x, text))
     out = []
     for y in sorted(lines, reverse=True):

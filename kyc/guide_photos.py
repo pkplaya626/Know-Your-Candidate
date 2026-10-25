@@ -97,13 +97,25 @@ GUIDES = {
                  "Elections'; its disclaimer grants no reuse. Hosted unmodified, credited "
                  "and linked, by the owner's decision of 2026-10-25.",
     },
+    "OR": {
+        "by": "Oregon Secretary of State",
+        "credit": "Oregon Secretary of State, State Voters' Pamphlet",
+        "title": "State Voters' Pamphlet, General Election November 3, 2026 (one book per "
+                 "county)",
+        "url": "https://sos.oregon.gov/elections/Voters-Pamphlet/Pages/Voters-Pamphlet-English.aspx",
+        "terms": "Oregon's general terms grant no reuse; the photographs are the "
+                 "candidates' own submissions. The pamphlet holds each as JPEG 2000, which "
+                 "no browser draws: decoded losslessly here (kyc/jpx.py, the reversible "
+                 "5/3 wavelet, every pixel as coded) and hosted as PNG, credited and linked "
+                 "to its page, by the owner's decision of 2026-10-25.",
+    },
 }
 
+OR_INDEX = GUIDES["OR"]["url"]
+OR_BOOK = re.compile(r"^/elections/Voters-Pamphlet/Documents/VP_G\d{2}-Book\w+_web\.pdf$")
+
 # Guides read and not used, and why: what a later version may take up.
-ELSEWHERE = {
-    "OR": "the State Voters' Pamphlet holds each photograph only as JPEG 2000 inside the "
-          "county PDFs (JPXDecode), which no browser draws; this site has no decoder for it",
-}
+ELSEWHERE = {}
 
 # The offices a guide prints, as this site keys them: a profile's race
 # (``H-WA-04-2026``, ``S-AK-2026``) or a statewide office (rule 91).
@@ -195,6 +207,16 @@ def join(code, entries, people, key_of, words_of):
             continue
         if hits:
             fits.setdefault(key_of(hits[0]), []).append(i)
+        else:
+            # Said where someone in the race carries its surname: a short
+            # form a person may record, with evidence, or a namesake.
+            from .statewide import fold, surname
+            family = fold(surname(entry["name"]))
+            alike = [key_of(p) for p in people if any(family in w for w in words_of(p))]
+            if family and alike:
+                problems.append(f"{code}: the guide's '{entry['name']}' shares a surname with "
+                                f"{', '.join(alike)} but is not their name (a short form needs "
+                                "an evidenced overrides.GUIDE_NAME_FORMS entry); not joined")
     for key, found in fits.items():
         if len(found) > 1:
             problems.append(f"{code}: {len(found)} of the guide's names fit {key}; "
@@ -300,17 +322,79 @@ def _pace(url):
 
 
 def get(url, limit=MAX_JSON):
-    """The bytes at *url*; ``GuidePhotoError`` when it cannot be read."""
+    """The bytes at *url*; ``GuidePhotoError`` when it cannot be read. A name
+    this machine's resolver cannot look up is looked up again at dns.google
+    before the read is given up (rule 78: this machine's resolver failed for
+    oregon.gov on 2026-10-25 while dns.google answered), and the server is
+    then asked at that address, its certificate checked for the name."""
     _pace(url)
     try:
         request = urllib.request.Request(url, headers=UA)
         with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
             data = response.read(limit + 1)
-    except (urllib.error.URLError, OSError, ValueError) as exc:
+    except urllib.error.URLError as exc:
+        import socket
+        if not isinstance(getattr(exc, "reason", None), socket.gaierror):
+            raise GuidePhotoError(f"could not read {url}: {exc}") from exc
+        data = _get_resolved(url, limit)
+    except (OSError, ValueError) as exc:
         raise GuidePhotoError(f"could not read {url}: {exc}") from exc
     if len(data) > limit:
         raise GuidePhotoError(f"{url} is over {limit} bytes")
     return data
+
+
+def _address(host):
+    """*host*'s IPv4 address as dns.google gives it, or None."""
+    query = "https://dns.google/resolve?name=" + urllib.parse.quote(host) + "&type=A"
+    try:
+        with urllib.request.urlopen(urllib.request.Request(query, headers=UA),
+                                    timeout=15) as response:
+            answer = json.loads(response.read().decode("utf-8"))
+    except (urllib.error.URLError, OSError, ValueError):
+        return None
+    for record in answer.get("Answer") or ():
+        if record.get("type") == 1:
+            return record.get("data")
+    return None
+
+
+def _get_resolved(url, limit, hops=5):
+    import http.client
+    import socket
+    import ssl
+
+    for _ in range(hops):
+        parts = urllib.parse.urlsplit(url)
+        if parts.scheme != "https" or not parts.hostname:
+            raise GuidePhotoError(f"could not read {url}: not an https address")
+        address = _address(parts.hostname)
+        if not address:
+            raise GuidePhotoError(f"could not read {url}: {parts.hostname} does not resolve "
+                                  "here or at dns.google")
+
+        class Pinned(http.client.HTTPSConnection):
+            def connect(self):
+                sock = socket.create_connection((address, self.port or 443), self.timeout)
+                self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
+
+        conn = Pinned(parts.hostname, parts.port or 443, timeout=TIMEOUT,
+                      context=ssl.create_default_context())
+        try:
+            conn.request("GET", parts.path + ("?" + parts.query if parts.query else ""),
+                         headers=dict(UA, Host=parts.hostname))
+            response = conn.getresponse()
+            if response.status in (301, 302, 303, 307, 308) and response.getheader("Location"):
+                url = urllib.parse.urljoin(url, response.getheader("Location"))
+                continue
+            if response.status != 200:
+                raise GuidePhotoError(f"could not read {url}: HTTP {response.status}")
+            return response.read(limit + 1)
+        except (OSError, http.client.HTTPException) as exc:
+            raise GuidePhotoError(f"could not read {url}: {exc}") from exc
+        finally:
+            conn.close()
+    raise GuidePhotoError(f"could not read {url}: too many redirects")
 
 
 # --------------------------------------------------------------- Washington
@@ -599,6 +683,186 @@ def read_alaska(wanted, getter=get, log=print):
     return photos, problems, unread
 
 
+# ------------------------------------------------------------------ Oregon
+
+_OR_HOUSE = re.compile(r"^US Representative, (\d+)(?:st|nd|rd|th) District$")
+_OR_STATEWIDE = {"Governor": "governor", "Secretary of State": "sos",
+                 "Attorney General": "ag"}
+
+
+def or_books(page):
+    """``[(book address, [county])]`` from the pamphlet's page of books, in
+    its order, each book once."""
+    out = {}
+    for href, words in re.findall(r'<a[^>]+href="([^"]+\.pdf)"[^>]*>(.*?)</a>', page or "", re.S):
+        href = html.unescape(href)
+        if not OR_BOOK.match(href):
+            continue
+        county = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", words)).split())
+        out.setdefault(urllib.parse.urljoin(OR_INDEX, href), []).append(county)
+    return list(out.items())
+
+
+def or_target(office):
+    """The race id or ``OR|office`` a pamphlet heading names, or None."""
+    found = _OR_HOUSE.match(office)
+    if found:
+        return f"H-OR-{int(found.group(1)):02d}-2026"
+    if office == "US Senator":
+        return "S-OR-2026"
+    if office in _OR_STATEWIDE:
+        return f"OR|{_OR_STATEWIDE[office]}"
+    return None
+
+
+def or_columns(doc):
+    """``[{"page", "office", "name", "party", "image"}]``: each candidate the
+    pamphlet's pages show with a photograph. A page sets each candidate in a
+    column under the office's heading, the photograph at its head and the
+    name in large type beside it, then the party in smaller type. A column
+    whose photograph is not the only image beside its name, or whose name or
+    heading cannot be read, gives nothing."""
+    out = []
+    for number, page in enumerate(doc.pages(), 1):
+        read = pdfread.read_page(doc, page)
+        photos = [i for i in read["images"] if i["stream"].info.get("Filter") in
+                  ("JPXDecode", ["JPXDecode"])]
+        if not photos:
+            continue
+        for image in photos:
+            x0, y0, x1, y1 = image["box"]
+            heads = [t.strip() for x, y, t, _s in read["text"]
+                     if abs(x - x0) < 4 and y1 < y < y1 + 25 and t.strip()]
+            beside = sorted(((y, x, t.strip(), s) for x, y, t, s in read["text"]
+                             if x1 < x < x1 + 20 and y0 <= y <= y1 and t.strip()),
+                            key=lambda r: (-r[0], r[1]))
+            near = [i for i in read["images"] if i is not image and
+                    i["box"][0] < x1 + 20 and i["box"][2] > x0 and
+                    i["box"][1] < y1 and i["box"][3] > y0]
+            if len(heads) != 1 or not beside or near:
+                continue
+            size = beside[0][3]
+            name = []
+            for _y, _x, words, s in beside:
+                if s != size:
+                    break
+                name.append(words)
+            # The party: the lines straight after the name in the next size.
+            party = []
+            rest = beside[len(name):]
+            for _y, _x, words, s in rest:
+                if s != rest[0][3] or s >= size or len(party) == 3:
+                    break
+                party.append(words)
+            out.append({"page": number, "office": heads[0], "name": " ".join(" ".join(name).split()),
+                        "party": ", ".join(party), "image": image})
+    return out
+
+
+def or_photo(image, doc):
+    """``(png bytes, codestream sha256, "")`` for a pamphlet photograph, or
+    ``(None, None, why)``: a grey JPEG 2000 image with no mask, decoded
+    losslessly (:mod:`kyc.jpx`)."""
+    from . import jpx
+    info = image["stream"].info
+    space = doc.resolve(info.get("ColorSpace"))
+    if space != "DeviceGray":
+        return None, None, f"an image in {space}, not grey"
+    for key in ("SMask", "Mask", "Decode", "ImageMask"):
+        if info.get(key):
+            return None, None, f"the image carries /{key}"
+    try:
+        data, image_filter = pdfread.decode(image["stream"])
+    except pdfread.PDFError as exc:
+        return None, None, f"the image cannot be read ({exc})"
+    if image_filter != "JPXDecode":
+        return None, None, f"the image is {image_filter}, not JPEG 2000"
+    try:
+        width, height, rows = jpx.decode(data)
+    except jpx.JPXError as exc:
+        return None, None, f"the JPEG 2000 cannot be decoded faithfully ({exc})"
+    if (width, height) != (info.get("Width"), info.get("Height")):
+        return None, None, "the decoded image is not the size the PDF gives"
+    return jpx.png(width, height, rows), hashlib.sha256(data).hexdigest(), ""
+
+
+def read_oregon(wanted, getter=get, log=print):
+    """``(photos, problems, unread)`` as :func:`read_washington`, from the
+    county books of the State Voters' Pamphlet: each book is read in the
+    order the pamphlet's page lists them until every race and office wanted
+    has been found on a page (a race's page is in each book for a county in
+    it)."""
+    photos, problems, unread = {}, [], set()
+    targets = {k for k in wanted if k.startswith(("H-OR-", "S-OR-", "OR|"))}
+    if not targets:
+        return photos, problems, unread
+    try:
+        books = or_books(getter(OR_INDEX).decode("utf-8", "replace"))
+    except GuidePhotoError as exc:
+        problems.append(f"OR: {exc}; the last photographs read are kept")
+        return photos, problems, set(targets)
+    if not books:
+        problems.append("OR: the pamphlet's page lists no county books; the last photographs "
+                        "read are kept")
+        return photos, problems, set(targets)
+    found = {}
+    remaining = set(targets)
+    for book, counties in books:
+        if not remaining:
+            break
+        try:
+            doc = pdfread.Document(getter(book, limit=MAX_PDF))
+            columns = or_columns(doc)
+        except (GuidePhotoError, pdfread.PDFError) as exc:
+            problems.append(f"OR: {exc}")
+            continue
+        here = {}
+        for column in columns:
+            target = or_target(column["office"])
+            if target in remaining:
+                here.setdefault(target, []).append(column)
+        for target, entries in here.items():
+            found[target] = (book, counties, doc, entries)
+            remaining.discard(target)
+    unread |= remaining
+    for target in sorted(found):
+        book, counties, doc, entries = found[target]
+        people = wanted[target]
+        if target.startswith("OR|"):
+            joined, more = join("OR", entries, people, lambda p: p["key"],
+                                lambda p: {name_words(p["name"])})
+        else:
+            joined, more = join("OR", entries, people, profile_key_of, person_words)
+        problems += more
+        for i, key in sorted(joined.items()):
+            entry = entries[i]
+            png, source_sha, why = or_photo(entry["image"], doc)
+            if why:
+                problems.append(f"OR {target}: {entry['name']}'s photograph: {why}; not used")
+                continue
+            page = f"{book}#page={entry['page']}"
+            words = (f"page {entry['page']} of the State Voters' Pamphlet (the book for "
+                     f"{', '.join(counties)}) heads a column '{entry['office']}' and prints "
+                     f"'{entry['name']}'" + (f", '{entry['party']}'" if entry["party"] else "")
+                     + " beside its one photograph")
+            office = target.split("|", 1)[1] if target.startswith("OR|") else \
+                ("senate" if target.startswith("S-") else "house")
+            race = "" if target.startswith("OR|") else target
+            record, why = photo_record("OR", race, office, entry["name"], page, book, words, png,
+                                       extra={"method": "decoded", "sourceSha256": source_sha,
+                                              "decoder": DECODER})
+            if why:
+                problems.append(f"OR {target}: {entry['name']}'s photograph: {why}; not used")
+                continue
+            record["for"] = key
+            photos[key] = record
+    return photos, problems, unread
+
+
+DECODER = ("kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, every coding "
+           "pass - lossless, written as PNG")
+
+
 # ------------------------------------------------------------------ who
 
 def race_of(profile):
@@ -698,7 +962,7 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     log(f"  guide photographs: {sum(len(v) for v in want.values())} people in "
         f"{len(want)} races or offices without one ({', '.join(sorted(GUIDES))})")
     photos, problems, unread = {}, [], set()
-    for reader in (read_washington, read_alaska):
+    for reader in (read_washington, read_alaska, read_oregon):
         found, more, gone_unread = reader(wanted, getter=getter, log=log)
         problems += more
         unread |= gone_unread
@@ -732,10 +996,17 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
         entry = keep.setdefault(name, dict(hosted.get(name) or {}))
         if entry.get("sha256") not in (None, rec["sha256"]):
             entry = keep[name] = {}
-        entry.update({"method": "unmodified", "page": rec["page"], "from": rec["from"],
-                      "sha256": rec["sha256"], "bytes": rec["bytes"], "width": rec["width"],
-                      "height": rec["height"], "type": rec["type"], "read": rec["read"],
-                      "by": rec["by"]})
+        entry.update({"method": rec.get("method") or "unmodified", "page": rec["page"],
+                      "from": rec["from"], "sha256": rec["sha256"], "bytes": rec["bytes"],
+                      "width": rec["width"], "height": rec["height"], "type": rec["type"],
+                      "read": rec["read"], "by": rec["by"]})
+        # A JPEG 2000 decoded losslessly (Oregon's): the codestream it was
+        # decoded from, and how.
+        for field in ("sourceSha256", "decoder"):
+            if rec.get(field):
+                entry[field] = rec[field]
+            else:
+                entry.pop(field, None)
         cache["photos"][key] = rec
         was = ((previous or {}).get("photos") or {}).get(key) or {}
         if was.get("photo") != rec["photo"]:
@@ -792,6 +1063,12 @@ def record_problems(key, rec, manifest=None):
         out.append(f"guide_photos {key}: {rec['photo']} is not a file under photos/")
     if rec.get("for") and rec["for"] != key:
         out.append(f"guide_photos {key}: kept for {rec['for']}")
+    if rec.get("method", "unmodified") not in ("unmodified", "decoded"):
+        out.append(f"guide_photos {key}: method {rec.get('method')!r}")
+    if rec.get("method") == "decoded" and not (rec.get("sourceSha256") and rec.get("decoder")
+                                               and rec.get("type") == "image/png"):
+        out.append(f"guide_photos {key}: a decoded photograph without its source's hash, "
+                   "its decoder, or as anything but a PNG")
     try:
         datetime.date.fromisoformat(str(rec.get("read") or ""))
     except ValueError:

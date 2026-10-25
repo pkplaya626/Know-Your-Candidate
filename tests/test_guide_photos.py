@@ -332,7 +332,7 @@ class TestPdfRead(unittest.TestCase):
         self.assertEqual(doc.catalog().get("Type"), "Catalog")
         pages = doc.pages()
         self.assertEqual(len(pages), 1)
-        self.assertEqual(pdfread.read_page(doc, pages[0])["text"], [(9.0, 9.0, "Hi")])
+        self.assertEqual(pdfread.read_page(doc, pages[0])["text"], [(9.0, 9.0, "Hi", 1.0)])
 
 
 class Root(unittest.TestCase):
@@ -603,6 +603,159 @@ class TestThePage(Root):
         self.assertNotIn("photo", rows[0])
 
 
+JPX = os.path.join(os.path.dirname(__file__), "fixtures", "jpx_dropbox_mask.jp2")
+
+
+def oregon_book(columns, colour="DeviceGray"):
+    """A pamphlet page: each column ``(x, office, name lines, party)`` with a
+    JPEG 2000 photograph at its head, the name in 20pt type beside it, the
+    party in 10pt and the occupation in 8pt, as the State Voters' Pamphlet
+    sets them."""
+    with open(JPX, "rb") as handle:
+        jpx_bytes = handle.read()
+    objects, draws, names = {}, "", []
+    n = 10
+    for i, (x, office, lines, party) in enumerate(columns):
+        objects[n] = (f"<< /Type /XObject /Subtype /Image /Width 456 /Height 460 "
+                      f"/ColorSpace /{colour} /BitsPerComponent 8 /Filter /JPXDecode "
+                      f"/Length {len(jpx_bytes)} >>").encode(), jpx_bytes
+        names.append(f"/Im{i} {n} 0 R")
+        draws += f"q 108 0 0 126 {x} 581.2 cm /Im{i} Do Q\n"
+        draws += f"BT /F1 10 Tf 1 0 0 1 {x} 716.8 Tm ({office}) Tj ET\n"
+        y = 693.4
+        for line in lines:
+            draws += f"BT /F1 20 Tf 1 0 0 1 {x + 118} {y} Tm ({line} ) Tj ET\n"
+            y -= 20
+        draws += f"BT /F1 10 Tf 1 0 0 1 {x + 118} 657.8 Tm ({party}) Tj ET\n"
+        draws += f"BT /F1 8 Tf 1 0 0 1 {x + 118} 632.2 Tm (Occupation:) Tj ET\n"
+        n += 1
+    body = draws.encode()
+    objects[3] = (f"<< /Length {len(body)} >>").encode(), body
+    objects[2] = (f"<< /Type /Page /Parent 1 0 R /MediaBox [0 0 540 774] /Contents 3 0 R "
+                  f"/Resources << /Font << /F1 4 0 R >> /XObject << {' '.join(names)} >> >> >>"
+                  ).encode(), None
+    objects[4] = b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", None
+    objects[1] = b"<< /Type /Pages /Kids [2 0 R] /Count 1 >>", None
+    objects[5] = b"<< /Type /Catalog /Pages 1 0 R >>", None
+    out = b"%PDF-1.6\n"
+    for num in sorted(objects):
+        head, stream = objects[num]
+        out += f"{num} 0 obj\n".encode() + head
+        if stream is not None:
+            out += b"\nstream\n" + stream + b"\nendstream"
+        out += b"\nendobj\n"
+    return out + b"trailer\n<< /Root 5 0 R >>\n%%EOF\n"
+
+
+OR_INDEX_PAGE = (
+    '<ul><li><a href="/elections/Voters-Pamphlet/Documents/VP_G26-Book12_web.pdf">Washington</a>'
+    '<a href="/elections/Voters-Pamphlet/Documents/VP_G26-Book9_web.pdf">Polk</a>'
+    '<a href="/elections/Voters-Pamphlet/Documents/VP_G26-Book12_web.pdf">Columbia</a>'
+    '<a href="/elections/other.pdf">a form</a></ul>').encode()
+BOOK12 = "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book12_web.pdf"
+BOOK9 = "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book9_web.pdf"
+
+
+class TestOregon(Root):
+    def kahl(self):
+        return profile("FEC_H6OR01308", "Barbara J Kahl", "KAHL, BARBARA J DR DVM", state="OR",
+                       district=1)
+
+    def pages(self, book=None):
+        return {guide_photos.OR_INDEX: OR_INDEX_PAGE,
+                BOOK12: book or oregon_book([
+                    (22.5, "US Representative, 1st District", ["Barbara J", "Kahl"], "Republican"),
+                    (274.7, "US Representative, 1st District", ["Suzanne", "Bonamici"],
+                     "Democrat")])}
+
+    def test_the_books_in_the_pamphlets_order_each_once(self):
+        books = guide_photos.or_books(OR_INDEX_PAGE.decode())
+        self.assertEqual(books, [(BOOK12, ["Washington", "Columbia"]), (BOOK9, ["Polk"])])
+
+    def test_the_name_beside_the_photograph_under_the_office(self):
+        doc = pdfread.Document(self.pages()[BOOK12])
+        columns = guide_photos.or_columns(doc)
+        self.assertEqual([(c["office"], c["name"], c["party"]) for c in columns],
+                         [("US Representative, 1st District", "Barbara J Kahl", "Republican"),
+                          ("US Representative, 1st District", "Suzanne Bonamici", "Democrat")])
+        self.assertEqual(guide_photos.or_target(columns[0]["office"]), "H-OR-01-2026")
+        self.assertEqual(guide_photos.or_target("Governor"), "OR|governor")
+
+    def test_a_photograph_decoded_losslessly_and_hosted_as_a_png(self):
+        from kyc import jpx
+        getter = Getter(self.pages())
+        photos, problems, unread = guide_photos.read_oregon({"H-OR-01-2026": [self.kahl()]},
+                                                            getter=getter)
+        rec = photos["person:FEC_H6OR01308"]
+        self.assertEqual(rec["method"], "decoded")
+        with open(JPX, "rb") as handle:
+            source = handle.read()
+        self.assertEqual(rec["sourceSha256"], hashlib.sha256(source).hexdigest())
+        self.assertEqual(rec["type"], "image/png")
+        self.assertTrue(rec["photo"].endswith(".png"))
+        self.assertEqual(jpx.png_pixels(rec["_data"]), jpx.decode(source))
+        self.assertEqual(rec["page"], BOOK12 + "#page=1")
+        self.assertIn("heads a column 'US Representative, 1st District' and prints "
+                      "'Barbara J Kahl', 'Republican'", rec["evidence"])
+        self.assertIn("Washington, Columbia", rec["evidence"])
+        # The other books are not read once every race wanted is found.
+        self.assertNotIn(BOOK9, getter.asked)
+
+    def test_the_manifest_lists_a_decoded_file_with_its_source(self):
+        people = [self.kahl()]
+        cache, problems = guide_photos.fetch(self.root, profiles=people, stategov={},
+                                             getter=Getter(self.pages()), log=lambda *a: None)
+        rec = cache["photos"]["person:FEC_H6OR01308"]
+        entry = photocopies.load(self.root)["hosted"][rec["photo"][len("photos/"):]]
+        self.assertEqual((entry["method"], entry["sourceSha256"], entry["decoder"]),
+                         ("decoded", rec["sourceSha256"], guide_photos.DECODER))
+        codes = [c for level, c, _m in photocopies.problems(photocopies.load(self.root), self.root)
+                 if level == "error"]
+        self.assertEqual(codes, [])
+        manifest = photocopies.load(self.root)
+        del manifest["hosted"][rec["photo"][len("photos/"):]]["sourceSha256"]
+        photocopies.save(manifest, self.root)
+        codes = [c for level, c, _m in photocopies.problems(photocopies.load(self.root), self.root)
+                 if level == "error"]
+        self.assertEqual(codes, ["photo-hosted-unrecorded"])
+
+    def test_a_short_form_needs_its_evidenced_entry(self):
+        russ = profile("FEC_H2OR01240", "David Honorable Russ", "RUSS, DAVID HONORABLE",
+                       state="OR", district=6)
+        book = oregon_book([(274.7, "US Representative, 6th District", ["David", "Russ"],
+                             "Republican")])
+        pages = {guide_photos.OR_INDEX: OR_INDEX_PAGE, BOOK12: book}
+        with mock.patch("kyc.overrides.GUIDE_NAME_FORMS", {}):
+            photos, problems, _ = guide_photos.read_oregon({"H-OR-06-2026": [russ]},
+                                                           getter=Getter(pages))
+        self.assertEqual(photos, {})
+        self.assertTrue(any("'David Russ' shares a surname" in p for p in problems), problems)
+        photos, problems, _ = guide_photos.read_oregon({"H-OR-06-2026": [russ]},
+                                                       getter=Getter(pages))
+        self.assertEqual(sorted(photos), ["person:FEC_H2OR01240"])
+
+    def test_a_colour_or_unreadable_image_gives_none(self):
+        book = oregon_book([(22.5, "US Representative, 1st District", ["Barbara J", "Kahl"],
+                             "Republican")], colour="DeviceRGB")
+        photos, problems, _ = guide_photos.read_oregon({"H-OR-01-2026": [self.kahl()]},
+                                                       getter=Getter(self.pages(book)))
+        self.assertEqual(photos, {})
+        self.assertTrue(any("not grey" in p for p in problems), problems)
+
+    def test_two_images_beside_one_name_give_none(self):
+        book = oregon_book([(22.5, "US Representative, 1st District", ["Barbara J", "Kahl"],
+                             "Republican"),
+                            (40.5, "US Representative, 1st District", ["Barbara J", "Kahl"],
+                             "Republican")])
+        doc = pdfread.Document(book)
+        self.assertEqual(guide_photos.or_columns(doc), [])
+
+    def test_an_unreadable_pamphlet_concludes_nothing(self):
+        photos, problems, unread = guide_photos.read_oregon({"H-OR-01-2026": [self.kahl()]},
+                                                            getter=Getter({}))
+        self.assertEqual((photos, unread), ({}, {"H-OR-01-2026"}))
+
+
 class TestTheCommittedCache(unittest.TestCase):
     ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -612,14 +765,23 @@ class TestTheCommittedCache(unittest.TestCase):
         self.assertEqual(guide_photos.problems(cache, manifest), [])
         for key, rec in (cache.get("photos") or {}).items():
             entry = manifest["hosted"][rec["photo"][len("photos/"):]]
-            self.assertEqual(entry["method"], "unmodified", key)
             self.assertIn(key, entry["for"])
             self.assertTrue(rec["page"].startswith(("https://voter.votewa.gov/",
-                                                    "https://elections.alaska.gov/")), key)
+                                                    "https://elections.alaska.gov/",
+                                                    "https://sos.oregon.gov/")), key)
 
-    def test_the_oregon_pamphlet_is_said_not_read(self):
-        self.assertIn("OR", guide_photos.ELSEWHERE)
-        self.assertIn("JPEG 2000", guide_photos.ELSEWHERE["OR"])
+    def test_every_decoded_photograph_is_its_sources_pixels(self):
+        cache = guide_photos.load_cache(self.ROOT)
+        manifest = photocopies.load(self.ROOT)
+        for key, rec in (cache.get("photos") or {}).items():
+            entry = manifest["hosted"][rec["photo"][len("photos/"):]]
+            if rec["state"] == "OR":
+                self.assertEqual(entry["method"], "decoded", key)
+                self.assertEqual(entry["sourceSha256"], rec["sourceSha256"], key)
+                self.assertTrue(rec["page"].startswith(
+                    "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/"), key)
+            else:
+                self.assertEqual(entry["method"], "unmodified", key)
 
 
 if __name__ == "__main__":

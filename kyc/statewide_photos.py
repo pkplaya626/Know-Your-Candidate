@@ -22,12 +22,11 @@ these routes, in this order, and no other:
    image comes before the heading, and a parser that took the next image
    gave Rob Bonta Michael Gates's face).
 
-   TODO (a follow-up to rule 101's copies, kyc/photocopies.py, which copy
-   only a file with an address): the official guides whose photographs
-   have no address of their own - Washington's VoteWA (base64 in the
-   page), Alaska's statements (encrypted PDFs) and Oregon's pamphlet (JPEG
-   2000) - can be shown only from an unmodified copy kept here, which the
-   owner allowed on 2026-10-25. They wait for it; they are not ruled out.
+   The official guides whose photographs have no address of their own -
+   Alaska's statements (PDFs) and Oregon's pamphlet (JPEG 2000 in PDFs) -
+   are kept here as copies by the owner's decision of 2026-10-25
+   (kyc/guide_photos.py): one is shown for a candidate none of these
+   routes pictures, by :func:`attach`.
 4. **The race's own Wikipedia article** (``2026 Colorado gubernatorial
    election``, a title built from the race, never a person), the link it
    gives the candidate - matched on surname *and* given name within that
