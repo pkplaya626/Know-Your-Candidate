@@ -967,7 +967,7 @@ def inherit_cross_links(profiles, cache):
 _ID_ROUTES = ("clerk.house.gov", "congress.gov", "cross-link")
 
 
-def route_ok(profile, record):
+def route_ok(profile, record, legislators=None, legislator_photos=None):
     """True when a cached portrait reached this profile by an allowed route.
 
     Rule 24 for every profile: a member's portrait comes through their
@@ -977,13 +977,21 @@ def route_ok(profile, record):
     searching a name - the Kansas Senate nominee, a pastor, carried a 1930s
     photograph of another Adam Hamilton - and those are refused here, not
     merely no longer looked for. A hand-pinned record stands on its own
-    evidence.
+    evidence. The two routes ``nominee_photos`` adds - Wikidata by the
+    person's FEC id, and their state legislature's own page - are taught
+    here by name and checked there (*legislators*: the roster, which a
+    legislature's photograph must still seat them in; *legislator_photos*:
+    the ``legphotos`` cache, so the card must still show that file).
     """
+    from . import nominee_photos
+
     if record.get("pinned"):
         return True
     via = record.get("via")
     if via in _ID_ROUTES:
         return True
+    if via in nominee_photos.ROUTES:
+        return nominee_photos.route_ok(profile, record, legislators, legislator_photos)
     if via != "wikipedia":
         return not record.get("url")
     linked = record.get("linked") or record.get("title")
@@ -998,17 +1006,20 @@ def route_ok(profile, record):
             and article_is_theirs(record.get("title") or "", profile))
 
 
-def apply_cache(profiles, cache):
+def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
     """Put the resolved URL at the head of each profile's fallback chain.
 
     Only a portrait whose route :func:`route_ok` accepts; anything else
     leaves the chain as :mod:`kyc.photos` built it, ending at the silhouette.
+    *legislators* is the state legislators' roster and *legislator_photos*
+    the ``legphotos`` cache, for a portrait from a legislature
+    (``nominee_photos``).
     """
     hits = 0
     for profile in profiles:
         record = cache.get(profile_key(profile)) or {}
         url = record.get("url")
-        if not url or not route_ok(profile, record):
+        if not url or not route_ok(profile, record, legislators, legislator_photos):
             profile["photoSource"] = None
             continue
         if (record.get("credit") or {}).get("nonFree"):
@@ -1030,6 +1041,8 @@ def apply_cache(profiles, cache):
             profile["photoSet"] = record["set"]
         if wikimedia_file(url):
             profile["photoCredit"] = commons_credit(record.get("credit"))
+        elif record.get("via") == "state-legislature" and record.get("credit"):
+            profile["photoCredit"] = dict(record["credit"])
         hits += 1
     return hits
 

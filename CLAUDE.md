@@ -44,6 +44,7 @@ data/courts.json            ──┤   (each state's highest court, from the co
 data/voting_links.json      ──┤   (each state's official voting pages: NASS Can I Vote)
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
+data/statewide_photos.json  ──┤   (those candidates' photographs, by the routes rule 91 names: ballotphotos)
 data/ballot_measures.json   ──┤   (each jurisdiction's statewide questions, from its own list: hand-edited, kyc/ballot_measures.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
@@ -130,7 +131,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `legislator_photos.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
-  `statewide_candidates.json`, `ballot_measures.json`,
+  `statewide_candidates.json`, `statewide_photos.json`, `ballot_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
@@ -183,7 +184,8 @@ python build_profile_site.py localgov         # every local government (Census l
 python build_profile_site.py localgov --check-sites  # open every listed local website; resumes (rule 78)
 python build_profile_site.py executives       # every governor (NGA), and NCSL's party counts
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
-python build_profile_site.py courts           # each state's highest court, from the court's own roster
+python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
+python build_profile_site.py ballotphotos     # the statewide candidates' photographs (official guides, members, the race's Wikipedia article)
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
@@ -203,13 +205,13 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2174 tests, no dependencies
-npm install && npm test                       # 3350 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2248 tests, no dependencies
+npm install && npm test                       # 3324 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
-`officers`, `courts`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `ballotphotos`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -389,7 +391,61 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     name, `portraits.route_ok` refuses a cached portrait that did not come
     by one of these routes (it is applied after the results, which carry
     the ballot link), and `validate` fails on any `Special:FilePath` or
-    `Special:Redirect` URL in any profile's chain.
+    `Special:Redirect` URL in any profile's chain. On 2026-10-19, 417 of
+    the 585 people on the November ballot for Congress showed the
+    silhouette, so two more routes reach them (`kyc/nominee_photos.py`),
+    each taught to `route_ok` by name, so a cached portrait from any other
+    route is still refused:
+    - a Wikidata item carrying the person's own FEC candidate id (P1839)
+      and an image (P18), asked by every id the profile holds: a human,
+      the only item any of the person's ids is on, its label ending in
+      their surname and carrying one of their given names as the profile
+      or the filing writes it (`given_fits`: no nickname table, no prefix;
+      "Drew Williams" is not "WILLIAMS, JOHN ANDREW" but through an
+      evidenced `overrides.PORTRAIT_NAME_FORMS` entry), and a second tie of
+      the item's own - a year of birth the profile's agrees with, else a
+      2026 candidacy in their state (P3602), an office held for it (P39,
+      or its electoral district, P768), each a label of a whole shape with
+      the state in its slot, never the state's name found in it ("Mayor of
+      Kansas City, Missouri" is not an office for Kansas, "Ambassador to
+      Georgia" is the country's: rule 5), an official website (P856) that
+      is their campaign's, or an English article that is the one their
+      ballot page links. An id is not proof on its own (rule 82): the
+      first version took the surname alone - "John Andrews" passed for
+      John Andrew Williams, as "andrew" is in it - and none of the three
+      nominees it pictured had a birth date to compare, so a namesake's
+      item carrying a bot-added id would have passed. The file is resolved
+      on Commons (never `Special:FilePath`) and credited from its own page
+      (rule 87);
+    - for a nominee who sits in their state's legislature, the photograph
+      this site's legislature page shows on that member's card
+      (`legislature.card_photo`, one implementation, rule 12): only on the
+      legislature's own host and credited to it, never a caucus's (rule 87,
+      as rule 100 says: Sean McCann's is on senatedems.com, and he has
+      none), never a file Open States gives two members, and never an
+      "oversized" legphotos entry, whose file was offered before the
+      checks a seat-keyed file needs (it waits for those and for rule
+      101's copies, not for its weight). The first version read the member's
+      page again by rules of its own, which skipped legphotos' safeguards.
+      That member is found by the chamber their own article's corroborated
+      record of offices gives (rule 69) and the same first and last name
+      in it, nobody else's, and the photograph is withheld once the roster
+      seats someone else or the card shows another file: "Sen22.jpg" shows
+      whoever holds the seat.
+    Either route refuses a frame wider than tall unless its file is named
+    a headshot or portrait (rule 38), and any file in
+    `overrides.NOT_A_PORTRAIT` or `PORTRAIT_LICENCE_DOUBTS`: the first
+    version gave a person no way to withdraw one. A photograph over the
+    caps is shown smaller from the same file where a resizer serves it,
+    else at full size, and said (rule 87). The election offices that print
+    candidates' photographs (Washington's voters' guide, Alaska's and
+    Oregon's pamphlets) serve them only base64 inside JSON or inside PDFs,
+    with no file to link. The owner's decision of 2026-10-25 allows an
+    unmodified copy of such an official photograph; it waits for the
+    site's one store of copies, being built apart, and is not ruled out
+    (`ELECTION_OFFICES`). Every record keeps the page,
+    the words naming the person, the day read and its bytes and size, and
+    `validate` fails a shown one without them (`photo-unevidenced`).
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
@@ -529,7 +585,34 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     family photographs, every one carrying the right name. What passes
     every rule and is still not a likeness goes in
     `overrides.NOT_A_PORTRAIT`, because the weekly re-read undoes an edit
-    to the cache. Issue headings come from one heading level of a page
+    to the cache. Where the home page has none, the campaign's About or
+    Meet page on its own host is read by the same rules, and must itself
+    name the candidate (four of thirty nominees' sites without one had it
+    there); a site that draws its images with JavaScript, or answers a
+    script with a bot wall (Mary Silva's 403, Jena Nelson's 202), is drawn
+    in the courts' headless Chrome (`render_portraits`, forty a run, a
+    dozen to a browser run) and read by them again, never across a
+    redirect to another host. The image is the one the campaign's own page
+    draws, wherever it is hosted (a site builder's CDN serves the site's
+    files), and the cache keeps that page, the words that named them
+    (`portraitEvidence`: an alt text naming them, else the file name) and
+    the day. A heavy one is taken in a rendition the page itself lists
+    (its `srcset`), else its host's resizer's or Photon's, else at full
+    size (rule 87). What a person looks at is judged by one test: a
+    photograph of the candidate alone whose face, brow to chin, is at
+    least a tenth of the height of the 4:5 card that crops it from the top
+    (6.5px of the state pages' 65px phone card, where eyes and a mouth can
+    be made out) is a likeness and is shown; anything else goes in
+    `NOT_A_PORTRAIT` with what was seen and measured. The first version
+    let Jamie Davis by a tractor and Brian Bengs speaking in a park stand
+    while refusing like scenes; measured, Bengs's face is a seventh and a
+    half of the card and stays, Davis's an eleventh and Lauren Jewett's
+    beside a seal a fifteenth, and both are refused, as are a family
+    photograph, a page of biography text, a halftone street scene, and
+    a festival stall and a rally with other people in the frame. A curated row takes its campaign's
+    portrait as a filer does: Brian Bengs's sat in the cache while his
+    profile showed the silhouette. A sitting member never does: their
+    portrait comes by their bioguide id. Issue headings come from one heading level of a page
     that is not a ballot-question page ("Tyler votes NO" under a measure is
     not his platform), and never a line naming anyone else in the race -
     "Rob Wittman has allowed healthcare prices to skyrocket" is an attack
@@ -1617,27 +1700,48 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     could not be read waits off the page for the next run (rule 8) rather
     than fail the build. A portrait not on Wikimedia is weighed when
     found: one campaign's was a 5 MB PNG for a 165px card, and 27 of the
-    NGA's governors' headshots weighed 320 KB to 7.6 MB for a 40px
-    circle. Over 300 KB or 1,200px it is shown smaller from the same file
-    - its host's own resizer, or WordPress.com's Photon, which fetches
-    that very address and scales it (rule 42) - once the smaller copy is
-    weighed and found the same shape (`photos.lighter_form`). Where
-    neither serves it, it is shown all the same and said
-    (`portraitHeavy`) until the site has made a smaller copy of it itself
-    (rule 101, the owner, 2026-10-25): withholding them left eleven
-    November nominees with the silhouette beside an opponent's
-    photograph. The House
+    NGA's governors' headshots weighed 320 KB to 7.6 MB for a 40px circle.
+    Over 300 KB or 1,200px it is shown smaller from the same file - a
+    rendition its page's srcset or a `<picture>`'s `<source>` lists,
+    Wikimedia's standard widths, its host's own resizer, or WordPress.com's
+    Photon, which fetches that very address and scales it (rule 42) - once
+    the smaller copy is weighed and found the same shape
+    (`photos.lighter_rendition`; `lighter_form` where no page offers
+    renditions), by every route alike: a campaign's, a legislature's, a
+    Wikidata item's, an attorney general's, a justice's and a statewide
+    candidate's (`kyc/official_photos.py` `choose`, `officers.ag_photo`).
+    Where none serves it, it is shown all the same and said
+    (`portraitHeavy`, with the heavy file's address, which rule 101's copies
+    key on; `kept`, or `heavy` in the portrait cache; the build prints how
+    many), as the smaller copy this site made of it where its host is one
+    rule 101 copies from, and a heavy record that does not say so fails the
+    build. Weight is never a reason to leave a photograph out. A brief of 2026-10-19
+    ("official small renditions only") ruled the resizers out: the first
+    version of PR #134, built under it, left six nominees main showed out
+    again (Michael J. Quirk's PNG was 6 KB over), with Nevada's headshot of
+    Carrie Buck; withholding them left eleven November nominees with the
+    silhouette beside an opponent's photograph; and under it 27 justices the
+    court's own page tied to them - all nine of Texas's Court of Criminal
+    Appeals - drew empty circles for their weight alone. The owner's
+    decision of 2026-10-25 ("more content is better than strict rules")
+    relaxed it for nominees, attorneys general, justices and statewide
+    candidates alike: a weight cap and a resizer cost or save only page
+    weight and guard no fact about a person. What it never relaxes is a
+    route tied to the person (rule 24), the words naming them, the shape
+    test, a person's look and the licence doubts (`NOT_A_PORTRAIT`,
+    `PORTRAIT_LICENCE_DOUBTS`), and the credits. The House
     Clerk's are only weighed; every one is within the caps. A server that
     gzips an image is read through it (Missouri's attorney general's
     headshot read as "not an image"). No srcset offers a size wider than
     a 2x screen needs, the officials' dialog's included. A state officer's photograph
     comes only from their office or their association's roster, matched by
-    state, never a search. No attorney general had one: NAAG's member
-    pages answer every script and a headless browser with a Cloudflare
-    challenge, and a party association's photograph is the party's. So
+    state, never a search. No attorney general had one (STATEGOV-13): a
+    party association's photograph is the party's. So
     `officers.add_ag_photos` reads the office's own pages - those that
-    confirmed the name (rule 56), and the attorney general's page they
-    link - and takes only an image carrying the surname as a word, or in
+    confirmed the name (rule 56), the attorney general's page they link,
+    and where the front page links none the office's own page about its
+    attorney general (`officers.BIO_PAGES`, an address typed in, the image
+    on it tested like any other) - and takes only an image carrying the surname as a word, or in
     run-together words of the holder's name and title
     ("AgLizMurrillHeadshot"), with no other first name before it, whose
     words say it is a likeness ("headshot", "photo of") or are nothing but
@@ -1653,6 +1757,45 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     was checked for and is withheld, and said, once the roster names
     someone else. Every build lists the confirmed officers still shown
     without one.
+
+    Nine attorneys general's offices offer theirs only above the caps
+    (California's is a 6 MB original).
+    Their association's card is the lighter of two photographs tied to the
+    person and goes first there (`stategov.officer_photos`): NAAG's "Find
+    my AG" roster names each attorney general and the state beside the
+    photograph at WordPress's own 225x300. naag.org answers a script and
+    a headless browser with a Cloudflare challenge, so a person reads it
+    in a windowed Chrome (`tools/read_naag_cards.mjs`) and records each
+    card in `OFFICER_PHOTOS` on its state and name, never its file's:
+    West Virginia's is "ag-WA-McCusker". A holder whose name the office
+    has not confirmed gets none. An office's biography page typed into
+    `officers.BIO_PAGES` carries the day and the holder it was found for,
+    and the build says when the holder has changed or the page gave them
+    nothing. A state justice's photograph comes from the roster the
+    court's recipe reads (rule 57) or the one page the roster links from
+    that justice's own name or row - never an address built from a name -
+    and only where every word the page gives the image (its alt text,
+    title, caption and file name) is theirs and none says a scene
+    (`court_photos.judge`). Two Connecticut justices' own pages carry a
+    former justice's alt text, "Justice Christine E. Keller"; Oklahoma's
+    Edmondson page shows him "pinned by his brother". A surname that is
+    also a word the test passes over (Iowa's Justice May) counts only
+    beside a given name, an initial or a title: "IMG_May_2024" is a date.
+    An official portrait those words refuse is an evidenced
+    `overrides.JUSTICE_PHOTOS` entry. The state page credits each to the
+    court, linked to the page it was read on (`KYC.photoCreditHtml`, as
+    every credit is). Every photograph on these routes is cached with that
+    page, the words naming the person beside it, the day read, its bytes
+    and pixel size; `official_photos.record_problems` fails one without
+    them, read or curated, and the build stops on it rather than drop it
+    from the page without a word. Every record, read now or kept from an
+    earlier read (rule 8), is asked of the lists a person keeps -
+    `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS`, one of each for every
+    route, a nominee's, an official's and a judge's (`photos.refused`,
+    one test that `nominee_photos`, `official_photos.held_back` and
+    `judge_links.held_back` all ask; a campaign site's reader asks
+    `NOT_A_PORTRAIT`, its images carrying no licence to doubt) - and a
+    file in either never reaches a page.
 
 88. **A colour that carries meaning is checked as a colour-blind reader
     sees it, and is never the only cue.** The 2026-10-17 audit ran the
@@ -1821,10 +1964,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Sanders"), the list's form kept beside them; a party the list
     abbreviates is spelled out from its key or statute
     (`statewide.PARTY_CODES`), and an unexplained code fails the build.
-    Write-ins apart, listed by surname and said to be; no portrait, money
-    or platform, never a profile (rule 27), never joined to one by a name
-    (rule 25): a sitting member a list names is a build warning
-    (`statewide-member-unnoted`) until an evidenced
+    Write-ins apart, listed by surname and said to be; no money or
+    platform, never a profile (rule 27), never joined to one by a name
+    (rule 25). A photograph since the owner's decision of 2026-10-19, by
+    these routes in this order and no other (`kyc/statewide_photos.py`,
+    `ballotphotos`), credited beside the name: the office photograph the
+    card already shows, for the one candidate the holder line settles as
+    its holder; a member of Congress's own, by bioguide id, through an
+    evidenced `OTHER_OFFICE_NOMINEES` entry; an official guide's (Arizona's
+    Clean Elections Commission's list, California's voter guide, each
+    pairing the picture with the name - by block and alt text, never by
+    nearness: California's image precedes its heading, and a reader that
+    took the next image gave Rob Bonta Michael Gates's face); and
+    the race's own Wikipedia article, its title built from the race, its
+    link matched on given name and surname within that race (Danielle
+    Ford is not Aaron Ford, whose article the same page links) and never
+    on a one-word name, then checked as rule 33's are, the race's infobox
+    image beside the nominee before the article's lead. The guides whose
+    photographs have no address of their own - Washington's VoteWA
+    (base64), Alaska's statements (encrypted PDFs), Oregon's pamphlet (JPEG
+    2000) - wait for the follow-up the owner allowed on 2026-10-25, which
+    hosts unmodified copies once rule 101's copies land; they are not ruled
+    out. A heavy photograph is shown and said, as rule 87 says. A Commons
+    file is held to rule 82's one licence test, at the read and again at
+    every build (`statewide_photos.licence_doubt`): one whose page names no
+    author, public domain on an uploader's word alone ("PD-author", or no
+    PD category), or an uploader's own declaration (CC0, "Copyrighted free
+    use", "Attribution") on a file calling itself official by an author
+    who is no government office - Kris Kobach's "official portrait, 2024",
+    CC0 by a user account - is withheld and said, and what a person doubts
+    is in `PORTRAIT_LICENCE_DOUBTS`; the first review found CC0 taken on
+    the same word that refused "PD-author". A scene or an event ("Aaron
+    Ford addresses the United Nations Human Rights Committee") is refused
+    by the file's name, and what a person looked at and found no likeness
+    in is in `NOT_A_PORTRAIT`, keyed on the Commons upload. A running
+    mate is matched only beside their own ticket's nominee
+    (`running_mateN` beside `nomineeN`). A sitting member a list names is a
+    build warning (`statewide-member-unnoted`) until an evidenced
     `OTHER_OFFICE_NOMINEES` entry says so on their profile - Amy
     Klobuchar was on Minnesota's governor ballot while hers said nothing.
     The holder line is read from the list for the roster's holder at build

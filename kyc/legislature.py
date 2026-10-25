@@ -731,11 +731,26 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
             out["pageCaucus"] = page["caucus"]
         if page.get("session"):
             out["pageSession"] = page["session"]
-    image = record.get("image")
-    kind = photo_kind(record, photos)
-    if kind == "openstates":
+    shown = card_photo(record, code, page, photos)
+    out.update({k: shown[k] for k in ("image", "imageCredit") if k in shown})
+    kind = shown["kind"]
+    if dropped is not None and kind not in ("openstates", "legislature", "none"):
+        dropped[kind] = dropped.get(kind, 0) + 1
+    return out
+
+
+def card_photo(record, code="", page=None, photos=None):
+    """The portrait a legislator's card shows: ``{"kind"}`` (``photo_kind``)
+    with ``"image"`` and, where the legislature serves it, ``"imageCredit"``.
+    *page* is the member's page (``pages_for``) and *photos* the
+    ``legphotos`` cache. The one implementation of "the legislature's
+    photograph of a member" (rule 12): the legislature pages draw it, and a
+    November nominee who sits in the legislature is shown it
+    (``nominee_photos``)."""
+    out = {"kind": photo_kind(record, photos)}
+    if out["kind"] == "openstates":
         # Loaded over https, as the page is; 'statelegs' checked that copy.
-        out["image"] = statelegs.secure(image)
+        out["image"] = statelegs.secure(record.get("image"))
         # A portrait the legislature itself serves is credited to it like
         # the ones legphotos reads (rule 87): in a district of two, one
         # credited and one not read as coming from two places (the
@@ -754,12 +769,10 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
             # smaller copy of it (rule 101).
             out["imageCredit"] = {"host": photocopies.host_of(out["image"]),
                                   "listedBy": "Open States"}
-    elif kind == "legislature":
+    elif out["kind"] == "legislature":
         own = legphotos.entry_for(record, photos)
         out["image"] = own["image"]
         out["imageCredit"] = {"by": own["credit"], "page": own["page"]}
-    if dropped is not None and kind not in ("openstates", "legislature", "none"):
-        dropped[kind] = dropped.get(kind, 0) + 1
     return out
 
 

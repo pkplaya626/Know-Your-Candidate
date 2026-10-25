@@ -81,6 +81,10 @@ BOXES = {
     "governor": (72, 72),
     # .gov-officer-photo: a statewide officer's row.
     "officer": (40, 40),
+    # .gov-photo: a justice in the state's highest court's list, and a
+    # statewide candidate in the election office's list (rules 57, 91).
+    "justice": (32, 32),
+    "candidate": (32, 32),
     # .card-photo: a profile's card, 4:5, as wide as its column - the
     # Senate view's holder column at most 180px (.senate-holder
     # .card-grid); the dialog's .modal-portrait img is 116x145.
@@ -260,18 +264,25 @@ def expected(code, member, photos):
 _GOVERNMENT_HOST = re.compile(r"(\.gov|\.mil|\.state\.[a-z]{2}\.us)$", re.I)
 
 
-def may_copy(url, kind, code=""):
+def may_copy(url, kind, code="", own=()):
     """Whether this site may host a copy of *url* shown as *kind*: never a
     Wikimedia file (rule 42); a legislator's only from the legislature's own
-    host or a government's; every other kind's source is already the
-    person's office, their association, the White House or their own
-    campaign (rules 38, 87)."""
+    host or a government's; a justice's or a statewide candidate's only
+    from a government's host or one of *own*, the hosts that are the body's
+    own (the court's roster's; for a candidate shown the holder's office
+    photograph, that photograph's where the holder's card may show a copy
+    of it) - never a news organisation's, a party's or a campaign's file;
+    every other kind's source is already the person's office, their
+    association, the White House or, for a profile, their own campaign
+    (rules 38, 87)."""
     if is_wikimedia(url):
         return False
+    host = host_of(url)
+    if kind in ("justice", "candidate"):
+        return bool(host) and (bool(_GOVERNMENT_HOST.search(host)) or host in set(own or ()))
     if kind != "legislator":
         return True
     from .legphotos import official_host
-    host = host_of(url)
     return bool(host) and (bool(_GOVERNMENT_HOST.search(host)) or official_host(code, url))
 
 
@@ -284,6 +295,11 @@ def key_of(kind, record, code="", office=""):
         return f"governor:{code}:{record.get('name')}"
     if kind == "officer":
         return f"officer:{code}:{office}:{record.get('name')}"
+    # A justice by the court's key on the state ("court", "criminalCourt")
+    # and the name the court lists; a candidate by the office and the name
+    # the election office's list gives (rule 91).
+    if kind in ("justice", "candidate"):
+        return f"{kind}:{code}:{office}:{record.get('name')}"
     return f"{kind}:{record.get('id')}"
 
 
@@ -293,15 +309,16 @@ def src(copy):
     return f"{PHOTOS_URL}{copy['file']}?v={copy['sha256'][:10]}"
 
 
-def attach(record, url, cache, kind, key=None, code="", expect=None):
+def attach(record, url, cache, kind, key=None, code="", expect=None, own=()):
     """Point *record* at the copy of *url*, its original, where one is
     current for this record (``current``) and this site may host one
-    (``may_copy``): ``photoCopy = {"src", "of", "ofBytes"}``; the record
-    keeps the original's address and credit, which the page names beside
-    the copy, with the original's weight. Returns whether a copy was
-    attached."""
+    (``may_copy``; *own* as there): ``photoCopy = {"src", "of", "ofBytes"}``;
+    the record keeps the original's address and credit, which the page
+    names beside the copy, with the original's weight. Returns whether a
+    copy was attached."""
     key = key if key is not None else key_of(kind, record, code)
-    copy = current(cache, url, kind, key, expect) if url and may_copy(url, kind, code) else None
+    copy = (current(cache, url, kind, key, expect)
+            if url and may_copy(url, kind, code, own) else None)
     if copy:
         record["photoCopy"] = {"src": src(copy), "of": url}
         weight = (cache["originals"][url].get("bytes") or 0)
@@ -349,19 +366,58 @@ def apply_federal(payload, cache):
     return n
 
 
-def apply_stategov(payload, cache):
-    """Each governor's NGA headshot and each statewide officer's photograph,
-    copied; returns how many."""
-    n = 0
-    for code, entry in sorted((payload.get("states") or {}).items()):
+def stategov_photos(payload):
+    """``(record, url, kind, key, code, credited, own)`` for every
+    photograph ``stategov.js`` shows: each governor's NGA headshot, each
+    statewide officer's photograph, each justice's from the court's own
+    pages (``court.photos``) and each statewide candidate's
+    (``candidates[*].photo``, kyc/statewide_photos.py). One walk for the
+    build and the checks (rule 12). *credited* is whether the page draws a
+    credit beside it (rule 87: no copy without one); *own* the hosts
+    ``may_copy`` counts as the body's own for a justice or a candidate."""
+    for code, entry in sorted(((payload or {}).get("states") or {}).items()):
         gov = entry.get("governor") or {}
         if gov.get("headshot"):
-            n += attach(gov, gov["headshot"], cache, "governor", code=code)
+            yield (gov, gov["headshot"], "governor", key_of("governor", gov, code), code,
+                   bool(gov.get("headshotBy")), ())
+        holders = {"governor": gov.get("headshot")}
         for office in ("lt", "ag", "sos"):
             holder = entry.get(office)
             if isinstance(holder, dict) and holder.get("photo"):
-                n += attach(holder, holder["photo"], cache, "officer",
-                            key=key_of("officer", holder, code, office))
+                holders[office] = holder["photo"]
+                yield (holder, holder["photo"], "officer", key_of("officer", holder, code, office),
+                       code, bool(holder.get("photoBy")), ())
+        for court_key in ("court", "criminalCourt"):
+            court = entry.get(court_key) or {}
+            # The page credits each to the court, linked to the page it was
+            # read on (kyc-stategov.js courtBlock).
+            own = tuple(h for h in (host_of(court.get("url")),) if h)
+            for name, shot in sorted((court.get("photos") or {}).items()):
+                if isinstance(shot, dict) and shot.get("photo"):
+                    yield (shot, shot["photo"], "justice",
+                           key_of("justice", {"name": name}, code, court_key), code,
+                           bool(shot.get("page")), own)
+        for office, item in sorted((((entry.get("ballot2026") or {}).get("offices")) or {}).items()):
+            for row in ((item.get("candidates") or {}).get("candidates") or ()):
+                url = row.get("photo") if isinstance(row, dict) else None
+                if not url:
+                    continue
+                credit = row.get("photoCredit") or {}
+                # The holder's office photograph (statewide_photos route 1)
+                # is copied where the holder's card's may be; any other only
+                # from a government's host.
+                own = (host_of(url),) if url == holders.get(office) else ()
+                yield (row, url, "candidate", key_of("candidate", row, code, office), code,
+                       bool(credit.get("by") or credit.get("licence")), own)
+
+
+def apply_stategov(payload, cache):
+    """Each governor's NGA headshot, each statewide officer's photograph,
+    each justice's and each statewide candidate's, copied; returns how
+    many."""
+    n = 0
+    for record, url, kind, key, code, _credited, own in list(stategov_photos(payload)):
+        n += attach(record, url, cache, kind, key=key, code=code, own=own)
     return n
 
 
@@ -403,11 +459,11 @@ class Shown:
         self.linked = {}
         self.issues = []
 
-    def add(self, url, kind, record_id, record=None, credited=True, code="", expect=None):
+    def add(self, url, kind, record_id, record=None, credited=True, code="", expect=None, own=()):
         if not url or not url.startswith(("https://", "http://")):
             return
         copy = (record or {}).get("photoCopy")
-        allowed = may_copy(url, kind, code)
+        allowed = may_copy(url, kind, code, own)
         if copy:
             if copy.get("of") != url:
                 self.issues.append(("error", "photo-copy-misplaced",
@@ -421,8 +477,8 @@ class Shown:
                                     f"{record_id} shows a copy of a Wikimedia file, {url}"))
             elif not allowed:
                 self.issues.append(("error", "photo-copy-host",
-                                    f"{record_id} shows a copy of {url}, which is on no "
-                                    f"government's host (rule 101)"))
+                                    f"{record_id} shows a copy of {url}, which is on no host "
+                                    f"this site copies a {kind}'s photograph from (rule 101)"))
         if is_wikimedia(url):
             return
         if not allowed:
@@ -450,16 +506,8 @@ class Shown:
         return self
 
     def add_stategov(self, payload):
-        for code, entry in sorted(((payload or {}).get("states") or {}).items()):
-            gov = entry.get("governor") or {}
-            self.add(gov.get("headshot"), "governor", key_of("governor", gov, code), gov,
-                     bool(gov.get("headshotBy")))
-            for office in ("lt", "ag", "sos"):
-                holder = entry.get(office)
-                if isinstance(holder, dict):
-                    self.add(holder.get("photo"), "officer",
-                             key_of("officer", holder, code, office), holder,
-                             bool(holder.get("photoBy")))
+        for record, url, kind, key, code, credited, own in stategov_photos(payload):
+            self.add(url, kind, key, record, credited, code=code, own=own)
         return self
 
     def add_people(self, people):
@@ -554,11 +602,16 @@ def stats(cache, shown):
     over = [u for u in shown.urls if heavy(originals.get(u))]
     copied = [u for u in over if for_all(cache, u, shown.urls[u])]
     weight = sum(e["copy"]["bytes"] for e in originals.values() if e.get("copy"))
+    kinds = {}
+    for url_kinds in shown.linked.values():
+        kind = sorted(url_kinds)[0]
+        kinds[kind] = kinds.get(kind, 0) + 1
+    linked = ", ".join(f"{k} {n:,}" for k, n in sorted(kinds.items())) or "none"
     return (f"{len(copied):,} of {len(over):,} portraits over the caps shown as a copy made here "
             f"({weight / 1e6:.1f} MB under {PHOTOS_DIR}); "
             f"{sum(1 for u in shown.urls if (originals.get(u) or {}).get('read')):,} of "
-            f"{len(shown.urls):,} addresses weighed; {len(shown.linked):,} legislators' portraits "
-            f"on no government's host drawn from their own host, never copied")
+            f"{len(shown.urls):,} addresses weighed; {len(shown.linked):,} portraits on no host "
+            f"this site copies from ({linked}) drawn from their own host, never copied")
 
 
 def problems(cache, root=".", shown=None, files=True):

@@ -430,7 +430,9 @@ class TestOfficerPhotos(unittest.TestCase):
     def test_a_photograph_is_given_while_the_roster_names_its_person(self):
         code, office, photo = self.entry()
         entry = {office: {"name": photo["name"]}}
-        self.assertEqual(stategov.officer_photos(code, entry), [])
+        # The state's other offices' entries speak of their own holders.
+        self.assertEqual([p for p in stategov.officer_photos(code, entry)
+                          if p.startswith(f"{code} {office}:")], [])
         self.assertEqual(entry[office]["photo"], photo["photo"])
         self.assertEqual(entry[office]["photoBy"], photo["by"])
         self.assertEqual(entry[office]["photoPage"], photo["page"])
@@ -475,6 +477,29 @@ class TestOfficerPhotos(unittest.TestCase):
                 self.assertRegex(photo["checked"], r"^\d{4}-\d{2}-\d{2}$")
                 self.assertEqual(too_heavy(photo["weight"]), "")
                 self.assertLessEqual(photo["weight"]["bytes"], 300_000)
+
+    def test_an_associations_card_is_matched_on_its_state_and_name_never_its_file(self):
+        """NAAG's roster names each attorney general and the state beside
+        the photograph; its files are not evidence (West Virginia's is
+        "ag-WA-McCusker"). Every NAAG entry quotes a card naming its own
+        state and the holder's surname, and is the card's own small size."""
+        from kyc.overrides import OFFICER_PHOTOS
+        from kyc.pages import state_name
+        naag = {k: v for k, v in OFFICER_PHOTOS.items()
+                if v["by"] == "National Association of Attorneys General"}
+        self.assertTrue(naag)
+        for (code, office), photo in naag.items():
+            with self.subTest(code=code):
+                self.assertEqual(office, "ag")
+                card = photo["evidence"].split('card reads "', 1)[1].split('"', 1)[0]
+                self.assertTrue(card.endswith(" " + state_name(code)), card)
+                self.assertIn(photo["name"].split()[-1], card)
+                self.assertLessEqual(max(photo["weight"]["width"], photo["weight"]["height"]), 300)
+                # The file's own name is never the evidence: no entry's
+                # state comes from it (West Virginia's card, filed
+                # "ag-WA-McCusker", was dropped on 2026-10-25 once its
+                # office's own photograph was shown smaller, rule 87).
+                self.assertNotIn("card reads \"" + photo["photo"], photo["evidence"])
 
     def test_no_headshot_or_photograph_is_shown_uncredited(self):
         payload, _ = stategov.build(ROOT)

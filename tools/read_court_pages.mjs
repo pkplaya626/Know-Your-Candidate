@@ -9,6 +9,9 @@
 //    "title", "read", "error"}}}
 // `python build_profile_site.py courts` runs this and reads what it wrote
 // with each court's recipe (kyc/courts.py); nothing is guessed from it.
+// `enrich` runs it too, for campaign sites whose portrait only a browser
+// draws (kyc/enrich.py render_portraits), and reads each page by the same
+// rules as a plain read (rule 38).
 //
 // No dependencies: Node's own WebSocket (Node 22 or later) speaks the
 // DevTools protocol to Chrome. Chrome is found from $CHROME, then the usual

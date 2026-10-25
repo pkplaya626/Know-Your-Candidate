@@ -116,6 +116,9 @@ class TestBoxes(unittest.TestCase):
             decls = block(text, selector)
             self.assertEqual(photocopies.BOXES[kind], (px(decls, "width"), px(decls, "height")),
                              selector)
+        for kind in ("justice", "candidate"):
+            decls = block(text, ".gov-photo")
+            self.assertEqual(photocopies.BOXES[kind], (px(decls, "width"), px(decls, "height")), kind)
         fed = block(text, ".fed-photo")
         self.assertLessEqual(px(fed, "width"), photocopies.BOXES["federal"][0])
         self.assertLessEqual(px(fed, "height"), photocopies.BOXES["federal"][1])
@@ -538,6 +541,97 @@ class TestAttach(unittest.TestCase):
                          "https://candidates.example.org/photos/abc.jpg?v=0123456789")
         self.assertEqual(share.og_photo(dict(person, photoCopy=None), "candidates.example.org"),
                          HEAVY)
+
+
+class TestStateGovHook(unittest.TestCase):
+    """PR #135's photographs - a justice's from the court's own pages, a
+    statewide candidate's - go through the same copies (rule 101): only from
+    a government's host or the body's own, each copy for the person it
+    shows, credited as the original."""
+
+    COURT = "https://www.gasupreme.us/wp-content/uploads/justice.png"
+    GUIDE = "https://www.azcleanelections.gov/Uploads/candidate.jpg"
+    NGA = "https://www.nga.org/wp-content/uploads/headshot.jpg"
+    CAMPAIGN = "https://smithforgovernor.com/headshot.png"
+
+    def payload(self):
+        return {"states": {"GA": {
+            "governor": {"name": "Pat Holder", "headshot": self.NGA,
+                         "headshotBy": "National Governors Association"},
+            "court": {"url": "https://www.gasupreme.us/court-information/biographies/",
+                      "photos": {"Jane Roe": {"photo": self.COURT,
+                                              "page": "https://www.gasupreme.us/roe/"},
+                                 "John Doe": {"photo": "https://i0.wp.com/x.org/doe.png",
+                                              "page": "https://www.gasupreme.us/doe/"}}},
+            "ballot2026": {"offices": {"governor": {"up": True, "candidates": {"candidates": [
+                {"name": "Pat Holder", "photo": self.NGA,
+                 "photoCredit": {"by": "National Governors Association", "page": "https://www.nga.org/"}},
+                {"name": "Ann Guide", "photo": self.GUIDE,
+                 "photoCredit": {"by": "Arizona Citizens Clean Elections Commission"}},
+                {"name": "Sam Smith", "photo": self.CAMPAIGN, "photoCredit": {"by": "smithforgovernor.com"}},
+                {"name": "Wiki Person", "photo": WIKI, "photoCredit": {"licence": "CC BY 2.0"}},
+            ]}}}}}}}
+
+    def cache(self, *pairs):
+        return {"originals": {url: {"bytes": 4_000_000, "copy": {
+            "file": "abc.jpg", "sha256": "0123456789abcdef", "box": [216, 216], "for": list(keys)}}
+            for url, keys in pairs}}
+
+    def test_only_a_governments_or_the_bodys_own_host(self):
+        own = ("www.gasupreme.us",)
+        self.assertTrue(photocopies.may_copy(self.COURT, "justice", "GA", own))
+        self.assertFalse(photocopies.may_copy(self.COURT, "justice", "GA"))
+        self.assertTrue(photocopies.may_copy("https://www.azcourts.gov/j.jpg", "justice"))
+        self.assertFalse(photocopies.may_copy("https://i0.wp.com/x.org/doe.png", "justice", "GA", own))
+        self.assertFalse(photocopies.may_copy(WIKI, "justice", "GA", ("upload.wikimedia.org",)))
+        self.assertTrue(photocopies.may_copy(self.GUIDE, "candidate"))
+        self.assertFalse(photocopies.may_copy(self.CAMPAIGN, "candidate"))
+        self.assertFalse(photocopies.may_copy("https://www.ajc.com/photo.jpg", "candidate"))
+        self.assertFalse(photocopies.may_copy(self.NGA, "candidate"))
+        self.assertTrue(photocopies.may_copy(self.NGA, "candidate", own=("www.nga.org",)))
+
+    def test_every_photograph_the_state_pages_show_is_walked_once(self):
+        walked = {(kind, key): (url, credited, own) for _rec, url, kind, key, _code, credited, own
+                  in photocopies.stategov_photos(self.payload())}
+        self.assertEqual(walked[("justice", "justice:GA:court:Jane Roe")],
+                         (self.COURT, True, ("www.gasupreme.us",)))
+        # The holder's office photograph, as the holder's card may be copied.
+        self.assertEqual(walked[("candidate", "candidate:GA:governor:Pat Holder")],
+                         (self.NGA, True, ("www.nga.org",)))
+        self.assertEqual(walked[("candidate", "candidate:GA:governor:Sam Smith")],
+                         (self.CAMPAIGN, True, ()))
+        self.assertIn(("governor", "governor:GA:Pat Holder"), walked)
+        self.assertEqual(len(walked), 7)
+
+    def test_a_copy_is_attached_for_the_person_it_was_made_for(self):
+        payload = self.payload()
+        cache = self.cache((self.COURT, ["justice:GA:court:Jane Roe"]),
+                           (self.GUIDE, ["candidate:GA:governor:Someone Else"]),
+                           (self.CAMPAIGN, ["candidate:GA:governor:Sam Smith"]),
+                           (self.NGA, ["governor:GA:Pat Holder", "candidate:GA:governor:Pat Holder"]))
+        self.assertEqual(photocopies.apply_stategov(payload, cache), 3)
+        entry = payload["states"]["GA"]
+        shot = entry["court"]["photos"]["Jane Roe"]
+        self.assertEqual(shot["photoCopy"], {"src": "photos/abc.jpg?v=0123456789", "of": self.COURT,
+                                             "ofBytes": 4_000_000})
+        rows = {r["name"]: r for r in entry["ballot2026"]["offices"]["governor"]["candidates"]["candidates"]}
+        self.assertEqual(rows["Pat Holder"]["photoCopy"]["of"], self.NGA)
+        self.assertIn("photoCopy", entry["governor"])
+        self.assertNotIn("photoCopy", rows["Ann Guide"], "made for someone else")
+        self.assertNotIn("photoCopy", rows["Sam Smith"], "a campaign's file is not hosted here")
+        self.assertNotIn("photoCopy", rows["Wiki Person"])
+
+    def test_the_checks_see_them(self):
+        payload = self.payload()
+        rows = payload["states"]["GA"]["ballot2026"]["offices"]["governor"]["candidates"]["candidates"]
+        rows[2]["photoCopy"] = {"src": "photos/abc.jpg", "of": self.CAMPAIGN}
+        shown = photocopies.Shown().add_stategov(payload)
+        self.assertIn(self.COURT, shown.urls)
+        self.assertIn(self.GUIDE, shown.urls)
+        self.assertEqual(shown.urls[self.NGA]["kinds"], {"governor", "candidate"})
+        self.assertEqual(shown.linked, {self.CAMPAIGN: {"candidate"},
+                                        "https://i0.wp.com/x.org/doe.png": {"justice"}})
+        self.assertEqual([c for _, c, _ in shown.issues], ["photo-copy-host"])
 
 
 class TestJusticesYears(unittest.TestCase):

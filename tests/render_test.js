@@ -1139,6 +1139,18 @@ async function testDirectory() {
       KYC.profile.close();
     }
 
+    // A nominee who sits in their state's legislature: its own photograph,
+    // credited to the legislature by its name and linked to their page.
+    const legislature = shown.find((p) => p.photoSource === "state-legislature");
+    if (legislature) {
+      KYC.profile.open(legislature.id);
+      check("a legislature's photograph is credited to it by name, linked to the member's page",
+        line().textContent === "Photo: " + legislature.photoCredit.by &&
+          !!line().querySelector('a[href="' + legislature.photoCredit.page + '"]'),
+        line().textContent);
+      KYC.profile.close();
+    }
+
     const silhouette = window.legislatorsData.find((p) => (p.photos || [])[0] === "placeholder");
     if (silhouette) {
       KYC.profile.open(silhouette.id);
@@ -1928,9 +1940,11 @@ async function testDirectoryAsync() {
     const quoted = window.legislatorsData.find((p) => p.campaignQuote);
     check("built profiles carry campaign descriptions", !!quoted);
     const pictured = window.legislatorsData.filter((p) => p.photoSource === "campaign-site");
-    check("a portrait from a campaign site is only ever a filed candidate's",
-      pictured.every((p) => p.source === "fec-field" && p.isCandidate),
-      pictured.filter((p) => p.source !== "fec-field").map((p) => p.id).join(","));
+    // A challenger's, filed or curated (Brian Bengs's sat unused in the
+    // cache); never a sitting member's, whose portrait comes by their id.
+    check("a portrait from a campaign site is only ever a challenger's",
+      pictured.every((p) => p.isCandidate && !p.bioguide),
+      pictured.filter((p) => !p.isCandidate || p.bioguide).map((p) => p.id).join(","));
   });
 
   suite("index.html — in this race", () => {
@@ -2774,8 +2788,11 @@ async function testStates() {
       /^In surname order, not ballot order\. (Names are written [^.]*\. )?Source: the Georgia Secretary of State’s list of November candidates \(read /.test(source.textContent) &&
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
-    check("no portrait, no profile link, no money (rules 24, 25, 27)",
-      !block.querySelector("img, a[href*='#/profile/']") && !/\$/.test(block.textContent));
+    // A photograph only by rule 91's routes, each with whose it is beside it.
+    check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
+      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
+        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-candidate-photo") &&
+          /^Photo: ./.test((img.parentNode.querySelector(".gov-photo-credit") || {}).textContent || "")));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -8807,13 +8824,94 @@ async function testStateGov() {
     check("says the territory has none", /The territory has no secretary of state/.test(text), text.slice(0, 300));
   });
 
+  /* A photograph beside a statewide candidate and a justice, each with
+   * whose it is (rules 87 and 91; STATEGOV-13). Drawn from a copy of
+   * Georgia's own record with one photograph given, so the check holds
+   * whoever the caches picture today. */
+  const gaPhotos = await buildPage("states/ga.html");
+  suite("state pages — candidates' and justices' photographs, each credited", () => {
+    const { window } = gaPhotos;
+    const sg = window.kycStateGov.states.GA;
+    const item = sg.ballot2026.offices.governor;
+    const list = item && item.candidates && item.candidates.candidates;
+    const court = sg.court;
+    if (!list || !court || !court.members || !court.members.length) {
+      check("Georgia lists its governor's candidates and its justices", false);
+      return;
+    }
+    const saved = JSON.stringify({ list, photos: court.photos || null });
+    const printed = list.filter((p) => !p.writeIn);
+    printed.forEach((p) => { delete p.photo; delete p.photoCredit; });
+    printed[0].photo = "https://commons.example/thumb/250px-A.jpg";
+    printed[0].photoCredit = { by: "Jane Photographer", licence: "CC BY-SA 4.0",
+      licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0", page: "https://commons.example/A",
+      via: "Wikimedia Commons" };
+    if (printed[1]) {
+      printed[1].photo = "https://www.azcleanelections.gov/Custom/Picture/2427";
+      printed[1].photoCredit = { by: "Arizona Citizens Clean Elections Commission",
+        page: "https://www.azcleanelections.gov/Custom/CandidateList?location=" };
+    }
+    court.photos = {};
+    court.photos[court.members[0]] = { photo: "https://court.example/j.jpg", page: "https://court.example/bio" };
+    const box = window.document.createElement("div");
+    box.innerHTML = window.KYC.stategov.render("GA", { links: false });
+    // The governor's list: the card's first (the other offices' lists picture no one here).
+    const block = box.querySelector(".gov-candidates");
+    const rows = [...block.querySelectorAll(".gov-candidate-list:not(.gov-writein-list) .gov-candidate")];
+    const first = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[0].name);
+    check("a candidate's photograph is drawn beside their name",
+      !!first && !!first.querySelector('img.gov-candidate-photo[src="' + printed[0].photo + '"]'));
+    check("with whose it is: author, licence and Commons",
+      !!first && /^Photo: Jane Photographer, CC BY-SA 4\.0, via Wikimedia Commons$/.test(
+        first.querySelector(".gov-photo-credit").textContent), first && first.textContent);
+    if (printed[1]) {
+      const second = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[1].name);
+      check("an official guide's photograph names the guide, linked to its page",
+        !!second && !!second.querySelector('.gov-photo-credit a[href^="https://www.azcleanelections.gov/"]'));
+    }
+    const bare = rows.filter((li) => !li.querySelector("img"));
+    check("a candidate without one keeps the column, an empty circle, and no credit",
+      bare.every((li) => li.querySelector(".gov-photo-none") && !li.querySelector(".gov-photo-credit")),
+      bare.length);
+    check("no photograph is ever drawn without its credit",
+      [...box.querySelectorAll("img.gov-photo")].every((img) =>
+        img.parentNode.querySelector(".gov-photo-credit")));
+    const member = box.querySelector(".gov-court-member");
+    check("a justice's photograph is credited to the court, linked to the page it was read on",
+      !!member && !!member.querySelector('img.gov-court-photo') &&
+        member.querySelector(".gov-photo-credit").textContent ===
+          "Photo: " + court.name + " of " + window.KYC.stateName("GA") &&
+        member.querySelector(".gov-photo-credit a").getAttribute("href") === "https://court.example/bio");
+    // One credit implementation for every photograph (rule 12, PR #135
+    // review): the justices' line is KYC.photoCreditHtml's, as a
+    // candidate's is.
+    check("a justice's credit is KYC.photoCreditHtml's own line",
+      !!member && member.querySelector(".gov-photo-credit").innerHTML ===
+        window.KYC.photoCreditHtml({ by: court.name + " of " + window.KYC.stateName("GA"),
+          page: "https://court.example/bio" }));
+    check("the justice's name and title still read first",
+      !!member && member.querySelector(".gov-court-name").textContent.indexOf(court.members[0]) === 0);
+    // A photograph that fails to load takes its credit with it.
+    window.document.body.appendChild(box);
+    const img = box.querySelector("img.gov-candidate-photo");
+    img.dispatchEvent(new window.Event("error"));
+    check("a photograph that fails to load leaves the circle and no credit",
+      !!first && !first.querySelector("img") && !!first.querySelector(".gov-photo-none") &&
+        !first.querySelector(".gov-photo-credit"));
+    box.remove();
+    // Put the record back as it was for the suites after this one.
+    const back = JSON.parse(saved);
+    list.splice(0, list.length, ...back.list);
+    if (back.photos) court.photos = back.photos; else delete court.photos;
+  });
+
   const tx = await buildPage("states/tx.html");
   const al = await buildPage("states/al.html");
   const ut = await buildPage("states/ut.html");
   suite("state pages — each state's highest court", () => {
     const court = tx.window.kycStateGov.states.TX.court;
     const section = tx.D.getElementById("state-government");
-    const names = [...section.querySelectorAll(".gov-court-member")].map((li) => li.textContent);
+    const names = [...section.querySelectorAll(".gov-court-name")].map((li) => li.textContent);
     check("the court's members are listed, as the court lists them",
       court.members.every((m) => names.some((n) => n.indexOf(m) === 0)), names.join("; "));
     check("the chief comes first, marked as chief", /Chief Justice$/.test(names[0]) &&
@@ -8842,7 +8940,7 @@ async function testStateGov() {
   suite("state pages — a court read by hand, or from a dated roster file", () => {
     const court = ny.window.kycStateGov.states.NY.court;
     const nyText = ny.D.getElementById("state-government").textContent;
-    const nyNames = [...ny.D.querySelectorAll("#state-government .gov-court-member")].map((li) => li.textContent);
+    const nyNames = [...ny.D.querySelectorAll("#state-government .gov-court-name")].map((li) => li.textContent);
     check("New York's judges are listed, with the chief judge first",
       !!court && court.members.length > 0 && nyNames.length === court.members.length &&
       nyNames[0].indexOf(court.chief) === 0 && /Chief Judge$/.test(nyNames[0]), nyNames.join("; "));
@@ -11934,7 +12032,8 @@ async function testSharePages() {
             ? url === "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/" + copy.src
             : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
               (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
-            (p.photoSource === "campaign-site" && !!p.photoCredit)));
+            ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature") &&
+              !!p.photoCredit)));
       if (!ok || /Special:/.test(url)) images.push(`${p.id}: ${url}`);
       if (!/social-card/.test(url)) photos += 1;
     });
@@ -15126,6 +15225,60 @@ async function testPhotoCopies() {
       }
       if (off) off.photoCopy = keep[0];
       gov.photoCopy = keep[1];
+    });
+    window.close();
+  }
+  {
+    // #135's photographs go through the same copies (rule 101): a justice's
+    // from the court's own pages and a statewide candidate's.
+    const { window, D, errors } = await buildPage("states/az.html");
+    const KYC = window.KYC;
+    suite("states/az.html — a justice's and a statewide candidate's photograph, as the copy made here", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const s = window.kycStateGov.states.AZ;
+      const court = s.court || {};
+      const name = Object.keys(court.photos || {})[0];
+      const shot = name && court.photos[name];
+      const rows = Object.values((s.ballot2026 || {}).offices || {})
+        .flatMap((item) => ((item.candidates || {}).candidates || []));
+      const row = rows.find((p) => p.photo && p.photoCredit && !p.writeIn);
+      check("Arizona shows a justice's and a candidate's photograph to copy", !!shot && !!row);
+      if (!shot || !row) return;
+      const keep = [shot.photoCopy, row.photoCopy];
+      shot.photoCopy = { src: COPY, of: shot.photo, ofBytes: 2400000 };
+      row.photoCopy = { src: COPY, of: row.photo };
+      const host = D.createElement("div");
+      host.innerHTML = KYC.stategov.render("AZ");
+      const justice = [...host.querySelectorAll(".gov-court-photo")].find((img) =>
+        img.getAttribute("data-photo-original") === shot.photo);
+      const candidate = [...host.querySelectorAll(".gov-candidate-photo")].find((img) =>
+        img.getAttribute("data-photo-original") === row.photo);
+      check("the justice's row loads the copy, and knows its original",
+        !!justice && justice.getAttribute("src") === "../" + COPY);
+      check("the candidate's row loads the copy, and knows its original",
+        !!candidate && candidate.getAttribute("src") === "../" + COPY);
+      const note = (img) => img && img.closest("li").querySelector(".photo-copy-note");
+      check("the justice's credit stays the court's and says it is a copy made here, with the weight",
+        !!note(justice) && /^Photo: Supreme Court of Arizona; a smaller copy made by this site of the original file \(2\.4 MB\)$/
+          .test(justice.closest("li").querySelector(".gov-photo-credit").textContent),
+        justice && justice.closest("li").querySelector(".gov-photo-credit").textContent);
+      check("the candidate's credit says it is a copy made here", !!note(candidate));
+      D.body.appendChild(host);
+      justice.dispatchEvent(new window.Event("error"));
+      check("a justice's copy that fails gives way to the original, and stops calling it a copy",
+        host.contains(justice) && justice.getAttribute("src") === shot.photo && !note(justice) &&
+        /^Photo: Supreme Court of Arizona$/.test(
+          justice.closest("li").querySelector(".gov-photo-credit").textContent));
+      host.remove();
+      shot.photoCopy = { src: COPY, of: "https://www.azcourts.gov/another.jpg" };
+      row.photoCopy = { src: COPY, of: "https://www.azcleanelections.gov/another.jpg" };
+      host.innerHTML = KYC.stategov.render("AZ");
+      check("a copy of another address is never drawn for a justice or a candidate",
+        host.innerHTML.indexOf(COPY) === -1 && host.querySelectorAll(".photo-copy-note").length === 0);
+      shot.photoCopy = keep[0];
+      row.photoCopy = keep[1];
+      if (!shot.photoCopy) delete shot.photoCopy;
+      if (!row.photoCopy) delete row.photoCopy;
     });
     window.close();
   }

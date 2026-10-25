@@ -453,7 +453,7 @@ class TestStale(unittest.TestCase):
             with open(os.path.join(root, courts.CACHE_PATH), "w", encoding="utf-8") as handle:
                 json.dump({"fetched": "2026-08-01T10:00:00+00:00",
                            "courts": {"CT": dict(court), "MA": dict(court, read="2026-07-01")}}, handle)
-            courts.fetch = lambda codes=None, pause=1.0, root=".": ({}, [])
+            courts.fetch = lambda codes=None, pause=1.0, root=".", pages=None: ({}, [])
             out = io.StringIO()
             for _ in range(2):
                 with contextlib.redirect_stdout(out), contextlib.redirect_stderr(io.StringIO()):
