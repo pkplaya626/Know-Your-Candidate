@@ -512,7 +512,28 @@ class TestAttach(unittest.TestCase):
                         (news, False), ("https://images.squarespace-cdn.com/p.jpg", False),
                         ("https://senatedems.com/p.jpg", False), (WIKI, False)):
             self.assertEqual(photocopies.may_copy(url, "legislator", "OK"), ok, url)
-        self.assertTrue(photocopies.may_copy("https://bobsmithforcongress.com/p.jpg", "person"))
+        # A campaign's file is never hosted here: the owner's decision of
+        # 2026-10-25 was for official photographs (rule 101). A profile's
+        # is copied only from a government's host, the legislature's, or
+        # their own party caucus's where the card credits it to the caucus.
+        for kind in ("person", "legislator"):
+            self.assertFalse(photocopies.may_copy("https://bobsmithforcongress.com/p.jpg", kind, "TX"))
+            self.assertFalse(photocopies.may_copy(
+                "https://assets.nationbuilder.com/marysilva4congress/x.jpg", kind, "WA"))
+        self.assertTrue(photocopies.may_copy("https://clerk.house.gov/images/members/M001212.jpg",
+                                             "person", "AL"))
+        self.assertTrue(photocopies.may_copy(
+            "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg", "person", "MO"))
+        self.assertFalse(photocopies.may_copy(
+            "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg".replace(
+                "www.senate.mo.gov", "brattinforcongress.com"), "person", "MO"))
+        mccann = "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann.jpg"
+        credit = {"by": "Michigan Senate Democrats", "caucus": True}
+        for kind in ("person", "legislator"):
+            self.assertTrue(photocopies.may_copy(mccann, kind, "MI",
+                                                 photocopies.caucus_own(mccann, credit)))
+            self.assertFalse(photocopies.may_copy(mccann, kind, "MI",
+                                                  photocopies.caucus_own(mccann, {"host": "x"})))
         cache = {"originals": {news: dict(self.cache["originals"][HEAVY])}}
         member = {"id": "ocd-person/1", "image": news}
         self.assertFalse(photocopies.attach(member, news, cache, "legislator", code="IL"))
@@ -532,6 +553,24 @@ class TestAttach(unittest.TestCase):
         self.assertEqual(photocopies.apply_people(people, cache), 1)
         self.assertIn("photoCopy", people[0])
         self.assertNotIn("photoCopy", people[1])
+
+    def test_a_campaigns_portrait_is_shown_from_its_own_host_never_copied(self):
+        # Four campaign portraits were copied before 2026-10-25 (Mary Silva's,
+        # WA-1); the owner's decision was for official photographs only.
+        campaign = "https://assets.nationbuilder.com/marysilva4congress/pages/29/Mary_Silva_-_8.jpg"
+        entry = dict(self.cache["originals"][HEAVY],
+                     copy=dict(self.cache["originals"][HEAVY]["copy"], box=[540, 675],
+                               **{"for": ["person:FEC_H4WA01282"]}))
+        cache = {"originals": {campaign: entry}}
+        person = {"id": "FEC_H4WA01282", "state": "WA", "photos": [campaign],
+                  "photoSource": "campaign-site", "photoCredit": {"by": "marysilva4congress.com"},
+                  "photoCopy": {"src": "photos/old.jpg", "of": campaign}}
+        self.assertEqual(photocopies.apply_people([person], cache), 0)
+        self.assertNotIn("photoCopy", person)
+        shown = photocopies.Shown().add_people([person])
+        self.assertEqual(shown.linked, {campaign: {"person"}})
+        # Its old copy is an orphan, which the 'photocopies' command removes.
+        self.assertNotIn(campaign, shown.urls)
 
     def test_a_shared_profile_unfurls_with_the_copy_on_the_sites_host(self):
         person = {"photo_url": HEAVY, "photoSource": "campaign-site",

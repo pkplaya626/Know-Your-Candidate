@@ -168,25 +168,111 @@ LEGISLATURE_HOSTS = {
 # was read on 2026-10-17 and its own title names the caucus (gophouse.org,
 # asmrc.org and the Delaware sites refused a script, and are the caucuses'
 # addresses on the legislatures' own member lists).
-# ``(host, path prefix, chamber, the caucus's name)``; a host beginning
-# with "." is every subdomain of it (California's "a14.asmdc.org").
+#
+# A caucus's photograph of its own member is shown too, credited to the
+# caucus by this name (the owner, 2026-10-25: "we can credit caucus"),
+# only on the chamber's caucus of the member's own party (``caucus_photo``).
+# The hosts only Open States's photographs named - Michigan's Senate
+# Republicans, Delaware's House and Senate Republicans, Washington's,
+# Pennsylvania's and Tennessee's - were added on 2026-10-25 from the
+# legislator files' image hosts, each title read that day. nhhousedems.org
+# is not one: its title is "New Hampshire House Dems Victory Committee", a
+# campaign committee's, so its files stay "as listed by Open States".
+# ``(host, path prefix, chamber, the caucus's name, its party's key, the
+# evidence: its own page title and the day read)``; a host beginning with
+# "." is every subdomain of it (California's "a14.asmdc.org").
 CAUCUS_SITES = {
-    "AL": (("alsenaterepublicans.org", "/", "upper", "Alabama Senate Republican Caucus"),),
-    "CA": ((".asmdc.org", "/", "lower", "Assembly Democratic Caucus"),
-           (".asmrc.org", "/", "lower", "Assembly Republican Caucus")),
-    "CT": (("housedems.ct.gov", "/", "lower", "Connecticut House Democrats"),
-           ("cthousegop.com", "/", "lower", "Connecticut House Republicans"),
-           ("senatedems.ct.gov", "/", "upper", "Connecticut Senate Democrats"),
-           ("ctsenaterepublicans.com", "/", "upper", "Connecticut Senate Republicans")),
-    "DE": (("housedems.delaware.gov", "/members/", "lower", "Delaware House Democrats"),
-           ("senatedems.delaware.gov", "/members/", "upper", "Delaware Senate Democrats")),
-    "IN": (("indianahouserepublicans.com", "/members/", "lower", "Indiana House Republicans"),
-           ("indianasenaterepublicans.com", "/", "upper", "Indiana Senate Republicans"),
-           ("indianasenatedemocrats.org", "/", "upper", "Indiana Senate Democrats")),
-    "MI": (("housedems.com", "/", "lower", "Michigan House Democrats"),
-           ("gophouse.org", "/", "lower", "Michigan House Republicans"),
-           ("senatedems.com", "/", "upper", "Michigan Senate Democrats")),
+    "AL": (("alsenaterepublicans.org", "/", "upper", "Alabama Senate Republican Caucus", "R",
+            "title 'Alabama Senate Republican Caucus', read 2026-10-25"),),
+    "CA": ((".asmdc.org", "/", "lower", "Assembly Democratic Caucus", "D",
+            "title 'Assembly Democratic Caucus', read 2026-10-25"),
+           (".asmrc.org", "/", "lower", "Assembly Republican Caucus", "R",
+            "the Assembly's member list links it; it refused a script on 2026-10-17 and "
+            "on 2026-10-25 (403)")),
+    "CT": (("housedems.ct.gov", "/", "lower", "Connecticut House Democrats", "D",
+            "title 'Home | Connecticut House Democrats', read 2026-10-25"),
+           ("cthousegop.com", "/", "lower", "Connecticut House Republicans", "R",
+            "title 'Connecticut House Republicans', read 2026-10-25"),
+           ("senatedems.ct.gov", "/", "upper", "Connecticut Senate Democrats", "D",
+            "title 'Home - Connecticut Senate Democrats', read 2026-10-25"),
+           ("ctsenaterepublicans.com", "/", "upper", "Connecticut Senate Republicans", "R",
+            "title 'Home - Connecticut Senate Republicans', read 2026-10-25")),
+    "DE": (("housedems.delaware.gov", "/members/", "lower", "Delaware House Democrats", "D",
+            "title 'Home - House Democrats', read 2026-10-25"),
+           ("senatedems.delaware.gov", "/members/", "upper", "Delaware Senate Democrats", "D",
+            "title 'Home - Senate Democrats', read 2026-10-25"),
+           ("housegop.delaware.gov", "/members/", "lower", "Delaware House Republicans", "R",
+            "title 'Home - House Republicans', read 2026-10-25"),
+           ("senategop.delaware.gov", "/members/", "upper", "Delaware Senate Republicans", "R",
+            "title 'Home - Senate Republicans', read 2026-10-25")),
+    "IN": (("indianahouserepublicans.com", "/members/", "lower", "Indiana House Republicans", "R",
+            "title 'Indiana House Republicans', read 2026-10-25"),
+           ("indianasenaterepublicans.com", "/", "upper", "Indiana Senate Republicans", "R",
+            "title 'Indiana Senate Republicans', read 2026-10-25"),
+           ("indianasenatedemocrats.org", "/", "upper", "Indiana Senate Democrats", "D",
+            "title 'Indiana Senate Democrats - Official Democratic Caucus Website', "
+            "read 2026-10-25")),
+    "MI": (("housedems.com", "/", "lower", "Michigan House Democrats", "D",
+            "title 'Home - Michigan House Democrats', read 2026-10-25"),
+           ("gophouse.org", "/", "lower", "Michigan House Republicans", "R",
+            "title 'Home | Michigan House Republicans', read 2026-10-25"),
+           ("senatedems.com", "/", "upper", "Michigan Senate Democrats", "D",
+            "title 'Michigan Senate Democrats', read 2026-10-25"),
+           ("misenategop.com", "/", "upper", "Michigan Senate Republicans", "R",
+            "title 'Michigan Senate Republicans', read 2026-10-25")),
+    "PA": (("pahouse.com", "/", "lower", "Pennsylvania House Democratic Caucus", "D",
+            "title 'Pennsylvania House Democratic Caucus | Homepage', read 2026-10-25"),),
+    "TN": (("tnhousegop.org", "/", "lower", "Tennessee House Republican Caucus", "R",
+            "title 'Tennessee House Republican Caucus', read 2026-10-25"),),
+    "WA": ((".houserepublicans.wa.gov", "/", "lower", "Washington State House Republicans", "R",
+            "title 'Home | Washington State House Republicans' (houserepublicans.wa.gov; "
+            "each member's own site is a subdomain of it), read 2026-10-25"),
+           ("housedemocrats.wa.gov", "/", "lower", "Washington State House Democrats", "D",
+            "title 'Washington State House Democrats', read 2026-10-25"),
+           ("senatedemocrats.wa.gov", "/", "upper", "Washington Senate Democrats", "D",
+            "title 'Home - Washington Senate Democrats', read 2026-10-25")),
 }
+
+# Words of a file's name that say it is not one member's own photograph: a
+# group's, a leadership team's, a banner's (the owner, 2026-10-25: a
+# caucus's file is shown only where it is that member's alone).
+_NOT_ONE_MEMBER = {"group", "groups", "leadership", "leaders", "leader", "team", "staff",
+                   "banner", "logo", "caucus", "delegation", "members", "officers", "cover",
+                   "hero", "header", "event", "events", "rally"}
+
+
+def caucus_photo(code, record, url):
+    """The name of the caucus whose photograph of *record* *url* is, or
+    ``None``: a host ``CAUCUS_SITES`` lists for the state, of the member's
+    own chamber and party (``partyKey``, a fusion line's first party), for
+    a file Open States gives this member alone (``imageShared``, rule 100)
+    and whose name does not call it a group's, a leader's or a banner. The
+    owner's decision of 2026-10-25 ("we can credit caucus") shows a
+    caucus's photograph of its own member, credited to the caucus; another
+    party's caucus, another chamber's, a host not in the table or a file
+    two members share is not credited to one."""
+    parts = urllib.parse.urlsplit(url or "")
+    host = (parts.hostname or "").lower()
+    if not host or record.get("imageShared"):
+        return None
+    name = urllib.parse.unquote(parts.path.rsplit("/", 1)[-1]).lower()
+    if set(re.split(r"[^a-z0-9]+", name)) & _NOT_ONE_MEMBER:
+        return None
+    for site, _prefix, chamber, caucus, party, _evidence in CAUCUS_SITES.get(code, ()):
+        bare = site.lstrip(".")
+        if ((host == bare or host.endswith("." + bare)) and chamber == record.get("chamber")
+                and party == record.get("partyKey")):
+            return caucus
+    return None
+
+
+def caucus_host(code, url):
+    """*url* is on a host ``CAUCUS_SITES`` lists for the state, of any
+    chamber or party."""
+    host = (urllib.parse.urlsplit(url or "").hostname or "").lower()
+    return bool(host) and any(host == s.lstrip(".") or host.endswith("." + s.lstrip("."))
+                              for s, *_rest in CAUCUS_SITES.get(code, ()))
+
 
 # A file, a download or a page about something other than the member.
 _NOT_A_PAGE = re.compile(r"\.(pdf|txt|csv|docx?|xlsx?|jpe?g|png|gif)$|ftpdocument|/downloads?/"
@@ -581,7 +667,7 @@ def _host_rank(hosts, host):
 
 
 def _caucus_site(code, host, path, chamber):
-    for site, prefix, theirs, caucus_name in CAUCUS_SITES.get(code, ()):
+    for site, prefix, theirs, caucus_name, *_rest in CAUCUS_SITES.get(code, ()):
         if (host == site or (site.startswith(".") and host.endswith(site))) \
                 and path.lower().startswith(prefix) and (chamber in (None, theirs)):
             return caucus_name
@@ -741,7 +827,10 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
 
 def card_photo(record, code="", page=None, photos=None):
     """The portrait a legislator's card shows: ``{"kind"}`` (``photo_kind``)
-    with ``"image"`` and, where the legislature serves it, ``"imageCredit"``.
+    with ``"image"`` and its ``"imageCredit"``: the legislature's where it
+    serves the file, the member's own party caucus's where a caucus in
+    ``CAUCUS_SITES`` does (``caucus_photo``, ``"caucus": True``), else where
+    Open States found it.
     *page* is the member's page (``pages_for``) and *photos* the
     ``legphotos`` cache. The one implementation of "the legislature's
     photograph of a member" (rule 12): the legislature pages draw it, and a
@@ -759,6 +848,16 @@ def card_photo(record, code="", page=None, photos=None):
             credit = {"by": legphotos.legislature_name(code)}
             if (page and page["kind"] == "member" and not page.get("session")
                     and legphotos.official_host(code, page["url"])):
+                credit["page"] = page["url"]
+            out["imageCredit"] = credit
+        elif caucus_photo(code, record, out["image"]):
+            # The member's own party caucus's photograph of them, credited to
+            # the caucus by its own name (the owner, 2026-10-25: "we can
+            # credit caucus"), and linked to their page on its site where
+            # that is the page the card links.
+            caucus = caucus_photo(code, record, out["image"])
+            credit = {"by": caucus, "caucus": True}
+            if page and page["kind"] == "caucus" and page.get("caucus") == caucus:
                 credit["page"] = page["url"]
             out["imageCredit"] = credit
         else:

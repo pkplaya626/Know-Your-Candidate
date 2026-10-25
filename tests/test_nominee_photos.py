@@ -459,6 +459,30 @@ class TestStateLegislature(unittest.TestCase):
                               legislator_photos=moved)
         self.assertEqual(profile["photos"], ["placeholder"])
 
+    def test_their_own_caucuss_photograph_credited_to_the_caucus(self):
+        # Sean McCann (MI) is shown his senatedems.com photograph, credited
+        # to the Michigan Senate Democrats (the owner, 2026-10-25: "we can
+        # credit caucus"); his only page is on the caucus's site.
+        page = "https://nmhousedems.example/zamora"
+        file = "https://nmhousedems.example/wp-content/uploads/Zamora-Headshot.jpg"
+        sites = {"NM": (("nmhousedems.example", "/", "lower", "New Mexico House Democrats", "D",
+                         "title 'New Mexico House Democrats', read 2026-10-25"),)}
+        theirs = roster_with(image=file, links=[page], party="Democratic", partyKey="D")
+        with unittest.mock.patch.dict(legislature.CAUCUS_SITES, sites):
+            record, counts = self.resolve(roster=theirs, url=file)
+            self.assertEqual(counts["legislature"], 1)
+            self.assertEqual((record["url"], record["page"]), (file, page))
+            self.assertEqual(record["credit"], {"by": "New Mexico House Democrats", "caucus": True,
+                                                "page": page})
+            self.assertIn("their own party's caucus", record["evidence"])
+            # Another party's caucus, or a file two members share, is not.
+            for member in ({"partyKey": "R", "party": "Republican"}, {"imageShared": True}):
+                other = roster_with(**dict({"image": file, "links": [page], "party": "Democratic",
+                                            "partyKey": "D"}, **member))
+                record, counts = self.resolve(roster=other, url=file)
+                self.assertIsNone(record, member)
+                self.assertEqual(counts["legislature"], 0)
+
     def test_a_file_the_card_does_not_show_or_off_the_legislatures_host_gives_nothing(self):
         for member in ({"image": None},                                   # nothing listed
                        {"imageShared": True},                             # another member's too

@@ -728,6 +728,79 @@ class TestRefreshAndBuild(unittest.TestCase):
         self.assertEqual(out["imageCredit"], {"host": "s3.amazonaws.com", "listedBy": "Open States"})
         self.assertNotIn("by", out["imageCredit"])
 
+    MCCANN = "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg"
+
+    def test_a_caucuss_photograph_of_its_own_member_is_credited_to_the_caucus(self):
+        # The owner, 2026-10-25: "we can credit caucus". Michigan's
+        # legislators' only photographs are their caucuses' (rule 100).
+        member = rec("Sean McCann", chamber="upper", district="19", image=self.MCCANN,
+                     links=["https://senatedems.com/mccann"])
+        page = {"url": "https://senatedems.com/mccann", "kind": "caucus",
+                "caucus": "Michigan Senate Democrats"}
+        out = legislature._person(member, "MI", 2026, pages={member["id"]: page},
+                                  photos={"people": {}})
+        self.assertEqual(out["image"], self.MCCANN)
+        self.assertEqual(out["imageCredit"], {"by": "Michigan Senate Democrats", "caucus": True,
+                                              "page": "https://senatedems.com/mccann"})
+        # Linked only to the member's own page on that caucus's site.
+        out = legislature._person(member, "MI", 2026, pages={member["id"]: None},
+                                  photos={"people": {}})
+        self.assertEqual(out["imageCredit"], {"by": "Michigan Senate Democrats", "caucus": True})
+        # A subdomain of a caucus's host is the caucus's (Washington's
+        # members' sites), and "www." is the host itself.
+        wa = rec("Rob Chase", image="https://robchase.houserepublicans.wa.gov/wp-content/uploads/"
+                 "2025/01/Rep-Chase_Rob-2025_900x1200.jpg", party="Republican", partyKey="R")
+        self.assertEqual(legislature.caucus_photo("WA", wa, wa["image"]),
+                         "Washington State House Republicans")
+        gop = rec("Joe Bellino", chamber="upper", party="Republican", partyKey="R",
+                  image="https://www.misenategop.com/wp-content/uploads/2023/01/Bellino-580x770.jpg")
+        self.assertEqual(legislature.caucus_photo("MI", gop, gop["image"]),
+                         "Michigan Senate Republicans")
+
+    def test_another_partys_or_chambers_caucus_or_a_shared_file_is_not_credited_to_it(self):
+        image = "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/X.jpg"
+        independent = rec("Pat Smith", party="Independent", partyKey="I", image=image)
+        self.assertIsNone(legislature.caucus_photo("IN", independent, image))
+        out = legislature._person(independent, "IN", 2026, pages={independent["id"]: None},
+                                  photos={"people": {}})
+        self.assertEqual(out["imageCredit"], {"host": "www.indianahouserepublicans.com",
+                                              "listedBy": "Open States"})
+        # The House caucus's file of a senator is not the Senate caucus's.
+        senator = rec("Pat Smith", chamber="upper", party="Republican", partyKey="R", image=image)
+        self.assertIsNone(legislature.caucus_photo("IN", senator, image))
+        # Another state's caucus of the same name is not this state's.
+        mccann = rec("Sean McCann", chamber="upper", image=self.MCCANN)
+        self.assertIsNone(legislature.caucus_photo("OH", mccann, self.MCCANN))
+        # A file Open States gives two members is neither's (rule 100),
+        # and one whose name calls it a group's or a leader's is not one
+        # member's own.
+        self.assertIsNone(legislature.caucus_photo("MI", dict(mccann, imageShared=True),
+                                                   self.MCCANN))
+        for name in ("Senate-Democratic-Leadership-2025.jpg", "caucus_group_photo.jpg",
+                     "Leader-Brinks-banner.jpg"):
+            url = "https://senatedems.com/wp-content/uploads/2025/01/" + name
+            self.assertIsNone(legislature.caucus_photo("MI", dict(mccann, image=url), url), name)
+
+    def test_a_host_not_in_the_table_reads_as_where_open_states_found_it(self):
+        # New Hampshire's House Dems Victory Committee is a campaign
+        # committee, not the caucus: never credited as one.
+        member = rec("Terri O'Rorke", image="https://nhhousedems.org/wp-content/uploads/2024/10/"
+                     "Terri-ORorke-768x1024.jpeg")
+        out = legislature._person(member, "NH", 2026, pages={member["id"]: None},
+                                  photos={"people": {}})
+        self.assertEqual(out["imageCredit"], {"host": "nhhousedems.org", "listedBy": "Open States"})
+
+    def test_every_caucus_in_the_table_says_its_party_and_its_evidence(self):
+        for code, sites in legislature.CAUCUS_SITES.items():
+            for host, prefix, chamber, name, party, evidence in sites:
+                self.assertIn(chamber, ("upper", "lower"), host)
+                self.assertIn(party, ("D", "R"), host)
+                self.assertTrue(prefix.startswith("/") and name, host)
+                # Its own page's title, or why none could be read, and the day.
+                self.assertRegex(evidence, r"2026-\d\d-\d\d", host)
+                # The caucus's name names its party.
+                self.assertRegex(name, {"D": "Democrat", "R": "Republican"}[party], host)
+
     def test_the_build_names_a_member_the_legislature_says_has_left(self):
         member = rec("D.J. Swearingen", district="89")
         cache = {"people": {member["id"]: {"withheld": "the chamber's directory lists the seat as vacant",

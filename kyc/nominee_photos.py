@@ -591,7 +591,9 @@ def legislator_for(profile, history, legislators):
 def card_photo(member, code, page=None, photos=None):
     """``(image, credit, evidence)``: the photograph the site's legislature
     page shows on *member*'s card (``legislature.card_photo``), when the
-    legislature serves it and credits it, or ``(None, None, why)``."""
+    legislature serves it and credits it, or the member's own party caucus
+    in that chamber does (``legislature.caucus_photo``), or ``(None, None,
+    why)``."""
     from . import legphotos
     from .legislature import card_photo as shown_on_card
 
@@ -608,12 +610,18 @@ def card_photo(member, code, page=None, photos=None):
         # 101's copies show it smaller (rule 100); no nominee on the
         # ballot was affected on 2026-10-25.
         return None, None, f"the legislature page shows no photograph of them ({shown['kind']})"
-    if not credit or not legphotos.official_host(code, image):
-        # A party caucus's photograph is the party's (rule 87, as rule 100
-        # says of Michigan): Sean McCann's card shows senatedems.com's file,
-        # uncredited, and his profile does not.
-        return None, None, "the photograph the card shows is not on the legislature's own host"
-    if shown["kind"] == "legislature":
+    caucus = bool(credit and credit.get("caucus"))
+    if not credit or not (legphotos.official_host(code, image) or caucus):
+        # Only the legislature's file, or the member's own party caucus's
+        # credited to it (``legislature.caucus_photo``; the owner,
+        # 2026-10-25: "we can credit caucus"): never a file Open States
+        # found on a news site, a campaign's or a county party's.
+        return None, None, ("the photograph the card shows is on neither the legislature's own "
+                            "host nor their caucus's")
+    if caucus:
+        evidence = (f"the file Open States lists for {member['name']} ({member['id']}), "
+                    f"served by the {credit['by']}, their own party's caucus in that chamber")
+    elif shown["kind"] == "legislature":
         entry = legphotos.entry_for(member, photos) or {}
         evidence = (f"{entry.get('evidence')} (the legislature's record of {member['name']}, "
                     f"read {entry.get('read')})")
@@ -811,10 +819,15 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 roster = (legislators.get("states") or {}).get(code) or []
                 pages[code] = pages_for(code, roster, year)[0]
             page = pages[code].get(member["id"])
-            if not page or page.get("kind") != "member":
-                log(f"    [skip] {profile['name']}: no page of theirs on the legislature's site")
+            if not page or page.get("kind") not in ("member", "caucus"):
+                log(f"    [skip] {profile['name']}: no page of theirs on the legislature's site "
+                    "or their caucus's")
                 continue
             image, credit, evidence = card_photo(member, code, page, legislator_photos)
+            if image and page["kind"] == "caucus" and credit.get("page") != page["url"]:
+                # Their page on a caucus's site ties only that caucus's file
+                # to them (Sean McCann's senatedems.com page and photograph).
+                image, evidence = None, "their caucus page is not the caucus that serves the file"
             if not image:
                 log(f"    [skip] {profile['name']}: {evidence}")
                 if record.get("via") == LEGISLATURE:
