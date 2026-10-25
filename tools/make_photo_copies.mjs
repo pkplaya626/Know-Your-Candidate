@@ -3,7 +3,9 @@
 //
 //   node tools/make_photo_copies.mjs --jobs JOBS.json --out REPORT.json
 //
-// JOBS.json: {"quality": 0.86, "jobs": [{"id", "in", "out", "box": [w, h]}]}
+// JOBS.json: {"quality": 0.86, "deadline": <Unix ms or null>,
+//             "jobs": [{"id", "in", "out", "box": [w, h]}]}
+// - no job is started after "deadline": each is reported "out of time";
 // - "in" is a downloaded original, "out" where the copy is written;
 // - "box" is the size, in device pixels, the copy must cover: the largest
 //   CSS box any page draws that kind of portrait in, times three (phones
@@ -182,6 +184,8 @@ async function main() {
   const spec = JSON.parse(fs.readFileSync(jobsPath, 'utf8'));
   const jobs = spec.jobs || [];
   const quality = Number(spec.quality);
+  // Unix milliseconds after which no job is started (the run's time budget).
+  const deadline = Number(spec.deadline) || 0;
   if (!(quality > 0 && quality <= 1)) throw new Error('quality must be in (0, 1]');
   if (typeof WebSocket !== 'function') {
     console.error('[error] this Node has no WebSocket; the maker needs Node 22 or later');
@@ -211,6 +215,12 @@ async function main() {
     await sleep(500);
     for (const [index, job] of jobs.entries()) {
       const result = { ok: false, width: 0, height: 0, srcWidth: 0, srcHeight: 0, bytes: 0, error: '' };
+      if (deadline && Date.now() > deadline) {
+        // The run's budget is spent: the rest wait for the next run.
+        result.error = 'out of time';
+        report.results[job.id] = result;
+        continue;
+      }
       try {
         const [boxW, boxH] = job.box;
         const expression = `(${DRAW})(${index}, ${Number(boxW)}, ${Number(boxH)}, ${quality})`;

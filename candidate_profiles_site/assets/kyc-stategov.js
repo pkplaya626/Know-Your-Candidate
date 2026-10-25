@@ -775,7 +775,7 @@
   function photoSources(s) {
     var gov = s.governor || {};
     var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage,
-      gov.headshot && gov.photoCopy && gov.photoCopy.of === gov.headshot && gov.headshot]];
+      gov.headshot && KYC.copyOf(gov.headshot, gov.photoCopy)]];
     [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
       .forEach(function (pair) {
         var off = pair[1] || {};
@@ -784,14 +784,20 @@
         var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
           off.vacant || off.none || off.notMember);
         rows.push([pair[0], drawn && off.photoBy, off.photoPage,
-          drawn && off.photoCopy && off.photoCopy.of === off.photo && off.photo]);
+          drawn && KYC.copyOf(off.photo, off.photoCopy)]);
       });
     // A smaller copy this site made of a heavy one says so, and links the
-    // original (rule 101), as the credit line under a portrait does.
+    // original (rule 101), as the credit line under a portrait does; the
+    // note goes if the copy fails and the original is drawn
+    // (KYC.retryOriginal removes every note naming that original).
     var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
+      var copy = row[3];
       return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
         (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1])) +
-        (row[3] ? " (a smaller copy made by this site of " + link(row[3], "the original file") + ")"
+        (copy ? '<span class="photo-copy-note" data-copy-of="' + KYC.escapeAttr(copy.of) +
+          '"> (a smaller copy made by this site of ' +
+          link(copy.of, "the original file" +
+            (copy.ofBytes ? " (" + KYC.weightWords(copy.ofBytes) + ")" : "")) + ")</span>"
           : "");
     });
     return said.length ? " Photographs: " + said.join("; ") + "." : "";

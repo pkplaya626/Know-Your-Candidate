@@ -10,8 +10,10 @@ import os
 import re
 import shutil
 import struct
+import subprocess
 import sys
 import tempfile
+import time
 import unittest
 import zlib
 
@@ -76,9 +78,11 @@ class FakeNet:
 class FakeChrome:
     def __init__(self):
         self.calls = 0
+        self.deadlines = []
 
-    def __call__(self, jobs, root):
+    def __call__(self, jobs, root, deadline=None):
         self.calls += 1
+        self.deadlines.append(deadline)
         results = {}
         for job in jobs:
             with open(job["in"], "rb") as handle:
@@ -86,7 +90,9 @@ class FakeChrome:
             out = b"\xff\xd8\xff\xe0" + hashlib.sha256(data).digest() * 100
             with open(job["out"], "wb") as handle:
                 handle.write(out)
-            results[job["id"]] = {"ok": True, "width": job["box"][0], "height": job["box"][1] + 40,
+            # The original's 3:4, covering the box (no copy is cropped).
+            results[job["id"]] = {"ok": True, "width": job["box"][0],
+                                  "height": round(job["box"][0] * 4 / 3),
                                   "srcWidth": 3000, "srcHeight": 4000, "bytes": len(out)}
         return {"chrome": "HeadlessChrome/156.0", "quality": photocopies.QUALITY,
                 "results": results}
@@ -191,7 +197,7 @@ class TestRun(unittest.TestCase):
         self.run_once(s)
         self.net.jpeg(HEAVY, 8_000_000, etag='"new"')
 
-        def broken(jobs, root):
+        def broken(jobs, root, deadline=None):
             raise photocopies.PhotoCopyError("no Chrome")
         photocopies.run(self.root, shown=s, maker=broken, prober=self.net.prober,
                         fetcher=self.net.fetcher, log=lambda *_: None, force=True)
@@ -253,19 +259,72 @@ class TestRun(unittest.TestCase):
 
     def test_a_batch_is_oldest_first_and_keeps_what_it_did_not_reach(self):
         for i in range(3):
-            self.net.jpeg(f"https://a{i}.example/p.jpg", 9_000_000)
-        s = shown(*[(f"https://a{i}.example/p.jpg", "legislator") for i in range(3)])
+            self.net.jpeg(f"https://a{i}.example.gov/p.jpg", 9_000_000)
+        s = shown(*[(f"https://a{i}.example.gov/p.jpg", "legislator") for i in range(3)])
         report = photocopies.run(self.root, shown=s, maker=self.chrome, prober=self.net.prober,
                                  fetcher=self.net.fetcher, log=lambda *_: None, limit=2)
         self.assertEqual((report["weighed"], report["skipped"]), (2, 1))
         originals = self.cache()["originals"]
         self.assertEqual(len(originals), 3, "the one not reached is kept, unread")
         self.assertEqual(sorted(u for u, e in originals.items() if not e.get("read")),
-                         ["https://a2.example/p.jpg"])
+                         ["https://a2.example.gov/p.jpg"])
         self.net.reads.clear()
         photocopies.run(self.root, shown=s, maker=self.chrome, prober=self.net.prober,
                         fetcher=self.net.fetcher, log=lambda *_: None, limit=1, force=True)
-        self.assertEqual(self.net.reads, ["https://a2.example/p.jpg"], "never read comes first")
+        self.assertEqual(self.net.reads, ["https://a2.example.gov/p.jpg"], "never read comes first")
+
+    def test_a_successor_on_the_same_address_is_read_again_before_it_is_shown_the_copy(self):
+        # A seat's file passes from A to B. The copy made for A is not B's
+        # until the file is read again whole, at once whatever its age, and
+        # is the very file it was made of (the PR #137 review's blocker).
+        self.net.jpeg(HEAVY, 9_000_000)
+        a = photocopies.Shown()
+        a.add(HEAVY, "legislator", "legislator:CT:A")
+        photocopies.run(self.root, shown=a, maker=self.chrome, prober=self.net.prober,
+                        fetcher=self.net.fetcher, log=lambda *_: None)
+        copy = self.cache()["originals"][HEAVY]["copy"]
+        self.assertEqual(copy["for"], ["legislator:CT:A"])
+        self.assertIsNone(photocopies.current(self.cache(), HEAVY, "legislator", "legislator:CT:B"))
+        b = photocopies.Shown()
+        b.add(HEAVY, "legislator", "legislator:CT:B")
+        # Not forced, read today: due all the same.
+        self.assertEqual(photocopies._order(b, self.cache()), [HEAVY])
+        self.assertEqual(photocopies._order(a, self.cache()), [])
+        self.net.reads.clear()
+        self.net.fetches.clear()
+        report = photocopies.run(self.root, shown=b, maker=self.chrome, prober=self.net.prober,
+                                 fetcher=self.net.fetcher, log=lambda *_: None)
+        self.assertEqual((self.net.reads, self.net.fetches), ([HEAVY], [HEAVY]),
+                         "read whole, not on its validators")
+        self.assertEqual((report["kept"], self.chrome.calls), (1, 1))
+        self.assertEqual(self.cache()["originals"][HEAVY]["copy"]["for"], ["legislator:CT:B"])
+        self.assertIsNotNone(photocopies.current(self.cache(), HEAVY, "legislator", "legislator:CT:B"))
+        # Had the file changed, B gets a new copy of the new file, and the
+        # old one is gone.
+        c = photocopies.Shown()
+        c.add(HEAVY, "legislator", "legislator:CT:C")
+        old = self.cache()["originals"][HEAVY]["copy"]["file"]
+        self.net.files[HEAVY] = (self.net.files[HEAVY][0][:-1] + b"\x01",) + self.net.files[HEAVY][1:]
+        photocopies.run(self.root, shown=c, maker=self.chrome, prober=self.net.prober,
+                        fetcher=self.net.fetcher, log=lambda *_: None)
+        copy = self.cache()["originals"][HEAVY]["copy"]
+        self.assertNotEqual(copy["file"], old)
+        self.assertEqual((copy["for"], self.photos()), (["legislator:CT:C"], [copy["file"]]))
+
+    def test_the_weighing_is_kept_before_chrome_and_chrome_gets_the_budget(self):
+        self.net.jpeg(HEAVY, 9_000_000)
+        seen = {}
+
+        def maker(jobs, root, deadline=None):
+            seen["deadline"] = deadline
+            seen["saved"] = photocopies.load(root)["originals"].get(HEAVY, {}).get("sha256")
+            raise subprocess.TimeoutExpired("node", 1)
+        photocopies.run(self.root, shown=shown((HEAVY, "legislator")), maker=maker,
+                        prober=self.net.prober, fetcher=self.net.fetcher, log=lambda *_: None,
+                        max_minutes=30)
+        self.assertEqual(seen["saved"], hashlib.sha256(self.net.files[HEAVY][0]).hexdigest())
+        self.assertGreater(seen["deadline"], time.time() * 1000 + 25 * 60 * 1000)
+        self.assertIsNone(photocopies.current(self.cache(), HEAVY))
 
     def test_a_copy_made_for_a_smaller_box_is_made_again(self):
         self.net.jpeg(HEAVY, 9_000_000)
@@ -290,7 +349,8 @@ class TestProblems(unittest.TestCase):
             "read": "2026-10-25", "kinds": ["legislator"],
             "copy": {"file": self.name, "sha256": self.sha, "bytes": len(data), "width": 168,
                      "height": 224, "box": [168, 210], "chrome": "HeadlessChrome/156",
-                     "quality": 0.86, "made": "2026-10-25"}}}}
+                     "quality": 0.86, "made": "2026-10-25", "from": [3000, 4000],
+                     "for": ["legislator:OK:1", "person:1"]}}}}
 
     def tearDown(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -350,6 +410,29 @@ class TestProblems(unittest.TestCase):
         s = photocopies.Shown()
         s.add(HEAVY, "person", "person:1", {"photoCopy": {"src": good, "of": HEAVY}})
         self.assertIn("photo-copy-stale", self.codes(s))
+        # Nor one made for another record on the same address.
+        s = photocopies.Shown()
+        s.add(HEAVY, "legislator", "legislator:OK:2", {"photoCopy": {"src": good, "of": HEAVY}})
+        self.assertIn("photo-copy-stale", self.codes(s))
+
+    def test_a_copy_records_whom_it_was_made_for_and_keeps_its_shape(self):
+        self.cache["originals"][HEAVY]["copy"].pop("for")
+        self.assertIn("photo-copy-unrecorded", self.codes())
+        self.cache["originals"][HEAVY]["copy"]["for"] = ["legislator:OK:1"]
+        # Cropped: no longer the original's shape.
+        self.cache["originals"][HEAVY]["copy"]["from"] = [3000, 3000]
+        self.assertIn("photo-copy-shape", self.codes())
+        self.cache["originals"][HEAVY]["copy"]["from"] = [3000, 4000]
+        self.assertEqual(self.codes(), [])
+        # The file's own pixels are the manifest's.
+        data = png(168, 230)
+        sha = hashlib.sha256(data).hexdigest()
+        os.remove(os.path.join(self.root, photocopies.PHOTOS_DIR, self.name))
+        with open(os.path.join(self.root, photocopies.PHOTOS_DIR, sha[:20] + ".jpg"), "wb") as h:
+            h.write(data)
+        self.cache["originals"][HEAVY]["copy"].update(file=sha[:20] + ".jpg", sha256=sha,
+                                                      bytes=len(data))
+        self.assertEqual(self.codes(), ["photo-copy-shape"])
 
     def test_what_is_left_is_counted_by_kind(self):
         s = shown((HEAVY, "legislator"), (LIGHT, "officer"))
@@ -362,29 +445,85 @@ class TestProblems(unittest.TestCase):
 
 class TestAttach(unittest.TestCase):
     cache = {"originals": {HEAVY: {"bytes": 9_000_000, "copy": {
-        "file": "abc.jpg", "sha256": "0123456789abcdef", "box": [168, 210]}}}}
+        "file": "abc.jpg", "sha256": "0123456789abcdef", "box": [168, 210],
+        "for": ["legislator:OK:ocd-person/1", "legislator::ocd-person/1"]}}}}
 
     def test_the_copy_is_named_stamped_and_tied_to_its_original(self):
         member = {"id": "ocd-person/1", "image": HEAVY,
                   "imageCredit": {"by": "Oklahoma Legislature", "page": "https://oksenate.gov/x"}}
         self.assertTrue(photocopies.attach(member, HEAVY, self.cache, "legislator"))
-        self.assertEqual(member["photoCopy"], {"src": "photos/abc.jpg?v=0123456789", "of": HEAVY})
+        self.assertEqual(member["photoCopy"], {"src": "photos/abc.jpg?v=0123456789", "of": HEAVY,
+                                               "ofBytes": 9_000_000})
         self.assertEqual(member["image"], HEAVY, "the record keeps its original")
         self.assertFalse(photocopies.attach(member, LIGHT, self.cache, "legislator"))
         self.assertNotIn("photoCopy", member)
         self.assertFalse(photocopies.attach({}, HEAVY, self.cache, "federal"),
                          "a copy made for a 56x70 card is not sharp in a 116px dialog")
 
-    def test_an_open_states_copy_is_credited_to_the_host_that_served_it(self):
-        payload = {"chambers": {"upper": {"members": {"1": [{"id": "p1", "image": HEAVY}]}}}}
+    def test_a_copy_is_only_ever_shown_for_the_record_it_was_made_for(self):
+        # A seat-keyed address (rule 100) passes to a successor: the copy
+        # made while it showed the predecessor is never shown for them, and
+        # the card draws the original, as before the copies (PR #137 review).
+        payload = {"chambers": {"upper": {"members": {"1": [{"id": "ocd-person/1", "image": HEAVY},
+                                                            {"id": "ocd-person/2", "image": HEAVY}]}}}}
         self.assertEqual(photocopies.apply_legislature(payload, self.cache, "OK"), 1)
-        member = payload["chambers"]["upper"]["members"]["1"][0]
-        self.assertEqual(member["imageCredit"], {"by": "oksenate.gov", "via": "Open States"})
+        first, second = payload["chambers"]["upper"]["members"]["1"]
+        self.assertIn("photoCopy", first)
+        self.assertNotIn("photoCopy", second)
+        # A governor or an officer is keyed by name, never by seat.
+        self.assertEqual(photocopies.key_of("officer", {"name": "Cori Mills"}, "AK", "ag"),
+                         "officer:AK:ag:Cori Mills")
+        self.assertEqual(photocopies.key_of("governor", {"name": "Mike Dunleavy"}, "AK"),
+                         "governor:AK:Mike Dunleavy")
+
+    def test_a_copy_is_of_the_file_the_records_own_source_weighed(self):
+        # The legislature's own photograph (rule 100) is copied only where
+        # this cache read the file legphotos weighed: the same length, the
+        # same day of Last-Modified.
+        cache = {"originals": {HEAVY: dict(self.cache["originals"][HEAVY],
+                                           lastModified="Thu, 06 Mar 2025 10:00:00 GMT")}}
+        member = {"id": "ocd-person/1", "image": HEAVY}
+        photos = {"people": {"ocd-person/1": {"image": HEAVY, "bytes": 9_000_000,
+                                              "lastModified": "2025-03-06"}}}
+        payload = {"members": [member]}
+        self.assertEqual(photocopies.apply_legislature(payload, cache, "OK", photos), 1)
+        for change in ({"bytes": 8_000_000}, {"lastModified": "2026-01-10"}):
+            photos["people"]["ocd-person/1"].update(change)
+            self.assertEqual(photocopies.apply_legislature(payload, cache, "OK", photos), 0, change)
+            self.assertNotIn("photoCopy", member)
+            photos = {"people": {"ocd-person/1": {"image": HEAVY, "bytes": 9_000_000,
+                                                  "lastModified": "2025-03-06"}}}
+        # "Over the cap" is not a length legphotos read.
+        photos["people"]["ocd-person/1"]["bytes"] = 300_001
+        self.assertEqual(photocopies.expected("OK", member, photos), {"lastModified": "2025-03-06"})
+        # Another file than the card shows says nothing about this one.
+        photos["people"]["ocd-person/1"]["image"] = LIGHT
+        self.assertIsNone(photocopies.expected("OK", member, photos))
+
+    def test_a_legislators_portrait_is_copied_only_from_a_governments_host(self):
+        # Open States also lists news sites' and campaigns' photographs:
+        # those stay drawn from their own host (PR #137 review; rule 101).
+        news = "https://www.chicagotribune.com/wp-content/uploads/2026/07/x.jpg"
+        for url, ok in ((HEAVY, True), ("https://www2.housedems.ct.gov/p.jpg", True),
+                        ("http://www.legislature.state.al.us/aliswww/p.jpg", True),
+                        (news, False), ("https://images.squarespace-cdn.com/p.jpg", False),
+                        ("https://senatedems.com/p.jpg", False), (WIKI, False)):
+            self.assertEqual(photocopies.may_copy(url, "legislator", "OK"), ok, url)
+        self.assertTrue(photocopies.may_copy("https://bobsmithforcongress.com/p.jpg", "person"))
+        cache = {"originals": {news: dict(self.cache["originals"][HEAVY])}}
+        member = {"id": "ocd-person/1", "image": news}
+        self.assertFalse(photocopies.attach(member, news, cache, "legislator", code="IL"))
+        s = photocopies.Shown()
+        s.add(news, "legislator", "legislator:IL:1", {"photoCopy": {"src": "photos/a.jpg", "of": news}},
+              code="IL")
+        self.assertNotIn(news, s.urls)
+        self.assertEqual(s.linked, {news: {"legislator"}})
+        self.assertEqual([c for _, c, _ in s.issues], ["photo-copy-host"])
 
     def test_a_profile_without_a_credit_gets_no_copy(self):
         cache = {"originals": {HEAVY: dict(self.cache["originals"][HEAVY],
                                            copy=dict(self.cache["originals"][HEAVY]["copy"],
-                                                     box=[540, 675]))}}
+                                                     box=[540, 675], **{"for": ["person:a", "person:b"]}))}}
         people = [{"id": "a", "photos": [HEAVY], "photoCredit": {"by": "x.com"}},
                   {"id": "b", "photos": [HEAVY]}]
         self.assertEqual(photocopies.apply_people(people, cache), 1)
@@ -484,6 +623,10 @@ class TestChrome(unittest.TestCase):
             self.assertEqual(data[:3], b"\xff\xd8\xff")
             self.assertEqual(portraits.image_size(data), (168, 224))
             self.assertTrue(made["chrome"])
+            # Past its deadline the maker starts nothing, and says so.
+            late = photocopies.make_copies(jobs[:1], ROOT, deadline=int(time.time() * 1000) - 1)
+            self.assertEqual((late["results"]["a"]["ok"], late["results"]["a"]["error"]),
+                             (False, "out of time"))
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
 
@@ -495,6 +638,20 @@ class TestCommitted(unittest.TestCase):
         self.assertEqual(errors, [])
         for url in cache["originals"]:
             self.assertFalse(photocopies.is_wikimedia(url), url)
+        for url, entry in cache["originals"].items():
+            if entry.get("copy"):
+                self.assertTrue(entry["copy"].get("for"), url)
+
+    def test_the_validate_only_build_checks_the_records_too(self):
+        # `build --check` ran only the manifest's file checks; the records'
+        # (stale, misplaced, uncredited, the counts) ran only in a writing
+        # build and in verify (the reviewers of PR #137).
+        import inspect
+        from kyc import cli
+        source = inspect.getsource(cli._build)
+        check_return = source.index('print("\\n[check] validation only, nothing written.")')
+        gathered = source.index("photocopies.gather(args.root, people=profiles)")
+        self.assertLess(gathered, check_return)
 
 
 if __name__ == "__main__":

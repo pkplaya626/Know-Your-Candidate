@@ -746,6 +746,14 @@ def _person(record, code="", year=0, assembly=None, dropped=None, others=(), pag
                     and legphotos.official_host(code, page["url"])):
                 credit["page"] = page["url"]
             out["imageCredit"] = credit
+        else:
+            # Any other is said to be where Open States found it, never
+            # "Photo: <host>": a host is not whose photograph it is (a news
+            # site, an image CDN; the reviewers of PR #137). The same words
+            # on every such card, whether the page shows the file or a
+            # smaller copy of it (rule 101).
+            out["imageCredit"] = {"host": photocopies.host_of(out["image"]),
+                                  "listedBy": "Open States"}
     elif kind == "legislature":
         own = legphotos.entry_for(record, photos)
         out["image"] = own["image"]
@@ -945,7 +953,7 @@ def build(root=".", codes=None, dropped=None):
         counts = {} if dropped is None else dropped.setdefault(code, {})
         out[code] = build_state(code, root, places, roster, control.get(code),
                                 cache.get("fetched", ""), counts, photos)
-        photocopies.apply_legislature(out[code], copies, code)
+        photocopies.apply_legislature(out[code], copies, code, photos)
     return out
 
 

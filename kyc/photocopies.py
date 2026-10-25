@@ -101,6 +101,9 @@ TIMEOUT = 40
 WORKERS = 12
 # An entry read this recently is not read again unless forced.
 RECHECK_DAYS = 7
+# Of a run's time budget, what the weighing leaves the copy maker: at most
+# this many seconds, at most a third of what is left when the run starts.
+MAKE_RESERVE = 10 * 60
 # A host that gave no answer this many times running is not asked again in
 # the same run.
 DOWN_AFTER = 3
@@ -183,16 +186,105 @@ def covers(copy, box):
     return made[0] >= box[0] and made[1] >= box[1]
 
 
-def current(cache, url, kind=None):
+def current(cache, url, kind=None, key=None, expect=None):
     """The copy the pages show for *url*, or ``None``: one made, not gone,
-    and made for a box that covers *kind*'s."""
+    made for a box that covers *kind*'s, made for the record *key* (the
+    copy's ``for``: a seat-keyed address can pass to a successor, and a copy
+    made while it showed someone else is never shown for them), and, where
+    the record's own source weighed the file (*expect*, ``expected``), of
+    the file that source weighed."""
     entry = ((cache or {}).get("originals") or {}).get(url)
     if not entry or not entry.get("copy") or (entry.get("gone") or 0) >= GONE_AFTER:
         return None
     copy = entry["copy"]
     if kind and not covers(copy, box_for([kind])):
         return None
+    if key is not None and key not in (copy.get("for") or ()):
+        return None
+    if expect and not agrees(entry, expect):
+        return None
     return copy
+
+
+def agrees(entry, expect):
+    """Whether the original as this cache read it is the file the record's
+    own source weighed (*expect*: ``{"bytes", "lastModified"}``, either
+    absent where that source could not tell): the same length, and the same
+    day of Last-Modified where both have one."""
+    if not expect:
+        return True
+    if expect.get("bytes") and expect["bytes"] != entry.get("bytes"):
+        return False
+    theirs = expect.get("lastModified")
+    ours = _http_day(entry.get("lastModified"))
+    return not (theirs and ours and theirs != ours)
+
+
+def _http_day(value):
+    """An HTTP date's day in UTC, ISO 8601, or ``None``."""
+    import email.utils
+    try:
+        when = email.utils.parsedate_to_datetime(value) if value else None
+    except (TypeError, ValueError):
+        return None
+    if when is None:
+        return None
+    if when.tzinfo is not None:
+        when = when.astimezone(datetime.timezone.utc)
+    return when.date().isoformat()
+
+
+def expected(code, member, photos):
+    """What ``legphotos`` weighed of a member's portrait, where the card
+    shows the file it read (rule 100): its bytes (not where it could only
+    tell "over the cap") and its Last-Modified day; else ``None``."""
+    from .photos import MAX_PORTRAIT_BYTES
+    entry = (((photos or {}).get("people") or {}).get(member.get("id")) or {})
+    if not entry.get("image") or entry.get("image") != member.get("image"):
+        return None
+    out = {}
+    if entry.get("bytes") and entry["bytes"] != MAX_PORTRAIT_BYTES + 1:
+        out["bytes"] = entry["bytes"]
+    if entry.get("lastModified"):
+        out["lastModified"] = entry["lastModified"]
+    return out or None
+
+
+# A government's own host: the only places outside the legislature's own
+# (``legphotos.official_host``) whose legislator portraits this site hosts
+# a copy of. Open States also lists photographs on news sites, campaign
+# sites, party sites and image CDNs; those stay where they are, drawn from
+# their own host as before (the reviewers of PR #137: hosting a copy is
+# another act than linking, and the owner's decision was for official
+# photographs).
+_GOVERNMENT_HOST = re.compile(r"(\.gov|\.mil|\.state\.[a-z]{2}\.us)$", re.I)
+
+
+def may_copy(url, kind, code=""):
+    """Whether this site may host a copy of *url* shown as *kind*: never a
+    Wikimedia file (rule 42); a legislator's only from the legislature's own
+    host or a government's; every other kind's source is already the
+    person's office, their association, the White House or their own
+    campaign (rules 38, 87)."""
+    if is_wikimedia(url):
+        return False
+    if kind != "legislator":
+        return True
+    from .legphotos import official_host
+    host = host_of(url)
+    return bool(host) and (bool(_GOVERNMENT_HOST.search(host)) or official_host(code, url))
+
+
+def key_of(kind, record, code="", office=""):
+    """The record a copy is made for, as ``Shown`` and ``attach`` name it: a
+    person, never a seat (a governor and an officer by their name)."""
+    if kind == "legislator":
+        return f"legislator:{code}:{record.get('id')}"
+    if kind == "governor":
+        return f"governor:{code}:{record.get('name')}"
+    if kind == "officer":
+        return f"officer:{code}:{office}:{record.get('name')}"
+    return f"{kind}:{record.get('id')}"
 
 
 def src(copy):
@@ -201,14 +293,20 @@ def src(copy):
     return f"{PHOTOS_URL}{copy['file']}?v={copy['sha256'][:10]}"
 
 
-def attach(record, url, cache, kind):
+def attach(record, url, cache, kind, key=None, code="", expect=None):
     """Point *record* at the copy of *url*, its original, where one is
-    current: ``photoCopy = {"src", "of"}``; the record keeps the original's
-    address and credit, which the page names beside the copy. Returns
-    whether a copy was attached."""
-    copy = current(cache, url, kind) if url else None
+    current for this record (``current``) and this site may host one
+    (``may_copy``): ``photoCopy = {"src", "of", "ofBytes"}``; the record
+    keeps the original's address and credit, which the page names beside
+    the copy, with the original's weight. Returns whether a copy was
+    attached."""
+    key = key if key is not None else key_of(kind, record, code)
+    copy = current(cache, url, kind, key, expect) if url and may_copy(url, kind, code) else None
     if copy:
         record["photoCopy"] = {"src": src(copy), "of": url}
+        weight = (cache["originals"][url].get("bytes") or 0)
+        if weight:
+            record["photoCopy"]["ofBytes"] = weight
         return True
     record.pop("photoCopy", None)
     return False
@@ -228,18 +326,16 @@ def apply_people(profiles, cache):
     return n
 
 
-def apply_legislature(payload, cache, code=""):
+def apply_legislature(payload, cache, code="", photos=None):
     """Each member's portrait on one legislature page, copied; returns how
-    many. A copy carries a credit (rule 87): where the card credits none -
-    an Open States portrait the legislature's own host does not serve - the
-    copy is credited to the host that serves the original, as Open States
-    lists it, since the page no longer loads it from there."""
+    many. *photos* is the ``legphotos`` cache: a portrait read from the
+    legislature's own records is copied only where this cache read the file
+    that one weighed (``expected``). Every card shown a copy carries a
+    credit (``legislature.member``; ``Shown`` fails one without)."""
     n = 0
     for _code, member in _legislators({code: payload}):
-        if attach(member, member["image"], cache, "legislator"):
-            n += 1
-            if not member.get("imageCredit"):
-                member["imageCredit"] = {"by": host_of(member["image"]), "via": "Open States"}
+        n += attach(member, member["image"], cache, "legislator", code=code,
+                    expect=expected(code, member, photos))
     return n
 
 
@@ -257,14 +353,15 @@ def apply_stategov(payload, cache):
     """Each governor's NGA headshot and each statewide officer's photograph,
     copied; returns how many."""
     n = 0
-    for _code, entry in sorted((payload.get("states") or {}).items()):
+    for code, entry in sorted((payload.get("states") or {}).items()):
         gov = entry.get("governor") or {}
         if gov.get("headshot"):
-            n += attach(gov, gov["headshot"], cache, "governor")
+            n += attach(gov, gov["headshot"], cache, "governor", code=code)
         for office in ("lt", "ag", "sos"):
             holder = entry.get(office)
             if isinstance(holder, dict) and holder.get("photo"):
-                n += attach(holder, holder["photo"], cache, "officer")
+                n += attach(holder, holder["photo"], cache, "officer",
+                            key=key_of("officer", holder, code, office))
     return n
 
 
@@ -298,13 +395,19 @@ class Shown:
     wrong with any copy a record points at."""
 
     def __init__(self):
+        # url -> {"kinds": set, "records": {key: {"kind", "expect"}},
+        #         "shows": {key: (src, kind)}}
         self.urls = {}
+        # url -> the kinds it is shown as, where this site hosts no copy of
+        # it (``may_copy``): drawn from its own host, as before.
+        self.linked = {}
         self.issues = []
 
-    def add(self, url, kind, record_id, record=None, credited=True):
+    def add(self, url, kind, record_id, record=None, credited=True, code="", expect=None):
         if not url or not url.startswith(("https://", "http://")):
             return
         copy = (record or {}).get("photoCopy")
+        allowed = may_copy(url, kind, code)
         if copy:
             if copy.get("of") != url:
                 self.issues.append(("error", "photo-copy-misplaced",
@@ -316,36 +419,46 @@ class Shown:
             if is_wikimedia(url):
                 self.issues.append(("error", "photo-copy-wikimedia",
                                     f"{record_id} shows a copy of a Wikimedia file, {url}"))
+            elif not allowed:
+                self.issues.append(("error", "photo-copy-host",
+                                    f"{record_id} shows a copy of {url}, which is on no "
+                                    f"government's host (rule 101)"))
         if is_wikimedia(url):
             return
-        slot = self.urls.setdefault(url, {"kinds": set(), "records": set(), "shows": {}})
+        if not allowed:
+            self.linked.setdefault(url, set()).add(kind)
+            return
+        slot = self.urls.setdefault(url, {"kinds": set(), "records": {}, "shows": {}})
         slot["kinds"].add(kind)
-        slot["records"].add(record_id)
+        slot["records"][record_id] = {"kind": kind, "expect": expect}
         if copy and copy.get("of") == url:
             slot["shows"][record_id] = (copy.get("src") or "", kind)
 
-    def add_legislatures(self, payloads):
+    def add_legislatures(self, payloads, photos=None):
+        """*photos* is the ``legphotos`` cache (``expected``)."""
         for code, member in _legislators(payloads):
-            self.add(member["image"], "legislator", f"legislator:{code}:{member['id']}", member,
-                     bool(member.get("imageCredit")))
+            self.add(member["image"], "legislator", key_of("legislator", member, code), member,
+                     bool(member.get("imageCredit")), code=code,
+                     expect=expected(code, member, photos))
         return self
 
     def add_federal(self, payload):
         for person in federal_people(payload or {}):
             # The page credits every White House photograph to it
             # (kyc-official.js picture).
-            self.add(person.get("photo"), "federal", f"federal:{person.get('id')}", person, True)
+            self.add(person.get("photo"), "federal", key_of("federal", person), person, True)
         return self
 
     def add_stategov(self, payload):
         for code, entry in sorted(((payload or {}).get("states") or {}).items()):
             gov = entry.get("governor") or {}
-            self.add(gov.get("headshot"), "governor", f"governor:{code}", gov,
+            self.add(gov.get("headshot"), "governor", key_of("governor", gov, code), gov,
                      bool(gov.get("headshotBy")))
             for office in ("lt", "ag", "sos"):
                 holder = entry.get(office)
                 if isinstance(holder, dict):
-                    self.add(holder.get("photo"), "officer", f"officer:{code}:{office}", holder,
+                    self.add(holder.get("photo"), "officer",
+                             key_of("officer", holder, code, office), holder,
                              bool(holder.get("photoBy")))
         return self
 
@@ -353,9 +466,22 @@ class Shown:
         for person in people or []:
             first = (person.get("photos") or [""])[0]
             if first and first != "placeholder":
-                self.add(first, "person", f"person:{person.get('id')}", person,
+                self.add(first, "person", key_of("person", person), person,
                          bool(person.get("photoCredit")))
         return self
+
+    def stale(self, url, entry):
+        """Whether the copy of *url* must be read again before it can be
+        shown for every record that shows *url*: a record it was not made
+        for (a successor on a seat's address), or one whose own source
+        weighed another file."""
+        slot = self.urls.get(url) or {}
+        copy = (entry or {}).get("copy")
+        if not copy:
+            return False
+        made_for = set(copy.get("for") or ())
+        return any(key not in made_for or not agrees(entry, rec.get("expect"))
+                   for key, rec in (slot.get("records") or {}).items())
 
 
 def read_people(root="."):
@@ -378,16 +504,22 @@ def read_people(root="."):
     return [people[k] for k in sorted(people, key=str)]
 
 
-def gather(root="."):
+def gather(root=".", people=None):
     """``Shown`` for what the build shows now: the legislatures, the federal
-    executive and the state governments built from their caches, and the
-    people as the last build wrote them."""
-    from . import federal_build, legislature, stategov
+    executive and the state governments built from their caches, and
+    *people* - by default everyone as the last build wrote them, their
+    copies attached afresh from the manifest as the next build will attach
+    them (the people files are rewritten only by a build, which follows
+    this command in the refresh)."""
+    from . import federal_build, legislature, legphotos, stategov
     shown = Shown()
-    shown.add_legislatures(legislature.build(root))
+    shown.add_legislatures(legislature.build(root), legphotos.load_cache(root))
     shown.add_federal(federal_build.build(root)[0])
     shown.add_stategov(stategov.build(root)[0])
-    shown.add_people(read_people(root))
+    if people is None:
+        people = read_people(root)
+        apply_people(people, load(root))
+    shown.add_people(people)
     return shown
 
 
@@ -410,16 +542,23 @@ def heavy(entry):
                       "height": entry.get("height")})
 
 
+def for_all(cache, url, slot):
+    """Whether every record that shows *url* is shown its copy."""
+    return all(current(cache, url, rec["kind"], key, rec.get("expect"))
+               for key, rec in (slot.get("records") or {}).items())
+
+
 def stats(cache, shown):
     """One line of figures for the build's report."""
     originals = (cache or {}).get("originals") or {}
     over = [u for u in shown.urls if heavy(originals.get(u))]
-    copied = [u for u in over if current(cache, u, sorted(shown.urls[u]["kinds"])[0])]
+    copied = [u for u in over if for_all(cache, u, shown.urls[u])]
     weight = sum(e["copy"]["bytes"] for e in originals.values() if e.get("copy"))
     return (f"{len(copied):,} of {len(over):,} portraits over the caps shown as a copy made here "
             f"({weight / 1e6:.1f} MB under {PHOTOS_DIR}); "
             f"{sum(1 for u in shown.urls if (originals.get(u) or {}).get('read')):,} of "
-            f"{len(shown.urls):,} addresses weighed")
+            f"{len(shown.urls):,} addresses weighed; {len(shown.linked):,} legislators' portraits "
+            f"on no government's host drawn from their own host, never copied")
 
 
 def problems(cache, root=".", shown=None, files=True):
@@ -427,6 +566,7 @@ def problems(cache, root=".", shown=None, files=True):
     wrong or unaccounted file on the page, a warning for what is left to do.
     *files* checks the manifest against ``photos/``; *shown* (a ``Shown``)
     checks the records that show the copies, and counts what is left."""
+    from .portraits import image_size
     out = []
     originals = (cache or {}).get("originals") or {}
     listed = {}
@@ -454,7 +594,7 @@ def problems(cache, root=".", shown=None, files=True):
         if size != copy.get("bytes"):
             out.append(("error", "photo-copy-bytes", f"{PHOTOS_DIR}/{name} is {size} bytes, the "
                                                      f"manifest says {copy.get('bytes')}"))
-        for key in ("chrome", "quality", "made", "box", "width", "height"):
+        for key in ("chrome", "quality", "made", "box", "width", "height", "for", "from"):
             if not copy.get(key):
                 out.append(("error", "photo-copy-unrecorded",
                             f"{url}: the copy does not record its {key}"))
@@ -472,6 +612,19 @@ def problems(cache, root=".", shown=None, files=True):
                 (copy.get("bytes") or 0) >= (entry.get("bytes") or 0):
             out.append(("error", "photo-copy-heavy", f"{url}: the copy is {copy.get('bytes')} "
                                                      f"bytes, the original {entry.get('bytes')}"))
+        # The photograph, smaller: the original's shape, to the pixel's
+        # rounding (never cropped), and the very pixels the manifest gives.
+        drawn = copy.get("from") or [0, 0]
+        if w and h and drawn[0] and drawn[1] and abs(w - drawn[0] * h / drawn[1]) > 1                 and abs(h - drawn[1] * w / drawn[0]) > 1:
+            out.append(("error", "photo-copy-shape",
+                        f"{url}: the copy is {w}x{h}, not the shape of its original "
+                        f"({drawn[0]}x{drawn[1]})"))
+        with open(path, "rb") as handle:
+            size_px = image_size(handle.read(FIRST_BYTES))
+        if size_px and tuple(size_px) != (w, h):
+            out.append(("error", "photo-copy-shape",
+                        f"{PHOTOS_DIR}/{name} is {size_px[0]}x{size_px[1]}, the manifest says "
+                        f"{w}x{h}"))
         if not heavy(entry):
             out.append(("error", "photo-copy-unneeded",
                         f"{url}: copied, but the original as read is within the caps"))
@@ -493,8 +646,10 @@ def problems(cache, root=".", shown=None, files=True):
         # A record shows exactly the copy the manifest holds for its
         # original, made for a box that covers the kind it is drawn as:
         # never one withdrawn, remade or made for a smaller box.
+        records = slot.get("records") or {}
         for record_id, (shows, as_kind) in sorted(slot.get("shows", {}).items()):
-            made = current(cache, url, as_kind)
+            made = current(cache, url, as_kind, record_id,
+                           (records.get(record_id) or {}).get("expect"))
             made = src(made) if made else None
             if shows != made:
                 out.append(("error", "photo-copy-stale",
@@ -502,7 +657,7 @@ def problems(cache, root=".", shown=None, files=True):
                             f"holds {made or 'no current copy'}; rebuild"))
         if not entry or not entry.get("read"):
             unweighed[kind] = unweighed.get(kind, 0) + 1
-        elif heavy(entry) and not current(cache, url, kind) and (entry.get("gone") or 0) < GONE_AFTER:
+        elif heavy(entry) and not for_all(cache, url, slot) and (entry.get("gone") or 0) < GONE_AFTER:
             missing[kind] = missing.get(kind, 0) + 1
     for url, entry in sorted(originals.items()):
         if entry.get("copy") and url not in shown.urls:
@@ -660,7 +815,8 @@ def _unchanged(entry, read):
 
 def _order(shown, cache, force=False, now=None):
     """The addresses to read, oldest first: never read, then by the day last
-    read; those read in the last ``RECHECK_DAYS`` only when forced."""
+    read; those read in the last ``RECHECK_DAYS`` only when forced, or when
+    their copy is not yet one every record showing them may be shown."""
     now = now or datetime.date.today()
     originals = cache.get("originals") or {}
     todo = []
@@ -674,6 +830,11 @@ def _order(shown, cache, force=False, now=None):
                 age = RECHECK_DAYS
             box = box_for(shown.urls[url]["kinds"])
             needs = heavy(entry) and (not entry.get("copy") or not covers(entry["copy"], box))
+            # A copy not made for every record now showing its address (a
+            # successor on a seat's file), or of another file than the
+            # record's own source weighed, is read again at once, whatever
+            # its age: until then the page shows the original.
+            needs = needs or shown.stale(url, entry)
             if age < RECHECK_DAYS and not needs and not entry.get("error"):
                 continue
         todo.append((read, url))
@@ -721,16 +882,22 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
     workdir = tempfile.mkdtemp(prefix="kyc-photocopies-")
     jobs = []
 
+    # The weighing stops early enough to leave the copy maker its share of
+    # the budget (rule 78: a step killed at its limit saves nothing).
+    weigh_until = None if deadline is None else \
+        deadline - min(MAKE_RESERVE, max(0.0, deadline - time.monotonic()) / 3)
+
     def out_of_time():
-        return deadline is not None and time.monotonic() > deadline
+        return weigh_until is not None and time.monotonic() > weigh_until
 
     def one(url, headers):
         entry = originals[url]
         # A conditional read only where a 304 would leave nothing to do: a
-        # copy made for a box that covers every kind the original is shown as,
-        # or a file within the caps.
+        # copy made for a box that covers every kind the original is shown as
+        # and for every record that shows it, or a file within the caps.
         known = entry if (
-            (entry.get("copy") and covers(entry["copy"], box_for(entry.get("kinds") or [])))
+            (entry.get("copy") and covers(entry["copy"], box_for(entry.get("kinds") or []))
+             and not shown.stale(url, entry))
             or (entry.get("bytes") and not heavy(entry))) else None
         read = prober(url, known, headers)
         if read["status"] == "error" and read.get("code") in (401, 403, 406) and headers is UA:
@@ -781,7 +948,12 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
                         report["removed"] += 1
                         log(f"  {url}: gone ({read['code']}) twice; its copy is removed")
                 continue
-            same = bool(entry.get("copy")) and _unchanged(entry, read)
+            # A copy is kept on its validators alone only while it was made
+            # for every record that shows the address: for a new one (a
+            # successor on a seat's file) the file is read whole, and the
+            # copy stands only on the very same hash.
+            same = bool(entry.get("copy")) and _unchanged(entry, read) and \
+                not shown.stale(url, entry)
             with lock:
                 # A file that may have changed loses its copy at once, before
                 # it is downloaded again: a seat-keyed address (rule 100) can
@@ -837,8 +1009,10 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
             with lock:
                 if held and held[1] == sha and covers(held[0], box):
                     # The very file the copy was made of (a server whose
-                    # validators move between its machines): the copy stands.
-                    entry["copy"] = held[0]
+                    # validators move between its machines, or an address
+                    # now shown for another record): the copy stands, and is
+                    # the copy of what every record showing it shows.
+                    entry["copy"] = dict(held[0], **{"for": sorted(shown.urls[url]["records"])})
                     report["kept"] += 1
                     continue
                 if (entry.get("copy") and entry.get("sha256") == sha
@@ -862,10 +1036,15 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
             for future in [pool.submit(host_worker, h, u) for h, u in sorted(by_host.items())]:
                 future.result()
+        # What was weighed is kept before Chrome starts: a maker cut off by
+        # the step's limit must not take the weighing with it (rule 78). An
+        # original waiting for its copy has no copy in the cache meanwhile,
+        # so nothing old is shown for it.
+        save(cache, root)
         if jobs:
             log(f"  making {len(jobs)} copies in headless Chrome")
             try:
-                made = maker(jobs, root)
+                made = maker(jobs, root, deadline=_wall(deadline))
             except (PhotoCopyError, OSError, subprocess.SubprocessError) as exc:
                 # No Chrome concludes nothing: what was weighed is kept, and
                 # the next run makes the copies (rule 8).
@@ -909,6 +1088,9 @@ def _take(made, jobs, originals, root, report, log):
                 handle.write(data)
         entry["copy"] = {
             "file": name, "sha256": sha, "bytes": len(data),
+            # The records it was made for (``current``): never shown for
+            # anyone else until the file is read again whole for them.
+            "for": sorted(entry.get("records") or []),
             "width": result["width"], "height": result["height"],
             "box": job["box"], "chrome": made.get("chrome") or "",
             "quality": made.get("quality"), "made": today(),
@@ -934,18 +1116,31 @@ def _sweep(cache, root, log=print):
     return removed
 
 
-def make_copies(jobs, root="."):
-    """Run ``tools/make_photo_copies.mjs`` over *jobs*; its report."""
+def _wall(deadline):
+    """A ``time.monotonic`` deadline as Unix time in milliseconds, or None."""
+    if deadline is None:
+        return None
+    return int((time.time() + (deadline - time.monotonic())) * 1000)
+
+
+def make_copies(jobs, root=".", deadline=None):
+    """Run ``tools/make_photo_copies.mjs`` over *jobs*; its report. With a
+    *deadline* (Unix milliseconds) the maker starts no job after it, and
+    reports those as not made, for the next run."""
     node = shutil.which("node")
     if not node:
         raise PhotoCopyError("no node to run the copy maker")
+    timeout = 3600
+    if deadline is not None:
+        # One job's own limit and Chrome's start and close past the deadline.
+        timeout = max(120, deadline / 1000 - time.time() + 180)
     with tempfile.TemporaryDirectory(prefix="kyc-photojobs-") as tmp:
         spec = os.path.join(tmp, "jobs.json")
         out = os.path.join(tmp, "report.json")
         with open(spec, "w", encoding="utf-8") as handle:
-            json.dump({"quality": QUALITY, "jobs": jobs}, handle)
+            json.dump({"quality": QUALITY, "jobs": jobs, "deadline": deadline}, handle)
         done = subprocess.run([node, os.path.join(root, TOOL), "--jobs", spec, "--out", out],
-                              capture_output=True, text=True, timeout=3600)
+                              capture_output=True, text=True, timeout=timeout)
         if done.returncode or not os.path.exists(out):
             raise PhotoCopyError(f"the copy maker failed ({done.returncode}): "
                                  f"{(done.stderr or done.stdout).strip()[:300]}")

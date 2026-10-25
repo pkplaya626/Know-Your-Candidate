@@ -1036,25 +1036,42 @@
   }
 
   /** *credit* for a portrait the page shows as its copy: the original's
-   *  credit, saying it is a smaller copy made here (``photoCreditHtml``). */
+   *  credit, saying it is a smaller copy made here, and how heavy the
+   *  original it links is (``photoCreditHtml``). */
   function copyCredit(credit, url, copy) {
-    if (!credit || !copyOf(url, copy)) return credit;
+    var own = copyOf(url, copy);
+    if (!credit || !own) return credit;
     var out = {};
     Object.keys(credit).forEach(function (k) { out[k] = credit[k]; });
     out.copyOf = url;
+    if (own.ofBytes) out.copyOfBytes = own.ofBytes;
     return out;
   }
 
-  /** A copy that fails to load is replaced by its original, once; true
+  /** "12.4 MB", "820 KB": a file's weight, for a link to it. */
+  function weightWords(bytes) {
+    var n = Number(bytes) || 0;
+    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, "") + " MB";
+    return Math.max(1, Math.round(n / 1e3)) + " KB";
+  }
+
+  /** A copy that fails to load is replaced by its original, once (or by
+   *  *data-photo-original*: a lighter rendition its host serves of it),
+   *  and every note on the page that the copy was shown goes with it; true
    *  when it was (or another listener already did so for this *event*). */
   function retryOriginal(img, event) {
     if (event && event.kycRetried) return true;
     var original = img && img.getAttribute("data-photo-original");
     if (!original) return false;
+    var of = img.getAttribute("data-photo-of") || original;
     img.removeAttribute("data-photo-original");
+    img.removeAttribute("data-photo-of");
     img.removeAttribute("srcset");
     if (event) event.kycRetried = true;
     img.src = original;
+    Array.prototype.forEach.call(doc.querySelectorAll(".photo-copy-note"), function (note) {
+      if (note.getAttribute("data-copy-of") === of) note.remove();
+    });
     return true;
   }
 
@@ -1180,7 +1197,7 @@
    *  Wikimedia Commons", each linked where the credit holds the address,
    *  or "" when there is no credit. Escaped. */
   function photoCreditHtml(credit) {
-    if (!credit || !(credit.by || credit.licence)) return "";
+    if (!credit || !(credit.by || credit.licence || credit.host)) return "";
     function anchor(href, text) {
       return /^https?:\/\//.test(href || "")
         ? '<a href="' + escapeAttr(href) + '" target="_blank" rel="noopener noreferrer">' +
@@ -1191,16 +1208,22 @@
     if (credit.by) parts.push(credit.via ? escapeHtml(credit.by) : anchor(credit.page, credit.by));
     // The licence asks for the author and the file's page names none.
     else if (credit.authorUnrecorded) parts.push("author not recorded on Commons");
+    // Where a list found it, not whose it is: "Photo: from <host>, as listed
+    // by Open States" (a host may be a news site or an image CDN).
+    else if (credit.host) parts.push("from " + escapeHtml(credit.host));
     if (credit.licence) parts.push(anchor(credit.licenceUrl, credit.licence));
     var line = parts.length ? "Photo: " + parts.join(", ") : "Photo";
     if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
+    if (credit.listedBy) line += ", as listed by " + escapeHtml(credit.listedBy);
     // When it was taken, where the source dates it ("Official portrait, 2005").
     if (credit.dated) line = escapeHtml(credit.dated) + ". " + line;
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.
     if (credit.copyOf) {
-      line += '<span class="photo-copy-note">; a smaller copy made by this site of ' +
-        anchor(credit.copyOf, "the original file") + "</span>";
+      line += '<span class="photo-copy-note" data-copy-of="' + escapeAttr(credit.copyOf) +
+        '">; a smaller copy made by this site of ' +
+        anchor(credit.copyOf, "the original file" +
+          (credit.copyOfBytes ? " (" + weightWords(credit.copyOfBytes) + ")" : "")) + "</span>";
     }
     return line;
   }
@@ -3488,6 +3511,8 @@
     photoSrc: photoSrc,
     photoAttrs: photoAttrs,
     copyCredit: copyCredit,
+    copyOf: copyOf,
+    weightWords: weightWords,
     retryOriginal: retryOriginal,
     handleImageFallback: handleImageFallback,
     SILHOUETTE: SILHOUETTE,

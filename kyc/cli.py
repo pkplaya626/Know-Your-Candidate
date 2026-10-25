@@ -325,6 +325,23 @@ def _build(args):
     from . import photocopies
     for level, code, message in photocopies.problems(photocopies.load(args.root), args.root):
         issues.append(validate.Issue(level, code, message, ""))
+    if args.check:
+        # And each copy shown only for its own original and record, credited,
+        # with what is left to weigh or copy (rule 101), where a reviewer
+        # runs the documented validate-only command (the reviewers of PR
+        # #137); a writing build checks the same after it builds.
+        try:
+            copies_shown = photocopies.gather(args.root, people=profiles)
+        except Exception as exc:  # noqa: BLE001 - reported, never silent
+            issues.append(validate.Issue("error", "photo-copy-unchecked",
+                                         f"the records showing copies could not be built: {exc}", ""))
+        else:
+            for level, code, message in photocopies.problems(
+                    photocopies.load(args.root), args.root, copies_shown, files=False):
+                issues.append(validate.Issue(level, code, message, ""))
+            if not args.json:
+                print(f"  smaller copies of heavy portraits: "
+                      f"{photocopies.stats(photocopies.load(args.root), copies_shown)}")
     errors = [i for i in issues if i.level == "error"]
 
     if args.json:
@@ -504,8 +521,8 @@ def _build(args):
 
     # Each copy shown only for its own original, credited; and what is left
     # to weigh or copy, by kind (rule 101: never silent).
-    shown = photocopies.Shown().add_legislatures(legislatures).add_people(profiles)
-    shown.add_stategov(state_gov).add_federal(fed_payload)
+    shown = photocopies.Shown().add_legislatures(legislatures, legphotos.load_cache(args.root))
+    shown.add_people(profiles).add_stategov(state_gov).add_federal(fed_payload)
     copy_issues = photocopies.problems(photocopies.load(args.root), args.root, shown, files=False)
     for level, code, message in copy_issues:
         print(f"  [{'error' if level == 'error' else 'warn'}] {code}: {message}",
@@ -1747,8 +1764,9 @@ def _verify(args):
     # The smaller copies of heavy portraits (rule 101): each on disk with its
     # hash, and each shown only in place of its own original, credited.
     from . import photocopies
-    shown = photocopies.Shown().add_legislatures(legislatures).add_people(profiles)
-    shown.add_stategov(gov_built).add_federal(fed[0] if fed else None)
+    from . import legphotos
+    shown = photocopies.Shown().add_legislatures(legislatures, legphotos.load_cache(args.root))
+    shown.add_people(profiles).add_stategov(gov_built).add_federal(fed[0] if fed else None)
     copy_errors = [(code, message) for level, code, message in photocopies.problems(
         photocopies.load(args.root), args.root, shown) if level == "error"]
     for code, message in copy_errors:

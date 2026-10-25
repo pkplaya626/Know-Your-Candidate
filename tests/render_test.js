@@ -7677,7 +7677,7 @@ async function testLegislatures() {
     suite("legislature/mt.html — the legislature's own photographs, credited", () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
       const everyone = [].concat(...Object.values(state.chambers.upper.members), state.unplaced);
-      const credited = everyone.filter((p) => p.imageCredit);
+      const credited = everyone.filter((p) => p.imageCredit && p.imageCredit.by);
       check("every credited photograph is the legislature's, from its own host",
         credited.every((p) => /^https:\/\/(www\.)?legmt\.gov\//.test(p.image) &&
           p.imageCredit.by === "Montana Legislature" && /legmt\.gov/.test(p.imageCredit.page)),
@@ -7708,16 +7708,26 @@ async function testLegislatures() {
       check("every portrait served by the legislature is credited to it",
         hosted.every((p) => p.imageCredit && p.imageCredit.by === "Montana Legislature"),
         hosted.filter((p) => !p.imageCredit).map((p) => p.name).join(", "));
-      const plain = everyone.find((p) => p.image && !p.imageCredit);
+      /* Any other Open States portrait says where Open States found it,
+       * never "Photo: <host>" as though the host were whose it is (the
+       * reviewers of PR #137: a news site, an image CDN). */
+      const listed = everyone.filter((p) => p.image && !(p.imageCredit && p.imageCredit.by));
+      check("every other portrait is said to be where Open States found it",
+        listed.every((p) => p.imageCredit && p.imageCredit.listedBy === "Open States" &&
+          p.imageCredit.host === new URL(p.image).hostname),
+        listed.filter((p) => !p.imageCredit).map((p) => p.name).join(", "));
+      const plain = listed.find((p) => Object.keys(state.chambers.upper.members).some((k) =>
+        state.chambers.upper.members[k].includes(p)));
       if (plain) {
         const id = Object.keys(state.chambers.upper.members).find((k) =>
           state.chambers.upper.members[k].includes(plain));
-        if (id) {
-          pick(D, window, id);
-          const card = [...D.querySelectorAll("#legPanelBody .leg-person")].find((el) =>
-            el.textContent.includes(plain.name));
-          check("a card with no recorded credit prints no credit line", !card.querySelector(".leg-credit"));
-        }
+        pick(D, window, id);
+        const card = [...D.querySelectorAll("#legPanelBody .leg-person")].find((el) =>
+          el.textContent.includes(plain.name));
+        const line = card && card.querySelector(".leg-credit");
+        check("such a card says where the file is and who listed it, and credits no one",
+          !!line && line.textContent === "Photo: from " + plain.imageCredit.host +
+            ", as listed by Open States" && !line.querySelector("a"), line && line.textContent);
       }
     });
   }
@@ -11015,7 +11025,9 @@ async function testFederal() {
     const credit = D.getElementById("officialModalPhotoCredit");
     check("their photograph is credited under their name, as a profile's is (rule 87)",
       office.holder.photo ? !credit.hidden && credit.textContent === "Photo: The White House" +
-        (office.holder.photoCopy ? "; a smaller copy made by this site of the original file" : "")
+        (office.holder.photoCopy ? "; a smaller copy made by this site of the original file" +
+          (office.holder.photoCopy.ofBytes
+            ? " (" + window.KYC.weightWords(office.holder.photoCopy.ofBytes) + ")" : "") : "")
         : credit.hidden, credit.textContent);
     KYC.official.close();
     const record = d.offices.find((o) => o.holder && (o.holder.politicalHistory || {}).rows &&
@@ -14997,6 +15009,17 @@ async function testPhotoCopies() {
         KYC.photoCreditHtml({ by: "<b>x</b>", copyOf: 'https://e.x/a"b.jpg' }).indexOf("<b>") === -1);
       check("a copy that is not of this address is never used",
         KYC.photoSrc("https://e.x/a.jpg", { src: COPY, of: "https://e.x/b.jpg" }) === "https://e.x/a.jpg");
+      // The link to the original says how heavy it is (PR #137 review): one
+      // tap on a phone fetched 9 to 12 MB.
+      const weighed = KYC.photoCreditHtml(KYC.copyCredit({ by: "Oklahoma Legislature" }, "https://e.x/a.jpg",
+        { src: COPY, of: "https://e.x/a.jpg", ofBytes: 12_400_000 })).replace(/<[^>]+>/g, "");
+      check("the original's weight is in its link",
+        /a smaller copy made by this site of the original file \(12\.4 MB\)$/.test(weighed), weighed);
+      check("a weight under a megabyte in KB, a whole one without a decimal",
+        KYC.weightWords(820_400) === "820 KB" && KYC.weightWords(2_000_000) === "2 MB");
+      check("an Open States listing names where the file is, never whose it is",
+        KYC.photoCreditHtml({ host: "www.chicagotribune.com", listedBy: "Open States" }) ===
+          "Photo: from www.chicagotribune.com, as listed by Open States");
     });
     window.close();
   }
@@ -15023,13 +15046,26 @@ async function testPhotoCopies() {
         credit.textContent === "Photo: The White House; a smaller copy made by this site of the original file" &&
         !!credit.querySelector('a[href="' + holder.photo + '"]'), credit.textContent);
       photo.dispatchEvent(new window.Event("error"));
-      check("a copy that fails gives way to the original, and the credit says only whose it is",
-        photo.getAttribute("src") === holder.photo && credit.textContent === "Photo: The White House" &&
+      // Never the heavy original itself: the White House's own smallest
+      // rendition of the file, as before the copies (PR #137 review).
+      const lighter = holder.photoSet && holder.photoSet.length ? holder.photoSet[0][0] : holder.photo;
+      check("a copy that fails gives way to the White House's own rendition, and the credit says only whose it is",
+        photo.getAttribute("src") === lighter && credit.textContent === "Photo: The White House" &&
         !D.getElementById("officialModalPortrait").hidden, photo.getAttribute("src"));
+      check("that rendition is a smaller size of the same file",
+        !holder.photoSet || !holder.photoSet.length ||
+          lighter.split("?")[0] === holder.photo.split("?")[0], lighter);
       KYC.official.close();
       const card = KYC.official.pictureTag(holder, 72, "fed-photo");
       check("the hub's card loads the copy too", card.indexOf('src="../' + COPY + '"') !== -1 &&
-        card.indexOf('data-photo-original="' + KYC.escapeAttr(holder.photo) + '"') !== -1, card);
+        card.indexOf('data-photo-original="' + KYC.escapeAttr(lighter) + '"') !== -1, card);
+      // A copy of another address is not this photograph's: the White
+      // House's own sizes are drawn, as on a page with no copies.
+      holder.photoCopy = { src: COPY, of: "https://www.whitehouse.gov/other.jpg" };
+      const own = KYC.official.pictureTag(holder, 72, "fed-photo");
+      check("a copy of another photograph falls through to the White House's own sizes",
+        own.indexOf(COPY) === -1 && own.indexOf("data-photo-original") === -1 &&
+        (!holder.photoSet || !holder.photoSet.length || own.indexOf("srcset=") !== -1), own);
       holder.photoCopy = kept;
     });
     suite("federal/index.html — a justice's official portrait says its year", () => {
@@ -15076,10 +15112,16 @@ async function testPhotoCopies() {
       if (gov.headshot) {
         const img = host.querySelector(".gov-portrait");
         check("the governor's card loads the copy", !!img && img.getAttribute("src") === "../" + COPY);
+        const said = () => [...host.querySelectorAll(".photo-copy-note")].some((n) =>
+          n.getAttribute("data-copy-of") === gov.headshot);
+        check("the list of sources says the governor's photograph is a copy made here", said(),
+          host.textContent.slice(-400));
         D.body.appendChild(host);
         img.dispatchEvent(new window.Event("error"));
         check("a governor's copy that fails gives way to the original, not to nothing",
           host.contains(img) && img.getAttribute("src") === gov.headshot);
+        // ...and the sources stop calling it a copy (PR #137 review).
+        check("and the list of sources stops calling it a copy", !said());
         host.remove();
       }
       if (off) off.photoCopy = keep[0];

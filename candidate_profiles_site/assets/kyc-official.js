@@ -90,18 +90,21 @@
     if (!person) return null;
     // No size wider than a 2x screen needs at *px* (KYC.cappedSrcset).
     var drawn = (px || 116) + "px";
-    if (person.photo && person.photoCopy) {
-      // The smaller copy this site made of a heavy original (rule 101): one
-      // size, made for the dialog's box at three times its pixels.
-      return {
-        src: KYC.photoSrc(person.photo, person.photoCopy),
-        srcset: "",
-        original: person.photo,
-        credit: KYC.copyCredit({ by: "The White House" }, person.photo, person.photoCopy),
-      };
-    }
     if (person.photo) {
       var sizes = person.photoSet || [];
+      if (KYC.copyOf(person.photo, person.photoCopy)) {
+        // The smaller copy this site made of a heavy original (rule 101):
+        // one size, made for the dialog's box at three times its pixels.
+        // Should it fail, the White House's own smallest rendition of the
+        // file stands in, as before the copies, never the heavy original.
+        return {
+          src: KYC.photoSrc(person.photo, person.photoCopy),
+          srcset: "",
+          original: sizes.length ? sizes[0][0] : person.photo,
+          of: person.photo,
+          credit: KYC.copyCredit({ by: "The White House" }, person.photo, person.photoCopy),
+        };
+      }
       return {
         src: sizes.length ? sizes[0][0] : person.photo,
         srcset: KYC.cappedSrcset(sizes.map(function (s) { return [s[1], s[0]]; }), drawn),
@@ -136,6 +139,7 @@
     if (!p) return "";
     return '<img class="' + KYC.escapeAttr(className) + '" src="' + KYC.escapeAttr(p.src) + '"' +
       (p.original ? ' data-photo-original="' + KYC.escapeAttr(p.original) + '"' : "") +
+      (p.of ? ' data-photo-of="' + KYC.escapeAttr(p.of) + '"' : "") +
       (p.srcset ? ' srcset="' + KYC.escapeAttr(p.srcset) + '" sizes="' + px + 'px"' : "") +
       ' alt="" width="' + px + '" height="' + Math.round(px * 1.25) +
       '" loading="lazy" decoding="async">';
@@ -683,6 +687,8 @@
       photo.sizes = pic.srcset ? "116px" : "";
       if (pic.original) photo.setAttribute("data-photo-original", pic.original);
       else photo.removeAttribute("data-photo-original");
+      if (pic.of) photo.setAttribute("data-photo-of", pic.of);
+      else photo.removeAttribute("data-photo-of");
       photo.src = pic.src;
       photo.alt = person.name;
     } else {

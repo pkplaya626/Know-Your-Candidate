@@ -2244,7 +2244,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     already shows by a route the rules allow (a legislator's `image`, the
     White House's `photo`, an NGA headshot, an officer's `photo`, a
     profile's first portrait), never a Wikimedia file (rule 42): no new
-    route, no search, no address built from a name. It weighs each with a
+    route, no search, no address built from a name. Hosting a copy is
+    another act than linking a file, and the decision was for official
+    photographs: a legislator's is copied only from the legislature's own
+    host or a government's (`.gov`, `.mil`, `state.XX.us`;
+    `photocopies.may_copy`). Open States also lists news sites',
+    campaigns', party sites' and image CDNs' photographs - the Chicago
+    Tribune's, Gannett's, NPR's, Squarespace's - and the first version
+    hosted 148 copies of them; those stay drawn from their own host, as
+    before, and the build counts them. It weighs each with a
     ranged GET (HEAD lies, rule 51), one request a second to each host,
     and copies those over 300 KB or 1,200 px: the downloaded file drawn
     once in headless Chrome (`tools/make_photo_copies.mjs`, served to it
@@ -2264,35 +2272,58 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     first version kept it until a download succeeded), so no copy of a
     predecessor's photograph outlives its file (rule 100's seat files);
     the copy comes back only on the very same hash, as when a server's
-    machines give one file two ETags. One answering 404 or 410 twice is gone
+    machines give one file two ETags. A copy is tied to the people it was
+    made for, not only to its address (`copy.for`, a person's key: a
+    legislator's id, a governor or officer by name, never a seat): a seat's
+    file that passes to a successor kept showing the predecessor's copy
+    under the successor's name until the address happened to be read again,
+    up to two weeks, and January seats new members. A record not in `for`
+    is shown the original, and its address is read again at once, whatever
+    its age, whole and never on its validators; the copy becomes theirs
+    only on the very same hash. A legislature's own photograph (rule 100)
+    is copied only where this cache read the file `legphotos` weighed, the
+    same length and day of Last-Modified (`photocopies.expected`), and
+    `legphotos` tells a heavy seat file apart by its first bytes and its
+    length, so one unchanged since it showed someone else is withheld
+    (tested). One answering 404 or 410 twice is gone
     and its copy with it; a refusal, a reset, a truncated file Chrome
     cannot decode (two of Georgia's stop at exactly 1 MB) concludes
     nothing (rule 8), and Maine's host, which refuses this machine's TLS,
     is listed as unweighed, never as light. A run is a batch, oldest
-    first, inside a time budget (rule 78), and the refresh runs one after
-    every step that sets a portrait. The record keeps its original and
-    gains `photoCopy: {src, of}`; every page draws it through one helper
-    (`KYC.photoSrc` / `photoAttrs` / `portraitSrc`, from `KYC.siteRoot()`
-    at any depth, stamped `?v=` with the copy's hash, rule 76), and a copy
-    that fails to load gives way to its original (`KYC.retryOriginal`,
-    one listener's word for every module's). The credit stays the
+    first, inside a time budget (rule 78) that counts Chrome's time too:
+    the weighing stops early enough to leave the copy maker its share, is
+    saved before Chrome starts, and the maker starts no job past the
+    deadline. The refresh runs one after every step that sets a portrait;
+    the people it reads are the last build's, so a campaign portrait first
+    set in the same refresh is weighed by the next one. The record keeps
+    its original and gains `photoCopy: {src, of, ofBytes}`; every page
+    draws it through one helper (`KYC.photoSrc` / `photoAttrs` /
+    `portraitSrc` / `copyOf`, from `KYC.siteRoot()` at any depth, stamped
+    `?v=` with the copy's hash, rule 76), and a copy that fails to load
+    gives way to its original (`KYC.retryOriginal`, one listener's word for
+    every module's) - a White House photograph to the White House's own
+    smallest rendition of it, never the heavy file - and every note on
+    the page calling it a copy goes with it. The credit stays the
     original's, adding "a smaller copy made by this site of the original
-    file", linked to it (`KYC.copyCredit`); where a card credited no one -
-    an Open States portrait off the legislature's host - the copy is
-    credited to the host that served it, "via Open States", since the
-    page no longer loads it from there. A share page unfurls with the copy
-    at its absolute address on the one hostname (rule 21). `verify` and
-    `build` fail a file under `photos/` the manifest does not list, a
-    listed copy missing or not its hash, a copy larger than its box or
-    than its original, of a light or a Wikimedia file, shown for another
-    address than its own or without a credit; `build` counts the
-    originals still over the caps with no copy, and those not yet
-    weighed, by kind. The first runs weighed 7,491 of 7,716 addresses and
-    made 1,557 copies of the 1,559 originals over the caps (1,531
-    legislators', 15 of the White House's, 11 of campaigns'): some 2.4 GB
-    of originals became 15.6 MB. 36 of them are legislators `legphotos`
-    used to leave out as offered only over the caps, now checked as
-    theirs and shown (rule 100). The same day's photo
+    file (12.4 MB)", linked to it with its weight (`KYC.copyCredit`). An
+    Open States portrait off the legislature's host credits no one: "Photo:
+    from" a host, "as listed by Open States", copied or not - the first
+    version printed "Photo:" and the bare host on its copies, read as whose
+    photograph a CDN's or a newspaper's file was. A share page unfurls
+    with the copy at its absolute address on the one hostname (rule 21).
+    `verify`, `build` and `build --check` fail a file under `photos/` the
+    manifest does not list, a listed copy missing or not its hash, one
+    that does not record whom it was made for, one not its original's
+    shape or not the pixels the manifest gives, a copy larger than its box
+    or than its original, of a light or a Wikimedia file or a legislator's
+    off a government's host, shown for another address or person than its
+    own or without a credit; they count the originals still over the caps
+    with no copy, and those not yet weighed, by kind. The first runs made
+    1,557 copies; after the review's scope, 1,409 copies (1,383
+    legislators', 15 of the White House's, 11 of campaigns') stand for
+    originals that weigh some 2.4 GB, in 14.0 MB. 36 of them are
+    legislators `legphotos` used to leave out as offered only over the
+    caps, now checked as theirs and shown (rule 100). The same day's photo
     research found five of the justices' official portraits on Commons
     older than the Court's current ones; the credit says the year
     Commons' `DateTimeOriginal` gives ("Official portrait, 2005"), read
