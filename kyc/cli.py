@@ -1792,11 +1792,16 @@ def _courts(args):
             return 2
         read, problems = cache["courts"], []
     else:
-        read, problems = courts.fetch(root=args.root)
+        pages = {}
+        read, problems = courts.fetch(root=args.root, pages=pages)
         # A court that could not be read this time keeps its last good read
         # (rule 8): a timeout is not a court with no members.
         old = courts.load_cache(args.root) or {}
         before = old.get("courts", {})
+        # Each justice's photograph from the court's own pages (rule 87),
+        # a size the page offers within the caps or none.
+        from . import court_photos
+        problems.extend(court_photos.add_justice_photos(read, pages, before))
         for code in sorted(set(courts.COURTS) - set(read)):
             if code in before:
                 # With the day it was read, which this run's save does not
@@ -1823,6 +1828,12 @@ def _courts(args):
     print(f"  {len(read)} courts read; {len(curated)} read by hand from the court's own page "
           f"({', '.join(sorted(curated))}); {len(courts.UNREADABLE)} cannot be read at all"
           + (f"; no recipe or no result for {', '.join(missing)}" if missing else ""))
+    from . import court_photos
+    seen = court_photos.counts({"courts": read})
+    print(f"  photographs: {seen['shown']} of {seen['members']} justices from their court's own "
+          f"pages; {seen['oversized']} left out, offered only above the caps; "
+          f"{seen['unknown']} could not be read; {seen['none'] + seen['shape']} with none that "
+          "passes")
     if not args.check:
         print(f"[ok] wrote {courts.save_cache(read, args.root)}")
     return 2 if unfit else 0

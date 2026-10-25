@@ -1072,6 +1072,23 @@ LEADERSHIP_TITLES = {
         "Chair' Scott, Tim (R-SC), among the party leadership"),
 }
 
+# A justice's official portrait on their court's own page that the strict
+# words test of kyc/court_photos.py refuses - an alt text that misspells
+# them, a nickname, a file named by initials - looked at by a person, with
+# the page's own words beside it and the day. Keyed (court, the name as the
+# court's roster gives it); each is the record a read photograph carries
+# (official_photos.record: the file, its page, the evidence, the day, its
+# bytes and pixel size), at a size the page itself offers within the caps.
+# Not shown once the court no longer lists the justice, and the build says
+# so.
+def _justice_photo(photo, page, evidence, weight, read):
+    return dict(zip(("bytes", "width", "height"), weight), photo=photo, page=page,
+                evidence=evidence, read=read)
+
+
+JUSTICE_PHOTOS = {
+}
+
 # State high courts whose own sites refuse every automated reader - a plain
 # request and the headless Chrome of tools/read_court_pages.mjs alike (a
 # Cloudflare or Akamai wall, a 403) - read once by hand, in an ordinary
