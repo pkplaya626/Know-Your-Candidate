@@ -10,7 +10,14 @@
     "Jude Pate",
     "Aimee A. Oravec"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Aimee A. Oravec": "none",
+    "Dario Borghesan": "none",
+    "Jennifer S. Henderson": "none",
+    "Jude Pate": "none",
+    "Susan M. Carney": "none"
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://courts.alaska.gov/judges/index.htm"
   },
@@ -26,7 +33,72 @@
     "Nicholas Bronni",
     "Rhonda K. Wood"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Barbara Webb": {
+     "bytes": 6539,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Associate Justice Barbara Webb'; file 'justice-webb.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2021-01/justice-webb.jpg?itok=iiMtAH-f",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Cody Hiland": {
+     "bytes": 6359,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Associate Justice Cody Hiland, Position 3'; file 'Justice_Hiland_Court_Portrait.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2025-04/Justice_Hiland_Court_Portrait.jpg?itok=p97iGBop",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Courtney Rae Hudson": {
+     "bytes": 7697,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Associate Justice Courtney Hudson, Position 2'; file 'Justice Hudson-014.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2026-10/Justice%20Hudson-014.jpg?itok=sD0N-eAm",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Karen R. Baker": {
+     "bytes": 7412,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Chief Justice Karen R. Baker, Position 1'; file 'Justice_Karen_R_Baker.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2025-01/Justice_Karen_R_Baker.jpg?itok=eyKJUxVH",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Nicholas Bronni": {
+     "bytes": 6671,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Associate Justice Nicholas Bronni, Position 6'; file 'Justice_Bronni_Court_Portrait.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2025-04/Justice_Bronni_Court_Portrait.jpg?itok=wiDTgtnW",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Rhonda K. Wood": {
+     "bytes": 7779,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Associate Justice Rhonda K. Wood, Position 7'; file 'Rhonda Wood.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2019-06/Rhonda%20Wood.jpg?itok=pWkGascy",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Shawn A. Womack": {
+     "bytes": 5893,
+     "evidence": "On the court's page https://www.arcourts.gov/courts/supreme-court/justices: alt 'Associate Justice Shawn A. Womack, Position 5'; file 'JusticeWomack.jpg'",
+     "height": 263,
+     "page": "https://www.arcourts.gov/courts/supreme-court/justices",
+     "photo": "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2019-06/JusticeWomack.jpg?itok=ucjmWHfd",
+     "read": "2026-10-25",
+     "width": 210
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.arcourts.gov/courts/supreme-court/justices"
   },
@@ -42,7 +114,66 @@
     "Kathryn H. King",
     "Maria Elena Cruz"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Maria Elena Cruz": "none"
+   },
+   "photos": {
+    "Ann A. Scott Timmer": {
+     "bytes": 199217,
+     "evidence": "On the court's page https://www.azcourts.gov/meetthejustices: alt 'Vice Chief Justice Timmer'; title 'Vice Chief Justice Timmer'; file 'Timmer.png'",
+     "height": 440,
+     "page": "https://www.azcourts.gov/meetthejustices",
+     "photo": "https://www.azcourts.gov/portals/0/63/Images/Timmer.png",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Clint Bolick": {
+     "bytes": 197636,
+     "evidence": "On the court's page https://www.azcourts.gov/meetthejustices: alt 'Justice Bolick'; title 'Justice Bolick'; file 'Bolick.png'",
+     "height": 440,
+     "page": "https://www.azcourts.gov/meetthejustices",
+     "photo": "https://www.azcourts.gov/portals/0/63/Images/Bolick.png",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "James P. Beene": {
+     "bytes": 255181,
+     "evidence": "On the court's page https://www.azcourts.gov/meetthejustices: alt 'Justice Beene'; title 'Justice Beene'; file 'Beene.png'",
+     "height": 440,
+     "page": "https://www.azcourts.gov/meetthejustices",
+     "photo": "https://www.azcourts.gov/portals/0/63/Images/Beene.png",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "John R. Lopez IV": {
+     "bytes": 194409,
+     "evidence": "On the court's page https://www.azcourts.gov/meetthejustices: alt 'Justice Lopez'; title 'Justice Lopez'; file 'Lopez.png'",
+     "height": 440,
+     "page": "https://www.azcourts.gov/meetthejustices",
+     "photo": "https://www.azcourts.gov/portals/0/63/Images/Lopez.png",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Kathryn H. King": {
+     "bytes": 229801,
+     "evidence": "On the court's page https://www.azcourts.gov/meetthejustices: alt 'Justice King'; title 'Justice King'; file 'King.png'",
+     "height": 440,
+     "page": "https://www.azcourts.gov/meetthejustices",
+     "photo": "https://www.azcourts.gov/portals/0/63/Images/King.png",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "William G. Montgomery": {
+     "bytes": 298337,
+     "evidence": "On the court's page https://www.azcourts.gov/meetthejustices: alt 'Justice Montgomery'; title 'Justice Montgomery'; file 'Montgomery.png'",
+     "height": 440,
+     "page": "https://www.azcourts.gov/meetthejustices",
+     "photo": "https://www.azcourts.gov/portals/0/63/Images/Montgomery.png",
+     "read": "2026-10-25",
+     "width": 320
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.azcourts.gov/meetthejustices"
   },
@@ -57,7 +188,33 @@
     "Joshua P. Groban",
     "Kelli M. Evans"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Carol A. Corrigan": "none",
+    "Joshua P. Groban": "none",
+    "Leondra R. Kruger": "none",
+    "Patricia Guerrero": "none"
+   },
+   "photos": {
+    "Goodwin H. Liu": {
+     "bytes": 9488,
+     "evidence": "On the court's page https://supreme.courts.ca.gov/about-court/justices-court/associate-justice-goodwin-h-liu: alt 'Associate Justice Goodwin Liu'; file 'GLiu_040323.png'",
+     "height": 480,
+     "page": "https://supreme.courts.ca.gov/about-court/justices-court/associate-justice-goodwin-h-liu",
+     "photo": "https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/styles/large/public/2023-04/GLiu_040323.png?itok=RDC_v92i",
+     "read": "2026-10-25",
+     "width": 395
+    },
+    "Kelli M. Evans": {
+     "bytes": 16469,
+     "evidence": "On the court's page https://supreme.courts.ca.gov/about-court/justices-court/justice-kelli-m-evans: alt 'Associate Justice Kelli Evans'; file 'Justice Kelli Evans.png'",
+     "height": 480,
+     "page": "https://supreme.courts.ca.gov/about-court/justices-court/justice-kelli-m-evans",
+     "photo": "https://supreme.courts.ca.gov/sites/default/files/supremecourt/default/styles/large/public/2023-01/Justice%20Kelli%20Evans.png?itok=FjJ_04VJ",
+     "read": "2026-10-25",
+     "width": 322
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://supreme.courts.ca.gov/about-court/justices-court"
   },
@@ -73,7 +230,66 @@
     "Maria E. Berkenkotter",
     "Susan Blanco"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Carlos A. Samour, Jr.": "none"
+   },
+   "photos": {
+    "Brian D. Boatright": {
+     "bytes": 39090,
+     "evidence": "On the court's page https://www.coloradojudicial.gov/contact/brian-d-boatright: alt 'Boatright'; file 'Boatright.JPG'",
+     "height": 354,
+     "page": "https://www.coloradojudicial.gov/contact/brian-d-boatright",
+     "photo": "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Boatright.JPG?itok=LNacHVhk",
+     "read": "2026-10-25",
+     "width": 264
+    },
+    "Maria E. Berkenkotter": {
+     "bytes": 70154,
+     "evidence": "On the court's page https://www.coloradojudicial.gov/contact/maria-e-berkenkotter: alt 'Berkenkotter'; file 'Berkenkotter.JPG'",
+     "height": 354,
+     "page": "https://www.coloradojudicial.gov/contact/maria-e-berkenkotter",
+     "photo": "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Berkenkotter.JPG?itok=Sh7A9em7",
+     "read": "2026-10-25",
+     "width": 264
+    },
+    "Monica M. Márquez": {
+     "bytes": 52722,
+     "evidence": "On the court's page https://www.coloradojudicial.gov/contact/monica-m-marquez: alt 'Marquez'; file 'Marquez.jpg'",
+     "height": 354,
+     "page": "https://www.coloradojudicial.gov/contact/monica-m-marquez",
+     "photo": "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Marquez.jpg?itok=LJrA8alU",
+     "read": "2026-10-25",
+     "width": 264
+    },
+    "Richard L. Gabriel": {
+     "bytes": 60162,
+     "evidence": "On the court's page https://www.coloradojudicial.gov/contact/richard-l-gabriel: alt 'Gabriel'; file 'Gabriel.JPG'",
+     "height": 354,
+     "page": "https://www.coloradojudicial.gov/contact/richard-l-gabriel",
+     "photo": "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Gabriel.JPG?itok=h5fJq8nY",
+     "read": "2026-10-25",
+     "width": 264
+    },
+    "Susan Blanco": {
+     "bytes": 64508,
+     "evidence": "On the court's page https://www.coloradojudicial.gov/contact/susan-blanco: alt 'Susan Blanco'; file 'Blanco.jpg'",
+     "height": 354,
+     "page": "https://www.coloradojudicial.gov/contact/susan-blanco",
+     "photo": "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-10/Blanco.jpg?itok=aphSNq7z",
+     "read": "2026-10-25",
+     "width": 264
+    },
+    "William W. Hood, III": {
+     "bytes": 60905,
+     "evidence": "On the court's page https://www.coloradojudicial.gov/contact/william-w-hood-iii: alt 'Hood'; file 'Hood.JPG'",
+     "height": 354,
+     "page": "https://www.coloradojudicial.gov/contact/william-w-hood-iii",
+     "photo": "https://www.coloradojudicial.gov/sites/default/files/styles/contact/public/2023-08/Hood.JPG?itok=C3WkoI_6",
+     "read": "2026-10-25",
+     "width": 264
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.coloradojudicial.gov/supreme-court/supreme-court-judges-and-staff"
   },
@@ -89,7 +305,16 @@
     "William H. Bright, Jr.",
     "Melanie L. Cradle"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Andrew J. McDonald": "none",
+    "Gregory T. D’Auria": "none",
+    "Melanie L. Cradle": "none",
+    "Nora R. Dannehy": "none",
+    "Raheem L. Mullins": "none",
+    "Steven D. Ecker": "none",
+    "William H. Bright, Jr.": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.jud.ct.gov/external/supapp/supjustices.htm"
   },
@@ -103,7 +328,40 @@
     "N. Christopher Griffiths",
     "Morgan T. Zurn"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Abigail M. LeGrow": "oversized",
+    "N. Christopher Griffiths": "oversized"
+   },
+   "photos": {
+    "Collins J. Seitz, Jr.": {
+     "bytes": 16204,
+     "evidence": "On the court's page https://courts.delaware.gov/supreme/justices.aspx: alt 'Justice Collins J. Seitz, Jr. portrait'; file 'supreme_seitz_2023.jpg'",
+     "height": 190,
+     "page": "https://courts.delaware.gov/supreme/justices.aspx",
+     "photo": "https://courts.delaware.gov/supreme/agency/img/supreme_seitz_2023.jpg",
+     "read": "2026-10-25",
+     "width": 150
+    },
+    "Gary F. Traynor": {
+     "bytes": 28072,
+     "evidence": "On the court's page https://courts.delaware.gov/supreme/justices.aspx: alt 'Justice Gary F. Traynor portrait'; file 'supreme_traynor.jpg'",
+     "height": 190,
+     "page": "https://courts.delaware.gov/supreme/justices.aspx",
+     "photo": "https://courts.delaware.gov/supreme/agency/img/supreme_traynor.jpg",
+     "read": "2026-10-25",
+     "width": 150
+    },
+    "Morgan T. Zurn": {
+     "bytes": 5398,
+     "evidence": "On the court's page https://courts.delaware.gov/supreme/justices.aspx: alt 'Justice Morgan T. Zurn'; file 'supreme_zurn_2026.jpg'",
+     "height": 225,
+     "page": "https://courts.delaware.gov/supreme/justices.aspx",
+     "photo": "https://courts.delaware.gov/supreme/agency/img/supreme_zurn_2026.jpg",
+     "read": "2026-10-25",
+     "width": 150
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://courts.delaware.gov/supreme/justices.aspx"
   },
@@ -119,7 +377,16 @@
     "Meredith L. Barrios",
     "Adam Tanenbaum"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Adam Tanenbaum": "none",
+    "Carlos G. Muñiz": "none",
+    "Jamie R. Grosshans": "none",
+    "John D. Couriel": "none",
+    "Jorge Labarga": "none",
+    "Meredith L. Barrios": "none",
+    "Renatha S. Francis": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://supremecourt.flcourts.gov/Justices"
   },
@@ -137,7 +404,90 @@
     "Andrew A. Pinson",
     "Benjamin A. Land"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Andrew A. Pinson": {
+     "bytes": 11497,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-andrew-a-pinson/: alt 'Justice Andrew A. Pinson'; title 'Justice Andrew A. Pinson'; file 'j_pinson_web_edit.jpg'",
+     "height": 221,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-andrew-a-pinson/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2023/04/j_pinson_web_edit-200x221.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Benjamin A. Land": {
+     "bytes": 19415,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-benjamin-a-land/: alt 'Benjamin A. Land'; title 'Benjamin A. Land'; file 'IMAGE_2.jpeg'",
+     "height": 296,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-benjamin-a-land/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2025/07/IMAGE_2-200x296.jpeg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Carla Wong McMillian": {
+     "bytes": 28279,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-carla-wong-mcmillian/: title 'Justice Carla Wong McMillian'; file 'McMillian2472_8x10-819x1024.jpg'",
+     "height": 250,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-carla-wong-mcmillian/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2021/11/McMillian2472_8x10-200x250.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Charles J. Bethel": {
+     "bytes": 27402,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-charles-j-bethel/: title 'Justice Charles J. Bethel'; file 'Bethel0945_8x10-819x1024.jpg'",
+     "height": 250,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-charles-j-bethel/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2019/02/Bethel0945_8x10-200x250.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "John J. Ellington": {
+     "bytes": 27871,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-john-j-ellington/: title 'Justice John J. Ellington'; file 'Ellington0983_8x10-819x1024.jpg'",
+     "height": 250,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-john-j-ellington/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2019/02/Ellington0983_8x10-200x250.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Nels S.D. Peterson": {
+     "bytes": 12170,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-nels-s-d-peterson/: alt 'Chief Justice Peterson'; title 'Chief Justice Peterson'; file 'Chief-Justice-Peterson-scaled.jpg'",
+     "height": 259,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-nels-s-d-peterson/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2025/11/Chief-Justice-Peterson-200x259.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Sarah Hawkins Warren": {
+     "bytes": 10876,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-sarah-hawkins-warren/: alt 'Justice Sarah Hawkins Warren'; title 'Justice Sarah Hawkins Warren'; file 'j_warren_web_edit.jpg'",
+     "height": 208,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-sarah-hawkins-warren/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2023/04/j_warren_web_edit-200x208.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Shawn Ellen LaGrua": {
+     "bytes": 40540,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-shawn-ellen-lagrua/: title 'j_lagrua'; file 'j_lagrua.jpg'",
+     "height": 323,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-shawn-ellen-lagrua/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2021/01/j_lagrua-200x323.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Verda M. Colvin": {
+     "bytes": 27176,
+     "evidence": "On the court's page https://www.gasupreme.us/court-information/biographies/justice-verda-m-colvin/: title 'Justice Verda M. Colvin'; file 'JusticeColvin0688_8x10-819x1024.jpg'",
+     "height": 250,
+     "page": "https://www.gasupreme.us/court-information/biographies/justice-verda-m-colvin/",
+     "photo": "https://www.gasupreme.us/wp-content/uploads/2021/11/JusticeColvin0688_8x10-200x250.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    }
+   },
+   "read": "2026-10-25",
    "seats": 9,
    "url": "https://www.gasupreme.us/court-information/biographies/"
   },
@@ -150,7 +500,13 @@
     "Todd W. Eddins",
     "Lisa M. Ginoza"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Lisa M. Ginoza": "none",
+    "Sabrina S. McKenna": "none",
+    "Todd W. Eddins": "none",
+    "Vladimir P. Devens": "none"
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.courts.state.hi.us/courts/supreme/justices/justices"
   },
@@ -166,7 +522,72 @@
     "Matthew McDermott",
     "David May"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Christopher McDonald": {
+     "bytes": 1718,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of Christopher McDonald. View Christopher McDonald's profile\"; title 'Christopher McDonald'; file 'Justice_Christopher_McDonald_web_8AAB946804A8C.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/Justice_Christopher_McDonald_web_8AAB946804A8C.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    },
+    "Dana Oxley": {
+     "bytes": 1824,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of Dana Oxley. View Dana Oxley's profile\"; title 'Dana Oxley'; file 'Justice_Dana_Oxley_web_3CF35263E46B0.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/Justice_Dana_Oxley_web_3CF35263E46B0.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    },
+    "David May": {
+     "bytes": 1300,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of David May. View David May's profile\"; title 'David May'; file 'J_May_website_A8AC15EE628CC.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/J_May_website_A8AC15EE628CC.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    },
+    "Edward M. Mansfield": {
+     "bytes": 1458,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of Edward M. Mansfield. View Edward M. Mansfield's profile\"; title 'Edward M. Mansfield'; file 'Justice_Edward_Mansfield_web_05614E16A17E1.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/Justice_Edward_Mansfield_web_05614E16A17E1.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    },
+    "Matthew McDermott": {
+     "bytes": 1466,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of Matthew McDermott. View Matthew McDermott's profile\"; title 'Matthew McDermott'; file 'Justice_Matthew_McDermott_web_666DD36609AD3.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/Justice_Matthew_McDermott_web_666DD36609AD3.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    },
+    "Susan Christensen": {
+     "bytes": 1800,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of Susan Christensen. View Susan Christensen's profile\"; title 'Susan Christensen'; file 'Chief_Justice_Susan_Christensen_web_90B912835E0E7.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/Chief_Justice_Susan_Christensen_web_90B912835E0E7.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    },
+    "Thomas D. Waterman": {
+     "bytes": 1510,
+     "evidence": "On the court's page https://www.iowacourts.gov/iowa-courts/supreme-court/justices/: alt \"Image of Thomas D. Waterman. View Thomas D. Waterman's profile\"; title 'Thomas D. Waterman'; file 'Justice_Thomas_Waterman_web_F73D3E8B033AF.jpg'",
+     "height": 150,
+     "page": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/",
+     "photo": "https://www.iowacourts.gov/media/staffdirectory/Justice_Thomas_Waterman_web_F73D3E8B033AF.jpg?dimensions=107x150&format=webp",
+     "read": "2026-10-25",
+     "width": 107
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.iowacourts.gov/iowa-courts/supreme-court/justices/"
   },
@@ -180,7 +601,24 @@
     "Colleen D. Zahn",
     "Cynthia K.C. Meyer"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Colleen D. Zahn": "oversized",
+    "Cynthia K.C. Meyer": "oversized",
+    "G. Richard Bevan": "oversized",
+    "Gregory W. Moeller": "oversized"
+   },
+   "photos": {
+    "Robyn M. Brody": {
+     "bytes": 201706,
+     "evidence": "On the court's page https://isc.idaho.gov/about-the-courts/sc-justices: alt 'Chief Justice Robyn M. Brody'; file '1776539631327-brody_2025.webp'",
+     "height": 1200,
+     "page": "https://isc.idaho.gov/about-the-courts/sc-justices",
+     "photo": "https://api.isc.idaho.gov/uploads/Images/Page_Images/1776539631327-brody_2025.webp",
+     "read": "2026-10-25",
+     "width": 800
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://isc.idaho.gov/about-the-courts/sc-justices"
   },
@@ -196,7 +634,72 @@
     "Mary K. O'Brien",
     "Sanjay T. Tailor"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "David K. Overstreet": {
+     "bytes": 24491,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt 'Portrait of Justice David K. Overstreet'; file 'OverstreetD.jpg'",
+     "height": 156,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/40ca0568-932c-43b4-baa4-decfc480177a/OverstreetD.jpg",
+     "read": "2026-10-25",
+     "width": 122
+    },
+    "Elizabeth M. Rochford": {
+     "bytes": 35876,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt 'Portrait of Justice Elizabeth M. Rochford'; file 'Rochford.jpg'",
+     "height": 156,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/3779fade-4c40-4ef6-9039-ffeae86c0442/Rochford.jpg",
+     "read": "2026-10-25",
+     "width": 122
+    },
+    "Joy V. Cunningham": {
+     "bytes": 29161,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt 'Portrait of Justice Joy V. Cunningham'; file 'Cunningham.jpg'",
+     "height": 156,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/66424243-e801-45aa-9366-ae49af1897a8/Cunningham.jpg",
+     "read": "2026-10-25",
+     "width": 122
+    },
+    "Lisa Holder White": {
+     "bytes": 49170,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt 'portrait of supreme court justice Lisa Holder White'; file 'HolderWhite.jpg'",
+     "height": 156,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/e2078479-d16b-4c4f-9633-23553f4d497f/HolderWhite.jpg",
+     "read": "2026-10-25",
+     "width": 122
+    },
+    "Mary K. O'Brien": {
+     "bytes": 33372,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt \"Portrait of Justice Mary K. O'Brien\"; file 'OBrienM.jpg'",
+     "height": 157,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/447a7d16-d6d5-4d67-a81d-32683054381d/OBrienM.jpg",
+     "read": "2026-10-25",
+     "width": 122
+    },
+    "P. Scott Neville, Jr.": {
+     "bytes": 31811,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt 'Portrait of Justice P. Scott Neville, Jr'; file 'NevilleP.jpg'",
+     "height": 156,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/6fffaff5-8f4b-44d7-853f-c87283578e51/NevilleP.jpg",
+     "read": "2026-10-25",
+     "width": 112
+    },
+    "Sanjay T. Tailor": {
+     "bytes": 27921,
+     "evidence": "On the court's page https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/: alt 'Portrait of Justice Sanjay T. Tailor'; file 'Tailor.jpg'",
+     "height": 157,
+     "page": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/",
+     "photo": "https://ilcourtsaudio.blob.core.windows.net/antilles-resources/resources/c2469cd8-ed8a-402f-af13-f873befa843c/Tailor.jpg",
+     "read": "2026-10-25",
+     "width": 123
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.illinoiscourts.gov/courts/supreme-court/meet-the-justices/"
   },
@@ -210,7 +713,54 @@
     "Christopher M. Goff",
     "Derek R. Molter"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Christopher M. Goff": {
+     "bytes": 89523,
+     "evidence": "On the court's page https://www.in.gov/courts/supreme/justices/christopher-goff: alt 'Photo of Justice Christopher Goff'; file 'goff.jpg'",
+     "height": 420,
+     "page": "https://www.in.gov/courts/supreme/justices/christopher-goff",
+     "photo": "https://www.in.gov/courts/supreme/images/goff.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Derek R. Molter": {
+     "bytes": 40220,
+     "evidence": "On the court's page https://www.in.gov/courts/supreme/justices/derek-molter: alt 'Headshot of Judge Derek Molter'; file 'molter.jpg'",
+     "height": 420,
+     "page": "https://www.in.gov/courts/supreme/justices/derek-molter",
+     "photo": "https://www.in.gov/courts/supreme/images/molter.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Geoffrey G. Slaughter": {
+     "bytes": 93874,
+     "evidence": "On the court's page https://www.in.gov/courts/supreme/justices/geoffrey-slaughter: alt 'Photo of Justice Geoffrey Slaughter'; file 'slaughter.jpg'",
+     "height": 420,
+     "page": "https://www.in.gov/courts/supreme/justices/geoffrey-slaughter",
+     "photo": "https://www.in.gov/courts/supreme/images/slaughter.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Loretta H. Rush": {
+     "bytes": 84711,
+     "evidence": "On the court's page https://www.in.gov/courts/supreme/justices/loretta-rush: alt 'Photo of Chief Justice Loretta Rush'; file 'rush.jpg'",
+     "height": 420,
+     "page": "https://www.in.gov/courts/supreme/justices/loretta-rush",
+     "photo": "https://www.in.gov/courts/supreme/images/rush.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Mark S. Massa": {
+     "bytes": 88449,
+     "evidence": "On the court's page https://www.in.gov/courts/supreme/justices/mark-massa: alt 'Photo of Justice Mark Massa'; file 'massa.jpg'",
+     "height": 420,
+     "page": "https://www.in.gov/courts/supreme/justices/mark-massa",
+     "photo": "https://www.in.gov/courts/supreme/images/massa.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.in.gov/courts/supreme/justices/"
   },
@@ -226,7 +776,72 @@
     "Larkin Walsh",
     "K. Christopher Jayaram"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Caleb Stegall": {
+     "bytes": 30054,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'Stegall-Caleb-Justice-Supreme-Court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Stegall-Caleb-Justice-Supreme-Court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    },
+    "Dan Biles": {
+     "bytes": 24752,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'Biles-Dan-Justice-Supreme-Court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Biles-Dan-Justice-Supreme-Court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    },
+    "Eric S. Rosen": {
+     "bytes": 85339,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'Rosen-Eric-Justice-Supreme-Court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Rosen-Eric-Justice-Supreme-Court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    },
+    "K. Christopher Jayaram": {
+     "bytes": 41962,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'jayaram-k-christopher-justice-supreme-court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/jayaram-k-christopher-justice-supreme-court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    },
+    "K.J. Wall": {
+     "bytes": 24010,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'Wall-KJ-Justice-Supreme-Court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Wall-KJ-Justice-Supreme-Court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    },
+    "Larkin Walsh": {
+     "bytes": 99589,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'Walsh-Larkin-Justice-Supreme-Court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Walsh-Larkin-Justice-Supreme-Court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    },
+    "Melissa Taylor Standridge": {
+     "bytes": 34568,
+     "evidence": "On the court's page https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices: alt 'judge'; file 'Standridge-Melissa-Taylor-Justice-Supreme-Court.jpg'",
+     "height": 800,
+     "page": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices",
+     "photo": "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Standridge-Melissa-Taylor-Justice-Supreme-Court.jpg?ext=.jpg",
+     "read": "2026-10-25",
+     "width": 640
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.kscourts.gov/About-the-Courts/Supreme-Court/Supreme-Court-Justices"
   },
@@ -242,7 +857,66 @@
     "Pamela R. Goodwine",
     "Michelle M. Keller"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Angela McCormick Bisig": "none"
+   },
+   "photos": {
+    "C. Shea Nickell": {
+     "bytes": 105069,
+     "evidence": "On the court's page https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx: alt 'Official portrait of Justice Shea Nickell.'; file 'Shea_Nickell_Portrait.jpg'",
+     "height": 420,
+     "page": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx",
+     "photo": "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Shea_Nickell_Portrait.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Debra Hembree Lambert": {
+     "bytes": 131844,
+     "evidence": "On the court's page https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx: alt 'Official portrait of Chief Justice Debra Hembree Lambert. '; file 'Debra_Hembree_Lambert_Portrait.jpg'",
+     "height": 420,
+     "page": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx",
+     "photo": "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Debra_Hembree_Lambert_Portrait.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Kelly Thompson": {
+     "bytes": 99385,
+     "evidence": "On the court's page https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx: alt 'Official portrait of Justice Kelly Thompson. '; file 'Kelly_Thompson_Portrait.jpg'",
+     "height": 420,
+     "page": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx",
+     "photo": "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Kelly_Thompson_Portrait.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Michelle M. Keller": {
+     "bytes": 117169,
+     "evidence": "On the court's page https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx: alt 'Official portrait of Justice Michelle M. Keller. '; file 'Michelle_Keller_Portrait.jpg'",
+     "height": 420,
+     "page": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx",
+     "photo": "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Michelle_Keller_Portrait.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Pamela R. Goodwine": {
+     "bytes": 111045,
+     "evidence": "On the court's page https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx: alt 'Official portrait of Justice Pamela R. Goodwine.'; file 'Pamela_R._Goodwine_Portrait.jpg'",
+     "height": 420,
+     "page": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx",
+     "photo": "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Pamela_R._Goodwine_Portrait.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Robert B. Conley": {
+     "bytes": 104260,
+     "evidence": "On the court's page https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx: alt 'Official portrait of Deputy Chief Justice Robert B. Conley.'; file 'Robert_B_Conley_Portrait.jpg'",
+     "height": 420,
+     "page": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx",
+     "photo": "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Robert_B_Conley_Portrait.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.kycourts.gov/Courts/Supreme-Court/Pages/default.aspx"
   },
@@ -274,7 +948,16 @@
     "Elizabeth N. Dewar",
     "Gabrielle R. Wolohojian"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Dalila Argaez Wendlandt": "none",
+    "Elizabeth N. Dewar": "unknown",
+    "Frank M. Gaziano": "unknown",
+    "Gabrielle R. Wolohojian": "unknown",
+    "Kimberly S. Budd": "none",
+    "Scott L. Kafker": "none",
+    "Serge Georges, Jr.": "unknown"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.mass.gov/info-details/supreme-judicial-court-justices"
   },
@@ -290,7 +973,16 @@
     "Angela M. Eaves",
     "Peter K. Killough"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Angela M. Eaves": "none",
+    "Brynja M. Booth": "none",
+    "Jonathan Biran": "none",
+    "Matthew Fader": "none",
+    "Peter K. Killough": "none",
+    "Shirley M. Watts": "none",
+    "Steven B. Gould": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.mdcourts.gov/scm/justices"
   },
@@ -306,7 +998,16 @@
     "Julia M. Lipez",
     "Christopher C. Taub"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Andrew M. Mead": "none",
+    "Catherine R. Connors": "none",
+    "Christopher C. Taub": "none",
+    "Julia M. Lipez": "none",
+    "Rick E. Lawrence": "none",
+    "Valerie Stanfill": "none",
+    "Wayne R. Douglas": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.courts.maine.gov/courts/sjc/justices.html"
   },
@@ -322,7 +1023,16 @@
     "Kimberly A. Thomas",
     "Noah P. Hood"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Brian K. Zahra": "none",
+    "Elizabeth M. Welch": "none",
+    "Kimberly A. Thomas": "none",
+    "Kyra H. Bolden": "none",
+    "Megan K. Cavanagh": "none",
+    "Noah P. Hood": "none",
+    "Richard Bernstein": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.courts.michigan.gov/courts/supreme-court/justices/"
   },
@@ -338,7 +1048,16 @@
     "Sarah E. Hennesy",
     "Reynaldo A. Aligada, Jr."
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Anne K. McKeig": "none",
+    "Gordon L. Moore, III": "none",
+    "Karl C. Procaccini": "none",
+    "Paul C. Thissen": "none",
+    "Reynaldo A. Aligada, Jr.": "none",
+    "Sarah E. Hennesy": "none",
+    "Theodora Karin Gaïtas": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://mncourts.gov/supremecourt/supreme-court-justices"
   },
@@ -356,7 +1075,84 @@
     "Celeste Embrey Wilson",
     "Amanda Jones Tollison"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "T. Kenneth Griffis": "none"
+   },
+   "photos": {
+    "Amanda Jones Tollison": {
+     "bytes": 5703,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Associate Justice Amanda Jones Tollison'; file 'justicetollison_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justicetollison_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "Celeste Embrey Wilson": {
+     "bytes": 6904,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Associate Justice Celeste Embrey Wilson'; file 'justicewilson_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justicewilson_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "David M. Ishee": {
+     "bytes": 3597,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Associate Justice David M. Ishee'; file 'judge_Isheethumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/judge_Isheethumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "David P. Sullivan": {
+     "bytes": 6099,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Associate Justice David P. Sullivan'; file 'justicesullivan_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justicesullivan_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "Jenifer B. Branning": {
+     "bytes": 5407,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Associate Justice Jenifer B. Branning'; file 'justicebranning_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justicebranning_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "Josiah D. Coleman": {
+     "bytes": 6000,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Presiding Justice Josiah D. Coleman'; file 'justicecoleman_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justicecoleman_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "Leslie D. King": {
+     "bytes": 20835,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Presiding Justice Leslie D. King'; file 'justice_king_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justice_king_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    },
+    "Michael K. Randolph": {
+     "bytes": 5970,
+     "evidence": "On the court's page https://courts.ms.gov/appellatecourts/sc/scjustices.php: alt 'Chief Justice Michael K. Randolph'; file 'justicerandolph_thumbnail.jpg'",
+     "height": 142,
+     "page": "https://courts.ms.gov/appellatecourts/sc/scjustices.php",
+     "photo": "https://courts.ms.gov/appellatecourts/sc/bios/justicerandolph_thumbnail.jpg",
+     "read": "2026-10-25",
+     "width": 108
+    }
+   },
+   "read": "2026-10-25",
    "seats": 9,
    "url": "https://courts.ms.gov/appellatecourts/sc/scjustices.php"
   },
@@ -372,7 +1168,72 @@
     "James A. Rice",
     "Ingrid Gustafson"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Beth Baker": {
+     "bytes": 104579,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/Baker: alt 'Justice Baker'; title 'Justice Baker'; file 'baker_new1.jpg'",
+     "height": 400,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/Baker",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/baker_new1.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "Cory Swanson": {
+     "bytes": 19461,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/Swanson: alt 'Chief Justice Swanson'; file 'swanson.jpg'",
+     "height": 352,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/Swanson",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/swanson.jpg",
+     "read": "2026-10-25",
+     "width": 235
+    },
+    "Ingrid Gustafson": {
+     "bytes": 38967,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/: alt 'Justice Ingrid Gustafson'; file 'gustafson.jpg'",
+     "height": 450,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/gustafson.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    },
+    "James A. Rice": {
+     "bytes": 38074,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/Rice: alt 'Justice Rice'; file 'ricemug.jpg'",
+     "height": 314,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/Rice",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/ricemug.jpg",
+     "read": "2026-10-25",
+     "width": 226
+    },
+    "James Jeremiah Shea": {
+     "bytes": 31242,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/: alt 'Justice James Shea'; file 'shea-tmb.jpg'",
+     "height": 100,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/shea-tmb.jpg",
+     "read": "2026-10-25",
+     "width": 80
+    },
+    "Katherine M. Bidegaray": {
+     "bytes": 4075,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/: alt 'Justice Bidegaray'; title 'Justice Bidegaray'; file 'bidegaray-tmb.jpg'",
+     "height": 120,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/bidegaray-tmb.jpg",
+     "read": "2026-10-25",
+     "width": 80
+    },
+    "Laurie McKinnon": {
+     "bytes": 2217,
+     "evidence": "On the court's page https://courts.mt.gov/Courts/Supreme/About/bios/: alt 'Justice Laurie McKinnon'; file 'mckinnon.jpg'",
+     "height": 100,
+     "page": "https://courts.mt.gov/Courts/Supreme/About/bios/",
+     "photo": "https://courts.mt.gov/external/supreme/bios/images/mckinnon.jpg",
+     "read": "2026-10-25",
+     "width": 80
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://courts.mt.gov/Courts/Supreme/About/bios/"
   },
@@ -388,7 +1249,66 @@
     "Trey Allen",
     "Allison Riggs"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Allison Riggs": "none"
+   },
+   "photos": {
+    "Anita Earls": {
+     "bytes": 15035,
+     "evidence": "On the court's page https://www.nccourts.gov/courts/supreme-court/meet-the-justices: alt 'Justice Anita Earls'; file 'Justice-Anita-Earls.jpg'",
+     "height": 480,
+     "page": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices",
+     "photo": "https://www.nccourts.gov/assets/styles/320x480/s3/2021-08/Justice-Anita-Earls.jpg?VersionId=kQi.PI_9bb90nHBU9ICliQ4fhGkvMo5n&itok=X7CrrZNi",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Paul Newby": {
+     "bytes": 13466,
+     "evidence": "On the court's page https://www.nccourts.gov/courts/supreme-court/meet-the-justices: alt 'Justice Newby'; file 'newby.jpg'",
+     "height": 480,
+     "page": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices",
+     "photo": "https://www.nccourts.gov/assets/styles/320x480/s3/2018-06/newby.jpg?VersionId=mVcffY4kCzR_jFzJZRzVLoV2zmdPx4xa&itok=xYSGCMJV",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Philip Berger Jr.": {
+     "bytes": 12976,
+     "evidence": "On the court's page https://www.nccourts.gov/courts/supreme-court/meet-the-justices: alt 'Justice Philip Berger Jr'; file 'Justice-Philip-Berger-Jr-2023.jpg'",
+     "height": 480,
+     "page": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices",
+     "photo": "https://www.nccourts.gov/assets/styles/320x480/s3/2023-02/Justice-Philip-Berger-Jr-2023.jpg?VersionId=TGUXgyU7oYlzusmfLW6h2RvmU8xi5.EI&itok=1qkSx3OQ",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Richard Dietz": {
+     "bytes": 20086,
+     "evidence": "On the court's page https://www.nccourts.gov/courts/supreme-court/meet-the-justices: alt 'Justice Richard Dietz'; file 'Justice-Richard-Dietz-3628.jpg'",
+     "height": 480,
+     "page": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices",
+     "photo": "https://www.nccourts.gov/assets/styles/320x480/s3/2023-03/Justice-Richard-Dietz-3628.jpg?VersionId=_F5nu98ntoF0zmK10gxW8Twt6b.qCVzg&itok=N0-StujR",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Tamara Barringer": {
+     "bytes": 19009,
+     "evidence": "On the court's page https://www.nccourts.gov/courts/supreme-court/meet-the-justices: alt 'Justice Tamara Barringer'; file 'Justice-Tamara-Barringer-3594.jpg'",
+     "height": 480,
+     "page": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices",
+     "photo": "https://www.nccourts.gov/assets/styles/320x480/s3/2023-03/Justice-Tamara-Barringer-3594.jpg?VersionId=iBZ16C6ZCHZKKNUrpFBmA.1W74vslzqt&itok=-GQH8zar",
+     "read": "2026-10-25",
+     "width": 320
+    },
+    "Trey Allen": {
+     "bytes": 21576,
+     "evidence": "On the court's page https://www.nccourts.gov/courts/supreme-court/meet-the-justices: alt 'Justice Trey Allen'; file 'Justice-Trey-Allen-3640.jpg'",
+     "height": 480,
+     "page": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices",
+     "photo": "https://www.nccourts.gov/assets/styles/320x480/s3/2023-03/Justice-Trey-Allen-3640.jpg?VersionId=eIDH464VVXiv6YBeKZ9mwxkPomvd.I55&itok=DV_1AEql",
+     "read": "2026-10-25",
+     "width": 320
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.nccourts.gov/courts/supreme-court/meet-the-justices"
   },
@@ -402,7 +1322,48 @@
     "Douglas A. Bahr",
     "Mark A. Friese"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Mark A. Friese": "oversized"
+   },
+   "photos": {
+    "Douglas A. Bahr": {
+     "bytes": 9428,
+     "evidence": "On the court's page https://www.ndcourts.gov/supreme-court/justices: alt 'Justice Douglas A. Bahr'; file 'DouglasABahr-small.jpg'",
+     "height": 300,
+     "page": "https://www.ndcourts.gov/supreme-court/justices",
+     "photo": "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/DouglasABahr-small.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Jerod E. Tufte": {
+     "bytes": 31405,
+     "evidence": "On the court's page https://www.ndcourts.gov/supreme-court/justices: alt 'Justice Jerod Tufte'; file 'jerodtufte-small-2026.png'",
+     "height": 300,
+     "page": "https://www.ndcourts.gov/supreme-court/justices",
+     "photo": "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/jerodtufte-small-2026.png",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Jon J. Jensen": {
+     "bytes": 46674,
+     "evidence": "On the court's page https://www.ndcourts.gov/supreme-court/justices: alt 'Justice Jon J. Jensen'; file 'jonjjensen-small.png'",
+     "height": 300,
+     "page": "https://www.ndcourts.gov/supreme-court/justices",
+     "photo": "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/jonjjensen-small.png",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Lisa K. Fair McEvers": {
+     "bytes": 12328,
+     "evidence": "On the court's page https://www.ndcourts.gov/supreme-court/justices: alt 'Chief Justice Lisa Fair McEvers'; file 'Justice-Lisa-Fair-McEvers-small.jpg'",
+     "height": 300,
+     "page": "https://www.ndcourts.gov/supreme-court/justices",
+     "photo": "https://www.ndcourts.gov/Media/Default/SupremeCourt/justices/Justice-Lisa-Fair-McEvers-small.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.ndcourts.gov/supreme-court/justices"
   },
@@ -418,7 +1379,66 @@
     "Jason M. Bergevin",
     "John R. Freudenberg"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Derek R. Vaughn": "none"
+   },
+   "photos": {
+    "Jason M. Bergevin": {
+     "bytes": 5504,
+     "evidence": "On the court's page https://nebraskajudicial.gov/courts/hon-jason-m-bergevin: alt 'Hon. Jason M. Bergevin'; file 'Bergevin-2024_0.jpg'",
+     "height": 240,
+     "page": "https://nebraskajudicial.gov/courts/hon-jason-m-bergevin",
+     "photo": "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/Bergevin-2024_0.jpg?h=f95f79eb&itok=WrKi5RwE",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Jeffrey J. Funke": {
+     "bytes": 5116,
+     "evidence": "On the court's page https://nebraskajudicial.gov/courts/hon-jeffrey-j-funke-chief-justice: alt 'Hon. Jeffrey J. Funke, Chief Justice'; file 'Funke_robe-2018.jpg'",
+     "height": 240,
+     "page": "https://nebraskajudicial.gov/courts/hon-jeffrey-j-funke-chief-justice",
+     "photo": "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/Funke_robe-2018.jpg?h=526dba2c&itok=jZ7WZCu2",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "John R. Freudenberg": {
+     "bytes": 7073,
+     "evidence": "On the court's page https://nebraskajudicial.gov/courts/hon-john-r-freudenberg: alt 'Hon. John R. Freudenberg'; file '18.Freudenberg.jpg'",
+     "height": 240,
+     "page": "https://nebraskajudicial.gov/courts/hon-john-r-freudenberg",
+     "photo": "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/18.Freudenberg.jpg?h=f79d79ee&itok=fhaEGVTv",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Jonathan J. Papik": {
+     "bytes": 6190,
+     "evidence": "On the court's page https://nebraskajudicial.gov/courts/hon-jonathan-j-papik: alt 'Hon. Jonathan J. Papik'; file '18.Papik_.jpg'",
+     "height": 240,
+     "page": "https://nebraskajudicial.gov/courts/hon-jonathan-j-papik",
+     "photo": "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/18.Papik_.jpg?h=f6baa413&itok=RsEnMX2H",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Stephanie F. Stacy": {
+     "bytes": 7981,
+     "evidence": "On the court's page https://nebraskajudicial.gov/courts/hon-stephanie-f-stacy: alt 'Justice Stephanie Stacy'; file 'Stacy.jpg'",
+     "height": 240,
+     "page": "https://nebraskajudicial.gov/courts/hon-stephanie-f-stacy",
+     "photo": "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/Stacy.jpg?h=26e2f474&itok=ZM7axA2O",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "William B. Cassel": {
+     "bytes": 5469,
+     "evidence": "On the court's page https://nebraskajudicial.gov/courts/hon-william-b-cassel: alt 'Hon. William B. Cassel'; file 'cassel.jpg'",
+     "height": 240,
+     "page": "https://nebraskajudicial.gov/courts/hon-william-b-cassel",
+     "photo": "https://nebraskajudicial.gov/sites/default/files/styles/profile_image/public/profile-images/cassel.jpg?h=7ce96cc7&itok=x14WIHl7",
+     "read": "2026-10-25",
+     "width": 200
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://nebraskajudicial.gov/courts/supreme-court/supreme-court-justices"
   },
@@ -434,7 +1454,66 @@
     "Michael Noriega",
     "John Jay Hoffman"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Fabiana Pierre-Louis": "none"
+   },
+   "photos": {
+    "Anne M. Patterson": {
+     "bytes": 16598,
+     "evidence": "On the court's page https://www.njcourts.gov/public/museum/meet-the-justices: alt 'Biography of Patterson, Anne M.'; file 'JusticePatterson.jpg'",
+     "height": 540,
+     "page": "https://www.njcourts.gov/public/museum/meet-the-justices",
+     "photo": "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/JusticePatterson.jpg?itok=mVFkqAdz&cb=2733f3bc",
+     "read": "2026-10-25",
+     "width": 360
+    },
+    "Douglas M. Fasciale": {
+     "bytes": 20835,
+     "evidence": "On the court's page https://www.njcourts.gov/public/museum/meet-the-justices: alt 'Biography of Fasciale, Douglas M.'; file 'fasciale_sm.jpg'",
+     "height": 540,
+     "page": "https://www.njcourts.gov/public/museum/meet-the-justices",
+     "photo": "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/fasciale_sm.jpg?itok=bVkj7CY-&cb=3598076d",
+     "read": "2026-10-25",
+     "width": 360
+    },
+    "John Jay Hoffman": {
+     "bytes": 20066,
+     "evidence": "On the court's page https://www.njcourts.gov/public/museum/meet-the-justices: alt 'Biography of Hoffman, John Jay'; file 'john-hoffman.jpg'",
+     "height": 540,
+     "page": "https://www.njcourts.gov/public/museum/meet-the-justices",
+     "photo": "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/john-hoffman.jpg?itok=XIimH1mH&cb=c196c1c4",
+     "read": "2026-10-25",
+     "width": 360
+    },
+    "Michael Noriega": {
+     "bytes": 21334,
+     "evidence": "On the court's page https://www.njcourts.gov/public/museum/meet-the-justices: alt 'Biography of Noriega, Michael'; file 'michael_noriega.jpg'",
+     "height": 540,
+     "page": "https://www.njcourts.gov/public/museum/meet-the-justices",
+     "photo": "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/michael_noriega.jpg?itok=V4To35XH&cb=89ee0bf9",
+     "read": "2026-10-25",
+     "width": 360
+    },
+    "Rachel Wainer Apter": {
+     "bytes": 20842,
+     "evidence": "On the court's page https://www.njcourts.gov/public/museum/meet-the-justices: alt 'Biography of Apter, Rachel Wainer'; file 'justice_wainer_apter.jpg'",
+     "height": 540,
+     "page": "https://www.njcourts.gov/public/museum/meet-the-justices",
+     "photo": "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/justice_wainer_apter.jpg?itok=iBLoq8kB&cb=f3dc3b82",
+     "read": "2026-10-25",
+     "width": 360
+    },
+    "Stuart Rabner": {
+     "bytes": 18226,
+     "evidence": "On the court's page https://www.njcourts.gov/public/museum/meet-the-justices: alt 'Biography of Rabner, Stuart'; file 'JusticeRabner.jpg'",
+     "height": 540,
+     "page": "https://www.njcourts.gov/public/museum/meet-the-justices",
+     "photo": "https://www.njcourts.gov/sites/default/files/styles/biography_large/public/biographies/JusticeRabner.jpg?itok=9sG4wBuC&cb=14438635",
+     "read": "2026-10-25",
+     "width": 360
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.njcourts.gov/public/museum/meet-the-justices"
   },
@@ -448,7 +1527,14 @@
     "David K. Thomson",
     "Briana H. Zamora"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Briana H. Zamora": "none",
+    "C. Shannon Bacon": "none",
+    "David K. Thomson": "none",
+    "Julie J. Vargas": "none",
+    "Michael E. Vigil": "none"
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://supremecourt.nmcourts.gov/about-this-court/supreme-court-justices/"
   },
@@ -464,7 +1550,66 @@
     "Daniel R. Hawkins",
     "Megan E. Shanahan"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "R. Patrick DeWine": "none"
+   },
+   "photos": {
+    "Daniel R. Hawkins": {
+     "bytes": 24702,
+     "evidence": "On the court's page https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/daniel-hawkins/: alt 'Daniel Hawkins photo'; file 'HawkinsDanielR.jpg'",
+     "height": 437,
+     "page": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/daniel-hawkins/",
+     "photo": "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/HawkinsDanielR.jpg",
+     "read": "2026-10-25",
+     "width": 350
+    },
+    "Jennifer Brunner": {
+     "bytes": 25907,
+     "evidence": "On the court's page https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/jennifer-brunner/: alt 'Jennifer Brunner photo'; file 'brunner_highres.jpg'",
+     "height": 437,
+     "page": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/jennifer-brunner/",
+     "photo": "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/brunner_highres.jpg",
+     "read": "2026-10-25",
+     "width": 350
+    },
+    "Joseph T. Deters": {
+     "bytes": 29868,
+     "evidence": "On the court's page https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/joseph-deters/: alt 'Joseph Deters photo'; file 'JosephDeters.jpg'",
+     "height": 437,
+     "page": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/joseph-deters/",
+     "photo": "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/JosephDeters.jpg",
+     "read": "2026-10-25",
+     "width": 350
+    },
+    "Megan E. Shanahan": {
+     "bytes": 24508,
+     "evidence": "On the court's page https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/megan-shanahan/: alt 'Megan Shanahan photo'; file 'ShanahanMeganE.jpg'",
+     "height": 437,
+     "page": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/megan-shanahan/",
+     "photo": "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/ShanahanMeganE.jpg",
+     "read": "2026-10-25",
+     "width": 350
+    },
+    "Patrick F. Fischer": {
+     "bytes": 29168,
+     "evidence": "On the court's page https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/patrick-fischer/: alt 'Patrick Fischer photo'; file 'fischer_highres.jpg'",
+     "height": 437,
+     "page": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/patrick-fischer/",
+     "photo": "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/fischer_highres.jpg",
+     "read": "2026-10-25",
+     "width": 350
+    },
+    "Sharon L. Kennedy": {
+     "bytes": 29624,
+     "evidence": "On the court's page https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/sharon-kennedy/: alt 'Sharon Kennedy photo'; file 'kennedy_highres.jpg'",
+     "height": 437,
+     "page": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/sharon-kennedy/",
+     "photo": "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/kennedy_highres.jpg",
+     "read": "2026-10-25",
+     "width": 350
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.supremecourt.ohio.gov/courts/judicial-system/supreme-court-of-ohio/justices-overview/"
   },
@@ -482,7 +1627,84 @@
     "M. John Kane IV",
     "Travis Jett"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Travis Jett": "none"
+   },
+   "photos": {
+    "Dana Kuehn": {
+     "bytes": 14810,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/dana-kuehn/: file 'justice-kuehn-200x300.jpg'",
+     "height": 300,
+     "page": "https://oksc.oscn.net/justices/dana-kuehn/",
+     "photo": "https://d7anvewiv7mc.cloudfront.net/wp-content/uploads/justice-kuehn-200x300.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    },
+    "Douglas L. Combs": {
+     "bytes": 19815,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/douglas-l-combs/: file '8x10_Justice-Combs-240x300.jpg'",
+     "height": 200,
+     "page": "https://oksc.oscn.net/justices/douglas-l-combs/",
+     "photo": "https://oksc.oscn.net/uploads/8x10_Justice-Combs-160x200.jpg",
+     "read": "2026-10-25",
+     "width": 160
+    },
+    "Dustin P. Rowe": {
+     "bytes": 7071,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/dustin-p-rowe/: file 'rowe-1-240x300.jpg'",
+     "height": 300,
+     "page": "https://oksc.oscn.net/justices/dustin-p-rowe/",
+     "photo": "https://oksc.oscn.net/uploads/rowe-1-240x300.jpg",
+     "read": "2026-10-25",
+     "width": 240
+    },
+    "James E. Edmondson": {
+     "bytes": 15130,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/james-e-edmondson/: file 'JamesEdmondson-252x300.jpg'",
+     "height": 200,
+     "page": "https://oksc.oscn.net/justices/james-e-edmondson/",
+     "photo": "https://oksc.oscn.net/uploads/JamesEdmondson-168x200.jpg",
+     "read": "2026-10-25",
+     "width": 168
+    },
+    "James R. Winchester": {
+     "bytes": 17165,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/james-r-winchester/: file 'JamesWinchester-252x300.jpg'",
+     "height": 200,
+     "page": "https://oksc.oscn.net/justices/james-r-winchester/",
+     "photo": "https://oksc.oscn.net/uploads/JamesWinchester-168x200.jpg",
+     "read": "2026-10-25",
+     "width": 168
+    },
+    "M. John Kane IV": {
+     "bytes": 23892,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/john-kane-iv/: file 'kane-240x300.jpg'",
+     "height": 300,
+     "page": "https://oksc.oscn.net/justices/john-kane-iv/",
+     "photo": "https://oksc.oscn.net/uploads/kane-240x300.jpg",
+     "read": "2026-10-25",
+     "width": 240
+    },
+    "Noma Gurich": {
+     "bytes": 20147,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/noma-gurich/: file 'NomaGurich-1-252x300.jpg'",
+     "height": 200,
+     "page": "https://oksc.oscn.net/justices/noma-gurich/",
+     "photo": "https://oksc.oscn.net/uploads/NomaGurich-1-168x200.jpg",
+     "read": "2026-10-25",
+     "width": 168
+    },
+    "Richard Darby": {
+     "bytes": 23259,
+     "evidence": "On the court's page https://oksc.oscn.net/justices/richard-darby/: file 'darby-240x300.jpg'",
+     "height": 300,
+     "page": "https://oksc.oscn.net/justices/richard-darby/",
+     "photo": "https://oksc.oscn.net/uploads/darby-240x300.jpg",
+     "read": "2026-10-25",
+     "width": 240
+    }
+   },
+   "read": "2026-10-25",
    "seats": 9,
    "url": "https://oksc.oscn.net/justices/"
   },
@@ -496,7 +1718,48 @@
     "Robert L. Hudson",
     "Scott Rowland"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "David B. Lewis": "none"
+   },
+   "photos": {
+    "Gary L. Lumpkin": {
+     "bytes": 22537,
+     "evidence": "On the court's page https://www.okcca.net/judges/gary-l-lumpkin/: file 'lumpkin-gary-l-210x300.jpg'",
+     "height": 300,
+     "page": "https://www.okcca.net/judges/gary-l-lumpkin/",
+     "photo": "https://www.okcca.net/wp-content/uploads/2019/08/lumpkin-gary-l-210x300.jpg",
+     "read": "2026-10-25",
+     "width": 210
+    },
+    "Robert L. Hudson": {
+     "bytes": 27328,
+     "evidence": "On the court's page https://www.okcca.net/judges/robert-l-hudson/: file 'hudson-robert-l-240x300.jpg'",
+     "height": 300,
+     "page": "https://www.okcca.net/judges/robert-l-hudson/",
+     "photo": "https://www.okcca.net/wp-content/uploads/2019/08/hudson-robert-l-240x300.jpg",
+     "read": "2026-10-25",
+     "width": 240
+    },
+    "Scott Rowland": {
+     "bytes": 21692,
+     "evidence": "On the court's page https://www.okcca.net/judges/scott-rowland/: file 'rowland-scott-240x300.jpg'",
+     "height": 300,
+     "page": "https://www.okcca.net/judges/scott-rowland/",
+     "photo": "https://www.okcca.net/wp-content/uploads/2019/08/rowland-scott-240x300.jpg",
+     "read": "2026-10-25",
+     "width": 240
+    },
+    "William J. Musseman": {
+     "bytes": 8030,
+     "evidence": "On the court's page https://www.okcca.net/judges/william-musseman/: file 'william-musseman-200x300.jpg'",
+     "height": 300,
+     "page": "https://www.okcca.net/judges/william-musseman/",
+     "photo": "https://www.okcca.net/wp-content/uploads/2022/10/william-musseman-200x300.jpg",
+     "read": "2026-10-25",
+     "width": 200
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.okcca.net/judges/"
   },
@@ -512,7 +1775,16 @@
     "Rebecca A. Duncan",
     "Aruna A. Masih"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Aruna A. Masih": "none",
+    "Bronson D. James": "none",
+    "Christopher L. Garrett": "none",
+    "Meagan A. Flynn": "none",
+    "Rebecca A. Duncan": "none",
+    "Roger J. DeHoog": "none",
+    "Stephen K. Bushong": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.courts.oregon.gov/courts/appellate/supreme/Pages/justices.aspx"
   },
@@ -528,7 +1800,16 @@
     "P. Kevin Brobson",
     "Daniel D. McCaffery"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Christine Donohue": "none",
+    "Daniel D. McCaffery": "none",
+    "David N. Wecht": "none",
+    "Debra Todd": "none",
+    "Kevin M. Dougherty": "none",
+    "P. Kevin Brobson": "none",
+    "Sallie Updyke Mundy": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.pacourts.us/courts/supreme-court/supreme-court-justices"
   },
@@ -541,7 +1822,7 @@
     "Erin Lynch Prata",
     "Melissa A. Long"
    ],
-   "read": "2026-10-24",
+   "read": "2026-10-25",
    "revised": "2026-06-05",
    "seats": 5,
    "url": "https://www.courts.ri.gov/Public-Resources/Documents/JudicialRoster.pdf"
@@ -555,7 +1836,31 @@
     "D. Garrison Hill",
     "Letitia H. Verdin"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "John W. Kittredge": "none",
+    "Letitia H. Verdin": "none"
+   },
+   "photos": {
+    "D. Garrison Hill": {
+     "bytes": 10356,
+     "evidence": "On the court's page https://www.sccourts.org/courts/supreme-court/justices/: file 'hill.jpg'",
+     "height": 220,
+     "page": "https://www.sccourts.org/courts/supreme-court/justices/",
+     "photo": "https://www.sccourts.org/media/gtxbevpt/hill.jpg?cc=0.29588182632050136,0.12688221154901447,0.3102059086839749,0.5715004339368019&width=220&height=220&v=1da7bd6126ef3d0",
+     "read": "2026-10-25",
+     "width": 220
+    },
+    "George C. James, Jr.": {
+     "bytes": 43385,
+     "evidence": "On the court's page https://www.sccourts.org/courts/supreme-court/justices/: file 'justice_james.jpg'",
+     "height": 220,
+     "page": "https://www.sccourts.org/courts/supreme-court/justices/",
+     "photo": "https://www.sccourts.org/media/wqxf5voz/justice_james.jpg?cc=0,0.02571748339942641,0,0.26011334993390695&width=220&height=220&v=1db522f00a0a470",
+     "read": "2026-10-25",
+     "width": 220
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.sccourts.org/courts/supreme-court/justices/"
   },
@@ -569,7 +1874,54 @@
     "Scott P. Myren",
     "Robert Gusinsky"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Mark E. Salter": {
+     "bytes": 28794,
+     "evidence": "On the court's page https://ujs.sd.gov/supreme-court/: alt 'South Dakota Supreme Court Justice Mark E. Salter'; file 'salter-website.jpg'",
+     "height": 345,
+     "page": "https://ujs.sd.gov/supreme-court/",
+     "photo": "https://ujs.sd.gov/media/y0mak2i3/salter-website.jpg?width=345&height=345&v=1dca7f7f11750b0",
+     "read": "2026-10-25",
+     "width": 345
+    },
+    "Patricia J. DeVaney": {
+     "bytes": 39220,
+     "evidence": "On the court's page https://ujs.sd.gov/supreme-court/: alt 'South Dakota Supreme Court Justice Patricia J. DeVaney'; file 'devaney-website.jpg'",
+     "height": 345,
+     "page": "https://ujs.sd.gov/supreme-court/",
+     "photo": "https://ujs.sd.gov/media/1iceheld/devaney-website.jpg?width=345&height=345&v=1dca7f5225627d0",
+     "read": "2026-10-25",
+     "width": 345
+    },
+    "Robert Gusinsky": {
+     "bytes": 35866,
+     "evidence": "On the court's page https://ujs.sd.gov/supreme-court/: alt 'South Dakota Supreme Court Justice Robert Gusinsky'; file 'gusinsky-website.jpg'",
+     "height": 345,
+     "page": "https://ujs.sd.gov/supreme-court/",
+     "photo": "https://ujs.sd.gov/media/litjiags/gusinsky-website.jpg?width=345&height=345&v=1dca66aca7c7310",
+     "read": "2026-10-25",
+     "width": 345
+    },
+    "Scott P. Myren": {
+     "bytes": 36892,
+     "evidence": "On the court's page https://ujs.sd.gov/supreme-court/: alt 'South Dakota Supreme Court Justice Scott P. Myren'; file 'myren-website.jpg'",
+     "height": 345,
+     "page": "https://ujs.sd.gov/supreme-court/",
+     "photo": "https://ujs.sd.gov/media/pmed0rsj/myren-website.jpg?width=345&height=345&v=1dca66a1a1fad20",
+     "read": "2026-10-25",
+     "width": 345
+    },
+    "Steven R. Jensen": {
+     "bytes": 42552,
+     "evidence": "On the court's page https://ujs.sd.gov/supreme-court/: alt 'South Dakota Supreme Court Chief Justice Steven R. Jensen'; file 'jensen-website.jpg'",
+     "height": 345,
+     "page": "https://ujs.sd.gov/supreme-court/",
+     "photo": "https://ujs.sd.gov/media/bqvoglr1/jensen-website.jpg?width=345&height=345&v=1dca7f62b8608b0",
+     "read": "2026-10-25",
+     "width": 345
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://ujs.sd.gov/supreme-court/"
   },
@@ -583,7 +1935,14 @@
     "Mary L. Wagner",
     "Kyle Hixson"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Dwight E. Tarwater": "unknown",
+    "Jeffrey S. Bivins": "none",
+    "Kyle Hixson": "unknown",
+    "Mary L. Wagner": "unknown",
+    "Sarah Campbell": "unknown"
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.tncourts.gov/courts/supreme-court"
   },
@@ -601,7 +1960,52 @@
     "James P. Sullivan",
     "Kyle D. Hawkins"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Debra Lehrmann": "oversized",
+    "Evan A. Young": "oversized",
+    "James P. Sullivan": "oversized",
+    "Jane Bland": "oversized",
+    "Rebeca Aizpuru Huddle": "oversized"
+   },
+   "photos": {
+    "Brett Busby": {
+     "bytes": 148777,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice Brett Busby'; file 'brett-busby.png'",
+     "height": 400,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://www.txcourts.gov/media/1461169/brett-busby.png",
+     "read": "2026-10-25",
+     "width": 267
+    },
+    "Jimmy Blacklock": {
+     "bytes": 104265,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Chief Justice Jimmy Blacklock'; file 'chief-justice-jimmy-blacklock-web.jpg'",
+     "height": 950,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://www.txcourts.gov/media/1460030/chief-justice-jimmy-blacklock-web.jpg",
+     "read": "2026-10-25",
+     "width": 630
+    },
+    "John Phillip Devine": {
+     "bytes": 41194,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice John Phillip Devine'; file 'justice-john-p-devine-webjpg.jpg'",
+     "height": 527,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://www.txcourts.gov/media/1460028/justice-john-p-devine-webjpg.jpg",
+     "read": "2026-10-25",
+     "width": 367
+    },
+    "Kyle D. Hawkins": {
+     "bytes": 49738,
+     "evidence": "On the court's page https://www.txcourts.gov/supreme/about-the-court/justices/: alt 'Photo of Justice Kyle D. Hawkins'; file 'justice-kyle-hawkins.jpg'",
+     "height": 473,
+     "page": "https://www.txcourts.gov/supreme/about-the-court/justices/",
+     "photo": "https://www.txcourts.gov/media/1461570/justice-kyle-hawkins.jpg",
+     "read": "2026-10-25",
+     "width": 300
+    }
+   },
+   "read": "2026-10-25",
    "seats": 9,
    "url": "https://www.txcourts.gov/supreme/about-the-court/justices/"
   },
@@ -619,7 +2023,18 @@
     "Lee Finley",
     "Gina G. Parker"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Bert Richardson": "oversized",
+    "David J. Schenck": "oversized",
+    "David Newell": "oversized",
+    "Gina G. Parker": "oversized",
+    "Jesse F. McClure, III": "oversized",
+    "Kevin Yeary": "oversized",
+    "Lee Finley": "oversized",
+    "Mary Lou Keel": "oversized",
+    "Scott Walker": "oversized"
+   },
+   "read": "2026-10-25",
    "seats": 9,
    "url": "https://www.txcourts.gov/cca/about-the-court/judges/"
   },
@@ -635,7 +2050,26 @@
     "Jay T. Jorgensen",
     "Matthew L. Bell"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Jay T. Jorgensen": "oversized",
+    "Jill M. Pohlman": "oversized",
+    "John Nielsen": "oversized",
+    "Michael R. Menssen": "none",
+    "Paige Petersen": "oversized",
+    "Stephen P. Dent": "oversized"
+   },
+   "photos": {
+    "Matthew L. Bell": {
+     "bytes": 72147,
+     "evidence": "On the court's page https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html: file 'bell-m.jpeg'",
+     "height": 963,
+     "page": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html",
+     "photo": "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-2/teaser_1059132425_co_140928646.coreimg.jpeg/1790198234035/bell-m.jpeg",
+     "read": "2026-10-25",
+     "width": 722
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.utcourts.gov/en/courts/other-court-info/judges-bios/appellate-courts/supreme-court.html"
   },
@@ -651,7 +2085,16 @@
     "Thomas P. Mann",
     "Junius P. Fulton, III"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Cleo E. Powell": "none",
+    "D. Arthur Kelsey": "none",
+    "Junius P. Fulton, III": "none",
+    "Stephen R. McCullough": "none",
+    "Teresa M. Chafin": "none",
+    "Thomas P. Mann": "none",
+    "Wesley G. Russell Jr.": "none"
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.vacourts.gov/courts/scv/home"
   },
@@ -665,7 +2108,14 @@
     "Christina E. Nolan",
     "Michael P. Drescher"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Christina E. Nolan": "none",
+    "Harold E. Eaton, Jr.": "none",
+    "Michael P. Drescher": "none",
+    "Nancy J. Waples": "none",
+    "Paul L. Reiber": "none"
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.vtcourts.gov/supreme-court"
   },
@@ -683,7 +2133,90 @@
     "Colleen M. Melody",
     "Theodore J. Angelis"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Charles W. Johnson": {
+     "bytes": 38474,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'Johnson2016.jpg'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/supreme/Johnson2016.jpg",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Colleen M. Melody": {
+     "bytes": 46593,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'JusticeMelody2025.png'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/JusticeMelody2025.png",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Debra L. Stephens": {
+     "bytes": 45001,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'JusticeStephens2025.png'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/JusticeStephens2025.png",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "G. Helen Whitener": {
+     "bytes": 44979,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'JusticeWhitener.jpg'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/JusticeWhitener.jpg",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Raquel Montoya-Lewis": {
+     "bytes": 38988,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'MontoyaLewis.jpg'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/supreme/MontoyaLewis.jpg",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Salvador A. Mungia": {
+     "bytes": 51631,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'Mungia2025.png'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/Mungia2025.png",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Sheryl Gordon McCloud": {
+     "bytes": 55612,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'GordonMcCloud2017.png'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/GordonMcCloud2017.png",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Steven C. González": {
+     "bytes": 52925,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'Gonzalez2025.png'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/Gonzalez2025.png",
+     "read": "2026-10-25",
+     "width": 140
+    },
+    "Theodore J. Angelis": {
+     "bytes": 42841,
+     "evidence": "On the court's page https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices: file 'JusticeAngelis.png'",
+     "height": 197,
+     "page": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices",
+     "photo": "https://www.courts.wa.gov/images/JusticeAngelis.png",
+     "read": "2026-10-25",
+     "width": 140
+    }
+   },
+   "read": "2026-10-25",
    "seats": 9,
    "url": "https://www.courts.wa.gov/appellate_trial_courts/SupremeCourt/?fa=supremecourt.justices"
   },
@@ -699,7 +2232,72 @@
     "Susan M. Crawford",
     "Chris Taylor"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "Annette Kingsland Ziegler": {
+     "bytes": 212005,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Justice Annette Kingsland Ziegler'; file 'zieglerlg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/zieglerlg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    },
+    "Brian Hagedorn": {
+     "bytes": 209198,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Justice Brian Hagedorn'; file 'hagedornlg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/hagedornlg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    },
+    "Chris Taylor": {
+     "bytes": 167008,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Justice Chris Taylor'; file 'taylorlg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/taylorlg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    },
+    "Janet C. Protasiewicz": {
+     "bytes": 124659,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Justice Janet C. Protasiewicz'; file 'protasiewiczlg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/protasiewiczlg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    },
+    "Jill J. Karofsky": {
+     "bytes": 78846,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Chief Justice Jill J. Karofsky'; file 'karofskylg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/karofskylg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    },
+    "Rebecca Frank Dallet": {
+     "bytes": 104906,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Justice Rebecca Frank Dallet'; file 'dalletlg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/dalletlg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    },
+    "Susan M. Crawford": {
+     "bytes": 214244,
+     "evidence": "On the court's page https://www.wicourts.gov/courts/supreme/justices/index.htm: alt 'Justice Susan M. Crawford'; file 'crawfordlg.jpg'",
+     "height": 550,
+     "page": "https://www.wicourts.gov/courts/supreme/justices/index.htm",
+     "photo": "https://www.wicourts.gov/courts/supreme/justices/images/crawfordlg.jpg",
+     "read": "2026-10-25",
+     "width": 450
+    }
+   },
+   "read": "2026-10-25",
    "seats": 7,
    "url": "https://www.wicourts.gov/courts/supreme/justices/index.htm"
   },
@@ -713,7 +2311,54 @@
     "H.L. Kirkpatrick",
     "James W. Flanigan"
    ],
-   "read": "2026-10-24",
+   "photos": {
+    "C. Haley Bunn": {
+     "bytes": 13737,
+     "evidence": "On the court's page https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-bunn: alt 'justiceBunn'; file 'BunnApproved.jpg'",
+     "height": 406,
+     "page": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-bunn",
+     "photo": "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2024-03/BunnApproved.jpg?itok=J8bg3MW7",
+     "read": "2026-10-25",
+     "width": 290
+    },
+    "Charles S. Trump, IV": {
+     "bytes": 12311,
+     "evidence": "On the court's page https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-trump: alt 'justiceTrump'; file 'TrumpHeadshot.jpg'",
+     "height": 406,
+     "page": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-trump",
+     "photo": "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2025-01/TrumpHeadshot.jpg?itok=WhuVG4cg",
+     "read": "2026-10-25",
+     "width": 290
+    },
+    "H.L. Kirkpatrick": {
+     "bytes": 13702,
+     "evidence": "On the court's page https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-kirkpatrick: alt 'justiceKirkpatrick'; file 'Kirkpatrick.jpg'",
+     "height": 436,
+     "page": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-kirkpatrick",
+     "photo": "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2026-07/Kirkpatrick.jpg?itok=5wMPEMdi",
+     "read": "2026-10-25",
+     "width": 290
+    },
+    "James W. Flanigan": {
+     "bytes": 13275,
+     "evidence": "On the court's page https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-flanigan: alt 'justiceFlaniganHeadshot'; file 'Flaniganheadshot626.jpg'",
+     "height": 436,
+     "page": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-flanigan",
+     "photo": "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2026-07/Flaniganheadshot626.jpg?itok=SMMy-Ibs",
+     "read": "2026-10-25",
+     "width": 290
+    },
+    "William R. Wooton": {
+     "bytes": 8379,
+     "evidence": "On the court's page https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-wooton: alt 'justiceWooton'; file 'Wooton2020.jpg'",
+     "height": 296,
+     "page": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff/justice-wooton",
+     "photo": "https://www.courtswv.gov/sites/default/pubfilesmnt/styles/headshots/public/2024-03/Wooton2020.jpg?itok=dt8679em",
+     "read": "2026-10-25",
+     "width": 290
+    }
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.courtswv.gov/appellate-courts/supreme-court-of-appeals/justices-staff"
   },
@@ -727,10 +2372,17 @@
     "Robert C. Jarosh",
     "Bridget Hill"
    ],
-   "read": "2026-10-24",
+   "photoMisses": {
+    "Bridget Hill": "oversized",
+    "John G. Fenn": "none",
+    "Kari Gray": "none",
+    "Lynne Boomgaarden": "none",
+    "Robert C. Jarosh": "none"
+   },
+   "read": "2026-10-25",
    "seats": 5,
    "url": "https://www.wyocourts.gov/supreme-court/"
   }
  },
- "fetched": "2026-10-24T12:41:49+00:00"
+ "fetched": "2026-10-25T09:41:51+00:00"
 }

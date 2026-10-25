@@ -661,12 +661,14 @@ def extract(page, recipe):
     return out
 
 
-def read_court(code, recipe, seats, page=None):
+def read_court(code, recipe, seats, page=None, pages=None):
     """``{"members": [...], "chief": name, "listed", "seats", "url"}``, or
     raises when the page does not fit the court: no names, more names than
     seats, or more than one chief. A failed request is tried again before
     the court counts as unread: one dropped connection lost Mississippi.
-    A ``browser`` recipe reads *page*, as the browser reader drew it."""
+    A ``browser`` recipe reads *page*, as the browser reader drew it.
+    *pages*, when given, keeps the roster's HTML under *code*, for the
+    justices' photographs (``court_photos``)."""
     if recipe.get("browser"):
         if page is None:
             raise CourtsError(f"{code}: the browser did not read {recipe['url']}")
@@ -686,6 +688,8 @@ def read_court(code, recipe, seats, page=None):
             recipe = {k: v for k, v in recipe.items() if k != "format"}
         else:
             page = data.decode("utf-8", errors="replace")
+    if pages is not None and recipe.get("format") != "pdf":
+        pages[code] = page
     members = extract(page, recipe)
     if not members:
         raise CourtsError(f"{code}: no members read from {recipe['url']}")
@@ -709,9 +713,10 @@ def read_court(code, recipe, seats, page=None):
     return out
 
 
-def fetch(codes=None, pause=1.0, root="."):
+def fetch(codes=None, pause=1.0, root=".", pages=None):
     """``(courts, problems)`` for every court with a recipe. The courts a
-    browser must read are read first, together, by the browser reader."""
+    browser must read are read first, together, by the browser reader.
+    *pages*, when given, collects each roster's HTML (``read_court``)."""
     from .government_maps import HIGH_COURTS
     courts, problems = {}, []
     codes = sorted(codes or COURTS)
@@ -722,7 +727,7 @@ def fetch(codes=None, pause=1.0, root="."):
         recipe = COURTS[code]
         seats = recipe.get("seats", HIGH_COURTS.get(code[:2], ("", 0))[1])
         try:
-            courts[code] = read_court(code, recipe, seats, drawn.get(code))
+            courts[code] = read_court(code, recipe, seats, drawn.get(code), pages)
         except CourtsError as exc:
             problems.append(str(exc))
         if not recipe.get("browser"):
@@ -769,6 +774,14 @@ def for_state(code, cache):
                          seats=seats if key == "court" else CRIMINAL_SEATS.get(entry_code, 0))
         else:
             continue
+        if court.get("members"):
+            # Each justice's photograph from the court's own pages, or an
+            # evidenced override's (court_photos; rule 87), credited to the
+            # court on the page.
+            from .court_photos import for_page
+            shown = for_page(entry_code, read or {"members": court["members"]})
+            if shown:
+                court["photos"] = shown
         if key == "court":
             court["seats"] = court.get("seats") or seats
             if note:
