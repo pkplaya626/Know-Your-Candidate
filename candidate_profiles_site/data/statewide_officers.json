@@ -283,7 +283,7 @@
    "photo": "https://dojmt.gov/wp-content/uploads/2024/01/austin-knudsen-about-200x200.png",
    "photoPage": "https://dojmt.gov/attorney-generals-office/",
    "photoWeight": {
-    "bytes": 16549,
+    "bytes": 5972,
     "height": 200,
     "width": 200
    },
@@ -452,7 +452,8 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
-   "title": "Attorney General"
+   "unconfirmed": true,
+   "unreadable": true
   },
   "TN": {
    "listedBy": "Republican Attorneys General Association",
@@ -461,7 +462,8 @@
    "party": "R",
    "partyKey": "R",
    "selection": "Appointed by the state Supreme Court",
-   "title": "Attorney General"
+   "unconfirmed": true,
+   "unreadable": true
   },
   "TX": {
    "listedBy": "Republican Attorneys General Association",
@@ -536,7 +538,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-24T12:34:10+00:00",
+ "fetched": "2026-10-25T13:14:31+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
