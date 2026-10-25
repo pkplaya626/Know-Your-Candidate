@@ -533,10 +533,32 @@ def _office_text(url, pause):
 #   the alt text "Tim Griffin Attorney General of Arkansas";
 # - it is head-and-shoulders shaped (``enrich.portrait_check``) and no
 #   heavier than a campaign's may be (``photos.too_heavy``), or a size of
-#   the same file its srcset or its host's resizer serves is.
+#   the same file the page itself offers (its ``srcset``, a ``<picture>``'s
+#   ``<source>``) is. Nothing is resized for it: no image service, no
+#   resizer address the page does not give (the owner's decision of
+#   2026-10-19). A photograph the office offers only above the caps is left
+#   out, and counted (``"oversized"``): California's is a 6 MB original,
+#   West Virginia's 3.2 MB.
 #
 # A size that could not be read concludes nothing (rule 8): the last
 # photograph read of the same person is kept.
+#
+# Where the office's front page links no biography the reader can find,
+# ``BIO_PAGES`` names the office's own page about its attorney general, as
+# found by hand (research of 2026-10-19). The page's address is all that is
+# typed in: the image on it is taken by the same words test as any other.
+BIO_PAGES = {
+    "AZ": "https://www.azag.gov/kris-mayes",
+    "CA": "https://www.oag.ca.gov/about",
+    "HI": "https://ag.hawaii.gov/about-us/",
+    "MD": "https://oag.maryland.gov/our-office/Pages/about-the-attorney-general.aspx",
+    "MI": "https://www.michigan.gov/ag/team-listing-page/attorney-general-dana-nessel",
+    "PA": "https://www.attorneygeneral.gov/the-office/meet-the-attorney-general/",
+    "SD": "https://atg.sd.gov/OurOffice/bio.aspx",
+    "TX": "https://www.texasattorneygeneral.gov/about-office",
+    "WA": "https://www.atg.wa.gov/about-nick-brown",
+    "WV": "https://ago.wv.gov/about-us/meet-attorney-general-jb-mccuskey",
+}
 
 _LIKENESS = re.compile(r"\b(?:headshot|head shot|portrait|official photo|official headshot|"
                        r"photo of|photograph of|picture of|image of)\b")
@@ -554,21 +576,40 @@ _TITLE_WORDS = {"attorney", "general", "ag", "the", "of", "office", "state", "s"
                 "hon", "official", "mr", "ms", "mrs", "dr", "jr", "sr", "ii", "iii", "iv",
                 "photo", "photograph", "portrait", "headshot", "head", "shot", "picture",
                 "image", "pic", "and", "reporter"}
+# What a file name carries that is no word of anyone's: WordPress's
+# "-scaled" on a large upload ("AG-Anne-Lopez-scaled.jpg").
+_FILE_COUNTERS = {"scaled"}
+
+
+def _attr(tag, name):
+    found = re.search(rf'\b{name}\s*=\s*(?:"([^"]*)"|\'([^\']*)\')', tag, re.I)
+    return html.unescape((found.group(1) if found.group(1) is not None
+                          else found.group(2)) if found else "")
 
 
 def _img_tags(page):
     """``[(src, srcset, alt, class)]`` of every ``<img>`` on *page*, a lazy
-    one's real address (``data-src``) in place of its placeholder."""
+    one's real address (``data-src``) in place of its placeholder. An image
+    inside a ``<picture>`` carries the sizes its ``<source>`` elements offer
+    too: Michigan's page offers its attorney general's portrait at 320px
+    only there."""
     out = []
-    for tag in re.findall(r"<img\b[^>]*>", page, re.I):
-        def attr(name):
-            found = re.search(rf'\b{name}\s*=\s*(?:"([^"]*)"|\'([^\']*)\')', tag, re.I)
-            return html.unescape((found.group(1) if found.group(1) is not None
-                                  else found.group(2)) if found else "")
-        src = attr("data-src") or attr("data-lazy-src") or attr("src")
+    for block in re.findall(r"<picture\b.*?</picture>|<img\b[^>]*>", page, re.I | re.S):
+        if block[:8].lower() == "<picture":
+            tags = re.findall(r"<img\b[^>]*>", block, re.I)
+            if not tags:
+                continue
+            tag = tags[0]
+            sources = [_attr(s, "data-srcset") or _attr(s, "srcset")
+                       for s in re.findall(r"<source\b[^>]*>", block, re.I)]
+        else:
+            tag, sources = block, []
+        src = _attr(tag, "data-src") or _attr(tag, "data-lazy-src") or _attr(tag, "src")
         if not src or src.startswith("data:"):
             continue
-        out.append((src, attr("data-srcset") or attr("srcset"), attr("alt"), attr("class")))
+        srcset = ", ".join(s for s in sources + [_attr(tag, "data-srcset") or _attr(tag, "srcset")]
+                           if s)
+        out.append((src, srcset, _attr(tag, "alt"), _attr(tag, "class")))
     return out
 
 
@@ -636,8 +677,14 @@ def likeness_candidates(name, code, pages):
     surname = words[-1]
     firsts = {words[0]} | {_fold(form).split()[0] for form, office_form in NAME_FORMS.items()
                            if office_form == name and _fold(form).split()}
+    # Initials written together: "J.B. McCuskey" is "JB McCuskey" on his
+    # office's page ("Attorney General JB McCuskey").
+    initials = "".join(w for w in words[:-1] if len(w) == 1)
+    if len(initials) > 1:
+        firsts.add(initials)
     middles = set(words[1:-1])
-    plain = set(words) | _TITLE_WORDS | set(_fold(state_name(code)).split()) | {code.lower()}
+    plain = set(words) | firsts | _TITLE_WORDS | set(_fold(state_name(code)).split()) \
+        | {code.lower()}
     pieces = plain | firsts | set(_LIKENESS_FILE) | {"official", "photo", "pic", "img"}
     found, seen = [], set()
     for page_url, page in pages:
@@ -662,11 +709,15 @@ def likeness_candidates(name, code, pages):
                 continue
             hinted = bool(_LIKENESS.search(said + " " + file)) \
                 or any(word in flat for word in _LIKENESS_FILE)
-            # Nothing but the name and the title, in the alt text or, with
-            # its counters set aside, the file name ("AG_Marty_Jackley_0007a").
+            # Nothing but the name and the title, in the alt text (a middle
+            # initial passed over: "Attorney General Dave W. Sunday") or,
+            # with its counters set aside, the file name
+            # ("AG_Marty_Jackley_0007a", "AG-Anne-Lopez-scaled").
             named = [w for w in file.split()
-                     if len(w) > 1 and not any(c.isdigit() for c in w)]
-            if not hinted and not (said.split() and set(said.split()) <= plain) \
+                     if len(w) > 1 and not any(c.isdigit() for c in w)
+                     and w not in _FILE_COUNTERS]
+            alt_words = {w for w in said.split() if len(w) > 1}
+            if not hinted and not (alt_words and alt_words <= plain) \
                     and not (surname in named and set(named) <= plain):
                 continue
             sizes = []
@@ -685,19 +736,18 @@ def ag_photo(name, code, pages, check=None, refused=()):
     """``(photo, why)``: ``{"photo", "photoPage", "photoWeight"}`` from the
     office's own *pages* (``[(url, html)]``), or ``None`` and why not -
     ``"none"`` when no image passed, ``"unknown"`` when one could not be
-    read (rule 8). *check* is ``enrich.portrait_check``."""
-    from .photos import smaller_form, too_heavy
+    read (rule 8), ``"oversized"`` when the one that passed is offered only
+    above the caps (``photos.too_heavy``). Only the sizes the page itself
+    offers are tried, never a resizer's (the owner's decision of
+    2026-10-19). *check* is ``enrich.portrait_check``."""
+    from .photos import too_heavy
     if check is None:
         from .enrich import portrait_check as check
 
-    unknown = False
+    unknown = oversized = False
     for urls, page_url, hinted in likeness_candidates(name, code, pages):
-        tried = list(urls)
+        heavy = False
         for url in urls:
-            smaller = smaller_form(url, 300)
-            if smaller and smaller not in tried:
-                tried.append(smaller)
-        for url in tried:
             if url in refused:
                 break
             shape, weight = check(url, hinted)
@@ -711,11 +761,14 @@ def ag_photo(name, code, pages, check=None, refused=()):
             width, height = weight["width"], weight["height"]
             if not (min(width, height) >= 120
                     and 0.5 <= width / height <= (1.35 if hinted else 1.0)):
+                heavy = False
                 break                         # the file's shape is every size's
             if too_heavy(weight):
+                heavy = True
                 continue
             return {"photo": url, "photoPage": page_url, "photoWeight": weight}, ""
-    return None, "unknown" if unknown else "none"
+        oversized = oversized or heavy
+    return None, "unknown" if unknown else "oversized" if oversized else "none"
 
 
 _BIO_LABEL = re.compile(r"^(?:about|meet|biography of)(?: the)? (?:attorney general|ag)\b|"
@@ -774,7 +827,9 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                               refused=overrides.NOT_A_PORTRAIT)
         if not found:
             more = []
-            for url in bio_links(row["name"], read):
+            seen = {url for url, _ in read}
+            wanted = [BIO_PAGES[code]] if code in BIO_PAGES and BIO_PAGES[code] not in seen else []
+            for url in wanted + [u for u in bio_links(row["name"], read) if u not in wanted]:
                 time.sleep(pause)
                 try:
                     more.append((url, get(url)))
@@ -784,15 +839,24 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                 again, why_again = ag_photo(row["name"], code, more, check=check,
                                             refused=overrides.NOT_A_PORTRAIT)
                 found = again
-                why = "unknown" if "unknown" in (why, why_again) else why_again
+                why = next((w for w in ("unknown", "oversized") if w in (why, why_again)),
+                           why_again)
         time.sleep(pause)
         old = (previous or {}).get(code) or {}
+        row.pop("photoOversized", None)
         if not found and why == "unknown" and old.get("photo") and old.get("name") == row["name"]:
             found = {k: old[k] for k in ("photo", "photoPage", "photoWeight") if old.get(k)}
             problems.append(f"{code}: {row['name']}'s photograph could not be read; "
                             "the last one read is kept")
         if found:
             row.update(found)
+        elif why == "oversized":
+            # Left out, and counted: the office offers it only above the
+            # caps, and nothing here makes it smaller (the owner's decision
+            # of 2026-10-19).
+            row["photoOversized"] = True
+            problems.append(f"{code}: the office offers {row['name']}'s photograph only above "
+                            "300 KB or 1,200px; left out")
         else:
             problems.append(f"{code}: the office's own pages show no photograph of "
                             f"{row['name']} that passes the checks")
@@ -989,6 +1053,7 @@ def for_state(code, cache, disputes):
     if code in cache.get("ag", {}):
         out["ag"] = dict(cache["ag"][code])
         out["ag"].pop("photoWeight", None)
+        out["ag"].pop("photoOversized", None)
         if out["ag"].get("photo"):
             # The office's own photograph, from the page it was read on.
             host = urllib.parse.urlsplit(out["ag"].get("photoPage") or "").hostname or ""

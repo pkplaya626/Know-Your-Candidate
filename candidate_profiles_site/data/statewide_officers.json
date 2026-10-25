@@ -45,6 +45,7 @@
    "office": "https://www.azag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "CA": {
@@ -53,6 +54,7 @@
    "office": "https://www.oag.ca.gov/",
    "party": "D",
    "partyKey": "D",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "CO": {
@@ -99,6 +101,7 @@
    "office": "https://www.myfloridalegal.com/",
    "party": "R",
    "partyKey": "R",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "GA": {
@@ -122,6 +125,7 @@
    "office": "https://ag.hawaii.gov/",
    "party": "D",
    "partyKey": "D",
+   "photoOversized": true,
    "selection": "Appointed by the governor",
    "title": "Attorney General"
   },
@@ -217,6 +221,13 @@
    "office": "https://www.marylandattorneygeneral.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://oag.maryland.gov/our-office/PublishingImages/AttorneyGeneral.jpg",
+   "photoPage": "https://oag.maryland.gov/our-office/Pages/about-the-attorney-general.aspx",
+   "photoWeight": {
+    "bytes": 61235,
+    "height": 240,
+    "width": 192
+   },
    "title": "Attorney General"
   },
   "ME": {
@@ -234,6 +245,13 @@
    "office": "https://www.michigan.gov/ag/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://www.michigan.gov/ag/-/media/Project/Websites/AG/headshots/AG_Dana_Nessel_press.jpg?rev=67d9b803e48f4a9a8a80a68f5889c674&mw=320&hash=66AED384DD4F7BCBC7F692352D3949E3",
+   "photoPage": "https://www.michigan.gov/ag/team-listing-page/attorney-general-dana-nessel",
+   "photoWeight": {
+    "bytes": 18633,
+    "height": 480,
+    "width": 320
+   },
    "title": "Attorney General"
   },
   "MN": {
@@ -336,6 +354,7 @@
    "office": "https://www.njoag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photoOversized": true,
    "selection": "Appointed by the governor",
    "title": "Attorney General"
   },
@@ -421,6 +440,7 @@
    "office": "https://www.attorneygeneral.gov/",
    "party": "R",
    "partyKey": "R",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "RI": {
@@ -452,6 +472,7 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "TN": {
@@ -460,6 +481,13 @@
    "office": "https://www.tn.gov/attorneygeneral.html",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti/_jcr_content/contentFullWidth/tn_textandimage/image.img.jpg/1740766397785.jpg",
+   "photoPage": "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti.html",
+   "photoWeight": {
+    "bytes": 82283,
+    "height": 400,
+    "width": 400
+   },
    "selection": "Appointed by the state Supreme Court",
    "title": "Attorney General"
   },
@@ -469,6 +497,13 @@
    "office": "https://www.texasattorneygeneral.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.texasattorneygeneral.gov/sites/default/files/inline-images/ken_paxton_bio_thumb.jpg",
+   "photoPage": "https://www.texasattorneygeneral.gov/about-office",
+   "photoWeight": {
+    "bytes": 9622,
+    "height": 394,
+    "width": 262
+   },
    "title": "Attorney General"
   },
   "UT": {
@@ -508,6 +543,7 @@
    "office": "https://www.atg.wa.gov/",
    "party": "D",
    "partyKey": "D",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "WI": {
@@ -524,6 +560,7 @@
    "office": "https://ago.wv.gov/",
    "party": "R",
    "partyKey": "R",
+   "photoOversized": true,
    "title": "Attorney General"
   },
   "WY": {
@@ -536,7 +573,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-24T12:34:10+00:00",
+ "fetched": "2026-10-25T08:57:04+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",

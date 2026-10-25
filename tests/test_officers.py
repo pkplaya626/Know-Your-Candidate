@@ -439,7 +439,68 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
                             {"bytes": 400_000, "width": 300, "height": 375},
                             "https://ag.example.gov/u/Ellison-headshot.jpg":
                             {"bytes": 4_000_000, "width": 2000, "height": 2500}})
-        self.assertEqual(officers.ag_photo("Keith Ellison", "MN", [page], check=heavy), (None, "none"))
+        # Offered only above the caps: left out, and said so - never made
+        # smaller by an image service (the owner's decision of 2026-10-19).
+        self.assertEqual(officers.ag_photo("Keith Ellison", "MN", [page], check=heavy),
+                         (None, "oversized"))
+
+    def test_only_the_sizes_the_page_offers_are_tried(self):
+        """California's portrait is a 6 MB original with no smaller size on
+        the page: Photon would have served one, and no resizer is asked."""
+        asked = []
+
+        def check(url, hinted):
+            asked.append(url)
+            return True, {"bytes": 6_040_317, "width": 3349, "height": 5025}
+        page = ("https://www.oag.ca.gov/about", '<img src="/files/ag-bonta-official-2.jpg" '
+                'alt="Attorney General Rob Bonta">')
+        self.assertEqual(officers.ag_photo("Rob Bonta", "CA", [page], check=check),
+                         (None, "oversized"))
+        self.assertEqual(asked, ["https://www.oag.ca.gov/files/ag-bonta-official-2.jpg"])
+
+    def test_a_picture_elements_sources_are_its_sizes(self):
+        """Michigan's page offers the portrait at 320px only in a
+        ``<source>`` beside a 1,400px ``<img>``."""
+        page = ("https://www.michigan.gov/ag/team-listing-page/x",
+                '<picture><source srcset="/ag/-/media/AG_Dana_Nessel_press.jpg?mw=320 320w, '
+                '/ag/-/media/AG_Dana_Nessel_press.jpg?mw=480 480w" type="image/webp">'
+                '<img src="/ag/-/media/AG_Dana_Nessel_press.jpg?mw=1400" '
+                'alt="Attorney General Dana Nessel"></picture>')
+        found = officers.likeness_candidates("Dana Nessel", "MI", [page])
+        self.assertEqual(found[0][0][0],
+                         "https://www.michigan.gov/ag/-/media/AG_Dana_Nessel_press.jpg?mw=320")
+
+    def test_initials_middle_names_and_counters_do_not_hide_the_holder(self):
+        def taken(name, code, tag):
+            return [u[-1] for u, _, _ in officers.likeness_candidates(
+                name, code, [("https://ag.example.gov/", tag)])]
+        self.assertTrue(taken("Dave Sunday", "PA", '<img src="/u/sunday-in-office-image-scaled.jpg" '
+                                                   'alt="Attorney General Dave W. Sunday">'))
+        self.assertTrue(taken("J.B. McCuskey", "WV", '<img src="/f/AG%20McCuskey%20pic.jpeg" '
+                                                     'alt="Attorney General JB McCuskey">'))
+        self.assertTrue(taken("Anne Lopez", "HI", '<img src="/u/AG-Anne-Lopez-scaled.jpg" alt="">'))
+        # A logo carrying the name is still refused, initials or not.
+        self.assertFalse(taken("Dave Sunday", "PA", '<img src="/u/ag-sunday-logo-white-alt.png" '
+                                                    'alt="AG Dave Sunday">'))
+        # Another first name before the surname is still someone else.
+        self.assertFalse(taken("J.B. McCuskey", "WV", '<img src="/f/x.jpg" '
+                                                      'alt="Deputy Mary McCuskey headshot">'))
+
+    def test_the_offices_own_biography_page_is_read_where_the_front_page_links_none(self):
+        got = []
+        bio = '<img src="/images/paxton.jpg" alt="Texas Attorney General Ken Paxton">'
+
+        def get(url, timeout=60):
+            got.append(url)
+            return bio
+        check = self.weigh({"https://www.texasattorneygeneral.gov/images/paxton.jpg":
+                            {"bytes": 9_622, "width": 262, "height": 394}})
+        rows = {"TX": {"name": "Ken Paxton"}}
+        officers.add_ag_photos(rows, {"TX": [("https://www.texasattorneygeneral.gov/",
+                                              "<p>Home</p>")]}, check=check, pause=0, get=get)
+        self.assertEqual(got, [officers.BIO_PAGES["TX"]])
+        self.assertEqual(rows["TX"]["photoPage"], officers.BIO_PAGES["TX"])
+        self.assertNotIn("photoOversized", rows["TX"])
 
     def test_a_landscape_or_tiny_image_is_not_a_portrait(self):
         page = ("https://ag.example.gov/", '<img src="/u/Jones-headshot.jpg" alt="">')
