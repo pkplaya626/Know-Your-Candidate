@@ -762,7 +762,13 @@
       },
     });
     // A portrait that will not load is dropped, never shown broken.
-    el("officialModalPhoto").addEventListener("error", function () {
+    el("officialModalPhoto").addEventListener("error", function (event) {
+      // A copy this site made that fails gives way to its original (rule 101).
+      if (KYC.retryOriginal(event.target, event)) {
+        var note = el("officialModalPhotoCredit").querySelector(".photo-copy-note");
+        if (note) note.remove();
+        return;
+      }
       el("officialModalPortrait").hidden = true;
       el("officialModalPhotoCredit").hidden = true;
     });

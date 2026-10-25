@@ -363,7 +363,8 @@ def year_of(text):
     exactly one four-digit year ("2005", "2017-05-25 11:50:06", "21 August
     2009, per metadata"), else ``None``: a date Commons does not give is
     never guessed (rule 101's justices' years)."""
-    years = set(re.findall(r"(?<!\d)(1[89]\d\d|20\d\d)(?!\d)", plain_text(text) or ""))
+    # "the 1990s" is a decade, not a year.
+    years = set(re.findall(r"(?<!\d)(1[89]\d\d|20\d\d)(?!\d|'?s\b)", plain_text(text) or ""))
     return int(years.pop()) if len(years) == 1 else None
 
 

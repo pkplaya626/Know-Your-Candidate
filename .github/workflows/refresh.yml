@@ -319,6 +319,18 @@ jobs:
         timeout-minutes: 45
         run: python build_profile_site.py localgov --check-sites --limit 6000 --max-minutes 35
 
+      # Smaller copies of the heavy portraits the site shows (rule 101): each
+      # address weighed again, oldest first, and a copy made in the runner's
+      # own Chrome (tools/make_photo_copies.mjs, as the courts' reader finds
+      # it) of each over 300 KB or 1,200 px, after every step that sets a
+      # portrait and before the rebuild that shows them. A copy is never made
+      # again while its original is unchanged; a read that fails keeps what
+      # was there, and the run ends cleanly inside its budget (rule 78).
+      - name: Weigh the portraits and copy the heavy ones
+        continue-on-error: true
+        timeout-minutes: 40
+        run: python build_profile_site.py photocopies --limit 4000 --max-minutes 30
+
       # Market prices are not refreshed here: .github/workflows/odds.yml
       # does that every twelve hours and publishes on its own. The build
       # below leaves data/odds.js alone unless odds.json changed, so this

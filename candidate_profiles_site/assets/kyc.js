@@ -1199,7 +1199,8 @@
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.
     if (credit.copyOf) {
-      line += "; a smaller copy made by this site of " + anchor(credit.copyOf, "the original file");
+      line += '<span class="photo-copy-note">; a smaller copy made by this site of ' +
+        anchor(credit.copyOf, "the original file") + "</span>";
     }
     return line;
   }

@@ -92,7 +92,9 @@ COPY_MAX_BYTES = 150_000
 # The most an original may weigh to be downloaded.
 MAX_DOWNLOAD = 64 * 1024 * 1024
 # How much of a file a weighing reads: its size and pixels are near the
-# start (a JPEG's metadata can run past 64 KB, portraits.measure).
+# start, and a JPEG's metadata can run past the first 64 KB
+# (portraits.measure), when it is read again to 512 KB.
+FIRST_BYTES = 64 * 1024
 HEAD_BYTES = 512 * 1024
 PAUSE = 1.0
 TIMEOUT = 40
@@ -517,10 +519,6 @@ def _open(url, headers, timeout=TIMEOUT):
     return urllib.request.urlopen(request, timeout=timeout)
 
 
-def _status(exc):
-    return exc.code if isinstance(exc, urllib.error.HTTPError) else 0
-
-
 def _read(response, limit):
     data = response.read(limit + 1)
     if len(data) > limit:
@@ -547,10 +545,26 @@ def probe(url, entry=None, headers=UA):
     ``{"status": "error", "why"}`` (anything else that concludes nothing,
     rule 8), or ``{"status": "ok", "bytes", "width", "height", "etag",
     "lastModified", "type", "data"}`` where ``data`` is the whole file when
-    the read took all of it."""
+    the read took all of it. The first 64 KB tell a file's size and pixels;
+    a JPEG whose metadata runs past them is read again to 512 KB
+    (``portraits.measure``)."""
     from .portraits import image_size
 
-    sent = dict(headers, Range=f"bytes=0-{HEAD_BYTES - 1}")
+    read = _probe_once(url, entry, headers, FIRST_BYTES)
+    if (read["status"] == "ok" and read["width"] is None and read["data"] is None
+            and read["bytes"] > FIRST_BYTES):
+        again = _probe_once(url, None, headers, HEAD_BYTES)
+        if again["status"] == "ok":
+            read = again
+    if read["status"] == "ok":
+        read.pop("head", None)
+    return read
+
+
+def _probe_once(url, entry, headers, span):
+    from .portraits import image_size
+
+    sent = dict(headers, Range=f"bytes=0-{span - 1}")
     entry = entry or {}
     if entry.get("etag"):
         sent["If-None-Match"] = entry["etag"]
@@ -560,13 +574,14 @@ def probe(url, entry=None, headers=UA):
         with _open(url, sent) as response:
             gz = (response.headers.get("Content-Encoding") or "").lower() == "gzip"
             total = None
-            span = response.headers.get("Content-Range") or ""
-            if response.status == 206 and "/" in span and span.rsplit("/", 1)[1].isdigit():
-                total = int(span.rsplit("/", 1)[1])
+            span_header = response.headers.get("Content-Range") or ""
+            if response.status == 206 and "/" in span_header and \
+                    span_header.rsplit("/", 1)[1].isdigit():
+                total = int(span_header.rsplit("/", 1)[1])
             elif response.status == 200 and (response.headers.get("Content-Length") or "").isdigit():
                 total = int(response.headers["Content-Length"])
             if response.status == 206 and not gz:
-                head = response.read(HEAD_BYTES)
+                head = response.read(span)
                 data = head if total is not None and len(head) >= total else None
             else:
                 # The whole file came (no ranges), or it came compressed.
@@ -700,9 +715,11 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
     def one(url, headers):
         entry = originals[url]
         # A conditional read only where a 304 would leave nothing to do: a
-        # copy made for a box that covers every kind the original is shown as.
-        known = entry if (entry.get("copy") and
-                          covers(entry["copy"], box_for(entry.get("kinds") or []))) else None
+        # copy made for a box that covers every kind the original is shown as,
+        # or a file within the caps.
+        known = entry if (
+            (entry.get("copy") and covers(entry["copy"], box_for(entry.get("kinds") or [])))
+            or (entry.get("bytes") and not heavy(entry))) else None
         read = prober(url, known, headers)
         if read["status"] == "error" and read.get("code") in (401, 403, 406) and headers is UA:
             time.sleep(PAUSE)

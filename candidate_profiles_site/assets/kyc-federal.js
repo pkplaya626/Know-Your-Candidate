@@ -1374,6 +1374,8 @@
     // A portrait that will not load is dropped, never shown broken.
     root.addEventListener("error", function (event) {
       if (event.target.classList && event.target.classList.contains("fed-photo")) {
+        // A copy this site made that fails gives way to its original (rule 101).
+        if (KYC.retryOriginal(event.target, event)) return;
         event.target.remove();
       }
     }, true);
