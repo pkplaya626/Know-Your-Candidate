@@ -1243,10 +1243,16 @@
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.
     if (credit.copyOf) {
+      var original = "the original file" +
+        (credit.copyOfBytes ? " (" + weightWords(credit.copyOfBytes) + ")" : "");
+      // An original hosted here (an election office's guide's) is linked
+      // where this page loads it from.
       line += '<span class="photo-copy-note" data-copy-of="' + escapeAttr(credit.copyOf) +
         '">; a smaller copy made by this site of ' +
-        anchor(photoHref(credit.copyOf), "the original file" +
-          (credit.copyOfBytes ? " (" + weightWords(credit.copyOfBytes) + ")" : "")) + "</span>";
+        (HOSTED.test(credit.copyOf)
+          ? '<a href="' + escapeAttr(photoHref(credit.copyOf)) +
+            '" target="_blank" rel="noopener noreferrer">' + escapeHtml(original) + "</a>"
+          : anchor(credit.copyOf, original)) + "</span>";
     }
     return line;
   }
