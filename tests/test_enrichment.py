@@ -1740,6 +1740,19 @@ class TestPhotoCredits(unittest.TestCase):
         self.assertEqual(profile["photoCredit"], {"by": "the campaign's website (janesmith.com)",
                                                   "page": "https://janesmith.com"})
 
+    def test_the_credit_names_the_host_of_the_page_it_links(self):
+        """Michael J. Quirk's filed address redirects to another host, where
+        his portrait is: the credit read "michaelquirk4congress.com" and
+        linked michaelquirkforcongress.com."""
+        profile = _challenger(campaignSite="https://janesmith.com")
+        site = dict(TestApplyEnrichment.SAFE_SITE,
+                    portraitPage="https://www.janesmithforcongress.com/about")
+        enrich.apply_cache([profile], TestApplyEnrichment().cache(site=site),
+                           as_of=TestApplyEnrichment.AS_OF)
+        self.assertEqual(profile["photoCredit"],
+                         {"by": "the campaign's website (janesmithforcongress.com)",
+                          "page": "https://www.janesmithforcongress.com/about"})
+
 
 class TestPortraitWeights(unittest.TestCase):
     """TECH-13: a 1.3 MB campaign PNG was downloaded for a 165px card."""

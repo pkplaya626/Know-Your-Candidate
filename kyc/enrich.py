@@ -1630,8 +1630,11 @@ def take_campaign_portrait(profile, entry, site, counts):
     profile["photos"] = [picture] + photos
     profile["photo_url"] = picture
     profile["photoSource"] = "campaign-site"
-    profile["photoCredit"] = dict(campaign_credit(profile.get("campaignSite")),
-                                  page=record.get("portraitPage") or profile.get("campaignSite"))
+    # The credit names the host of the page it links, the one the image
+    # was on: a filed address that redirects (michaelquirk4congress.com to
+    # michaelquirkforcongress.com) read as one site and linked another.
+    page = record.get("portraitPage") or profile.get("campaignSite")
+    profile["photoCredit"] = campaign_credit(page)
     counts["portrait"] += 1
     return True
 
