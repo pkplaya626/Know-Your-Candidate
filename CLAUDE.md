@@ -1030,8 +1030,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     disagree: Dan Bishop (R); Jeff Jackson (D)" over the office that had
     named Jackson on every read. And a read is whole only when every page
     it set out to read answered (`officers.OfficeRead`): one whose linked
-    attorney general's page did not answer confirms whom it names, and its
-    silence concludes nothing, never "does not name them". Past `KEPT_STALE_DAYS` a kept confirmation
+    attorney general's page (or that drew itself with JavaScript) did not
+    answer confirms whom it names only where one association lists someone -
+    with two, the unread page may name the other, which a whole read shows
+    as a dispute - and otherwise concludes nothing, never "does not name
+    them", nor drops a photograph. Past `KEPT_STALE_DAYS` a kept confirmation
     is a warning (`officer-confirmation-kept`) to read the page by hand.
 
 57. **A court's members come from the court.** No national source lists

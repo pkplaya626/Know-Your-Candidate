@@ -530,7 +530,10 @@ def _office_pages(url, pause):
             if urllib.parse.urlparse(target).netloc == urllib.parse.urlparse(url).netloc:
                 time.sleep(pause)
                 linked = _get_answered(target)
-                if linked is None or _BOT_WALL.search(linked):
+                # A bot wall, or a page that draws itself with JavaScript,
+                # says nothing either way, as the front page's would.
+                if (linked is None or _BOT_WALL.search(linked)
+                        or len(visible_text(linked)) < 300):
                     pages.unread.append(("the attorney general's page", target))
                 else:
                     pages.append((target, linked))
@@ -560,8 +563,10 @@ def office_read(urls, link, pause):
     text (``None`` when none did) with the pages that did not."""
     found = _read_offices(urls, pause)
     if not found:
-        return [], (link, None, [])
-    return list(found), (link, " ".join(visible_text(page) for _, page in found), found.unread)
+        return OfficeRead(), (link, None, [])
+    # The pages stay an OfficeRead, so add_ag_photos knows a photograph may
+    # be on a page that did not answer.
+    return found, (link, " ".join(visible_text(page) for _, page in found), found.unread)
 
 
 def _office_text(url, pause):
@@ -940,11 +945,17 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
             # stands as the confirming read left it (kept_confirmation), not
             # dropped, re-read or reported as changed.
             continue
+        # A partial read (OfficeRead.unread): the page that did not answer
+        # may be the one with the photograph, so finding none there
+        # concludes nothing and the last one read of this holder is kept.
+        unread = getattr(pages.get(code), "unread", None)
         read = list(pages.get(code) or [])
         # What a person refused is kept on the row (``notPortraits``) so
         # validate can tell a NOT_A_PORTRAIT entry still means something.
         passed_over = []
         found, why = ag_photo(row["name"], code, read, check=check, passed_over=passed_over)
+        if not found and unread:
+            why = "unknown"
         if not found:
             more = []
             seen = {url for url, _ in read}
@@ -1075,10 +1086,13 @@ def attorneys_general(raga, daga, office_texts, previous=None, previous_day=None
     cache's rows and *previous_day* its ``fetched`` day: where an office's
     site concludes nothing, its last confirmation is kept while nothing
     read contradicts it (:func:`kept_confirmation`). A partial read
-    concludes only what it says: one that names a listing beside the title
-    confirms them, and one that names nobody concludes nothing, as a site
-    that did not answer - never "does not name them", never a dispute on
-    its silence. *today* dates each confirmation (``confirmedOn``)."""
+    concludes only what it says: where one association lists someone, one
+    that names them beside the title confirms them; one that names nobody,
+    or a state two associations list (the page that did not answer may name
+    the other), concludes nothing, as a site that did not answer - never
+    "does not name them", never a dispute on its silence, and an earlier
+    confirmation is not kept where it names another listing. *today* dates
+    each confirmation (``confirmedOn``)."""
     from .government_maps import STATES
     today = today or _utc_today()
     rows, problems = {}, []
@@ -1095,16 +1109,43 @@ def attorneys_general(raga, daga, office_texts, previous=None, previous_day=None
             problems.append(f"{code}: neither association lists an attorney general")
             continue
         unreadable = "the office's site could not be read"
+        named = []
         if text is not None and unread:
             unreadable = _unread_words(unread)
-            if not any(names_attorney_general(_as_shown(r["name"]), text, code)
-                       for r, _, _ in listed):
+            named = [(r, p, s) for r, p, s in listed
+                     if names_attorney_general(_as_shown(r["name"]), text, code)]
+            if not named:
                 text = None                     # what did not answer may name them
+            elif len(listed) > 1:
+                # Two associations list someone. A whole read of a site that
+                # names both is a dispute (rule 55), and the page that did
+                # not answer may name the other listing - a predecessor's
+                # name left beside the title on the front page is enough -
+                # so a partial read is never more sure than the whole read
+                # would be: it concludes nothing. An earlier confirmation is
+                # kept only where what answered names its holder and no one
+                # else (below).
+                text = None
+                problems.append(f"{code}: {unreadable}; the pages that answered name "
+                                + " and ".join(_as_shown(r["name"]) for r, _, _ in named)
+                                + " as attorney general; with two associations' listings "
+                                "a partial read confirms no one")
             else:
-                problems.append(f"{code}: {unreadable}; the pages that answered name the "
-                                "attorney general")
+                problems.append(f"{code}: {unreadable}; the pages that answered name "
+                                f"{_as_shown(named[0][0]['name'])} as attorney general")
         if text is None:
             kept = kept_confirmation((previous or {}).get(code), listed, previous_day)
+            other = [r["name"] for r, p, s in named if kept and not (
+                s == kept.get("listedBy") and p == kept.get("party")
+                and _as_shown(r["name"]) == kept["name"])]
+            if other:
+                # Naming another listing beside the title contradicts the
+                # earlier confirmation, which stood only while every other
+                # listing went unnamed (kept_confirmation).
+                problems.append(f"{code}: its confirmation of {kept['name']} on "
+                                f"{kept['confirmedOn']} is not kept: the pages that answered "
+                                f"name {' and '.join(other)} as attorney general")
+                kept = None
             if kept:
                 rows[code] = dict({k: v for k, v in kept.items()
                                    if k not in ("office", "selection")}, **base)
@@ -1129,17 +1170,13 @@ def attorneys_general(raga, daga, office_texts, previous=None, previous_day=None
             if names_attorney_general(name, text, code):
                 confirmed.append((name, party, source, r))
             else:
-                problems.append(f"{code}: {source} lists {r['name']}, whom the office's "
-                                + ("pages that answered do" if unread else "page does")
-                                + " not name as attorney general")
+                problems.append(f"{code}: {source} lists {r['name']}, whom the office's page "
+                                f"does not name as attorney general")
         if len(confirmed) == 1:
             name, party, source, r = confirmed[0]
-            # A partial read that names one listing beside the title records
-            # the others as listings it did not name, as a whole read does:
-            # an office names one attorney general, so the page that did not
-            # answer could not have made another listing its holder - at
-            # most the office's word a dispute, which the next whole read
-            # shows.
+            # A partial read reaches here only where one association lists
+            # someone and what answered names them (above), so ``alsoListed``
+            # is a whole read's: the listings the office did not name.
             rows[code] = dict(base, name=name, party=party, partyKey=party, listedBy=source,
                               title="Acting Attorney General" if acting(name, text)
                               else "Attorney General", confirmedOn=today,

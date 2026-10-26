@@ -635,10 +635,10 @@ class TestPartialReads(unittest.TestCase):
     NC = dict(TestKeptConfirmations.NC, confirmedOn="2026-10-19", alsoListed=["Dan Bishop (R)"])
 
     @staticmethod
-    def page(words="", link=True):
+    def page(words="", link=True, label="About the Attorney General"):
         return ("<html><head><title>Department of Justice</title></head><body>"
                 + "Welcome to the Department of Justice. " * 12
-                + ('<a href="/about-the-attorney-general/">About the Attorney General</a> '
+                + (f'<a href="/about-the-attorney-general/">{label}</a> '
                    if link else "") + words + "</body></html>")
 
     def setUp(self):
@@ -667,19 +667,72 @@ class TestPartialReads(unittest.TestCase):
                                           "2026-10-25", "2026-10-26")
 
     def test_a_front_page_naming_the_holder_confirms_them_when_the_linked_page_fails(self):
-        pages, texts = self.read(self.page("Attorney General Jeff Jackson"), [None])
+        pages, texts = self.read(self.page("Attorney General John Formella"), [None])
         self.assertEqual(self.calls.count(self.ABOUT), 3)          # retried, as the front page
         self.assertEqual([u for u, _ in pages], [self.FRONT])
         self.assertEqual(texts[2], [("the attorney general's page", self.ABOUT)])
-        rows, problems = self.ag("NC", texts)
-        nc = rows["NC"]
-        self.assertEqual((nc["name"], nc["party"], nc["confirmedOn"]),
-                         ("Jeff Jackson", "D", "2026-10-26"))
-        self.assertEqual(nc["alsoListed"], ["Dan Bishop (R)"])
-        self.assertIn(f"NC: the attorney general's page {self.ABOUT} could not be read; the "
-                      "pages that answered name the attorney general", problems)
-        self.assertIn("NC: Republican Attorneys General Association lists Dan Bishop, whom the "
-                      "office's pages that answered do not name as attorney general", problems)
+        rows, problems = self.ag("NH", texts)
+        nh = rows["NH"]
+        self.assertEqual((nh["name"], nh["party"], nh["confirmedOn"], nh["alsoListed"]),
+                         ("John Formella", "R", "2026-10-26", []))
+        self.assertNotIn("confirmationKept", nh)
+        self.assertIn(f"NH: the attorney general's page {self.ABOUT} could not be read; the "
+                      "pages that answered name John Formella as attorney general", problems)
+
+    def test_two_listings_on_a_partial_read_confirm_no_one(self):
+        """Review of PR #154: a whole read naming both listings is a dispute,
+        so a partial read naming one - a predecessor's name left beside the
+        title, say - must not confirm them, nor record the real holder as a
+        listing the office did not name for kept_confirmation to lean on."""
+        down, _ = self.ag("NC", (self.FRONT, None))
+        for front in ("Attorney General Jeff Jackson", "Attorney General Dan Bishop announces"):
+            self.calls.clear()
+            _, texts = self.read(self.page(front), [None])
+            rows, problems = self.ag("NC", texts)
+            self.assertEqual(rows["NC"], down["NC"])              # as a site that did not answer
+            self.assertTrue(any(p.startswith(f"NC: the attorney general's page {self.ABOUT} "
+                                             "could not be read; the pages that answered name")
+                                and p.endswith("a partial read confirms no one")
+                                for p in problems), problems)
+        # The earlier confirmation of Jackson is kept where what answered
+        # names him and no one else ...
+        _, texts = self.read(self.page("Attorney General Jeff Jackson"), [None])
+        rows, _ = self.ag("NC", texts, {"NC": dict(self.NC)})
+        self.assertEqual((rows["NC"]["name"], rows["NC"]["confirmedOn"]),
+                         ("Jeff Jackson", "2026-10-19"))
+        self.assertTrue(rows["NC"]["confirmationKept"])
+        # ... and not where it names Bishop beside the title: a whole read
+        # would have been a dispute, and so is this.
+        _, texts = self.read(self.page("Attorney General Dan Bishop announces"), [None])
+        rows, problems = self.ag("NC", texts, {"NC": dict(self.NC)})
+        self.assertEqual(rows["NC"]["disputed"], ["Dan Bishop (R)", "Jeff Jackson (D)"])
+        self.assertIn("NC: its confirmation of Jeff Jackson on 2026-10-19 is not kept: the pages "
+                      "that answered name Dan Bishop as attorney general", problems)
+
+    def test_a_linked_page_drawn_by_javascript_is_not_read(self):
+        shell = "<html><body><div id=app></div><script>render()</script></body></html>"
+        pages, texts = self.read(self.page(), [shell])
+        self.assertEqual([u for u, _ in pages], [self.FRONT])
+        self.assertEqual(texts[2], [("the attorney general's page", self.ABOUT)])
+        rows, _ = self.ag("NC", texts, {"NC": dict(self.NC)})
+        self.assertTrue(rows["NC"]["confirmationKept"])
+        self.assertNotIn("disputed", rows["NC"])
+
+    def test_a_partial_read_keeps_the_holders_last_photograph(self):
+        """The photograph may be on the page that did not answer: finding
+        none on the front page concludes nothing (rule 8)."""
+        # Linked as "Attorney General", which bio_links does not ask again.
+        pages, texts = self.read(self.page("Attorney General John Formella",
+                                           label="Attorney General"), [None])
+        rows, _ = self.ag("NH", texts)
+        old = {"NH": dict(TestKeptConfirmations.NH, photo="https://ag.example.gov/img/f.jpg",
+                          photoPage=self.ABOUT)}
+        problems = officers.add_ag_photos(rows, {"NH": pages}, old, check=lambda *a: (True, 1),
+                                          pause=0, get=self.get)
+        self.assertEqual(rows["NH"].get("photo"), "https://ag.example.gov/img/f.jpg")
+        self.assertIn("NH: John Formella's photograph could not be read; the last one read is "
+                      "kept", problems)
+        self.assertFalse([p for p in problems if "dropped" in p], problems)
 
     def test_a_partial_read_that_names_nobody_concludes_nothing(self):
         _, texts = self.read(self.page(), [None])
