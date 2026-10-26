@@ -515,6 +515,16 @@ VOTING_LINKS = {
         "browser; the Secretary of State's Elections page (sos.nh.gov/elections, 'Elections | "
         "New Hampshire Secretary of State') links '2026 Election Results' here, titled '2026 "
         "Election Results | New Hampshire Secretary of State' (both opened by hand 2026-10-26)"),
+    # Ohio's address is kept, labelled for what it reached: the office now
+    # sends it to its data portal, not a results page as such (NOTES.md,
+    # round three), so "Official results" would promise a count the page
+    # was not seen to hold. Look again once the office posts November's.
+    ("OH", "results"): (
+        "https://www.ohiosos.gov/elections/election-results-and-data/",
+        "https://www.ohiosos.gov/elections/election-results-and-data/",
+        "Election data portal",
+        "the address redirects to ohiosos.gov/data, 'Ohio Secretary of State Data Portal | "
+        "Interactive Dashboards & Public Information' (opened by hand 2026-10-26)"),
 }
 
 # Voting links the weekly check could not open (a bot wall, a reset: rule 8
@@ -656,8 +666,9 @@ VOTING_LINKS_BY_HAND = {
                         "opened", "", "Election Results | Wisconsin Elections Commission"),
     # The office now sends its results address to its data portal: it opened,
     # and the portal is the Secretary of State's, but it is not a results page
-    # as such. The reading names no other results page, so the link and its
-    # label stay; look again once the office posts November's count.
+    # as such. The reading names no other results page, so the link stays,
+    # labelled for the portal in VOTING_LINKS; look again once the office
+    # posts November's count.
     ("OH", "results"): ("https://www.ohiosos.gov/elections/election-results-and-data/",
                         _BY_HAND_DAY, "opened", "https://www.ohiosos.gov/data",
                         "Ohio Secretary of State Data Portal | Interactive Dashboards & Public "

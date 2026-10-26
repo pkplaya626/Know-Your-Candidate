@@ -353,6 +353,18 @@ class TestRoundThree(unittest.TestCase):
             self.assertTrue(voting.official(new, code))
         self.assertEqual(voting.stale_overrides(cache), [])
 
+    def test_ohios_results_address_is_labelled_for_the_portal_it_reaches(self):
+        # A person found it leads to the office's data portal, not a results
+        # page as such: the button never promises "Official results" there.
+        cache = voting.load_cache(ROOT)
+        url = voting.RESULTS["OH"]
+        self.assertEqual(voting.effective(cache)["OH"]["results"],
+                         {"url": url, "from": voting.OFFICE, "label": "Election data portal"})
+        page = voting.for_page(cache)
+        self.assertEqual(page["OH"]["results"], url)
+        self.assertEqual(page["_labels"]["OH"]["results"], "Election data portal")
+        self.assertIn("results", page["_byHand"]["OH"])
+
     def test_a_curated_override_stops_once_the_table_changes(self):
         from unittest import mock
         cache = voting.load_cache(ROOT)
