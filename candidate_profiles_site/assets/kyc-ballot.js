@@ -382,6 +382,11 @@
     return "Each date is from the election office's own page or the law, linked beside it" +
       (d.read ? ", read on " + KYC.escapeHtml(d.read) : "") +
       (d.checked ? " and checked again on " + KYC.escapeHtml(d.checked) : "") +
+      // A source read later than the record (Nevada's Secretary of State's
+      // page, read by hand) says its own day (PR #140 review).
+      ((info.mine || {}).reread || []).map(function (r) {
+        return " (" + KYC.escapeHtml(r.labels.join(" and ")) + " read on " + KYC.escapeHtml(r.d) + ")";
+      }).join("") +
       "; where the source gives a rule, such as “15 days before the election”, the date " +
       "is that rule counted on the 2026 calendar. Whether a date has passed is counted on your " +
       "device's calendar. ";
@@ -419,7 +424,11 @@
    *  (2-year terms)" repeated the term line under it. */
   function basisText(c) {
     // "all 56 districts" says no more than the count beside it.
+    // A list after the count ("11 districts: 2, 8, 9, ...", Nevada's
+    // Senate) names the districts; its count dropped, it read "The state's
+    // record: : 2, 8" (PR #140 review).
     var t = String(c.ballot.basis || "").replace(/^(none regular|none|all)\b:?\s*/i, "")
+      .replace(/^\d+ districts:\s*/i, "Districts ")
       .replace(/^\d+ districts\b\s*/i, "").trim();
     if (c.termYears) {
       var n = String(c.termYears);
