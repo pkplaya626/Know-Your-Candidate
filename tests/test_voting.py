@@ -427,12 +427,36 @@ class TestAsItsSiteLinksIt(unittest.TestCase):
                     self.assertRegex(fix[3], r"(?<!NASS )\blinks\b|\blinked from\b", (code, kind))
                 else:
                     self.assertEqual(curated.get(kind, {}).get(code), url, (code, kind))
-        # And the office's pages the record does not show linked are left
-        # out of them: Maryland's polling place and Colorado's mail-ballot
-        # page replace NASS's on evidence of what they are, not of a link.
-        self.assertIn("polling", self.page["MD"])
-        self.assertNotIn("polling", self.page["_siteLinked"]["MD"])
-        self.assertNotIn("absentee", self.page["_siteLinked"]["CO"])
+
+    def test_marylands_polling_place_is_the_lookup_its_voting_page_links(self):
+        # #147 took the words from Maryland's voting/where.html: no page of
+        # the Board's read links it. Its "Voting in Maryland" page links
+        # "assigned polling place" to the Voter Services lookup, which is
+        # shown now, and said so (NOTES.md, "Maryland's and Colorado's
+        # links", 2026-10-26).
+        lookup = "https://voterservices.elections.maryland.gov/VoterSearch"
+        self.assertEqual(self.page["MD"]["polling"], lookup)
+        self.assertIn("polling", self.page["_siteLinked"]["MD"])
+        evidence = overrides.VOTING_LINKS[("MD", "polling")][3]
+        for words in ("https://elections.maryland.gov/voting/index.html",
+                      "links 'assigned polling place' here", "'Voter Lookup'",
+                      "Find out where to vote.", "opened by hand 2026-10-26"):
+            self.assertIn(words, evidence)
+        self.assertNotIn("https://elections.maryland.gov/voting/where.html",
+                         [links.get("polling") for code, links in self.page.items()
+                          if not code.startswith("_")])
+        self.assertNotIn("https://elections.maryland.gov/voting/where.html",
+                         [entry[0] for entry in overrides.VOTING_LINKS_BY_HAND.values()])
+
+    def test_colorados_mail_ballot_faq_is_the_one_its_faqs_page_links(self):
+        url = "https://www.sos.state.co.us/pubs/elections/FAQs/mailBallotsFAQ.html"
+        self.assertEqual(self.page["CO"]["absentee"], url)
+        self.assertIn("absentee", self.page["_siteLinked"]["CO"])
+        self.assertTrue(voting.site_linked("CO", "absentee", url))
+        evidence = overrides.VOTING_LINKS[("CO", "absentee")][3]
+        for words in ("linked from", "https://www.sos.state.co.us/pubs/elections/FAQs/FAQsMain.html",
+                      "as 'Mail-in ballots'", "2026-10-26"):
+            self.assertIn(words, evidence)
 
     def test_a_redirect_or_nasss_listing_is_not_the_site_linking(self):
         from unittest import mock
@@ -447,8 +471,14 @@ class TestAsItsSiteLinksIt(unittest.TestCase):
             page = voting.for_page(voting.load_cache(ROOT))
             self.assertEqual(page["OK"]["results"], "https://results.okelections.gov/OKER/")
             self.assertNotIn("results", page["_siteLinked"]["OK"])
-        self.assertFalse(voting.site_linked("CO", "absentee",
-                                            overrides.VOTING_LINKS[("CO", "absentee")][1]))
+        # Evidence that says what a page is, and not where the office links
+        # it, does not make it linked (Colorado's, before 2026-10-26's read).
+        url = overrides.VOTING_LINKS[("CO", "absentee")][1]
+        what_it_is = (overrides.VOTING_LINKS[("CO", "absentee")][0], url, None,
+                      "NASS links the Election Day FAQ; Colorado mails every voter a ballot, "
+                      "and this is the Secretary of State's Mail-in Ballots FAQ")
+        with mock.patch.dict(overrides.VOTING_LINKS, {("CO", "absentee"): what_it_is}):
+            self.assertFalse(voting.site_linked("CO", "absentee", url))
         self.assertTrue(voting.site_linked("OK", "results", OK_RESULTS))
         self.assertTrue(voting.site_linked("WY", "results", voting.RESULTS["WY"]))
         self.assertFalse(voting.site_linked("WY", "deadlines", voting.DEADLINES["WY"]))
