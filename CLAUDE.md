@@ -1857,7 +1857,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     party is the member's (an independent on the House Republicans' host
     is not credited to them), for a file Open States gives that member
     alone and whose name does not call it a group's, a leader's or a
-    banner (`legislature.caucus_photo`). Any other host still reads
+    banner (`legislature.caucus_photo`). One test says what host is a
+    caucus's, for its files and its member pages alike
+    (`legislature.on_caucus_host`: the entry or any subdomain of it): the
+    first matched "www.misenategop.com" for a file and not for a page, so
+    18 cards were credited to the Michigan Senate Republicans without a
+    link to their page there. Any other host still reads
     "Photo: from <host>, as listed by Open States", and New Hampshire's
     nhhousedems.org is not a caucus: its title is "New Hampshire House
     Dems Victory Committee", a campaign committee's.

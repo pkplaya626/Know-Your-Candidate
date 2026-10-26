@@ -1230,7 +1230,8 @@ offers the 500px size only once it is weighed within the caps. A nominee who sit
 the chamber their own article's corroborated record of offices gives, the
 same first and last name in it and nobody else - gets the photograph the
 site's legislature page shows on that member's card, on the legislature's
-own host (a party caucus's file, as Michigan's, is not: rule 87),
+own host or their own party caucus's in that chamber, credited to the
+caucus (Sean McCann's senatedems.com photograph; the owner, 2026-10-25),
 withheld once the roster seats someone else or the card shows another
 file, and not taken from an "oversized" legphotos entry, offered before a
 seat-keyed file's checks; a heavy one is shown smaller through Photon where it serves
@@ -1240,7 +1241,15 @@ person looking at a photograph judges it by one test: the candidate alone
 - nobody else in the frame, even in the background or in part (the owner,
 2026-10-25) - their face brow to chin at least a tenth of the 4:5 card's height (6.5px
 of the 65px phone card), is a likeness; anything else goes in
-`NOT_A_PORTRAIT` with what was seen. Each record keeps the page, the words naming the person
+`NOT_A_PORTRAIT` with what was seen. A portrait a person refused is no
+portrait: these routes are asked for its person as for anyone without one,
+and a record keeps what it stands in for (`replaces`). A photograph that
+comes forward when one before it is refused, from a route that can take a
+picture not made in a studio, is a build warning
+(`portrait-fallback-unseen`) until a person has looked at it and recorded
+it in `overrides.SEEN_AFTER_A_REFUSAL` or `NOT_A_PORTRAIT` (the PR #139
+review: refusing James Talarico's Commons crop put forward his campaign's
+classroom photograph, children in the frame). Each record keeps the page, the words naming the person
 beside the image (`evidence`, `portraitEvidence`), the day read and the
 bytes and pixel size; `validate` fails a shown one without them
 (`photo-unevidenced`). Washington's voters' guide and Alaska's and Oregon's
