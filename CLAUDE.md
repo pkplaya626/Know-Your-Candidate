@@ -646,7 +646,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     least a tenth of the height of the 4:5 card that crops it from the top
     (6.5px of the state pages' 65px phone card, where eyes and a mouth can
     be made out) is a likeness and is shown; anything else goes in
-    `NOT_A_PORTRAIT` with what was seen and measured. The first version
+    `NOT_A_PORTRAIT` with what was seen and measured. A picture of a
+    person is not a person in the frame (decided for the owner the same
+    day, in his rule's words "background people"): a framed photograph,
+    a poster, a book jacket or a face on a screen behind them refuses
+    nothing, a real person, even in part, does - so John Giles's guide
+    photograph and Dave Sunday's office photograph (framed photographs on
+    the shelves), Adam Hamawy's and Donna Miller's are shown again, as
+    Alex Vindman's (a book jacket) always was. The background-people rule
+    is for candidates' and officials' photographs: asked about the
+    federal judges' Senate Judiciary hearing stills, about 40% of the
+    1,012 portraits the judges' item route shows, the owner said "keep"
+    (2026-10-25) - the judge is plainly the subject. So an entry whose only
+    finding is other people in the frame is marked
+    `overrides.OTHERS_IN_FRAME` and withholds no judge's portrait, a
+    federal judge's or a state justice's from the court's roster, a judge
+    too (`photos.applies`); every other entry and check still does. The
+    first version
     let Jamie Davis by a tractor and Brian Bengs speaking in a park stand
     while refusing like scenes; measured, Bengs's face is a seventh and a
     half of the card and stays, Davis's an eleventh and Lauren Jewett's
@@ -658,17 +674,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (the article's or Wikidata's), 122 statewide candidates' (Commons, the
     guides and commissions, the holder's office card), 46 attorneys
     general's (their offices' pages and NAAG's cards) and 89 judges' (the
-    crop, article and agreeing-article routes) - and the 88 with anyone
+    crop, article and agreeing-article routes) - and those with anyone
     else visible refused, by route: 1 campaign's, 33 profiles' Commons
-    files, 5 statewide candidates' (Arizona's Clean Elections photograph of
+    files, 4 statewide candidates' (Arizona's Clean Elections photograph of
     Duwayne Collier is cropped from a family snapshot: a child's face and
-    another person's arm), 1 attorney general's office's, and 48 judges'
-    Senate hearing stills (9 crops, 39 articles' images); the 267
-    legislator cards newly credited to a caucus were looked at too, and 2
-    refused. Its review found five more (a hand at JoCasta Zamarripa's
-    edge, two judges' hearing audiences, a face on the screen behind Donna
-    Miller, a framed photograph of people behind Adam Hamawy, as John
-    Giles's and Dave Sunday's were refused) and a refusal's worst case: it
+    another person's arm); the 48 judges' hearing stills refused that day
+    are shown again by the owner's "keep". The 267 legislator cards newly
+    credited to a caucus were looked at as cards, and 2 refused; the live
+    check after found more at full size, so each of Connecticut's House
+    Democrats' 65 files was opened at full size - their chamber and
+    atrium shots - and 8 show someone else (Henry Genga, Gregg Haddad,
+    Minnie Gonzalez, Manny Sanchez, Amy Morrin Bello, Jane Garibay, Josh
+    Elliott, Joe Gresko); the blurred shapes at the chamber's desks behind
+    three others are its flags and microphones. Its review found a hand
+    at JoCasta Zamarripa's edge (and two more judges' hearing stills,
+    shown again with the rest) and a refusal's worst case: it
     promoted James Talarico's campaign photograph of him helping a child in
     a classroom, which nobody had seen, and then his Wikidata item's uncut
     file of the refused crop. A photograph that comes forward when a
@@ -679,13 +699,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     routes keep what a record stands in for (`replaces`); a refused
     portrait is no portrait, so those routes are asked for its person
     (Talarico, Jeremy Moss, La Shawn Ford and Adrian Boafo now show their
-    legislature's or caucus's photograph). Not looked at: the judges'
-    `item` route (a Wikidata item's own image, 1,012 portraits), which the
-    brief did not name. Most of its recent judges' are Senate Judiciary
-    hearing stills with the audience behind them - in a sample of the
-    first 330, some 130 clearly show someone else - so applying the
-    owner's test there would withdraw several hundred judges' photographs;
-    that waits for the owner. One test asks the list wherever a
+    legislature's or caucus's photograph). The judges' `item` route (a
+    Wikidata item's own image, 1,012 portraits) was not looked at for
+    people behind the judge, and by the owner's "keep" need not be.
+    One test asks the list wherever a
     page is read (`photos.not_a_portrait`, rule 12: the campaign sites'
     reader, a court's, an attorney general's office's, a statewide
     candidate's guide or article, a judge's), and records what it refused
@@ -1587,7 +1604,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     first list withheld two D.C. court photographs while 491 court
     photographs under the same tag were shown. What fails waits in
     `overrides.PORTRAIT_LICENCE_DOUBTS` for a person, and a portrait kept
-    from an earlier read is asked of it again. A photograph
+    from an earlier read is asked of it again. A judge is not refused for
+    the people behind them: of the Senate Judiciary hearing stills, some
+    40% of the item route's portraits, the owner said "keep" on
+    2026-10-25, the judge plainly the subject, so a `NOT_A_PORTRAIT` entry
+    whose only finding is other people in the frame (`OTHERS_IN_FRAME`,
+    `photos.applies`) withholds no judge's portrait - a state justice's
+    from the court's roster (rule 57) included - and the 50 refused that
+    morning are shown again; one finding another subject, no likeness or
+    a drawing still withholds it. A photograph
     is shown only at Wikimedia's own sizes up to the 250px a page draws,
     its largest weighed and within 300 KB and 1,200px. A file offered
     only over that is left out and counted (`judge-portraits-oversized`),
@@ -1884,7 +1909,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `official_photos.held_back`, `judge_links.held_back`,
     `portraits.held_back`, `enrich.campaign_portrait`, the officers'
     roster cards and the legislator cards all ask) - and a file in either
-    never reaches a page. A page read asks `NOT_A_PORTRAIT` through one
+    never reaches a page, save that an entry whose only finding is other
+    people in the frame (`OTHERS_IN_FRAME`) withholds no judge's portrait,
+    federal or a state justice's: the owner's background-people rule is
+    for candidates and officials, and of the judges' hearing stills he
+    said "keep" (2026-10-25; rule 82). A page read asks `NOT_A_PORTRAIT` through one
     helper beside it (`photos.not_a_portrait`), which records what it
     passed over for the staleness check (rule 12).
 

@@ -36,8 +36,11 @@ nothing a route ties to the person is left out for its weight). A photograph
 that could not be read keeps the last one read of the same justice (rule 8).
 Every record, read or kept, is asked of the lists a person keeps
 (``official_photos.held_back``: ``NOT_A_PORTRAIT``,
-``PORTRAIT_LICENCE_DOUBTS``). The page credits each court's photographs to
-the court.
+``PORTRAIT_LICENCE_DOUBTS``), as a judge's: a justice is a judge, and the
+owner's background-people rule is not applied to a judge's portrait (his
+"keep" of 2026-10-25, ``photos.applies``), so an entry whose only finding
+is other people in the frame does not withhold a justice's photograph. The
+page credits each court's photographs to the court.
 """
 
 import html
@@ -308,7 +311,7 @@ def photo_for(name, members, pages, place_words=(), measure=None, lighter=None,
             if not ok:
                 continue
             if not_a_portrait(image["src"], *[u for _, u in image["offered"]],
-                              passed_over=passed_over, table=refused):
+                              passed_over=passed_over, table=refused, judge=True):
                 why_not = "not-a-portrait"
                 continue
             url, weight, why, heavy = official_photos.choose(image["offered"], measure,
@@ -371,7 +374,7 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
             if why == official_photos.UNKNOWN and name in before:
                 # Kept from the last read (rule 8), but asked again of the
                 # lists a person keeps: a file refused since is not kept.
-                held = official_photos.held_back(before[name])
+                held = official_photos.held_back(before[name], judge=True)
                 if held:
                     problems.append(f"{code}: {name}'s photograph could not be read, and the "
                                     f"last one read is withheld: {held}")
@@ -429,7 +432,8 @@ def _fit(rec, name):
     """Whether *rec* may reach the page: it carries what ties it to the
     justice (``official_photos.record_problems``) and no list a person
     keeps withholds it (``official_photos.held_back``)."""
-    return not official_photos.record_problems(rec, name) and not official_photos.held_back(rec)
+    return (not official_photos.record_problems(rec, name)
+            and not official_photos.held_back(rec, judge=True))
 
 
 def for_page(code, read):
@@ -457,7 +461,7 @@ def read_problems(cache):
     for code, read in sorted(((cache or {}).get("courts") or {}).items()):
         for name, rec in sorted((read.get("photos") or {}).items()):
             errors.extend(official_photos.record_problems(rec, f"courts {code} {name}"))
-            held = official_photos.held_back(rec)
+            held = official_photos.held_back(rec, judge=True)
             if held:
                 withheld.append(f"courts {code} {name}: {held}")
     return errors, withheld

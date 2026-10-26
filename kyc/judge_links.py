@@ -40,7 +40,10 @@ so there is none (rules 24, 32). What the join finds is still checked:
 - an image must be a photograph Wikimedia can scale (JPEG, PNG, WebP),
   no more than a fifth wider than it is tall (``WIDEST``: the Senate's
   near-square hearing stills pass; a group photograph, a courthouse or a
-  16:9 frame is wider), not one ``overrides.NOT_A_PORTRAIT`` lists, and
+  16:9 frame is wider), not one ``overrides.NOT_A_PORTRAIT`` lists - save
+  an entry whose only finding is other people in the frame: a hearing
+  still's seated rows are not a reason to refuse a judge's portrait, the
+  owner's decision of 2026-10-25 (``photos.applies``) - and
   not one whose licence ``overrides.PORTRAIT_LICENCE_DOUBTS`` holds for a
   person to decide. Where the item has no single portrait, one is taken
   only by these routes (the research of 2026-10-19, checked by a second
@@ -640,9 +643,11 @@ def held_back(portrait):
     """Why a portrait must not be shown, from the overrides a person keeps,
     or None. Asked of every portrait kept from an earlier read as well as of
     every new one: a doubt added after a file was first read withholds it on
-    the next run, whatever that run could read."""
+    the next run, whatever that run could read. A judge's portrait is not
+    refused for other people in the frame (``photos.applies``, the owner's
+    decision of 2026-10-25: "keep" the hearing stills)."""
     from .photos import refused
-    return refused(source_url((portrait or {}).get("source"))) or None
+    return refused(source_url((portrait or {}).get("source")), judge=True) or None
 
 
 def _keep(last_entry, name, problems):
@@ -863,7 +868,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
             size = sizes.get(url) if url else None
             if not url or not thumb_set(url, 1):
                 why = f"{name}: {ref} is not a photograph Wikimedia scales; not shown"
-            elif not_a_portrait(url, passed_over=passed_over):
+            elif not_a_portrait(url, passed_over=passed_over, judge=True):
                 why = f"{name}: {url} is in overrides.NOT_A_PORTRAIT; not shown"
             elif url in doubts:
                 doubted.add(url)

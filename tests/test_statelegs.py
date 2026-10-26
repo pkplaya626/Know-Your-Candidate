@@ -590,18 +590,29 @@ class TestImageCheck(unittest.TestCase):
     """Legislators' portraits, checked the tristate way (STATEGOV-03)."""
 
     def test_a_refusal_concludes_nothing(self):
-        # Only a 404 or 410 to a GET is "missing": an HTML page with status
-        # 200, a bot wall's 403, a throttle or a dropped connection says
-        # nothing (rules 8 and 52; Texas's host refused one machine every
-        # connection). HEAD is never asked: Massachusetts answers it 404 for
+        # Only a 404 or 410 to a GET is "missing": a bot wall's 403, a
+        # throttle or a dropped connection says nothing (rule 8; Texas's host
+        # refused one machine every connection). A 200 is read from its
+        # body (rule 52): a page in the image's place - Connecticut's House
+        # Republicans' site answers each image address with one - or a
+        # one-pixel image - Michigan's House Democrats' files - is no
+        # portrait. HEAD is never asked: Massachusetts answers it 404 for
         # portraits GET serves, South Dakota with an HTML page.
         import io
+        import struct
         import urllib.error
         from unittest import mock
 
+        def png(width, height):
+            return (b"\x89PNG\r\n\x1a\n" + struct.pack(">I", 13) + b"IHDR"
+                    + struct.pack(">II", width, height) + b"\x08\x02\x00\x00\x00")
+
+        jpeg = (b"\xff\xd8\xff\xe0" + struct.pack(">H", 16) + b"JFIF\x00" + b"\x00" * 9
+                + b"\xff\xc0" + struct.pack(">HBHH", 17, 8, 250, 200) + b"\x00" * 12)
+
         class Response(io.BytesIO):
-            def __init__(self, ctype):
-                super().__init__(b"")
+            def __init__(self, ctype, body=jpeg):
+                super().__init__(body)
                 self.status, self.headers = 200, {"Content-Type": ctype}
 
             def __enter__(self):
@@ -617,7 +628,17 @@ class TestImageCheck(unittest.TestCase):
         cases = [(raising(404), False), (raising(410), False), (raising(403), None),
                  (raising(429), None), (raising(503), None),
                  (lambda req, timeout=None: Response("image/jpeg"), True),
-                 (lambda req, timeout=None: Response("text/html; charset=utf-8"), None),
+                 (lambda req, timeout=None: Response("image/png", png(400, 500)), True),
+                 # Virginia's House: AVIF under "image/jpeg", drawn by browsers.
+                 (lambda req, timeout=None: Response(
+                     "image/jpeg", b"\x00\x00\x00\x1cftypavif\x00\x00\x00\x00avifmif1"), True),
+                 (lambda req, timeout=None: Response("text/html; charset=utf-8",
+                                                     b"<!doctype html><html></html>"),
+                  statelegs.NOT_AN_IMAGE),
+                 (lambda req, timeout=None: Response("image/jpeg", b"<html>Request Rejected"),
+                  statelegs.NOT_AN_IMAGE),
+                 (lambda req, timeout=None: Response("image/png", png(1, 1)),
+                  statelegs.NOT_AN_IMAGE),
                  (mock.Mock(side_effect=OSError("refused")), None)]
         for opener, want in cases:
             with mock.patch("urllib.request.urlopen", opener):
@@ -649,7 +670,7 @@ class TestImageCheck(unittest.TestCase):
         counts = statelegs.check_images(by_state, today=today, check=check, pause=0)
         rows = by_state["KS"]
         self.assertEqual([r.get("imageStatus") for r in rows], ["ok", "broken", None, "ok", None])
-        self.assertEqual(counts["KS"], {"ok": 2, "broken": 1, "unknown": 1})
+        self.assertEqual(counts["KS"], {"ok": 2, "broken": 1, "notImage": 0, "unknown": 1})
         # The https copy of an http portrait is the one checked; a search
         # thumbnail is never asked about.
         self.assertIn("https://b.gov/4.jpg", asked)
@@ -668,6 +689,49 @@ class TestImageCheck(unittest.TestCase):
                                today=later, check=check, pause=0)
         self.assertEqual(fresh["KS"][1]["imageStatus"], "broken")
         self.assertIn("https://a.gov/2.jpg", asked)
+
+
+    def test_a_page_or_a_pixel_is_refused_and_a_silent_host_is_reported(self):
+        import datetime
+        answers = {"https://www.cthousegop.com/a.jpg": statelegs.NOT_AN_IMAGE,
+                   "https://housedems.com/b.png": statelegs.NOT_AN_IMAGE,
+                   "https://ctsenaterepublicans.com/c.jpg": None,
+                   "https://cga.ct.gov/d.jpg": True}
+        by_state = {"CT": [{"id": str(i), "image": url} for i, url in enumerate(answers)]}
+        today = datetime.date(2026, 10, 25)
+        report = {}
+        counts = statelegs.check_images(by_state, today=today, check=answers.get, pause=0,
+                                        report=report)
+        rows = by_state["CT"]
+        self.assertEqual([r.get("imageStatus") for r in rows], ["notImage", "notImage", None, "ok"])
+        self.assertEqual(counts["CT"], {"ok": 1, "broken": 0, "notImage": 2, "unknown": 1})
+        # The host that did not answer is said, and nothing is concluded.
+        self.assertEqual(report["unanswered"], {"ctsenaterepublicans.com": 1})
+        # Neither card shows it, as a missing file is not shown.
+        for r in rows[:2]:
+            r.update(name="X", chamber="lower", district="1")
+            self.assertEqual(legislature.photo_kind(r, {"people": {}}), "notImage")
+
+    def test_an_ok_from_the_headers_alone_is_asked_again(self):
+        # Michigan's 1x1 files were "ok" by their Content-Type: read before
+        # the body was, an answer is not carried over.
+        import datetime
+        today = datetime.date(2026, 10, 25)
+        previous = {"states": {"MI": [{"id": "1", "image": "https://housedems.com/b.png",
+                                       "imageStatus": "ok", "imageChecked": "2026-10-24"},
+                                      {"id": "2", "image": "https://a.gov/2.jpg",
+                                       "imageStatus": "ok", "imageChecked": "2026-10-24",
+                                       "imageBody": True}]}}
+        fresh = {"MI": [{"id": "1", "image": "https://housedems.com/b.png"},
+                        {"id": "2", "image": "https://a.gov/2.jpg"}]}
+        asked = []
+
+        def check(url):
+            asked.append(url)
+            return statelegs.NOT_AN_IMAGE
+        statelegs.check_images(fresh, previous=previous, today=today, check=check, pause=0)
+        self.assertEqual(asked, ["https://housedems.com/b.png"])
+        self.assertEqual([r["imageStatus"] for r in fresh["MI"]], ["notImage", "ok"])
 
 
 class TestDownloader(unittest.TestCase):

@@ -116,11 +116,82 @@ class TestEveryRouteAsksAtBuildTime(unittest.TestCase):
     def test_a_judges_file_is_withheld_and_recorded(self):
         cache = judge_links.load_cache(ROOT)
         refused = set(cache.get("notPortraits") or ())
-        self.assertTrue(refused)
         self.assertTrue(refused <= set(overrides.NOT_A_PORTRAIT))
         shown = {judge_links.source_url(e["portrait"]["source"])
                  for e in cache["judges"].values() if e.get("portrait")}
-        self.assertFalse(shown & set(overrides.NOT_A_PORTRAIT))
+        # What withholds a judge's file: any entry but one whose only
+        # finding is other people in the frame (the owner's "keep").
+        withheld = {u for u, e in overrides.NOT_A_PORTRAIT.items() if photos.applies(e, judge=True)}
+        self.assertFalse(shown & withheld)
+
+
+class TestAJudgeIsNotRefusedForPeopleBehindThem(unittest.TestCase):
+    """The owner, 2026-10-25: the background-people rule ("probably better
+    to leave out background people") is for candidates' and officials'
+    photographs; of the judges' Senate Judiciary hearing stills he said
+    "keep". An entry whose only finding is other people in the frame
+    withholds a candidate's photograph and never a judge's; any other
+    entry withholds both."""
+
+    # Upload addresses as Commons forms them, so a portrait's source page
+    # leads back to them (judge_links.source_url).
+    STILL = judge_links.commons_url(judge_links.file_ref("Pat Doe.png"))
+    OTHER = judge_links.commons_url(judge_links.file_ref("Lee Roe.png"))
+    TABLE = {
+        STILL: ("2026-10-25", "Judge Pat Doe (FJC 1): people seated behind her (a hearing still)",
+                overrides.OTHERS_IN_FRAME),
+        OTHER: ("2026-10-25", "Judge Lee Roe (FJC 2): another man is the subject; the judge is at "
+                              "the edge"),
+    }
+
+    def test_a_hearing_still_is_refused_for_a_candidate_and_not_for_a_judge(self):
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, self.TABLE):
+            self.assertIn("NOT_A_PORTRAIT", photos.refused(self.STILL))
+            self.assertEqual(photos.refused(self.STILL, judge=True), "")
+            self.assertEqual(photos.not_a_portrait(self.STILL), self.STILL)
+            self.assertEqual(photos.not_a_portrait(self.STILL, judge=True), "")
+            # Any other finding still withholds a judge's.
+            self.assertIn("NOT_A_PORTRAIT", photos.refused(self.OTHER, judge=True))
+            self.assertEqual(photos.not_a_portrait(self.OTHER, judge=True), self.OTHER)
+
+    def test_every_judges_route_asks_as_a_judge(self):
+        from kyc import official_photos
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, self.TABLE):
+            # A federal judge's Commons file (judge_links).
+            self.assertEqual(judge_links.source_url(judge_links.file_page(self.STILL)), self.STILL)
+            self.assertIsNone(judge_links.held_back({"source": judge_links.file_page(self.STILL)}))
+            self.assertTrue(judge_links.held_back({"source": judge_links.file_page(self.OTHER)}))
+            # A state justice's from the court's roster (court_photos asks
+            # official_photos as a judge); a statewide candidate's is not.
+            rec = {"photo": self.STILL}
+            self.assertIsNone(official_photos.held_back(rec, judge=True))
+            self.assertTrue(official_photos.held_back(rec))
+            # A statewide candidate's or a nominee's Commons file is refused.
+            passed = []
+            self.assertEqual(photos.not_a_portrait(self.STILL, passed_over=passed), self.STILL)
+            self.assertEqual(passed, [self.STILL])
+
+    def test_a_judge_entry_with_a_still_is_never_met_by_a_judges_read(self):
+        # The join's own test: the file is taken, not passed over.
+        passed = []
+        self.assertEqual(photos.not_a_portrait(self.STILL, table=self.TABLE, judge=True,
+                                               passed_over=passed), "")
+        self.assertEqual(passed, [])
+
+    def test_no_committed_entry_withholds_a_judge_for_people_behind_them(self):
+        # The 50 hearing stills of 2026-10-25 are shown again; a judge's
+        # entry must find something other than people in the frame.
+        for url, entry in overrides.NOT_A_PORTRAIT.items():
+            if "(FJC " in entry[1]:
+                self.assertFalse(photos.others_only(entry), url)
+
+    def test_a_picture_of_a_person_is_no_person_in_the_frame(self):
+        # Decided for the owner, 2026-10-25: a framed photograph, a poster, a
+        # book jacket or a screen behind someone refuses nothing.
+        import re
+        pictures = re.compile(r"\b(framed|poster|book jacket|on the screen)\b", re.I)
+        for url, entry in overrides.NOT_A_PORTRAIT.items():
+            self.assertIsNone(pictures.search(entry[1]), url)
 
 
 class TestTheStalenessCheckSeesEveryRoute(unittest.TestCase):

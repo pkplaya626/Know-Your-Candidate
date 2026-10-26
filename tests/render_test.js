@@ -7719,6 +7719,34 @@ async function testLegislatures() {
         check("a portrait that fails to load takes its credit with it",
           !card.querySelector(".leg-photo") && !card.querySelector(".leg-credit"));
       }
+      /* Michigan's House Democrats' files load as one pixel and fire no
+       * error: the card drew an empty 56x70 box under "Photo: Michigan House
+       * Democrats". A load whose naturalWidth is 1 or less is a failed load
+       * (KYC's one rule, kyc.js isPixel), and the credit goes with it; a
+       * photograph that loads at its size stays. */
+      const twoCards = credited.slice(1, 3);
+      if (twoCards.length === 2) {
+        const cardOf = (p) => {
+          const id = Object.keys(state.chambers.upper.members).find((k) =>
+            state.chambers.upper.members[k].includes(p));
+          pick(D, window, id);
+          return [...D.querySelectorAll("#legPanelBody .leg-person")].find((el) =>
+            el.textContent.includes(p.name));
+        };
+        const loads = (img, width) => {
+          Object.defineProperty(img, "naturalWidth", { value: width, configurable: true });
+          img.dispatchEvent(new window.Event("load"));
+        };
+        let card = cardOf(twoCards[0]);
+        loads(card.querySelector(".leg-photo"), 400);
+        check("a photograph that loads at its size stays, credited",
+          !!card.querySelector(".leg-photo") && !!card.querySelector(".leg-credit"));
+        card = cardOf(twoCards[1]);
+        loads(card.querySelector(".leg-photo"), 1);
+        check("a portrait that loads as a pixel is dropped with its credit",
+          !card.querySelector(".leg-photo") && !card.querySelector(".leg-credit"),
+          card.innerHTML.slice(0, 300));
+      }
       /* An Open States portrait the legislature's own host serves is
        * credited to it as well: Vermont's two-member districts showed one
        * credited and one not, from the same folder. */

@@ -253,21 +253,55 @@ def secure(url):
     return "https://" + url[len("http://"):] if url.startswith("http://") else url
 
 
+#: ``check_portrait``'s answer for an address that serves a body but no
+#: portrait: a page in the image's place, or an image of one pixel.
+NOT_AN_IMAGE = "notImage"
+
+# Enough of a body to tell an image from a page and read a JPEG's size
+# past its EXIF block.
+_SNIFF_BYTES = 65536
+
+
+def portrait_body(data):
+    """Why the first bytes of a body served for a portrait are not one, or
+    ``""``: not an image at all (a page answering 200 in the file's place,
+    rule 52's soft 200 - Connecticut's House Republicans' site answers each
+    image address with an HTML page), or an image of one pixel (Michigan's
+    House Democrats' files load as 1x1, so a card drew an empty box under
+    its credit, and no error handler fired)."""
+    from .portraits import image_size
+    data = data or b""
+    # AVIF counts: Virginia's House serves its delegates' photographs as
+    # AVIF under "image/jpeg", and every browser the site supports draws it.
+    if not (data[:3] == b"\xff\xd8\xff" or data[:8] == b"\x89PNG\r\n\x1a\n"
+            or data[:6] in (b"GIF87a", b"GIF89a")
+            or (data[:4] == b"RIFF" and data[8:12] == b"WEBP")
+            or (data[4:8] == b"ftyp" and data[8:12] in (b"avif", b"avis"))):
+        return "not an image"
+    size = image_size(data)
+    if size and min(size) <= 1:
+        return f"an image of {size[0]}x{size[1]} pixels"
+    return ""
+
+
 def check_portrait(url, timeout=25):
-    """``True`` the address serves an image, ``False`` it definitely does
-    not, ``None`` could not tell - ``portraits.check_image``'s tristate, made
-    stricter for hosts this project does not know: only a 404 or 410 (how
-    Kansas answers for its missing portraits) is ``False``. A 200 that is
-    not an image, a refusal (401, 403: a bot wall), a throttle, a server
-    error or a failed connection concludes nothing (rule 8):
-    Texas's host refused every connection from one machine and served the
-    same files to another.
+    """``True`` the address serves a portrait, ``False`` it definitely does
+    not exist, :data:`NOT_AN_IMAGE` it answers with a body that is no
+    portrait (:func:`portrait_body`), ``None`` could not tell -
+    ``portraits.check_image``'s tristate, made stricter for hosts this
+    project does not know: only a 404 or 410 (how Kansas answers for its
+    missing portraits) is ``False``. A refusal (401, 403: a bot wall), a
+    throttle, a server error or a failed connection concludes nothing
+    (rule 8): Texas's host refused every connection from one machine and
+    served the same files to another. A 200 is read from its first bytes,
+    as rule 52 reads a zip: a page where the image should be, or a one-pixel
+    image, is refused, never shown as a portrait; the next check asks again.
 
     It asks with GET, never HEAD: Massachusetts answers HEAD for every
     member's portrait with 404 and GET with the image, and South Dakota
     answers HEAD with an HTML page where GET redirects to the photograph.
     The first run asked HEAD first and called 211 working portraits
-    missing. Only the headers are read."""
+    missing. Only the first :data:`_SNIFF_BYTES` are read."""
     import urllib.error
 
     from .portraits import _UA
@@ -276,31 +310,39 @@ def check_portrait(url, timeout=25):
         with urllib.request.urlopen(req, timeout=timeout) as response:
             if response.status != 200:
                 return None
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            # A page where an image should be may be a soft 404 or a bot
-            # wall's "Request Rejected" with status 200 (rule 52): it
-            # concludes nothing.
-            return True if ctype.startswith("image") else None
+            data = response.read(_SNIFF_BYTES)
+            if (response.headers.get("Content-Encoding") or "").lower() == "gzip":
+                import zlib
+                data = zlib.decompressobj(31).decompress(data)
+            return NOT_AN_IMAGE if portrait_body(data) else True
     except urllib.error.HTTPError as exc:
         return False if exc.code in (404, 410) else None
     except Exception:
         return None
 
 
-def check_images(by_state, previous=None, today=None, check=None, pause=0.5, workers=8):
-    """Mark each record's portrait ``imageStatus`` "ok" or "broken", the
-    tristate way (``check_portrait``, rule 8): only a definite answer - a
-    404 or 410 - is "broken", and a throttled,
+def check_images(by_state, previous=None, today=None, check=None, pause=0.5, workers=8,
+                 report=None):
+    """Mark each record's portrait ``imageStatus`` "ok", "broken" or
+    "notImage", the tristate way (``check_portrait``, rule 8): only a
+    definite answer - a 404 or 410 - is "broken", a body that is no portrait
+    (a page, a one-pixel image) "notImage", and a throttled,
     refused or timed-out request leaves the last answer standing, or none.
+    *report*, when given, receives ``unanswered``: ``{host: n}`` for the
+    addresses whose check concluded nothing - a host that did not answer
+    is reported, never concluded from (ctsenaterepublicans.com gave no
+    connection to one reader and its files to another).
 
     Kansas's member pages name portraits the legislature no longer serves
     (123 of 165 failed to load, audit 2026-10-17, STATEGOV-03); the page
     drops a "broken" one rather than drawing nothing in its place. An answer
     younger than ``IMAGE_RECHECK_DAYS`` is carried over from *previous* (the
-    last cache) for the same person and address. Requests are spread over
-    hosts, one at a time to each, *pause* seconds apart.
+    last cache) for the same person and address - except an "ok" given
+    before the body was read (``imageBody``) and a "notImage", which are
+    asked again. Requests
+    are spread over hosts, one at a time to each, *pause* seconds apart.
 
-    Returns ``{code: {"ok": n, "broken": n, "unknown": n}}``."""
+    Returns ``{code: {"ok": n, "broken": n, "notImage": n, "unknown": n}}``."""
     import concurrent.futures
     import urllib.parse
 
@@ -311,18 +353,25 @@ def check_images(by_state, previous=None, today=None, check=None, pause=0.5, wor
     for records in ((previous or {}).get("states") or {}).values():
         for r in records:
             if r.get("imageStatus") and r.get("imageChecked"):
-                before[(r["id"], r.get("image"))] = (r["imageStatus"], r["imageChecked"])
+                before[(r["id"], r.get("image"))] = (r["imageStatus"], r["imageChecked"],
+                                                     bool(r.get("imageBody")))
     todo = {}
     for records in by_state.values():
         for r in records:
             url = r.get("image")
             if not url or search_thumbnail(url):
                 continue
-            status, checked = before.get((r["id"], url), (None, None))
+            status, checked, body = before.get((r["id"], url), (None, None, False))
             if status:
                 r["imageStatus"], r["imageChecked"] = status, checked
+                if body:
+                    r["imageBody"] = True
                 age = (today - datetime.date.fromisoformat(checked)).days
-                if age < IMAGE_RECHECK_DAYS:
+                # An "ok" from the headers alone is asked again: a page or a
+                # pixel answered 200 with an image's address (rule 52). So is
+                # "notImage" on every run: a bot wall's page in a file's place
+                # passes, and the file is shown again once it is served.
+                if age < IMAGE_RECHECK_DAYS and (status == "broken" or (status == "ok" and body)):
                     continue
             todo.setdefault(secure(url), []).append(r)
     by_host = {}
@@ -341,16 +390,24 @@ def check_images(by_state, previous=None, today=None, check=None, pause=0.5, wor
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
         for result in pool.map(run, [by_host[h] for h in sorted(by_host)]):
             answers.update(result)
+    unanswered = {}
     for url, records in todo.items():
         verdict = answers.get(url)
         if verdict is None:
-            continue                    # could not tell: the last answer stands
+            # Could not tell: the last answer stands, and the host is said.
+            host = urllib.parse.urlsplit(url).hostname or ""
+            unanswered[host] = unanswered.get(host, 0) + 1
+            continue
         for r in records:
-            r["imageStatus"] = "ok" if verdict else "broken"
+            r["imageStatus"] = ("notImage" if verdict == NOT_AN_IMAGE
+                                else "ok" if verdict else "broken")
             r["imageChecked"] = today.isoformat()
+            r["imageBody"] = True
+    if report is not None:
+        report["unanswered"] = dict(sorted(unanswered.items()))
     counts = {}
     for code, records in by_state.items():
-        c = counts.setdefault(code, {"ok": 0, "broken": 0, "unknown": 0})
+        c = counts.setdefault(code, {"ok": 0, "broken": 0, "notImage": 0, "unknown": 0})
         for r in records:
             if r.get("image") and not search_thumbnail(r["image"]):
                 c[r.get("imageStatus") or "unknown"] += 1

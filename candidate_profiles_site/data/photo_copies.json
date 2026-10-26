@@ -6852,16 +6852,6 @@
    "sha256": "df8d6c896e5eb94955eb7eeaf246d07453cfa6197f4477383e44008810ff09d4",
    "width": 4846
   },
-  "https://billstatus.ls.state.ms.us/members/house/boyd_(37).jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:MS:ocd-person/95d25b69-8eb7-44cd-a789-54351e17970c"
-   ]
-  },
   "https://billstatus.ls.state.ms.us/members/house/burnett.jpg": {
    "bytes": 1166988,
    "copy": {
@@ -7490,16 +7480,6 @@
    ],
    "sha256": "3494b193a38e1ed63113323f5489fcfa7edaac51723e50ec5f29ec13b0636d5a",
    "width": 4846
-  },
-  "https://billstatus.ls.state.ms.us/members/house/ford.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:MS:ocd-person/7a9174a7-1301-407a-8c77-5f70e70fde92"
-   ]
   },
   "https://billstatus.ls.state.ms.us/members/house/ford_(73rd).jpg": {
    "bytes": 1173209,
@@ -32341,6 +32321,21 @@
    ],
    "width": 500
   },
+  "https://i0.wp.com/atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg?w=500&ssl=1": {
+   "bytes": 23622,
+   "etag": "\"8abc759a86d4ad3f\"",
+   "gone": 0,
+   "height": 749,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:28:13 GMT",
+   "read": "2026-10-26",
+   "records": [
+    "officer:SD:ag:Marty Jackley"
+   ],
+   "width": 500
+  },
   "https://i0.wp.com/nlga.us/wp-content/uploads/2025/04/Burt-Jones-scaled-e1682542209640.jpeg?resize=150%2C150&ssl=1": {
    "bytes": 2084,
    "etag": "\"e0df8b63d65de363\"",
@@ -33097,6 +33092,21 @@
    "read": "2026-10-25",
    "records": [
     "person:FEC_H6MI11191"
+   ],
+   "width": 500
+  },
+  "https://i0.wp.com/www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg?w=500&ssl=1": {
+   "bytes": 19272,
+   "etag": "\"05d60165b8067795\"",
+   "gone": 0,
+   "height": 590,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 14:27:58 GMT",
+   "read": "2026-10-26",
+   "records": [
+    "officer:PA:ag:Dave Sunday"
    ],
    "width": 500
   },
@@ -36889,16 +36899,6 @@
    ],
    "sha256": "517ffffbc14efc478dc61793bb404fd7f0f3c471e59c808920ec1ab47a5eecdb",
    "width": 3000
-  },
-  "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMlJUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--c083d9d0c61aec511c97d0802cd5873416f901d9/Mauro,%20Tisha.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CO:ocd-person/851b5f31-0694-4674-a3b8-468b6eb1f0a8"
-   ]
   },
   "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBMmRUQXc9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--7e3263a1638a76c8a5732293d1ea8f844d2e9d25/Winter,Ty.jpg": {
    "bytes": 37186,
@@ -70848,15 +70848,6 @@
    ],
    "width": 429
   },
-  "https://www.arkleg.state.ar.us/assembly/2011/Member%20Pictures/Steele_t.jpg": {
-   "error": "not an image (text/html)",
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:AR:ocd-person/be626067-db01-4481-b096-d2792ff189c8"
-   ]
-  },
   "https://www.assembly.ca.gov/sites/assembly.ca.gov/files/memberphotos/ad14_header.jpg": {
    "bytes": 31207,
    "etag": "\"79e7-5eac3e3a8964b\"",
@@ -71015,6 +71006,20 @@
     "candidate:AZ:lt:Lisa Castillo"
    ],
    "width": 752
+  },
+  "https://www.azcleanelections.gov/Custom/Picture/2640": {
+   "bytes": 61013,
+   "gone": 0,
+   "height": 894,
+   "kinds": [
+    "candidate"
+   ],
+   "lastModified": "Wed, 12 Aug 2026 06:11:00 GMT",
+   "read": "2026-10-26",
+   "records": [
+    "candidate:AZ:lt:John Giles"
+   ],
+   "width": 715
   },
   "https://www.azcleanelections.gov/Custom/Picture/2642": {
    "bytes": 72487,
@@ -76521,129 +76526,6 @@
     "legislator:RI:ocd-person/4f6ac85b-f69f-4916-beaf-a30087ba1214"
    ],
    "width": 959
-  },
-  "https://www.cthousegop.com/bolinsky/wp-content/uploads/sites/8/2016/12/Bolinsky-Bio-Web-Sized.jpg": {
-   "error": "not an image (text/html)",
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/5af50689-4e90-49b1-8544-7a00048dad99"
-   ]
-  },
-  "https://www.cthousegop.com/candelora/wp-content/uploads/sites/12/2022/02/Candelora-2022-Bio-Photo-Web.jpg": {
-   "error": "not an image (text/html)",
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/1d02baaa-ab25-4607-b33f-40948893f928"
-   ]
-  },
-  "https://www.cthousegop.com/carney/wp-content/uploads/sites/13/2016/11/Carney-2017-Web-Bio-Pict-216x300.jpg": {
-   "error": "not an image (text/html)",
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/79d4059c-5faa-443f-a842-7b494ea2d57e"
-   ]
-  },
-  "https://www.cthousegop.com/case/wp-content/uploads/sites/15/2016/11/Case-2017-Web-Bio-Pict.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/fc3cb4e1-f784-46ac-9d54-1dd44cb817b0"
-   ]
-  },
-  "https://www.cthousegop.com/dubitsky/wp-content/uploads/sites/23/2019/01/2-Dubitsky-headshot-cropped-v2-050318-5673-265x300.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/2342cde8-078f-4dd8-8879-f9fdaa036a94"
-   ]
-  },
-  "https://www.cthousegop.com/fishbein/wp-content/uploads/sites/28/2019/01/sm_Fishbein-headshot-020117-7754.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/02ce0fa3-ac25-42dd-9f5e-ee44b7e9d542"
-   ]
-  },
-  "https://www.cthousegop.com/haines/wp-content/uploads/sites/77/2021/12/BD3A1188-sized-232x300.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/02cd12d5-6a88-4834-b9b5-11fb491f6b4b"
-   ]
-  },
-  "https://www.cthousegop.com/hall/wp-content/uploads/sites/34/2016/11/hall-bio-pict-big.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/5e47f657-ab56-4673-bebb-5a7c1a0410db"
-   ]
-  },
-  "https://www.cthousegop.com/odea/wp-content/uploads/sites/46/2018/05/ODea-Headshot-683x1024.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/03642345-7acb-4294-91b5-84dcc3c18cc7"
-   ]
-  },
-  "https://www.cthousegop.com/piscopo/wp-content/uploads/sites/52/2016/11/Piscopo-Bio-Pict-Web.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/e7f7ad52-69a8-4306-8dfe-02368f74d75b"
-   ]
-  },
-  "https://www.cthousegop.com/polletta/wp-content/uploads/sites/74/2017/04/Polletta-Web-Bio.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/df318645-047c-46a5-be61-682a7272e6b6"
-   ]
-  },
-  "https://www.cthousegop.com/vail/wp-content/uploads/sites/66/2016/11/Vail-Bio-Web.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/ffa361d0-7471-450e-aee8-cb0c32ee2742"
-   ]
-  },
-  "https://www.cthousegop.com/yaccarino/wp-content/uploads/sites/70/2020/11/Yaccarino-Headshot-240x300.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/12835342-bb95-428a-ace3-78c51c3e8443"
-   ]
-  },
-  "https://www.cthousegop.com/zawistowski/wp-content/uploads/sites/71/2016/11/Zawistowski-Bio-Web.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/b57c3599-c0b0-4fd3-a48c-2bfd32d95071"
-   ]
-  },
-  "https://www.cthousegop.com/zupkus/wp-content/uploads/sites/73/2016/11/Zupkus_Bio_Web.jpg": {
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:CT:ocd-person/cddc0b8f-51e5-4ed1-af05-41de718801f3"
-   ]
   },
   "https://www.doj.state.or.us/wp-content/uploads/2024/12/Rayfield_400x600x96_4-17x6-25-250x375.jpg": {
    "bytes": 14942,
@@ -82899,16 +82781,6 @@
    ],
    "width": 640
   },
-  "https://www.kslegislature.gov/static/li_pics/rep_amyx_mike_1.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:KS:ocd-person/05204bb3-1917-4f12-848e-b83f68f5fddf"
-   ]
-  },
   "https://www.kslegislature.gov/static/li_pics/rep_boatman_abi_1.jpg": {
    "bytes": 14012,
    "etag": "\"69c6b9f1-5018\"",
@@ -82923,46 +82795,6 @@
     "legislator:KS:ocd-person/052c229e-ad06-4b61-abec-4e64858b3a3b"
    ],
    "width": 205
-  },
-  "https://www.kslegislature.gov/static/li_pics/rep_stogsdill_jerry_1.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:KS:ocd-person/4a358caf-0fad-4d45-8fa7-3c5ef062a544"
-   ]
-  },
-  "https://www.kslegislature.gov/static/li_pics/rep_williams_kristey_1.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:KS:ocd-person/81803637-3bf0-4bbe-9ae4-7724488955b7"
-   ]
-  },
-  "https://www.kslegislature.gov/static/li_pics/sen_masterson_ty_1.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:KS:ocd-person/b4774ff4-de16-4716-8956-65ecc740eb8c"
-   ]
-  },
-  "https://www.kslegislature.gov/static/li_pics/sen_sykes_dinah_1.jpg": {
-   "gone": 1,
-   "kinds": [
-    "legislator"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "legislator:KS:ocd-person/549c712e-1cc1-4ca7-9ef7-b09bb36d7229"
-   ]
   },
   "https://www.kycourts.gov/Courts/Supreme-Court/PublishingImages/Debra_Hembree_Lambert_Portrait.jpg": {
    "bytes": 131844,
@@ -83909,15 +83741,6 @@
    ],
    "sha256": "425f3ff2d24e9a212caf6948fc8e1795112f1277d080291101164a3275cc0eb2",
    "width": 1838
-  },
-  "https://www.legis.ga.gov/api/images/default-source/portraits/bentley-patty-811.jpg": {
-   "error": "not an image (application/octet-stream)",
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:GA:ocd-person/af51c2db-8871-45a4-803d-314fa2b9d18d"
-   ]
   },
   "https://www.legis.ga.gov/api/images/default-source/portraits/blackmon-shaw-1878.jpg": {
    "bytes": 451925,
@@ -88144,7 +87967,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "records": [
     "legislator:GA:ocd-person/6f986b42-14f6-4147-9466-c49294331db9"
    ],
@@ -89436,7 +89259,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "records": [
     "legislator:GA:ocd-person/4b162447-89a7-4ffc-acbf-617e1ad87e2a"
    ],
@@ -120158,15 +119981,6 @@
    ],
    "width": 150
   },
-  "https://www.southamptontownny.gov/ImageRepository/Document?documentID=19829": {
-   "error": "not an image (no type)",
-   "kinds": [
-    "legislator"
-   ],
-   "records": [
-    "legislator:NY:ocd-person/60b6c2ff-a1ce-46a1-b484-affd805bc297"
-   ]
-  },
   "https://www.supremecourt.ohio.gov/assets/inc/timthumb.php?w=350&src=/docs/images/justices/HawkinsDanielR.jpg": {
    "bytes": 24702,
    "gone": 0,
@@ -120264,6 +120078,21 @@
     "officer:TX:ag:Ken Paxton"
    ],
    "width": 262
+  },
+  "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti/_jcr_content/contentFullWidth/tn_textandimage/image.img.jpg/1740766397785.jpg": {
+   "bytes": 82283,
+   "etag": "\"1416b-604cc9f9d7580\"",
+   "gone": 0,
+   "height": 400,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Thu, 07 Sep 2023 22:45:58 GMT",
+   "read": "2026-10-26",
+   "records": [
+    "officer:TN:ag:Jonathan Skrmetti"
+   ],
+   "width": 400
   },
   "https://www.txcourts.gov/media/1460028/justice-john-p-devine-webjpg.jpg": {
    "bytes": 41194,
@@ -123686,43 +123515,6 @@
    "sha256": "45a569e4160d95883583cabe75eae8f0ac5bfa64a779336c190361b499de9a4d",
    "width": 1024
   },
-  "https://www2.housedems.ct.gov/Elliott/images/Elliott_HS.jpg": {
-   "bytes": 2978186,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 14461,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "d2532371adc4c66ed910.jpg",
-    "for": [
-     "legislator:CT:ocd-person/57461c01-e706-4ce5-9dfd-8982e1f29021"
-    ],
-    "from": [
-     3567,
-     2378
-    ],
-    "height": 210,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "d2532371adc4c66ed910a6c2f8a23e8a35432e74ee2086b59a328194f987ec50",
-    "width": 315
-   },
-   "etag": "\"804ed0331d0d21:0\"",
-   "gone": 0,
-   "height": 2378,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Thu, 18 May 2017 18:04:33 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/57461c01-e706-4ce5-9dfd-8982e1f29021"
-   ],
-   "sha256": "16d27930357ce2a1a817e88f9eea42b79148a95135999fe904df9a36645ff020",
-   "width": 3567
-  },
   "https://www2.housedems.ct.gov/Exum/images/Exum_HS.jpg": {
    "bytes": 3863829,
    "copy": {
@@ -123871,43 +123663,6 @@
    "sha256": "2e384d32df80ac2cbe286e16724d65e2d5f63c41e9ac274552a9eec9a83720b5",
    "width": 2321
   },
-  "https://www2.housedems.ct.gov/Garibay/images/Garibay_HS.jpg": {
-   "bytes": 3162453,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 16957,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "f9e09d935f1751dc8c32.jpg",
-    "for": [
-     "legislator:CT:ocd-person/fee3a7d8-7e51-4c5a-af29-190694152ccc"
-    ],
-    "from": [
-     5472,
-     3648
-    ],
-    "height": 210,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "f9e09d935f1751dc8c32161c5a7aaa1b765c09d6e49ef6c527c717695a771016",
-    "width": 315
-   },
-   "etag": "\"8043c17aacd0db1:0\"",
-   "gone": 0,
-   "height": 3648,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Thu, 29 May 2025 15:15:15 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/fee3a7d8-7e51-4c5a-af29-190694152ccc"
-   ],
-   "sha256": "994368c8ff57a0b332e1fabf02444f3ea11bc99688c61032788ea9fbf1760ebb",
-   "width": 5472
-  },
   "https://www2.housedems.ct.gov/Gibson/images/Gibson_HS.jpg": {
    "bytes": 1337359,
    "copy": {
@@ -124018,80 +123773,6 @@
    ],
    "sha256": "8ebf37f806f5ee6103775115522014adde9a8d7673c812bdabac9a0d2a9e2e72",
    "width": 1500
-  },
-  "https://www2.housedems.ct.gov/Gonzalez/images/Gonzalez_HS.jpg": {
-   "bytes": 1587570,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 13276,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "f1b264c55631c3e59923.jpg",
-    "for": [
-     "legislator:CT:ocd-person/57900db1-ade5-4107-8025-a0c664f41a32"
-    ],
-    "from": [
-     2592,
-     3888
-    ],
-    "height": 252,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "f1b264c55631c3e59923ab08d102d7da70a6d7d59a81497811f2cc62f7490837",
-    "width": 168
-   },
-   "etag": "\"e2d715292cccd1:0\"",
-   "gone": 0,
-   "height": 3888,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Tue, 27 Mar 2012 15:13:27 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/57900db1-ade5-4107-8025-a0c664f41a32"
-   ],
-   "sha256": "8be5e83b48b6dc767c5cf7a022bb71e3410482b6834c9078c8d22e0222a33d21",
-   "width": 2592
-  },
-  "https://www2.housedems.ct.gov/Gresko/images/gresko_HS.jpg": {
-   "bytes": 2824164,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 8841,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "6a4c06eeb80e62a471c1.jpg",
-    "for": [
-     "legislator:CT:ocd-person/06bb6ad8-3238-4ba7-8f83-47507541a300"
-    ],
-    "from": [
-     2240,
-     3360
-    ],
-    "height": 252,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "6a4c06eeb80e62a471c1e19341c53ad19422dbd581a5f50dd8ff805f830c8d7e",
-    "width": 168
-   },
-   "etag": "\"e4ca789882d61:0\"",
-   "gone": 0,
-   "height": 3360,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Thu, 03 Sep 2020 15:40:23 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/06bb6ad8-3238-4ba7-8f83-47507541a300"
-   ],
-   "sha256": "6cadc1d068fe7adc3e3f423f5b9d6b8d60bfb16fbda7a15bea3479a32b4797cf",
-   "width": 2240
   },
   "https://www2.housedems.ct.gov/Hall/images/Hall_HS.jpg": {
    "bytes": 4663285,
@@ -124574,43 +124255,6 @@
    "sha256": "fd95504ff81ac384c53a95307b13d8502e87b8baf4b4f0aeb117077a8471a6f4",
    "width": 5760
   },
-  "https://www2.housedems.ct.gov/MorrinBello/images/MorrinBello_HS.jpg": {
-   "bytes": 3657425,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 18305,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "440c80c0be02d6eb5d92.jpg",
-    "for": [
-     "legislator:CT:ocd-person/ff1c4d90-5cc3-4ff9-8f31-454d03803816"
-    ],
-    "from": [
-     3360,
-     2240
-    ],
-    "height": 210,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "440c80c0be02d6eb5d9212f9fdf335c495c653ad2439e2a64e770716061c2203",
-    "width": 315
-   },
-   "etag": "\"4befcb45206bda1:0\"",
-   "gone": 0,
-   "height": 2240,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Thu, 29 Feb 2024 15:02:11 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/ff1c4d90-5cc3-4ff9-8f31-454d03803816"
-   ],
-   "sha256": "375b5c0b63abec6ee14a937e586e3e0e97a622da5111fd524e1a6aad508afab9",
-   "width": 3360
-  },
   "https://www2.housedems.ct.gov/Mushinsky/images/Mushinsky_HS.jpg": {
    "bytes": 548917,
    "copy": {
@@ -125017,43 +124661,6 @@
    ],
    "sha256": "7a12877bed8a300c537f54e5378d0281186ec212e1c808851891114ca4aa79e6",
    "width": 1034
-  },
-  "https://www2.housedems.ct.gov/SanchezM/images/SanchezM_HS.jpg": {
-   "bytes": 3545424,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 16121,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "5a28322dc33d831b1b69.jpg",
-    "for": [
-     "legislator:CT:ocd-person/140d2d97-aae9-433a-b012-ce3775aa81a8"
-    ],
-    "from": [
-     3360,
-     2240
-    ],
-    "height": 210,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "5a28322dc33d831b1b6990ef6d03af0169a42395346bd81d159b5c9ba411358d",
-    "width": 315
-   },
-   "etag": "\"43113c41866bd81:0\"",
-   "gone": 0,
-   "height": 2240,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Thu, 19 May 2022 13:42:17 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/140d2d97-aae9-433a-b012-ce3775aa81a8"
-   ],
-   "sha256": "d874d53bee4a566d7fc4e2a667b718cfbdc77e51df8452f20bee60a6688ff0b5",
-   "width": 3360
   },
   "https://www2.housedems.ct.gov/SantiagoH/images/SantiagoH_HS.jpg": {
    "bytes": 9229614,
