@@ -1045,7 +1045,10 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
              "photos": {}}
     manifest = photocopies.load(root)
     hosted = manifest.setdefault("hosted", {})
-    keep = {}
+    # A file hosted by a person's choice (overrides.CANDIDATE_PHOTOS) is not
+    # this reader's to rewrite or remove.
+    chosen = {name for name in photocopies.curated_names() if name in hosted}
+    keep = {name: hosted[name] for name in chosen}
     for key, rec in sorted(photos.items()):
         data = rec.pop("_data", None)
         name = rec["photo"][len("photos/"):]
@@ -1076,6 +1079,8 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
             problems.append(f"{key}: photograph {'changed' if was.get('photo') else 'added'}: "
                             f"{rec['photo']} (from {rec['page']}); look at it")
     for name, entry in keep.items():
+        if name in chosen:
+            continue
         entry["for"] = sorted({k for k, rec in cache["photos"].items()
                                if rec["photo"] == "photos/" + name})
         # A copy made for someone this file no longer shows is not theirs.

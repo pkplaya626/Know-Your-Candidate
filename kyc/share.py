@@ -362,8 +362,9 @@ def og_photo(person, host=None):
     """The share image of *person*: a photograph that reached the profile
     by a sourced route (rule 24), or None for the site's card. Only the
     sizes of the article's own file (``photoSet``, rule 42), the House
-    Clerk's portrait, or a campaign's or a state legislature's own portrait
-    with its credit - never a URL from a fallback chain. A heavy portrait
+    Clerk's portrait, or a campaign's, a state legislature's or a person's
+    chosen portrait (``overrides.CANDIDATE_PHOTOS``) with its credit - never
+    a URL from a fallback chain. A heavy portrait
     the site made a smaller copy of (rule 101) is shared as that copy, at
     its absolute address on the site's one hostname (rule 21)."""
     sizes = [s for s in person.get("photoSet") or []
@@ -374,11 +375,19 @@ def og_photo(person, host=None):
         return url
     url = person.get("photo_url") or ""
     source = person.get("photoSource")
+    from .photocopies import is_hosted
+    if source == "curated" and is_hosted(url) and person.get("photoCredit"):
+        # An office's photograph this site hosts unmodified, a person's
+        # choice (the Tennessee General Assembly's, drawn on its page with
+        # no address of its own): at its address on the site's hostname.
+        copy = person.get("photoCopy") or {}
+        shown = copy["src"] if copy.get("of") == url and copy.get("src") else url
+        return f"https://{host}/{shown}" if host else None
     if not _https(url) or "Special:" in url:
         return None
     if source in ("clerk.house.gov", "cross-link") and urlparse(url).hostname == "clerk.house.gov":
         return url
-    if source in ("campaign-site", "state-legislature") and person.get("photoCredit"):
+    if source in ("campaign-site", "state-legislature", "curated") and person.get("photoCredit"):
         copy = person.get("photoCopy") or {}
         if host and copy.get("of") == url and copy.get("src"):
             return f"https://{host}/{copy['src']}"

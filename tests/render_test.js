@@ -2829,31 +2829,69 @@ async function testStates() {
 
   /* A list from a county or a commission is named as what it is and is
    * never "Certified by" it; the page says why the state's own was not used
-   * (PR #109 review: "Certified by the Clark County Registrar of Voters"). */
-  const nvGov = await buildPage("states/nv.html");
-  suite("states/nv.html — a county's notice, named as one; names and parties in words", () => {
-    const gov = nvGov.D.getElementById("state-government");
-    const item = nvGov.window.kycStateGov.states.NV.ballot2026.offices.governor;
-    const block = gov.querySelector(".gov-candidates");
+   * (PR #109 review: "Certified by the Clark County Registrar of Voters").
+   * Arkansas's Secretary of State publishes no list of the November
+   * candidates, so Pulaski County's notice of election stands. */
+  const arGov = await buildPage("states/ar.html");
+  suite("states/ar.html — a county's notice, named as one; parties in words", () => {
+    const gov = arGov.D.getElementById("state-government");
+    const block = [...gov.querySelectorAll(".gov-candidates")].find((b) =>
+      /Pulaski County/.test((b.querySelector(".gov-candidates-source") || {}).textContent || ""));
     check("credited as the county's notice, never 'Certified by'",
-      /Source: the Clark County Registrar of Voters’ notice of general election \(read /
+      !!block && /Source: the Pulaski County Board of Election Commissioners’ notice of election \(read /
         .test(block.querySelector(".gov-candidates-source").textContent) &&
         !/Certified by/.test(gov.textContent) &&
         ![...gov.querySelectorAll(".gov-candidates-source, .gov-holder-status")]
-          .some((p) => /certified/i.test(p.textContent)), block.textContent);
+          .some((p) => /certified/i.test(p.textContent)), block && block.textContent);
     check("says why the state's own list was not used",
-      /^Not the state’s own list\. The Secretary of State's own certified list could not be read/
+      !!block && /^Not the state’s own list\. The Secretary of State publishes no statewide list/
         .test((block.querySelector(".gov-candidates-uncertified") || {}).textContent || ""));
-    const names = [...block.querySelectorAll(".gov-candidate-name")];
+    check("a party the list abbreviates is spelled out",
+      !!block && !/\((REP|DEM|LIB)\)/.test(gov.textContent) &&
+        /\((Republican|Democratic)\)/.test(block.textContent), block && block.textContent);
+  });
+
+  /* Nevada's lists were Clark County's notice while nvsos.gov refused every
+   * script; the Secretary of State's own certified list, read by hand from
+   * the office's page on 2026-10-25 (rule 91), is the source now, and the
+   * county's stands for nothing. */
+  const nvGov = await buildPage("states/nv.html");
+  suite("states/nv.html — the Secretary of State's certified list; names and parties as it prints them", () => {
+    const gov = nvGov.D.getElementById("state-government");
+    const offices = nvGov.window.kycStateGov.states.NV.ballot2026.offices;
+    const blocks = [...gov.querySelectorAll(".gov-candidates")];
+    const sources = blocks.map((b) => (b.querySelector(".gov-candidates-source") || {}).textContent || "");
+    check("every office's list is the Secretary of State's certified list",
+      blocks.length === 4 && sources.every((t) =>
+        /Source: the Nevada Secretary of State’s certified list of candidates \(read /.test(t)) &&
+        [...gov.querySelectorAll(".gov-candidates-source a")].every((a) =>
+          /^https:\/\/www\.nvsos\.gov\//.test(a.getAttribute("href"))), sources.join(" | "));
+    check("no county stands in for it, and nothing says it is not the state's",
+      !gov.querySelector(".gov-candidates-uncertified") && !/Clark County/.test(gov.textContent),
+      gov.textContent.slice(0, 400));
+    const block = blocks[0];
+    const names = block ? [...block.querySelectorAll(".gov-candidate-name")] : [];
     check("names first name first, the list's own form on hover (rule 77)",
       names.length >= 2 && names.every((n) => !/,/.test(n.textContent)) &&
         names.some((n) => /^The list prints: [^,]+, /.test(n.getAttribute("title") || "")),
       names.map((n) => n.textContent + " / " + n.getAttribute("title")).join(" | "));
     check("the page says how names are written",
-      /Names are written first name first, in ordinary capitals/.test(block.textContent));
-    check("a party the list abbreviates is spelled out",
-      item.candidates.candidates.some((c) => c.party === "No Political Party") &&
-        !/\((IAP|LPN|NPP|DEM|REP)\)/.test(gov.textContent), block.textContent);
+      !!block && /Names are written first name first, in ordinary capitals/.test(block.textContent));
+    check("each party in the list's own words, never a code",
+      offices.governor.candidates.candidates.some((c) => c.party === "No Political Party") &&
+        offices.lt.candidates.candidates.some((c) => c.party === "Independent American Party") &&
+        offices.sos.candidates.candidates.some((c) => c.party === "Libertarian Party of Nevada") &&
+        !/\((IAP|LPN|NPP|DEM|REP)\)/.test(gov.textContent), gov.textContent.slice(0, 400));
+    // PR #140 review: "Nicole Jeanette Cannizzaro (Democratic Party)" stood
+    // under "Aaron Ford (Democratic)"; the major parties read as one word.
+    check("the major parties in the one word the holder lines use",
+      offices.ag.candidates.candidates.some((c) => c.party === "Democratic") &&
+        !/\((Democratic|Republican) Party\)/.test(gov.textContent), gov.textContent.slice(0, 400));
+    const lines = [...gov.querySelectorAll(".gov-holder-status")].map((p) => p.textContent);
+    check("the holder lines cite the certified list",
+      lines.some((t) => /^Joe Lombardo is among the candidates for this office \(the Nevada Secretary of State’s certified list of candidates\)/.test(t)) &&
+        lines.some((t) => /^Open seat: Aaron Ford is not among the candidates for this office \(the Nevada Secretary of State’s certified list of candidates\)/.test(t)),
+      lines.join(" | "));
   });
 
   const flList = await buildPage("states/fl.html");
@@ -3204,6 +3242,15 @@ async function testStates() {
     check("Nevada's October 20 is the last day to register and still be mailed a ballot",
       !!nvMail && /October 20, 2026/.test(nvMail.textContent) && /mailed a ballot/.test(nvMail.textContent) &&
         /Today/.test(nvMail.textContent), nvMail && nvMail.textContent);
+    // PR #140 review: nvsos.gov's early-voting words were read by hand on
+    // 2026-10-25, not on the record's read and check days.
+    const nvNote = (nvVote.D.querySelector("#voting") || {}).textContent || "";
+    check("Nevada's note gives the day nvsos.gov was read",
+      /read on 2026-10-17 and checked again on 2026-10-18 \(nvsos\.gov read on 2026-10-25\);/.test(nvNote),
+      nvNote.slice(nvNote.indexOf("Each date"), nvNote.indexOf("Each date") + 200));
+    const maNote = (maVote.D.querySelector("#voting") || {}).textContent || "";
+    check("a state with no later reading says nothing more",
+      /checked again on 2026-10-18; where/.test(maNote) && !/ read on 2026-10-2/.test(maNote));
     check("North Carolina after its deadline: the regular deadline, same-day registration until October 31",
       /The regular deadline to register for November 3 was October 9, 2026; you can still register and vote at the same time, until October 31, 2026/.test(lead(ncVote)) &&
         !!ncVote.D.querySelector('#voting .vote-dates li[data-kind="sameday"]') &&
@@ -7946,6 +7993,18 @@ async function testLegislatures() {
     });
   }
   {
+    // PR #140 review: Nevada's Senate record, "11 districts: 2, 8, 9, ...",
+    // read "The state's record: : 2, 8, 9" once its count was dropped.
+    const { D, errors } = await buildPage("legislature/nv.html");
+    suite("legislature/nv.html — the state's record names its districts", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      D.querySelector('.segmented [data-chamber="upper"]').click();
+      const ballot = (D.querySelector("#legPanelBody .leg-ballot") || {}).textContent || "";
+      check("the list reads as districts, with one colon",
+        /The state's record: Districts 2, 8, 9, 10\b/.test(ballot) && !/: :/.test(ballot), ballot);
+    });
+  }
+  {
     // A fusion ballot's lines are not parties (STATEGOV-21); a coalition
     // runs Alaska's chambers (STATEGOV-05, rule 54).
     const sg = {};
@@ -12091,14 +12150,21 @@ async function testSharePages() {
       // A campaign's heavy portrait unfurls as the smaller copy made here
       // (rule 101), on the site's own host, and only the copy of that file.
       const copy = p.photoCopy && p.photoCopy.of === p.photo_url ? p.photoCopy : null;
+      // An office's photograph a person chose, hosted here unmodified
+      // because its page draws it with no address of its own (Brent
+      // Taylor's, the PR #141 review), unfurls from the site's own host.
+      const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+      const hosted = p.photoSource === "curated" && !!p.photoCredit &&
+        /^photos\/[0-9a-f]{20}\.(?:jpg|png)$/.test(p.photo_url || "");
       const ok = /\/assets\/social-card\.png$/.test(url) ||
-        (sizes.length ? sizes.indexOf(url) !== -1
+        (hosted ? url === host + (copy ? copy.src : p.photo_url) :
+        sizes.length ? sizes.indexOf(url) !== -1
           : copy && p.photoSource === "campaign-site" && !!p.photoCredit
             ? url === "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/" + copy.src
             : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
               (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
-            ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature") &&
-              !!p.photoCredit)));
+            ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature" ||
+              p.photoSource === "curated") && !!p.photoCredit)));
       if (!ok || /Special:/.test(url)) images.push(`${p.id}: ${url}`);
       if (!/social-card/.test(url)) photos += 1;
     });

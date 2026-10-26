@@ -4327,14 +4327,14 @@
    "verified": "NM verified 2026-10-18 with one correction: Secretary of State's 2026 General Election Contest/Candidate List re-read: Gov/Lt Hull/Gallegos (REP, Qualified 1), Haaland/Garcia Richard (DEM, Qualified 2); Lt. Gov. rows Toulouse Oliver Withdrawn, Lopez Disqualified; AG Torrez (DEM), Kane Sr (REP); SoS Lopez Askin (DEM), Goolsby (REP); incumbent pages re-read. Removed the unsourced 'second four-year term' parenthetical from the Governor's incumbent note."
   },
   "NV": {
-   "notes": "Source for all four offices: the Clark County Registrar of Voters' certified Notice of General Election ('I, LORENA S. PORTILLO, the duly appointed Registrar of Voters for the County of Clark, State of Nevada, do hereby certify that the 2026 General Election will be held on Tuesday, November 3, 2026'), downloaded 2026-10-18. It is an official election authority's list of the candidates on the ballot, but a county's, not the Secretary of State's statewide certified list, which nvsos.gov would not serve (Incapsula block on every attempt; rule 8). Names are printed surname-first, as on the notice; party abbreviations as printed (DEM, REP, NPP, IAP, LPN); the notice gives no key to them. Every statewide office's ballot also offers 'None of these candidates'.",
+   "notes": "Source for all four offices: the Secretary of State's '2026 General Election / Statewide Certified List of Candidates' (https://www.nvsos.gov/home/showpublisheddocument/20105/639232733439300000; its file title '2026 Master General Statewide Certified List of Candidates.APPROVED.xlsx', 12 pages, dated 6/25/2026 on its first page), linked from the office's 2026 Election Information page (https://www.nvsos.gov/elections/election-information/2026-election-information) in the line '2026 General Election Certified list of Candidates'. nvsos.gov answers every script - urllib, curl, a headless Chrome - with an Imperva Incapsula challenge (HTTP 200, a 1 KB page loading /_Incapsula_Resource) and serves its pages only to a person's browser, so the list was read by hand on 2026-10-25 in an ordinary Chrome, with no attempt to get a script past the check (rule 57's reading by hand, rule 91). Its columns are Name on Ballot, Candidate Name, Party or Nonpartisan Office, Office Sought, Filing Office, Filed Date and Note; no statewide row carries a note. 'name' is the Name on Ballot column, surname first; parties are the list's own words. It names the same people with the same parties for all four offices as the Clark County Registrar of Voters' Notice of General Election (https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:dde8b423-5fd3-4635-a9e5-653e57b5491d/original/as/Notice-Gen-Election-26G.pdf, Last-Modified 2026-10-07), which this file cited from 2026-10-18 to 2026-10-25 while the state's own list could not be read.",
    "offices": {
     "ag": {
      "candidates": [
       {
        "holder": false,
        "name": "Cannizzaro, Nicole Jeanette",
-       "party": "DEM",
+       "party": "Democratic Party",
        "runningMate": null,
        "surname": "Cannizzaro",
        "writeIn": false
@@ -4342,14 +4342,15 @@
       {
        "holder": false,
        "name": "Guzmán Fralick, Adriana",
-       "party": "REP",
+       "party": "Republican Party",
        "runningMate": null,
        "surname": "Fralick",
        "writeIn": false
       }
      ],
-     "certified": false,
-     "holderNote": "Running for Governor instead: the list of candidates to be voted upon has 'Ford, Aaron D. DEM' under GOVERNOR, and he is not among the Attorney General candidates.",
+     "certified": true,
+     "certifiedQuote": "Statewide Certified List of Candidates",
+     "holderNote": "Running for Governor instead: the Secretary of State's statewide certified list has 'Ford, Aaron D. | Aaron Darnell Ford | Democratic Party | Governor', and he is not among the Attorney General candidates.",
      "holderOnList": false,
      "holderResearched": "Aaron D. Ford",
      "holderSource": {
@@ -4357,15 +4358,14 @@
       "url": "https://ag.nv.gov/"
      },
      "list": {
-      "by": "Clark County Registrar of Voters",
-      "dated": "2026-10-07 (HTTP Last-Modified)",
-      "kind": "notice of general election",
-      "quote": "ATTORNEY GENERAL 4-YEAR TERM Cannizzaro, Nicole Jeanette DEM Guzmán Fralick, Adriana REP None of these candidates",
-      "read": "2026-10-18",
-      "title": "Clark County Registrar of Voters, Notice of General Election 2026: 'LIST OF CANDIDATES TO BE VOTED UPON AT THE NOVEMBER 3, 2026, GENERAL ELECTION'",
-      "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:dde8b423-5fd3-4635-a9e5-653e57b5491d/original/as/Notice-Gen-Election-26G.pdf"
+      "by": "Nevada Secretary of State",
+      "dated": "2026-06-25 (the date printed on the list's first page, 6/25/2026)",
+      "kind": "certified list of candidates",
+      "quote": "2026 General Election / Statewide Certified List of Candidates / Name on Ballot | Candidate Name | Party or Nonpartisan Office | Office Sought | Filing Office | Filed Date | Note ... Cannizzaro, Nicole Jeanette | Nicole Jeanette Cannizzaro | Democratic Party | Attorney General | Secretary of State | 3/5/2026 / Guzmán Fralick, Adriana | Adriana Guzman Fralick | Republican Party | Attorney General | Secretary of State | 3/3/2026",
+      "read": "2026-10-25",
+      "title": "Nevada Secretary of State, '2026 General Election / Statewide Certified List of Candidates' (linked as '2026 General Election' in the line '2026 General Election Certified list of Candidates' on https://www.nvsos.gov/elections/election-information/2026-election-information)",
+      "url": "https://www.nvsos.gov/home/showpublisheddocument/20105/639232733439300000"
      },
-     "notStateList": "The Secretary of State's own certified list could not be read (nvsos.gov refused every request); this is Clark County's notice of the general election, which lists every statewide contest on the county's ballot",
      "notes": "",
      "title": "Attorney General"
     },
@@ -4374,7 +4374,7 @@
       {
        "holder": false,
        "name": "Ford, Aaron D.",
-       "party": "DEM",
+       "party": "Democratic Party",
        "runningMate": null,
        "surname": "Ford",
        "writeIn": false
@@ -4382,7 +4382,7 @@
       {
        "holder": false,
        "name": "Ford, Danielle",
-       "party": "NPP",
+       "party": "No Political Party",
        "runningMate": null,
        "surname": "Ford",
        "writeIn": false
@@ -4390,14 +4390,15 @@
       {
        "holder": true,
        "name": "Lombardo, Joseph",
-       "party": "REP",
+       "party": "Republican Party",
        "runningMate": null,
        "surname": "Lombardo",
        "writeIn": false
       }
      ],
-     "certified": false,
-     "holderNote": "Republican candidate for Governor ('Lombardo, Joseph REP') on the list of candidates to be voted upon at the November 3, 2026 General Election.",
+     "certified": true,
+     "certifiedQuote": "Statewide Certified List of Candidates",
+     "holderNote": "Republican candidate for Governor on the Secretary of State's statewide certified list ('Lombardo, Joseph | Joseph Lombardo | Republican Party | Governor').",
      "holderOnList": true,
      "holderResearched": "Joe Lombardo",
      "holderSource": {
@@ -4405,16 +4406,15 @@
       "url": "https://gov.nv.gov/"
      },
      "list": {
-      "by": "Clark County Registrar of Voters",
-      "dated": "2026-10-07 (HTTP Last-Modified Wed, 07 Oct 2026 23:32:54 GMT)",
-      "kind": "notice of general election",
-      "quote": "GOVERNOR 4-YEAR TERM Ford, Aaron D. DEM Ford, Danielle NPP Lombardo, Joseph REP None of these candidates",
-      "read": "2026-10-18",
-      "title": "Clark County Registrar of Voters, Notice of General Election 2026: 'LIST OF CANDIDATES TO BE VOTED UPON AT THE NOVEMBER 3, 2026, GENERAL ELECTION'",
-      "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:dde8b423-5fd3-4635-a9e5-653e57b5491d/original/as/Notice-Gen-Election-26G.pdf"
+      "by": "Nevada Secretary of State",
+      "dated": "2026-06-25 (the date printed on the list's first page, 6/25/2026)",
+      "kind": "certified list of candidates",
+      "quote": "2026 General Election / Statewide Certified List of Candidates / Name on Ballot | Candidate Name | Party or Nonpartisan Office | Office Sought | Filing Office | Filed Date | Note ... Ford, Aaron D. | Aaron Darnell Ford | Democratic Party | Governor | Secretary of State | 3/2/2026 / Ford, Danielle | Danielle Ford | No Political Party | Governor | Secretary of State | 3/12/2026 / Lombardo, Joseph | Joseph Lombardo | Republican Party | Governor | Secretary of State | 3/5/2026",
+      "read": "2026-10-25",
+      "title": "Nevada Secretary of State, '2026 General Election / Statewide Certified List of Candidates' (linked as '2026 General Election' in the line '2026 General Election Certified list of Candidates' on https://www.nvsos.gov/elections/election-information/2026-election-information)",
+      "url": "https://www.nvsos.gov/home/showpublisheddocument/20105/639232733439300000"
      },
-     "notStateList": "The Secretary of State's own certified list could not be read (nvsos.gov refused every request); this is Clark County's notice of the general election, which lists every statewide contest on the county's ballot",
-     "notes": "Nevada governors are elected separately from the Lieutenant Governor. 'None of these candidates' is a ballot option, not a candidate. The Secretary of State's own '2026 General Election Statewide Certified List of Candidates' (nvsos.gov) could not be read: nvsos.gov answers every scripted and browser request, headless or visible, with an Incapsula 'Request unsuccessful' page, so this file cites the Clark County Registrar of Voters' certified notice of the general election, which lists every contest on Clark County's ballot, statewide ones included. An earlier version of the same notice (notice-general-election-26g.pdf, Last-Modified 2026-07-01) lists the same candidates for all four offices.",
+     "notes": "Nevada governors are elected separately from the Lieutenant Governor. 'None of these candidates' is a ballot option, not a candidate (Clark County's notice of general election prints it under every statewide office).",
      "title": "Governor"
     },
     "lt": {
@@ -4422,7 +4422,7 @@
       {
        "holder": true,
        "name": "Anthony, Stavros",
-       "party": "REP",
+       "party": "Republican Party",
        "runningMate": null,
        "surname": "Anthony",
        "writeIn": false
@@ -4430,7 +4430,7 @@
       {
        "holder": false,
        "name": "Hansen, Janine",
-       "party": "IAP",
+       "party": "Independent American Party",
        "runningMate": null,
        "surname": "Hansen",
        "writeIn": false
@@ -4438,14 +4438,15 @@
       {
        "holder": false,
        "name": "Jauregui, Sandra",
-       "party": "DEM",
+       "party": "Democratic Party",
        "runningMate": null,
        "surname": "Jauregui",
        "writeIn": false
       }
      ],
-     "certified": false,
-     "holderNote": "Republican candidate for Lieutenant Governor ('Anthony, Stavros REP') on the list of candidates to be voted upon.",
+     "certified": true,
+     "certifiedQuote": "Statewide Certified List of Candidates",
+     "holderNote": "Republican candidate for Lieutenant Governor on the Secretary of State's statewide certified list ('Anthony, Stavros | Stavros S Anthony | Republican Party | Lieutenant Governor').",
      "holderOnList": true,
      "holderResearched": "Stavros Anthony",
      "holderSource": {
@@ -4453,15 +4454,14 @@
       "url": "https://ltgov.nv.gov/"
      },
      "list": {
-      "by": "Clark County Registrar of Voters",
-      "dated": "2026-10-07 (HTTP Last-Modified)",
-      "kind": "notice of general election",
-      "quote": "LIEUTENANT GOVERNOR 4-YEAR TERM Anthony, Stavros REP Hansen, Janine IAP Jauregui, Sandra DEM None of these candidates",
-      "read": "2026-10-18",
-      "title": "Clark County Registrar of Voters, Notice of General Election 2026: 'LIST OF CANDIDATES TO BE VOTED UPON AT THE NOVEMBER 3, 2026, GENERAL ELECTION'",
-      "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:dde8b423-5fd3-4635-a9e5-653e57b5491d/original/as/Notice-Gen-Election-26G.pdf"
+      "by": "Nevada Secretary of State",
+      "dated": "2026-06-25 (the date printed on the list's first page, 6/25/2026)",
+      "kind": "certified list of candidates",
+      "quote": "2026 General Election / Statewide Certified List of Candidates / Name on Ballot | Candidate Name | Party or Nonpartisan Office | Office Sought | Filing Office | Filed Date | Note ... Anthony, Stavros | Stavros S Anthony | Republican Party | Lieutenant Governor | Secretary of State | 3/2/2026 / Hansen, Janine | Janine Hansen | Independent American Party | Lieutenant Governor | Secretary of State | 3/11/2026 / Jauregui, Sandra | Sandra Jauregui | Democratic Party | Lieutenant Governor | Secretary of State | 3/10/2026",
+      "read": "2026-10-25",
+      "title": "Nevada Secretary of State, '2026 General Election / Statewide Certified List of Candidates' (linked as '2026 General Election' in the line '2026 General Election Certified list of Candidates' on https://www.nvsos.gov/elections/election-information/2026-election-information)",
+      "url": "https://www.nvsos.gov/home/showpublisheddocument/20105/639232733439300000"
      },
-     "notStateList": "The Secretary of State's own certified list could not be read (nvsos.gov refused every request); this is Clark County's notice of the general election, which lists every statewide contest on the county's ballot",
      "notes": "Elected separately from the Governor in Nevada.",
      "title": "Lieutenant Governor"
     },
@@ -4470,7 +4470,7 @@
       {
        "holder": true,
        "name": "Aguilar, Francisco \"Cisco\"",
-       "party": "DEM",
+       "party": "Democratic Party",
        "runningMate": null,
        "surname": "Aguilar",
        "writeIn": false
@@ -4478,7 +4478,7 @@
       {
        "holder": false,
        "name": "Barnhill, Brad Lee",
-       "party": "IAP",
+       "party": "Independent American Party",
        "runningMate": null,
        "surname": "Barnhill",
        "writeIn": false
@@ -4486,7 +4486,7 @@
       {
        "holder": false,
        "name": "Kennedy, John T.",
-       "party": "LPN",
+       "party": "Libertarian Party of Nevada",
        "runningMate": null,
        "surname": "Kennedy",
        "writeIn": false
@@ -4494,14 +4494,15 @@
       {
        "holder": false,
        "name": "Marchant, Jim",
-       "party": "REP",
+       "party": "Republican Party",
        "runningMate": null,
        "surname": "Marchant",
        "writeIn": false
       }
      ],
-     "certified": false,
-     "holderNote": "Democratic candidate for Secretary of State ('Aguilar, Francisco \"Cisco\" DEM') on the list of candidates to be voted upon.",
+     "certified": true,
+     "certifiedQuote": "Statewide Certified List of Candidates",
+     "holderNote": "Democratic candidate for Secretary of State on the Secretary of State's statewide certified list ('Aguilar, Francisco \"Cisco\" | Francisco V. Aguilar | Democratic Party | Secretary Of State').",
      "holderOnList": true,
      "holderResearched": "Francisco V. Aguilar",
      "holderSource": {
@@ -4509,20 +4510,19 @@
       "url": "https://nsla.nv.gov/archives-SOS-office"
      },
      "list": {
-      "by": "Clark County Registrar of Voters",
-      "dated": "2026-10-07 (HTTP Last-Modified)",
-      "kind": "notice of general election",
-      "quote": "SECRETARY OF STATE 4-YEAR TERM Aguilar, Francisco \"Cisco\" DEM Barnhill, Brad Lee IAP Kennedy, John T. LPN Marchant, Jim REP None of these candidates",
-      "read": "2026-10-18",
-      "title": "Clark County Registrar of Voters, Notice of General Election 2026: 'LIST OF CANDIDATES TO BE VOTED UPON AT THE NOVEMBER 3, 2026, GENERAL ELECTION'",
-      "url": "https://www.clarkcountynv.gov/adobe/assets/urn:aaid:aem:dde8b423-5fd3-4635-a9e5-653e57b5491d/original/as/Notice-Gen-Election-26G.pdf"
+      "by": "Nevada Secretary of State",
+      "dated": "2026-06-25 (the date printed on the list's first page, 6/25/2026)",
+      "kind": "certified list of candidates",
+      "quote": "2026 General Election / Statewide Certified List of Candidates / Name on Ballot | Candidate Name | Party or Nonpartisan Office | Office Sought | Filing Office | Filed Date | Note ... Aguilar, Francisco \"Cisco\" | Francisco V. Aguilar | Democratic Party | Secretary Of State | Secretary of State | 3/9/2026 / Barnhill, Brad Lee | Brad Lee Barnhill | Independent American Party | Secretary Of State | Secretary of State | 3/12/2026 / Kennedy, John T. | John T Kennedy | Libertarian Party of Nevada | Secretary Of State | Secretary of State | 3/10/2026 / Marchant, Jim | James \"Jim\" Marchant | Republican Party | Secretary Of State | Secretary of State | 3/13/2026",
+      "read": "2026-10-25",
+      "title": "Nevada Secretary of State, '2026 General Election / Statewide Certified List of Candidates' (linked as '2026 General Election' in the line '2026 General Election Certified list of Candidates' on https://www.nvsos.gov/elections/election-information/2026-election-information)",
+      "url": "https://www.nvsos.gov/home/showpublisheddocument/20105/639232733439300000"
      },
-     "notStateList": "The Secretary of State's own certified list could not be read (nvsos.gov refused every request); this is Clark County's notice of the general election, which lists every statewide contest on the county's ballot",
-     "notes": "The Secretary of State's own site (nvsos.gov) refuses all requests (Incapsula), so the incumbent is cited from the Nevada State Library, Archives and Public Records' list of Secretaries of State.",
+     "notes": "The incumbent is cited from the Nevada State Library, Archives and Public Records' list of Secretaries of State; the certified list's own heading carries his office's logo, 'Francisco V. Aguilar / Nevada Secretary of State'.",
      "title": "Secretary of State"
     }
    },
-   "verified": "NV verified 2026-10-18: Clark County Registrar of Voters' Notice of General Election (Last-Modified 2026-10-07) re-downloaded: Gov A. Ford (DEM), D. Ford (NPP), Lombardo (REP); Lt Anthony (REP), Hansen (IAP), Jauregui (DEM); SoS Aguilar (DEM), Barnhill (IAP), Kennedy (LPN), Marchant (REP); AG Cannizzaro (DEM), Guzman Fralick (REP); the July 1 notice's statewide section is identical; incumbent quotes found. nvsos.gov still refuses every request (blank page in visible Chrome), so the state's own certified list remains unread; no corrections."
+   "verified": "NV verified 2026-10-18: Clark County Registrar of Voters' Notice of General Election (Last-Modified 2026-10-07) re-downloaded: Gov A. Ford (DEM), D. Ford (NPP), Lombardo (REP); Lt Anthony (REP), Hansen (IAP), Jauregui (DEM); SoS Aguilar (DEM), Barnhill (IAP), Kennedy (LPN), Marchant (REP); AG Cannizzaro (DEM), Guzman Fralick (REP); the July 1 notice's statewide section is identical; incumbent quotes found. nvsos.gov still refuses every request (blank page in visible Chrome), so the state's own certified list remains unread; no corrections. RE-SOURCED 2026-10-25: the Secretary of State's statewide certified list, read by hand in a person's Chrome (nvsos.gov challenges every script); the transcription of its statewide rows was checked again, row by row, against a screenshot of the list's first page taken in that browser, and compared name by name and party by party with Clark County's notice: Gov A. Ford (Democratic Party / DEM), D. Ford (No Political Party / NPP), Lombardo (Republican Party / REP); Lt Anthony (REP), Hansen (Independent American Party / IAP), Jauregui (DEM); SoS Aguilar (DEM), Barnhill (IAP), Kennedy (Libertarian Party of Nevada / LPN), Marchant (REP); AG Cannizzaro (DEM), Guzmán Fralick (REP). No difference."
   },
   "NY": {
    "notes": "All three offices from the New York State Board of Elections' Amended Certification for the November 3, 2026 General Election, dated October 7, 2026 (signed by Co-Executive Directors Kristen Zebrowski Stavisky and Raymond J. Riley III), read 2026-10-18. Party lines as the certification names them. No write-in candidates appear in the certification.",

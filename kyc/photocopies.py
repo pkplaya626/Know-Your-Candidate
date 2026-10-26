@@ -124,8 +124,10 @@ BROWSER_UA = dict(UA, **{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64
 
 _WIKIMEDIA = re.compile(r"(^|\.)(wikimedia|wikipedia)\.org$", re.I)
 # A photograph this site hosts itself, unmodified, because its source offers
-# no address of its own (an election office's guide, kyc/guide_photos.py):
-# named by its own hash, its address from the site's root.
+# no address of its own (an election office's guide, kyc/guide_photos.py; an
+# office's page that writes the portrait into itself as a data: image, chosen
+# by a person in overrides.CANDIDATE_PHOTOS): named by its own hash, its
+# address from the site's root.
 _HOSTED = re.compile(r"^photos/[0-9a-f]{20}\.(?:jpg|png)$")
 _IMAGE_MAGIC = (b"\xff\xd8\xff", b"\x89PNG", b"GIF8", b"RIFF")
 
@@ -156,6 +158,17 @@ def is_hosted(url):
     """Whether *url* is a photograph this site hosts as an unmodified copy
     (``hosted`` in the manifest), by its address from the site's root."""
     return bool(_HOSTED.match(str(url or "")))
+
+
+def curated_names():
+    """The files under ``photos/`` an ``overrides.CANDIDATE_PHOTOS`` entry
+    names: hosted by a person's choice, not by a guide's reader, so
+    ``guide_photos.fetch``, which rewrites the guides' entries, keeps them
+    as they stand."""
+    from . import overrides
+    return {str(e.get("url"))[len(PHOTOS_URL):]
+            for e in overrides.CANDIDATE_PHOTOS.values()
+            if isinstance(e, dict) and is_hosted(e.get("url"))}
 
 
 def hosted_entry(cache, url):
@@ -688,7 +701,7 @@ def stats(cache, shown):
     if hosted:
         made = sum(1 for e in hosted.values() if e.get("copy"))
         decoded = sum(1 for e in hosted.values() if e.get("method") == "decoded")
-        hosted_line = (f"{len(hosted):,} election offices' photographs hosted here "
+        hosted_line = (f"{len(hosted):,} official photographs hosted here "
                        f"({len(hosted) - decoded:,} unmodified, {decoded:,} decoded losslessly "
                        f"from JPEG 2000; {made:,} shown as a smaller copy); ")
     return (hosted_line +

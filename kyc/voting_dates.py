@@ -55,6 +55,10 @@ ELECTION = "2026-11-03"
 # windows open in the summer, and the last ballot counted arrives in
 # December.
 EARLIEST, LATEST = "2026-06-01", "2026-12-31"
+# The day a source was read, where it was read after the record's own
+# read and check ("read" on a source): Nevada's Secretary of State's page,
+# which serves only a person's browser, was read by hand on 2026-10-25.
+_ISO_DAY = re.compile(r"^2026-(?:0[6-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$")
 
 # Every jurisdiction with a state page: the fifty states, D.C. and the five
 # territories.
@@ -117,7 +121,10 @@ JURISDICTION_DOMAINS = {
     "MI": ("michigan.gov",), "MN": ("mn.gov",), "MO": ("mo.gov",), "MP": ("gov.mp",),
     "MS": ("ms.gov",), "MT": ("mt.gov", "votemt.gov", "sosmt.gov", "legmt.gov"),
     "NC": ("nc.gov", "ncsbe.gov", "ncleg.gov"), "ND": ("nd.gov",), "NE": ("nebraska.gov",),
-    "NH": ("nh.gov",), "NJ": ("nj.gov",), "NM": ("nm.gov", "nmlegis.gov"), "NV": ("nv.gov",),
+    "NH": ("nh.gov",), "NJ": ("nj.gov",), "NM": ("nm.gov", "nmlegis.gov"),
+    # nvsos.gov is the Secretary of State's own domain, where its election
+    # pages and certified lists are published.
+    "NV": ("nv.gov", "nvsos.gov"),
     "NY": ("ny.gov",), "OH": ("ohiosos.gov", "ohio.gov"), "OK": ("oklahoma.gov", "ok.gov"),
     "OR": ("oregon.gov", "oregonlegislature.gov"), "PA": ("pa.gov",), "PR": ("pr.gov",),
     "RI": ("ri.gov",), "SC": ("sc.gov", "scvotes.gov", "scstatehouse.gov"),
@@ -325,6 +332,9 @@ def state_problems(code, record, runoffs):
             out.append(f"{code} {source.get('field')}: {source.get('url')} - {why}")
         if not str(source.get("quote") or "").strip():
             out.append(f"{code} {source.get('field')}: a source with no quote")
+        if "read" in source and not _ISO_DAY.match(str(source.get("read") or "")):
+            out.append(f"{code} {source.get('field')}: read {source.get('read')!r} is not a day "
+                       "(YYYY-MM-DD)")
     fields = {s.get("field") for s in record.get("sources") or []}
     for path, stand_ins in SHOWN.items():
         if _shown(record, path) is None:
@@ -686,6 +696,23 @@ def place(code):
     return PLACES.get(code) or state_name(code)
 
 
+def reread(record, links, checked):
+    """The linked sources read after the record's own check, as the page's
+    note names them: ``[{"d": day, "labels": [link label, ...]}]``, earliest
+    first. The note under the dates says when they were read; a page read by
+    hand later (Nevada's Secretary of State's, 2026-10-25) is not "read on
+    2026-10-17" (PR #140 review)."""
+    days = {}
+    for source in record.get("sources") or []:
+        day, url = source.get("read"), source.get("url")
+        if not day or day <= checked or url not in links.urls:
+            continue
+        label = links.labels[links.urls.index(url)]
+        if label not in days.setdefault(day, []):
+            days[day].append(label)
+    return [{"d": day, "labels": labels} for day, labels in sorted(days.items())]
+
+
 def for_page(data, runoffs=None):
     """The build meta's ``voting._dates``: ``{"states": {code: {"lines",
     "urls", "labels", "register"?}}, ...}``, with when the record was read and
@@ -706,6 +733,9 @@ def for_page(data, runoffs=None):
         entry = {"lines": found, "urls": links.urls, "labels": links.labels}
         if register:
             entry["register"] = register
+        later = reread(record, links, data.get("checked") or data.get("read") or "")
+        if later:
+            entry["reread"] = later
         out[code] = entry
     return {"states": out, "election": data.get("election") or ELECTION,
             "read": data.get("read") or "", "checked": data.get("checked") or ""}

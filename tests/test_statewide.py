@@ -109,14 +109,14 @@ class TestTheCache(unittest.TestCase):
 
     def test_a_county_list_is_never_the_states_certification(self):
         def county(c):
-            o = c["states"]["NV"]["offices"]["governor"]
+            o = c["states"]["AR"]["offices"]["governor"]
             o.update(certified=True, certifiedQuote="certified Notice")
             o["notes"] = (o.get("notes") or "") + " certified Notice"
         self.assertIn("is not the state's election office", self.broken(county))
 
     def test_a_list_that_is_not_the_states_says_why(self):
         self.assertIn("says why ('notStateList')", self.broken(
-            lambda c: c["states"]["NV"]["offices"]["ag"].pop("notStateList")))
+            lambda c: c["states"]["AR"]["offices"]["ag"].pop("notStateList")))
         self.assertIn("'notStateList' on the state's own list", self.broken(
             lambda c: c["states"]["GA"]["offices"]["ag"].update(notStateList="why")))
 
@@ -220,9 +220,11 @@ class TestNames(unittest.TestCase):
 
     def test_parties_in_words(self):
         words = statewide.party_words
-        self.assertEqual(words("NV", "IAP"), "Independent American Party")
-        self.assertEqual(words("NV", "NPP"), "No Political Party")
+        self.assertEqual(words("FL", "LPF"), "Libertarian Party of Florida")
         self.assertEqual(words("FL", "NPA"), "No Party Affiliation")
+        # A list's own words are kept: Nevada's certified list spells out
+        # "Independent American Party".
+        self.assertEqual(words("NV", "Independent American Party"), "Independent American Party")
         self.assertEqual(words("PA", "DEM"), "Democratic")
         # One party, one word on every state page (wave 2d review).
         self.assertEqual(words("GU", "DEMOCRAT"), "Democratic")
@@ -232,6 +234,17 @@ class TestNames(unittest.TestCase):
         self.assertEqual(words("VT", "FREEDOM AND UNITY"), "Freedom and Unity")
         self.assertEqual(words("TX", "GREEN"), "Green")
         self.assertEqual(words("ND", "Democratic-NPL"), "Democratic-NPL")
+        # PR #140 review: Nevada's list's "Democratic Party" sat under a
+        # holder line reading "Democratic". The major parties read as one
+        # word, each part of a fusion line alike; a minor party's own name,
+        # or a state's branch of one, is the list's.
+        self.assertEqual(words("NV", "Democratic Party"), "Democratic")
+        self.assertEqual(words("NV", "Republican Party"), "Republican")
+        self.assertEqual(words("CO", "Libertarian Party"), "Libertarian")
+        self.assertEqual(words("NV", "Libertarian Party of Nevada"), "Libertarian Party of Nevada")
+        self.assertEqual(words("CT", "Republican Party; Independent Party"),
+                         "Republican; Independent Party")
+        self.assertEqual(words("MI", "U.S. Taxpayers Party"), "U.S. Taxpayers Party")
         self.assertEqual(words("IN", "Write-In (National Socialist American Workers')", True),
                          "National Socialist American Workers'")
         self.assertIsNone(words("FL", "WRI", True))
@@ -242,6 +255,93 @@ class TestNames(unittest.TestCase):
         # form (overrides.STATEWIDE_NAME_FORMS).
         self.assertFalse(statewide.same_given_name("Joe Lombardo", "Lombardo, Joseph"))
         self.assertFalse(statewide.same_given_name("Bill Lee", "Eddie Lee Murphy"))
+
+
+class TestNevadasOwnList(unittest.TestCase):
+    """Nevada's statewide offices cited Clark County's notice of the general
+    election, "the Secretary of State's own certified list could not be
+    read (nvsos.gov refused every request)": the office's site challenges
+    every script and serves only a person's browser. Its certified list was
+    read by hand from the office's own page on 2026-10-25 (rule 91, as rule
+    57 reads a court's), and is now the source for all four offices."""
+
+    # The list's rows: (Name on Ballot, Party), compared name by name and
+    # party by party with Clark County's notice, which named the same.
+    ROWS = {
+        "governor": [("Ford, Aaron D.", "Democratic Party"),
+                     ("Ford, Danielle", "No Political Party"),
+                     ("Lombardo, Joseph", "Republican Party")],
+        "lt": [("Anthony, Stavros", "Republican Party"),
+               ("Hansen, Janine", "Independent American Party"),
+               ("Jauregui, Sandra", "Democratic Party")],
+        "sos": [('Aguilar, Francisco "Cisco"', "Democratic Party"),
+                ("Barnhill, Brad Lee", "Independent American Party"),
+                ("Kennedy, John T.", "Libertarian Party of Nevada"),
+                ("Marchant, Jim", "Republican Party")],
+        "ag": [("Cannizzaro, Nicole Jeanette", "Democratic Party"),
+               ("Guzmán Fralick, Adriana", "Republican Party")],
+    }
+    URL = "https://www.nvsos.gov/home/showpublisheddocument/20105/639232733439300000"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = statewide.load(".")
+        cls.payload, cls.problems = stategov.build(".")
+
+    def test_the_list_is_the_secretary_of_states_own_and_certified(self):
+        from kyc import voting_dates
+        for key in self.ROWS:
+            o = statewide.office(self.cache, "NV", key)
+            self.assertNotIn("notStateList", o, key)
+            self.assertFalse(statewide.not_the_states(o["list"]), key)
+            self.assertIsNone(statewide.elsewhere(o["list"]["url"]), key)
+            self.assertEqual(o["list"]["url"], self.URL, key)
+            self.assertEqual(o["list"]["by"], "Nevada Secretary of State", key)
+            # On Nevada's own domain, not by an evidenced exception.
+            self.assertTrue(voting_dates.official_source(o["list"]["url"], "NV")[0], key)
+            self.assertTrue(o["certified"], key)
+            self.assertIn("Certified", o["certifiedQuote"], key)
+            self.assertEqual(o["list"]["read"], "2026-10-25", key)
+
+    def test_the_four_offices_names_and_parties(self):
+        for key, rows in self.ROWS.items():
+            o = statewide.office(self.cache, "NV", key)
+            self.assertEqual(sorted((p["name"], p["party"]) for p in o["candidates"]),
+                             sorted(rows), key)
+            for name, party in rows:
+                self.assertIn(f"{name} | ", o["list"]["quote"], key)
+            # The page reads the major parties as the holder line does.
+            parties = {p["printed"]: p.get("party") for p in
+                       self.payload["states"]["NV"]["ballot2026"]["offices"][key]
+                       ["candidates"]["candidates"]}
+            for name, party in rows:
+                self.assertEqual(parties[name], {"Democratic Party": "Democratic",
+                                                 "Republican Party": "Republican"}.get(party, party))
+            shown = self.payload["states"]["NV"]["ballot2026"]["offices"][key]["candidates"]
+            self.assertEqual(shown["source"],
+                             "the Nevada Secretary of State’s certified list of candidates")
+            self.assertNotIn("notStateList", shown)
+
+    def test_the_holder_lines(self):
+        offices = self.payload["states"]["NV"]["ballot2026"]["offices"]
+        for key in ("governor", "lt", "sos"):
+            status = offices[key]["holderStatus"]
+            self.assertEqual(status["why"], "listed", key)
+            self.assertEqual(status["source"], self.URL, key)
+        self.assertEqual(offices["governor"]["holderStatus"]["name"], "Lombardo, Joseph")
+        self.assertEqual(offices["lt"]["holderStatus"]["name"], "Anthony, Stavros")
+        self.assertEqual(offices["sos"]["holderStatus"]["name"], 'Aguilar, Francisco "Cisco"')
+        # The attorney general is on the governor's list, not his own.
+        ag = offices["ag"]["holderStatus"]
+        self.assertEqual(ag["why"], "not-listed")
+        self.assertIn("Ford", ag["holder"])
+        self.assertFalse([p for p in self.problems if p.startswith("NV ")], self.problems)
+
+    def test_no_exception_stands_for_nevadas_own_office_or_its_county(self):
+        from kyc import overrides
+        self.assertFalse([p for p in overrides.STATEWIDE_LISTS_ELSEWHERE
+                          if "clarkcountynv" in p or "nvsos" in p])
+        self.assertFalse([p for p in overrides.MEASURE_SOURCES_ELSEWHERE if "nvsos" in p])
 
 
 class TestHolderStatus(unittest.TestCase):

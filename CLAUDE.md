@@ -377,7 +377,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     through the article the person's ballot page links (rule 33), from the
     campaign site their own committee filed (rule 38), or as an evidenced
     `CANDIDATE_PHOTOS` entry naming a served file, and by no other route,
-    for members and curated rows as much as filed candidates. A ballot link
+    for members and curated rows as much as filed candidates. An entry is
+    keyed on the profile's id, never a name, and names the page that names
+    the person beside the file, its words, why that person is this
+    profile's, what a person saw (the person alone) and the day; it stands
+    ahead of the automatic routes as the portrait cache's `curated` route:
+    Ken Paxton, left a silhouette when the background-people sweep refused
+    his Commons photograph, shows his office's portrait this way. A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
@@ -2108,9 +2114,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     jurisdiction's own election office's - a county's only where the state
     publishes none that can be read, by an evidenced
     `overrides.STATEWIDE_LISTS_ELSEWHERE` entry - quoted and dated, and
-    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list is
-    named as the document it is ("the Clark County Registrar of Voters’
-    notice of general election"), never "Certified by" a body: the first
+    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list the
+    office serves only to a person's browser is read by hand from the
+    office's own page, quoted and dated, as rule 57 reads a court's, and a
+    county's never stands in for it while a person can read the office's
+    own: Nevada's four offices cited Clark County's notice for a week
+    because nvsos.gov answers every script with a bot check, until the
+    Secretary of State's certified list was read that way (2026-10-25).
+    Arizona's still stand on its Clean Elections Commission's guide until
+    its Secretary of State's listing, behind a bot check too, is read the
+    same way. A list is named as the document it is ("the Pulaski County
+    Board of Election Commissioners’ notice of election"), never
+    "Certified by" a body: the first
     page credited a county's sample ballot and a commission's voter guide
     as certified by them. "Certified" is said only where the document's
     own words say so (`certifiedQuote`) and the state's own office
@@ -2120,7 +2135,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "Lombardo, Joseph", "JOSH SHAPIRO", "Governor Sarah Huckabee
     Sanders"), the list's form kept beside them; a party the list
     abbreviates is spelled out from its key or statute
-    (`statewide.PARTY_CODES`), and an unexplained code fails the build.
+    (`statewide.PARTY_CODES`), and an unexplained code fails the build;
+    a major party's full name is the one word the holder line beside it
+    uses ("Democratic Party" is "Democratic", as on the race cards).
     Write-ins apart, listed by surname and said to be; no money or
     platform, never a profile (rule 27), never joined to one by a name
     (rule 25). A photograph since the owner's decision of 2026-10-19, by

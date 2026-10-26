@@ -358,6 +358,22 @@
    "type": "image/jpeg",
    "width": 1095
   },
+  "dc407c55c78c101cce27.png": {
+   "by": "Tennessee General Assembly",
+   "bytes": 286711,
+   "for": [
+    "person:FEC_H6TN09464"
+   ],
+   "from": "https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=S31",
+   "height": 400,
+   "inline": "the page's only <img class='framed-photo'>, a data:image/png;base64 image with alt text 'Photo of Brent Taylor'; the file is its decoded bytes",
+   "method": "unmodified",
+   "page": "https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=S31",
+   "read": "2026-10-25",
+   "sha256": "dc407c55c78c101cce271c92f649b61936ca6b7f9367fc63a8ac4f5764cb4271",
+   "type": "image/png",
+   "width": 400
+  },
   "fd2a5042d813f41e2379.jpg": {
    "by": "from the Alaska Division of Elections' Official Election Pamphlet",
    "bytes": 210718,
