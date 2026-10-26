@@ -1589,7 +1589,10 @@ ROLL_CALL_NON_MEMBERS = {
 # 91) published on a host that is not the jurisdiction's own domain
 # (voting_dates.JURISDICTION_DOMAINS): the state election office's own file
 # store or vendor, or - only where the state's own list could not be read or
-# does not exist - a county's election office or another state body.
+# does not exist - a county's election office or another state body. A list
+# the state's office serves only to a person's browser is read by hand from
+# its own page, quoted and dated, never stood in for by a county's (rule 91:
+# Nevada's, read 2026-10-25, replaced Clark County's notice).
 # {url prefix: (codes, who publishes it, own, evidence)}, where *own* is True
 # only for the state election office's own document on another host. A list
 # that is not the state's own is never called certified and says on the page
@@ -1617,11 +1620,6 @@ STATEWIDE_LISTS_ELSEWHERE = {
         ("MI",), "Michigan Department of State", True,
         "the Bureau of Elections' Official Candidate Listing, linked as '2026 November General "
         "Candidate Listing' from https://www.michigan.gov/sos/elections"),
-    "https://www.clarkcountynv.gov/": (
-        ("NV",), "Clark County Registrar of Voters", False,
-        "the Registrar's Notice of General Election, which lists every contest on Clark "
-        "County's ballot, statewide ones included; nvsos.gov refused every request (an "
-        "Incapsula block), so the Secretary of State's own certified list could not be read"),
     "https://sos-prod.tnsosgovfiles.com/": (
         ("TN",), "Tennessee Secretary of State", True,
         "the Division of Elections' file store, linked as PDF from "
@@ -1638,16 +1636,16 @@ STATEWIDE_LISTS_ELSEWHERE = {
 # evidence)}. Being a .gov host is not enough: a page counts here only for
 # the jurisdictions named. Read 2026-10-19.
 MEASURE_SOURCES_ELSEWHERE = {
-    "https://www.nvsos.gov/": (
-        ("NV",), "Nevada Secretary of State",
-        "the Secretary of State's own site; its 2026 Petitions page ('Updated July 27, 2026') "
-        "names the statewide questions on the November 2026 ballot"),
     "https://www.clarkcountynv.gov/": (
         ("NV",), "Clark County Election Department",
         "the Department's official ballot-questions booklet for the November 3, 2026 general "
-        "election, which prints State Questions 6 and 7; the Secretary of State's 2026 Ballot "
-        "Question Guide was not yet posted ('will be published HERE prior to the 2026 General "
-        "Election')"),
+        "election, which prints State Questions 6 and 7, the two questions the Secretary of "
+        "State's 2026 Petitions page names. The questions' words are quoted from it because, "
+        "read on 2026-10-19, the Secretary of State's 2026 Ballot Question Guide was not yet "
+        "posted ('will be published HERE prior to the 2026 General Election'); it is posted "
+        "now (https://www.nvsos.gov/home/showpublisheddocument/20519/639233354596030000, linked "
+        "from the 2026 Election Information page, read by hand 2026-10-25), and its text has "
+        "not been compared with the booklet's, since nvsos.gov serves no script"),
     "https://s3.amazonaws.com/dl.ncsbe.gov/": (
         ("NC",), "North Carolina State Board of Elections",
         "the State Board's file store, linked as 'Statewide referenda' from "
@@ -1696,8 +1694,10 @@ STATEWIDE_NAME_FORMS = {
     ("NV", "governor", "Joe Lombardo"): (
         "Lombardo, Joseph",
         "the Governor's own site, gov.nv.gov (read 2026-10-18), links his account "
-        "twitter.com/JosephMLombardo; the Clark County notice prints 'Lombardo, Joseph REP' "
-        "for Governor, and both researchers read it as the governor"),
+        "twitter.com/JosephMLombardo; the Secretary of State's statewide certified list "
+        "prints 'Lombardo, Joseph | Joseph Lombardo | Republican Party | Governor' (read by "
+        "hand 2026-10-25), as Clark County's notice printed 'Lombardo, Joseph REP', and every "
+        "reader read it as the governor"),
 }
 
 # Phrases in a Status value that mean the incumbent is not on the 2026 ballot.

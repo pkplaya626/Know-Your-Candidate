@@ -11,7 +11,11 @@ from the election office's certified or qualified list - a Secretary of
 State's, a board of elections', or a county election office's where the
 state publishes none it could read - and every list re-opened by a second
 reader. Ballotpedia, Wikipedia, news and party sites were leads, never
-sources (rule 50).
+sources (rule 50). A list the office serves only to a person's browser is
+read by hand from the office's own page, quoted and dated, and a county's
+never stands in for it while a person can read it: Nevada's Secretary of
+State answers every script with a bot check, and its certified list,
+read that way on 2026-10-25, replaced Clark County's notice.
 
 What reaches the page is the list's: each name as it prints it, written
 first name first and in ordinary capitals without a ballot title (rule
@@ -79,12 +83,8 @@ PARTY_CODES = {
     # of Florida), NPA (no party affiliation)" (the cache's notes, read
     # 2026-10-18).
     "FL": {"LPF": "Libertarian Party of Florida", "NPA": "No Party Affiliation"},
-    # Clark County's 2026 sample ballot key ("IAP = Independent American
-    # Party, LPN = Libertarian Party of Nevada, NPP = No Political Party"),
-    # and NRS 293.267: "the words 'no political party' or the abbreviation
-    # 'NPP'". Read 2026-10-18.
-    "NV": {"IAP": "Independent American Party", "LPN": "Libertarian Party of Nevada",
-           "NPP": "No Political Party"},
+    # (Nevada's codes went with Clark County's notice: the Secretary of
+    # State's certified list spells each party out.)
     # The Secretary of State's file labels a candidate both the Democratic
     # and Progressive parties nominated "DEM/PROG" (the cache's notes).
     "VT": {"DEM/PROG": "Democratic/Progressive"},
@@ -534,8 +534,8 @@ def holder_status(code, key, entry, holder):
     if not entry or not holder:
         return None, None
     lst = entry["list"]
-    # The source names the document as what it is ("the Clark County
-    # Registrar of Voters’ notice of general election"), never "the
+    # The source names the document as what it is ("the Pulaski County
+    # Board of Election Commissioners’ notice of election"), never "the
     # certified list" for one that is not (PR #109 review).
     base = {"holder": holder, "source": lst["url"], "cite": source_words(lst),
             "certified": bool(entry.get("certified"))}

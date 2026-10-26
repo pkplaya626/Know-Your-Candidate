@@ -117,7 +117,10 @@ JURISDICTION_DOMAINS = {
     "MI": ("michigan.gov",), "MN": ("mn.gov",), "MO": ("mo.gov",), "MP": ("gov.mp",),
     "MS": ("ms.gov",), "MT": ("mt.gov", "votemt.gov", "sosmt.gov", "legmt.gov"),
     "NC": ("nc.gov", "ncsbe.gov", "ncleg.gov"), "ND": ("nd.gov",), "NE": ("nebraska.gov",),
-    "NH": ("nh.gov",), "NJ": ("nj.gov",), "NM": ("nm.gov", "nmlegis.gov"), "NV": ("nv.gov",),
+    "NH": ("nh.gov",), "NJ": ("nj.gov",), "NM": ("nm.gov", "nmlegis.gov"),
+    # nvsos.gov is the Secretary of State's own domain, where its election
+    # pages and certified lists are published.
+    "NV": ("nv.gov", "nvsos.gov"),
     "NY": ("ny.gov",), "OH": ("ohiosos.gov", "ohio.gov"), "OK": ("oklahoma.gov", "ok.gov"),
     "OR": ("oregon.gov", "oregonlegislature.gov"), "PA": ("pa.gov",), "PR": ("pr.gov",),
     "RI": ("ri.gov",), "SC": ("sc.gov", "scvotes.gov", "scstatehouse.gov"),

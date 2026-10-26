@@ -95,6 +95,25 @@ class TestSources(unittest.TestCase):
                           ("https://www.govinfo.gov/content/pkg/USCODE-2024-title48/x", "GU")):
             self.assertTrue(voting_dates.official_source(url, code)[0], (url, code))
 
+    def test_nevadas_secretary_of_state_is_on_its_own_domain(self):
+        # nvsos.gov is the Secretary of State's own site; it once needed an
+        # override entry (overrides.MEASURE_SOURCES_ELSEWHERE) to count for
+        # Nevada at all. It counts for Nevada alone, and a county's page
+        # still does not.
+        url = "https://www.nvsos.gov/elections/election-information/2026-election-information"
+        self.assertEqual(voting_dates.official_source(url, "NV"), (True, "nvsos.gov"))
+        self.assertFalse(voting_dates.official_source(url, "AZ")[0])
+        self.assertFalse(voting_dates.official_source("https://www.clarkcountynv.gov/x", "NV")[0])
+        self.assertFalse(voting_dates.official_source("https://nvsos.gov.example.com/x", "NV")[0])
+
+    def test_nevadas_early_voting_cites_the_offices_own_words_first(self):
+        record = voting_dates.load(".")["states"]["NV"]
+        for field in ("earlyVoting.start", "earlyVoting.end"):
+            first = next(s for s in record["sources"] if s["field"] == field)
+            self.assertTrue(first["url"].startswith("https://www.nvsos.gov/"), field)
+            self.assertIn("October 17th through October 30th", first["quote"])
+        self.assertNotIn("Verify against nvsos.gov", record["notes"])
+
     def test_every_jurisdiction_has_its_own_domains(self):
         self.assertEqual(set(voting_dates.JURISDICTION_DOMAINS), voting_dates.JURISDICTIONS)
 

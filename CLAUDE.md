@@ -2040,9 +2040,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     jurisdiction's own election office's - a county's only where the state
     publishes none that can be read, by an evidenced
     `overrides.STATEWIDE_LISTS_ELSEWHERE` entry - quoted and dated, and
-    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list is
-    named as the document it is ("the Clark County Registrar of Voters’
-    notice of general election"), never "Certified by" a body: the first
+    exactly the offices `kyc/ballot2026.py` puts on the ballot. A list the
+    office serves only to a person's browser is read by hand from the
+    office's own page, quoted and dated, as rule 57 reads a court's, and a
+    county's never stands in for it while a person can read the office's
+    own: Nevada's four offices cited Clark County's notice for a week
+    because nvsos.gov answers every script with a bot check, until the
+    Secretary of State's certified list was read that way (2026-10-25).
+    Arizona's still stand on its Clean Elections Commission's guide until
+    its Secretary of State's listing, behind a bot check too, is read the
+    same way. A list is named as the document it is ("the Pulaski County
+    Board of Election Commissioners’ notice of election"), never
+    "Certified by" a body: the first
     page credited a county's sample ballot and a commission's voter guide
     as certified by them. "Certified" is said only where the document's
     own words say so (`certifiedQuote`) and the state's own office
