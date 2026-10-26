@@ -1544,7 +1544,7 @@ def _fold(text):
 _SUFFIX_TOKENS = {"jr", "sr", "ii", "iii", "iv", "v", "md", "phd", "esq"}
 # Honorifics and credentials the FEC lets a filer type into the name field:
 # "URIBE, CHARLES MR. JR.", "RAZACK, MD JD, NIZAM", "BAIRD, JAMES R DR.".
-_TITLE_TOKENS = {"mr", "mrs", "ms", "miss", "dr", "hon", "rev", "sen", "rep",
+_TITLE_TOKENS = {"mr", "mrs", "ms", "miss", "dr", "hon", "honorable", "rev", "sen", "rep",
                  "md", "jd", "phd", "esq", "dds", "cpa", "ret", "usaf", "usmc",
                  "usn", "usa", "col", "capt", "maj", "lt", "sgt"}
 

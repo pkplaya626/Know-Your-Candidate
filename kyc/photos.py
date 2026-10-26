@@ -192,36 +192,62 @@ def too_heavy(weight):
     return ""
 
 
-def refused(*urls):
+def others_only(entry):
+    """Is a ``NOT_A_PORTRAIT`` entry's only finding other people in the
+    frame - behind, beside, in part - marked ``overrides.OTHERS_IN_FRAME``?
+    A picture of a person (a framed photograph on a shelf, a poster, a book
+    jacket) is not a person in the frame, and is never such an entry."""
+    from .overrides import OTHERS_IN_FRAME
+    return len(entry) > 2 and entry[2] == OTHERS_IN_FRAME
+
+
+def applies(entry, judge=False):
+    """Does a ``NOT_A_PORTRAIT`` entry refuse its file for this route? For
+    everyone, except that the owner's background-people rule ("probably
+    better to leave out background people", 2026-10-25) is for candidates'
+    and officials' photographs: of a judge's portrait - a federal judge's
+    Senate Judiciary hearing still, a state justice's from the court's own
+    roster - he said "keep" the same day, since the judge is plainly the
+    subject. So for a judge (*judge*) an entry whose only finding is other
+    people in the frame (:func:`others_only`) does not apply; one that
+    finds another person the subject, no likeness, a drawing or a scene
+    does, as do the licence doubts."""
+    return not (judge and others_only(entry))
+
+
+def refused(*urls, judge=False):
     """Why the lists a person keeps withhold one of *urls*, or ``""``:
     ``overrides.NOT_A_PORTRAIT`` (rule 38: someone looked, and it is not a
     likeness) or ``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82: its licence
     waits for a person). One test for every route that asks both - a
     nominee's (``nominee_photos``), an official's or a statewide
     candidate's (``official_photos.held_back``) and a judge's
-    (``judge_links.held_back``) - asked of a record read now and of one
-    kept from an earlier read (rule 8)."""
+    (``judge_links.held_back``, *judge*: :func:`applies`) - asked of a
+    record read now and of one kept from an earlier read (rule 8)."""
     from . import overrides
 
     doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
     for url in urls:
         if not url:
             continue
-        for table, name in ((overrides.NOT_A_PORTRAIT, "NOT_A_PORTRAIT"),
-                            (doubts, "PORTRAIT_LICENCE_DOUBTS")):
-            if url in table:
-                return f"{url} is in overrides.{name} ({table[url][1]})"
+        if url in overrides.NOT_A_PORTRAIT and applies(overrides.NOT_A_PORTRAIT[url], judge):
+            return f"{url} is in overrides.NOT_A_PORTRAIT ({overrides.NOT_A_PORTRAIT[url][1]})"
+        if url in doubts:
+            return f"{url} is in overrides.PORTRAIT_LICENCE_DOUBTS ({doubts[url][1]})"
     return ""
 
 
-def not_a_portrait(*urls, passed_over=None, table=None):
+def not_a_portrait(*urls, passed_over=None, table=None, judge=False):
     """The first of *urls* a person looked at and found no likeness of the
     person alone in (``overrides.NOT_A_PORTRAIT``, rule 38), or ``""``. The
     one test every reader asks of an image it meets on a page - a campaign
-    site's (``enrich``), a court's (``court_photos``), an attorney
+    site's (``enrich``), a court's (``court_photos``, *judge*), an attorney
     general's office's (``officers.add_ag_photos``), a statewide
-    candidate's guide or article (``statewide_photos``) - where
-    ``refused`` asks both lists of a record already made (rule 12).
+    candidate's guide or article (``statewide_photos``), a federal judge's
+    Commons file (``judge_links``, *judge*) - where ``refused`` asks both
+    lists of a record already made (rule 12). For a judge an entry whose
+    only finding is other people in the frame does not apply
+    (:func:`applies`, the owner's decision of 2026-10-25).
     What it refuses is appended to *passed_over*, the list the reader keeps
     in its cache as ``notPortraits``, so ``validate``'s staleness check
     knows the entry still names an image a route offers. *table* stands in
@@ -229,7 +255,7 @@ def not_a_portrait(*urls, passed_over=None, table=None):
     if table is None:
         from .overrides import NOT_A_PORTRAIT as table
     for url in urls:
-        if url and url in table:
+        if url and url in table and applies(table[url], judge):
             if passed_over is not None and url not in passed_over:
                 passed_over.append(url)
             return url
@@ -434,8 +460,14 @@ def parse_srcset(srcset, base=""):
 def offered_forms(offered):
     """The renditions a page's own srcset offers of one image, in the order
     they are tried: the narrowest at least :data:`CARD_WIDTH` wide first,
-    then the narrower ones, widest first."""
-    sized = sorted({(int(width), url) for url, width in offered or () if width})
+    then the narrower ones, widest first. A rendition that declares itself
+    wider than :data:`MAX_PORTRAIT_PX` is over the caps whatever it weighs,
+    and is not tried: Mark Nair's Squarespace page lists 100w to 2500w, and
+    the five tries went to 500w, 750w, 1000w, 1500w and 2500w, never
+    reaching 300w, the one within the caps, so his 479 KB original was
+    shown."""
+    sized = sorted({(int(width), url) for url, width in offered or ()
+                    if width and int(width) <= MAX_PORTRAIT_PX})
     wide = [url for width, url in sized if width >= CARD_WIDTH]
     narrow = [url for width, url in reversed(sized) if width < CARD_WIDTH]
     return wide + narrow

@@ -20,11 +20,11 @@
   "AR|sos|Kelly Grappe": "not-linked",
   "AR|sos|Michael Pakko": "not-linked",
   "AR|sos|Senator Kim Hammer": "no-image",
-  "AZ|governor|Risa Lombardo": "not-linked",
-  "AZ|governor|Teri Ann Hourihan": "not-linked",
-  "AZ|lt|Angela Harrolle Mohan": "not-linked",
-  "AZ|lt|Lisa Castillo": "not-linked",
-  "AZ|sos|Duwayne Collier": "not-linked",
+  "AZ|governor|HOURIHAN, TERI ANN": "not-linked",
+  "AZ|governor|LOMBARDO, RISA": "not-linked",
+  "AZ|lt|Castillo, Lisa": "not-linked",
+  "AZ|lt|Harrolle Mohan, Angela": "not-linked",
+  "AZ|sos|COLLIER, DUWAYNE": "not-linked",
   "CA|ag|Michael E. Gates": "not-linked",
   "CO|governor|Eric Mulder": "not-linked",
   "CO|governor|Erik Underwood": "not-linked",
@@ -50,6 +50,7 @@
   "CT|lt|Susan Bysiewicz": "file-name",
   "DE|ag|David C. \"Dave\" Graham": "not-linked",
   "FL|governor|Charles Burkett": "not-linked",
+  "FL|governor|David Jolly": "licence-doubt",
   "FL|governor|Dean Ocean Abrams": "not-linked",
   "FL|governor|Frank J. Russo": "not-linked",
   "FL|governor|Jeffrey Peter \"Dr. Jeff\" Datto": "not-linked",
@@ -100,6 +101,7 @@
   "IN|sos|Lauri A. Shillings": "not-linked",
   "IN|sos|Max Engling": "not-linked",
   "KS|ag|Chris Mann": "not-linked",
+  "KS|ag|Kris Kobach": "licence-doubt",
   "KS|governor|Cindy Holscher": "file-name",
   "KS|lt|Jeffrey Klemp": "no-image",
   "KS|lt|KC Ohaebosim": "no-image",
@@ -167,6 +169,7 @@
   "NM|sos|RAMONA L GOOLSBY": "not-linked",
   "NV|ag|Cannizzaro, Nicole Jeanette": "no-image",
   "NV|ag|Guzmán Fralick, Adriana": "not-linked",
+  "NV|governor|Ford, Aaron D.": "file-name",
   "NV|governor|Ford, Danielle": "not-linked",
   "NV|governor|Lombardo, Joseph": "not-linked",
   "NV|lt|Hansen, Janine": "not-linked",
@@ -224,6 +227,7 @@
   "SD|governor|Dan Ahlers": "file-name",
   "SD|lt|Steven McCleerey": "no-image",
   "SD|lt|Tony Venhuizen": "file-name",
+  "SD|sos|Heather Baxter": "not-a-portrait",
   "SD|sos|Tamara J. Lesnar": "not-linked",
   "SD|sos|Terrence Davis": "not-linked",
   "TN|governor|Charles Van Morgan": "not-linked",
@@ -276,6 +280,10 @@
   "WY|sos|Robert Short": "not-linked",
   "WY|sos|Tamara Trujillo": "file-name"
  },
+ "notPortraits": [
+  "https://upload.wikimedia.org/wikipedia/commons/7/7d/Heather_Baxter_by_Gage_Skidmore.jpg",
+  "https://www.azcleanelections.gov/Custom/Picture/2469"
+ ],
  "photos": {
   "AL|governor|DOUG JONES": {
    "article": "Doug Jones (politician)",
@@ -295,7 +303,7 @@
    "height": 303,
    "page": "https://en.wikipedia.org/wiki/2026_Alabama_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Senator_Doug_Jones_official_photo_%28cropped%29_2.jpg/250px-Senator_Doug_Jones_official_photo_%28cropped%29_2.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -307,7 +315,7 @@
    "height": 250,
    "page": "https://bioguide.congress.gov/search/bio/T000278",
    "photo": "https://www.congress.gov/img/member/t000278_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 200
   },
@@ -329,7 +337,7 @@
    "height": 312,
    "page": "https://en.wikipedia.org/wiki/2026_Arkansas_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Rep_Tim_Griffin_Official_Photo_%28cropped%29.jpg/250px-Rep_Tim_Griffin_Official_Photo_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -350,7 +358,7 @@
    "height": 321,
    "page": "https://en.wikipedia.org/wiki/2026_Arkansas_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Governor_Sarah_Huckabee_Sanders_2026.jpg/250px-Governor_Sarah_Huckabee_Sanders_2026.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -371,153 +379,142 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Arkansas_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Leslie_Rutledge_%2825475720912%29_%281%29.jpg/250px-Leslie_Rutledge_%2825475720912%29_%281%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
-  "AZ|ag|Kris Mayes": {
+  "AZ|ag|MAYES, KRIS": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 64846,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2292 with 'Kris Mayes', 'Attorney General', 'Democratic'",
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2292",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 800
   },
-  "AZ|ag|Warren Petersen": {
+  "AZ|ag|PETERSEN, WARREN": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 126899,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2427 with 'Warren Petersen', 'Attorney General', 'Republican'",
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2427",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 799
   },
-  "AZ|governor|Andy Biggs": {
+  "AZ|governor|BIGGS, ANDY": {
    "bioguide": "B001302",
    "by": "Congress.gov",
    "bytes": 8290,
-   "evidence": "Andy Biggs (B001302), whom overrides.OTHER_OFFICE_NOMINEES records as Republican nominee for Governor of Arizona (https://en.wikipedia.org/wiki/2026_Arizona_gubernatorial_election); the list prints 'Andy Biggs'. The portrait is the member's by bioguide id.",
+   "evidence": "Andy Biggs (B001302), whom overrides.OTHER_OFFICE_NOMINEES records as Republican nominee for Governor of Arizona (https://en.wikipedia.org/wiki/2026_Arizona_gubernatorial_election); the list prints 'BIGGS, ANDY'. The portrait is the member's by bioguide id.",
    "height": 263,
    "page": "https://bioguide.congress.gov/search/bio/B001302",
    "photo": "https://www.congress.gov/img/member/b001302_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 175
   },
-  "AZ|governor|Katie Hobbs": {
+  "AZ|governor|HOBBS, KATIE": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 75590,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2343 with 'Katie Hobbs', 'Governor', 'Democratic'",
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2343",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 800
   },
-  "AZ|governor|Risa Lombardo": {
-   "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 13470,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2460 with 'Risa Lombardo', 'Governor', 'Green'",
-   "height": 370,
-   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
-   "read": "2026-10-25",
-   "route": "guide",
-   "width": 296
-  },
-  "AZ|governor|Teri Ann Hourihan": {
+  "AZ|governor|HOURIHAN, TERI ANN": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 50602,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2366 with 'Teri Ann Hourihan', 'Governor', 'No Labels'",
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2366",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 666
   },
-  "AZ|lt|Angela Harrolle Mohan": {
+  "AZ|governor|LOMBARDO, RISA": {
    "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 63074,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2634 with 'Angela Harrolle Mohan (Hourihan)', 'Lieutenant Governor', 'Independent'",
-   "height": 870,
+   "bytes": 13470,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2460 with 'Risa Lombardo', 'Governor', 'Green'",
+   "height": 370,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
-   "read": "2026-10-25",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
+   "read": "2026-10-26",
    "route": "guide",
-   "width": 696
+   "width": 296
   },
-  "AZ|lt|John Giles": {
-   "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 61013,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2640 with 'John Giles (Hobbs)', 'Lieutenant Governor', 'Independent'",
-   "height": 894,
-   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
-   "read": "2026-10-25",
-   "route": "guide",
-   "width": 715
-  },
-  "AZ|lt|Lisa Castillo": {
+  "AZ|lt|Castillo, Lisa": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 49696,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2635 with 'Lisa Castillo (Lombardo)', 'Lieutenant Governor', 'Green'",
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2635",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 752
   },
-  "AZ|lt|Sine Kerr": {
+  "AZ|lt|Giles, John": {
+   "by": "Arizona Citizens Clean Elections Commission",
+   "bytes": 61013,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2640 with 'John Giles (Hobbs)', 'Lieutenant Governor', 'Independent'",
+   "height": 894,
+   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
+   "read": "2026-10-26",
+   "route": "guide",
+   "width": 715
+  },
+  "AZ|lt|Harrolle Mohan, Angela": {
+   "by": "Arizona Citizens Clean Elections Commission",
+   "bytes": 63074,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2634 with 'Angela Harrolle Mohan (Hourihan)', 'Lieutenant Governor', 'Independent'",
+   "height": 870,
+   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
+   "read": "2026-10-26",
+   "route": "guide",
+   "width": 696
+  },
+  "AZ|lt|Kerr, Sine": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 72487,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2642 with 'Sine Kerr (Biggs)', 'Lieutenant Governor', 'Republican'",
    "height": 955,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2642",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 764
   },
-  "AZ|sos|Adrian Fontes": {
+  "AZ|sos|FONTES, ADRIAN": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 48258,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2451 with 'Adrian Fontes', 'Secretary of State', 'Democratic'",
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2451",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 666
   },
-  "AZ|sos|Alexander Kolodin": {
+  "AZ|sos|KOLODIN, ALEXANDER": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 11411,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2302 with 'Alexander Kolodin', 'Secretary of State', 'Republican'",
    "height": 291,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2302",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 233
-  },
-  "AZ|sos|Duwayne Collier": {
-   "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 5920,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2469 with 'Duwayne Collier', 'Secretary of State', 'Green'",
-   "height": 220,
-   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2469",
-   "read": "2026-10-25",
-   "route": "guide",
-   "width": 176
   },
   "CA|ag|Rob Bonta": {
    "article": "Rob Bonta",
@@ -537,7 +534,7 @@
    "height": 317,
    "page": "https://en.wikipedia.org/wiki/2026_California_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Rob_Bonta_official_portrait_%28cropped%29.jpg/250px-Rob_Bonta_official_portrait_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -558,7 +555,7 @@
    "height": 328,
    "page": "https://en.wikipedia.org/wiki/2026_California_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Steve_Hilton_%2854233445987_crop%29.jpg/250px-Steve_Hilton_%2854233445987_crop%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -580,7 +577,7 @@
    "height": 412,
    "page": "https://en.wikipedia.org/wiki/2026_California_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/HHS_Xavier_Becerra.jpg/330px-HHS_Xavier_Becerra.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 330
   },
@@ -591,7 +588,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/lt-governor-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/lt-governor/ma.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 207
   },
@@ -613,7 +610,7 @@
    "height": 244,
    "page": "https://en.wikipedia.org/wiki/2026_California_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/e/e0/Gloria_Romero%2C_c._2007.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 179
   },
@@ -624,7 +621,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/sos-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/sos/wagner.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "guide",
    "width": 207
   },
@@ -646,7 +643,7 @@
    "height": 313,
    "page": "https://en.wikipedia.org/wiki/2026_California_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Shirley_Weber_%28cropped%29.jpg/250px-Shirley_Weber_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -667,7 +664,7 @@
    "height": 364,
    "page": "https://en.wikipedia.org/wiki/2026_Colorado_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Jena_Griswold_%28cropped%29.JPG/250px-Jena_Griswold_%28cropped%29.JPG",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -688,7 +685,7 @@
    "height": 335,
    "page": "https://en.wikipedia.org/wiki/2026_Colorado_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Allen_Headshot_-_Pikes_Peak_background_%28cropped%29.jpg/250px-Allen_Headshot_-_Pikes_Peak_background_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -709,7 +706,7 @@
    "height": 331,
    "page": "https://en.wikipedia.org/wiki/2026_Colorado_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Victor_Marx_%2852125665777%29_%28cropped%29.jpg/250px-Victor_Marx_%2852125665777%29_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -731,7 +728,7 @@
    "height": 160,
    "page": "https://en.wikipedia.org/wiki/2026_Connecticut_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/Ned_Lamont%2C_2026_%28cropped%29.jpg/120px-Ned_Lamont%2C_2026_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 120
   },
@@ -752,7 +749,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Connecticut_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Ryan_Fazio%2C_2026_%28cropped%29.jpg/250px-Ryan_Fazio%2C_2026_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -774,7 +771,7 @@
    "height": 309,
    "page": "https://en.wikipedia.org/wiki/2026_Delaware_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/86/Kathy_Jennings_CFPB.png/250px-Kathy_Jennings_CFPB.png",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -796,7 +793,7 @@
    "height": 345,
    "page": "https://en.wikipedia.org/wiki/2026_Florida_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Official_portrait_of_Attorney_General_James_Uthmeier%2C_2025_%28cropped%29.jpg/250px-Official_portrait_of_Attorney_General_James_Uthmeier%2C_2025_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -818,7 +815,7 @@
    "height": 341,
    "page": "https://en.wikipedia.org/wiki/2026_Florida_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Jose_Javier_Rodriguez_Senate_Photo.jpg/250px-Jose_Javier_Rodriguez_Senate_Photo.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -830,30 +827,9 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/D000032",
    "photo": "https://www.congress.gov/img/member/d000032_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 175
-  },
-  "FL|governor|David Jolly": {
-   "article": "David Jolly",
-   "bytes": 17767,
-   "credit": {
-    "basis": "PD US Congress",
-    "by": null,
-    "licence": "Public domain",
-    "licenceUrl": null,
-    "page": "https://commons.wikimedia.org/wiki/File:David_Jolly_(cropped).jpg",
-    "via": "Wikimedia Commons",
-    "yearForm": 4,
-    "yearUnstated": true
-   },
-   "evidence": "The race's article '2026 Florida gubernatorial election' links [[David Jolly]] for the list's 'David Jolly'; the article 'David Jolly' is the nominee's, and the race's infobox sets File:David Jolly (cropped).jpg beside them",
-   "height": 312,
-   "page": "https://en.wikipedia.org/wiki/2026_Florida_gubernatorial_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/David_Jolly_%28cropped%29.jpg/250px-David_Jolly_%28cropped%29.jpg",
-   "read": "2026-10-25",
-   "route": "wikipedia",
-   "width": 250
   },
   "FL|governor|Moliere \"Moe\" Dimanche": {
    "article": "Moliere Dimanche",
@@ -872,7 +848,7 @@
    "height": 262,
    "page": "https://en.wikipedia.org/wiki/2026_Florida_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Moliere_dimanche.png/250px-Moliere_dimanche.png",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -894,7 +870,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Florida_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/26/Gwen_Graham%2C_Official_Portrait%2C_114th_Congress_%28cropped%29.jpg/250px-Gwen_Graham%2C_Official_Portrait%2C_114th_Congress_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -916,7 +892,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Georgia_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/61/Keisha_Lance_Bottoms_%28cropped%29.jpg/250px-Keisha_Lance_Bottoms_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -937,7 +913,7 @@
    "height": 306,
    "page": "https://en.wikipedia.org/wiki/2026_Georgia_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/29/Rick_Jackson_%28cropped%29_%28cropped%29.png/250px-Rick_Jackson_%28cropped%29_%28cropped%29.png",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -958,7 +934,7 @@
    "height": 344,
    "page": "https://en.wikipedia.org/wiki/2026_Hawaii_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Josh_Green_Official_Photo_2022_%28cropped%29_%28cropped%29.jpg/250px-Josh_Green_Official_Photo_2022_%28cropped%29_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -979,7 +955,7 @@
    "height": 331,
    "page": "https://en.wikipedia.org/wiki/2026_Iowa_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Brenna_Bird_by_Gage_Skidmore_2.jpg/250px-Brenna_Bird_by_Gage_Skidmore_2.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1000,7 +976,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Iowa_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Rob_Sand_campaign_headshot_%28cropped_1%29.jpg/250px-Rob_Sand_campaign_headshot_%28cropped_1%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1021,7 +997,7 @@
    "height": 312,
    "page": "https://en.wikipedia.org/wiki/2026_Iowa_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Paul_Pate_%28cropped%29.jpeg/250px-Paul_Pate_%28cropped%29.jpeg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1043,7 +1019,7 @@
    "height": 335,
    "page": "https://en.wikipedia.org/wiki/2026_Idaho_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Raul_Labrador_115th_%28cropped%29.jpg/250px-Raul_Labrador_115th_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1064,7 +1040,7 @@
    "height": 359,
    "page": "https://en.wikipedia.org/wiki/2026_Idaho_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Brad_Little_official_photo_%28cropped%29.jpg/250px-Brad_Little_official_photo_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1085,7 +1061,7 @@
    "height": 329,
    "page": "https://en.wikipedia.org/wiki/2026_Idaho_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Scott_Bedke_in_2022_%28cropped%29.jpg/250px-Scott_Bedke_in_2022_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1106,7 +1082,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Illinois_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/69/Kwame_Raoul_RFCG_%28adjust2%29.jpg/250px-Kwame_Raoul_RFCG_%28adjust2%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1127,28 +1103,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Illinois_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/JB_Pritzker_2026_%28cropped_3x4%29.jpg/250px-JB_Pritzker_2026_%28cropped_3x4%29.jpg",
-   "read": "2026-10-25",
-   "route": "wikipedia",
-   "width": 250
-  },
-  "KS|ag|Kris Kobach": {
-   "article": "Kris Kobach",
-   "by": "WilliamJHendrixKS",
-   "bytes": 19898,
-   "credit": {
-    "by": "WilliamJHendrixKS",
-    "licence": "CC0",
-    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "page": "https://commons.wikimedia.org/wiki/File:Kris_Kobach_official_portrait,_2024_(cropped).jpg",
-    "via": "Wikimedia Commons",
-    "year": 2024,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 Kansas Attorney General election' links [[Kris Kobach]] for the list's 'Kris Kobach'; the article 'Kris Kobach' is the nominee's, and the race's infobox sets File:Kris Kobach official portrait, 2024 (cropped).jpg beside them",
-   "height": 321,
-   "page": "https://en.wikipedia.org/wiki/2026_Kansas_Attorney_General_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Kris_Kobach_official_portrait%2C_2024_%28cropped%29.jpg/250px-Kris_Kobach_official_portrait%2C_2024_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1169,7 +1124,7 @@
    "height": 352,
    "page": "https://en.wikipedia.org/wiki/2026_Kansas_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/TY_mASTERSON_%28cropped%29.jpg/250px-TY_mASTERSON_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1191,7 +1146,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Massachusetts_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Andrea_Campbell_official_attorney_general_headshot%2C_2023_%283x4%29.jpg/250px-Andrea_Campbell_official_attorney_general_headshot%2C_2023_%283x4%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1213,7 +1168,7 @@
    "height": 324,
    "page": "https://en.wikipedia.org/wiki/2026_Massachusetts_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Maura_Healey%2C_official_portrait%2C_governor_%28cropped%29.jpg/250px-Maura_Healey%2C_official_portrait%2C_governor_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1235,7 +1190,7 @@
    "height": 318,
    "page": "https://en.wikipedia.org/wiki/2026_Massachusetts_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Kim_Driscoll%2C_official_portrait%2C_lieutenant_governor.jpg/250px-Kim_Driscoll%2C_official_portrait%2C_lieutenant_governor.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1256,7 +1211,7 @@
    "height": 312,
    "page": "https://en.wikipedia.org/wiki/2026_Maryland_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Anthony_G._Brown_%28November_2023%29.jpg/250px-Anthony_G._Brown_%28November_2023%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1277,7 +1232,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Maryland_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Dan_Cox_Mar2020_%2849617550556%29.jpg/250px-Dan_Cox_Mar2020_%2849617550556%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1298,7 +1253,7 @@
    "height": 313,
    "page": "https://en.wikipedia.org/wiki/2026_Maryland_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Aruna_Miller_Official_Portrait.jpg/250px-Aruna_Miller_Official_Portrait.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1319,7 +1274,7 @@
    "height": 314,
    "page": "https://en.wikipedia.org/wiki/2026_Maine_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Headshot_of_Hannah_Pingree_in_February_2026_%28cropped%29.jpg/250px-Headshot_of_Hannah_Pingree_in_February_2026_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1340,7 +1295,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Maine_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/db/Robert_Charles_%28cropped%29.jpg/250px-Robert_Charles_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1361,7 +1316,7 @@
    "height": 272,
    "page": "https://en.wikipedia.org/wiki/2026_Michigan_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d9/Eli_Savit_Photo_%28cropped%29.jpg/250px-Eli_Savit_Photo_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1382,7 +1337,7 @@
    "height": 308,
    "page": "https://en.wikipedia.org/wiki/2026_Michigan_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/SOS_Jocelyn_Benson_web_%28cropped%29.jpg/250px-SOS_Jocelyn_Benson_web_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1394,7 +1349,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/J000307",
    "photo": "https://www.congress.gov/img/member/j000307_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 175
   },
@@ -1415,7 +1370,7 @@
    "height": 318,
    "page": "https://en.wikipedia.org/wiki/2026_Michigan_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Garlin_Gilchrist_in_Grand_Rapids.jpg/250px-Garlin_Gilchrist_in_Grand_Rapids.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1437,7 +1392,7 @@
    "height": 325,
    "page": "https://en.wikipedia.org/wiki/2026_Minnesota_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/62/Keith_Ellison_portrait.jpg/250px-Keith_Ellison_portrait.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1449,7 +1404,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/K000367",
    "photo": "https://www.congress.gov/img/member/k000367_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 180
   },
@@ -1470,7 +1425,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Minnesota_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Lisa_Demuth%2C_2026_%283x4%29.jpg/250px-Lisa_Demuth%2C_2026_%283x4%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1492,7 +1447,7 @@
    "height": 314,
    "page": "https://en.wikipedia.org/wiki/2026_Minnesota_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Portrait_of_Tad_Jude_%28cropped%29.jpg/250px-Portrait_of_Tad_Jude_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1514,7 +1469,7 @@
    "height": 324,
    "page": "https://en.wikipedia.org/wiki/2026_Northern_Mariana_Islands_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/BJ_Attao_Headshot_2025.jpg/250px-BJ_Attao_Headshot_2025.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1536,7 +1491,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Northern_Mariana_Islands_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Governor_Torres_official_portrait%2C_high_resolution_%281%29.jpg/250px-Governor_Torres_official_portrait%2C_high_resolution_%281%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1558,7 +1513,7 @@
    "height": 312,
    "page": "https://en.wikipedia.org/wiki/2026_Northern_Mariana_Islands_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Edmund_Villagomez_22nd_CNMI_Leg.jpg/250px-Edmund_Villagomez_22nd_CNMI_Leg.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1580,7 +1535,7 @@
    "height": 229,
    "page": "https://en.wikipedia.org/wiki/2026_North_Dakota_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/c/c1/Drew_Wrigley_-_official_U.S._Attorney_portrait_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 180
   },
@@ -1602,7 +1557,7 @@
    "height": 338,
    "page": "https://en.wikipedia.org/wiki/2026_North_Dakota_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Michael_Howe_ND_Blue_Book_2023.png/250px-Michael_Howe_ND_Blue_Book_2023.png",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1623,7 +1578,7 @@
    "height": 375,
    "page": "https://en.wikipedia.org/wiki/2026_Nebraska_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Mike_Hilgers.jpg/250px-Mike_Hilgers.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1644,7 +1599,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Nebraska_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Brett_Lindstrom_%28cropped%29.jpg/250px-Brett_Lindstrom_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1665,7 +1620,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Nebraska_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Jim_Pillen_SelectUSA_%2855251574792%29.jpg/250px-Jim_Pillen_SelectUSA_%2855251574792%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1686,14 +1641,14 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Nebraska_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Joe_Kelly_%2855412180714%29.jpg/250px-Joe_Kelly_%2855412180714%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
   "NE|sos|Bob Krist": {
    "article": "Bob Krist",
    "by": "No1husker ( Uploads )",
-   "bytes": 66778,
+   "bytes": 22449,
    "credit": {
     "by": "No1husker ( Uploads )",
     "licence": "CC BY 3.0",
@@ -1704,12 +1659,12 @@
     "yearForm": 4
    },
    "evidence": "The race's article '2026 Nebraska Secretary of State election' links [[Bob Krist]] for the list's 'Bob Krist'; the article 'Bob Krist' leads with File:Bob Krist photo.jpg",
-   "height": 630,
+   "height": 315,
    "page": "https://en.wikipedia.org/wiki/2026_Nebraska_Secretary_of_State_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Bob_Krist_photo.jpg/500px-Bob_Krist_photo.jpg",
-   "read": "2026-10-25",
+   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Bob_Krist_photo.jpg/250px-Bob_Krist_photo.jpg",
+   "read": "2026-10-26",
    "route": "wikipedia",
-   "width": 500
+   "width": 250
   },
   "NH|governor|Kelly Ayotte": {
    "article": "Kelly Ayotte",
@@ -1729,7 +1684,7 @@
    "height": 339,
    "page": "https://en.wikipedia.org/wiki/2026_New_Hampshire_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8f/NH_Governor_Kelly_Ayotte_%28December_11%2C_2025%29.jpg/250px-NH_Governor_Kelly_Ayotte_%28December_11%2C_2025%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1750,7 +1705,7 @@
    "height": 306,
    "page": "https://en.wikipedia.org/wiki/2026_New_Mexico_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Ra%C3%BAl_Torrez_%28cropped_2%29.jpg/250px-Ra%C3%BAl_Torrez_%28cropped_2%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1772,7 +1727,7 @@
    "height": 307,
    "page": "https://en.wikipedia.org/wiki/2026_New_Mexico_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Secretary_Deb_Haaland%2C_official_headshot.jpg/250px-Secretary_Deb_Haaland%2C_official_headshot.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1793,29 +1748,7 @@
    "height": 250,
    "page": "https://en.wikipedia.org/wiki/2026_New_Mexico_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Stephanie_Garcia_Richard_in_2018.jpg/250px-Stephanie_Garcia_Richard_in_2018.jpg",
-   "read": "2026-10-25",
-   "route": "wikipedia",
-   "width": 250
-  },
-  "NV|governor|Ford, Aaron D.": {
-   "article": "Aaron Ford (Nevada politician)",
-   "by": "United States Mission to Geneva, United States Department of State",
-   "bytes": 26718,
-   "credit": {
-    "basis": "CC-PD-Mark",
-    "by": "United States Mission to Geneva, United States Department of State",
-    "licence": "Public domain",
-    "licenceUrl": null,
-    "page": "https://commons.wikimedia.org/wiki/File:Nevada_Attorney_General_Aaron_Ford_addresses_the_United_Nations_Human_Rights_Committee,_October_17-18,_2023_1_(cropped).jpg",
-    "via": "Wikimedia Commons",
-    "year": 2023,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 Nevada gubernatorial election' links [[Aaron Ford (Nevada politician)]] for the list's 'Ford, Aaron D.'; the article 'Aaron Ford (Nevada politician)' is the nominee's, and the race's infobox sets File:Nevada Attorney General Aaron Ford addresses the United Nations Human Rights Committee, October 17-18, 2023 1 (cropped).jpg beside them",
-   "height": 350,
-   "page": "https://en.wikipedia.org/wiki/2026_Nevada_gubernatorial_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Nevada_Attorney_General_Aaron_Ford_addresses_the_United_Nations_Human_Rights_Committee%2C_October_17-18%2C_2023_1_%28cropped%29.jpg/250px-Nevada_Attorney_General_Aaron_Ford_addresses_the_United_Nations_Human_Rights_Committee%2C_October_17-18%2C_2023_1_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1837,7 +1770,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Nevada_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Stavros_Anthony%2C_2023_%28cropped%29.jpg/250px-Stavros_Anthony%2C_2023_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1858,7 +1791,7 @@
    "height": 319,
    "page": "https://en.wikipedia.org/wiki/2026_Nevada_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Jim_Marchant.jpg/250px-Jim_Marchant.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1879,7 +1812,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Ohio_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Amy_Acton_05_%28cropped%29.jpg/250px-Amy_Acton_05_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1900,7 +1833,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Ohio_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Vivek_Ramaswamy_%2855241367373%29_%28cropped%29.jpg/250px-Vivek_Ramaswamy_%2855241367373%29_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1921,7 +1854,7 @@
    "height": 330,
    "page": "https://en.wikipedia.org/wiki/2026_Ohio_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9a/David_A_Pepper_%28City_Club_of_Cleveland%29_%28cropped%29.jpg/250px-David_A_Pepper_%28City_Club_of_Cleveland%29_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1942,7 +1875,7 @@
    "height": 331,
    "page": "https://en.wikipedia.org/wiki/2026_Oregon_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Christine_Drazan_in_August_2022_%28cropped%29.jpg/250px-Christine_Drazan_in_August_2022_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1963,7 +1896,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Pennsylvania_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Josh_Shapiro_December_2025_B.jpg/250px-Josh_Shapiro_December_2025_B.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -1985,7 +1918,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Pennsylvania_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Stacy_Garrity%2C_2025_%283x4%29.jpg/250px-Stacy_Garrity%2C_2025_%283x4%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2006,7 +1939,7 @@
    "height": 384,
    "page": "https://en.wikipedia.org/wiki/2026_Rhode_Island_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/9/96/John_J._Loughlin_Jr_Rhode_Island.png",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 242
   },
@@ -2027,7 +1960,7 @@
    "height": 375,
    "page": "https://en.wikipedia.org/wiki/2026_Rhode_Island_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Rhode_Island_Lieutenant_governor_Sabina_Matos.jpg/250px-Rhode_Island_Lieutenant_governor_Sabina_Matos.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2048,7 +1981,7 @@
    "height": 368,
    "page": "https://en.wikipedia.org/wiki/2026_Rhode_Island_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Rhode_Island_Secretary_Of_State_Gregg_M._Amore.jpg/250px-Rhode_Island_Secretary_Of_State_Gregg_M._Amore.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2070,7 +2003,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_South_Carolina_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Alan_Wilson_in_August_2025.jpg/250px-Alan_Wilson_in_August_2025.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2091,7 +2024,7 @@
    "height": 323,
    "page": "https://en.wikipedia.org/wiki/2026_South_Carolina_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Mark_Hammond_cropped.jpg/250px-Mark_Hammond_cropped.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2112,28 +2045,7 @@
    "height": 356,
    "page": "https://en.wikipedia.org/wiki/2026_South_Dakota_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Larry_Rhoden_2025_%28cropped%29.jpg/250px-Larry_Rhoden_2025_%28cropped%29.jpg",
-   "read": "2026-10-25",
-   "route": "wikipedia",
-   "width": 250
-  },
-  "SD|sos|Heather Baxter": {
-   "article": "Heather Baxter",
-   "by": "Gage Skidmore",
-   "bytes": 23442,
-   "credit": {
-    "by": "Gage Skidmore",
-    "licence": "CC BY-SA 3.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "page": "https://commons.wikimedia.org/wiki/File:Heather_Baxter_by_Gage_Skidmore.jpg",
-    "via": "Wikimedia Commons",
-    "year": 2024,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 South Dakota Secretary of State election' links [[Heather Baxter]] for the list's 'Heather Baxter'; the article 'Heather Baxter' leads with File:Heather Baxter by Gage Skidmore.jpg",
-   "height": 334,
-   "page": "https://en.wikipedia.org/wiki/2026_South_Dakota_Secretary_of_State_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/Heather_Baxter_by_Gage_Skidmore.jpg/250px-Heather_Baxter_by_Gage_Skidmore.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2145,7 +2057,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/B001243",
    "photo": "https://www.congress.gov/img/member/b001243_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 180
   },
@@ -2166,7 +2078,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Texas_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Mayes_Middleton_by_Gage_Skidmore_%28cropped%29.jpg/250px-Mayes_Middleton_by_Gage_Skidmore_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2188,7 +2100,7 @@
    "height": 328,
    "page": "https://en.wikipedia.org/wiki/2026_Texas_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Greg_Abbott_2026.jpg/250px-Greg_Abbott_2026.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2209,7 +2121,7 @@
    "height": 312,
    "page": "https://en.wikipedia.org/wiki/2026_Texas_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Dan_Patrick_Texas_%28alt_crop%29.jpg/250px-Dan_Patrick_Texas_%28alt_crop%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2230,7 +2142,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Texas_lieutenant_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/HiRes-Vikki_Goodwin-6381-red_%28cropped%29_%28cropped%29.jpg/250px-HiRes-Vikki_Goodwin-6381-red_%28cropped%29_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2242,7 +2154,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/P000610",
    "photo": "https://www.congress.gov/img/member/p000610_200.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "member",
    "width": 175
   },
@@ -2263,7 +2175,7 @@
    "height": 314,
    "page": "https://en.wikipedia.org/wiki/2026_United_States_Virgin_Islands_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Warren_Mosler_2012_cropped.jpg/250px-Warren_Mosler_2012_cropped.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2284,7 +2196,7 @@
    "height": 312,
    "page": "https://en.wikipedia.org/wiki/2026_Vermont_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c0/Charity_Clark.jpg/250px-Charity_Clark.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2306,7 +2218,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Vermont_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Phil_Scott_2019_%28cropped%29.jpg/250px-Phil_Scott_2019_%28cropped%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2327,7 +2239,7 @@
    "height": 334,
    "page": "https://en.wikipedia.org/wiki/2026_Wisconsin_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Josh_Kaul-13_-_44610449305_%283x4b%29.jpg/250px-Josh_Kaul-13_-_44610449305_%283x4b%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2348,7 +2260,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Wisconsin_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/David_Crowley_2026_%283x4_crop%29.jpg/250px-David_Crowley_2026_%283x4_crop%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2370,7 +2282,7 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Wisconsin_gubernatorial_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Tom_Tiffany_%283x4_crop%29.jpg/250px-Tom_Tiffany_%283x4_crop%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   },
@@ -2391,10 +2303,10 @@
    "height": 333,
    "page": "https://en.wikipedia.org/wiki/2026_Wisconsin_Secretary_of_State_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/JoCasta_Zamarripa_%2851017746066%29.jpg/250px-JoCasta_Zamarripa_%2851017746066%29.jpg",
-   "read": "2026-10-25",
+   "read": "2026-10-26",
    "route": "wikipedia",
    "width": 250
   }
  },
- "read": "2026-10-25"
+ "read": "2026-10-26"
 }

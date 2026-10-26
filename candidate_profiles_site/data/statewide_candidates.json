@@ -520,85 +520,84 @@
    "verified": "AR verified 2026-10-18: every name, ballot title and party re-read in the Pulaski notice (Last-Modified 2026-10-05) and Washington County's table (updated 08/21/26), and confirmed against the SoS's own candidate search (candidates.arkansas.gov, added as corroboration); Jester listed for Commissioner of State Lands. certified stays false (no state certified list published). No value changed."
   },
   "AZ": {
-   "notes": "Read 2026-10-18. The Secretary of State's own candidate listing (apps.arizona.vote/electioninfo/Election/69) is behind a Cloudflare bot check that a script cannot pass, so it was not read. Sources used: the Citizens Clean Elections Commission's 2026 Voter Education Guide (the state's statutory candidate statement pamphlet; PDF Last-Modified 2026-09-11), cross-checked against Pima County's official general election candidate list (updated 9/9/2026), which agree on every name and running mate; write-in and withdrawn candidates from the Secretary of State's list revised 9/9/2026. Names as the guide prints them (the Pima list prints 'LAST, FIRST' in capitals). Skeptic 2026-10-18: re-read the guide, the Pima list and the SoS write-in list; the write-in list (Revised 9/9/2026) is still the file the SoS links from https://azsos.gov/media/718 (\"2026 General Write-In and Withdrawn Candidate List\") on 2026-10-18. The Pima file is titled \"General Election-November 3, 2026 Candidate List\" (it does not say \"Official\").",
+   "notes": "Source for all four offices: the Secretary of State's candidate listing for the 2026 General Election (https://apps.arizona.vote/electioninfo/Election/69), State tab: the page '2026 General Election / Tuesday, November 03, 2026' under the banner 'ADRIAN FONTES, SECRETARY OF STATE', footer 'Copyright (c) 2026 Arizona Secretary of State'. It does not call itself certified or official and gives no date of its own, so the day read is its date. apps.arizona.vote, like azsos.gov, answers every script with a Cloudflare challenge ('Just a moment...', HTTP 403) and serves its pages only to a person's browser, so it was read by hand on 2026-10-26 in an ordinary Chrome, with no attempt to get a script past the check (rule 57's reading by hand, rule 91). Each candidate is printed 'LAST, FIRST (PARTY)'; 'name' is that, and parties are the listing's codes, spelled out from the Secretary of State's own key (statewide.PARTY_CODES). It names the same people, parties, tickets and write-in candidates as the Citizens Clean Elections Commission's 2026 Voter Education Guide and Pima County's candidate list, which this file cited from 2026-10-18 to 2026-10-26.",
    "offices": {
     "ag": {
      "candidates": [
       {
        "holder": true,
-       "name": "Kris Mayes",
-       "party": "Democratic",
+       "name": "MAYES, KRIS",
+       "party": "DEM",
        "runningMate": null,
        "surname": "Mayes",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Warren Petersen",
-       "party": "Republican",
+       "name": "PETERSEN, WARREN",
+       "party": "REP",
        "runningMate": null,
        "surname": "Petersen",
        "writeIn": false
       }
      ],
      "certified": false,
-     "holderNote": "In the guide among the candidates for Attorney General, and on Pima County's official candidate list.",
+     "holderNote": "Democratic candidate for Attorney General on the Secretary of State's candidate listing ('MAYES, KRIS (DEM)').",
      "holderOnList": true,
      "holderResearched": "Kris Mayes",
      "holderSource": {
-      "quote": "CANDIDATES FOR ATTORNEY GENERAL ... Kris Mayes Party: Democratic Funding: Traditional Website: www.krismayes.com",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "quote": "Attorney General / PETERSEN, WARREN (REP) / MAYES, KRIS (DEM)",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
      "list": {
-      "by": "Arizona Citizens Clean Elections Commission",
-      "dated": "2026-09-11",
-      "kind": "voter education guide",
-      "quote": "Warren Petersen Party: Republican Funding: Traditional Website: www.petersenforag.com",
-      "read": "2026-10-18",
-      "title": "2026 Voter Education Guide (Arizona Citizens Clean Elections Commission), November 3, 2026 General Election, English",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "by": "Arizona Secretary of State",
+      "dated": null,
+      "kind": "candidate listing",
+      "quote": "Attorney General / PETERSEN, WARREN (REP) / MAYES, KRIS (DEM)",
+      "read": "2026-10-26",
+      "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
-     "notStateList": "The Secretary of State's own list could not be read (it is behind a bot check); this is the voter education guide of the state's Clean Elections Commission, which certifies no candidates, and Pima County's official candidate list names the same candidates and running mates",
-     "notes": "The Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026 8:00 AM, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799) lists exactly the same candidates for this office.",
+     "notes": "It names the same candidates and parties for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
      "title": "Attorney General"
     },
     "governor": {
      "candidates": [
       {
        "holder": false,
-       "name": "Andy Biggs",
-       "party": "Republican",
-       "runningMate": "Sine Kerr",
+       "name": "BIGGS, ANDY",
+       "party": "REP",
+       "runningMate": "Kerr, Sine",
        "surname": "Biggs",
        "writeIn": false
       },
       {
        "holder": true,
-       "name": "Katie Hobbs",
-       "party": "Democratic",
-       "runningMate": "John Giles",
+       "name": "HOBBS, KATIE",
+       "party": "DEM",
+       "runningMate": "Giles, John",
        "surname": "Hobbs",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Teri Ann Hourihan",
-       "party": "No Labels",
-       "runningMate": "Angela Harrolle Mohan",
+       "name": "HOURIHAN, TERI ANN",
+       "party": "NOL",
+       "runningMate": "Harrolle Mohan, Angela",
        "surname": "Hourihan",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Risa Lombardo",
-       "party": "Green",
-       "runningMate": "Lisa Castillo",
+       "name": "LOMBARDO, RISA",
+       "party": "GRN",
+       "runningMate": "Castillo, Lisa",
        "surname": "Lombardo",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Gertritrude Gonzalez",
+       "name": "GONZALEZ, GERTRITRUDE",
        "party": "REP",
        "runningMate": null,
        "surname": "Gonzalez",
@@ -606,7 +605,7 @@
       },
       {
        "holder": false,
-       "name": "Alice Novoa",
+       "name": "NOVOA, ALICE",
        "party": "REP",
        "runningMate": null,
        "surname": "Novoa",
@@ -614,64 +613,56 @@
       }
      ],
      "certified": false,
-     "holderNote": "In the Clean Elections Commission's guide among the candidates for Governor, and on Pima County's official candidate list.",
+     "holderNote": "Democratic candidate for Governor on the Secretary of State's candidate listing ('HOBBS, KATIE (DEM)', with 'Giles, John (PND)' as her Lieutenant Governor).",
      "holderOnList": true,
      "holderResearched": "Katie Hobbs",
      "holderSource": {
-      "quote": "CANDIDATES FOR GOVERNOR ... Katie Hobbs Party: Democratic Funding: Traditional Website: katiehobbs.org",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "quote": "HOBBS, KATIE (DEM) / Giles, John (PND) / Lieutenant Governor",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
      "list": {
-      "by": "Arizona Citizens Clean Elections Commission",
-      "dated": "2026-09-11",
-      "kind": "voter education guide",
-      "quote": "Andy Biggs Party: Republican Funding: Traditional Website: biggsforarizona.com",
-      "read": "2026-10-18",
-      "title": "2026 Voter Education Guide (Arizona Citizens Clean Elections Commission), November 3, 2026 General Election, English",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
-     },
-     "notStateList": "The Secretary of State's own list could not be read (it is behind a bot check); this is the voter education guide of the state's Clean Elections Commission, which certifies no candidates, and Pima County's official candidate list names the same candidates and running mates",
-     "notes": "The Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026 8:00 AM, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799) lists exactly the same candidates for this office. Governor and Lieutenant Governor are one contest ('Governor and Lieutenant Governor ... Vote for not more than 1' on the Pima list). The two write-in candidates come from the Secretary of State's 'General Election November 3, 2026 Write-In and Withdrawn Candidates' list (Revised 9/9/2026, https://azsos.gov/sites/default/files/docs/2026-General-Write-In-and-Withdrawn-Candidate-List-0909.pdf): 'Gertritrude Gonzalez Governor All Counties REP' and 'Alice Novoa Governor All Counties REP'; it names no running mate for either and lists no withdrawn candidates ('none'). Party labels for ballot candidates are the guide's words; the Pima list abbreviates them DEM, REP, NOL, GRN.",
-     "title": "Governor",
-     "writeInList": {
       "by": "Arizona Secretary of State",
-      "kind": "list of write-in and withdrawn candidates",
-      "read": "2026-10-18",
-      "title": "Arizona Secretary of State, 'General Election November 3, 2026 Write-In and Withdrawn Candidates' (Revised 9/9/2026)",
-      "url": "https://azsos.gov/sites/default/files/docs/2026-General-Write-In-and-Withdrawn-Candidate-List-0909.pdf"
-     }
+      "dated": null,
+      "kind": "candidate listing",
+      "quote": "Governor / BIGGS, ANDY (REP) / Kerr, Sine (REP) / Lieutenant Governor / HOBBS, KATIE (DEM) / Giles, John (PND) / Lieutenant Governor / LOMBARDO, RISA (GRN) / Castillo, Lisa (GRN) / Lieutenant Governor / HOURIHAN, TERI ANN (NOL) / Harrolle Mohan, Angela (PND) / Lieutenant Governor / GONZALEZ, GERTRITRUDE (REP) / Write-In Candidate / NOVOA, ALICE (REP) / Write-In Candidate",
+      "read": "2026-10-26",
+      "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
+     },
+     "notes": "Governor and Lieutenant Governor are one contest: the listing prints each governor candidate's running mate under them as 'Last, First (PARTY)' with the link 'Lieutenant Governor' (Arizona Constitution, art. 5, sec. 1(C): each nominee for governor 'shall run on a ticket as a joint candidate'). The two write-in candidates are marked 'Write-In Candidate' on the listing, which names no running mate for either; the Secretary of State's 'General Election November 3, 2026 Write-In and Withdrawn Candidates' list (Revised 9/9/2026, https://azsos.gov/sites/default/files/docs/2026-General-Write-In-and-Withdrawn-Candidate-List-0909.pdf, linked from https://azsos.gov/media/718, re-read by hand 2026-10-26) names the same two ('Gertritrude Gonzalez Governor All Counties REP', 'Alice Novoa Governor All Counties REP') and no withdrawn candidate ('none'). It names the same candidates, parties, running mates and write-in candidates for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
+     "title": "Governor"
     },
     "lt": {
      "candidates": [
       {
        "holder": false,
-       "name": "Sine Kerr",
-       "party": "Republican",
-       "runningMate": "Andy Biggs",
+       "name": "Kerr, Sine",
+       "party": "REP",
+       "runningMate": "BIGGS, ANDY",
        "surname": "Kerr",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "John Giles",
-       "party": "Independent",
-       "runningMate": "Katie Hobbs",
+       "name": "Giles, John",
+       "party": "PND",
+       "runningMate": "HOBBS, KATIE",
        "surname": "Giles",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Angela Harrolle Mohan",
-       "party": "Independent",
-       "runningMate": "Teri Ann Hourihan",
-       "surname": "Mohan",
+       "name": "Harrolle Mohan, Angela",
+       "party": "PND",
+       "runningMate": "HOURIHAN, TERI ANN",
+       "surname": "Harrolle Mohan",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Lisa Castillo",
-       "party": "Green",
-       "runningMate": "Risa Lombardo",
+       "name": "Castillo, Lisa",
+       "party": "GRN",
+       "runningMate": "LOMBARDO, RISA",
        "surname": "Castillo",
        "writeIn": false
       }
@@ -681,72 +672,70 @@
      "holderOnList": null,
      "holderResearched": null,
      "holderSource": {
-      "quote": "The first time voters will be choosing an Arizona Lieutenant Governor will be in 2026. Voters will elect the Governor and Lieutenant Governor on a joint ticket.",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "quote": "A. The executive department shall consist of the governor, lieutenant governor, secretary of state, attorney general, state treasurer and superintendent of public instruction ... C. ... each nominee for the office of governor shall name a lieutenant governor nominee and shall run on a ticket as a joint candidate in the general election with that nominee for the office of lieutenant governor.",
+      "url": "https://www.azleg.gov/const/5/1.htm"
      },
      "list": {
-      "by": "Arizona Citizens Clean Elections Commission",
-      "dated": "2026-09-11",
-      "kind": "voter education guide",
-      "quote": "John Giles (Hobbs) Party: Independent Funding: Traditional Website: katiehobbs.org",
-      "read": "2026-10-18",
-      "title": "2026 Voter Education Guide (Arizona Citizens Clean Elections Commission), November 3, 2026 General Election, English",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "by": "Arizona Secretary of State",
+      "dated": null,
+      "kind": "candidate listing",
+      "quote": "Governor / BIGGS, ANDY (REP) / Kerr, Sine (REP) / Lieutenant Governor / HOBBS, KATIE (DEM) / Giles, John (PND) / Lieutenant Governor / LOMBARDO, RISA (GRN) / Castillo, Lisa (GRN) / Lieutenant Governor / HOURIHAN, TERI ANN (NOL) / Harrolle Mohan, Angela (PND) / Lieutenant Governor / GONZALEZ, GERTRITRUDE (REP) / Write-In Candidate / NOVOA, ALICE (REP) / Write-In Candidate",
+      "read": "2026-10-26",
+      "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
-     "notStateList": "The Secretary of State's own list could not be read (it is behind a bot check); this is the voter education guide of the state's Clean Elections Commission, which certifies no candidates, and Pima County's official candidate list names the same candidates and running mates",
-     "notes": "The Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026 8:00 AM, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799) lists exactly the same candidates for this office. The guide prints the governor candidate in parentheses after each running mate. The guide calls Giles and Harrolle Mohan 'Independent'; the Pima list prints 'PND' (party not designated) for both. Running mates of the two write-in governor candidates are not named on the Secretary of State's write-in list.",
+     "notes": "The listing has no heading of its own for Lieutenant Governor: each candidate is printed under their joint candidate for Governor, as 'Last, First (PARTY)' above the link 'Lieutenant Governor' (to an azsos.gov page per ticket, e.g. https://azsos.gov/lieutenant-governor-hobbs-katie, which prints 'Lt. Gov - Giles, John (PND)'). 'runningMate' is that governor candidate, as the listing prints them. The listing prints 'Harrolle Mohan' as the surname (before the comma). PND is the Secretary of State's 'Party Not Designated' (statewide.PARTY_CODES); Giles's Lieutenant Governor Candidate Nomination Paper, linked from that page, checks 'I am not a member of a recognized political party in the State of Arizona'. It names the same running mates, each on the same ticket, as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read. The guide's 'Independent' for Giles and Harrolle Mohan is the listing's PND. The guide also says 'The first time voters will be choosing an Arizona Lieutenant Governor will be in 2026. Voters will elect the Governor and Lieutenant Governor on a joint ticket.'",
      "title": "Lieutenant Governor"
     },
     "sos": {
      "candidates": [
       {
        "holder": true,
-       "name": "Adrian Fontes",
-       "party": "Democratic",
+       "name": "FONTES, ADRIAN",
+       "party": "DEM",
        "runningMate": null,
        "surname": "Fontes",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Alexander Kolodin",
-       "party": "Republican",
+       "name": "KOLODIN, ALEXANDER",
+       "party": "REP",
        "runningMate": null,
        "surname": "Kolodin",
        "writeIn": false
       },
       {
        "holder": false,
-       "name": "Duwayne Collier",
-       "party": "Green",
+       "name": "COLLIER, DUWAYNE",
+       "party": "GRN",
        "runningMate": null,
        "surname": "Collier",
        "writeIn": false
       }
      ],
      "certified": false,
-     "holderNote": "In the guide among the candidates for Secretary of State, and on Pima County's official candidate list.",
+     "holderNote": "Democratic candidate for Secretary of State on the Secretary of State's candidate listing ('FONTES, ADRIAN (DEM)').",
      "holderOnList": true,
      "holderResearched": "Adrian Fontes",
      "holderSource": {
-      "quote": "CANDIDATES FOR SECRETARY OF STATE ... Adrian Fontes Party: Democratic Funding: Traditional Website: electfontes.com",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "quote": "Secretary of State / ... FONTES, ADRIAN (DEM)",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
      "list": {
-      "by": "Arizona Citizens Clean Elections Commission",
-      "dated": "2026-09-11",
-      "kind": "voter education guide",
-      "quote": "Alexander Kolodin Party: Republican Funding: Traditional Website: www.alexforaz.com",
-      "read": "2026-10-18",
-      "title": "2026 Voter Education Guide (Arizona Citizens Clean Elections Commission), November 3, 2026 General Election, English",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "by": "Arizona Secretary of State",
+      "dated": null,
+      "kind": "candidate listing",
+      "quote": "Secretary of State / KOLODIN, ALEXANDER (REP) / FONTES, ADRIAN (DEM) / COLLIER, DUWAYNE (GRN)",
+      "read": "2026-10-26",
+      "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
+      "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
-     "notStateList": "The Secretary of State's own list could not be read (it is behind a bot check); this is the voter education guide of the state's Clean Elections Commission, which certifies no candidates, and Pima County's official candidate list names the same candidates and running mates",
-     "notes": "The Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026 8:00 AM, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799) lists exactly the same candidates for this office.",
+     "notes": "It names the same candidates and parties for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
      "title": "Secretary of State"
     }
    },
-   "verified": "AZ verified 2026-10-18: every ticket, party and running mate re-read in the Clean Elections guide (LM 2026-09-11) and Pima County's list (updated 9/9/2026); write-ins Gonzalez and Novoa confirmed for Governor (REP) on the SoS list Revised 9/9/2026, still the current linked file. Corrected only the Pima file's title in notes."
+   "verified": "AZ verified 2026-10-18: every ticket, party and running mate re-read in the Clean Elections guide (LM 2026-09-11) and Pima County's list (updated 9/9/2026); write-ins Gonzalez and Novoa confirmed for Governor (REP) on the SoS list Revised 9/9/2026, still the current linked file. Corrected only the Pima file's title in notes. RE-SOURCED 2026-10-26: the Secretary of State's own candidate listing, read by hand in a person's Chrome (apps.arizona.vote challenges every script), its State tab read twice that day and compared name by name, party by party and ticket by ticket with the Clean Elections guide and Pima County's list: Gov Biggs/Kerr (REP/REP), Hobbs/Giles (DEM/PND), Lombardo/Castillo (GRN/GRN), Hourihan/Harrolle Mohan (NOL/PND), write-ins Gonzalez (REP) and Novoa (REP); SoS Kolodin (REP), Fontes (DEM), Collier (GRN); AG Petersen (REP), Mayes (DEM). No difference but the guide's 'Independent' for the listing's PND."
   },
   "CA": {
    "notes": "Source: the Secretary of State's certified list, 'Dated at Sacramento, California, this 27th day of August, 2026' (41 pages), read 2026-10-18. Write-in candidates are certified separately and are not on this list; none recorded.",

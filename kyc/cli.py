@@ -60,6 +60,8 @@ def _legislature_links(root):
     for kind, why, warn in (
             ("thumbnail", "legislator portraits left off, image-search thumbnails", True),
             ("broken", "legislator portraits left off, confirmed missing", True),
+            ("notImage", "legislator portraits left off, the address answering with a page or a "
+                         "one-pixel image (statelegs.check_portrait)", True),
             ("sharedImage", "legislator portraits left off, one Open States file given to two "
                             "members (statelegs.mark_shared_images)", True),
             ("notAPortrait", "legislator portraits left off, a file a person refused "
@@ -2524,17 +2526,27 @@ def _statelegs(args):
     if not args.check and not args.no_images:
         # Each portrait, checked the tristate way: only a definite answer
         # drops one from the page (rule 8).
-        images = statelegs.check_images(by_state, previous=statelegs.load_cache(args.root))
+        report = {}
+        images = statelegs.check_images(by_state, previous=statelegs.load_cache(args.root),
+                                        report=report)
+        # A host that did not answer is said, and concludes nothing (rule 8).
+        if report.get("unanswered"):
+            print("  [warn] portraits not confirmed, the check concluding nothing (no answer, "
+                  "a refusal or a throttle; the last answer stands): "
+                  + ", ".join(f"{h} {n}" for h, n in report["unanswered"].items()))
     else:
-        images = {code: {"ok": 0, "broken": 0, "unknown": 0} for code in by_state}
+        images = {code: {"ok": 0, "broken": 0, "notImage": 0, "unknown": 0} for code in by_state}
         for code, records in by_state.items():
             for r in records:
                 if r.get("image"):
                     images[code][r.get("imageStatus") or "unknown"] += 1
     broken = {code: c["broken"] for code, c in images.items() if c["broken"]}
+    pages = {code: c["notImage"] for code, c in images.items() if c.get("notImage")}
     print(f"  portraits: {sum(c['ok'] for c in images.values()):,} load, "
           f"{sum(broken.values())} confirmed missing and left off the page"
           + (f" ({', '.join(f'{c} {n}' for c, n in sorted(broken.items()))})" if broken else "")
+          + f", {sum(pages.values())} answered with no portrait (a page or a pixel) and left off"
+          + (f" ({', '.join(f'{c} {n}' for c, n in sorted(pages.items()))})" if pages else "")
           + f", {sum(c['unknown'] for c in images.values()):,} not checked or inconclusive")
     report = statelegs.seats_report(by_state)
     short = [f"{c} {ch} {n}/{s}" for c, v in report.items() for ch, (n, s) in v.items() if n < s]

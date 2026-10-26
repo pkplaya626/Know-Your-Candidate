@@ -550,8 +550,21 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
-   "unconfirmed": true,
-   "unreadable": true
+   "photo": "https://i0.wp.com/atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg?w=500&ssl=1",
+   "photoHeavy": [
+    {
+     "kept": false,
+     "url": "https://atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg",
+     "why": "13724 KB, over 300 KB"
+    }
+   ],
+   "photoPage": "https://atg.sd.gov/OurOffice/bio.aspx",
+   "photoWeight": {
+    "bytes": 23622,
+    "height": 749,
+    "width": 500
+   },
+   "title": "Attorney General"
   },
   "TN": {
    "listedBy": "Republican Attorneys General Association",
@@ -559,9 +572,15 @@
    "office": "https://www.tn.gov/attorneygeneral.html",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti/_jcr_content/contentFullWidth/tn_textandimage/image.img.jpg/1740766397785.jpg",
+   "photoPage": "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti.html",
+   "photoWeight": {
+    "bytes": 82283,
+    "height": 400,
+    "width": 400
+   },
    "selection": "Appointed by the state Supreme Court",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "TX": {
    "listedBy": "Republican Attorneys General Association",
@@ -671,7 +690,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-25T13:14:31+00:00",
+ "fetched": "2026-10-26T03:56:14+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",

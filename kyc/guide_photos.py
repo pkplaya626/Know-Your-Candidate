@@ -138,7 +138,7 @@ OFFICE_WORDS = {
 }
 
 _SUFFIX = {"jr", "sr", "ii", "iii", "iv", "v"}
-_TITLES = {"dr", "mr", "mrs", "ms", "hon", "dvm", "md", "phd", "esq", "rev"}
+_TITLES = {"dr", "mr", "mrs", "ms", "hon", "honorable", "dvm", "md", "phd", "esq", "rev"}
 
 
 class GuidePhotoError(RuntimeError):

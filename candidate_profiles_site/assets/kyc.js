@@ -1269,9 +1269,37 @@
     return line;
   }
 
+  /** Did *img* load as a placeholder pixel (a naturalWidth of 1 or less)?
+   *  Not the silhouette or any other drawing (an SVG may have no intrinsic
+   *  width at all), and not a load that reports no size whatever (0: no
+   *  decoded raster, as a script-dispatched load in a test reports); once
+   *  only for one address. */
+  function isPixel(img) {
+    var src = img.currentSrc || img.src || "";
+    if (!src || /^data:/i.test(src) || /\.svg(?:[?#]|$)/i.test(src)) return false;
+    if (img.getAttribute("data-photo-pixel") === src) return false;
+    if (!(img.naturalWidth > 0 && img.naturalWidth <= 1)) return false;
+    img.setAttribute("data-photo-pixel", src);
+    return true;
+  }
+
   /* Delegated: one listener for every portrait on the page, rather than an
    * inline onerror attribute per image with an id interpolated into it. */
   function initPortraitFallback() {
+    // A file that loads as a pixel has failed as surely as one that does
+    // not load: Michigan's House Democrats' portraits load 1x1, and a card
+    // drew an empty box under "Photo: Michigan House Democrats" because no
+    // error fired. Such a load is sent to the page's own error handlers as
+    // an error, so each drops the image and its credit as it does for a
+    // failed load (one rule for every portrait, rule 12).
+    doc.addEventListener(
+      "load",
+      function (event) {
+        var img = event.target;
+        if (img && img.tagName === "IMG" && isPixel(img)) img.dispatchEvent(new global.Event("error"));
+      },
+      true // load does not bubble either
+    );
     doc.addEventListener(
       "error",
       function (event) {

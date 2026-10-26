@@ -172,6 +172,35 @@
    "wikipedia": "Candace Jackson-Akiwumi"
   },
   "10376611": {
+   "portrait": {
+    "by": "Senator Durbin and US Government",
+    "bytes": 17629,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q106287245 carries the FJC id cunningham-tiffany-patrice of fjc.gov/node/10376611; born 1976 by Wikidata and the article, as the directory; the item's image (P18), 'Tiffany Cunningham.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q106287245 alone (P180)",
+    "file": [
+     446,
+     566
+    ],
+    "height": 317,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Tiffany_Cunningham_(cropped).jpg/120px-Tiffany_Cunningham_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Tiffany_Cunningham_(cropped).jpg/250px-Tiffany_Cunningham_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Tiffany_Cunningham_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Tiffany_Cunningham_(cropped).jpg/120px-Tiffany_Cunningham_(cropped).jpg",
+    "width": 250,
+    "year": 2021
+   },
    "wikidata": "Q106287245",
    "wikipedia": "Tiffany P. Cunningham"
   },
@@ -2131,6 +2160,35 @@
    "wikipedia": "Roopali Desai"
   },
   "12537146": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 17647,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q84955892 carries the FJC id rearden-jennifer-hutchison of fjc.gov/node/12537146; born 1970 by Wikidata and the article, as the directory; the item's image (P18), 'Jennifer Rearden (Judge).jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q84955892 alone (P180)",
+    "file": [
+     347,
+     493
+    ],
+    "height": 355,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Jennifer_Rearden_(Judge)_(cropped).jpg/120px-Jennifer_Rearden_(Judge)_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Jennifer_Rearden_(Judge)_(cropped).jpg/250px-Jennifer_Rearden_(Judge)_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Jennifer_Rearden_%28Judge%29_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Jennifer_Rearden_(Judge)_(cropped).jpg/120px-Jennifer_Rearden_(Judge)_(cropped).jpg",
+    "width": 250,
+    "year": 2022
+   },
    "wikidata": "Q84955892",
    "wikipedia": "Jennifer H. Rearden"
   },
@@ -5464,10 +5522,68 @@
    "wikipedia": "Georgia N. Alexakis"
   },
   "13761656": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 101410,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q125941575 carries the FJC id bulsara-sanket-jayshukh of fjc.gov/node/13761656; born 1976 by the article, as the directory; the item has no image; its article 'Sanket J. Bulsara' shows this file in its infobox and leads with it",
+    "file": [
+     774,
+     956
+    ],
+    "height": 309,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Sanket_J._Bulsara.png/120px-Sanket_J._Bulsara.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Sanket_J._Bulsara.png/250px-Sanket_J._Bulsara.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Sanket_J._Bulsara.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/34/Sanket_J._Bulsara.png/120px-Sanket_J._Bulsara.png",
+    "width": 250,
+    "year": 2024
+   },
    "wikidata": "Q125941575",
    "wikipedia": "Sanket J. Bulsara"
   },
   "13761661": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 99823,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q126369802 carries the FJC id schulte-eric-claude of fjc.gov/node/13761661; born 1972 by the article, as the directory; the item has no image; its article 'Eric Schulte' shows this file in its infobox and leads with it",
+    "file": [
+     1002,
+     1110
+    ],
+    "height": 277,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Eric_C._Schulte.png/120px-Eric_C._Schulte.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Eric_C._Schulte.png/250px-Eric_C._Schulte.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Eric_C._Schulte.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Eric_C._Schulte.png/120px-Eric_C._Schulte.png",
+    "width": 250,
+    "year": 2024
+   },
    "wikidata": "Q126369802",
    "wikipedia": "Eric Schulte"
   },
@@ -5915,6 +6031,35 @@
    "wikipedia": "Michelle Williams Court"
   },
   "13761869": {
+   "portrait": {
+    "by": "United States Senate Committee on the Judiciary",
+    "bytes": 17727,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q130365756 carries the FJC id conway-byron-browning of fjc.gov/node/13761869; born 1976 by the article, as the directory; the item has no image; its article 'Byron B. Conway' shows this file in its infobox and leads with it",
+    "file": [
+     651,
+     687
+    ],
+    "height": 264,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Byron_B._Conway-7-31-24.jpg/120px-Byron_B._Conway-7-31-24.jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Byron_B._Conway-7-31-24.jpg/250px-Byron_B._Conway-7-31-24.jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Byron_B._Conway-7-31-24.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/76/Byron_B._Conway-7-31-24.jpg/120px-Byron_B._Conway-7-31-24.jpg",
+    "width": 250,
+    "year": 2024
+   },
    "wikidata": "Q130365756",
    "wikipedia": "Byron B. Conway"
   },
@@ -5952,10 +6097,68 @@
    "wikipedia": "April Perry"
   },
   "13761886": {
+   "portrait": {
+    "by": "United States Senate Committee on the Judiciary",
+    "bytes": 15797,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q131173684 carries the FJC id hawley-jonathan-eugene of fjc.gov/node/13761886; born 1971 by the article, as the directory; the item has no image; its article 'Jonathan E. Hawley' shows this file in its infobox and leads with it",
+    "file": [
+     687,
+     621
+    ],
+    "height": 226,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Jonathan_E._Hawley-7-31-24.jpg/120px-Jonathan_E._Hawley-7-31-24.jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Jonathan_E._Hawley-7-31-24.jpg/250px-Jonathan_E._Hawley-7-31-24.jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Jonathan_E._Hawley-7-31-24.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Jonathan_E._Hawley-7-31-24.jpg/120px-Jonathan_E._Hawley-7-31-24.jpg",
+    "width": 250,
+    "year": 2024
+   },
    "wikidata": "Q131173684",
    "wikipedia": "Jonathan E. Hawley"
   },
   "13761891": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 102543,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q131288247 carries the FJC id kidd-embry-jerode of fjc.gov/node/13761891; born 1983 by Wikidata and the article, as the directory; the item has no image; its article 'Embry Kidd' shows this file in its infobox and leads with it",
+    "file": [
+     1148,
+     1444
+    ],
+    "height": 314,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Embry_J_Kidd.png/120px-Embry_J_Kidd.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Embry_J_Kidd.png/250px-Embry_J_Kidd.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Embry_J_Kidd.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Embry_J_Kidd.png/120px-Embry_J_Kidd.png",
+    "width": 250,
+    "year": 2024
+   },
    "wikidata": "Q131288247",
    "wikipedia": "Embry Kidd"
   },
@@ -6201,6 +6404,35 @@
    "wikipedia": "Catherine Henry"
   },
   "13761902": {
+   "portrait": {
+    "by": "United States Senate Committee on the Judiciary",
+    "bytes": 16954,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q131385111 carries the FJC id weilheimer-gail-allison of fjc.gov/node/13761902; born 1970 by the article, as the directory; the item has no image; its article 'Gail A. Weilheimer' shows this file in its infobox and leads with it",
+    "file": [
+     593,
+     623
+    ],
+    "height": 263,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Gail_A._Weilheimer-7-31-24.jpg/120px-Gail_A._Weilheimer-7-31-24.jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Gail_A._Weilheimer-7-31-24.jpg/250px-Gail_A._Weilheimer-7-31-24.jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Gail_A._Weilheimer-7-31-24.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Gail_A._Weilheimer-7-31-24.jpg/120px-Gail_A._Weilheimer-7-31-24.jpg",
+    "width": 250,
+    "year": 2024
+   },
    "wikidata": "Q131385111",
    "wikipedia": "Gail A. Weilheimer"
   },
@@ -6445,10 +6677,68 @@
    "wikipedia": "Serena Murillo"
   },
   "13762030": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 118196,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q134301468 carries the FJC id hermandorfer-whitney-downs of fjc.gov/node/13762030; born 1987 by the article, as the directory; the item has no image; its article 'Whitney Hermandorfer' shows this file in its infobox and leads with it",
+    "file": [
+     1070,
+     1144
+    ],
+    "height": 267,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Whitney_Hermandorfer.png/120px-Whitney_Hermandorfer.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Whitney_Hermandorfer.png/250px-Whitney_Hermandorfer.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Whitney_Hermandorfer.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Whitney_Hermandorfer.png/120px-Whitney_Hermandorfer.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q134301468",
    "wikipedia": "Whitney Hermandorfer"
   },
   "13762033": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 85441,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q135116768 carries the FJC id divine-joshua-michael of fjc.gov/node/13762033; born 1990 by Wikidata and the article, as the directory; the item has no image; its article 'Josh Divine' shows this file in its infobox and leads with it",
+    "file": [
+     776,
+     746
+    ],
+    "height": 240,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Joshua_M._Divine.png/120px-Joshua_M._Divine.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Joshua_M._Divine.png/250px-Joshua_M._Divine.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Joshua_M._Divine.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f2/Joshua_M._Divine.png/120px-Joshua_M._Divine.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q135116768",
    "wikipedia": "Josh Divine"
   },
@@ -6486,6 +6776,35 @@
    "wikipedia": "Cristian Stevens"
   },
   "13762035": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 116322,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q135454760 carries the FJC id bluestone-zachary-maxwell of fjc.gov/node/13762035; born 1986 by Wikidata and the article, as the directory; the item has no image; its article 'Zack Bluestone' shows this file in its infobox and leads with it",
+    "file": [
+     584,
+     748
+    ],
+    "height": 320,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Zack_Bluestone.png/120px-Zack_Bluestone.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Zack_Bluestone.png/250px-Zack_Bluestone.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Zack_Bluestone.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Zack_Bluestone.png/120px-Zack_Bluestone.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q135454760",
    "wikipedia": "Zack Bluestone"
   },
@@ -6523,22 +6842,167 @@
    "wikipedia": "Emil Bove"
   },
   "13762047": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 98128,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q136101693 carries the FJC id artau-edward-l of fjc.gov/node/13762047; born 1964 by Wikidata and the article, as the directory; the item has no image; its article 'Ed Artau' shows this file in its infobox and leads with it",
+    "file": [
+     1064,
+     1064
+    ],
+    "height": 250,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Edward_L._Artau.png/120px-Edward_L._Artau.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Edward_L._Artau.png/250px-Edward_L._Artau.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Edward_L._Artau.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Edward_L._Artau.png/120px-Edward_L._Artau.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q136101693",
    "wikipedia": "Ed Artau"
   },
   "13762048": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 98146,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q136101737 carries the FJC id lanahan-maria-ann of fjc.gov/node/13762048; born 1987 by Wikidata and the article, as the directory; the item has no image; its article 'Maria Lanahan' shows this file in its infobox and leads with it",
+    "file": [
+     806,
+     804
+    ],
+    "height": 249,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Maria_Lanahan.png/120px-Maria_Lanahan.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Maria_Lanahan.png/250px-Maria_Lanahan.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Maria_Lanahan.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Maria_Lanahan.png/120px-Maria_Lanahan.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q136101737",
    "wikipedia": "Maria Lanahan"
   },
   "13762049": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 106449,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q136198396 carries the FJC id dudek-kyle-christopher of fjc.gov/node/13762049; born 1985 by the article, as the directory; the item has no image; its article 'Kyle Dudek' shows this file in its infobox and leads with it",
+    "file": [
+     1048,
+     1000
+    ],
+    "height": 239,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Kyle_C._Dudek.png/120px-Kyle_C._Dudek.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Kyle_C._Dudek.png/250px-Kyle_C._Dudek.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Kyle_C._Dudek.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Kyle_C._Dudek.png/120px-Kyle_C._Dudek.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q136198396",
    "wikipedia": "Kyle Dudek"
   },
   "13762066": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 94906,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q136522047 carries the FJC id mooty-harold-dean-iii of fjc.gov/node/13762066; born 1983 by the article, as the directory; the item has no image; its article 'Harold Mooty' shows this file in its infobox and leads with it",
+    "file": [
+     748,
+     814
+    ],
+    "height": 272,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Harold_D._Mooty.png/120px-Harold_D._Mooty.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Harold_D._Mooty.png/250px-Harold_D._Mooty.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Harold_D._Mooty.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Harold_D._Mooty.png/120px-Harold_D._Mooty.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q136522047",
    "wikipedia": "Harold Mooty"
   },
   "13762067": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 131381,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q136547193 carries the FJC id moe-anne-leigh-gaylord of fjc.gov/node/13762067; born 1979 by the article, as the directory; the item has no image; its article 'Anne-Leigh Gaylord Moe' shows this file in its infobox and leads with it",
+    "file": [
+     1010,
+     1202
+    ],
+    "height": 298,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Anne-Leigh_Moe.png/120px-Anne-Leigh_Moe.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Anne-Leigh_Moe.png/250px-Anne-Leigh_Moe.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Anne-Leigh_Moe.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Anne-Leigh_Moe.png/120px-Anne-Leigh_Moe.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q136547193",
    "wikipedia": "Anne-Leigh Gaylord Moe"
   },
@@ -6642,6 +7106,35 @@
    "wikipedia": "Rebecca Taibleson"
   },
   "13762071": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 114234,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q134961026 carries the FJC id lewis-billy-wayne-jr of fjc.gov/node/13762071; born 1978 by the article, as the directory; the item has no image; its article 'Bill Lewis (judge)' shows this file in its infobox and leads with it",
+    "file": [
+     904,
+     876
+    ],
+    "height": 242,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Bill_W._Lewis.png/120px-Bill_W._Lewis.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Bill_W._Lewis.png/250px-Bill_W._Lewis.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Bill_W._Lewis.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Bill_W._Lewis.png/120px-Bill_W._Lewis.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q134961026",
    "wikipedia": "Bill Lewis (judge)"
   },
@@ -6844,18 +7337,134 @@
    "wikipedia": "Lindsey Freeman"
   },
   "13762088": {
+   "portrait": {
+    "by": "Senate Judiciary Committee",
+    "bytes": 104857,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q137210948 carries the FJC id orso-matthew-emile of fjc.gov/node/13762088; born 1978 by Wikidata and the article, as the directory; the item has no image; its article 'Matthew Orso' shows this file in its infobox and leads with it",
+    "file": [
+     1076,
+     1326
+    ],
+    "height": 308,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Matthew_E._Orso.png/120px-Matthew_E._Orso.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Matthew_E._Orso.png/250px-Matthew_E._Orso.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Matthew_E._Orso.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Matthew_E._Orso.png/120px-Matthew_E._Orso.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q137210948",
    "wikipedia": "Matthew Orso"
   },
   "13762092": {
+   "portrait": {
+    "by": "Senate Judiciary Committee",
+    "bytes": 125484,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q137216373 carries the FJC id rodriguez-susan-courtwright of fjc.gov/node/13762092; born 1981 by Wikidata and the article, as the directory; the item has no image; its article 'Susan C. Rodriguez' shows this file in its infobox and leads with it",
+    "file": [
+     1072,
+     1326
+    ],
+    "height": 309,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Susan_Courtwright_Rodriguez.png/120px-Susan_Courtwright_Rodriguez.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Susan_Courtwright_Rodriguez.png/250px-Susan_Courtwright_Rodriguez.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Susan_Courtwright_Rodriguez.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Susan_Courtwright_Rodriguez.png/120px-Susan_Courtwright_Rodriguez.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q137216373",
    "wikipedia": "Susan C. Rodriguez"
   },
   "13762093": {
+   "portrait": {
+    "by": "Senate Judiciary Committee",
+    "bytes": 116166,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q47450647 carries the FJC id chamberlin-robert-porter of fjc.gov/node/13762093; born 1965 by Wikidata and the article, as the directory; the item has no image; its article 'Robert P. Chamberlin' shows this file in its infobox and leads with it",
+    "file": [
+     1014,
+     1186
+    ],
+    "height": 292,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Robert_Chamberlin.png/120px-Robert_Chamberlin.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Robert_Chamberlin.png/250px-Robert_Chamberlin.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Robert_Chamberlin.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/Robert_Chamberlin.png/120px-Robert_Chamberlin.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q47450647",
    "wikipedia": "Robert P. Chamberlin"
   },
   "13762095": {
+   "portrait": {
+    "by": "Senate Judiciary Committee",
+    "bytes": 103952,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q47428143 carries the FJC id maxwell-james-donald-ii of fjc.gov/node/13762095; born 1975 by Wikidata and the article, as the directory; the item has no image; its article 'James D. Maxwell II' shows this file in its infobox and leads with it",
+    "file": [
+     916,
+     1124
+    ],
+    "height": 307,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/James_Maxwell.png/120px-James_Maxwell.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/James_Maxwell.png/250px-James_Maxwell.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:James_Maxwell.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/James_Maxwell.png/120px-James_Maxwell.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q47428143",
    "wikipedia": "James D. Maxwell II"
   },
@@ -6960,49 +7569,368 @@
    "wikipedia": "Nicholas Ganjei"
   },
   "13762106": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 101253,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q138006851 carries the FJC id peterson-aaron-christian of fjc.gov/node/13762106; born 1981 by the article, as the directory; the item has no image; its article 'Aaron C. Peterson' shows this file in its infobox and leads with it",
+    "file": [
+     906,
+     968
+    ],
+    "height": 267,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Aaron_C._Peterson.png/120px-Aaron_C._Peterson.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Aaron_C._Peterson.png/250px-Aaron_C._Peterson.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Aaron_C._Peterson.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/Aaron_C._Peterson.png/120px-Aaron_C._Peterson.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q138006851",
    "wikipedia": "Aaron C. Peterson"
   },
   "13762107": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 95119,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q138040727 carries the FJC id benton-megan-blair of fjc.gov/node/13762107; born 1985 by Wikidata and the article, as the directory; the item has no image; its article 'Megan Benton' shows this file in its infobox and leads with it",
+    "file": [
+     686,
+     656
+    ],
+    "height": 239,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Megan_Benton.png/120px-Megan_Benton.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Megan_Benton.png/250px-Megan_Benton.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Megan_Benton.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Megan_Benton.png/120px-Megan_Benton.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q138040727",
    "wikipedia": "Megan Benton"
   },
   "13762108": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 100910,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q138006852 carries the FJC id lea-brian-charles of fjc.gov/node/13762108; born 1983 by the article, as the directory; the item has no image; its article 'Brian C. Lea' shows this file in its infobox and leads with it",
+    "file": [
+     812,
+     826
+    ],
+    "height": 254,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Brian_Lea.png/120px-Brian_Lea.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Brian_Lea.png/250px-Brian_Lea.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Brian_Lea.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Brian_Lea.png/120px-Brian_Lea.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q138006852",
    "wikipedia": "Brian C. Lea"
   },
   "13762109": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 110798,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q138024690 carries the FJC id olson-justin-ross of fjc.gov/node/13762109; born 1987 by the article, as the directory; the item has no image; its article 'Justin R. Olson' shows this file in its infobox and leads with it",
+    "file": [
+     720,
+     834
+    ],
+    "height": 290,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Justin_Olson.png/120px-Justin_Olson.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Justin_Olson.png/250px-Justin_Olson.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Justin_Olson.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ee/Justin_Olson.png/120px-Justin_Olson.png",
+    "width": 250,
+    "year": 2025
+   },
    "wikidata": "Q138024690",
    "wikipedia": "Justin R. Olson"
   },
   "13762116": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 113785,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q138717596 carries the FJC id st-john-anna-elizabeth-wagner of fjc.gov/node/13762116; born 1979 by Wikidata and the article, as the directory; the item has no image; its article 'Anna St. John' shows this file in its infobox and leads with it",
+    "file": [
+     852,
+     936
+    ],
+    "height": 275,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Anna_St._John.png/120px-Anna_St._John.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Anna_St._John.png/250px-Anna_St._John.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Anna_St._John.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Anna_St._John.png/120px-Anna_St._John.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q138717596",
    "wikipedia": "Anna St. John"
   },
   "13762120": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 105867,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q139446270 carries the FJC id shepherd-john-thomas of fjc.gov/node/13762120; born 1987 by Wikidata and the article, as the directory; the item has no image; its article 'John T. Shepherd' shows this file in its infobox and leads with it",
+    "file": [
+     746,
+     824
+    ],
+    "height": 276,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/John_Thomas_Shepherd.png/120px-John_Thomas_Shepherd.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/John_Thomas_Shepherd.png/250px-John_Thomas_Shepherd.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:John_Thomas_Shepherd.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7d/John_Thomas_Shepherd.png/120px-John_Thomas_Shepherd.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q139446270",
    "wikipedia": "John T. Shepherd"
   },
   "13762121": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 87422,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q139406388 carries the FJC id wolfe-christopher-robert of fjc.gov/node/13762121; born 1972 by Wikidata and the article, as the directory; the item has no image; its article 'Chris Wolfe' shows this file in its infobox and leads with it",
+    "file": [
+     792,
+     844
+    ],
+    "height": 266,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Christopher_R._Wolfe.png/120px-Christopher_R._Wolfe.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Christopher_R._Wolfe.png/250px-Christopher_R._Wolfe.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Christopher_R._Wolfe.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9e/Christopher_R._Wolfe.png/120px-Christopher_R._Wolfe.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q139406388",
    "wikipedia": "Chris Wolfe"
   },
   "13762122": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 97424,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q139386822 carries the FJC id davis-andrew-bray of fjc.gov/node/13762122; born 1985 by Wikidata and the article, as the directory; the item has no image; its article 'Andrew B. Davis' shows this file in its infobox and leads with it",
+    "file": [
+     658,
+     744
+    ],
+    "height": 283,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Andrew_B._Davis.png/120px-Andrew_B._Davis.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Andrew_B._Davis.png/250px-Andrew_B._Davis.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Andrew_B._Davis.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Andrew_B._Davis.png/120px-Andrew_B._Davis.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q139386822",
    "wikipedia": "Andrew B. Davis"
   },
   "13762124": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 103617,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Sheria Clarke' carries {{FJC Bio|nid=13762124}} and its Wikidata item is Q139858209; born 1981 by Wikidata and the article, as the directory; the item has no image; its article 'Sheria Clarke' shows this file in its infobox and leads with it",
+    "file": [
+     954,
+     988
+    ],
+    "height": 259,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Sheria_Akins_Clarke.png/120px-Sheria_Akins_Clarke.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Sheria_Akins_Clarke.png/250px-Sheria_Akins_Clarke.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Sheria_Akins_Clarke.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Sheria_Akins_Clarke.png/120px-Sheria_Akins_Clarke.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q139858209",
    "wikipedia": "Sheria Clarke"
   },
   "13762128": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 90747,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Katie Lane' carries {{FJC Bio|nid=13762128}} and its Wikidata item is Q140041064; born 1991 by Wikidata and the article, as the directory; the item has no image; its article 'Katie Lane' shows this file in its infobox and leads with it",
+    "file": [
+     816,
+     868
+    ],
+    "height": 266,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Kathleen_S._Lane.png/120px-Kathleen_S._Lane.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Kathleen_S._Lane.png/250px-Kathleen_S._Lane.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Kathleen_S._Lane.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Kathleen_S._Lane.png/120px-Kathleen_S._Lane.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q140041064",
    "wikipedia": "Katie Lane"
   },
   "13762129": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 128677,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Jeffrey M. Kuhlman' carries {{FJC Bio|nid=13762129}} and its Wikidata item is Q140043980; born 1989 by Wikidata and the article, as the directory; the item has no image; its article 'Jeffrey M. Kuhlman' shows this file in its infobox and leads with it",
+    "file": [
+     648,
+     822
+    ],
+    "height": 317,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Jeffrey_M._Kuhlman.png/120px-Jeffrey_M._Kuhlman.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Jeffrey_M._Kuhlman.png/250px-Jeffrey_M._Kuhlman.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Jeffrey_M._Kuhlman.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Jeffrey_M._Kuhlman.png/120px-Jeffrey_M._Kuhlman.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q140043980",
    "wikipedia": "Jeffrey M. Kuhlman"
   },
@@ -7042,6 +7970,35 @@
   },
   "13762132": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 113549,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Anthony J. Powell' carries {{FJC Bio|nid=13762132}} and its Wikidata item is Q52165934; born 1962 by Wikidata and the article, as the directory; the item has no image; its article 'Anthony J. Powell' shows this file in its infobox and leads with it",
+    "file": [
+     708,
+     814
+    ],
+    "height": 287,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Anthony_J._Powell.png/120px-Anthony_J._Powell.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Anthony_J._Powell.png/250px-Anthony_J._Powell.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Anthony_J._Powell.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Anthony_J._Powell.png/120px-Anthony_J._Powell.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q52165934",
    "wikipedia": "Anthony J. Powell"
   },
@@ -7148,6 +8105,35 @@
   },
   "13762140": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 105321,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Matthew Schwartz' carries {{FJC Bio|nid=13762140}} and its Wikidata item is Q140640246; born 1978 by the article, as the directory; the item has no image; its article 'Matthew Schwartz' shows this file in its infobox and leads with it",
+    "file": [
+     996,
+     1102
+    ],
+    "height": 277,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Matthew_A._Schwartz.png/120px-Matthew_A._Schwartz.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Matthew_A._Schwartz.png/250px-Matthew_A._Schwartz.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Matthew_A._Schwartz.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Matthew_A._Schwartz.png/120px-Matthew_A._Schwartz.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q140640246",
    "wikipedia": "Matthew Schwartz"
   },
@@ -7187,6 +8173,35 @@
   },
   "13762146": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 97891,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Kara Westercamp' carries {{FJC Bio|nid=13762146}} and its Wikidata item is Q139382410; born 1982 by the article, as the directory; the item has no image; its article 'Kara Westercamp' shows this file in its infobox and leads with it",
+    "file": [
+     960,
+     964
+    ],
+    "height": 251,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Kara_M._Westercamp.png/120px-Kara_M._Westercamp.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Kara_M._Westercamp.png/250px-Kara_M._Westercamp.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Kara_M._Westercamp.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Kara_M._Westercamp.png/120px-Kara_M._Westercamp.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q139382410",
    "wikipedia": "Kara Westercamp"
   },
@@ -7226,6 +8241,35 @@
   },
   "13762148": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 100609,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Michael C. Martin' carries {{FJC Bio|nid=13762148}} and its Wikidata item is Q140679041; born 1974 by Wikidata and the article, as the directory; the item has no image; its article 'Michael C. Martin' shows this file in its infobox and leads with it",
+    "file": [
+     812,
+     848
+    ],
+    "height": 261,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Michael_C._Martin.png/120px-Michael_C._Martin.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Michael_C._Martin.png/250px-Michael_C._Martin.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Michael_C._Martin.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Michael_C._Martin.png/120px-Michael_C._Martin.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q140679041",
    "wikipedia": "Michael C. Martin"
   },
@@ -7265,16 +8309,103 @@
   },
   "13762157": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 104875,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Matthew R. Byrne' carries {{FJC Bio|nid=13762157}} and its Wikidata item is Q141471618; born 1981 by Wikidata and the article, as the directory; the item has no image; its article 'Matthew R. Byrne' shows this file in its infobox and leads with it",
+    "file": [
+     912,
+     922
+    ],
+    "height": 253,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Matthew_R._Byrne.png/120px-Matthew_R._Byrne.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Matthew_R._Byrne.png/250px-Matthew_R._Byrne.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Matthew_R._Byrne.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Matthew_R._Byrne.png/120px-Matthew_R._Byrne.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q141471618",
    "wikipedia": "Matthew R. Byrne"
   },
   "13762214": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 101847,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Kasdin Mitchell' carries {{FJC Bio|nid=13762214}} and its Wikidata item is Q141492521; born 1985 by the article, as the directory; the item has no image; its article 'Kasdin Mitchell' shows this file in its infobox and leads with it",
+    "file": [
+     924,
+     880
+    ],
+    "height": 238,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Kasdin_M._Mitchell.png/120px-Kasdin_M._Mitchell.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Kasdin_M._Mitchell.png/250px-Kasdin_M._Mitchell.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Kasdin_M._Mitchell.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Kasdin_M._Mitchell.png/120px-Kasdin_M._Mitchell.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q141492521",
    "wikipedia": "Kasdin Mitchell"
   },
   "13762219": {
    "linkVia": "fjc-bio",
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 123903,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "the English Wikipedia article 'Angela Colmenero' carries {{FJC Bio|nid=13762219}} and its Wikidata item is Q121222022; born 1979 by the article, as the directory; the item has no image; its article 'Angela Colmenero' shows this file in its infobox and leads with it",
+    "file": [
+     688,
+     920
+    ],
+    "height": 334,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Angela_V._Colmenero.png/120px-Angela_V._Colmenero.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Angela_V._Colmenero.png/250px-Angela_V._Colmenero.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Angela_V._Colmenero.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Angela_V._Colmenero.png/120px-Angela_V._Colmenero.png",
+    "width": 250,
+    "year": 2026
+   },
    "wikidata": "Q121222022",
    "wikipedia": "Angela Colmenero"
   },
@@ -26382,6 +27513,35 @@
    "wikipedia": "Pamela K. Chen"
   },
   "1394136": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 11095,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q6376512 carries the FJC id failla-katherine-polk of fjc.gov/node/1394136; born 1969 by Wikidata and the article, as the directory; the item's image (P18), 'Katherine Failla.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q6376512 alone (P180)",
+    "file": [
+     352,
+     428
+    ],
+    "height": 304,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Katherine_Failla_(cropped).jpg/120px-Katherine_Failla_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Katherine_Failla_(cropped).jpg/250px-Katherine_Failla_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Katherine_Failla_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Katherine_Failla_(cropped).jpg/120px-Katherine_Failla_(cropped).jpg",
+    "width": 250,
+    "year": 2012
+   },
    "wikidata": "Q6376512",
    "wikipedia": "Katherine Polk Failla"
   },
@@ -27448,6 +28608,35 @@
    "wikipedia": "Elizabeth A. Wolford"
   },
   "1394326": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 14496,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q16194685 carries the FJC id mccafferty-landya-b of fjc.gov/node/1394326; born 1962 by Wikidata and the article, as the directory; the item's image (P18), 'Landya McCafferty.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q16194685 alone (P180)",
+    "file": [
+     394,
+     506
+    ],
+    "height": 321,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Landya_McCafferty_(cropped).jpg/120px-Landya_McCafferty_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Landya_McCafferty_(cropped).jpg/250px-Landya_McCafferty_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Landya_McCafferty_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Landya_McCafferty_(cropped).jpg/120px-Landya_McCafferty_(cropped).jpg",
+    "width": 250,
+    "year": 2013
+   },
    "wikidata": "Q16194685",
    "wikipedia": "Landya B. McCafferty"
   },
@@ -28396,6 +29585,35 @@
    "wikipedia": "Tanya Chutkan"
   },
   "1394551": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 16880,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q16195170 carries the FJC id lauck-mary-hannah of fjc.gov/node/1394551; born 1963 by Wikidata and the article, as the directory; the item's image (P18), 'Hannah Lauck.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q16195170 alone (P180)",
+    "file": [
+     659,
+     786
+    ],
+    "height": 298,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Hannah_Lauck_(cropped).jpg/120px-Hannah_Lauck_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Hannah_Lauck_(cropped).jpg/250px-Hannah_Lauck_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Hannah_Lauck_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Hannah_Lauck_(cropped).jpg/120px-Hannah_Lauck_(cropped).jpg",
+    "width": 250,
+    "year": 2014
+   },
    "wikidata": "Q16195170",
    "wikipedia": "M. Hannah Lauck"
   },
@@ -28862,6 +30080,35 @@
    "wikipedia": "Randolph Moss"
   },
   "1394641": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 14259,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q16213646 carries the FJC id may-leigh-martin of fjc.gov/node/1394641; born 1971 by Wikidata and the article, as the directory; the item's image (P18), 'Leigh May.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q16213646 alone (P180)",
+    "file": [
+     442,
+     461
+    ],
+    "height": 261,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Leigh_May_(cropped).jpg/120px-Leigh_May_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Leigh_May_(cropped).jpg/250px-Leigh_May_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Leigh_May_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Leigh_May_(cropped).jpg/120px-Leigh_May_(cropped).jpg",
+    "width": 250,
+    "year": 2014
+   },
    "wikidata": "Q16213646",
    "wikipedia": "Leigh Martin May"
   },
@@ -29489,6 +30736,35 @@
    "wikipedia": "Alfred H. Bennett"
   },
   "1394786": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 13383,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q18169257 carries the FJC id olvera-jose-rolando-jr of fjc.gov/node/1394786; born 1963 by Wikidata and the article, as the directory; the item's image (P18), 'Jose Olvera Jr.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q18169257 alone (P180)",
+    "file": [
+     412,
+     475
+    ],
+    "height": 288,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Jose_Olvera_Jr_(cropped).jpg/120px-Jose_Olvera_Jr_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Jose_Olvera_Jr_(cropped).jpg/250px-Jose_Olvera_Jr_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Jose_Olvera_Jr_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Jose_Olvera_Jr_(cropped).jpg/120px-Jose_Olvera_Jr_(cropped).jpg",
+    "width": 250,
+    "year": 2015
+   },
    "wikidata": "Q18169257",
    "wikipedia": "Rolando Olvera"
   },
@@ -29591,6 +30867,35 @@
    "wikipedia": "Dale A. Drozd"
   },
   "1394806": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 15673,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q18685770 carries the FJC id donnelly-ann-marie of fjc.gov/node/1394806; born 1959 by Wikidata and the article, as the directory; the item's image (P18), 'Ann Donnelly.jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q18685770 alone (P180)",
+    "file": [
+     367,
+     398
+    ],
+    "height": 271,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Ann_Donnelly_(cropped).jpg/120px-Ann_Donnelly_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Ann_Donnelly_(cropped).jpg/250px-Ann_Donnelly_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Ann_Donnelly_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Ann_Donnelly_(cropped).jpg/120px-Ann_Donnelly_(cropped).jpg",
+    "width": 250,
+    "year": 2015
+   },
    "wikidata": "Q18685770",
    "wikipedia": "Ann Donnelly"
   },
@@ -30086,6 +31391,35 @@
    "wikipedia": "Allison H. Eid"
   },
   "3989731": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 114862,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q7608476 carries the FJC id bibas-stephanos of fjc.gov/node/3989731; born 1969 by Wikidata and the article, as the directory; the item has no image; its article 'Stephanos Bibas' shows this file in its infobox and leads with it",
+    "file": [
+     966,
+     1364
+    ],
+    "height": 353,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Stephanos_Bibas.png/120px-Stephanos_Bibas.png"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Stephanos_Bibas.png/250px-Stephanos_Bibas.png"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Stephanos_Bibas.png",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b1/Stephanos_Bibas.png/120px-Stephanos_Bibas.png",
+    "width": 250,
+    "year": 2017
+   },
    "wikidata": "Q7608476",
    "wikipedia": "Stephanos Bibas"
   },
@@ -30288,6 +31622,35 @@
    "wikipedia": "William L. Campbell Jr."
   },
   "4028131": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 13717,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q33026926 carries the FJC id parker-thomas-lee-robinson of fjc.gov/node/4028131; born 1963 by Wikidata and the article, as the directory; the item has no image; its article 'Tommy Parker (judge)' shows this file in its infobox and leads with it",
+    "file": [
+     414,
+     535
+    ],
+    "height": 323,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Thomas_Lee_R._Parker_(cropped).jpg/120px-Thomas_Lee_R._Parker_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Thomas_Lee_R._Parker_(cropped).jpg/250px-Thomas_Lee_R._Parker_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Thomas_Lee_R._Parker_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Thomas_Lee_R._Parker_(cropped).jpg/120px-Thomas_Lee_R._Parker_(cropped).jpg",
+    "width": 250,
+    "year": 2017
+   },
    "wikidata": "Q33026926",
    "wikipedia": "Tommy Parker (judge)"
   },
@@ -30795,6 +32158,35 @@
    "wikipedia": "Robert E. Wier"
   },
   "4733056": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 14019,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q38976522 carries the FJC id rodriguez-fernando-jr of fjc.gov/node/4733056; born 1969 by Wikidata and the article, as the directory; the item has no image; its article 'Fernando Rodriguez Jr.' shows this file in its infobox and leads with it",
+    "file": [
+     430,
+     519
+    ],
+    "height": 302,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg/120px-Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg/250px-Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Fernando_Rodriguez_Jr._%28Judge%29_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg/120px-Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg",
+    "width": 250,
+    "year": 2017
+   },
    "wikidata": "Q38976522",
    "wikipedia": "Fernando Rodriguez Jr."
   },
@@ -32319,6 +33711,35 @@
    "wikipedia": "Holly A. Brady"
   },
   "6278461": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 15705,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q51732533 carries the FJC id morales-david-steven of fjc.gov/node/6278461; born 1968 by Wikidata and the article, as the directory; the item has no image; its article 'David S. Morales' shows this file in its infobox and leads with it",
+    "file": [
+     539,
+     600
+    ],
+    "height": 278,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "article",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/David_Steven_Morales_(Judge).jpg/120px-David_Steven_Morales_(Judge).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/David_Steven_Morales_(Judge).jpg/250px-David_Steven_Morales_(Judge).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:David_Steven_Morales_%28Judge%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/David_Steven_Morales_(Judge).jpg/120px-David_Steven_Morales_(Judge).jpg",
+    "width": 250,
+    "year": 2018
+   },
    "wikidata": "Q51732533",
    "wikipedia": "David S. Morales"
   },
@@ -35073,6 +36494,35 @@
    "wikipedia": "Gary R. Brown"
   },
   "7545481": {
+   "portrait": {
+    "by": "U.S. Senate Judiciary Committee",
+    "bytes": 15089,
+    "credit": "Wikimedia Commons",
+    "creditForm": 4,
+    "evidence": "Wikidata Q62000424 carries the FJC id davis-stephanie-dawkins of fjc.gov/node/7545481; born 1967 by Wikidata and the article, as the directory; the item's image (P18), 'Stephanie Davis (Judge).jpg', is a wide frame; this file says it is extracted from it ({{Extracted from}}) and depicts Q62000424 alone (P180)",
+    "file": [
+     425,
+     518
+    ],
+    "height": 305,
+    "licence": "Public domain",
+    "read": "2026-10-25",
+    "route": "crop",
+    "set": [
+     [
+      120,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Stephanie_Davis_(Judge)_(cropped).jpg/120px-Stephanie_Davis_(Judge)_(cropped).jpg"
+     ],
+     [
+      250,
+      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Stephanie_Davis_(Judge)_(cropped).jpg/250px-Stephanie_Davis_(Judge)_(cropped).jpg"
+     ]
+    ],
+    "source": "https://commons.wikimedia.org/wiki/File:Stephanie_Davis_%28Judge%29_%28cropped%29.jpg",
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Stephanie_Davis_(Judge)_(cropped).jpg/120px-Stephanie_Davis_(Judge)_(cropped).jpg",
+    "width": 250,
+    "year": 2022
+   },
    "wikidata": "Q62000424",
    "wikipedia": "Stephanie D. Davis"
   },
@@ -36403,58 +37853,7 @@
    "wikipedia": "Fernando Aenlle-Rocha"
   }
  },
- "notPortraits": [
-  "https://upload.wikimedia.org/wikipedia/commons/0/07/Andrew_B._Davis.png",
-  "https://upload.wikimedia.org/wikipedia/commons/0/0a/Leigh_May_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/16/Hannah_Lauck_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/1/1d/Michael_C._Martin.png",
-  "https://upload.wikimedia.org/wikipedia/commons/2/24/Zack_Bluestone.png",
-  "https://upload.wikimedia.org/wikipedia/commons/3/34/Sanket_J._Bulsara.png",
-  "https://upload.wikimedia.org/wikipedia/commons/3/37/Robert_Chamberlin.png",
-  "https://upload.wikimedia.org/wikipedia/commons/3/38/Kara_M._Westercamp.png",
-  "https://upload.wikimedia.org/wikipedia/commons/3/3a/Harold_D._Mooty.png",
-  "https://upload.wikimedia.org/wikipedia/commons/3/3e/Maria_Lanahan.png",
-  "https://upload.wikimedia.org/wikipedia/commons/3/3e/Sheria_Akins_Clarke.png",
-  "https://upload.wikimedia.org/wikipedia/commons/4/40/Embry_J_Kidd.png",
-  "https://upload.wikimedia.org/wikipedia/commons/4/42/Gail_A._Weilheimer-7-31-24.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/5/55/Stephanie_Davis_(Judge)_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/5/5c/Angela_V._Colmenero.png",
-  "https://upload.wikimedia.org/wikipedia/commons/5/5d/Aaron_C._Peterson.png",
-  "https://upload.wikimedia.org/wikipedia/commons/6/64/Landya_McCafferty_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/6/6a/Jeffrey_M._Kuhlman.png",
-  "https://upload.wikimedia.org/wikipedia/commons/6/6b/James_Maxwell.png",
-  "https://upload.wikimedia.org/wikipedia/commons/7/76/Byron_B._Conway-7-31-24.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/7/7d/John_Thomas_Shepherd.png",
-  "https://upload.wikimedia.org/wikipedia/commons/8/87/Anne-Leigh_Moe.png",
-  "https://upload.wikimedia.org/wikipedia/commons/8/87/Kathleen_S._Lane.png",
-  "https://upload.wikimedia.org/wikipedia/commons/8/89/Anna_St._John.png",
-  "https://upload.wikimedia.org/wikipedia/commons/8/8b/Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/9/9c/Jonathan_E._Hawley-7-31-24.jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/9/9c/Megan_Benton.png",
-  "https://upload.wikimedia.org/wikipedia/commons/9/9e/Christopher_R._Wolfe.png",
-  "https://upload.wikimedia.org/wikipedia/commons/a/a1/Matthew_R._Byrne.png",
-  "https://upload.wikimedia.org/wikipedia/commons/a/a4/Thomas_Lee_R._Parker_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/a/a7/Kasdin_M._Mitchell.png",
-  "https://upload.wikimedia.org/wikipedia/commons/a/aa/Matthew_E._Orso.png",
-  "https://upload.wikimedia.org/wikipedia/commons/a/ac/David_Steven_Morales_(Judge).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/b/b1/Stephanos_Bibas.png",
-  "https://upload.wikimedia.org/wikipedia/commons/b/b3/Tiffany_Cunningham_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/b/b4/Matthew_A._Schwartz.png",
-  "https://upload.wikimedia.org/wikipedia/commons/b/bb/Jennifer_Rearden_(Judge)_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/b/bf/Katherine_Failla_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/c/c4/Jose_Olvera_Jr_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/d/d4/Ann_Donnelly_(cropped).jpg",
-  "https://upload.wikimedia.org/wikipedia/commons/d/d7/Brian_Lea.png",
-  "https://upload.wikimedia.org/wikipedia/commons/d/dc/Whitney_Hermandorfer.png",
-  "https://upload.wikimedia.org/wikipedia/commons/d/df/Edward_L._Artau.png",
-  "https://upload.wikimedia.org/wikipedia/commons/e/e5/Eric_C._Schulte.png",
-  "https://upload.wikimedia.org/wikipedia/commons/e/e5/Kyle_C._Dudek.png",
-  "https://upload.wikimedia.org/wikipedia/commons/e/ee/Justin_Olson.png",
-  "https://upload.wikimedia.org/wikipedia/commons/f/f2/Joshua_M._Divine.png",
-  "https://upload.wikimedia.org/wikipedia/commons/f/f3/Susan_Courtwright_Rodriguez.png",
-  "https://upload.wikimedia.org/wikipedia/commons/f/f5/Anthony_J._Powell.png",
-  "https://upload.wikimedia.org/wikipedia/commons/f/ff/Bill_W._Lewis.png"
- ],
+ "notPortraits": [],
  "oversized": [],
  "problems": [
   "Deborah Lynn Boardman: Wikidata Q106287225 for boardman-deborah-lynn gives a year of birth of 1975, the directory 1974; not used",
@@ -36571,55 +37970,7 @@
   "Robert Joshua Luck: https://upload.wikimedia.org/wikipedia/commons/a/ab/Florida-Supreme-Court-Justice-Robert-Luck-2019.jpg is wider than a portrait (3350x2428) and 2 crops of it depict Q60736961 alone; not shown as a portrait",
   "Sarah Elizabeth Pitlyk: Q66459258 has 2 images; none shown",
   "Michael Jay Newman: Wikidata Q30121886 for newman-michael-jay gives a year of birth of 2000, the directory 1960; not used",
-  "Joseph Dawson, III: https://upload.wikimedia.org/wikipedia/commons/5/5f/Joseph_Dawson_III_(Judge).jpg is wider than a portrait (914x647) and no crop of it depicts Q99800784 alone; not shown as a portrait",
-  "Tiffany P. Cunningham: https://upload.wikimedia.org/wikipedia/commons/b/b3/Tiffany_Cunningham_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Jennifer H. Rearden: https://upload.wikimedia.org/wikipedia/commons/b/bb/Jennifer_Rearden_(Judge)_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Sanket J. Bulsara: https://upload.wikimedia.org/wikipedia/commons/3/34/Sanket_J._Bulsara.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Eric Schulte: https://upload.wikimedia.org/wikipedia/commons/e/e5/Eric_C._Schulte.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Byron B. Conway: https://upload.wikimedia.org/wikipedia/commons/7/76/Byron_B._Conway-7-31-24.jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Jonathan E. Hawley: https://upload.wikimedia.org/wikipedia/commons/9/9c/Jonathan_E._Hawley-7-31-24.jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Embry Kidd: https://upload.wikimedia.org/wikipedia/commons/4/40/Embry_J_Kidd.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Gail A. Weilheimer: https://upload.wikimedia.org/wikipedia/commons/4/42/Gail_A._Weilheimer-7-31-24.jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Whitney Hermandorfer: https://upload.wikimedia.org/wikipedia/commons/d/dc/Whitney_Hermandorfer.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Josh Divine: https://upload.wikimedia.org/wikipedia/commons/f/f2/Joshua_M._Divine.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Zack Bluestone: https://upload.wikimedia.org/wikipedia/commons/2/24/Zack_Bluestone.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Ed Artau: https://upload.wikimedia.org/wikipedia/commons/d/df/Edward_L._Artau.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Maria Lanahan: https://upload.wikimedia.org/wikipedia/commons/3/3e/Maria_Lanahan.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Kyle Dudek: https://upload.wikimedia.org/wikipedia/commons/e/e5/Kyle_C._Dudek.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Harold Mooty: https://upload.wikimedia.org/wikipedia/commons/3/3a/Harold_D._Mooty.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Anne-Leigh Gaylord Moe: https://upload.wikimedia.org/wikipedia/commons/8/87/Anne-Leigh_Moe.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Bill Lewis (judge): https://upload.wikimedia.org/wikipedia/commons/f/ff/Bill_W._Lewis.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Susan C. Rodriguez: https://upload.wikimedia.org/wikipedia/commons/f/f3/Susan_Courtwright_Rodriguez.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Robert P. Chamberlin: https://upload.wikimedia.org/wikipedia/commons/3/37/Robert_Chamberlin.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "James D. Maxwell II: https://upload.wikimedia.org/wikipedia/commons/6/6b/James_Maxwell.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Aaron C. Peterson: https://upload.wikimedia.org/wikipedia/commons/5/5d/Aaron_C._Peterson.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Megan Benton: https://upload.wikimedia.org/wikipedia/commons/9/9c/Megan_Benton.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Brian C. Lea: https://upload.wikimedia.org/wikipedia/commons/d/d7/Brian_Lea.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Justin R. Olson: https://upload.wikimedia.org/wikipedia/commons/e/ee/Justin_Olson.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Anna St. John: https://upload.wikimedia.org/wikipedia/commons/8/89/Anna_St._John.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "John T. Shepherd: https://upload.wikimedia.org/wikipedia/commons/7/7d/John_Thomas_Shepherd.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Chris Wolfe: https://upload.wikimedia.org/wikipedia/commons/9/9e/Christopher_R._Wolfe.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Andrew B. Davis: https://upload.wikimedia.org/wikipedia/commons/0/07/Andrew_B._Davis.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Sheria Clarke: https://upload.wikimedia.org/wikipedia/commons/3/3e/Sheria_Akins_Clarke.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Katie Lane: https://upload.wikimedia.org/wikipedia/commons/8/87/Kathleen_S._Lane.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Jeffrey M. Kuhlman: https://upload.wikimedia.org/wikipedia/commons/6/6a/Jeffrey_M._Kuhlman.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Matthew Schwartz: https://upload.wikimedia.org/wikipedia/commons/b/b4/Matthew_A._Schwartz.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Kara Westercamp: https://upload.wikimedia.org/wikipedia/commons/3/38/Kara_M._Westercamp.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Michael C. Martin: https://upload.wikimedia.org/wikipedia/commons/1/1d/Michael_C._Martin.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Matthew R. Byrne: https://upload.wikimedia.org/wikipedia/commons/a/a1/Matthew_R._Byrne.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Kasdin Mitchell: https://upload.wikimedia.org/wikipedia/commons/a/a7/Kasdin_M._Mitchell.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Angela Colmenero: https://upload.wikimedia.org/wikipedia/commons/5/5c/Angela_V._Colmenero.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Katherine Polk Failla: https://upload.wikimedia.org/wikipedia/commons/b/bf/Katherine_Failla_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Landya B. McCafferty: https://upload.wikimedia.org/wikipedia/commons/6/64/Landya_McCafferty_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "M. Hannah Lauck: https://upload.wikimedia.org/wikipedia/commons/1/16/Hannah_Lauck_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Leigh Martin May: https://upload.wikimedia.org/wikipedia/commons/0/0a/Leigh_May_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Rolando Olvera: https://upload.wikimedia.org/wikipedia/commons/c/c4/Jose_Olvera_Jr_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Ann Donnelly: https://upload.wikimedia.org/wikipedia/commons/d/d4/Ann_Donnelly_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Stephanos Bibas: https://upload.wikimedia.org/wikipedia/commons/b/b1/Stephanos_Bibas.png is in overrides.NOT_A_PORTRAIT; not shown",
-  "Tommy Parker (judge): https://upload.wikimedia.org/wikipedia/commons/a/a4/Thomas_Lee_R._Parker_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Fernando Rodriguez Jr.: https://upload.wikimedia.org/wikipedia/commons/8/8b/Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "David S. Morales: https://upload.wikimedia.org/wikipedia/commons/a/ac/David_Steven_Morales_(Judge).jpg is in overrides.NOT_A_PORTRAIT; not shown",
-  "Stephanie D. Davis: https://upload.wikimedia.org/wikipedia/commons/5/55/Stephanie_Davis_(Judge)_(cropped).jpg is in overrides.NOT_A_PORTRAIT; not shown"
+  "Joseph Dawson, III: https://upload.wikimedia.org/wikipedia/commons/5/5f/Joseph_Dawson_III_(Judge).jpg is wider than a portrait (914x647) and no crop of it depicts Q99800784 alone; not shown as a portrait"
  ],
  "read": "2026-10-25",
  "slugs": {
