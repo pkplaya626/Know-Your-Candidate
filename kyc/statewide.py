@@ -647,7 +647,20 @@ def for_page(code, entry, holder_name=None):
     if more and any(p.get("writeIn") for p in entry["candidates"]):
         page["writeIns"] = {"url": more["url"], "by": more["by"], "read": more["read"],
                             "source": source_words(more)}
+        if write_ins_certified(more):
+            # Georgia's main list is not marked certified, but its write-in
+            # list is titled "Final List of Certified Write-In Candidates":
+            # the document's own word, said of its write-ins alone (rule 91).
+            page["writeIns"]["certified"] = True
     return page
+
+
+def write_ins_certified(lst):
+    """Does a write-in list call its people certified in its own title (the
+    part the cache quotes, between straight quotes)? Never the cache's own
+    description around it."""
+    return any(re.search(r"\bcertified\b", quoted, re.I)
+               for quoted in re.findall(r"'([^']+)'", str((lst or {}).get("title") or "")))
 
 
 def member_leads(cache, legislators, noted):

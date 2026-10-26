@@ -10501,6 +10501,19 @@ async function testSearchAnswers() {
     check("its write-ins are counted as write-ins", /; and 2 write-in candidates\./.test(text()) &&
       !/certified write-in/.test(text()), text().slice(0, 400));
   });
+  // Georgia's main list is not marked certified, but its write-ins come from
+  // its "Final List of Certified Write-In Candidates": the word is its own.
+  const gaGov = ((gov.GA || {}).ballot2026 || {}).offices || {};
+  if (gaGov.governor && gaGov.governor.candidates && gaGov.governor.candidates.writeIns) {
+    await ask("Georgia governor race");
+    suite("search answers — 'Georgia governor race': write-ins certified by their own list", () => {
+      const list = gaGov.governor.candidates;
+      const n = list.candidates.filter((c) => c.writeIn).length;
+      check("the main list is not certified, its write-in list is", !list.certified && !!list.writeIns.certified);
+      check("the write-ins are called certified", new RegExp("; and " + n + " certified write-in candidates?\\.")
+        .test(text()), text().slice(0, 500));
+    });
+  }
   // An office a place does not have, or this site does not list, is not
   // titled as though the page held it (rule 75).
   await ask("DC governor");

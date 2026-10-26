@@ -471,6 +471,18 @@ class TestArizonasOwnList(unittest.TestCase):
         self.assertFalse([p for p in lt["candidates"] if p["holder"]])
         self.assertFalse([p for p in self.problems if p.startswith("AZ ")], self.problems)
 
+    def test_no_other_body_is_cited_as_arizonas_source(self):
+        # The Clean Elections guide stays in the notes, as what the listing
+        # was compared with; no source field cites it (PR #144 review: the
+        # lieutenant governor's holderSource still did).
+        for key, entry in self.cache["states"]["AZ"]["offices"].items():
+            for field in ("list", "holderSource", "writeInList"):
+                url = (entry.get(field) or {}).get("url") or ""
+                if url:
+                    self.assertNotIn("storageccec", url, (key, field))
+                    self.assertRegex(url, r"^https://(apps\.arizona\.vote|azsos\.gov|www\.azleg\.gov)/",
+                                     (key, field))
+
     def test_no_exception_stands_for_arizonas_own_office(self):
         from kyc import overrides
         self.assertFalse([p for p in overrides.STATEWIDE_LISTS_ELSEWHERE
@@ -634,6 +646,29 @@ class TestThePage(unittest.TestCase):
         self.assertEqual(page["candidates"][0]["party"], "Republican")
         self.assertEqual(page["by"], "Georgia Secretary of State")
         self.assertEqual(page["source"], "the Georgia Secretary of State’s candidate list")
+
+    def test_write_ins_are_certified_only_by_their_own_documents_title(self):
+        # Georgia's main list is not marked certified; its write-in list is
+        # titled "Final List of Certified Write-In Candidates", so the search
+        # may say "certified" of the write-ins alone. Arizona's, Maine's,
+        # Texas's and Wisconsin's say no such thing (PR #144 review).
+        cache = statewide.load(".")
+        seen = {}
+        for code, state in cache["states"].items():
+            for key, entry in state["offices"].items():
+                if entry.get("writeInList") and any(p.get("writeIn") for p in entry["candidates"]):
+                    page = statewide.for_page(code, entry)
+                    seen[(code, key)] = (bool(page["certified"]),
+                                         bool(page["writeIns"].get("certified")))
+        self.assertEqual(seen[("GA", "governor")], (False, True))
+        for where, (main, write_ins) in seen.items():
+            if where != ("GA", "governor"):
+                self.assertFalse(write_ins, where)
+        # The cache's own words around the quoted title never count.
+        self.assertFalse(statewide.write_ins_certified(
+            {"title": "Certified by nobody: Example County, 'Write-in list'"}))
+        self.assertTrue(statewide.write_ins_certified(
+            {"title": "Example, 'List of Certified Write-In Candidates' (1/1/26)"}))
 
     def test_the_lists_own_form_stays_beside_the_name_shown(self):
         entry = office()

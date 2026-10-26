@@ -558,7 +558,7 @@
       "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
       "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
-     "notes": "It names the same candidates, parties, running mates and write-in candidates for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
+     "notes": "It names the same candidates and parties for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
      "title": "Attorney General"
     },
     "governor": {
@@ -672,8 +672,8 @@
      "holderOnList": null,
      "holderResearched": null,
      "holderSource": {
-      "quote": "The first time voters will be choosing an Arizona Lieutenant Governor will be in 2026. Voters will elect the Governor and Lieutenant Governor on a joint ticket.",
-      "url": "https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf"
+      "quote": "A. The executive department shall consist of the governor, lieutenant governor, secretary of state, attorney general, state treasurer and superintendent of public instruction ... C. ... each nominee for the office of governor shall name a lieutenant governor nominee and shall run on a ticket as a joint candidate in the general election with that nominee for the office of lieutenant governor.",
+      "url": "https://www.azleg.gov/const/5/1.htm"
      },
      "list": {
       "by": "Arizona Secretary of State",
@@ -684,7 +684,7 @@
       "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
       "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
-     "notes": "The listing has no heading of its own for Lieutenant Governor: each candidate is printed under their joint candidate for Governor, as 'Last, First (PARTY)' above the link 'Lieutenant Governor' (to an azsos.gov page per ticket, e.g. https://azsos.gov/lieutenant-governor-hobbs-katie, which prints 'Lt. Gov - Giles, John (PND)'). 'runningMate' is that governor candidate, as the listing prints them. The listing prints 'Harrolle Mohan' as the surname (before the comma). PND is the Secretary of State's 'Party Not Designated' (statewide.PARTY_CODES); Giles's Lieutenant Governor Candidate Nomination Paper, linked from that page, checks 'I am not a member of a recognized political party in the State of Arizona'. The Clean Elections guide calls Giles and Harrolle Mohan 'Independent', which the Secretary of State keeps apart from PND. It names the same candidates, parties, running mates and write-in candidates for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
+     "notes": "The listing has no heading of its own for Lieutenant Governor: each candidate is printed under their joint candidate for Governor, as 'Last, First (PARTY)' above the link 'Lieutenant Governor' (to an azsos.gov page per ticket, e.g. https://azsos.gov/lieutenant-governor-hobbs-katie, which prints 'Lt. Gov - Giles, John (PND)'). 'runningMate' is that governor candidate, as the listing prints them. The listing prints 'Harrolle Mohan' as the surname (before the comma). PND is the Secretary of State's 'Party Not Designated' (statewide.PARTY_CODES); Giles's Lieutenant Governor Candidate Nomination Paper, linked from that page, checks 'I am not a member of a recognized political party in the State of Arizona'. It names the same running mates, each on the same ticket, as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read. The guide's 'Independent' for Giles and Harrolle Mohan is the listing's PND. The guide also says 'The first time voters will be choosing an Arizona Lieutenant Governor will be in 2026. Voters will elect the Governor and Lieutenant Governor on a joint ticket.'",
      "title": "Lieutenant Governor"
     },
     "sos": {
@@ -731,7 +731,7 @@
       "title": "Arizona Secretary of State, '2026 General Election / Tuesday, November 03, 2026' candidate listing (State tab), under the banner 'ADRIAN FONTES, SECRETARY OF STATE'",
       "url": "https://apps.arizona.vote/electioninfo/Election/69"
      },
-     "notes": "It names the same candidates, parties, running mates and write-in candidates for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
+     "notes": "It names the same candidates and parties for this office as the Arizona Citizens Clean Elections Commission's 2026 Voter Education Guide (https://storageccec.blob.core.usgovcloudapi.net/public/docs/1509-1497AllDistrictWebEnglishv2.pdf, Last-Modified 2026-09-11) and the Pima County Elections Department's 'General Election-November 3, 2026 Candidate List' (UPDATED: 9/9/2026, https://content.civicplus.com/api/assets/az-pimacounty/d2c310c3-ade7-484e-a6f0-1ddaebec0799), which this file cited from 2026-10-18 to 2026-10-26 while the listing could not be read.",
      "title": "Secretary of State"
     }
    },
