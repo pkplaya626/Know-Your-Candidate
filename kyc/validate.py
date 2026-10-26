@@ -1902,6 +1902,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_voting_links(voting)
     if officers is not None:
         issues += check_officers_by_hand(officers)
+        issues += check_officers_kept(officers)
     if voting_dates is not None:
         issues += check_voting_dates(voting_dates)
     if statewide is not None:
@@ -2216,6 +2217,22 @@ def check_officers_by_hand(cache):
     return [Issue("warn", "officers-by-hand",
                   f"{len(unused)} overrides.OFFICERS_READ_BY_HAND entries confirm nobody on "
                   f"the page", unused)]
+
+
+def check_officers_kept(cache, today=None):
+    """A statewide officer's confirmation kept from an earlier read of the
+    office's own site, because the site has concluded nothing since
+    (officers.kept_confirmation, rule 8), is shown as the confirmed holder,
+    as a court's last good read is (rule 57). Past
+    officers.KEPT_STALE_DAYS a person should read the office's page by
+    hand."""
+    from . import officers
+    stale = officers.kept_stale(cache, today)
+    if not stale:
+        return []
+    return [Issue("warn", "officer-confirmation-kept",
+                  f"{len(stale)} statewide officer(s) shown on a confirmation by the office's "
+                  f"site more than {officers.KEPT_STALE_DAYS} days old", stale)]
 
 
 def check_ballot2026():

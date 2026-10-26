@@ -875,6 +875,11 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
     for code, row in sorted(rows.items()):
         if not row.get("name") or row.get("unconfirmed") or row.get("disputed"):
             continue
+        if row.get("confirmationKept"):
+            # The office's site concluded nothing this run: its photograph
+            # stands as the confirming read left it (kept_confirmation), not
+            # dropped, re-read or reported as changed.
+            continue
         read = list(pages.get(code) or [])
         # What a person refused is kept on the row (``notPortraits``) so
         # validate can tell a NOT_A_PORTRAIT entry still means something.
@@ -943,11 +948,74 @@ def photo_changes(code, old, row):
             f"(from {row.get('photoPage')}); look at it"]
 
 
-def attorneys_general(raga, daga, office_texts):
+# A confirmation is the office's word on the day its page was read
+# (``confirmedOn``), with the other association listings that page did not
+# name (``alsoListed``, "Name (P)"). Where the office's site later concludes
+# nothing (a timeout, a refusal, a page drawn by script: rule 8), that
+# confirmation is kept - shown as the confirmed holder, as a court's last
+# good read is (rule 57) - only while nothing read since contradicts it: the
+# same association lists the same holder with the same party, and every
+# other listing is one the confirming read saw and did not name. On
+# 2026-10-20, -21 and -22 ncdoj.gov did not answer, and North Carolina's
+# page called its attorney general disputed between Jeff Jackson, whom the
+# office names, and Dan Bishop, whom RAGA still lists after he lost the
+# 2024 election. Past ``KEPT_STALE_DAYS`` the build says a person should
+# read the office's page by hand (overrides.OFFICERS_READ_BY_HAND).
+KEPT_STALE_DAYS = 14
+
+
+def _utc_today():
+    return datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+
+
+def _listing(r, party):
+    return f"{r['name']} ({party})"
+
+
+def _as_shown(name):
+    """An association's spelling as the office writes it (``NAME_FORMS``)."""
+    return " ".join(NAME_FORMS.get(name, name).split())
+
+
+def kept_confirmation(old, listed, previous_day=None):
+    """The previous cache's confirmed row *old*, kept where the office's site
+    concluded nothing this run, or ``None``. *listed* is this run's
+    ``[(listing, party, association)]``; *previous_day* the previous cache's
+    ``fetched`` day, the day a row written before ``confirmedOn`` existed was
+    confirmed (every run reads every office). Kept only when the same
+    association lists the same holder with the same party and every other
+    listing this run is one the confirming read did not name
+    (``alsoListed``). A row written before this was recorded has no
+    ``alsoListed``, so a state two associations list is kept only once a
+    read has recorded what else it saw; a one-listing state needs nothing
+    more."""
+    old = old or {}
+    if not old.get("name") or old.get("unconfirmed") or old.get("disputed") or old.get("unlisted"):
+        return None
+    day = old.get("confirmedOn") or previous_day
+    if not day:
+        return None
+    holder = [(r, p) for r, p, source in listed if source == old.get("listedBy")
+              and p == old.get("party") and _as_shown(r["name"]) == old["name"]]
+    if len(holder) != 1:
+        return None
+    seen = old.get("alsoListed")
+    others = [_listing(r, p) for r, p, _ in listed if r is not holder[0][0]]
+    if others and (seen is None or any(o not in seen for o in others)):
+        return None
+    return dict(old, confirmedOn=day, confirmationKept=True)
+
+
+def attorneys_general(raga, daga, office_texts, previous=None, previous_day=None, today=None):
     """``(rows, problems)``. *office_texts* is ``{code: (url, text or None)}``.
     A row is the confirmed holder, an unconfirmed association listing, or a
-    dispute; *problems* says what a person should look at."""
+    dispute; *problems* says what a person should look at. *previous* is
+    the last cache's rows and *previous_day* its ``fetched`` day: where an
+    office's site concludes nothing, its last confirmation is kept while
+    nothing read contradicts it (:func:`kept_confirmation`). *today* dates
+    each confirmation (``confirmedOn``)."""
     from .government_maps import STATES
+    today = today or _utc_today()
     rows, problems = {}, []
     for code in STATES:
         url, text = office_texts.get(code, ("", None))
@@ -961,7 +1029,15 @@ def attorneys_general(raga, daga, office_texts):
             problems.append(f"{code}: neither association lists an attorney general")
             continue
         if text is None:
-            if len(listed) > 1:
+            kept = kept_confirmation((previous or {}).get(code), listed, previous_day)
+            if kept:
+                rows[code] = dict({k: v for k, v in kept.items()
+                                   if k not in ("office", "selection")}, **base)
+                problems.append(f"{code}: the office's site could not be read; its confirmation "
+                                f"of {kept['name']} on {kept['confirmedOn']} is kept"
+                                + (f" ({', '.join(kept['alsoListed'])} also listed, and not "
+                                   "named on that read)" if kept.get("alsoListed") else ""))
+            elif len(listed) > 1:
                 rows[code] = dict(base, disputed=[f"{r['name']} ({p})" for r, p, _ in listed])
                 problems.append(f"{code}: both associations list someone and the office "
                                 f"could not be read")
@@ -985,7 +1061,8 @@ def attorneys_general(raga, daga, office_texts):
             name, party, source, r = confirmed[0]
             rows[code] = dict(base, name=name, party=party, partyKey=party, listedBy=source,
                               title="Acting Attorney General" if acting(name, text)
-                              else "Attorney General")
+                              else "Attorney General", confirmedOn=today,
+                              alsoListed=[_listing(o, p) for o, p, _ in listed if o is not r])
         elif not confirmed and len(listed) > 1:
             # Both associations list someone and the office names neither:
             # neither listing stands for the office (RAGA's alone would be
@@ -1018,11 +1095,13 @@ def ag_problems(rows):
     return out
 
 
-def fetch_attorneys_general(pause=0.5, previous=None):
+def fetch_attorneys_general(pause=0.5, previous=None, previous_day=None):
     """``(rows, problems)`` from the live rosters, USA.gov and every office,
     each confirmed holder with their office's photograph (``add_ag_photos``;
     *previous* is the last cache's rows, whose photograph a read that
-    concludes nothing keeps)."""
+    concludes nothing keeps, and whose confirmation an office's site that
+    concludes nothing keeps: :func:`kept_confirmation`; *previous_day* is
+    that cache's ``fetched`` day)."""
     from .government_maps import STATES
     from .pages import state_name
     raga, daga = parse_raga(_get(RAGA_URL)), parse_daga(_get(DAGA_URL))
@@ -1036,23 +1115,42 @@ def fetch_attorneys_general(pause=0.5, previous=None):
         texts[code] = (OFFICE_LINK.get(code, url),
                        " ".join(visible_text(page) for _, page in read[code]) or None)
         time.sleep(pause)
-    rows, problems = attorneys_general(raga, daga, texts)
+    rows, problems = attorneys_general(raga, daga, texts, previous, previous_day)
     problems += add_ag_photos(rows, read, previous)
     return rows, problems
 
 
-def confirm_non_members(sos, pause=0.5):
+def confirm_non_members(sos, pause=0.5, previous=None, previous_day=None, today=None,
+                        problems=None):
     """A secretary of state NASS lists for a state that is not a member is
     not NASS speaking for its member; the office's own site, which NASS
     links, can still confirm it. Marks ``officeConfirms`` on each it does,
-    and ``officeRead`` on each it does not: ``"unreadable"`` where the site
-    refused or drew nothing (rule 8), ``"not-named"`` where it was read and
-    does not name them, so the page can say why."""
+    with the day (``confirmedOn``), and ``officeRead`` on each it does not:
+    ``"unreadable"`` where the site refused or drew nothing (rule 8),
+    ``"not-named"`` where it was read and does not name them, so the page
+    can say why. Where the site concludes nothing, *previous* (the last
+    cache's ``sos``) keeps an ``officeConfirms`` of the very same name, with
+    its ``confirmedOn`` (else *previous_day*, the last cache's ``fetched``
+    day), as ``confirmationKept``; a site read that does not name them keeps
+    nothing. What was kept is appended to *problems*."""
+    today = today or _utc_today()
     for code, entry in sorted(sos.items()):
         if entry.get("member") is False and office_of(entry["title"]) == "Secretary of State":
             text = _office_text(entry["website"], pause) if entry.get("website") else None
+            old = (previous or {}).get(code) or {}
             if text and names_holder(entry["name"], text, "sos", code):
                 entry["officeConfirms"] = True
+                entry["confirmedOn"] = today
+            elif (entry.get("website") and not text and old.get("officeConfirms")
+                    and old.get("name") == entry["name"]
+                    and office_of(old.get("title", "")) == "Secretary of State"
+                    and (old.get("confirmedOn") or previous_day)):
+                entry.update(officeConfirms=True, confirmationKept=True,
+                             confirmedOn=old.get("confirmedOn") or previous_day)
+                if problems is not None:
+                    problems.append(f"{code}: the secretary of state's site could not be read; "
+                                    f"its confirmation of {entry['name']} on "
+                                    f"{entry['confirmedOn']} is kept")
             elif entry.get("website"):
                 entry["officeRead"] = "not-named" if text else "unreadable"
             time.sleep(pause)
@@ -1155,11 +1253,44 @@ def by_hand_unused(cache):
         elif entry["holder"] not in (name, " ".join(NAME_FORMS.get(name, name).split())):
             out.append(f"{where}: the roster now names {name}; the entry for {entry['holder']} "
                        "confirms nobody and should go")
+        elif row.get("confirmationKept"):
+            # The office's site did not answer this run; its last
+            # confirmation was only kept (kept_confirmation), so the site
+            # does not "now answer", and the reading by hand still stands.
+            continue
         elif office == "ag" and not (row.get("unconfirmed") and row.get("unreadable")):
             out.append(f"{where}: the office's own site now answers for {name}; the entry may go")
         elif office == "sos" and (row.get("member") is not False or row.get("officeConfirms")):
             out.append(f"{where}: NASS or the office's own site now answers for {name}; the "
                        "entry may go")
+    return out
+
+
+def kept_stale(cache, today=None):
+    """Every confirmation kept from an earlier read (``confirmationKept``)
+    more than ``KEPT_STALE_DAYS`` old and not since read by hand: the
+    office's site has not answered since, and a person should read its page
+    (overrides.OFFICERS_READ_BY_HAND). For validate
+    (``officer-confirmation-kept``)."""
+    today = today or datetime.date.today()
+    out = []
+    for office, label in (("ag", "attorney general"), ("sos", "secretary of state")):
+        for code, row in sorted(((cache or {}).get(office) or {}).items()):
+            if not row.get("confirmationKept"):
+                continue
+            if hand_confirms(code, office, row.get("name")):
+                continue                         # read by hand since: by_hand_stale ages it
+            try:
+                age = (today - datetime.date.fromisoformat(row.get("confirmedOn") or "")).days
+            except (TypeError, ValueError):
+                out.append(f"{code} {label}: {row.get('name')}'s kept confirmation carries no "
+                           f"day ({row.get('confirmedOn')!r})")
+                continue
+            if age > KEPT_STALE_DAYS:
+                out.append(f"{code} {label}: {row['name']}, confirmed by the office's site on "
+                           f"{row['confirmedOn']} ({age} days ago) and kept since, as the site "
+                           "has not answered; read the office's page by hand and record it in "
+                           "overrides.OFFICERS_READ_BY_HAND")
     return out
 
 
@@ -1173,9 +1304,16 @@ def fetch(previous=None):
     """``{"sos": {...}, "lt": {...}, "ag": {...}}`` from the live rosters,
     with the attorney-general problems to report. *previous* is the cache
     being replaced."""
-    ag, problems = fetch_attorneys_general(previous=(previous or {}).get("ag"))
-    return {"sos": confirm_non_members(parse_nass(_get(NASS_URL))),
-            "lt": parse_nlga(_get(NLGA_URL)), "ag": ag, "agProblems": problems}
+    previous = previous or {}
+    # The day the previous cache was read: a confirmed row it holds that
+    # predates ``confirmedOn`` was confirmed that day (kept_confirmation).
+    day = (previous.get("fetched") or "")[:10] or None
+    ag, problems = fetch_attorneys_general(previous=previous.get("ag"), previous_day=day)
+    sos_problems = []
+    sos = confirm_non_members(parse_nass(_get(NASS_URL)), previous=previous.get("sos"),
+                              previous_day=day, problems=sos_problems)
+    return {"sos": sos, "lt": parse_nlga(_get(NLGA_URL)), "ag": ag, "agProblems": problems,
+            "sosProblems": sos_problems}
 
 
 # ------------------------------------------------------------- for a state
@@ -1234,9 +1372,12 @@ def for_state(code, cache, disputes):
             out["lt"]["successor"] = _credited(_person(lt), NLGA_BY)
     if code in cache.get("ag", {}):
         out["ag"] = dict(cache["ag"][code])
-        out["ag"].pop("photoWeight", None)
-        out["ag"].pop("photoOversized", None)
-        out["ag"].pop("notPortraits", None)
+        # A kept confirmation is shown as the confirmed holder, in the same
+        # words (kept_confirmation; validate says when it grows old).
+        kept = out["ag"].pop("confirmationKept", None)
+        for field in ("photoWeight", "photoOversized", "notPortraits", "confirmedOn",
+                      "alsoListed"):
+            out["ag"].pop(field, None)
         from .photos import refused
         if out["ag"].get("photo") and refused(out["ag"]["photo"]):
             # A file a person refused since it was read (rule 38: someone
@@ -1248,14 +1389,16 @@ def for_state(code, cache, disputes):
             host = urllib.parse.urlsplit(out["ag"].get("photoPage") or "").hostname or ""
             out["ag"]["photoBy"] = ("the office's website (" + host.removeprefix("www.") + ")"
                                     if host else "the office's website")
-        hand = (out["ag"].get("unconfirmed") and out["ag"].get("unreadable")
+        hand = (((out["ag"].get("unconfirmed") and out["ag"].get("unreadable")) or kept)
                 and hand_confirms(code, "ag", out["ag"].get("name")))
         if hand:
             # The office's site refuses a script; its page, read by hand,
             # names them beside the title (overrides.OFFICERS_READ_BY_HAND).
+            # Where the site's last confirmation is kept, the reading by hand
+            # is what a person read since (KEPT_STALE_DAYS asks for one).
             name, entry = hand
             for field in ("unconfirmed", "unreadable"):
-                out["ag"].pop(field)
+                out["ag"].pop(field, None)
             out["ag"]["name"] = name
             out["ag"]["title"] = ("Acting Attorney General" if any(acting(name, w) for w in entry["words"])
                                   else "Attorney General")
@@ -1269,7 +1412,8 @@ def for_state(code, cache, disputes):
         person = _person(sos)
         if person.get("photo") and not _surname_in(sos["name"], person["photo"]):
             del person["photo"]
-        if sos.get("member") is False and not sos.get("officeConfirms"):
+        if sos.get("member") is False and (not sos.get("officeConfirms")
+                                           or sos.get("confirmationKept")):
             hand = hand_confirms(code, "sos", sos["name"])
             if hand:
                 # NASS does not speak for a non-member; the office's own
@@ -1279,6 +1423,8 @@ def for_state(code, cache, disputes):
                 # The page read by hand names the holder, not their party:
                 # that is still the non-member listing's, and said so.
                 person["partyFrom"] = NASS_BY
+            elif sos.get("officeConfirms"):
+                pass                             # the site's last confirmation, kept
             else:
                 person["notMember"] = True
                 if sos.get("officeRead"):

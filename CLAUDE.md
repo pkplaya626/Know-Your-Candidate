@@ -1011,7 +1011,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     commented-out "Attorney General Josh Stein". And a name counts only
     directly beside its title - an 80-character window confirmed "former
     attorney general Treg Taylor" on Alaska's page, and a governor standing
-    beside the attorney general.
+    beside the attorney general. A confirmation is the office's word on the
+    day its page was read (`confirmedOn`, with the listings it did not name,
+    `alsoListed`), and a site that concludes nothing keeps it while the same
+    association lists the same holder of the same party and no listing is
+    new (`officers.kept_confirmation`): ncdoj.gov did not answer on
+    2026-10-20, -21 and -22, and North Carolina's page read "The sources
+    disagree: Dan Bishop (R); Jeff Jackson (D)" over the office that had
+    named Jackson on every read. Past `KEPT_STALE_DAYS` a kept confirmation
+    is a warning (`officer-confirmation-kept`) to read the page by hand.
 
 57. **A court's members come from the court.** No national source lists
     sitting state justices, so `courts.COURTS` holds a recipe per court and
