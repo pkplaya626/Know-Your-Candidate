@@ -232,11 +232,13 @@ class TestOpenedByHand(unittest.TestCase):
         # rounds (New York's and Georgia's lookups each stand for two kinds),
         # and three whose portal asked first that the visitor show they are a
         # person. Alaska's registration page opened with no check: only its
-        # early-voting page asked.
+        # early-voting page asked. A third round opened twelve curated pages
+        # (two of them the replacements for Oklahoma's and New Hampshire's
+        # results) and vote.gov's 56 registration pages.
         cache = voting.load_cache(ROOT)
         what = [entry[2] for entry in overrides.VOTING_LINKS_BY_HAND.values()]
         self.assertEqual((what.count(voting.OPENED_BY_HAND), what.count(voting.HUMAN_CHECK)),
-                         (33, 3))
+                         (33 + 12 + 56, 3))
         self.assertEqual(sorted(key for key, entry in overrides.VOTING_LINKS_BY_HAND.items()
                                 if entry[2] == voting.HUMAN_CHECK),
                          [("AK", "absentee"), ("NH", "polling"), ("NH", "status")])
@@ -251,6 +253,127 @@ class TestOpenedByHand(unittest.TestCase):
                 entry = overrides.VOTING_LINKS_BY_HAND[(code, kind)]
                 self.assertEqual((day, seen), (entry[1], entry[2]))
                 self.assertEqual(page[code][kind], entry[0])
+
+
+class TestRoundThree(unittest.TestCase):
+    """After #142 the state pages still called the curated links - results,
+    sample ballots, Guam's information page, Iowa's absentee page, vote.gov's
+    registration page - "could not be confirmed". A person opened them on
+    2026-10-26 (research/by-hand-2026-10-26/NOTES.md, round three); two
+    results links showed readers "Forbidden" and are repointed; Alabama's
+    results page did not load, and nothing is concluded from that (rule 8)."""
+
+    OPENED = {
+        ("AK", "results"): "https://www.elections.alaska.gov/election-results/",
+        ("AK", "sample"): "https://www.elections.alaska.gov/sample-ballots/",
+        ("AZ", "results"): "https://results.arizona.vote/",
+        ("IA", "absentee"): "https://sos.iowa.gov/voters/absentee-voting",
+        ("MT", "results"): "https://sosmt.gov/elections/results/",
+        ("NY", "results"): "https://nyenr.elections.ny.gov/",
+        ("WI", "results"): "https://elections.wi.gov/elections/election-results",
+        ("OH", "results"): "https://www.ohiosos.gov/elections/election-results-and-data/",
+        ("GU", "info"): "https://gec.guam.gov/2026-general-election-info/",
+        ("MI", "sample"): "https://mvic.sos.state.mi.us/PublicBallot/Index",
+        ("OK", "results"): "https://results.okelections.gov/OKER/",
+        ("NH", "results"): "https://www.sos.nh.gov/2026-election-results",
+    }
+
+    def test_each_page_opened_is_recorded_at_the_address_shown(self):
+        shown = voting.effective(voting.load_cache(ROOT))
+        for (code, kind), url in self.OPENED.items():
+            entry = overrides.VOTING_LINKS_BY_HAND[(code, kind)]
+            self.assertEqual(entry[:3], (url, "2026-10-26", voting.OPENED_BY_HAND), (code, kind))
+            self.assertEqual(shown[code][kind]["url"], url, (code, kind))
+
+    def test_vote_govs_56_pages_each_opened_under_its_own_title(self):
+        hand = {code: entry for (code, kind), entry in overrides.VOTING_LINKS_BY_HAND.items()
+                if kind == "deadlines"}
+        self.assertEqual({code: entry[0] for code, entry in hand.items()}, voting.DEADLINES)
+        self.assertEqual(len(hand), 56)
+        for code, (url, day, what, final, title) in hand.items():
+            self.assertEqual((day, what, final), ("2026-10-26", voting.OPENED_BY_HAND, ""), code)
+            self.assertRegex(title, r"^How to register in [A-Z][\w. ]+ \| Vote\.gov$", code)
+        self.assertEqual(hand["DC"][4], "How to register in District of Columbia | Vote.gov")
+        self.assertEqual(hand["VI"][4], "How to register in U.S. Virgin Islands | Vote.gov")
+
+    def test_only_alabamas_results_are_left_unconfirmed(self):
+        # The 69 links the check could not open before round three (the
+        # curated pages above with Oklahoma's and New Hampshire's old
+        # addresses, vote.gov's pages, Alabama's results), each left unknown
+        # at the address now shown and every other link live: all but
+        # Alabama's results page carry a reading by hand.
+        cache = dict(voting.load_cache(ROOT))
+        shown = voting.effective(cache)
+        round_three = set(self.OPENED) | {(code, "deadlines") for code in voting.DEADLINES} | {
+            ("AL", "results")}
+        self.assertEqual(len(round_three), 69)
+        cache["links"] = {link["url"]: voting.UNKNOWN if (code, kind) in round_three
+                          else voting.LIVE
+                          for code, links in shown.items() for kind, link in links.items()}
+        page = voting.for_page(cache)
+        left = sorted((code, kind) for code, kinds in page["_unreached"].items()
+                      for kind in kinds if kind not in page["_byHand"].get(code, {}))
+        self.assertEqual(left, [("AL", "results")])
+        self.assertNotIn(("AL", "results"), overrides.VOTING_LINKS_BY_HAND)
+
+    def test_each_reading_is_of_the_address_the_state_page_shows(self):
+        # As the build writes the pages (with each jurisdiction's own dates,
+        # which take vote.gov's page off every state whose record gives its
+        # deadlines): every round-three link a page shows is the address a
+        # person opened, and is counted as opened by hand while the check
+        # cannot open it - New Hampshire's vote.gov page among them.
+        from kyc import voting_dates
+        cache = dict(voting.load_cache(ROOT))
+        cache["links"] = {}
+        page = voting.for_page(cache, voting_dates.load(ROOT))
+        shown = {(code, kind): url for code, links in page.items() if not code.startswith("_")
+                 for kind, url in links.items()}
+        recorded = {key: entry[0] for key, entry in overrides.VOTING_LINKS_BY_HAND.items()}
+        for key, url in self.OPENED.items():
+            self.assertEqual(shown.get(key), url, key)
+        self.assertEqual(shown[("NH", "deadlines")], recorded[("NH", "deadlines")])
+        for (code, kind), url in shown.items():
+            if (code, kind) in recorded and recorded[(code, kind)] == url:
+                self.assertIn(kind, page["_byHand"].get(code, {}), (code, kind))
+
+    def test_oklahomas_and_new_hampshires_results_are_repointed(self):
+        # Oklahoma's answered "403 - Forbidden: Access is denied.", New
+        # Hampshire's a "Forbidden" page, in a person's browser.
+        cache = voting.load_cache(ROOT)
+        shown = voting.effective(cache)
+        page = voting.for_page(cache)
+        for code, old, new in (
+                ("OK", "https://results.okelections.us/", "https://results.okelections.gov/OKER/"),
+                ("NH", "https://www.sos.nh.gov/elections/elections/election-results",
+                 "https://www.sos.nh.gov/2026-election-results")):
+            self.assertEqual(voting.RESULTS[code], old)
+            self.assertEqual(overrides.VOTING_LINKS[(code, "results")][:2], (old, new))
+            self.assertEqual(shown[code]["results"], {"url": new, "from": voting.OFFICE})
+            self.assertEqual(page[code]["results"], new)
+            self.assertTrue(voting.official(new, code))
+        self.assertEqual(voting.stale_overrides(cache), [])
+
+    def test_ohios_results_address_is_labelled_for_the_portal_it_reaches(self):
+        # A person found it leads to the office's data portal, not a results
+        # page as such: the button never promises "Official results" there.
+        cache = voting.load_cache(ROOT)
+        url = voting.RESULTS["OH"]
+        self.assertEqual(voting.effective(cache)["OH"]["results"],
+                         {"url": url, "from": voting.OFFICE, "label": "Election data portal"})
+        page = voting.for_page(cache)
+        self.assertEqual(page["OH"]["results"], url)
+        self.assertEqual(page["_labels"]["OH"]["results"], "Election data portal")
+        self.assertIn("results", page["_byHand"]["OH"])
+
+    def test_a_curated_override_stops_once_the_table_changes(self):
+        from unittest import mock
+        cache = voting.load_cache(ROOT)
+        with mock.patch.dict(voting.RESULTS, {"OK": "https://results.okelections.gov/new/"}):
+            self.assertEqual(voting.effective(cache)["OK"]["results"]["url"],
+                             "https://results.okelections.gov/new/")
+            self.assertEqual(voting.stale_overrides(cache),
+                             ["OK results: kyc/voting.py now lists "
+                              "https://results.okelections.gov/new/"])
 
 
 class TestValidate(unittest.TestCase):
@@ -368,7 +491,12 @@ class TestMorePages(unittest.TestCase):
         cache["links"][voting.DEADLINES["TX"]] = voting.UNKNOWN
         shown = voting.for_page(cache)
         self.assertEqual(shown["_unreached"], {"GU": ["info"], "TX": ["deadlines"]})
-        unchecked = [i for i in validate.check_voting_links(cache) if i.code == "voting-links-unchecked"]
+        # Both were later opened by hand (round three, 2026-10-26); with no
+        # such reading, each is listed unchecked.
+        from unittest import mock
+        with mock.patch.dict(overrides.VOTING_LINKS_BY_HAND, {}, clear=True):
+            unchecked = [i for i in validate.check_voting_links(cache)
+                         if i.code == "voting-links-unchecked"]
         self.assertEqual(len(unchecked), 1)
         self.assertEqual(len(unchecked[0].detail), 2)
         self.assertTrue(all("(unknown)" in line for line in unchecked[0].detail))

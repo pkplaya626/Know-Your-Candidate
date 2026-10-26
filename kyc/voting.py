@@ -196,6 +196,10 @@ DEADLINES = {code: f"{VOTE_GOV}/{slug}" for code, slug in {
 # Dakota" (opened 2026-10-17).
 DEADLINE_LABELS = {"ND": "No registration needed (vote.gov)"}
 
+# The pages this module lists itself, by kind: an evidenced
+# overrides.VOTING_LINKS entry replaces one as it replaces NASS's.
+CURATED = (("sample", SAMPLE_BALLOTS), ("results", RESULTS), ("deadlines", DEADLINES))
+
 # NASS lists no territory, so a territory's page said nothing about voting
 # (audit 2026-10-17, RACES-07, STATEGOV-15). Each link is the territory's
 # election office's own, from its home page (checked 2026-10-17), with the
@@ -409,26 +413,34 @@ def effective(cache):
     curated pages beside them; ``from`` is NASS, OFFICE or VOTE_GOV_FROM.
 
     An override applies only while NASS still lists the URL it replaces;
-    once NASS changes its entry, NASS's is shown and validate says so.
+    once NASS changes its entry, NASS's is shown and validate says so. The
+    same holds for a page this module curates (``CURATED``): an override
+    replaces it only while the table still gives the address it names.
     """
     from . import overrides
+
+    def link(code, kind, url, source):
+        fix = overrides.VOTING_LINKS.get((code, kind))
+        if fix and fix[0] == url:
+            return ({"url": fix[1], "from": OFFICE, **({"label": fix[2]} if fix[2] else {})}
+                    if fix[1] else None)
+        return {"url": url, "from": source}
 
     out = {}
     for code, links in ((cache or {}).get("states") or {}).items():
         shown = {}
         for kind, url in links.items():
-            fix = overrides.VOTING_LINKS.get((code, kind))
-            if fix and fix[0] == url:
-                if fix[1]:
-                    shown[kind] = {"url": fix[1], "from": OFFICE,
-                                   **({"label": fix[2]} if fix[2] else {})}
-                continue
-            shown[kind] = {"url": url, "from": NASS}
-        for kind, table in (("sample", SAMPLE_BALLOTS), ("results", RESULTS),
-                            ("deadlines", DEADLINES)):
+            found = link(code, kind, url, NASS)
+            if found:
+                shown[kind] = found
+        for kind, table in CURATED:
             if code in table:
-                shown[kind] = {"url": table[code],
-                               "from": VOTE_GOV_FROM if kind == "deadlines" else OFFICE}
+                found = link(code, kind, table[code],
+                             VOTE_GOV_FROM if kind == "deadlines" else OFFICE)
+                if found:
+                    shown[kind] = found
+                else:
+                    shown.pop(kind, None)
         if code in DEADLINE_LABELS and "deadlines" in shown:
             shown["deadlines"]["label"] = DEADLINE_LABELS[code]
         out[code] = shown
@@ -444,13 +456,21 @@ def effective(cache):
 
 
 def stale_overrides(cache):
-    """Overrides whose NASS entry has changed: each may now be unneeded."""
+    """Overrides whose NASS entry, or curated page, has changed: each may
+    now be unneeded."""
     from . import overrides
 
     states = (cache or {}).get("states") or {}
-    return sorted(f"{code} {kind}: NASS now lists {(states.get(code) or {}).get(kind)}"
-                  for (code, kind), fix in overrides.VOTING_LINKS.items()
-                  if (states.get(code) or {}).get(kind) != fix[0])
+    curated = dict(CURATED)
+    out = []
+    for (code, kind), fix in overrides.VOTING_LINKS.items():
+        if kind in curated:
+            listed, who = curated[kind].get(code), "kyc/voting.py"
+        else:
+            listed, who = (states.get(code) or {}).get(kind), "NASS"
+        if listed != fix[0]:
+            out.append(f"{code} {kind}: {who} now lists {listed}")
+    return sorted(out)
 
 
 # Links opened by hand in a person's browser where the weekly check could not

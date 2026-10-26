@@ -1573,6 +1573,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "each link opened" on the check's day (Rhode Island's four lookups read
     so), and one whose portal asks
     for proof of being a person says so, never "could not be confirmed".
+    A link a person finds broken is replaced, a curated page's as NASS's,
+    by an evidenced `overrides.VOTING_LINKS` entry naming the address it
+    replaces: Oklahoma's results answered readers "403 - Forbidden" and
+    New Hampshire's "Forbidden" (2026-10-26). A page that did not load in
+    a person's browser either (Alabama's results) is not recorded as
+    opened (rule 8).
     A next election year is a statute's or the state's record's
     (`ballot2026.NEXT`), never a term length's: Virginia's governor was
     elected in 2025 and is next elected in 2029, its legislature in 2027.

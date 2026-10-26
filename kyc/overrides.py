@@ -436,7 +436,8 @@ RESULT_NAMES = {
 }
 
 # Official voting pages that replace what NASS's "Can I Vote" lists for a
-# state, keyed (state, kind) - kind is status, polling, absentee or register.
+# state, keyed (state, kind) - kind is status, polling, absentee or register,
+# or a kind kyc/voting.py curates itself (results; see the entries' note).
 # Each is (the URL NASS lists, the state's own page that replaces it or None
 # to show no button, a label or None for the usual one, the evidence). The
 # NASS URL is kept so validate warns once NASS changes its entry and the
@@ -495,6 +496,35 @@ VOTING_LINKS = {
         "NASS links the ORESTAR voter lookup, behind a bot wall a script cannot pass; "
         "'Oregon Secretary of State : My Vote' on sos.oregon.gov links it as 'Go to My Vote "
         "Now' (read 2026-10-19)"),
+    # The results pages kyc/voting.py lists (voting.RESULTS) are replaced the
+    # same way: the first field is then the address that table gives, and
+    # the entry stops applying once the table changes. Both opened by hand
+    # in a person's Chrome on 2026-10-26 (research/by-hand-2026-10-26/
+    # NOTES.md, round three): the old addresses showed readers an error.
+    ("OK", "results"): (
+        "https://results.okelections.us/",
+        "https://results.okelections.gov/OKER/", None,
+        "results.okelections.us answers '403 - Forbidden: Access is denied.' in a person's "
+        "browser; its /OKER/ page redirects to the State Election Board's "
+        "results.okelections.gov/OKER/, 'OK Election Results' (both opened by hand "
+        "2026-10-26)"),
+    ("NH", "results"): (
+        "https://www.sos.nh.gov/elections/elections/election-results",
+        "https://www.sos.nh.gov/2026-election-results", None,
+        "the old address redirects to /node/281/election-results, 'Forbidden' in a person's "
+        "browser; the Secretary of State's Elections page (sos.nh.gov/elections, 'Elections | "
+        "New Hampshire Secretary of State') links '2026 Election Results' here, titled '2026 "
+        "Election Results | New Hampshire Secretary of State' (both opened by hand 2026-10-26)"),
+    # Ohio's address is kept, labelled for what it reached: the office now
+    # sends it to its data portal, not a results page as such (NOTES.md,
+    # round three), so "Official results" would promise a count the page
+    # was not seen to hold. Look again once the office posts November's.
+    ("OH", "results"): (
+        "https://www.ohiosos.gov/elections/election-results-and-data/",
+        "https://www.ohiosos.gov/elections/election-results-and-data/",
+        "Election data portal",
+        "the address redirects to ohiosos.gov/data, 'Ohio Secretary of State Data Portal | "
+        "Interactive Dashboards & Public Information' (opened by hand 2026-10-26)"),
 }
 
 # Voting links the weekly check could not open (a bot wall, a reset: rule 8
@@ -520,6 +550,9 @@ VOTING_LINKS = {
 # Michigan's, Ohio's registration and lookup, New Hampshire's registration
 # page, Kentucky's registration and polling, Alaska's voter portal and
 # registration page). All 34 links a page showed as unconfirmed opened.
+# A third round the same day opened the curated pages (results, sample
+# ballots, Guam's information page, Iowa's absentee page, vote.gov's
+# registration pages): every one but Alabama's results, which did not load.
 _BY_HAND_DAY = "2026-10-26"
 VOTING_LINKS_BY_HAND = {
     ("MT", "absentee"): ("http://sos.mt.gov/elections/absentee", _BY_HAND_DAY, "opened",
@@ -613,7 +646,115 @@ VOTING_LINKS_BY_HAND = {
                         "'Verification', then 'Home'"),
     ("NH", "status"): ("https://app.sos.nh.gov/voterinformation", _BY_HAND_DAY, "human-check", "",
                        "'Verification', then 'Voter Information'"),
+    # Round three, the links the pages still called unconfirmed after #142
+    # (NOTES.md, "Round three" and "Round three, continued"): the curated
+    # results, sample-ballot and information pages.
+    ("AK", "results"): ("https://www.elections.alaska.gov/election-results/", _BY_HAND_DAY,
+                        "opened", "", "Election Results - Division of Elections"),
+    ("AK", "sample"): ("https://www.elections.alaska.gov/sample-ballots/", _BY_HAND_DAY,
+                       "opened", "", "Sample Ballots - Division of Elections"),
+    ("AZ", "results"): ("https://results.arizona.vote/", _BY_HAND_DAY, "opened",
+                        "https://results.arizona.vote/default.html", "Arizona Election Results"),
+    ("IA", "absentee"): ("https://sos.iowa.gov/voters/absentee-voting", _BY_HAND_DAY, "opened",
+                         "", "Absentee Voting | Iowa Secretary of State - Paul D. Pate"),
+    ("MT", "results"): ("https://sosmt.gov/elections/results/", _BY_HAND_DAY, "opened", "",
+                        "Official Election Results - Official Montana Secretary of State "
+                        "Website - Christi Jacobsen"),
+    ("NY", "results"): ("https://nyenr.elections.ny.gov/", _BY_HAND_DAY, "opened", "",
+                        "NYS Board of Elections Unofficial Election Night Results"),
+    ("WI", "results"): ("https://elections.wi.gov/elections/election-results", _BY_HAND_DAY,
+                        "opened", "", "Election Results | Wisconsin Elections Commission"),
+    # The office now sends its results address to its data portal: it opened,
+    # and the portal is the Secretary of State's, but it is not a results page
+    # as such. The reading names no other results page, so the link stays,
+    # labelled for the portal in VOTING_LINKS; look again once the office
+    # posts November's count.
+    ("OH", "results"): ("https://www.ohiosos.gov/elections/election-results-and-data/",
+                        _BY_HAND_DAY, "opened", "https://www.ohiosos.gov/data",
+                        "Ohio Secretary of State Data Portal | Interactive Dashboards & Public "
+                        "Information"),
+    ("GU", "info"): ("https://gec.guam.gov/2026-general-election-info/", _BY_HAND_DAY, "opened",
+                     "", "2026 GENERAL ELECTION INFO – GUAM ELECTION COMMISSION"),
+    ("MI", "sample"): ("https://mvic.sos.state.mi.us/PublicBallot/Index", _BY_HAND_DAY, "opened",
+                       "", "What's on the ballot?"),
+    # The two replacements in VOTING_LINKS, each opened that day: Oklahoma's
+    # reached through results.okelections.us/OKER/, which redirects there.
+    ("OK", "results"): ("https://results.okelections.gov/OKER/", _BY_HAND_DAY, "opened", "",
+                        "OK Election Results"),
+    ("NH", "results"): ("https://www.sos.nh.gov/2026-election-results", _BY_HAND_DAY, "opened",
+                        "", "2026 Election Results | New Hampshire Secretary of State"),
+    # Alabama's results page (www2.alabamavotes.gov) was still loading after
+    # 45 seconds in a person's browser, as judicial.alabama.gov resets this
+    # network's connections: nothing concluded (rule 8), and no entry.
 }
+
+# vote.gov's "How to register in <place> | Vote.gov" page for each
+# jurisdiction (voting.DEADLINES), all 56 opened by hand on 2026-10-26
+# (NOTES.md, "Round three, continued"), each under that title. A page shows
+# one only where the jurisdiction's own record gives no deadline
+# (voting.for_page), so most entries wait unused until a record changes.
+# {code: (the address, the place as the title names it)}
+_VOTE_GOV_OPENED = {
+    "AK": ("https://vote.gov/register/alaska", "Alaska"),
+    "AL": ("https://vote.gov/register/alabama", "Alabama"),
+    "AR": ("https://vote.gov/register/arkansas", "Arkansas"),
+    "AS": ("https://vote.gov/register/american-samoa", "American Samoa"),
+    "AZ": ("https://vote.gov/register/arizona", "Arizona"),
+    "CA": ("https://vote.gov/register/california", "California"),
+    "CO": ("https://vote.gov/register/colorado", "Colorado"),
+    "CT": ("https://vote.gov/register/connecticut", "Connecticut"),
+    "DC": ("https://vote.gov/register/district-of-columbia", "District of Columbia"),
+    "DE": ("https://vote.gov/register/delaware", "Delaware"),
+    "FL": ("https://vote.gov/register/florida", "Florida"),
+    "GA": ("https://vote.gov/register/georgia", "Georgia"),
+    "GU": ("https://vote.gov/register/guam", "Guam"),
+    "HI": ("https://vote.gov/register/hawaii", "Hawaii"),
+    "IA": ("https://vote.gov/register/iowa", "Iowa"),
+    "ID": ("https://vote.gov/register/idaho", "Idaho"),
+    "IL": ("https://vote.gov/register/illinois", "Illinois"),
+    "IN": ("https://vote.gov/register/indiana", "Indiana"),
+    "KS": ("https://vote.gov/register/kansas", "Kansas"),
+    "KY": ("https://vote.gov/register/kentucky", "Kentucky"),
+    "LA": ("https://vote.gov/register/louisiana", "Louisiana"),
+    "MA": ("https://vote.gov/register/massachusetts", "Massachusetts"),
+    "MD": ("https://vote.gov/register/maryland", "Maryland"),
+    "ME": ("https://vote.gov/register/maine", "Maine"),
+    "MI": ("https://vote.gov/register/michigan", "Michigan"),
+    "MN": ("https://vote.gov/register/minnesota", "Minnesota"),
+    "MO": ("https://vote.gov/register/missouri", "Missouri"),
+    "MP": ("https://vote.gov/register/northern-mariana-islands", "Northern Mariana Islands"),
+    "MS": ("https://vote.gov/register/mississippi", "Mississippi"),
+    "MT": ("https://vote.gov/register/montana", "Montana"),
+    "NC": ("https://vote.gov/register/north-carolina", "North Carolina"),
+    "ND": ("https://vote.gov/register/north-dakota", "North Dakota"),
+    "NE": ("https://vote.gov/register/nebraska", "Nebraska"),
+    "NH": ("https://vote.gov/register/new-hampshire", "New Hampshire"),
+    "NJ": ("https://vote.gov/register/new-jersey", "New Jersey"),
+    "NM": ("https://vote.gov/register/new-mexico", "New Mexico"),
+    "NV": ("https://vote.gov/register/nevada", "Nevada"),
+    "NY": ("https://vote.gov/register/new-york", "New York"),
+    "OH": ("https://vote.gov/register/ohio", "Ohio"),
+    "OK": ("https://vote.gov/register/oklahoma", "Oklahoma"),
+    "OR": ("https://vote.gov/register/oregon", "Oregon"),
+    "PA": ("https://vote.gov/register/pennsylvania", "Pennsylvania"),
+    "PR": ("https://vote.gov/register/puerto-rico", "Puerto Rico"),
+    "RI": ("https://vote.gov/register/rhode-island", "Rhode Island"),
+    "SC": ("https://vote.gov/register/south-carolina", "South Carolina"),
+    "SD": ("https://vote.gov/register/south-dakota", "South Dakota"),
+    "TN": ("https://vote.gov/register/tennessee", "Tennessee"),
+    "TX": ("https://vote.gov/register/texas", "Texas"),
+    "UT": ("https://vote.gov/register/utah", "Utah"),
+    "VA": ("https://vote.gov/register/virginia", "Virginia"),
+    "VI": ("https://vote.gov/register/us-virgin-islands", "U.S. Virgin Islands"),
+    "VT": ("https://vote.gov/register/vermont", "Vermont"),
+    "WA": ("https://vote.gov/register/washington", "Washington"),
+    "WI": ("https://vote.gov/register/wisconsin", "Wisconsin"),
+    "WV": ("https://vote.gov/register/west-virginia", "West Virginia"),
+    "WY": ("https://vote.gov/register/wyoming", "Wyoming"),
+}
+VOTING_LINKS_BY_HAND.update({
+    (code, "deadlines"): (url, _BY_HAND_DAY, "opened", "", f"How to register in {place} | Vote.gov")
+    for code, (url, place) in _VOTE_GOV_OPENED.items()})
 
 # Links on a state's government block that the rosters give wrongly, each
 # opened on 2026-10-17 (audit 2026-10-17, LINKS-08, LINKS-09):
