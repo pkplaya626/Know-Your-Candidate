@@ -1721,6 +1721,18 @@ async function testDirectoryAsync() {
         /Congressional Directory/.test(careers.lastElementChild.textContent));
     check("a field of one entry stays a plain line",
       !education.querySelector("ul") && /^B\.A\., Pacific Lutheran/.test(education.textContent));
+    // The Directory's stray semicolons (G000598, R000305): a bare range or a
+    // bracketed role stays with the career before it, in the source's words.
+    const stray = KYC.fieldItems("member, Long Beach City Council, 2009-14; (vice mayor, 2012-14); " +
+      "member, North Carolina House of Representatives; 2003-13; staff, campaign; 2016; teacher");
+    check("a stray semicolon never makes a bare year or a bracket a career of its own",
+      stray.length === 4 &&
+        stray[0] === "member, Long Beach City Council, 2009-14; (vice mayor, 2012-14)" &&
+        stray[1] === "member, North Carolina House of Representatives; 2003-13" &&
+        stray[2] === "staff, campaign; 2016" && stray[3] === "teacher", stray.join(" | "));
+    check("a year range in a listed career does not break at its hyphen",
+      [...careers.querySelectorAll(".field-list li .nowrap")].map((s) => s.textContent).join(",") ===
+        "1987-2008,2004-12,2008-10");
 
     const contact = D.getElementById("profileModalContact");
     check("a House member's offices at home are listed, with the casework line",
@@ -13368,6 +13380,8 @@ async function testRaceMoney() {
     check("a short line of the totals, each side's groups and the cycle, and nothing else",
       !!summary && /^Outside groups spent \$[\d.]+[KMB]? supporting \(\d+ groups?\) and \$[\d.]+[KMB]? opposing \(\d+ groups?\) in \d{4}–\d\d\.$/
         .test(summary.textContent) && !summary.querySelector("a"), summary && summary.textContent);
+    check("the cycle does not break at its dash on a phone",
+      /^\d{4}–\d\d$/.test((summary.querySelector(".nowrap") || {}).textContent || ""));
     const o = person.outsideSpending;
     const rows = [...panel.querySelectorAll(".outside-side")].map((side) =>
       [...side.querySelectorAll(".outside-row")].map((r) =>

@@ -1997,6 +1997,24 @@ class TestElectionPageWords(unittest.TestCase):
             "Rio Phillips": "cybersecurity technician",
         })
 
+    def test_a_citation_cut_off_at_the_line_end_is_not_a_career(self):
+        # MI-13 and TN-9: the <ref> runs on to the next line, so the bullet's
+        # own line holds a template that never closes; it showed on the page.
+        section = "\n".join([
+            "===Candidates===",
+            "====Declared====",
+            "* Ann Coe, state representative from the 11th district (2023–present)"
+            "<ref>{{cite news |last=Kamisar |first=Ben |title=Rep. loses",
+            "|url=x}}</ref>",
+            "* Bo Doe, state senator and candidate in 2002{{cite web|title=Run for office",
+            "* Cy Foe, farmer<ref name=a/> and {{nowrap|county commissioner}}",
+        ])
+        self.assertEqual(results.candidate_descriptors(section), {
+            "Ann Coe": "state representative from the 11th district (2023–present)",
+            "Bo Doe": "state senator and candidate in 2002",
+            "Cy Foe": "farmer and county commissioner",
+        })
+
     def test_the_external_links_list_gives_each_candidates_site(self):
         sites = results.campaign_sites(self.SECTION)
         self.assertEqual(sites["Jane Doe"], "https://www.janedoe.com/")

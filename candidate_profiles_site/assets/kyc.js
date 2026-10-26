@@ -1399,7 +1399,30 @@
       }
     }
     out.push(text.slice(from));
-    return out.map(function (s) { return s.trim(); }).filter(Boolean);
+    // A stray semicolon in the source cuts a career from its years or its
+    // bracketed role: the Directory prints "Member, Long Beach City Council,
+    // 2009-14; (vice mayor, 2012-14)" and "Member, North Carolina House of
+    // Representatives; 2003-13". An entry that is only a year or a range, or
+    // opens with a bracket, goes back onto the one before it, joined with the
+    // source's own "; ", so no bullet reads as a career of its own.
+    var joined = [];
+    out.map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (s) {
+      if (joined.length && (/^\d{4}(?:[-–]\d{2,4})?$/.test(s) || s.charAt(0) === "(")) {
+        joined[joined.length - 1] += "; " + s;
+      } else {
+        joined.push(s);
+      }
+    });
+    return joined;
+  }
+
+  /** Escaped *html* with each year range ("1999-2002", "2025–26") kept on one
+   *  line: on a phone "1999-" / "2002" broke at the hyphen. The characters
+   *  are the source's; only a span is added around them. */
+  function keepRanges(html) {
+    return String(html).replace(/\d{4}[-–]\d{2,4}/g, function (range) {
+      return '<span class="nowrap">' + range + "</span>";
+    });
   }
 
   /** A field of several entries as a list, one entry a line, each in its
@@ -1412,7 +1435,8 @@
     var items = ABSENT[status] || status === "generic" ? [] : fieldItems(item[field]);
     if (items.length < 2) return renderField(item, field);
     return '<ul class="field-list">' + items.map(function (entry) {
-      return "<li>" + escapeHtml(entry.charAt(0).toUpperCase() + entry.slice(1)) + "</li>";
+      return "<li>" + keepRanges(escapeHtml(entry.charAt(0).toUpperCase() + entry.slice(1))) +
+        "</li>";
     }).join("") + "</ul>" + sourceBadge(item, field).replace(/^ /, "");
   }
 
@@ -3520,6 +3544,7 @@
     renderField: renderField,
     renderListField: renderListField,
     fieldItems: fieldItems,
+    keepRanges: keepRanges,
     officesHeld: officesHeld,
     officesHeldShort: officesHeldShort,
     holderRole: holderRole,

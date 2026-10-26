@@ -722,6 +722,13 @@ def candidate_descriptors(section):
             continue
         line = bullet["line"].lstrip("*").strip()
         rest = line[len(bullet["raw"]):] if line.startswith(bullet["raw"]) else ""
+        # A note that runs on past the bullet's line is cut off in it: its
+        # "<ref>" and "{{cite news |last=Kamisar ..." never close here, and
+        # MI-13's and TN-9's challengers carried the citation's markup as
+        # their careers (rule 10). An unclosed note or template goes to the
+        # end of the line.
+        rest = re.sub(r"<ref(?:\s[^>]*)?(?<!/)>(?![\s\S]*</ref>)[\s\S]*$", "", rest, flags=re.I)
+        rest = re.sub(r"\{\{(?![\s\S]*\}\})[\s\S]*$", "", rest)
         # Links to their labels before a note is dropped: a note's link can
         # hold a bracket of its own ("''(previously ran as a [[Democratic
         # Party (United States)|Democrat]])''"), and the note's pattern

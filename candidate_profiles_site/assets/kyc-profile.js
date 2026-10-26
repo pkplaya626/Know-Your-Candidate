@@ -1075,7 +1075,7 @@
     var read = item.districtOfficesRead
       ? " as read on " + KYC.escapeHtml(KYC.dateWords(item.districtOfficesRead)) : "";
     var words;
-    if (!home.length) words = "’s record of this term";
+    if (!home.length) words = ": the Washington office from its record of this term";
     else if (!washington) words = read ? "," + read : "";
     else words = ": the Washington office from its record of this term, the " + kind + "s" +
       (read || " from its list");

@@ -974,8 +974,8 @@
   /** "[lead]Outside groups spent $2.4M supporting (4 groups) and ... in
    *  2025–26", escaped. */
   function outsideSentence(o, lead) {
-    return KYC.escapeHtml((lead || "") + (lead ? "outside" : "Outside") + " groups spent " +
-      outsideTotals(o) + outsideCycle(o));
+    return KYC.keepRanges(KYC.escapeHtml((lead || "") + (lead ? "outside" : "Outside") +
+      " groups spent " + outsideTotals(o) + outsideCycle(o)));
   }
 
   function fecLink(o, label) {
