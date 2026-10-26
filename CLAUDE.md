@@ -377,7 +377,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     through the article the person's ballot page links (rule 33), from the
     campaign site their own committee filed (rule 38), or as an evidenced
     `CANDIDATE_PHOTOS` entry naming a served file, and by no other route,
-    for members and curated rows as much as filed candidates. A ballot link
+    for members and curated rows as much as filed candidates. An entry is
+    keyed on the profile's id, never a name, and names the page that names
+    the person beside the file, its words, why that person is this
+    profile's, what a person saw (the person alone) and the day; it stands
+    ahead of the automatic routes as the portrait cache's `curated` route:
+    Ken Paxton, left a silhouette when the background-people sweep refused
+    his Commons photograph, shows his office's portrait this way. A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the

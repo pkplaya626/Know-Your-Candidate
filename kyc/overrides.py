@@ -7,23 +7,182 @@ the source of truth wherever they are correct.
 
 from urllib.parse import urlsplit
 
-# Photo overrides for candidates, keyed on (name, state) and applied ONLY to
-# candidate rows. A bare-name key is unsafe: Rep. Mike Rogers (AL-3) and 2026
-# Senate candidate Mike Rogers (MI) are different people, and a name-keyed
-# override put the Michigan candidate's portrait on the Alabama congressman's
-# profile.
+# A candidate's portrait chosen by a person, keyed on the profile's id (rules
+# 3 and 17): a curated row's ``ID`` ("CAND_4") or a filer's ("FEC_<candidate
+# id>"). A name key put one Mike Rogers's portrait on the other's profile,
+# and in 2026-10-17 24 of the 25 entries that stood here named Commons files
+# made up from a name ("Roy_Cooper_official_photo.jpg"), which do not exist -
+# the guess rule 24 forbids. Each entry names a file a page serves now, and
+# a person looked at the photograph and at the page:
 #
-# {(name, state): (the file's upload.wikimedia.org URL, date checked,
-# evidence)}, the evidence being the file's own Commons page. Empty: checked
-# on 2026-10-17 against the Commons API, 24 of the 25 URLs that stood here
-# named files that do not exist ("Roy_Cooper_official_photo.jpg",
-# "Mike_Rogers_official_portrait.jpg"), file names made up from the person's
-# name - the guess rule 24 forbids, waiting for whoever uploads under that
-# name - and the 25th, Barry Moore's, asked for an 800px size Wikimedia
-# refuses (HTTP 400). A candidate's portrait comes through the article their
-# ballot page links (portraits, rule 33) or their own campaign site (enrich,
-# rule 38).
-CANDIDATE_PHOTOS = {}
+#   url    the file shown: a government office's or the campaign's own file
+#          as the page serves it, or a Commons file's upload address; or,
+#          where an office's page draws the portrait with no address of its
+#          own (a data: image), the file hosted here unmodified
+#          ("photos/<hash>.png", listed in rule 101's manifest, ``hosted``,
+#          with the page, the hash and the day read)
+#   page   the page that names the person beside it (a Commons file: its own
+#          description page, in the person's own category)
+#   words  the page's words that name them beside it
+#   by     whose photograph it is, for the credit line (rule 87); a Commons
+#          file's credit is read from its page (``portraits.credit_all``),
+#          never typed here
+#   tie    why the person the page names is this profile's (rule 25: the
+#          state, the office, the years)
+#   seen   what the photograph shows: the person alone, nobody else in the
+#          frame even in part, the face a tenth of the 4:5 card or more
+#   read   the day the page and the photograph were read
+#   seat   only for a file the legislature names by its seat ("rep17.jpg"),
+#          which shows whoever holds it: the state, chamber, district, Open
+#          States id and name of the member it was read for. The photograph
+#          is withheld, and validate warns (photo-curated-unseated), once the
+#          roster no longer seats them there (photos.curated_seated). A file
+#          hosted here is the member's bytes, read once, and needs none.
+#
+# ``portraits`` puts the entry in the portrait cache as route ``curated``,
+# where its size, its weight and a Commons file's credit are read like any
+# other; it stands ahead of every automatic route, since a person chose it,
+# and ``validate`` fails an entry without these fields, one a person
+# refused (NOT_A_PORTRAIT) and one for a profile that no longer exists.
+#
+# The first entries (2026-10-25) are for people on the November ballot
+# whom the background-people sweep of PR #139 left with the silhouette,
+# where a route tied to them offers a clean photograph (the owner: "more
+# content is better than strict rules", but "better to leave out background
+# people").
+CANDIDATE_PHOTOS = {
+    "CAND_4": {
+        "url": "https://www.texasattorneygeneral.gov/sites/default/files/inline-images/"
+               "ken_paxton_bio_thumb.jpg",
+        "page": "https://www.texasattorneygeneral.gov/about-office",
+        "words": "\"About the Attorney General\": \"Ken Paxton is the 51st Attorney General of "
+                 "Texas\", the image's alt text \"Texas Attorney General Ken Paxton\"",
+        "by": "Office of the Texas Attorney General",
+        "tie": "Ken Paxton, the Texas Republican Senate nominee, holds that office: his record "
+               "of offices (history, Wikidata and his article agreeing) gives Texas Attorney "
+               "General since 2015, and this site's Texas attorney general card shows the same "
+               "file from the same page (officers.add_ag_photos)",
+        "seen": "a studio portrait, him alone against a plain backdrop",
+        "read": "2026-10-25",
+    },
+    "CAND_9": {
+        "url": "https://run.imgix.net/68d35dd5-f7a6-4a7e-9057-c3908286d00f/"
+               "e4f5b452-3eca-4f0c-82ea-227d95204138/e4f5b452-3eca-4f0c-82ea-227d95204138.jpg"
+               "?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C393%2C2102%2C2282"
+               "&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=7faf701c8ebd5e5e8466e7faf23dc0dc",
+        "page": "https://www.bradlanderforcongress.com/",
+        "words": "the page's opening photograph, beside \"Fight, Don't Fold. Brad Lander is "
+                 "running for Congress\" (the srcset's 640px form, signed by the site)",
+        "by": "the campaign's website (bradlanderforcongress.com)",
+        "tie": "the site his filed campaign site (landerfornyc.com) moved to, which enrich "
+               "read as still naming him; his file names no surname, so rule 38's reader "
+               "could not take it unattended",
+        "seen": "him alone in front of a brick house and a red door, arms folded",
+        "read": "2026-10-25",
+    },
+    "FEC_H6IL02355": {
+        "url": "https://www.cookcountyil.gov/sites/g/files/ywwepo161/files/styles/"
+               "crop_profile_photo/public/images/portraits/2021-09/"
+               "donna_miller_6th_district_0.jpg?h=9326d3c7&itok=su4DaALf",
+        "page": "https://www.cookcountyil.gov/all-people/donna-miller",
+        "words": "\"Donna Miller - County Board Commissioner, 6th District\", the image's alt "
+                 "text \"Board of Commissioner Donna Miller\"",
+        "by": "Cook County",
+        "tie": "the IL-2 nominee is that commissioner: the article her ballot page links is "
+               "about the Cook County commissioner, and her campaign's site says \"As a Cook "
+               "County Commissioner, she's led major initiatives\"",
+        "seen": "a studio portrait, her alone before the county's seal",
+        "read": "2026-10-25",
+    },
+    "FEC_H6IN05307": {
+        "url": "https://indianasenatedemocrats.org/wp-content/uploads/2024/08/"
+               "Ford_Headshot-with-State-Flag.jpg",
+        "page": "https://indianasenatedemocrats.org/senator/s29/",
+        "words": "\"State Senator J.D. Ford - Indiana Senate Democrats\", the image's alt text "
+                 "\"Senator J.D. Ford\"",
+        "by": "Indiana Senate Democrats",
+        "tie": "the IN-5 nominee sits in the Indiana Senate (history: Member of the State "
+               "Senate of Indiana since 2018, corroborated), and the legislature roster "
+               "(Open States) links this caucus page for him; his card's own route stops "
+               "because the legislature's page it links shows no photograph",
+        "seen": "a studio portrait, him alone before the state flag",
+        "read": "2026-10-25",
+    },
+    "FEC_H6TN09449": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/"
+               "Justin_J._Pearson_at_the_White_House.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Justin_J._Pearson_at_the_White_House.jpg",
+        "words": "\"Tennessee state representative Justin J. Pearson at the White House, April "
+                 "24, 2023\", in Category:Justin J. Pearson; {{PD-USGov-POTUS}}, author "
+                 "\"@whitehouse (The White House)\"",
+        "tie": "the TN-9 nominee is that representative (history: Member of the Tennessee "
+               "House of Representatives since 2023, corroborated); the legislature serves "
+               "his photograph only inline, with no file to link",
+        "seen": "him alone outside the Eisenhower building, facing the camera",
+        "read": "2026-10-25",
+    },
+    "FEC_H6TN09464": {
+        # Brent Taylor, TN-9's Republican nominee. His Commons file was
+        # refused (someone else in the frame); the Senate's member page draws
+        # his portrait only inline, so it is hosted here unmodified (the PR
+        # #141 review: TN-9's Democratic nominee had a photograph and he did
+        # not).
+        "url": "photos/dc407c55c78c101cce27.png",
+        "page": "https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=S31",
+        "words": "\"Senator Brent Taylor\" heading the page, directly above the photograph "
+                 "(alt text \"Photo of Brent Taylor\"), then \"Republican\", \"Memphis\", "
+                 "\"District 31\", \"Born on August 9, 1968\"",
+        "by": "Tennessee General Assembly",
+        "tie": "the article his ballot page links (Brent Taylor (Tennessee politician)) says "
+               "he has served since 2023 as a member of the Tennessee Senate representing "
+               "District 31, born August 9, 1968, and is a candidate for Tennessee's 9th "
+               "district; the roster (Open States) seats Brent Taylor in TN upper 31. The "
+               "file is the page's data: image decoded, so it stays his whoever later "
+               "holds the seat",
+        "seen": "a studio portrait, him alone against a grey backdrop",
+        "read": "2026-10-25",
+    },
+    "FEC_H6AZ05190": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Jay_Feely_2026_%28cropped%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Jay_Feely_2026_(cropped).jpg",
+        "words": "\"Jay Feely speaking with attendees at the 'Build the Red Wall' rally at Dream "
+                 "City Church in Phoenix, Arizona\" (2026-04-17), in Category:Jay Feely; Gage "
+                 "Skidmore's photograph, CC BY-SA 4.0",
+        "tie": "the AZ-1 nominee, in Phoenix in his campaign's year; the article his ballot "
+               "page links (Jay Feely) is his",
+        "seen": "him alone at a lectern, microphones at the foot of the frame and nobody else",
+        "read": "2026-10-25",
+    },
+    "FEC_H6CT01206": {
+        "url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Luke_Bronin_%28cropped_3x4%29.jpg",
+        "page": "https://commons.wikimedia.org/wiki/File:Luke_Bronin_(cropped_3x4).jpg",
+        "words": "\"Governor Dannel P. Malloy today joined Hartford Mayor Luke Bronin\" (2018-09-20), "
+                 "in Category:Luke Bronin; extracted from the governor's office's Flickr "
+                 "photograph, CC BY 2.0",
+        "tie": "the CT-1 nominee, Hartford's mayor from 2016 to 2024 (history, corroborated); "
+               "the article his ballot page links (Luke Bronin) is his",
+        "seen": "him alone, head and shoulders, before a market's banner",
+        "read": "2026-10-25",
+    },
+    "FEC_H6LA05341": {
+        "url": "https://house.louisiana.gov/H_Reps/RepPics/rep17.jpg",
+        "page": "https://house.louisiana.gov/H_Reps/members?ID=17",
+        "words": "'State Representative Patricia \"Pat\" Moore', 'Democrat', 'District 17' "
+                 "above the file",
+        "by": "Louisiana House of Representatives",
+        "tie": "her filed campaign site (patmooreforcongress.com) says \"State Representative, "
+               "Louisiana House District 17 since 2019\" and links \"Official Louisiana House "
+               "profile\"; its own headshot (refused for the chamber behind her) is the same "
+               "woman. The file is keyed by seat, and legphotos withholds it unattended "
+               "because its date is a copy's; a person compared the two photographs",
+        "seen": "a studio portrait, her alone against a grey backdrop",
+        "read": "2026-10-25",
+        # rep17.jpg shows whoever holds District 17 (the PR #141 review).
+        "seat": {"state": "LA", "chamber": "lower", "district": "17",
+                 "legislator": "ocd-person/88548c7a-b637-4821-b336-c99cfa475e22",
+                 "name": "Pat Moore"},
+    },
+}
 
 # There is no list of members to leave out. Whoever has left is decided by
 # bioguide id from Congress's own records (legislators.departures) and moved
@@ -1153,6 +1312,12 @@ NOT_A_PORTRAIT = {
                        "upper right"),
     "https://upload.wikimedia.org/wikipedia/commons/1/11/Adam_Hamawy_in_2025.jpg":
         ("2026-10-25", "Adam Hamawy (NJ): a framed photograph of people on the wall behind him"),
+    # The same California National Guard photograph under its new name (the
+    # old one answered 404 and was never looked at by the sweep), offered
+    # again when her portrait was resolved anew.
+    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg":
+        ("2026-10-25", "Jacqui V Irwin (CA): another woman seated at the right edge, and another "
+                       "person's hair at the left"),
 }
 
 # Photographs that came forward when a person refused the one before them
