@@ -1876,8 +1876,10 @@ ROLL_CALL_NON_MEMBERS = {
 # store or vendor, or - only where the state's own list could not be read or
 # does not exist - a county's election office or another state body. A list
 # the state's office serves only to a person's browser is read by hand from
-# its own page, quoted and dated, never stood in for by a county's (rule 91:
-# Nevada's, read 2026-10-25, replaced Clark County's notice).
+# its own page, quoted and dated, never stood in for by another body's (rule
+# 91: Nevada's, read 2026-10-25, replaced Clark County's notice; Arizona's
+# Secretary of State's listing, read 2026-10-26, its Clean Elections
+# Commission's voter education guide).
 # {url prefix: (codes, who publishes it, own, evidence)}, where *own* is True
 # only for the state election office's own document on another host. A list
 # that is not the state's own is never called certified and says on the page
@@ -1891,12 +1893,6 @@ STATEWIDE_LISTS_ELSEWHERE = {
         "2026-10-05); Arkansas's Secretary of State publishes no list of the November "
         "candidates, and its candidate search (candidates.arkansas.gov) names the same people "
         "for these offices"),
-    "https://storageccec.blob.core.usgovcloudapi.net/public/docs/": (
-        ("AZ",), "Arizona Citizens Clean Elections Commission", False,
-        "the Commission's 2026 Voter Education Guide, the state's candidate statement pamphlet "
-        "(PDF, Last-Modified 2026-09-11); the Commission certifies no candidates; the "
-        "Secretary of State's listing is behind a bot check, and Pima County's official "
-        "candidate list (updated 9/9/2026) agrees on every name and running mate"),
     "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/": (
         ("GU",), "Guam Election Commission", True,
         "'2026 General Election Sample Ballot', linked by that name from the Commission's home "

@@ -344,6 +344,187 @@ class TestNevadasOwnList(unittest.TestCase):
         self.assertFalse([p for p in overrides.MEASURE_SOURCES_ELSEWHERE if "nvsos" in p])
 
 
+class TestArizonasOwnList(unittest.TestCase):
+    """Arizona's statewide offices cited the Citizens Clean Elections
+    Commission's voter education guide, "the Secretary of State's own list
+    could not be read (it is behind a bot check)": apps.arizona.vote answers
+    every script with a Cloudflare challenge. The Secretary of State's
+    candidate listing was read by hand from the office's own page on
+    2026-10-26 (rule 91), and is now the source for all four offices. It
+    calls itself neither certified nor official, so it is neither."""
+
+    URL = "https://apps.arizona.vote/electioninfo/Election/69"
+    # The listing's State tab: (name, party code, running mate) as printed.
+    ROWS = {
+        "governor": [("BIGGS, ANDY", "REP", "Kerr, Sine"),
+                     ("HOBBS, KATIE", "DEM", "Giles, John"),
+                     ("HOURIHAN, TERI ANN", "NOL", "Harrolle Mohan, Angela"),
+                     ("LOMBARDO, RISA", "GRN", "Castillo, Lisa")],
+        "lt": [("Kerr, Sine", "REP", "BIGGS, ANDY"),
+               ("Giles, John", "PND", "HOBBS, KATIE"),
+               ("Harrolle Mohan, Angela", "PND", "HOURIHAN, TERI ANN"),
+               ("Castillo, Lisa", "GRN", "LOMBARDO, RISA")],
+        "sos": [("KOLODIN, ALEXANDER", "REP", None), ("FONTES, ADRIAN", "DEM", None),
+                ("COLLIER, DUWAYNE", "GRN", None)],
+        "ag": [("PETERSEN, WARREN", "REP", None), ("MAYES, KRIS", "DEM", None)],
+    }
+    WRITE_INS = [("GONZALEZ, GERTRITRUDE", "REP"), ("NOVOA, ALICE", "REP")]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = statewide.load(".")
+        cls.payload, cls.problems = stategov.build(".")
+
+    def shown(self, key):
+        return self.payload["states"]["AZ"]["ballot2026"]["offices"][key]["candidates"]
+
+    def test_the_list_is_the_secretary_of_states_own_and_not_called_certified(self):
+        from kyc import voting_dates
+        for key in self.ROWS:
+            o = statewide.office(self.cache, "AZ", key)
+            self.assertNotIn("notStateList", o, key)
+            self.assertNotIn("certifiedQuote", o, key)
+            self.assertFalse(o["certified"], key)
+            self.assertFalse(statewide.not_the_states(o["list"]), key)
+            self.assertIsNone(statewide.elsewhere(o["list"]["url"]), key)
+            self.assertEqual(o["list"]["url"], self.URL, key)
+            self.assertEqual(o["list"]["by"], "Arizona Secretary of State", key)
+            self.assertNotIn("certif", o["list"]["kind"].lower(), key)
+            # On Arizona's own domain (arizona.vote, voting.OFFICIAL_HOSTS),
+            # not by an evidenced exception, and Arizona's alone.
+            self.assertTrue(voting_dates.official_source(o["list"]["url"], "AZ")[0], key)
+            self.assertFalse(voting_dates.official_source(o["list"]["url"], "NV")[0], key)
+            self.assertEqual(o["list"]["read"], "2026-10-26", key)
+            self.assertNotIn("writeInList", o, key)
+            shown = self.shown(key)
+            self.assertNotIn("notStateList", shown)
+            self.assertFalse(shown["certified"])
+            self.assertEqual(shown["source"], "the Arizona Secretary of State’s candidate listing")
+
+    def test_the_secretary_of_states_domains_are_arizonas(self):
+        from kyc import voting_dates
+        for url in (self.URL, "https://azsos.gov/media/718",
+                    "https://apps.azsos.gov/election/2026/candidates/ltgov/hobbs/x.pdf"):
+            self.assertTrue(voting_dates.official_source(url, "AZ")[0], url)
+            self.assertFalse(voting_dates.official_source(url, "NM")[0], url)
+
+    def test_the_four_offices_names_parties_and_tickets(self):
+        for key, rows in self.ROWS.items():
+            o = statewide.office(self.cache, "AZ", key)
+            printed = [p for p in o["candidates"] if not p["writeIn"]]
+            self.assertEqual(sorted((p["name"], p["party"], p["runningMate"]) for p in printed),
+                             sorted(rows), key)
+            for name, party, _mate in rows:
+                self.assertIn(f"{name} ({party})", o["list"]["quote"], key)
+
+    def test_the_tickets_agree_both_ways(self):
+        governors = {p["name"]: p["runningMate"]
+                     for p in statewide.office(self.cache, "AZ", "governor")["candidates"]
+                     if not p["writeIn"]}
+        mates = {p["name"]: p["runningMate"]
+                 for p in statewide.office(self.cache, "AZ", "lt")["candidates"]}
+        self.assertEqual({mate: governor for governor, mate in governors.items()}, mates)
+
+    def test_the_write_ins_apart(self):
+        o = statewide.office(self.cache, "AZ", "governor")
+        found = sorted((p["name"], p["party"]) for p in o["candidates"] if p["writeIn"])
+        self.assertEqual(found, sorted(self.WRITE_INS))
+        self.assertTrue(all(p["runningMate"] is None and not p["holder"]
+                            for p in o["candidates"] if p["writeIn"]))
+        rows = [p for p in self.shown("governor")["candidates"] if p.get("writeIn")]
+        self.assertEqual(sorted(p["name"] for p in rows), ["Alice Novoa", "Gertritrude Gonzalez"])
+        self.assertTrue(all(p["party"] == "Republican" for p in rows))
+        for key in ("lt", "sos", "ag"):
+            self.assertFalse([p for p in statewide.office(self.cache, "AZ", key)["candidates"]
+                              if p["writeIn"]], key)
+
+    def test_the_page_spells_each_code_out(self):
+        words = {"REP": "Republican", "DEM": "Democratic", "GRN": "Green", "NOL": "No Labels",
+                 "PND": "Party Not Designated"}
+        for key, rows in self.ROWS.items():
+            parties = {p["printed"]: p.get("party") for p in self.shown(key)["candidates"]}
+            for name, code, _mate in rows:
+                self.assertEqual(parties[name], words[code], (key, name))
+        lt = {p["name"]: p for p in self.shown("lt")["candidates"]}
+        # Never the Clean Elections guide's "Independent" for the listing's PND.
+        self.assertEqual(lt["John Giles"]["party"], "Party Not Designated")
+        self.assertEqual(lt["Angela Harrolle Mohan"]["party"], "Party Not Designated")
+        self.assertEqual(lt["John Giles"]["runningMate"], "Katie Hobbs")
+        gov = {p["name"]: p for p in self.shown("governor")["candidates"]}
+        self.assertEqual(gov["Teri Ann Hourihan"]["runningMate"], "Angela Harrolle Mohan")
+
+    def test_the_holder_lines(self):
+        offices = self.payload["states"]["AZ"]["ballot2026"]["offices"]
+        for key, name in (("governor", "HOBBS, KATIE"), ("sos", "FONTES, ADRIAN"),
+                          ("ag", "MAYES, KRIS")):
+            status = offices[key]["holderStatus"]
+            self.assertEqual(status["why"], "listed", key)
+            self.assertEqual(status["name"], name, key)
+            self.assertEqual(status["source"], self.URL, key)
+            self.assertFalse(status["certified"], key)
+            self.assertEqual(status["cite"], "the Arizona Secretary of State’s candidate listing")
+            self.assertIn("is among the candidates for this office", status["text"], key)
+        # The lieutenant governor's office is new in 2026: no holder to read.
+        self.assertNotIn("holderStatus", offices["lt"])
+        lt = statewide.office(self.cache, "AZ", "lt")
+        self.assertIsNone(lt["holderOnList"])
+        self.assertFalse([p for p in lt["candidates"] if p["holder"]])
+        self.assertFalse([p for p in self.problems if p.startswith("AZ ")], self.problems)
+
+    def test_no_other_body_is_cited_as_arizonas_source(self):
+        # The Clean Elections guide stays in the notes, as what the listing
+        # was compared with; no source field cites it (PR #144 review: the
+        # lieutenant governor's holderSource still did).
+        for key, entry in self.cache["states"]["AZ"]["offices"].items():
+            for field in ("list", "holderSource", "writeInList"):
+                url = (entry.get(field) or {}).get("url") or ""
+                if url:
+                    self.assertNotIn("storageccec", url, (key, field))
+                    self.assertRegex(url, r"^https://(apps\.arizona\.vote|azsos\.gov|www\.azleg\.gov)/",
+                                     (key, field))
+
+    def test_no_exception_stands_for_arizonas_own_office(self):
+        from kyc import overrides
+        self.assertFalse([p for p in overrides.STATEWIDE_LISTS_ELSEWHERE
+                          if "storageccec" in p or "arizona.vote" in p or "azsos" in p])
+        self.assertFalse([e for e in overrides.STATEWIDE_LISTS_ELSEWHERE.values()
+                          if "AZ" in e[0]])
+
+
+class TestTheListsPartyKeys(unittest.TestCase):
+    """Rule 91: a code a list prints is spelled out from the list's own key
+    or statute. Arizona's listing prints REP, DEM, GRN, NOL and PND with no
+    key; the Secretary of State's own party-preference key spells them, and
+    keeps "Party Not Designated" apart from "Independent"."""
+
+    def test_arizonas_codes_from_the_secretary_of_states_key(self):
+        words = statewide.party_words
+        self.assertEqual(words("AZ", "GRN"), "Green")
+        self.assertEqual(words("AZ", "NOL"), "No Labels")
+        self.assertEqual(words("AZ", "PND"), "Party Not Designated")
+        self.assertEqual(words("AZ", "IND"), "Independent")
+        self.assertEqual(words("AZ", "LBT"), "Libertarian")
+        self.assertEqual(words("AZ", "REP"), "Republican")
+        self.assertEqual(words("AZ", "DEM"), "Democratic")
+        self.assertNotEqual(words("AZ", "PND"), words("AZ", "IND"))
+
+    def test_a_code_is_one_lists_own(self):
+        # Arizona's key is Arizona's: another list's "PND" is not spelled out
+        # from it, and problems() refuses it.
+        self.assertEqual(statewide.party_words("NV", "PND"), "PND")
+        cache = statewide.load(".")
+        broken = copy.deepcopy(cache)
+        broken["states"]["NV"]["offices"]["governor"]["candidates"][0]["party"] = "PND"
+        self.assertTrue([p for p in statewide.problems(broken) if "is a code" in p])
+
+    def test_without_its_key_arizonas_list_fails(self):
+        with mock.patch.dict(statewide.PARTY_CODES, {"AZ": {}}):
+            found = [p for p in statewide.problems(statewide.load(".")) if p.startswith("AZ ")]
+        self.assertTrue([p for p in found if "'PND'" in p], found)
+        self.assertTrue([p for p in found if "'NOL'" in p], found)
+        self.assertTrue([p for p in found if "'GRN'" in p], found)
+
+
 class TestHolderStatus(unittest.TestCase):
     """Rule 79: "not running" is the list's word, for whoever holds the
     office now; "on the list" only where the list's own holder is them."""
@@ -465,6 +646,29 @@ class TestThePage(unittest.TestCase):
         self.assertEqual(page["candidates"][0]["party"], "Republican")
         self.assertEqual(page["by"], "Georgia Secretary of State")
         self.assertEqual(page["source"], "the Georgia Secretary of State’s candidate list")
+
+    def test_write_ins_are_certified_only_by_their_own_documents_title(self):
+        # Georgia's main list is not marked certified; its write-in list is
+        # titled "Final List of Certified Write-In Candidates", so the search
+        # may say "certified" of the write-ins alone. Arizona's, Maine's,
+        # Texas's and Wisconsin's say no such thing (PR #144 review).
+        cache = statewide.load(".")
+        seen = {}
+        for code, state in cache["states"].items():
+            for key, entry in state["offices"].items():
+                if entry.get("writeInList") and any(p.get("writeIn") for p in entry["candidates"]):
+                    page = statewide.for_page(code, entry)
+                    seen[(code, key)] = (bool(page["certified"]),
+                                         bool(page["writeIns"].get("certified")))
+        self.assertEqual(seen[("GA", "governor")], (False, True))
+        for where, (main, write_ins) in seen.items():
+            if where != ("GA", "governor"):
+                self.assertFalse(write_ins, where)
+        # The cache's own words around the quoted title never count.
+        self.assertFalse(statewide.write_ins_certified(
+            {"title": "Certified by nobody: Example County, 'Write-in list'"}))
+        self.assertTrue(statewide.write_ins_certified(
+            {"title": "Example, 'List of Certified Write-In Candidates' (1/1/26)"}))
 
     def test_the_lists_own_form_stays_beside_the_name_shown(self):
         entry = office()
