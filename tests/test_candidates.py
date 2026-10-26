@@ -972,3 +972,35 @@ class TestNicknameCase(unittest.TestCase):
         self.assertEqual(display_name('DANTZLER, OSCAR "OMAR"'), 'Oscar "Omar" Dantzler')
         self.assertEqual(display_name("SMITH, JOHN (JACK)"), "John (Jack) Smith")
         self.assertEqual(display_name("O'BRIEN, PAT"), "Pat O'Brien")
+
+
+class TestAnHonorificIsNoName(unittest.TestCase):
+    """OR-6: the FEC files David Russ as "RUSS, DAVID HONORABLE", and the
+    profile read "David Honorable Russ". An honorific spelled out is dropped
+    from the shown name as "HON" always was; the filed form stays as
+    filedName, and no matching rule reads it as a name."""
+
+    def test_the_shown_name_drops_it(self):
+        from kyc.candidates import display_name
+        self.assertEqual(display_name("RUSS, DAVID HONORABLE"), "David Russ")
+        self.assertEqual(display_name("RUSS, HONORABLE DAVID"), "David Russ")
+        self.assertEqual(display_name("RUSS, DAVID HON."), "David Russ")
+        # Nothing else is lost.
+        self.assertEqual(display_name("CARL, JERRY LEE, JR"), "Jerry Lee Carl Jr.")
+
+    def test_the_matchers_read_the_same_words(self):
+        from kyc import guide_photos, results
+        # A results page's or a guide's "David Russ" is the filing's words
+        # exactly - no looser match is needed, and none is made.
+        self.assertEqual(results._tokens("RUSS, DAVID HONORABLE".replace(",", " ")),
+                         ["russ", "david"])
+        self.assertEqual(guide_photos.name_words("RUSS, DAVID HONORABLE", filed=True),
+                         guide_photos.name_words("David Russ"))
+        # A different given name is still a different person (rule 3).
+        self.assertNotEqual(guide_photos.name_words("RUSS, DAVID HONORABLE", filed=True),
+                            guide_photos.name_words("Daniel Russ"))
+        # One committee's two registrations are one person only when the
+        # filed names are the same letter for letter (rule 72): the honorific
+        # still tells "RUSS, DAVID HONORABLE" from "RUSS, DAVID" there.
+        self.assertFalse(candidates.same_filed_name({"name": "RUSS, DAVID HONORABLE"},
+                                                    {"name": "RUSS, DAVID"}))
