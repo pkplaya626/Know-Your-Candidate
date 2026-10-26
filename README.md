@@ -73,8 +73,9 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
+| `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3378 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (3396 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1163,10 +1164,10 @@ URL, and `validate` fails a `photoSet` that names another file.
 | Field | What it holds |
 |---|---|
 | `photos` | The fallback chain the page walks on a load error, ending in `"placeholder"` (the silhouette) |
-| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id) or `state-legislature` (the legislature's own page for a nominee who sits in it) |
+| `photoSource` | Where the first entry came from: `clerk.house.gov`, `congress.gov`, `wikipedia` (the article the bioguide mapping names, or the one the ballot page links), `cross-link` (the same person's other profile), `campaign-site` (the campaign's own site, its About page or the page as a browser draws it), `wikidata-fec` (the Wikidata item carrying the person's own FEC candidate id), `state-legislature` (the legislature's own page for a nominee who sits in it) or `election-guide` (the election office's own guide, the file hosted here: the first entry is then `photos/<hash>.jpg` or `.png`, from the site's root) |
 | `photoSet` | `[[width, url], ...]`, smallest first: sizes of the first entry's photograph for the page's `srcset`. Wikimedia portraits only |
 | `photoCopy` | `{src, of, ofBytes}`: the smaller copy this site made of the first entry, `of` being that entry's address and `ofBytes` its weight, `src` the copy under `photos/` from the site's root, stamped with its hash. Only for a credited portrait over 300 KB or 1,200px, and only for the person the copy was made for; the page loads it in the first entry's place and falls back to the original (rule 101) |
-| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?, year?, caucus?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one), with the year the page dates the file to where it gives a single four-digit one plainly (`year`, printed "Photo (1981): ..."; never guessed, and never an upload date, an estimate or a span); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page), or the member's own party caucus's (`by: "Michigan Senate Democrats"`, `caucus: true`, `page` their page on its site). Absent for the silhouette |
+| `photoCredit` | Whose photograph the first entry is: `{by, licence, licenceUrl, page, via, authorUnrecorded?, year?, caucus?, converted?}`. A Commons file's author and licence as its own description page records them (`via: "Wikimedia Commons"`, `page` the file's page; `by` null where the page names no author, and `authorUnrecorded` where its licence asks for one), with the year the page dates the file to where it gives a single four-digit one plainly (`year`, printed "Photo (1981): ..."; never guessed, and never an upload date, an estimate or a span); a government portrait's host (`by: "U.S. House of Representatives"`); a campaign's website (`by`, `page` the page the image was on); a state legislature's (`by: "New Mexico Legislature"`, `page` the member's page), or the member's own party caucus's (`by: "Michigan Senate Democrats"`, `caucus: true`, `page` their page on its site); an election office's guide's, by where it was found (`by: "from the Washington Secretary of State's voters' guide"`, `page` the candidate's page in it), with `converted` where this site decoded the file (Oregon's JPEG 2000, as PNG). Absent for the silhouette |
 
 ### Credits and weights
 
@@ -1254,9 +1255,23 @@ beside the image (`evidence`, `portraitEvidence`), the day read and the
 bytes and pixel size; `validate` fails a shown one without them
 (`photo-unevidenced`). Washington's voters' guide and Alaska's and Oregon's
 pamphlets print candidates' photographs, but only base64 inside JSON or
-inside PDFs, so there is no file to link; an unmodified hosted copy, which
-the owner allowed on 2026-10-25, waits for a follow-up to the site's store
-of copies, which copies only files with an address of their own. The page offers a srcset no size wider than a 2x screen
+inside PDFs, so there is no file to link. By the owner's decision of
+2026-10-25 they are kept here (`guidephotos`, `kyc/guide_photos.py`) for
+anyone no other route pictures: the guide's own page must name the person
+beside the photograph for that office, in the words of their filing,
+profile or the office's list (a short form only through an evidenced
+`overrides.GUIDE_NAME_FORMS` entry), and the name must fit one person in
+the race. The file is the very bytes the guide holds, or for Oregon the
+pixels of its JPEG 2000 decoded losslessly by `kyc/jpx.py` (checked pixel
+for pixel against Chrome's own PDF renderer) and written as PNG; it is
+credited to the guide where it was found and linked to the candidate's
+page in it ("Photo: from the Washington Secretary of State's voters'
+guide"), and a decoded one adds that this site converted it to PNG. A guide
+that answers in a shape the reader no longer knows (no race, no row, no
+statement link, no photograph field) concludes nothing, and the last
+photographs are kept. A PDF page drawing two
+images or none, and Bill Hill's CMYK statement photograph, which a browser
+draws inverted, give none. The page offers a srcset no size wider than a 2x screen
 needs for the width it draws, so a 165px card stops at the 330px file and a
 judge's 116px portrait at the 250px one.
 
@@ -1290,6 +1305,17 @@ just cover three times the largest box a page draws that kind in:
 | Justice, statewide candidate | 32x32 (`.gov-photo`) | 96x96 |
 | Profile | 180x225 (a card at its widest) | 540x675 |
 
+The same folder holds the election offices' guides' photographs that have
+no address of their own (`guidephotos`): each named by its own hash and
+listed in the manifest's `hosted` table with `method` ("unmodified", the
+bytes the guide's JSON or PDF holds, or "decoded", Oregon's JPEG 2000
+decoded losslessly to PNG, with the codestream's `sourceSha256` and the
+`decoder`), the guide's `page` and the JSON or PDF it came `from`, sha256,
+bytes, pixels, the day read and whom it shows (`for`). `verify` and both
+builds fail a file the manifest does not list and a listed file that is
+not on disk or not those bytes and pixels; a heavy one has a copy like
+any other.
+
 A copy is a JPEG at quality 0.86 under `candidate_profiles_site/photos/`,
 named by its own sha256; `data/photo_copies.json` (hand-editable) records
 for each original the records that show it, its bytes, pixels, sha256,
@@ -1316,7 +1342,9 @@ used to leave out as offered only heavier files), 15 of the White House's
 and 11 campaign portraits - for some 2.4 GB of originals, in 14.0 MB.
 Once the code held to the rule that a campaign's file is never copied, and
 caucus-credited cards were copied like the legislature's, 1,407 stood
-(1,392 legislators', 15 of the White House's), in 13.4 MB. The
+(1,392 legislators', 15 of the White House's), in 13.4 MB; with the three
+made of the election offices' guides' photographs (`guidephotos`), 1,410,
+in 13.5 MB. The
 refresh runs a batch after every step that sets a portrait, before the
 rebuild; the people it reads are the last build's, so a campaign portrait
 set in the same refresh is copied by the next.
@@ -2202,10 +2230,10 @@ the day, its bytes and size):
    its silhouette, picture 0, is no one's) and California's Official Voter
    Information Guide statements (each block's image is taken only where its
    alt text is the block's heading's name: the image precedes the heading).
-   Washington's VoteWA (base64 in the page), Alaska's statements (encrypted
-   PDFs) and Oregon's pamphlet (JPEG 2000) have no address of their own;
-   they wait for the follow-up the owner allowed on 2026-10-25, which hosts
-   unmodified copies (rule 101's copies are of files with an address);
+   Alaska's statements (PDFs) and Oregon's pamphlet (JPEG 2000 inside
+   PDFs) have no address of their own: a candidate none of these routes
+   pictures is shown the guide's photograph, hosted here
+   (`guidephotos`, rule 101), joined on the list's own words for the office;
 4. the race's own Wikipedia article ("2026 Kansas gubernatorial
    election"), the link it gives the candidate, matched on given name and
    surname within that race and never on a one-word name, the article

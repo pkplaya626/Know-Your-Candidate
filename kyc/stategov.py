@@ -443,6 +443,11 @@ def build(root="."):
     unfit = statewide_photos.problems(photo_cache)
     if unfit:
         raise StateGovError(f"{statewide_photos.CACHE_PATH}: " + "; ".join(unfit))
+    # And the election offices' own guides' photographs, hosted here
+    # unmodified, for a candidate no other route pictures (kyc/guide_photos.py).
+    from . import guide_photos, photocopies
+    guide_cache = guide_photos.load_cache(root)
+    copies_manifest = photocopies.load(root)
     candidates_heavy = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
@@ -518,7 +523,7 @@ def build(root="."):
                         else None)
                     candidates_heavy += statewide_photos.attach(
                         code, key, item["candidates"]["candidates"], listed, holder, status,
-                        photo_cache)
+                        photo_cache, guide_cache, copies_manifest)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))

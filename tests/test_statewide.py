@@ -471,11 +471,16 @@ class TestThePage(unittest.TestCase):
                 for person in item["candidates"]["candidates"]:
                     # The list's words, and a photograph only with whose it is
                     # (rule 91, the owner's decision of 2026-10-19): never a
-                    # figure or a profile id (rules 24, 25, 27).
+                    # figure or a profile id (rules 24, 25, 27). A heavy one is
+                    # drawn as the smaller copy made here (rule 101,
+                    # ``photoCopy``): an election office's guide's, hosted
+                    # here, can be (kyc/guide_photos.py).
                     self.assertLessEqual(set(person), {"name", "party", "runningMate",
                                                        "ballotName", "writeIn", "holder",
                                                        "printed", "surnameOnly", "record",
-                                                       "photo", "photoCredit"})
+                                                       "photo", "photoCredit", "photoCopy"})
+                    if person.get("photoCopy"):
+                        self.assertEqual(person["photoCopy"]["of"], person["photo"], person)
                     self.assertEqual("photo" in person, bool((person.get("photoCredit") or {})
                                                              .get("by") or (person.get(
                                                                  "photoCredit") or {}).get(

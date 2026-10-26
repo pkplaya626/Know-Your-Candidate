@@ -1586,7 +1586,8 @@ class TestNoControlCharacters(unittest.TestCase):
         except (OSError, subprocess.CalledProcessError):
             self.skipTest("not a git checkout")
         control = re.compile(rb"[\x01-\x08\x0b\x0c\x0e-\x1f\x7f]")
-        binary = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".zip")
+        # A JPEG 2000 file (tests/fixtures, kyc/jpx.py) is an image too.
+        binary = (".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".zip", ".jp2")
         found = []
         for name in files:
             if name.lower().endswith(binary):
