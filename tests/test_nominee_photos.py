@@ -626,9 +626,13 @@ class TestRoutesByName(unittest.TestCase):
             self.assertFalse(portraits.route_ok(nominee(), {"via": via, "url": "https://x/y.jpg"}))
         self.assertEqual(set(nominee_photos.ROUTES), {"wikidata-fec", "state-legislature"})
 
-    def test_the_election_offices_that_offer_no_file_are_said_why(self):
+    def test_the_election_offices_that_offer_no_file_are_a_route_of_their_own(self):
+        # Kept here as copies (kyc/guide_photos.py, the owner's decision of
+        # 2026-10-25), never through the portrait cache's routes.
+        from kyc import guide_photos
         for code in ("WA", "AK", "OR"):
-            self.assertIn(code, nominee_photos.ELECTION_OFFICES)
+            self.assertIn(code, guide_photos.GUIDES)
+        self.assertNotIn(guide_photos.ROUTE, nominee_photos.ROUTES)
 
     def test_both_routes_keep_their_credit(self):
         for via, credit in (("state-legislature", {"by": "New Mexico Legislature"}),

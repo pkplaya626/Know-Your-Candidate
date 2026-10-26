@@ -57,9 +57,9 @@ decision of 2026-10-25 ("more content is better than strict rules") put
 coverage before weight, and its weight is never a reason for the
 silhouette. Washington's online voters' guide serves its photographs only
 base64-encoded inside a JSON answer, and Alaska's and Oregon's pamphlets
-only inside PDFs (``ELECTION_OFFICES``): there is no file to link, so they
-wait for the store of copies a hosted, unmodified copy needs (the owner
-allowed one on 2026-10-25).
+only inside PDFs: there is no file to link, so they are kept here as
+copies, by the owner's decision of 2026-10-25 (kyc/guide_photos.py, a route
+of its own that fills in only where these leave the silhouette).
 
 Every record keeps the page that ties the photograph to the person, the
 words that name them (``evidence``), the day it was read, and its bytes and
@@ -94,20 +94,6 @@ MAX_IMAGE = 8_000_000
 UA = {"User-Agent": "know-your-candidate/2.1 (https://candidates.radicalrelay.us; "
                     "open-source civic data project)"}
 
-# What each state's election office offers, and why it is not a route yet:
-# the research of 2026-10-19 (research/photos/nominees.json) and its check.
-# The owner's decision of 2026-10-25 allows hosting an unmodified official
-# image that has no address of its own; that waits for a follow-up to the
-# site's one store of copies (kyc/photocopies.py, which copies only a file
-# with an address), not a second one here (rule 12). Not ruled out: waiting.
-ELECTION_OFFICES = {
-    "WA": "the online voters' guide (election 899) serves each photograph only "
-          "base64-encoded inside candidate.ashx's JSON, never as a file",
-    "AK": "the Official Election Pamphlet's candidate statements hold the "
-          "photograph only inside each PDF",
-    "OR": "the State Voters' Pamphlet holds the photograph only inside the "
-          "county PDFs, as JPEG 2000",
-}
 
 _FEC_ID = re.compile(r"^[HSP]\d[A-Z0-9]{2}\d{5}$")
 _GENERATIONAL = {"jr", "sr", "ii", "iii", "iv", "v"}

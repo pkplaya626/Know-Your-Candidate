@@ -235,7 +235,8 @@ def assign_credits(profiles):
             profile.pop("photoCredit", None)
             continue
         if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site",
-                                          "wikidata-fec", "state-legislature", CURATED) \
+                                          "wikidata-fec", "state-legislature",
+                                          "election-guide", CURATED) \
                 and profile.get("photoCredit"):
             credited += 1
             continue

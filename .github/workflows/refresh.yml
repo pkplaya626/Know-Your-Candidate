@@ -234,6 +234,18 @@ jobs:
             python build_profile_site.py ballotphotos --no-wikipedia
           fi
 
+      # The election offices' own guides' photographs (kyc/guide_photos.py):
+      # Washington's voters' guide, Alaska's pamphlet statements and Oregon's
+      # county pamphlets, for the nominees and statewide candidates the last
+      # build showed with none; each hosted under photos/ (the bytes the guide
+      # holds, or Oregon's JPEG 2000 decoded losslessly) and listed in rule
+      # 101's manifest, a heavy one as a smaller copy made at once. A guide
+      # that cannot be read keeps its last photographs (rule 8).
+      - name: Refresh the election offices' guides' photographs
+        continue-on-error: true
+        timeout-minutes: 25
+        run: python build_profile_site.py guidephotos
+
       # The President, the Vice President and the Cabinet: the White House's
       # pages, each office's own page and the Senate's roll calls
       # (kyc/federal.py). A source that cannot be read keeps the committed

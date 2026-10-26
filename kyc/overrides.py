@@ -926,6 +926,25 @@ CAMPAIGN_PORTRAITS = {
 PORTRAIT_NAME_FORMS = {}
 
 
+# An election office's guide that prints a candidate under a short form of
+# the name their filing, profile or the office's list writes
+# (kyc/guide_photos.py), keyed on (state, the guide's name exactly as
+# printed): (the person it stands for - "person:<profile id>" or
+# "candidate:<state>:<office>:<name shown>" - and the evidence tying the
+# two, with the day it was read). Without one, a guide's name joins only
+# where its words are the person's (rule 62): "David Russ" is not "RUSS,
+# DAVID HONORABLE".
+GUIDE_NAME_FORMS = {
+    ("OR", "David Russ"): (
+        "person:FEC_H2OR01240",
+        "the State Voters' Pamphlet's statement for David Russ, Republican, US "
+        "Representative, 6th District (VP_G26-Book12 page 35, read 2026-10-25), prints "
+        "'RussIsForUS.com' and is 'furnished by David Russ Is For US'; the filing RUSS, DAVID "
+        "HONORABLE (H2OR01240) names that site, russisforus.com, as its campaign's (FEC "
+        "Form 1)"),
+}
+
+
 # Images that a route would take as a person's portrait but that are not one,
 # keyed on the image URL: (date checked, what it shows). One list for every
 # route (rule 38): a campaign's own site (`enrich`), a nominee's Wikidata item
