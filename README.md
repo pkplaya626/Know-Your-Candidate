@@ -1994,6 +1994,7 @@ they run the state's elections; and each chamber's seats by party.
 | How to vote: registration status, polling place, absentee and early voting, registering | Each state's own pages, as NASS's "Can I Vote" (nass.org/can-I-vote) lists them. Shown as "Voting in <State>" on the state page | `voting` writes `data/voting_links.json` |
 | Key dates: registration deadlines (online, by mail, in person), same-day registration, early voting, mail-ballot application and return deadlines, a late-arriving ballot's last day, runoffs | Each jurisdiction's election office: its pages, calendars and statutes, read 2026-10-17 and every value re-opened by a second researcher. Every value shown carries the page's address and its words, on the jurisdiction's own domains; a compiled table (NCSL, Ballotpedia, Wikipedia, vote.gov, Vote.org, fvap.gov, usa.gov) is refused as a source. Where same-day registration exists, a deadline before Election Day is called the regular deadline, and where it happens is quoted in the office's words. Shown in words and as a calendar strip in "Voting in <State>", each line linked, and marked passed on the reader's own calendar day; "Register to vote" says when registration closed. From the day after the election only a ballot still arriving and a runoff stay | hand-edited `data/voting_dates.json`, checked by `kyc/voting_dates.py` |
 | Official results, sample ballots, registration deadlines, territories | `voting.RESULTS` (every state and D.C.) and `voting.SAMPLE_BALLOTS` (where the election office links a statewide one), each the office's own page; vote.gov's page for deadlines only where the jurisdiction's own record (above) does not say when registration closes; the territories' election offices (`voting.TERRITORY_LINKS`) | curated in `kyc/voting.py`; opened by `voting` with NASS's links |
+| Links opened by hand | Where the weekly check could not open a link (a bot wall, a reset; rule 8), a person opened it in their own browser: the address, the page it reached, its title and the day (`overrides.VOTING_LINKS_BY_HAND`). The page counts it as opened, "opened by hand" on its own day, named apart from the links the check itself opened (never "each link opened" on the check's day), for `voting.BY_HAND_DAYS` from that day on the reader's calendar, and then no longer, so a later failure is seen again. A portal that asked the person to prove they are human was left alone and is recorded so: the page says the state's portal asks visitors to show they are people, so this site cannot open it itself, never "could not be confirmed". An entry counts only while its link is the one shown and the weekly check has found it neither live nor dead; validate lists any it no longer counts (`voting-by-hand-stale`) | curated, from a person's reading of 2026-10-26 |
 | Attorneys general: party | Republican and Democratic Attorneys General Associations, members | `officers` |
 
 A party holds a chamber when it has more than half of **all** its seats; a
@@ -2035,8 +2036,9 @@ Member": such an entry is not NASS speaking for its own member, so it never
 overrides NLGA's - its Hawaii entry named Sylvia Luke, whom Keith Regan
 (acting) had replaced - and a secretary of state NASS lists for a non-member
 state is shown as fact only when that office's own site names them (Florida,
-Virginia and Wisconsin's do; Nevada's draws itself with JavaScript, so it
-stays NASS's listing). A state with no lieutenant governor says who is first
+Virginia and Wisconsin's do), or its own page read by hand does (Nevada's
+answers a script with a bot check; see below). That page names the holder,
+not their party, so Nevada's party is said to be as NASS lists it. A state with no lieutenant governor says who is first
 in line, unless that office is itself vacant or disputed; New Jersey's
 lieutenant governorship is vacant, as NLGA lists it. A photograph from
 either roster must carry the person's surname in its file name: NASS's alt
@@ -2051,9 +2053,22 @@ Carolina the Republican Jeff Jackson beat in 2024, and printed "Maryland" and
 covered all fifty - give each candidate and their party, and a name is shown
 only when the attorney general's own office, linked from USA.gov's page for
 the state, names that person beside the title: 48 of 50 on 2026-10-05.
-Where the office's site refuses a script (Massachusetts, New Hampshire) the
-page says which association lists whom, and that the office could not
-confirm it. A few offices need another official page
+Where the office's site refuses a script, a person reads the office's own
+page in their own browser, rule 57's way (`overrides.OFFICERS_READ_BY_HAND`:
+the holder, the page, the day and its words quoted, each piece as it
+stands). The entry confirms only the holder the roster names, and only where
+its words pass the same test as a read page's (`officers.names_holder`); the
+page then names them and says "The office's own page names them, read by
+hand on" that day, linked. Read on 2026-10-26: Nevada's secretary of state
+and the attorneys general of Massachusetts, New Hampshire, South Dakota and
+Tennessee. An entry for someone the roster no longer names confirms nobody
+and validate says so (`officers-by-hand`); past
+`officers.BY_HAND_STALE_DAYS` the build says to read the page again, and an
+entry whose words do not name the holder beside the title stops the build.
+Where nothing confirms a listing, the page says in whole sentences who lists
+the person, that this site has not confirmed it on the office's own site and
+why (it refuses automated requests, or does not name them), with that site
+linked in the sentence. A few offices need another official page
 (`officers.OFFICE_PAGES`: Wyoming's staff page, Kansas's state portal) and a
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.

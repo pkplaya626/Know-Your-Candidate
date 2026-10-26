@@ -150,6 +150,109 @@ class TestOverrides(unittest.TestCase):
         self.assertEqual(voting.for_page(cache)["OR"]["status"], url)
 
 
+class TestOpenedByHand(unittest.TestCase):
+    """Links the weekly check could not open, opened by hand in a person's
+    browser on 2026-10-26, or found behind a portal's check for people
+    (overrides.VOTING_LINKS_BY_HAND): counted as such, and only while the
+    entry fits the link shown."""
+
+    ENTRIES = {
+        ("AZ", "polling"): ("https://vote.az.gov/polling", "2026-10-26", "opened", "",
+                            "Search by address"),
+        ("NH", "polling"): ("https://vote.nh.gov/polling", "2026-10-26", "human-check",
+                            "https://vote.nh.gov/captcha/challenge", "Verification"),
+    }
+
+    def run_with(self, cache, today=None):
+        import datetime
+        from unittest import mock
+        with mock.patch.dict(overrides.VOTING_LINKS_BY_HAND, self.ENTRIES, clear=True):
+            return (voting.for_page(cache),
+                    voting.by_hand_problems(cache, today or datetime.date(2026, 10, 27)),
+                    validate.check_voting_links(cache))
+
+    def unknown(self, **status):
+        cache = cache_of()
+        cache["links"] = {"https://vote.az.gov/polling": voting.UNKNOWN,
+                          "https://vote.nh.gov/polling": voting.UNKNOWN, **status}
+        cache["linksChecked"] = "2026-10-25"
+        return cache
+
+    def test_each_is_given_to_the_page_with_its_day(self):
+        page, problems, issues = self.run_with(self.unknown())
+        self.assertEqual(page["_byHand"], {"AZ": {"polling": ["2026-10-26", "opened"]},
+                                           "NH": {"polling": ["2026-10-26", "human-check"]}})
+        self.assertEqual(page["_byHandDays"], voting.BY_HAND_DAYS)
+        # Still unreached by the weekly check: the page decides, on the
+        # reader's day, whether the reading by hand still counts.
+        self.assertIn("polling", page["_unreached"]["AZ"])
+        self.assertEqual(problems, [])
+        unchecked = [i for i in issues if i.code == "voting-links-unchecked"]
+        self.assertFalse(any(d.startswith(("AZ polling", "NH polling"))
+                             for i in unchecked for d in i.detail))
+
+    def test_a_link_the_weekly_check_now_opens_needs_no_entry(self):
+        page, problems, _ = self.run_with(self.unknown(**{
+            "https://vote.az.gov/polling": voting.LIVE}))
+        self.assertNotIn("AZ", page["_byHand"])
+        self.assertEqual(problems, ["AZ polling: the weekly check found "
+                                    "https://vote.az.gov/polling live; the entry may go"])
+
+    def test_an_entry_for_another_address_counts_for_nothing(self):
+        cache = self.unknown()
+        cache["states"]["AZ"]["polling"] = "https://vote.az.gov/new-polling"
+        page, problems, issues = self.run_with(cache)
+        self.assertNotIn("AZ", page["_byHand"])
+        self.assertTrue(any(p.startswith("AZ polling: the page now shows") for p in problems))
+        self.assertIn("voting-by-hand-stale", [i.code for i in issues])
+
+    def test_a_mistyped_word_counts_for_nothing(self):
+        # Only "opened" or "human-check" reaches the page: a typo in a
+        # curated value must never make the page say a link was opened.
+        import datetime
+        from unittest import mock
+        typo = {("AZ", "polling"): ("https://vote.az.gov/polling", "2026-10-26", "openned", "",
+                                    "Search by address")}
+        with mock.patch.dict(overrides.VOTING_LINKS_BY_HAND, typo, clear=True):
+            page = voting.for_page(self.unknown())
+            problems = voting.by_hand_problems(self.unknown(), datetime.date(2026, 10, 27))
+        self.assertEqual(page["_byHand"], {})
+        self.assertIn("polling", page["_unreached"]["AZ"])
+        self.assertTrue(any("is neither" in p for p in problems))
+
+    def test_an_old_reading_is_reported_and_listed_unchecked_again(self):
+        import datetime
+        late = datetime.date(2026, 10, 26) + datetime.timedelta(days=voting.BY_HAND_DAYS + 1)
+        _, problems, _ = self.run_with(self.unknown(), late)
+        self.assertEqual(len(problems), 2)
+        self.assertTrue(all("the page no longer counts it" in p for p in problems))
+
+    def test_the_committed_entries_fit_the_links_shown(self):
+        # research/by-hand-2026-10-26/NOTES.md: thirty-three opened in two
+        # rounds (New York's and Georgia's lookups each stand for two kinds),
+        # and three whose portal asked first that the visitor show they are a
+        # person. Alaska's registration page opened with no check: only its
+        # early-voting page asked.
+        cache = voting.load_cache(ROOT)
+        what = [entry[2] for entry in overrides.VOTING_LINKS_BY_HAND.values()]
+        self.assertEqual((what.count(voting.OPENED_BY_HAND), what.count(voting.HUMAN_CHECK)),
+                         (33, 3))
+        self.assertEqual(sorted(key for key, entry in overrides.VOTING_LINKS_BY_HAND.items()
+                                if entry[2] == voting.HUMAN_CHECK),
+                         [("AK", "absentee"), ("NH", "polling"), ("NH", "status")])
+        # A refresh that opens a link itself, or a later day, makes an entry
+        # one validate reports (voting-by-hand-stale), never a failed test:
+        # only a malformed entry fails here.
+        self.assertEqual([p for p in voting.by_hand_problems(cache)
+                          if "is neither" in p or "is not YYYY-MM-DD" in p], [])
+        page = voting.for_page(cache)
+        for code, kinds in page["_byHand"].items():
+            for kind, (day, seen) in kinds.items():
+                entry = overrides.VOTING_LINKS_BY_HAND[(code, kind)]
+                self.assertEqual((day, seen), (entry[1], entry[2]))
+                self.assertEqual(page[code][kind], entry[0])
+
+
 class TestValidate(unittest.TestCase):
     def codes(self, cache):
         return sorted(i.code for i in validate.check_voting_links(cache))

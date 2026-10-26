@@ -568,6 +568,21 @@
       ")</span>";
   }
 
+  /** The sentence that says this site has not confirmed a listing on the
+   *  office's own site, and why, with that site linked in its words:
+   *  *why* is "unreadable" (it refuses automated requests), "not-named"
+   *  (it was read and does not name them as *word*), or unknown. */
+  function notConfirmed(url, why, word) {
+    if (!url) return "This site has not confirmed it with the office.";
+    var site = link(url, "the office's own site");
+    return why === "unreadable"
+      ? "This site has not confirmed it on " + site + ", which refuses automated requests."
+      : why === "not-named"
+        ? "This site has not confirmed it: " + site + " does not name them as " +
+          KYC.escapeHtml(word) + "."
+        : "This site has not confirmed it on " + site + ".";
+  }
+
   /** One statewide officer's row: the holder, or why there is none. */
   function officerRow(kind, off, mark, item, place, open, running) {
     var label = OFFICES[kind].title;
@@ -590,17 +605,17 @@
         KYC.escapeHtml(off.disputed[0]) + "; NLGA lists " + KYC.escapeHtml(off.disputed[1]) +
         ". Neither is shown as the holder.</p>";
     } else if (off.unlisted) {
+      // Whole sentences, the office's site linked in its words (never a
+      // dangling "The office's site.").
       body = '<p class="gov-officer-note">Neither party\'s association of attorneys general lists ' +
-        "one for this state." + (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
+        "one for this state, so this site names no holder." +
+        (off.office ? " You can look on " + link(off.office, "the office's own site") + "." : "") + "</p>";
     } else if (off.unconfirmed) {
       // Why it is not confirmed is the pipeline's to say: a site that refused
       // the request, or a page that was read and does not name them.
       body = '<p class="gov-officer-note">The ' + KYC.escapeHtml(off.listedBy) + " lists " + who(off) +
-        " as its member here. " + (off.unreadable
-          ? "The office's own site refuses automated requests, so this is not confirmed."
-          : "The office's own page does not name them as attorney general, so this is the " +
-            "association's listing, not confirmed.") +
-        (off.office ? " " + link(off.office, "The office's site") + "." : "") + "</p>";
+        " as its member here. " + notConfirmed(off.office, off.unreadable ? "unreadable" : "not-named",
+          "attorney general") + "</p>";
     } else if (off.vacant) {
       body = '<p class="gov-officer-note">Vacant, as the National Lieutenant Governors Association lists it.</p>';
     } else if (off.none && kind === "lt" && fresh) {
@@ -616,13 +631,18 @@
       body = '<p class="gov-officer-note">' + place + " has no secretary of state" +
         (off.electionChief ? "; the lieutenant governor's office runs its elections." : ".") + "</p>";
     } else if (off.notMember) {
+      // NASS does not speak for an office that is not its member (rule 55);
+      // why the office's own site did not confirm them is the pipeline's.
       body = '<p class="gov-officer-note">The National Association of Secretaries of State lists ' +
-        who(off) + " as " + KYC.escapeHtml(off.title.toLowerCase()) + ", though the office is not " +
-        "currently a NASS member, so this is the association's listing, not confirmed." +
-        (off.website ? " " + link(off.website, "The office's site") + "." : "") + "</p>";
+        who(off) + " as " + KYC.escapeHtml(off.title.toLowerCase()) + ", but the office is not " +
+        "currently a member, so that listing does not speak for it. " +
+        notConfirmed(off.website, off.officeRead, off.title.toLowerCase()) + "</p>";
     } else {
       var facts = [off.selection, off.electionChief ? "Chief election official" : "",
-        off.listedBy ? "Party: a member of the " + off.listedBy : ""].filter(Boolean);
+        off.listedBy ? "Party: a member of the " + off.listedBy : "",
+        // A holder confirmed by hand where the association does not speak
+        // for the office: the party is still only the association's listing.
+        off.partyFrom ? "Party as the " + off.partyFrom + " lists it" : ""].filter(Boolean);
       var links = [off.website ? link(off.website, "Office") : "", off.office ? link(off.office, "Office") : "",
         off.bio ? link(off.bio, "Biography") : ""].filter(Boolean);
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);
@@ -637,6 +657,12 @@
           ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
         (facts.length ? '<p class="faint">' + KYC.escapeHtml(facts.join(" · ")) + "</p>" : "") +
         (links.length ? '<p class="gov-links">' + links.join(" · ") + "</p>" : "") +
+        // Confirmed from the office's own page, read by hand in a person's
+        // browser because its site refuses automated requests, or because
+        // the association does not speak for it (rule 57's words).
+        (off.readByHand ? '<p class="faint gov-by-hand">' + link(off.readByHand.url, "The office's own page") +
+          " names them, read by hand on " + KYC.escapeHtml(KYC.dayMonthYear(off.readByHand.read)) +
+          ".</p>" : "") +
         (contact.length ? '<p class="faint gov-contact">' + contact.join(" · ") + "</p>" : "");
     }
     var pictured = body.indexOf("gov-officer-photo") !== -1;
@@ -678,8 +704,8 @@
     var body;
     if (court.unreadable) {
       body = '<p class="gov-officer-note">' + KYC.escapeHtml(court.unreadable) +
-        ", so its members are not listed here." + (court.url ? " " + link(court.url, "The court's site") + "." : "") +
-        "</p>";
+        ", so its members are not listed here." +
+        (court.url ? " You can try " + link(court.url, "the court's own page") + " yourself." : "") + "</p>";
     } else {
       var members = court.members.slice().sort(function (a, b) {
         return (b === court.chief) - (a === court.chief);
@@ -712,7 +738,7 @@
         (short > 0 ? "; " + short + " with nobody listed by the court" : "") +
         (court.chief ? "" : "; the court lists no " + chiefTitle.toLowerCase()) + ". " +
         // A roster file says so before a tap starts a download.
-        link(court.url, /\.pdf(?:[?#]|$)/i.test(court.url) ? "The court's roster (PDF)" : "The court's roster") +
+        "From " + link(court.url, /\.pdf(?:[?#]|$)/i.test(court.url) ? "the court's roster (PDF)" : "the court's roster") +
         // Where the list came from, when it is not this week's read of the
         // page: a roster file's own date, or a page read by hand because
         // the site refuses automated reading (rule 57).

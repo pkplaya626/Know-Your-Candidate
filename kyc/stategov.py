@@ -484,6 +484,13 @@ def build(root="."):
         raise StateGovError("overrides.COURT_ROSTERS: " + "; ".join(unfit))
     problems.extend(courts.curated_stale())
     problems.extend(courts.stale(court_cache))
+    # An officer confirmed from the office's page read by hand is held to
+    # what a read page is (officers.names_holder): an entry that could not
+    # confirm anyone stops the build; its age is a warning.
+    unfit = officers.by_hand_errors()
+    if unfit:
+        raise StateGovError("overrides.OFFICERS_READ_BY_HAND: " + "; ".join(unfit))
+    problems.extend(officers.by_hand_stale())
     states = {}
     for code in sorted(governors):
         entry = {"governor": _governor(dict(governors[code], state=code), problems)}
