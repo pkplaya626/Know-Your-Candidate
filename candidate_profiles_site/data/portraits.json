@@ -8400,40 +8400,22 @@
   "width": 533
  },
  "person:brad lander|NY|H": {
+  "bytes": 83440,
   "credit": {
-   "attribution": true,
-   "by": "Tessa Bury",
-   "file": "https://commons.wikimedia.org/wiki/File:Brad_Lander.jpg",
-   "form": 4,
-   "licence": "CC BY 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
-   "nonFree": false,
-   "year": null
+   "by": "the campaign's website (bradlanderforcongress.com)",
+   "page": "https://www.bradlanderforcongress.com/"
   },
-  "height": 5350,
+  "evidence": "the page's opening photograph, beside \"Fight, Don't Fold. Brad Lander is running for Congress\" (the srcset's 640px form, signed by the site)",
+  "height": 695,
   "name": "Brad Lander",
-  "set": [
-   [
-    120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Brad_Lander.jpg/120px-Brad_Lander.jpg"
-   ],
-   [
-    250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Brad_Lander.jpg/250px-Brad_Lander.jpg"
-   ],
-   [
-    330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Brad_Lander.jpg/330px-Brad_Lander.jpg"
-   ],
-   [
-    500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Brad_Lander.jpg/500px-Brad_Lander.jpg"
-   ]
+  "page": "https://www.bradlanderforcongress.com/",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/2/26/Brad_Lander.jpg"
   ],
-  "title": "Brad Lander",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Brad_Lander.jpg/960px-Brad_Lander.jpg",
-  "via": "wikipedia",
-  "width": 4280
+  "url": "https://run.imgix.net/68d35dd5-f7a6-4a7e-9057-c3908286d00f/e4f5b452-3eca-4f0c-82ea-227d95204138/e4f5b452-3eca-4f0c-82ea-227d95204138.jpg?ixlib=js-3.8.0&bri=0&con=0&sat=0&high=0&shad=0&usm=0&rect=0%2C393%2C2102%2C2282&auto=compress%2Cformat&fit=fillmax&w=640&q=75&s=7faf701c8ebd5e5e8466e7faf23dc0dc",
+  "via": "curated",
+  "width": 640
  },
  "person:brandon herrera|TX|H": {
   "credit": {
@@ -10637,41 +10619,22 @@
   "width": 915
  },
  "person:donna miller|IL|H": {
+  "bytes": 71624,
   "credit": {
-   "attribution": true,
-   "by": "Paul Goyette",
-   "file": "https://commons.wikimedia.org/wiki/File:Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg",
-   "form": 4,
-   "licence": "CC BY 2.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
-   "nonFree": false,
-   "year": 2025
+   "by": "Cook County",
+   "page": "https://www.cookcountyil.gov/all-people/donna-miller"
   },
-  "height": 1020,
+  "evidence": "\"Donna Miller - County Board Commissioner, 6th District\", the image's alt text \"Board of Commissioner Donna Miller\"",
+  "height": 1000,
   "name": "Donna Miller",
-  "set": [
-   [
-    120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg/120px-Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg"
-   ],
-   [
-    250,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg/250px-Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg"
-   ],
-   [
-    330,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg/330px-Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg"
-   ],
-   [
-    500,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg/500px-Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg"
-   ]
+  "page": "https://www.cookcountyil.gov/all-people/donna-miller",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg"
   ],
-  "title": "Donna Miller",
-  "unverified": true,
-  "url": "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg",
-  "via": "wikipedia",
-  "width": 765
+  "url": "https://www.cookcountyil.gov/sites/g/files/ywwepo161/files/styles/crop_profile_photo/public/images/portraits/2021-09/donna_miller_6th_district_0.jpg?h=9326d3c7&itok=su4DaALf",
+  "via": "curated",
+  "width": 800
  },
  "person:dorothy mcauliffe|VA|H": {
   "credit": {
@@ -11762,41 +11725,22 @@
   "width": 2529
  },
  "person:j.d. ford|IN|H": {
+  "bytes": 109551,
   "credit": {
-   "attribution": false,
-   "by": "Dominic",
-   "file": "https://commons.wikimedia.org/wiki/File:JD_Ford,_Indy_Pride_Parade_2023_(2)_(cropped).jpg",
-   "form": 4,
-   "licence": "CC0",
-   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-   "nonFree": false,
-   "year": 2023
+   "by": "Indiana Senate Democrats",
+   "page": "https://indianasenatedemocrats.org/senator/s29/"
   },
-  "height": 498,
-  "linked": "J.D. Ford",
+  "evidence": "\"State Senator J.D. Ford - Indiana Senate Democrats\", the image's alt text \"Senator J.D. Ford\"",
+  "height": 900,
   "name": "J.D. Ford",
-  "set": [
-   [
-    120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg/120px-JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg"
-   ],
-   [
-    250,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg/250px-JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg"
-   ],
-   [
-    330,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg/330px-JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg"
-   ],
-   [
-    381,
-    "https://upload.wikimedia.org/wikipedia/commons/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg"
-   ]
+  "page": "https://indianasenatedemocrats.org/senator/s29/",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/7/74/JD_Ford,_Indy_Pride_Parade_2023_(2)_(cropped).jpg"
   ],
-  "title": "J. D. Ford",
-  "url": "https://upload.wikimedia.org/wikipedia/commons/7/74/JD_Ford%2C_Indy_Pride_Parade_2023_%282%29_%28cropped%29.jpg",
-  "via": "wikipedia",
-  "width": 381
+  "url": "https://indianasenatedemocrats.org/wp-content/uploads/2024/08/Ford_Headshot-with-State-Flag.jpg",
+  "via": "curated",
+  "width": 600
  },
  "person:jack schlossberg|NY|H": {
   "credit": {
@@ -11872,40 +11816,28 @@
   "width": 2133
  },
  "person:jacqui v irwin|CA|H": {
+  "bytes": 285049,
+  "chamber": "lower",
   "credit": {
-   "attribution": true,
-   "by": "California National Guard",
-   "file": "https://commons.wikimedia.org/wiki/File:Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg",
-   "form": 4,
-   "licence": "CC BY 2.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
-   "nonFree": false,
-   "year": 2015
+   "by": "California Legislature",
+   "page": "https://www.assembly.ca.gov/assemblymembers/42"
   },
-  "height": 1706,
+  "district": "42",
+  "evidence": "the file Open States lists for Jacqui Irwin (ocd-person/e7ad99fd-fda5-4114-af3e-320f5be9be3c), served by the California Legislature",
+  "height": 500,
+  "legislator": "ocd-person/e7ad99fd-fda5-4114-af3e-320f5be9be3c",
+  "legislatorName": "Jacqui Irwin",
   "name": "Jacqui V Irwin",
-  "set": [
-   [
-    120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg/120px-150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg"
-   ],
-   [
-    250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg/250px-150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg"
-   ],
-   [
-    330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg/330px-150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg"
-   ],
-   [
-    500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg/500px-150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg"
-   ]
+  "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
+  "page": "https://www.assembly.ca.gov/assemblymembers/42",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
-  "title": "Jacqui Irwin",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/99/150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg/960px-150302-Z-WQ610-_%2816698067641%29_%28cropped%29.jpg",
-  "via": "wikipedia",
-  "width": 1492
+  "state": "CA",
+  "url": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
+  "via": "state-legislature",
+  "width": 500
  },
  "person:james (j.d.) david ford|IN|H": {
   "credit": {
@@ -12448,38 +12380,42 @@
   "credit": {
    "attribution": true,
    "by": "Gage Skidmore",
-   "file": "https://commons.wikimedia.org/wiki/File:Jay_Feely_by_Gage_Skidmore.jpg",
+   "file": "https://commons.wikimedia.org/wiki/File:Jay_Feely_2026_(cropped).jpg",
    "form": 4,
-   "licence": "CC BY-SA 3.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
    "nonFree": false,
-   "year": 2015
+   "year": 2026
   },
-  "height": 3584,
-  "linked": "Jay Feely",
+  "evidence": "\"Jay Feely speaking with attendees at the 'Build the Red Wall' rally at Dream City Church in Phoenix, Arizona\" (2026-04-17), in Category:Jay Feely; Gage Skidmore's photograph, CC BY-SA 4.0",
+  "height": 2589,
   "name": "Jay Feely",
+  "page": "https://commons.wikimedia.org/wiki/File:Jay_Feely_2026_(cropped).jpg",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/0/0f/Jay_Feely_by_Gage_Skidmore.jpg"
+  ],
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Jay_Feely_by_Gage_Skidmore.jpg/120px-Jay_Feely_by_Gage_Skidmore.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Jay_Feely_2026_%28cropped%29.jpg/120px-Jay_Feely_2026_%28cropped%29.jpg"
    ],
    [
     250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Jay_Feely_by_Gage_Skidmore.jpg/250px-Jay_Feely_by_Gage_Skidmore.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Jay_Feely_2026_%28cropped%29.jpg/250px-Jay_Feely_2026_%28cropped%29.jpg"
    ],
    [
     330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Jay_Feely_by_Gage_Skidmore.jpg/330px-Jay_Feely_by_Gage_Skidmore.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Jay_Feely_2026_%28cropped%29.jpg/330px-Jay_Feely_2026_%28cropped%29.jpg"
    ],
    [
     500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Jay_Feely_by_Gage_Skidmore.jpg/500px-Jay_Feely_by_Gage_Skidmore.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/7/72/Jay_Feely_2026_%28cropped%29.jpg/500px-Jay_Feely_2026_%28cropped%29.jpg"
    ]
   ],
-  "title": "Jay Feely",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0f/Jay_Feely_by_Gage_Skidmore.jpg/960px-Jay_Feely_by_Gage_Skidmore.jpg",
-  "via": "wikipedia",
-  "width": 2808
+  "url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Jay_Feely_2026_%28cropped%29.jpg",
+  "via": "curated",
+  "width": 1944
  },
  "person:jeff gunter|NV|H": {
   "credit": {
@@ -13678,39 +13614,44 @@
  },
  "person:justin j. pearson|TN|H": {
   "credit": {
-   "attribution": true,
-   "by": "TrentBenge",
-   "file": "https://commons.wikimedia.org/wiki/File:Justin_J_Pearson_August_2023.jpg",
+   "attribution": false,
+   "by": "@whitehouse (The White House)",
+   "file": "https://commons.wikimedia.org/wiki/File:Justin_J._Pearson_at_the_White_House.jpg",
    "form": 4,
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+   "licence": "Public domain",
+   "licenceUrl": null,
    "nonFree": false,
    "year": 2023
   },
-  "height": 2512,
+  "evidence": "\"Tennessee state representative Justin J. Pearson at the White House, April 24, 2023\", in Category:Justin J. Pearson; {{PD-USGov-POTUS}}, author \"@whitehouse (The White House)\"",
+  "height": 1326,
   "name": "Justin J. Pearson",
+  "page": "https://commons.wikimedia.org/wiki/File:Justin_J._Pearson_at_the_White_House.jpg",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/2/23/Justin_J_Pearson_August_2023.jpg"
+  ],
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Justin_J_Pearson_August_2023.jpg/120px-Justin_J_Pearson_August_2023.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Justin_J._Pearson_at_the_White_House.jpg/120px-Justin_J._Pearson_at_the_White_House.jpg"
    ],
    [
     250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Justin_J_Pearson_August_2023.jpg/250px-Justin_J_Pearson_August_2023.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Justin_J._Pearson_at_the_White_House.jpg/250px-Justin_J._Pearson_at_the_White_House.jpg"
    ],
    [
     330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Justin_J_Pearson_August_2023.jpg/330px-Justin_J_Pearson_August_2023.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Justin_J._Pearson_at_the_White_House.jpg/330px-Justin_J._Pearson_at_the_White_House.jpg"
    ],
    [
     500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Justin_J_Pearson_August_2023.jpg/500px-Justin_J_Pearson_August_2023.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Justin_J._Pearson_at_the_White_House.jpg/500px-Justin_J._Pearson_at_the_White_House.jpg"
    ]
   ],
-  "title": "Justin J. Pearson",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/23/Justin_J_Pearson_August_2023.jpg/960px-Justin_J_Pearson_August_2023.jpg",
-  "via": "wikipedia",
-  "width": 1884
+  "url": "https://upload.wikimedia.org/wikipedia/commons/3/3d/Justin_J._Pearson_at_the_White_House.jpg",
+  "via": "curated",
+  "width": 1079
  },
  "person:justin murphy|NJ|S": {
   "name": "Justin Murphy",
@@ -13915,40 +13856,22 @@
   "via": "unresolved"
  },
  "person:ken paxton|TX|S": {
+  "bytes": 9622,
   "credit": {
-   "attribution": true,
-   "by": "Gage Skidmore",
-   "file": "https://commons.wikimedia.org/wiki/File:Ken_Paxton_(54816860552)_(cropped).jpg",
-   "form": 4,
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-   "nonFree": false,
-   "year": 2025
+   "by": "Office of the Texas Attorney General",
+   "page": "https://www.texasattorneygeneral.gov/about-office"
   },
-  "height": 2406,
+  "evidence": "\"About the Attorney General\": \"Ken Paxton is the 51st Attorney General of Texas\", the image's alt text \"Texas Attorney General Ken Paxton\"",
+  "height": 394,
   "name": "Ken Paxton",
-  "set": [
-   [
-    120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/120px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
-   ],
-   [
-    250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/250px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
-   ],
-   [
-    330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/330px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
-   ],
-   [
-    500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/500px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg"
-   ]
+  "page": "https://www.texasattorneygeneral.gov/about-office",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/0/06/Ken_Paxton_(54816860552)_(cropped).jpg"
   ],
-  "title": "Ken Paxton",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/06/Ken_Paxton_%2854816860552%29_%28cropped%29.jpg/960px-Ken_Paxton_%2854816860552%29_%28cropped%29.jpg",
-  "via": "wikipedia",
-  "width": 1828
+  "url": "https://www.texasattorneygeneral.gov/sites/default/files/inline-images/ken_paxton_bio_thumb.jpg",
+  "via": "curated",
+  "width": 262
  },
  "person:kevin hern|OK|S": {
   "credit": {
@@ -14531,38 +14454,34 @@
   "credit": {
    "attribution": true,
    "by": "Dannel Malloy",
-   "file": "https://commons.wikimedia.org/wiki/File:Luke_Bronin_(42831415392).jpg",
+   "file": "https://commons.wikimedia.org/wiki/File:Luke_Bronin_(cropped_3x4).jpg",
    "form": 4,
    "licence": "CC BY 2.0",
    "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
    "nonFree": false,
    "year": 2018
   },
-  "height": 589,
+  "evidence": "\"Governor Dannel P. Malloy today joined Hartford Mayor Luke Bronin\" (2018-09-20), in Category:Luke Bronin; extracted from the governor's office's Flickr photograph, CC BY 2.0",
+  "height": 289,
   "name": "Luke Bronin",
+  "page": "https://commons.wikimedia.org/wiki/File:Luke_Bronin_(cropped_3x4).jpg",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/c/ca/Luke_Bronin_(42831415392).jpg"
+  ],
   "set": [
    [
     120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Luke_Bronin_%2842831415392%29.jpg/120px-Luke_Bronin_%2842831415392%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2e/Luke_Bronin_%28cropped_3x4%29.jpg/120px-Luke_Bronin_%28cropped_3x4%29.jpg"
    ],
    [
-    250,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Luke_Bronin_%2842831415392%29.jpg/250px-Luke_Bronin_%2842831415392%29.jpg"
-   ],
-   [
-    330,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Luke_Bronin_%2842831415392%29.jpg/330px-Luke_Bronin_%2842831415392%29.jpg"
-   ],
-   [
-    441,
-    "https://upload.wikimedia.org/wikipedia/commons/c/ca/Luke_Bronin_%2842831415392%29.jpg"
+    217,
+    "https://upload.wikimedia.org/wikipedia/commons/2/2e/Luke_Bronin_%28cropped_3x4%29.jpg"
    ]
   ],
-  "title": "Luke Bronin",
-  "unverified": true,
-  "url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/Luke_Bronin_%2842831415392%29.jpg",
-  "via": "wikipedia",
-  "width": 441
+  "url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/Luke_Bronin_%28cropped_3x4%29.jpg",
+  "via": "curated",
+  "width": 217
  },
  "person:luther \"uncleluke\" campbell|FL|H": {
   "credit": {
@@ -16613,6 +16532,21 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4d/Pamela_Stevenson.jpg/960px-Pamela_Stevenson.jpg",
   "via": "wikipedia",
   "width": 2697
+ },
+ "person:patricia ann moore|LA|H": {
+  "bytes": 72670,
+  "credit": {
+   "by": "Louisiana House of Representatives",
+   "page": "https://house.louisiana.gov/H_Reps/members?ID=17"
+  },
+  "evidence": "'State Representative Patricia \"Pat\" Moore', 'Democrat', 'District 17' above the file",
+  "height": 325,
+  "name": "Patricia Ann Moore",
+  "page": "https://house.louisiana.gov/H_Reps/members?ID=17",
+  "read": "2026-10-25",
+  "url": "https://house.louisiana.gov/H_Reps/RepPics/rep17.jpg",
+  "via": "curated",
+  "width": 260
  },
  "person:patrick halpin|NY|H": {
   "credit": {
@@ -18939,39 +18873,40 @@
  },
  "person:todd achilles|ID|S": {
   "credit": {
-   "attribution": false,
-   "by": "Politicsenthusiast06",
-   "file": "https://commons.wikimedia.org/wiki/File:Todd_Achilles_2026_(cropped2).jpg",
-   "form": 2,
-   "licence": "CC0",
-   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-   "nonFree": false
+   "attribution": true,
+   "by": "DL a.k.a. LibertyDad",
+   "file": "https://commons.wikimedia.org/wiki/File:Todd_Achilles_on_LibertyDad%27s_stream.png",
+   "form": 4,
+   "licence": "CC BY 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "nonFree": false,
+   "year": 2026
   },
-  "height": 749,
+  "height": 909,
+  "linked": "Todd Achilles",
   "name": "Todd Achilles",
   "set": [
    [
     120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Todd_Achilles_2026_%28cropped2%29.jpg/120px-Todd_Achilles_2026_%28cropped2%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Todd_Achilles_on_LibertyDad%27s_stream.png/120px-Todd_Achilles_on_LibertyDad%27s_stream.png"
    ],
    [
     250,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Todd_Achilles_2026_%28cropped2%29.jpg/250px-Todd_Achilles_2026_%28cropped2%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Todd_Achilles_on_LibertyDad%27s_stream.png/250px-Todd_Achilles_on_LibertyDad%27s_stream.png"
    ],
    [
     330,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Todd_Achilles_2026_%28cropped2%29.jpg/330px-Todd_Achilles_2026_%28cropped2%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Todd_Achilles_on_LibertyDad%27s_stream.png/330px-Todd_Achilles_on_LibertyDad%27s_stream.png"
    ],
    [
     500,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a8/Todd_Achilles_2026_%28cropped2%29.jpg/500px-Todd_Achilles_2026_%28cropped2%29.jpg"
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Todd_Achilles_on_LibertyDad%27s_stream.png/500px-Todd_Achilles_on_LibertyDad%27s_stream.png"
    ]
   ],
   "title": "Todd Achilles",
-  "unverified": true,
-  "url": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Todd_Achilles_2026_%28cropped2%29.jpg",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Todd_Achilles_on_LibertyDad%27s_stream.png",
   "via": "wikipedia",
-  "width": 545
+  "width": 673
  },
  "person:todd warner|TN|H": {
   "name": "Todd Warner",

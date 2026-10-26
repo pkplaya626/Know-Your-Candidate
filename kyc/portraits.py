@@ -829,6 +829,10 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     escape hatch for hand-corrections.
     """
     cache = load_cache(root)
+    # A photograph a person chose (overrides.CANDIDATE_PHOTOS) stands ahead
+    # of every route, and is never resolved over (not even by --refresh).
+    synced = sync_curated(profiles, cache)
+    profiles = [p for p in profiles if not curated(p)]
 
     # Nobody's portrait is guessed (rule 24). A member's goes through the
     # official photographs and the authoritative bioguide -> Wikipedia
@@ -855,7 +859,7 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
         changed = size_all(cache, log=log)
         changed += credit_all(cache, log=log)
         changed += measure_all(cache, log=log)
-        if changed:
+        if changed or synced:
             save_cache(cache, root)
         return cache, {"resolved": 0, "cached": len(cache)}
 
@@ -992,6 +996,58 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
     return cache, {"resolved": hits, "cached": len(cache)}
 
 
+def curated(profile):
+    """The person's ``overrides.CANDIDATE_PHOTOS`` entry (``photos.curated``)."""
+    from .photos import curated as entry_for
+    return entry_for(profile)
+
+
+def curated_record(profile, entry, old=None):
+    """The portrait cache record of a photograph a person chose for
+    *profile* (``overrides.CANDIDATE_PHOTOS``): route ``curated``, its page,
+    the words naming the person and the day read, and - for a file not on
+    Commons - the credit the entry gives (rule 87). A Commons file's credit,
+    sizes and a file's weight are read by :func:`credit_all`,
+    :func:`size_all` and :func:`measure_all` like any other. What a person
+    refused that *old* offered is kept as what it ``replaces``, so the
+    refusal still counts as guarding something (rule 38)."""
+    from .photos import CURATED, refused
+
+    record = {"url": entry["url"], "via": CURATED, "name": profile["name"],
+              "page": entry["page"], "evidence": entry["words"], "read": entry["read"]}
+    if not wikimedia_file(entry["url"]):
+        record["credit"] = {"by": entry.get("by"), "page": entry["page"]}
+    old = old or {}
+    stood = [u for u in addresses(old) if refused(u)] if old.get("via") != CURATED else []
+    replaces = sorted(set(stood) | set(old.get("replaces") or ()))
+    if replaces:
+        record["replaces"] = replaces
+    return record
+
+
+def sync_curated(profiles, cache):
+    """Put each ``overrides.CANDIDATE_PHOTOS`` entry in *cache* for its
+    profile, in place, keeping what was read of the same file before (its
+    sizes, weight and credit); returns how many records changed."""
+    changed = 0
+    for profile in profiles:
+        entry = curated(profile)
+        if not entry:
+            continue
+        key = profile_key(profile)
+        old = cache.get(key) or {}
+        new = curated_record(profile, entry, old)
+        if old.get("via") == new["via"] and old.get("url") == new["url"]:
+            kept = {k: v for k, v in old.items() if k not in new and k != "credit"}
+            if wikimedia_file(new["url"]) and old.get("credit"):
+                kept["credit"] = old["credit"]
+            new.update(kept)
+        if new != old:
+            cache[key] = new
+            changed += 1
+    return changed
+
+
 def inherit_cross_links(profiles, cache):
     """Share a portrait between a member and their own 2026 candidacy.
 
@@ -1044,10 +1100,15 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
     the ``legphotos`` cache, so the card must still show that file).
     """
     from . import nominee_photos
+    from .photos import CURATED
 
     if record.get("pinned"):
         return True
     via = record.get("via")
+    if via == CURATED:
+        # Only while a person's entry for this very profile names the file.
+        entry = curated(profile)
+        return bool(entry) and entry["url"] == record.get("url")
     if via in _ID_ROUTES:
         return True
     if via in nominee_photos.ROUTES:
@@ -1100,6 +1161,11 @@ def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
             # build (rule 8), and the next photograph or the silhouette shows.
             profile["photoSource"] = None
             continue
+        if record.get("via") == "curated" and record.get("set"):
+            # A Commons file a person chose is named by its upload address;
+            # the card draws its widest standard size (rule 42), never the
+            # original at full weight.
+            url = record["set"][-1][1]
         profile["photos"] = [url] + [u for u in profile["photos"] if u != url]
         profile["photo_url"] = url
         profile["photoSource"] = record.get("via")
@@ -1108,7 +1174,7 @@ def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
             profile["photoSet"] = record["set"]
         if wikimedia_file(url):
             profile["photoCredit"] = commons_credit(record.get("credit"))
-        elif record.get("via") == "state-legislature" and record.get("credit"):
+        elif record.get("via") in ("state-legislature", "curated") and record.get("credit"):
             profile["photoCredit"] = dict(record["credit"])
         hits += 1
     return hits

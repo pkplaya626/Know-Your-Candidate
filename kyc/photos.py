@@ -5,7 +5,8 @@ them in order and falls back to the next on load error, ending at the literal
 sentinel ``"placeholder"`` which the page renders as an inline silhouette.
 
 Every URL in a chain is resolved from an id the source holds (a bioguide id)
-or chosen by hand (``overrides.CANDIDATE_PHOTOS``). Nothing is built from a
+or chosen by hand (``overrides.CANDIDATE_PHOTOS``, by profile id, through the
+portrait cache's ``curated`` route). Nothing is built from a
 name. The chains used to end in Wikipedia ``Special:FilePath/<Name>.jpg``
 guesses, and the files those names reach are whoever uploaded under them:
 "Justin_Murphy.jpg" is a French-Australian rugby league player and
@@ -18,7 +19,6 @@ nominees. Behind every member's official sources sat the same guess -
 import re
 
 from .normalize import is_missing
-from .overrides import CANDIDATE_PHOTOS
 
 PLACEHOLDER = "placeholder"
 
@@ -58,21 +58,63 @@ def member_photos(name, bioguide_id):
 
 
 def candidate_photos(name, state):
-    """Portrait chain for a 2026 candidate.
+    """Portrait chain for a 2026 candidate: the silhouette, until a route
+    tied to the person puts a photograph in front of it - the article their
+    ballot page links (``portraits``, rules 24 and 33), their own campaign
+    site (``enrich``, rule 38), Wikidata or their legislature
+    (``nominee_photos``), or a person's choice (``overrides.CANDIDATE_PHOTOS``,
+    by the profile's id: :func:`curated`). Nothing is looked up by *name*;
+    the override used to be keyed on it."""
+    return [PLACEHOLDER]
 
-    The curated override is keyed on ``(name, state)`` so that two different
-    people who share a name never share a portrait. Anything else reaches the
-    chain through ``portraits`` - an article the person's ballot page links,
-    checked to be about them (rules 24 and 33) - or not at all.
-    """
-    urls = []
 
-    override = CANDIDATE_PHOTOS.get((str(name).strip(), state))
-    if override:
-        urls.append(override[0])  # (url, date checked, evidence)
+# The portrait cache's route for a photograph a person chose.
+CURATED = "curated"
 
-    urls.append(PLACEHOLDER)
-    return urls
+# What every CANDIDATE_PHOTOS entry must say (``curated_problems``).
+CURATED_FIELDS = ("url", "page", "words", "tie", "seen", "read")
+
+
+def curated(profile):
+    """The ``overrides.CANDIDATE_PHOTOS`` entry for *profile*, by its id
+    (rules 3 and 17), or ``None``. Only a candidate's: a member's portrait
+    comes by their bioguide id (rule 24)."""
+    from . import overrides
+
+    if not profile or not profile.get("isCandidate") or profile.get("bioguide"):
+        return None
+    entry = overrides.CANDIDATE_PHOTOS.get(profile.get("id"))
+    return entry if isinstance(entry, dict) and entry.get("url") else None
+
+
+def curated_problems(entry):
+    """What a ``CANDIDATE_PHOTOS`` *entry* lacks, as words, or ``[]``: its
+    fields, a read date that is a date, https addresses, a credit where the
+    file is not on Commons (a Commons file's is read from its page, rule 87),
+    a Commons file's own description page, and no address reached by a name
+    (rule 24)."""
+    import datetime
+
+    from .portraits import wikimedia_file
+
+    if not isinstance(entry, dict):
+        return ["not a record of the file, its page and why it is theirs"]
+    out = [f"no {f}" for f in CURATED_FIELDS if not str(entry.get(f) or "").strip()]
+    try:
+        datetime.date.fromisoformat(str(entry.get("read") or ""))
+    except ValueError:
+        out.append("a read date that is not a date")
+    url, page = str(entry.get("url") or ""), str(entry.get("page") or "")
+    if not url.startswith("https://") or not page.startswith("https://"):
+        out.append("an address that is not https")
+    if is_guessed(url) or is_guessed(page):
+        out.append("a file reached by a name (Special:FilePath)")
+    if wikimedia_file(url):
+        if "commons.wikimedia.org/wiki/File:" not in page:
+            out.append("a Commons file whose page is not its description page")
+    elif not str(entry.get("by") or "").strip():
+        out.append("no credit (by)")
+    return out
 
 
 def is_guessed(url):
@@ -193,7 +235,7 @@ def assign_credits(profiles):
             profile.pop("photoCredit", None)
             continue
         if profile.get("photoSource") in ("wikipedia", "cross-link", "campaign-site",
-                                          "wikidata-fec", "state-legislature") \
+                                          "wikidata-fec", "state-legislature", CURATED) \
                 and profile.get("photoCredit"):
             credited += 1
             continue

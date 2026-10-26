@@ -130,30 +130,52 @@ class TestPhotos(unittest.TestCase):
         self.assertIn("https://bioguide.congress.gov/photo/G000553.jpg", chain)
         self.assertFalse([u for u in chain if "bioguideretro" in u], chain)
 
-    def test_override_is_scoped_by_state(self):
-        """Two different people sharing a name must not share a portrait."""
-        url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Mike_Rogers_MI.jpg"
-        with mock.patch.dict("kyc.photos.CANDIDATE_PHOTOS",
-                             {("Mike Rogers", "MI"): (url, "2026-10-17", "test")}):
-            mi = candidate_photos("Mike Rogers", "MI")
-            al = candidate_photos("Mike Rogers", "AL")
-        self.assertEqual(mi[0], url)
-        self.assertNotEqual(mi[0], al[0])
+    def test_a_chosen_photo_is_keyed_on_the_profile_id(self):
+        """Two different people who share a name must not share a portrait:
+        a name-keyed override put the Michigan Senate candidate Mike Rogers's
+        photograph on Rep. Mike Rogers (AL-3). An entry is keyed on the
+        profile's id (rules 3 and 17), and only a candidate's."""
+        from kyc import photos
+        entry = {"url": "https://example.gov/rogers.jpg"}
+        mi = {"id": "CAND_1", "name": "Mike Rogers", "state": "MI", "isCandidate": True}
+        al = {"id": "FEC_H2AL03032", "name": "Mike Rogers", "state": "AL", "isCandidate": True}
+        member = {"id": "R000575", "name": "Mike Rogers", "state": "AL", "isCandidate": False,
+                  "bioguide": "R000575"}
+        with mock.patch.dict("kyc.overrides.CANDIDATE_PHOTOS",
+                             {"CAND_1": entry, "R000575": entry}, clear=True):
+            self.assertIs(photos.curated(mi), entry)
+            self.assertIsNone(photos.curated(al))
+            self.assertIsNone(photos.curated(member))
+        self.assertEqual(candidate_photos("Mike Rogers", "MI"), [PLACEHOLDER])
 
     def test_no_hand_chosen_photo_is_a_made_up_file_name(self):
         # 24 of the 25 "hand-chosen" URLs named Commons files that do not
         # exist, made up from the person's name (2026-10-17). An entry now
-        # names a served file, not a name lookup, with the date it was
-        # checked and the evidence that it is this person.
-        import datetime
+        # names a served file and the page naming the person beside it, with
+        # the day it was read, why it is this person, and what was seen.
         from kyc import overrides, photos
         for key, entry in overrides.CANDIDATE_PHOTOS.items():
-            self.assertEqual(len(entry), 3, key)
-            url, checked, evidence = entry
-            self.assertTrue(url.startswith("https://upload.wikimedia.org/"), key)
-            self.assertFalse(photos.is_guessed(url), key)
-            datetime.date.fromisoformat(checked)
-            self.assertTrue(str(evidence).strip(), key)
+            self.assertEqual(photos.curated_problems(entry), [], key)
+            self.assertFalse(photos.is_guessed(entry["url"]), key)
+
+    def test_an_entry_without_its_evidence_is_named(self):
+        from kyc import photos
+        good = {"url": "https://example.gov/a.jpg", "page": "https://example.gov/a",
+                "words": "Attorney General A", "tie": "the office", "seen": "alone",
+                "read": "2026-10-25", "by": "Office of A"}
+        self.assertEqual(photos.curated_problems(good), [])
+        self.assertIn("no credit (by)", photos.curated_problems(dict(good, by="")))
+        self.assertIn("no seen", photos.curated_problems(dict(good, seen="")))
+        self.assertIn("a read date that is not a date",
+                      photos.curated_problems(dict(good, read="October")))
+        commons = dict(good, url="https://upload.wikimedia.org/wikipedia/commons/a/ab/A.jpg",
+                       by="")
+        self.assertEqual(photos.curated_problems(commons),
+                         ["a Commons file whose page is not its description page"])
+        self.assertEqual(photos.curated_problems(
+            dict(commons, page="https://commons.wikimedia.org/wiki/File:A.jpg")), [])
+        self.assertTrue(photos.curated_problems(
+            dict(good, url="https://commons.wikimedia.org/wiki/Special:FilePath/A.jpg")))
 
 
 class TestBuild(unittest.TestCase):

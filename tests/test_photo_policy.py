@@ -313,5 +313,118 @@ class TestARefusalPromotesNothingUnseen(unittest.TestCase):
                             for v in overrides.SEEN_AFTER_A_REFUSAL.values()))
 
 
+class TestAPersonsChoice(unittest.TestCase):
+    """overrides.CANDIDATE_PHOTOS after the background-people sweep: a
+    person on the ballot is not left a silhouette where a page tied to them
+    shows them alone (Ken Paxton's office photograph). The entry is keyed on
+    the profile's id, is the portrait cache's `curated` route, stands ahead
+    of the automatic routes, and keeps what the person refused counted."""
+
+    CROP = "https://upload.wikimedia.org/wikipedia/commons/0/06/Pat_Doe_(cropped).jpg"
+    OFFICE = "https://www.example.gov/images/pat_doe_bio.jpg"
+    ENTRY = {"url": OFFICE, "page": "https://www.example.gov/about",
+             "words": "Attorney General Pat Doe", "by": "Office of the Attorney General",
+             "tie": "she holds the office", "seen": "her alone, a studio portrait",
+             "read": "2026-10-25"}
+
+    def profile(self, pid="CAND_1"):
+        return {"id": pid, "name": "Pat Doe", "state": "TX", "isCandidate": True,
+                "chamber": "Senate (Candidate)", "photos": ["placeholder"]}
+
+    def test_the_entry_stands_ahead_of_a_refused_article_and_keeps_the_refusal(self):
+        p = self.profile()
+        key = portraits.profile_key(p)
+        cache = {key: {"via": "wikipedia", "url": self.CROP, "name": "Pat Doe"}}
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": self.ENTRY}), \
+                unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                         {self.CROP: ("2026-10-25", "a crowd behind her")}):
+            self.assertEqual(portraits.sync_curated([p], cache), 1)
+            record = cache[key]
+            self.assertEqual((record["via"], record["url"]), ("curated", self.OFFICE))
+            self.assertEqual(record["replaces"], [self.CROP])
+            self.assertEqual(record["credit"], {"by": "Office of the Attorney General",
+                                                "page": "https://www.example.gov/about"})
+            record.update(bytes=9622, width=262, height=394)
+            # Read again, it keeps what was measured.
+            self.assertEqual(portraits.sync_curated([p], cache), 0)
+            self.assertEqual(portraits.apply_cache([p], cache), 1)
+            self.assertEqual(p["photos"][0], self.OFFICE)
+            self.assertEqual(p["photoSource"], "curated")
+            self.assertEqual(p["photoCredit"]["by"], "Office of the Attorney General")
+            self.assertEqual(validate.check_photo_evidence([p], cache), [])
+        # Without the entry the record stands for nobody (route_ok).
+        q = self.profile()
+        self.assertFalse(portraits.route_ok(q, cache[key]))
+        self.assertEqual(portraits.apply_cache([q], cache), 0)
+        self.assertEqual(q["photos"], ["placeholder"])
+
+    def test_it_is_one_profile_by_id_never_a_namesake(self):
+        p, namesake = self.profile("CAND_1"), self.profile("FEC_H6TX01001")
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": self.ENTRY}):
+            cache = {}
+            portraits.sync_curated([p], cache)
+            self.assertFalse(portraits.route_ok(namesake, cache[portraits.profile_key(p)]))
+
+    def test_a_commons_choice_draws_a_standard_size_with_its_read_credit(self):
+        url = "https://upload.wikimedia.org/wikipedia/commons/3/3d/Pat_Doe_at_the_White_House.jpg"
+        entry = dict(self.ENTRY, url=url, by="",
+                     page="https://commons.wikimedia.org/wiki/File:Pat_Doe_at_the_White_House.jpg")
+        p = self.profile()
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry}):
+            self.assertEqual(photos.curated_problems(entry), [])
+            cache = {}
+            portraits.sync_curated([p], cache)
+            record = cache[portraits.profile_key(p)]
+            self.assertNotIn("credit", record)
+            # Not credited yet (Commons not read): withheld, never uncredited.
+            self.assertEqual(portraits.apply_cache([p], cache), 0)
+            record["set"] = portraits.thumb_set(url, 1079)
+            record["credit"] = {"by": "@whitehouse (The White House)",
+                                "licence": "Public domain", "form": portraits.CREDIT_FORM,
+                                "file": entry["page"]}
+            self.assertEqual(portraits.apply_cache([p], cache), 1)
+            self.assertEqual(p["photos"][0], record["set"][-1][1])
+            self.assertIn("/500px-", p["photos"][0])
+            self.assertEqual(p["photoCredit"]["licence"], "Public domain")
+
+    def test_validate_names_an_entry_refused_unshown_or_unevidenced(self):
+        p = self.profile()
+        table = overrides.CANDIDATE_PHOTOS
+        with unittest.mock.patch.dict(table, {"CAND_1": self.ENTRY}, clear=True):
+            self.assertEqual(validate.check_curated_photos([p]), [])
+            issues = validate.check_photo_evidence([p], {})
+            self.assertIn("not shown", issues[0].detail[0])
+            with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                          {self.OFFICE: ("2026-10-25", "x")}):
+                self.assertEqual([i.code for i in validate.check_curated_photos([p])],
+                                 ["photo-curated-unevidenced"])
+        with unittest.mock.patch.dict(table, {"CAND_1": dict(self.ENTRY, tie="")}, clear=True):
+            self.assertEqual([i.code for i in validate.check_curated_photos([p])],
+                             ["photo-curated-unevidenced"])
+        with unittest.mock.patch.dict(table, {"CAND_404": self.ENTRY}, clear=True):
+            self.assertEqual([i.code for i in validate.check_curated_photos([p])],
+                             ["stale-photo-override"])
+
+    def test_a_refusal_is_kept_by_the_address_its_entry_names(self):
+        # Jacqui Irwin's refused Commons file stood in her new record as the
+        # 960px thumbnail, which no NOT_A_PORTRAIT entry names: the entry's
+        # key is the file's upload address, from its description page.
+        from kyc import nominee_photos
+        page = "https://commons.wikimedia.org/wiki/File:Pat_Doe_(cropped).jpg"
+        upload = judge_links.source_url(page)
+        thumb = upload.replace("/commons/", "/commons/thumb/") + "/960px-Pat_Doe_(cropped).jpg"
+        record = {"via": "wikipedia", "url": thumb, "credit": {"file": page}}
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, {upload: ("2026-10-25", "x")}):
+            self.assertEqual(nominee_photos.replaced(record), [upload])
+        # A record refused by its own address still names that address.
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, {thumb: ("2026-10-25", "x")}):
+            self.assertEqual(nominee_photos.replaced(record), [thumb])
+
+    def test_the_committed_entries_are_complete(self):
+        for pid, entry in overrides.CANDIDATE_PHOTOS.items():
+            self.assertEqual(photos.curated_problems(entry), [], pid)
+            self.assertFalse(photos.refused(entry["url"]), pid)
+
+
 if __name__ == "__main__":
     unittest.main()

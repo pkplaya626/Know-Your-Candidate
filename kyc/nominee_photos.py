@@ -39,14 +39,12 @@ through something the person is already tied to here, never a name:
   seat, or the card shows another file: a file keyed by seat ("Sen22.jpg")
   shows whoever holds it.
 
-Not a route yet: a statewide officer's office photograph for an officer on
-the ballot for Congress. Ken Paxton (TX Senate) shows the silhouette since
-his Commons portrait was refused (someone else in the frame), while the
-state page shows his office's photograph as Attorney General. The officers'
-cards are matched to an office by state and title, never to a profile, so
-the tie would be a third route - their corroborated record of offices
-(``history``) naming that office, as ``legislator_for`` does for a seat -
-with its own review; it waits for one (the PR #139 review).
+A statewide officer's office photograph is not one of these routes: the
+officers' cards are matched to an office by state and title, never to a
+profile. Ken Paxton (TX Senate), whose Commons portrait was refused (a crowd
+behind him), shows his office's photograph as Attorney General through a
+person's choice instead (``overrides.CANDIDATE_PHOTOS``, route ``curated``),
+which names the page, the words and why the office's holder is him.
 
 Either route refuses a frame wider than tall unless its file is named a
 headshot or portrait (rule 38), and a file a person refused in
@@ -917,12 +915,20 @@ def replaced(record):
     James Talarico's Wikidata item carried the uncut file of the crop
     refused for someone at its edge - so ``validate`` names any such one
     shown until a person has (``portrait-fallback-unseen``)."""
-    from .portraits import held_back
+    from .photos import refused
+    from .portraits import addresses, held_back
 
     record = record or {}
     out = list(record.get("replaces") or [])
-    if record.get("url") and held_back(record) and record["url"] not in out:
-        out.insert(0, record["url"])
+    if record.get("url") and held_back(record):
+        # The address a person's entry names - a Commons file's upload
+        # address, where the record shows a thumbnail of it - so the entry
+        # still counts as guarding a file a route offers (Jacqui Irwin's
+        # 960px thumbnail stood here in place of the refused file).
+        named = [u for u in addresses(record) if refused(u)] or [record["url"]]
+        for url in reversed(named):
+            if url not in out:
+                out.insert(0, url)
     return out
 
 

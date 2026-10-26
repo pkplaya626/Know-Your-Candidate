@@ -12069,8 +12069,8 @@ async function testSharePages() {
             ? url === "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/" + copy.src
             : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
               (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
-            ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature") &&
-              !!p.photoCredit)));
+            ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature" ||
+              p.photoSource === "curated") && !!p.photoCredit)));
       if (!ok || /Special:/.test(url)) images.push(`${p.id}: ${url}`);
       if (!/social-card/.test(url)) photos += 1;
     });

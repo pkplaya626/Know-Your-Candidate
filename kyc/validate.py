@@ -243,18 +243,7 @@ def check_overrides(profiles, raw):
                             "from its source and replace or remove the entry",
                             sorted(overrides.OTHER_OFFICE_NOMINEES)))
 
-    candidate_keys = {
-        (p["name"], p["state"]) for p in profiles if p["isCandidate"]
-    }
-    dead_photos = sorted(
-        f"{name} ({state})"
-        for (name, state) in overrides.CANDIDATE_PHOTOS
-        if (name, state) not in candidate_keys
-    )
-    if dead_photos:
-        issues.append(Issue("warn", "stale-photo-override",
-                            f"{len(dead_photos)} photo overrides match no candidate",
-                            dead_photos))
+    issues += check_curated_photos(profiles)
 
     # Not an error, just useful: members who are also 2026 candidates.
     from .record import seated
@@ -266,6 +255,35 @@ def check_overrides(profiles, raw):
     if duals:
         issues.append(Issue("warn", "dual-role",
                             f"{len(duals)} sitting members are also 2026 candidates", duals))
+    return issues
+
+
+def check_curated_photos(profiles):
+    """Every ``overrides.CANDIDATE_PHOTOS`` entry is a candidate's, by
+    profile id (rules 3 and 17), says what file, page, words, tie and look
+    it rests on (``photos.curated_problems``), and is not a photograph a
+    person refused (``NOT_A_PORTRAIT``, ``PORTRAIT_LICENCE_DOUBTS``)."""
+    from .photos import curated_problems, refused
+
+    by_id = {p["id"]: p for p in profiles}
+    issues, bad, dead = [], [], []
+    for pid, entry in sorted(overrides.CANDIDATE_PHOTOS.items()):
+        profile = by_id.get(pid)
+        if not profile or not profile.get("isCandidate") or profile.get("bioguide"):
+            dead.append(str(pid))
+        problems = curated_problems(entry)
+        if not problems and refused(entry["url"]):
+            problems.append(refused(entry["url"]))
+        if problems:
+            bad.append(f"{pid}: {'; '.join(problems)}")
+    if bad:
+        issues.append(Issue("error", "photo-curated-unevidenced",
+                            f"{len(bad)} overrides.CANDIDATE_PHOTOS entries do not say what "
+                            "they rest on, or name a refused photograph", bad))
+    if dead:
+        issues.append(Issue("warn", "stale-photo-override",
+                            f"{len(dead)} overrides.CANDIDATE_PHOTOS entries match no "
+                            "candidate's profile id", dead))
     return issues
 
 
@@ -1357,6 +1375,27 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None):
                 missing.append("note that it is over the caps")
             if missing:
                 found.append(f"{p['name']} (campaign-site): no {', '.join(missing)}")
+        elif source == "curated":
+            # A photograph a person chose (overrides.CANDIDATE_PHOTOS): its
+            # page, words and day, and its size as read - a Commons file's
+            # standard sizes, another file's bytes and pixels, within the
+            # caps (an entry is a person's look, not a reason to send 5 MB).
+            from .portraits import wikimedia_file
+            record = portraits.get(profile_key(p)) or {}
+            missing = [f for f in ("page", "evidence", "read") if not record.get(f)]
+            if wikimedia_file(record.get("url")):
+                if not record.get("set"):
+                    missing.append("sizes")
+            elif not all(record.get(k) for k in ("bytes", "width", "height")):
+                missing.append("weight")
+            elif too_heavy(record):
+                missing.append("weight within the caps")
+            if missing:
+                found.append(f"{p['name']} (curated): no {', '.join(missing)}")
+        if source != "curated" and p.get("isCandidate") and not p.get("bioguide") \
+                and p.get("id") in overrides.CANDIDATE_PHOTOS:
+            found.append(f"{p['name']} (curated): the entry is not shown; run 'portraits' "
+                         "to read it into the portrait cache")
     if not found:
         return []
     return [Issue("error", "photo-unevidenced",
