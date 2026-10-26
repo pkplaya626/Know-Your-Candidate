@@ -316,6 +316,26 @@ class TestRoundThree(unittest.TestCase):
         self.assertEqual(left, [("AL", "results")])
         self.assertNotIn(("AL", "results"), overrides.VOTING_LINKS_BY_HAND)
 
+    def test_each_reading_is_of_the_address_the_state_page_shows(self):
+        # As the build writes the pages (with each jurisdiction's own dates,
+        # which take vote.gov's page off every state whose record gives its
+        # deadlines): every round-three link a page shows is the address a
+        # person opened, and is counted as opened by hand while the check
+        # cannot open it - New Hampshire's vote.gov page among them.
+        from kyc import voting_dates
+        cache = dict(voting.load_cache(ROOT))
+        cache["links"] = {}
+        page = voting.for_page(cache, voting_dates.load(ROOT))
+        shown = {(code, kind): url for code, links in page.items() if not code.startswith("_")
+                 for kind, url in links.items()}
+        recorded = {key: entry[0] for key, entry in overrides.VOTING_LINKS_BY_HAND.items()}
+        for key, url in self.OPENED.items():
+            self.assertEqual(shown.get(key), url, key)
+        self.assertEqual(shown[("NH", "deadlines")], recorded[("NH", "deadlines")])
+        for (code, kind), url in shown.items():
+            if (code, kind) in recorded and recorded[(code, kind)] == url:
+                self.assertIn(kind, page["_byHand"].get(code, {}), (code, kind))
+
     def test_oklahomas_and_new_hampshires_results_are_repointed(self):
         # Oklahoma's answered "403 - Forbidden: Access is denied.", New
         # Hampshire's a "Forbidden" page, in a person's browser.
