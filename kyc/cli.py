@@ -62,6 +62,8 @@ def _legislature_links(root):
             ("broken", "legislator portraits left off, confirmed missing", True),
             ("sharedImage", "legislator portraits left off, one Open States file given to two "
                             "members (statelegs.mark_shared_images)", True),
+            ("notAPortrait", "legislator portraits left off, a file a person refused "
+                             "(overrides.NOT_A_PORTRAIT: someone else in the frame)", False),
             ("legislature", "legislator portraits from the legislature's own records "
                             "(legphotos), where Open States has none", False),
             ("oversized", "legislator portraits left out, the legislature offering only a file "
@@ -2001,11 +2003,38 @@ def _voting(args):
 
 
 def _photo_routes(root):
-    """The images the court and statewide photograph routes reached or
-    passed over, for validate's ``NOT_A_PORTRAIT`` staleness check."""
-    from . import court_photos, courts, statewide_photos
-    return (court_photos.refused_offered(courts.load_cache(root))
-            | statewide_photos.doubted(statewide_photos.load_cache(root)))
+    """The images every route besides the campaign sites' reached or passed
+    over - a court's, a statewide candidate's, an attorney general's
+    office's, a judge's and a profile's portrait cache - for validate's
+    ``NOT_A_PORTRAIT`` staleness check (``photos.not_a_portrait`` records
+    what each refused)."""
+    from . import court_photos, courts, judge_links, officers, portraits, statewide_photos
+    out = (court_photos.refused_offered(courts.load_cache(root))
+           | statewide_photos.doubted(statewide_photos.load_cache(root)))
+    officer_cache = officers.load_cache(root) or {}
+    for office in ("ag", "lt", "sos"):
+        for row in (officer_cache.get(office) or {}).values():
+            if isinstance(row, dict):
+                out.update([row.get("photo")] + list(row.get("notPortraits") or ()))
+    judges = judge_links.load_cache(root) or {}
+    out.update(judges.get("notPortraits") or ())
+    for entry in (judges.get("judges") or {}).values():
+        out.add(judge_links.source_url((entry.get("portrait") or {}).get("source")))
+    for record in portraits.load_cache(root).values():
+        if isinstance(record, dict):
+            # And what a person refused that it stands in for (a nominee's
+            # route asked again, nominee_photos.replaced).
+            out.update(portraits.addresses(record) + list(record.get("replaces") or ()))
+    # A legislator's card: Open States's file, as listed and as loaded.
+    from . import legphotos, statelegs
+    for roster in ((statelegs.load_cache(root) or {}).get("states") or {}).values():
+        for member in roster:
+            if member.get("image"):
+                out.update([member["image"], statelegs.secure(member["image"])])
+    for entry in ((legphotos.load_cache(root) or {}).get("people") or {}).values():
+        out.add(entry.get("image"))
+    out.discard(None)
+    return out
 
 
 def _tribes(args):

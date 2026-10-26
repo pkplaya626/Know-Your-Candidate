@@ -294,10 +294,9 @@ def photo_for(name, members, pages, place_words=(), measure=None, lighter=None,
     offered only above the caps is shown all the same and said
     (``portraitHeavy``); or ``None`` and why not. An image any of whose
     sizes is in *refused* (``overrides.NOT_A_PORTRAIT``) is passed over and
-    named in the record's ``notPortraits``."""
+    named in the record's ``notPortraits`` (``photos.not_a_portrait``)."""
+    from .photos import not_a_portrait
     measure = measure or official_photos.weigh
-    if refused is None:
-        from .overrides import NOT_A_PORTRAIT as refused
     why_not = official_photos.NONE
     tried, passed_over = set(), []
     for page_url, page in pages:
@@ -308,9 +307,8 @@ def photo_for(name, members, pages, place_words=(), measure=None, lighter=None,
             ok, _ = judge(name, members, image, place_words)
             if not ok:
                 continue
-            known = [u for u in [image["src"]] + [u for _, u in image["offered"]] if u in refused]
-            if known:
-                passed_over.append(known[0])
+            if not_a_portrait(image["src"], *[u for _, u in image["offered"]],
+                              passed_over=passed_over, table=refused):
                 why_not = "not-a-portrait"
                 continue
             url, weight, why, heavy = official_photos.choose(image["offered"], measure,

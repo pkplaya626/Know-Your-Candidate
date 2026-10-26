@@ -133,6 +133,28 @@ def refused(*urls):
     return ""
 
 
+def not_a_portrait(*urls, passed_over=None, table=None):
+    """The first of *urls* a person looked at and found no likeness of the
+    person alone in (``overrides.NOT_A_PORTRAIT``, rule 38), or ``""``. The
+    one test every reader asks of an image it meets on a page - a campaign
+    site's (``enrich``), a court's (``court_photos``), an attorney
+    general's office's (``officers.add_ag_photos``), a statewide
+    candidate's guide or article (``statewide_photos``) - where
+    ``refused`` asks both lists of a record already made (rule 12).
+    What it refuses is appended to *passed_over*, the list the reader keeps
+    in its cache as ``notPortraits``, so ``validate``'s staleness check
+    knows the entry still names an image a route offers. *table* stands in
+    for the overrides in a test."""
+    if table is None:
+        from .overrides import NOT_A_PORTRAIT as table
+    for url in urls:
+        if url and url in table:
+            if passed_over is not None and url not in passed_over:
+                passed_over.append(url)
+            return url
+    return ""
+
+
 def host_of(url):
     import urllib.parse
     try:

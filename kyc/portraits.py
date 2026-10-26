@@ -231,7 +231,7 @@ def file_info(urls, log=None):
         titles = list(by_title)
         for i in range(0, len(titles), _BATCH):
             try:
-                payload = _api({"prop": "imageinfo", "iiprop": "size|url|extmetadata",
+                payload = _api({"prop": "imageinfo", "iiprop": IIPROP,
                                 "iiextmetadatafilter": _CREDIT_FIELDS,
                                 "titles": "|".join(titles[i:i + _BATCH])},
                                endpoint=_api_endpoint(project))
@@ -266,11 +266,21 @@ def image_sizes(urls, log=None):
 # credit is read from it - never typed in - and stored with the portrait.
 
 _CREDIT_FIELDS = "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree|DateTimeOriginal"
+# What every reader asks of a file: its size and address, its description
+# page's fields, and when its shown version was uploaded - a date Commons
+# gives that is the upload day is not the day it was taken (``year_of``).
+IIPROP = "size|url|extmetadata|timestamp"
 
 # Which reading of a file's description page a stored credit is. A credit
 # read by an earlier form is read again: the first printed Commons' hidden
-# duplicate spans, uploaders' sentences and file names as authors.
-CREDIT_FORM = 2
+# duplicate spans, uploaders' sentences and file names as authors; the
+# second carried no year, which every Commons credit now says where the
+# file's page gives a single one (form 3, 2026-10-25: Tad Jude's decades-old
+# black-and-white legislature portrait read as current); the third took any
+# single year, and printed upload dates ("13 October 2020 (upload date)")
+# and estimates ("circa 1993", "circa 2025-26") as the year a photograph was
+# taken (form 4, the PR #139 review: no year where Commons qualifies it).
+CREDIT_FORM = 4
 
 # Licence codes Commons gives where the licence has a name.
 LICENCE_NAMES = {
@@ -358,13 +368,62 @@ def licence_name(code):
     return LICENCE_NAMES.get(code, code) if code else None
 
 
-def year_of(text):
+# A date Commons gives with a word that makes it less than the day the
+# picture was taken: an estimate ("circa 1993", "c. 2000", "ca. November
+# 2024", "before 1950"), a guess ("1975?") or a choice ("2005 or 2006").
+_QUALIFIED = re.compile(
+    r"\b(?:circa|cca|ca|c|approx(?:imately)?|about|around|before|after|between|or|"
+    r"probably|possibly|presumably|perhaps|likely|early|late|mid|unknown)\b|[?~]", re.I)
+# A span: "2025-26", "2024\u201325", "2010/11". A hyphen and a number up to 12
+# is a month ("2017-05", Commons' own form) and stays a date.
+_SPAN = re.compile(r"(?<!\d)(?:1[89]|20)\d\d\s*([-\u2013\u2014/])\s*(\d{2})(?![\d-])")
+
+
+def _uploaded_that_day(text, timestamp):
+    """True when *text* gives the very day the file's shown version was
+    uploaded (*timestamp*, ``2023-04-27T03:58:14Z``). Commons' upload form
+    puts the upload day where the uploader gives no date, so that day is no
+    evidence of when the picture was taken: Jackie Norris's
+    "Norris_Jackie_2024-1.jpg" read 2025."""
+    import datetime
+    try:
+        day = datetime.date.fromisoformat(str(timestamp or "")[:10])
+    except ValueError:
+        return False
+    flat = " ".join(str(text or "").split())
+    month = day.strftime("%B")
+    forms = (day.isoformat(), f"{day.day} {month} {day.year}", f"{month} {day.day}, {day.year}",
+             f"{day.day:02d} {month} {day.year}")
+    return any(form in flat for form in forms)
+
+
+def year_of(text, uploaded=None):
     """The year a file's description page dates it to, where it names
     exactly one four-digit year ("2005", "2017-05-25 11:50:06", "21 August
-    2009, per metadata"), else ``None``: a date Commons does not give is
-    never guessed (rule 101's justices' years)."""
+    2009, per metadata") and says it plainly, else ``None``: a date Commons
+    does not give is never guessed (rule 101's justices' years).
+
+    No year where the page says the date is the upload's ("13 October 2020
+    (upload date)", "(original upload date)"), qualifies it (``_QUALIFIED``,
+    or an ``{{other date}}`` whose hidden statement carries a sourcing
+    circumstance, P1480), gives a span ("circa 2025-26"), or gives the very
+    day the file was *uploaded* (``_uploaded_that_day``): each was printed
+    as the year a photograph was taken (the PR #139 review: Amanda
+    Edwards's "2020", an upload date; Judge Matheson's "1993", an
+    estimate)."""
+    raw = str(text or "")
+    if "P1480" in raw:
+        return None
+    flat = plain_text(raw) or ""
+    if re.search(r"upload", flat, re.I) or _QUALIFIED.search(flat):
+        return None
+    for span in _SPAN.finditer(flat):
+        if span.group(1) != "-" or int(span.group(2)) > 12:
+            return None
+    if uploaded and _uploaded_that_day(flat, uploaded):
+        return None
     # "the 1990s" is a decade, not a year.
-    years = set(re.findall(r"(?<!\d)(1[89]\d\d|20\d\d)(?!\d|'?s\b)", plain_text(text) or ""))
+    years = set(re.findall(r"(?<!\d)(1[89]\d\d|20\d\d)(?!\d|'?s\b)", flat))
     return int(years.pop()) if len(years) == 1 else None
 
 
@@ -390,7 +449,8 @@ def credit_of(info):
         # When the photograph was taken, as the file's page dates it: read
         # with the author and licence, shown only for a justice's official
         # portrait (judge_links), whose year a reader needs to know.
-        "year": year_of((meta.get("DateTimeOriginal") or {}).get("value")),
+        "year": year_of((meta.get("DateTimeOriginal") or {}).get("value"),
+                        uploaded=info.get("timestamp")),
     }
 
 
@@ -1027,6 +1087,13 @@ def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
             # else: it is not shown here.
             profile["photoSource"] = None
             continue
+        if held_back(record):
+            # A file a person looked at and refused (rule 38: someone else
+            # in the frame, even in the background), or whose licence waits
+            # for a person, by every route alike - a member's article
+            # portrait as much as a nominee's (photos.refused).
+            profile["photoSource"] = None
+            continue
         if wikimedia_file(url) and not (record.get("credit") or {}).get("licence"):
             # Its credit has not been read yet (Commons did not answer): it
             # waits for the next run rather than show uncredited or hold the
@@ -1047,6 +1114,24 @@ def apply_cache(profiles, cache, legislators=None, legislator_photos=None):
     return hits
 
 
+def addresses(record):
+    """Every address a portrait cache *record* stands for: the file shown,
+    the original it was made smaller from, and its Commons upload (what the
+    overrides key a Commons file on, ``judge_links.source_url``)."""
+    from .judge_links import source_url
+    page = ((record or {}).get("credit") or {}).get("file") or ""
+    out = [(record or {}).get("url"), (record or {}).get("original"),
+           source_url(page) if "/wiki/File:" in page else None]
+    return [u for u in out if u]
+
+
+def held_back(record):
+    """Why the lists a person keeps withhold a portrait cache *record*, or
+    ``""`` (``photos.refused``, the one test every route asks)."""
+    from .photos import refused
+    return refused(*addresses(record))
+
+
 def commons_credit(credit):
     """What the page prints for a Commons file: its author, its licence and
     the file's page, as the file's description page records them - or, with
@@ -1055,6 +1140,11 @@ def commons_credit(credit):
     out = {"by": credit.get("by"), "licence": credit.get("licence"),
            "licenceUrl": credit.get("licenceUrl"), "page": credit.get("file"),
            "via": "Wikimedia Commons"}
+    # The year the file's own page dates it to, where it gives a single one
+    # (``year_of``); never a guessed or an upload year. The page prints it
+    # (``KYC.photoCreditHtml``: "Photo (1983): ...").
+    if credit.get("year"):
+        out["year"] = credit["year"]
     if credit.get("attribution") and not credit.get("by"):
         # The licence asks for the author and the page names none: the line
         # says so, and links the file's page (rule 87).

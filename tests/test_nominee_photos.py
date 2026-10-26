@@ -459,6 +459,31 @@ class TestStateLegislature(unittest.TestCase):
                               legislator_photos=moved)
         self.assertEqual(profile["photos"], ["placeholder"])
 
+    def test_their_own_caucuss_photograph_credited_to_the_caucus(self):
+        # As Sean McCann (MI) is shown his senatedems.com photograph,
+        # credited to the Michigan Senate Democrats (the owner, 2026-10-25:
+        # "we can credit caucus"), whose site holds his only page: here a
+        # made-up New Mexico caucus stands in for it.
+        page = "https://nmhousedems.example/zamora"
+        file = "https://nmhousedems.example/wp-content/uploads/Zamora-Headshot.jpg"
+        sites = {"NM": (("nmhousedems.example", "/", "lower", "New Mexico House Democrats", "D",
+                         "title 'New Mexico House Democrats', read 2026-10-25"),)}
+        theirs = roster_with(image=file, links=[page], party="Democratic", partyKey="D")
+        with unittest.mock.patch.dict(legislature.CAUCUS_SITES, sites):
+            record, counts = self.resolve(roster=theirs, url=file)
+            self.assertEqual(counts["legislature"], 1)
+            self.assertEqual((record["url"], record["page"]), (file, page))
+            self.assertEqual(record["credit"], {"by": "New Mexico House Democrats", "caucus": True,
+                                                "page": page})
+            self.assertIn("their own party's caucus", record["evidence"])
+            # Another party's caucus, or a file two members share, is not.
+            for member in ({"partyKey": "R", "party": "Republican"}, {"imageShared": True}):
+                other = roster_with(**dict({"image": file, "links": [page], "party": "Democratic",
+                                            "partyKey": "D"}, **member))
+                record, counts = self.resolve(roster=other, url=file)
+                self.assertIsNone(record, member)
+                self.assertEqual(counts["legislature"], 0)
+
     def test_a_file_the_card_does_not_show_or_off_the_legislatures_host_gives_nothing(self):
         for member in ({"image": None},                                   # nothing listed
                        {"imageShared": True},                             # another member's too
@@ -485,6 +510,32 @@ class TestStateLegislature(unittest.TestCase):
             dict(ZAMORA, image=None), "NM", {"kind": "member", "url": PAGE_URL}, photos_cache)
         self.assertIsNone(image)
         self.assertIn("oversized", why)
+
+    def test_a_refused_portrait_by_another_route_is_no_portrait(self):
+        # Jeremy Moss (MI-11) and four more nominees were left with the
+        # silhouette once their Commons portrait was refused (someone else in
+        # the frame), while the legislature page showed their own (the PR
+        # #139 review): a refused record is asked for again by these routes.
+        commons = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Zamora_rally.jpg"
+        kept = {"via": "election-page", "url": commons, "name": "Martin Zamora"}
+        key = portraits.profile_key(zamora())
+        self.assertEqual(nominee_photos.wanted([zamora()], {key: kept}), [])
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                      {commons: ("2026-10-25", "another person behind him")}):
+            self.assertEqual([p["id"] for p in nominee_photos.wanted([zamora()], {key: kept})],
+                             [zamora()["id"]])
+            cache = {key: dict(kept)}
+            getter = Getter({IMAGE_URL: image(jpeg(300, 375))})
+            with unittest.mock.patch.object(nominee_photos, "wikidata_items", return_value={}):
+                nominee_photos.resolve_all([zamora()], cache, history=HISTORY, legislators=ROSTER,
+                                           getter=getter, log=lambda *a: None)
+            self.assertEqual((cache[key]["via"], cache[key]["url"]),
+                             ("state-legislature", IMAGE_URL))
+        # A pinned record is never asked about.
+        pinned = dict(kept, pinned=True)
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                      {commons: ("2026-10-25", "another person behind him")}):
+            self.assertEqual(nominee_photos.wanted([zamora()], {key: pinned}), [])
 
     def test_a_wide_frame_or_a_refused_file_is_not_shown(self):
         record, _ = self.resolve(body=jpeg(600, 400))

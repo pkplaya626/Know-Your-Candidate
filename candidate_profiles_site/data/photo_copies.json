@@ -1082,20 +1082,6 @@
    "sha256": "5386b3cc3e3f3d685990c3a3ec3042a136df4017068722490d1ad01a8cc93629",
    "width": 900
   },
-  "https://angelica4congress.com/wp-content/uploads/2026/09/angelica_SFV_v2-257x300.png": {
-   "bytes": 122954,
-   "gone": 0,
-   "height": 300,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Tue, 08 Sep 2026 17:34:01 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H8CA29100"
-   ],
-   "width": 257
-  },
   "https://api.isc.idaho.gov/uploads/Images/Page_Images/1776539631327-brody_2025.webp": {
    "bytes": 201706,
    "etag": "W/\"313ea-19da2037d98\"",
@@ -1642,20 +1628,6 @@
     "legislator:VA:ocd-person/f747c790-f609-4da1-b125-73f1807e1430"
    ],
    "width": 262
-  },
-  "https://ariasforcongress.us/assets/victor-current-portrait.jpg": {
-   "bytes": 84862,
-   "etag": "\"b4f6e9c6fb9c44accb41e4db8f440658\"",
-   "gone": 0,
-   "height": 1000,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6FL19277"
-   ],
-   "width": 800
   },
   "https://arkleg.state.ar.us/Content/photos/2025/House/566_sm.jpg": {
    "bytes": 36544,
@@ -5507,80 +5479,6 @@
    ],
    "width": 593
   },
-  "https://assets.nationbuilder.com/marysilva4congress/pages/29/attachments/original/1709837614/Mary_Silva_-_8.jpg?1709837614": {
-   "bytes": 1007239,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 66585,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "ff626e7467ef98da12e2.jpg",
-    "for": [
-     "person:FEC_H4WA01282"
-    ],
-    "from": [
-     1898,
-     2657
-    ],
-    "height": 756,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "ff626e7467ef98da12e27bb1c11759fc23ec5b2665369bdffcae9351b60ca2f2",
-    "width": 540
-   },
-   "etag": "\"4fbabe8b01c5313b3cc45175a8a59d4b\"",
-   "gone": 0,
-   "height": 2657,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 07 Mar 2024 18:53:35 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H4WA01282"
-   ],
-   "sha256": "90cfc82ff591f259cf1bf6188b5dcebe4cfebb319b3297148192de81f1acd01c",
-   "width": 1898
-  },
-  "https://assets.nationbuilder.com/themes/6a526eb8300636d1e3f480c1/attachments/original/1784490997/michael-no-tint.png?1784490997": {
-   "bytes": 306579,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 70625,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "b4212644f23a551b22da.jpg",
-    "for": [
-     "person:FEC_H6FL17081"
-    ],
-    "from": [
-     800,
-     913
-    ],
-    "height": 675,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "b4212644f23a551b22da29e8422b21f4dc94479df0e4fa9c43aac21c422098f8",
-    "width": 591
-   },
-   "etag": "\"5aba3fc8ddc2b54cca9ee9e2b6f6c523\"",
-   "gone": 0,
-   "height": 913,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 19 Jul 2026 19:56:38 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6FL17081"
-   ],
-   "sha256": "01e0cb7d1d871010fb81ef376d011607f97f735e9802aa6c271d39587d95043b",
-   "width": 800
-  },
   "https://attorneygeneral.nd.gov/wp-content/uploads/2023/02/Attorney-General-Wrigley.jpg": {
    "bytes": 64762,
    "etag": "\"fcfa-6824ee97-b5b691d961b437a6;;;\"",
@@ -5595,19 +5493,6 @@
    "records": [
     "candidate:ND:ag:Drew Wrigley",
     "officer:ND:ag:Drew Wrigley"
-   ],
-   "width": 768
-  },
-  "https://aurora4pa.com/wp-content/uploads/2026/04/aurora-stuski-768x1024.jpeg": {
-   "bytes": 84494,
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6PA04169"
    ],
    "width": 768
   },
@@ -6207,21 +6092,6 @@
     "legislator:AZ:ocd-person/d19ab410-5bc3-4160-b279-765e25d959ab"
    ],
    "width": 874
-  },
-  "https://bengsforsouthdakota.com/wp-content/uploads/2026/09/brian-bengs-candid.jpg": {
-   "bytes": 71986,
-   "etag": "\"6abe617b-11932\"",
-   "gone": 0,
-   "height": 772,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 01 Oct 2026 13:34:51 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:CAND_44"
-   ],
-   "width": 577
   },
   "https://berkeleyca.gov/sites/default/files/elected-office-holder/portrait.jpg": {
    "bytes": 157347,
@@ -10972,21 +10842,6 @@
    "sha256": "e473fac239ce07860252c80c673c68c8b4b1fb5591a9e5286ed827aa1a3feb75",
    "width": 4009
   },
-  "https://bobsmithforcongress.com/wp-content/uploads/bob-smith-headshot-2026-09-480x600.jpg": {
-   "bytes": 21304,
-   "etag": "\"45a0497-5338-65bb6eef77484\"",
-   "gone": 0,
-   "height": 600,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Fri, 18 Sep 2026 00:25:11 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6CA24345"
-   ],
-   "width": 480
-  },
   "https://brianburnett.houserepublicans.wa.gov/wp-content/uploads/2025/01/Rep-Burnett_Brian-2025_900x1200.jpg": {
    "bytes": 715600,
    "copy": {
@@ -11023,21 +10878,6 @@
    ],
    "sha256": "a9b7b8ea95d6346ac26a9567a3230d916f57ed0209e5c8558dc2d058fe8ac4c3",
    "width": 900
-  },
-  "https://callieforcongress.com/wp-content/uploads/2026/05/1-Callie-Barr-4-27-26-692-web_300x375.png": {
-   "bytes": 167424,
-   "etag": "\"6a0bb232-28e00\"",
-   "gone": 0,
-   "height": 375,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Tue, 19 May 2026 00:43:30 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H4MI01155"
-   ],
-   "width": 300
   },
   "https://capitol.tn.gov/house/members/images/H13.jpg": {
    "bytes": 232007,
@@ -14330,12 +14170,14 @@
    "gone": 0,
    "height": 700,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Tue, 04 Mar 2025 17:20:09 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:IL:ocd-person/91164a3d-fc17-4252-a31f-a8d0d113b74b"
+    "legislator:IL:ocd-person/91164a3d-fc17-4252-a31f-a8d0d113b74b",
+    "person:FEC_H6IL07354"
    ],
    "width": 500
   },
@@ -15631,21 +15473,6 @@
     "legislator:IL:ocd-person/1055f952-0000-4628-9584-c2a3fc9e991c"
    ],
    "sha256": "1fd2bf787b191a851721015bcf9f9479bbe3f3fc59832812aff8ea1fc05ea806",
-   "width": 500
-  },
-  "https://cdn.prod.website-files.com/6a039d746f415ed9d732b21a/6a0d3f104322eac0caa7131e_spencer-meline-headshot-cropped-p-500.png": {
-   "bytes": 109792,
-   "etag": "\"9c8a1e9f6c5d998bc321bfa02126e74a\"",
-   "gone": 0,
-   "height": 437,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Wed, 20 May 2026 04:56:53 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6WA08167"
-   ],
    "width": 500
   },
   "https://cga.ct.gov/legpics/008.png?ver=": {
@@ -22735,6 +22562,51 @@
    ],
    "width": 235
   },
+  "https://ctsenaterepublicans.com/wp-content/uploads/2019/01/Berthel2019forWeb.jpg": {
+   "bytes": 5120,
+   "etag": "\"803d6d852156db1:0\"",
+   "gone": 0,
+   "height": 200,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 24 Dec 2024 16:33:11 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CT:ocd-person/58a9b2fa-cd93-420c-a9bc-6326a75a218a"
+   ],
+   "width": 150
+  },
+  "https://ctsenaterepublicans.com/wp-content/uploads/2020/12/HeatherHeadshot-e1608139012865.jpg": {
+   "bytes": 4628,
+   "etag": "\"8062ef562156db1:0\"",
+   "gone": 0,
+   "height": 150,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 24 Dec 2024 16:31:53 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CT:ocd-person/a648c360-3b9e-408d-ba2a-c171edada365"
+   ],
+   "width": 150
+  },
+  "https://ctsenaterepublicans.com/wp-content/uploads/2021/08/Hwang_Headshot2019.jpg": {
+   "bytes": 13394,
+   "etag": "\"0a2e1402156db1:0\"",
+   "gone": 0,
+   "height": 299,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 24 Dec 2024 16:31:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:CT:ocd-person/b1ab473b-e7ff-4c53-96af-ee796c89f4dd"
+   ],
+   "width": 264
+  },
   "https://da.mdah.ms.gov/series-files/legislature/composites/2016/500/house-of-representatives/2016_2020HousePhotos/Tracy.Arnold.jpg": {
    "bytes": 87160,
    "gone": 0,
@@ -22747,21 +22619,6 @@
     "legislator:MS:ocd-person/2601640f-867f-480f-83a1-c59c332c0b82"
    ],
    "width": 375
-  },
-  "https://deniseforcongress.org/wp-content/uploads/2025/04/APC-Powell-2025-2-copy-832x1024.webp": {
-   "bytes": 34972,
-   "etag": "\"681376fe-889c\"",
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 01 May 2025 13:28:30 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6NE02174"
-   ],
-   "width": 832
   },
   "https://dgbf0g52sf9l0.cloudfront.net/medium_Norwood_Kevin_dfbc7ed28d.jpg": {
    "bytes": 53422,
@@ -25568,35 +25425,6 @@
    ],
    "width": 200
   },
-  "https://drmikekatz.com/imgs/profile-suit.png": {
-   "bytes": 244802,
-   "etag": "\"ab33b5700d07b7b5e5f5c1eecf415253-ssl\"",
-   "gone": 0,
-   "height": 559,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_S6DE00206"
-   ],
-   "width": 447
-  },
-  "https://flowersformaryland.com/wp-content/uploads/2023/10/berney-flowers-2023-600x729.jpg": {
-   "bytes": 60971,
-   "etag": "\"68c72ff4-ee2b\"",
-   "gone": 0,
-   "height": 729,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 14 Sep 2025 21:13:24 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H4MD03149"
-   ],
-   "width": 600
-  },
   "https://flsenate.gov/PublishedContent/Senators/2022-2024/Photos/s02_5389.jpg": {
    "bytes": 62663,
    "etag": "\"204dd6ed723d91:0\"",
@@ -26016,21 +25844,6 @@
     "legislator:FL:ocd-person/afd55a58-b8f6-4dd7-9d93-a2207b65e425"
    ],
    "width": 185
-  },
-  "https://gallantny.com/wp-content/uploads/2025/07/gallant-iso-1-819x1024.png": {
-   "bytes": 217268,
-   "etag": "\"697b9e4e-350b4\"",
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 29 Jan 2026 17:52:14 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6NY01159"
-   ],
-   "width": 819
   },
   "https://gc.nh.gov/house/images/memberpics/409028.jpg": {
    "bytes": 1902455,
@@ -29282,12 +29095,14 @@
    "gone": 0,
    "height": 175,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Thu, 06 Jun 2024 19:31:00 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:TX:ocd-person/5e4e2fd2-e8a9-46f3-aab5-ffbc782afa8b"
+    "legislator:TX:ocd-person/5e4e2fd2-e8a9-46f3-aab5-ffbc782afa8b",
+    "person:CAND_27"
    ],
    "width": 125
   },
@@ -30852,6 +30667,96 @@
    "sha256": "07fee8eb97827da34d70eca2942294dce30a602fddb4dfb3999781ef9d5e52c8",
    "width": 1914
   },
+  "https://housedems.com/wp-content/uploads/2021/01/Scott.jpg": {
+   "bytes": 21447,
+   "etag": "\"69301b52-53c7\"",
+   "gone": 0,
+   "height": 351,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 03 Dec 2025 11:13:22 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/6751fa70-04e4-45e1-b3c5-6e0a5a397f8f"
+   ],
+   "width": 300
+  },
+  "https://housedems.com/wp-content/uploads/2021/01/Weiss_300x350.jpg": {
+   "bytes": 27737,
+   "etag": "\"69300ec0-6c59\"",
+   "gone": 0,
+   "height": 350,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 03 Dec 2025 10:19:44 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/ae5a3a48-9948-4c6c-95c2-c2d0915fd866"
+   ],
+   "width": 300
+  },
+  "https://housedems.com/wp-content/uploads/2023/02/McKinney-Headshot-300x350-1.jpg": {
+   "bytes": 28993,
+   "etag": "\"692fb245-7141\"",
+   "gone": 0,
+   "height": 350,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 03 Dec 2025 03:45:09 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/36e87b55-c5db-4331-8088-8fe1dbc544f9"
+   ],
+   "width": 300
+  },
+  "https://housedems.com/wp-content/uploads/2023/02/Price-Headshot-300x350-1.jpg": {
+   "bytes": 31339,
+   "etag": "\"692fb23b-7a6b\"",
+   "gone": 0,
+   "height": 350,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 03 Dec 2025 03:44:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/2c6f93a7-f08a-4ad4-9424-cdd857401e6e"
+   ],
+   "width": 300
+  },
+  "https://housedems.com/wp-content/uploads/2025/02/Untitled-design-9.png": {
+   "bytes": 58637,
+   "etag": "\"68599484-e50d\"",
+   "gone": 0,
+   "height": 350,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 23 Jun 2025 17:53:08 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/b34263be-1f2e-49db-a261-b30e76ba790a"
+   ],
+   "width": 300
+  },
+  "https://housedems.com/wp-content/uploads/2025/03/Paiz-Headshot-300x350-1.png": {
+   "bytes": 62194,
+   "etag": "\"68598b53-f2f2\"",
+   "gone": 0,
+   "height": 350,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 23 Jun 2025 17:13:55 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/8c335851-e7f6-40d6-b83c-fe413f21934e"
+   ],
+   "width": 300
+  },
   "https://housedems.delaware.gov/wp-content/blogs.dir/210/files/sites/210/2022/09/Griffith-headshot.jpg": {
    "bytes": 393867,
    "copy": {
@@ -32091,66 +31996,6 @@
    ],
    "width": 500
   },
-  "https://i0.wp.com/chelseyhockettforcongress.com/images/chelsey.jpg?w=500&ssl=1": {
-   "bytes": 34180,
-   "etag": "\"100fb5d7ea8bddf8\"",
-   "gone": 0,
-   "height": 750,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 18 Oct 2026 22:33:05 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6TX05189"
-   ],
-   "width": 499
-  },
-  "https://i0.wp.com/dontracyforil.com/wp-content/uploads/2026/07/tracy-headshot-final.jpg?resize=236%2C377&ssl=1": {
-   "bytes": 10390,
-   "etag": "\"d3723849d5557849\"",
-   "gone": 0,
-   "height": 377,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 08:58:55 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:CAND_34"
-   ],
-   "width": 236
-  },
-  "https://i0.wp.com/fellerforcongress.com/feller-portrait.png?w=500&ssl=1": {
-   "bytes": 239276,
-   "etag": "\"9f4c5bef9cf3b2c9\"",
-   "gone": 0,
-   "height": 665,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 14:00:58 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6WA02228"
-   ],
-   "width": 499
-  },
-  "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1": {
-   "bytes": 12010,
-   "etag": "\"bcca3005a94cc181\"",
-   "gone": 0,
-   "height": 500,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 14:02:40 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6NV01331"
-   ],
-   "width": 500
-  },
   "https://i0.wp.com/nlga.us/wp-content/uploads/2025/04/Burt-Jones-scaled-e1682542209640.jpeg?resize=150%2C150&ssl=1": {
    "bytes": 2084,
    "etag": "\"e0df8b63d65de363\"",
@@ -32895,78 +32740,18 @@
    ],
    "width": 280
   },
-  "https://i0.wp.com/projectduecourse.org/RPH_Candidate_Photo.jpg?w=330&ssl=1": {
-   "bytes": 162038,
-   "etag": "\"d2789687268f1501\"",
+  "https://i0.wp.com/senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg?w=500&ssl=1": {
+   "bytes": 42240,
+   "etag": "\"461c6fa8c3126996\"",
    "gone": 0,
-   "height": 438,
+   "height": 700,
    "kinds": [
     "person"
    ],
-   "lastModified": "Sun, 25 Oct 2026 14:00:37 GMT",
+   "lastModified": "Sun, 25 Oct 2026 23:55:41 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6OK05301"
-   ],
-   "width": 330
-  },
-  "https://i0.wp.com/rickcrosson.com/wp-content/uploads/2025/12/rick-swearing-in.jpg?w=500&ssl=1": {
-   "bytes": 14094,
-   "etag": "\"f0d20fa03c458a2b\"",
-   "gone": 0,
-   "height": 666,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 18 Oct 2026 22:33:10 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6WI08205"
-   ],
-   "width": 500
-  },
-  "https://i0.wp.com/rudyforuscongress.com/wp-content/uploads/2025/05/IMG_5517-scaled.jpg?w=800&ssl=1": {
-   "bytes": 62598,
-   "etag": "\"c8665ab93af133d0\"",
-   "gone": 0,
-   "height": 1101,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Fri, 04 Sep 2026 10:38:32 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H2CA00153"
-   ],
-   "width": 799
-  },
-  "https://i0.wp.com/vibe.filesafe.space/1777176457512626988/attachments/767184b8-edbf-472a-9dff-b39edf3eb5bf.jpg?w=500&ssl=1": {
-   "bytes": 29086,
-   "etag": "\"b3d64b569cb5640c\"",
-   "gone": 0,
-   "height": 888,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 14:00:34 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6CA52163"
-   ],
-   "width": 500
-  },
-  "https://i0.wp.com/www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg?w=500&ssl=1": {
-   "bytes": 19272,
-   "etag": "\"05d60165b8067795\"",
-   "gone": 0,
-   "height": 590,
-   "kinds": [
-    "officer"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 14:27:58 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "officer:PA:ag:Dave Sunday"
+    "person:FEC_H6MI11191"
    ],
    "width": 500
   },
@@ -32986,36 +32771,6 @@
     "officer:AZ:ag:Kris Mayes"
    ],
    "width": 330
-  },
-  "https://i0.wp.com/www.moniqueforcongress.com/images/despain-large.png?w=330&ssl=1": {
-   "bytes": 147294,
-   "etag": "\"023f427460e27731\"",
-   "gone": 0,
-   "height": 524,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 14:00:39 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6OR04260"
-   ],
-   "width": 330
-  },
-  "https://i0.wp.com/www.nancymannion.com/img/Nancy-Mannion-Main.png?w=500&ssl=1": {
-   "bytes": 178798,
-   "etag": "\"0ec8c0a5919dd227\"",
-   "gone": 0,
-   "height": 595,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 14:00:43 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6PA11099"
-   ],
-   "width": 500
   },
   "https://i0.wp.com/www.nga.org/wp-content/uploads/2018/01/Governor-Ivey-2019-Headshot-scaled.jpg?w=500&ssl=1": {
    "bytes": 34912,
@@ -34362,238 +34117,117 @@
    ],
    "width": 100
   },
-  "https://images.squarespace-cdn.com/content/v1/64cf1b438f455911726f83b9/42dc3e83-c84b-4e9f-89dc-7f4300821dee/DavidPan_Headshot_2023-2.jpg?format=500w": {
-   "bytes": 34344,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2020/12/Senator-Qaddoura.jpg": {
+   "bytes": 43197,
    "gone": 0,
-   "height": 647,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:53 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H4CA46137"
+    "legislator:IN:ocd-person/ba72879f-42bd-4735-a3e0-d5edd0358f98"
    ],
-   "width": 500
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/6862a998f72d105f9d938b41/b163a071-e297-4345-9ad9-1909800dd2a8/Jeffrey-Walter-17.PNG?format=500w": {
-   "bytes": 179744,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2020/12/Senator-Taylor.jpg": {
+   "bytes": 75085,
    "gone": 0,
-   "height": 700,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:53 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6IL11166"
+    "legislator:IN:ocd-person/39798614-3cb2-40b7-adad-4f5c53ff59e5"
    ],
-   "width": 500
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/6879022f5686401f7b648b84/1d7e216d-6a81-439a-9f1a-d5e78df398fd/Amanda-Hollowell_Headshot_Silo.png?format=500w": {
-   "bytes": 261414,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2020/12/Senator-Yoder.jpg": {
+   "bytes": 48840,
    "gone": 0,
-   "height": 768,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:53 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6GA01158"
+    "legislator:IN:ocd-person/872447dd-3b06-421e-af8c-25ea68aa5ae4"
    ],
-   "width": 500
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/6897cada8764414f9733ee5d/51b95d22-2439-4280-9610-178c96eb48e1/Alan+Smiles+at+Park+2.png?format=300w": {
-   "bytes": 180096,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2021/11/Senator-Pol_Hoosierjpg.jpg": {
+   "bytes": 32199,
    "gone": 0,
-   "height": 400,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:53 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6PA14200"
+    "legislator:IN:ocd-person/4058ba4c-30a9-46a7-80a1-1f3de1e44a2f"
    ],
-   "width": 300
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/68f7b7fa74d2410763d13e33/b45f3b0c-a9a5-475b-8359-988eae0e2a12/Montavon+official+photo+%281%29.jpg": {
-   "bytes": 126218,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2022/12/Senator-Ford-Indiana-State-Flag-Headshot.jpg": {
+   "bytes": 31398,
    "gone": 0,
-   "height": 1121,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:54 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H4FL17060"
+    "legislator:IN:ocd-person/85b8c0cf-3df4-45a1-8c38-d220b7122226"
    ],
-   "width": 1200
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/693c3ee95bff1a362a266abf/3c7175b3-7440-4496-bd80-c46ba66628c1/Singer+Proofs-91.jpg?format=500w": {
-   "bytes": 28360,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2022/12/Senator-Hunley_Hoosier-Profile-Pic-600x900-2.jpg": {
+   "bytes": 34195,
    "gone": 0,
-   "height": 750,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:54 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6FL23188"
+    "legislator:IN:ocd-person/f22b3c5a-950d-4e0c-83c8-bf9a7c005c73"
    ],
-   "width": 500
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/69414dc907486468d86ae59d/d60c3278-f7ce-430d-b8a9-722e7f0d813b/Amanda+McKinney+Headshot+2.JPG?format=500w": {
-   "bytes": 53804,
+  "https://indianasenatedemocrats.org/wp-content/uploads/2022/12/Senator-Randolph-Indiana-State-Flag-Headshot.jpg": {
+   "bytes": 54392,
    "gone": 0,
-   "height": 631,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:54 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6WA04216"
+    "legislator:IN:ocd-person/a48f9631-3436-4445-b8fc-87c143f373cd"
    ],
-   "width": 500
+   "width": 600
   },
-  "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png": {
-   "bytes": 479272,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 81682,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "5ebf94c044a22025dbf7.jpg",
-    "for": [
-     "person:FEC_H6TX13159"
-    ],
-    "from": [
-     678,
-     1150
-    ],
-    "height": 916,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "5ebf94c044a22025dbf72df3f0b77d9aa27bb45918a88b35896766a519da5db7",
-    "width": 540
-   },
+  "https://indianasenatedemocrats.org/wp-content/uploads/2022/12/Senator-niezgodski-Indiana-State-Flag-Headshot.jpg": {
+   "bytes": 111096,
    "gone": 0,
-   "height": 1150,
+   "height": 900,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Fri, 19 Sep 2025 19:48:54 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_H6TX13159"
+    "legislator:IN:ocd-person/1fad6d9f-7d2c-4b2e-a74f-26a2ea44f371"
    ],
-   "sha256": "459ea92e2c35040ea0c9b8efe621d38cba29594f9aee3a58a36e368769b17fc3",
-   "width": 678
-  },
-  "https://images.squarespace-cdn.com/content/v1/699ca62672f2f441420897e9/109e6ee2-7b4c-447f-b2b9-e666e5780825/Shane+Lewis+Marine+Photo.jpg": {
-   "bytes": 15408,
-   "gone": 0,
-   "height": 470,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6CA18172"
-   ],
-   "width": 375
-  },
-  "https://images.squarespace-cdn.com/content/v1/69ae035a0f16472c8d935e76/37dd9b40-cb4d-4767-b068-88c731c65068/Mebruer+small+smile.jpg?format=500w": {
-   "bytes": 49526,
-   "gone": 0,
-   "height": 752,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6LA05259"
-   ],
-   "width": 500
-  },
-  "https://jenanelson.com/wp-content/uploads/2025/09/jena-nelson-headshot-new-271x300.png": {
-   "bytes": 119585,
-   "etag": "\"68cdb103-1d321\"",
-   "gone": 0,
-   "height": 300,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Fri, 19 Sep 2025 19:37:39 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6OK05293"
-   ],
-   "width": 271
-  },
-  "https://jerseyjustin4senate.org/wp-content/uploads/2024/02/D70_8732-Web-684x1024.webp": {
-   "bytes": 43284,
-   "etag": "\"a914-65aad69b57357\"",
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Fri, 04 Sep 2026 19:38:29 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:CAND_40"
-   ],
-   "width": 684
-  },
-  "https://joemalesforca.com/wp-content/uploads/2025/04/Adobe-Express-file-5-e1744046921739-248x300.png": {
-   "bytes": 48308,
-   "etag": "\"67f40b4b-1190f\"",
-   "gone": 0,
-   "height": 300,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Mon, 07 Apr 2025 17:28:43 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6CA25219"
-   ],
-   "width": 248
-  },
-  "https://jonnyutah4congress.com/images/hero/jonny-landing-page-image.webp?v=1": {
-   "bytes": 221864,
-   "copy": {
-    "box": [
-     540,
-     675
-    ],
-    "bytes": 75330,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "e2bf9d46c982c5ebeda0.jpg",
-    "for": [
-     "person:FEC_H6UT02424"
-    ],
-    "from": [
-     1134,
-     1509
-    ],
-    "height": 719,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "e2bf9d46c982c5ebeda0e068c834ba07b25dc261ad038e925d9d198a99086392",
-    "width": 540
-   },
-   "etag": "\"bb09cf28004418625d126e6a34dbf9f6-ssl\"",
-   "gone": 0,
-   "height": 1509,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6UT02424"
-   ],
-   "sha256": "8b360eeae57bb9698af8bcdbcf28a2fc848cf862ee9aab256c99d5ea3bafc7d0",
-   "width": 1134
+   "width": 600
   },
   "https://law.alaska.gov/img/Mills.jpg": {
    "bytes": 28072,
@@ -54684,33 +54318,6 @@
    ],
    "width": 170
   },
-  "https://media.base44.com/images/public/69fcfad11a04d0a611264e35/8fd4e522f__D6A9689.jpg": {
-   "bytes": 50726,
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H4TX14111"
-   ],
-   "width": 683
-  },
-  "https://melissaforcongress.com/wp-content/uploads/2023/09/Melissa-Headshot-480x720.jpg": {
-   "bytes": 75865,
-   "gone": 0,
-   "height": 720,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Wed, 13 Sep 2023 21:17:14 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H4TX38011"
-   ],
-   "width": 480
-  },
   "https://memdata.virginiageneralassembly.gov/images/display_image/H0056": {
    "bytes": 724744,
    "copy": {
@@ -59308,12 +58915,14 @@
    "gone": 0,
    "height": 300,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Tue, 01 Oct 2024 14:23:08 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:MD:ocd-person/a1a2b050-266e-4d44-9463-be3a02e16e41"
+    "legislator:MD:ocd-person/a1a2b050-266e-4d44-9463-be3a02e16e41",
+    "person:FEC_H6MD05321"
    ],
    "width": 250
   },
@@ -59456,21 +59065,6 @@
     "legislator:MD:ocd-person/5d11064b-6757-42f7-86fa-3023fefb6c10"
    ],
    "width": 250
-  },
-  "https://mikeklein4congress.com/wp-content/uploads/2026/04/Klein-photo.png": {
-   "bytes": 245318,
-   "etag": "\"69e0ea6a-4c70a\"",
-   "gone": 0,
-   "height": 720,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 16 Apr 2026 13:55:54 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6FL03149"
-   ],
-   "width": 480
   },
   "https://montgomerytn.gov/storage/departments/commission/commissioner/Commissioners-Sept-2022/MichaelLankford.jpg": {
    "bytes": 31108,
@@ -61607,21 +61201,6 @@
    ],
    "width": 465
   },
-  "https://piaforcongress.com/ignition/resources/img/Pia-Dandiya-for-Congress-pia-portrait.webp": {
-   "bytes": 42430,
-   "etag": "\"a5be-65c33ce475468\"",
-   "gone": 0,
-   "height": 1200,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 24 Sep 2026 05:23:54 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6FL21059"
-   ],
-   "width": 957
-  },
   "https://portal.ct.gov/-/media/ag/about-the-ag/agtong-headshot.png?rev=4a0632a1575241d28bb665b018292c1b&la=en&h=185&w=200&hash=967A32323799CA3E2102ABB9309E36C1": {
    "bytes": 44010,
    "etag": "8381e063e09c456aa7c15d4bf50b93e8",
@@ -63364,50 +62943,6 @@
    ],
    "width": 250
   },
-  "https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/699e2c87152195f76cb97e6c/8fe141e97_CLOSEUP1.jpg": {
-   "bytes": 120276,
-   "etag": "\"56464ba3f9ac180c85850d17e76c8eb8\"",
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Thu, 26 Feb 2026 00:32:09 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6IA01213"
-   ],
-   "width": 868
-  },
-  "https://rachelgrage.com/_ipx/w_400&f_webp/images/rg.png": {
-   "bytes": 18984,
-   "etag": "\"22134988\"",
-   "gone": 0,
-   "height": 469,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Tue, 13 Oct 2026 16:03:50 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6FL05250"
-   ],
-   "width": 400
-  },
-  "https://raw.githubusercontent.com/dpconway4-bot/pat-moore-for-congress/main/assets/pat-moore-headshot.jpg": {
-   "bytes": 68132,
-   "etag": "W/\"276a78bd0c2deba8a655d4c1f33a52f3ee2fced3bb7325e600874537d6033f9e\"",
-   "gone": 0,
-   "height": 700,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6LA05341"
-   ],
-   "width": 480
-  },
   "https://riag.ri.gov/sites/g/files/xkgbur496/files/styles/max_325x325/public/2021-05/PFN.jpg?itok=L5nFPCGM": {
    "bytes": 12900,
    "gone": 0,
@@ -63421,19 +62956,6 @@
     "officer:RI:ag:Peter Neronha"
    ],
    "width": 260
-  },
-  "https://rickedmonds.com/wp-content/uploads/2026/06/rick-edmonds-headshot-Thumb.jpg": {
-   "bytes": 19908,
-   "gone": 0,
-   "height": 512,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6LA05226"
-   ],
-   "width": 512
   },
   "https://rilegislature.gov/LegislationPictures/todd_patalano.jpg": {
    "bytes": 95150,
@@ -63486,21 +63008,6 @@
    ],
    "sha256": "0a4a06bf8a4bd89936cf7c9c5b5cf19dc73305191aae55f8d717471066237425",
    "width": 900
-  },
-  "https://ronrussellforcongress.com/wp-content/uploads/2024/08/ron-russell-img-1-263x300.png": {
-   "bytes": 111977,
-   "etag": "\"66c51e6d-1b569\"",
-   "gone": 0,
-   "height": 300,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Tue, 20 Aug 2024 22:53:33 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H4ME01160"
-   ],
-   "width": 263
   },
   "https://scstatehouse.gov/images/members/0002272727.jpg": {
    "bytes": 10706,
@@ -67159,6 +66666,425 @@
    "sha256": "615819983cae94a58a845a57b287912bce15069ff7022cc2389daa497be4b1d4",
    "width": 900
   },
+  "https://senatedems.com/anthony/wp-content/uploads/sites/21/2022/12/MDS_Anthony_DSC5449.jpg": {
+   "bytes": 141173,
+   "etag": "\"63a0bc3b-22775\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 19 Dec 2022 19:32:11 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/08eac592-a25a-444f-aea7-db0cdfa79e7b"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/bayer/wp-content/uploads/sites/17/2022/12/Bayer-Official-Portrait.jpeg": {
+   "bytes": 350392,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11020,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "d8f415a135395f73c8a5.jpg",
+    "for": [
+     "legislator:MI:ocd-person/3e24c95f-2ed8-442a-a41f-1a3a9a0b95ed"
+    ],
+    "from": [
+     1389,
+     1944
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "d8f415a135395f73c8a592fcbaa89f0f4bbd03af8ccd6b2813dc755f9ef61411",
+    "width": 168
+   },
+   "etag": "\"6398c9dc-558b8\"",
+   "gone": 0,
+   "height": 1944,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 13 Dec 2022 18:52:12 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/3e24c95f-2ed8-442a-a41f-1a3a9a0b95ed"
+   ],
+   "sha256": "92109b4ab0dab5ae4c1b8ab0aed6fdd84e191eb5961a3a324822318e406a37d9",
+   "width": 1389
+  },
+  "https://senatedems.com/brinks/wp-content/uploads/sites/6/2022/12/MDS_Brinks_DSC5456_536.jpg": {
+   "bytes": 47361,
+   "etag": "\"63a375ce-b901\"",
+   "gone": 0,
+   "height": 536,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 21 Dec 2022 21:08:30 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/de38477b-6f3e-44cd-96d0-bd81ff831948"
+   ],
+   "width": 383
+  },
+  "https://senatedems.com/camilleri/wp-content/uploads/sites/10/2022/12/Portrait_Camilleri_Web.jpg": {
+   "bytes": 154209,
+   "etag": "\"6392146a-25a61\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 08 Dec 2022 16:44:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/5d2fbcb4-0e27-4cb5-99bf-f94693b3aa12"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/cavanagh/wp-content/uploads/sites/12/2022/12/Cavanaugh_Web.jpg": {
+   "bytes": 152311,
+   "etag": "\"63921617-252f7\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 08 Dec 2022 16:51:35 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/a9e6b2e4-016d-481e-9f34-1f1b33d857ca"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/chang/wp-content/uploads/sites/9/2022/12/MDS_Chang_DSC5412.jpg": {
+   "bytes": 123802,
+   "etag": "\"63a0bcd5-1e39a\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 19 Dec 2022 19:34:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/1d297b7e-2e51-4e1a-a208-2f5505e9f1f7"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/cherry/wp-content/uploads/sites/22/2022/12/Portrait_Cherry_Web.jpg": {
+   "bytes": 181162,
+   "etag": "\"639217d4-2c3aa\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 08 Dec 2022 16:59:00 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/de1a4de4-aa34-4487-98f8-27b140fed784"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/geiss/wp-content/uploads/sites/7/2022/12/MDS_Geiss_DSC5413.jpg": {
+   "bytes": 172058,
+   "etag": "\"63a0bd33-2a01a\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 19 Dec 2022 19:36:19 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/ebc9981a-cbe1-4d37-99b0-89d3c350fd3f"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/hertel/wp-content/uploads/sites/16/2022/12/Hertel_Portrait.jpg": {
+   "bytes": 214071,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8801,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "5eb51db27c2f4835c610.jpg",
+    "for": [
+     "legislator:MI:ocd-person/cbfd5eae-d312-4498-a988-bcb52883f637"
+    ],
+    "from": [
+     1388,
+     1943
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "5eb51db27c2f4835c6102d4f3a9f2f5a6e9f703db7ca82e592a653d289812adf",
+    "width": 168
+   },
+   "etag": "\"6398c86c-34437\"",
+   "gone": 0,
+   "height": 1943,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 13 Dec 2022 18:46:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/cbfd5eae-d312-4498-a988-bcb52883f637"
+   ],
+   "sha256": "e472a344201bf5c16c31ce05b42d26412611d8c55f635b7a445382722bc59e6e",
+   "width": 1388
+  },
+  "https://senatedems.com/irwin/wp-content/uploads/sites/19/2022/12/MDS_Irwin_DSC5423.jpg": {
+   "bytes": 141762,
+   "etag": "\"63a0bd9d-229c2\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 19 Dec 2022 19:38:05 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/a1c1163d-af8d-4b88-9365-07717d4a45c3"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/klinefelt/wp-content/uploads/sites/15/2022/12/Portrait_Klinefelt_Web.jpg": {
+   "bytes": 207504,
+   "etag": "\"6392185a-32a90\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 08 Dec 2022 17:01:14 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/3cef42f4-ef0b-43c2-b0b8-01f7f399af2f"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg": {
+   "bytes": 134407,
+   "etag": "\"63a0bdf1-20d07\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator",
+    "person"
+   ],
+   "lastModified": "Mon, 19 Dec 2022 19:39:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/c15f272e-73f2-410c-8afe-1cc91ad3603a",
+    "person:FEC_H6MI04204"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/mcmorrow/wp-content/uploads/sites/14/2023/02/MDS_McMorrow_DSC5342_dec20.jpg": {
+   "bytes": 2486273,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 12134,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "3f93e68b98848faeb36d.jpg",
+    "for": [
+     "legislator:MI:ocd-person/dc6ff9c0-f2b1-433d-a96b-292cf05bcb50"
+    ],
+    "from": [
+     1500,
+     2100
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "3f93e68b98848faeb36dcfff614182413df9ed3f038fa4fde6dc83823ffd2f66",
+    "width": 168
+   },
+   "etag": "\"63f905e7-25f001\"",
+   "gone": 0,
+   "height": 2100,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 24 Feb 2023 18:45:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/dc6ff9c0-f2b1-433d-a96b-292cf05bcb50"
+   ],
+   "sha256": "7d336b1f689f10ff80277f2eca36909bcdd4b0e1534af43f8a4cbdce237ee0a4",
+   "width": 1500
+  },
+  "https://senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg": {
+   "bytes": 656824,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 11523,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "df2a1055bdfe305fd616.jpg",
+    "for": [
+     "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44"
+    ],
+    "from": [
+     1500,
+     2100
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "df2a1055bdfe305fd6162fda03dd6fabf68bcf7f87c27eb681bbaade49ac99c1",
+    "width": 168
+   },
+   "etag": "\"63c05f7d-a05b8\"",
+   "gone": 0,
+   "height": 2100,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 12 Jan 2023 19:29:01 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44"
+   ],
+   "sha256": "e96c482c0849e48e0e05fd76ee32111270106a214a41c9adf70919aec12abede",
+   "width": 1500
+  },
+  "https://senatedems.com/polehanki/wp-content/uploads/sites/11/2022/12/Polehanki-Official-Portrait.jpeg": {
+   "bytes": 246947,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8433,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "a00a31ad60c3a9e9519f.jpg",
+    "for": [
+     "legislator:MI:ocd-person/f266a938-3705-4c7c-994f-859b2b6024dc"
+    ],
+    "from": [
+     1389,
+     1944
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "a00a31ad60c3a9e9519f6406579a6b0f70a4233869457e463fd219dff386491e",
+    "width": 168
+   },
+   "etag": "\"6398bbe0-3c4a3\"",
+   "gone": 0,
+   "height": 1944,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 13 Dec 2022 17:52:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/f266a938-3705-4c7c-994f-859b2b6024dc"
+   ],
+   "sha256": "f84f18274662e01e4a5301cfa32f14f817979db6718f6c6c3d7dc0ac183a856e",
+   "width": 1389
+  },
+  "https://senatedems.com/santana/wp-content/uploads/sites/8/2022/12/Santana-Official-Portrait.jpeg": {
+   "bytes": 194098,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8676,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "c4a9794453ff9033fd3e.jpg",
+    "for": [
+     "legislator:MI:ocd-person/8e302b97-4868-4575-a56f-3881e91ae0f8"
+    ],
+    "from": [
+     1250,
+     1750
+    ],
+    "height": 235,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "c4a9794453ff9033fd3eb9b945fb707b68ed32d9bc1a5cd2c19b686137b8032e",
+    "width": 168
+   },
+   "etag": "\"6398ac47-2f632\"",
+   "gone": 0,
+   "height": 1750,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 13 Dec 2022 16:45:59 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/8e302b97-4868-4575-a56f-3881e91ae0f8"
+   ],
+   "sha256": "4df613f7bc451f5c4e2ce1de70dea67994bf1cdb3c254c31623d3160586870b2",
+   "width": 1250
+  },
+  "https://senatedems.com/shink/wp-content/uploads/sites/18/2022/12/Portrait_Shink_Web.jpg": {
+   "bytes": 170015,
+   "etag": "\"639219df-2981f\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 08 Dec 2022 17:07:43 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/38c58e5f-715a-4943-a8d9-2b557db3db02"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/singh/wp-content/uploads/sites/23/2023/01/Singh-portrait.jpg": {
+   "bytes": 157666,
+   "etag": "\"63c70f66-267e2\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 17 Jan 2023 21:13:10 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/9271c2c7-01d8-44f1-95a4-1496b8716268"
+   ],
+   "width": 720
+  },
+  "https://senatedems.com/wojno/wp-content/uploads/sites/3/2023/01/MDS_Wojno_OfficialPortrait.jpg": {
+   "bytes": 190330,
+   "etag": "\"63c024cf-2e77a\"",
+   "gone": 0,
+   "height": 1008,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 12 Jan 2023 15:18:39 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/1d71200f-5f95-46e8-ac9b-a35c6c0178d8"
+   ],
+   "width": 720
+  },
   "https://senatedems.delaware.gov/wp-content/blogs.dir/219/files/sites/219/2022/09/54321266879_820e6ac631_c-640x710.jpg": {
    "bytes": 70252,
    "etag": "\"1126c-63141e7908563\"",
@@ -67716,76 +67642,6 @@
    ],
    "width": 710
   },
-  "https://shannontaylorva.com/wp-content/uploads/2024/01/Shannon_Taylor_Headshot-1024x1024.jpg": {
-   "bytes": 100470,
-   "etag": "\"659b5c29-18876\"",
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Mon, 08 Jan 2024 02:21:29 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6VA01299"
-   ],
-   "width": 1024
-  },
-  "https://static.wixstatic.com/media/18a1de_c99c0e04e59d4253bc99a48059351abd~mv2.jpg/v1/fill/w_233,h_316,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/Portrait%20-%20Herzig.jpg": {
-   "bytes": 14494,
-   "gone": 0,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6NJ06286"
-   ]
-  },
-  "https://static.wixstatic.com/media/71f2e5_c8325d924542483d953c55f55e0ec3aa~mv2.jpg/v1/fill/w_378,h_681,al_c,q_80,enc_avif,quality_auto/71f2e5_c8325d924542483d953c55f55e0ec3aa~mv2.jpg": {
-   "bytes": 22910,
-   "gone": 0,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6MT02150"
-   ]
-  },
-  "https://static.wixstatic.com/media/7d9660_bda4c45919f84546afe8accaab2636d2~mv2.png/v1/crop/x_535,y_0,w_836,h_1080/fill/w_471,h_608,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Kelly%20Esti%20Headshot%208_edited.png": {
-   "bytes": 26314,
-   "gone": 0,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6GA08138"
-   ]
-  },
-  "https://static.wixstatic.com/media/a86008_695773585da14371ab38bd4ec9820404~mv2.png/v1/fill/w_559,h_537,al_c,lg_1,q_85,enc_avif,quality_auto/headshot-removebg-preview.png": {
-   "bytes": 18863,
-   "gone": 0,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H0CA48172"
-   ]
-  },
-  "https://static.wixstatic.com/media/b8cc96_db133280d3d64883af6a55faebb356b4~mv2.png/v1/fill/w_555,h_739,al_c,q_90,usm_0.66_1.00_0.01,enc_avif,quality_auto/854B7425_edited_edited.png": {
-   "bytes": 30917,
-   "gone": 0,
-   "kinds": [
-    "person"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6IL13154"
-   ]
-  },
   "https://stephaniebarnard.houserepublicans.wa.gov/wp-content/uploads/2025/01/Rep-Barnard_Stephanie-2025_900x1200.jpg": {
    "bytes": 733025,
    "copy": {
@@ -67847,34 +67703,42 @@
     "justice:CA:court:Goodwin H. Liu"
    ]
   },
-  "https://tedbrown.org/website/images/ted-headshot-2026.jpg": {
-   "bytes": 10815,
-   "etag": "\"66a8676ea8f10c736c109160f560314a\"",
+  "https://tnhousegop.org/wp-content/uploads/2025/01/Scarbrough-scaled.jpg": {
+   "bytes": 561460,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7130,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "be4ceb32a4135192c68d.jpg",
+    "for": [
+     "legislator:TN:ocd-person/e38dc213-a42e-43ec-8924-236dc2d9ef35"
+    ],
+    "from": [
+     2048,
+     2560
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "be4ceb32a4135192c68d47753cea113b01f76d122942dd5a1ee7685b158d7dc7",
+    "width": 168
+   },
+   "etag": "\"6792537c-91ed3\"",
    "gone": 0,
-   "height": 410,
+   "height": 2560,
    "kinds": [
-    "person"
+    "legislator"
    ],
+   "lastModified": "Thu, 23 Jan 2025 14:34:36 GMT",
    "read": "2026-10-25",
    "records": [
-    "person:FEC_S4TX00888"
+    "legislator:TN:ocd-person/e38dc213-a42e-43ec-8924-236dc2d9ef35"
    ],
-   "width": 410
-  },
-  "https://trinaforcongress.com/wp-content/uploads/2026/07/Trina-Headshot-Editedv2-940x1024.webp": {
-   "bytes": 52846,
-   "etag": "\"6a70d778-ce6e\"",
-   "gone": 0,
-   "height": 1024,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Mon, 03 Aug 2026 18:01:28 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6MN08179"
-   ],
-   "width": 940
+   "sha256": "4566d24a4dda3a0a591b7246ee80e12635e43a3b781e917ee6e6dda4dc2f7cec",
+   "width": 2048
   },
   "https://ujs.sd.gov/media/1iceheld/devaney-website.jpg?width=345&height=345&v=1dca7f5225627d0": {
    "bytes": 39220,
@@ -70779,20 +70643,6 @@
    ],
    "width": 296
   },
-  "https://www.azcleanelections.gov/Custom/Picture/2469": {
-   "bytes": 5920,
-   "gone": 0,
-   "height": 220,
-   "kinds": [
-    "candidate"
-   ],
-   "lastModified": "Tue, 07 Apr 2026 06:10:00 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "candidate:AZ:sos:Duwayne Collier"
-   ],
-   "width": 176
-  },
   "https://www.azcleanelections.gov/Custom/Picture/2634": {
    "bytes": 63074,
    "gone": 0,
@@ -70820,20 +70670,6 @@
     "candidate:AZ:lt:Lisa Castillo"
    ],
    "width": 752
-  },
-  "https://www.azcleanelections.gov/Custom/Picture/2640": {
-   "bytes": 61013,
-   "gone": 0,
-   "height": 894,
-   "kinds": [
-    "candidate"
-   ],
-   "lastModified": "Wed, 12 Aug 2026 06:11:00 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "candidate:AZ:lt:John Giles"
-   ],
-   "width": 715
   },
   "https://www.azcleanelections.gov/Custom/Picture/2642": {
    "bytes": 72487,
@@ -76341,6 +76177,129 @@
    ],
    "width": 959
   },
+  "https://www.cthousegop.com/bolinsky/wp-content/uploads/sites/8/2016/12/Bolinsky-Bio-Web-Sized.jpg": {
+   "error": "not an image (text/html)",
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/5af50689-4e90-49b1-8544-7a00048dad99"
+   ]
+  },
+  "https://www.cthousegop.com/candelora/wp-content/uploads/sites/12/2022/02/Candelora-2022-Bio-Photo-Web.jpg": {
+   "error": "not an image (text/html)",
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/1d02baaa-ab25-4607-b33f-40948893f928"
+   ]
+  },
+  "https://www.cthousegop.com/carney/wp-content/uploads/sites/13/2016/11/Carney-2017-Web-Bio-Pict-216x300.jpg": {
+   "error": "not an image (text/html)",
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/79d4059c-5faa-443f-a842-7b494ea2d57e"
+   ]
+  },
+  "https://www.cthousegop.com/case/wp-content/uploads/sites/15/2016/11/Case-2017-Web-Bio-Pict.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/fc3cb4e1-f784-46ac-9d54-1dd44cb817b0"
+   ]
+  },
+  "https://www.cthousegop.com/dubitsky/wp-content/uploads/sites/23/2019/01/2-Dubitsky-headshot-cropped-v2-050318-5673-265x300.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/2342cde8-078f-4dd8-8879-f9fdaa036a94"
+   ]
+  },
+  "https://www.cthousegop.com/fishbein/wp-content/uploads/sites/28/2019/01/sm_Fishbein-headshot-020117-7754.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/02ce0fa3-ac25-42dd-9f5e-ee44b7e9d542"
+   ]
+  },
+  "https://www.cthousegop.com/haines/wp-content/uploads/sites/77/2021/12/BD3A1188-sized-232x300.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/02cd12d5-6a88-4834-b9b5-11fb491f6b4b"
+   ]
+  },
+  "https://www.cthousegop.com/hall/wp-content/uploads/sites/34/2016/11/hall-bio-pict-big.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/5e47f657-ab56-4673-bebb-5a7c1a0410db"
+   ]
+  },
+  "https://www.cthousegop.com/odea/wp-content/uploads/sites/46/2018/05/ODea-Headshot-683x1024.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/03642345-7acb-4294-91b5-84dcc3c18cc7"
+   ]
+  },
+  "https://www.cthousegop.com/piscopo/wp-content/uploads/sites/52/2016/11/Piscopo-Bio-Pict-Web.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/e7f7ad52-69a8-4306-8dfe-02368f74d75b"
+   ]
+  },
+  "https://www.cthousegop.com/polletta/wp-content/uploads/sites/74/2017/04/Polletta-Web-Bio.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/df318645-047c-46a5-be61-682a7272e6b6"
+   ]
+  },
+  "https://www.cthousegop.com/vail/wp-content/uploads/sites/66/2016/11/Vail-Bio-Web.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/ffa361d0-7471-450e-aee8-cb0c32ee2742"
+   ]
+  },
+  "https://www.cthousegop.com/yaccarino/wp-content/uploads/sites/70/2020/11/Yaccarino-Headshot-240x300.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/12835342-bb95-428a-ace3-78c51c3e8443"
+   ]
+  },
+  "https://www.cthousegop.com/zawistowski/wp-content/uploads/sites/71/2016/11/Zawistowski-Bio-Web.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/b57c3599-c0b0-4fd3-a48c-2bfd32d95071"
+   ]
+  },
+  "https://www.cthousegop.com/zupkus/wp-content/uploads/sites/73/2016/11/Zupkus_Bio_Web.jpg": {
+   "kinds": [
+    "legislator"
+   ],
+   "records": [
+    "legislator:CT:ocd-person/cddc0b8f-51e5-4ed1-af05-41de718801f3"
+   ]
+  },
   "https://www.doj.state.or.us/wp-content/uploads/2024/12/Rayfield_400x600x96_4-17x6-25-250x375.jpg": {
    "bytes": 14942,
    "gone": 0,
@@ -81388,6 +81347,1009 @@
     "justice:IN:court:Geoffrey G. Slaughter"
    ],
    "width": 300
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Abbott_Main_List_2022.jpg": {
+   "bytes": 36737,
+   "etag": "\"8f81-5eedee81e3f00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 02 Dec 2022 21:20:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/a080b584-c899-4694-a797-73cca22610fe"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Aylesworth_Main_List_2022.jpg": {
+   "bytes": 36883,
+   "etag": "\"9013-5eedf0a54ca80\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 02 Dec 2022 21:30:02 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/2ca76c73-5db4-499b-b718-c83294b5f68e"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Baird_Main_List.jpg": {
+   "bytes": 38619,
+   "etag": "\"96db-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/a8ed53f7-00fb-428b-a629-7532efaf902d"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Barrett_mainlist3.png": {
+   "bytes": 89251,
+   "etag": "\"15ca3-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/6629fcea-f482-4e63-872d-d2f8734502ca"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Bartels_Main_List.jpg": {
+   "bytes": 62833,
+   "etag": "\"f571-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/df749cfb-56e8-482f-bf4b-183a1fb52594"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Behning_lister2021.png": {
+   "bytes": 86221,
+   "etag": "\"150cd-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/3d215bfb-c08a-47f0-91d3-eb114b33c56d"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Borders_Main_List_2022.jpg": {
+   "bytes": 42107,
+   "etag": "\"a47b-5eedeef26c880\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 02 Dec 2022 21:22:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/fe83212e-72d8-4d9c-80cb-338c7f318f09"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Carbaugh_Main_List.jpg": {
+   "bytes": 59109,
+   "etag": "\"e6e5-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/1b9ddafb-fca9-4924-b565-d651c2ca133b"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Cash_Main_list.jpg": {
+   "bytes": 582175,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9597,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "6f162866e48dc85c4b78.jpg",
+    "for": [
+     "legislator:IN:ocd-person/172ba652-d80a-45cd-a387-f072925561f7"
+    ],
+    "from": [
+     1775,
+     1775
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "6f162866e48dc85c4b78790c61d133053f160131d73283c41ad48926698cf182",
+    "width": 210
+   },
+   "etag": "\"8e21f-5edb144dece00\"",
+   "gone": 0,
+   "height": 1775,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 17 Nov 2022 21:28:24 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/172ba652-d80a-45cd-a387-f072925561f7"
+   ],
+   "sha256": "5e8f2525c123b5cf531548db67e907f03dc3b54a49f7b1581a387a4e3d4650d7",
+   "width": 1775
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Culp_Main_List.jpg": {
+   "bytes": 64924,
+   "etag": "\"fd9c-5edc1f8e85500\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 17:24:04 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/0b35c9d0-f21d-41a3-b7b6-15759df5bc59"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Davis_Main_List_2022.jpg": {
+   "bytes": 33286,
+   "etag": "\"8206-5eedf1317d540\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 02 Dec 2022 21:32:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/7580d002-efd7-461a-80ee-06c82ab0db71"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/DeVon_Main_List.jpg": {
+   "bytes": 60645,
+   "etag": "\"ece5-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/da8afc87-2b9a-4544-8fb9-2f03f426a451"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Engleman_mainlist.jpg": {
+   "bytes": 311266,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8214,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "3e5dfb33c40489ea6927.jpg",
+    "for": [
+     "legislator:IN:ocd-person/efa78779-f35e-49fb-8b6b-5cccd00c870a"
+    ],
+    "from": [
+     1500,
+     1500
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "3e5dfb33c40489ea6927d429d64edf62f35170c2061a348148e40caaa60ebfa8",
+    "width": 210
+   },
+   "etag": "\"4bfe2-5edb406d3e700\"",
+   "gone": 0,
+   "height": 1500,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:45:48 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/efa78779-f35e-49fb-8b6b-5cccd00c870a"
+   ],
+   "sha256": "2ffba2441a68b0cc6953b815d2ac15817676e9ba1e8d761cfbdf203da2e62341",
+   "width": 1500
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Goss-Reaves_mainlist.png": {
+   "bytes": 117243,
+   "etag": "\"1c9fb-60c68897bfbc0\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 13 Dec 2023 18:43:03 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/4647c4f2-f1d1-4151-a85a-74db23a7fb5d"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Greene_Main_List.jpg": {
+   "bytes": 60357,
+   "etag": "\"ebc5-5edc1dfc11f80\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 17:17:02 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/cd2f0bde-b248-4ba3-81ad-042acd7d60c8"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Haggard_mainlist2023.png": {
+   "bytes": 100687,
+   "etag": "\"1894f-60bc8235e20c0\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 05 Dec 2023 19:21:15 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/006e6bcf-0a2c-4eef-92e3-44714f31aa4e"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Hall_mainlist_2023.png": {
+   "bytes": 119272,
+   "etag": "\"1d1e8-60bc837098740\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 05 Dec 2023 19:26:45 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/e1599f41-bd7d-45c4-8a43-c25d8b519f53"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Heaton_Main_List.jpg": {
+   "bytes": 37394,
+   "etag": "\"9212-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/791928fe-00bb-46bf-9b57-36b7a40e0250"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Heine_mainlist4.png": {
+   "bytes": 84925,
+   "etag": "\"14bbd-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/ed771fd3-4bd9-4c99-bb42-4bd9f5d1ff8d"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Hostettler_Main_List.jpg": {
+   "bytes": 34759,
+   "etag": "\"87c7-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/be7ad6b3-da1b-4b8d-b41b-6b6e48a9bdfa"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Jeter_Main_List.jpg": {
+   "bytes": 63249,
+   "etag": "\"f711-5edb621b69d40\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:29 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/8f56f62b-e700-4fdc-b35a-bba408d3e6cf"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Jordan_Main_List.jpg": {
+   "bytes": 27829,
+   "etag": "\"6cb5-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/12a4df88-7cf2-453c-9cb8-dc5d4a2f6b55"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Judy_Main_List_2022.jpg": {
+   "bytes": 35693,
+   "etag": "\"8b6d-5eedf03894a00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 02 Dec 2022 21:28:08 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/35824e09-976c-44b7-9825-0787030f0e4e"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Karickhoff_Main_List_2.jpg": {
+   "bytes": 34475,
+   "etag": "\"86ab-5edc32f729f80\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 18:50:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/344cb784-deed-4671-94f1-0616555296e3"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/King_Main_List.jpg": {
+   "bytes": 56500,
+   "etag": "\"dcb4-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/e2a84cfb-4ec9-4c0c-879b-27e51dbd6674"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Lauer_Mainlist_Image.png": {
+   "bytes": 110973,
+   "etag": "\"1b17d-60bde34a2e580\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 06 Dec 2023 21:40:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d96c807a-9e72-4861-bca4-67d787cbf49f"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Ledbetter_lister2021.png": {
+   "bytes": 82894,
+   "etag": "\"143ce-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/e3cfa300-8d75-4217-9cc4-371aca7f77dd"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Lehman_Main_List.jpg": {
+   "bytes": 63111,
+   "etag": "\"f687-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/423b3123-c1b6-4e2f-92f4-5610130de844"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Lindauer_Main_List.jpg": {
+   "bytes": 36783,
+   "etag": "\"8faf-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/2a0b391a-a59d-4b7f-907b-87980c2714d8"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Lucas_Main_List.jpg": {
+   "bytes": 74245,
+   "etag": "\"12205-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/70f005b9-1417-4132-9956-ad93942ca87d"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Manning_MainList2023V2.png": {
+   "bytes": 91921,
+   "etag": "\"16711-60bc84594ac40\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 05 Dec 2023 19:30:49 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/bdae77c7-d89e-426d-b6f6-52e1a48bc87a"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/May_mainlist2.png": {
+   "bytes": 88634,
+   "etag": "\"15a3a-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/f1571a79-9c64-42b2-82d2-ec9f512722eb"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Mayfield_Main_List.jpg": {
+   "bytes": 74659,
+   "etag": "\"123a3-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/0acb3367-1e1e-404e-89c8-82e3c6754235"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/McGuire_Main_List_2.jpg": {
+   "bytes": 39942,
+   "etag": "\"9c06-5eea0fd09a8c0\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 29 Nov 2022 19:28:11 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d88b76c4-5b6b-4f93-9347-6ae335208679"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/McNamara_mainlist2.png": {
+   "bytes": 102694,
+   "etag": "\"19126-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/ac2c89af-df39-4057-bdeb-15ca57b7ef9f"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Meltzer_Main_List_2.jpg": {
+   "bytes": 36346,
+   "etag": "\"8dfa-5ee9ce1f82c40\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 29 Nov 2022 14:34:17 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/98849cb4-9559-40c1-bd56-414eaef4e22a"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Miller_mainlist2.jpg": {
+   "bytes": 1464413,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8160,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "e95e7aee2a8da3ef4769.jpg",
+    "for": [
+     "legislator:IN:ocd-person/5b58dd7d-acb3-4554-9e4e-c1281155f4ab"
+    ],
+    "from": [
+     1500,
+     1500
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "e95e7aee2a8da3ef4769dc00624e250d39704609567d0210d30d0d141f44dac7",
+    "width": 210
+   },
+   "etag": "\"16585d-5edb40710f000\"",
+   "gone": 0,
+   "height": 1500,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:45:52 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/5b58dd7d-acb3-4554-9e4e-c1281155f4ab"
+   ],
+   "sha256": "124c62bb47ad987822f1d1c987704661ea73f88eb71a58065721567374dd8b3f",
+   "width": 1500
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Morris_Main_list.jpg": {
+   "bytes": 36654,
+   "etag": "\"8f2e-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/20851625-bc7c-41ed-841e-27af062bc03e"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/OBrien_Mainlist2.jpg": {
+   "bytes": 55071,
+   "etag": "\"d71f-5f057399d89c0\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 21 Dec 2022 14:18:23 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/87eb34dc-70d6-4614-a871-568a836ff552"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Olthoff_Main_List.jpg": {
+   "bytes": 63769,
+   "etag": "\"f919-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/df8a1659-63b2-4e11-8dce-17bce11f8162"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Patterson_Main_List.jpg": {
+   "bytes": 37356,
+   "etag": "\"91ec-5ee9cc8e03900\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 29 Nov 2022 14:27:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/62c64f60-2fb9-4edc-86ee-6c0d7cccff75"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Payne_Main_List.jpg": {
+   "bytes": 71684,
+   "etag": "\"11804-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/a74de022-873d-4a31-986c-66e81356a6f2"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Pierce_Main_List_3.jpg": {
+   "bytes": 36593,
+   "etag": "\"8ef1-5ee9cc2057640\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 29 Nov 2022 14:25:21 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/b5d0a278-d77b-49fe-88d4-2bd473055144"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Prescott-mainlist2.png": {
+   "bytes": 92456,
+   "etag": "\"16928-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/dcba8890-86e8-4a0c-a4a5-77b2fa98a267"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Pressel_Main_List.jpg": {
+   "bytes": 64343,
+   "etag": "\"fb57-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/3918dc6e-fbf5-4ea0-b62a-376729b463ec"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Rep._Criswell_2023_mainlist.png": {
+   "bytes": 105842,
+   "etag": "\"19d72-60c68bc53bb00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 13 Dec 2023 18:57:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/e4588f99-2084-4b0f-9260-f73a8f6aeb62"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Rep._Mark_Genda_Main_List.jpg": {
+   "bytes": 743521,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 8678,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "21d1042047cd553512b1.jpg",
+    "for": [
+     "legislator:IN:ocd-person/38ca634d-bbf0-42f3-bf01-4d6cdcb84bbd"
+    ],
+    "from": [
+     2059,
+     2059
+    ],
+    "height": 210,
+    "made": "2026-10-25",
+    "quality": 0.86,
+    "sha256": "21d1042047cd553512b12ff2449155d3f4890616b19cf70281596f657e41e708",
+    "width": 210
+   },
+   "etag": "\"b5861-5edb40cf78ec0\"",
+   "gone": 0,
+   "height": 2059,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:31 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/38ca634d-bbf0-42f3-bf01-4d6cdcb84bbd"
+   ],
+   "sha256": "54fb20c0f4986113f861abef7d6afe310a55d16258cd05884ee3ebc9a65acc12",
+   "width": 2059
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Rowray_MainList2023.png": {
+   "bytes": 114169,
+   "etag": "\"1bdf9-60c685f398080\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Wed, 13 Dec 2023 18:31:14 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/fafeb171-4592-4254-bb59-788745371b7b"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Slager_mainlist.png": {
+   "bytes": 87054,
+   "etag": "\"1540e-5edb40cf78ec0\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:31 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/b71e9f3a-2c59-4e18-80e6-da0a7cc51648"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Smaltz_main_list2023.png": {
+   "bytes": 99078,
+   "etag": "\"18306-60bc84c6f6f00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 05 Dec 2023 19:32:44 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/ea2c35cb-7071-43de-8dc6-e91756d03f11"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Snow_mainlist2023.png": {
+   "bytes": 97883,
+   "etag": "\"17e5b-60bc8301f8240\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 05 Dec 2023 19:24:49 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d9c1cb89-9943-4afd-9353-8c771dcac356"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Soliday_Main_List.jpg": {
+   "bytes": 62076,
+   "etag": "\"f27c-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/3fbcc2a9-c620-456c-b38f-03e0f9063c3f"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Speaker_Huston_Lister.png": {
+   "bytes": 91100,
+   "etag": "\"163dc-5edb40cf78ec0\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:31 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d2667b82-c381-495d-b533-c70a9ae92ec0"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Steurerwald_MainList2023.png": {
+   "bytes": 93161,
+   "etag": "\"16be9-60bee79ed9800\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 07 Dec 2023 17:05:36 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/3ee97114-199a-4084-903f-5eaa231ca656"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Sweet_mainlist2023.png": {
+   "bytes": 122873,
+   "etag": "\"1dff9-60bc82aa3b340\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 05 Dec 2023 19:23:17 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/3568c1ff-87a5-4121-a468-ced11a824691"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Teshka_Main_List.jpg": {
+   "bytes": 23216,
+   "etag": "\"5ab0-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/d0f113c5-ffad-4c18-867b-417fea0d0a52"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Thompson_lister2021.png": {
+   "bytes": 84265,
+   "etag": "\"14929-5edb40d06d100\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 00:47:32 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/6835c75a-05e6-44d8-9d8b-7ee4559892b2"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/VanNatter_Main_List.jpg": {
+   "bytes": 29265,
+   "etag": "\"7251-5edb621a75b00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 18 Nov 2022 03:16:28 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/113063ff-6e21-4bf7-b9d0-f06aafc349f2"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Wesco_MainList2023.png": {
+   "bytes": 96161,
+   "etag": "\"177a1-60c413ae8b240\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 11 Dec 2023 19:49:21 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/fbcd4d2c-32c6-4c97-837b-4e4ed80c43df"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/Yocum_2025_Main_List.png": {
+   "bytes": 106709,
+   "etag": "\"1a0d5-62fc304ec7f00\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 07 Mar 2025 16:21:48 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/fb16b382-4ca4-47c2-abaf-3c6e72f5a780"
+   ],
+   "width": 255
+  },
+  "https://www.indianahouserepublicans.com/clientuploads/directory/members/Zimmerman_Edited_Headshot.jpg": {
+   "bytes": 9103,
+   "etag": "\"238f-60c8f31b3fd80\"",
+   "gone": 0,
+   "height": 255,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 15 Dec 2023 16:50:14 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:IN:ocd-person/7daef9db-7675-4d8e-8e78-b943a24fd5b7"
+   ],
+   "width": 237
   },
   "https://www.iowacourts.gov/media/staffdirectory/Chief_Justice_Susan_Christensen_web_90B912835E0E7.jpg?dimensions=107x150&format=webp": {
    "bytes": 1800,
@@ -99353,6 +100315,276 @@
    ],
    "width": 320
   },
+  "https://www.misenategop.com/wp-content/uploads/2019/01/McBroom-580x770.jpg": {
+   "bytes": 117136,
+   "etag": "\"63b49b6e-1c990\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 03 Jan 2023 21:17:34 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/4fc7e235-2446-405d-9a56-5e010017f617"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2019/01/Nesbitt-580x770.jpg": {
+   "bytes": 271222,
+   "etag": "\"63d7eb85-42376\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 30 Jan 2023 16:08:37 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/6d11944d-f19f-4697-811c-0c9dca750c57"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2019/01/Outman-580x770.jpg": {
+   "bytes": 167722,
+   "etag": "\"63b20360-28f2a\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/9c525554-fb85-45f3-87fa-cf6a3208ce32"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2019/01/Runestad-580x770.jpg": {
+   "bytes": 152491,
+   "etag": "\"6786d0a6-253ab\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 14 Jan 2025 21:01:26 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/e0a8928d-8ccc-4e1e-9ca5-d7f50642ff91"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2019/01/Theis-580x770.jpg": {
+   "bytes": 200952,
+   "etag": "\"63b20360-310f8\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/4fa99fea-71fd-4f21-9f75-157e6a946c80"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2019/01/Victory-580x770.jpg": {
+   "bytes": 61421,
+   "etag": "\"6938aba7-efed\"",
+   "gone": 0,
+   "height": 771,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 09 Dec 2025 23:07:19 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/cd36ab04-a62b-41fa-8b91-d6c792f6719e"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2021/11/Huizenga-580x770.jpg": {
+   "bytes": 143197,
+   "etag": "\"63b20360-22f5d\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/8564d477-bb39-47a4-87e1-3ceacd7d3abe"
+   ],
+   "width": 579
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Albert-580x770.jpg": {
+   "bytes": 176408,
+   "etag": "\"63b20360-2b118\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/c96aa62f-6a2c-4d37-9074-2c25875c639b"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Bellino-580x770.jpg": {
+   "bytes": 227028,
+   "etag": "\"63b20360-376d4\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/e394293d-abd7-46a9-a60f-6c75e369468e"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Bumstead-580x770.jpg": {
+   "bytes": 229535,
+   "etag": "\"63b20360-3809f\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/5a58fa81-639b-4304-87ca-7471ba9ade96"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Daley-580x770.jpg": {
+   "bytes": 187869,
+   "etag": "\"63b20360-2dddd\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/cf7ed8de-2df4-41ff-9dcb-489980b031a0"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Damoose-580x770.jpg": {
+   "bytes": 197763,
+   "etag": "\"63b20360-30483\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/071e391f-da3d-4e66-ae78-61a63bc23729"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Hauck-580x770.jpg": {
+   "bytes": 105417,
+   "etag": "\"677d731a-19bc9\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 07 Jan 2025 18:31:54 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/b6d8b86d-2975-4d07-83fe-a1841f39806b"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Hoitenga-580x770.jpg": {
+   "bytes": 213296,
+   "etag": "\"66acfdf6-34130\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 02 Aug 2024 15:40:38 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/0c9a2c44-5a9a-44cd-8470-5dad5c7b2c53"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Johnson-580x770.jpg": {
+   "bytes": 200993,
+   "etag": "\"63b20360-31121\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/8d0d58dd-a718-4f8f-bb7f-c530e039c0c5"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Lauwers-580x770.jpg": {
+   "bytes": 167802,
+   "etag": "\"63b20360-28f7a\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/30afc35e-fa35-448c-b303-e0f6cc456c77"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Lindsey-580x770.jpg": {
+   "bytes": 192462,
+   "etag": "\"63b20360-2efce\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Sun, 01 Jan 2023 22:04:16 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/a16e3693-0703-40fb-b508-3b2812079548"
+   ],
+   "width": 580
+  },
+  "https://www.misenategop.com/wp-content/uploads/2023/01/Webber-580x770.jpg": {
+   "bytes": 243202,
+   "etag": "\"63c9c294-3b602\"",
+   "gone": 0,
+   "height": 770,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 19 Jan 2023 22:22:12 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "legislator:MI:ocd-person/be2c96ad-1304-4c25-8cab-2c8ec5d6475f"
+   ],
+   "width": 580
+  },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-DE-jennings-225x300.jpg": {
    "bytes": 11201,
    "etag": "\"68592c93-2bc1\"",
@@ -99403,13 +100635,19 @@
    "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-MS-Fitch-2024-225x300.jpg": {
-   "error": "HTTP 403",
+   "bytes": 17333,
+   "etag": "\"68592c93-43b5\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:29:39 GMT",
+   "read": "2026-10-25",
    "records": [
     "officer:MS:ag:Lynn Fitch"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-NY-james2-225x300.jpg": {
    "bytes": 7901,
@@ -99429,13 +100667,19 @@
    "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-SC-Wilson_new-225x300.jpg": {
-   "error": "HTTP 403",
+   "bytes": 6382,
+   "etag": "\"68592c94-18ee\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:29:40 GMT",
+   "read": "2026-10-25",
    "records": [
     "officer:SC:ag:Alan Wilson"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-WI-kaul-225x300.jpg": {
    "bytes": 8850,
@@ -99455,97 +100699,151 @@
    "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2022/11/Mike-Hilgers-AG-600px-headshot-300x298.png": {
-   "error": "HTTP 403",
+   "bytes": 26792,
+   "etag": "\"6a32abaa-68a8\"",
+   "gone": 0,
+   "height": 298,
    "kinds": [
     "candidate",
     "officer"
    ],
+   "lastModified": "Wed, 17 Jun 2026 14:14:02 GMT",
+   "read": "2026-10-25",
    "records": [
     "candidate:NE:ag:Mike Hilgers",
     "officer:NE:ag:Mike Hilgers"
-   ]
+   ],
+   "width": 300
   },
   "https://www.naag.org/wp-content/uploads/2022/11/ag-AG-Griffin-1-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 105306,
+   "etag": "\"68592bdf-19b5a\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "candidate",
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:39 GMT",
+   "read": "2026-10-25",
    "records": [
     "candidate:AR:ag:Tim Griffin",
     "officer:AR:ag:Tim Griffin"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2022/11/ag-IA-Bird-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 95965,
+   "etag": "\"68592bdf-176dd\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "candidate",
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:39 GMT",
+   "read": "2026-10-25",
    "records": [
     "candidate:IA:ag:Brenna Bird",
     "officer:IA:ag:Brenna Bird"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2022/11/ag-ID-Labrador-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 102503,
+   "etag": "\"68592bdf-19067\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "candidate",
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:39 GMT",
+   "read": "2026-10-25",
    "records": [
     "candidate:ID:ag:Raul R. Labrador",
     "officer:ID:ag:Raúl Labrador"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2022/11/ag-KS-Kobach-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 30604,
+   "etag": "\"68592bdf-778c\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "candidate",
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:39 GMT",
+   "read": "2026-10-25",
    "records": [
     "candidate:KS:ag:Kris Kobach",
     "officer:KS:ag:Kris Kobach"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2022/11/ag-OK-Drummond-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 118321,
+   "etag": "\"68592bdf-1ce31\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:39 GMT",
+   "read": "2026-10-25",
    "records": [
     "officer:OK:ag:Gentner Drummond"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2025/01/ag-FL-Uthmeier-James-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 32592,
+   "etag": "\"68592bba-7f50\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "candidate",
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:02 GMT",
+   "read": "2026-10-25",
    "records": [
     "candidate:FL:ag:James Uthmeier",
     "officer:FL:ag:James Uthmeier"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2025/01/ag-NC-Jackson-Jeff-2025-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 24212,
+   "etag": "\"68592bba-5e94\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:02 GMT",
+   "read": "2026-10-25",
    "records": [
     "officer:NC:ag:Jeff Jackson"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2025/01/ag-UT-Brown-Derek-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 30412,
+   "etag": "\"68592bba-76cc\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "officer"
    ],
+   "lastModified": "Mon, 23 Jun 2025 10:26:02 GMT",
+   "read": "2026-10-25",
    "records": [
     "officer:UT:ag:Derek Brown"
-   ]
+   ],
+   "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2025/01/ag-WA-Brown-Nick-225x300.png": {
    "bytes": 19311,
@@ -99578,13 +100876,19 @@
    "width": 225
   },
   "https://www.naag.org/wp-content/uploads/2026/01/ag-VA-jones-jay-225x300.png": {
-   "error": "HTTP 403",
+   "bytes": 31065,
+   "etag": "\"69b86d34-7959\"",
+   "gone": 0,
+   "height": 300,
    "kinds": [
     "officer"
    ],
+   "lastModified": "Mon, 16 Mar 2026 20:51:00 GMT",
+   "read": "2026-10-25",
    "records": [
     "officer:VA:ag:Jay Jones"
-   ]
+   ],
+   "width": 225
   },
   "https://www.nass.org/sites/default/files/styles/secretary/public/2019-01/co-jena-griswold-2019.png?itok=mtQEM8aG": {
    "bytes": 15349,
@@ -99774,20 +101078,6 @@
    "read": "2026-10-25",
    "records": [
     "officer:KS:sos:Scott Schwab"
-   ]
-  },
-  "https://www.nass.org/sites/default/files/styles/secretary/public/2023-03/MA-Galvin-2023.jpg?itok=7JV1GBsz": {
-   "bytes": 13630,
-   "etag": "\"CGvGGA8FXBs2ZnEUULVGNu0XNNVv6Sedfujzojco9OA\"",
-   "gone": 0,
-   "kinds": [
-    "candidate",
-    "officer"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "candidate:MA:sos:William Francis Galvin",
-    "officer:MA:sos:William Galvin"
    ]
   },
   "https://www.nass.org/sites/default/files/styles/secretary/public/2023-03/OH-LaRose-23.jpg?itok=Kr52OOP7": {
@@ -110205,6 +111495,19 @@
     "legislator:OR:ocd-person/497f7e2e-b1d8-4803-8fb8-22dc045bc0b0"
    ],
    "width": 115
+  },
+  "https://www.pahouse.com/imageHandler/top/125/175/755deff6-049c-f111-afcc-b489d332d98e": {
+   "bytes": 54604,
+   "gone": 0,
+   "height": 175,
+   "kinds": [
+    "legislator"
+   ],
+   "read": "2026-10-25",
+   "records": [
+    "legislator:PA:ocd-person/f619eb4d-d296-46b9-af60-12f33d90e6e0"
+   ],
+   "width": 125
   },
   "https://www.palegis.us/resources/images/members/200/2025.jpg?20241220": {
    "bytes": 77774,
@@ -122260,43 +123563,6 @@
    "sha256": "994368c8ff57a0b332e1fabf02444f3ea11bc99688c61032788ea9fbf1760ebb",
    "width": 5472
   },
-  "https://www2.housedems.ct.gov/Genga/images/Genga_HS.jpg": {
-   "bytes": 3192858,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 9759,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "96a942957fb56564b8a2.jpg",
-    "for": [
-     "legislator:CT:ocd-person/c07f613b-b79d-4e11-b959-589c8cefac41"
-    ],
-    "from": [
-     2304,
-     3072
-    ],
-    "height": 224,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "96a942957fb56564b8a2152c8e3927fc87b558b6bb8751a7c9fac9ed63303c7a",
-    "width": 168
-   },
-   "etag": "\"4c813aa29eecb1:0\"",
-   "gone": 0,
-   "height": 3072,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Tue, 29 Mar 2011 15:50:34 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/c07f613b-b79d-4e11-b959-589c8cefac41"
-   ],
-   "sha256": "4d0b4f72e819fb8c3e0dff988b23d039d7bfeddc169528fc1083af52373957a7",
-   "width": 2304
-  },
   "https://www2.housedems.ct.gov/Gibson/images/Gibson_HS.jpg": {
    "bytes": 1337359,
    "copy": {
@@ -122481,43 +123747,6 @@
    ],
    "sha256": "6cadc1d068fe7adc3e3f423f5b9d6b8d60bfb16fbda7a15bea3479a32b4797cf",
    "width": 2240
-  },
-  "https://www2.housedems.ct.gov/Haddad/images/Haddad_19.jpg": {
-   "bytes": 1024553,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 11774,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "e80745af226db64dae20.jpg",
-    "for": [
-     "legislator:CT:ocd-person/63a8e4ab-dfcd-4a69-8317-53b8e9a69729"
-    ],
-    "from": [
-     1000,
-     1500
-    ],
-    "height": 252,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "e80745af226db64dae20bfd2fc801f4222d1675cf96a101d91c70d396dddb8c9",
-    "width": 168
-   },
-   "etag": "\"a93f18f52b7dd51:0\"",
-   "gone": 0,
-   "height": 1500,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Mon, 07 Oct 2019 16:26:22 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:CT:ocd-person/63a8e4ab-dfcd-4a69-8317-53b8e9a69729"
-   ],
-   "sha256": "bdbdafb2d22715548852cfd08e324d38a02714fcdc67aa9c6acf796f7f9580a8",
-   "width": 1000
   },
   "https://www2.housedems.ct.gov/Hall/images/Hall_HS.jpg": {
    "bytes": 4663285,

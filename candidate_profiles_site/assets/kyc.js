@@ -1212,10 +1212,15 @@
     // by Open States" (a host may be a news site or an image CDN).
     else if (credit.host) parts.push("from " + escapeHtml(credit.host));
     if (credit.licence) parts.push(anchor(credit.licenceUrl, credit.licence));
-    var line = parts.length ? "Photo: " + parts.join(", ") : "Photo";
+    // When it was made, where the source dates it plainly: any Commons
+    // file's own single year, "Photo (1981): ..." - one phrase, and true of
+    // a painted portrait too, where "Photograph, 2012." was not (the PR
+    // #139 review) - and a justice's "Official portrait, 2005." before it.
+    // Never a guessed, an estimated or an upload year (portraits.year_of).
+    var year = !credit.dated && /^\d{4}$/.test(String(credit.year || "")) ? " (" + credit.year + ")" : "";
+    var line = parts.length ? "Photo" + year + ": " + parts.join(", ") : "Photo" + year;
     if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
     if (credit.listedBy) line += ", as listed by " + escapeHtml(credit.listedBy);
-    // When it was taken, where the source dates it ("Official portrait, 2005").
     if (credit.dated) line = escapeHtml(credit.dated) + ". " + line;
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.

@@ -39,6 +39,15 @@ through something the person is already tied to here, never a name:
   seat, or the card shows another file: a file keyed by seat ("Sen22.jpg")
   shows whoever holds it.
 
+Not a route yet: a statewide officer's office photograph for an officer on
+the ballot for Congress. Ken Paxton (TX Senate) shows the silhouette since
+his Commons portrait was refused (someone else in the frame), while the
+state page shows his office's photograph as Attorney General. The officers'
+cards are matched to an office by state and title, never to a profile, so
+the tie would be a third route - their corroborated record of offices
+(``history``) naming that office, as ``legislator_for`` does for a seat -
+with its own review; it waits for one (the PR #139 review).
+
 Either route refuses a frame wider than tall unless its file is named a
 headshot or portrait (rule 38), and a file a person refused in
 ``overrides.NOT_A_PORTRAIT`` or ``PORTRAIT_LICENCE_DOUBTS``.
@@ -470,11 +479,11 @@ def wikidata_choice(profile, rows):
 def commons_file(name, api=None):
     """``imageinfo`` for File:*name* on Commons, with a thumbnail at
     :data:`SHOWN_WIDTH` and the licence fields (rule 87), or ``None``."""
-    from .portraits import _CREDIT_FIELDS, _api
+    from .portraits import _CREDIT_FIELDS, IIPROP, _api
 
     try:
         payload = (api or _api)({"prop": "imageinfo", "titles": "File:" + name,
-                                 "iiprop": "size|url|extmetadata", "iiurlwidth": SHOWN_WIDTH,
+                                 "iiprop": IIPROP, "iiurlwidth": SHOWN_WIDTH,
                                  "iiextmetadatafilter": _CREDIT_FIELDS},
                                 endpoint=COMMONS_API)
     except Exception:
@@ -591,7 +600,9 @@ def legislator_for(profile, history, legislators):
 def card_photo(member, code, page=None, photos=None):
     """``(image, credit, evidence)``: the photograph the site's legislature
     page shows on *member*'s card (``legislature.card_photo``), when the
-    legislature serves it and credits it, or ``(None, None, why)``."""
+    legislature serves it and credits it, or the member's own party caucus
+    in that chamber does (``legislature.caucus_photo``), or ``(None, None,
+    why)``."""
     from . import legphotos
     from .legislature import card_photo as shown_on_card
 
@@ -608,12 +619,18 @@ def card_photo(member, code, page=None, photos=None):
         # 101's copies show it smaller (rule 100); no nominee on the
         # ballot was affected on 2026-10-25.
         return None, None, f"the legislature page shows no photograph of them ({shown['kind']})"
-    if not credit or not legphotos.official_host(code, image):
-        # A party caucus's photograph is the party's (rule 87, as rule 100
-        # says of Michigan): Sean McCann's card shows senatedems.com's file,
-        # uncredited, and his profile does not.
-        return None, None, "the photograph the card shows is not on the legislature's own host"
-    if shown["kind"] == "legislature":
+    caucus = bool(credit and credit.get("caucus"))
+    if not credit or not (legphotos.official_host(code, image) or caucus):
+        # Only the legislature's file, or the member's own party caucus's
+        # credited to it (``legislature.caucus_photo``; the owner,
+        # 2026-10-25: "we can credit caucus"): never a file Open States
+        # found on a news site, a campaign's or a county party's.
+        return None, None, ("the photograph the card shows is on neither the legislature's own "
+                            "host nor their caucus's")
+    if caucus:
+        evidence = (f"the file Open States lists for {member['name']} ({member['id']}), "
+                    f"served by the {credit['by']}, their own party's caucus in that chamber")
+    elif shown["kind"] == "legislature":
         entry = legphotos.entry_for(member, photos) or {}
         evidence = (f"{entry.get('evidence')} (the legislature's record of {member['name']}, "
                     f"read {entry.get('read')})")
@@ -700,16 +717,24 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
 
 
 def wanted(profiles, cache):
-    """The people still on the ballot with no portrait by another route."""
+    """The people still on the ballot with no portrait by another route.
+
+    A portrait a person refused (``photos.refused``: ``NOT_A_PORTRAIT``,
+    ``PORTRAIT_LICENCE_DOUBTS``) is no portrait: withheld at build time, it
+    left Jeremy Moss, La Shawn Ford, Adrian Boafo and J.D. Ford with the
+    silhouette on their profiles while their legislature's or caucus's
+    photograph stood on the legislature page (the PR #139 review), so they
+    are asked for by these routes as if they had none."""
     from .enrich import running
-    from .portraits import profile_key
+    from .portraits import held_back, profile_key
 
     out = []
     for profile in profiles:
         if not running(profile):
             continue
         record = cache.get(profile_key(profile)) or {}
-        if record.get("pinned") or (record.get("url") and record.get("via") not in ROUTES):
+        if record.get("pinned") or (record.get("url") and record.get("via") not in ROUTES
+                                    and not held_back(record)):
             continue
         out.append(profile)
     return out
@@ -730,6 +755,19 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
     counts = {"wikidata": 0, "legislature": 0, "heavy": 0, "kept": 0}
     people = wanted(profiles, cache)
     log(f"  nominee portraits: {len(people)} on the ballot with none by another route")
+    # What a person refused among what each one's routes offer: the record
+    # held before, and any file a route meets now (``replaced``).
+    passed = {}
+
+    def passed_over(key, *urls):
+        for url in urls:
+            if url and url not in passed.setdefault(key, []):
+                passed[key].append(url)
+
+    for profile in people:
+        key = profile_key(profile)
+        record = cache.get(key) or {}
+        passed_over(key, *replaced(record))
 
     # Wikidata, by the person's own FEC id.
     by_fec = {fec: p for p in people for fec in fec_ids(p)}
@@ -773,6 +811,8 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 counts["kept"] += record.get("via") == WIKIDATA
                 continue                     # unmeasured: tried again next run
             refused = refused_file(shown, (info.get("url") or "").split("?", 1)[0])
+            if refused:
+                passed_over(key, (info.get("url") or "").split("?", 1)[0])
             if refused or wide_frame(shown, weight):
                 log(f"    [skip] {profile['name']}: "
                     f"{refused or 'a frame wider than tall, not named a headshot (rule 38)'}")
@@ -811,10 +851,15 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 roster = (legislators.get("states") or {}).get(code) or []
                 pages[code] = pages_for(code, roster, year)[0]
             page = pages[code].get(member["id"])
-            if not page or page.get("kind") != "member":
-                log(f"    [skip] {profile['name']}: no page of theirs on the legislature's site")
+            if not page or page.get("kind") not in ("member", "caucus"):
+                log(f"    [skip] {profile['name']}: no page of theirs on the legislature's site "
+                    "or their caucus's")
                 continue
             image, credit, evidence = card_photo(member, code, page, legislator_photos)
+            if image and page["kind"] == "caucus" and credit.get("page") != page["url"]:
+                # Their page on a caucus's site ties only that caucus's file
+                # to them (Sean McCann's senatedems.com page and photograph).
+                image, evidence = None, "their caucus page is not the caucus that serves the file"
             if not image:
                 log(f"    [skip] {profile['name']}: {evidence}")
                 if record.get("via") == LEGISLATURE:
@@ -829,6 +874,8 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 counts["kept"] += record.get("via") == LEGISLATURE
                 continue
             refused = refused_file(image)
+            if refused:
+                passed_over(key, image)
             if refused or wide_frame(image, weight):
                 log(f"    [skip] {profile['name']}: "
                     f"{refused or 'a frame wider than tall, not named a headshot (rule 38)'}")
@@ -850,10 +897,33 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
             cache[key] = new
             counts["legislature"] += 1
             counts["heavy"] += bool(new.get("heavy"))
+    # Each record keeps what a person refused of what that person's routes
+    # offered (``replaces``): what it stands in for, which validate's
+    # staleness check counts as still offered.
+    for key, urls in passed.items():
+        if key in cache and cache[key].get("url") not in urls:
+            cache[key]["replaces"] = sorted(urls)
     log(f"  nominee portraits: {counts['wikidata']} from Wikidata, {counts['legislature']} "
         f"from a legislature ({counts['heavy']} over the caps, shown all the same), "
         f"{counts['kept']} kept from an earlier read")
     return counts
+
+
+def replaced(record):
+    """The photographs a person refused that a portrait cache *record*
+    stands in for: its own address where a person refused it
+    (``photos.refused``), and what it says it ``replaces``. A route asked
+    again after a refusal can offer a photograph nobody has looked at -
+    James Talarico's Wikidata item carried the uncut file of the crop
+    refused for someone at its edge - so ``validate`` names any such one
+    shown until a person has (``portrait-fallback-unseen``)."""
+    from .portraits import held_back
+
+    record = record or {}
+    out = list(record.get("replaces") or [])
+    if record.get("url") and held_back(record) and record["url"] not in out:
+        out.insert(0, record["url"])
+    return out
 
 
 def heavy_shown(profiles, cache):

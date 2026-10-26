@@ -512,7 +512,28 @@ class TestAttach(unittest.TestCase):
                         (news, False), ("https://images.squarespace-cdn.com/p.jpg", False),
                         ("https://senatedems.com/p.jpg", False), (WIKI, False)):
             self.assertEqual(photocopies.may_copy(url, "legislator", "OK"), ok, url)
-        self.assertTrue(photocopies.may_copy("https://bobsmithforcongress.com/p.jpg", "person"))
+        # A campaign's file is never hosted here: the owner's decision of
+        # 2026-10-25 was for official photographs (rule 101). A profile's
+        # is copied only from a government's host, the legislature's, or
+        # their own party caucus's where the card credits it to the caucus.
+        for kind in ("person", "legislator"):
+            self.assertFalse(photocopies.may_copy("https://bobsmithforcongress.com/p.jpg", kind, "TX"))
+            self.assertFalse(photocopies.may_copy(
+                "https://assets.nationbuilder.com/marysilva4congress/x.jpg", kind, "WA"))
+        self.assertTrue(photocopies.may_copy("https://clerk.house.gov/images/members/M001212.jpg",
+                                             "person", "AL"))
+        self.assertTrue(photocopies.may_copy(
+            "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg", "person", "MO"))
+        self.assertFalse(photocopies.may_copy(
+            "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg".replace(
+                "www.senate.mo.gov", "brattinforcongress.com"), "person", "MO"))
+        mccann = "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann.jpg"
+        credit = {"by": "Michigan Senate Democrats", "caucus": True}
+        for kind in ("person", "legislator"):
+            self.assertTrue(photocopies.may_copy(mccann, kind, "MI",
+                                                 photocopies.caucus_own(mccann, credit)))
+            self.assertFalse(photocopies.may_copy(mccann, kind, "MI",
+                                                  photocopies.caucus_own(mccann, {"host": "x"})))
         cache = {"originals": {news: dict(self.cache["originals"][HEAVY])}}
         member = {"id": "ocd-person/1", "image": news}
         self.assertFalse(photocopies.attach(member, news, cache, "legislator", code="IL"))
@@ -532,6 +553,24 @@ class TestAttach(unittest.TestCase):
         self.assertEqual(photocopies.apply_people(people, cache), 1)
         self.assertIn("photoCopy", people[0])
         self.assertNotIn("photoCopy", people[1])
+
+    def test_a_campaigns_portrait_is_shown_from_its_own_host_never_copied(self):
+        # Four campaign portraits were copied before 2026-10-25 (Mary Silva's,
+        # WA-1); the owner's decision was for official photographs only.
+        campaign = "https://assets.nationbuilder.com/marysilva4congress/pages/29/Mary_Silva_-_8.jpg"
+        entry = dict(self.cache["originals"][HEAVY],
+                     copy=dict(self.cache["originals"][HEAVY]["copy"], box=[540, 675],
+                               **{"for": ["person:FEC_H4WA01282"]}))
+        cache = {"originals": {campaign: entry}}
+        person = {"id": "FEC_H4WA01282", "state": "WA", "photos": [campaign],
+                  "photoSource": "campaign-site", "photoCredit": {"by": "marysilva4congress.com"},
+                  "photoCopy": {"src": "photos/old.jpg", "of": campaign}}
+        self.assertEqual(photocopies.apply_people([person], cache), 0)
+        self.assertNotIn("photoCopy", person)
+        shown = photocopies.Shown().add_people([person])
+        self.assertEqual(shown.linked, {campaign: {"person"}})
+        # Its old copy is an orphan, which the 'photocopies' command removes.
+        self.assertNotIn(campaign, shown.urls)
 
     def test_a_shared_profile_unfurls_with_the_copy_on_the_sites_host(self):
         person = {"photo_url": HEAVY, "photoSource": "campaign-site",
@@ -651,17 +690,25 @@ class TestJusticesYears(unittest.TestCase):
         self.assertEqual(portraits.credit_of(info)["year"], 2007)
         self.assertIn("DateTimeOriginal", portraits._CREDIT_FIELDS)
 
-    def test_only_an_official_portrait_carries_it_and_none_is_guessed(self):
+    def test_every_commons_portrait_is_dated_and_none_is_guessed(self):
+        # The owner's brief of 2026-10-25 gave every Commons photograph the
+        # year its file's page gives, not only the justices' official ones
+        # (Tad Jude's 1981 legislature portrait read as current).
         self.assertEqual(judge_links.dated({"year": 2005}), {"year": 2005})
         self.assertEqual(judge_links.dated({"year": None}), {"yearUnstated": True})
         self.assertIn("year", judge_links.PAGE_KEYS)
+        # The page words a justice's official portrait apart (kyc-official.js).
+        self.assertIn("route", judge_links.PAGE_KEYS)
         cache = judge_links.load_cache(ROOT)
         official = [e["portrait"] for e in cache["judges"].values()
                     if (e.get("portrait") or {}).get("route") == "official"]
         self.assertEqual(len(official), 9)
-        self.assertTrue(all("year" in p or p.get("yearUnstated") for p in official))
-        self.assertFalse(any("year" in e.get("portrait", {}) for e in cache["judges"].values()
-                             if (e.get("portrait") or {}).get("route") != "official"))
+        shown = [e["portrait"] for e in cache["judges"].values() if e.get("portrait")]
+        self.assertTrue(all("year" in p or p.get("yearUnstated") for p in shown))
+        self.assertTrue(all(p.get("creditForm") == portraits.CREDIT_FORM for p in shown
+                            if p.get("credit") == "Wikimedia Commons"))
+        # Only a single four-digit year the page gives is ever carried.
+        self.assertTrue(all(isinstance(p["year"], int) for p in shown if "year" in p))
 
     def test_a_portrait_read_before_the_year_was_is_read_again(self):
         cache = {"judges": {"1": {"portrait": {

@@ -43,6 +43,7 @@ from . import overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
 from .photos import campaign_credit, lighter_rendition, parse_srcset, too_heavy
+from .photos import not_a_portrait
 from .photos import refused as withheld_by_a_person
 from .portraits import article_is_theirs, image_size, surname_of, title_is_about
 from .results import OFF_BALLOT
@@ -1068,10 +1069,10 @@ def look_for_portrait(record, profile, page, final, pause=1.0):
             if verdict is not SAFE or host_of(about_final) != host_of(final):
                 break
         pictures = portrait(where, base, profile)
-        # Kept so validate can tell a NOT_A_PORTRAIT entry still means something.
-        refused = [u for u, _ in pictures if u in overrides.NOT_A_PORTRAIT]
-        refused_all += [u for u in refused if u not in refused_all]
-        taken = take_portrait(record, [p for p in pictures if p[0] not in refused],
+        # What is refused is kept so validate can tell a NOT_A_PORTRAIT
+        # entry still means something (photos.not_a_portrait).
+        taken = take_portrait(record, [p for p in pictures
+                                       if not not_a_portrait(p[0], passed_over=refused_all)],
                               offers=page_forms(where, base))
         if taken:
             original = (record.get("portraitHeavy") or [{}])[0].get("url") or taken
@@ -1242,9 +1243,10 @@ def _drawn_read(profile, url, markup, today):
     if verdict is not SAFE:
         return record, page
     found = portrait(page, url, profile)
-    pictures = [p for p in found if p[0] not in overrides.NOT_A_PORTRAIT]
-    # Kept so validate can tell a NOT_A_PORTRAIT entry still means something.
-    refused = [u for u, _ in found if u in overrides.NOT_A_PORTRAIT]
+    # What is refused is kept so validate can tell a NOT_A_PORTRAIT entry
+    # still means something (photos.not_a_portrait).
+    refused = []
+    pictures = [p for p in found if not not_a_portrait(p[0], passed_over=refused)]
     if refused:
         record["notPortraits"] = refused
     if take_portrait(record, pictures, offers=page_forms(page, url)):
