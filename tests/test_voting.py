@@ -371,7 +371,12 @@ class TestRoundThree(unittest.TestCase):
         page = voting.for_page(cache)
         self.assertEqual(page["OH"]["results"], url)
         self.assertEqual(page["_labels"]["OH"]["results"], "Election data portal")
-        self.assertIn("results", page["_byHand"]["OH"])
+        # The reading by hand counts while the weekly check cannot open the
+        # portal, and not once it can: which it is, is the week's record, so
+        # each is made here on the cache (CLAUDE.md, "Conventions").
+        for status, counted in ((voting.UNKNOWN, True), (voting.LIVE, False)):
+            made = dict(cache, links=dict(cache.get("links") or {}, **{url: status}))
+            self.assertEqual("results" in voting.for_page(made)["_byHand"].get("OH", {}), counted, status)
 
     def test_a_curated_override_stops_once_the_table_changes(self):
         from unittest import mock
