@@ -635,7 +635,16 @@ class TestImageCheck(unittest.TestCase):
                  (lambda req, timeout=None: Response("text/html; charset=utf-8",
                                                      b"<!doctype html><html></html>"),
                   statelegs.NOT_AN_IMAGE),
+                 # A bot wall's page or an empty body says the request was
+                 # turned away, not that no image is there: nothing concluded.
                  (lambda req, timeout=None: Response("image/jpeg", b"<html>Request Rejected"),
+                  None),
+                 (lambda req, timeout=None: Response(
+                     "text/html", b"<html><title>Just a moment...</title></html>"), None),
+                 (lambda req, timeout=None: Response("image/jpeg", b""), None),
+                 # Connecticut's House Republicans: the site's own page.
+                 (lambda req, timeout=None: Response(
+                     "text/html", b"<!doctype html><html><title>Rep. Bolinsky</title></html>"),
                   statelegs.NOT_AN_IMAGE),
                  (lambda req, timeout=None: Response("image/png", png(1, 1)),
                   statelegs.NOT_AN_IMAGE),

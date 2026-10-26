@@ -991,8 +991,10 @@ GUIDE_NAME_FORMS = {
 # justice's from the court's own roster (court_photos), a judge as well -
 # and every other entry, and every other check, still does
 # (photos.applies). A picture of a person - a framed photograph on a shelf
-# or a wall, a poster, a book jacket, a face on a screen - is not a person
-# in the frame and refuses nothing (decided for the owner, 2026-10-25).
+# or a wall, a poster, a book jacket - is not a person in the frame and
+# refuses nothing (decided for the owner, 2026-10-25). A screen showing a
+# face is not decided: a rally's screen is usually a live feed of someone
+# there, so Donna Miller's stays refused until the owner rules on screens.
 OTHERS_IN_FRAME = "others in the frame"
 
 # Images that a route would take as a person's portrait but that are not one,
@@ -1019,7 +1021,7 @@ OTHERS_IN_FRAME = "others in the frame"
 # decision of 2026-10-25). Anything else is here, with what was seen and
 # measured: another person in the frame, a scene, a full-length figure. A
 # picture of a person behind them (a framed photograph, a poster, a book
-# jacket, a screen) is not another person: John Giles's and Dave Sunday's
+# jacket) is not another person: John Giles's and Dave Sunday's
 # photographs, refused for one on 2026-10-25, are shown again. For a judge,
 # the background-people rule does not apply (OTHERS_IN_FRAME above).
 # Measured on 2026-10-25, Brian Bengs's park photograph (a seventh and a
@@ -1214,9 +1216,11 @@ NOT_A_PORTRAIT = {
     # James Talarico's campaign photograph, which nobody had looked at, in
     # place of his Commons one (validate's portrait-fallback-unseen now
     # names any such photograph); and the sweep missed JoCasta Zamarripa's.
-    # (Two judges' hearing stills, a framed photograph behind Adam Hamawy and
-    # a face on the screen behind Donna Miller, refused in that review too,
-    # are shown again: a judge by the owner's "keep", a picture as no person.)
+    # (Two judges' hearing stills and a framed photograph behind Adam Hamawy,
+    # refused in that review too, are shown again: a judge by the owner's
+    # "keep", a picture as no person. Hamawy's was not among the two the
+    # brief named; looked at again, it shows him alone before a framed
+    # photograph on the wall.)
     "https://jamestalarico.com/wp-content/uploads/2025/09/james-talarico-texas-education-819x1024.webp":
         ("2026-10-25", "James Talarico (TX): bent over a desk helping a child in a classroom, "
                        "two more children in the frame, his face turned down"),
@@ -1228,6 +1232,12 @@ NOT_A_PORTRAIT = {
     "https://upload.wikimedia.org/wikipedia/commons/f/f0/JoCasta_Zamarripa_(51017746066).jpg":
         ("2026-10-25", "JoCasta Zamarripa (WI secretary of state candidate): another person's "
                        "hand and fingers at the left edge", OTHERS_IN_FRAME),
+    # A screen is not a framed picture: at a rally it is usually a live feed
+    # of a person there. Kept refused until the owner rules on screens; her
+    # shown portrait is the county's (portraits.json, curated) either way.
+    "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg":
+        ("2026-10-25", "Donna Miller (IL): a person's face on the rally's LED screen behind her, "
+                       "at the upper right", OTHERS_IN_FRAME),
     # The same California National Guard photograph under its new name (the
     # old one answered 404 and was never looked at by the sweep), offered
     # again when her portrait was resolved anew.

@@ -655,11 +655,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `NOT_A_PORTRAIT` with what was seen and measured. A picture of a
     person is not a person in the frame (decided for the owner the same
     day, in his rule's words "background people"): a framed photograph,
-    a poster, a book jacket or a face on a screen behind them refuses
-    nothing, a real person, even in part, does - so John Giles's guide
-    photograph and Dave Sunday's office photograph (framed photographs on
-    the shelves), Adam Hamawy's and Donna Miller's are shown again, as
-    Alex Vindman's (a book jacket) always was. The background-people rule
+    a poster or a book jacket behind them refuses nothing, a real person,
+    even in part, does - so John Giles's guide photograph and Dave
+    Sunday's office photograph (framed photographs on the shelves) and
+    Adam Hamawy's (one on the wall) are shown again, as Alex Vindman's (a
+    book jacket) always was. A face on a screen is not decided - at a
+    rally it is usually a live feed of someone there - so Donna Miller's
+    May Day file stays refused until the owner rules on screens (her
+    profile shows the county's portrait either way). The background-people rule
     is for candidates' and officials' photographs: asked about the
     federal judges' Senate Judiciary hearing stills, about 40% of the
     1,012 portraits the judges' item route shows, the owner said "keep"
@@ -692,7 +695,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     atrium shots - and 8 show someone else (Henry Genga, Gregg Haddad,
     Minnie Gonzalez, Manny Sanchez, Amy Morrin Bello, Jane Garibay, Josh
     Elliott, Joe Gresko); the blurred shapes at the chamber's desks behind
-    three others are its flags and microphones. Its review found a hand
+    three others are its flags and microphones, and the white shape behind
+    the upper balcony's balusters in Jill Barry's atrium shot, with nothing
+    above the handrail, is no person that can be made out, so hers stays. Its review found a hand
     at JoCasta Zamarripa's edge (and two more judges' hearing stills,
     shown again with the rest) and a refusal's worst case: it
     promoted James Talarico's campaign photograph of him helping a child in
@@ -927,7 +932,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     floterial seat is one RSA 662:5 makes floterial (`NH_FLOTERIAL`); any
     other unplaced name is unmatched. A portrait that is a search
     engine's thumbnail is not shown; one is dropped as missing only when a
-    GET answers 404 or 410 (`statelegs.check_portrait`). Texas's host
+    GET answers 404 or 410 (`statelegs.check_portrait`), and left off
+    (`notImage`) when a 200's first bytes are a page or a one-pixel image
+    (rule 52's reading: Connecticut's House Republicans answer every image
+    address with a page, Michigan's House Democrats' files are 1x1) - asked
+    again on every run, and an empty body or a bot wall's "Request
+    Rejected" or challenge page concludes nothing (rule 8). Texas's host
     refused one machine every connection (rule 8), and HEAD lies:
     Massachusetts answers it 404 for portraits GET serves, and the first
     run called 211 working portraits missing.

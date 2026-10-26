@@ -187,9 +187,10 @@ class TestAJudgeIsNotRefusedForPeopleBehindThem(unittest.TestCase):
 
     def test_a_picture_of_a_person_is_no_person_in_the_frame(self):
         # Decided for the owner, 2026-10-25: a framed photograph, a poster, a
-        # book jacket or a screen behind someone refuses nothing.
+        # book jacket behind someone refuses nothing. A screen showing a face
+        # (a rally's live feed) is not decided, and stays refused.
         import re
-        pictures = re.compile(r"\b(framed|poster|book jacket|on the screen)\b", re.I)
+        pictures = re.compile(r"\b(framed|poster|book jacket)\b", re.I)
         for url, entry in overrides.NOT_A_PORTRAIT.items():
             self.assertIsNone(pictures.search(entry[1]), url)
 

@@ -261,6 +261,22 @@ NOT_AN_IMAGE = "notImage"
 # past its EXIF block.
 _SNIFF_BYTES = 65536
 
+# A page in an image's place that says the request was turned away, not
+# that the file is gone: the Census server's burst answer (rule 52) and the
+# challenge pages of the usual bot walls. Read lower-case.
+_WALL_WORDS = (b"request rejected", b"access denied", b"just a moment",
+               b"attention required", b"captcha", b"cf-chl", b"are you a robot",
+               b"too many requests")
+
+
+def turned_away(data):
+    """Whether a body served for a portrait concludes nothing (rule 8): an
+    empty one (a dropped connection reads as empty as easily as a missing
+    file does), or a bot wall's page in the file's place, which says the
+    request was refused, not that the address serves no image."""
+    data = (data or b"")[:_SNIFF_BYTES].lower()
+    return not data.strip() or any(w in data for w in _WALL_WORDS)
+
 
 def portrait_body(data):
     """Why the first bytes of a body served for a portrait are not one, or
@@ -296,6 +312,7 @@ def check_portrait(url, timeout=25):
     served the same files to another. A 200 is read from its first bytes,
     as rule 52 reads a zip: a page where the image should be, or a one-pixel
     image, is refused, never shown as a portrait; the next check asks again.
+    An empty body or a bot wall's page (:func:`turned_away`) is ``None``.
 
     It asks with GET, never HEAD: Massachusetts answers HEAD for every
     member's portrait with 404 and GET with the image, and South Dakota
@@ -314,7 +331,11 @@ def check_portrait(url, timeout=25):
             if (response.headers.get("Content-Encoding") or "").lower() == "gzip":
                 import zlib
                 data = zlib.decompressobj(31).decompress(data)
-            return NOT_AN_IMAGE if portrait_body(data) else True
+            if not portrait_body(data):
+                return True
+            # An empty body or a bot wall's page concludes nothing; any
+            # other page or a pixel is no portrait.
+            return None if turned_away(data) else NOT_AN_IMAGE
     except urllib.error.HTTPError as exc:
         return False if exc.code in (404, 410) else None
     except Exception:
