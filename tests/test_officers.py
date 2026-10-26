@@ -600,6 +600,22 @@ class TestKeptConfirmations(unittest.TestCase):
         self.assertEqual(ag["readByHand"]["read"], "2026-10-26")
         self.assertEqual(sos["readByHand"]["read"], "2026-10-26")
 
+    def test_a_reading_by_hand_before_the_kept_confirmation_does_not_silence_it(self):
+        # Read by hand on 10-26; the site confirmed again on 11-01 and has
+        # not answered since. The reading is older than the confirmation
+        # kept, so it does not stand for a read since: the warning comes.
+        import datetime
+        from unittest import mock
+        entries = {("NC", "ag"): ("Jeff Jackson", "https://ncdoj.gov/", "2026-10-26",
+                                  ("Attorney General Jeff Jackson",))}
+        kept = {"ag": {"NC": dict(self.NC, confirmedOn="2026-11-01", confirmationKept=True)},
+                "sos": {}, "lt": {}}
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", entries, clear=True):
+            self.assertEqual(officers.kept_stale(kept, datetime.date(2026, 11, 15)), [])
+            stale = officers.kept_stale(kept, datetime.date(2026, 11, 16))
+        self.assertEqual(len(stale), 1)
+        self.assertIn("2026-11-01 (15 days ago)", stale[0])
+
 
 class TestAttorneyGeneralPhotos(unittest.TestCase):
     """STATEGOV-13: no attorney general had a photograph. Each is read from

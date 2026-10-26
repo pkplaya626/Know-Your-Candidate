@@ -1271,15 +1271,20 @@ def kept_stale(cache, today=None):
     more than ``KEPT_STALE_DAYS`` old and not since read by hand: the
     office's site has not answered since, and a person should read its page
     (overrides.OFFICERS_READ_BY_HAND). For validate
-    (``officer-confirmation-kept``)."""
-    today = today or datetime.date.today()
+    (``officer-confirmation-kept``). Aged on the UTC day, as ``confirmedOn``
+    is stamped."""
+    today = today or datetime.date.fromisoformat(_utc_today())
     out = []
     for office, label in (("ag", "attorney general"), ("sos", "secretary of state")):
         for code, row in sorted(((cache or {}).get(office) or {}).items()):
             if not row.get("confirmationKept"):
                 continue
-            if hand_confirms(code, office, row.get("name")):
-                continue                         # read by hand since: by_hand_stale ages it
+            hand = hand_confirms(code, office, row.get("name"))
+            if hand and str(hand[1]["read"]) >= str(row.get("confirmedOn") or "~"):
+                # Read by hand on or after the kept confirmation's day:
+                # by_hand_stale ages it. A reading older than the kept
+                # confirmation does not stand for the read since.
+                continue
             try:
                 age = (today - datetime.date.fromisoformat(row.get("confirmedOn") or "")).days
             except (TypeError, ValueError):
