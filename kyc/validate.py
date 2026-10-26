@@ -243,8 +243,6 @@ def check_overrides(profiles, raw):
                             "from its source and replace or remove the entry",
                             sorted(overrides.OTHER_OFFICE_NOMINEES)))
 
-    issues += check_curated_photos(profiles)
-
     # Not an error, just useful: members who are also 2026 candidates.
     from .record import seated
 
@@ -258,24 +256,34 @@ def check_overrides(profiles, raw):
     return issues
 
 
-def check_curated_photos(profiles):
+def check_curated_photos(profiles, legislators=None, manifest=None):
     """Every ``overrides.CANDIDATE_PHOTOS`` entry is a candidate's, by
     profile id (rules 3 and 17), says what file, page, words, tie and look
-    it rests on (``photos.curated_problems``), and is not a photograph a
-    person refused (``NOT_A_PORTRAIT``, ``PORTRAIT_LICENCE_DOUBTS``)."""
-    from .photos import curated_problems, refused
+    it rests on (``photos.curated_problems``; a file hosted here is in
+    *manifest*, the ``photocopies`` cache), and is not a photograph a
+    person refused (``NOT_A_PORTRAIT``, ``PORTRAIT_LICENCE_DOUBTS``). An
+    entry for a file a legislature keys by seat whose member *legislators*
+    (the roster) no longer seats there is withheld from the page
+    (``portraits.route_ok``) and named here, to be removed or replaced: the
+    file now shows whoever holds the seat."""
+    from .photos import curated_problems, curated_seated, refused
 
     by_id = {p["id"]: p for p in profiles}
-    issues, bad, dead = [], [], []
+    issues, bad, dead, unseated = [], [], [], []
     for pid, entry in sorted(overrides.CANDIDATE_PHOTOS.items()):
         profile = by_id.get(pid)
         if not profile or not profile.get("isCandidate") or profile.get("bioguide"):
             dead.append(str(pid))
-        problems = curated_problems(entry)
+        problems = curated_problems(entry, manifest)
         if not problems and refused(entry["url"]):
             problems.append(refused(entry["url"]))
         if problems:
             bad.append(f"{pid}: {'; '.join(problems)}")
+        elif not curated_seated(entry, legislators):
+            seat = entry["seat"]
+            unseated.append(f"{pid}: {seat['name']} is no longer listed in {seat['state']} "
+                            f"{seat['chamber']} district {seat['district']}, whose file "
+                            f"{entry['url']} is keyed by the seat")
     if bad:
         issues.append(Issue("error", "photo-curated-unevidenced",
                             f"{len(bad)} overrides.CANDIDATE_PHOTOS entries do not say what "
@@ -284,6 +292,11 @@ def check_curated_photos(profiles):
         issues.append(Issue("warn", "stale-photo-override",
                             f"{len(dead)} overrides.CANDIDATE_PHOTOS entries match no "
                             "candidate's profile id", dead))
+    if unseated:
+        issues.append(Issue("warn", "photo-curated-unseated",
+                            f"{len(unseated)} overrides.CANDIDATE_PHOTOS entries name a file "
+                            "keyed by a seat its member no longer holds; withheld - remove or "
+                            "replace them", unseated))
     return issues
 
 
@@ -1349,7 +1362,7 @@ def check_future_coverage(profiles, today=None):
 
 
 def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
-                         manifest=None):
+                         manifest=None, legislators=None):
     """A photograph reached through a page - a campaign's (rule 38), a
     legislature's or a Wikidata item (``nominee_photos``) - carries in its
     cache the page that ties it to the person, the words that name them
@@ -1361,7 +1374,7 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
     from the build's root by the caller; without them a profile shown with
     a guide's photograph has no record, and fails."""
     from . import nominee_photos
-    from .photos import too_heavy
+    from .photos import curated_seated, too_heavy
     from .portraits import profile_key
 
     portraits, enrichment = portraits or {}, enrichment or {}
@@ -1418,7 +1431,8 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
             if missing:
                 found.append(f"{p['name']} (curated): no {', '.join(missing)}")
         if source != "curated" and p.get("isCandidate") and not p.get("bioguide") \
-                and p.get("id") in overrides.CANDIDATE_PHOTOS:
+                and p.get("id") in overrides.CANDIDATE_PHOTOS \
+                and curated_seated(overrides.CANDIDATE_PHOTOS[p["id"]], legislators):
             found.append(f"{p['name']} (curated): the entry is not shown; run 'portraits' "
                          "to read it into the portrait cache")
     if not found:
@@ -1818,7 +1832,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
         history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
-        photo_routes=(), guides=None, photo_manifest=None):
+        photo_routes=(), guides=None, photo_manifest=None, legislators=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1842,8 +1856,9 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_portrait_overrides(enrichment, photo_routes)
     if portraits is not None:
         issues += check_photo_evidence(profiles, portraits, enrichment, guides,
-                                       photo_manifest)
+                                       photo_manifest, legislators)
         issues += check_refusal_fallbacks(profiles, portraits)
+    issues += check_curated_photos(profiles, legislators, photo_manifest)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)

@@ -87,14 +87,25 @@ def curated(profile):
     return entry if isinstance(entry, dict) and entry.get("url") else None
 
 
-def curated_problems(entry):
+def curated_problems(entry, manifest=None):
     """What a ``CANDIDATE_PHOTOS`` *entry* lacks, as words, or ``[]``: its
     fields, a read date that is a date, https addresses, a credit where the
     file is not on Commons (a Commons file's is read from its page, rule 87),
     a Commons file's own description page, and no address reached by a name
-    (rule 24)."""
+    (rule 24).
+
+    The file may be one this site hosts unmodified (``photos/<hash>``, rule
+    101's manifest ``hosted``), where the office's page draws it with no
+    address of its own (the Tennessee General Assembly's member pages write
+    the portrait into the page as a ``data:`` image). Where *manifest* (the
+    ``photocopies`` cache) is given, it must list that file as read from
+    the entry's own page (``photocopies.problems`` checks its bytes, its
+    credit and whom it is listed for, ``photo-hosted-not-theirs``), and an
+    entry's *seat* (a file a legislature keys by seat) must say which
+    member of which seat it was read for (:func:`curated_seated`)."""
     import datetime
 
+    from .photocopies import hosted_entry, is_hosted
     from .portraits import wikimedia_file
 
     if not isinstance(entry, dict):
@@ -105,8 +116,20 @@ def curated_problems(entry):
     except ValueError:
         out.append("a read date that is not a date")
     url, page = str(entry.get("url") or ""), str(entry.get("page") or "")
-    if not url.startswith("https://") or not page.startswith("https://"):
+    hosted = is_hosted(url)
+    if not (url.startswith("https://") or hosted) or not page.startswith("https://"):
         out.append("an address that is not https")
+    if hosted and manifest is not None:
+        listed = hosted_entry(manifest, url)
+        if not listed:
+            out.append(f"{url} is not in the manifest's hosted files")
+        elif listed.get("page") != page:
+            out.append(f"the manifest's {url} was read from another page")
+    seat = entry.get("seat")
+    if seat is not None and (not isinstance(seat, dict) or not all(
+            str(seat.get(k) or "").strip()
+            for k in ("state", "chamber", "district", "legislator", "name"))):
+        out.append("a seat that does not name its state, chamber, district and member")
     if is_guessed(url) or is_guessed(page):
         out.append("a file reached by a name (Special:FilePath)")
     if wikimedia_file(url):
@@ -115,6 +138,22 @@ def curated_problems(entry):
     elif not str(entry.get("by") or "").strip():
         out.append("no credit (by)")
     return out
+
+
+def curated_seated(entry, legislators):
+    """Whether a ``CANDIDATE_PHOTOS`` *entry* may still stand, as far as its
+    seat goes: ``True`` for an entry with no ``seat`` or where *legislators*
+    (the state legislators' roster) was not given, else whether the roster
+    still lists that member in that seat. A file a legislature keys by seat
+    ("rep17.jpg") shows whoever holds it, so the photograph read for one
+    member would show their successor's face on their profile
+    (``nominee_photos.roster_member``, the legislature route's own test)."""
+    from .nominee_photos import roster_member
+
+    seat = (entry or {}).get("seat")
+    if not seat or legislators is None:
+        return True
+    return roster_member(seat, legislators) is not None
 
 
 def is_guessed(url):

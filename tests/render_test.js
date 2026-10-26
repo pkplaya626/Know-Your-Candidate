@@ -12063,8 +12063,15 @@ async function testSharePages() {
       // A campaign's heavy portrait unfurls as the smaller copy made here
       // (rule 101), on the site's own host, and only the copy of that file.
       const copy = p.photoCopy && p.photoCopy.of === p.photo_url ? p.photoCopy : null;
+      // An office's photograph a person chose, hosted here unmodified
+      // because its page draws it with no address of its own (Brent
+      // Taylor's, the PR #141 review), unfurls from the site's own host.
+      const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+      const hosted = p.photoSource === "curated" && !!p.photoCredit &&
+        /^photos\/[0-9a-f]{20}\.(?:jpg|png)$/.test(p.photo_url || "");
       const ok = /\/assets\/social-card\.png$/.test(url) ||
-        (sizes.length ? sizes.indexOf(url) !== -1
+        (hosted ? url === host + (copy ? copy.src : p.photo_url) :
+        sizes.length ? sizes.indexOf(url) !== -1
           : copy && p.photoSource === "campaign-site" && !!p.photoCredit
             ? url === "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/" + copy.src
             : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&

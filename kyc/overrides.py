@@ -16,7 +16,11 @@ from urllib.parse import urlsplit
 # a person looked at the photograph and at the page:
 #
 #   url    the file shown: a government office's or the campaign's own file
-#          as the page serves it, or a Commons file's upload address
+#          as the page serves it, or a Commons file's upload address; or,
+#          where an office's page draws the portrait with no address of its
+#          own (a data: image), the file hosted here unmodified
+#          ("photos/<hash>.png", listed in rule 101's manifest, ``hosted``,
+#          with the page, the hash and the day read)
 #   page   the page that names the person beside it (a Commons file: its own
 #          description page, in the person's own category)
 #   words  the page's words that name them beside it
@@ -28,6 +32,12 @@ from urllib.parse import urlsplit
 #   seen   what the photograph shows: the person alone, nobody else in the
 #          frame even in part, the face a tenth of the 4:5 card or more
 #   read   the day the page and the photograph were read
+#   seat   only for a file the legislature names by its seat ("rep17.jpg"),
+#          which shows whoever holds it: the state, chamber, district, Open
+#          States id and name of the member it was read for. The photograph
+#          is withheld, and validate warns (photo-curated-unseated), once the
+#          roster no longer seats them there (photos.curated_seated). A file
+#          hosted here is the member's bytes, read once, and needs none.
 #
 # ``portraits`` puts the entry in the portrait cache as route ``curated``,
 # where its size, its weight and a Commons file's credit are read like any
@@ -111,6 +121,27 @@ CANDIDATE_PHOTOS = {
         "seen": "him alone outside the Eisenhower building, facing the camera",
         "read": "2026-10-25",
     },
+    "FEC_H6TN09464": {
+        # Brent Taylor, TN-9's Republican nominee. His Commons file was
+        # refused (someone else in the frame); the Senate's member page draws
+        # his portrait only inline, so it is hosted here unmodified (the PR
+        # #141 review: TN-9's Democratic nominee had a photograph and he did
+        # not).
+        "url": "photos/dc407c55c78c101cce27.png",
+        "page": "https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=S31",
+        "words": "\"Senator Brent Taylor\" heading the page, directly above the photograph "
+                 "(alt text \"Photo of Brent Taylor\"), then \"Republican\", \"Memphis\", "
+                 "\"District 31\", \"Born on August 9, 1968\"",
+        "by": "Tennessee General Assembly",
+        "tie": "the article his ballot page links (Brent Taylor (Tennessee politician)) says "
+               "he has served since 2023 as a member of the Tennessee Senate representing "
+               "District 31, born August 9, 1968, and is a candidate for Tennessee's 9th "
+               "district; the roster (Open States) seats Brent Taylor in TN upper 31. The "
+               "file is the page's data: image decoded, so it stays his whoever later "
+               "holds the seat",
+        "seen": "a studio portrait, him alone against a grey backdrop",
+        "read": "2026-10-25",
+    },
     "FEC_H6AZ05190": {
         "url": "https://upload.wikimedia.org/wikipedia/commons/7/72/Jay_Feely_2026_%28cropped%29.jpg",
         "page": "https://commons.wikimedia.org/wiki/File:Jay_Feely_2026_(cropped).jpg",
@@ -146,6 +177,10 @@ CANDIDATE_PHOTOS = {
                "because its date is a copy's; a person compared the two photographs",
         "seen": "a studio portrait, her alone against a grey backdrop",
         "read": "2026-10-25",
+        # rep17.jpg shows whoever holds District 17 (the PR #141 review).
+        "seat": {"state": "LA", "chamber": "lower", "district": "17",
+                 "legislator": "ocd-person/88548c7a-b637-4821-b336-c99cfa475e22",
+                 "name": "Pat Moore"},
     },
 }
 

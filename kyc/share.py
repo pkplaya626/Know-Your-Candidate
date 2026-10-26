@@ -375,6 +375,14 @@ def og_photo(person, host=None):
         return url
     url = person.get("photo_url") or ""
     source = person.get("photoSource")
+    from .photocopies import is_hosted
+    if source == "curated" and is_hosted(url) and person.get("photoCredit"):
+        # An office's photograph this site hosts unmodified, a person's
+        # choice (the Tennessee General Assembly's, drawn on its page with
+        # no address of its own): at its address on the site's hostname.
+        copy = person.get("photoCopy") or {}
+        shown = copy["src"] if copy.get("of") == url and copy.get("src") else url
+        return f"https://{host}/{shown}" if host else None
     if not _https(url) or "Special:" in url:
         return None
     if source in ("clerk.house.gov", "cross-link") and urlparse(url).hostname == "clerk.house.gov":

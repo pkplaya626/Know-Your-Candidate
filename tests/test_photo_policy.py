@@ -421,9 +421,139 @@ class TestAPersonsChoice(unittest.TestCase):
             self.assertEqual(nominee_photos.replaced(record), [thumb])
 
     def test_the_committed_entries_are_complete(self):
+        from kyc import photocopies, statelegs
+        manifest = photocopies.load(ROOT)
+        roster = statelegs.load_cache(ROOT)
         for pid, entry in overrides.CANDIDATE_PHOTOS.items():
             self.assertEqual(photos.curated_problems(entry), [], pid)
+            self.assertEqual(photos.curated_problems(entry, manifest), [], pid)
             self.assertFalse(photos.refused(entry["url"]), pid)
+            if roster:
+                self.assertTrue(photos.curated_seated(entry, roster), pid)
+        # A committed hosted choice is on disk as its manifest entry gives it,
+        # listed for that very profile (photocopies.problems checks the bytes).
+        for pid, entry in overrides.CANDIDATE_PHOTOS.items():
+            if photocopies.is_hosted(entry["url"]):
+                listed = photocopies.hosted_entry(manifest, entry["url"])
+                self.assertIn(f"person:{pid}", listed["for"], pid)
+                self.assertEqual(listed["by"], entry["by"], pid)
+
+    # Brent Taylor's Tennessee Senate portrait is drawn on its page only as
+    # a data: image, so it is hosted here unmodified (the PR #141 review).
+    HOSTED = "photos/0123456789abcdef0123.png"
+    PAGE = "https://www.example.gov/member?district=S31"
+
+    def hosted(self):
+        entry = dict(self.ENTRY, url=self.HOSTED, page=self.PAGE, by="Example General Assembly")
+        manifest = {"originals": {}, "hosted": {self.HOSTED[len("photos/"):]: {
+            "method": "unmodified", "page": self.PAGE, "from": self.PAGE, "bytes": 286711,
+            "width": 400, "height": 400, "sha256": "0123456789abcdef0123" + "0" * 44,
+            "read": "2026-10-25", "by": "Example General Assembly",
+            "for": ["person:CAND_1"]}}}
+        return entry, manifest
+
+    def test_a_hosted_choice_is_weighed_from_its_manifest_and_shared_on_the_host(self):
+        from kyc import share
+        entry, manifest = self.hosted()
+        self.assertEqual(photos.curated_problems(entry, manifest), [])
+        self.assertIn(f"{self.HOSTED} is not in the manifest's hosted files",
+                      photos.curated_problems(entry, {"originals": {}, "hosted": {}}))
+        other = {"originals": {}, "hosted": {k: dict(v, page="https://www.example.gov/x")
+                                             for k, v in manifest["hosted"].items()}}
+        self.assertIn(f"the manifest's {self.HOSTED} was read from another page",
+                      photos.curated_problems(entry, other))
+        # Neither a name-built address nor a plain path outside photos/.
+        self.assertIn("an address that is not https",
+                      photos.curated_problems(dict(entry, url="img/taylor.png")))
+        p = self.profile()
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry},
+                                      clear=True):
+            cache = {}
+            portraits.sync_curated([p], cache, manifest)
+            record = cache[portraits.profile_key(p)]
+            self.assertEqual((record["bytes"], record["width"], record["height"]),
+                             (286711, 400, 400))
+            # Never fetched: measure_all leaves an address from the site's root.
+            with unittest.mock.patch.object(portraits, "measure",
+                                            side_effect=AssertionError("fetched")):
+                portraits.measure_all({"k": {k: v for k, v in record.items() if k != "bytes"}},
+                                      log=lambda *_: None)
+            self.assertEqual(portraits.apply_cache([p], cache), 1)
+            self.assertEqual(p["photos"][0], self.HOSTED)
+            self.assertEqual(p["photoCredit"], {"by": "Example General Assembly",
+                                                "page": self.PAGE})
+            self.assertEqual(validate.check_photo_evidence([p], cache), [])
+            self.assertEqual(validate.check_curated_photos([p], None, manifest), [])
+            self.assertEqual(share.og_photo(p, "candidates.example.org"),
+                             f"https://candidates.example.org/{self.HOSTED}")
+            self.assertIsNone(share.og_photo(p))
+
+    def test_a_guide_read_keeps_a_hosted_choice(self):
+        # guide_photos.fetch rewrites the manifest's hosted files from what
+        # the guides gave; a file a person chose is not its to remove.
+        import json
+        import tempfile
+        from kyc import guide_photos, photocopies
+        entry, manifest = self.hosted()
+        orphan = "fedcba9876543210fedc.jpg"
+        manifest["hosted"][orphan] = dict(manifest["hosted"][self.HOSTED[7:]],
+                                          **{"for": ["person:gone"]})
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, photocopies.PHOTOS_DIR))
+            for name in (self.HOSTED[7:], orphan):
+                with open(os.path.join(root, photocopies.PHOTOS_DIR, name), "wb") as handle:
+                    handle.write(b"\x89PNG")
+            photocopies.save(manifest, root)
+
+            def no_network(url, *a, **k):
+                raise AssertionError(f"fetched {url}")
+
+            with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry},
+                                          clear=True):
+                guide_photos.fetch(root, profiles=[], stategov={}, getter=no_network,
+                                   log=lambda *_: None)
+            with open(os.path.join(root, photocopies.CACHE_PATH), encoding="utf-8") as handle:
+                after = json.load(handle)["hosted"]
+            self.assertEqual(after, {self.HOSTED[7:]: manifest["hosted"][self.HOSTED[7:]]})
+            self.assertEqual(os.listdir(os.path.join(root, photocopies.PHOTOS_DIR)),
+                             [self.HOSTED[7:]])
+
+    # Pat Moore's file is the Louisiana House's "rep17.jpg", which shows
+    # whoever holds District 17 (the PR #141 review).
+    SEAT = {"state": "LA", "chamber": "lower", "district": "17",
+            "legislator": "ocd-person/1", "name": "Pat Doe"}
+
+    def roster(self, who="ocd-person/1", name="Pat Doe"):
+        return {"states": {"LA": [{"id": who, "name": name, "chamber": "lower",
+                                   "district": "17", "state": "LA"}]}}
+
+    def test_a_seat_keyed_choice_stands_only_while_its_member_holds_the_seat(self):
+        entry = dict(self.ENTRY, seat=self.SEAT)
+        self.assertEqual(photos.curated_problems(entry), [])
+        self.assertIn("a seat that does not name its state, chamber, district and member",
+                      photos.curated_problems(dict(entry, seat={"state": "LA"})))
+        p = self.profile()
+        with unittest.mock.patch.dict(overrides.CANDIDATE_PHOTOS, {"CAND_1": entry},
+                                      clear=True):
+            cache = {}
+            portraits.sync_curated([p], cache)
+            record = cache[portraits.profile_key(p)]
+            record.update(bytes=9622, width=262, height=394)
+            seated, successor = self.roster(), self.roster("ocd-person/2", "Lee Roe")
+            self.assertTrue(portraits.route_ok(p, record, seated))
+            self.assertEqual(validate.check_curated_photos([p], seated), [])
+            # A successor in the seat: the file now shows them, so it is
+            # withheld and named, not reported as merely unread.
+            self.assertFalse(portraits.route_ok(p, record, successor))
+            q = self.profile()
+            self.assertEqual(portraits.apply_cache([q], cache, successor), 0)
+            self.assertEqual(q["photos"], ["placeholder"])
+            self.assertEqual([i.code for i in validate.check_curated_photos([q], successor)],
+                             ["photo-curated-unseated"])
+            self.assertEqual(validate.check_photo_evidence([q], cache, legislators=successor),
+                             [])
+            # Without a roster (a test, a missing cache) nothing is decided.
+            self.assertTrue(portraits.route_ok(p, record))
 
 
 if __name__ == "__main__":

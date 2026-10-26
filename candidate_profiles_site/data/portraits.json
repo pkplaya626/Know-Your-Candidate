@@ -8490,41 +8490,22 @@
   "width": 1462
  },
  "person:brent taylor|TN|H": {
+  "bytes": 286711,
   "credit": {
-   "attribution": true,
-   "by": "GatewayPolitics",
-   "file": "https://commons.wikimedia.org/wiki/File:Brent_Taylor_(Tennessee_politician).jpg",
-   "form": 4,
-   "licence": "CC BY-SA 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
-   "nonFree": false,
-   "year": 2023
+   "by": "Tennessee General Assembly",
+   "page": "https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=S31"
   },
-  "height": 1045,
+  "evidence": "\"Senator Brent Taylor\" heading the page, directly above the photograph (alt text \"Photo of Brent Taylor\"), then \"Republican\", \"Memphis\", \"District 31\", \"Born on August 9, 1968\"",
+  "height": 400,
   "name": "Brent Taylor",
-  "set": [
-   [
-    120,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Brent_Taylor_%28Tennessee_politician%29.jpg/120px-Brent_Taylor_%28Tennessee_politician%29.jpg"
-   ],
-   [
-    250,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Brent_Taylor_%28Tennessee_politician%29.jpg/250px-Brent_Taylor_%28Tennessee_politician%29.jpg"
-   ],
-   [
-    330,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Brent_Taylor_%28Tennessee_politician%29.jpg/330px-Brent_Taylor_%28Tennessee_politician%29.jpg"
-   ],
-   [
-    500,
-    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Brent_Taylor_%28Tennessee_politician%29.jpg/500px-Brent_Taylor_%28Tennessee_politician%29.jpg"
-   ]
+  "page": "https://wapp.capitol.tn.gov/apps/LegislatorInfo/member?district=S31",
+  "read": "2026-10-25",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/d/d8/Brent_Taylor_(Tennessee_politician).jpg"
   ],
-  "title": "Brent Taylor (Tennessee politician)",
-  "unverified": true,
-  "url": "https://upload.wikimedia.org/wikipedia/commons/d/d8/Brent_Taylor_%28Tennessee_politician%29.jpg",
-  "via": "wikipedia",
-  "width": 814
+  "url": "photos/dc407c55c78c101cce27.png",
+  "via": "curated",
+  "width": 400
  },
  "person:brenton awa|HI|H": {
   "credit": {
