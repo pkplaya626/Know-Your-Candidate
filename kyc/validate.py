@@ -1809,11 +1809,22 @@ def check_voting_links(cache):
     # rule 8 concludes nothing from either): the page says it could not be
     # reached, and this lists it, so "unknown" is never counted as checked.
     checked = cache.get("links") or {}
+    # A link a person opened by hand (overrides.VOTING_LINKS_BY_HAND) is
+    # listed apart, while its reading counts; one it no longer counts is
+    # listed again here and below.
+    stale_by_hand = voting.by_hand_problems(cache)
+    counted = {(code, kind) for code, kinds in voting.by_hand(cache).items() for kind in kinds
+               if not any(p.startswith(f"{code} {kind}: opened by hand") for p in stale_by_hand)}
     unchecked = sorted(f"{code} {kind}: {link['url']} "
                        f"({checked.get(link['url'], 'never opened')})"
                        for code, links in voting.effective(cache).items()
                        for kind, link in links.items()
-                       if checked.get(link["url"]) not in (voting.LIVE, voting.DEAD))
+                       if checked.get(link["url"]) not in (voting.LIVE, voting.DEAD)
+                       and (code, kind) not in counted)
+    if stale_by_hand:
+        issues.append(Issue("warn", "voting-by-hand-stale",
+                            f"{len(stale_by_hand)} overrides.VOTING_LINKS_BY_HAND entries the "
+                            f"page no longer counts", stale_by_hand))
     if unchecked:
         issues.append(Issue("warn", "voting-links-unchecked",
                             f"{len(unchecked)} voting links were not found live when last "
@@ -1832,7 +1843,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
         history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
-        photo_routes=(), guides=None, photo_manifest=None, legislators=None):
+        photo_routes=(), guides=None, photo_manifest=None, legislators=None, officers=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1889,6 +1900,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_history(history, profiles)
     if voting is not None:                 # None: the caller did not supply it
         issues += check_voting_links(voting)
+    if officers is not None:
+        issues += check_officers_by_hand(officers)
     if voting_dates is not None:
         issues += check_voting_dates(voting_dates)
     if statewide is not None:
@@ -2187,6 +2200,22 @@ def check_guide(today=None):
                              f"since the page was checked; re-check them and move its 'reviewed'",
                              [f"{slug} (since {day}): {what}" for slug, day, what in due]))
     return issues
+
+
+def check_officers_by_hand(cache):
+    """A statewide officer confirmed from the office's page read by hand
+    (overrides.OFFICERS_READ_BY_HAND) is confirmed only while the roster
+    names that very person. One the roster no longer names, or one the
+    office's own site now answers for, confirms nobody on the page: stale,
+    and reported so it is removed rather than left (CLAUDE.md, "Curated
+    data")."""
+    from . import officers
+    unused = officers.by_hand_unused(cache)
+    if not unused:
+        return []
+    return [Issue("warn", "officers-by-hand",
+                  f"{len(unused)} overrides.OFFICERS_READ_BY_HAND entries confirm nobody on "
+                  f"the page", unused)]
 
 
 def check_ballot2026():
