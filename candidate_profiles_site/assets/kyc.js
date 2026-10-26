@@ -1404,15 +1404,24 @@
     // 2009-14; (vice mayor, 2012-14)" and "Member, North Carolina House of
     // Representatives; 2003-13". An entry that is only a year or a range, or
     // opens with a bracket, goes back onto the one before it, joined with the
-    // source's own "; ", so no bullet reads as a career of its own.
+    // source's own "; ", so no bullet reads as a career of its own. One that
+    // opens the field has nothing before it, so it goes onto the entry after
+    // it: the Directory prints Sean Casten's education as "1989; B.A., ...",
+    // the school before the year missing from the Directory's own text.
     var joined = [];
+    var lead = "";
     out.map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (s) {
-      if (joined.length && (/^\d{4}(?:[-–]\d{2,4})?$/.test(s) || s.charAt(0) === "(")) {
+      var stray = /^\d{4}(?:[-–]\d{2,4})?$/.test(s) || s.charAt(0) === "(";
+      if (stray && joined.length) {
         joined[joined.length - 1] += "; " + s;
+      } else if (stray) {
+        lead += s + "; ";
       } else {
-        joined.push(s);
+        joined.push(lead + s);
+        lead = "";
       }
     });
+    if (lead) joined.push(lead.slice(0, -2));
     return joined;
   }
 

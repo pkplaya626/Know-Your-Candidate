@@ -1730,6 +1730,21 @@ async function testDirectoryAsync() {
         stray[0] === "member, Long Beach City Council, 2009-14; (vice mayor, 2012-14)" &&
         stray[1] === "member, North Carolina House of Representatives; 2003-13" &&
         stray[2] === "staff, campaign; 2016" && stray[3] === "teacher", stray.join(" | "));
+    // C001117: the Directory itself prints "education: 1989; B.A., ...", so a
+    // bare year that opens the field goes onto the entry after it, never a
+    // bullet of its own; and W000800's "A.B., ..., MA; 1969" stays together.
+    const leading = KYC.fieldItems("1989; B.A., molecular biology, Middlebury College, 1993; " +
+      "M.S., Dartmouth College, 1998");
+    check("a bare year opening a field is never an entry of its own",
+      leading.length === 2 &&
+        leading[0] === "1989; B.A., molecular biology, Middlebury College, 1993" &&
+        leading[1] === "M.S., Dartmouth College, 1998", leading.join(" | "));
+    const tail = KYC.fieldItems("A.B., College of the Holy Cross, Worcester, MA; 1969; J.D., Yale; (honors)");
+    check("a trailing year or bracket stays on its entry",
+      tail.length === 2 && tail[0] === "A.B., College of the Holy Cross, Worcester, MA; 1969" &&
+        tail[1] === "J.D., Yale; (honors)", tail.join(" | "));
+    check("a field of nothing but stray pieces keeps them whole",
+      KYC.fieldItems("1989; (2001)").join("|") === "1989; (2001)");
     check("a year range in a listed career does not break at its hyphen",
       [...careers.querySelectorAll(".field-list li .nowrap")].map((s) => s.textContent).join(",") ===
         "1987-2008,2004-12,2008-10");
