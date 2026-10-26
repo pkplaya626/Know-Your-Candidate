@@ -255,6 +255,13 @@ class TestOpenedByHand(unittest.TestCase):
                 self.assertEqual(page[code][kind], entry[0])
 
 
+# Oklahoma's State Election Board's own 2026 results page, reached from its
+# home page through "Election Results" and "2026" (NOTES.md, "Oklahoma's
+# results link", 2026-10-26).
+OK_RESULTS = ("https://oklahoma.gov/elections/elections-results/election-results/"
+              "2026-election-results.html")
+
+
 class TestRoundThree(unittest.TestCase):
     """After #142 the state pages still called the curated links - results,
     sample ballots, Guam's information page, Iowa's absentee page, vote.gov's
@@ -274,7 +281,7 @@ class TestRoundThree(unittest.TestCase):
         ("OH", "results"): "https://www.ohiosos.gov/elections/election-results-and-data/",
         ("GU", "info"): "https://gec.guam.gov/2026-general-election-info/",
         ("MI", "sample"): "https://mvic.sos.state.mi.us/PublicBallot/Index",
-        ("OK", "results"): "https://results.okelections.gov/OKER/",
+        ("OK", "results"): OK_RESULTS,
         ("NH", "results"): "https://www.sos.nh.gov/2026-election-results",
     }
 
@@ -343,7 +350,7 @@ class TestRoundThree(unittest.TestCase):
         shown = voting.effective(cache)
         page = voting.for_page(cache)
         for code, old, new in (
-                ("OK", "https://results.okelections.us/", "https://results.okelections.gov/OKER/"),
+                ("OK", "https://results.okelections.us/", OK_RESULTS),
                 ("NH", "https://www.sos.nh.gov/elections/elections/election-results",
                  "https://www.sos.nh.gov/2026-election-results")):
             self.assertEqual(voting.RESULTS[code], old)
@@ -374,6 +381,77 @@ class TestRoundThree(unittest.TestCase):
             self.assertEqual(voting.stale_overrides(cache),
                              ["OK results: kyc/voting.py now lists "
                               "https://results.okelections.gov/new/"])
+
+
+class TestAsItsSiteLinksIt(unittest.TestCase):
+    """The page calls the office's own pages it shows "as its site links
+    it" (kyc-ballot.js). #146 said so of results.okelections.gov/OKER/,
+    which the record showed only as where an old address redirected: no
+    page of the Board's site was seen to link it. The words stand only for
+    an address the record shows the office's site linking."""
+
+    def setUp(self):
+        from kyc import voting_dates
+        self.page = voting.for_page(voting.load_cache(ROOT), voting_dates.load(ROOT))
+
+    def test_oklahomas_results_page_is_the_one_its_site_links(self):
+        self.assertEqual(self.page["OK"]["results"], OK_RESULTS)
+        self.assertIn("results", self.page["_siteLinked"]["OK"])
+        evidence = overrides.VOTING_LINKS[("OK", "results")][3]
+        for words in ("oklahoma.gov/elections.html", "links 'Election Results'",
+                      "oklahoma.gov/elections/elections-results/election-results.html",
+                      "which links '2026' here", "'2026 Election Results'",
+                      "opened by hand 2026-10-26"):
+            self.assertIn(words, evidence)
+        self.assertNotIn("results.okelections.gov", evidence)
+        entry = overrides.VOTING_LINKS_BY_HAND[("OK", "results")]
+        self.assertEqual(entry, (OK_RESULTS, "2026-10-26", voting.OPENED_BY_HAND, "",
+                                 "2026 Election Results"))
+        # The OKER address is shown nowhere now, so no reading of it is kept.
+        self.assertNotIn("https://results.okelections.gov/OKER/",
+                         [entry[0] for entry in overrides.VOTING_LINKS_BY_HAND.values()])
+
+    def test_the_words_stand_only_for_an_address_the_record_shows_linked(self):
+        # Every page the words are said of is a curated page at its table's
+        # address (each opened from the link the office's home page gives
+        # it) or a replacement whose evidence names the page linking it.
+        curated = {kind: table for kind, table in voting.CURATED if kind != "deadlines"}
+        for code, kinds in self.page["_siteLinked"].items():
+            if code in voting.TERRITORY_LINKS:  # said in other words (kyc-ballot.js)
+                self.assertEqual(kinds, [], code)
+            for kind in kinds:
+                url = self.page[code][kind]
+                self.assertNotIn(kind, self.page["_nass"][code], (code, kind))
+                fix = overrides.VOTING_LINKS.get((code, kind))
+                if fix and fix[1] == url and fix[1] != fix[0]:
+                    self.assertRegex(fix[3], r"(?<!NASS )\blinks\b|\blinked from\b", (code, kind))
+                else:
+                    self.assertEqual(curated.get(kind, {}).get(code), url, (code, kind))
+        # And the office's pages the record does not show linked are left
+        # out of them: Maryland's polling place and Colorado's mail-ballot
+        # page replace NASS's on evidence of what they are, not of a link.
+        self.assertIn("polling", self.page["MD"])
+        self.assertNotIn("polling", self.page["_siteLinked"]["MD"])
+        self.assertNotIn("absentee", self.page["_siteLinked"]["CO"])
+
+    def test_a_redirect_or_nasss_listing_is_not_the_site_linking(self):
+        from unittest import mock
+        oker = ("https://results.okelections.us/", "https://results.okelections.gov/OKER/", None,
+                "results.okelections.us answers '403 - Forbidden: Access is denied.' in a "
+                "person's browser; its /OKER/ page redirects to the State Election Board's "
+                "results.okelections.gov/OKER/, 'OK Election Results' (both opened by hand "
+                "2026-10-26)")
+        with mock.patch.dict(overrides.VOTING_LINKS, {("OK", "results"): oker}):
+            self.assertFalse(voting.site_linked("OK", "results",
+                                                "https://results.okelections.gov/OKER/"))
+            page = voting.for_page(voting.load_cache(ROOT))
+            self.assertEqual(page["OK"]["results"], "https://results.okelections.gov/OKER/")
+            self.assertNotIn("results", page["_siteLinked"]["OK"])
+        self.assertFalse(voting.site_linked("CO", "absentee",
+                                            overrides.VOTING_LINKS[("CO", "absentee")][1]))
+        self.assertTrue(voting.site_linked("OK", "results", OK_RESULTS))
+        self.assertTrue(voting.site_linked("WY", "results", voting.RESULTS["WY"]))
+        self.assertFalse(voting.site_linked("WY", "deadlines", voting.DEADLINES["WY"]))
 
 
 class TestValidate(unittest.TestCase):

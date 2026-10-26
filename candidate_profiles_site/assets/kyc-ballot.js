@@ -285,13 +285,29 @@
         (all._listed ? " listed " + (nass.length === 1 ? "it" : "them") + " on " +
           KYC.escapeHtml(all._listed) : " lists " + (nass.length === 1 ? "it" : "them")) + ".");
     }
-    if (own.length) {
+    if (own.length && office) {
       out.push(quoted(own, labels) + (own.length === 1 ? " is " : " are ") +
-        (office ? "the " + outLink(office.url, office.name) + (/s$/.test(office.name) ? "'" : "'s") +
-          " own page" + (own.length === 1 ? "" : "s") +
-          "; the National Association of Secretaries of State lists no territory."
-        : KYC.escapeHtml(possessive(place)) + " election office's own page" +
-          (own.length === 1 ? "" : "s") + ", as its site links " + (own.length === 1 ? "it." : "them.")));
+        "the " + outLink(office.url, office.name) + (/s$/.test(office.name) ? "'" : "'s") +
+        " own page" + (own.length === 1 ? "" : "s") +
+        "; the National Association of Secretaries of State lists no territory.");
+    } else if (own.length) {
+      // "As its site links it" only of a page the record shows the office's
+      // site linking (voting.site_linked): Oklahoma's results address was
+      // said so when the record held only a redirect to it.
+      var linkedBy = ((all._siteLinked || {})[code] || []);
+      var linked = own.filter(function (k) { return linkedBy.indexOf(k) !== -1; });
+      var other = own.filter(function (k) { return linkedBy.indexOf(k) === -1; });
+      var ownPages = function (n) {
+        return KYC.escapeHtml(possessive(place)) + " election office's own page" + (n === 1 ? "" : "s");
+      };
+      if (linked.length) {
+        out.push(quoted(linked, labels) + (linked.length === 1 ? " is " : " are ") +
+          ownPages(linked.length) + ", as its site links " + (linked.length === 1 ? "it." : "them."));
+      }
+      if (other.length) {
+        out.push(quoted(other, labels) + (other.length === 1 ? " is " : " are ") +
+          ownPages(other.length) + ".");
+      }
     }
     if (links.deadlines) {
       // The deadlines are vote.gov's to state, never typed here, and the
