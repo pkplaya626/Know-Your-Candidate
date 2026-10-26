@@ -114,6 +114,22 @@ class TestSources(unittest.TestCase):
             self.assertIn("October 17th through October 30th", first["quote"])
         self.assertNotIn("Verify against nvsos.gov", record["notes"])
 
+    def test_a_source_read_later_says_its_own_day(self):
+        # PR #140 review: the note under the dates said every date was "read
+        # on 2026-10-17 and checked again on 2026-10-18" over nvsos.gov's
+        # early-voting words, read by hand on 2026-10-25.
+        data = voting_dates.load(".")
+        page = voting_dates.for_page(data)
+        self.assertEqual(page["states"]["NV"]["reread"],
+                         [{"d": "2026-10-25", "labels": ["nvsos.gov"]}])
+        # A record with no source read later carries nothing.
+        self.assertNotIn("reread", page["states"]["GA"])
+        # A read day must be a day of the cycle.
+        record = copy.deepcopy(data["states"]["NV"])
+        record["sources"][0]["read"] = "Oct 25"
+        self.assertTrue(any("is not a day" in p for p in
+                            voting_dates.state_problems("NV", record, {})))
+
     def test_every_jurisdiction_has_its_own_domains(self):
         self.assertEqual(set(voting_dates.JURISDICTION_DOMAINS), voting_dates.JURISDICTIONS)
 

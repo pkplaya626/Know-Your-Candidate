@@ -75,10 +75,17 @@ PARTY_CODES = {
     # "Democrat" is the noun some lists print where others print "DEM" or
     # "Democratic": one party, so one word for it on every state page (wave
     # 2d review: Guam's and Alabama's read "(Democrat)", Georgia's
-    # "(Democratic)"). A longer name a list gives ("Democratic-NPL",
-    # "Registered Democrat") is that list's own and kept.
+    # "(Democratic)"). So is a list's "Democratic Party" beside the holder
+    # line's "Democratic" (PR #140 review: Nevada's certified list, and
+    # Colorado's, Connecticut's and Michigan's, spell the name out), as the
+    # race cards already read it (``results.list_party_words``); each part
+    # of a fusion line alike. A longer name a list gives ("Democratic-NPL",
+    # "Registered Democrat", "Libertarian Party of Nevada") is that list's
+    # own and kept.
     "*": {"D": "Democratic", "DEM": "Democratic", "R": "Republican", "REP": "Republican",
-          "LIB": "Libertarian", "Democrat": "Democratic", "DEMOCRAT": "Democratic"},
+          "LIB": "Libertarian", "Democrat": "Democratic", "DEMOCRAT": "Democratic",
+          "Democratic Party": "Democratic", "Republican Party": "Republican",
+          "Libertarian Party": "Libertarian"},
     # The Division of Elections' listing: "REP, DEM, LPF (Libertarian Party
     # of Florida), NPA (no party affiliation)" (the cache's notes, read
     # 2026-10-18).
@@ -228,6 +235,10 @@ def party_words(code, party, write_in=False):
     elif write_in and _WRITE_IN_LABEL.match(text):
         return None
     table = PARTY_CODES.get(code) or {}
+    if "; " in text:
+        # A fusion line, each party as it would read alone: Connecticut's
+        # "Democratic Party; Working Families Party".
+        return "; ".join(party_words(code, part) or part for part in text.split("; "))
     if text in table or text in PARTY_CODES["*"]:
         return table.get(text) or PARTY_CODES["*"][text]
     if _CODE.match(text):

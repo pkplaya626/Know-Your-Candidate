@@ -1663,8 +1663,9 @@ MEASURE_SOURCES_ELSEWHERE = {
         "read on 2026-10-19, the Secretary of State's 2026 Ballot Question Guide was not yet "
         "posted ('will be published HERE prior to the 2026 General Election'); it is posted "
         "now (https://www.nvsos.gov/home/showpublisheddocument/20519/639233354596030000, linked "
-        "from the 2026 Election Information page, read by hand 2026-10-25), and its text has "
-        "not been compared with the booklet's, since nvsos.gov serves no script"),
+        "from the 2026 Election Information page, read by hand 2026-10-25) and is the voter "
+        "guide the page links; its text has not been compared with the booklet's, since "
+        "nvsos.gov serves no script, so each question's words and its page stay the booklet's"),
     "https://s3.amazonaws.com/dl.ncsbe.gov/": (
         ("NC",), "North Carolina State Board of Elections",
         "the State Board's file store, linked as 'Statewide referenda' from "

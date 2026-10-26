@@ -2100,7 +2100,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "Lombardo, Joseph", "JOSH SHAPIRO", "Governor Sarah Huckabee
     Sanders"), the list's form kept beside them; a party the list
     abbreviates is spelled out from its key or statute
-    (`statewide.PARTY_CODES`), and an unexplained code fails the build.
+    (`statewide.PARTY_CODES`), and an unexplained code fails the build;
+    a major party's full name is the one word the holder line beside it
+    uses ("Democratic Party" is "Democratic", as on the race cards).
     Write-ins apart, listed by surname and said to be; no money or
     platform, never a profile (rule 27), never joined to one by a name
     (rule 25). A photograph since the owner's decision of 2026-10-19, by

@@ -234,6 +234,17 @@ class TestNames(unittest.TestCase):
         self.assertEqual(words("VT", "FREEDOM AND UNITY"), "Freedom and Unity")
         self.assertEqual(words("TX", "GREEN"), "Green")
         self.assertEqual(words("ND", "Democratic-NPL"), "Democratic-NPL")
+        # PR #140 review: Nevada's list's "Democratic Party" sat under a
+        # holder line reading "Democratic". The major parties read as one
+        # word, each part of a fusion line alike; a minor party's own name,
+        # or a state's branch of one, is the list's.
+        self.assertEqual(words("NV", "Democratic Party"), "Democratic")
+        self.assertEqual(words("NV", "Republican Party"), "Republican")
+        self.assertEqual(words("CO", "Libertarian Party"), "Libertarian")
+        self.assertEqual(words("NV", "Libertarian Party of Nevada"), "Libertarian Party of Nevada")
+        self.assertEqual(words("CT", "Republican Party; Independent Party"),
+                         "Republican; Independent Party")
+        self.assertEqual(words("MI", "U.S. Taxpayers Party"), "U.S. Taxpayers Party")
         self.assertEqual(words("IN", "Write-In (National Socialist American Workers')", True),
                          "National Socialist American Workers'")
         self.assertIsNone(words("FL", "WRI", True))
@@ -299,6 +310,13 @@ class TestNevadasOwnList(unittest.TestCase):
                              sorted(rows), key)
             for name, party in rows:
                 self.assertIn(f"{name} | ", o["list"]["quote"], key)
+            # The page reads the major parties as the holder line does.
+            parties = {p["printed"]: p.get("party") for p in
+                       self.payload["states"]["NV"]["ballot2026"]["offices"][key]
+                       ["candidates"]["candidates"]}
+            for name, party in rows:
+                self.assertEqual(parties[name], {"Democratic Party": "Democratic",
+                                                 "Republican Party": "Republican"}.get(party, party))
             shown = self.payload["states"]["NV"]["ballot2026"]["offices"][key]["candidates"]
             self.assertEqual(shown["source"],
                              "the Nevada Secretary of State’s certified list of candidates")

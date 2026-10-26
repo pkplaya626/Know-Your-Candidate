@@ -4920,13 +4920,15 @@
      "field": "earlyVoting.start",
      "url": "https://www.nvsos.gov/elections/election-information/2026-election-information",
      "quote": "Early Voting for the November General runs October 17th through October 30th. Election Day is November 3rd.",
-     "pageUpdated": null
+     "pageUpdated": null,
+     "read": "2026-10-25"
     },
     {
      "field": "earlyVoting.end",
      "url": "https://www.nvsos.gov/elections/election-information/2026-election-information",
      "quote": "Early Voting for the November General runs October 17th through October 30th. Election Day is November 3rd.",
-     "pageUpdated": null
+     "pageUpdated": null,
+     "read": "2026-10-25"
     },
     {
      "field": "earlyVoting.start",

@@ -2882,6 +2882,11 @@ async function testStates() {
         offices.lt.candidates.candidates.some((c) => c.party === "Independent American Party") &&
         offices.sos.candidates.candidates.some((c) => c.party === "Libertarian Party of Nevada") &&
         !/\((IAP|LPN|NPP|DEM|REP)\)/.test(gov.textContent), gov.textContent.slice(0, 400));
+    // PR #140 review: "Nicole Jeanette Cannizzaro (Democratic Party)" stood
+    // under "Aaron Ford (Democratic)"; the major parties read as one word.
+    check("the major parties in the one word the holder lines use",
+      offices.ag.candidates.candidates.some((c) => c.party === "Democratic") &&
+        !/\((Democratic|Republican) Party\)/.test(gov.textContent), gov.textContent.slice(0, 400));
     const lines = [...gov.querySelectorAll(".gov-holder-status")].map((p) => p.textContent);
     check("the holder lines cite the certified list",
       lines.some((t) => /^Joe Lombardo is among the candidates for this office \(the Nevada Secretary of State’s certified list of candidates\)/.test(t)) &&
@@ -3237,6 +3242,15 @@ async function testStates() {
     check("Nevada's October 20 is the last day to register and still be mailed a ballot",
       !!nvMail && /October 20, 2026/.test(nvMail.textContent) && /mailed a ballot/.test(nvMail.textContent) &&
         /Today/.test(nvMail.textContent), nvMail && nvMail.textContent);
+    // PR #140 review: nvsos.gov's early-voting words were read by hand on
+    // 2026-10-25, not on the record's read and check days.
+    const nvNote = (nvVote.D.querySelector("#voting") || {}).textContent || "";
+    check("Nevada's note gives the day nvsos.gov was read",
+      /read on 2026-10-17 and checked again on 2026-10-18 \(nvsos\.gov read on 2026-10-25\);/.test(nvNote),
+      nvNote.slice(nvNote.indexOf("Each date"), nvNote.indexOf("Each date") + 200));
+    const maNote = (maVote.D.querySelector("#voting") || {}).textContent || "";
+    check("a state with no later reading says nothing more",
+      /checked again on 2026-10-18; where/.test(maNote) && !/ read on 2026-10-2/.test(maNote));
     check("North Carolina after its deadline: the regular deadline, same-day registration until October 31",
       /The regular deadline to register for November 3 was October 9, 2026; you can still register and vote at the same time, until October 31, 2026/.test(lead(ncVote)) &&
         !!ncVote.D.querySelector('#voting .vote-dates li[data-kind="sameday"]') &&
@@ -7948,6 +7962,18 @@ async function testLegislatures() {
       const c = window.kycLegislature.NE.chambers.upper;
       check("the term is said where the state's record states it",
         !c.termYears || summary.includes("Members serve " + c.termYears + "-year terms"), summary);
+    });
+  }
+  {
+    // PR #140 review: Nevada's Senate record, "11 districts: 2, 8, 9, ...",
+    // read "The state's record: : 2, 8, 9" once its count was dropped.
+    const { D, errors } = await buildPage("legislature/nv.html");
+    suite("legislature/nv.html — the state's record names its districts", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      D.querySelector('.segmented [data-chamber="upper"]').click();
+      const ballot = (D.querySelector("#legPanelBody .leg-ballot") || {}).textContent || "";
+      check("the list reads as districts, with one colon",
+        /The state's record: Districts 2, 8, 9, 10\b/.test(ballot) && !/: :/.test(ballot), ballot);
     });
   }
   {
