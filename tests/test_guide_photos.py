@@ -795,6 +795,100 @@ class TestOregon(Root):
         self.assertEqual((photos, unread), ({}, {"H-OR-01-2026"}))
 
 
+class TestTheRefreshOrder(Root):
+    """The refresh runs ``guidephotos``, then ``photocopies``, then the
+    build. On 2026-10-26 the runner's zlib wrote Oregon's decoded PNGs in
+    other bytes than the zlib-ng that made the committed files, so each was
+    hosted under a new name and the old let go; ``photocopies`` then read
+    the last build's people files, found four nominees "showing" files the
+    manifest no longer listed (photo-hosted-unlisted), and failed."""
+
+    KEY = "person:FEC_H6OR01308"
+    kahl = TestOregon.kahl
+    pages = TestOregon.pages
+
+    def fetch_or(self, people):
+        cache, problems = guide_photos.fetch(self.root, profiles=people, stategov={},
+                                             getter=Getter(self.pages()), log=lambda *a: None)
+        guide_photos.save_cache(cache, self.root)
+        return cache, problems
+
+    def build(self):
+        """The people as a build shows them, written where the build writes
+        them (``photocopies.read_people`` reads them back)."""
+        from kyc import emit
+        people = [self.kahl()]
+        guide_photos.apply_people(people, guide_photos.load_cache(self.root),
+                                  photocopies.load(self.root))
+        directory = os.path.join(self.root, emit.PEOPLE_DIR)
+        os.makedirs(directory, exist_ok=True)
+        with open(os.path.join(directory, "OR.js"), "w", encoding="utf-8", newline="") as handle:
+            handle.write("window.kycPeopleFile = " + json.dumps({"people": people}) + ";\n")
+        return people
+
+    def other_zlib(self):
+        """A zlib whose compressed bytes differ for the same pixels."""
+        import zlib
+        real = zlib.compress
+        return mock.patch.object(zlib, "compress", lambda data, level=-1: real(data, 1))
+
+    def test_another_zlibs_bytes_are_another_file_only_where_the_pixels_differ(self):
+        from kyc import jpx
+        self.fetch_or([self.kahl()])
+        people = self.build()
+        hosted = people[0]["photos"][0]
+        self.assertTrue(hosted.startswith("photos/"))
+        with self.other_zlib():
+            fresh = guide_photos.read_oregon({"H-OR-01-2026": [self.kahl()]},
+                                             getter=Getter(self.pages()))[0][self.KEY]
+            self.assertNotEqual(fresh["photo"], hosted)  # the test's premise
+            cache, problems = self.fetch_or(photocopies.read_people(self.root))
+        self.assertEqual(cache["photos"][self.KEY]["photo"], hosted)
+        self.assertFalse([p for p in problems if "photograph changed" in p], problems)
+        name = hosted[len("photos/"):]
+        self.assertEqual(photocopies.load(self.root)["hosted"][name]["for"], [self.KEY])
+        with open(os.path.join(self.root, photocopies.PHOTOS_DIR, name), "rb") as handle:
+            self.assertEqual(jpx.png_pixels(handle.read()), jpx.png_pixels(fresh["_data"]))
+        self.assertEqual(os.listdir(os.path.join(self.root, photocopies.PHOTOS_DIR)), [name])
+
+    def test_copies_after_the_guides_see_what_the_next_build_shows(self):
+        self.fetch_or([self.kahl()])
+        old = self.build()[0]["photos"][0]
+        # The guide's photograph is another file now (a new photograph, or
+        # bytes no earlier file holds): the old one is let go at once.
+        with self.other_zlib(), mock.patch.object(guide_photos, "same_decode", return_value=None):
+            cache, _ = self.fetch_or(photocopies.read_people(self.root))
+        new = cache["photos"][self.KEY]["photo"]
+        self.assertNotEqual(new, old)
+        self.assertNotIn(old[len("photos/"):], photocopies.load(self.root)["hosted"])
+        # photocopies reads the last build's people files, which still show
+        # the old file, and judges them as the next build will show them.
+        with mock.patch("kyc.legislature.build", return_value={}), \
+                mock.patch("kyc.federal_build.build", return_value=({}, [])), \
+                mock.patch("kyc.stategov.build", return_value=({}, [])):
+            shown = photocopies.gather(self.root)
+        self.assertEqual(sorted(shown.hosted), [new])
+        self.assertEqual(sorted(shown.hosted[new]["records"]), [self.KEY])
+        issues = photocopies.problems(photocopies.load(self.root), self.root, shown)
+        self.assertEqual([i for i in issues if i[0] == "error"], [])
+        self.assertFalse([i for i in issues if i[1] == "photo-hosted-orphan"], issues)
+        # And the people file as the build will write it shows the new file,
+        # credited, the way gather took it.
+        self.assertEqual(self.build()[0]["photos"][0], new)
+
+    def test_one_the_guide_no_longer_pictures_is_shown_none(self):
+        self.fetch_or([self.kahl()])
+        self.build()
+        guide_photos.save_cache({"photos": {}}, self.root)
+        people = photocopies.read_people(self.root)
+        self.assertEqual(guide_photos.reapply_people(people, guide_photos.load_cache(self.root),
+                                                     photocopies.load(self.root)), 0)
+        self.assertEqual(people[0]["photos"], ["placeholder"])
+        self.assertEqual(people[0]["photo_url"], "placeholder")
+        for field in ("photoSource", "photoCredit", "photoCopy"):
+            self.assertNotIn(field, people[0])
+
+
 class TestTheCommittedCache(unittest.TestCase):
     ROOT = os.path.join(os.path.dirname(__file__), "..")
 
