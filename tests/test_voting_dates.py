@@ -95,6 +95,41 @@ class TestSources(unittest.TestCase):
                           ("https://www.govinfo.gov/content/pkg/USCODE-2024-title48/x", "GU")):
             self.assertTrue(voting_dates.official_source(url, code)[0], (url, code))
 
+    def test_nevadas_secretary_of_state_is_on_its_own_domain(self):
+        # nvsos.gov is the Secretary of State's own site; it once needed an
+        # override entry (overrides.MEASURE_SOURCES_ELSEWHERE) to count for
+        # Nevada at all. It counts for Nevada alone, and a county's page
+        # still does not.
+        url = "https://www.nvsos.gov/elections/election-information/2026-election-information"
+        self.assertEqual(voting_dates.official_source(url, "NV"), (True, "nvsos.gov"))
+        self.assertFalse(voting_dates.official_source(url, "AZ")[0])
+        self.assertFalse(voting_dates.official_source("https://www.clarkcountynv.gov/x", "NV")[0])
+        self.assertFalse(voting_dates.official_source("https://nvsos.gov.example.com/x", "NV")[0])
+
+    def test_nevadas_early_voting_cites_the_offices_own_words_first(self):
+        record = voting_dates.load(".")["states"]["NV"]
+        for field in ("earlyVoting.start", "earlyVoting.end"):
+            first = next(s for s in record["sources"] if s["field"] == field)
+            self.assertTrue(first["url"].startswith("https://www.nvsos.gov/"), field)
+            self.assertIn("October 17th through October 30th", first["quote"])
+        self.assertNotIn("Verify against nvsos.gov", record["notes"])
+
+    def test_a_source_read_later_says_its_own_day(self):
+        # PR #140 review: the note under the dates said every date was "read
+        # on 2026-10-17 and checked again on 2026-10-18" over nvsos.gov's
+        # early-voting words, read by hand on 2026-10-25.
+        data = voting_dates.load(".")
+        page = voting_dates.for_page(data)
+        self.assertEqual(page["states"]["NV"]["reread"],
+                         [{"d": "2026-10-25", "labels": ["nvsos.gov"]}])
+        # A record with no source read later carries nothing.
+        self.assertNotIn("reread", page["states"]["GA"])
+        # A read day must be a day of the cycle.
+        record = copy.deepcopy(data["states"]["NV"])
+        record["sources"][0]["read"] = "Oct 25"
+        self.assertTrue(any("is not a day" in p for p in
+                            voting_dates.state_problems("NV", record, {})))
+
     def test_every_jurisdiction_has_its_own_domains(self):
         self.assertEqual(set(voting_dates.JURISDICTION_DOMAINS), voting_dates.JURISDICTIONS)
 

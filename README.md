@@ -2189,9 +2189,13 @@ Under each office on the ballot, the candidates its election office lists
 jurisdiction by jurisdiction on 2026-10-18 from each Secretary of State's,
 board of elections' or election commission's own list - a county election
 office's or another state body's only where the state's own could not be
-read or does not exist (Arkansas, Arizona, Nevada) - with every list
+read or does not exist (Arkansas, Arizona) - with every list
 re-opened by a second reader. Ballotpedia, Wikipedia, news and party sites
-were leads, never sources (rule 50). 129 offices in 42 jurisdictions; the
+were leads, never sources (rule 50). A list the office serves only to a
+person's browser is read by hand from its own page, quoted and dated:
+Nevada's Secretary of State answers every script with a bot check, and its
+statewide certified list, read that way on 2026-10-25, replaced Clark
+County's notice of the general election, which names the same people. 129 offices in 42 jurisdictions; the
 build log counts the candidates, the lists whose own words certify them and
 those that are not the state's own.
 
