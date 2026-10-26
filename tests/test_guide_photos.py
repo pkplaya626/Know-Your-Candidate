@@ -751,18 +751,26 @@ class TestOregon(Root):
         self.assertEqual(codes, ["photo-hosted-unrecorded"])
 
     def test_a_short_form_needs_its_evidenced_entry(self):
-        russ = profile("FEC_H2OR01240", "David Honorable Russ", "RUSS, DAVID HONORABLE",
+        russ = profile("FEC_H2OR01240", "David Russ", "RUSS, DAVID HONORABLE",
                        state="OR", district=6)
-        book = oregon_book([(274.7, "US Representative, 6th District", ["David", "Russ"],
-                             "Republican")])
-        pages = {guide_photos.OR_INDEX: OR_INDEX_PAGE, BOOK12: book}
+        pages = lambda given: {guide_photos.OR_INDEX: OR_INDEX_PAGE, BOOK12: oregon_book(  # noqa: E731
+            [(274.7, "US Representative, 6th District", [given, "Russ"], "Republican")])}
+        # "Honorable" is an honorific, not a name: the pamphlet's "David
+        # Russ" is the filing's words, and joins without an entry.
         with mock.patch("kyc.overrides.GUIDE_NAME_FORMS", {}):
             photos, problems, _ = guide_photos.read_oregon({"H-OR-06-2026": [russ]},
-                                                           getter=Getter(pages))
+                                                           getter=Getter(pages("David")))
+        self.assertEqual(sorted(photos), ["person:FEC_H2OR01240"])
+        # A short form the filing does not write needs its evidenced entry.
+        with mock.patch("kyc.overrides.GUIDE_NAME_FORMS", {}):
+            photos, problems, _ = guide_photos.read_oregon({"H-OR-06-2026": [russ]},
+                                                           getter=Getter(pages("Dave")))
         self.assertEqual(photos, {})
-        self.assertTrue(any("'David Russ' shares a surname" in p for p in problems), problems)
-        photos, problems, _ = guide_photos.read_oregon({"H-OR-06-2026": [russ]},
-                                                       getter=Getter(pages))
+        self.assertTrue(any("'Dave Russ' shares a surname" in p for p in problems), problems)
+        forms = {("OR", "Dave Russ"): ("person:FEC_H2OR01240", "a test's evidence")}
+        with mock.patch("kyc.overrides.GUIDE_NAME_FORMS", forms):
+            photos, problems, _ = guide_photos.read_oregon({"H-OR-06-2026": [russ]},
+                                                           getter=Getter(pages("Dave")))
         self.assertEqual(sorted(photos), ["person:FEC_H2OR01240"])
 
     def test_a_colour_or_unreadable_image_gives_none(self):

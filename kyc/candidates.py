@@ -302,7 +302,9 @@ _SUFFIXES = {"JR": "Jr.", "SR": "Sr.", "II": "II", "III": "III", "IV": "IV",
 # read as noise wherever the treasurer typed them: "Rudolph Dr. Moise",
 # "M.D. Jd Razack Nizam", "Joseph Dr. Joe Ph.d. Arminio". They are dropped
 # from the display name; the filed form stays on the profile as filedName.
-_HONORIFICS = {"MR", "MRS", "MS", "MISS", "DR", "HON", "REV", "SEN", "REP",
+# "HONORABLE" spelled out is one: OR-6's "RUSS, DAVID HONORABLE" was shown
+# as "David Honorable Russ".
+_HONORIFICS = {"MR", "MRS", "MS", "MISS", "DR", "HON", "HONORABLE", "REV", "SEN", "REP",
                "PROF", "CAPT", "COL", "GEN", "LT", "MAJ", "SGT", "CMDR",
                "MAYOR", "JUDGE", "GOV", "ATTY", "RABBI", "PASTOR", "FR",
                "MD", "PHD", "DDS", "DVM", "ESQ", "JD", "MBA", "CPA", "RN",

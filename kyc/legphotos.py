@@ -1187,6 +1187,10 @@ def settle(http, code, record, candidate, previous_files, today, starts):
         # once `photocopies` has made one, after every check below - the
         # checks a heavy file used to skip, so it is checked as theirs.
         chosen = dict(smallest, heavy=True)
+    if min(chosen["width"], chosen["height"]) <= 1:
+        # A placeholder pixel, as Michigan's House Democrats' files load
+        # (statelegs.portrait_body): no photograph, and no empty box.
+        return dict(base, withheld=f"an image of {chosen['width']}x{chosen['height']} pixels")
     if landscape(chosen):
         return dict(base, withheld=f"a landscape frame ({chosen['width']}x{chosen['height']})")
     same = candidate.get("sameShapeAs")
@@ -1337,7 +1341,8 @@ def open_states_image_ok(record):
     from .legislature import search_thumbnail
     from .photos import refused
     image = record.get("image")
-    return (bool(image) and not search_thumbnail(image) and record.get("imageStatus") != "broken"
+    return (bool(image) and not search_thumbnail(image)
+            and record.get("imageStatus") not in ("broken", "notImage")
             and not record.get("imageShared") and not refused(image, _secure(image)))
 
 
