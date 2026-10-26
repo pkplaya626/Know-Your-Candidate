@@ -50,6 +50,8 @@ import re
 import time
 import urllib.request
 
+from . import tls
+
 USER_AGENT = "Mozilla/5.0 (compatible; know-your-candidate/1.0)"
 TIMEOUT = 60
 GAP = 2.0           # seconds between requests to one state's server
@@ -431,7 +433,10 @@ def _read(url):
         data = json.dumps(body).encode("utf-8")
         headers["Content-Type"] = "application/json"
     request = urllib.request.Request(url, data=data, headers=headers)
-    with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+    # Alaska's server sends the wrong intermediate; the context completes
+    # its chain from the certificate's own issuer (kyc/tls.py).
+    with urllib.request.urlopen(request, timeout=TIMEOUT,
+                                context=tls.context()) as response:
         return response.read().decode("utf-8", "replace")
 
 

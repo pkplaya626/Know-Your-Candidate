@@ -207,7 +207,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2428 tests, no dependencies
+python -m unittest discover tests             # 2475 tests, no dependencies
 npm install && npm test                       # 3434 real-DOM checks (needs jsdom)
 ```
 
@@ -263,7 +263,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
    whose source cannot be read keeps its committed cache and the run goes on
    (`continue-on-error`). On 2026-10-19 one association's roster that did not
    resolve in DNS failed the whole daily refresh, money and results with it,
-   because four state-government commands ran as one step.
+   because four state-government commands ran as one step. And a kept cache
+   is not a fix: from at least 2026-10-23 every refresh kept Alaska's
+   certified list of 2026-10-17, its guide's photographs and its voting
+   links, because `www.elections.alaska.gov` sends the wrong intermediate
+   certificate and Python, unlike a browser, does not fetch the right one
+   from the certificate's Authority Information Access. A server that sends
+   the wrong intermediate is completed from its own certificate's issuer,
+   never trusted less: the intermediate is vendored under `kyc/certs/`
+   with its source, fingerprints and checks, and `kyc/tls.context()` adds
+   it to the default roots, verification on and partial chains off, for
+   every reader that fetches Alaska's site.
 
 9. **Never add a topical hint to a Wikipedia search.** `Dan Osborn NE politician`
    pushes his own article out of the results; `Dan Osborn` returns it first.
