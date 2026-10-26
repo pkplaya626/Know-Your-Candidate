@@ -683,6 +683,10 @@ class TestReadByHand(unittest.TestCase):
             self.assertTrue(row["readByHand"]["url"].startswith("https://"))
         self.assertEqual(ag["title"], "Attorney General")
         self.assertEqual(sos["name"], "Francisco V. Aguilar")
+        # The page read by hand names him, not his party: that is still the
+        # non-member listing's, and credited to it (rule 55).
+        self.assertEqual(sos["partyFrom"], officers.NASS_BY)
+        self.assertNotIn("partyFrom", ag)
 
     def test_without_an_entry_nothing_changes(self):
         ag, sos = self.given(self.cache(), {("XX", "ag"): self.ENTRIES[("MA", "ag")]})

@@ -1276,6 +1276,9 @@ def for_state(code, cache, disputes):
                 # page, read by hand, names them (OFFICERS_READ_BY_HAND).
                 person["name"] = hand[0]
                 person["readByHand"] = _by_hand_record(hand[1])
+                # The page read by hand names the holder, not their party:
+                # that is still the non-member listing's, and said so.
+                person["partyFrom"] = NASS_BY
             else:
                 person["notMember"] = True
                 if sos.get("officeRead"):

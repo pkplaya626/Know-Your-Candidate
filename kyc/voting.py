@@ -476,6 +476,8 @@ def by_hand(cache):
     shown = effective(cache)
     out = {}
     for (code, kind), (url, day, what, *_seen) in sorted(overrides.VOTING_LINKS_BY_HAND.items()):
+        if what not in (OPENED_BY_HAND, HUMAN_CHECK):
+            continue  # a mistyped word counts for nothing (by_hand_problems says so)
         link = (shown.get(code) or {}).get(kind)
         if link and link["url"] == url and status.get(url) not in (LIVE, DEAD):
             out.setdefault(code, {})[kind] = [day, what]

@@ -1542,7 +1542,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and "each link opened" is said only of links found live. A link a person
     opened by hand where the weekly check could not
     (`overrides.VOTING_LINKS_BY_HAND`) counts as opened on its own day, for
-    `voting.BY_HAND_DAYS` on the reader's calendar, and one whose portal asks
+    `voting.BY_HAND_DAYS` on the reader's calendar, and is never folded into
+    "each link opened" on the check's day (Rhode Island's four lookups read
+    so), and one whose portal asks
     for proof of being a person says so, never "could not be confirmed".
     A next election year is a statute's or the state's record's
     (`ballot2026.NEXT`), never a term length's: Virginia's governor was

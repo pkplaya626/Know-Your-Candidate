@@ -639,7 +639,10 @@
         notConfirmed(off.website, off.officeRead, off.title.toLowerCase()) + "</p>";
     } else {
       var facts = [off.selection, off.electionChief ? "Chief election official" : "",
-        off.listedBy ? "Party: a member of the " + off.listedBy : ""].filter(Boolean);
+        off.listedBy ? "Party: a member of the " + off.listedBy : "",
+        // A holder confirmed by hand where the association does not speak
+        // for the office: the party is still only the association's listing.
+        off.partyFrom ? "Party as the " + off.partyFrom + " lists it" : ""].filter(Boolean);
       var links = [off.website ? link(off.website, "Office") : "", off.office ? link(off.office, "Office") : "",
         off.bio ? link(off.bio, "Biography") : ""].filter(Boolean);
       var contact = [off.phone, off.email, off.address].filter(Boolean).map(KYC.escapeHtml);

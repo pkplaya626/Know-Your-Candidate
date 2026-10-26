@@ -316,15 +316,22 @@
         var entry = hand[k];
         if (!entry) return true;
         if (entry[1] === "human-check") human.push(k);
-        else (byDay[entry[0]] = byDay[entry[0]] || []).push(k);
+        else if (entry[1] === "opened") (byDay[entry[0]] = byDay[entry[0]] || []).push(k);
+        else return true;
         return false;
       });
       var opened = Object.keys(byDay).sort().map(function (day) {
         return quoted(byDay[day], labels) + " opened by hand " + KYC.escapeHtml(day);
       });
-      if (!missed.length && !human.length) {
-        out.push("Each link opened " + KYC.escapeHtml(all._opened) +
-          (opened.length ? "; " + opened.join("; ") : "") + ".");
+      if (!missed.length && !human.length && !opened.length) {
+        out.push("Each link opened " + KYC.escapeHtml(all._opened) + ".");
+      } else if (!missed.length && !human.length) {
+        // "Each link opened <the check's day>" would claim the check opened
+        // the links only a person did (rule 79): name what the check opened.
+        var unreached = (all._unreached || {})[code] || [];
+        var live = shown.filter(function (k) { return unreached.indexOf(k) === -1; });
+        out.push((live.length ? quoted(live, labels) + " opened " + KYC.escapeHtml(all._opened) + "; " : "") +
+          opened.join("; ") + ".");
       } else {
         out.push("Links checked " + KYC.escapeHtml(all._opened) +
           (opened.length ? "; " + opened.join("; ") : "") +

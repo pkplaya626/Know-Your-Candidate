@@ -505,19 +505,21 @@ VOTING_LINKS = {
 #
 # - "opened": the state's own page opened; the page counts the link as
 #   opened, on this day, as it counts the weekly check's;
-# - "human-check": the state's portal asked the person to prove they are
-#   human, which is never passed (nothing is got past a check), so the page
-#   says the portal asks visitors to show they are people. A link on the
-#   same host as one that asked is recorded as that host's, not opened.
+# - "human-check": the state's portal first asked the person to show they
+#   are a person, and opened only after that (the check cleared without
+#   Claude acting on it; nothing is got past a check), so the page says the
+#   portal asks visitors to show they are people and this site cannot open
+#   it itself. The last two fields say what the check was, then what opened.
 #
 # An entry counts only while that link is the one shown and the weekly check
 # has not found it live or dead, and only for voting.BY_HAND_DAYS from its
 # day on the reader's calendar, so a later failure is seen again
 # (validate: voting-by-hand-stale). Read on 2026-10-26 (research/by-hand-
-# 2026-10-26/NOTES.md). Links the browser extension did not allow (New
-# York's, Georgia's, Michigan's, Ohio's registration and lookup, New
-# Hampshire's registration page, Kentucky's registration and polling,
-# Alaska's voter portal) were not opened and keep the weekly check's words.
+# 2026-10-26/NOTES.md), in two rounds: the second once PK had allowed the
+# remaining sites in the browser extension (New York's, Georgia's,
+# Michigan's, Ohio's registration and lookup, New Hampshire's registration
+# page, Kentucky's registration and polling, Alaska's voter portal and
+# registration page). All 34 links a page showed as unconfirmed opened.
 _BY_HAND_DAY = "2026-10-26"
 VOTING_LINKS_BY_HAND = {
     ("MT", "absentee"): ("http://sos.mt.gov/elections/absentee", _BY_HAND_DAY, "opened",
@@ -561,15 +563,56 @@ VOTING_LINKS_BY_HAND = {
                          "opened", "", "Welcome to your Voter Information Center"),
     ("KY", "status"): ("https://vrsws.sos.ky.gov/VIC/", _BY_HAND_DAY, "opened", "",
                        "Voter Information Center"),
-    ("AK", "absentee"): ("http://www.elections.alaska.gov/Core/AKVoteEarly.php", _BY_HAND_DAY,
-                         "human-check", "", "Human Verification"),
+    # Second round, after PK allowed the remaining sites in the extension.
+    ("NY", "absentee"): ("http://www.elections.ny.gov/VotingAbsentee.html", _BY_HAND_DAY,
+                         "opened", "https://elections.ny.gov/request-ballot",
+                         "Request a Ballot | New York State Board of Elections"),
+    ("NY", "polling"): ("https://voterlookup.elections.ny.gov/", _BY_HAND_DAY, "opened", "",
+                        "Voter Search Screen for VoterLookUp"),
+    ("NY", "status"): ("https://voterlookup.elections.ny.gov/", _BY_HAND_DAY, "opened", "",
+                       "Voter Search Screen for VoterLookUp"),
+    ("GA", "polling"): ("http://www.mvp.sos.ga.gov/", _BY_HAND_DAY, "opened",
+                        "https://mvp.sos.ga.gov/s/", "GA My Voter Page"),
+    ("GA", "absentee"): ("https://www.mvp.sos.ga.gov/MVP/mvp.do", _BY_HAND_DAY, "opened",
+                         "https://mvp.sos.ga.gov/s/", "GA My Voter Page"),
+    ("GA", "status"): ("https://www.mvp.sos.ga.gov/MVP/mvp.do", _BY_HAND_DAY, "opened",
+                       "https://mvp.sos.ga.gov/s/", "GA My Voter Page"),
+    ("GA", "register"): ("https://mvp.sos.ga.gov/s/olvr-home", _BY_HAND_DAY, "opened", "",
+                         "Home | GA SOS VR"),
+    ("MI", "status"): ("https://mvic.sos.state.mi.us/Voter/Index", _BY_HAND_DAY, "opened", "",
+                       "Your voter information"),
+    ("MI", "polling"): ("https://mvic.sos.state.mi.us/Voter/index", _BY_HAND_DAY, "opened", "",
+                        "Your voter information"),
+    ("OH", "register"): ("https://olvr.ohiosos.gov/", _BY_HAND_DAY, "opened", "",
+                         "Welcome – Online Voter Registration – Ohio Secretary of State"),
+    ("OH", "absentee"): ("https://www.ohiosos.gov/elections/frequently-asked-questions"
+                         "#absentee-voting", _BY_HAND_DAY, "opened", "",
+                         "Ohio Election FAQ | Voter Registration, Absentee Voting & Election Day "
+                         "Information"),
+    ("OH", "status"): ("https://voterlookup.ohiosos.gov/voterlookup.aspx", _BY_HAND_DAY, "opened",
+                       "", "My Voter Information - Voter Search"),
+    ("NH", "register"): ("https://www.sos.nh.gov/elections/voters/register-vote", _BY_HAND_DAY,
+                         "opened", "https://www.sos.nh.gov/elections/register-vote",
+                         "Register to Vote | New Hampshire Secretary of State"),
+    ("KY", "register"): ("https://vrsws.sos.ky.gov/ovrweb/", _BY_HAND_DAY, "opened", "",
+                         "Welcome - Kentucky State Board of Elections"),
+    ("KY", "polling"): ("https://vrsws.sos.ky.gov/ovrweb/govoteky", _BY_HAND_DAY, "opened",
+                        "https://vrsws.sos.ky.gov/ovrweb/govoteky/",
+                        "Voter Information Guide - Kentucky State Board of Elections"),
+    ("AK", "status"): ("https://myvoterportal.alaska.gov/", _BY_HAND_DAY, "opened", "",
+                       "Voter Information Lookup - Division of Elections"),
     ("AK", "register"): ("https://www.elections.alaska.gov/voter-information/#Reg", _BY_HAND_DAY,
-                         "human-check", "",
-                         "not opened: the same host as AKVoteEarly.php, which asked"),
+                         "opened", "", "Voter Information - Division of Elections"),
+    # The portal asked first that the visitor show they are a person.
+    ("AK", "absentee"): ("http://www.elections.alaska.gov/Core/AKVoteEarly.php", _BY_HAND_DAY,
+                         "human-check", "https://www.elections.alaska.gov/absentee-and-early-voting/",
+                         "'Human Verification', then 'Absentee and Early Voting - Division of "
+                         "Elections'"),
     ("NH", "polling"): ("https://app.sos.nh.gov/viphome", _BY_HAND_DAY, "human-check",
-                        "https://app.sos.nh.gov/captcha/challenge", "Verification"),
+                        "https://app.sos.nh.gov/captcha/challenge",
+                        "'Verification', then 'Home'"),
     ("NH", "status"): ("https://app.sos.nh.gov/voterinformation", _BY_HAND_DAY, "human-check", "",
-                       "not opened: the same host as viphome, which asked"),
+                       "'Verification', then 'Voter Information'"),
 }
 
 # Links on a state's government block that the rosters give wrongly, each
@@ -1847,8 +1890,13 @@ COURT_ROSTERS = {
 # (research/by-hand-2026-10-26/NOTES.md); nothing was got past a bot check.
 OFFICERS_READ_BY_HAND = {
     # nvsos.gov answers a script with a bot check; NASS lists Nevada as not a
-    # member. The page's title names him beside the office; its text says he
-    # took office in 2023.
+    # member. The office's "About" page for him (under Office Facts) is titled
+    # with his name beside the office's, which is what passes rule 56's test;
+    # its text, read by the same person, says he "was elected as Nevada
+    # Secretary of State in 2022 and assumed office on January 2, 2023".
+    # That sentence does not pass on its own, and is not made to: rule 56
+    # refuses "<name> was elected as <title>" for every office, since it
+    # also describes a predecessor.
     ("NV", "sos"): ("Francisco V. Aguilar",
                     "https://www.nvsos.gov/sos/sos-information/office-facts/about-francisco-v-aguilar",
                     "2026-10-26",

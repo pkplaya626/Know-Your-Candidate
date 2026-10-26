@@ -392,8 +392,8 @@ BROWSER_TOOL = os.path.join("tools", "read_court_pages.mjs")
 # is a clause the pages finish with ", so its members are not listed here."
 UNREADABLE = {
     "AL": ("https://judicial.alabama.gov/appellate/supremecourt",
-           "The court's site could not be reached, by this site or from a person's own "
-           "browser, on October 26, 2026"),
+           "The court's site could not be reached by this site's automated reader, nor from "
+           "a person's own browser on October 26, 2026"),
 }
 
 # A roster grows stale without a sound: a court kept at its last good read

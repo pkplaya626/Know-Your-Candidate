@@ -3172,21 +3172,55 @@ async function testStates() {
   suite("states/ak.html — a portal that asks for proof of being a person says so", () => {
     const hand = (akVote.window.kycBuildMeta.voting._byHand || {}).AK || {};
     const note = akVote.D.querySelector("#voting .state-note").textContent;
-    check("Alaska's early-voting and registration links are behind a check for people",
-      hand.absentee && hand.absentee[1] === "human-check" && hand.register && hand.register[1] === "human-check",
-      JSON.stringify(hand));
+    // NOTES.md: only the early-voting page asked; the registration page and
+    // the voter portal opened by hand with no check.
+    check("only Alaska's early-voting link is behind a check for people",
+      hand.absentee && hand.absentee[1] === "human-check" && hand.register && hand.register[1] === "opened" &&
+        hand.status && hand.status[1] === "opened", JSON.stringify(hand));
     check("said in plain words, not as a failed check",
-      /“Vote absentee or early” and “Register to vote” lead to Alaska's own portal, which asks visitors to show they are people, so this site cannot open them itself\./.test(note) &&
+      /“Vote absentee or early” leads to Alaska's own portal, which asks visitors to show they are people, so this site cannot open it itself\./.test(note) &&
         !/“Vote absentee or early”[^.]*could not be confirmed/.test(note) &&
         !/captcha|CAPTCHA|bot|HTTP|script/.test(note), note);
+    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("the registration page and the voter portal opened by hand, never behind the check",
+      !!said && /“Register to vote”/.test(said[1]) && /“Check your registration”/.test(said[1]) &&
+        !/“Register to vote”[^.]*lead/.test(note) &&
+        !/(“Register to vote”|“Check your registration”)[^;]*could not be confirmed/.test(note), note);
   });
   const nhHand = await buildPage("states/nh.html");
   suite("states/nh.html — the voting block says each link's own state", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
-    check("an absentee page opened by hand, a portal that asks for people, the rest unconfirmed",
-      /“Vote absentee or early” opened by hand 2026-10-26/.test(note) &&
+    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("absentee and registration pages opened by hand, a portal that asks for people",
+      !!said && /“Vote absentee or early”/.test(said[1]) && /“Register to vote”/.test(said[1]) &&
         /“Check your registration” and “Find your polling place” lead to New Hampshire's own portal, which asks visitors to show they are people/.test(note) &&
-        /“Register to vote”[^.]* could not be confirmed by this site's automated check that day/.test(note), note);
+        !/“Register to vote”[^;]* could not be confirmed/.test(note), note);
+  });
+  /* Where every link the check missed was opened by hand, "Each link opened
+   * <the check's day>" would claim the check opened them (rule 79): the
+   * sentence names what the check opened, then what a person did. */
+  const riHand = await buildPage("states/ri.html");
+  const nyHand = await buildPage("states/ny.html");
+  suite("states/ri.html — links opened by hand are never said opened on the check's day", () => {
+    const meta = riHand.window.kycBuildMeta.voting;
+    const note = riHand.D.querySelector("#voting .state-note").textContent;
+    const missed = (meta._unreached || {}).RI || [];
+    check("the weekly check missed Rhode Island's four lookups",
+      ["polling", "register", "status", "absentee"].every((k) => missed.indexOf(k) !== -1), JSON.stringify(missed));
+    check("what the check opened, on its day, then what a person opened, on theirs",
+      !/Each link opened/.test(note) &&
+        new RegExp("“[^”]+” opened " + meta._opened + "; [^;]* opened by hand 2026-10-26\\.").test(note) &&
+        !/could not be confirmed/.test(note), note);
+  });
+  suite("states/ny.html — the second round of links opened by hand", () => {
+    const note = nyHand.D.querySelector("#voting .state-note").textContent;
+    const said = /([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("New York's absentee page and voter lookup opened by hand",
+      !!said && ["Vote absentee or early", "Find your polling place", "Check your registration"].every((w) =>
+        said[1].indexOf("“" + w + "”") !== -1), note);
+    check("and none of them called unconfirmed",
+      !/(“Vote absentee or early”|“Find your polling place”|“Check your registration”)[^;]*could not be confirmed/.test(note),
+      note);
   });
 
   const nd = await buildPage("states/nd.html");
@@ -9156,6 +9190,15 @@ async function testStateGov() {
           line.querySelector("a").getAttribute("href") === off.readByHand.url &&
           /noopener/.test(line.querySelector("a").rel), line && line.textContent);
     }
+    // The page read by hand names Nevada's secretary, not his party: that is
+    // still the listing of an association he is not a member of (rule 55).
+    const nvRow = officerRow(nvGov, "Secretary of state");
+    check("Nevada's party is credited to NASS's listing",
+      !!nvRow && /Party as the National Association of Secretaries of State lists it/.test(nvRow.textContent),
+      nvRow && nvRow.textContent);
+    const nhRow = officerRow(nhGov, "Attorney general");
+    check("an attorney general's party stays its association's membership",
+      !!nhRow && !/Party as the/.test(nhRow.textContent), nhRow && nhRow.textContent);
   });
   suite("state pages — where the office's site cannot confirm a listing, whole sentences", () => {
     const W = nhGov.window;
@@ -9204,7 +9247,7 @@ async function testStateGov() {
       .find((el) => /court's site/.test(el.textContent));
     check("the court's site could not be reached, from a person's browser too, on that day",
       !!court.unreadable && !court.members && !!p &&
-        /^The court's site could not be reached, by this site or from a person's own browser, on October 26, 2026, so its members are not listed here\. You can try the court's own page yourself\.$/.test(p.textContent),
+        /^The court's site could not be reached by this site's automated reader, nor from a person's own browser on October 26, 2026, so its members are not listed here\. You can try the court's own page yourself\.$/.test(p.textContent),
       p && p.textContent);
     check("its page linked in the sentence", !!p && p.querySelector("a").getAttribute("href") === court.url);
   });
