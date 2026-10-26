@@ -234,11 +234,12 @@ class TestOpenedByHand(unittest.TestCase):
         # person. Alaska's registration page opened with no check: only its
         # early-voting page asked. A third round opened twelve curated pages
         # (two of them the replacements for Oklahoma's and New Hampshire's
-        # results) and vote.gov's 56 registration pages.
+        # results) and vote.gov's 56 registration pages; and Nevada's
+        # mail-ballot page, the replacement for its absentee link.
         cache = voting.load_cache(ROOT)
         what = [entry[2] for entry in overrides.VOTING_LINKS_BY_HAND.values()]
         self.assertEqual((what.count(voting.OPENED_BY_HAND), what.count(voting.HUMAN_CHECK)),
-                         (33 + 12 + 56, 3))
+                         (33 + 12 + 56 + 1, 3))
         self.assertEqual(sorted(key for key, entry in overrides.VOTING_LINKS_BY_HAND.items()
                                 if entry[2] == voting.HUMAN_CHECK),
                          [("AK", "absentee"), ("NH", "polling"), ("NH", "status")])
@@ -457,6 +458,34 @@ class TestAsItsSiteLinksIt(unittest.TestCase):
         for words in ("linked from", "https://www.sos.state.co.us/pubs/elections/FAQs/FAQsMain.html",
                       "as 'Mail-in ballots'", "2026-10-26"):
             self.assertIn(words, evidence)
+
+    def test_nevadas_absentee_link_is_its_mail_ballot_page(self):
+        # STATEGOV-10: NASS lists the absentee page for voters with
+        # disabilities, though every Nevada voter is mailed a ballot. The
+        # Secretary of State's "Mail Ballot Voting" page, which its 2026
+        # Election Information page links, is shown, and said to be linked
+        # by the office's site (NOTES.md, "Nevada's absentee link").
+        url = "https://www.nvsos.gov/elections/voters/mail-ballot-voting"
+        disabilities = ("https://www.nvsos.gov/sos/elections/voters/voters-with-disabilities/"
+                        "absentee-voting")
+        self.assertEqual(self.page["NV"]["absentee"], url)
+        self.assertNotIn(disabilities, [links.get("absentee") for code, links in self.page.items()
+                                        if not code.startswith("_")])
+        self.assertIn("absentee", self.page["_siteLinked"]["NV"])
+        self.assertNotIn("absentee", self.page["_nass"]["NV"])
+        self.assertTrue(voting.site_linked("NV", "absentee", url))
+        fix = overrides.VOTING_LINKS[("NV", "absentee")]
+        self.assertEqual(fix[:3], (disabilities, url, None))
+        for words in ("'Mail Ballot Voting | Nevada Secretary of State'",
+                      "all registered voters will receive a ballot by mail",
+                      "linked from the office's '2026 Election Information' page",
+                      "https://www.nvsos.gov/elections/election-information/"
+                      "2026-election-information", "as 'Mail Ballot Voting'",
+                      "opened by hand 2026-10-26"):
+            self.assertIn(words, fix[3])
+        self.assertEqual(overrides.VOTING_LINKS_BY_HAND[("NV", "absentee")],
+                         (url, "2026-10-26", voting.OPENED_BY_HAND, "",
+                          "Mail Ballot Voting | Nevada Secretary of State"))
 
     def test_a_redirect_or_nasss_listing_is_not_the_site_linking(self):
         from unittest import mock

@@ -477,10 +477,23 @@ VOTING_LINKS = {
     ("ND", "status"): (
         "https://www.sos.nd.gov/elections", None, None,
         "no registration to check; NASS lists the general Elections page"),
-    # Audit 2026-10-17, STATEGOV-10. Nevada's absentee link (a page under
-    # "voters-with-disabilities") is held: it answered 403 to a plain
-    # request and drew a blank page in headless Chrome, which concludes
-    # nothing (rule 8) until a person opens it.
+    # Audit 2026-10-17, STATEGOV-10. NASS lists Nevada's absentee page for
+    # voters with disabilities, though every Nevada voter is mailed a
+    # ballot. Held at first (a 403 to a plain request, a blank page in
+    # headless Chrome: rule 8), then read by a person (research/by-hand-
+    # 2026-10-26/NOTES.md, "Nevada's absentee link").
+    ("NV", "absentee"): (
+        "https://www.nvsos.gov/sos/elections/voters/voters-with-disabilities/absentee-voting",
+        "https://www.nvsos.gov/elections/voters/mail-ballot-voting", None,
+        "NASS links the Secretary of State's absentee-voting page for voters with "
+        "disabilities; Nevada mails every registered voter a ballot, and this is the "
+        "Secretary of State's 'Mail Ballot Voting | Nevada Secretary of State': 'With the "
+        "passage of Assembly Bill 321 during the 2021 Legislative Session, all registered "
+        "voters will receive a ballot by mail. You can request to opt-out by submitting "
+        "this form [English], [Spanish], or [Filipino] to your county clerk.' It is linked "
+        "from the office's '2026 Election Information' page (https://www.nvsos.gov/elections/"
+        "election-information/2026-election-information) as 'Mail Ballot Voting' (that "
+        "page's links read 2026-10-25; the page opened by hand 2026-10-26)"),
     ("DC", "absentee"): (
         "https://www.dcboe.org/voters/casting-your-vote/voting-by-special-ballot",
         "https://www.dcboe.org/voters/casting-your-vote/mail-ballot-instructions", None,
@@ -702,6 +715,17 @@ VOTING_LINKS_BY_HAND = {
                         "2026 Election Results"),
     ("NH", "results"): ("https://www.sos.nh.gov/2026-election-results", _BY_HAND_DAY, "opened",
                         "", "2026 Election Results | New Hampshire Secretary of State"),
+    # Nevada's mail-ballot page, the replacement for NASS's absentee link
+    # (STATEGOV-10; NOTES.md, "Nevada's absentee link"). nvsos.gov does not
+    # answer a script alike each time: a plain request had a 403 and
+    # headless Chrome a blank page, and on 2026-10-26 one request with the
+    # weekly check's headers had the page and one without them a 403. The
+    # weekly check has not opened this address yet, so the person's reading
+    # stands until it does (rule 8); once it does, validate says the entry
+    # may go (voting-by-hand-stale).
+    ("NV", "absentee"): ("https://www.nvsos.gov/elections/voters/mail-ballot-voting",
+                         _BY_HAND_DAY, "opened", "",
+                         "Mail Ballot Voting | Nevada Secretary of State"),
     # Alabama's results page (www2.alabamavotes.gov) was still loading after
     # 45 seconds in a person's browser, as judicial.alabama.gov resets this
     # network's connections: nothing concluded (rule 8), and no entry.
