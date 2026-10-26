@@ -454,14 +454,21 @@ VOTING_LINKS = {
         "NASS's page answers 404; in.gov/sos/elections links absentee voting here"),
     ("MD", "polling"): (
         "http://www.elections.state.md.us/voting/where.html",
-        "https://elections.maryland.gov/voting/where.html", None,
-        "the old domain now redirects to the board's home page; this is the same "
-        "'Voter Registration and Polling Place Look-Up' on the current one"),
+        "https://voterservices.elections.maryland.gov/VoterSearch", None,
+        "the old domain now redirects to the board's home page. The Board's 'Voting in "
+        "Maryland' page (https://elections.maryland.gov/voting/index.html) says 'On "
+        "election day, you must vote at your assigned polling place' and links 'assigned "
+        "polling place' here: its Voter Services 'Voter Lookup', 'You can use this tool "
+        "to: ... Find out where to vote.' (opened by hand 2026-10-26; the pages read do "
+        "not link the board's voting/where.html look-up, shown here until then)"),
     ("CO", "absentee"): (
         "https://www.sos.state.co.us/pubs/elections/FAQs/ElectionDay.html",
         "https://www.sos.state.co.us/pubs/elections/FAQs/mailBallotsFAQ.html", None,
         "NASS links the Election Day FAQ; Colorado mails every voter a ballot, and this "
-        "is the Secretary of State's Mail-in Ballots FAQ"),
+        "is the Secretary of State's 'Mail-in Ballots FAQs', linked from its 'Elections & "
+        "Voting Frequently Asked Questions (FAQs)' page "
+        "(https://www.sos.state.co.us/pubs/elections/FAQs/FAQsMain.html, itself linked as "
+        "'FAQs' from the Elections page) as 'Mail-in ballots' (read by hand 2026-10-26)"),
     ("ND", "register"): (
         "https://www.sos.nd.gov/elections/voter",
         "https://www.sos.nd.gov/elections/voter", "Voting in North Dakota",

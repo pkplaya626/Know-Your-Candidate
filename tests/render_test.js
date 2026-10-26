@@ -3378,10 +3378,11 @@ async function testStates() {
   /* "As its site links it" is said only of a page the record shows the
    * office's site linking (voting.site_linked, `_siteLinked`): #146 said it
    * of Oklahoma's results.okelections.gov, where an old address only
-   * redirected. Maryland's polling-place page replaces NASS's on evidence
-   * of what it is, not of a link, and is called the office's page alone. */
+   * redirected. Evidence of what a page is, and not of a link, gives the
+   * office's page alone. */
   const mdLinked = await buildPage("states/md.html");
-  suite("states/ok.html and md.html — 'as its site links it' only where the record shows the link", () => {
+  const coLinked = await buildPage("states/co.html");
+  suite("states/ok.html, md.html and co.html — 'as its site links it' only where the record shows the link", () => {
     const meta = okHand.window.kycBuildMeta.voting;
     const okNote = okHand.D.querySelector("#voting .state-note").textContent;
     check("Oklahoma's results page is one the record shows the Board's site linking",
@@ -3399,13 +3400,20 @@ async function testStates() {
     const mdMeta = mdLinked.window.kycBuildMeta.voting;
     const mdNote = mdLinked.D.querySelector("#voting .state-note").textContent;
     const mdLinks = (mdMeta._siteLinked || {}).MD || [];
-    check("Maryland's polling-place page is not among those its site is recorded linking",
-      !!mdMeta.MD.polling && mdLinks.indexOf("polling") === -1 && mdLinks.indexOf("results") !== -1,
+    /* Maryland's polling-place link is now the Voter Lookup its Board's
+     * "Voting in Maryland" page links (2026-10-26), so it is said so too. */
+    check("Maryland's polling-place link is the lookup its site is recorded linking",
+      mdMeta.MD.polling === "https://voterservices.elections.maryland.gov/VoterSearch" &&
+        mdLinks.indexOf("polling") !== -1 && mdLinks.indexOf("results") !== -1,
       JSON.stringify(mdLinks));
-    check("so it is called the office's own page, and only the results 'as its site links it'",
-      /“Find your polling place” is Maryland's election office's own page\./.test(mdNote) &&
-        /“Official results” is Maryland's election office's own page, as its site links it\./.test(mdNote) &&
-        !/“Find your polling place”[^.]*site links/.test(mdNote), mdNote);
+    check("and both are its office's own pages 'as its site links them'",
+      /“Find your polling place” and “Official results” are Maryland's election office's own pages, as its site links them\./.test(mdNote) &&
+        !mdLinked.D.querySelector('a[href*="voting/where.html"]'), mdNote);
+    const coNote = coLinked.D.querySelector("#voting .state-note").textContent;
+    check("Colorado's mail-ballot FAQ, linked from its FAQs page, is said so",
+      ((coLinked.window.kycBuildMeta.voting._siteLinked || {}).CO || []).indexOf("absentee") !== -1 &&
+        /“Vote absentee or early”[^.]* election office's own pages?, as its site links (it|them)\./.test(coNote),
+      coNote);
   });
   suite("states/nh.html — vote.gov's registration page and the results opened by hand", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
