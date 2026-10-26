@@ -335,7 +335,7 @@ def state_problems(code, record, runoffs):
         if "read" in source and not _ISO_DAY.match(str(source.get("read") or "")):
             out.append(f"{code} {source.get('field')}: read {source.get('read')!r} is not a day "
                        "(YYYY-MM-DD)")
-    fields ={s.get("field") for s in record.get("sources") or []}
+    fields = {s.get("field") for s in record.get("sources") or []}
     for path, stand_ins in SHOWN.items():
         if _shown(record, path) is None:
             continue
