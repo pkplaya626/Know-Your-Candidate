@@ -7318,7 +7318,7 @@
   "name": "Adrian Boafo",
   "original": "https://mgaleg.maryland.gov/2026RS/images/boafo01.jpg",
   "page": "https://mgaleg.maryland.gov/mgawebsite/Members/Details/boafo01",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg"
   ],
@@ -8963,7 +8963,7 @@
   "width": 422
  },
  "person:carrie buck|NV|H": {
-  "bytes": 33014,
+  "bytes": 3918638,
   "chamber": "upper",
   "credit": {
    "by": "Nevada Legislature",
@@ -8971,23 +8971,18 @@
   },
   "district": "5",
   "evidence": "the file Open States lists for Carrie Buck (ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1), served by the Nevada Legislature",
-  "heavy": "3918 KB, over 300 KB; shown smaller from the same file",
-  "height": 500,
+  "heavy": "3918 KB, over 300 KB",
+  "height": 2964,
   "legislator": "ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
   "legislatorName": "Carrie Buck",
   "name": "Carrie Buck",
   "original": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
-  "originalWeight": {
-   "bytes": 3918638,
-   "height": 2964,
-   "width": 2964
-  },
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "state": "NV",
-  "url": "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1",
+  "url": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
   "via": "state-legislature",
-  "width": 500
+  "width": 2964
  },
  "person:casey crabtree|SD|H": {
   "name": "Casey Crabtree",
@@ -9314,6 +9309,9 @@
   },
   "height": 1039,
   "name": "Chris Stigall",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/0/0f/Chris_Stigall_2017_(cropped).jpg"
+  ],
   "set": [
    [
     120,
@@ -11136,7 +11134,7 @@
   "name": "Fred Wellman",
   "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "set": [
    [
     120,
@@ -11811,7 +11809,7 @@
   "name": "Jacqui V Irwin",
   "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
   "page": "https://www.assembly.ca.gov/assemblymembers/42",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
@@ -11941,7 +11939,7 @@
   "name": "James Talarico",
   "original": "https://house.texas.gov/images/members/3685.jpg?v=1",
   "page": "https://house.texas.gov/members/3685",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg",
    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg"
@@ -12544,7 +12542,7 @@
   "width": 1500
  },
  "person:jeremy moss|MI|H": {
-  "bytes": 70655,
+  "bytes": 656824,
   "chamber": "upper",
   "credit": {
    "by": "Michigan Senate Democrats",
@@ -12553,26 +12551,21 @@
   },
   "district": "7",
   "evidence": "the file Open States lists for Jeremy Moss (ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44), served by the Michigan Senate Democrats, their own party's caucus in that chamber",
-  "heavy": "656 KB, over 300 KB; shown smaller from the same file",
-  "height": 700,
+  "heavy": "656 KB, over 300 KB",
+  "height": 2100,
   "legislator": "ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44",
   "legislatorName": "Jeremy Moss",
   "name": "Jeremy Moss",
   "original": "https://senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg",
-  "originalWeight": {
-   "bytes": 656824,
-   "height": 2100,
-   "width": 1500
-  },
   "page": "https://senatedems.com/moss",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg"
   ],
   "state": "MI",
-  "url": "https://i0.wp.com/senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg?w=500&ssl=1",
+  "url": "https://senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg",
   "via": "state-legislature",
-  "width": 500
+  "width": 1500
  },
  "person:jerry lee carl jr.|AL|H": {
   "credit": {
@@ -12961,7 +12954,7 @@
   "name": "John Andrew Williams",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "set": [
    [
     120,
@@ -14810,6 +14803,9 @@
   },
   "height": 3319,
   "name": "Mark Charles Teixeira",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/f/f2/Mark_Teixeira_basepaths_2011.jpg"
+  ],
   "set": [
    [
     120,
@@ -15036,7 +15032,7 @@
   "name": "Martin R Zamora",
   "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "state": "NM",
   "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "via": "state-legislature",
@@ -15968,6 +15964,9 @@
   },
   "height": 978,
   "name": "Mike Lipetri",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/3/35/Mike_LiPetri_(2024_Italian_Heritage_Street_Festival)_(cropped).jpg"
+  ],
   "set": [
    [
     120,
@@ -17231,7 +17230,7 @@
   "name": "Rick Brattin",
   "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "state": "MO",
   "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "via": "state-legislature",
@@ -17352,6 +17351,9 @@
   },
   "height": 1507,
   "name": "Robin Ficker",
+  "replaces": [
+   "https://upload.wikimedia.org/wikipedia/commons/0/09/Robin_Ficker_(35598540490).jpg"
+  ],
   "set": [
    [
     120,
@@ -18139,7 +18141,7 @@
   "name": "Sean McCann",
   "original": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "page": "https://senatedems.com/mccann",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "state": "MI",
   "url": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "via": "state-legislature",
@@ -19189,7 +19191,7 @@
   "name": "Wes Climer",
   "original": "https://scstatehouse.gov/images/members/0356818139.jpg",
   "page": "https://scstatehouse.gov/member.php?code=0356818139",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "state": "SC",
   "url": "https://scstatehouse.gov/images/members/0356818139.jpg",
   "via": "state-legislature",
@@ -19401,7 +19403,7 @@
   "name": "Yolanda Rena Prince",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
-  "read": "2026-10-25",
+  "read": "2026-10-26",
   "set": [
    [
     120,
