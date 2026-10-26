@@ -3131,9 +3131,14 @@ async function testStates() {
     check("NASS spelled as its name", /National Association of Secretaries of State lists no territory/.test(mp) &&
       !/national association/.test(mp), mp);
     const gu = guVote.D.getElementById("voting").textContent;
-    const missed = guVote.window.kycBuildMeta.voting._unreached.GU || [];
-    check("Guam's link that could not be reached is not called opened",
-      missed.indexOf("info") !== -1 && /could not be confirmed/.test(gu) && !/Each link opened/.test(gu), gu);
+    const meta = guVote.window.kycBuildMeta.voting;
+    const missed = meta._unreached.GU || [];
+    const hand = ((meta._byHand || {}).GU || {}).info;
+    // The weekly check could not open it; a person did (round three), so it
+    // is said opened by hand - and never "Each link opened" on the check's day.
+    check("Guam's link the check could not reach is never said opened by the check",
+      missed.indexOf("info") !== -1 && !/Each link opened/.test(gu) &&
+        (hand ? /opened by hand/.test(gu) : /could not be confirmed/.test(gu)), gu);
   });
 
   /* Links the weekly check could not open, opened by hand in a person's
@@ -3148,11 +3153,13 @@ async function testStates() {
     const hand = (meta._byHand || {}).AZ || {};
     const note = azVote.D.querySelector("#voting .state-note").textContent;
     const words = { status: "Check your registration", polling: "Find your polling place",
-                    absentee: "Vote absentee or early" };
+                    absentee: "Vote absentee or early", results: "Official results" };
     const kinds = Object.keys(hand);
     check("Arizona's three lookups were opened by hand", ["status", "polling", "absentee"].every((k) =>
       hand[k] && hand[k][1] === "opened"), JSON.stringify(hand));
-    const said = /(?:Links checked|Each link opened) [\d-]+; ([^;]*) opened by hand ([\d-]+)(.*)$/.exec(note);
+    // "Links checked <day>; ..." while any link is unconfirmed; once every
+    // one the check missed was opened by hand, "“...” opened <day>; ...".
+    const said = /(?:Links checked|” opened) [\d-]+; ([^;]*) opened by hand ([\d-]+)(.*)$/.exec(note);
     check("each is said opened by hand, with its day",
       !!said && kinds.every((k) => said[1].indexOf("“" + words[k] + "”") !== -1) && said[2] === hand.polling[0],
       note);
@@ -3221,6 +3228,49 @@ async function testStates() {
     check("and none of them called unconfirmed",
       !/(“Vote absentee or early”|“Find your polling place”|“Check your registration”)[^;]*could not be confirmed/.test(note),
       note);
+  });
+  /* Round three (NOTES.md, 2026-10-26): the curated pages opened by hand,
+   * and two results links that showed readers an error repointed through
+   * overrides.VOTING_LINKS - Oklahoma's "403 - Forbidden" and New
+   * Hampshire's "Forbidden". Alabama's results page did not load in a
+   * person's browser either, and stays unconfirmed (rule 8). */
+  const okHand = await buildPage("states/ok.html");
+  const alHand = await buildPage("states/al.html");
+  const resultsLink = (page) => [...page.D.querySelectorAll("#voting a")].find((a) =>
+    a.textContent.trim() === "Official results");
+  suite("states/ok.html and nh.html — results links that answered 'Forbidden' are repointed", () => {
+    const ok = resultsLink(okHand);
+    const nh = resultsLink(nhHand);
+    check("Oklahoma's goes to the State Election Board's results.okelections.gov",
+      !!ok && ok.getAttribute("href") === "https://results.okelections.gov/OKER/", ok && ok.outerHTML);
+    check("New Hampshire's goes to the office's own 2026 results page",
+      !!nh && nh.getAttribute("href") === "https://www.sos.nh.gov/2026-election-results", nh && nh.outerHTML);
+    check("neither old address is linked anywhere on the pages",
+      !okHand.D.querySelector('a[href^="https://results.okelections.us"]') &&
+        !nhHand.D.querySelector('a[href*="elections/elections/election-results"]'));
+    const okNote = okHand.D.querySelector("#voting .state-note").textContent;
+    check("Oklahoma's results page opened by hand, not called unconfirmed",
+      /“Official results” opened by hand 2026-10-26/.test(okNote) && !/could not be confirmed/.test(okNote),
+      okNote);
+  });
+  suite("states/nh.html — vote.gov's registration page and the results opened by hand", () => {
+    const note = nhHand.D.querySelector("#voting .state-note").textContent;
+    check("vote.gov's page is said for what it is",
+      /“Registration deadlines \(vote\.gov\)” is the page for New Hampshire on vote\.gov/.test(note), note);
+    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("and is among the links opened by hand, with the results page",
+      !!said && /“Registration deadlines \(vote\.gov\)”/.test(said[1]) && /“Official results”/.test(said[1]), note);
+    check("no link on New Hampshire's page is called unconfirmed", !/could not be confirmed/.test(note), note);
+  });
+  suite("states/gu.html and al.html — Guam's page opened by hand; Alabama's results did not load", () => {
+    const gu = guVote.D.querySelector("#voting .state-note").textContent;
+    check("Guam's election-information page opened by hand",
+      /“2026 general election: early voting and sample ballots” opened by hand 2026-10-26/.test(gu) &&
+        !/could not be confirmed/.test(gu) && !/Each link opened/.test(gu), gu);
+    const al = alHand.D.querySelector("#voting .state-note").textContent;
+    check("Alabama's results page still could not be confirmed, and nothing else on its page",
+      /; “Official results” could not be confirmed by this site's automated check that day\./.test(al) &&
+        !/opened by hand/.test(al), al);
   });
 
   const nd = await buildPage("states/nd.html");
