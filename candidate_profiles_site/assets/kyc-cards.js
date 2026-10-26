@@ -954,23 +954,44 @@
     "are made, sometimes longer, so the latest spending, reported in 24- and 48-hour reports, " +
     "is often not yet in these totals, and in a race spent on heavily near the election the " +
     "totals can be well below what has been spent. Each side is shown as filed; nothing is netted.";
-  function outsideSpan(o, lead, opts) {
+  /* The words every view says outside spending in: one implementation
+   * (rule 12) for the race's money row, its comparison and the dialog. */
+  function outsideTotals(o) {
     var side = function (total, n, word) {
       return total ? KYC.moneyShort(total) + " " + word +
         (n ? " (" + n + (n === 1 ? " group" : " groups") + ")" : "") : "";
     };
-    var parts = [side(o.support, o.supportCommittees, "supporting"),
-                 side(o.oppose, o.opposeCommittees, "opposing")].filter(Boolean);
+    return [side(o.support, o.supportCommittees, "supporting"),
+            side(o.oppose, o.opposeCommittees, "opposing")].filter(Boolean).join(" and ");
+  }
+
+  /** " in 2025–26": the two-year cycle the FEC totals it for. */
+  function outsideCycle(o) {
+    var year = parseInt(o.cycle, 10);
+    return year ? " in " + (year - 1) + "–" + String(year).slice(2) : "";
+  }
+
+  /** "[lead]Outside groups spent $2.4M supporting (4 groups) and ... in
+   *  2025–26", escaped. */
+  function outsideSentence(o, lead) {
+    return KYC.escapeHtml((lead || "") + (lead ? "outside" : "Outside") + " groups spent " +
+      outsideTotals(o) + outsideCycle(o));
+  }
+
+  function fecLink(o, label) {
+    return '<a href="' + KYC.escapeAttr(o.url) + '" target="_blank" rel="noopener noreferrer">' +
+      KYC.escapeHtml(label || "FEC") + "</a>";
+  }
+
+  function outsideSpan(o, lead, opts) {
     return '<span class="money-outside' + (opts && opts.block ? " block" : "") + '" title="' +
-      KYC.escapeAttr(OUTSIDE_NOTE) + '">' + KYC.escapeHtml(lead || "") +
-      (lead ? "outside" : "Outside") + " groups spent " + KYC.escapeHtml(parts.join(" and ")) +
-      " in 2025–26, in the filings the FEC had processed when read on " +
+      KYC.escapeAttr(OUTSIDE_NOTE) + '">' + outsideSentence(o, lead) +
+      ", in the filings the FEC had processed when read on " +
       KYC.escapeHtml(KYC.dateWords(o.asOf)) +
       // Said on the line, where a phone reader sees it (wave 2d review: a
       // title alone let the totals read as the race's whole scale).
       "; the latest spending may not be in them yet" +
-      ' &middot; <a href="' + KYC.escapeAttr(o.url) +
-      '" target="_blank" rel="noopener noreferrer">FEC</a></span>';
+      " &middot; " + fecLink(o) + "</span>";
   }
 
   function chamberWord(p) {
@@ -983,23 +1004,83 @@
    * the campaign they are running carries it on a line of its own, never
    * added to its own figures. Andy Barr's $7.2 million under his House id
    * read as his Senate race's under a House candidacy he is not running. */
+  function outsideLead(p) {
+    var o = p.outsideSpending;
+    if (!o.runningElsewhere) return "";
+    var running = KYC.byId(o.runningElsewhere);
+    return "Filed under their " + (o.candidacy || chamberWord(p)) + " candidacy, not the " +
+      (running ? chamberWord(running) : "other") + " campaign they are running: ";
+  }
+
+  function outsideOtherLead(o) {
+    return "Filed separately under their " + (o.candidacy || "other") +
+      " candidacy, and not added in here: ";
+  }
+
   function outsideLine(p, opts) {
     var o = p && p.outsideSpending;
     if (!o) return "";
-    var lead = "";
-    if (o.runningElsewhere) {
-      var running = KYC.byId(o.runningElsewhere);
-      lead = "Filed under their " + (o.candidacy || chamberWord(p)) + " candidacy, not the " +
-        (running ? chamberWord(running) : "other") + " campaign they are running: ";
-    }
-    return outsideSpan(o, lead, opts);
+    return outsideSpan(o, outsideLead(p), opts);
   }
 
   function outsideOtherLine(p, opts) {
     var o = p && p.outsideSpendingOther;
     if (!o) return "";
-    return outsideSpan(o, "Filed separately under their " + (o.candidacy || "other") +
-      " candidacy, and not added in here: ", opts);
+    return outsideSpan(o, outsideOtherLead(o), opts);
+  }
+
+  /* One side's committees, each with its amount in a column, as the FEC
+   * files their names (an acronym's capitals are its own: LCV, AFSCME). */
+  function outsideSide(word, total, n, top) {
+    if (!total) return "";
+    top = top || [];
+    var row = function (name, amount, cls) {
+      return '<li class="outside-row' + (cls ? " " + cls : "") + '"><span class="outside-name">' +
+        KYC.escapeHtml(name) + '</span> <span class="outside-amount">' +
+        KYC.escapeHtml(KYC.moneyShort(amount)) + "</span></li>";
+    };
+    var more = n - top.length;
+    return '<div class="outside-side"><ul class="outside-list">' +
+      row(word, total, "outside-side-head") +
+      top.map(function (c) { return row(c.committee, c.total); }).join("") +
+      (more > 0 ? '<li class="outside-more">and ' + more + (more === 1 ? " more group" :
+        " more groups") + "</li>" : "") + "</ul></div>";
+  }
+
+  /* The dialog's outside spending (PERSONA-12): a short line of each side's
+   * total and its number of groups, each side's committees with their
+   * amounts in a column, and at the foot what the totals are and are not,
+   * the day they were read and the FEC's page. Two sides, never a net. */
+  function outsideDetail(p) {
+    var o = p && p.outsideSpending;
+    var other = p && p.outsideSpendingOther;
+    if (!o && !other) return "";
+    var html = '<span class="field-label outside-head">Outside spending</span>';
+    var reads = [];
+    if (o) {
+      html += '<p class="outside-summary">' + outsideSentence(o, outsideLead(p)) + ".</p>" +
+        '<div class="outside-sides">' +
+        outsideSide("Supporting", o.support, o.supportCommittees, o.supportTop) +
+        outsideSide("Opposing", o.oppose, o.opposeCommittees, o.opposeTop) + "</div>";
+      reads.push(o);
+    }
+    if (other) {
+      html += '<p class="outside-summary outside-other">' +
+        outsideSentence(other, outsideOtherLead(other)) + ".</p>";
+      reads.push(other);
+    }
+    // The day each was read and its FEC page; one day said once.
+    var label = function (r) {
+      return reads.length > 1 ? "FEC, " + (r.candidacy || "other") + " candidacy" : "FEC";
+    };
+    var oneDay = reads.every(function (r) { return r.asOf === reads[0].asOf; });
+    var foot = oneDay
+      ? "Read on " + KYC.escapeHtml(KYC.dateWords(reads[0].asOf)) + ": " +
+        reads.map(function (r) { return fecLink(r, label(r)); }).join(" &middot; ") + "."
+      : reads.map(function (r) {
+          return "Read on " + KYC.escapeHtml(KYC.dateWords(r.asOf)) + ": " + fecLink(r, label(r)) + ".";
+        }).join(" ");
+    return html + '<p class="outside-note">' + KYC.escapeHtml(OUTSIDE_NOTE) + " " + foot + "</p>";
   }
 
   function moneyRow(p, max, attr, self) {
@@ -1413,6 +1494,7 @@
     lastTimeBlock: lastTimeBlock,
     outsideLine: outsideLine,
     outsideOtherLine: outsideOtherLine,
+    outsideDetail: outsideDetail,
     outsideNote: OUTSIDE_NOTE,
     unprofiledNames: unprofiledNames,
     unprofiledNote: unprofiledNote,

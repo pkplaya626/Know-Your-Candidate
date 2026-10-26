@@ -722,7 +722,12 @@ def candidate_descriptors(section):
             continue
         line = bullet["line"].lstrip("*").strip()
         rest = line[len(bullet["raw"]):] if line.startswith(bullet["raw"]) else ""
-        text = plain_text(_LISTING_NOTE.sub("", rest.lstrip(",;: ")))
+        # Links to their labels before a note is dropped: a note's link can
+        # hold a bracket of its own ("''(previously ran as a [[Democratic
+        # Party (United States)|Democrat]])''"), and the note's pattern
+        # stopped there and left "cybersecurity technician |Democrat]])" on
+        # a West Virginia candidate's careers.
+        text = plain_text(_LISTING_NOTE.sub("", plain_text(rest.lstrip(",;: "))))
         if 3 <= len(text) <= 200 and bullet["name"] not in out:
             out[bullet["name"]] = text
     return out

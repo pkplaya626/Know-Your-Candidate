@@ -1,8 +1,9 @@
 {
  "count": 539,
- "fetched": "2026-10-25T12:36:51+00:00",
+ "fetched": "2026-10-26T05:26:18+00:00",
  "legislators": [
   {
+   "address": "272 Cannon House Office Building Washington DC 20515-0104",
    "ballotpedia": "Robert B. Aderholt",
    "bioguide": "A000055",
    "birthday": "1965-07-22",
@@ -46,6 +47,7 @@
    "wikipedia": "Robert Aderholt"
   },
   {
+   "address": "1524 Longworth House Office Building Washington DC 20515-2104",
    "ballotpedia": "Jake Auchincloss",
    "bioguide": "A000148",
    "birthday": "1988-01-29",
@@ -88,6 +90,7 @@
    "wikipedia": "Jake Auchincloss"
   },
   {
+   "address": "104 Cannon House Office Building Washington DC 20515-2802",
    "ballotpedia": "Mark Amodei",
    "bioguide": "A000369",
    "birthday": "1958-06-12",
@@ -135,6 +138,7 @@
    "wikipedia": "Mark Amodei"
   },
   {
+   "address": "2436 Rayburn House Office Building Washington DC 20515-3312",
    "ballotpedia": "Alma Adams",
    "bioguide": "A000370",
    "birthday": "1946-05-27",
@@ -179,6 +183,7 @@
    "wikipedia": "Alma Adams"
   },
   {
+   "address": "108 Cannon House Office Building Washington DC 20515-0533",
    "ballotpedia": "Pete Aguilar",
    "bioguide": "A000371",
    "birthday": "1979-06-19",
@@ -227,6 +232,7 @@
    "wikipedia": "Pete Aguilar"
   },
   {
+   "address": "462 Cannon House Office Building Washington DC 20515-1012",
    "ballotpedia": "Rick Allen",
    "bioguide": "A000372",
    "birthday": "1951-11-07",
@@ -270,6 +276,7 @@
    "wikipedia": "Rick Allen (politician)"
   },
   {
+   "address": "1111 Longworth House Office Building Washington DC 20515-4319",
    "ballotpedia": "Jodey Arrington",
    "bioguide": "A000375",
    "birthday": "1972-03-09",
@@ -313,6 +320,7 @@
    "wikipedia": "Jodey Arrington"
   },
   {
+   "address": "328 Cannon House Office Building Washington DC 20515-2504",
    "ballotpedia": "Mark Alford",
    "bioguide": "A000379",
    "birthday": "1963-10-04",
@@ -355,6 +363,7 @@
    "wikipedia": "Mark Alford"
   },
   {
+   "address": "1119 Longworth House Office Building Washington DC 20515-3901",
    "ballotpedia": "Gabe Amo",
    "bioguide": "A000380",
    "birthday": "1987-12-11",
@@ -395,6 +404,7 @@
    "wikipedia": "Gabe Amo"
   },
   {
+   "address": "1432 Longworth House Office Building Washington DC 20515-0303",
    "ballotpedia": "Yassamin Ansari",
    "bioguide": "A000381",
    "birthday": "1992-04-07",
@@ -435,6 +445,7 @@
    "wikipedia": "Yassamin Ansari"
   },
   {
+   "address": "374 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Angela Alsobrooks",
    "bioguide": "A000382",
    "birthday": "1971-02-23",
@@ -475,6 +486,7 @@
    "wikipedia": "Angela Alsobrooks"
   },
   {
+   "address": "330 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Alan Armstrong",
    "bioguide": "A000383",
    "birthday": "1962-07-11",
@@ -506,6 +518,7 @@
    "wikipedia": "Alan S. Armstrong"
   },
   {
+   "address": "2407 Rayburn House Office Building Washington DC 20515-1002",
    "ballotpedia": "Sanford Bishop Jr.",
    "bioguide": "B000490",
    "birthday": "1947-02-04",
@@ -550,6 +563,7 @@
    "wikipedia": "Sanford Bishop"
   },
   {
+   "address": "409 Cannon House Office Building Washington DC 20515-3702",
    "ballotpedia": "Cliff Bentz",
    "bioguide": "B000668",
    "birthday": "1952-01-12",
@@ -592,6 +606,7 @@
    "wikipedia": "Cliff Bentz"
   },
   {
+   "address": "2402 Rayburn House Office Building Washington DC 20515-3605",
    "ballotpedia": "Stephanie Bice",
    "bioguide": "B000740",
    "birthday": "1973-11-11",
@@ -633,6 +648,7 @@
    "wikipedia": "Stephanie Bice"
   },
   {
+   "address": "1713 Longworth House Office Building Washington DC 20515-0604",
    "ballotpedia": "Lauren Boebert",
    "bioguide": "B000825",
    "birthday": "1986-12-15",
@@ -674,6 +690,7 @@
    "wikipedia": "Lauren Boebert"
   },
   {
+   "address": "141 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Tammy Baldwin",
    "bioguide": "B001230",
    "birthday": "1962-02-11",
@@ -725,6 +742,7 @@
    "wikipedia": "Tammy Baldwin"
   },
   {
+   "address": "555 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "John Boozman",
    "bioguide": "B001236",
    "birthday": "1950-12-10",
@@ -769,6 +787,7 @@
    "wikipedia": "John Boozman"
   },
   {
+   "address": "357 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Marsha Blackburn",
    "bioguide": "B001243",
    "birthday": "1952-06-06",
@@ -814,6 +833,7 @@
    "wikipedia": "Marsha Blackburn"
   },
   {
+   "address": "2306 Rayburn House Office Building Washington DC 20515-0912",
    "ballotpedia": "Gus M. Bilirakis",
    "bioguide": "B001257",
    "birthday": "1963-02-08",
@@ -858,6 +878,7 @@
    "wikipedia": "Gus Bilirakis"
   },
   {
+   "address": "2409 Rayburn House Office Building Washington DC 20515-0916",
    "ballotpedia": "Vern Buchanan",
    "bioguide": "B001260",
    "birthday": "1951-05-08",
@@ -901,6 +922,7 @@
    "wikipedia": "Vern Buchanan"
   },
   {
+   "address": "307 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "John Barrasso",
    "bioguide": "B001261",
    "birthday": "1952-07-21",
@@ -951,6 +973,7 @@
    "wikipedia": "John Barrasso"
   },
   {
+   "address": "261 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Michael Bennet",
    "bioguide": "B001267",
    "birthday": "1964-11-28",
@@ -995,6 +1018,7 @@
    "wikipedia": "Michael Bennet"
   },
   {
+   "address": "503 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Richard Blumenthal",
    "bioguide": "B001277",
    "birthday": "1946-02-13",
@@ -1038,6 +1062,7 @@
    "wikipedia": "Richard Blumenthal"
   },
   {
+   "address": "2231 Rayburn House Office Building Washington DC 20515-3701",
    "ballotpedia": "Suzanne Bonamici",
    "bioguide": "B001278",
    "birthday": "1954-10-14",
@@ -1081,6 +1106,7 @@
    "wikipedia": "Suzanne Bonamici"
   },
   {
+   "address": "2079 Rayburn House Office Building Washington DC 20515-3503",
    "ballotpedia": "Joyce Beatty",
    "bioguide": "B001281",
    "birthday": "1950-03-12",
@@ -1123,6 +1149,7 @@
    "wikipedia": "Joyce Beatty"
   },
   {
+   "address": "2430 Rayburn House Office Building Washington DC 20515-1706",
    "ballotpedia": "Andy Barr",
    "bioguide": "B001282",
    "birthday": "1973-07-24",
@@ -1168,6 +1195,7 @@
    "wikipedia": "Andy Barr"
   },
   {
+   "address": "2262 Rayburn House Office Building Washington DC 20515-0526",
    "ballotpedia": "Julia Brownley",
    "bioguide": "B001285",
    "birthday": "1952-08-28",
@@ -1211,6 +1239,7 @@
    "wikipedia": "Julia Brownley"
   },
   {
+   "address": "172 Cannon House Office Building Washington DC 20515-0506",
    "ballotpedia": "Ami Bera",
    "bioguide": "B001287",
    "birthday": "1965-03-02",
@@ -1254,6 +1283,7 @@
    "wikipedia": "Ami Bera"
   },
   {
+   "address": "306 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Cory Booker",
    "bioguide": "B001288",
    "birthday": "1969-04-27",
@@ -1305,6 +1335,7 @@
    "wikipedia": "Cory Booker"
   },
   {
+   "address": "2236 Rayburn House Office Building Washington DC 20515-4336",
    "ballotpedia": "Brian Babin",
    "bioguide": "B001291",
    "birthday": "1948-03-23",
@@ -1346,6 +1377,7 @@
    "wikipedia": "Brian Babin"
   },
   {
+   "address": "1226 Longworth House Office Building Washington DC 20515-4608",
    "ballotpedia": "Don Beyer",
    "bioguide": "B001292",
    "birthday": "1950-06-20",
@@ -1391,6 +1423,7 @@
    "wikipedia": "Don Beyer"
   },
   {
+   "address": "352 Cannon House Office Building Washington DC 20515-1312",
    "ballotpedia": "Mike Bost",
    "bioguide": "B001295",
    "birthday": "1960-12-30",
@@ -1432,6 +1465,7 @@
    "wikipedia": "Mike Bost"
   },
   {
+   "address": "1502 Longworth House Office Building Washington DC 20515-3802",
    "ballotpedia": "Brendan Boyle",
    "bioguide": "B001296",
    "birthday": "1977-02-06",
@@ -1474,6 +1508,7 @@
    "wikipedia": "Brendan Boyle"
   },
   {
+   "address": "2104 Rayburn House Office Building Washington DC 20515-2702",
    "ballotpedia": "Don Bacon",
    "bioguide": "B001298",
    "birthday": "1963-08-16",
@@ -1516,6 +1551,7 @@
    "wikipedia": "Don Bacon"
   },
   {
+   "address": "303 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Jim Banks",
    "bioguide": "B001299",
    "birthday": "1979-07-16",
@@ -1559,6 +1595,7 @@
    "wikipedia": "Jim Banks"
   },
   {
+   "address": "2312 Rayburn House Office Building Washington DC 20515-0544",
    "ballotpedia": "Nanette Barragán",
    "bioguide": "B001300",
    "birthday": "1976-09-15",
@@ -1601,6 +1638,7 @@
    "wikipedia": "Nanette Barragán"
   },
   {
+   "address": "566 Cannon House Office Building Washington DC 20515-2201",
    "ballotpedia": "Jack Bergman",
    "bioguide": "B001301",
    "birthday": "1947-02-02",
@@ -1643,6 +1681,7 @@
    "wikipedia": "Jack Bergman"
   },
   {
+   "address": "464 Cannon House Office Building Washington DC 20515-0305",
    "ballotpedia": "Andy Biggs",
    "bioguide": "B001302",
    "birthday": "1958-11-07",
@@ -1685,6 +1724,7 @@
    "wikipedia": "Andy Biggs"
   },
   {
+   "address": "513 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Lisa Blunt Rochester",
    "bioguide": "B001303",
    "birthday": "1962-02-10",
@@ -1727,6 +1767,7 @@
    "wikipedia": "Lisa Blunt Rochester"
   },
   {
+   "address": "354 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Ted Budd",
    "bioguide": "B001305",
    "birthday": "1971-10-21",
@@ -1770,6 +1811,7 @@
    "wikipedia": "Ted Budd"
   },
   {
+   "address": "2429 Rayburn House Office Building Washington DC 20515-3512",
    "ballotpedia": "Troy Balderson",
    "bioguide": "B001306",
    "birthday": "1962-01-16",
@@ -1811,6 +1853,7 @@
    "wikipedia": "Troy Balderson"
   },
   {
+   "address": "2303 Rayburn House Office Building Washington DC 20515-1404",
    "ballotpedia": "James Baird",
    "bioguide": "B001307",
    "birthday": "1945-06-04",
@@ -1853,6 +1896,7 @@
    "wikipedia": "Jim Baird (politician)"
   },
   {
+   "address": "1122 Longworth House Office Building Washington DC 20515-4202",
    "ballotpedia": "Tim Burchett",
    "bioguide": "B001309",
    "birthday": "1964-08-25",
@@ -1892,6 +1936,7 @@
    "wikipedia": "Tim Burchett"
   },
   {
+   "address": "2455 Rayburn House Office Building Washington DC 20515-3511",
    "ballotpedia": "Shontel Brown",
    "bioguide": "B001313",
    "birthday": "1975-06-24",
@@ -1934,6 +1979,7 @@
    "wikipedia": "Shontel Brown"
   },
   {
+   "address": "2459 Rayburn House Office Building Washington DC 20515-0904",
    "ballotpedia": "Aaron Bean",
    "bioguide": "B001314",
    "birthday": "1967-01-25",
@@ -1976,6 +2022,7 @@
    "wikipedia": "Aaron Bean"
   },
   {
+   "address": "1717 Longworth House Office Building Washington DC 20515-1313",
    "ballotpedia": "Nikki Budzinski",
    "bioguide": "B001315",
    "birthday": "1977-03-11",
@@ -2019,6 +2066,7 @@
    "wikipedia": "Nikki Budzinski"
   },
   {
+   "address": "1108 Longworth House Office Building Washington DC 20515-2507",
    "ballotpedia": "Eric Burlison",
    "bioguide": "B001316",
    "birthday": "1976-10-02",
@@ -2062,6 +2110,7 @@
    "wikipedia": "Eric Burlison"
   },
   {
+   "address": "351 Cannon House Office Building Washington DC 20515-3602",
    "ballotpedia": "Josh Brecheen",
    "bioguide": "B001317",
    "birthday": "1979-06-19",
@@ -2104,6 +2153,7 @@
    "wikipedia": "Josh Brecheen"
   },
   {
+   "address": "1510 Longworth House Office Building Washington DC 20515-4500",
    "ballotpedia": "Becca Balint",
    "bioguide": "B001318",
    "birthday": "1968-05-04",
@@ -2147,6 +2197,7 @@
    "wikipedia": "Becca Balint"
   },
   {
+   "address": "416 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Katie Britt",
    "bioguide": "B001319",
    "birthday": "1982-02-02",
@@ -2189,6 +2240,7 @@
    "wikipedia": "Katie Britt"
   },
   {
+   "address": "1232 Longworth House Office Building Washington DC 20515-2207",
    "ballotpedia": "Tom Barrett (Michigan)",
    "bioguide": "B001321",
    "birthday": "1981-04-30",
@@ -2229,6 +2281,7 @@
    "wikipedia": "Tom Barrett (Michigan politician)"
   },
   {
+   "address": "124 Cannon House Office Building Washington DC 20515-4705",
    "ballotpedia": null,
    "bioguide": "B001322",
    "birthday": "1975-12-13",
@@ -2270,6 +2323,7 @@
    "wikipedia": "Michael Baumgartner"
   },
   {
+   "address": "153 Cannon House Office Building Washington DC 20515-0200",
    "ballotpedia": "Nicholas Begich",
    "bioguide": "B001323",
    "birthday": "1977-10-21",
@@ -2312,6 +2366,7 @@
    "wikipedia": "Nick Begich III"
   },
   {
+   "address": "1429 Longworth House Office Building Washington DC 20515-2501",
    "ballotpedia": "Wesley Bell",
    "bioguide": "B001324",
    "birthday": "1974-11-05",
@@ -2353,6 +2408,7 @@
    "wikipedia": "Wesley Bell"
   },
   {
+   "address": "1530 Longworth House Office Building Washington DC 20515-4003",
    "ballotpedia": "Sheri Biggs",
    "bioguide": "B001325",
    "birthday": "1970-03-28",
@@ -2394,6 +2450,7 @@
    "wikipedia": "Sheri Biggs"
   },
   {
+   "address": "1508 Longworth House Office Building Washington DC 20515-3705",
    "ballotpedia": "Janelle Bynum",
    "bioguide": "B001326",
    "birthday": "1975-01-31",
@@ -2435,6 +2492,7 @@
    "wikipedia": "Janelle Bynum"
   },
   {
+   "address": "1133 Longworth House Office Building Washington DC 20515-3808",
    "ballotpedia": "Rob Bresnahan Jr.",
    "bioguide": "B001327",
    "birthday": "1990-04-22",
@@ -2477,6 +2535,7 @@
    "wikipedia": "Rob Bresnahan"
   },
   {
+   "address": "468 Cannon House Office Building Washington DC 20515-1013",
    "ballotpedia": "Everton Blair Jr.",
    "bioguide": "B001328",
    "birthday": "1992-04-23",
@@ -2513,6 +2572,7 @@
    "wikipedia": "Everton Blair"
   },
   {
+   "address": "2205 Rayburn House Office Building Washington DC 20515-0541",
    "ballotpedia": "Ken Calvert",
    "bioguide": "C000059",
    "birthday": "1953-06-08",
@@ -2557,6 +2617,7 @@
    "wikipedia": "Ken Calvert"
   },
   {
+   "address": "511 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Maria Cantwell",
    "bioguide": "C000127",
    "birthday": "1958-10-13",
@@ -2600,6 +2661,7 @@
    "wikipedia": "Maria Cantwell"
   },
   {
+   "address": "274 Cannon House Office Building Washington DC 20515-4006",
    "ballotpedia": "James E. Clyburn",
    "bioguide": "C000537",
    "birthday": "1940-07-21",
@@ -2645,6 +2707,7 @@
    "wikipedia": "Jim Clyburn"
   },
   {
+   "address": "239 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Mike Crapo",
    "bioguide": "C000880",
    "birthday": "1951-05-20",
@@ -2691,6 +2754,7 @@
    "wikipedia": "Mike Crapo"
   },
   {
+   "address": "413 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Susan Collins",
    "bioguide": "C001035",
    "birthday": "1952-12-07",
@@ -2735,6 +2799,7 @@
    "wikipedia": "Susan Collins"
   },
   {
+   "address": "2421 Rayburn House Office Building Washington DC 20515-0903",
    "ballotpedia": "Kat Cammack",
    "bioguide": "C001039",
    "birthday": "1988-02-16",
@@ -2777,6 +2842,7 @@
    "wikipedia": "Kat Cammack"
   },
   {
+   "address": "170 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Shelley Moore Capito",
    "bioguide": "C001047",
    "birthday": "1953-11-26",
@@ -2828,6 +2894,7 @@
    "wikipedia": "Shelley Moore Capito"
   },
   {
+   "address": "2208 Rayburn House Office Building Washington DC 20515-4331",
    "ballotpedia": "John Carter",
    "bioguide": "C001051",
    "birthday": "1941-11-06",
@@ -2872,6 +2939,7 @@
    "wikipedia": "John Carter (Texas politician)"
   },
   {
+   "address": "2207 Rayburn House Office Building Washington DC 20515-3604",
    "ballotpedia": "Tom Cole",
    "bioguide": "C001053",
    "birthday": "1949-04-28",
@@ -2915,6 +2983,7 @@
    "wikipedia": "Tom Cole"
   },
   {
+   "address": "2210 Rayburn House Office Building Washington DC 20515-1101",
    "ballotpedia": "Ed Case",
    "bioguide": "C001055",
    "birthday": "1952-09-27",
@@ -2957,6 +3026,7 @@
    "wikipedia": "Ed Case"
   },
   {
+   "address": "517 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "John Cornyn",
    "bioguide": "C001056",
    "birthday": "1952-02-02",
@@ -2999,6 +3069,7 @@
    "wikipedia": "John Cornyn"
   },
   {
+   "address": "2081 Rayburn House Office Building Washington DC 20515-0521",
    "ballotpedia": "Jim Costa",
    "bioguide": "C001059",
    "birthday": "1952-04-13",
@@ -3041,6 +3112,7 @@
    "wikipedia": "Jim Costa"
   },
   {
+   "address": "2217 Rayburn House Office Building Washington DC 20515-2505",
    "ballotpedia": "Emanuel Cleaver",
    "bioguide": "C001061",
    "birthday": "1944-10-26",
@@ -3085,6 +3157,7 @@
    "wikipedia": "Emanuel Cleaver"
   },
   {
+   "address": "2308 Rayburn House Office Building Washington DC 20515-4328",
    "ballotpedia": "Henry Cuellar",
    "bioguide": "C001063",
    "birthday": "1955-09-19",
@@ -3128,6 +3201,7 @@
    "wikipedia": "Henry Cuellar"
   },
   {
+   "address": "2188 Rayburn House Office Building Washington DC 20515-0914",
    "ballotpedia": "Kathy Castor",
    "bioguide": "C001066",
    "birthday": "1966-08-20",
@@ -3173,6 +3247,7 @@
    "wikipedia": "Kathy Castor"
   },
   {
+   "address": "2058 Rayburn House Office Building Washington DC 20515-3209",
    "ballotpedia": "Yvette D. Clarke",
    "bioguide": "C001067",
    "birthday": "1964-11-21",
@@ -3217,6 +3292,7 @@
    "wikipedia": "Yvette Clarke"
   },
   {
+   "address": "2268 Rayburn House Office Building Washington DC 20515-4209",
    "ballotpedia": "Steve Cohen",
    "bioguide": "C001068",
    "birthday": "1949-05-24",
@@ -3260,6 +3336,7 @@
    "wikipedia": "Steve Cohen (politician)"
   },
   {
+   "address": "2449 Rayburn House Office Building Washington DC 20515-0702",
    "ballotpedia": "Joe Courtney",
    "bioguide": "C001069",
    "birthday": "1953-04-06",
@@ -3303,6 +3380,7 @@
    "wikipedia": "Joe Courtney (politician)"
   },
   {
+   "address": "2135 Rayburn House Office Building Washington DC 20515-1407",
    "ballotpedia": "Andre Carson",
    "bioguide": "C001072",
    "birthday": "1974-10-16",
@@ -3346,6 +3424,7 @@
    "wikipedia": "André Carson"
   },
   {
+   "address": "455 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Bill Cassidy",
    "bioguide": "C001075",
    "birthday": "1957-09-28",
@@ -3390,6 +3469,7 @@
    "wikipedia": "Bill Cassidy"
   },
   {
+   "address": "2423 Rayburn House Office Building Washington DC 20515-0528",
    "ballotpedia": "Judy Chu",
    "bioguide": "C001080",
    "birthday": "1953-07-07",
@@ -3434,6 +3514,7 @@
    "wikipedia": "Judy Chu"
   },
   {
+   "address": "2422 Rayburn House Office Building Washington DC 20515-0401",
    "ballotpedia": "Rick Crawford",
    "bioguide": "C001087",
    "birthday": "1966-01-22",
@@ -3479,6 +3560,7 @@
    "wikipedia": "Rick Crawford (politician)"
   },
   {
+   "address": "218 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Chris Coons",
    "bioguide": "C001088",
    "birthday": "1963-09-09",
@@ -3523,6 +3605,7 @@
    "wikipedia": "Chris Coons"
   },
   {
+   "address": "2241 Rayburn House Office Building Washington DC 20515-4320",
    "ballotpedia": "Joaquin Castro",
    "bioguide": "C001091",
    "birthday": "1974-09-16",
@@ -3567,6 +3650,7 @@
    "wikipedia": "Joaquin Castro"
   },
   {
+   "address": "326 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Tom Cotton",
    "bioguide": "C001095",
    "birthday": "1977-05-13",
@@ -3617,6 +3701,7 @@
    "wikipedia": "Tom Cotton"
   },
   {
+   "address": "313 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Kevin Cramer",
    "bioguide": "C001096",
    "birthday": "1961-01-21",
@@ -3662,6 +3747,7 @@
    "wikipedia": "Kevin Cramer"
   },
   {
+   "address": "167 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Ted Cruz",
    "bioguide": "C001098",
    "birthday": "1970-12-22",
@@ -3705,6 +3791,7 @@
    "wikipedia": "Ted Cruz"
   },
   {
+   "address": "2368 Rayburn House Office Building Washington DC 20515-2105",
    "ballotpedia": "Katherine Clark",
    "bioguide": "C001101",
    "birthday": "1963-07-17",
@@ -3755,6 +3842,7 @@
    "wikipedia": "Katherine Clark"
   },
   {
+   "address": "2432 Rayburn House Office Building Washington DC 20515-1001",
    "ballotpedia": "Earl \"Buddy\" Carter",
    "bioguide": "C001103",
    "birthday": "1957-09-06",
@@ -3800,6 +3888,7 @@
    "wikipedia": "Buddy Carter"
   },
   {
+   "address": "2410 Rayburn House Office Building Washington DC 20515-1701",
    "ballotpedia": "James Comer Jr.",
    "bioguide": "C001108",
    "birthday": "1972-08-19",
@@ -3841,6 +3930,7 @@
    "wikipedia": "James Comer"
   },
   {
+   "address": "2082 Rayburn House Office Building Washington DC 20515-0546",
    "ballotpedia": "Lou Correa",
    "bioguide": "C001110",
    "birthday": "1958-01-24",
@@ -3884,6 +3974,7 @@
    "wikipedia": "Lou Correa"
   },
   {
+   "address": "2331 Rayburn House Office Building Washington DC 20515-0524",
    "ballotpedia": "Salud Carbajal",
    "bioguide": "C001112",
    "birthday": "1964-11-18",
@@ -3927,6 +4018,7 @@
    "wikipedia": "Salud Carbajal"
   },
   {
+   "address": "309 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Catherine Cortez Masto",
    "bioguide": "C001113",
    "birthday": "1964-03-29",
@@ -3976,6 +4068,7 @@
    "wikipedia": "Catherine Cortez Masto"
   },
   {
+   "address": "502 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "John Curtis (Utah)",
    "bioguide": "C001114",
    "birthday": "1960-05-10",
@@ -4020,6 +4113,7 @@
    "wikipedia": "John Curtis"
   },
   {
+   "address": "304 Cannon House Office Building Washington DC 20515-4327",
    "ballotpedia": "Michael Cloud (Texas)",
    "bioguide": "C001115",
    "birthday": "1975-05-13",
@@ -4062,6 +4156,7 @@
    "wikipedia": "Michael Cloud"
   },
   {
+   "address": "445 Cannon House Office Building Washington DC 20515-1009",
    "ballotpedia": "Andrew Clyde",
    "bioguide": "C001116",
    "birthday": "1963-11-22",
@@ -4105,6 +4200,7 @@
    "wikipedia": "Andrew Clyde"
   },
   {
+   "address": "2440 Rayburn House Office Building Washington DC 20515-1306",
    "ballotpedia": "Sean Casten",
    "bioguide": "C001117",
    "birthday": "1971-11-23",
@@ -4147,6 +4243,7 @@
    "wikipedia": "Sean Casten"
   },
   {
+   "address": "2443 Rayburn House Office Building Washington DC 20515-4606",
    "ballotpedia": "Ben Cline",
    "bioguide": "C001118",
    "birthday": "1972-02-29",
@@ -4189,6 +4286,7 @@
    "wikipedia": "Ben Cline"
   },
   {
+   "address": "2052 Rayburn House Office Building Washington DC 20515-2302",
    "ballotpedia": "Angie Craig",
    "bioguide": "C001119",
    "birthday": "1972-02-14",
@@ -4230,6 +4328,7 @@
    "wikipedia": "Angie Craig"
   },
   {
+   "address": "248 Cannon House Office Building Washington DC 20515-4302",
    "ballotpedia": "Daniel Crenshaw",
    "bioguide": "C001120",
    "birthday": "1984-03-14",
@@ -4272,6 +4371,7 @@
    "wikipedia": "Dan Crenshaw"
   },
   {
+   "address": "1323 Longworth House Office Building Washington DC 20515-0606",
    "ballotpedia": "Jason Crow",
    "bioguide": "C001121",
    "birthday": "1979-03-15",
@@ -4312,6 +4412,7 @@
    "wikipedia": "Jason Crow"
   },
   {
+   "address": "2463 Rayburn House Office Building Washington DC 20515-0531",
    "ballotpedia": "Gil Cisneros",
    "bioguide": "C001123",
    "birthday": "1971-02-12",
@@ -4354,6 +4455,7 @@
    "wikipedia": "Gil Cisneros"
   },
   {
+   "address": "442 Cannon House Office Building Washington DC 20515-1802",
    "ballotpedia": "Troy Carter",
    "bioguide": "C001125",
    "birthday": "1963-10-26",
@@ -4395,6 +4497,7 @@
    "wikipedia": "Troy Carter (politician)"
   },
   {
+   "address": "1433 Longworth House Office Building Washington DC 20515-3515",
    "ballotpedia": "Mike Carey (Ohio)",
    "bioguide": "C001126",
    "birthday": "1971-03-13",
@@ -4436,6 +4539,7 @@
    "wikipedia": "Mike Carey (politician)"
   },
   {
+   "address": "2351 Rayburn House Office Building Washington DC 20515-1010",
    "ballotpedia": "Mike Collins (Georgia)",
    "bioguide": "C001129",
    "birthday": "1967-07-02",
@@ -4480,6 +4584,7 @@
    "wikipedia": "Mike Collins (politician)"
   },
   {
+   "address": "1616 Longworth House Office Building Washington DC 20515-4330",
    "ballotpedia": "Jasmine Crockett",
    "bioguide": "C001130",
    "birthday": "1981-03-29",
@@ -4523,6 +4628,7 @@
    "wikipedia": "Jasmine Crockett"
   },
   {
+   "address": "446 Cannon House Office Building Washington DC 20515-4335",
    "ballotpedia": null,
    "bioguide": "C001131",
    "birthday": "1989-05-04",
@@ -4565,6 +4671,7 @@
    "wikipedia": "Greg Casar"
   },
   {
+   "address": "307 Cannon House Office Building Washington DC 20515-0302",
    "ballotpedia": "Eli Crane",
    "bioguide": "C001132",
    "birthday": "1980-01-03",
@@ -4606,6 +4713,7 @@
    "wikipedia": "Eli Crane"
   },
   {
+   "address": "461 Cannon House Office Building Washington DC 20515-0306",
    "ballotpedia": "Juan Ciscomani",
    "bioguide": "C001133",
    "birthday": "1982-08-30",
@@ -4649,6 +4757,7 @@
    "wikipedia": "Juan Ciscomani"
   },
   {
+   "address": "1022 Longworth House Office Building Washington DC 20515-3003",
    "ballotpedia": "Herbert Conaway Jr.",
    "bioguide": "C001136",
    "birthday": "1963-01-30",
@@ -4689,6 +4798,7 @@
    "wikipedia": "Herb Conaway"
   },
   {
+   "address": "1029 Longworth House Office Building Washington DC 20515-0605",
    "ballotpedia": "Jeff Crank",
    "bioguide": "C001137",
    "birthday": "1967-01-28",
@@ -4730,6 +4840,7 @@
    "wikipedia": "Jeff Crank"
   },
   {
+   "address": "1710 Longworth House Office Building Washington DC 20515-0919",
    "ballotpedia": "Byron Donalds",
    "bioguide": "D000032",
    "birthday": "1978-10-28",
@@ -4772,6 +4883,7 @@
    "wikipedia": "Byron Donalds"
   },
   {
+   "address": "2159 Rayburn House Office Building Washington DC 20515-1307",
    "ballotpedia": "Danny K. Davis",
    "bioguide": "D000096",
    "birthday": "1941-09-06",
@@ -4815,6 +4927,7 @@
    "wikipedia": "Danny Davis (Illinois politician)"
   },
   {
+   "address": "2111 Rayburn House Office Building Washington DC 20515-0601",
    "ballotpedia": "Diana DeGette",
    "bioguide": "D000197",
    "birthday": "1957-07-29",
@@ -4858,6 +4971,7 @@
    "wikipedia": "Diana DeGette"
   },
   {
+   "address": "2413 Rayburn House Office Building Washington DC 20515-0703",
    "ballotpedia": "Rosa DeLauro",
    "bioguide": "D000216",
    "birthday": "1943-03-02",
@@ -4901,6 +5015,7 @@
    "wikipedia": "Rosa DeLauro"
   },
   {
+   "address": "1123 Longworth House Office Building Washington DC 20515-3301",
    "ballotpedia": "Donald Davis",
    "bioguide": "D000230",
    "birthday": "1971-08-29",
@@ -4942,6 +5057,7 @@
    "wikipedia": "Don Davis (North Carolina politician)"
   },
   {
+   "address": "2307 Rayburn House Office Building Washington DC 20515-0001",
    "ballotpedia": "Lloyd Doggett",
    "bioguide": "D000399",
    "birthday": "1946-10-06",
@@ -4986,6 +5102,7 @@
    "wikipedia": "Lloyd Doggett"
   },
   {
+   "address": "1222 Longworth House Office Building Washington DC 20515-3817",
    "ballotpedia": "Chris Deluzio",
    "bioguide": "D000530",
    "birthday": "1984-07-13",
@@ -5028,6 +5145,7 @@
    "wikipedia": "Chris Deluzio"
   },
   {
+   "address": "711 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Dick Durbin",
    "bioguide": "D000563",
    "birthday": "1944-11-21",
@@ -5079,6 +5197,7 @@
    "wikipedia": "Dick Durbin"
   },
   {
+   "address": "1415 Longworth House Office Building Washington DC 20515-4315",
    "ballotpedia": "Monica De La Cruz",
    "bioguide": "D000594",
    "birthday": "1974-11-11",
@@ -5120,6 +5239,7 @@
    "wikipedia": "Monica De La Cruz"
   },
   {
+   "address": "374 Cannon House Office Building Washington DC 20515-0926",
    "ballotpedia": "Mario Diaz-Balart",
    "bioguide": "D000600",
    "birthday": "1961-09-25",
@@ -5163,6 +5283,7 @@
    "wikipedia": "Mario Díaz-Balart"
   },
   {
+   "address": "2304 Rayburn House Office Building Washington DC 20515-4204",
    "ballotpedia": "Scott DesJarlais",
    "bioguide": "D000616",
    "birthday": "1964-02-21",
@@ -5206,6 +5327,7 @@
    "wikipedia": "Scott DesJarlais"
   },
   {
+   "address": "2311 Rayburn House Office Building Washington DC 20515-4701",
    "ballotpedia": "Suzan DelBene",
    "bioguide": "D000617",
    "birthday": "1962-02-17",
@@ -5249,6 +5371,7 @@
    "wikipedia": "Suzan DelBene"
   },
   {
+   "address": "320 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Steve Daines",
    "bioguide": "D000618",
    "birthday": "1962-08-20",
@@ -5293,6 +5416,7 @@
    "wikipedia": "Steve Daines"
   },
   {
+   "address": "524 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Tammy Duckworth",
    "bioguide": "D000622",
    "birthday": "1968-03-12",
@@ -5337,6 +5461,7 @@
    "wikipedia": "Tammy Duckworth"
   },
   {
+   "address": "2134 Rayburn House Office Building Washington DC 20515-0510",
    "ballotpedia": "Mark DeSaulnier",
    "bioguide": "D000623",
    "birthday": "1952-03-31",
@@ -5378,6 +5503,7 @@
    "wikipedia": "Mark DeSaulnier"
   },
   {
+   "address": "102 Cannon House Office Building Washington DC 20515-2206",
    "ballotpedia": "Debbie Dingell",
    "bioguide": "D000624",
    "birthday": "1953-11-23",
@@ -5420,6 +5546,7 @@
    "wikipedia": "Debbie Dingell"
   },
   {
+   "address": "2113 Rayburn House Office Building Washington DC 20515-3508",
    "ballotpedia": "Warren Davidson",
    "bioguide": "D000626",
    "birthday": "1970-03-01",
@@ -5462,6 +5589,7 @@
    "wikipedia": "Warren Davidson"
   },
   {
+   "address": "466 Cannon House Office Building Washington DC 20515-0902",
    "ballotpedia": "Neal Dunn",
    "bioguide": "D000628",
    "birthday": "1953-02-16",
@@ -5504,6 +5632,7 @@
    "wikipedia": "Neal Dunn"
   },
   {
+   "address": "2435 Rayburn House Office Building Washington DC 20515-1603",
    "ballotpedia": "Sharice Davids",
    "bioguide": "D000629",
    "birthday": "1980-05-22",
@@ -5543,6 +5672,7 @@
    "wikipedia": "Sharice Davids"
   },
   {
+   "address": "150 Cannon House Office Building Washington DC 20515-3804",
    "ballotpedia": "Madeleine Dean",
    "bioguide": "D000631",
    "birthday": "1959-06-06",
@@ -5585,6 +5715,7 @@
    "wikipedia": "Madeleine Dean"
   },
   {
+   "address": "1529 Longworth House Office Building Washington DC 20515-0001",
    "ballotpedia": "Troy Downing",
    "bioguide": "D000634",
    "birthday": "1967-03-04",
@@ -5626,6 +5757,7 @@
    "wikipedia": "Troy Downing"
   },
   {
+   "address": "1207 Longworth House Office Building Washington DC 20515-3703",
    "ballotpedia": "Maxine Dexter",
    "bioguide": "D000635",
    "birthday": "1972-12-05",
@@ -5667,6 +5799,7 @@
    "wikipedia": "Maxine Dexter"
   },
   {
+   "address": "1721 Longworth House Office Building Washington DC 20515-4306",
    "ballotpedia": "Jake Ellzey",
    "bioguide": "E000071",
    "birthday": "1970-01-24",
@@ -5707,6 +5840,7 @@
    "wikipedia": "Jake Ellzey"
   },
   {
+   "address": "443 Cannon House Office Building Washington DC 20515-2404",
    "ballotpedia": "Mike Ezell",
    "bioguide": "E000235",
    "birthday": "1959-04-06",
@@ -5749,6 +5883,7 @@
    "wikipedia": "Mike Ezell"
   },
   {
+   "address": "1505 Longworth House Office Building Washington DC 20515-3311",
    "ballotpedia": "Chuck Edwards",
    "bioguide": "E000246",
    "birthday": "1960-09-13",
@@ -5791,6 +5926,7 @@
    "wikipedia": "Chuck Edwards"
   },
   {
+   "address": "326 Cannon House Office Building Washington DC 20515-2306",
    "ballotpedia": "Tom Emmer",
    "bioguide": "E000294",
    "birthday": "1961-03-03",
@@ -5840,6 +5976,7 @@
    "wikipedia": "Tom Emmer"
   },
   {
+   "address": "260 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Joni Ernst",
    "bioguide": "E000295",
    "birthday": "1970-07-01",
@@ -5882,6 +6019,7 @@
    "wikipedia": "Joni Ernst"
   },
   {
+   "address": "1105 Longworth House Office Building Washington DC 20515-3803",
    "ballotpedia": "Dwight Evans",
    "bioguide": "E000296",
    "birthday": "1954-05-16",
@@ -5923,6 +6061,7 @@
    "wikipedia": "Dwight Evans (politician)"
   },
   {
+   "address": "2332 Rayburn House Office Building Washington DC 20515-3213",
    "ballotpedia": "Adriano Espaillat",
    "bioguide": "E000297",
    "birthday": "1954-09-27",
@@ -5965,6 +6104,7 @@
    "wikipedia": "Adriano Espaillat"
   },
   {
+   "address": "2234 Rayburn House Office Building Washington DC 20515-1604",
    "ballotpedia": "Ron Estes (U.S. House representative)",
    "bioguide": "E000298",
    "birthday": "1956-07-19",
@@ -6007,6 +6147,7 @@
    "wikipedia": "Ron Estes"
   },
   {
+   "address": "2448 Rayburn House Office Building Washington DC 20515-4316",
    "ballotpedia": "Veronica Escobar",
    "bioguide": "E000299",
    "birthday": "1969-09-15",
@@ -6049,6 +6190,7 @@
    "wikipedia": "Veronica Escobar"
   },
   {
+   "address": "1229 Longworth House Office Building Washington DC 20515-0001",
    "ballotpedia": "Gabe Evans",
    "bioguide": "E000300",
    "birthday": "1986-07-28",
@@ -6089,6 +6231,7 @@
    "wikipedia": "Gabe Evans"
   },
   {
+   "address": "1213 Longworth House Office Building Washington DC 20515-2003",
    "ballotpedia": "Sarah Elfreth",
    "bioguide": "E000301",
    "birthday": "1988-09-09",
@@ -6130,6 +6273,7 @@
    "wikipedia": "Sarah Elfreth"
   },
   {
+   "address": "2349 Rayburn House Office Building Washington DC 20515-1806",
    "ballotpedia": "Cleo Fields",
    "bioguide": "F000110",
    "birthday": "1962-11-22",
@@ -6170,6 +6314,7 @@
    "wikipedia": "Cleo Fields"
   },
   {
+   "address": "2416 Rayburn House Office Building Washington DC 20515-4304",
    "ballotpedia": null,
    "bioguide": "F000246",
    "birthday": "1967-12-19",
@@ -6214,6 +6359,7 @@
    "wikipedia": "Pat Fallon"
   },
   {
+   "address": "2434 Rayburn House Office Building Washington DC 20515-1504",
    "ballotpedia": "Randy Feenstra",
    "bioguide": "F000446",
    "birthday": "1969-01-14",
@@ -6255,6 +6401,7 @@
    "wikipedia": "Randy Feenstra"
   },
   {
+   "address": "2462 Rayburn House Office Building Washington DC 20515-3305",
    "ballotpedia": "Virginia Foxx",
    "bioguide": "F000450",
    "birthday": "1943-06-29",
@@ -6298,6 +6445,7 @@
    "wikipedia": "Virginia Foxx"
   },
   {
+   "address": "2366 Rayburn House Office Building Washington DC 20515-1311",
    "ballotpedia": "Bill Foster",
    "bioguide": "F000454",
    "birthday": "1955-10-07",
@@ -6342,6 +6490,7 @@
    "wikipedia": "Bill Foster (politician)"
   },
   {
+   "address": "2187 Rayburn House Office Building Washington DC 20515-4203",
    "ballotpedia": "Charles Fleischmann",
    "bioguide": "F000459",
    "birthday": "1962-10-11",
@@ -6386,6 +6535,7 @@
    "wikipedia": "Chuck Fleischmann"
   },
   {
+   "address": "2305 Rayburn House Office Building Washington DC 20515-0922",
    "ballotpedia": "Lois Frankel",
    "bioguide": "F000462",
    "birthday": "1948-05-16",
@@ -6431,6 +6581,7 @@
    "wikipedia": "Lois Frankel"
   },
   {
+   "address": "448 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Deb Fischer",
    "bioguide": "F000463",
    "birthday": "1951-03-01",
@@ -6474,6 +6625,7 @@
    "wikipedia": "Deb Fischer"
   },
   {
+   "address": "271 Cannon House Office Building Washington DC 20515-3801",
    "ballotpedia": "Brian Fitzpatrick",
    "bioguide": "F000466",
    "birthday": "1973-12-17",
@@ -6517,6 +6669,7 @@
    "wikipedia": "Brian Fitzpatrick (American politician)"
   },
   {
+   "address": "2004 Rayburn House Office Building Washington DC 20515-4307",
    "ballotpedia": "Lizzie Pannill Fletcher",
    "bioguide": "F000468",
    "birthday": "1975-02-13",
@@ -6559,6 +6712,7 @@
    "wikipedia": "Lizzie Fletcher"
   },
   {
+   "address": "1514 Longworth House Office Building Washington DC 20515-1201",
    "ballotpedia": "Russ Fulcher",
    "bioguide": "F000469",
    "birthday": "1962-03-09",
@@ -6601,6 +6755,7 @@
    "wikipedia": "Russ Fulcher"
   },
   {
+   "address": "2229 Rayburn House Office Building Washington DC 20515-2307",
    "ballotpedia": "Michelle Fischbach",
    "bioguide": "F000470",
    "birthday": "1965-11-03",
@@ -6644,6 +6799,7 @@
    "wikipedia": "Michelle Fischbach"
   },
   {
+   "address": "2444 Rayburn House Office Building Washington DC 20515-4905",
    "ballotpedia": null,
    "bioguide": "F000471",
    "birthday": "1963-11-16",
@@ -6685,6 +6841,7 @@
    "wikipedia": "Scott Fitzgerald (politician)"
   },
   {
+   "address": "2301 Rayburn House Office Building Washington DC 20515-0918",
    "ballotpedia": "Scott Franklin",
    "bioguide": "F000472",
    "birthday": "1964-08-23",
@@ -6728,6 +6885,7 @@
    "wikipedia": "Scott Franklin (politician)"
   },
   {
+   "address": "343 Cannon House Office Building Washington DC 20515-2701",
    "ballotpedia": "Mike Flood",
    "bioguide": "F000474",
    "birthday": "1975-02-23",
@@ -6767,6 +6925,7 @@
    "wikipedia": "Mike Flood (politician)"
   },
   {
+   "address": "2418 Rayburn House Office Building Washington DC 20515-2301",
    "ballotpedia": "Brad Finstad",
    "bioguide": "F000475",
    "birthday": "1976-05-30",
@@ -6808,6 +6967,7 @@
    "wikipedia": "Brad Finstad"
   },
   {
+   "address": "1224 Longworth House Office Building Washington DC 20515-0910",
    "ballotpedia": "Maxwell Alejandro Frost",
    "bioguide": "F000476",
    "birthday": "1997-01-17",
@@ -6850,6 +7010,7 @@
    "wikipedia": "Maxwell Frost"
   },
   {
+   "address": "2452 Rayburn House Office Building Washington DC 20515-3304",
    "ballotpedia": "Valerie Foushee",
    "bioguide": "F000477",
    "birthday": "1956-05-07",
@@ -6893,6 +7054,7 @@
    "wikipedia": "Valerie Foushee"
   },
   {
+   "address": "345 Cannon House Office Building Washington DC 20515-4007",
    "ballotpedia": null,
    "bioguide": "F000478",
    "birthday": "1985-01-31",
@@ -6937,6 +7099,7 @@
    "wikipedia": "Russell Fry"
   },
   {
+   "address": "142 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "John Fetterman",
    "bioguide": "F000479",
    "birthday": "1969-08-15",
@@ -6977,6 +7140,7 @@
    "wikipedia": "John Fetterman"
   },
   {
+   "address": "243 Cannon House Office Building Washington DC 20515-0520",
    "ballotpedia": "Vince Fong",
    "bioguide": "F000480",
    "birthday": "1979-10-24",
@@ -7016,6 +7180,7 @@
    "wikipedia": "Vince Fong"
   },
   {
+   "address": "225 Cannon House Office Building Washington DC 20515-0102",
    "ballotpedia": "Shomari Figures",
    "bioguide": "F000481",
    "birthday": "1985-09-03",
@@ -7057,6 +7222,7 @@
    "wikipedia": "Shomari Figures"
   },
   {
+   "address": "1607 Longworth House Office Building Washington DC 20515-3400",
    "ballotpedia": "Julie Fedorchak",
    "bioguide": "F000482",
    "birthday": "1968-09-28",
@@ -7098,6 +7264,7 @@
    "wikipedia": "Julie Fedorchak"
   },
   {
+   "address": "1517 Longworth House Office Building Washington DC 20515-0530",
    "ballotpedia": "Laura Friedman",
    "bioguide": "F000483",
    "birthday": "1966-12-03",
@@ -7139,6 +7306,7 @@
    "wikipedia": "Laura Friedman"
   },
   {
+   "address": "244 Cannon House Office Building Washington DC 20515-0906",
    "ballotpedia": "Randy Fine",
    "bioguide": "F000484",
    "birthday": "1974-04-20",
@@ -7176,6 +7344,7 @@
    "wikipedia": "Randy Fine"
   },
   {
+   "address": "2201 Rayburn House Office Building Washington DC 20515-1014",
    "ballotpedia": "Clayton Fuller",
    "bioguide": "F000485",
    "birthday": "1981-04-09",
@@ -7211,6 +7380,7 @@
    "wikipedia": "Clay Fuller"
   },
   {
+   "address": "135 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Chuck Grassley",
    "bioguide": "G000386",
    "birthday": "1933-09-17",
@@ -7263,6 +7433,7 @@
    "wikipedia": "Chuck Grassley"
   },
   {
+   "address": "1135 Longworth House Office Building Washington DC 20515-2506",
    "ballotpedia": "Sam Graves",
    "bioguide": "G000546",
    "birthday": "1963-11-07",
@@ -7306,6 +7477,7 @@
    "wikipedia": "Sam Graves"
   },
   {
+   "address": "2347 Rayburn House Office Building Washington DC 20515-4309",
    "ballotpedia": "Al Green",
    "bioguide": "G000553",
    "birthday": "1947-09-01",
@@ -7349,6 +7521,7 @@
    "wikipedia": "Al Green (politician)"
   },
   {
+   "address": "478 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Kirsten Gillibrand",
    "bioguide": "G000555",
    "birthday": "1966-12-09",
@@ -7394,6 +7567,7 @@
    "wikipedia": "Kirsten Gillibrand"
   },
   {
+   "address": "2161 Rayburn House Office Building Washington DC 20515-1702",
    "ballotpedia": "Brett Guthrie",
    "bioguide": "G000558",
    "birthday": "1964-02-18",
@@ -7437,6 +7611,7 @@
    "wikipedia": "Brett Guthrie"
   },
   {
+   "address": "2428 Rayburn House Office Building Washington DC 20515-0508",
    "ballotpedia": "John Garamendi",
    "bioguide": "G000559",
    "birthday": "1945-01-24",
@@ -7480,6 +7655,7 @@
    "wikipedia": "John Garamendi"
   },
   {
+   "address": "2057 Rayburn House Office Building Washington DC 20515-0309",
    "ballotpedia": "Paul Gosar",
    "bioguide": "G000565",
    "birthday": "1958-11-22",
@@ -7524,6 +7700,7 @@
    "wikipedia": "Paul Gosar"
   },
   {
+   "address": "2110 Rayburn House Office Building Washington DC 20515-4609",
    "ballotpedia": "Morgan Griffith",
    "bioguide": "G000568",
    "birthday": "1958-03-15",
@@ -7568,6 +7745,7 @@
    "wikipedia": "Morgan Griffith"
   },
   {
+   "address": "302 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Ruben Gallego",
    "bioguide": "G000574",
    "birthday": "1979-11-20",
@@ -7610,6 +7788,7 @@
    "wikipedia": "Ruben Gallego"
   },
   {
+   "address": "1211 Longworth House Office Building Washington DC 20515-4906",
    "ballotpedia": "Glenn Grothman",
    "bioguide": "G000576",
    "birthday": "1955-07-03",
@@ -7652,6 +7831,7 @@
    "wikipedia": "Glenn Grothman"
   },
   {
+   "address": "1201 Longworth House Office Building Washington DC 20515-4334",
    "ballotpedia": "Vicente Gonzalez Jr.",
    "bioguide": "G000581",
    "birthday": "1967-09-04",
@@ -7694,6 +7874,7 @@
    "wikipedia": "Vicente Gonzalez (American politician)"
   },
   {
+   "address": "106 Cannon House Office Building Washington DC 20515-3005",
    "ballotpedia": "Josh Gottheimer",
    "bioguide": "G000583",
    "birthday": "1975-03-08",
@@ -7735,6 +7916,7 @@
    "wikipedia": "Josh Gottheimer"
   },
   {
+   "address": "506 Cannon House Office Building Washington DC 20515-0534",
    "ballotpedia": "Jimmy Gomez",
    "bioguide": "G000585",
    "birthday": "1974-11-25",
@@ -7777,6 +7959,7 @@
    "wikipedia": "Jimmy Gomez"
   },
   {
+   "address": "2334 Rayburn House Office Building Washington DC 20515-1304",
    "ballotpedia": "Jesus Garcia",
    "bioguide": "G000586",
    "birthday": "1956-04-12",
@@ -7819,6 +8002,7 @@
    "wikipedia": "Chuy García"
   },
   {
+   "address": "2419 Rayburn House Office Building Washington DC 20515-4329",
    "ballotpedia": "Sylvia Garcia",
    "bioguide": "G000587",
    "birthday": "1950-09-06",
@@ -7860,6 +8044,7 @@
    "wikipedia": "Sylvia Garcia"
   },
   {
+   "address": "2431 Rayburn House Office Building Washington DC 20515-4305",
    "ballotpedia": "Lance Gooden",
    "bioguide": "G000589",
    "birthday": "1982-12-01",
@@ -7898,6 +8083,7 @@
    "wikipedia": "Lance Gooden"
   },
   {
+   "address": "450 Cannon House Office Building Washington DC 20515-2403",
    "ballotpedia": "Michael Guest",
    "bioguide": "G000591",
    "birthday": "1970-02-04",
@@ -7938,6 +8124,7 @@
    "wikipedia": "Michael Guest (politician)"
   },
   {
+   "address": "1107 Longworth House Office Building Washington DC 20515-1902",
    "ballotpedia": "Jared Golden",
    "bioguide": "G000592",
    "birthday": "1982-07-25",
@@ -7978,6 +8165,7 @@
    "wikipedia": "Jared Golden"
   },
   {
+   "address": "448 Cannon House Office Building Washington DC 20515-0001",
    "ballotpedia": "Carlos Gimenez",
    "bioguide": "G000593",
    "birthday": "1954-01-17",
@@ -8020,6 +8208,7 @@
    "wikipedia": "Carlos A. Giménez"
   },
   {
+   "address": "2344 Rayburn House Office Building Washington DC 20515-3202",
    "ballotpedia": "Andrew Garbarino",
    "bioguide": "G000597",
    "birthday": "1984-09-27",
@@ -8061,6 +8250,7 @@
    "wikipedia": "Andrew Garbarino"
   },
   {
+   "address": "109 Cannon House Office Building Washington DC 20515-0542",
    "ballotpedia": "Robert Garcia (California)",
    "bioguide": "G000598",
    "birthday": "1977-12-02",
@@ -8103,6 +8293,7 @@
    "wikipedia": "Robert Garcia (California congressman)"
   },
   {
+   "address": "245 Cannon House Office Building Washington DC 20515-3210",
    "ballotpedia": "Daniel Goldman",
    "bioguide": "G000599",
    "birthday": "1976-02-26",
@@ -8145,6 +8336,7 @@
    "wikipedia": "Dan Goldman"
   },
   {
+   "address": "1431 Longworth House Office Building Washington DC 20515-4703",
    "ballotpedia": "Marie Gluesenkamp Perez",
    "bioguide": "G000600",
    "birthday": "1988-06-06",
@@ -8187,6 +8379,7 @@
    "wikipedia": "Marie Gluesenkamp Perez"
   },
   {
+   "address": "1716 Longworth House Office Building Washington DC 20515-4312",
    "ballotpedia": null,
    "bioguide": "G000601",
    "birthday": "1968-10-03",
@@ -8228,6 +8421,7 @@
    "wikipedia": "Craig Goldman"
   },
   {
+   "address": "428 Cannon House Office Building Washington DC 20515-3204",
    "ballotpedia": "Laura Gillen",
    "bioguide": "G000602",
    "birthday": "1969-07-10",
@@ -8271,6 +8465,7 @@
    "wikipedia": "Laura Gillen"
   },
   {
+   "address": "1305 Longworth House Office Building Washington DC 20515-4326",
    "ballotpedia": "Brandon Gill",
    "bioguide": "G000603",
    "birthday": "1994-02-26",
@@ -8312,6 +8507,7 @@
    "wikipedia": "Brandon Gill"
   },
   {
+   "address": "223 Cannon House Office Building Washington DC 20515-2902",
    "ballotpedia": "Maggie Goodlander",
    "bioguide": "G000604",
    "birthday": "1986-11-04",
@@ -8353,6 +8549,7 @@
    "wikipedia": "Maggie Goodlander"
   },
   {
+   "address": "1230 Longworth House Office Building Washington DC 20515-0513",
    "ballotpedia": "Adam Gray",
    "bioguide": "G000605",
    "birthday": "1977-09-23",
@@ -8394,6 +8591,7 @@
    "wikipedia": "Adam Gray"
   },
   {
+   "address": "1203 Longworth House Office Building Washington DC 20515-0307",
    "ballotpedia": "Adelita Grijalva",
    "bioguide": "G000606",
    "birthday": "1970-10-30",
@@ -8430,6 +8628,7 @@
    "wikipedia": "Adelita Grijalva"
   },
   {
+   "address": "408 Cannon House Office Building Washington DC 20515-0501",
    "ballotpedia": null,
    "bioguide": "G000607",
    "birthday": "1981-03-07",
@@ -8465,6 +8664,7 @@
    "wikipedia": null
   },
   {
+   "address": "211 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": null,
    "bioguide": "G000608",
    "birthday": "1964-06-12",
@@ -8496,6 +8696,7 @@
    "wikipedia": "Darline Graham Nordone"
   },
   {
+   "address": "316 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "John Hickenlooper",
    "bioguide": "H000273",
    "birthday": "1952-02-07",
@@ -8539,6 +8740,7 @@
    "wikipedia": "John Hickenlooper"
   },
   {
+   "address": "251 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Bill Hagerty",
    "bioguide": "H000601",
    "birthday": "1959-08-14",
@@ -8582,6 +8784,7 @@
    "wikipedia": "Bill Hagerty"
   },
   {
+   "address": "1705 Longworth House Office Building Washington DC 20515-2005",
    "ballotpedia": "Steny Hoyer",
    "bioguide": "H000874",
    "birthday": "1939-06-14",
@@ -8626,6 +8829,7 @@
    "wikipedia": "Steny Hoyer"
   },
   {
+   "address": "109 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Mazie K. Hirono",
    "bioguide": "H001042",
    "birthday": "1947-11-03",
@@ -8671,6 +8875,7 @@
    "wikipedia": "Mazie Hirono"
   },
   {
+   "address": "709 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Martin Heinrich",
    "bioguide": "H001046",
    "birthday": "1971-10-17",
@@ -8715,6 +8920,7 @@
    "wikipedia": "Martin Heinrich"
   },
   {
+   "address": "2137 Rayburn House Office Building Washington DC 20515-0704",
    "ballotpedia": "Jim Himes",
    "bioguide": "H001047",
    "birthday": "1966-07-05",
@@ -8760,6 +8966,7 @@
    "wikipedia": "Jim Himes"
   },
   {
+   "address": "1536 Longworth House Office Building Washington DC 20515-2001",
    "ballotpedia": "Andrew Harris",
    "bioguide": "H001052",
    "birthday": "1957-01-25",
@@ -8802,6 +9009,7 @@
    "wikipedia": "Andy Harris (politician)"
   },
   {
+   "address": "2232 Rayburn House Office Building Washington DC 20515-2204",
    "ballotpedia": "Bill Huizenga",
    "bioguide": "H001058",
    "birthday": "1969-01-31",
@@ -8845,6 +9053,7 @@
    "wikipedia": "Bill Huizenga"
   },
   {
+   "address": "338 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "John Hoeven",
    "bioguide": "H001061",
    "birthday": "1957-03-13",
@@ -8888,6 +9097,7 @@
    "wikipedia": "John Hoeven"
   },
   {
+   "address": "406 Cannon House Office Building Washington DC 20515-2804",
    "ballotpedia": "Steven Horsford",
    "bioguide": "H001066",
    "birthday": "1973-04-29",
@@ -8930,6 +9140,7 @@
    "wikipedia": "Steven Horsford"
   },
   {
+   "address": "2112 Rayburn House Office Building Washington DC 20515-3309",
    "ballotpedia": "Richard Hudson",
    "bioguide": "H001067",
    "birthday": "1971-11-04",
@@ -8972,6 +9183,7 @@
    "wikipedia": "Richard Hudson (American politician)"
   },
   {
+   "address": "2330 Rayburn House Office Building Washington DC 20515-0502",
    "ballotpedia": "Jared Huffman",
    "bioguide": "H001068",
    "birthday": "1964-02-18",
@@ -9015,6 +9227,7 @@
    "wikipedia": "Jared Huffman"
   },
   {
+   "address": "1533 Longworth House Office Building Washington DC 20515-0402",
    "ballotpedia": "French Hill",
    "bioguide": "H001072",
    "birthday": "1956-12-05",
@@ -9058,6 +9271,7 @@
    "wikipedia": "French Hill (politician)"
   },
   {
+   "address": "324 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Maggie Hassan",
    "bioguide": "H001076",
    "birthday": "1958-02-27",
@@ -9101,6 +9315,7 @@
    "wikipedia": "Maggie Hassan"
   },
   {
+   "address": "572 Cannon House Office Building Washington DC 20515-1803",
    "ballotpedia": "Clay Higgins",
    "bioguide": "H001077",
    "birthday": "1961-08-24",
@@ -9142,6 +9357,7 @@
    "wikipedia": "Clay Higgins"
   },
   {
+   "address": "528 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Cindy Hyde-Smith",
    "bioguide": "H001079",
    "birthday": "1959-05-10",
@@ -9184,6 +9400,7 @@
    "wikipedia": "Cindy Hyde-Smith"
   },
   {
+   "address": "2049 Rayburn House Office Building Washington DC 20515-0705",
    "ballotpedia": "Jahana Hayes",
    "bioguide": "H001081",
    "birthday": "1973-03-08",
@@ -9226,6 +9443,7 @@
    "wikipedia": "Jahana Hayes"
   },
   {
+   "address": "171 Cannon House Office Building Washington DC 20515-3601",
    "ballotpedia": "Kevin Hern",
    "bioguide": "H001082",
    "birthday": "1961-12-04",
@@ -9276,6 +9494,7 @@
    "wikipedia": "Kevin Hern"
   },
   {
+   "address": "1727 Longworth House Office Building Washington DC 20515-3806",
    "ballotpedia": "Chrissy Houlahan",
    "bioguide": "H001085",
    "birthday": "1967-06-05",
@@ -9318,6 +9537,7 @@
    "wikipedia": "Chrissy Houlahan"
   },
   {
+   "address": "167 Cannon House Office Building Washington DC 20515-4201",
    "ballotpedia": "Diana Harshbarger",
    "bioguide": "H001086",
    "birthday": "1960-01-01",
@@ -9358,6 +9578,7 @@
    "wikipedia": "Diana Harshbarger"
   },
   {
+   "address": "381 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Josh Hawley",
    "bioguide": "H001089",
    "birthday": "1979-12-31",
@@ -9401,6 +9622,7 @@
    "wikipedia": "Josh Hawley"
   },
   {
+   "address": "209 Cannon House Office Building Washington DC 20515-0509",
    "ballotpedia": "Josh Harder",
    "bioguide": "H001090",
    "birthday": "1986-08-01",
@@ -9440,6 +9662,7 @@
    "wikipedia": "Josh Harder"
   },
   {
+   "address": "2458 Rayburn House Office Building Washington DC 20515-1502",
    "ballotpedia": "Ashley Hinson",
    "bioguide": "H001091",
    "birthday": "1983-06-27",
@@ -9481,6 +9704,7 @@
    "wikipedia": "Ashley Hinson"
   },
   {
+   "address": "342 Cannon House Office Building Washington DC 20515-1409",
    "ballotpedia": "Erin Houchin",
    "bioguide": "H001093",
    "birthday": "1976-09-24",
@@ -9523,6 +9747,7 @@
    "wikipedia": "Erin Houchin"
   },
   {
+   "address": "1620 Longworth House Office Building Washington DC 20515-3704",
    "ballotpedia": "Val Hoyle",
    "bioguide": "H001094",
    "birthday": "1964-02-14",
@@ -9565,6 +9790,7 @@
    "wikipedia": "Val Hoyle"
   },
   {
+   "address": "1520 Longworth House Office Building Washington DC 20515-0001",
    "ballotpedia": "Wesley Hunt (Texas Congress)",
    "bioguide": "H001095",
    "birthday": "1981-11-13",
@@ -9608,6 +9834,7 @@
    "wikipedia": "Wesley Hunt"
   },
   {
+   "address": "1227 Longworth House Office Building Washington DC 20515-5000",
    "ballotpedia": "Harriet Hageman",
    "bioguide": "H001096",
    "birthday": "1962-10-18",
@@ -9649,6 +9876,7 @@
    "wikipedia": "Harriet Hageman"
   },
   {
+   "address": "1722 Longworth House Office Building Washington DC 20515-0308",
    "ballotpedia": "Abraham Hamadeh",
    "bioguide": "H001098",
    "birthday": "1991-05-15",
@@ -9685,6 +9913,7 @@
    "wikipedia": "Abraham Hamadeh"
   },
   {
+   "address": "1039 Longworth House Office Building Washington DC 20515-0908",
    "ballotpedia": "Mike Haridopolos",
    "bioguide": "H001099",
    "birthday": "1970-03-15",
@@ -9724,6 +9953,7 @@
    "wikipedia": "Mike Haridopolos"
   },
   {
+   "address": "1641 Longworth House Office Building Washington DC 20515-0603",
    "ballotpedia": "Jeff Hurd",
    "bioguide": "H001100",
    "birthday": "1979-08-15",
@@ -9766,6 +9996,7 @@
    "wikipedia": "Jeff Hurd"
   },
   {
+   "address": "1233 Longworth House Office Building Washington DC 20515-3310",
    "ballotpedia": "Pat Harrigan",
    "bioguide": "H001101",
    "birthday": "1987-06-21",
@@ -9806,6 +10037,7 @@
    "wikipedia": "Pat Harrigan"
   },
   {
+   "address": "126 Cannon House Office Building Washington DC 20515-3308",
    "ballotpedia": "Mark Harris (North Carolina)",
    "bioguide": "H001102",
    "birthday": "1966-04-24",
@@ -9849,6 +10081,7 @@
    "wikipedia": "Mark Harris (North Carolina politician)"
   },
   {
+   "address": "1419 Longworth House Office Building Washington DC 20515-5401",
    "ballotpedia": "Pablo Jose Hernandez Rivera",
    "bioguide": "H001103",
    "birthday": "1991-05-11",
@@ -9889,6 +10122,7 @@
    "wikipedia": "Pablo Hernández Rivera"
   },
   {
+   "address": "304 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Jon Husted",
    "bioguide": "H001104",
    "birthday": "1967-08-25",
@@ -9925,6 +10159,7 @@
    "wikipedia": "Jon Husted"
   },
   {
+   "address": "2108 Rayburn House Office Building Washington DC 20515-0548",
    "ballotpedia": "Darrell Issa",
    "bioguide": "I000056",
    "birthday": "1953-11-01",
@@ -9967,6 +10202,7 @@
    "wikipedia": "Darrell Issa"
   },
   {
+   "address": "1610 Longworth House Office Building Washington DC 20515-2004",
    "ballotpedia": "Glenn Ivey",
    "bioguide": "I000058",
    "birthday": "1961-02-27",
@@ -10011,6 +10247,7 @@
    "wikipedia": "Glenn Ivey"
   },
   {
+   "address": "2240 Rayburn House Office Building Washington DC 20515-1004",
    "ballotpedia": "Henry C. Johnson, Jr.",
    "bioguide": "J000288",
    "birthday": "1954-10-02",
@@ -10057,6 +10294,7 @@
    "wikipedia": "Hank Johnson"
   },
   {
+   "address": "2056 Rayburn House Office Building Washington DC 20515-3504",
    "ballotpedia": "Jim Jordan (Ohio)",
    "bioguide": "J000289",
    "birthday": "1964-02-17",
@@ -10099,6 +10337,7 @@
    "wikipedia": "Jim Jordan"
   },
   {
+   "address": "328 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Ron Johnson (Wisconsin)",
    "bioguide": "J000293",
    "birthday": "1955-04-08",
@@ -10142,6 +10381,7 @@
    "wikipedia": "Ron Johnson"
   },
   {
+   "address": "2267 Rayburn House Office Building Washington DC 20515-3208",
    "ballotpedia": "Hakeem Jeffries",
    "bioguide": "J000294",
    "birthday": "1970-08-04",
@@ -10192,6 +10432,7 @@
    "wikipedia": "Hakeem Jeffries"
   },
   {
+   "address": "2065 Rayburn House Office Building Washington DC 20515-3514",
    "ballotpedia": "David Joyce",
    "bioguide": "J000295",
    "birthday": "1957-03-17",
@@ -10236,6 +10477,7 @@
    "wikipedia": "David Joyce (politician)"
   },
   {
+   "address": "2346 Rayburn House Office Building Washington DC 20515-4707",
    "ballotpedia": "Pramila Jayapal",
    "bioguide": "J000298",
    "birthday": "1965-09-21",
@@ -10279,6 +10521,7 @@
    "wikipedia": "Pramila Jayapal"
   },
   {
+   "address": "521 Cannon House Office Building Washington DC 20515-1804",
    "ballotpedia": "Mike Johnson (Louisiana)",
    "bioguide": "J000299",
    "birthday": "1972-01-30",
@@ -10328,6 +10571,7 @@
    "wikipedia": "Mike Johnson"
   },
   {
+   "address": "1714 Longworth House Office Building Washington DC 20515-4100",
    "ballotpedia": "Dusty Johnson",
    "bioguide": "J000301",
    "birthday": "1976-09-30",
@@ -10367,6 +10611,7 @@
    "wikipedia": "Dusty Johnson"
   },
   {
+   "address": "2102 Rayburn House Office Building Washington DC 20515-3813",
    "ballotpedia": "John Joyce (Pennsylvania)",
    "bioguide": "J000302",
    "birthday": "1957-02-08",
@@ -10406,6 +10651,7 @@
    "wikipedia": "John Joyce (American politician)"
   },
   {
+   "address": "125 Cannon House Office Building Washington DC 20515-4313",
    "ballotpedia": "Ronny Jackson",
    "bioguide": "J000304",
    "birthday": "1967-05-04",
@@ -10448,6 +10694,7 @@
    "wikipedia": "Ronny Jackson"
   },
   {
+   "address": "2348 Rayburn House Office Building Washington DC 20515-0551",
    "ballotpedia": "Sara Jacobs",
    "bioguide": "J000305",
    "birthday": "1989-02-01",
@@ -10489,6 +10736,7 @@
    "wikipedia": "Sara Jacobs"
   },
   {
+   "address": "1519 Longworth House Office Building Washington DC 20515-2210",
    "ballotpedia": "John James (Michigan)",
    "bioguide": "J000307",
    "birthday": "1981-06-08",
@@ -10532,6 +10780,7 @@
    "wikipedia": "John James (Michigan politician)"
   },
   {
+   "address": "1632 Longworth House Office Building Washington DC 20515-1301",
    "ballotpedia": "Jonathan Jackson (Illinois)",
    "bioguide": "J000309",
    "birthday": "1966-01-07",
@@ -10572,6 +10821,7 @@
    "wikipedia": "Jonathan Jackson (Illinois politician)"
   },
   {
+   "address": "221 Cannon House Office Building Washington DC 20515-4332",
    "ballotpedia": "Julie Johnson",
    "bioguide": "J000310",
    "birthday": "1966-05-02",
@@ -10613,6 +10863,7 @@
    "wikipedia": "Julie Johnson (politician)"
   },
   {
+   "address": "1320 Longworth House Office Building Washington DC 20515-1003",
    "ballotpedia": "Brian Jack",
    "bioguide": "J000311",
    "birthday": "1988-02-17",
@@ -10654,6 +10905,7 @@
    "wikipedia": "Brian Jack"
   },
   {
+   "address": "509 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": null,
    "bioguide": "J000312",
    "birthday": "1951-04-27",
@@ -10695,6 +10947,7 @@
    "wikipedia": "Jim Justice"
   },
   {
+   "address": "2314 Rayburn House Office Building Washington DC 20515-3509",
    "ballotpedia": "Marcy Kaptur",
    "bioguide": "K000009",
    "birthday": "1946-06-17",
@@ -10738,6 +10991,7 @@
    "wikipedia": "Marcy Kaptur"
   },
   {
+   "address": "425 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Amy Klobuchar",
    "bioguide": "K000367",
    "birthday": "1960-05-25",
@@ -10787,6 +11041,7 @@
    "wikipedia": "Amy Klobuchar"
   },
   {
+   "address": "2372 Rayburn House Office Building Washington DC 20515-2109",
    "ballotpedia": "Bill Keating",
    "bioguide": "K000375",
    "birthday": "1952-09-06",
@@ -10830,6 +11085,7 @@
    "wikipedia": "Bill Keating"
   },
   {
+   "address": "1707 Longworth House Office Building Washington DC 20515-3816",
    "ballotpedia": "Mike Kelly",
    "bioguide": "K000376",
    "birthday": "1948-05-10",
@@ -10872,6 +11128,7 @@
    "wikipedia": "Mike Kelly (Pennsylvania politician)"
   },
   {
+   "address": "516 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Mark Kelly",
    "bioguide": "K000377",
    "birthday": "1964-02-21",
@@ -10914,6 +11171,7 @@
    "wikipedia": "Mark Kelly"
   },
   {
+   "address": "133 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Angus King",
    "bioguide": "K000383",
    "birthday": "1944-03-31",
@@ -10958,6 +11216,7 @@
    "wikipedia": "Angus King"
   },
   {
+   "address": "231 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Tim Kaine",
    "bioguide": "K000384",
    "birthday": "1958-02-26",
@@ -11000,6 +11259,7 @@
    "wikipedia": "Tim Kaine"
   },
   {
+   "address": "2329 Rayburn House Office Building Washington DC 20515-1302",
    "ballotpedia": "Robin Kelly",
    "bioguide": "K000385",
    "birthday": "1956-04-30",
@@ -11044,6 +11304,7 @@
    "wikipedia": "Robin Kelly"
   },
   {
+   "address": "2243 Rayburn House Office Building Washington DC 20515-2401",
    "ballotpedia": "Trent Kelly",
    "bioguide": "K000388",
    "birthday": "1966-03-01",
@@ -11086,6 +11347,7 @@
    "wikipedia": "Trent Kelly"
   },
   {
+   "address": "306 Cannon House Office Building Washington DC 20515-0517",
    "ballotpedia": "Ro Khanna",
    "bioguide": "K000389",
    "birthday": "1976-09-13",
@@ -11128,6 +11390,7 @@
    "wikipedia": "Ro Khanna"
   },
   {
+   "address": "2367 Rayburn House Office Building Washington DC 20515-1308",
    "ballotpedia": "Raja Krishnamoorthi",
    "bioguide": "K000391",
    "birthday": "1973-07-19",
@@ -11170,6 +11433,7 @@
    "wikipedia": "Raja Krishnamoorthi"
   },
   {
+   "address": "560 Cannon House Office Building Washington DC 20515-4208",
    "ballotpedia": "David Kustoff",
    "bioguide": "K000392",
    "birthday": "1966-10-08",
@@ -11212,6 +11476,7 @@
    "wikipedia": "David Kustoff"
   },
   {
+   "address": "437 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "John Neely Kennedy",
    "bioguide": "K000393",
    "birthday": "1951-11-21",
@@ -11255,6 +11520,7 @@
    "wikipedia": "John Kennedy (Louisiana politician)"
   },
   {
+   "address": "520 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Andrew Kim (New Jersey)",
    "bioguide": "K000394",
    "birthday": "1982-07-12",
@@ -11295,6 +11561,7 @@
    "wikipedia": "Andy Kim"
   },
   {
+   "address": "2439 Rayburn House Office Building Washington DC 20515-0540",
    "ballotpedia": "Young Kim (California)",
    "bioguide": "K000397",
    "birthday": "1962-10-18",
@@ -11338,6 +11605,7 @@
    "wikipedia": "Young Kim"
   },
   {
+   "address": "251 Cannon House Office Building Washington DC 20515-3007",
    "ballotpedia": "Thomas Kean Jr.",
    "bioguide": "K000398",
    "birthday": "1968-09-05",
@@ -11381,6 +11649,7 @@
    "wikipedia": "Thomas Kean Jr."
   },
   {
+   "address": "152 Cannon House Office Building Washington DC 20515-4602",
    "ballotpedia": "Jennifer Kiggans",
    "bioguide": "K000399",
    "birthday": "1971-06-18",
@@ -11423,6 +11692,7 @@
    "wikipedia": "Jen Kiggans"
   },
   {
+   "address": "144 Cannon House Office Building Washington DC 20515-0537",
    "ballotpedia": "Sydney Kamlager-Dove",
    "bioguide": "K000400",
    "birthday": "1972-07-20",
@@ -11464,6 +11734,7 @@
    "wikipedia": "Sydney Kamlager-Dove"
   },
   {
+   "address": "2445 Rayburn House Office Building Washington DC 20515-0503",
    "ballotpedia": "Kevin Kiley",
    "bioguide": "K000401",
    "birthday": "1985-01-30",
@@ -11506,6 +11777,7 @@
    "wikipedia": "Kevin Kiley (politician)"
   },
   {
+   "address": "423 Cannon House Office Building Washington DC 20515-3226",
    "ballotpedia": "Timothy M. Kennedy",
    "bioguide": "K000402",
    "birthday": "1976-10-20",
@@ -11547,6 +11819,7 @@
    "wikipedia": "Tim Kennedy (politician)"
   },
   {
+   "address": "1626 Longworth House Office Building Washington DC 20515-4403",
    "ballotpedia": null,
    "bioguide": "K000403",
    "birthday": "1969-02-02",
@@ -11588,6 +11861,7 @@
    "wikipedia": "Mike Kennedy"
   },
   {
+   "address": "425 Cannon House Office Building Washington DC 20515-5201",
    "ballotpedia": null,
    "bioguide": "K000404",
    "birthday": "1975-04-10",
@@ -11629,6 +11903,7 @@
    "wikipedia": "Kimberlyn King-Hinds"
   },
   {
+   "address": "1239 Longworth House Office Building Washington DC 20515-3313",
    "ballotpedia": "Brad Knott",
    "bioguide": "K000405",
    "birthday": "1986-04-17",
@@ -11669,6 +11944,7 @@
    "wikipedia": "Brad Knott"
   },
   {
+   "address": "2417 Rayburn House Office Building Washington DC 20515-3103",
    "ballotpedia": "Teresa Leger Fernandez",
    "bioguide": "L000273",
    "birthday": "1959-07-01",
@@ -11712,6 +11988,7 @@
    "wikipedia": "Teresa Leger Fernández"
   },
   {
+   "address": "1401 Longworth House Office Building Washington DC 20515-0518",
    "ballotpedia": "Zoe Lofgren",
    "bioguide": "L000397",
    "birthday": "1947-12-21",
@@ -11754,6 +12031,7 @@
    "wikipedia": "Zoe Lofgren"
   },
   {
+   "address": "2405 Rayburn House Office Building Washington DC 20515-3603",
    "ballotpedia": "Frank D. Lucas",
    "bioguide": "L000491",
    "birthday": "1960-01-06",
@@ -11798,6 +12076,7 @@
    "wikipedia": "Frank Lucas (Oklahoma politician)"
   },
   {
+   "address": "1501 Longworth House Office Building Washington DC 20515-0701",
    "ballotpedia": "John B. Larson",
    "bioguide": "L000557",
    "birthday": "1948-07-22",
@@ -11842,6 +12121,7 @@
    "wikipedia": "John B. Larson"
   },
   {
+   "address": "2163 Rayburn House Office Building Washington DC 20515-4702",
    "ballotpedia": "Rick Larsen",
    "bioguide": "L000560",
    "birthday": "1965-06-15",
@@ -11885,6 +12165,7 @@
    "wikipedia": "Rick Larsen"
   },
   {
+   "address": "2109 Rayburn House Office Building Washington DC 20515-2108",
    "ballotpedia": "Stephen Lynch",
    "bioguide": "L000562",
    "birthday": "1955-03-31",
@@ -11930,6 +12211,7 @@
    "wikipedia": "Stephen Lynch (politician)"
   },
   {
+   "address": "2470 Rayburn House Office Building Washington DC 20515-3505",
    "ballotpedia": "Bob Latta",
    "bioguide": "L000566",
    "birthday": "1956-04-18",
@@ -11974,6 +12256,7 @@
    "wikipedia": "Bob Latta"
   },
   {
+   "address": "498 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Ben Ray Luján",
    "bioguide": "L000570",
    "birthday": "1972-06-07",
@@ -12017,6 +12300,7 @@
    "wikipedia": "Ben Ray Luján"
   },
   {
+   "address": "127A Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Cynthia Lummis",
    "bioguide": "L000571",
    "birthday": "1954-09-10",
@@ -12060,6 +12344,7 @@
    "wikipedia": "Cynthia Lummis"
   },
   {
+   "address": "731 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "James Lankford",
    "bioguide": "L000575",
    "birthday": "1968-03-04",
@@ -12111,6 +12396,7 @@
    "wikipedia": "James Lankford"
   },
   {
+   "address": "363 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Mike Lee",
    "bioguide": "L000577",
    "birthday": "1971-06-04",
@@ -12154,6 +12440,7 @@
    "wikipedia": "Mike Lee"
   },
   {
+   "address": "2454 Rayburn House Office Building Washington DC 20515-0536",
    "ballotpedia": "Ted Lieu",
    "bioguide": "L000582",
    "birthday": "1969-03-29",
@@ -12203,6 +12490,7 @@
    "wikipedia": "Ted Lieu"
   },
   {
+   "address": "2133 Rayburn House Office Building Washington DC 20515-1011",
    "ballotpedia": "Barry Loudermilk",
    "bioguide": "L000583",
    "birthday": "1963-12-22",
@@ -12245,6 +12533,7 @@
    "wikipedia": "Barry Loudermilk"
   },
   {
+   "address": "503 Cannon House Office Building Washington DC 20515-1316",
    "ballotpedia": "Darin LaHood",
    "bioguide": "L000585",
    "birthday": "1968-07-05",
@@ -12286,6 +12575,7 @@
    "wikipedia": "Darin LaHood"
   },
   {
+   "address": "365 Cannon House Office Building Washington DC 20515-2803",
    "ballotpedia": "Susie Lee",
    "bioguide": "L000590",
    "birthday": "1966-11-07",
@@ -12327,6 +12617,7 @@
    "wikipedia": "Susie Lee"
   },
   {
+   "address": "2352 Rayburn House Office Building Washington DC 20515-0549",
    "ballotpedia": "Mike Levin",
    "bioguide": "L000593",
    "birthday": "1978-10-28",
@@ -12369,6 +12660,7 @@
    "wikipedia": "Mike Levin"
   },
   {
+   "address": "142 Cannon House Office Building Washington DC 20515-1805",
    "ballotpedia": "Julia Letlow",
    "bioguide": "L000595",
    "birthday": "1981-03-16",
@@ -12410,6 +12702,7 @@
    "wikipedia": "Julia Letlow"
   },
   {
+   "address": "226 Cannon House Office Building Washington DC 20515-0913",
    "ballotpedia": "Anna Paulina Luna",
    "bioguide": "L000596",
    "birthday": "1989-05-06",
@@ -12452,6 +12745,7 @@
    "wikipedia": "Anna Paulina Luna"
   },
   {
+   "address": "2464 Rayburn House Office Building Washington DC 20515-0915",
    "ballotpedia": "Laurel Lee",
    "bioguide": "L000597",
    "birthday": "1974-03-26",
@@ -12494,6 +12788,7 @@
    "wikipedia": "Laurel Lee"
   },
   {
+   "address": "122 Cannon House Office Building Washington DC 20515-3201",
    "ballotpedia": "Nicholas J. LaLota",
    "bioguide": "L000598",
    "birthday": "1978-06-23",
@@ -12536,6 +12831,7 @@
    "wikipedia": "Nick LaLota"
   },
   {
+   "address": "324 Cannon House Office Building Washington DC 20515-3217",
    "ballotpedia": "Michael Lawler (New York)",
    "bioguide": "L000599",
    "birthday": "1986-09-09",
@@ -12579,6 +12875,7 @@
    "wikipedia": "Mike Lawler"
   },
   {
+   "address": "422 Cannon House Office Building Washington DC 20515-3223",
    "ballotpedia": "Nick Langworthy",
    "bioguide": "L000600",
    "birthday": "1981-02-27",
@@ -12620,6 +12917,7 @@
    "wikipedia": "Nick Langworthy"
   },
   {
+   "address": "2244 Rayburn House Office Building Washington DC 20515-3501",
    "ballotpedia": "Greg Landsman",
    "bioguide": "L000601",
    "birthday": "1976-12-04",
@@ -12661,6 +12959,7 @@
    "wikipedia": "Greg Landsman"
   },
   {
+   "address": "2437 Rayburn House Office Building Washington DC 20515-3812",
    "ballotpedia": "Summer Lee",
    "bioguide": "L000602",
    "birthday": "1987-11-26",
@@ -12703,6 +13002,7 @@
    "wikipedia": "Summer Lee"
   },
   {
+   "address": "444 Cannon House Office Building Washington DC 20515-4308",
    "ballotpedia": null,
    "bioguide": "L000603",
    "birthday": "1975-11-07",
@@ -12745,6 +13045,7 @@
    "wikipedia": "Morgan Luttrell"
   },
   {
+   "address": "1507 Longworth House Office Building Washington DC 20515-3216",
    "ballotpedia": "George Latimer (New York)",
    "bioguide": "L000606",
    "birthday": "1953-11-22",
@@ -12786,6 +13087,7 @@
    "wikipedia": "George Latimer (New York politician)"
   },
   {
+   "address": "1117 Longworth House Office Building Washington DC 20515-0516",
    "ballotpedia": "Sam Liccardo",
    "bioguide": "L000607",
    "birthday": "1970-04-16",
@@ -12826,6 +13128,7 @@
    "wikipedia": "Sam Liccardo"
   },
   {
+   "address": "255 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Ed Markey",
    "bioguide": "M000133",
    "birthday": "1946-07-11",
@@ -12872,6 +13175,7 @@
    "wikipedia": "Ed Markey"
   },
   {
+   "address": "1728 Longworth House Office Building Washington DC 20515-4001",
    "ballotpedia": "Nancy Mace",
    "bioguide": "M000194",
    "birthday": "1977-12-04",
@@ -12914,6 +13218,7 @@
    "wikipedia": "Nancy Mace"
   },
   {
+   "address": "370 Cannon House Office Building Washington DC 20515-2102",
    "ballotpedia": "Jim McGovern (Massachusetts)",
    "bioguide": "M000312",
    "birthday": "1959-11-20",
@@ -12959,6 +13264,7 @@
    "wikipedia": "Jim McGovern (American politician)"
   },
   {
+   "address": "1124 Longworth House Office Building Washington DC 20515-3211",
    "ballotpedia": "Nicole Malliotakis",
    "bioguide": "M000317",
    "birthday": "1980-11-11",
@@ -12999,6 +13305,7 @@
    "wikipedia": "Nicole Malliotakis"
   },
   {
+   "address": "317 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Mitch McConnell",
    "bioguide": "M000355",
    "birthday": "1942-02-20",
@@ -13040,6 +13347,7 @@
    "wikipedia": "Mitch McConnell"
   },
   {
+   "address": "2263 Rayburn House Office Building Washington DC 20515-2007",
    "ballotpedia": "Kweisi Mfume",
    "bioguide": "M000687",
    "birthday": "1948-10-24",
@@ -13085,6 +13393,7 @@
    "wikipedia": "Kweisi Mfume"
   },
   {
+   "address": "344 Cannon House Office Building Washington DC 20515-1601",
    "ballotpedia": "Tracey Mann",
    "bioguide": "M000871",
    "birthday": "1976-12-17",
@@ -13127,6 +13436,7 @@
    "wikipedia": "Tracey Mann"
   },
   {
+   "address": "521 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Jerry Moran",
    "bioguide": "M000934",
    "birthday": "1954-05-29",
@@ -13171,6 +13481,7 @@
    "wikipedia": "Jerry Moran"
   },
   {
+   "address": "154 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Patty Murray",
    "bioguide": "M001111",
    "birthday": "1950-10-11",
@@ -13213,6 +13524,7 @@
    "wikipedia": "Patty Murray"
   },
   {
+   "address": "562 Cannon House Office Building Washington DC 20515-2209",
    "ballotpedia": "Lisa McClain",
    "bioguide": "M001136",
    "birthday": "1966-04-07",
@@ -13262,6 +13574,7 @@
    "wikipedia": "Lisa McClain"
   },
   {
+   "address": "2310 Rayburn House Office Building Washington DC 20515-3205",
    "ballotpedia": "Gregory Meeks",
    "bioguide": "M001137",
    "birthday": "1953-09-25",
@@ -13306,6 +13619,7 @@
    "wikipedia": "Gregory Meeks"
   },
   {
+   "address": "2426 Rayburn House Office Building Washington DC 20515-2304",
    "ballotpedia": "Betty McCollum",
    "bioguide": "M001143",
    "birthday": "1954-07-12",
@@ -13350,6 +13664,7 @@
    "wikipedia": "Betty McCollum"
   },
   {
+   "address": "522 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Lisa Murkowski",
    "bioguide": "M001153",
    "birthday": "1957-05-22",
@@ -13394,6 +13709,7 @@
    "wikipedia": "Lisa Murkowski"
   },
   {
+   "address": "2300 Rayburn House Office Building Washington DC 20515-4310",
    "ballotpedia": "Michael McCaul",
    "bioguide": "M001157",
    "birthday": "1962-01-14",
@@ -13438,6 +13754,7 @@
    "wikipedia": "Michael McCaul"
   },
   {
+   "address": "2252 Rayburn House Office Building Washington DC 20515-4904",
    "ballotpedia": "Gwen Moore",
    "bioguide": "M001160",
    "birthday": "1951-04-18",
@@ -13481,6 +13798,7 @@
    "wikipedia": "Gwen Moore"
   },
   {
+   "address": "2206 Rayburn House Office Building Washington DC 20515-0507",
    "ballotpedia": "Doris Matsui",
    "bioguide": "M001163",
    "birthday": "1944-09-25",
@@ -13525,6 +13843,7 @@
    "wikipedia": "Doris Matsui"
   },
   {
+   "address": "136 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Chris Murphy (Connecticut)",
    "bioguide": "M001169",
    "birthday": "1973-08-03",
@@ -13577,6 +13896,7 @@
    "wikipedia": "Chris Murphy"
   },
   {
+   "address": "531 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Jeff Merkley",
    "bioguide": "M001176",
    "birthday": "1956-10-24",
@@ -13620,6 +13940,7 @@
    "wikipedia": "Jeff Merkley"
   },
   {
+   "address": "2256 Rayburn House Office Building Washington DC 20515-0505",
    "ballotpedia": "Tom McClintock",
    "bioguide": "M001177",
    "birthday": "1956-07-10",
@@ -13665,6 +13986,7 @@
    "wikipedia": "Tom McClintock"
   },
   {
+   "address": "2371 Rayburn House Office Building Washington DC 20515-1704",
    "ballotpedia": "Thomas Massie",
    "bioguide": "M001184",
    "birthday": "1971-01-13",
@@ -13708,6 +14030,7 @@
    "wikipedia": "Thomas Massie"
   },
   {
+   "address": "2468 Rayburn House Office Building Washington DC 20515-3206",
    "ballotpedia": "Grace Meng",
    "bioguide": "M001188",
    "birthday": "1975-10-01",
@@ -13749,6 +14072,7 @@
    "wikipedia": "Grace Meng"
   },
   {
+   "address": "246 Cannon House Office Building Washington DC 20515-2202",
    "ballotpedia": "John Moolenaar",
    "bioguide": "M001194",
    "birthday": "1961-05-08",
@@ -13792,6 +14116,7 @@
    "wikipedia": "John Moolenaar"
   },
   {
+   "address": "1126 Longworth House Office Building Washington DC 20515-2106",
    "ballotpedia": "Seth Moulton",
    "bioguide": "M001196",
    "birthday": "1978-10-24",
@@ -13835,6 +14160,7 @@
    "wikipedia": "Seth Moulton"
   },
   {
+   "address": "479A Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Roger Marshall",
    "bioguide": "M001198",
    "birthday": "1960-08-09",
@@ -13878,6 +14204,7 @@
    "wikipedia": "Roger Marshall"
   },
   {
+   "address": "2182 Rayburn House Office Building Washington DC 20515-0921",
    "ballotpedia": "Brian Mast",
    "bioguide": "M001199",
    "birthday": "1980-07-10",
@@ -13921,6 +14248,7 @@
    "wikipedia": "Brian Mast"
   },
   {
+   "address": "350 Cannon House Office Building Washington DC 20515-3809",
    "ballotpedia": "Dan Meuser",
    "bioguide": "M001204",
    "birthday": "1964-02-10",
@@ -13961,6 +14289,7 @@
    "wikipedia": "Dan Meuser"
   },
   {
+   "address": "465 Cannon House Office Building Washington DC 20515-4801",
    "ballotpedia": "Carol Miller (West Virginia)",
    "bioguide": "M001205",
    "birthday": "1950-11-04",
@@ -14002,6 +14331,7 @@
    "wikipedia": "Carol Miller (politician)"
   },
   {
+   "address": "570 Cannon House Office Building Washington DC 20515-3225",
    "ballotpedia": "Joseph Morelle",
    "bioguide": "M001206",
    "birthday": "1957-04-29",
@@ -14043,6 +14373,7 @@
    "wikipedia": "Joseph Morelle"
   },
   {
+   "address": "2246 Rayburn House Office Building Washington DC 20515-1006",
    "ballotpedia": "Lucy McBath",
    "bioguide": "M001208",
    "birthday": "1960-06-01",
@@ -14084,6 +14415,7 @@
    "wikipedia": "Lucy McBath"
   },
   {
+   "address": "407 Cannon House Office Building Washington DC 20515-3303",
    "ballotpedia": "Gregory Murphy",
    "bioguide": "M001210",
    "birthday": "1963-03-05",
@@ -14126,6 +14458,7 @@
    "wikipedia": "Greg Murphy (politician)"
   },
   {
+   "address": "1740 Longworth House Office Building Washington DC 20515-1315",
    "ballotpedia": "Mary Miller (Illinois)",
    "bioguide": "M001211",
    "birthday": "1959-08-27",
@@ -14167,6 +14500,7 @@
    "wikipedia": "Mary Miller (politician)"
   },
   {
+   "address": "1511 Longworth House Office Building Washington DC 20515-0101",
    "ballotpedia": "Barry Moore (Alabama)",
    "bioguide": "M001212",
    "birthday": "1966-09-26",
@@ -14208,6 +14542,7 @@
    "wikipedia": "Barry Moore (American politician)"
   },
   {
+   "address": "1131 Longworth House Office Building Washington DC 20515-4401",
    "ballotpedia": null,
    "bioguide": "M001213",
    "birthday": "1980-06-22",
@@ -14251,6 +14586,7 @@
    "wikipedia": "Blake Moore"
   },
   {
+   "address": "2441 Rayburn House Office Building Washington DC 20515-1401",
    "ballotpedia": "Frank Mrvan (Indiana congressional member)",
    "bioguide": "M001214",
    "birthday": "1969-04-16",
@@ -14292,6 +14628,7 @@
    "wikipedia": "Frank J. Mrvan"
   },
   {
+   "address": "504 Cannon House Office Building Washington DC 20515-1501",
    "ballotpedia": "Mariannette Miller-Meeks",
    "bioguide": "M001215",
    "birthday": "1955-09-06",
@@ -14333,6 +14670,7 @@
    "wikipedia": "Mariannette Miller-Meeks"
   },
   {
+   "address": "346 Cannon House Office Building Washington DC 20515-0907",
    "ballotpedia": "Cory Mills",
    "bioguide": "M001216",
    "birthday": "1980-07-30",
@@ -14373,6 +14711,7 @@
    "wikipedia": "Cory Mills"
   },
   {
+   "address": "242 Cannon House Office Building Washington DC 20515-0923",
    "ballotpedia": "Jared Moskowitz",
    "bioguide": "M001217",
    "birthday": "1980-12-18",
@@ -14416,6 +14755,7 @@
    "wikipedia": "Jared Moskowitz"
   },
   {
+   "address": "1719 Longworth House Office Building Washington DC 20515-1007",
    "ballotpedia": "Rich McCormick",
    "bioguide": "M001218",
    "birthday": "1968-10-07",
@@ -14458,6 +14798,7 @@
    "wikipedia": "Rich McCormick"
   },
   {
+   "address": "228 Cannon House Office Building Washington DC 20515-5301",
    "ballotpedia": "James Moylan",
    "bioguide": "M001219",
    "birthday": "1962-07-18",
@@ -14499,6 +14840,7 @@
    "wikipedia": "James Moylan"
   },
   {
+   "address": "1527 Longworth House Office Building Washington DC 20515-1703",
    "ballotpedia": "Morgan McGarvey",
    "bioguide": "M001220",
    "birthday": "1979-12-23",
@@ -14540,6 +14882,7 @@
    "wikipedia": "Morgan McGarvey"
   },
   {
+   "address": "143 Cannon House Office Building Washington DC 20515-3507",
    "ballotpedia": "Max Miller",
    "bioguide": "M001222",
    "birthday": "1988-11-13",
@@ -14582,6 +14925,7 @@
    "wikipedia": "Max Miller (politician)"
   },
   {
+   "address": "252 Cannon House Office Building Washington DC 20515-3902",
    "ballotpedia": "Seth Magaziner",
    "bioguide": "M001223",
    "birthday": "1983-07-22",
@@ -14622,6 +14966,7 @@
    "wikipedia": "Seth Magaziner"
   },
   {
+   "address": "1605 Longworth House Office Building Washington DC 20515-4301",
    "ballotpedia": "Nathaniel Moran",
    "bioguide": "M001224",
    "birthday": "1974-07-22",
@@ -14664,6 +15009,7 @@
    "wikipedia": "Nathaniel Moran"
   },
   {
+   "address": "1404 Longworth House Office Building Washington DC 20515-0515",
    "ballotpedia": "Kevin Mullin (California)",
    "bioguide": "M001225",
    "birthday": "1970-06-15",
@@ -14706,6 +15052,7 @@
    "wikipedia": "Kevin Mullin"
   },
   {
+   "address": "2453 Rayburn House Office Building Washington DC 20515-3008",
    "ballotpedia": "Rob Menendez (New Jersey)",
    "bioguide": "M001226",
    "birthday": "1985-07-12",
@@ -14749,6 +15096,7 @@
    "wikipedia": "Rob Menendez"
   },
   {
+   "address": "1628 Longworth House Office Building Washington DC 20515-4604",
    "ballotpedia": "Jennifer McClellan",
    "bioguide": "M001227",
    "birthday": "1972-12-28",
@@ -14788,6 +15136,7 @@
    "wikipedia": "Jennifer McClellan"
   },
   {
+   "address": "249 Cannon House Office Building Washington DC 20515-4402",
    "ballotpedia": "Celeste Maloy",
    "bioguide": "M001228",
    "birthday": "1981-05-22",
@@ -14829,6 +15178,7 @@
    "wikipedia": "Celeste Maloy"
   },
   {
+   "address": "426 Cannon House Office Building Washington DC 20515-3010",
    "ballotpedia": "LaMonica McIver",
    "bioguide": "M001229",
    "birthday": "1986-06-20",
@@ -14869,6 +15219,7 @@
    "wikipedia": "LaMonica McIver"
   },
   {
+   "address": "121 Cannon House Office Building Washington DC 20515-3807",
    "ballotpedia": "Ryan Mackenzie",
    "bioguide": "M001230",
    "birthday": "1982-08-03",
@@ -14910,6 +15261,7 @@
    "wikipedia": "Ryan Mackenzie"
   },
   {
+   "address": "1516 Longworth House Office Building Washington DC 20515-3222",
    "ballotpedia": "John Mannion",
    "bioguide": "M001231",
    "birthday": "1968-07-08",
@@ -14951,6 +15303,7 @@
    "wikipedia": "John Mannion (American politician)"
   },
   {
+   "address": "1130 Longworth House Office Building Washington DC 20515-2006",
    "ballotpedia": "April McClain-Delaney",
    "bioguide": "M001232",
    "birthday": "1964-05-28",
@@ -14992,6 +15345,7 @@
    "wikipedia": "April McClain Delaney"
   },
   {
+   "address": "1208 Longworth House Office Building Washington DC 20515-1408",
    "ballotpedia": "Mark Messmer",
    "bioguide": "M001233",
    "birthday": "1967-12-16",
@@ -15031,6 +15385,7 @@
    "wikipedia": "Mark Messmer"
   },
   {
+   "address": "1205 Longworth House Office Building Washington DC 20515-2303",
    "ballotpedia": "Kelly Morrison",
    "bioguide": "M001234",
    "birthday": "1969-02-02",
@@ -15072,6 +15427,7 @@
    "wikipedia": "Kelly Morrison"
   },
   {
+   "address": "1337 Longworth House Office Building Washington DC 20515-4802",
    "ballotpedia": null,
    "bioguide": "M001235",
    "birthday": "1980-07-01",
@@ -15112,6 +15468,7 @@
    "wikipedia": "Riley Moore"
   },
   {
+   "address": "1424 Longworth House Office Building Washington DC 20515-0001",
    "ballotpedia": "Timothy K. Moore",
    "bioguide": "M001236",
    "birthday": "1970-10-02",
@@ -15153,6 +15510,7 @@
    "wikipedia": "Tim Moore (North Carolina politician)"
   },
   {
+   "address": "1408 Longworth House Office Building Washington DC 20515-2208",
    "ballotpedia": "Kristen McDonald Rivet",
    "bioguide": "M001237",
    "birthday": "1970-07-11",
@@ -15194,6 +15552,7 @@
    "wikipedia": "Kristen McDonald Rivet"
   },
   {
+   "address": "1306 Longworth House Office Building Washington DC 20515-0800",
    "ballotpedia": "Sarah McBride",
    "bioguide": "M001238",
    "birthday": "1990-08-09",
@@ -15234,6 +15593,7 @@
    "wikipedia": "Sarah McBride"
   },
   {
+   "address": "1013 Longworth House Office Building Washington DC 20515-4605",
    "ballotpedia": "John McGuire",
    "bioguide": "M001239",
    "birthday": "1968-08-24",
@@ -15278,6 +15638,7 @@
    "wikipedia": "John McGuire (Virginia politician)"
   },
   {
+   "address": "1032 Longworth House Office Building Washington DC 20515-3306",
    "ballotpedia": "Addison McDowell",
    "bioguide": "M001240",
    "birthday": "1994-01-21",
@@ -15319,6 +15680,7 @@
    "wikipedia": "Addison McDowell"
   },
   {
+   "address": "1034 Longworth House Office Building Washington DC 20515-0547",
    "ballotpedia": "Dave Min",
    "bioguide": "M001241",
    "birthday": "1976-03-05",
@@ -15355,6 +15717,7 @@
    "wikipedia": "Dave Min"
   },
   {
+   "address": "284 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Bernie Moreno",
    "bioguide": "M001242",
    "birthday": "1967-02-14",
@@ -15394,6 +15757,7 @@
    "wikipedia": "Bernie Moreno"
   },
   {
+   "address": "702 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "David McCormick (Pennsylvania)",
    "bioguide": "M001243",
    "birthday": "1965-08-17",
@@ -15435,6 +15799,7 @@
    "wikipedia": "Dave McCormick"
   },
   {
+   "address": "387 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Ashley B. Moody",
    "bioguide": "M001244",
    "birthday": "1975-03-28",
@@ -15471,6 +15836,7 @@
    "wikipedia": "Ashley Moody"
   },
   {
+   "address": "1318 Longworth House Office Building Washington DC 20515-4318",
    "ballotpedia": "Christian Menefee",
    "bioguide": "M001245",
    "birthday": "1988-04-18",
@@ -15507,6 +15873,7 @@
    "wikipedia": "Christian Menefee"
   },
   {
+   "address": "1427 Longworth House Office Building Washington DC 20515-3011",
    "ballotpedia": "Analilia Mejia",
    "bioguide": "M001246",
    "birthday": "1977-08-19",
@@ -15542,6 +15909,7 @@
    "wikipedia": "Analilia Mejia"
   },
   {
+   "address": "2132 Rayburn House Office Building Washington DC 20515-3212",
    "ballotpedia": "Jerrold Nadler",
    "bioguide": "N000002",
    "birthday": "1947-06-13",
@@ -15585,6 +15953,7 @@
    "wikipedia": "Jerry Nadler"
   },
   {
+   "address": "372 Cannon House Office Building Washington DC 20515-2101",
    "ballotpedia": "Richard Neal",
    "bioguide": "N000015",
    "birthday": "1949-02-14",
@@ -15628,6 +15997,7 @@
    "wikipedia": "Richard Neal"
   },
   {
+   "address": "1104 Longworth House Office Building Washington DC 20515-4322",
    "ballotpedia": "Troy Nehls",
    "bioguide": "N000026",
    "birthday": "1968-04-07",
@@ -15670,6 +16040,7 @@
    "wikipedia": "Troy Nehls"
   },
   {
+   "address": "2136 Rayburn House Office Building Washington DC 20515-5101",
    "ballotpedia": "Eleanor Holmes Norton",
    "bioguide": "N000147",
    "birthday": "1937-06-13",
@@ -15715,6 +16086,7 @@
    "wikipedia": "Eleanor Holmes Norton"
   },
   {
+   "address": "2427 Rayburn House Office Building Washington DC 20515-3001",
    "ballotpedia": "Donald Norcross",
    "bioguide": "N000188",
    "birthday": "1958-12-13",
@@ -15758,6 +16130,7 @@
    "wikipedia": "Donald Norcross"
   },
   {
+   "address": "460 Cannon House Office Building Washington DC 20515-4704",
    "ballotpedia": "Dan Newhouse",
    "bioguide": "N000189",
    "birthday": "1955-07-10",
@@ -15800,6 +16173,7 @@
    "wikipedia": "Dan Newhouse"
   },
   {
+   "address": "569 Cannon House Office Building Washington DC 20515-4005",
    "ballotpedia": "Ralph Norman",
    "bioguide": "N000190",
    "birthday": "1953-06-20",
@@ -15843,6 +16217,7 @@
    "wikipedia": "Ralph Norman"
   },
   {
+   "address": "2400 Rayburn House Office Building Washington DC 20515-0602",
    "ballotpedia": "Joe Neguse",
    "bioguide": "N000191",
    "birthday": "1984-05-13",
@@ -15890,6 +16265,7 @@
    "wikipedia": "Joe Neguse"
   },
   {
+   "address": "1410 Longworth House Office Building Washington DC 20515-1503",
    "ballotpedia": "Zach Nunn",
    "bioguide": "N000193",
    "birthday": "1979-05-04",
@@ -15933,6 +16309,7 @@
    "wikipedia": "Zach Nunn"
   },
   {
+   "address": "2433 Rayburn House Office Building Washington DC 20515-0523",
    "ballotpedia": "Jay Obernolte",
    "bioguide": "O000019",
    "birthday": "1970-08-18",
@@ -15973,6 +16350,7 @@
    "wikipedia": "Jay Obernolte"
   },
   {
+   "address": "309 Cannon House Office Building Washington DC 20515-4404",
    "ballotpedia": "Burgess Owens",
    "bioguide": "O000086",
    "birthday": "1951-08-02",
@@ -16016,6 +16394,7 @@
    "wikipedia": "Burgess Owens"
   },
   {
+   "address": "250 Cannon House Office Building Washington DC 20515-3214",
    "ballotpedia": "Alexandria Ocasio-Cortez",
    "bioguide": "O000172",
    "birthday": "1989-10-13",
@@ -16056,6 +16435,7 @@
    "wikipedia": "Alexandria Ocasio-Cortez"
   },
   {
+   "address": "1730 Longworth House Office Building Washington DC 20515-2305",
    "ballotpedia": "Ilhan Omar",
    "bioguide": "O000173",
    "birthday": "1981-10-04",
@@ -16095,6 +16475,7 @@
    "wikipedia": "Ilhan Omar"
   },
   {
+   "address": "317 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Jon Ossoff",
    "bioguide": "O000174",
    "birthday": "1987-02-16",
@@ -16137,6 +16518,7 @@
    "wikipedia": "Jon Ossoff"
   },
   {
+   "address": "151 Cannon House Office Building Washington DC 20515-4205",
    "ballotpedia": "Andy Ogles",
    "bioguide": "O000175",
    "birthday": "1971-06-18",
@@ -16178,6 +16560,7 @@
    "wikipedia": "Andy Ogles"
   },
   {
+   "address": "1339 Longworth House Office Building Washington DC 20515-2002",
    "ballotpedia": "John Olszewski Jr.",
    "bioguide": "O000176",
    "birthday": "1982-09-10",
@@ -16219,6 +16602,7 @@
    "wikipedia": "Johnny Olszewski"
   },
   {
+   "address": "1113 Longworth House Office Building Washington DC 20515-2503",
    "ballotpedia": "Bob Onder",
    "bioguide": "O000177",
    "birthday": "1962-01-06",
@@ -16263,6 +16647,7 @@
    "wikipedia": "Bob Onder"
   },
   {
+   "address": "2107 Rayburn House Office Building Washington DC 20515-3006",
    "ballotpedia": "Frank Pallone",
    "bioguide": "P000034",
    "birthday": "1951-10-30",
@@ -16309,6 +16694,7 @@
    "wikipedia": "Frank Pallone"
   },
   {
+   "address": "2202 Rayburn House Office Building Washington DC 20515-4311",
    "ballotpedia": "August Pfluger",
    "bioguide": "P000048",
    "birthday": "1978-12-28",
@@ -16353,6 +16739,7 @@
    "wikipedia": "August Pfluger"
   },
   {
+   "address": "331 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Alex Padilla",
    "bioguide": "P000145",
    "birthday": "1973-03-22",
@@ -16395,6 +16782,7 @@
    "wikipedia": "Alex Padilla"
   },
   {
+   "address": "1236 Longworth House Office Building Washington DC 20515-0511",
    "ballotpedia": "Nancy Pelosi",
    "bioguide": "P000197",
    "birthday": "1940-03-26",
@@ -16437,6 +16825,7 @@
    "wikipedia": "Nancy Pelosi"
   },
   {
+   "address": "724 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Gary Peters",
    "bioguide": "P000595",
    "birthday": "1958-12-01",
@@ -16482,6 +16871,7 @@
    "wikipedia": "Gary Peters"
   },
   {
+   "address": "2354 Rayburn House Office Building Washington DC 20515-1901",
    "ballotpedia": "Chellie Pingree",
    "bioguide": "P000597",
    "birthday": "1955-04-02",
@@ -16527,6 +16917,7 @@
    "wikipedia": "Chellie Pingree"
   },
   {
+   "address": "295 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Rand Paul",
    "bioguide": "P000603",
    "birthday": "1963-01-07",
@@ -16570,6 +16961,7 @@
    "wikipedia": "Rand Paul"
   },
   {
+   "address": "2160 Rayburn House Office Building Washington DC 20515-3810",
    "ballotpedia": "Scott Perry",
    "bioguide": "P000605",
    "birthday": "1962-05-27",
@@ -16613,6 +17005,7 @@
    "wikipedia": "Scott Perry"
   },
   {
+   "address": "1026 Longworth House Office Building Washington DC 20515-4902",
    "ballotpedia": "Mark Pocan",
    "bioguide": "P000607",
    "birthday": "1964-08-14",
@@ -16656,6 +17049,7 @@
    "wikipedia": "Mark Pocan"
   },
   {
+   "address": "2369 Rayburn House Office Building Washington DC 20515-0550",
    "ballotpedia": "Scott Peters",
    "bioguide": "P000608",
    "birthday": "1958-06-17",
@@ -16699,6 +17093,7 @@
    "wikipedia": "Scott Peters (politician)"
   },
   {
+   "address": "170 Cannon House Office Building Washington DC 20515-0106",
    "ballotpedia": "Gary Palmer",
    "bioguide": "P000609",
    "birthday": "1954-05-14",
@@ -16742,6 +17137,7 @@
    "wikipedia": "Gary Palmer"
   },
   {
+   "address": "2059 Rayburn House Office Building Washington DC 20515-5500",
    "ballotpedia": "Stacey Plaskett",
    "bioguide": "P000610",
    "birthday": "1966-05-13",
@@ -16785,6 +17181,7 @@
    "wikipedia": "Stacey Plaskett"
   },
   {
+   "address": "200 Cannon House Office Building Washington DC 20515-0519",
    "ballotpedia": "Jimmy Panetta",
    "bioguide": "P000613",
    "birthday": "1969-10-01",
@@ -16827,6 +17224,7 @@
    "wikipedia": "Jimmy Panetta"
   },
   {
+   "address": "452 Cannon House Office Building Washington DC 20515-2901",
    "ballotpedia": "Chris Pappas",
    "bioguide": "P000614",
    "birthday": "1980-06-04",
@@ -16867,6 +17265,7 @@
    "wikipedia": "Chris Pappas (American politician)"
   },
   {
+   "address": "402 Cannon House Office Building Washington DC 20515-2107",
    "ballotpedia": "Ayanna Pressley",
    "bioguide": "P000617",
    "birthday": "1974-02-03",
@@ -16909,6 +17308,7 @@
    "wikipedia": "Ayanna Pressley"
   },
   {
+   "address": "348 Cannon House Office Building Washington DC 20515-0607",
    "ballotpedia": "Brittany Pettersen",
    "bioguide": "P000620",
    "birthday": "1981-12-06",
@@ -16950,6 +17350,7 @@
    "wikipedia": "Brittany Pettersen"
   },
   {
+   "address": "1007 Longworth House Office Building Washington DC 20515-3009",
    "ballotpedia": "Nellie Pou",
    "bioguide": "P000621",
    "birthday": "1956-05-20",
@@ -16991,6 +17392,7 @@
    "wikipedia": "Nellie Pou"
   },
   {
+   "address": "2021 Rayburn House Office Building Washington DC 20515-0901",
    "ballotpedia": "Jimmy Patronis",
    "bioguide": "P000622",
    "birthday": "1972-04-13",
@@ -17028,6 +17430,7 @@
    "wikipedia": "Jimmy Patronis"
   },
   {
+   "address": "2083 Rayburn House Office Building Washington DC 20515-1305",
    "ballotpedia": "Michael Quigley",
    "bioguide": "Q000023",
    "birthday": "1958-10-17",
@@ -17071,6 +17474,7 @@
    "wikipedia": "Mike Quigley"
   },
   {
+   "address": "728 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Jack Reed",
    "bioguide": "R000122",
    "birthday": "1949-11-12",
@@ -17116,6 +17520,7 @@
    "wikipedia": "Jack Reed (Rhode Island politician)"
   },
   {
+   "address": "1221 Longworth House Office Building Washington DC 20515-3302",
    "ballotpedia": "Deborah Ross",
    "bioguide": "R000305",
    "birthday": "1963-06-20",
@@ -17158,6 +17563,7 @@
    "wikipedia": "Deborah Ross (politician)"
   },
   {
+   "address": "2406 Rayburn House Office Building Washington DC 20515-1705",
    "ballotpedia": "Harold Rogers",
    "bioguide": "R000395",
    "birthday": "1937-12-31",
@@ -17202,6 +17608,7 @@
    "wikipedia": "Hal Rogers"
   },
   {
+   "address": "2469 Rayburn House Office Building Washington DC 20515-0103",
    "ballotpedia": "Mike Rogers (Alabama)",
    "bioguide": "R000575",
    "birthday": "1958-07-16",
@@ -17245,6 +17652,7 @@
    "wikipedia": "Mike Rogers (Alabama politician)"
   },
   {
+   "address": "1708 Longworth House Office Building Washington DC 20515-3218",
    "ballotpedia": "Pat Ryan (New York)",
    "bioguide": "R000579",
    "birthday": "1982-03-28",
@@ -17284,6 +17692,7 @@
    "wikipedia": "Pat Ryan (politician)"
   },
   {
+   "address": "483 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Jim Risch",
    "bioguide": "R000584",
    "birthday": "1943-05-03",
@@ -17327,6 +17736,7 @@
    "wikipedia": "Jim Risch"
   },
   {
+   "address": "2342 Rayburn House Office Building Washington DC 20515-0525",
    "ballotpedia": "Raul Ruiz",
    "bioguide": "R000599",
    "birthday": "1972-08-25",
@@ -17369,6 +17779,7 @@
    "wikipedia": "Raul Ruiz (politician)"
   },
   {
+   "address": "2001 Rayburn House Office Building Washington DC 20515-5200",
    "ballotpedia": "Amata Radewagen",
    "bioguide": "R000600",
    "birthday": "1947-12-29",
@@ -17411,6 +17822,7 @@
    "wikipedia": "Amata Coleman Radewagen"
   },
   {
+   "address": "2333 Rayburn House Office Building Washington DC 20515-3307",
    "ballotpedia": "David Rouzer",
    "bioguide": "R000603",
    "birthday": "1972-02-16",
@@ -17453,6 +17865,7 @@
    "wikipedia": "David Rouzer"
   },
   {
+   "address": "716 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Mike Rounds",
    "bioguide": "R000605",
    "birthday": "1954-10-24",
@@ -17495,6 +17908,7 @@
    "wikipedia": "Mike Rounds"
   },
   {
+   "address": "2242 Rayburn House Office Building Washington DC 20515-2008",
    "ballotpedia": "Jamie Raskin",
    "bioguide": "R000606",
    "birthday": "1962-12-13",
@@ -17537,6 +17951,7 @@
    "wikipedia": "Jamie Raskin"
   },
   {
+   "address": "713 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Jacky Rosen",
    "bioguide": "R000608",
    "birthday": "1957-08-02",
@@ -17579,6 +17994,7 @@
    "wikipedia": "Jacky Rosen"
   },
   {
+   "address": "1711 Longworth House Office Building Washington DC 20515-0905",
    "ballotpedia": "John Rutherford (Florida)",
    "bioguide": "R000609",
    "birthday": "1952-09-02",
@@ -17622,6 +18038,7 @@
    "wikipedia": "John Rutherford (Florida politician)"
   },
   {
+   "address": "2209 Rayburn House Office Building Washington DC 20515-3814",
    "ballotpedia": "Guy Reschenthaler",
    "bioguide": "R000610",
    "birthday": "1983-04-17",
@@ -17664,6 +18081,7 @@
    "wikipedia": "Guy Reschenthaler"
   },
   {
+   "address": "2238 Rayburn House Office Building Washington DC 20515-4206",
    "ballotpedia": "John Rose (Tennessee)",
    "bioguide": "R000612",
    "birthday": "1965-02-23",
@@ -17705,6 +18123,7 @@
    "wikipedia": "John Rose (Tennessee politician)"
   },
   {
+   "address": "103 Cannon House Office Building Washington DC 20515-4321",
    "ballotpedia": "Chip Roy",
    "bioguide": "R000614",
    "birthday": "1972-08-07",
@@ -17744,6 +18163,7 @@
    "wikipedia": "Chip Roy"
   },
   {
+   "address": "1523 Longworth House Office Building Washington DC 20515-1303",
    "ballotpedia": "Delia Ramirez",
    "bioguide": "R000617",
    "birthday": "1983-06-02",
@@ -17785,6 +18205,7 @@
    "wikipedia": "Delia Ramirez"
   },
   {
+   "address": "139 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Pete Ricketts",
    "bioguide": "R000618",
    "birthday": "1964-08-19",
@@ -17826,6 +18247,7 @@
    "wikipedia": "Pete Ricketts"
   },
   {
+   "address": "421 Cannon House Office Building Washington DC 20515-3506",
    "ballotpedia": "Michael Rulli",
    "bioguide": "R000619",
    "birthday": "1969-03-11",
@@ -17862,6 +18284,7 @@
    "wikipedia": "Michael Rulli"
   },
   {
+   "address": "1319 Longworth House Office Building Washington DC 20515-0529",
    "ballotpedia": "Luz Maria Rivas",
    "bioguide": "R000620",
    "birthday": "1974-02-06",
@@ -17903,6 +18326,7 @@
    "wikipedia": "Luz Rivas"
   },
   {
+   "address": "1531 Longworth House Office Building Washington DC 20515-4706",
    "ballotpedia": "Emily Randall",
    "bioguide": "R000621",
    "birthday": "1985-10-30",
@@ -17939,6 +18363,7 @@
    "wikipedia": "Emily Randall"
   },
   {
+   "address": "128 Cannon House Office Building Washington DC 20515-3219",
    "ballotpedia": "Josh Riley",
    "bioguide": "R000622",
    "birthday": "1981-01-21",
@@ -17979,6 +18404,7 @@
    "wikipedia": "Josh Riley"
   },
   {
+   "address": "332 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Bernie Sanders",
    "bioguide": "S000033",
    "birthday": "1941-09-08",
@@ -18030,6 +18456,7 @@
    "wikipedia": "Bernie Sanders"
   },
   {
+   "address": "322 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Chuck Schumer",
    "bioguide": "S000148",
    "birthday": "1950-11-23",
@@ -18083,6 +18510,7 @@
    "wikipedia": "Chuck Schumer"
   },
   {
+   "address": "2162 Rayburn House Office Building Washington DC 20515-0927",
    "ballotpedia": "Maria Elvira Salazar",
    "bioguide": "S000168",
    "birthday": "1961-11-01",
@@ -18125,6 +18553,7 @@
    "wikipedia": "María Elvira Salazar"
   },
   {
+   "address": "2328 Rayburn House Office Building Washington DC 20515-4603",
    "ballotpedia": "Robert C. Scott",
    "bioguide": "S000185",
    "birthday": "1947-04-30",
@@ -18170,6 +18599,7 @@
    "wikipedia": "Bobby Scott (politician)"
   },
   {
+   "address": "2204 Rayburn House Office Building Washington DC 20515-4317",
    "ballotpedia": "Pete Sessions",
    "bioguide": "S000250",
    "birthday": "1955-03-22",
@@ -18213,6 +18643,7 @@
    "wikipedia": "Pete Sessions"
   },
   {
+   "address": "2365 Rayburn House Office Building Washington DC 20515-0532",
    "ballotpedia": "Brad Sherman",
    "bioguide": "S000344",
    "birthday": "1954-10-24",
@@ -18257,6 +18688,7 @@
    "wikipedia": "Brad Sherman"
   },
   {
+   "address": "2264 Rayburn House Office Building Washington DC 20515-4709",
    "ballotpedia": "Adam Smith",
    "bioguide": "S000510",
    "birthday": "1965-06-15",
@@ -18300,6 +18732,7 @@
    "wikipedia": "Adam Smith (Washington politician)"
   },
   {
+   "address": "2373 Rayburn House Office Building Washington DC 20515-3004",
    "ballotpedia": "Chris Smith (New Jersey)",
    "bioguide": "S000522",
    "birthday": "1953-03-04",
@@ -18343,6 +18776,7 @@
    "wikipedia": "Chris Smith (New Jersey politician)"
   },
   {
+   "address": "1609 Longworth House Office Building Washington DC 20515-1405",
    "ballotpedia": "Victoria Spartz",
    "bioguide": "S000929",
    "birthday": "1978-10-06",
@@ -18383,6 +18817,7 @@
    "wikipedia": "Victoria Spartz"
   },
   {
+   "address": "2408 Rayburn House Office Building Washington DC 20515-1309",
    "ballotpedia": "Jan Schakowsky",
    "bioguide": "S001145",
    "birthday": "1944-05-26",
@@ -18428,6 +18863,7 @@
    "wikipedia": "Jan Schakowsky"
   },
   {
+   "address": "2084 Rayburn House Office Building Washington DC 20515-1202",
    "ballotpedia": "Michael K. Simpson",
    "bioguide": "S001148",
    "birthday": "1950-09-08",
@@ -18473,6 +18909,7 @@
    "wikipedia": "Mike Simpson"
   },
   {
+   "address": "112 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Adam Schiff",
    "bioguide": "S001150",
    "birthday": "1960-06-22",
@@ -18516,6 +18953,7 @@
    "wikipedia": "Adam Schiff"
   },
   {
+   "address": "2309 Rayburn House Office Building Washington DC 20515-0538",
    "ballotpedia": "Linda Sánchez",
    "bioguide": "S001156",
    "birthday": "1969-01-28",
@@ -18560,6 +18998,7 @@
    "wikipedia": "Linda Sánchez"
   },
   {
+   "address": "1724 Longworth House Office Building Washington DC 20515-4710",
    "ballotpedia": "Marilyn Strickland",
    "bioguide": "S001159",
    "birthday": "1962-09-25",
@@ -18601,6 +19040,7 @@
    "wikipedia": "Marilyn Strickland"
   },
   {
+   "address": "502 Cannon House Office Building Washington DC 20515-2703",
    "ballotpedia": "Adrian Smith",
    "bioguide": "S001172",
    "birthday": "1970-12-19",
@@ -18644,6 +19084,7 @@
    "wikipedia": "Adrian Smith (politician)"
   },
   {
+   "address": "266 Cannon House Office Building Washington DC 20515-1801",
    "ballotpedia": "Steve Scalise",
    "bioguide": "S001176",
    "birthday": "1965-10-06",
@@ -18695,6 +19136,7 @@
    "wikipedia": "Steve Scalise"
   },
   {
+   "address": "506 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Jeanne Shaheen",
    "bioguide": "S001181",
    "birthday": "1947-01-28",
@@ -18738,6 +19180,7 @@
    "wikipedia": "Jeanne Shaheen"
   },
   {
+   "address": "166 Cannon House Office Building Washington DC 20515-0301",
    "ballotpedia": "David Schweikert",
    "bioguide": "S001183",
    "birthday": "1962-03-03",
@@ -18783,6 +19226,7 @@
    "wikipedia": "David Schweikert"
   },
   {
+   "address": "104 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Tim Scott",
    "bioguide": "S001184",
    "birthday": "1965-09-19",
@@ -18834,6 +19278,7 @@
    "wikipedia": "Tim Scott"
   },
   {
+   "address": "1035 Longworth House Office Building Washington DC 20515-0107",
    "ballotpedia": "Terri Sewell",
    "bioguide": "S001185",
    "birthday": "1965-01-01",
@@ -18878,6 +19323,7 @@
    "wikipedia": "Terri Sewell"
   },
   {
+   "address": "404 Cannon House Office Building Washington DC 20515-1403",
    "ballotpedia": "Marlin Stutzman",
    "bioguide": "S001188",
    "birthday": "1976-08-31",
@@ -18920,6 +19366,7 @@
    "wikipedia": "Marlin Stutzman"
   },
   {
+   "address": "2185 Rayburn House Office Building Washington DC 20515-1008",
    "ballotpedia": "Austin Scott",
    "bioguide": "S001189",
    "birthday": "1969-12-10",
@@ -18962,6 +19409,7 @@
    "wikipedia": "Austin Scott"
   },
   {
+   "address": "300 Cannon House Office Building Washington DC 20515-1310",
    "ballotpedia": "Brad Schneider",
    "bioguide": "S001190",
    "birthday": "1961-08-20",
@@ -19006,6 +19454,7 @@
    "wikipedia": "Brad Schneider"
   },
   {
+   "address": "722 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Brian E. Schatz",
    "bioguide": "S001194",
    "birthday": "1972-10-20",
@@ -19058,6 +19507,7 @@
    "wikipedia": "Brian Schatz"
   },
   {
+   "address": "1011 Longworth House Office Building Washington DC 20515-2508",
    "ballotpedia": "Jason Smith (Missouri representative)",
    "bioguide": "S001195",
    "birthday": "1980-06-16",
@@ -19101,6 +19551,7 @@
    "wikipedia": "Jason Smith (American politician)"
   },
   {
+   "address": "2211 Rayburn House Office Building Washington DC 20515-3221",
    "ballotpedia": "Elise Stefanik",
    "bioguide": "S001196",
    "birthday": "1984-07-02",
@@ -19144,6 +19595,7 @@
    "wikipedia": "Elise Stefanik"
   },
   {
+   "address": "706 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Daniel S. Sullivan",
    "bioguide": "S001198",
    "birthday": "1964-11-13",
@@ -19186,6 +19638,7 @@
    "wikipedia": "Dan Sullivan (U.S. senator)"
   },
   {
+   "address": "302 Cannon House Office Building Washington DC 20515-3811",
    "ballotpedia": "Lloyd Smucker",
    "bioguide": "S001199",
    "birthday": "1964-01-23",
@@ -19227,6 +19680,7 @@
    "wikipedia": "Lloyd Smucker"
   },
   {
+   "address": "2353 Rayburn House Office Building Washington DC 20515-0909",
    "ballotpedia": "Darren Soto",
    "bioguide": "S001200",
    "birthday": "1978-02-25",
@@ -19269,6 +19723,7 @@
    "wikipedia": "Darren Soto"
   },
   {
+   "address": "203 Cannon House Office Building Washington DC 20515-3203",
    "ballotpedia": "Tom Suozzi",
    "bioguide": "S001201",
    "birthday": "1962-08-31",
@@ -19309,6 +19764,7 @@
    "wikipedia": "Tom Suozzi"
   },
   {
+   "address": "720 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Tina Smith",
    "bioguide": "S001203",
    "birthday": "1958-03-04",
@@ -19351,6 +19807,7 @@
    "wikipedia": "Tina Smith"
   },
   {
+   "address": "1214 Longworth House Office Building Washington DC 20515-3805",
    "ballotpedia": "Mary Gay Scanlon",
    "bioguide": "S001205",
    "birthday": "1959-08-30",
@@ -19393,6 +19850,7 @@
    "wikipedia": "Mary Gay Scanlon"
   },
   {
+   "address": "291 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Elissa Slotkin",
    "bioguide": "S001208",
    "birthday": "1976-07-10",
@@ -19435,6 +19893,7 @@
    "wikipedia": "Elissa Slotkin"
   },
   {
+   "address": "207 Cannon House Office Building Washington DC 20515-0304",
    "ballotpedia": "Greg Stanton",
    "bioguide": "S001211",
    "birthday": "1970-03-08",
@@ -19476,6 +19935,7 @@
    "wikipedia": "Greg Stanton"
   },
   {
+   "address": "145 Cannon House Office Building Washington DC 20515-2308",
    "ballotpedia": "Pete Stauber",
    "bioguide": "S001212",
    "birthday": "1966-05-10",
@@ -19516,6 +19976,7 @@
    "wikipedia": "Pete Stauber"
   },
   {
+   "address": "1526 Longworth House Office Building Washington DC 20515-4901",
    "ballotpedia": "Bryan Steil",
    "bioguide": "S001213",
    "birthday": "1981-03-30",
@@ -19555,6 +20016,7 @@
    "wikipedia": "Bryan Steil"
   },
   {
+   "address": "2457 Rayburn House Office Building Washington DC 20515-0917",
    "ballotpedia": "Greg Steube",
    "bioguide": "S001214",
    "birthday": "1978-05-19",
@@ -19598,6 +20060,7 @@
    "wikipedia": "Greg Steube"
   },
   {
+   "address": "2411 Rayburn House Office Building Washington DC 20515-2211",
    "ballotpedia": "Haley Stevens",
    "bioguide": "S001215",
    "birthday": "1983-06-24",
@@ -19640,6 +20103,7 @@
    "wikipedia": "Haley Stevens"
   },
   {
+   "address": "1110 Longworth House Office Building Washington DC 20515-4708",
    "ballotpedia": "Kim Schrier",
    "bioguide": "S001216",
    "birthday": "1968-08-23",
@@ -19680,6 +20144,7 @@
    "wikipedia": "Kim Schrier"
   },
   {
+   "address": "110 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Rick Scott",
    "bioguide": "S001217",
    "birthday": "1952-12-01",
@@ -19722,6 +20187,7 @@
    "wikipedia": "Rick Scott"
   },
   {
+   "address": "1421 Longworth House Office Building Washington DC 20515-3101",
    "ballotpedia": "Melanie Ann Stansbury",
    "bioguide": "S001218",
    "birthday": "1979-01-31",
@@ -19763,6 +20229,7 @@
    "wikipedia": "Melanie Stansbury"
   },
   {
+   "address": "449 Cannon House Office Building Washington DC 20515-0105",
    "ballotpedia": "Dale Strong",
    "bioguide": "S001220",
    "birthday": "1970-05-08",
@@ -19803,6 +20270,7 @@
    "wikipedia": "Dale Strong"
   },
   {
+   "address": "1317 Longworth House Office Building Washington DC 20515-2203",
    "ballotpedia": "Hillary Scholten",
    "bioguide": "S001221",
    "birthday": "1982-02-22",
@@ -19844,6 +20312,7 @@
    "wikipedia": "Hillary Scholten"
   },
   {
+   "address": "1217 Longworth House Office Building Washington DC 20515-3513",
    "ballotpedia": "Emilia Sykes",
    "bioguide": "S001223",
    "birthday": "1986-01-04",
@@ -19887,6 +20356,7 @@
    "wikipedia": "Emilia Sykes"
   },
   {
+   "address": "1030 Longworth House Office Building Washington DC 20515-4303",
    "ballotpedia": "Keith Self",
    "bioguide": "S001224",
    "birthday": "1953-03-20",
@@ -19930,6 +20400,7 @@
    "wikipedia": "Keith Self"
   },
   {
+   "address": "1314 Longworth House Office Building Washington DC 20515-1317",
    "ballotpedia": "Eric Sorensen",
    "bioguide": "S001225",
    "birthday": "1976-03-18",
@@ -19970,6 +20441,7 @@
    "wikipedia": "Eric Sorensen (politician)"
   },
   {
+   "address": "403 Cannon House Office Building Washington DC 20515-0001",
    "ballotpedia": "Andrea Salinas",
    "bioguide": "S001226",
    "birthday": "1969-12-06",
@@ -20011,6 +20483,7 @@
    "wikipedia": "Andrea Salinas"
   },
   {
+   "address": "404 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Eric Schmitt",
    "bioguide": "S001227",
    "birthday": "1975-06-20",
@@ -20053,6 +20526,7 @@
    "wikipedia": "Eric Schmitt"
   },
   {
+   "address": "1223 Longworth House Office Building Washington DC 20515-1602",
    "ballotpedia": "Derek Schmidt",
    "bioguide": "S001228",
    "birthday": "1968-01-23",
@@ -20094,6 +20568,7 @@
    "wikipedia": "Derek Schmidt"
   },
   {
+   "address": "224 Cannon House Office Building Washington DC 20515-1406",
    "ballotpedia": "Jefferson Shreve",
    "bioguide": "S001229",
    "birthday": "1965-09-24",
@@ -20135,6 +20610,7 @@
    "wikipedia": "Jefferson Shreve"
   },
   {
+   "address": "1009 Longworth House Office Building Washington DC 20515-4610",
    "ballotpedia": "Suhas Subramanyam",
    "bioguide": "S001230",
    "birthday": "1986-09-26",
@@ -20175,6 +20651,7 @@
    "wikipedia": "Suhas Subramanyam"
   },
   {
+   "address": "1023 Longworth House Office Building Washington DC 20515-0512",
    "ballotpedia": "Lateefah Simon",
    "bioguide": "S001231",
    "birthday": "1977-01-29",
@@ -20216,6 +20693,7 @@
    "wikipedia": "Lateefah Simon"
   },
   {
+   "address": "124 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Tim Sheehy",
    "bioguide": "S001232",
    "birthday": "1985-11-18",
@@ -20252,6 +20730,7 @@
    "wikipedia": "Tim Sheehy"
   },
   {
+   "address": "451 Cannon House Office Building Washington DC 20515-4907",
    "ballotpedia": "Tom Tiffany",
    "bioguide": "T000165",
    "birthday": "1957-12-30",
@@ -20293,6 +20772,7 @@
    "wikipedia": "Tom Tiffany"
   },
   {
+   "address": "2466 Rayburn House Office Building Washington DC 20515-2402",
    "ballotpedia": "Bennie Thompson",
    "bioguide": "T000193",
    "birthday": "1948-01-28",
@@ -20337,6 +20817,7 @@
    "wikipedia": "Bennie Thompson"
   },
   {
+   "address": "511 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "John Thune",
    "bioguide": "T000250",
    "birthday": "1961-01-07",
@@ -20388,6 +20869,7 @@
    "wikipedia": "John Thune"
   },
   {
+   "address": "455 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Tommy Tuberville",
    "bioguide": "T000278",
    "birthday": "1954-09-18",
@@ -20430,6 +20912,7 @@
    "wikipedia": "Tommy Tuberville"
   },
   {
+   "address": "268 Cannon House Office Building Washington DC 20515-0504",
    "ballotpedia": "Mike Thompson (California)",
    "bioguide": "T000460",
    "birthday": "1951-01-24",
@@ -20474,6 +20957,7 @@
    "wikipedia": "Mike Thompson"
   },
   {
+   "address": "2183 Rayburn House Office Building Washington DC 20515-3510",
    "ballotpedia": "Michael Turner (Ohio)",
    "bioguide": "T000463",
    "birthday": "1960-01-11",
@@ -20520,6 +21004,7 @@
    "wikipedia": "Mike Turner"
   },
   {
+   "address": "400 Cannon House Office Building Washington DC 20515-3815",
    "ballotpedia": "Glenn Thompson (Pennsylvania)",
    "bioguide": "T000467",
    "birthday": "1959-07-27",
@@ -20563,6 +21048,7 @@
    "wikipedia": "Glenn Thompson (politician)"
   },
   {
+   "address": "2370 Rayburn House Office Building Washington DC 20515-2801",
    "ballotpedia": "Dina Titus",
    "bioguide": "T000468",
    "birthday": "1950-05-23",
@@ -20606,6 +21092,7 @@
    "wikipedia": "Dina Titus"
   },
   {
+   "address": "2269 Rayburn House Office Building Washington DC 20515-3220",
    "ballotpedia": "Paul Tonko",
    "bioguide": "T000469",
    "birthday": "1949-06-18",
@@ -20649,6 +21136,7 @@
    "wikipedia": "Paul Tonko"
   },
   {
+   "address": "2078 Rayburn House Office Building Washington DC 20515-0539",
    "ballotpedia": "Mark Takano",
    "bioguide": "T000472",
    "birthday": "1960-12-10",
@@ -20692,6 +21180,7 @@
    "wikipedia": "Mark Takano"
   },
   {
+   "address": "2227 Rayburn House Office Building Washington DC 20515-0535",
    "ballotpedia": "Norma Torres",
    "bioguide": "T000474",
    "birthday": "1965-04-04",
@@ -20736,6 +21225,7 @@
    "wikipedia": "Norma Torres"
   },
   {
+   "address": "113 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Thom Tillis (North Carolina)",
    "bioguide": "T000476",
    "birthday": "1960-08-30",
@@ -20778,6 +21268,7 @@
    "wikipedia": "Thom Tillis"
   },
   {
+   "address": "2230 Rayburn House Office Building Washington DC 20515-3224",
    "ballotpedia": "Claudia Tenney",
    "bioguide": "T000478",
    "birthday": "1961-02-04",
@@ -20818,6 +21309,7 @@
    "wikipedia": "Claudia Tenney"
   },
   {
+   "address": "267 Cannon House Office Building Washington DC 20515-4004",
    "ballotpedia": "William Timmons",
    "bioguide": "T000480",
    "birthday": "1984-04-30",
@@ -20860,6 +21352,7 @@
    "wikipedia": "William Timmons"
   },
   {
+   "address": "2438 Rayburn House Office Building Washington DC 20515-2212",
    "ballotpedia": "Rashida Tlaib",
    "bioguide": "T000481",
    "birthday": "1976-07-24",
@@ -20902,6 +21395,7 @@
    "wikipedia": "Rashida Tlaib"
   },
   {
+   "address": "2233 Rayburn House Office Building Washington DC 20515-2103",
    "ballotpedia": "Lori Trahan",
    "bioguide": "T000482",
    "birthday": "1973-10-27",
@@ -20945,6 +21439,7 @@
    "wikipedia": "Lori Trahan"
   },
   {
+   "address": "1414 Longworth House Office Building Washington DC 20515-3215",
    "ballotpedia": "Ritchie Torres",
    "bioguide": "T000486",
    "birthday": "1988-03-12",
@@ -20988,6 +21483,7 @@
    "wikipedia": "Ritchie Torres"
   },
   {
+   "address": "1027 Longworth House Office Building Washington DC 20515-1102",
    "ballotpedia": "Jill Tokuda",
    "bioguide": "T000487",
    "birthday": "1976-03-28",
@@ -21031,6 +21527,7 @@
    "wikipedia": "Jill Tokuda"
   },
   {
+   "address": "154 Cannon House Office Building Washington DC 20515-2213",
    "ballotpedia": "Shri Thanedar",
    "bioguide": "T000488",
    "birthday": "1955-02-22",
@@ -21072,6 +21569,7 @@
    "wikipedia": "Shri Thanedar"
   },
   {
+   "address": "325 Cannon House Office Building Washington DC 20515-3502",
    "ballotpedia": "David Taylor (Ohio)",
    "bioguide": "T000490",
    "birthday": "1969-11-16",
@@ -21113,6 +21611,7 @@
    "wikipedia": "David Taylor (Ohio politician)"
   },
   {
+   "address": "1127 Longworth House Office Building Washington DC 20515-0545",
    "ballotpedia": "Derek Tran",
    "bioguide": "T000491",
    "birthday": "1980-12-22",
@@ -21149,6 +21648,7 @@
    "wikipedia": "Derek Tran"
   },
   {
+   "address": "2228 Rayburn House Office Building Washington DC 20515-1314",
    "ballotpedia": "Lauren Underwood",
    "bioguide": "U000040",
    "birthday": "1986-10-04",
@@ -21188,6 +21688,7 @@
    "wikipedia": "Lauren Underwood"
   },
   {
+   "address": "2302 Rayburn House Office Building Washington DC 20515-3207",
    "ballotpedia": "Nydia Velazquez",
    "bioguide": "V000081",
    "birthday": "1953-03-28",
@@ -21231,6 +21732,7 @@
    "wikipedia": "Nydia Velázquez"
   },
   {
+   "address": "730 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Chris Van Hollen",
    "bioguide": "V000128",
    "birthday": "1959-01-10",
@@ -21275,6 +21777,7 @@
    "wikipedia": "Chris Van Hollen"
   },
   {
+   "address": "2465 Rayburn House Office Building Washington DC 20515-0522",
    "ballotpedia": "David G. Valadao",
    "bioguide": "V000129",
    "birthday": "1977-04-14",
@@ -21316,6 +21819,7 @@
    "wikipedia": "David Valadao"
   },
   {
+   "address": "2467 Rayburn House Office Building Washington DC 20515-0552",
    "ballotpedia": "Juan Vargas",
    "bioguide": "V000130",
    "birthday": "1961-03-07",
@@ -21359,6 +21863,7 @@
    "wikipedia": "Juan Vargas"
   },
   {
+   "address": "2186 Rayburn House Office Building Washington DC 20515-4333",
    "ballotpedia": "Marc Veasey",
    "bioguide": "V000131",
    "birthday": "1971-01-03",
@@ -21403,6 +21908,7 @@
    "wikipedia": "Marc Veasey"
   },
   {
+   "address": "2447 Rayburn House Office Building Washington DC 20515-3002",
    "ballotpedia": "Jeff Van Drew",
    "bioguide": "V000133",
    "birthday": "1953-02-23",
@@ -21445,6 +21951,7 @@
    "wikipedia": "Jeff Van Drew"
   },
   {
+   "address": "1725 Longworth House Office Building Washington DC 20515-4324",
    "ballotpedia": "Beth Van Duyne",
    "bioguide": "V000134",
    "birthday": "1970-11-16",
@@ -21487,6 +21994,7 @@
    "wikipedia": "Beth Van Duyne"
   },
   {
+   "address": "1513 Longworth House Office Building Washington DC 20515-4903",
    "ballotpedia": "Derrick Van Orden",
    "bioguide": "V000135",
    "birthday": "1969-09-15",
@@ -21529,6 +22037,7 @@
    "wikipedia": "Derrick Van Orden"
   },
   {
+   "address": "322 Cannon House Office Building Washington DC 20515-3102",
    "ballotpedia": "Gabriel Vasquez",
    "bioguide": "V000136",
    "birthday": "1984-08-03",
@@ -21569,6 +22078,7 @@
    "wikipedia": "Gabe Vasquez"
   },
   {
+   "address": "1005 Longworth House Office Building Washington DC 20515-4607",
    "ballotpedia": "Eugene Vindman",
    "bioguide": "V000138",
    "birthday": "1975-06-06",
@@ -21610,6 +22120,7 @@
    "wikipedia": "Eugene Vindman"
   },
   {
+   "address": "2446 Rayburn House Office Building Washington DC 20515-4207",
    "ballotpedia": "Matt Van Epps",
    "bioguide": "V000139",
    "birthday": "1983-03-29",
@@ -21645,6 +22156,7 @@
    "wikipedia": "Matt Van Epps"
   },
   {
+   "address": "2221 Rayburn House Office Building Washington DC 20515-0543",
    "ballotpedia": "Maxine Waters",
    "bioguide": "W000187",
    "birthday": "1938-08-15",
@@ -21688,6 +22200,7 @@
    "wikipedia": "Maxine Waters"
   },
   {
+   "address": "425 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Roger Wicker",
    "bioguide": "W000437",
    "birthday": "1951-07-05",
@@ -21733,6 +22246,7 @@
    "wikipedia": "Roger Wicker"
   },
   {
+   "address": "221 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Ron Wyden",
    "bioguide": "W000779",
    "birthday": "1949-05-03",
@@ -21777,6 +22291,7 @@
    "wikipedia": "Ron Wyden"
   },
   {
+   "address": "1406 Longworth House Office Building Washington DC 20515-1005",
    "ballotpedia": "Nikema Williams",
    "bioguide": "W000788",
    "birthday": "1978-07-30",
@@ -21819,6 +22334,7 @@
    "wikipedia": "Nikema Williams"
   },
   {
+   "address": "717 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Raphael Warnock",
    "bioguide": "W000790",
    "birthday": "1969-07-23",
@@ -21861,6 +22377,7 @@
    "wikipedia": "Raphael Warnock"
   },
   {
+   "address": "1436 Longworth House Office Building Washington DC 20515-4002",
    "ballotpedia": "Joe Wilson",
    "bioguide": "W000795",
    "birthday": "1947-07-31",
@@ -21905,6 +22422,7 @@
    "wikipedia": "Joe Wilson"
   },
   {
+   "address": "270 Cannon House Office Building Washington DC 20515-0925",
    "ballotpedia": "Debbie Wasserman Schultz",
    "bioguide": "W000797",
    "birthday": "1966-09-27",
@@ -21948,6 +22466,7 @@
    "wikipedia": "Debbie Wasserman Schultz"
   },
   {
+   "address": "2266 Rayburn House Office Building Washington DC 20515-2205",
    "ballotpedia": "Tim Walberg",
    "bioguide": "W000798",
    "birthday": "1951-04-12",
@@ -21991,6 +22510,7 @@
    "wikipedia": "Tim Walberg"
   },
   {
+   "address": "115 Russell Senate Office Building Washington DC 20510",
    "ballotpedia": "Peter Welch",
    "bioguide": "W000800",
    "birthday": "1947-05-02",
@@ -22036,6 +22556,7 @@
    "wikipedia": "Peter Welch"
   },
   {
+   "address": "530 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Sheldon Whitehouse",
    "bioguide": "W000802",
    "birthday": "1955-10-20",
@@ -22079,6 +22600,7 @@
    "wikipedia": "Sheldon Whitehouse"
   },
   {
+   "address": "2055 Rayburn House Office Building Washington DC 20515-4601",
    "ballotpedia": "Robert J. Wittman",
    "bioguide": "W000804",
    "birthday": "1959-02-03",
@@ -22123,6 +22645,7 @@
    "wikipedia": "Rob Wittman"
   },
   {
+   "address": "703 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Mark Warner",
    "bioguide": "W000805",
    "birthday": "1954-12-15",
@@ -22175,6 +22698,7 @@
    "wikipedia": "Mark Warner"
   },
   {
+   "address": "2184 Rayburn House Office Building Washington DC 20515-0911",
    "ballotpedia": "Daniel Webster",
    "bioguide": "W000806",
    "birthday": "1949-04-27",
@@ -22218,6 +22742,7 @@
    "wikipedia": "Daniel Webster (Florida politician)"
   },
   {
+   "address": "2080 Rayburn House Office Building Washington DC 20515-0924",
    "ballotpedia": "Frederica Wilson",
    "bioguide": "W000808",
    "birthday": "1942-11-05",
@@ -22262,6 +22787,7 @@
    "wikipedia": "Frederica Wilson"
   },
   {
+   "address": "2412 Rayburn House Office Building Washington DC 20515-0403",
    "ballotpedia": "Steve Womack",
    "bioguide": "W000809",
    "birthday": "1957-02-18",
@@ -22305,6 +22831,7 @@
    "wikipedia": "Steve Womack"
   },
   {
+   "address": "2350 Rayburn House Office Building Washington DC 20515-2502",
    "ballotpedia": "Ann Wagner",
    "bioguide": "W000812",
    "birthday": "1962-09-13",
@@ -22347,6 +22874,7 @@
    "wikipedia": "Ann Wagner"
   },
   {
+   "address": "107 Cannon House Office Building Washington DC 20515-4314",
    "ballotpedia": "Randy Weber",
    "bioguide": "W000814",
    "birthday": "1953-07-02",
@@ -22392,6 +22920,7 @@
    "wikipedia": "Randy Weber"
   },
   {
+   "address": "2336 Rayburn House Office Building Washington DC 20515-4325",
    "ballotpedia": "Roger Williams",
    "bioguide": "W000816",
    "birthday": "1949-09-13",
@@ -22434,6 +22963,7 @@
    "wikipedia": "Roger Williams (Texas politician)"
   },
   {
+   "address": "311 Hart Senate Office Building Washington DC 20510",
    "ballotpedia": "Elizabeth Warren",
    "bioguide": "W000817",
    "birthday": "1949-06-22",
@@ -22484,6 +23014,7 @@
    "wikipedia": "Elizabeth Warren"
   },
   {
+   "address": "202 Cannon House Office Building Washington DC 20515-0404",
    "ballotpedia": "Bruce Westerman",
    "bioguide": "W000821",
    "birthday": "1967-11-18",
@@ -22525,6 +23056,7 @@
    "wikipedia": "Bruce Westerman"
   },
   {
+   "address": "168 Cannon House Office Building Washington DC 20515-3012",
    "ballotpedia": "Bonnie Watson Coleman",
    "bioguide": "W000822",
    "birthday": "1945-02-06",
@@ -22567,6 +23099,7 @@
    "wikipedia": "Bonnie Watson Coleman"
   },
   {
+   "address": "424 Cannon House Office Building Washington DC 20515-4908",
    "ballotpedia": "Tony Wied",
    "bioguide": "W000829",
    "birthday": "1976-05-03",
@@ -22607,6 +23140,7 @@
    "wikipedia": "Tony Wied"
   },
   {
+   "address": "1504 Longworth House Office Building Washington DC 20515-0527",
    "ballotpedia": "George Whitesides",
    "bioguide": "W000830",
    "birthday": "1974-03-03",
@@ -22648,6 +23182,7 @@
    "wikipedia": "George T. Whitesides"
   },
   {
+   "address": "2265 Rayburn House Office Building Washington DC 20515-4611",
    "ballotpedia": "James Walkinshaw",
    "bioguide": "W000831",
    "birthday": "1982-10-22",
@@ -22684,6 +23219,7 @@
    "wikipedia": "James Walkinshaw"
   },
   {
+   "address": "174 Cannon House Office Building Washington DC 20515-0514",
    "ballotpedia": "Aisha Wahab",
    "bioguide": "W000832",
    "birthday": "1987-01-11",
@@ -22718,6 +23254,7 @@
    "wikipedia": "Aisha Wahab"
   },
   {
+   "address": "185 Dirksen Senate Office Building Washington DC 20510",
    "ballotpedia": "Todd Young",
    "bioguide": "Y000064",
    "birthday": "1972-08-24",
@@ -22763,6 +23300,7 @@
    "wikipedia": "Todd Young"
   },
   {
+   "address": "349 Cannon House Office Building Washington DC 20515-1402",
    "ballotpedia": "Rudy Yakym",
    "bioguide": "Y000067",
    "birthday": "1984-02-24",
@@ -22803,6 +23341,7 @@
    "wikipedia": "Rudy Yakym"
   },
   {
+   "address": "512 Cannon House Office Building Washington DC 20515-2600",
    "ballotpedia": "Ryan Zinke",
    "bioguide": "Z000018",
    "birthday": "1961-11-01",

@@ -1979,6 +1979,8 @@ class TestElectionPageWords(unittest.TestCase):
         "===Independents===",
         "====Declared====",
         "* Alex Lowe, retired teacher ''(running as an independent)''",
+        "* Rio Phillips, cybersecurity technician ''(previously ran as a [[Democratic Party "
+        "(United  States)|Democrat]])''<ref>{{Cite web |title=Candidates|url=x}}</ref>",
         "* Chris Bowe",
         "== External links ==",
         "'''Official campaign websites for candidates'''",
@@ -1991,6 +1993,8 @@ class TestElectionPageWords(unittest.TestCase):
         self.assertEqual(results.candidate_descriptors(self.SECTION), {
             "Jane Doe": "molecular biologist and DSA member",
             "Alex Lowe": "retired teacher",
+            # A note whose link holds a bracket is dropped whole, link and all.
+            "Rio Phillips": "cybersecurity technician",
         })
 
     def test_the_external_links_list_gives_each_candidates_site(self):

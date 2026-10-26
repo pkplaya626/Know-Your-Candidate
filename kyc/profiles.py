@@ -199,6 +199,27 @@ def _dedup_candidates(rows):
     return list(people.values())
 
 
+# congress-legislators writes a Washington office's address as one run of
+# words, "2452 Rayburn House Office Building Washington DC 20515-3304".
+_DC_ADDRESS = re.compile(r"^(?P<street>.+?),?\s+Washington,?\s+DC,?\s+"
+                         r"(?P<zip>\d{5}(?:-\d{4})?)$")
+
+
+def office_address(raw):
+    """The Washington office's address as a reader writes it - "2452 Rayburn
+    House Office Building, Washington, DC 20515-3304" - from the term's own
+    record. Only the commas are added: the street, the city and the ZIP code
+    are the record's. One that is not in that form is kept as recorded, and
+    an absent one is ``None`` (rule 28)."""
+    text = " ".join(str(raw or "").split())
+    if not text:
+        return None
+    match = _DC_ADDRESS.match(text)
+    if not match:
+        return text
+    return f"{match['street']}, Washington, DC {match['zip']}"
+
+
 def _contact(person):
     """Contact details and reference ids from the member's own term record.
 
@@ -210,6 +231,9 @@ def _contact(person):
                      ("contactForm", "contactForm"), ("wikipedia", "wikipedia")):
         if person.get(src):
             out[dst] = person[src]
+    address = office_address(person.get("address"))
+    if address:
+        out["officeAddress"] = address
     fixed = overrides.MEMBER_CONTACT_FORMS.get(person.get("bioguide"))
     if fixed and person.get("contactForm") == fixed[0]:
         # Only while the source still holds the value the entry corrects.

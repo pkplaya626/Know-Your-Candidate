@@ -1,6 +1,6 @@
 {
  "congress": 119,
- "fetched": "2026-10-25T12:36:52+00:00",
+ "fetched": "2026-10-26T05:26:19+00:00",
  "members": [
   {
    "aliases": [
@@ -178,6 +178,6 @@
    "termStart": "2021-01-03"
   }
  ],
- "membershipRead": "2026-10-25",
+ "membershipRead": "2026-10-26",
  "source": "https://unitedstates.github.io/congress-legislators/legislators-historical.json"
 }
