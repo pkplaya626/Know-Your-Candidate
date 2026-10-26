@@ -48,6 +48,7 @@
     share: "M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M12 15V3M8 7l4-4 4 4",
     mail: "M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zM3 7l9 6 9-6",
     phone: "M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z",
+    clock: "M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0M12 7v5l3 2",
     filter: "M3 5h18l-7 8v6l-4 2v-8z",
     print: "M6 9V3h12v6M6 17H4a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2M6 14h12v7H6z",
     sort: "M7 4v16M3 16l4 4 4-4M17 20V4M13 8l4-4 4 4",
@@ -1403,6 +1404,77 @@
         '">' + escapeHtml(item.financeSource) + "</span>";
     }
     return html;
+  }
+
+  /** A field's entries where its source separates them with semicolons:
+   *  the Congressional Directory's careers ("staffer, Chapel Hill Police
+   *  department, 1987-2008; member, ... (chair, 2001-03); ..."), an
+   *  infobox's degrees ("Vanderbilt University (BA); ..."). Only a semicolon
+   *  outside brackets separates: "attorney (admitted to the California Bar,
+   *  1977; admitted to the Idaho Bar, 1979)" is one entry. */
+  function fieldItems(value) {
+    var text = typeof value === "string" ? value : "";
+    var out = [];
+    var depth = 0;
+    var from = 0;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text.charAt(i);
+      if (ch === "(" || ch === "[") depth++;
+      else if ((ch === ")" || ch === "]") && depth) depth--;
+      else if (ch === ";" && !depth) {
+        out.push(text.slice(from, i));
+        from = i + 1;
+      }
+    }
+    out.push(text.slice(from));
+    // A stray semicolon in the source cuts a career from its years or its
+    // bracketed role: the Directory prints "Member, Long Beach City Council,
+    // 2009-14; (vice mayor, 2012-14)" and "Member, North Carolina House of
+    // Representatives; 2003-13". An entry that is only a year or a range, or
+    // opens with a bracket, goes back onto the one before it, joined with the
+    // source's own "; ", so no bullet reads as a career of its own. One that
+    // opens the field has nothing before it, so it goes onto the entry after
+    // it: the Directory prints Sean Casten's education as "1989; B.A., ...",
+    // the school before the year missing from the Directory's own text.
+    var joined = [];
+    var lead = "";
+    out.map(function (s) { return s.trim(); }).filter(Boolean).forEach(function (s) {
+      var stray = /^\d{4}(?:[-–]\d{2,4})?$/.test(s) || s.charAt(0) === "(";
+      if (stray && joined.length) {
+        joined[joined.length - 1] += "; " + s;
+      } else if (stray) {
+        lead += s + "; ";
+      } else {
+        joined.push(lead + s);
+        lead = "";
+      }
+    });
+    if (lead) joined.push(lead.slice(0, -2));
+    return joined;
+  }
+
+  /** Escaped *html* with each year range ("1999-2002", "2025–26") kept on one
+   *  line: on a phone "1999-" / "2002" broke at the hyphen. The characters
+   *  are the source's; only a span is added around them. */
+  function keepRanges(html) {
+    return String(html).replace(/\d{4}[-–]\d{2,4}/g, function (range) {
+      return '<span class="nowrap">' + range + "</span>";
+    });
+  }
+
+  /** A field of several entries as a list, one entry a line, each in its
+   *  source's words with only its first letter raised for the list, and the
+   *  source's badge once, after it (rule 86). One entry, or an absence, is
+   *  renderField's plain line. A run-on paragraph of eleven careers read as
+   *  one sentence (the owner's request of 2026-10-26). */
+  function renderListField(item, field) {
+    var status = (item.quality || {})[field];
+    var items = ABSENT[status] || status === "generic" ? [] : fieldItems(item[field]);
+    if (items.length < 2) return renderField(item, field);
+    return '<ul class="field-list">' + items.map(function (entry) {
+      return "<li>" + keepRanges(escapeHtml(entry.charAt(0).toUpperCase() + entry.slice(1))) +
+        "</li>";
+    }).join("") + "</ul>" + sourceBadge(item, field).replace(/^ /, "");
   }
 
   var MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -3507,6 +3579,9 @@
     escapeHtml: escapeHtml,
     escapeAttr: escapeAttr,
     renderField: renderField,
+    renderListField: renderListField,
+    fieldItems: fieldItems,
+    keepRanges: keepRanges,
     officesHeld: officesHeld,
     officesHeldShort: officesHeldShort,
     holderRole: holderRole,

@@ -354,7 +354,7 @@ INDEX_LEAVES_OUT = frozenset({
     "campaignCommittee", "campaignIssuesUrl", "campaignSiteVia", "committeeList",
     "disclosureFiled", "disclosureSource",
     "disclosureUrl", "disclosureYear", "districtOffices", "districtOfficesRead", "fecName",
-    "fundingBase", "fundingBreakdown", "incumbentSeat", "officialIssuesUrl", "pay",
+    "fundingBase", "fundingBreakdown", "incumbentSeat", "officeAddress", "officialIssuesUrl", "pay",
     "photoCredit", "platformRead", "refs", "social", "website", "wikipedia",
     # The race's money and its ballot side by side (kyc-cards.js moneyBlock,
     # compareBlock), and the dialog's.

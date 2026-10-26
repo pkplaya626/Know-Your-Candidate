@@ -60,6 +60,46 @@ class TestTrim(unittest.TestCase):
         self.assertEqual(trimmed["district"], 32)
         self.assertIsNone(trimmed["senateClass"])
 
+    def test_the_washington_address_comes_through_from_the_term_record(self):
+        # The profile dialog put the phone beside the address's pin and the
+        # bare building after it, with no city or ZIP code (the owner's
+        # request of 2026-10-26). The term records the whole address.
+        from kyc import emit, profiles as profiles_mod
+        person = entry(bioguide="F000477", last="Foushee", chamber="rep", state="NC", district=4)
+        person["terms"][-1].update({
+            "office": "2452 Rayburn House Office Building", "phone": "202-225-1784",
+            "address": "2452 Rayburn House Office Building Washington DC 20515-3304"})
+        trimmed = legislators.trim(person)
+        self.assertEqual(trimmed["address"],
+                         "2452 Rayburn House Office Building Washington DC 20515-3304")
+        contact = profiles_mod._contact(trimmed)
+        self.assertEqual(contact["officeAddress"],
+                         "2452 Rayburn House Office Building, Washington, DC 20515-3304")
+        self.assertEqual(contact["office"], "2452 Rayburn House Office Building")
+        # A senator's, whose ZIP code has no extension.
+        self.assertEqual(profiles_mod.office_address(
+            "522 Hart Senate Office Building  Washington DC 20510"),
+            "522 Hart Senate Office Building, Washington, DC 20510")
+        # Another form is kept as recorded; none is never invented (rule 28).
+        self.assertEqual(profiles_mod.office_address("H-232, The Capitol"), "H-232, The Capitol")
+        del person["terms"][-1]["address"]
+        self.assertNotIn("officeAddress", profiles_mod._contact(legislators.trim(person)))
+        # The dialog's alone: the cards never read it (rule 94).
+        self.assertIn("officeAddress", emit.INDEX_LEAVES_OUT)
+
+    def test_the_committed_snapshot_gives_every_member_a_whole_address(self):
+        from kyc import profiles as profiles_mod
+        snapshot = legislators.load_snapshot(ROOT)
+        people = snapshot["legislators"]
+        with_address = [p for p in people if p.get("address")]
+        self.assertGreater(len(with_address), len(people) // 2)
+        for p in with_address:
+            self.assertRegex(profiles_mod.office_address(p["address"]),
+                             r", Washington, DC \d{5}(?:-\d{4})?$", p["bioguide"])
+            # The same room as the term's office ("127a" and "127A" Russell).
+            self.assertTrue(profiles_mod.office_address(p["address"]).lower()
+                            .startswith(p["office"].lower()), p["bioguide"])
+
     def test_senate_records_carry_a_class_and_no_district(self):
         trimmed = legislators.trim(entry(chamber="sen", senate_class=2))
         self.assertEqual(trimmed["senateClass"], 2)

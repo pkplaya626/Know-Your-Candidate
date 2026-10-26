@@ -85,9 +85,9 @@
       '          <div class="field" id="profileModalDisclosureField"><span class="field-label">Financial disclosure</span>',
       '            <span class="field-value" id="profileModalDisclosure"></span></div>',
       '          <div class="field span-2" id="profileModalEducationField"><span class="field-label">Education</span>',
-      '            <span class="field-value subtle" id="profileModalEducation"></span></div>',
+      '            <div class="field-value subtle" id="profileModalEducation"></div></div>',
       '          <div class="field span-2" id="profileModalCareersField"><span class="field-label">Previous careers</span>',
-      '            <span class="field-value subtle" id="profileModalCareers"></span></div>',
+      '            <div class="field-value subtle" id="profileModalCareers"></div></div>',
       '          <div class="field span-2" id="profileModalPayField" hidden><span class="field-label">What the job pays</span>',
       '            <span class="field-value subtle" id="profileModalPay"></span></div>',
       "        </div>",
@@ -1002,33 +1002,84 @@
       KYC.escapeHtml(label) + KYC.icon("share", "link-chip-icon") + "</a>";
   }
 
+  function dialLink(phone) {
+    return '<a href="tel:' + KYC.escapeAttr(String(phone).replace(/[^\d+]/g, "")) + '">' +
+      KYC.escapeHtml(phone) + "</a>";
+  }
+
+  /* One office, whichever it is - Washington, a district's or a state's -
+   * laid out alike: its name, the address beside the pin, the phone beside
+   * the phone as a number to dial, and its hours where recorded. The
+   * Washington office's phone sat beside the pin with the bare building
+   * after it, and the offices at home put the phone on the city's line and
+   * the address under it (the owner's request of 2026-10-26). */
+  function officeCard(kind, name, address, phone, hours) {
+    // The address as an envelope writes it: the street, then the city's
+    // line, which never breaks inside its ZIP code.
+    var lines = address.filter(Boolean).map(function (line, i, all) {
+      return '<span class="office-address-line' + (i && i === all.length - 1 ? " office-city" : "") +
+        '">' + KYC.escapeHtml(line) + "</span>";
+    });
+    return '<li class="office ' + kind + '"><p class="office-name">' + KYC.escapeHtml(name) +
+      "</p>" +
+      (lines.length ? '<p class="office-line office-address">' + KYC.icon("pin") +
+        '<span><span class="sr-only">Address: </span>' + lines.join(" ") +
+        "</span></p>" : "") +
+      (phone ? '<p class="office-line office-phone">' + KYC.icon("phone") +
+        '<span><span class="sr-only">Phone: </span>' + dialLink(phone) +
+        "</span></p>" : "") +
+      (hours ? '<p class="office-line office-hours">' + KYC.icon("clock") +
+        '<span><span class="sr-only">Hours: </span>' + KYC.escapeHtml(hours) +
+        "</span></p>" : "") +
+      "</li>";
+  }
+
   /* Casework - a Social Security check, a VA claim, the IRS - is done by a
    * member's offices at home, and the profile listed only the Washington
    * one (PERSONA-14). These are congress-legislators' records of each
-   * member's offices, by bioguide id. A senator's are state offices. */
-  function homeOffices(item) {
+   * member's offices, by bioguide id. A senator's are state offices. The
+   * Washington office's address is its term record's whole address
+   * (officeAddress, "..., Washington, DC 20515-3304"), or the office as
+   * recorded where the record gives no address. */
+  function renderOffices(item) {
+    var out = "";
+    var capitol = item.officeAddress || item.office;
+    var washington = !!(capitol || item.phone);
+    // "2452 Rayburn House Office Building, Washington, DC 20515-3304", as the
+    // pipeline writes the record's address, on two lines.
+    var split = /^(.+), (Washington, DC \d{5}(?:-\d{4})?)$/.exec(capitol || "");
     var senate = item.chamber.indexOf("Senate") !== -1;
     var kind = senate ? "state office" : "district office";
-    var list = item.districtOffices.map(function (o) {
-      var street = [o.building, o.address, o.suite].filter(Boolean).join(", ");
-      var place = [o.city, [o.state, o.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
-      return '<li class="home-office"><strong>' + KYC.escapeHtml(o.city || "") + "</strong>" +
-        (o.phone ? ' <a href="tel:' + KYC.escapeAttr(String(o.phone).replace(/[^\d+]/g, "")) +
-          '">' + KYC.escapeHtml(o.phone) + "</a>" : "") +
-        '<span class="home-office-address">' + KYC.escapeHtml([street, place].filter(Boolean)
-          .join(", ")) + "</span>" +
-        (o.hours ? '<span class="home-office-hours">' + KYC.escapeHtml(o.hours) + "</span>" : "") +
-        "</li>";
-    }).join("");
-    return '<span class="field-label">' + (senate ? "State offices" : "District offices") +
-      "</span>" +
-      '<p class="casework-note">For help with a federal agency – Social Security, the VA, ' +
-      "the IRS – call a " + kind + ".</p>" +
-      '<ul class="home-offices">' + list + "</ul>" +
-      '<p class="field-credit">From ' + outLink(
-        "https://github.com/unitedstates/congress-legislators", "congress-legislators") +
-      (item.districtOfficesRead ? ", as read on " +
-        KYC.escapeHtml(KYC.dateWords(item.districtOfficesRead)) : "") + "</p>";
+    if (washington) {
+      out += '<ul class="offices">' +
+        officeCard("washington-office", "Washington office",
+          split ? [split[1], split[2]] : [capitol], item.phone) + "</ul>";
+    }
+    var home = item.districtOffices || [];
+    if (home.length) {
+      out += '<span class="field-label">' + (senate ? "State offices" : "District offices") +
+        "</span>" +
+        '<p class="casework-note">For help with a federal agency – Social Security, the VA, ' +
+        "the IRS – call a " + kind + ".</p>" +
+        '<ul class="offices">' + home.map(function (o) {
+          var street = [o.building, o.address, o.suite].filter(Boolean).join(", ");
+          var place = [o.city, [o.state, o.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+          return officeCard("home-office", o.city || (senate ? "State office" : "District office"),
+            [street, place], o.phone, o.hours);
+        }).join("") + "</ul>";
+    }
+    if (!out) return "";
+    // Said once, after every office: the Washington office is the term's
+    // record, the offices at home the list read on its own day.
+    var source = outLink("https://github.com/unitedstates/congress-legislators", "congress-legislators");
+    var read = item.districtOfficesRead
+      ? " as read on " + KYC.escapeHtml(KYC.dateWords(item.districtOfficesRead)) : "";
+    var words;
+    if (!home.length) words = ": the Washington office from its record of this term";
+    else if (!washington) words = read ? "," + read : "";
+    else words = ": the Washington office from its record of this term, the " + kind + "s" +
+      (read || " from its list");
+    return out + '<p class="field-credit">From ' + source + words + "</p>";
   }
 
   function renderContact(item) {
@@ -1051,25 +1102,17 @@
       // congress-legislators holds a form for 88 members; for the rest it
       // is the page their own site links as Contact, fetched and seen to
       // hold a form before it is linked (PROFILES-16).
-      sites.push(linkChip(item.contactForm, "Contact form", item.contactFormVia === "official-site"
-        ? "The contact page their official website links" +
+      // Named for what it does: "Contact form" sat among the websites as one
+      // more site, not the way to write to the office.
+      sites.push(linkChip(item.contactForm, "Write to their office", item.contactFormVia === "official-site"
+        ? "The contact form on the page their official website links as Contact" +
           (item.contactFormChecked ? ", checked on " + KYC.dateWords(item.contactFormChecked) : "")
-        : null));
+        : "Their office's contact form"));
     }
     if (sites.length) rows.push('<div class="links-row">' + sites.join("") + "</div>");
 
-    var office = [];
-    if (item.phone) {
-      office.push('<span>' + KYC.icon("pin") + ' <a href="tel:' +
-        KYC.escapeAttr(String(item.phone).replace(/[^\d+]/g, "")) + '">' +
-        KYC.escapeHtml(item.phone) + "</a></span>");
-    }
-    if (item.office) office.push("<span>" + KYC.escapeHtml(item.office) + "</span>");
-    if (office.length) {
-      rows.push((item.districtOffices ? '<span class="field-label">Washington office</span>' : "") +
-        '<p class="modal-meta contact-office">' + office.join("") + "</p>");
-    }
-    if (item.districtOffices && item.districtOffices.length) rows.push(homeOffices(item));
+    var offices = renderOffices(item);
+    if (offices) rows.push(offices);
 
     var social = [];
     var seen = {};
@@ -1150,7 +1193,7 @@
     var money = KYC.hasValue(filing, "receipts") && filing.financeSource
       ? " raised " + filing.receipts +
         (KYC.hasValue(filing, "disbursements") ? " and spent " + filing.disbursements : "") +
-        (filing.financeAsOf ? ", through " + filing.financeAsOf : "") + "."
+        (filing.financeAsOf ? ", through " + KYC.dateWords(filing.financeAsOf) : "") + "."
       : " reports no totals yet.";
     target.hidden = false;
     target.innerHTML = KYC.escapeHtml(words + id + money) +
@@ -1159,41 +1202,14 @@
   }
 
   /* Outside spending: each side's total and the committees that spent it,
-   * as the FEC totals them by candidate (PERSONA-12). Two sides, never a
-   * net; the committees as filed. */
+   * as the FEC totals them by candidate (PERSONA-12), drawn by kyc-cards.js
+   * in the race view's words. Two sides, never a net; the committees as
+   * filed. */
   function renderOutside(item) {
     var target = el("profileModalOutside");
-    var o = item.outsideSpending;
-    var other = item.outsideSpendingOther ?
-      '<p class="finance-period">' + KYC.cards.outsideOtherLine(item) + "</p>" : "";
-    if (!o && !other) {
-      target.hidden = true;
-      target.innerHTML = "";
-      return;
-    }
-    if (!o) {
-      target.hidden = false;
-      target.innerHTML = '<span class="field-label">Outside spending</span>' + other +
-        '<p class="faint outside-note">' + KYC.escapeHtml(KYC.cards.outsideNote) + "</p>";
-      return;
-    }
-    var side = function (word, total, n, top) {
-      if (!total) return "";
-      return '<div class="outside-side"><span class="field-label">' + KYC.escapeHtml(word) +
-        " " + KYC.escapeHtml(KYC.moneyShort(total)) + "</span>" +
-        '<ul class="outside-list">' + (top || []).map(function (c) {
-          return "<li>" + KYC.escapeHtml(c.committee) + ' <span class="faint">' +
-            KYC.escapeHtml(KYC.moneyShort(c.total)) + "</span></li>";
-        }).join("") + (n > (top || []).length ? '<li class="faint">and ' +
-          (n - top.length) + " more</li>" : "") + "</ul></div>";
-    };
-    target.hidden = false;
-    target.innerHTML = '<span class="field-label">Outside spending</span>' +
-      '<p class="finance-period">' + KYC.cards.outsideLine(item) + "</p>" +
-      '<div class="outside-sides">' +
-      side("Supporting", o.support, o.supportCommittees, o.supportTop) +
-      side("Opposing", o.oppose, o.opposeCommittees, o.opposeTop) + "</div>" + other +
-      '<p class="faint outside-note">' + KYC.escapeHtml(KYC.cards.outsideNote) + "</p>";
+    var html = KYC.cards.outsideDetail(item);
+    target.hidden = !html;
+    target.innerHTML = html;
   }
 
   function renderCrossLink(item) {
@@ -1504,8 +1520,8 @@
           "Clerk's index or the Senate's eFD. The filing may exist.") +
         '">Not linked here</span>';
     }
-    el("profileModalEducation").innerHTML = KYC.renderField(item, "education");
-    el("profileModalCareers").innerHTML = KYC.renderField(item, "previous_professions");
+    el("profileModalEducation").innerHTML = KYC.renderListField(item, "education");
+    el("profileModalCareers").innerHTML = KYC.renderListField(item, "previous_professions");
     // A member's record is found by their congress-legislators id; a
     // challenger's only through the article their election page links.
     el("profileModalHeld").innerHTML = KYC.officesHeld(item.politicalHistory, item.isCandidate

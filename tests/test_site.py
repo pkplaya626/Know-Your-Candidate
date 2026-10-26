@@ -454,8 +454,11 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     # profile.
     EXEMPT = {"kyc-profile.js", "kyc-stategov.js"}
     # The race folds (kyc-cards.js fold()) draw their body only once
-    # KYC.peopleFull says the race's state is whole.
+    # KYC.peopleFull says the race's state is whole. outsideDetail is the
+    # dialog's (kyc-profile.js, which opens a record once its file is in),
+    # in the folds' words (rule 12).
     FOLD_DRAWN = {"kyc-cards.js": ("moneyBlock", "moneyRow", "outsideLine", "outsideOtherLine",
+                                   "outsideLead", "outsideDetail",
                                    "compareTable", "compareCell", "platformFrom")}
     FOLD_ENTRIES = {"kyc-cards.js": ("moneyBlock", "compareBlock")}
     # Reads a history record's own `wikipedia`, not the profile's.

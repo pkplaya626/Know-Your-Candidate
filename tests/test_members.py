@@ -117,6 +117,22 @@ class TestTheDirectory(unittest.TestCase):
                                            "1992-93; member, Missouri State Senate, 1994-2000")
         self.assertTrue(fields["election history"].startswith("elected to the 107th Congress"))
 
+    def test_an_education_the_directory_opens_with_a_bare_year_is_its_words(self):
+        # Sean Casten's entry in CDIR-2026-02-20 reads "education: 1989; B.A.,
+        # ...": the school is missing from the Directory's own text, not cut
+        # by this reader, so the field keeps the printed words (the page's
+        # list puts the year with the entry after it, KYC.fieldItems).
+        text = ("SEAN CASTEN, Democrat, of Downers Grove, IL; born in Dublin, Ireland, \n"
+                "November 23, 1971; education: 1989; B.A., molecular biology and \n"
+                "biochemistry, Middlebury College, Middlebury, VT, 1993; professional \n"
+                "history: cancer researcher, 1993-95; election history: elected.\n\n"
+                "                          Congressional Office\n"
+                "                         https://casten.house.gov\n")
+        _, _, fields = members.directory_entries(text)[0]
+        self.assertEqual(members.directory_facts(fields)["education"],
+                         "1989; B.A., molecular biology and biochemistry, Middlebury College, "
+                         "Middlebury, VT, 1993")
+
     def test_an_address_that_leads_to_the_members_site_joins(self):
         # The Directory prints dingell.house.gov, which leads to the
         # debbiedingell.house.gov congress-legislators lists (2026-10-18).
