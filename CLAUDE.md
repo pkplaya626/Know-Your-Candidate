@@ -45,6 +45,7 @@ data/voting_links.json      ──┤   (each state's official voting pages: NAS
 data/voting_dates.json      ──┤   (each jurisdiction's key dates, from its own pages: hand-edited, kyc/voting_dates.py)
 data/statewide_candidates.json ┤  (who is on the ballot for governor and the statewide offices: hand-edited, kyc/statewide.py)
 data/statewide_photos.json  ──┤   (those candidates' photographs, by the routes rule 91 names: ballotphotos)
+data/guide_photos.json      ──┤   (the election offices' guides' photographs, hosted under photos/: guidephotos)
 data/ballot_measures.json   ──┤   (each jurisdiction's statewide questions, from its own list: hand-edited, kyc/ballot_measures.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
@@ -61,7 +62,7 @@ data/record_2026.json       ──┤   (the frozen 2026 race set: record --free
 data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
 data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
-data/photo_copies.json      ──┤   (each heavy portrait's original and its copy: photocopies, rule 101)
+data/photo_copies.json      ──┤   (each heavy portrait's original and its copy, and each photograph hosted here: rule 101)
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/people/meta.js (the build's figures and signature)
                                              data/people/index.js (everyone's cards and search fields, every race)
@@ -131,7 +132,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `campaigns.json`, `enrichment.json`, `odds.json`,
   `census_governments.json`, `state_legislators.json`, `legislator_photos.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
-  `statewide_candidates.json`, `statewide_photos.json`, `ballot_measures.json`,
+  `statewide_candidates.json`, `statewide_photos.json`, `guide_photos.json`, `ballot_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
@@ -186,6 +187,7 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
 python build_profile_site.py ballotphotos     # the statewide candidates' photographs (official guides, members, the race's Wikipedia article)
+python build_profile_site.py guidephotos      # the election offices' guides' photographs (WA voters' guide, AK and OR pamphlets), hosted here
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
@@ -205,13 +207,13 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2317 tests, no dependencies
-npm install && npm test                       # 3378 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2383 tests, no dependencies
+npm install && npm test                       # 3396 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
 `campaigns`, `enrich`, `odds`, `census`, `statelegs`, `legphotos`, `localgov`, `executives`,
-`officers`, `courts`, `ballotphotos`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
+`officers`, `courts`, `ballotphotos`, `guidephotos`, `voting`, `federal`, `judiciary`, `vacancies`, `history`, `oge`, `tribes`, `members`, `votes`, `seats`, `outside`, `photocopies` and `congress` touch the network, as do the four `tools/fetch_*_maps.py` scripts and `tools/fetch_court_districts.py`. Run the
 unit tests and `build --check` after touching the pipeline; run `npm test`
 after touching a page or anything in `assets/`. Run `verify` before committing
 generated data.
@@ -447,13 +449,43 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     else as it is, and said (rule 87), and as rule 101's smaller copy once
     one is made. The election offices that print candidates' photographs
     (Washington's voters' guide, Alaska's and Oregon's pamphlets) serve
-    them only base64 inside JSON or inside PDFs, with no file to link. The
-    owner's decision of 2026-10-25 allows an unmodified copy of such an
-    official photograph; rule 101's store copies only a file with an
-    address of its own, so they wait for a follow-up to it, and are not
-    ruled out (`ELECTION_OFFICES`). Every record keeps the page,
+    them only base64 inside JSON or inside PDFs, with no file to link; by
+    the owner's decision of 2026-10-25 they are a route of their own, kept
+    here as copies (`kyc/guide_photos.py`, rule 101) and shown only where
+    every other route leaves the silhouette. The guide's own page must name
+    the person beside the photograph, for that office: the statement record
+    (Washington), the statement's heading under the candidate list's link
+    beside the name (Alaska), the column under the office's heading with the
+    name beside the photograph (Oregon). The name joins in the words of the
+    filing, the profile or the office's list, in any order - never a
+    surname alone, a short form or an initial only through an evidenced
+    `overrides.GUIDE_NAME_FORMS` entry (Oregon's "David Russ" is the filing
+    "RUSS, DAVID HONORABLE" through the campaign site both name) - and only
+    where it fits one person in the race and the person one of the guide's
+    names: Alaska's Senate statements of Dan S. Sullivan and Daniel J.
+    Sullivan Jr. are told apart by the initial and the suffix alone. A PDF
+    page that draws two images or none, an image no browser draws as the
+    guide prints it (Bill Hill's statement holds a CMYK JPEG with an Adobe
+    marker, drawn inverted; Oregon's colour ones), and anything the
+    likeness test refuses (a frame wider than tall, `photos.refused`) give
+    none. A person's refusal is keyed on an address that names one
+    candidate - the hosted file, Washington's candidate page, Alaska's
+    statement PDF - never one the race shares (Washington's
+    `candidate.ashx`, an Oregon page of two columns or its county book),
+    which would withdraw the other column's photograph
+    (`guide_photos.own_addresses`). A guide that answers in a shape it no
+    longer reads - an index with none of the races, a list with no row or
+    statement link for an office, a statement record with no photograph
+    field, a statement PDF the reader cannot parse - concludes nothing
+    (rules 8 and 36): the review of PR #138 found that one changed heading
+    tag would have sent thirteen people back to the silhouette and deleted
+    their files. Every record keeps the page,
     the words naming the person, the day read and its bytes and size, and
-    `validate` fails a shown one without them (`photo-unevidenced`).
+    `validate` fails a shown one without them (`photo-unevidenced`), read
+    from the build's own caches. The words are the page's: two runs of
+    type that abut are one word (`pdfread.page_text`, by the font's
+    widths), or Kreiss-Tomkins's heading was cached as "Registered Demo
+    crat".
 
 25. **Report look-alike people; never merge them.** Alaska's Senate race holds
     both Dan Sullivan and a different Daniel J Sullivan.
@@ -1734,7 +1766,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     sites. `portraits` reads each Commons file's author and licence from
     its own description page (`extmetadata`), never typed in; a non-free
     file is not shown. Both dialogs print the credit under the name, a
-    government photograph names its host, a campaign's its website, and a
+    government photograph names its host, a campaign's its website, an
+    election office's guide's where it was found ("Photo: from the
+    Washington Secretary of State's voters' guide", linked to the
+    candidate's page in it, though the file is hosted here:
+    `kyc/guide_photos.py`; the candidates submit these photographs, and
+    "Photo: Washington Secretary of State" read as the office's own), a
+    file this site decoded says so ("converted by this site to PNG from the
+    pamphlet's JPEG 2000 image, pixel for pixel", `credit.converted`), and a
     fallback that loads instead is credited by its own host.
     `validate` fails a shown photograph with no credit and a Commons one
     with no recorded licence, a judge's (`judge_links`, read with the
@@ -2070,11 +2109,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Ford is not Aaron Ford, whose article the same page links) and never
     on a one-word name, then checked as rule 33's are, the race's infobox
     image beside the nominee before the article's lead. The guides whose
-    photographs have no address of their own - Washington's VoteWA
-    (base64), Alaska's statements (encrypted PDFs), Oregon's pamphlet (JPEG
-    2000) - wait for the follow-up the owner allowed on 2026-10-25, which
-    hosts unmodified copies: rule 101's copies are of files with an address
-    of their own. They are not ruled out. A heavy photograph is shown and said, as rule 87 says. A Commons
+    photographs have no address of their own - Alaska's statements (PDFs,
+    none of them encrypted, whatever this rule once said) and Oregon's
+    pamphlet (JPEG 2000 inside PDFs) - picture a candidate none of those
+    routes reaches, kept here as copies by the owner's decision of
+    2026-10-25 (`kyc/guide_photos.py`, rules 24 and 101), joined on the
+    list's own words for that office. A heavy photograph is shown and said, as rule 87 says. A Commons
     file is held to rule 82's one licence test, at the read and again at
     every build (`statewide_photos.licence_doubt`): one whose page names no
     author, public domain on an uploader's word alone ("PD-author", or no
@@ -2626,6 +2666,40 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     where the card now credits their caucus, 1,407 copies stand (1,392
     legislators', 15 of the White House's), for originals of some 2.4 GB,
     in 13.4 MB.
+    An election office's guide that prints a candidate's photograph with
+    no address of its own - Washington's voters' guide (base64 inside its
+    JSON), Alaska's statement PDFs, Oregon's pamphlet (JPEG 2000 inside
+    county PDFs) - is shown from a file hosted here, by the owner's same
+    decision (official guides' photographs with no address of their own,
+    hosted as unmodified copies, credited and sourced). `guidephotos`
+    (`kyc/guide_photos.py`) writes it under `photos/`, named by its own
+    hash, and lists it in the manifest's `hosted` table with how it was
+    taken (`method`: "unmodified", the very bytes the JSON or PDF holds; or
+    "decoded", for Oregon's, whose JPEG 2000 no browser draws: the
+    reversible 5/3 coding decoded losslessly by `kyc/jpx.py`, standard
+    library only, and written as a PNG with the codestream's hash and the
+    decoder named - its pixels matched Chrome's own PDF renderer, PDFium,
+    one for one on every photograph shown, 2026-10-25, and a test decodes
+    one pamphlet codestream, kept in `tests/fixtures`, to the very pixels
+    hosted for him), the guide's page
+    and the JSON or PDF address, sha256, bytes, pixel size, the day read
+    and whom it shows (`for`). The checks run both ways: a file under
+    `photos/` the manifest does not list, a listed file missing or not the
+    bytes or pixels it gives, an entry that does not say how, from where,
+    when or for whom, a record showing a hosted file the manifest does not
+    hold for it, or showing it with no credit, fails `verify`, `build` and
+    `build --check`. Every page addresses it from the site's root at any
+    depth (`KYC.photoHref`). Three over the caps (John Duresky's 4.2 MB;
+    Dave Bronson's and Candi English's, over 1,200px) are shown as smaller
+    copies made from that file the way every copy is made, at once by
+    `guidephotos` rather than at the next refresh, and a copy that fails
+    gives way to the hosted file; with them, 1,410 copies stand (13.5 MB),
+    beside the 18 files hosted here. A decoded file's credit says this site
+    converted it, as a copy's says it is one (rule 87). Of the 20 nominees and
+    statewide candidates in the three states who showed no photograph on
+    2026-10-25, 18 have one: Bill Hill's statement holds a CMYK JPEG no
+    browser draws as printed (rule 24), and the pamphlet pictures no Jason
+    Faler.
 
 ## District maps
 

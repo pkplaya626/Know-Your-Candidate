@@ -1019,20 +1019,39 @@
     return copy && copy.src && url && copy.of === url ? copy : null;
   }
 
+  /** A photograph this site hosts itself, unmodified, because its source
+   *  (an election office's guide) gives it no address of its own: named
+   *  ``photos/<hash>`` from the site's root (rule 101, kyc/guide_photos.py). */
+  var HOSTED = /^photos\/[0-9a-f]{20}\.(?:jpg|png)$/;
+
+  /** *url* as an <img> or a link loads it from this page: a photograph
+   *  hosted here from the site's root at any depth, any other as it is. */
+  function photoHref(url) {
+    return HOSTED.test(String(url || "")) ? siteRoot() + url : url || "";
+  }
+
+  /** The attributes naming the original a copy falls back to: its address
+   *  as this page loads it and, where that differs from the original's
+   *  own (a file hosted here), the original, which the credit's note names. */
+  function originalAttrs(url) {
+    var href = photoHref(url);
+    return ' data-photo-original="' + escapeAttr(href) + '"' +
+      (href !== url ? ' data-photo-of="' + escapeAttr(url) + '"' : "");
+  }
+
   /** Where an <img> loads a portrait from: the smaller copy this site made
    *  of a heavy original (rule 101), from the site's root at any depth, or
    *  the original's own address. One helper for every portrait (rule 12). */
   function photoSrc(url, copy) {
     var own = copyOf(url, copy);
-    return own ? siteRoot() + own.src : url || "";
+    return own ? siteRoot() + own.src : photoHref(url);
   }
 
   /** The attributes of a portrait <img>, escaped: its src (``photoSrc``) and,
    *  for a copy, the original it falls back to if the copy fails to load. */
   function photoAttrs(url, copy) {
     var own = copyOf(url, copy);
-    return 'src="' + escapeAttr(photoSrc(url, copy)) + '"' +
-      (own ? ' data-photo-original="' + escapeAttr(url) + '"' : "");
+    return 'src="' + escapeAttr(photoSrc(url, copy)) + '"' + (own ? originalAttrs(url) : "");
   }
 
   /** *credit* for a portrait the page shows as its copy: the original's
@@ -1131,7 +1150,7 @@
     var copy = copyOf(first, item && item.photoCopy);
     return 'src="' + escapeAttr(portraitSrc(item)) + '"' + (set
       ? ' srcset="' + escapeAttr(set) + '" sizes="' + escapeAttr(sizes) + '"'
-      : "") + (copy ? ' data-photo-original="' + escapeAttr(first) + '"' : "");
+      : "") + (copy ? originalAttrs(first) : "");
   }
 
   /** A small round portrait for a row - the map's panel, a profile's race -
@@ -1161,7 +1180,11 @@
       img.setAttribute("sizes", sizes);
       img.setAttribute("srcset", set);
     }
-    if (copyOf(first, item && item.photoCopy)) img.setAttribute("data-photo-original", first);
+    img.removeAttribute("data-photo-of");
+    if (copyOf(first, item && item.photoCopy)) {
+      img.setAttribute("data-photo-original", photoHref(first));
+      if (photoHref(first) !== first) img.setAttribute("data-photo-of", first);
+    }
     img.src = portraitSrc(item);
   }
 
@@ -1185,7 +1208,7 @@
     if (!at) {
       // The copy this site made, or its original once the copy failed.
       var first = (item.photos || [])[0];
-      return (src === photoSrc(first, item.photoCopy)
+      return (src === photoSrc(first, item.photoCopy) && copyOf(first, item.photoCopy)
         ? copyCredit(item.photoCredit, first, item.photoCopy) : item.photoCredit) || null;
     }
     var table = (global.kycBuildMeta && global.kycBuildMeta.photoCredits) || {};
@@ -1222,13 +1245,25 @@
     if (credit.via) line += (parts.length ? ", via " : " via ") + anchor(credit.page, credit.via);
     if (credit.listedBy) line += ", as listed by " + escapeHtml(credit.listedBy);
     if (credit.dated) line = escapeHtml(credit.dated) + ". " + line;
+    // A file this site decoded from the guide's (Oregon's JPEG 2000, which
+    // no browser draws) is not the guide's own file, and says so, as a
+    // smaller copy does (rule 101; kyc/guide_photos.py).
+    if (credit.converted) {
+      line += '<span class="photo-converted-note">; ' + escapeHtml(credit.converted) + "</span>";
+    }
     // A smaller copy this site made of a heavy original (rule 101): whose
     // photograph it is stays the original's, and the original is linked.
     if (credit.copyOf) {
+      var original = "the original file" +
+        (credit.copyOfBytes ? " (" + weightWords(credit.copyOfBytes) + ")" : "");
+      // An original hosted here (an election office's guide's) is linked
+      // where this page loads it from.
       line += '<span class="photo-copy-note" data-copy-of="' + escapeAttr(credit.copyOf) +
         '">; a smaller copy made by this site of ' +
-        anchor(credit.copyOf, "the original file" +
-          (credit.copyOfBytes ? " (" + weightWords(credit.copyOfBytes) + ")" : "")) + "</span>";
+        (HOSTED.test(credit.copyOf)
+          ? '<a href="' + escapeAttr(photoHref(credit.copyOf)) +
+            '" target="_blank" rel="noopener noreferrer">' + escapeHtml(original) + "</a>"
+          : anchor(credit.copyOf, original)) + "</span>";
     }
     return line;
   }
@@ -3514,6 +3549,7 @@
     cappedSrcset: cappedSrcset,
     photoCreditHtml: photoCreditHtml,
     photoSrc: photoSrc,
+    photoHref: photoHref,
     photoAttrs: photoAttrs,
     copyCredit: copyCredit,
     copyOf: copyOf,

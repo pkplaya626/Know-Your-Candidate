@@ -15379,6 +15379,143 @@ async function testPhotoCopies() {
   }
 }
 
+/* ============================================ election offices' guides */
+
+/* The owner's decision of 2026-10-25 (kyc/guide_photos.py): an election
+ * office's guide that prints a candidate's photograph beside their name but
+ * gives it no address - Washington's voters' guide, Alaska's pamphlet - is
+ * shown from an unmodified copy hosted under photos/, from the site's root
+ * at any depth, credited to the guide and linked to the candidate's page in
+ * it; a heavy one as the smaller copy made of it, which gives way to the
+ * hosted file, never to a broken relative address. */
+async function testGuidePhotos() {
+  const HOSTED = "photos/0123456789abcdef0123.jpg";
+  const COPY = "photos/fedcba98765432100123.jpg?v=fedcba9876";
+  {
+    const { window, D, errors } = await buildPage("states/wa.html");
+    const KYC = window.KYC;
+    suite("states/wa.html — a nominee's photograph from the voters' guide, hosted here", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const guided = KYC.people().filter((p) => p.photoSource === "election-guide");
+      check("every guide photograph in the data is a file hosted here, credited to the guide and its page",
+        guided.every((p) => /^photos\/[0-9a-f]{20}\.(jpg|png)$/.test(p.photos[0]) &&
+          p.photo_url === p.photos[0] && /voters' guide$/.test((p.photoCredit || {}).by || "") &&
+          /^https:\/\/voter\.votewa\.gov\//.test((p.photoCredit || {}).page || "")),
+        guided.map((p) => p.name).join(", "));
+      const item = { id: "t", name: "A Nominee", photos: [HOSTED, "placeholder"],
+                     photoCredit: { by: "from the Washington Secretary of State's voters' guide",
+                                    page: "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/1/2" } };
+      const attrs = KYC.portraitAttrs(item, "165px");
+      check("the card loads the hosted file from the site's root, one folder up",
+        attrs.indexOf('src="../' + HOSTED + '"') === 0 && attrs.indexOf("data-photo-original") === -1, attrs);
+      check("one helper for every portrait resolves it", KYC.photoSrc(HOSTED) === "../" + HOSTED &&
+        KYC.photoHref("https://e.x/a.jpg") === "https://e.x/a.jpg");
+      const img = D.createElement("img");
+      KYC.setPortrait(img, item, "116px");
+      const line = KYC.photoCreditHtml(KYC.shownPhotoCredit(img, item));
+      const text = (html) => { const el = D.createElement("p"); el.innerHTML = html; return el.textContent; };
+      check("the dialog credits where it was found, the guide, linked to the candidate's page in it",
+        text(line) === "Photo: from the Washington Secretary of State's voters' guide" &&
+        line.indexOf('href="' + item.photoCredit.page.replace(/&/g, "&amp;") + '"') !== -1, line);
+      // A heavy one (Duresky's 4.2 MB): the smaller copy made of the hosted file.
+      item.photoCopy = { src: COPY, of: HOSTED, ofBytes: 4228148 };
+      KYC.setPortrait(img, item, "116px");
+      check("a heavy one loads the copy, and falls back to the hosted file at its real address",
+        img.getAttribute("src") === "../" + COPY && img.getAttribute("data-photo-original") === "../" + HOSTED &&
+        img.getAttribute("data-photo-of") === HOSTED, img.outerHTML);
+      const said = KYC.photoCreditHtml(KYC.shownPhotoCredit(img, item));
+      check("its credit stays the guide's, and links the hosted original with its weight",
+        /^Photo: from the Washington Secretary of State's voters' guide; a smaller copy made by this site of the original file \(4\.2 MB\)$/
+          .test(text(said)) && said.indexOf('href="../' + HOSTED + '"') !== -1, said);
+      const host = D.createElement("div");
+      host.innerHTML = '<img ' + KYC.portraitAttrs(item, "165px") + '><p>' + said + "</p>";
+      D.body.appendChild(host);
+      const card = host.querySelector("img");
+      card.dispatchEvent(new window.Event("error"));
+      check("a copy that fails gives way to the hosted file, and the note that it was a copy goes",
+        card.getAttribute("src") === "../" + HOSTED && !host.querySelector(".photo-copy-note"),
+        card.getAttribute("src"));
+      host.remove();
+    });
+    window.close();
+  }
+  {
+    const { window, D, errors } = await buildPage("states/ak.html");
+    const KYC = window.KYC;
+    suite("states/ak.html — a statewide candidate's photograph from the pamphlet, hosted here", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const s = window.kycStateGov.states.AK;
+      const rows = Object.values((s.ballot2026 || {}).offices || {})
+        .flatMap((item) => ((item.candidates || {}).candidates || []));
+      const hosted = rows.filter((p) => /^photos\//.test(p.photo || ""));
+      check("every hosted row is a file under photos/, credited to the pamphlet's statement",
+        hosted.every((p) => /^photos\/[0-9a-f]{20}\.(jpg|png)$/.test(p.photo) && !p.writeIn &&
+          p.photoCredit.by === "from the Alaska Division of Elections' Official Election Pamphlet" && !p.photoCredit.converted &&
+          /^https:\/\/elections\.alaska\.gov\/doc\/oep\/2026\/.+\.pdf$/.test(p.photoCredit.page)),
+        hosted.map((p) => p.name).join(", "));
+      const row = rows.find((p) => !p.writeIn);
+      check("Alaska lists a candidate to draw", !!row);
+      if (!row) return;
+      const keep = [row.photo, row.photoCredit, row.photoCopy];
+      row.photo = HOSTED;
+      row.photoCredit = { by: "from the Alaska Division of Elections' Official Election Pamphlet",
+                          page: "https://elections.alaska.gov/doc/oep/2026/A.pdf" };
+      delete row.photoCopy;
+      const host = D.createElement("div");
+      host.innerHTML = KYC.stategov.render("AK");
+      const img = [...host.querySelectorAll(".gov-candidate-photo")].find((el) =>
+        el.getAttribute("src") === "../" + HOSTED);
+      check("the row loads the hosted file from the site's root", !!img);
+      const credit = img && img.closest("li").textContent;
+      check("and credits the pamphlet", !!credit &&
+        credit.indexOf("Photo: from the Alaska Division of Elections' Official Election Pamphlet") !== -1 &&
+        credit.indexOf("converted") === -1, credit);
+      row.photoCopy = { src: COPY, of: HOSTED, ofBytes: 321884 };
+      host.innerHTML = KYC.stategov.render("AK");
+      const copied = [...host.querySelectorAll(".gov-candidate-photo")].find((el) =>
+        el.getAttribute("src") === "../" + COPY);
+      check("a heavy one is the copy, falling back to the hosted file at its real address",
+        !!copied && copied.getAttribute("data-photo-original") === "../" + HOSTED);
+      [row.photo, row.photoCredit, row.photoCopy] = keep;
+      if (!row.photo) delete row.photo;
+      if (!row.photoCredit) delete row.photoCredit;
+      if (!row.photoCopy) delete row.photoCopy;
+    });
+    window.close();
+  }
+  {
+    // Oregon's pamphlet holds JPEG 2000, which no browser draws: the file
+    // hosted is this site's lossless PNG of it, and the credit says so, as a
+    // smaller copy's does (the review of PR #138); a guide's own bytes never.
+    const { window, D, errors } = await buildPage("states/or.html");
+    const KYC = window.KYC;
+    suite("states/or.html — a pamphlet photograph this site decoded says so", () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const text = (html) => { const el = D.createElement("p"); el.innerHTML = html; return el.textContent; };
+      const NOTE = "; converted by this site to PNG from the pamphlet's JPEG 2000 image, pixel for pixel";
+      const guided = KYC.people().filter((p) => p.photoSource === "election-guide");
+      check("Oregon's guide photographs are PNGs hosted here, each credited as converted",
+        guided.length > 0 && guided.every((p) => /^photos\/[0-9a-f]{20}\.png$/.test(p.photos[0]) &&
+          (p.photoCredit || {}).by === "from the Oregon Secretary of State's State Voters' Pamphlet" &&
+          /^https:\/\/sos\.oregon\.gov\/.+#page=\d+$/.test(p.photoCredit.page) &&
+          text(KYC.photoCreditHtml(p.photoCredit)) ===
+            "Photo: from the Oregon Secretary of State's State Voters' Pamphlet" + NOTE),
+        guided.map((p) => p.name + ": " + text(KYC.photoCreditHtml(p.photoCredit || {}))).join(" | "));
+      const s = window.kycStateGov.states.OR;
+      const rows = Object.values((s.ballot2026 || {}).offices || {})
+        .flatMap((item) => ((item.candidates || {}).candidates || []))
+        .filter((p) => /^photos\//.test(p.photo || ""));
+      check("a statewide candidate's decoded photograph says so on the state page too",
+        rows.length > 0 && rows.every((p) => p.photoCredit.converted) &&
+          rows.every((p) => KYC.stategov.render("OR").indexOf(KYC.escapeHtml(p.photoCredit.converted)) !== -1),
+        rows.map((p) => p.name).join(", "));
+      const unmodified = { by: "from the Washington Secretary of State's voters' guide", page: "https://voter.votewa.gov/g#/candidates/1/2" };
+      check("a guide's own bytes carry no such note", text(KYC.photoCreditHtml(unmodified)).indexOf("converted") === -1);
+    });
+    window.close();
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -15390,6 +15527,7 @@ async function testPhotoCopies() {
   if (!only || only === "federal") await testFederal();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "photos" || only === "legislature") await testPhotoCopies();
+  if (!only || only === "photos") await testGuidePhotos();
   if (!only || only === "counties") await testCounties();
   if (!only || only === "stategov") await testStateGov();
   if (!only || only === "index.html") await testDirectoryAsync();
