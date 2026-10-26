@@ -207,7 +207,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2401 tests, no dependencies
+python -m unittest discover tests             # 2411 tests, no dependencies
 npm install && npm test                       # 3412 real-DOM checks (needs jsdom)
 ```
 
@@ -377,7 +377,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     through the article the person's ballot page links (rule 33), from the
     campaign site their own committee filed (rule 38), or as an evidenced
     `CANDIDATE_PHOTOS` entry naming a served file, and by no other route,
-    for members and curated rows as much as filed candidates. A ballot link
+    for members and curated rows as much as filed candidates. An entry is
+    keyed on the profile's id, never a name, and names the page that names
+    the person beside the file, its words, why that person is this
+    profile's, what a person saw (the person alone) and the day; it stands
+    ahead of the automatic routes as the portrait cache's `curated` route:
+    Ken Paxton, left a silhouette when the background-people sweep refused
+    his Commons photograph, shows his office's portrait this way. A ballot link
     withheld as leading elsewhere is withheld before any portrait is taken
     from it (`enrich.withhold_links`).
     `title_is_about` rejects a resolved title that does not contain the
