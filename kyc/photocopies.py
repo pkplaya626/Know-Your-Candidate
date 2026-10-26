@@ -643,17 +643,21 @@ def gather(root=".", people=None):
     """``Shown`` for what the build shows now: the legislatures, the federal
     executive and the state governments built from their caches, and
     *people* - by default everyone as the last build wrote them, their
-    copies attached afresh from the manifest as the next build will attach
-    them (the people files are rewritten only by a build, which follows
-    this command in the refresh)."""
-    from . import federal_build, legislature, legphotos, stategov
+    election guide's photograph and their copies attached afresh from the
+    caches as the next build will attach them (the people files are
+    rewritten only by a build, which follows this command in the refresh;
+    ``guidephotos``, before it, may have hosted a new file for someone and
+    let the last build's go)."""
+    from . import federal_build, guide_photos, legislature, legphotos, stategov
     shown = Shown()
     shown.add_legislatures(legislature.build(root), legphotos.load_cache(root))
     shown.add_federal(federal_build.build(root)[0])
     shown.add_stategov(stategov.build(root)[0])
     if people is None:
         people = read_people(root)
-        apply_people(people, load(root))
+        manifest = load(root)
+        guide_photos.reapply_people(people, guide_photos.load_cache(root), manifest)
+        apply_people(people, manifest)
     shown.add_people(people)
     return shown
 

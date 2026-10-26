@@ -58,10 +58,12 @@ import html
 import json
 import os
 import re
+import struct
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
+import zlib
 
 from . import pdfread
 
@@ -1008,6 +1010,51 @@ def save_cache(cache, root="."):
     return path
 
 
+def same_decode(rec, previous, root="."):
+    """*rec* as the file already hosted for it, where *rec* is a decode
+    (Oregon's) of the very codestream, by the same decoder, that a
+    previous record's file was made from, and that file is on disk as its
+    name gives it and holds the same pixels; else None. The PNG's pixels
+    are the decode's, but its compressed bytes are zlib's, and zlib's
+    output differs between builds of it (zlib-ng here, the runner's
+    system zlib): named by those bytes' hash, every Oregon photograph read
+    on the other machine was a new file and "changed" (the refresh of
+    2026-10-26), with nothing about the photograph changed."""
+    from . import jpx, photocopies
+    from .photos import refused
+    data = rec.get("_data")
+    if rec.get("method") != "decoded" or data is None:
+        return None
+    for was in sorted(((previous or {}).get("photos") or {}).values(),
+                      key=lambda r: r.get("photo") or ""):
+        if (was.get("method") != "decoded" or was.get("sourceSha256") != rec.get("sourceSha256")
+                or was.get("decoder") != rec.get("decoder") or not was.get("photo")):
+            continue
+        if was["photo"] == rec["photo"]:
+            return None
+        name = was["photo"][len("photos/"):]
+        path = os.path.join(root, photocopies.PHOTOS_DIR, name)
+        if not os.path.exists(path):
+            continue
+        with open(path, "rb") as handle:
+            old = handle.read()
+        if hashlib.sha256(old).hexdigest() != was.get("sha256"):
+            continue
+        try:
+            if jpx.png_pixels(old) != jpx.png_pixels(data):
+                continue
+        except (jpx.JPXError, ValueError, zlib.error, struct.error):
+            continue
+        if refused(was["photo"]):
+            continue
+        out = dict(rec)
+        out.update(measure(old))
+        out["photo"] = was["photo"]
+        out["_data"] = old
+        return out
+    return None
+
+
 def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     """Read each guide for whoever lacks a photograph; host what joins and
     update the manifest and the cache. Returns ``(cache, problems)``."""
@@ -1039,6 +1086,10 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
             continue
         problems.append(f"{key}: the guide could not be read; the last photograph is kept")
         photos[key] = rec
+    for key, rec in sorted(photos.items()):
+        same = same_decode(rec, previous, root)
+        if same:
+            photos[key] = same
     cache = {"about": ABOUT, "read": today(),
              "guides": {code: dict(GUIDES[code]) for code in sorted(GUIDES)},
              "elsewhere": dict(ELSEWHERE),
@@ -1218,6 +1269,29 @@ def apply_people(profiles, cache, manifest=None):
         profile["photoCredit"] = credit(rec)
         n += 1
     return n
+
+
+def reapply_people(profiles, cache, manifest=None):
+    """Give each profile, as the last build wrote it, the guide's photograph
+    the next build will give it: the one this route gave it taken off, then
+    :func:`apply_people` from the cache as it stands. ``guidephotos`` runs
+    between two builds and may host a new file for someone (a read whose
+    bytes differ, a photograph the guide changed) and drop the one the last
+    build showed, so a reader of the last build's people files
+    (``photocopies``) must not take that build's file as still shown (the
+    refresh of 2026-10-26: four Oregon nominees "showed" files the manifest
+    had just let go). Returns how many profiles show one."""
+    from .photos import PLACEHOLDER
+    for profile in profiles:
+        if profile.get("photoSource") != ROUTE:
+            continue
+        old = (profile.get("photos") or [PLACEHOLDER])[0]
+        rest = [u for u in profile.get("photos") or [] if u != old] or [PLACEHOLDER]
+        profile["photos"] = rest
+        profile["photo_url"] = rest[0]
+        for field in ("photoSource", "photoCredit", "photoCopy"):
+            profile.pop(field, None)
+    return apply_people(profiles, cache, manifest)
 
 
 def for_row(cache, code, office, row, manifest=None):
