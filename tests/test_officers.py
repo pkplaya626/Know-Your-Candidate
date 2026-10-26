@@ -365,7 +365,7 @@ class TestAttorneysGeneral(unittest.TestCase):
         saved = officers._get
         officers._get = lambda url, timeout=60: "<html><body><div id=app></div></body></html>"
         try:
-            self.assertIsNone(officers._office_text("https://example.gov/", 0))
+            self.assertEqual(officers._office_text("https://example.gov/", 0), (None, []))
         finally:
             officers._get = saved
 
@@ -523,7 +523,7 @@ class TestKeptConfirmations(unittest.TestCase):
     def non_member(self, text, previous, day="2026-10-25"):
         from unittest import mock
         problems = []
-        with mock.patch.object(officers, "_office_text", lambda url, pause: text):
+        with mock.patch.object(officers, "_office_text", lambda url, pause: (text, [])):
             sos = officers.confirm_non_members({"FL": dict(self.SOS)}, pause=0, previous=previous,
                                                previous_day=day, today="2026-10-26",
                                                problems=problems)
@@ -615,6 +615,184 @@ class TestKeptConfirmations(unittest.TestCase):
             stale = officers.kept_stale(kept, datetime.date(2026, 11, 16))
         self.assertEqual(len(stale), 1)
         self.assertIn("2026-11-01 (15 days ago)", stale[0])
+
+
+class TestPartialReads(unittest.TestCase):
+    """A read is whole only when every page it set out to read answered.
+    The office's front page was retried, but the page it links as its
+    attorney general's own was asked once and dropped silently when it did
+    not answer; the front page alone was then judged, and where the name is
+    on the linked page the row read "does not name them as attorney
+    general" - or, with RAGA still listing Dan Bishop beside Jeff Jackson,
+    disputed. A partial read confirms what it names; its silence concludes
+    nothing, as a site that did not answer. No request leaves the test."""
+
+    FRONT = "https://ag.example.gov/"
+    ABOUT = "https://ag.example.gov/about-the-attorney-general/"
+    STAFF = "https://ag.example.gov/staff/"
+    RAGA = {"NC": {"name": "Dan Bishop"}, "NH": {"name": "John Formella"}}
+    DAGA = {"NC": {"name": "Jeff Jackson"}}
+    NC = dict(TestKeptConfirmations.NC, confirmedOn="2026-10-19", alsoListed=["Dan Bishop (R)"])
+
+    @staticmethod
+    def page(words="", link=True):
+        return ("<html><head><title>Department of Justice</title></head><body>"
+                + "Welcome to the Department of Justice. " * 12
+                + ('<a href="/about-the-attorney-general/">About the Attorney General</a> '
+                   if link else "") + words + "</body></html>")
+
+    def setUp(self):
+        from unittest import mock
+        self.answers, self.calls = {}, []
+        for patch in (mock.patch.object(officers, "_get", self.get),
+                      mock.patch.object(officers, "_RETRY_WAITS", (0, 0))):
+            patch.start()
+            self.addCleanup(patch.stop)
+
+    def get(self, url, timeout=60):
+        # Each url's answers in turn, the last repeated; None does not answer.
+        self.calls.append(url)
+        answers = self.answers[url]
+        answer = answers.pop(0) if len(answers) > 1 else answers[0]
+        if answer is None:
+            raise officers.OfficersError(f"could not fetch {url}")
+        return answer
+
+    def read(self, front, about, urls=None):
+        self.answers.update({self.FRONT: [front], self.ABOUT: about})
+        return officers.office_read(urls or [self.FRONT], self.FRONT, 0)
+
+    def ag(self, code, texts, previous=None):
+        return officers.attorneys_general(self.RAGA, self.DAGA, {code: texts}, previous,
+                                          "2026-10-25", "2026-10-26")
+
+    def test_a_front_page_naming_the_holder_confirms_them_when_the_linked_page_fails(self):
+        pages, texts = self.read(self.page("Attorney General Jeff Jackson"), [None])
+        self.assertEqual(self.calls.count(self.ABOUT), 3)          # retried, as the front page
+        self.assertEqual([u for u, _ in pages], [self.FRONT])
+        self.assertEqual(texts[2], [("the attorney general's page", self.ABOUT)])
+        rows, problems = self.ag("NC", texts)
+        nc = rows["NC"]
+        self.assertEqual((nc["name"], nc["party"], nc["confirmedOn"]),
+                         ("Jeff Jackson", "D", "2026-10-26"))
+        self.assertEqual(nc["alsoListed"], ["Dan Bishop (R)"])
+        self.assertIn(f"NC: the attorney general's page {self.ABOUT} could not be read; the "
+                      "pages that answered name the attorney general", problems)
+        self.assertIn("NC: Republican Attorneys General Association lists Dan Bishop, whom the "
+                      "office's pages that answered do not name as attorney general", problems)
+
+    def test_a_partial_read_that_names_nobody_concludes_nothing(self):
+        _, texts = self.read(self.page(), [None])
+        rows, problems = self.ag("NH", texts)
+        nh = rows["NH"]
+        self.assertTrue(nh["unconfirmed"] and nh["unreadable"])
+        self.assertEqual(nh["name"], "John Formella")
+        self.assertIn(f"NH: the attorney general's page {self.ABOUT} could not be read; John "
+                      "Formella is shown as Republican Attorneys General Association's "
+                      "listing, unconfirmed", problems)
+        self.assertFalse([p for p in problems if "not name as" in p], problems)
+        # With a previous confirmation it is kept.
+        previous = {"NH": dict(TestKeptConfirmations.NH, confirmedOn="2026-10-19", alsoListed=[])}
+        rows, _ = self.ag("NH", texts, previous)
+        self.assertTrue(rows["NH"]["confirmationKept"])
+        self.assertNotIn("unconfirmed", rows["NH"])
+        # The page says the site could not be read, never that it does not
+        # name them (without the reading by hand New Hampshire has).
+        from unittest import mock
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", {}, clear=True):
+            page = officers.for_state("NH", {"ag": self.ag("NH", texts)[0], "sos": {},
+                                             "lt": {}}, [])["ag"]
+        self.assertTrue(page.get("unreadable"), page)
+
+    def test_north_carolina_on_a_partial_read_is_kept_not_disputed(self):
+        _, texts = self.read(self.page(), [None])
+        rows, problems = self.ag("NC", texts, {"NC": dict(self.NC)})
+        nc = rows["NC"]
+        self.assertNotIn("disputed", nc)
+        self.assertEqual((nc["name"], nc["confirmedOn"]), ("Jeff Jackson", "2026-10-19"))
+        self.assertTrue(nc["confirmationKept"])
+        self.assertTrue(any(p.startswith(f"NC: the attorney general's page {self.ABOUT} could "
+                                         "not be read; its confirmation of Jeff Jackson on "
+                                         "2026-10-19 is kept") for p in problems), problems)
+        self.assertFalse([p for p in problems if "not name as" in p], problems)
+        # Without one, the row is the one a site that did not answer gives.
+        partial, _ = self.ag("NC", texts)
+        down, _ = self.ag("NC", (self.FRONT, None))
+        self.assertEqual(partial["NC"], down["NC"])
+
+    def test_a_linked_page_that_answers_on_a_retry_is_a_whole_read(self):
+        _, texts = self.read(self.page(),
+                             [None, self.page("Attorney General Jeff Jackson", link=False)])
+        self.assertEqual(texts[2], [])
+        rows, problems = self.ag("NC", texts)
+        self.assertEqual(rows["NC"]["name"], "Jeff Jackson")
+        self.assertFalse([p for p in problems if p.startswith("NC:") and "could not be read" in p],
+                         problems)
+
+    def test_a_bot_wall_on_the_linked_page_is_not_read(self):
+        wall = "<html><head><title>Access Denied</title></head><body>No.</body></html>"
+        pages, texts = self.read(self.page(), [wall])
+        self.assertEqual([u for u, _ in pages], [self.FRONT])
+        self.assertEqual(texts[2], [("the attorney general's page", self.ABOUT)])
+
+    def test_a_whole_read_that_does_not_name_them_still_says_so(self):
+        _, texts = self.read(self.page(), [self.page("Biography and priorities.", link=False)])
+        self.assertEqual(texts[2], [])
+        rows, problems = self.ag("NH", texts)
+        self.assertTrue(rows["NH"]["unconfirmed"])
+        self.assertNotIn("unreadable", rows["NH"])
+        self.assertIn("NH: Republican Attorneys General Association lists John Formella, whom "
+                      "the office's page does not name as attorney general", problems)
+
+    def test_one_of_several_office_pages_failing_makes_the_read_partial(self):
+        self.answers[self.STAFF] = [None]
+        pages, texts = self.read(self.page(link=False), [None], urls=[self.FRONT, self.STAFF])
+        self.assertEqual([u for u, _ in pages], [self.FRONT])
+        self.assertEqual(texts[2], [("the office's page", self.STAFF)])
+        rows, problems = self.ag("NH", texts)
+        self.assertTrue(rows["NH"]["unconfirmed"] and rows["NH"]["unreadable"])
+        self.assertTrue(any(p.startswith(f"NH: the office's page {self.STAFF} could not be read")
+                            for p in problems), problems)
+        # The page that answered naming the holder confirms them.
+        _, texts = self.read(self.page("Attorney General John Formella", link=False), [None],
+                             urls=[self.FRONT, self.STAFF])
+        rows, _ = self.ag("NH", texts)
+        self.assertEqual(rows["NH"]["confirmedOn"], "2026-10-26")
+        # None answering is a site that did not answer.
+        self.answers[self.FRONT] = [None]
+        self.assertEqual(officers.office_read([self.FRONT, self.STAFF], self.FRONT, 0),
+                         ([], (self.FRONT, None, [])))
+
+    SOS = TestKeptConfirmations.SOS
+
+    def non_member(self, front, about, previous=None):
+        self.answers.update({self.FRONT: [front], self.ABOUT: about})
+        problems = []
+        sos = officers.confirm_non_members({"FL": dict(self.SOS, website=self.FRONT)}, pause=0,
+                                           previous=previous, previous_day="2026-10-25",
+                                           today="2026-10-26", problems=problems)
+        return sos["FL"], problems
+
+    def test_a_secretary_of_state_on_a_partial_read(self):
+        fl, problems = self.non_member(self.page("Secretary of State Cord Byrd"), [None])
+        self.assertEqual((fl["officeConfirms"], fl["confirmedOn"]), (True, "2026-10-26"))
+        self.assertTrue(any(p.startswith(f"FL: the attorney general's page {self.ABOUT} could "
+                                         "not be read") for p in problems), problems)
+        # Silent: unreadable, never "not-named"; a previous confirmation is kept.
+        fl, problems = self.non_member(self.page(), [None])
+        self.assertEqual(fl["officeRead"], "unreadable")
+        self.assertNotIn("officeConfirms", fl)
+        old = {"FL": dict(self.SOS, website=self.FRONT, officeConfirms=True,
+                          confirmedOn="2026-10-19")}
+        fl, problems = self.non_member(self.page(), [None], old)
+        self.assertTrue(fl["officeConfirms"] and fl["confirmationKept"])
+        self.assertEqual(fl["confirmedOn"], "2026-10-19")
+        self.assertIn(f"FL: the attorney general's page {self.ABOUT} could not be read; its "
+                      "confirmation of Cord Byrd on 2026-10-19 is kept", problems)
+        # A whole read that names nobody is still "not-named", and keeps nothing.
+        fl, _ = self.non_member(self.page(), [self.page("About us.", link=False)], old)
+        self.assertEqual(fl["officeRead"], "not-named")
+        self.assertNotIn("officeConfirms", fl)
 
 
 class TestAttorneyGeneralPhotos(unittest.TestCase):
