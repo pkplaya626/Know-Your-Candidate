@@ -251,10 +251,16 @@ def officer_photos(code, entry):
     that no longer fits - the office changed hands, or the roster now has a
     photograph of its own - so a stale one is never shown (rule 87)."""
     from .overrides import OFFICER_PHOTOS
+    from .photos import refused
 
     problems = []
     for (state, office), photo in sorted(OFFICER_PHOTOS.items()):
         if state != code:
+            continue
+        if refused(photo["photo"]):
+            # One test for every route (rule 38): a curated card a person
+            # has since refused is not shown.
+            problems.append(f"{code} {office}: {refused(photo['photo'])}; not shown")
             continue
         holder = entry.get(office)
         field, by_field, page_field = (("headshot", "headshotBy", "headshotPage")

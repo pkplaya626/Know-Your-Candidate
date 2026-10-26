@@ -280,12 +280,16 @@ class TestOfficialPage(unittest.TestCase):
             stale = {h for h in hosts if not any(s == h or (h.startswith(".") and s.endswith(h))
                                                  for s in seen)}
             self.assertFalse(stale, code)
+        # A caucus's host is one a member is linked from or whose
+        # photograph Open States lists (Michigan's Senate Republicans').
         for code, sites in legislature.CAUCUS_SITES.items():
             seen = {(urllib.parse.urlsplit(link).hostname or "").lower().removeprefix("www.")
-                    for r in cache["states"][code] for link in r.get("links", ())}
+                    for r in cache["states"][code]
+                    for link in list(r.get("links", ())) + [r.get("image") or ""]}
             for site in sites:
-                self.assertTrue(any(s == site[0] or (site[0].startswith(".") and s.endswith(site[0]))
-                                    for s in seen), (code, site[0]))
+                bare = site[0].lstrip(".")
+                self.assertTrue(any(s == bare or s.endswith("." + bare) for s in seen),
+                                (code, site[0]))
 
 
 class TestPerson(unittest.TestCase):

@@ -207,8 +207,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2352 tests, no dependencies
-npm install && npm test                       # 3385 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2383 tests, no dependencies
+npm install && npm test                       # 3396 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -422,9 +422,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     - for a nominee who sits in their state's legislature, the photograph
       this site's legislature page shows on that member's card
       (`legislature.card_photo`, one implementation, rule 12): only on the
-      legislature's own host and credited to it, never a caucus's (rule 87,
-      as rule 100 says: Sean McCann's is on senatedems.com, and he has
-      none), never a file Open States gives two members, and never an
+      legislature's own host and credited to it, or on their own party's
+      caucus's host in that chamber (`legislature.CAUCUS_SITES`) and
+      credited to the caucus - the owner's decision of 2026-10-25, "we can
+      credit caucus": Sean McCann's is the Michigan Senate Democrats' file,
+      tied to him by his page on its site - never a file Open States gives
+      two members, and never an
       "oversized" legphotos entry, whose file was offered before the
       checks a seat-keyed file needs (it waits for those, which legphotos
       now makes before it takes a heavy file, rule 100, not for its
@@ -438,7 +441,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Either route refuses a frame wider than tall unless its file is named
     a headshot or portrait (rule 38), and any file in
     `overrides.NOT_A_PORTRAIT` or `PORTRAIT_LICENCE_DOUBTS`: the first
-    version gave a person no way to withdraw one. A photograph over the
+    version gave a person no way to withdraw one. So does every other
+    route, at build time (`photos.refused`): a member's article portrait
+    (`portraits.held_back`) as much as a nominee's, an officer's roster
+    card, a curated association card, a legislator's card. A photograph over the
     caps is shown smaller from the same file where a resizer serves it,
     else as it is, and said (rule 87), and as rule 101's smaller copy once
     one is made. The election offices that print candidates' photographs
@@ -633,7 +639,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the day. A heavy one is taken in a rendition the page itself lists
     (its `srcset`), else its host's resizer's or Photon's, else at full
     size (rule 87). What a person looks at is judged by one test: a
-    photograph of the candidate alone whose face, brow to chin, is at
+    photograph of the candidate alone - nobody else in the frame, even in
+    the background or in part (an arm, a shoulder, a child's face, a
+    hearing's audience; the owner, 2026-10-25: "probably better to leave
+    out background people") - whose face, brow to chin, is at
     least a tenth of the height of the 4:5 card that crops it from the top
     (6.5px of the state pages' 65px phone card, where eyes and a mouth can
     be made out) is a likeness and is shown; anything else goes in
@@ -643,7 +652,45 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     half of the card and stays, Davis's an eleventh and Lauren Jewett's
     beside a seal a fifteenth, and both are refused, as are a family
     photograph, a page of biography text, a halftone street scene, and
-    a festival stall and a rally with other people in the frame. A curated row takes its campaign's
+    a festival stall and a rally with other people in the frame. On
+    2026-10-25 the photographs shown by the routes the owner's brief named
+    were looked at - 701: 53 campaign sites', 391 profiles' Commons files
+    (the article's or Wikidata's), 122 statewide candidates' (Commons, the
+    guides and commissions, the holder's office card), 46 attorneys
+    general's (their offices' pages and NAAG's cards) and 89 judges' (the
+    crop, article and agreeing-article routes) - and the 88 with anyone
+    else visible refused, by route: 1 campaign's, 33 profiles' Commons
+    files, 5 statewide candidates' (Arizona's Clean Elections photograph of
+    Duwayne Collier is cropped from a family snapshot: a child's face and
+    another person's arm), 1 attorney general's office's, and 48 judges'
+    Senate hearing stills (9 crops, 39 articles' images); the 267
+    legislator cards newly credited to a caucus were looked at too, and 2
+    refused. Its review found five more (a hand at JoCasta Zamarripa's
+    edge, two judges' hearing audiences, a face on the screen behind Donna
+    Miller, a framed photograph of people behind Adam Hamawy, as John
+    Giles's and Dave Sunday's were refused) and a refusal's worst case: it
+    promoted James Talarico's campaign photograph of him helping a child in
+    a classroom, which nobody had seen, and then his Wikidata item's uncut
+    file of the refused crop. A photograph that comes forward when a
+    person refuses the one before it, from a route that can take a picture
+    not made in a studio, is now a build warning
+    (`portrait-fallback-unseen`) until it is in
+    `overrides.SEEN_AFTER_A_REFUSAL` or `NOT_A_PORTRAIT`, and the nominee
+    routes keep what a record stands in for (`replaces`); a refused
+    portrait is no portrait, so those routes are asked for its person
+    (Talarico, Jeremy Moss, La Shawn Ford and Adrian Boafo now show their
+    legislature's or caucus's photograph). Not looked at: the judges'
+    `item` route (a Wikidata item's own image, 1,012 portraits), which the
+    brief did not name. Most of its recent judges' are Senate Judiciary
+    hearing stills with the audience behind them - in a sample of the
+    first 330, some 130 clearly show someone else - so applying the
+    owner's test there would withdraw several hundred judges' photographs;
+    that waits for the owner. One test asks the list wherever a
+    page is read (`photos.not_a_portrait`, rule 12: the campaign sites'
+    reader, a court's, an attorney general's office's, a statewide
+    candidate's guide or article, a judge's), and records what it refused
+    in that route's cache (`notPortraits`) for `validate`'s staleness
+    check. A curated row takes its campaign's
     portrait as a filer does: Brian Bengs's sat in the cache while his
     profile showed the silhouette. A sitting member never does: their
     portrait comes by their bioguide id. Issue headings come from one heading level of a page
@@ -1832,11 +1879,51 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     from the page without a word. Every record, read now or kept from an
     earlier read (rule 8), is asked of the lists a person keeps -
     `NOT_A_PORTRAIT` and `PORTRAIT_LICENCE_DOUBTS`, one of each for every
-    route, a nominee's, an official's and a judge's (`photos.refused`,
-    one test that `nominee_photos`, `official_photos.held_back` and
-    `judge_links.held_back` all ask; a campaign site's reader asks
-    `NOT_A_PORTRAIT`, its images carrying no licence to doubt) - and a
-    file in either never reaches a page.
+    route, a nominee's, an official's, a judge's and a campaign's
+    (`photos.refused`, one test that `nominee_photos`,
+    `official_photos.held_back`, `judge_links.held_back`,
+    `portraits.held_back`, `enrich.campaign_portrait`, the officers'
+    roster cards and the legislator cards all ask) - and a file in either
+    never reaches a page. A page read asks `NOT_A_PORTRAIT` through one
+    helper beside it (`photos.not_a_portrait`), which records what it
+    passed over for the staleness check (rule 12).
+
+    A party caucus's photograph of its own member is that caucus's word
+    about its member, and is shown credited to the caucus by the name its
+    own site gives itself (the owner, 2026-10-25: "we can credit caucus"):
+    only a host `legislature.CAUCUS_SITES` lists for that state and
+    chamber, with its own page title and the day read as evidence, whose
+    party is the member's (an independent on the House Republicans' host
+    is not credited to them), for a file Open States gives that member
+    alone and whose name does not call it a group's, a leader's or a
+    banner (`legislature.caucus_photo`). One test says what host is a
+    caucus's, for its files and its member pages alike
+    (`legislature.on_caucus_host`: the entry or any subdomain of it): the
+    first matched "www.misenategop.com" for a file and not for a page, so
+    18 cards were credited to the Michigan Senate Republicans without a
+    link to their page there. Any other host still reads
+    "Photo: from <host>, as listed by Open States", and New Hampshire's
+    nhhousedems.org is not a caucus: its title is "New Hampshire House
+    Dems Victory Committee", a campaign committee's.
+
+    A Commons photograph's credit says the year its file's own page gives
+    it (`portraits.year_of`, read with the author and licence:
+    `CREDIT_FORM` 4), every route alike - a profile's, a statewide
+    candidate's, a judge's - through the one helper
+    (`KYC.photoCreditHtml`: "Photo (1981): ..."; a justice's official
+    portrait keeps "Official portrait, 2005"), and nothing where the page
+    gives no single four-digit year, never a guessed or an upload year:
+    Tad Jude's (MN) black-and-white legislature portrait is from 1981 and
+    read as current (the owner's brief of 2026-10-25). Its review found
+    the first reading took any single year: "13 October 2020 (upload
+    date)" and "(original upload date)" printed as the year Amanda Edwards's
+    and four judges' photographs were taken, "circa 1993", "c. 2000" and
+    "circa 2025-26" as exact years, and a date that is the very day the
+    file was uploaded (the upload form's default) as evidence. Now a date
+    that says upload, is qualified (circa, before, "or", a "?", an
+    `{{other date}}` carrying P1480), is a span, or is the upload day
+    gives none. The year is said as "Photo (1981)", not "Photograph,
+    1981.", which was false under a judge's oil portrait.
 
 88. **A colour that carries meaning is checked as a colour-blind reader
     sees it, and is never the only cue.** The 2026-10-17 audit ran the
@@ -2406,8 +2493,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     legislators with a portrait (rule 101: the owner relaxed "no
     resizing"). A portrait the card shows, its or Open States's, that is
     over the caps is shown as that copy; a landscape frame is
-    not a portrait (rule 38). No party caucus's photograph (Michigan, rule
-    87), and no archived copy of a file the legislature stopped serving:
+    not a portrait (rule 38). `legphotos` reads no party caucus's pages
+    (Michigan's only portraits are theirs), but a caucus's file Open
+    States lists for its own member is shown credited to the caucus (rule
+    87, the owner's decision of 2026-10-25), and no archived copy of a
+    file the legislature stopped serving:
     Kansas's pages name a file that answers 404, and are read again each
     run so a restored file is shown. A host that answers nothing three
     times running (Maine's) is not asked again that run, and pages drawn by
@@ -2466,11 +2556,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     search, no address built from a name. Hosting a copy is another act
     than linking a file, and the decision was for official photographs: a
     legislator's is copied only from the legislature's own host or a
-    government's (`.gov`, `.mil`, `state.XX.us`; `photocopies.may_copy`),
-    and a justice's or a statewide candidate's only from a government's
-    host or the court's own (its roster's host) - a candidate shown the
-    holder's office photograph as the holder's card is - never a news
-    organisation's, a party's or a campaign's file. One walk of what
+    government's (`.gov`, `.mil`, `state.XX.us`; `photocopies.may_copy`)
+    or the member's own party caucus's in `legislature.CAUCUS_SITES`
+    where the card credits the caucus (`photocopies.caucus_own`, rule
+    87), a profile's portrait (kind "person") the same way - a
+    government's host, the legislature's, the caucus's, or an office's
+    own - and a justice's or a statewide candidate's only from a
+    government's host or the court's own (its roster's host) - a
+    candidate shown the holder's office photograph as the holder's card
+    is - never a news organisation's, a party's or a campaign's file.
+    The first version copied four campaigns' portraits (Mary Silva's,
+    Michael J. Quirk's, Mark Nair's, Jonny Larsen's) though this rule
+    said it would not; they are drawn from their own host again, in a
+    rendition it offers or at full size and said (`portraitHeavy`), and
+    their copies were removed (2026-10-25). One walk of what
     `stategov.js` shows (`photocopies.stategov_photos`) serves the build,
     the checks and the weighing. Open States also lists news sites',
     campaigns', party sites' and image CDNs' photographs - the Chicago
@@ -2560,7 +2659,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     older than the Court's current ones; the credit says the year
     Commons' `DateTimeOriginal` gives ("Official portrait, 2005"), read
     with the author and licence, and nothing where Commons names no single
-    year (`portraits.year_of`, `judge_links.dated`).
+    year (`portraits.year_of`, `judge_links.dated`); every other Commons
+    photograph's credit now says its year the same way (rule 87). With
+    the campaigns' four copies removed, the two Connecticut photographs
+    refused (rule 38) gone with them, and eleven more legislators' made
+    where the card now credits their caucus, 1,407 copies stand (1,392
+    legislators', 15 of the White House's), for originals of some 2.4 GB,
+    in 13.4 MB.
     An election office's guide that prints a candidate's photograph with
     no address of its own - Washington's voters' guide (base64 inside its
     JSON), Alaska's statement PDFs, Oregon's pamphlet (JPEG 2000 inside
@@ -2588,7 +2693,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Dave Bronson's and Candi English's, over 1,200px) are shown as smaller
     copies made from that file the way every copy is made, at once by
     `guidephotos` rather than at the next refresh, and a copy that fails
-    gives way to the hosted file. A decoded file's credit says this site
+    gives way to the hosted file; with them, 1,410 copies stand (13.5 MB),
+    beside the 18 files hosted here. A decoded file's credit says this site
     converted it, as a copy's says it is one (rule 87). Of the 20 nominees and
     statewide candidates in the three states who showed no photograph on
     2026-10-25, 18 have one: Bill Hill's statement holds a CMYK JPEG no

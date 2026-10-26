@@ -122,7 +122,7 @@ CAP_PX = 1200
 FILEPATH = "http://commons.wikimedia.org/wiki/Special:FilePath/"
 # What a page shows of a portrait; the rest is the record behind it.
 PAGE_KEYS = ("url", "set", "credit", "source", "by", "licence", "licenceUrl", "year",
-             "authorUnrecorded")
+             "authorUnrecorded", "route")
 # What every portrait must carry (rule 87, and the owner's 2026-10-19 rule).
 RECORD_KEYS = ("source", "route", "evidence", "read", "bytes", "width", "height")
 
@@ -607,12 +607,14 @@ def credit_fields(credit):
 
 
 def dated(credit):
-    """A justice's official portrait's year, as its Commons page dates it:
-    ``{"year": 2005}``, or ``{"yearUnstated": True}`` where the page gives no
-    single four-digit year - then none is shown, never guessed. Five of the
-    nine are older than the Court's current portraits (Roberts 2005, Thomas
-    2007, Alito 2006, Sotomayor 2009, Gorsuch 2017: the photo research of
-    2026-10-25), and a reader should see that the photograph is not new."""
+    """A judge's Commons portrait's year, as its file's page dates it
+    (``portraits.year_of``): ``{"year": 2005}``, or ``{"yearUnstated":
+    True}`` where the page gives no single four-digit year - then none is
+    shown, never guessed. Five of the nine justices' official portraits are
+    older than the Court's current ones (Roberts 2005, Thomas 2007, Alito
+    2006, Sotomayor 2009, Gorsuch 2017: the photo research of 2026-10-25),
+    and a reader should see that a photograph is not new; the owner's brief
+    of 2026-10-25 gave every Commons photograph the same year."""
     return {"year": credit["year"]} if credit.get("year") else {"yearUnstated": True}
 
 
@@ -669,8 +671,9 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     {"bytes", "width", "height"}}`` and *previous* the last cache's
     ``judges``. A rendition not yet weighed is added to *wanted*. *report*,
     when given, receives ``oversized`` (the judges left out because their
-    file is offered only over the caps) and ``doubted`` (the
-    ``PORTRAIT_LICENCE_DOUBTS`` entries met). *bio_missed* is ``{nid:
+    file is offered only over the caps), ``doubted`` (the
+    ``PORTRAIT_LICENCE_DOUBTS`` entries met) and ``notPortraits`` (the
+    ``NOT_A_PORTRAIT`` entries met, ``photos.not_a_portrait``). *bio_missed* is ``{nid:
     why}`` for a judge no item carries whose ``{{FJC Bio}}`` search was
     read and settled nothing (no article, or several).
 
@@ -680,6 +683,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     judge no item carries whose ``{{FJC Bio}}`` search is neither in *bio*
     nor in *bio_missed*, since that search was not read."""
     from . import overrides
+    from .photos import not_a_portrait
     from .portraits import thumb_set, title_is_about
 
     articles, crops, bio = articles or {}, crops or {}, bio or {}
@@ -687,7 +691,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     weights, credits = weights or {}, credits or {}
     today = today or datetime.date.today().isoformat()
     doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
-    out, problems, oversized, doubted = {}, [], [], set()
+    out, problems, oversized, doubted, passed_over = {}, [], [], set(), []
     for judge in judges.values():
         nid = judge.get("nid") or judge["id"].replace("fjc-", "")
         slug = slugs.get(nid)
@@ -859,7 +863,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
             size = sizes.get(url) if url else None
             if not url or not thumb_set(url, 1):
                 why = f"{name}: {ref} is not a photograph Wikimedia scales; not shown"
-            elif url in overrides.NOT_A_PORTRAIT:
+            elif not_a_portrait(url, passed_over=passed_over):
                 why = f"{name}: {url} is in overrides.NOT_A_PORTRAIT; not shown"
             elif url in doubts:
                 doubted.add(url)
@@ -900,8 +904,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                         "bytes": weight["bytes"], "width": weight["width"],
                         "height": weight["height"], "file": list(size),
                     }, **credit_fields(credits[url]))
-                    if route == "official":
-                        portrait.update(dated(credits[url]))
+                    portrait.update(dated(credits[url]))
                 elif not unsure:
                     oversized.append(name)
                     why = (f"{name}: Wikimedia offers {url} only over {CAP_BYTES // 1000} KB or "
@@ -925,6 +928,7 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     if report is not None:
         report["oversized"] = sorted(oversized)
         report["doubted"] = sorted(doubted)
+        report["notPortraits"] = sorted(passed_over)
     return out, problems
 
 
@@ -936,9 +940,8 @@ def files_read(infos):
 
 
 def undated(portrait):
-    """A justice's official portrait whose year has not been read."""
-    return (portrait.get("route") == "official" and "year" not in portrait
-            and not portrait.get("yearUnstated"))
+    """A portrait whose Commons year has not been read (``dated``)."""
+    return "year" not in portrait and not portrait.get("yearUnstated")
 
 
 def credit_portraits(cache, info_of=None, log=print):
@@ -978,8 +981,7 @@ def credit_portraits(cache, info_of=None, log=print):
             for key in ("by", "authorUnrecorded", "licenceUrl", "year", "yearUnstated"):
                 portrait.pop(key, None)
             portrait.update(credit_fields(credit))
-            if portrait.get("route") == "official":
-                portrait.update(dated(credit))
+            portrait.update(dated(credit))
             credited += 1
     return credited, withdrawn
 
@@ -1231,7 +1233,8 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
              "slugs": {k: slugs[k] for k in sorted(slugs) if k in nids},
              "judges": {k: joined[k] for k in sorted(joined)},
              "problems": problems, "unread": unread,
-             "oversized": report["oversized"], "doubted": report["doubted"]}
+             "oversized": report["oversized"], "doubted": report["doubted"],
+             "notPortraits": report["notPortraits"]}
     # A portrait kept from an earlier read without its licence gets one.
     credit_portraits(cache, sizes_of, log)
     save_cache(cache, root)

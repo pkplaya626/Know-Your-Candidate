@@ -295,15 +295,19 @@ _GOVERNMENT_HOST = re.compile(r"(\.gov|\.mil|\.state\.[a-z]{2}\.us)$", re.I)
 
 def may_copy(url, kind, code="", own=()):
     """Whether this site may host a copy of *url* shown as *kind*: never a
-    Wikimedia file (rule 42); a legislator's only from the legislature's own
-    host or a government's; a justice's or a statewide candidate's only
-    from a government's host or one of *own*, the hosts that are the body's
-    own (the court's roster's; for a candidate shown the holder's office
-    photograph, that photograph's where the holder's card may show a copy
-    of it) - never a news organisation's, a party's or a campaign's file;
-    every other kind's source is already the person's office, their
-    association, the White House or, for a profile, their own campaign
-    (rules 38, 87)."""
+    Wikimedia file (rule 42); a legislator's or a profile's ("person") only
+    from the legislature's own host, a government's, or one of *own* - the
+    member's own party caucus's host where the card credits the caucus
+    (``legislature.caucus_photo``, ``caucus_own``), an office's own; a
+    justice's or a statewide candidate's only from a government's host or
+    one of *own*, the hosts that are the body's own (the court's roster's;
+    for a candidate shown the holder's office photograph, that photograph's
+    where the holder's card may show a copy of it) - never a news
+    organisation's, a party's or a campaign's file. The owner's decision of
+    2026-10-25 was for official photographs: a campaign's file is shown from
+    its own host, a lighter rendition it offers or at full size, and never
+    hosted here. Every other kind's source is already the person's office,
+    their association or the White House (rules 38, 87)."""
     if is_wikimedia(url):
         return False
     if is_hosted(url):
@@ -312,12 +316,22 @@ def may_copy(url, kind, code="", own=()):
         # the very file the page would otherwise draw.
         return True
     host = host_of(url)
-    if kind in ("justice", "candidate"):
-        return bool(host) and (bool(_GOVERNMENT_HOST.search(host)) or host in set(own or ()))
-    if kind != "legislator":
+    if not host:
+        return False
+    if _GOVERNMENT_HOST.search(host) or host in set(own or ()):
         return True
-    from .legphotos import official_host
-    return bool(host) and (bool(_GOVERNMENT_HOST.search(host)) or official_host(code, url))
+    if kind in ("legislator", "person"):
+        from .legphotos import official_host
+        return bool(code) and official_host(code, url)
+    return kind not in ("justice", "candidate")
+
+
+def caucus_own(url, credit):
+    """*own* for ``may_copy``: the host of *url* where the page credits it to
+    the member's own party caucus (``legislature.card_photo``'s
+    ``"caucus": True``, carried into a nominee's ``photoCredit``), else
+    ``()``."""
+    return (host_of(url),) if url and (credit or {}).get("caucus") else ()
 
 
 def key_of(kind, record, code="", office=""):
@@ -371,7 +385,8 @@ def apply_people(profiles, cache):
         first = (profile.get("photos") or [""])[0]
         if (first and first != "placeholder" and profile.get("photoCredit")
                 and not is_wikimedia(first)):
-            n += attach(profile, first, cache, "person")
+            n += attach(profile, first, cache, "person", code=profile.get("state") or "",
+                        own=caucus_own(first, profile["photoCredit"]))
         else:
             profile.pop("photoCopy", None)
     return n
@@ -386,7 +401,8 @@ def apply_legislature(payload, cache, code="", photos=None):
     n = 0
     for _code, member in _legislators({code: payload}):
         n += attach(member, member["image"], cache, "legislator", code=code,
-                    expect=expected(code, member, photos))
+                    expect=expected(code, member, photos),
+                    own=caucus_own(member["image"], member.get("imageCredit")))
     return n
 
 
@@ -551,7 +567,8 @@ class Shown:
         for code, member in _legislators(payloads):
             self.add(member["image"], "legislator", key_of("legislator", member, code), member,
                      bool(member.get("imageCredit")), code=code,
-                     expect=expected(code, member, photos))
+                     expect=expected(code, member, photos),
+                     own=caucus_own(member["image"], member.get("imageCredit")))
         return self
 
     def add_federal(self, payload):
@@ -571,7 +588,8 @@ class Shown:
             first = (person.get("photos") or [""])[0]
             if first and first != "placeholder":
                 self.add(first, "person", key_of("person", person), person,
-                         bool(person.get("photoCredit")))
+                         bool(person.get("photoCredit")), code=person.get("state") or "",
+                         own=caucus_own(first, person.get("photoCredit")))
         return self
 
     def stale(self, url, entry):

@@ -124,9 +124,11 @@
                credit: p.licence
                  ? { by: p.by, licence: p.licence, licenceUrl: p.licenceUrl, page: p.source,
                      via: "Wikimedia Commons", authorUnrecorded: !!p.authorUnrecorded,
-                     // A justice's official portrait says when it was taken,
-                     // where Commons dates it (several are 2005-2017).
-                     dated: p.year ? "Official portrait, " + p.year : "" }
+                     // Says when it was taken, where Commons dates it: a
+                     // justice's official portrait (several are 2005-2017)
+                     // in those words, any other as a photograph's year.
+                     year: p.year || "",
+                     dated: p.year && p.route === "official" ? "Official portrait, " + p.year : "" }
                  : { by: p.credit, page: p.source } };
     }
     return null;

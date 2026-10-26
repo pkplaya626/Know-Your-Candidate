@@ -1390,6 +1390,47 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
                   "'portraits' to read them again", sorted(found))]
 
 
+# Where a profile's photograph may be a picture not made in a studio: a
+# campaign's site, a Commons file by an article, a cross-link or Wikidata.
+_NOT_A_STUDIO = ("campaign-site", "wikipedia", "cross-link", "wikidata-fec")
+
+
+def check_refusal_fallbacks(profiles, portraits=None):
+    """A photograph shown because a person refused the one before it must
+    itself have been looked at (the PR #139 review). Refusing James
+    Talarico's Commons crop for someone at its edge promoted his campaign's
+    photograph of him helping a child in a classroom, which nobody had
+    seen. A profile whose portrait record a person refused (``photos.refused``),
+    or whose record replaced one they refused (``nominee_photos.replacing``),
+    and which now shows a photograph from a route that can take a picture
+    not made in a studio, is named until that photograph is in
+    ``overrides.SEEN_AFTER_A_REFUSAL`` (looked at: the person alone) or
+    ``NOT_A_PORTRAIT``."""
+    from . import nominee_photos
+    from .portraits import profile_key
+
+    seen = getattr(overrides, "SEEN_AFTER_A_REFUSAL", {})
+    found = []
+    for p in profiles:
+        shown = (p.get("photos") or ["placeholder"])[0]
+        if shown in (None, "placeholder") or p.get("photoSource") not in _NOT_A_STUDIO:
+            continue
+        record = (portraits or {}).get(profile_key(p)) or {}
+        refused = nominee_photos.replaced(record)
+        if not refused:
+            continue
+        if any(u in seen for u in (shown, record.get("original")) if u):
+            continue
+        found.append(f"{p['name']} ({p.get('officeLabel') or p.get('state')}): shows {shown} "
+                     f"({p.get('photoSource')}) since {refused[0]} was refused")
+    if not found:
+        return []
+    return [Issue("warn", "portrait-fallback-unseen",
+                  f"{len(found)} profiles show a photograph that came forward when a person "
+                  "refused the one before it; look at each, and record it in "
+                  "overrides.SEEN_AFTER_A_REFUSAL or NOT_A_PORTRAIT", sorted(found))]
+
+
 def check_portrait_overrides(enrichment, elsewhere=()):
     """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
 
@@ -1763,6 +1804,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     if portraits is not None:
         issues += check_photo_evidence(profiles, portraits, enrichment, guides,
                                        photo_manifest)
+        issues += check_refusal_fallbacks(profiles, portraits)
     issues += check_odds(races, odds)
     issues += check_races(profiles, races)
     issues += check_markup(profiles)
