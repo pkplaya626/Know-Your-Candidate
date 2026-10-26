@@ -284,6 +284,7 @@
     }
     var printed = list.candidates.filter(function (c) { return !c.writeIn; });
     var writeIns = list.candidates.length - printed.length;
+    var writeInsCertified = !!(list.certified || (list.writeIns && list.writeIns.certified));
     var notState = list.notStateList ? " Not the state’s own list. " + esc(list.notStateList) + "." : "";
     if (!full) {
       return esc(plural(printed.length, "candidate", "candidates")) + " on " +
@@ -295,8 +296,13 @@
         : esc(list.source || list.by || "the election office’s list")) + " lists them: " +
       printed.map(function (c) {
         return esc(c.name) + (c.party ? " (" + esc(c.party) + ")" : "");
-      }).join(", ") + (writeIns ? "; and " + esc(plural(writeIns, "certified write-in candidate",
-        "certified write-in candidates")) : "") + ".";
+      // "Certified" only where the list's own words say so (rule 91):
+      // Arizona's listing marks its write-ins and certifies no one;
+      // Georgia's write-ins come from its "Final List of Certified Write-In
+      // Candidates", though its main list is not marked certified.
+      }).join(", ") + (writeIns ? "; and " + esc(plural(writeIns,
+        (writeInsCertified ? "certified " : "") + "write-in candidate",
+        (writeInsCertified ? "certified " : "") + "write-in candidates")) : "") + ".";
   }
 
   /** The holder's row for one state's office. A row is titled as an office

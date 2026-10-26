@@ -2894,6 +2894,45 @@ async function testStates() {
       lines.join(" | "));
   });
 
+  /* Arizona's lists were the Clean Elections Commission's voter guide
+   * while apps.arizona.vote challenged every script; the Secretary of
+   * State's candidate listing, read by hand on 2026-10-26 (rule 91), is the
+   * source now. It calls itself neither certified nor official, and its
+   * codes are spelled out from the office's own key: PND is "Party Not
+   * Designated", never the guide's "Independent". */
+  const azGov = await buildPage("states/az.html");
+  suite("states/az.html — the Secretary of State's candidate listing; codes in the office's words", () => {
+    const gov = azGov.D.getElementById("state-government");
+    const offices = azGov.window.kycStateGov.states.AZ.ballot2026.offices;
+    const blocks = [...gov.querySelectorAll(".gov-candidates")];
+    const sources = blocks.map((b) => (b.querySelector(".gov-candidates-source") || {}).textContent || "");
+    check("every office's list is the Secretary of State's listing, never called certified",
+      blocks.length === 4 && sources.every((t) =>
+        /Source: the Arizona Secretary of State’s candidate listing \(read /.test(t)) &&
+        [...gov.querySelectorAll(".gov-candidates-source a")].every((a) =>
+          /^https:\/\/apps\.arizona\.vote\//.test(a.getAttribute("href"))) &&
+        ![...gov.querySelectorAll(".gov-candidates-source, .gov-holder-status")]
+          .some((p) => /certified/i.test(p.textContent)), sources.join(" | "));
+    check("no commission stands in for it, and nothing says it is not the state's",
+      !gov.querySelector(".gov-candidates-uncertified") && !/Clean Elections Commission’s/.test(sources.join(" ")),
+      gov.textContent.slice(0, 400));
+    check("each party in words, never a code",
+      !/\((REP|DEM|GRN|NOL|PND)\)/.test(gov.textContent) &&
+        offices.lt.candidates.candidates.filter((c) => c.party === "Party Not Designated").length === 2 &&
+        !offices.lt.candidates.candidates.some((c) => c.party === "Independent") &&
+        offices.governor.candidates.candidates.some((c) => c.party === "No Labels") &&
+        offices.governor.candidates.candidates.some((c) => c.party === "Green"), gov.textContent.slice(0, 400));
+    const writeIns = [...gov.querySelectorAll(".gov-writein-list li")].map((li) => li.textContent);
+    check("the two write-in candidates for governor, apart",
+      writeIns.length === 2 && writeIns.some((t) => /Gertritrude Gonzalez/.test(t)) &&
+        writeIns.some((t) => /Alice Novoa/.test(t)), writeIns.join(" | "));
+    const lines = [...gov.querySelectorAll(".gov-holder-status")].map((p) => p.textContent);
+    check("the holder lines read the listing",
+      ["Katie Hobbs", "Adrian Fontes", "Kris Mayes"].every((n) => lines.some((t) =>
+        t.indexOf(n + " is among the candidates for this office (the Arizona Secretary of State’s candidate listing)") === 0)),
+      lines.join(" | "));
+  });
+
   const flList = await buildPage("states/fl.html");
   suite("states/fl.html — the Division of Elections' own listing, not a county's ballot", () => {
     const gov = flList.D.getElementById("state-government");
@@ -10707,6 +10746,28 @@ async function testSearchAnswers() {
       check("with the candidates its list names", printed.every((c) => text().indexOf(c.name) !== -1));
       check("and a list that is not the state's own says so", !item.candidates || !item.candidates.notStateList ||
         /Not the state’s own list/.test(text()));
+    });
+  }
+  // Rule 91: "certified" only where the list's own words say so. Arizona's
+  // listing marks two write-in candidates for governor and certifies no one.
+  await ask("Arizona governor race");
+  suite("search answers — 'Arizona governor race': write-ins, never called certified", () => {
+    const list = gov.AZ.ballot2026.offices.governor.candidates;
+    check("the list is not certified", !!list && !list.certified);
+    check("its write-ins are counted as write-ins", /; and 2 write-in candidates\./.test(text()) &&
+      !/certified write-in/.test(text()), text().slice(0, 400));
+  });
+  // Georgia's main list is not marked certified, but its write-ins come from
+  // its "Final List of Certified Write-In Candidates": the word is its own.
+  const gaGov = ((gov.GA || {}).ballot2026 || {}).offices || {};
+  if (gaGov.governor && gaGov.governor.candidates && gaGov.governor.candidates.writeIns) {
+    await ask("Georgia governor race");
+    suite("search answers — 'Georgia governor race': write-ins certified by their own list", () => {
+      const list = gaGov.governor.candidates;
+      const n = list.candidates.filter((c) => c.writeIn).length;
+      check("the main list is not certified, its write-in list is", !list.certified && !!list.writeIns.certified);
+      check("the write-ins are called certified", new RegExp("; and " + n + " certified write-in candidates?\\.")
+        .test(text()), text().slice(0, 500));
     });
   }
   // An office a place does not have, or this site does not list, is not
