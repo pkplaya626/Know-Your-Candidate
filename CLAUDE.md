@@ -207,8 +207,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2383 tests, no dependencies
-npm install && npm test                       # 3396 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2401 tests, no dependencies
+npm install && npm test                       # 3412 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2085,10 +2085,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     county's never stands in for it while a person can read the office's
     own: Nevada's four offices cited Clark County's notice for a week
     because nvsos.gov answers every script with a bot check, until the
-    Secretary of State's certified list was read that way (2026-10-25).
-    Arizona's still stand on its Clean Elections Commission's guide until
-    its Secretary of State's listing, behind a bot check too, is read the
-    same way. A list is named as the document it is ("the Pulaski County
+    Secretary of State's certified list was read that way (2026-10-25);
+    Arizona's stood on its Clean Elections Commission's voter guide until
+    its Secretary of State's candidate listing, behind a Cloudflare
+    challenge, was read the same way (2026-10-26). A list is named as the document it is ("the Pulaski County
     Board of Election Commissioners’ notice of election"), never
     "Certified by" a body: the first
     page credited a county's sample ballot and a commission's voter guide
@@ -2100,7 +2100,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "Lombardo, Joseph", "JOSH SHAPIRO", "Governor Sarah Huckabee
     Sanders"), the list's form kept beside them; a party the list
     abbreviates is spelled out from its key or statute
-    (`statewide.PARTY_CODES`), and an unexplained code fails the build;
+    (`statewide.PARTY_CODES`), and an unexplained code fails the build
+    (Arizona's listing prints REP, DEM, GRN, NOL and PND with no key: the
+    office's own party-preference key spells them, and its PND is "Party
+    Not Designated", which it keeps apart from "Independent");
     a major party's full name is the one word the holder line beside it
     uses ("Democratic Party" is "Democratic", as on the race cards).
     Write-ins apart, listed by surname and said to be; no money or

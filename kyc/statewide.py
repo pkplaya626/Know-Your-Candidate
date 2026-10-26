@@ -15,7 +15,10 @@ sources (rule 50). A list the office serves only to a person's browser is
 read by hand from the office's own page, quoted and dated, and a county's
 never stands in for it while a person can read it: Nevada's Secretary of
 State answers every script with a bot check, and its certified list,
-read that way on 2026-10-25, replaced Clark County's notice.
+read that way on 2026-10-25, replaced Clark County's notice; Arizona's
+Secretary of State's candidate listing, behind a Cloudflare challenge,
+read that way on 2026-10-26, replaced the Clean Elections Commission's
+voter education guide.
 
 What reaches the page is the list's: each name as it prints it, written
 first name first and in ordinary capitals without a ballot title (rule
@@ -86,6 +89,18 @@ PARTY_CODES = {
           "LIB": "Libertarian", "Democrat": "Democratic", "DEMOCRAT": "Democratic",
           "Democratic Party": "Democratic", "Republican Party": "Republican",
           "Libertarian Party": "Libertarian"},
+    # The Secretary of State's candidate listing prints these codes with no
+    # key; the office's own key is its Voter Registration Procedures page
+    # (https://azsos.gov/elections/about-elections/elections-procedures/
+    # vr-procedures, "Political Party Preference", read by hand 2026-10-26):
+    # 'Green: "Green," "GRN,"', 'Independent: "Independent," "IND,"',
+    # 'Libertarian: "Libertarian," "LBT,"', 'No Labels - "No Labels Party",
+    # "No Labels", "NOL"' and 'PND: "Party Not Designated," "PND," ...'. PND
+    # is not "Independent": the office keeps the two apart (IND is its own
+    # line), so a running mate the listing prints as PND is "Party Not
+    # Designated", never the Clean Elections guide's "Independent".
+    "AZ": {"GRN": "Green", "IND": "Independent", "LBT": "Libertarian", "NOL": "No Labels",
+           "PND": "Party Not Designated"},
     # The Division of Elections' listing: "REP, DEM, LPF (Libertarian Party
     # of Florida), NPA (no party affiliation)" (the cache's notes, read
     # 2026-10-18).

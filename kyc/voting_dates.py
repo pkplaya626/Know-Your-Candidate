@@ -110,6 +110,10 @@ OFFICIAL_ELSEWHERE = {
 JURISDICTION_DOMAINS = {
     "AK": ("alaska.gov",), "AL": ("alabama.gov", "alabamavotes.gov"),
     "AR": ("arkansas.gov",), "AS": ("aselectionoffice.gov", "americansamoa.gov"),
+    # The Secretary of State publishes on azsos.gov (and apps.azsos.gov) and
+    # arizona.vote (its candidate listing on apps.arizona.vote, read by hand
+    # 2026-10-26); arizona.vote, not a .gov host, counts through
+    # voting.OFFICIAL_HOSTS, as the sentence above says.
     "AZ": ("azsos.gov", "azleg.gov", "az.gov"), "CA": ("ca.gov",),
     "CO": ("coloradosos.gov", "colorado.gov"), "CT": ("ct.gov",), "DC": ("dc.gov",),
     "DE": ("delaware.gov",), "FL": ("fl.gov", "registertovoteflorida.gov", "flsenate.gov"),

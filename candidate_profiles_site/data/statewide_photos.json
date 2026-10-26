@@ -20,11 +20,11 @@
   "AR|sos|Kelly Grappe": "not-linked",
   "AR|sos|Michael Pakko": "not-linked",
   "AR|sos|Senator Kim Hammer": "no-image",
-  "AZ|governor|Risa Lombardo": "not-linked",
-  "AZ|governor|Teri Ann Hourihan": "not-linked",
-  "AZ|lt|Angela Harrolle Mohan": "not-linked",
-  "AZ|lt|Lisa Castillo": "not-linked",
-  "AZ|sos|Duwayne Collier": "not-linked",
+  "AZ|governor|HOURIHAN, TERI ANN": "not-linked",
+  "AZ|governor|LOMBARDO, RISA": "not-linked",
+  "AZ|lt|Castillo, Lisa": "not-linked",
+  "AZ|lt|Harrolle Mohan, Angela": "not-linked",
+  "AZ|sos|COLLIER, DUWAYNE": "not-linked",
   "CA|ag|Michael E. Gates": "not-linked",
   "CO|governor|Eric Mulder": "not-linked",
   "CO|governor|Erik Underwood": "not-linked",
@@ -375,7 +375,7 @@
    "route": "wikipedia",
    "width": 250
   },
-  "AZ|ag|Kris Mayes": {
+  "AZ|ag|MAYES, KRIS": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 64846,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2292 with 'Kris Mayes', 'Attorney General', 'Democratic'",
@@ -386,7 +386,7 @@
    "route": "guide",
    "width": 800
   },
-  "AZ|ag|Warren Petersen": {
+  "AZ|ag|PETERSEN, WARREN": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 126899,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2427 with 'Warren Petersen', 'Attorney General', 'Republican'",
@@ -397,11 +397,11 @@
    "route": "guide",
    "width": 799
   },
-  "AZ|governor|Andy Biggs": {
+  "AZ|governor|BIGGS, ANDY": {
    "bioguide": "B001302",
    "by": "Congress.gov",
    "bytes": 8290,
-   "evidence": "Andy Biggs (B001302), whom overrides.OTHER_OFFICE_NOMINEES records as Republican nominee for Governor of Arizona (https://en.wikipedia.org/wiki/2026_Arizona_gubernatorial_election); the list prints 'Andy Biggs'. The portrait is the member's by bioguide id.",
+   "evidence": "Andy Biggs (B001302), whom overrides.OTHER_OFFICE_NOMINEES records as Republican nominee for Governor of Arizona (https://en.wikipedia.org/wiki/2026_Arizona_gubernatorial_election); the list prints 'BIGGS, ANDY'. The portrait is the member's by bioguide id.",
    "height": 263,
    "page": "https://bioguide.congress.gov/search/bio/B001302",
    "photo": "https://www.congress.gov/img/member/b001302_200.jpg",
@@ -409,7 +409,7 @@
    "route": "member",
    "width": 175
   },
-  "AZ|governor|Katie Hobbs": {
+  "AZ|governor|HOBBS, KATIE": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 75590,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2343 with 'Katie Hobbs', 'Governor', 'Democratic'",
@@ -420,18 +420,7 @@
    "route": "guide",
    "width": 800
   },
-  "AZ|governor|Risa Lombardo": {
-   "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 13470,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2460 with 'Risa Lombardo', 'Governor', 'Green'",
-   "height": 370,
-   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
-   "read": "2026-10-25",
-   "route": "guide",
-   "width": 296
-  },
-  "AZ|governor|Teri Ann Hourihan": {
+  "AZ|governor|HOURIHAN, TERI ANN": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 50602,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2366 with 'Teri Ann Hourihan', 'Governor', 'No Labels'",
@@ -442,29 +431,18 @@
    "route": "guide",
    "width": 666
   },
-  "AZ|lt|Angela Harrolle Mohan": {
+  "AZ|governor|LOMBARDO, RISA": {
    "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 63074,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2634 with 'Angela Harrolle Mohan (Hourihan)', 'Lieutenant Governor', 'Independent'",
-   "height": 870,
+   "bytes": 13470,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2460 with 'Risa Lombardo', 'Governor', 'Green'",
+   "height": 370,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
    "read": "2026-10-25",
    "route": "guide",
-   "width": 696
+   "width": 296
   },
-  "AZ|lt|John Giles": {
-   "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 61013,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2640 with 'John Giles (Hobbs)', 'Lieutenant Governor', 'Independent'",
-   "height": 894,
-   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
-   "read": "2026-10-25",
-   "route": "guide",
-   "width": 715
-  },
-  "AZ|lt|Lisa Castillo": {
+  "AZ|lt|Castillo, Lisa": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 49696,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2635 with 'Lisa Castillo (Lombardo)', 'Lieutenant Governor', 'Green'",
@@ -475,7 +453,29 @@
    "route": "guide",
    "width": 752
   },
-  "AZ|lt|Sine Kerr": {
+  "AZ|lt|Giles, John": {
+   "by": "Arizona Citizens Clean Elections Commission",
+   "bytes": 61013,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2640 with 'John Giles (Hobbs)', 'Lieutenant Governor', 'Independent'",
+   "height": 894,
+   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
+   "read": "2026-10-25",
+   "route": "guide",
+   "width": 715
+  },
+  "AZ|lt|Harrolle Mohan, Angela": {
+   "by": "Arizona Citizens Clean Elections Commission",
+   "bytes": 63074,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2634 with 'Angela Harrolle Mohan (Hourihan)', 'Lieutenant Governor', 'Independent'",
+   "height": 870,
+   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
+   "read": "2026-10-25",
+   "route": "guide",
+   "width": 696
+  },
+  "AZ|lt|Kerr, Sine": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 72487,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2642 with 'Sine Kerr (Biggs)', 'Lieutenant Governor', 'Republican'",
@@ -486,7 +486,18 @@
    "route": "guide",
    "width": 764
   },
-  "AZ|sos|Adrian Fontes": {
+  "AZ|sos|COLLIER, DUWAYNE": {
+   "by": "Arizona Citizens Clean Elections Commission",
+   "bytes": 5920,
+   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2469 with 'Duwayne Collier', 'Secretary of State', 'Green'",
+   "height": 220,
+   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+   "photo": "https://www.azcleanelections.gov/Custom/Picture/2469",
+   "read": "2026-10-25",
+   "route": "guide",
+   "width": 176
+  },
+  "AZ|sos|FONTES, ADRIAN": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 48258,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2451 with 'Adrian Fontes', 'Secretary of State', 'Democratic'",
@@ -497,7 +508,7 @@
    "route": "guide",
    "width": 666
   },
-  "AZ|sos|Alexander Kolodin": {
+  "AZ|sos|KOLODIN, ALEXANDER": {
    "by": "Arizona Citizens Clean Elections Commission",
    "bytes": 11411,
    "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2302 with 'Alexander Kolodin', 'Secretary of State', 'Republican'",
@@ -507,17 +518,6 @@
    "read": "2026-10-25",
    "route": "guide",
    "width": 233
-  },
-  "AZ|sos|Duwayne Collier": {
-   "by": "Arizona Citizens Clean Elections Commission",
-   "bytes": 5920,
-   "evidence": "Arizona Citizens Clean Elections Commission: the list pairs Picture/2469 with 'Duwayne Collier', 'Secretary of State', 'Green'",
-   "height": 220,
-   "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
-   "photo": "https://www.azcleanelections.gov/Custom/Picture/2469",
-   "read": "2026-10-25",
-   "route": "guide",
-   "width": 176
   },
   "CA|ag|Rob Bonta": {
    "article": "Rob Bonta",

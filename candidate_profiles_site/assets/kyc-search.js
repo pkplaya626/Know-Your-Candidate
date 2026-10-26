@@ -295,8 +295,11 @@
         : esc(list.source || list.by || "the election office’s list")) + " lists them: " +
       printed.map(function (c) {
         return esc(c.name) + (c.party ? " (" + esc(c.party) + ")" : "");
-      }).join(", ") + (writeIns ? "; and " + esc(plural(writeIns, "certified write-in candidate",
-        "certified write-in candidates")) : "") + ".";
+      // "Certified" only where the list's own words say so (rule 91):
+      // Arizona's listing marks its write-ins and certifies no one.
+      }).join(", ") + (writeIns ? "; and " + esc(plural(writeIns,
+        (list.certified ? "certified " : "") + "write-in candidate",
+        (list.certified ? "certified " : "") + "write-in candidates")) : "") + ".";
   }
 
   /** The holder's row for one state's office. A row is titled as an office
