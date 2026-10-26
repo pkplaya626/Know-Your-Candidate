@@ -1658,8 +1658,6 @@ a.badge-link {
   .link-chip:hover { background: var(--surface-1); border-color: var(--border-strong); }
 }
 .link-chip-icon { width: 0.85em; height: 0.85em; opacity: 0.7; }
-.contact-office { margin: 0 0 var(--s-2); }
-.contact-office a { color: inherit; }
 
 /* A member's offices at home, where casework is done (PERSONA-14). */
 .casework-note {
@@ -1668,19 +1666,40 @@ a.badge-link {
   line-height: 1.5;
   color: var(--text-muted);
 }
-.home-offices {
+/* Every office - Washington, a district's, a state's - one layout: its
+ * name, then the address, the phone and the hours, each beside its icon. */
+.offices {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  gap: var(--s-2) var(--s-3);
-  margin: 0;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-3);
   padding: 0;
   list-style: none;
   font-size: var(--t-sm);
   line-height: 1.45;
 }
-.home-office a { color: inherit; white-space: nowrap; }
-.home-office-address, .home-office-hours { display: block; color: var(--text-muted); }
-.home-office-hours { font-size: var(--t-xs); color: var(--text-faint); }
+.office { min-width: 0; }
+.office-name { margin: 0 0 2px; font-weight: 600; color: var(--text); }
+.office-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  margin: 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.office-line > .icon { flex: none; width: 1em; height: 1em; margin-top: 0.2em; color: var(--text-faint); }
+.office-line > span { min-width: 0; }
+.office-address-line { display: block; }
+.office-city { white-space: nowrap; }
+.office-phone a { color: var(--text); font-weight: 600; white-space: nowrap; }
+.office-hours { font-size: var(--t-xs); color: var(--text-faint); }
+.offices + .field-credit { margin: 0 0 var(--s-3); }
+
+/* A field the source lists entry by entry (rule 86): one entry a line. */
+.field-list { margin: 0 0 var(--s-1); padding-left: 1.1rem; }
+.field-list li + li { margin-top: 2px; }
+.field-list + .field-source { margin-left: 0; }
 
 /* A challenger's absences, said once (PROFILES-18). */
 .absent-summary { margin: var(--s-2) 0 0; font-size: var(--t-sm); line-height: 1.5; }
@@ -2917,6 +2936,10 @@ a.badge-link {
     align-items: center;
     min-height: 44px;
   }
+  /* An office's number to dial is a target of its own. */
+  .office-phone { align-items: center; }
+  .office-phone > .icon { margin-top: 0; }
+  .office-phone a { display: inline-flex; align-items: center; min-height: 44px; }
   /* "1" through "9" in a state's jump row were 39px wide. */
   .chip { min-width: 44px; justify-content: center; }
 
@@ -5412,10 +5435,28 @@ button.local-county-link {
 .last-table td { padding: var(--s-1) var(--s-3) var(--s-1) 0; text-align: left; font-weight: 400; }
 .last-table td { font-variant-numeric: tabular-nums; }
 
-.outside-panel { margin-top: var(--s-3); }
-.outside-sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-3); }
-.outside-list { margin: var(--s-1) 0 0; padding-left: 1rem; font-size: var(--t-xs); }
-.outside-note { font-size: var(--t-xs); margin: var(--s-2) 0 0; }
+/* Outside spending in the dialog: spaced like the funding box above it, a
+ * short line of totals, each side's committees with their amounts in a
+ * column, and the FEC's caveat at the foot in the faint note style. */
+.outside-panel { margin-top: var(--s-4); }
+.outside-head { display: block; }
+.outside-summary { margin: 0 0 var(--s-3); font-size: var(--t-sm); line-height: 1.5; color: var(--text-muted); }
+.outside-summary.outside-other { margin-top: var(--s-3); }
+.outside-sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--s-3) var(--s-4); }
+.outside-list { margin: 0; padding: 0; list-style: none; font-size: var(--t-xs); line-height: 1.45; }
+.outside-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--s-2);
+  padding: 3px 0;
+  border-top: 1px solid var(--border);
+}
+.outside-name { min-width: 0; overflow-wrap: anywhere; color: var(--text-muted); }
+.outside-amount { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--text); }
+.outside-side-head { border-top: 0; padding-top: 0; font-size: var(--t-sm); font-weight: 600; }
+.outside-side-head .outside-name { color: var(--text); }
+.outside-more { padding: 3px 0; border-top: 1px solid var(--border); color: var(--text-faint); }
+.outside-note { margin: var(--s-3) 0 0; font-size: var(--t-xs); line-height: 1.5; color: var(--text-faint); }
 @media (max-width: 560px) {
   .money-bar { grid-template-columns: 3rem minmax(0, 1fr) 3.75rem; }
 }

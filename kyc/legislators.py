@@ -410,6 +410,10 @@ def trim(entry, social=None, as_of=None):
         "url": term.get("url"),
         "phone": term.get("phone"),
         "office": term.get("office"),
+        # The office's whole address as the term records it ("2452 Rayburn
+        # House Office Building Washington DC 20515-3304"): the city and the
+        # ZIP code are the record's, never typed in.
+        "address": term.get("address"),
         "contactForm": term.get("contact_form"),
         # Reference ids, so the page can link the record elsewhere without
         # guessing a URL from a name.

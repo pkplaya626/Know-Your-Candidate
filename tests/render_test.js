@@ -1670,7 +1670,14 @@ async function testDirectoryAsync() {
     const fields = {
       platforms: "Agriculture; Health Care, Medicare and Medicaid; Veterans",
       education: "B.A., Pacific Lutheran University, Tacoma, WA, 1987",
-      previous_professions: "member, Snohomish County Council, 1998-2001",
+      // The Directory's own run, with a semicolon inside brackets that
+      // separates nothing.
+      previous_professions: "staffer, Chapel Hill Police department, 1987-2008; attorney " +
+        "(admitted to the California Bar, 1977; admitted to the Idaho Bar, 1979); member, " +
+        "Orange County Board of Commissioners, 2004-12 (chair, 2008-10)",
+      phone: "202-225-1784",
+      office: "2452 Rayburn House Office Building",
+      officeAddress: "2452 Rayburn House Office Building, Washington, DC 20515-3304",
       quality: {}, officialIssuesUrl: host.website + "/issues", platformRead: "2026-10-18",
       fieldSources: { platforms: "official-site", education: "congressional-directory",
         previous_professions: "congressional-directory" },
@@ -1700,22 +1707,94 @@ async function testDirectoryAsync() {
     check("education is credited to the Congressional Directory",
       /Congressional Directory/.test(education.textContent) &&
         /Government Publishing Office/.test((education.querySelector(".field-source") || {}).title || ""));
+    // The careers, entry by entry (the owner's request of 2026-10-26).
+    const careers = D.getElementById("profileModalCareers");
+    const jobs = [...careers.querySelectorAll(".field-list li")].map((li) => li.textContent);
+    check("careers are a list, one entry a line, split only where the source separates them",
+      jobs.length === 3 && jobs[0] === "Staffer, Chapel Hill Police department, 1987-2008" &&
+        jobs[1] === "Attorney (admitted to the California Bar, 1977; admitted to the Idaho Bar, 1979)" &&
+        jobs[2] === "Member, Orange County Board of Commissioners, 2004-12 (chair, 2008-10)",
+      jobs.join(" | "));
+    check("the careers' source is said once, after the list",
+      careers.querySelectorAll(".field-source").length === 1 &&
+        careers.lastElementChild.classList.contains("field-source") &&
+        /Congressional Directory/.test(careers.lastElementChild.textContent));
+    check("a field of one entry stays a plain line",
+      !education.querySelector("ul") && /^B\.A\., Pacific Lutheran/.test(education.textContent));
+    // The Directory's stray semicolons (G000598, R000305): a bare range or a
+    // bracketed role stays with the career before it, in the source's words.
+    const stray = KYC.fieldItems("member, Long Beach City Council, 2009-14; (vice mayor, 2012-14); " +
+      "member, North Carolina House of Representatives; 2003-13; staff, campaign; 2016; teacher");
+    check("a stray semicolon never makes a bare year or a bracket a career of its own",
+      stray.length === 4 &&
+        stray[0] === "member, Long Beach City Council, 2009-14; (vice mayor, 2012-14)" &&
+        stray[1] === "member, North Carolina House of Representatives; 2003-13" &&
+        stray[2] === "staff, campaign; 2016" && stray[3] === "teacher", stray.join(" | "));
+    // C001117: the Directory itself prints "education: 1989; B.A., ...", so a
+    // bare year that opens the field goes onto the entry after it, never a
+    // bullet of its own; and W000800's "A.B., ..., MA; 1969" stays together.
+    const leading = KYC.fieldItems("1989; B.A., molecular biology, Middlebury College, 1993; " +
+      "M.S., Dartmouth College, 1998");
+    check("a bare year opening a field is never an entry of its own",
+      leading.length === 2 &&
+        leading[0] === "1989; B.A., molecular biology, Middlebury College, 1993" &&
+        leading[1] === "M.S., Dartmouth College, 1998", leading.join(" | "));
+    const tail = KYC.fieldItems("A.B., College of the Holy Cross, Worcester, MA; 1969; J.D., Yale; (honors)");
+    check("a trailing year or bracket stays on its entry",
+      tail.length === 2 && tail[0] === "A.B., College of the Holy Cross, Worcester, MA; 1969" &&
+        tail[1] === "J.D., Yale; (honors)", tail.join(" | "));
+    check("a field of nothing but stray pieces keeps them whole",
+      KYC.fieldItems("1989; (2001)").join("|") === "1989; (2001)");
+    check("a year range in a listed career does not break at its hyphen",
+      [...careers.querySelectorAll(".field-list li .nowrap")].map((s) => s.textContent).join(",") ===
+        "1987-2008,2004-12,2008-10");
+
     const contact = D.getElementById("profileModalContact");
     check("a House member's offices at home are listed, with the casework line",
       /District offices/.test(contact.textContent) &&
         /For help with a federal agency/.test(contact.textContent) &&
         /Social Security, the VA, the IRS/.test(contact.textContent) &&
         contact.querySelectorAll(".home-office").length === 2);
+    const capitol = contact.querySelector(".washington-office");
+    check("the Washington office gives the record's whole address, Washington, DC and the ZIP code",
+      !!capitol && /Washington office/.test(capitol.querySelector(".office-name").textContent) &&
+        capitol.querySelector(".office-address").textContent.replace(/^Address: /, "") ===
+          "2452 Rayburn House Office Building Washington, DC 20515-3304" &&
+        capitol.querySelector(".office-address .office-city").textContent ===
+          "Washington, DC 20515-3304",
+      capitol && capitol.textContent);
+    check("its phone is a number to dial beside a phone icon, never the address's pin",
+      !!capitol && capitol.querySelector(".office-phone a").getAttribute("href") === "tel:2022251784" &&
+        !!capitol.querySelector('.office-phone use[href="#i-phone"]') &&
+        !!capitol.querySelector('.office-address use[href="#i-pin"]') &&
+        !capitol.querySelector('.office-phone use[href="#i-pin"]'));
+    const cards = [...contact.querySelectorAll(".offices > .office")];
+    check("every office, Washington's and those at home, has one layout: name, address, phone",
+      cards.length === 3 && cards.every((c) => c.firstElementChild.classList.contains("office-name") &&
+        !!c.querySelector(".office-address use[href='#i-pin']") &&
+        !!c.querySelector(".office-phone a[href^='tel:']")) &&
+        cards[1].querySelector(".office-name").textContent === "Everett" &&
+        cards[1].querySelector(".office-city").textContent === "Everett, WA 98201",
+      cards.map((c) => c.textContent).join(" | "));
+    check("the casework note comes before the offices at home",
+      !!contact.querySelector(".casework-note + .offices .home-office"));
     check("each office's phone can be dialled",
       [...contact.querySelectorAll(".home-office a")].map((a) => a.getAttribute("href")).join(" ") ===
         "tel:4252523188 tel:3607334500");
-    check("an office's hours are text, never markup",
-      !contact.querySelector(".home-office b") && /<b>M-F<\/b>/.test(contact.textContent));
-    check("the offices say where they come from and when",
-      /congress-legislators, as read on Oct\. 18, 2026/.test(contact.textContent));
-    const form = [...contact.querySelectorAll("a")].find((a) => /Contact form/.test(a.textContent));
-    check("a contact page from their own site says it was checked",
-      !!form && form.href === host.website + "/contact/email-me" && /checked on Oct\. 18, 2026/.test(form.title));
+    check("an office's hours are text, never markup, beside a clock",
+      !contact.querySelector(".home-office b") && /<b>M-F<\/b>/.test(contact.textContent) &&
+        !!contact.querySelector(".office-hours use[href='#i-clock']"));
+    const credits = contact.querySelectorAll(".field-credit");
+    check("the offices say where they come from and when, once, after every office",
+      credits.length === 1 && /congress-legislators: the Washington office from its record of this term, the district offices as read on Oct\. 18, 2026/
+        .test(credits[0].textContent) &&
+        [...contact.querySelectorAll(".office")].every((o) =>
+          o.compareDocumentPosition(credits[0]) & window.Node.DOCUMENT_POSITION_FOLLOWING),
+      credits.length && credits[0].textContent);
+    const form = [...contact.querySelectorAll("a")].find((a) => /Write to their office/.test(a.textContent));
+    check("a contact page from their own site is the way to write to the office, and says it was checked",
+      !!form && form.href === host.website + "/contact/email-me" && /checked on Oct\. 18, 2026/.test(form.title) &&
+        !!form.closest(".links-row") && form.closest(".links-row") === contact.firstElementChild);
     KYC.profile.close();
 
     // Read, and their site lists no issues: said as that, with the site.
@@ -4141,6 +4220,9 @@ async function testPeopleWording() {
     }));
     check("never 'No filing this cycle'; the other campaign's totals, its office and FEC id",
       wrong.length === 0, wrong.map((p) => p.name).join(", "));
+    // "through 2026-10-14" sat above the outside spending (2026-10-26).
+    check("the other campaign's totals are dated in words", running.every((p) => opened(p, () =>
+      !/\d{4}-\d\d-\d\d/.test(D.getElementById("profileModalOtherCampaign").textContent))));
     check("a missing filing is named for the seat held", missing.every((p) => opened(p, () =>
       /^No (House|Senate) filing$/.test(text("profileModalReceipts")))),
       missing.length ? opened(missing[0], () => text("profileModalReceipts")) : "");
@@ -13575,6 +13657,47 @@ async function testRaceMoney() {
         /Opposing \$/.test(panel.textContent) && /24- and 48-hour reports/.test(panel.textContent) &&
         !/\bnet\b(?! )/.test(panel.querySelector(".outside-sides").textContent),
       panel && panel.textContent.slice(0, 200));
+    if (!panel) return;
+    const summary = panel.querySelector(".outside-summary");
+    check("a short line of the totals, each side's groups and the cycle, and nothing else",
+      !!summary && /^Outside groups spent \$[\d.]+[KMB]? supporting \(\d+ groups?\) and \$[\d.]+[KMB]? opposing \(\d+ groups?\) in \d{4}–\d\d\.$/
+        .test(summary.textContent) && !summary.querySelector("a"), summary && summary.textContent);
+    check("the cycle does not break at its dash on a phone",
+      /^\d{4}–\d\d$/.test((summary.querySelector(".nowrap") || {}).textContent || ""));
+    const o = person.outsideSpending;
+    const rows = [...panel.querySelectorAll(".outside-side")].map((side) =>
+      [...side.querySelectorAll(".outside-row")].map((r) =>
+        [r.querySelector(".outside-name").textContent, r.querySelector(".outside-amount").textContent]));
+    check("each side's committees with their amounts in a column, their names as the FEC files them",
+      rows.length === 2 && rows[0][0][0] === "Supporting" && rows[1][0][0] === "Opposing" &&
+        rows[0].slice(1).map((r) => r[0]).join("|") === o.supportTop.map((c) => c.committee).join("|") &&
+        rows[0].slice(1).every((r, i) => r[1] === close.window.KYC.moneyShort(o.supportTop[i].total)),
+      JSON.stringify(rows).slice(0, 200));
+    const note = panel.lastElementChild;
+    check("the FEC's caveat, the day read and its page close the section, in the faint note style",
+      note.classList.contains("outside-note") && /24- and 48-hour reports/.test(note.textContent) &&
+        new RegExp("Read on " + close.window.KYC.dateWords(o.asOf).replace(/\./g, "\\.") + ": FEC\\.$")
+          .test(note.textContent) && /fec\.gov/.test(note.querySelector("a").href),
+      note.textContent.slice(-80));
+    const css = fs.readFileSync(path.join(SITE, "assets/kyc.css"), "utf8");
+    check("the section is spaced from the funding box, and its amounts are a right-aligned column",
+      /\.outside-panel\s*\{\s*margin-top:\s*var\(--s-4\)/.test(css) &&
+        /\.outside-row\s*\{[^}]*grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/.test(css) &&
+        /\.outside-amount\s*\{[^}]*text-align:\s*right/.test(css));
+    close.window.KYC.profile.close();
+    // A member's campaign for the other chamber: its own spending apart.
+    const barr = close.window.legislatorsData.find((p) => p.outsideSpendingOther && p.outsideSpending);
+    if (barr) {
+      K_open(close.window, barr.id);
+      const box = close.D.getElementById("profileModalOutside");
+      const other = box.querySelector(".outside-summary.outside-other");
+      check("the other candidacy's spending is a line of its own, never added in, and its page is linked",
+        !!other && /^Filed separately under their (House|Senate) candidacy, and not added in here: outside groups spent/
+          .test(other.textContent) && box.lastElementChild.querySelectorAll("a").length === 2 &&
+          /FEC, (House|Senate) candidacy/.test(box.lastElementChild.textContent),
+        box.textContent.slice(-200));
+      close.window.KYC.profile.close();
+    }
   });
 }
 

@@ -1979,6 +1979,8 @@ class TestElectionPageWords(unittest.TestCase):
         "===Independents===",
         "====Declared====",
         "* Alex Lowe, retired teacher ''(running as an independent)''",
+        "* Rio Phillips, cybersecurity technician ''(previously ran as a [[Democratic Party "
+        "(United  States)|Democrat]])''<ref>{{Cite web |title=Candidates|url=x}}</ref>",
         "* Chris Bowe",
         "== External links ==",
         "'''Official campaign websites for candidates'''",
@@ -1991,6 +1993,26 @@ class TestElectionPageWords(unittest.TestCase):
         self.assertEqual(results.candidate_descriptors(self.SECTION), {
             "Jane Doe": "molecular biologist and DSA member",
             "Alex Lowe": "retired teacher",
+            # A note whose link holds a bracket is dropped whole, link and all.
+            "Rio Phillips": "cybersecurity technician",
+        })
+
+    def test_a_citation_cut_off_at_the_line_end_is_not_a_career(self):
+        # MI-13 and TN-9: the <ref> runs on to the next line, so the bullet's
+        # own line holds a template that never closes; it showed on the page.
+        section = "\n".join([
+            "===Candidates===",
+            "====Declared====",
+            "* Ann Coe, state representative from the 11th district (2023–present)"
+            "<ref>{{cite news |last=Kamisar |first=Ben |title=Rep. loses",
+            "|url=x}}</ref>",
+            "* Bo Doe, state senator and candidate in 2002{{cite web|title=Run for office",
+            "* Cy Foe, farmer<ref name=a/> and {{nowrap|county commissioner}}",
+        ])
+        self.assertEqual(results.candidate_descriptors(section), {
+            "Ann Coe": "state representative from the 11th district (2023–present)",
+            "Bo Doe": "state senator and candidate in 2002",
+            "Cy Foe": "farmer and county commissioner",
         })
 
     def test_the_external_links_list_gives_each_candidates_site(self):
