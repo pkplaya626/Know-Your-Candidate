@@ -384,6 +384,239 @@ class TestAttorneysGeneral(unittest.TestCase):
         self.assertNotIn("notMember", page["sos"])
 
 
+class TestKeptConfirmations(unittest.TestCase):
+    """A confirmation is the office's word on the day its page was read. On
+    2026-10-20, -21 and -22 ncdoj.gov did not answer, and North Carolina's
+    page said "The sources disagree: Dan Bishop (R); Jeff Jackson (D)" - RAGA
+    still lists the man who lost the 2024 election - though the office had
+    named Jeff Jackson on every read before. An office's site that
+    concludes nothing (rule 8) keeps its last confirmation while nothing
+    read since contradicts it."""
+
+    RAGA = {"NC": {"name": "Dan Bishop"}, "NH": {"name": "John Formella"}}
+    DAGA = {"NC": {"name": "Jeff Jackson"}}
+    NC = {"listedBy": "Democratic Attorneys General Association", "name": "Jeff Jackson",
+          "office": "https://ncdoj.gov/", "party": "D", "partyKey": "D",
+          "title": "Attorney General", "photo": "https://ncdoj.gov/jackson.jpg",
+          "photoPage": "https://ncdoj.gov/about/"}
+    NH = {"listedBy": "Republican Attorneys General Association", "name": "John Formella",
+          "office": "https://www.doj.nh.gov/", "party": "R", "partyKey": "R",
+          "title": "Attorney General", "selection": "Appointed by the governor and Executive Council"}
+    DOWN = {"NC": ("https://ncdoj.gov/", None), "NH": ("https://www.doj.nh.gov/", None)}
+
+    def rows(self, texts, previous, day="2026-10-25", raga=None, daga=None, today="2026-10-26"):
+        return officers.attorneys_general(self.RAGA if raga is None else raga,
+                                          self.DAGA if daga is None else daga, texts,
+                                          previous, day, today)
+
+    def test_a_confirming_read_records_its_day_and_what_else_was_listed(self):
+        rows, _ = self.rows({"NC": ("https://ncdoj.gov/", "Attorney General Jeff Jackson")}, None)
+        self.assertEqual(rows["NC"]["confirmedOn"], "2026-10-26")
+        self.assertEqual(rows["NC"]["alsoListed"], ["Dan Bishop (R)"])
+        self.assertNotIn("confirmationKept", rows["NC"])
+        rows, _ = self.rows({"NH": ("https://www.doj.nh.gov/", "Attorney General John Formella")}, None)
+        self.assertEqual(rows["NH"]["alsoListed"], [])
+
+    def test_north_carolina_is_kept_not_disputed(self):
+        previous = {"NC": dict(self.NC, confirmedOn="2026-10-19", alsoListed=["Dan Bishop (R)"])}
+        rows, problems = self.rows(self.DOWN, previous)
+        nc = rows["NC"]
+        self.assertNotIn("disputed", nc)
+        self.assertEqual((nc["name"], nc["party"]), ("Jeff Jackson", "D"))
+        self.assertEqual(nc["confirmedOn"], "2026-10-19")
+        self.assertTrue(nc["confirmationKept"])
+        self.assertTrue(any(p.startswith("NC: the office's site could not be read; its "
+                                         "confirmation of Jeff Jackson on 2026-10-19 is kept")
+                            for p in problems), problems)
+
+    def test_a_two_listing_row_from_before_this_is_still_a_dispute(self):
+        # No alsoListed: nobody recorded whether that read saw Dan Bishop.
+        rows, _ = self.rows(self.DOWN, {"NC": dict(self.NC)})
+        self.assertEqual(rows["NC"]["disputed"], ["Dan Bishop (R)", "Jeff Jackson (D)"])
+
+    def test_a_one_listing_row_from_before_this_is_kept_on_the_caches_day(self):
+        rows, problems = self.rows(self.DOWN, {"NH": dict(self.NH)}, day="2026-10-25")
+        nh = rows["NH"]
+        self.assertEqual(nh["name"], "John Formella")
+        self.assertNotIn("unconfirmed", nh)
+        self.assertEqual(nh["confirmedOn"], "2026-10-25")
+        self.assertTrue(any("confirmation of John Formella on 2026-10-25 is kept" in p
+                            for p in problems))
+        # Without the cache's day it cannot be dated, and is not kept.
+        rows, _ = self.rows(self.DOWN, {"NH": dict(self.NH)}, day=None)
+        self.assertTrue(rows["NH"]["unconfirmed"] and rows["NH"]["unreadable"])
+
+    def test_the_day_is_never_restamped(self):
+        first, _ = self.rows(self.DOWN, {"NH": dict(self.NH)}, day="2026-10-25")
+        second, _ = self.rows(self.DOWN, first, day="2026-10-26", today="2026-10-27")
+        third, _ = self.rows(self.DOWN, second, day="2026-10-27", today="2026-10-28")
+        self.assertEqual(third["NH"]["confirmedOn"], "2026-10-25")
+        self.assertTrue(third["NH"]["confirmationKept"])
+        # A read that answers confirms afresh, on its own day.
+        fresh, _ = self.rows({"NH": ("https://www.doj.nh.gov/", "Attorney General John Formella")},
+                             third, today="2026-10-29")
+        self.assertEqual(fresh["NH"]["confirmedOn"], "2026-10-29")
+        self.assertNotIn("confirmationKept", fresh["NH"])
+
+    def test_anything_read_since_that_contradicts_it_is_not_kept(self):
+        nc = {"NC": dict(self.NC, confirmedOn="2026-10-19", alsoListed=["Dan Bishop (R)"])}
+        nh = {"NH": dict(self.NH, confirmedOn="2026-10-19", alsoListed=[])}
+        # A new name at the association.
+        rows, _ = self.rows(self.DOWN, nh, raga={"NH": {"name": "Jane Roe"}})
+        self.assertTrue(rows["NH"]["unconfirmed"])
+        self.assertEqual(rows["NH"]["name"], "Jane Roe")
+        # The same name listed by the other association: another party.
+        rows, _ = self.rows(self.DOWN, nh, raga={}, daga={"NH": {"name": "John Formella"}})
+        self.assertTrue(rows["NH"]["unconfirmed"])
+        self.assertEqual(rows["NH"]["party"], "D")
+        # A listing the confirming read did not see.
+        rows, _ = self.rows(self.DOWN, nh, daga={"NH": {"name": "Pat Doe"}})
+        self.assertEqual(rows["NH"]["disputed"], ["John Formella (R)", "Pat Doe (D)"])
+        rows, _ = self.rows(self.DOWN, nc, raga={"NC": {"name": "Someone New"}})
+        self.assertIn("disputed", rows["NC"])
+        # The same holder, through an evidenced spelling, is the same holder.
+        ny = {"NY": {"listedBy": "Democratic Attorneys General Association",
+                     "name": "Letitia James", "party": "D", "partyKey": "D",
+                     "title": "Attorney General", "confirmedOn": "2026-10-19", "alsoListed": []}}
+        rows, _ = self.rows({"NY": ("https://ag.ny.gov/", None)}, ny, raga={},
+                            daga={"NY": {"name": "Tish James"}})
+        self.assertEqual(rows["NY"]["name"], "Letitia James")
+        self.assertTrue(rows["NY"]["confirmationKept"])
+
+    def test_an_office_page_that_was_read_and_does_not_name_them_keeps_nothing(self):
+        nc = {"NC": dict(self.NC, confirmedOn="2026-10-19", alsoListed=["Dan Bishop (R)"])}
+        rows, _ = self.rows({"NC": ("https://ncdoj.gov/", "Welcome to the Department. " * 20)}, nc)
+        self.assertIn("disputed", rows["NC"])
+        nh = {"NH": dict(self.NH, confirmedOn="2026-10-19", alsoListed=[])}
+        rows, _ = self.rows({"NH": ("https://www.doj.nh.gov/", "Attorney General Someone Else")}, nh)
+        self.assertTrue(rows["NH"]["unconfirmed"])
+        self.assertNotIn("unreadable", rows["NH"])
+
+    def test_the_photograph_is_kept_as_the_last_read_had_it(self):
+        previous = {"NC": dict(self.NC, confirmedOn="2026-10-19", alsoListed=["Dan Bishop (R)"],
+                               photoWeight={"bytes": 1, "width": 200, "height": 250})}
+        rows, _ = self.rows(self.DOWN, previous)
+
+        def get(url, timeout=60):
+            raise AssertionError("a kept row's photograph is not read again")
+
+        def check(url, hinted):
+            raise AssertionError("a kept row's photograph is not weighed again")
+        problems = officers.add_ag_photos(rows, {}, previous, check=check, pause=0, get=get)
+        for field in ("photo", "photoPage", "photoWeight"):
+            self.assertEqual(rows["NC"][field], previous["NC"][field])
+        self.assertFalse([p for p in problems if p.startswith("NC:")], problems)
+
+    def test_the_page_shows_a_kept_or_dated_row_as_it_showed_a_confirmed_one(self):
+        before = officers.for_state("NC", {"lt": {}, "sos": {}, "ag": {"NC": dict(self.NC)}}, [])
+        for extra in ({"confirmedOn": "2026-10-19", "alsoListed": ["Dan Bishop (R)"]},
+                      {"confirmedOn": "2026-10-19", "alsoListed": ["Dan Bishop (R)"],
+                       "confirmationKept": True}):
+            after = officers.for_state("NC", {"lt": {}, "sos": {}, "ag": {"NC": dict(self.NC, **extra)}},
+                                       [])
+            self.assertEqual(after, before)
+        self.assertNotIn("confirmedOn", before["ag"])
+
+    SOS = {"name": "Cord Byrd", "party": "R", "partyKey": "R", "title": "Secretary of State",
+           "member": False, "website": "https://dos.fl.gov/"}
+
+    def non_member(self, text, previous, day="2026-10-25"):
+        from unittest import mock
+        problems = []
+        with mock.patch.object(officers, "_office_text", lambda url, pause: text):
+            sos = officers.confirm_non_members({"FL": dict(self.SOS)}, pause=0, previous=previous,
+                                               previous_day=day, today="2026-10-26",
+                                               problems=problems)
+        return sos["FL"], problems
+
+    def test_a_secretary_of_states_confirmation_is_kept_the_same_way(self):
+        fl, _ = self.non_member("Secretary of State Cord Byrd", None)
+        self.assertEqual((fl["officeConfirms"], fl["confirmedOn"]), (True, "2026-10-26"))
+        # A site that concludes nothing keeps it, on the cache's day for a
+        # row written before confirmedOn, and never restamps it.
+        old = {"FL": dict(self.SOS, officeConfirms=True)}
+        fl, problems = self.non_member(None, old)
+        self.assertTrue(fl["officeConfirms"] and fl["confirmationKept"])
+        self.assertEqual(fl["confirmedOn"], "2026-10-25")
+        self.assertNotIn("officeRead", fl)
+        self.assertIn("its confirmation of Cord Byrd on 2026-10-25 is kept", problems[0])
+        again, _ = self.non_member(None, {"FL": fl}, day="2026-10-26")
+        self.assertEqual(again["confirmedOn"], "2026-10-25")
+        page = officers.for_state("FL", {"sos": {"FL": again}, "lt": {}}, [])["sos"]
+        self.assertNotIn("notMember", page)
+        self.assertNotIn("officeRead", page)
+        # A site read that does not name them is a finding: nothing is kept.
+        fl, problems = self.non_member("Welcome to the Department of State. " * 20, old)
+        self.assertEqual(fl["officeRead"], "not-named")
+        self.assertNotIn("officeConfirms", fl)
+        self.assertEqual(problems, [])
+        # Nor is another person's confirmation.
+        fl, _ = self.non_member(None, {"FL": dict(self.SOS, name="Laurel Lee", officeConfirms=True)})
+        self.assertEqual(fl["officeRead"], "unreadable")
+
+    def test_an_old_kept_confirmation_is_a_warning(self):
+        import datetime
+        from unittest import mock
+        from kyc import validate
+        cache = {"ag": {"NC": dict(self.NC, confirmedOn="2026-10-19", confirmationKept=True)},
+                 "sos": {"FL": dict(self.SOS, officeConfirms=True, confirmationKept=True,
+                                    confirmedOn="2026-10-19")}, "lt": {}}
+        day = datetime.date(2026, 10, 19)
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", {}, clear=True):
+            self.assertEqual(validate.check_officers_kept(
+                cache, day + datetime.timedelta(days=officers.KEPT_STALE_DAYS)), [])
+            issues = validate.check_officers_kept(
+                cache, day + datetime.timedelta(days=officers.KEPT_STALE_DAYS + 1))
+        self.assertEqual([i.code for i in issues], ["officer-confirmation-kept"])
+        details = " ".join(issues[0].detail)
+        for words in ("NC attorney general: Jeff Jackson", "FL secretary of state: Cord Byrd",
+                      "2026-10-19", "15 days ago", "OFFICERS_READ_BY_HAND"):
+            self.assertIn(words, details)
+        # A confirmation read afresh is not kept, and is no warning.
+        cache["ag"]["NC"].pop("confirmationKept")
+        cache["sos"]["FL"].pop("confirmationKept")
+        self.assertEqual(validate.check_officers_kept(cache, day + datetime.timedelta(days=99)), [])
+
+    def test_a_kept_row_does_not_say_a_reading_by_hand_may_go(self):
+        from unittest import mock
+        entries = {("NC", "ag"): ("Jeff Jackson", "https://ncdoj.gov/", "2026-10-26",
+                                  ("Attorney General Jeff Jackson",)),
+                   ("FL", "sos"): ("Cord Byrd", "https://dos.fl.gov/", "2026-10-26",
+                                   ("Secretary of State Cord Byrd",))}
+        kept = {"ag": {"NC": dict(self.NC, confirmedOn="2026-10-19", confirmationKept=True)},
+                "sos": {"FL": dict(self.SOS, officeConfirms=True, confirmationKept=True,
+                                   confirmedOn="2026-10-19")}, "lt": {}}
+        read = {"ag": {"NC": dict(self.NC, confirmedOn="2026-10-26")},
+                "sos": {"FL": dict(self.SOS, officeConfirms=True, confirmedOn="2026-10-26")},
+                "lt": {}}
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", entries, clear=True):
+            self.assertEqual(officers.by_hand_unused(kept), [])
+            self.assertEqual(len(officers.by_hand_unused(read)), 2)
+            # The reading by hand is what the page then names, and the
+            # kept confirmation, read by hand since, is no warning.
+            ag = officers.for_state("NC", kept, [])["ag"]
+            sos = officers.for_state("FL", kept, [])["sos"]
+            self.assertEqual(officers.kept_stale(kept, __import__("datetime").date(2027, 1, 1)), [])
+        self.assertEqual(ag["readByHand"]["read"], "2026-10-26")
+        self.assertEqual(sos["readByHand"]["read"], "2026-10-26")
+
+    def test_a_reading_by_hand_before_the_kept_confirmation_does_not_silence_it(self):
+        # Read by hand on 10-26; the site confirmed again on 11-01 and has
+        # not answered since. The reading is older than the confirmation
+        # kept, so it does not stand for a read since: the warning comes.
+        import datetime
+        from unittest import mock
+        entries = {("NC", "ag"): ("Jeff Jackson", "https://ncdoj.gov/", "2026-10-26",
+                                  ("Attorney General Jeff Jackson",))}
+        kept = {"ag": {"NC": dict(self.NC, confirmedOn="2026-11-01", confirmationKept=True)},
+                "sos": {}, "lt": {}}
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", entries, clear=True):
+            self.assertEqual(officers.kept_stale(kept, datetime.date(2026, 11, 15)), [])
+            stale = officers.kept_stale(kept, datetime.date(2026, 11, 16))
+        self.assertEqual(len(stale), 1)
+        self.assertIn("2026-11-01 (15 days ago)", stale[0])
+
+
 class TestAttorneyGeneralPhotos(unittest.TestCase):
     """STATEGOV-13: no attorney general had a photograph. Each is read from
     the office's own pages, the ones that confirmed the name, and only an
