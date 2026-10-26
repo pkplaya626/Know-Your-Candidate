@@ -453,6 +453,67 @@ def stale_overrides(cache):
                   if (states.get(code) or {}).get(kind) != fix[0])
 
 
+# Links opened by hand in a person's browser where the weekly check could not
+# open them (overrides.VOTING_LINKS_BY_HAND). The page counts such a link as
+# opened, or says its portal asks visitors to show they are people, for this
+# many days from the day on the reader's calendar, and then no longer: a
+# later failure is seen again (rule 84's way: the pipeline writes the day,
+# the page decides on the reader's own day).
+BY_HAND_DAYS = 30
+OPENED_BY_HAND = "opened"
+HUMAN_CHECK = "human-check"
+
+
+def by_hand(cache):
+    """``{code: {kind: [day, what]}}``: each link shown that a person opened
+    by hand (``OPENED_BY_HAND``) or found behind a check for people
+    (``HUMAN_CHECK``). An entry counts only while its address is the one
+    shown and the weekly check has found that link neither live nor dead:
+    a live link needs nothing, and a dead one is not shown."""
+    from . import overrides
+
+    status = (cache or {}).get("links") or {}
+    shown = effective(cache)
+    out = {}
+    for (code, kind), (url, day, what, *_seen) in sorted(overrides.VOTING_LINKS_BY_HAND.items()):
+        link = (shown.get(code) or {}).get(kind)
+        if link and link["url"] == url and status.get(url) not in (LIVE, DEAD):
+            out.setdefault(code, {})[kind] = [day, what]
+    return out
+
+
+def by_hand_problems(cache, today=None):
+    """Every entry the page no longer counts, for a person: the link shown
+    is another, the weekly check now opens it (or found it dead), or it was
+    read more than ``BY_HAND_DAYS`` ago. And an entry that is not a day, or
+    says neither opened nor a check for people, which counts for nothing."""
+    from . import overrides
+
+    today = today or datetime.date.today()
+    status = (cache or {}).get("links") or {}
+    shown = effective(cache)
+    out = []
+    for (code, kind), (url, day, what, *_seen) in sorted(overrides.VOTING_LINKS_BY_HAND.items()):
+        link = (shown.get(code) or {}).get(kind)
+        where = f"{code} {kind}"
+        if what not in (OPENED_BY_HAND, HUMAN_CHECK):
+            out.append(f"{where}: '{what}' is neither {OPENED_BY_HAND!r} nor {HUMAN_CHECK!r}")
+        if not link or link["url"] != url:
+            out.append(f"{where}: the page now shows {link['url'] if link else 'no link'}, not "
+                       f"{url}; the entry may go")
+        elif status.get(url) in (LIVE, DEAD):
+            out.append(f"{where}: the weekly check found {url} {status[url]}; the entry may go")
+        try:
+            age = (today - datetime.date.fromisoformat(day)).days
+        except (TypeError, ValueError):
+            out.append(f"{where}: the day {day!r} is not YYYY-MM-DD")
+            continue
+        if age > BY_HAND_DAYS:
+            out.append(f"{where}: opened by hand {age} days ago ({day}); the page no longer "
+                       f"counts it - open {url} again")
+    return out
+
+
 def dead_links(cache):
     """Links shown that were found dead, for a person to replace."""
     status = (cache or {}).get("links") or {}
@@ -496,6 +557,13 @@ def for_page(cache, dates=None):
     out["_labels"] = labels
     out["_nass"] = nass
     out["_unreached"] = unreached
+    # Links a person opened by hand, or found behind a check for people,
+    # with the day: the page counts them for BY_HAND_DAYS from that day.
+    out["_byHand"] = {code: {kind: entry for kind, entry in kinds.items()
+                             if kind in unreached.get(code, ())}
+                      for code, kinds in by_hand(cache).items()
+                      if any(kind in unreached.get(code, ()) for kind in kinds)}
+    out["_byHandDays"] = BY_HAND_DAYS
     out["_dates"] = voting_dates.for_page(dates)
     out["_territories"] = {code: {"url": url, "name": name}
                            for code, (url, name) in TERRITORY_SOURCES.items()}

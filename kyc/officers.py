@@ -1006,6 +1006,8 @@ def ag_problems(rows):
     at (the build re-reports these; the fetch reports more)."""
     out = []
     for code, row in sorted(rows.items()):
+        if row.get("unconfirmed") and row.get("unreadable") and hand_confirms(code, "ag", row["name"]):
+            continue                             # the office's page, read by hand
         if row.get("unconfirmed"):
             out.append(f"{code}: {row['name']} is shown as {row['listedBy']}'s listing; the "
                        f"office's own page did not confirm it")
@@ -1042,14 +1044,129 @@ def fetch_attorneys_general(pause=0.5, previous=None):
 def confirm_non_members(sos, pause=0.5):
     """A secretary of state NASS lists for a state that is not a member is
     not NASS speaking for its member; the office's own site, which NASS
-    links, can still confirm it. Marks ``officeConfirms`` on each it does."""
+    links, can still confirm it. Marks ``officeConfirms`` on each it does,
+    and ``officeRead`` on each it does not: ``"unreadable"`` where the site
+    refused or drew nothing (rule 8), ``"not-named"`` where it was read and
+    does not name them, so the page can say why."""
     for code, entry in sorted(sos.items()):
         if entry.get("member") is False and office_of(entry["title"]) == "Secretary of State":
             text = _office_text(entry["website"], pause) if entry.get("website") else None
             if text and names_holder(entry["name"], text, "sos", code):
                 entry["officeConfirms"] = True
+            elif entry.get("website"):
+                entry["officeRead"] = "not-named" if text else "unreadable"
             time.sleep(pause)
     return sos
+
+
+# --------------------------------------------- officers confirmed by hand
+#
+# Where the office's own site refuses a script, or the association's roster
+# does not speak for the office, a person reads the office's page in their
+# own browser (overrides.OFFICERS_READ_BY_HAND, rule 57's way). An entry
+# confirms only the holder the roster names, and only where its quoted words
+# pass the same test as a read page's (names_holder). Past this many days
+# since the reading, the build says the page must be read again, as a court
+# roster read by hand does (courts.STALE_DAYS).
+BY_HAND_STALE_DAYS = 45
+BY_HAND_OFFICES = ("ag", "sos")
+
+
+def by_hand():
+    """``{(code, office): {"holder", "page", "read", "words"}}``."""
+    from .overrides import OFFICERS_READ_BY_HAND
+    return {key: dict(zip(("holder", "page", "read", "words"), entry))
+            for key, entry in OFFICERS_READ_BY_HAND.items()}
+
+
+def hand_confirms(code, office, name):
+    """``(name as shown, entry)`` where a reading by hand confirms *name*
+    as the holder of *office* in *code*, else ``None``. Never anyone but the
+    entry's own holder: a roster that names someone else is confirmed by
+    nothing here (rule 3), and the entry is reported (``by_hand_unused``)."""
+    entry = by_hand().get((code, office))
+    if not entry or not name:
+        return None
+    form = " ".join(NAME_FORMS.get(name, name).split())
+    if entry["holder"] not in (name, form):
+        return None
+    if not any(names_holder(form, piece, office, code) for piece in entry["words"]):
+        return None
+    return form, entry
+
+
+def by_hand_errors():
+    """Every entry that could not confirm anyone as it stands: an office
+    this does not cover, no page or no day, no words quoted, or words that
+    do not name the holder beside the title (rule 56). An error that stops
+    the build (``stategov.build``), as a court roster read by hand that
+    does not fit its court does."""
+    out = []
+    for (code, office), entry in sorted(by_hand().items()):
+        where = f"{code} {office}"
+        if office not in BY_HAND_OFFICES:
+            out.append(f"{where}: an office the readings by hand do not cover")
+            continue
+        if not str(entry["page"]).startswith("https://"):
+            out.append(f"{where}: a reading by hand needs the office's own page")
+        try:
+            datetime.date.fromisoformat(entry["read"])
+        except (TypeError, ValueError):
+            out.append(f"{where}: a reading by hand needs the day it was read, as YYYY-MM-DD")
+        words = entry["words"]
+        if isinstance(words, str) or not words:
+            out.append(f"{where}: a reading by hand needs the page's words, quoted piece by piece")
+        elif not any(names_holder(" ".join(NAME_FORMS.get(entry["holder"], entry["holder"]).split()),
+                                  piece, office, code) for piece in words):
+            out.append(f"{where}: the words quoted do not name {entry['holder']} beside the title")
+    return out
+
+
+def by_hand_stale(today=None):
+    """Every reading by hand more than ``BY_HAND_STALE_DAYS`` old: a warning
+    for a person to read the office's page again."""
+    today = today or datetime.date.today()
+    out = []
+    for (code, office), entry in sorted(by_hand().items()):
+        try:
+            age = (today - datetime.date.fromisoformat(entry["read"])).days
+        except (TypeError, ValueError):
+            continue                             # by_hand_errors says so
+        if age > BY_HAND_STALE_DAYS:
+            out.append(f"{code} {office}: {entry['holder']} was confirmed by hand {age} days ago "
+                       f"({entry['read']}); read {entry['page']} again and update "
+                       "overrides.OFFICERS_READ_BY_HAND")
+    return out
+
+
+def by_hand_unused(cache):
+    """Every reading by hand that confirms nobody on the page: the roster now
+    names someone else (the entry is stale, and confirms nobody), names
+    nobody, or the office's own site now confirms the holder itself (the
+    entry may go). For validate (``officers-by-hand``)."""
+    out = []
+    for (code, office), entry in sorted(by_hand().items()):
+        row = ((cache or {}).get(office) or {}).get(code) or {}
+        name = row.get("name")
+        where = f"{code} {office}"
+        if not name:
+            out.append(f"{where}: the roster names nobody; the entry for {entry['holder']} "
+                       "confirms nobody")
+        elif entry["holder"] not in (name, " ".join(NAME_FORMS.get(name, name).split())):
+            out.append(f"{where}: the roster now names {name}; the entry for {entry['holder']} "
+                       "confirms nobody and should go")
+        elif office == "ag" and not (row.get("unconfirmed") and row.get("unreadable")):
+            out.append(f"{where}: the office's own site now answers for {name}; the entry may go")
+        elif office == "sos" and (row.get("member") is not False or row.get("officeConfirms")):
+            out.append(f"{where}: NASS or the office's own site now answers for {name}; the "
+                       "entry may go")
+    return out
+
+
+def _by_hand_record(entry):
+    """What the page says of a reading by hand: the office's page and the
+    day (rule 57: "read by hand on")."""
+    return {"url": entry["page"], "read": entry["read"]}
 
 
 def fetch(previous=None):
@@ -1131,6 +1248,18 @@ def for_state(code, cache, disputes):
             host = urllib.parse.urlsplit(out["ag"].get("photoPage") or "").hostname or ""
             out["ag"]["photoBy"] = ("the office's website (" + host.removeprefix("www.") + ")"
                                     if host else "the office's website")
+        hand = (out["ag"].get("unconfirmed") and out["ag"].get("unreadable")
+                and hand_confirms(code, "ag", out["ag"].get("name")))
+        if hand:
+            # The office's site refuses a script; its page, read by hand,
+            # names them beside the title (overrides.OFFICERS_READ_BY_HAND).
+            name, entry = hand
+            for field in ("unconfirmed", "unreadable"):
+                out["ag"].pop(field)
+            out["ag"]["name"] = name
+            out["ag"]["title"] = ("Acting Attorney General" if any(acting(name, w) for w in entry["words"])
+                                  else "Attorney General")
+            out["ag"]["readByHand"] = _by_hand_record(entry)
     sos = cache["sos"].get(code)
     if (code, "Secretary of State") in named:
         out["sos"] = {"disputed": list(named[(code, "Secretary of State")])}
@@ -1141,7 +1270,17 @@ def for_state(code, cache, disputes):
         if person.get("photo") and not _surname_in(sos["name"], person["photo"]):
             del person["photo"]
         if sos.get("member") is False and not sos.get("officeConfirms"):
-            person["notMember"] = True
+            hand = hand_confirms(code, "sos", sos["name"])
+            if hand:
+                # NASS does not speak for a non-member; the office's own
+                # page, read by hand, names them (OFFICERS_READ_BY_HAND).
+                person["name"] = hand[0]
+                person["readByHand"] = _by_hand_record(hand[1])
+            else:
+                person["notMember"] = True
+                if sos.get("officeRead"):
+                    # Why the office's own site did not confirm them.
+                    person["officeRead"] = sos["officeRead"]
         out["sos"] = _credited(person, NASS_BY)
     return out
 

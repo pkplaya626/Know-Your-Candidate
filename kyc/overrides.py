@@ -497,6 +497,81 @@ VOTING_LINKS = {
         "Now' (read 2026-10-19)"),
 }
 
+# Voting links the weekly check could not open (a bot wall, a reset: rule 8
+# concludes nothing), opened by hand in a person's Chrome. Keyed (state,
+# kind) as VOTING_LINKS; each is (the address shown, the day, what was seen,
+# the address it ended on or "" and the page's title, or why it was not
+# opened). What was seen is
+#
+# - "opened": the state's own page opened; the page counts the link as
+#   opened, on this day, as it counts the weekly check's;
+# - "human-check": the state's portal asked the person to prove they are
+#   human, which is never passed (nothing is got past a check), so the page
+#   says the portal asks visitors to show they are people. A link on the
+#   same host as one that asked is recorded as that host's, not opened.
+#
+# An entry counts only while that link is the one shown and the weekly check
+# has not found it live or dead, and only for voting.BY_HAND_DAYS from its
+# day on the reader's calendar, so a later failure is seen again
+# (validate: voting-by-hand-stale). Read on 2026-10-26 (research/by-hand-
+# 2026-10-26/NOTES.md). Links the browser extension did not allow (New
+# York's, Georgia's, Michigan's, Ohio's registration and lookup, New
+# Hampshire's registration page, Kentucky's registration and polling,
+# Alaska's voter portal) were not opened and keep the weekly check's words.
+_BY_HAND_DAY = "2026-10-26"
+VOTING_LINKS_BY_HAND = {
+    ("MT", "absentee"): ("http://sos.mt.gov/elections/absentee", _BY_HAND_DAY, "opened",
+                         "https://sosmt.gov/elections/absentee",
+                         "Voting by Absentee Ballot - Official Montana Secretary of State "
+                         "Website - Christi Jacobsen"),
+    ("ME", "absentee"): ("http://www.maine.gov/sos/cec/elec/voter-info/absent.html", _BY_HAND_DAY,
+                         "opened", "https://www.maine.gov/sos/elections-voting/absentee-voting",
+                         "Absentee Voting | SOS"),
+    ("WI", "absentee"): ("https://elections.wi.gov/node/1103", _BY_HAND_DAY, "opened",
+                         "https://elections.wi.gov/i-want-vote-absentee",
+                         "I want to vote absentee | Wisconsin Elections Commission"),
+    ("AZ", "polling"): ("https://my.arizona.vote/WhereToVote.aspx?s=address", _BY_HAND_DAY,
+                        "opened", "", "Search by address"),
+    ("AZ", "status"): ("https://my.arizona.vote/WhereToVote.aspx?s=individual", _BY_HAND_DAY,
+                       "opened", "", "Voter Registration Search"),
+    ("AZ", "absentee"): ("https://my.arizona.vote/Early/ApplicationLogin.aspx", _BY_HAND_DAY,
+                         "opened", "", "Ballot-by-Mail Login"),
+    ("OH", "polling"): ("https://www.ohiosos.gov/directories/find-my-polling-location",
+                        _BY_HAND_DAY, "opened", "", "Find My Polling Location"),
+    ("IA", "register"): ("https://sos.iowa.gov/voters/voter-registration", _BY_HAND_DAY, "opened",
+                         "", "Voter Registration | Iowa Secretary of State - Paul D. Pate"),
+    ("IA", "polling"): ("https://sos.iowa.gov/elections/voterreg/pollingplace/search.aspx",
+                        _BY_HAND_DAY, "opened",
+                        "https://apps.sos.iowa.gov/elections/voterreg/pollingplace/search.aspx",
+                        "Find Your Polling Place"),
+    ("IA", "status"): ("https://sos.iowa.gov/elections/voterreg/regtovote/search.aspx",
+                       _BY_HAND_DAY, "opened",
+                       "https://apps.sos.iowa.gov/elections/voterreg/regtovote/search.aspx",
+                       "Am I Registered to Vote | Iowa Secretary of State - Paul D. Pate"),
+    ("NH", "absentee"): ("https://sos.nh.gov/elections/voters/absentee-ballots/", _BY_HAND_DAY,
+                         "opened", "https://www.sos.nh.gov/elections/absentee-ballots",
+                         "Absentee Ballots | New Hampshire Secretary of State"),
+    ("RI", "polling"): ("https://vote.sos.ri.gov/Home/PollingPlaces?ActiveFlag=2", _BY_HAND_DAY,
+                        "opened", "", "Welcome to your Voter Information Center"),
+    ("RI", "register"): ("https://vote.sos.ri.gov/Home/RegistertoVote?ActiveFlag=1", _BY_HAND_DAY,
+                         "opened", "", "Welcome to your Voter Information Center"),
+    ("RI", "status"): ("https://vote.sos.ri.gov/Home/UpdateVoterRecord?ActiveFlag=0", _BY_HAND_DAY,
+                       "opened", "", "Welcome to your Voter Information Center"),
+    ("RI", "absentee"): ("https://vote.sos.ri.gov/Voter/VotebyMail?ActiveFlag=4", _BY_HAND_DAY,
+                         "opened", "", "Welcome to your Voter Information Center"),
+    ("KY", "status"): ("https://vrsws.sos.ky.gov/VIC/", _BY_HAND_DAY, "opened", "",
+                       "Voter Information Center"),
+    ("AK", "absentee"): ("http://www.elections.alaska.gov/Core/AKVoteEarly.php", _BY_HAND_DAY,
+                         "human-check", "", "Human Verification"),
+    ("AK", "register"): ("https://www.elections.alaska.gov/voter-information/#Reg", _BY_HAND_DAY,
+                         "human-check", "",
+                         "not opened: the same host as AKVoteEarly.php, which asked"),
+    ("NH", "polling"): ("https://app.sos.nh.gov/viphome", _BY_HAND_DAY, "human-check",
+                        "https://app.sos.nh.gov/captcha/challenge", "Verification"),
+    ("NH", "status"): ("https://app.sos.nh.gov/voterinformation", _BY_HAND_DAY, "human-check", "",
+                       "not opened: the same host as viphome, which asked"),
+}
+
 # Links on a state's government block that the rosters give wrongly, each
 # opened on 2026-10-17 (audit 2026-10-17, LINKS-08, LINKS-09):
 # {(state, office, field): (what the roster lists, or None for nothing;
@@ -1753,6 +1828,58 @@ COURT_ROSTERS = {
            "Anthony Cannataro', 'Hon. Caitlin J. Halligan'; the same page: 'On September 24, "
            "2026, Chief Judge Rowan D. Wilson conducted a statewide public hearing'. "
            "Cloudflare answers a headless Chrome 'Just a moment...'."),
+}
+
+# Statewide officers the office's own page names, read by hand in a person's
+# browser (rule 57's way), where kyc/officers.py's own read concludes
+# nothing - the office's site refuses a script (rule 8) - or the
+# association's roster does not speak for the office (NASS's "Currently Not a
+# NASS Member", rule 55). Keyed (state, office), office "ag" or "sos"; each is
+# (the holder the roster names, the office's own page, the day read, the
+# page's words, each piece quoted as it stands: its title, then its text).
+#
+# An entry confirms only the very person the roster names, and only where
+# officers.names_holder accepts one of its pieces - the full name beside the
+# title, or the title before the surname (rule 56; NAME_FORMS for a short
+# form). Once the roster names someone else it confirms nobody and validate
+# says so (officers-by-hand); past officers.BY_HAND_STALE_DAYS the build
+# warns that the page must be read again. Read on 2026-10-26
+# (research/by-hand-2026-10-26/NOTES.md); nothing was got past a bot check.
+OFFICERS_READ_BY_HAND = {
+    # nvsos.gov answers a script with a bot check; NASS lists Nevada as not a
+    # member. The page's title names him beside the office; its text says he
+    # took office in 2023.
+    ("NV", "sos"): ("Francisco V. Aguilar",
+                    "https://www.nvsos.gov/sos/sos-information/office-facts/about-francisco-v-aguilar",
+                    "2026-10-26",
+                    ("About Francisco V. Aguilar | Nevada Secretary of State",
+                     "Francisco “Cisco” Aguilar was elected as Nevada Secretary of State in 2022 "
+                     "and assumed office on January 2, 2023.")),
+    # mass.gov refuses a script.
+    ("MA", "ag"): ("Andrea Campbell", "https://www.mass.gov/orgs/office-of-the-attorney-general",
+                   "2026-10-26",
+                   ("Office of the Attorney General | Mass.gov",
+                    "Attorney General Andrea Joy Campbell’s Office is an advocate and resource "
+                    "for the people of Massachusetts")),
+    # atg.sd.gov refuses a script.
+    ("SD", "ag"): ("Marty Jackley", "https://atg.sd.gov/OurOffice/bio.aspx", "2026-10-26",
+                   ("South Dakota Attorney General",
+                    "Attorney General Marty J. Jackley Marty was raised in Sturgis")),
+    # tn.gov refuses a script; tn.gov/attorneygeneral.html links this page as
+    # "Attorney General Jonathan Skrmetti".
+    ("TN", "ag"): ("Jonathan Skrmetti",
+                   "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti.html",
+                   "2026-10-26",
+                   ("Attorney General Jonathan Skrmetti",
+                    "Attorney General Jonathan Skrmetti ... Jonathan Skrmetti has served as "
+                    "Tennessee’s Attorney General and Reporter since 2022.")),
+    # doj.nh.gov refuses a script. The home page's heading and name, and its
+    # news item of October 23, 2026.
+    ("NH", "ag"): ("John Formella", "https://www.doj.nh.gov/", "2026-10-26",
+                   ("Welcome | New Hampshire Department of Justice",
+                    "Attorney General John M. Formella",
+                    "Attorney General Formella and Secretary of State Scanlan Provide Voters "
+                    "with Update on Use of Student ID Cards Ahead of General Election")),
 }
 
 # Ids a chamber's roll calls list that belong to no member of that Congress,

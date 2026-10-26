@@ -385,10 +385,15 @@ BROWSER_TOOL = os.path.join("tools", "read_court_pages.mjs")
 # (rule 50). Alabama's site reset every connection on 2026-10-05, and on
 # 2026-10-17 and 2026-10-18 from a plain request, a headless Chrome and a
 # windowed Chrome alike (the plain http:// address answers only with a
-# redirect to the https:// one that resets).
+# redirect to the https:// one that resets). On 2026-10-26 a person's own
+# Chrome got the same, for the court's page and the site's home page
+# ("This site can't be reached. The connection was reset.",
+# research/by-hand-2026-10-26/NOTES.md): not a script's problem. The reason
+# is a clause the pages finish with ", so its members are not listed here."
 UNREADABLE = {
     "AL": ("https://judicial.alabama.gov/appellate/supremecourt",
-           "The court's site reset every connection"),
+           "The court's site could not be reached, by this site or from a person's own "
+           "browser, on October 26, 2026"),
 }
 
 # A roster grows stale without a sound: a court kept at its last good read

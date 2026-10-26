@@ -302,14 +302,62 @@
     }
     if (all._opened) {
       // A link refused or unanswered concludes nothing (rule 8): said as
-      // unconfirmed, never as broken, and never counted as opened.
+      // unconfirmed, never as broken, and never counted as opened. One a
+      // person opened by hand (overrides.VOTING_LINKS_BY_HAND) is counted
+      // as opened, on its own day, and one whose portal asks for proof of
+      // being a person says so - each only for the days the pipeline gives
+      // (voting.BY_HAND_DAYS), on the reader's calendar, so a later failure
+      // is seen again.
       var missed = ((all._unreached || {})[code] || []).filter(function (k) { return links[k]; });
-      out.push(missed.length
-        ? "Links checked " + KYC.escapeHtml(all._opened) + "; " + quoted(missed, labels) +
-          " could not be confirmed by this site's automated check that day."
-        : "Each link opened " + KYC.escapeHtml(all._opened) + ".");
+      var hand = byHand(all, code);
+      var byDay = {};
+      var human = [];
+      missed = missed.filter(function (k) {
+        var entry = hand[k];
+        if (!entry) return true;
+        if (entry[1] === "human-check") human.push(k);
+        else (byDay[entry[0]] = byDay[entry[0]] || []).push(k);
+        return false;
+      });
+      var opened = Object.keys(byDay).sort().map(function (day) {
+        return quoted(byDay[day], labels) + " opened by hand " + KYC.escapeHtml(day);
+      });
+      if (!missed.length && !human.length) {
+        out.push("Each link opened " + KYC.escapeHtml(all._opened) +
+          (opened.length ? "; " + opened.join("; ") : "") + ".");
+      } else {
+        out.push("Links checked " + KYC.escapeHtml(all._opened) +
+          (opened.length ? "; " + opened.join("; ") : "") +
+          (missed.length ? "; " + quoted(missed, labels) +
+            " could not be confirmed by this site's automated check that day" : "") + ".");
+      }
+      if (human.length) {
+        out.push(quoted(human, labels) + (human.length === 1 ? " leads" : " lead") + " to " +
+          KYC.escapeHtml(possessive(place)) + " own portal, which asks visitors to show they " +
+          "are people, so this site cannot open " + (human.length === 1 ? "it" : "them") + " itself.");
+      }
     }
     return out.join(" ");
+  }
+
+  /** ``{kind: [day, what]}``: the links of *code* a person opened by hand,
+   *  or found behind a check for people, that still count on the reader's
+   *  day: for ``_byHandDays`` from the day each was read. */
+  function byHand(all, code) {
+    var days = all._byHandDays;
+    var mine = (all._byHand || {})[code] || {};
+    var today = isoToday();
+    var out = {};
+    Object.keys(mine).forEach(function (kind) {
+      var day = mine[kind][0];
+      var until = new Date(day + "T00:00:00");
+      if (!days || isNaN(until.getTime())) return;
+      until.setDate(until.getDate() + days);
+      var last = until.getFullYear() + "-" + ("0" + (until.getMonth() + 1)).slice(-2) + "-" +
+        ("0" + until.getDate()).slice(-2);
+      if (today <= last) out[kind] = mine[kind];
+    });
+    return out;
   }
 
   /** The election office's own line that no election is held on November

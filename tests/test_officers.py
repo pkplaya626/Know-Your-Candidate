@@ -640,6 +640,135 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         self.assertIn("photoWeight", cache["ag"]["AR"])
 
 
+class TestReadByHand(unittest.TestCase):
+    """An officer confirmed from the office's own page, read by hand in a
+    person's browser where the office's site refuses a script, or where the
+    association does not speak for the office (overrides.OFFICERS_READ_BY_HAND,
+    the owner's request of 2026-10-26: "The National Association of
+    Secretaries of State lists Francisco V. Aguilar ... not confirmed. The
+    office's site.")."""
+
+    AG = {"name": "Andrea Campbell", "party": "D", "partyKey": "D", "unconfirmed": True,
+          "unreadable": True, "listedBy": "Democratic Attorneys General Association",
+          "office": "https://www.mass.gov/orgs/office-of-the-attorney-general"}
+    SOS = {"name": "Francisco V. Aguilar", "party": "D", "partyKey": "D",
+           "title": "Secretary of State", "selection": "Elected", "electionChief": True,
+           "member": False, "website": "https://www.nvsos.gov/sos"}
+    ENTRIES = {
+        ("MA", "ag"): ("Andrea Campbell", "https://www.mass.gov/orgs/office-of-the-attorney-general",
+                       "2026-10-26", ("Attorney General Andrea Joy Campbell’s Office is an advocate",)),
+        ("NV", "sos"): ("Francisco V. Aguilar", "https://www.nvsos.gov/sos/about", "2026-10-26",
+                        ("About Francisco V. Aguilar | Nevada Secretary of State",
+                         "Francisco “Cisco” Aguilar was elected as Nevada Secretary of State")),
+    }
+
+    def cache(self, ag=None, sos=None):
+        return {"ag": {"MA": dict(self.AG, **(ag or {}))},
+                "sos": {"NV": dict(self.SOS, **(sos or {}))}, "lt": {}}
+
+    def given(self, cache, entries=None):
+        from unittest import mock
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", entries or self.ENTRIES,
+                             clear=True):
+            return (officers.for_state("MA", cache, [])["ag"],
+                    officers.for_state("NV", cache, [])["sos"])
+
+    def test_the_holder_the_office_names_is_confirmed_and_says_how(self):
+        ag, sos = self.given(self.cache())
+        for row in (ag, sos):
+            self.assertNotIn("unconfirmed", row)
+            self.assertNotIn("unreadable", row)
+            self.assertNotIn("notMember", row)
+            self.assertEqual(row["readByHand"]["read"], "2026-10-26")
+            self.assertTrue(row["readByHand"]["url"].startswith("https://"))
+        self.assertEqual(ag["title"], "Attorney General")
+        self.assertEqual(sos["name"], "Francisco V. Aguilar")
+
+    def test_without_an_entry_nothing_changes(self):
+        ag, sos = self.given(self.cache(), {("XX", "ag"): self.ENTRIES[("MA", "ag")]})
+        self.assertTrue(ag["unconfirmed"] and ag["unreadable"])
+        self.assertTrue(sos["notMember"])
+        self.assertNotIn("readByHand", ag)
+
+    def test_it_never_confirms_someone_the_roster_names_instead(self):
+        # A new holder: the entry for the old one confirms nobody, and
+        # validate says so (rule 3; CLAUDE.md "Curated data").
+        cache = self.cache(ag={"name": "Jane Roe"}, sos={"name": "John Doe"})
+        ag, sos = self.given(cache)
+        self.assertTrue(ag["unconfirmed"])
+        self.assertTrue(sos["notMember"])
+        from unittest import mock
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", self.ENTRIES, clear=True):
+            unused = officers.by_hand_unused(cache)
+            issues = __import__("kyc.validate", fromlist=["x"]).check_officers_by_hand(cache)
+        self.assertTrue(any(u.startswith("MA ag: the roster now names Jane Roe") for u in unused))
+        self.assertTrue(any(u.startswith("NV sos: the roster now names John Doe") for u in unused))
+        self.assertEqual([i.code for i in issues], ["officers-by-hand"])
+
+    def test_words_that_do_not_name_them_beside_the_title_confirm_nobody(self):
+        # "X was elected as ... Secretary of State" is not the name beside
+        # the title (rule 56); without the page's title it confirms nothing.
+        entries = {("NV", "sos"): self.ENTRIES[("NV", "sos")][:3] + (
+            ("Francisco “Cisco” Aguilar was elected as Nevada Secretary of State",),)}
+        _, sos = self.given(self.cache(), entries)
+        self.assertTrue(sos["notMember"])
+        from unittest import mock
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", entries, clear=True):
+            self.assertEqual(officers.by_hand_errors(),
+                             ["NV sos: the words quoted do not name Francisco V. Aguilar beside "
+                              "the title"])
+
+    def test_a_site_that_was_read_and_does_not_name_them_is_not_overruled(self):
+        # Only a read that concluded nothing (rule 8) is consulted.
+        ag, _ = self.given(self.cache(ag={"unreadable": False}))
+        self.assertTrue(ag["unconfirmed"])
+        _, sos = self.given(self.cache(sos={"member": True}))
+        self.assertNotIn("readByHand", sos)
+
+    def test_an_old_reading_is_a_warning(self):
+        import datetime
+        from unittest import mock
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", self.ENTRIES, clear=True):
+            day = datetime.date(2026, 10, 26)
+            self.assertEqual(officers.by_hand_stale(day + datetime.timedelta(
+                days=officers.BY_HAND_STALE_DAYS)), [])
+            stale = officers.by_hand_stale(day + datetime.timedelta(
+                days=officers.BY_HAND_STALE_DAYS + 1))
+        self.assertEqual(len(stale), 2)
+        self.assertIn("read https://www.nvsos.gov/sos/about again", " ".join(stale))
+
+    def test_a_malformed_entry_stops_the_build(self):
+        from unittest import mock
+        bad = {("MA", "ag"): ("Andrea Campbell", "http://mass.gov/", "26 October",
+                              "Attorney General Andrea Campbell")}
+        with mock.patch.dict("kyc.overrides.OFFICERS_READ_BY_HAND", bad, clear=True):
+            errors = officers.by_hand_errors()
+            with self.assertRaises(stategov.StateGovError):
+                stategov.build(ROOT)
+        self.assertEqual(len(errors), 3)
+
+    def test_the_committed_entries_confirm_their_holders(self):
+        # The owner's request: Nevada's secretary of state, and the
+        # attorneys general whose sites refuse a script, read by hand on
+        # 2026-10-26 (research/by-hand-2026-10-26/NOTES.md).
+        # A refresh that changes a holder or confirms one itself makes the
+        # entry unused, which validate reports; it must not hold the refresh.
+        self.assertEqual(officers.by_hand_errors(), [])
+        payload, problems = stategov.build(ROOT)
+        cache = officers.load_cache(ROOT)
+        unused = {tuple(u.split(":")[0].split()) for u in officers.by_hand_unused(cache)}
+        for (code, office), entry in officers.by_hand().items():
+            if (code, office) in unused:
+                continue
+            row = payload["states"][code][office]
+            self.assertEqual(row["name"], entry["holder"], code)
+            self.assertEqual(row["readByHand"], {"url": entry["page"], "read": entry["read"]})
+            self.assertFalse(row.get("unconfirmed") or row.get("notMember"), code)
+            self.assertFalse(any(p.startswith(f"{code}: {entry['holder']} is shown as")
+                                 for p in problems), code)
+        self.assertIn(("NV", "sos"), officers.by_hand())
+
+
 class TestCommitted(unittest.TestCase):
 
     def test_every_state_has_both_offices_accounted_for(self):
