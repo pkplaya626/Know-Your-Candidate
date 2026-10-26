@@ -161,7 +161,77 @@ class TestACommonsPhotographsYear(unittest.TestCase):
         self.assertEqual(len(asked), 1)
         # A page that gives no single year is said once and never guessed.
         undated = statewide_photos.dated_credit({"licence": "CC0"}, {"year": None})
-        self.assertEqual(undated, {"licence": "CC0", "yearUnstated": True})
+        self.assertEqual(undated, {"licence": "CC0", "yearUnstated": True,
+                                   "yearForm": portraits.CREDIT_FORM})
+
+    def test_a_credit_dated_by_an_earlier_reading_is_dated_again(self):
+        # The third reading took "13 October 2020 (upload date)" as a year.
+        rec = {"route": "wikipedia",
+               "photo": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Amanda_Edwards.jpg",
+               "credit": {"licence": "CC BY 4.0", "via": "Wikimedia Commons", "year": 2020,
+                          "page": "https://commons.wikimedia.org/wiki/File:Amanda_Edwards.jpg"}}
+        cache = {"photos": {"TX|x|AMANDA EDWARDS": rec}}
+
+        def info_of(urls):
+            return {u: {"width": 400, "height": 500, "timestamp": "2023-04-27T03:58:14Z",
+                        "extmetadata": {"DateTimeOriginal": {"value": "13 October 2020 (upload date)"},
+                                        "LicenseShortName": {"value": "CC BY 4.0"}}} for u in urls}
+        self.assertEqual(statewide_photos.date_credits(cache, info_of, log=None), 1)
+        self.assertNotIn("year", rec["credit"])
+        self.assertTrue(rec["credit"]["yearUnstated"])
+
+
+class TestAYearIsOnlyOneCommonsStatesPlainly(unittest.TestCase):
+    """The PR #139 review: an upload date, an estimate, a span or the upload
+    day itself was printed as the year a photograph was taken."""
+
+    def test_an_upload_date_is_no_year(self):
+        self.assertIsNone(portraits.year_of("13 October 2020 (upload date)"))
+        self.assertIsNone(portraits.year_of("15 September 2006 (original upload date)"))
+
+    def test_an_estimate_is_no_year(self):
+        self.assertIsNone(portraits.year_of(
+            'circa 2023<div style="display: none;">date QS:P,+2023-00-00T00:00:00Z/9,'
+            'P1480,Q5727902</div>'))
+        self.assertIsNone(portraits.year_of("circa 1993"))
+        self.assertIsNone(portraits.year_of("c. 2000"))
+        self.assertIsNone(portraits.year_of("ca. November 2024"))
+        self.assertIsNone(portraits.year_of("before 1950"))
+        self.assertIsNone(portraits.year_of("1975?"))
+        self.assertIsNone(portraits.year_of("2005 or 2006"))
+        # The hidden statement alone says so.
+        self.assertIsNone(portraits.year_of(
+            '1990<div style="display: none;">date QS:P,+1990-00-00T00:00:00Z/9,P1480,Q5727902</div>'))
+
+    def test_a_span_is_no_year_and_a_month_is_a_date(self):
+        self.assertIsNone(portraits.year_of("circa 2025-26"))
+        self.assertIsNone(portraits.year_of("2025-26"))
+        self.assertIsNone(portraits.year_of("2024\u201325"))
+        self.assertEqual(portraits.year_of("2017-05"), 2017)
+        self.assertEqual(portraits.year_of("2017-05-25 11:50:06"), 2017)
+
+    def test_the_upload_day_is_no_evidence(self):
+        self.assertIsNone(portraits.year_of("27 April 2023", uploaded="2023-04-27T03:58:14Z"))
+        self.assertIsNone(portraits.year_of("2023-04-27", uploaded="2023-04-27T03:58:14Z"))
+        self.assertEqual(portraits.year_of("2023-04-26", uploaded="2023-04-27T03:58:14Z"), 2023)
+        info = {"timestamp": "2025-02-03T10:00:00Z",
+                "extmetadata": {"DateTimeOriginal": {"value": "3 February 2025"},
+                                "LicenseShortName": {"value": "CC BY 4.0"}}}
+        self.assertIsNone(portraits.credit_of(info)["year"])
+
+    def test_every_reader_asks_for_the_upload_time(self):
+        self.assertIn("timestamp", portraits.IIPROP)
+
+    def test_no_committed_credit_shows_a_year_its_reading_refused(self):
+        # Every cache's year was read by the current reading.
+        commons = [r for r in portraits.load_cache(ROOT).values()
+                   if r.get("url") and portraits.wikimedia_file(r["url"]) and r.get("credit")]
+        dated = [r for r in commons if (r["credit"].get("year")
+                                        and r["credit"].get("form") != portraits.CREDIT_FORM)]
+        self.assertLess(len(dated), 5, [r.get("name") for r in dated])
+        for rec in statewide_photos.load_cache(ROOT)["photos"].values():
+            if rec.get("route") == "wikipedia" and rec["credit"].get("year"):
+                self.assertEqual(rec["credit"].get("yearForm"), portraits.CREDIT_FORM)
 
     def test_the_committed_credits_are_dated(self):
         cache = statewide_photos.load_cache(ROOT)
@@ -177,6 +247,70 @@ class TestACommonsPhotographsYear(unittest.TestCase):
                    if r.get("url") and portraits.wikimedia_file(r["url"]) and r.get("credit")]
         stale = [r.get("name") for r in commons if r["credit"].get("form") != portraits.CREDIT_FORM]
         self.assertLess(len(stale), len(commons) / 50, stale)
+
+
+class TestARefusalPromotesNothingUnseen(unittest.TestCase):
+    """The PR #139 review: refusing James Talarico's Commons crop promoted
+    his campaign's photograph of him helping a child in a classroom, which
+    nobody had looked at."""
+
+    CROP = "https://upload.wikimedia.org/wikipedia/commons/7/70/Pat_Doe_(cropped).jpg"
+    CAMPAIGN = "https://patdoe.example/wp-content/uploads/pat-classroom.webp"
+
+    def profile(self, shown, source):
+        return {"id": "CAND_1", "name": "Pat Doe", "state": "TX", "officeLabel": "Senate (TX)",
+                "isCandidate": True, "source": "curated", "chamber": "Senate (Candidate)",
+                "photos": [shown, "placeholder"], "photoSource": source}
+
+    def cache_for(self, profile, record):
+        return {portraits.profile_key(profile): record}
+
+    def test_a_photograph_promoted_by_a_refusal_is_named_until_seen(self):
+        p = self.profile(self.CAMPAIGN, "campaign-site")
+        cache = self.cache_for(p, {"via": "election-page", "url": self.CROP})
+        table = {self.CROP: ("2026-10-25", "Pat Doe: a person at the right edge")}
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, table):
+            issues = validate.check_refusal_fallbacks([p], cache)
+            self.assertEqual([i.code for i in issues], ["portrait-fallback-unseen"])
+            self.assertIn(self.CAMPAIGN, issues[0].detail[0])
+            # Looked at, and the person alone: said once, and quiet.
+            with unittest.mock.patch.dict(overrides.SEEN_AFTER_A_REFUSAL,
+                                          {self.CAMPAIGN: ("2026-10-25", "Pat Doe alone")}):
+                self.assertEqual(validate.check_refusal_fallbacks([p], cache), [])
+        # Nothing refused: the campaign's photograph is the first route's.
+        self.assertEqual(validate.check_refusal_fallbacks([p], cache), [])
+
+    def test_a_studio_route_or_the_silhouette_needs_no_look(self):
+        table = {self.CROP: ("2026-10-25", "Pat Doe: a person at the right edge")}
+        house = "https://house.texas.gov/images/members/1.jpg"
+        for shown, source in ((house, "state-legislature"), ("placeholder", None)):
+            p = self.profile(shown, source)
+            record = {"via": "state-legislature", "url": house, "replaces": [self.CROP]}
+            with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, table):
+                self.assertEqual(validate.check_refusal_fallbacks([p], self.cache_for(p, record)),
+                                 [])
+
+    def test_a_route_asked_again_keeps_what_it_stands_in_for(self):
+        from kyc import nominee_photos
+        uncut = "https://upload.wikimedia.org/wikipedia/commons/8/8b/Pat_Doe.jpg"
+        record = {"via": "wikidata-fec", "url": uncut + "/330px", "replaces": [self.CROP]}
+        self.assertEqual(nominee_photos.replaced(record), [self.CROP])
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT,
+                                      {self.CROP: ("2026-10-25", "x")}):
+            p = self.profile(record["url"], "wikidata-fec")
+            issues = validate.check_refusal_fallbacks([p], self.cache_for(p, record))
+            self.assertEqual([i.code for i in issues], ["portrait-fallback-unseen"])
+        refused = {"via": "election-page", "url": self.CROP}
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, {self.CROP: ("2026-10-25", "x")}):
+            self.assertEqual(nominee_photos.replaced(refused), [self.CROP])
+        self.assertEqual(nominee_photos.replaced(refused), [])
+
+    def test_the_committed_build_promotes_nothing_unseen(self):
+        # Every profile's photograph that came forward after a refusal was
+        # looked at (the review's Talarico): the committed caches and data
+        # say nothing is waiting.
+        self.assertTrue(all(len(v) == 2 and v[0] and v[1]
+                            for v in overrides.SEEN_AFTER_A_REFUSAL.values()))
 
 
 if __name__ == "__main__":

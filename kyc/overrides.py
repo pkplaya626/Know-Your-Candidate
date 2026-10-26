@@ -859,9 +859,10 @@ NOT_A_PORTRAIT = {
         ("2026-10-25", "Lauren Jewett: a full-length figure beside the Clerk of Court's seal, her "
                        "face a fifteenth of the card's height"),
     # The owner, 2026-10-25: "probably better to leave out background people".
-    # Every photograph shown by a route that can take a picture not made in
-    # a studio was looked at on 2026-10-25 (701 of them); these show someone
-    # else, in the background or in part. Keyed as each route asks: a
+    # Every photograph shown by the routes the owner's brief named that can
+    # take a picture not made in a studio was looked at on 2026-10-25 (701
+    # of them; not the judges' item route, CLAUDE.md rule 38); these show
+    # someone else, in the background or in part. Keyed as each route asks: a
     # campaign's or an office's file by its address, a Commons file by its
     # upload address.
     # a campaign's own site (enrich): 1.
@@ -1106,6 +1107,43 @@ NOT_A_PORTRAIT = {
     "https://www2.housedems.ct.gov/Haddad/images/Haddad_19.jpg":
         ("2026-10-25", "Gregg Haddad (CT House): at his desk in the chamber, two colleagues "
                        "beside and behind him"),
+    # The PR #139 review, looked at again on 2026-10-25. A refusal promoted
+    # James Talarico's campaign photograph, which nobody had looked at, in
+    # place of his Commons one (validate's portrait-fallback-unseen now
+    # names any such photograph); the sweep missed four more; and a framed
+    # photograph of people on the wall counts as it did for John Giles and
+    # Dave Sunday.
+    "https://jamestalarico.com/wp-content/uploads/2025/09/james-talarico-texas-education-819x1024.webp":
+        ("2026-10-25", "James Talarico (TX): bent over a desk helping a child in a classroom, "
+                       "two more children in the frame, his face turned down"),
+    # The uncut file the refused crop came from, which his Wikidata item
+    # carries (nominee_photos' Wikidata route then offered it).
+    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg":
+        ("2026-10-25", "James Talarico (TX): another person's shoulder at the right edge"),
+    "https://upload.wikimedia.org/wikipedia/commons/f/f0/JoCasta_Zamarripa_(51017746066).jpg":
+        ("2026-10-25", "JoCasta Zamarripa (WI secretary of state candidate): another person's "
+                       "hand and fingers at the left edge"),
+    "https://upload.wikimedia.org/wikipedia/commons/a/aa/Matthew_E._Orso.png":
+        ("2026-10-25", "Judge Matthew E. Orso (FJC 13762088): a standing person's legs and shoe "
+                       "behind him at the upper right (a hearing still)"),
+    "https://upload.wikimedia.org/wikipedia/commons/f/f5/Anthony_J._Powell.png":
+        ("2026-10-25", "Judge Anthony J. Powell (FJC 13762132): people in suits seated behind "
+                       "him (a hearing still)"),
+    "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg":
+        ("2026-10-25", "Donna Miller (IL): a person's face on the screen behind her, at the "
+                       "upper right"),
+    "https://upload.wikimedia.org/wikipedia/commons/1/11/Adam_Hamawy_in_2025.jpg":
+        ("2026-10-25", "Adam Hamawy (NJ): a framed photograph of people on the wall behind him"),
+}
+
+# Photographs that came forward when a person refused the one before them
+# (NOT_A_PORTRAIT), from a route that can take a picture not made in a
+# studio, each looked at and found to be of the person alone, keyed on the
+# address shown: (date, what was seen). validate names any other such
+# photograph (portrait-fallback-unseen) - a refusal must never put a
+# photograph nobody has looked at in front of readers (the PR #139 review:
+# James Talarico's classroom photograph).
+SEEN_AFTER_A_REFUSAL = {
 }
 
 # Commons files a judge's route (kyc/judge_links.py) or a statewide

@@ -1105,8 +1105,8 @@ async function testDirectory() {
       KYC.profile.open(commons.id);
       const text = line().textContent;
       check("the dialog credits its author, its licence and Commons",
-        !line().hidden && text.indexOf((commons.photoCredit.year ? "Photograph, " +
-          commons.photoCredit.year + ". " : "") + "Photo: " + commons.photoCredit.by + ", " +
+        !line().hidden && text.indexOf("Photo" + (commons.photoCredit.year ? " (" +
+          commons.photoCredit.year + ")" : "") + ": " + commons.photoCredit.by + ", " +
           commons.photoCredit.licence + ", via Wikimedia Commons") === 0, text);
       check("linking the licence and the file's own page",
         !!line().querySelector('a[href="' + commons.photoCredit.licenceUrl + '"]') &&
@@ -2793,7 +2793,7 @@ async function testStates() {
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
       !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
         [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-candidate-photo") &&
-          /^(Photograph, \d{4}\. )?Photo: ./.test((img.parentNode.querySelector(".gov-photo-credit") || {}).textContent || "")));
+          /^Photo( \(\d{4}\))?: ./.test((img.parentNode.querySelector(".gov-photo-credit") || {}).textContent || "")));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -11882,9 +11882,9 @@ async function testFederalAudit() {
       const p = withLinks.judge.portrait;
       check("a judge's Commons portrait carries its licence", !!p.licence, JSON.stringify(p));
       check("credited under the name with its author, licence and Commons, linked to the file",
-        !credit.hidden && credit.textContent.indexOf((p.year ? (p.route === "official" ?
-          "Official portrait, " : "Photograph, ") + p.year + ". " : "") +
-          "Photo: " + (p.by ? p.by + ", " :
+        !credit.hidden && credit.textContent.indexOf((p.year && p.route === "official" ?
+          "Official portrait, " + p.year + ". Photo: " : p.year ? "Photo (" + p.year + "): " : "Photo: ") +
+          (p.by ? p.by + ", " :
           p.authorUnrecorded ? "author not recorded on Commons, " : "") + p.licence +
           ", via Wikimedia Commons") === 0 && !!credit.querySelector('a[href="' + p.source + '"]'),
         credit.textContent);
@@ -15160,16 +15160,21 @@ async function testPhotoCopies() {
       // owner's brief of 2026-10-25: Tad Jude's 1981 portrait read as
       // current); a justice's official words stand; no year, no words.
       const plainText = (c) => KYC.photoCreditHtml(c).replace(/<[^>]+>/g, "");
-      check("a Commons credit's year comes first",
+      // One phrase, true of a painted portrait too: "Photograph, 2012." was
+      // printed under a judge's oil portrait (the PR #139 review).
+      check("a Commons credit says its year in the one phrase",
         plainText({ by: "The Minnesota Legislature", licence: "Public domain", year: 1981,
           page: "https://commons.wikimedia.org/wiki/File:X.jpg", via: "Wikimedia Commons" }) ===
-          "Photograph, 1981. Photo: The Minnesota Legislature, Public domain, via Wikimedia Commons");
+          "Photo (1981): The Minnesota Legislature, Public domain, via Wikimedia Commons");
       check("a justice's official portrait keeps its own words",
         /^Official portrait, 2005\. Photo: /.test(plainText({ by: "Steve Petteway", licence: "Public domain",
+          year: 2005, dated: "Official portrait, 2005", via: "Wikimedia Commons" })) &&
+        !/\(2005\)/.test(plainText({ by: "Steve Petteway", licence: "Public domain",
           year: 2005, dated: "Official portrait, 2005", via: "Wikimedia Commons" })));
       check("no year, or one that is not a single four-digit year, says none",
-        !/Photograph,/.test(plainText({ by: "X", licence: "CC0", via: "Wikimedia Commons" })) &&
-        !/Photograph,/.test(plainText({ by: "X", licence: "CC0", year: "1990s" })));
+        /^Photo: X/.test(plainText({ by: "X", licence: "CC0", via: "Wikimedia Commons" })) &&
+        /^Photo: X/.test(plainText({ by: "X", licence: "CC0", year: "1990s" })) &&
+        !/Photograph/.test(plainText({ by: "X", licence: "CC0", year: 1990 })));
     });
     window.close();
   }
@@ -15248,7 +15253,7 @@ async function testPhotoCopies() {
     suite("states/mn.html — a Commons photograph's credit says its year", () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
       const jude = [...D.querySelectorAll("*")].filter((el) => el.children.length === 0 &&
-        /Photograph, 1981\. Photo: The Minnesota Legislature/.test(el.parentNode.textContent));
+        /Photo \(1981\): The Minnesota Legislature/.test(el.parentNode.textContent));
       check("Tad Jude's portrait is dated 1981 in its credit", jude.length > 0);
     });
     window.close();

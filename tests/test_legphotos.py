@@ -756,6 +756,16 @@ class TestRefreshAndBuild(unittest.TestCase):
                   image="https://www.misenategop.com/wp-content/uploads/2023/01/Bellino-580x770.jpg")
         self.assertEqual(legislature.caucus_photo("MI", gop, gop["image"]),
                          "Michigan Senate Republicans")
+        # And its page there is the caucus's page of them, by the same test
+        # (the PR #139 review: the 18 cards on www.misenategop.com were
+        # credited to the caucus with no link to its page of them).
+        self.assertEqual(legislature._caucus_site("MI", "www.misenategop.com", "/bellino/",
+                                                  "upper"), "Michigan Senate Republicans")
+        self.assertIsNone(legislature._caucus_site("MI", "notmisenategop.com", "/bellino/",
+                                                   "upper"))
+        self.assertTrue(legislature.on_caucus_host("www.misenategop.com", "misenategop.com"))
+        self.assertTrue(legislature.on_caucus_host("a14.asmdc.org", ".asmdc.org"))
+        self.assertFalse(legislature.on_caucus_host("evilmisenategop.com", "misenategop.com"))
 
     def test_another_partys_or_chambers_caucus_or_a_shared_file_is_not_credited_to_it(self):
         image = "https://www.indianahouserepublicans.com/clientuploads/directory/members/Main_List/X.jpg"

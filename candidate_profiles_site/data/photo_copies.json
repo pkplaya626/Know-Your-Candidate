@@ -14170,12 +14170,14 @@
    "gone": 0,
    "height": 700,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Tue, 04 Mar 2025 17:20:09 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:IL:ocd-person/91164a3d-fc17-4252-a31f-a8d0d113b74b"
+    "legislator:IL:ocd-person/91164a3d-fc17-4252-a31f-a8d0d113b74b",
+    "person:FEC_H6IL07354"
    ],
    "width": 500
   },
@@ -29093,12 +29095,14 @@
    "gone": 0,
    "height": 175,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Thu, 06 Jun 2024 19:31:00 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:TX:ocd-person/5e4e2fd2-e8a9-46f3-aab5-ffbc782afa8b"
+    "legislator:TX:ocd-person/5e4e2fd2-e8a9-46f3-aab5-ffbc782afa8b",
+    "person:CAND_27"
    ],
    "width": 125
   },
@@ -32735,6 +32739,21 @@
     "officer:NE:lt:Joe Kelly"
    ],
    "width": 280
+  },
+  "https://i0.wp.com/senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg?w=500&ssl=1": {
+   "bytes": 42240,
+   "etag": "\"461c6fa8c3126996\"",
+   "gone": 0,
+   "height": 700,
+   "kinds": [
+    "person"
+   ],
+   "lastModified": "Sun, 25 Oct 2026 23:55:41 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "person:FEC_H6MI11191"
+   ],
+   "width": 500
   },
   "https://i0.wp.com/www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png?w=330&ssl=1": {
    "bytes": 96350,
@@ -58896,12 +58915,14 @@
    "gone": 0,
    "height": 300,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Tue, 01 Oct 2024 14:23:08 GMT",
    "read": "2026-10-25",
    "records": [
-    "legislator:MD:ocd-person/a1a2b050-266e-4d44-9463-be3a02e16e41"
+    "legislator:MD:ocd-person/a1a2b050-266e-4d44-9463-be3a02e16e41",
+    "person:FEC_H6MD05321"
    ],
    "width": 250
   },

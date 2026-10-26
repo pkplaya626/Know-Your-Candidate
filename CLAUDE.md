@@ -205,7 +205,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2305 tests, no dependencies
+python -m unittest discover tests             # 2317 tests, no dependencies
 npm install && npm test                       # 3378 real-DOM checks (needs jsdom)
 ```
 
@@ -621,19 +621,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     beside a seal a fifteenth, and both are refused, as are a family
     photograph, a page of biography text, a halftone street scene, and
     a festival stall and a rally with other people in the frame. On
-    2026-10-25 every photograph shown by a route that can take a picture
-    not made in a studio was looked at - 701: 53 campaign sites', 391
-    profiles' Commons files (the article's or Wikidata's), 122 statewide
-    candidates' (Commons, the guides and commissions, the holder's
-    office card), 46 attorneys general's (their offices' pages and NAAG's
-    cards) and 89 judges' (the crop, article and agreeing-article routes)
-    - and the 88 with anyone else visible refused, by route: 1 campaign's,
-    33 profiles' Commons files, 5 statewide candidates' (Arizona's Clean
-    Elections photograph of Duwayne Collier is cropped from a family
-    snapshot: a child's face and another person's arm), 1 attorney
-    general's office's, and 48 judges' Senate hearing stills (9 crops, 39
-    articles' images); the 267 legislator cards newly credited to a caucus
-    were looked at too, and 2 refused. One test asks the list wherever a
+    2026-10-25 the photographs shown by the routes the owner's brief named
+    were looked at - 701: 53 campaign sites', 391 profiles' Commons files
+    (the article's or Wikidata's), 122 statewide candidates' (Commons, the
+    guides and commissions, the holder's office card), 46 attorneys
+    general's (their offices' pages and NAAG's cards) and 89 judges' (the
+    crop, article and agreeing-article routes) - and the 88 with anyone
+    else visible refused, by route: 1 campaign's, 33 profiles' Commons
+    files, 5 statewide candidates' (Arizona's Clean Elections photograph of
+    Duwayne Collier is cropped from a family snapshot: a child's face and
+    another person's arm), 1 attorney general's office's, and 48 judges'
+    Senate hearing stills (9 crops, 39 articles' images); the 267
+    legislator cards newly credited to a caucus were looked at too, and 2
+    refused. Its review found five more (a hand at JoCasta Zamarripa's
+    edge, two judges' hearing audiences, a face on the screen behind Donna
+    Miller, a framed photograph of people behind Adam Hamawy, as John
+    Giles's and Dave Sunday's were refused) and a refusal's worst case: it
+    promoted James Talarico's campaign photograph of him helping a child in
+    a classroom, which nobody had seen, and then his Wikidata item's uncut
+    file of the refused crop. A photograph that comes forward when a
+    person refuses the one before it, from a route that can take a picture
+    not made in a studio, is now a build warning
+    (`portrait-fallback-unseen`) until it is in
+    `overrides.SEEN_AFTER_A_REFUSAL` or `NOT_A_PORTRAIT`, and the nominee
+    routes keep what a record stands in for (`replaces`); a refused
+    portrait is no portrait, so those routes are asked for its person
+    (Talarico, Jeremy Moss, La Shawn Ford and Adrian Boafo now show their
+    legislature's or caucus's photograph). Not looked at: the judges'
+    `item` route (a Wikidata item's own image, 1,012 portraits), which the
+    brief did not name. Most of its recent judges' are Senate Judiciary
+    hearing stills with the audience behind them - in a sample of the
+    first 330, some 130 clearly show someone else - so applying the
+    owner's test there would withdraw several hundred judges' photographs;
+    that waits for the owner. One test asks the list wherever a
     page is read (`photos.not_a_portrait`, rule 12: the campaign sites'
     reader, a court's, an attorney general's office's, a statewide
     candidate's guide or article, a judge's), and records what it refused
@@ -1844,13 +1864,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
 
     A Commons photograph's credit says the year its file's own page gives
     it (`portraits.year_of`, read with the author and licence:
-    `CREDIT_FORM` 3), every route alike - a profile's, a statewide
+    `CREDIT_FORM` 4), every route alike - a profile's, a statewide
     candidate's, a judge's - through the one helper
-    (`KYC.photoCreditHtml`: "Photograph, 1981. Photo: ..."; a justice's
-    official portrait keeps "Official portrait, 2005"), and nothing where
-    the page gives no single four-digit year, never a guessed or an upload
-    year: Tad Jude's (MN) black-and-white legislature portrait is from
-    1981 and read as current (the owner's brief of 2026-10-25).
+    (`KYC.photoCreditHtml`: "Photo (1981): ..."; a justice's official
+    portrait keeps "Official portrait, 2005"), and nothing where the page
+    gives no single four-digit year, never a guessed or an upload year:
+    Tad Jude's (MN) black-and-white legislature portrait is from 1981 and
+    read as current (the owner's brief of 2026-10-25). Its review found
+    the first reading took any single year: "13 October 2020 (upload
+    date)" and "(original upload date)" printed as the year Amanda Edwards's
+    and four judges' photographs were taken, "circa 1993", "c. 2000" and
+    "circa 2025-26" as exact years, and a date that is the very day the
+    file was uploaded (the upload form's default) as evidence. Now a date
+    that says upload, is qualified (circa, before, "or", a "?", an
+    `{{other date}}` carrying P1480), is a span, or is the upload day
+    gives none. The year is said as "Photo (1981)", not "Photograph,
+    1981.", which was false under a judge's oil portrait.
 
 88. **A colour that carries meaning is checked as a colour-blind reader
     sees it, and is never the only cue.** The 2026-10-17 audit ran the

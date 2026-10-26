@@ -241,6 +241,20 @@ _NOT_ONE_MEMBER = {"group", "groups", "leadership", "leaders", "leader", "team",
                    "hero", "header", "event", "events", "rally"}
 
 
+def on_caucus_host(host, site):
+    """*host* is a ``CAUCUS_SITES`` entry's *site*, or any subdomain of it
+    ("www.misenategop.com" is "misenategop.com"'s; ".asmdc.org" is every
+    member's "a14.asmdc.org"). One test for a caucus's file
+    (``caucus_photo``), its member pages (``_caucus_site``) and any host
+    question (``caucus_host``), rule 12: the file test took the subdomain
+    and the page test did not, so the Michigan Senate Republicans' 18
+    cards were credited to the caucus without a link to its page of them
+    (the PR #139 review)."""
+    bare = site.lstrip(".")
+    host = (host or "").lower()
+    return bool(host) and (host == bare or host.endswith("." + bare))
+
+
 def caucus_photo(code, record, url):
     """The name of the caucus whose photograph of *record* *url* is, or
     ``None``: a host ``CAUCUS_SITES`` lists for the state, of the member's
@@ -259,8 +273,7 @@ def caucus_photo(code, record, url):
     if set(re.split(r"[^a-z0-9]+", name)) & _NOT_ONE_MEMBER:
         return None
     for site, _prefix, chamber, caucus, party, _evidence in CAUCUS_SITES.get(code, ()):
-        bare = site.lstrip(".")
-        if ((host == bare or host.endswith("." + bare)) and chamber == record.get("chamber")
+        if (on_caucus_host(host, site) and chamber == record.get("chamber")
                 and party == record.get("partyKey")):
             return caucus
     return None
@@ -269,9 +282,8 @@ def caucus_photo(code, record, url):
 def caucus_host(code, url):
     """*url* is on a host ``CAUCUS_SITES`` lists for the state, of any
     chamber or party."""
-    host = (urllib.parse.urlsplit(url or "").hostname or "").lower()
-    return bool(host) and any(host == s.lstrip(".") or host.endswith("." + s.lstrip("."))
-                              for s, *_rest in CAUCUS_SITES.get(code, ()))
+    host = urllib.parse.urlsplit(url or "").hostname
+    return any(on_caucus_host(host, s) for s, *_rest in CAUCUS_SITES.get(code, ()))
 
 
 # A file, a download or a page about something other than the member.
@@ -668,7 +680,7 @@ def _host_rank(hosts, host):
 
 def _caucus_site(code, host, path, chamber):
     for site, prefix, theirs, caucus_name, *_rest in CAUCUS_SITES.get(code, ()):
-        if (host == site or (site.startswith(".") and host.endswith(site))) \
+        if on_caucus_host(host, site) \
                 and path.lower().startswith(prefix) and (chamber in (None, theirs)):
             return caucus_name
     return None

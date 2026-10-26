@@ -2022,7 +2022,9 @@ def _photo_routes(root):
         out.add(judge_links.source_url((entry.get("portrait") or {}).get("source")))
     for record in portraits.load_cache(root).values():
         if isinstance(record, dict):
-            out.update(portraits.addresses(record))
+            # And what a person refused that it stands in for (a nominee's
+            # route asked again, nominee_photos.replaced).
+            out.update(portraits.addresses(record) + list(record.get("replaces") or ()))
     # A legislator's card: Open States's file, as listed and as loaded.
     from . import legphotos, statelegs
     for roster in ((statelegs.load_cache(root) or {}).get("states") or {}).values():

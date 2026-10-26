@@ -512,10 +512,10 @@ def _resolve(title):
 
 def _commons(file_name):
     """``{"info", "categories"}`` of a file, from Commons' API."""
-    from .portraits import _api
+    from .portraits import _CREDIT_FIELDS, IIPROP, _api
     data = _api({"titles": "File:" + file_name, "prop": "imageinfo|categories",
-                 "iiprop": "size|url|extmetadata", "cllimit": "max",
-                 "iiextmetadatafilter": "Artist|LicenseShortName|LicenseUrl|AttributionRequired|NonFree"},
+                 "iiprop": IIPROP, "cllimit": "max",
+                 "iiextmetadatafilter": _CREDIT_FIELDS},
                 endpoint="https://commons.wikimedia.org/w/api.php")
     page = ((data.get("query") or {}).get("pages") or [{}])[0]
     info = (page.get("imageinfo") or [None])[0]
@@ -602,26 +602,30 @@ def wiki_photo(code, office, candidate, links, race_title, refused=None, measure
 def dated_credit(shown, credit):
     """*shown*, a Commons credit as the page prints it, with the year the
     file's own page dates it to (``portraits.year_of``), or
-    ``yearUnstated`` where it gives no single one - so it is not asked
-    again, and no year is guessed."""
-    shown = {k: v for k, v in shown.items() if k not in ("year", "yearUnstated")}
+    ``yearUnstated`` where it gives no single one plainly, and the reading
+    that dated it (``yearForm``, ``portraits.CREDIT_FORM``) - so it is not
+    asked again until the reading changes, and no year is guessed."""
+    from .portraits import CREDIT_FORM
+    shown = {k: v for k, v in shown.items() if k not in ("year", "yearUnstated", "yearForm")}
     if (credit or {}).get("year"):
         shown["year"] = credit["year"]
     else:
         shown["yearUnstated"] = True
+    shown["yearForm"] = CREDIT_FORM
     return shown
 
 
 def date_credits(cache, info_of=None, log=print):
     """Give each Commons record in *cache* whose credit has not been dated
-    (read before credits carried a year) the year its file's page gives,
+    by the current reading (``portraits.CREDIT_FORM``: the third took
+    upload dates and estimates as years) the year its file's page gives,
     in place; returns how many were read. A file the read does not answer
     for is asked again next run (rule 8)."""
-    from .portraits import credit_of, file_info
+    from .portraits import CREDIT_FORM, credit_of, file_info
     info_of = info_of or file_info
     todo = {k: rec for k, rec in ((cache or {}).get("photos") or {}).items()
             if rec.get("route") == "wikipedia" and official_photos.commons_upload(rec)
-            and not {"year", "yearUnstated"} & set(rec.get("credit") or {})}
+            and (rec.get("credit") or {}).get("yearForm") != CREDIT_FORM}
     if not todo:
         return 0
     infos = info_of([official_photos.commons_upload(rec) for rec in todo.values()])
