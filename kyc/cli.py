@@ -313,7 +313,8 @@ def _build(args):
                           photo_routes=_photo_routes(args.root),
                           guides=guide_photos.load_cache(args.root),
                           photo_manifest=photocopies.load(args.root),
-                          legislators=_legislators(args.root))
+                          legislators=_legislators(args.root),
+                          officers=_officer_cache(args.root))
     from . import oge as oge_mod
     for level, code, message, detail in oge_mod.problems(oge_mod.load_cache(args.root),
                                                          federal_mod.load_cache(args.root)):
@@ -646,6 +647,12 @@ def _legislators(root):
     """The state legislators' roster (``statelegs``), or ``None``."""
     from . import statelegs
     return statelegs.load_cache(root) or None
+
+
+def _officer_cache(root):
+    """The statewide officers' cache (``officers``), or ``None``."""
+    from . import officers
+    return officers.load_cache(root)
 
 
 def _legislature(root):

@@ -484,9 +484,20 @@ class TestForState(unittest.TestCase):
 
     def test_an_unreadable_court_says_why_and_has_no_members(self):
         court = courts.for_state("AL", {"courts": {}})["court"]
-        self.assertIn("reset", court["unreadable"])
+        self.assertIn("could not be reached", court["unreadable"])
         self.assertNotIn("members", court)
         self.assertEqual(court["seats"], HIGH_COURTS["AL"][1])
+
+    def test_alabama_says_a_person_could_not_reach_it_either(self):
+        # A person's own Chrome got ERR_CONNECTION_RESET for the court's page
+        # and the site's home page on 2026-10-26: the reason says so, and the
+        # court stays listed without members (rule 57), never from another
+        # source.
+        reason = courts.UNREADABLE["AL"][1]
+        self.assertIn("a person's own browser", reason)
+        self.assertIn("October 26, 2026", reason)
+        self.assertNotRegex(reason, r"(?i)HTTP|ERR_|script|reset every")
+        self.assertNotIn("AL", courts.curated())
 
     def test_texas_and_oklahoma_have_two_highest_courts(self):
         cache = {"courts": {

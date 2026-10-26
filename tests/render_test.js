@@ -3136,6 +3136,93 @@ async function testStates() {
       missed.indexOf("info") !== -1 && /could not be confirmed/.test(gu) && !/Each link opened/.test(gu), gu);
   });
 
+  /* Links the weekly check could not open, opened by hand in a person's
+   * browser on 2026-10-26 (overrides.VOTING_LINKS_BY_HAND): counted as
+   * opened, in the same words, on their own day; a portal that asks for
+   * proof of being a person is said so. Built on CAMPAIGN_NOW, within
+   * the days a reading counts; a later day counts it no more. */
+  const azVote = await buildPage("states/az.html");
+  const akVote = await buildPage("states/ak.html");
+  suite("states/az.html — links opened by hand are counted as opened, on their day", () => {
+    const meta = azVote.window.kycBuildMeta.voting;
+    const hand = (meta._byHand || {}).AZ || {};
+    const note = azVote.D.querySelector("#voting .state-note").textContent;
+    const words = { status: "Check your registration", polling: "Find your polling place",
+                    absentee: "Vote absentee or early" };
+    const kinds = Object.keys(hand);
+    check("Arizona's three lookups were opened by hand", ["status", "polling", "absentee"].every((k) =>
+      hand[k] && hand[k][1] === "opened"), JSON.stringify(hand));
+    const said = /(?:Links checked|Each link opened) [\d-]+; ([^;]*) opened by hand ([\d-]+)(.*)$/.exec(note);
+    check("each is said opened by hand, with its day",
+      !!said && kinds.every((k) => said[1].indexOf("“" + words[k] + "”") !== -1) && said[2] === hand.polling[0],
+      note);
+    check("and none of them among the links that could not be confirmed",
+      !!said && kinds.every((k) => said[3].indexOf("“" + words[k] + "”") === -1), note);
+    // Past BY_HAND_DAYS on the reader's calendar, a reading no longer counts.
+    const saved = hand.polling[0];
+    hand.polling[0] = "2026-08-01";
+    const box = azVote.D.createElement("div");
+    box.innerHTML = azVote.window.KYC.ballot.votingBlock("AZ", "Arizona");
+    hand.polling[0] = saved;
+    const later = box.querySelector(".state-note").textContent;
+    check("a reading older than the days it counts for is not counted",
+      /“Find your polling place”[^.]*could not be confirmed by this site's automated check/.test(later) &&
+        !/“Find your polling place”[^;]*opened by hand/.test(later), later);
+  });
+  suite("states/ak.html — a portal that asks for proof of being a person says so", () => {
+    const hand = (akVote.window.kycBuildMeta.voting._byHand || {}).AK || {};
+    const note = akVote.D.querySelector("#voting .state-note").textContent;
+    // NOTES.md: only the early-voting page asked; the registration page and
+    // the voter portal opened by hand with no check.
+    check("only Alaska's early-voting link is behind a check for people",
+      hand.absentee && hand.absentee[1] === "human-check" && hand.register && hand.register[1] === "opened" &&
+        hand.status && hand.status[1] === "opened", JSON.stringify(hand));
+    check("said in plain words, not as a failed check",
+      /“Vote absentee or early” leads to Alaska's own portal, which asks visitors to show they are people, so this site cannot open it itself\./.test(note) &&
+        !/“Vote absentee or early”[^.]*could not be confirmed/.test(note) &&
+        !/captcha|CAPTCHA|bot|HTTP|script/.test(note), note);
+    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("the registration page and the voter portal opened by hand, never behind the check",
+      !!said && /“Register to vote”/.test(said[1]) && /“Check your registration”/.test(said[1]) &&
+        !/“Register to vote”[^.]*lead/.test(note) &&
+        !/(“Register to vote”|“Check your registration”)[^;]*could not be confirmed/.test(note), note);
+  });
+  const nhHand = await buildPage("states/nh.html");
+  suite("states/nh.html — the voting block says each link's own state", () => {
+    const note = nhHand.D.querySelector("#voting .state-note").textContent;
+    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("absentee and registration pages opened by hand, a portal that asks for people",
+      !!said && /“Vote absentee or early”/.test(said[1]) && /“Register to vote”/.test(said[1]) &&
+        /“Check your registration” and “Find your polling place” lead to New Hampshire's own portal, which asks visitors to show they are people/.test(note) &&
+        !/“Register to vote”[^;]* could not be confirmed/.test(note), note);
+  });
+  /* Where every link the check missed was opened by hand, "Each link opened
+   * <the check's day>" would claim the check opened them (rule 79): the
+   * sentence names what the check opened, then what a person did. */
+  const riHand = await buildPage("states/ri.html");
+  const nyHand = await buildPage("states/ny.html");
+  suite("states/ri.html — links opened by hand are never said opened on the check's day", () => {
+    const meta = riHand.window.kycBuildMeta.voting;
+    const note = riHand.D.querySelector("#voting .state-note").textContent;
+    const missed = (meta._unreached || {}).RI || [];
+    check("the weekly check missed Rhode Island's four lookups",
+      ["polling", "register", "status", "absentee"].every((k) => missed.indexOf(k) !== -1), JSON.stringify(missed));
+    check("what the check opened, on its day, then what a person opened, on theirs",
+      !/Each link opened/.test(note) &&
+        new RegExp("“[^”]+” opened " + meta._opened + "; [^;]* opened by hand 2026-10-26\\.").test(note) &&
+        !/could not be confirmed/.test(note), note);
+  });
+  suite("states/ny.html — the second round of links opened by hand", () => {
+    const note = nyHand.D.querySelector("#voting .state-note").textContent;
+    const said = /([^;]*) opened by hand 2026-10-26/.exec(note);
+    check("New York's absentee page and voter lookup opened by hand",
+      !!said && ["Vote absentee or early", "Find your polling place", "Check your registration"].every((w) =>
+        said[1].indexOf("“" + w + "”") !== -1), note);
+    check("and none of them called unconfirmed",
+      !/(“Vote absentee or early”|“Find your polling place”|“Check your registration”)[^;]*could not be confirmed/.test(note),
+      note);
+  });
+
   const nd = await buildPage("states/nd.html");
   suite("states/nd.html — a state that does not register voters", () => {
     const text = (nd.D.getElementById("voting") || {}).textContent || "";
@@ -9100,6 +9187,97 @@ async function testStateGov() {
     check("and say a roster read by hand was",
       nySources.indexOf(court.name + ": the court's own roster (read by hand, " +
         ny.window.KYC.dateWords(court.readOn) + ")") !== -1, nySources);
+  });
+
+  /* The owner's request of 2026-10-26, over Nevada's secretary of state:
+   * "lets solve stuff like: The National Association of Secretaries of
+   * State lists Francisco V. Aguilar (Democratic) as secretary of state,
+   * though the office is not currently a NASS member, so this is the
+   * association's listing, not confirmed. The office's site." An officer
+   * the office's own page names, read by hand (overrides.OFFICERS_READ_BY_HAND),
+   * is shown as the holder and says so; where the site still cannot confirm
+   * one, the note is whole sentences with the office's site linked in them. */
+  const nvGov = await buildPage("states/nv.html");
+  const nhGov = await buildPage("states/nh.html");
+  const alGov = await buildPage("states/al.html");
+  suite("state pages — an officer the office's own page names, read by hand", () => {
+    const officerRow = (p, word) => [...p.D.querySelectorAll("#state-government .gov-officer")]
+      .find((li) => new RegExp(word, "i").test(li.querySelector(".gov-officer-role").textContent));
+    for (const [p, code, key, word] of [[nvGov, "NV", "sos", "Secretary of state"],
+                                         [nhGov, "NH", "ag", "Attorney general"]]) {
+      const off = p.window.kycStateGov.states[code][key];
+      const row = officerRow(p, word);
+      const line = row && row.querySelector(".gov-by-hand");
+      check(code + "'s " + word.toLowerCase() + " is named as the holder, never as a listing",
+        !!off.readByHand && !off.notMember && !off.unconfirmed && !!row && !!row.querySelector(".gov-officer-name") &&
+          row.querySelector(".gov-officer-name").textContent.indexOf(off.name) === 0 &&
+          !/not currently a|not confirmed|has not confirmed/.test(row.textContent), row && row.textContent);
+      check("and says the office's own page names them, read by hand on that day, linked",
+        !!line && line.textContent === "The office's own page names them, read by hand on " +
+          p.window.KYC.dayMonthYear(off.readByHand.read) + "." &&
+          line.querySelector("a").getAttribute("href") === off.readByHand.url &&
+          /noopener/.test(line.querySelector("a").rel), line && line.textContent);
+    }
+    // The page read by hand names Nevada's secretary, not his party: that is
+    // still the listing of an association he is not a member of (rule 55).
+    const nvRow = officerRow(nvGov, "Secretary of state");
+    check("Nevada's party is credited to NASS's listing",
+      !!nvRow && /Party as the National Association of Secretaries of State lists it/.test(nvRow.textContent),
+      nvRow && nvRow.textContent);
+    const nhRow = officerRow(nhGov, "Attorney general");
+    check("an attorney general's party stays its association's membership",
+      !!nhRow && !/Party as the/.test(nhRow.textContent), nhRow && nhRow.textContent);
+  });
+  suite("state pages — where the office's site cannot confirm a listing, whole sentences", () => {
+    const W = nhGov.window;
+    const states = W.kycStateGov.states;
+    const ag = states.NH.ag;
+    const sos = states.NV.sos;
+    const note = (code) => {
+      const box = W.document.createElement("div");
+      box.innerHTML = W.KYC.stategov.render(code);
+      return [...box.querySelectorAll(".gov-officer-note")].map((p) => p);
+    };
+    // The shapes today's data no longer holds, drawn from the same rows.
+    states.NH.ag = Object.assign({}, ag, { unconfirmed: true, unreadable: true });
+    delete states.NH.ag.readByHand;
+    let p = note("NH").find((el) => /Attorneys General Association lists/.test(el.textContent));
+    check("a site that refuses automated requests: who lists them, not confirmed, why, and the site linked",
+      !!p && /^The Republican Attorneys General Association lists John Formella \(Republican\) as its member here\. This site has not confirmed it on the office's own site, which refuses automated requests\.$/.test(p.textContent) &&
+        p.querySelector("a").textContent === "the office's own site" &&
+        p.querySelector("a").getAttribute("href") === ag.office, p && p.textContent);
+    states.NH.ag = Object.assign({}, ag, { unconfirmed: true });
+    delete states.NH.ag.readByHand;
+    p = note("NH").find((el) => /Attorneys General Association lists/.test(el.textContent));
+    check("a page read that does not name them says so",
+      !!p && /This site has not confirmed it: the office's own site does not name them as attorney general\.$/.test(p.textContent),
+      p && p.textContent);
+    states.NH.ag = ag;
+    states.NV.sos = Object.assign({}, sos, { notMember: true, officeRead: "unreadable" });
+    delete states.NV.sos.readByHand;
+    p = note("NV").find((el) => /Secretaries of State lists/.test(el.textContent));
+    check("NASS's listing of a non-member: it does not speak for the office, and why the site did not confirm it",
+      !!p && /^The National Association of Secretaries of State lists Francisco V\. Aguilar \(Democratic\) as secretary of state, but the office is not currently a member, so that listing does not speak for it\. This site has not confirmed it on the office's own site, which refuses automated requests\.$/.test(p.textContent) &&
+        p.querySelector("a").getAttribute("href") === sos.website, p && p.textContent);
+    states.NV.sos = Object.assign({}, sos, { notMember: true });
+    delete states.NV.sos.readByHand;
+    p = note("NV").find((el) => /Secretaries of State lists/.test(el.textContent));
+    check("and with no reason recorded, still a whole sentence",
+      !!p && /This site has not confirmed it on the office's own site\.$/.test(p.textContent), p && p.textContent);
+    states.NV.sos = sos;
+    const every = note("NH").concat(note("NV")).map((el) => el.textContent);
+    check("no note ends in a dangling \"The office's site.\"",
+      every.every((t) => !/The office's site\./.test(t)), every.join(" | "));
+  });
+  suite("states/al.html — a court nobody could reach, said as the record shows it", () => {
+    const court = alGov.window.kycStateGov.states.AL.court;
+    const p = [...alGov.D.querySelectorAll("#state-government .gov-officer-note")]
+      .find((el) => /court's site/.test(el.textContent));
+    check("the court's site could not be reached, from a person's browser too, on that day",
+      !!court.unreadable && !court.members && !!p &&
+        /^The court's site could not be reached by this site's automated reader, nor from a person's own browser on October 26, 2026, so its members are not listed here\. You can try the court's own page yourself\.$/.test(p.textContent),
+      p && p.textContent);
+    check("its page linked in the sentence", !!p && p.querySelector("a").getAttribute("href") === court.url);
   });
 
   const dc = await buildPage("states/dc.html");
