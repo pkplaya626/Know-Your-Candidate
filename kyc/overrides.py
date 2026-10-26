@@ -501,13 +501,21 @@ VOTING_LINKS = {
     # the entry stops applying once the table changes. Both opened by hand
     # in a person's Chrome on 2026-10-26 (research/by-hand-2026-10-26/
     # NOTES.md, round three): the old addresses showed readers an error.
+    # Oklahoma's first replacement, results.okelections.gov/OKER/, was only
+    # where the old address redirected: no page of the Board's site was seen
+    # to link it, and the page says the office's site links what it shows
+    # (voting.site_linked). The Board's own 2026 page, reached by its links,
+    # replaces it (NOTES.md, "Oklahoma's results link").
     ("OK", "results"): (
         "https://results.okelections.us/",
-        "https://results.okelections.gov/OKER/", None,
+        "https://oklahoma.gov/elections/elections-results/election-results/"
+        "2026-election-results.html", None,
         "results.okelections.us answers '403 - Forbidden: Access is denied.' in a person's "
-        "browser; its /OKER/ page redirects to the State Election Board's "
-        "results.okelections.gov/OKER/, 'OK Election Results' (both opened by hand "
-        "2026-10-26)"),
+        "browser; the State Election Board's site (oklahoma.gov/elections.html, 'Oklahoma "
+        "State Election Board (0270)') links 'Election Results' (oklahoma.gov/elections/"
+        "elections-results/election-results.html, 'Election Results'), which links '2026' "
+        "here: '2026 Election Results', listing 'November 3 General Elections' (not yet a "
+        "link) and each earlier 2026 election's results page (opened by hand 2026-10-26)"),
     ("NH", "results"): (
         "https://www.sos.nh.gov/elections/elections/election-results",
         "https://www.sos.nh.gov/2026-election-results", None,
@@ -678,9 +686,13 @@ VOTING_LINKS_BY_HAND = {
     ("MI", "sample"): ("https://mvic.sos.state.mi.us/PublicBallot/Index", _BY_HAND_DAY, "opened",
                        "", "What's on the ballot?"),
     # The two replacements in VOTING_LINKS, each opened that day: Oklahoma's
-    # reached through results.okelections.us/OKER/, which redirects there.
-    ("OK", "results"): ("https://results.okelections.gov/OKER/", _BY_HAND_DAY, "opened", "",
-                        "OK Election Results"),
+    # reached from the State Election Board's home page through its
+    # "Election Results" and "2026" links (NOTES.md, "Oklahoma's results
+    # link"), which replaced results.okelections.gov/OKER/, a page no link
+    # shows now.
+    ("OK", "results"): ("https://oklahoma.gov/elections/elections-results/election-results/"
+                        "2026-election-results.html", _BY_HAND_DAY, "opened", "",
+                        "2026 Election Results"),
     ("NH", "results"): ("https://www.sos.nh.gov/2026-election-results", _BY_HAND_DAY, "opened",
                         "", "2026 Election Results | New Hampshire Secretary of State"),
     # Alabama's results page (www2.alabamavotes.gov) was still loading after

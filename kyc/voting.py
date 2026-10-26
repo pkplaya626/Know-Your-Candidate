@@ -455,6 +455,29 @@ def effective(cache):
     return out
 
 
+# An override's evidence records the office's site linking its replacement
+# when it says a page "links" it or it was "linked from" one: never NASS's
+# listing, and never a redirect. Oklahoma's results address was shown as
+# the office's own page "as its site links it" when the record said only
+# that an old address redirected there (NOTES.md, "Oklahoma's results link").
+_SITE_LINKS = re.compile(r"(?<!NASS )\blinks\b|\blinked from\b")
+
+
+def site_linked(code, kind, url):
+    """Does the record show *code*'s election office's site linking *url*,
+    the page shown for *kind*? A curated page at the table's own address
+    does (each was opened from the link the office's home page gives it);
+    an override's replacement only where its evidence names the page that
+    links it. NASS's listing is NASS's word, not the office's site's."""
+    from . import overrides
+
+    fix = overrides.VOTING_LINKS.get((code, kind))
+    if fix and fix[1] == url and _SITE_LINKS.search(fix[3]):
+        return True
+    table = dict(CURATED).get(kind)
+    return kind != "deadlines" and table is not None and table.get(code) == url
+
+
 def stale_overrides(cache):
     """Overrides whose NASS entry, or curated page, has changed: each may
     now be unneeded."""
@@ -559,7 +582,7 @@ def for_page(cache, dates=None):
     if not cache:
         return {}
     status = cache.get("links") or {}
-    out, labels, nass, unreached = {}, {}, {}, {}
+    out, labels, nass, linked, unreached = {}, {}, {}, {}, {}
     for code, links in effective(cache).items():
         if voting_dates.deadlines_known(dates, code):
             links = {kind: link for kind, link in links.items() if kind != "deadlines"}
@@ -573,11 +596,16 @@ def for_page(cache, dates=None):
         # so the page never says "each link opened" over one that could not
         # be reached (Guam's only link, on 2026-10-17).
         nass[code] = sorted(kind for kind in out[code] if links[kind]["from"] == NASS)
+        # Which of the office's own pages the record shows its site linking:
+        # the page says "as its site links it" of those and no others.
+        linked[code] = sorted(kind for kind, url in out[code].items()
+                              if links[kind]["from"] == OFFICE and site_linked(code, kind, url))
         missed = sorted(kind for kind in out[code] if status.get(links[kind]["url"]) != LIVE)
         if missed:
             unreached[code] = missed
     out["_labels"] = labels
     out["_nass"] = nass
+    out["_siteLinked"] = linked
     out["_unreached"] = unreached
     # Links a person opened by hand, or found behind a check for people,
     # with the day: the page counts them for BY_HAND_DAYS from that day.

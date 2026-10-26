@@ -3359,8 +3359,12 @@ async function testStates() {
   suite("states/ok.html and nh.html — results links that answered 'Forbidden' are repointed", () => {
     const ok = resultsLink(okHand);
     const nh = resultsLink(nhHand);
-    check("Oklahoma's goes to the State Election Board's results.okelections.gov",
-      !!ok && ok.getAttribute("href") === "https://results.okelections.gov/OKER/", ok && ok.outerHTML);
+    check("Oklahoma's goes to the State Election Board's own 2026 results page",
+      !!ok && ok.getAttribute("href") ===
+        "https://oklahoma.gov/elections/elections-results/election-results/2026-election-results.html",
+      ok && ok.outerHTML);
+    check("the address the old one redirected to, which no page of the Board's was seen to link, is not linked",
+      !okHand.D.querySelector('a[href^="https://results.okelections.gov"]'));
     check("New Hampshire's goes to the office's own 2026 results page",
       !!nh && nh.getAttribute("href") === "https://www.sos.nh.gov/2026-election-results", nh && nh.outerHTML);
     check("neither old address is linked anywhere on the pages",
@@ -3370,6 +3374,38 @@ async function testStates() {
     check("Oklahoma's results page opened by hand, not called unconfirmed",
       /“Official results” opened by hand 2026-10-26/.test(okNote) && !/could not be confirmed/.test(okNote),
       okNote);
+  });
+  /* "As its site links it" is said only of a page the record shows the
+   * office's site linking (voting.site_linked, `_siteLinked`): #146 said it
+   * of Oklahoma's results.okelections.gov, where an old address only
+   * redirected. Maryland's polling-place page replaces NASS's on evidence
+   * of what it is, not of a link, and is called the office's page alone. */
+  const mdLinked = await buildPage("states/md.html");
+  suite("states/ok.html and md.html — 'as its site links it' only where the record shows the link", () => {
+    const meta = okHand.window.kycBuildMeta.voting;
+    const okNote = okHand.D.querySelector("#voting .state-note").textContent;
+    check("Oklahoma's results page is one the record shows the Board's site linking",
+      ((meta._siteLinked || {}).OK || []).indexOf("results") !== -1, JSON.stringify(meta._siteLinked));
+    check("and is said so",
+      /“Official results” is Oklahoma's election office's own page, as its site links it\./.test(okNote), okNote);
+    const saved = meta._siteLinked;
+    meta._siteLinked = Object.assign({}, saved, { OK: [] });
+    const box = okHand.D.createElement("div");
+    box.innerHTML = okHand.window.KYC.ballot.votingBlock("OK", "Oklahoma");
+    meta._siteLinked = saved;
+    const bare = box.querySelector(".state-note").textContent;
+    check("a page the record does not show linked is the office's own page, never 'as its site links it'",
+      /“Official results” is Oklahoma's election office's own page\./.test(bare) && !/site links/.test(bare), bare);
+    const mdMeta = mdLinked.window.kycBuildMeta.voting;
+    const mdNote = mdLinked.D.querySelector("#voting .state-note").textContent;
+    const mdLinks = (mdMeta._siteLinked || {}).MD || [];
+    check("Maryland's polling-place page is not among those its site is recorded linking",
+      !!mdMeta.MD.polling && mdLinks.indexOf("polling") === -1 && mdLinks.indexOf("results") !== -1,
+      JSON.stringify(mdLinks));
+    check("so it is called the office's own page, and only the results 'as its site links it'",
+      /“Find your polling place” is Maryland's election office's own page\./.test(mdNote) &&
+        /“Official results” is Maryland's election office's own page, as its site links it\./.test(mdNote) &&
+        !/“Find your polling place”[^.]*site links/.test(mdNote), mdNote);
   });
   suite("states/nh.html — vote.gov's registration page and the results opened by hand", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
