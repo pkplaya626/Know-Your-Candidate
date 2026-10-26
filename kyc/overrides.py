@@ -1215,8 +1215,9 @@ PORTRAIT_NAME_FORMS = {}
 # printed): (the person it stands for - "person:<profile id>" or
 # "candidate:<state>:<office>:<name shown>" - and the evidence tying the
 # two, with the day it was read). Without one, a guide's name joins only
-# where its words are the person's (rule 62): "David Russ" is not "RUSS,
-# DAVID HONORABLE".
+# where its words are the person's (rule 62). "David Russ" was not "RUSS,
+# DAVID HONORABLE" until "Honorable" was read as the honorific it is
+# (candidates._HONORIFICS, 2026-10-25); the evidence below stays, read.
 GUIDE_NAME_FORMS = {
     ("OR", "David Russ"): (
         "person:FEC_H2OR01240",
@@ -1228,8 +1229,25 @@ GUIDE_NAME_FORMS = {
 }
 
 
+# The mark on a NOT_A_PORTRAIT entry whose only finding is other people in
+# the frame - behind, beside or in part (photos.others_only). The owner's
+# background-people rule (2026-10-25: "probably better to leave out
+# background people") is for candidates' and officials' photographs; asked
+# the same day about the federal judges' Senate Judiciary hearing stills, he
+# said "keep": the judge is plainly the subject. So such an entry does not
+# withhold a judge's portrait - a federal judge's (judge_links) or a state
+# justice's from the court's own roster (court_photos), a judge as well -
+# and every other entry, and every other check, still does
+# (photos.applies). A picture of a person - a framed photograph on a shelf
+# or a wall, a poster, a book jacket - is not a person in the frame and
+# refuses nothing (decided for the owner, 2026-10-25). A screen showing a
+# face is not decided: a rally's screen is usually a live feed of someone
+# there, so Donna Miller's stays refused until the owner rules on screens.
+OTHERS_IN_FRAME = "others in the frame"
+
 # Images that a route would take as a person's portrait but that are not one,
-# keyed on the image URL: (date checked, what it shows). One list for every
+# keyed on the image URL: (date checked, what it shows), with OTHERS_IN_FRAME
+# third where other people in the frame are all it shows. One list for every
 # route (rule 38): a campaign's own site (`enrich`), a nominee's Wikidata item
 # or legislature card (nominee_photos), an attorney general's office
 # (officers.add_ag_photos), a court's page (court_photos), a statewide
@@ -1249,7 +1267,11 @@ GUIDE_NAME_FORMS = {
 # 6.5px of the state pages' 65px phone card, where eyes and a mouth can be
 # made out - is a likeness and is shown ("more content", the owner's
 # decision of 2026-10-25). Anything else is here, with what was seen and
-# measured: another person in the frame, a scene, a full-length figure.
+# measured: another person in the frame, a scene, a full-length figure. A
+# picture of a person behind them (a framed photograph, a poster, a book
+# jacket) is not another person: John Giles's and Dave Sunday's
+# photographs, refused for one on 2026-10-25, are shown again. For a judge,
+# the background-people rule does not apply (OTHERS_IN_FRAME above).
 # Measured on 2026-10-25, Brian Bengs's park photograph (a seventh and a
 # half) and Jena Nelson's street portrait (a ninth) pass; Jamie Davis by his
 # tractor (an eleventh), Lauren Jewett by a seal (a fifteenth) and Jordan
@@ -1288,284 +1310,188 @@ NOT_A_PORTRAIT = {
     # Every photograph shown by the routes the owner's brief named that can
     # take a picture not made in a studio was looked at on 2026-10-25 (701
     # of them; not the judges' item route, CLAUDE.md rule 38); these show
-    # someone else, in the background or in part. Keyed as each route asks: a
+    # someone else, in the background or in part. The 48 judges' hearing
+    # stills refused that day are shown again by the owner's "keep" (above),
+    # as are Judges Orso's and Powell's, refused in the review that followed.
+    # Keyed as each route asks: a
     # campaign's or an office's file by its address, a Commons file by its
     # upload address.
     # a campaign's own site (enrich): 1.
     "https://raw.githubusercontent.com/dpconway4-bot/pat-moore-for-congress/main/assets/pat-moore-headshot.jpg":
-        ("2026-10-25", "Patricia Ann Moore (LA): the House chamber behind her, with members seated"),
+        ("2026-10-25", "Patricia Ann Moore (LA): the House chamber behind her, with members seated",
+         OTHERS_IN_FRAME),
     # the article a profile's bioguide id or ballot page links (portraits): 33.
     "https://upload.wikimedia.org/wikipedia/commons/7/7e/Adam_Hollier_at_Whitmer's_inauguration_(January_1,_2023)_(cropped).jpg":
-        ("2026-10-25", "Adam Hollier (MI): a person standing by the tents at the right"),
+        ("2026-10-25", "Adam Hollier (MI): a person standing by the tents at the right",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/7/79/2025_Virginia_State_of_the_Commonwealth,_Youngkin_procession_(cropped).jpg":
-        ("2026-10-25", "Adele McClure (VA): people behind her"),
+        ("2026-10-25", "Adele McClure (VA): people behind her", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg":
-        ("2026-10-25", "Adrian Boafo (MD): another person's arm raised at the left"),
+        ("2026-10-25", "Adrian Boafo (MD): another person's arm raised at the left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/6/6a/Amy_McGrath_Event-_(49220643717)_1.jpg":
-        ("2026-10-25", "Amy McGrath (KY): another person's hair at the left edge"),
+        ("2026-10-25", "Amy McGrath (KY): another person's hair at the left edge",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/2/26/Brad_Lander.jpg":
-        ("2026-10-25", "Brad Lander (NY): a person behind him at the left"),
+        ("2026-10-25", "Brad Lander (NY): a person behind him at the left", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/d/d8/Brent_Taylor_(Tennessee_politician).jpg":
-        ("2026-10-25", "Brent Taylor (TN): people at the stalls behind him at the left"),
+        ("2026-10-25", "Brent Taylor (TN): people at the stalls behind him at the left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/8/82/Cameron_Kasky_3.jpg":
-        ("2026-10-25", "Cameron Kasky (NY): a crowd around him"),
+        ("2026-10-25", "Cameron Kasky (NY): a crowd around him", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/0f/Chris_Stigall_2017_(cropped).jpg":
-        ("2026-10-25", "Chris Stigall (MO): people behind him at the left, one with a camera"),
+        ("2026-10-25", "Chris Stigall (MO): people behind him at the left, one with a camera",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/9/92/Dale_Romans.jpg":
-        ("2026-10-25", "Dale Romans (KY): people on the track behind him"),
+        ("2026-10-25", "Dale Romans (KY): people on the track behind him", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/e/e0/Emanuel_Jones_(46948866015).jpg":
-        ("2026-10-25", "Emanuel Jones (GA): people in purple shirts behind him"),
+        ("2026-10-25", "Emanuel Jones (GA): people in purple shirts behind him",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/9/90/Heather_Keeler_at_DFL_post-Roe_Agenda_Press_Conference_(cropped).jpg":
-        ("2026-10-25", "Heather Keeler (MN): another person's hair at the foot of the frame"),
+        ("2026-10-25", "Heather Keeler (MN): another person's hair at the foot of the frame",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/7/74/JD_Ford,_Indy_Pride_Parade_2023_(2)_(cropped).jpg":
-        ("2026-10-25", "J.D. Ford (IN): a crowd at a parade around him"),
+        ("2026-10-25", "J.D. Ford (IN): a crowd at a parade around him", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg":
-        ("2026-10-25", "James Talarico (TX): a person at the right edge"),
+        ("2026-10-25", "James Talarico (TX): a person at the right edge", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/0f/Jay_Feely_by_Gage_Skidmore.jpg":
-        ("2026-10-25", "Jay Feely (AZ): audience heads at the foot of the frame"),
+        ("2026-10-25", "Jay Feely (AZ): audience heads at the foot of the frame",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg":
-        ("2026-10-25", "Jeremy Moss (MI): people behind him in the room"),
+        ("2026-10-25", "Jeremy Moss (MI): people behind him in the room", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/8/8c/JillianGilchrestFebruary2026Cropped.jpg":
-        ("2026-10-25", "Jillian Gilchrest (CT): people standing behind her in the chamber"),
+        ("2026-10-25", "Jillian Gilchrest (CT): people standing behind her in the chamber",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/6/60/Colorado_State_Senator_Julie_Gonzales_2025_(cropped).jpg":
-        ("2026-10-25", "Julie Gonzales (CO): a person standing in the chamber behind her, right"),
+        ("2026-10-25", "Julie Gonzales (CO): a person standing in the chamber behind her, right",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/f/f3/Julie_Won_(54199169237)_(cropped).jpg":
-        ("2026-10-25", "Julie Jaehee Won (NY): a man standing behind her"),
+        ("2026-10-25", "Julie Jaehee Won (NY): a man standing behind her", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/2/23/Justin_J_Pearson_August_2023.jpg":
-        ("2026-10-25", "Justin J. Pearson (TN): a man's shoulder behind him at the left"),
+        ("2026-10-25", "Justin J. Pearson (TN): a man's shoulder behind him at the left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/06/Ken_Paxton_(54816860552)_(cropped).jpg":
-        ("2026-10-25", "Ken Paxton (TX): a crowd behind him"),
+        ("2026-10-25", "Ken Paxton (TX): a crowd behind him", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/a/a3/La_Shawn_K._Ford_on_11_December_2023_-_8_(cropped).jpg":
         ("2026-10-25", "La Shawn K Ford (IL): people standing behind him, a woman's hand on his "
-                       "shoulder"),
+                       "shoulder", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/c/ca/Luke_Bronin_(42831415392).jpg":
-        ("2026-10-25", "Luke Bronin (CT): a man in a blue shirt behind him, left"),
+        ("2026-10-25", "Luke Bronin (CT): a man in a blue shirt behind him, left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/4/47/Mallory_McMorrow_in_2023_-_8R4A5252_(cropped).jpg":
-        ("2026-10-25", "Mallory McMorrow (MI): a person in blue behind her at the top left"),
+        ("2026-10-25", "Mallory McMorrow (MI): a person in blue behind her at the top left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/f/f2/Mark_Teixeira_basepaths_2011.jpg":
-        ("2026-10-25", "Mark Charles Teixeira (TX): spectators in the stands behind him"),
+        ("2026-10-25", "Mark Charles Teixeira (TX): spectators in the stands behind him",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/e/ec/Matt_Strickler,_ribbon_cutting.jpg":
-        ("2026-10-25", "Matt Strickler (VA): another person's shoulder at the left"),
+        ("2026-10-25", "Matt Strickler (VA): another person's shoulder at the left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/3/35/Mike_LiPetri_(2024_Italian_Heritage_Street_Festival)_(cropped).jpg":
-        ("2026-10-25", "Mike Lipetri (NY): people behind him at the foot of the frame"),
+        ("2026-10-25", "Mike Lipetri (NY): people behind him at the foot of the frame",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/06/William_V_Bill_Bell_Way_Dedication_Ceremony_Nida_Allam.jpg":
-        ("2026-10-25", "Nida Allam (NC): people behind her at the left"),
+        ("2026-10-25", "Nida Allam (NC): people behind her at the left", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/b/bf/Phil_Lyman_at_Riley_Gaines_Speech_(cropped).jpg":
-        ("2026-10-25", "Phil Lyman (UT): another person at the right edge"),
+        ("2026-10-25", "Phil Lyman (UT): another person at the right edge", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/6/6d/Unveiling_the_NYS_Historic_Marker_Robert_Smullen.jpg":
-        ("2026-10-25", "Robert Smullen (NY): another man's shoulder at the right"),
+        ("2026-10-25", "Robert Smullen (NY): another man's shoulder at the right",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/09/Robin_Ficker_(35598540490).jpg":
-        ("2026-10-25", "Robin Ficker (MD): another man's shoulder at the left, and a person behind"),
+        ("2026-10-25", "Robin Ficker (MD): another man's shoulder at the left, and a person behind",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/b/b3/Rushern_Baker,_May_2017.jpg":
-        ("2026-10-25", "Rushern L Baker III (MD): a man behind him at the left"),
+        ("2026-10-25", "Rushern L Baker III (MD): a man behind him at the left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/e/ea/Sharif_Street_-_18901_gov_minwage_dz_030_(cropped).jpg":
-        ("2026-10-25", "Sharif Street (PA): a white-haired man behind him at the left"),
+        ("2026-10-25", "Sharif Street (PA): a white-haired man behind him at the left",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/0/00/(03-12-24)_Taylor_Darling.jpg":
-        ("2026-10-25", "Taylor R Darling (NY): people in white shirts behind her"),
-    # a statewide candidate's guide or Commons file (statewide_photos): 5.
+        ("2026-10-25", "Taylor R Darling (NY): people in white shirts behind her",
+         OTHERS_IN_FRAME),
+    # a statewide candidate's guide or Commons file (statewide_photos): 4
+    # (John Giles's, refused for framed photographs, is shown again).
     "https://www.azcleanelections.gov/Custom/Picture/2469":
         ("2026-10-25", "Duwayne Collier (AZ secretary of state candidate): a child's face and "
                        "another person's arm (the Clean Elections guide photograph, cropped from a "
-                       "family snapshot)"),
+                       "family snapshot)", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/7/7d/Heather_Baxter_by_Gage_Skidmore.jpg":
         ("2026-10-25", "Heather Baxter (SD secretary of state candidate): a person seated behind her "
-                       "at the right"),
-    "https://www.azcleanelections.gov/Custom/Picture/2640":
-        ("2026-10-25", "John Giles (AZ lieutenant governor candidate): framed photographs of people "
-                       "on the shelves behind him"),
+                       "at the right", OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/2/23/Mayes_Middleton_by_Gage_Skidmore_(cropped).jpg":
         ("2026-10-25", "Mayes Middleton (TX attorney general candidate): people behind him at the "
-                       "left and right"),
+                       "left and right", OTHERS_IN_FRAME),
     "https://www.nass.org/sites/default/files/styles/secretary/public/2023-03/MA-Galvin-2023.jpg?itok=7JV1GBsz":
         ("2026-10-25", "William Francis Galvin (MA secretary of state candidate): people walking on "
-                       "the path behind him"),
-    # an attorney general's office (officers.add_ag_photos): 1.
-    "https://i0.wp.com/www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg?w=500&ssl=1":
-        ("2026-10-25", "Dave Sunday (PA attorney general): a framed snapshot of people on the "
-                       "bookcase at the left"),
-    # a judge's Commons crop of a hearing still (judge_links, route 'crop'): 9.
-    "https://upload.wikimedia.org/wikipedia/commons/d/d4/Ann_Donnelly_(cropped).jpg":
-        ("2026-10-25", "Judge Ann Donnelly (FJC 1394806): people seated behind her (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/bb/Jennifer_Rearden_(Judge)_(cropped).jpg":
-        ("2026-10-25", "Judge Jennifer H. Rearden (FJC 12537146): a figure behind her at the right"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/bf/Katherine_Failla_(cropped).jpg":
-        ("2026-10-25", "Judge Katherine Polk Failla (FJC 1394136): a person seated behind her at the "
-                       "left (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/6/64/Landya_McCafferty_(cropped).jpg":
-        ("2026-10-25", "Judge Landya B. McCafferty (FJC 1394326): people seated behind her (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/0/0a/Leigh_May_(cropped).jpg":
-        ("2026-10-25", "Judge Leigh Martin May (FJC 1394641): people seated behind her at the left "
-                       "(a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/1/16/Hannah_Lauck_(cropped).jpg":
-        ("2026-10-25", "Judge M. Hannah Lauck (FJC 1394551): people seated behind her at the right "
-                       "(a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/c/c4/Jose_Olvera_Jr_(cropped).jpg":
-        ("2026-10-25", "Judge Rolando Olvera (FJC 1394786): a person seated behind him at the right "
-                       "(a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/5/55/Stephanie_Davis_(Judge)_(cropped).jpg":
-        ("2026-10-25", "Judge Stephanie D. Davis (FJC 7545481): people seated behind her (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/b3/Tiffany_Cunningham_(cropped).jpg":
-        ("2026-10-25", "Judge Tiffany P. Cunningham (FJC 10376611): a person in pink behind her"),
-    # a judge's article's image (judge_links, route 'article'): 39.
-    "https://upload.wikimedia.org/wikipedia/commons/5/5d/Aaron_C._Peterson.png":
-        ("2026-10-25", "Judge Aaron C. Peterson (FJC 13762106): a grey-haired person seated behind "
-                       "him at the left (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/0/07/Andrew_B._Davis.png":
-        ("2026-10-25", "Judge Andrew B. Davis (FJC 13762122): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/5/5c/Angela_V._Colmenero.png":
-        ("2026-10-25", "Judge Angela Colmenero (FJC 13762219): a person standing behind her (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/8/89/Anna_St._John.png":
-        ("2026-10-25", "Judge Anna St. John (FJC 13762116): people seated behind her (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/8/87/Anne-Leigh_Moe.png":
-        ("2026-10-25", "Judge Anne-Leigh Gaylord Moe (FJC 13762067): people seated behind her (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/f/ff/Bill_W._Lewis.png":
-        ("2026-10-25", "Judge Bill Lewis (FJC 13762071): a person in a patterned dress seated behind "
-                       "him (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/d/d7/Brian_Lea.png":
-        ("2026-10-25", "Judge Brian C. Lea (FJC 13762108): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/7/76/Byron_B._Conway-7-31-24.jpg":
-        ("2026-10-25", "Judge Byron B. Conway (FJC 13761869): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/9/9e/Christopher_R._Wolfe.png":
-        ("2026-10-25", "Judge Chris Wolfe (FJC 13762121): a person seated behind him at the right (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/a/ac/David_Steven_Morales_(Judge).jpg":
-        ("2026-10-25", "Judge David S. Morales (FJC 6278461): a person seated behind him at the "
-                       "right (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/d/df/Edward_L._Artau.png":
-        ("2026-10-25", "Judge Ed Artau (FJC 13762047): people seated behind him (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/4/40/Embry_J_Kidd.png":
-        ("2026-10-25", "Judge Embry Kidd (FJC 13761891): people seated behind him (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/e/e5/Eric_C._Schulte.png":
-        ("2026-10-25", "Judge Eric Schulte (FJC 13761661): a person seated behind him at the right "
-                       "(a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/8/8b/Fernando_Rodriguez_Jr._(Judge)_(cropped).jpg":
-        ("2026-10-25", "Judge Fernando Rodriguez Jr. (FJC 4733056): a person seated behind him at "
-                       "the right (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/4/42/Gail_A._Weilheimer-7-31-24.jpg":
-        ("2026-10-25", "Judge Gail A. Weilheimer (FJC 13761902): a person seated behind her at the "
-                       "left (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/3a/Harold_D._Mooty.png":
-        ("2026-10-25", "Judge Harold Mooty (FJC 13762066): a person in red seated behind him (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/6/6b/James_Maxwell.png":
-        ("2026-10-25", "Judge James D. Maxwell II (FJC 13762095): a person seated behind him (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/6/6a/Jeffrey_M._Kuhlman.png":
-        ("2026-10-25", "Judge Jeffrey M. Kuhlman (FJC 13762129): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/7/7d/John_Thomas_Shepherd.png":
-        ("2026-10-25", "Judge John T. Shepherd (FJC 13762120): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/9/9c/Jonathan_E._Hawley-7-31-24.jpg":
-        ("2026-10-25", "Judge Jonathan E. Hawley (FJC 13761886): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/f/f2/Joshua_M._Divine.png":
-        ("2026-10-25", "Judge Josh Divine (FJC 13762033): a person seated behind him at the right (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/e/ee/Justin_Olson.png":
-        ("2026-10-25", "Judge Justin R. Olson (FJC 13762109): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/38/Kara_M._Westercamp.png":
-        ("2026-10-25", "Judge Kara Westercamp (FJC 13762146): people seated behind her at the right "
-                       "(a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/a/a7/Kasdin_M._Mitchell.png":
-        ("2026-10-25", "Judge Kasdin Mitchell (FJC 13762214): a person in a striped shirt behind her "
-                       "(a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/8/87/Kathleen_S._Lane.png":
-        ("2026-10-25", "Judge Katie Lane (FJC 13762128): a person seated behind her at the left (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/e/e5/Kyle_C._Dudek.png":
-        ("2026-10-25", "Judge Kyle Dudek (FJC 13762049): people seated behind him (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/3e/Maria_Lanahan.png":
-        ("2026-10-25", "Judge Maria Lanahan (FJC 13762048): a person seated behind her (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/a/a1/Matthew_R._Byrne.png":
-        ("2026-10-25", "Judge Matthew R. Byrne (FJC 13762157): a person standing behind him at the "
-                       "right (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/b4/Matthew_A._Schwartz.png":
-        ("2026-10-25", "Judge Matthew Schwartz (FJC 13762140): a person seated behind him at the "
-                       "right (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/9/9c/Megan_Benton.png":
-        ("2026-10-25", "Judge Megan Benton (FJC 13762107): people seated behind her (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/1/1d/Michael_C._Martin.png":
-        ("2026-10-25", "Judge Michael C. Martin (FJC 13762148): a person standing behind him (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/37/Robert_Chamberlin.png":
-        ("2026-10-25", "Judge Robert P. Chamberlin (FJC 13762093): people seated behind him (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/34/Sanket_J._Bulsara.png":
-        ("2026-10-25", "Judge Sanket J. Bulsara (FJC 13761656): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/3/3e/Sheria_Akins_Clarke.png":
-        ("2026-10-25", "Judge Sheria Clarke (FJC 13762124): people seated behind her (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/b/b1/Stephanos_Bibas.png":
-        ("2026-10-25", "Judge Stephanos Bibas (FJC 3989731): people seated behind him (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/f/f3/Susan_Courtwright_Rodriguez.png":
-        ("2026-10-25", "Judge Susan C. Rodriguez (FJC 13762092): people seated behind her (a hearing "
-                       "still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/a/a4/Thomas_Lee_R._Parker_(cropped).jpg":
-        ("2026-10-25", "Judge Tommy Parker (FJC 4028131): a person seated behind him at the right (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/d/dc/Whitney_Hermandorfer.png":
-        ("2026-10-25", "Judge Whitney Hermandorfer (FJC 13762030): people seated behind her (a "
-                       "hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/2/24/Zack_Bluestone.png":
-        ("2026-10-25", "Judge Zack Bluestone (FJC 13762035): a person in pink behind him (a hearing "
-                       "still)"),
+                       "the path behind him", OTHERS_IN_FRAME),
+    # an attorney general's office (officers.add_ag_photos): none (Dave
+    # Sunday's, refused for a framed snapshot on his bookcase, is shown again).
     # A legislator's card (Open States's file or the legislature's,
     # legislature.photo_kind): the 267 cards credited to a caucus were looked
-    # at on 2026-10-25, when the owner allowed caucus credits; these two show
-    # colleagues.
+    # at on 2026-10-25, when the owner allowed caucus credits, and these two
+    # refused. The live check after PR #139 found more at full size (the
+    # sweep had looked at the cards), so each of Connecticut's House
+    # Democrats' 65 files was opened at full size on 2026-10-25; these 8 show
+    # someone else. Blurred shapes at the chamber's desks in Kate Farrar's,
+    # Robin Comey's and Maryam Khan's are the desks' flags and microphones (as
+    # Hubert Delany's sharp chamber shows them), not people.
     "https://www2.housedems.ct.gov/Genga/images/Genga_HS.jpg":
         ("2026-10-25", "Henry Genga (CT House): at his desk in the chamber, Rep. Conway seated "
-                       "behind him"),
+                       "behind him", OTHERS_IN_FRAME),
     "https://www2.housedems.ct.gov/Haddad/images/Haddad_19.jpg":
         ("2026-10-25", "Gregg Haddad (CT House): at his desk in the chamber, two colleagues "
-                       "beside and behind him"),
+                       "beside and behind him", OTHERS_IN_FRAME),
+    "https://www2.housedems.ct.gov/Gonzalez/images/Gonzalez_HS.jpg":
+        ("2026-10-25", "Minnie Gonzalez (CT House): at her desk in the chamber, members seated "
+                       "and standing behind her", OTHERS_IN_FRAME),
+    "https://www2.housedems.ct.gov/SanchezM/images/SanchezM_HS.jpg":
+        ("2026-10-25", "Manny Sanchez (CT House): two people standing in the hall behind him, at "
+                       "the left", OTHERS_IN_FRAME),
+    "https://www2.housedems.ct.gov/MorrinBello/images/MorrinBello_HS.jpg":
+        ("2026-10-25", "Amy Morrin Bello (CT House): in the Legislative Office Building's atrium, "
+                       "a person walking on the balcony behind her at the left and another at the "
+                       "right", OTHERS_IN_FRAME),
+    "https://www2.housedems.ct.gov/Garibay/images/Garibay_HS.jpg":
+        ("2026-10-25", "Jane Garibay (CT House): in the atrium, two people's legs on the balcony "
+                       "at the top of the frame", OTHERS_IN_FRAME),
+    "https://www2.housedems.ct.gov/Elliott/images/Elliott_HS.jpg":
+        ("2026-10-25", "Josh Elliott (CT House): in the atrium, a person in a blue shirt on the "
+                       "floor below at the lower right", OTHERS_IN_FRAME),
+    "https://www2.housedems.ct.gov/Gresko/images/gresko_HS.jpg":
+        ("2026-10-25", "Joe Gresko (CT House): on a beach, a person walking at the water's edge "
+                       "behind him at the left", OTHERS_IN_FRAME),
     # The PR #139 review, looked at again on 2026-10-25. A refusal promoted
     # James Talarico's campaign photograph, which nobody had looked at, in
     # place of his Commons one (validate's portrait-fallback-unseen now
-    # names any such photograph); the sweep missed four more; and a framed
-    # photograph of people on the wall counts as it did for John Giles and
-    # Dave Sunday.
+    # names any such photograph); and the sweep missed JoCasta Zamarripa's.
+    # (Two judges' hearing stills and a framed photograph behind Adam Hamawy,
+    # refused in that review too, are shown again: a judge by the owner's
+    # "keep", a picture as no person. Hamawy's was not among the two the
+    # brief named; looked at again, it shows him alone before a framed
+    # photograph on the wall.)
     "https://jamestalarico.com/wp-content/uploads/2025/09/james-talarico-texas-education-819x1024.webp":
         ("2026-10-25", "James Talarico (TX): bent over a desk helping a child in a classroom, "
                        "two more children in the frame, his face turned down"),
     # The uncut file the refused crop came from, which his Wikidata item
     # carries (nominee_photos' Wikidata route then offered it).
     "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg":
-        ("2026-10-25", "James Talarico (TX): another person's shoulder at the right edge"),
+        ("2026-10-25", "James Talarico (TX): another person's shoulder at the right edge",
+         OTHERS_IN_FRAME),
     "https://upload.wikimedia.org/wikipedia/commons/f/f0/JoCasta_Zamarripa_(51017746066).jpg":
         ("2026-10-25", "JoCasta Zamarripa (WI secretary of state candidate): another person's "
-                       "hand and fingers at the left edge"),
-    "https://upload.wikimedia.org/wikipedia/commons/a/aa/Matthew_E._Orso.png":
-        ("2026-10-25", "Judge Matthew E. Orso (FJC 13762088): a standing person's legs and shoe "
-                       "behind him at the upper right (a hearing still)"),
-    "https://upload.wikimedia.org/wikipedia/commons/f/f5/Anthony_J._Powell.png":
-        ("2026-10-25", "Judge Anthony J. Powell (FJC 13762132): people in suits seated behind "
-                       "him (a hearing still)"),
+                       "hand and fingers at the left edge", OTHERS_IN_FRAME),
+    # A screen is not a framed picture: at a rally it is usually a live feed
+    # of a person there. Kept refused until the owner rules on screens; her
+    # shown portrait is the county's (portraits.json, curated) either way.
     "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg":
-        ("2026-10-25", "Donna Miller (IL): a person's face on the screen behind her, at the "
-                       "upper right"),
-    "https://upload.wikimedia.org/wikipedia/commons/1/11/Adam_Hamawy_in_2025.jpg":
-        ("2026-10-25", "Adam Hamawy (NJ): a framed photograph of people on the wall behind him"),
+        ("2026-10-25", "Donna Miller (IL): a person's face on the rally's LED screen behind her, "
+                       "at the upper right", OTHERS_IN_FRAME),
     # The same California National Guard photograph under its new name (the
     # old one answered 404 and was never looked at by the sweep), offered
     # again when her portrait was resolved anew.
     "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg":
         ("2026-10-25", "Jacqui V Irwin (CA): another woman seated at the right edge, and another "
-                       "person's hair at the left"),
+                       "person's hair at the left", OTHERS_IN_FRAME),
 }
 
 # Photographs that came forward when a person refused the one before them

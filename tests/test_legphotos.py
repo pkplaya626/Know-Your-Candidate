@@ -529,6 +529,14 @@ class TestSettle(unittest.TestCase):
         entry = self.settle({url: image(313, 250)}, self.candidate(url))
         self.assertIn("landscape", entry["withheld"])
 
+    def test_a_one_pixel_image_is_not_a_portrait(self):
+        # Michigan's House Democrats' files load as 1x1: no photograph, and
+        # no empty box under a credit.
+        url = "https://www.legmt.gov/pixel.png"
+        entry = self.settle({url: image(1, 1, 68)}, self.candidate(url))
+        self.assertIn("1x1 pixels", entry["withheld"])
+        self.assertNotIn("image", entry)
+
     def test_an_unanswered_read_concludes_nothing(self):
         self.assertIsNone(self.settle({}, self.candidate("https://www.legmt.gov/a.jpg")))
 

@@ -13649,7 +13649,7 @@
      "PEOPLE FIRST in Education"
     ],
     "issuesUrl": "https://www.marknair.com/platform",
-    "portrait": "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png?format=300w",
     "portraitEvidence": "file name \"About+Mark+Nair.png\"",
     "portraitForms": [
      [
@@ -13683,7 +13683,7 @@
     ],
     "portraitHeavy": [
      {
-      "kept": true,
+      "kept": false,
       "url": "https://images.squarespace-cdn.com/content/v1/6976be3c171eae1f3b2ebcaa/52d88b54-9646-4ee6-bdca-672154211baf/About+Mark+Nair.png",
       "why": "479 KB, over 300 KB"
      }
@@ -13691,9 +13691,9 @@
     "portraitPage": "https://www.marknair.com/about-mark",
     "portraitRead": "2026-10-25",
     "portraitWeight": {
-     "bytes": 479272,
-     "height": 1150,
-     "width": 678
+     "bytes": 143308,
+     "height": 509,
+     "width": 300
     },
     "reason": "ok",
     "safe": true,

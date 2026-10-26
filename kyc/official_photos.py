@@ -355,15 +355,18 @@ def addresses(rec):
     return [u for u in out if u]
 
 
-def held_back(rec):
+def held_back(rec, judge=False):
     """Why a person's lists withhold *rec*, or ``None``: a file in
     ``overrides.NOT_A_PORTRAIT`` (rule 38: someone looked, and it is not a
     likeness) or ``overrides.PORTRAIT_LICENCE_DOUBTS`` (rule 82: its licence
     waits for a person). One test for every route, asked of a record read
     now and of one kept from an earlier read (rule 8), as
-    ``judge_links.held_back`` asks it of a judge's (``photos.refused``)."""
+    ``judge_links.held_back`` asks it of a judge's (``photos.refused``).
+    *judge* is a state justice's photograph from the court's own roster: a
+    judge, whose portrait is not refused for other people in the frame
+    (``photos.applies``, the owner's decision of 2026-10-25)."""
     from .photos import refused
-    return refused(*addresses(rec)) or None
+    return refused(*addresses(rec), judge=judge) or None
 
 
 CAPS_WORDS = f"{MAX_PORTRAIT_BYTES // 1000} KB or {MAX_PORTRAIT_PX:,}px"

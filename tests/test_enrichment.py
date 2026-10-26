@@ -1969,6 +1969,27 @@ class TestPortraitWeights(unittest.TestCase):
         self.assertEqual(photos.offered_forms([("s", 150), ("m", 384), ("l", 768), ("x", 0)]),
                          ["m", "l", "s"])
 
+    def test_a_squarespace_srcset_reaches_the_rendition_within_the_caps(self):
+        """Mark Nair (TX-13): Squarespace lists 100w to 2500w of one PNG.
+        The five tries went to 500w, 750w, 1000w, 1500w and 2500w and never
+        reached 300w, the only one within the caps, so the 479 KB original
+        was shown. A rendition declared wider than the caps is not tried."""
+        base = "https://images.squarespace-cdn.com/content/v1/abc/nair.png?format="
+        offered = photos.parse_srcset(", ".join(f"{base}{w}w {w}w" for w in
+                                                (100, 300, 500, 750, 1000, 1500, 2500)))
+        self.assertEqual([u.rsplit("=", 1)[1] for u in photos.offered_forms(offered)],
+                         ["500w", "750w", "1000w", "300w", "100w"])
+        original = {"bytes": 479_000, "width": 1600, "height": 2000}
+
+        def weigh(url):
+            width = int(url.rsplit("=", 1)[1][:-1])
+            return {"bytes": 320_000 if width >= 500 else 90_000, "width": width,
+                    "height": width * 5 // 4}
+
+        form, weight = photos.lighter_rendition(base + "original", original, weigh, offered)
+        self.assertEqual(form, base + "300w")
+        self.assertEqual(weight["width"], 300)
+
     def test_a_portrait_refused_for_its_weight_is_weighed_again_and_never_read_from_the_site(self):
         heavy = "https://smith.com/wp-content/uploads/smith.png"
         offered = "https://smith.com/wp-content/uploads/smith-500x584.png"
