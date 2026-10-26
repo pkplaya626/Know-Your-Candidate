@@ -52,7 +52,7 @@ import urllib.request
 
 from . import tls
 
-USER_AGENT ="Mozilla/5.0 (compatible; know-your-candidate/1.0)"
+USER_AGENT = "Mozilla/5.0 (compatible; know-your-candidate/1.0)"
 TIMEOUT = 60
 GAP = 2.0           # seconds between requests to one state's server
 
