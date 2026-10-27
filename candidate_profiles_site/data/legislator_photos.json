@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-25T15:42:46+00:00",
+ "fetched": "2026-10-26T20:17:41+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -145,6 +145,24 @@
    "sha": "6f106c3badb35883",
    "state": "MT",
    "width": 200
+  },
+  "ocd-person/02d806fd-fb8f-4d66-b9b8-6dacd2bd9656": {
+   "bytes": 40762,
+   "chamber": "upper",
+   "credit": "New Mexico Legislature",
+   "district": "19",
+   "evidence": "file \"STHOR.jpg\" named by the page's own key for the member (sthor), alt \"Thornton\"; page \"Senator Anthony L. Thornton - (R)\"",
+   "height": 375,
+   "image": "https://www.nmlegis.gov/Images/Legislators/Senate/STHOR.jpg",
+   "key": "member page",
+   "lastModified": "2025-02-12",
+   "lastModifiedAt": "2025-02-12T18:53:36",
+   "name": "Ant Thornton",
+   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=STHOR",
+   "read": "2026-10-26",
+   "sha": "c36aabed060bb989",
+   "state": "NM",
+   "width": 300
   },
   "ocd-person/0353532c-93a0-41cb-9621-278c8ef19178": {
    "bytes": 68843,
@@ -365,6 +383,24 @@
    "sha": "ab49c8f7733aa837",
    "state": "ME",
    "width": 152
+  },
+  "ocd-person/05204bb3-1917-4f12-848e-b83f68f5fddf": {
+   "bytes": 10115,
+   "chamber": "lower",
+   "credit": "Kansas Legislature",
+   "district": "45",
+   "evidence": "alt \"Mike Amyx\"; page \"Mike Amyx — Kansas Legislature\"",
+   "height": 300,
+   "image": "https://www.kslegislature.gov/static/li_pics/rep_amyx_mike_1.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-26",
+   "lastModifiedAt": "2026-10-26T13:22:09",
+   "name": "Mike Amyx",
+   "page": "https://www.kslegislature.gov/legislators/rep_amyx_mike_1/",
+   "read": "2026-10-26",
+   "sha": "95fe9dad0eede5b4",
+   "state": "KS",
+   "width": 205
   },
   "ocd-person/05a89099-12b0-46b5-9f6e-002e1e621583": {
    "bytes": 29788,
@@ -2913,6 +2949,24 @@
    "state": "MT",
    "width": 200
   },
+  "ocd-person/3089bcca-553d-4637-9b50-2d9698944d5a": {
+   "bytes": 33144,
+   "chamber": "lower",
+   "credit": "Wisconsin Legislature",
+   "district": "87",
+   "evidence": "alt \"Picture of Representative Brent Jacobson\"; page \"Representative Brent Jacobson\"",
+   "height": 200,
+   "image": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2899.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-26",
+   "lastModifiedAt": "2026-10-26T20:15:15",
+   "name": "Brent Jacobson",
+   "page": "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2899",
+   "read": "2026-10-26",
+   "sha": "047d80e855785803",
+   "state": "WI",
+   "width": 150
+  },
   "ocd-person/3093633a-62dc-4e93-a305-258a20bfd0f2": {
    "chamber": "upper",
    "credit": "Kansas Legislature",
@@ -3146,6 +3200,24 @@
    "read": "2026-10-19",
    "state": "NE",
    "width": 1200
+  },
+  "ocd-person/35f36593-4252-4205-b123-cc7236e96954": {
+   "bytes": 37485,
+   "chamber": "lower",
+   "credit": "New Mexico Legislature",
+   "district": "57",
+   "evidence": "file \"HCUCA.jpg\" named by the page's own key for the member (hcuca), alt \"Cullen\"; page \"Representative Catherine J. Cullen - (R)\"",
+   "height": 375,
+   "image": "https://www.nmlegis.gov/Images/Legislators/House/HCUCA.jpg",
+   "key": "member page",
+   "lastModified": "2025-02-16",
+   "lastModifiedAt": "2025-02-16T00:29:43",
+   "name": "Catherine Cullen",
+   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HCUCA",
+   "read": "2026-10-26",
+   "sha": "4b31c3d792270ff8",
+   "state": "NM",
+   "width": 300
   },
   "ocd-person/3618106c-5f38-4df6-bf12-d58576bd7c93": {
    "chamber": "lower",
@@ -4362,6 +4434,24 @@
    "state": "KS",
    "withheld": "the file the source names is gone"
   },
+  "ocd-person/4a358caf-0fad-4d45-8fa7-3c5ef062a544": {
+   "bytes": 10340,
+   "chamber": "lower",
+   "credit": "Kansas Legislature",
+   "district": "21",
+   "evidence": "alt \"Jerry Stogsdill\"; page \"Jerry Stogsdill — Kansas Legislature\"",
+   "height": 300,
+   "image": "https://www.kslegislature.gov/static/li_pics/rep_stogsdill_jerry_1.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-26",
+   "lastModifiedAt": "2026-10-26T13:22:09",
+   "name": "Jerry Stogsdill",
+   "page": "https://www.kslegislature.gov/legislators/rep_stogsdill_jerry_1/",
+   "read": "2026-10-26",
+   "sha": "72e1efd5ee2898cf",
+   "state": "KS",
+   "width": 205
+  },
   "ocd-person/4a510afe-84a6-4b0c-ac8d-13bebadfff78": {
    "bytes": 12950990,
    "chamber": "lower",
@@ -5125,6 +5215,24 @@
    "state": "MT",
    "width": 200
   },
+  "ocd-person/549c712e-1cc1-4ca7-9ef7-b09bb36d7229": {
+   "bytes": 13639,
+   "chamber": "upper",
+   "credit": "Kansas Legislature",
+   "district": "21",
+   "evidence": "alt \"Dinah Sykes\"; page \"Dinah Sykes — Kansas Legislature\"",
+   "height": 300,
+   "image": "https://www.kslegislature.gov/static/li_pics/sen_sykes_dinah_1.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-26",
+   "lastModifiedAt": "2026-10-26T13:22:09",
+   "name": "Dinah Sykes",
+   "page": "https://www.kslegislature.gov/senators/sen_sykes_dinah_1/",
+   "read": "2026-10-26",
+   "sha": "ad626ae823277d91",
+   "state": "KS",
+   "width": 205
+  },
   "ocd-person/54c93c1b-968f-4b39-a17f-26ebcb266f69": {
    "bytes": 9219,
    "chamber": "upper",
@@ -5754,6 +5862,27 @@
    "sha": "cef0fe0dd3fe0223",
    "state": "CT",
    "width": 152
+  },
+  "ocd-person/60b6c2ff-a1ce-46a1-b484-affd805bc297": {
+   "bytes": 1778385,
+   "chamber": "lower",
+   "credit": "New York Legislature",
+   "district": "1",
+   "evidence": "alt \"Tommy John Schiavoni headshot\"; alt \"Assembly Member  Tommy John Schiavoni\"; page \"Tommy John Schiavoni - Assembly District 1 |Assembly Member Directory | New York State Assembly\"",
+   "heavy": true,
+   "height": 2000,
+   "holderSince": "2025-01-01",
+   "image": "https://nyassembly.gov/write/upload/member_files/001/headshot/001.jpg?hst=1752244122",
+   "key": "member page",
+   "lastModified": "2025-07-11",
+   "lastModifiedAt": "2025-07-11T14:28:42",
+   "name": "Tommy John Schiavoni",
+   "page": "https://nyassembly.gov/mem/Tommy-John-Schiavoni",
+   "read": "2026-10-26",
+   "seatKeyed": true,
+   "sha": "h0b80074b6c1580b",
+   "state": "NY",
+   "width": 1428
   },
   "ocd-person/60ffe8d0-0469-4eca-a69a-deec93c203b3": {
    "bytes": 61538,
@@ -7730,6 +7859,24 @@
    "state": "MT",
    "width": 200
   },
+  "ocd-person/81803637-3bf0-4bbe-9ae4-7724488955b7": {
+   "bytes": 14844,
+   "chamber": "lower",
+   "credit": "Kansas Legislature",
+   "district": "77",
+   "evidence": "alt \"Kristey Williams\"; page \"Kristey Williams — Kansas Legislature\"",
+   "height": 300,
+   "image": "https://www.kslegislature.gov/static/li_pics/rep_williams_kristey_1.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-26",
+   "lastModifiedAt": "2026-10-26T13:22:09",
+   "name": "Kristey Williams",
+   "page": "https://www.kslegislature.gov/legislators/rep_williams_kristey_1/",
+   "read": "2026-10-26",
+   "sha": "2651ec58cfb39d5d",
+   "state": "KS",
+   "width": 205
+  },
   "ocd-person/818eac04-d5b7-49be-b740-84a8432cf5b3": {
    "bytes": 5323,
    "chamber": "lower",
@@ -8052,6 +8199,25 @@
    "sha": "9f8b6ccb78fe9563",
    "state": "PA",
    "width": 300
+  },
+  "ocd-person/851b5f31-0694-4674-a3b8-468b6eb1f0a8": {
+   "bytes": 2308175,
+   "chamber": "lower",
+   "credit": "Colorado General Assembly",
+   "district": "46",
+   "evidence": "alt \"Representative Tisha Mauro\"; page \"Representative Tisha Mauro | Colorado General Assembly\"",
+   "heavy": true,
+   "height": 4200,
+   "image": "https://leg.colorado.gov/rails/active_storage/blobs/redirect/eyJfcmFpbHMiOnsibWVzc2FnZSI6IkJBaHBBK3NRQ0E9PSIsImV4cCI6bnVsbCwicHVyIjoiYmxvYl9pZCJ9fQ==--91c44b5cc4d16b38eaec2741cefbd7a086b9f1f3/Mauro,%20Tisha.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-21",
+   "lastModifiedAt": "2026-10-21T12:01:08",
+   "name": "Tisha Mauro",
+   "page": "https://leg.colorado.gov/legislators/tisha-mauro",
+   "read": "2026-10-26",
+   "sha": "h03f196df1aa407e",
+   "state": "CO",
+   "width": 3000
   },
   "ocd-person/85361b50-c848-444c-9f54-c9203fe94777": {
    "bytes": 13248,
@@ -11244,6 +11410,24 @@
    "state": "VT",
    "width": 1200
   },
+  "ocd-person/b4774ff4-de16-4716-8956-65ecc740eb8c": {
+   "bytes": 10220,
+   "chamber": "upper",
+   "credit": "Kansas Legislature",
+   "district": "16",
+   "evidence": "alt \"Ty Masterson\"; page \"Ty Masterson — Kansas Legislature\"",
+   "height": 300,
+   "image": "https://www.kslegislature.gov/static/li_pics/sen_masterson_ty_1.jpg",
+   "key": "member page",
+   "lastModified": "2026-10-26",
+   "lastModifiedAt": "2026-10-26T13:22:09",
+   "name": "Ty Masterson",
+   "page": "https://www.kslegislature.gov/senators/sen_masterson_ty_1/",
+   "read": "2026-10-26",
+   "sha": "34e282973805310c",
+   "state": "KS",
+   "width": 205
+  },
   "ocd-person/b4a4657a-e588-4036-9a0f-48847e22a140": {
    "bytes": 58963,
    "chamber": "upper",
@@ -11887,6 +12071,24 @@
    "sha": "ff9e0b654b47afb7",
    "state": "OK",
    "width": 125
+  },
+  "ocd-person/be626067-db01-4481-b096-d2792ff189c8": {
+   "bytes": 39178,
+   "chamber": "lower",
+   "credit": "Arkansas General Assembly",
+   "district": "72",
+   "evidence": "alt \"Photo of Representative Steele\" on a page naming them; page \"Representative Tracy Steele (D) - Arkansas State Legislature\"",
+   "height": 536,
+   "image": "https://arkleg.state.ar.us/Content/photos/2025/House/642_sm.jpg",
+   "key": "member page",
+   "lastModified": "2025-01-14",
+   "lastModifiedAt": "2025-01-14T13:54:18",
+   "name": "Tracy Steele",
+   "page": "https://arkleg.state.ar.us/Legislators/Detail?member=Steele",
+   "read": "2026-10-26",
+   "sha": "d5d12dff852cbc8a",
+   "state": "AR",
+   "width": 429
   },
   "ocd-person/be77ffd0-b287-4585-8409-5189885d180a": {
    "bytes": 26742,
@@ -15990,6 +16192,12 @@
    "name": "Gary Clemons",
    "read": "2026-10-19",
    "sha": "3e8e242672c4efc8"
+  },
+  "https://nyassembly.gov/write/upload/member_files/001/headshot/001.jpg?hst=1752244122": {
+   "holder": "ocd-person/60b6c2ff-a1ce-46a1-b484-affd805bc297",
+   "name": "Tommy John Schiavoni",
+   "read": "2026-10-26",
+   "sha": "h0b80074b6c1580b"
   },
   "https://senate.la.gov/SenPics/Sen10.jpg": {
    "holder": "ocd-person/f6f401f7-7fb4-40df-84a0-b5a3f0fe9ec2",

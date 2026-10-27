@@ -45,19 +45,19 @@
    "office": "https://www.azag.gov/",
    "party": "D",
    "partyKey": "D",
-   "photo": "https://i0.wp.com/www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png?w=330&ssl=1",
+   "photo": "https://www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://www.azag.gov/sites/default/files/2025-09/Attorney%20General%20Mayes%20Headshot_Circle%20Crop%20Smiling.png",
      "why": "338 KB, over 300 KB"
     }
    ],
    "photoPage": "https://www.azag.gov/",
    "photoWeight": {
-    "bytes": 96350,
-    "height": 330,
-    "width": 330
+    "bytes": 338184,
+    "height": 500,
+    "width": 500
    },
    "title": "Attorney General"
   },
@@ -67,19 +67,19 @@
    "office": "https://www.oag.ca.gov/",
    "party": "D",
    "partyKey": "D",
-   "photo": "https://i0.wp.com/www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg?w=500&ssl=1",
+   "photo": "https://www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://www.oag.ca.gov/sites/default/files/media/ag-bonta-official-2.jpg",
      "why": "6039 KB, over 300 KB"
     }
    ],
    "photoPage": "https://www.oag.ca.gov/",
    "photoWeight": {
-    "bytes": 17820,
-    "height": 750,
-    "width": 499
+    "bytes": 6039936,
+    "height": 5025,
+    "width": 3349
    },
    "title": "Attorney General"
   },
@@ -164,19 +164,19 @@
    "office": "https://ag.hawaii.gov/",
    "party": "D",
    "partyKey": "D",
-   "photo": "https://i0.wp.com/ag.hawaii.gov/wp-content/uploads/2025/08/AG-Anne-Lopez-scaled.jpg?w=500&ssl=1",
+   "photo": "https://ag.hawaii.gov/wp-content/uploads/2025/08/AG-Anne-Lopez-scaled.jpg",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://ag.hawaii.gov/wp-content/uploads/2025/08/AG-Anne-Lopez-scaled.jpg",
      "why": "1922x2560px, over 1200px"
     }
    ],
    "photoPage": "https://ag.hawaii.gov/contact-us/",
    "photoWeight": {
-    "bytes": 19114,
-    "height": 665,
-    "width": 500
+    "bytes": 279419,
+    "height": 2560,
+    "width": 1922
    },
    "selection": "Appointed by the governor",
    "title": "Attorney General"
@@ -300,7 +300,7 @@
    "photo": "https://www.michigan.gov/ag/-/media/Project/Websites/AG/headshots/AG_Dana_Nessel_press.jpg?rev=67d9b803e48f4a9a8a80a68f5889c674&mw=320&hash=66AED384DD4F7BCBC7F692352D3949E3",
    "photoPage": "https://www.michigan.gov/ag/team-listing-page/attorney-general-dana-nessel",
    "photoWeight": {
-    "bytes": 18633,
+    "bytes": 11380,
     "height": 480,
     "width": 320
    },
@@ -360,6 +360,11 @@
    "title": "Attorney General"
   },
   "NC": {
+   "alsoListed": [
+    "Dan Bishop (R)"
+   ],
+   "confirmationKept": true,
+   "confirmedOn": "2026-10-26",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Jeff Jackson",
    "office": "https://ncdoj.gov/",
@@ -396,9 +401,15 @@
    "office": "https://www.doj.nh.gov/",
    "party": "R",
    "partyKey": "R",
+   "photo": "https://www.doj.nh.gov/sites/g/files/ehbemt721/files/inline-images/ag-john-formella-300.jpg",
+   "photoPage": "https://www.doj.nh.gov/",
+   "photoWeight": {
+    "bytes": 31318,
+    "height": 353,
+    "width": 300
+   },
    "selection": "Appointed by the governor and Executive Council",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "NJ": {
    "listedBy": "Democratic Attorneys General Association",
@@ -406,19 +417,19 @@
    "office": "https://www.njoag.gov/",
    "party": "D",
    "partyKey": "D",
-   "photo": "https://i0.wp.com/www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg?w=500&ssl=1",
+   "photo": "https://www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://www.njoag.gov/wp-content/uploads/2026/01/DAVENPORT_07_FINAL-scaled.jpg",
      "why": "426 KB, over 300 KB"
     }
    ],
    "photoPage": "https://www.njoag.gov/about/meet-attorney-general-davenport/",
    "photoWeight": {
-    "bytes": 17610,
-    "height": 625,
-    "width": 500
+    "bytes": 426267,
+    "height": 2560,
+    "width": 2048
    },
    "selection": "Appointed by the governor",
    "title": "Attorney General"
@@ -505,19 +516,19 @@
    "office": "https://www.attorneygeneral.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://i0.wp.com/www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg?w=500&ssl=1",
+   "photo": "https://www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://www.attorneygeneral.gov/wp-content/uploads/sunday-in-office-image-scaled.jpg",
      "why": "407 KB, over 300 KB"
     }
    ],
    "photoPage": "https://www.attorneygeneral.gov/the-office/meet-the-attorney-general/",
    "photoWeight": {
-    "bytes": 19272,
-    "height": 590,
-    "width": 500
+    "bytes": 407993,
+    "height": 2560,
+    "width": 2166
    },
    "title": "Attorney General"
   },
@@ -550,19 +561,19 @@
    "office": "https://atg.sd.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://i0.wp.com/atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg?w=500&ssl=1",
+   "photo": "https://atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://atg.sd.gov/img/AG_Marty_Jackley_0007a.jpg",
      "why": "13724 KB, over 300 KB"
     }
    ],
    "photoPage": "https://atg.sd.gov/OurOffice/bio.aspx",
    "photoWeight": {
-    "bytes": 23622,
-    "height": 749,
-    "width": 500
+    "bytes": 13724550,
+    "height": 5912,
+    "width": 3943
    },
    "title": "Attorney General"
   },
@@ -664,19 +675,19 @@
    "office": "https://ago.wv.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://i0.wp.com/ago.wv.gov/sites/default/files/2025-09/AG%20McCuskey%20pic.jpeg?w=500&ssl=1",
+   "photo": "https://ago.wv.gov/sites/default/files/2025-09/AG%20McCuskey%20pic.jpeg",
    "photoHeavy": [
     {
-     "kept": false,
+     "kept": true,
      "url": "https://ago.wv.gov/sites/default/files/2025-09/AG%20McCuskey%20pic.jpeg",
      "why": "1779 KB, over 300 KB"
     }
    ],
    "photoPage": "https://ago.wv.gov/about-us/meet-attorney-general-jb-mccuskey",
    "photoWeight": {
-    "bytes": 29620,
-    "height": 625,
-    "width": 500
+    "bytes": 1779728,
+    "height": 6000,
+    "width": 4796
    },
    "title": "Attorney General"
   },
@@ -690,7 +701,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-26T03:56:14+00:00",
+ "fetched": "2026-10-26T20:14:15+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
@@ -1631,6 +1642,7 @@
    "email": "sosexec@sos.nv.gov",
    "member": false,
    "name": "Francisco V. Aguilar",
+   "officeRead": "unreadable",
    "party": "D",
    "partyKey": "D",
    "phone": "(775) 684-5708",

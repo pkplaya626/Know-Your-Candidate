@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-25T13:20:19+00:00",
+ "fetched": "2026-10-26T20:17:16+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -53889,7 +53889,8 @@
     "email": "terry.baker@house.maryland.gov",
     "id": "ocd-person/e5f4fb79-fd8e-437d-9488-68fd47d430c6",
     "image": "https://msa.maryland.gov/msa/mdmanual/36loc/wa/leg/images/1198-1-09528b.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/baker04"
@@ -54821,7 +54822,8 @@
     "email": "andre.johnson@house.maryland.gov",
     "id": "ocd-person/ecb19095-2750-4bef-bb87-1f646818a9b1",
     "image": "https://msa.maryland.gov/msa/mdmanual/36loc/ha/leg/images/1198-1-09406b.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/johnson02",
@@ -55603,7 +55605,8 @@
     "email": "robbyn.lewis@house.maryland.gov",
     "id": "ocd-person/d0e4f14b-c4a3-485e-88f7-ea7a86f67ca1",
     "image": "http://msa.maryland.gov/msa/mdmanual/06hse/images/1198-1-07944b.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://mgaleg.maryland.gov/mgawebsite/Members/Details/lewis01",
@@ -56901,7 +56904,8 @@
     "email": "lucien.daigle@legislature.maine.gov",
     "id": "ocd-person/1f33e4be-1228-4c31-9b0f-c79012be9d07",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/834a7b36-8074-466c-b489-a7e7894105ed_Daigle-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/memberprofiles/Details/3106",
@@ -56919,7 +56923,8 @@
     "email": "william.tuell@legislature.maine.gov",
     "id": "ocd-person/76a9907f-f257-4621-b176-8e911bb8cf35",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/359c0f24-8550-4e4a-b28d-6d2d0384c3db_tuelwr%5B1%5D.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/49",
@@ -56937,7 +56942,8 @@
     "email": "daniel.ankeles@legislature.maine.gov",
     "id": "ocd-person/eb5efd36-8020-46f1-a6ef-6dac6873f692",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/4ce09159-182e-48aa-93cb-0c127b0abe7c_ANKELES.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1495",
@@ -56955,7 +56961,8 @@
     "email": "poppy.arford@legislature.maine.gov",
     "id": "ocd-person/522f7557-1c06-451b-9c81-78080fc5c21c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/e67bda1d-1bd9-46a4-8dca-4c3616a20dfa_ArfordNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1421",
@@ -57018,7 +57025,8 @@
     "email": "anne.graham@legislature.maine.gov",
     "id": "ocd-person/2f7e7649-5c68-4f8f-8c9a-7993b66d383a",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3c31dd8d-1de9-4bf3-b506-b7c45790974f_AGRAHAM.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/259",
@@ -57036,7 +57044,8 @@
     "email": "barbara.bagshaw@legislature.maine.gov",
     "id": "ocd-person/72cc3b25-8e1e-4095-93be-216ee191572c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/d2a8373a-d1e8-4e25-936a-4fbcd3ac4087_BBAGSHAW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1473",
@@ -57104,7 +57113,8 @@
     "email": "tiffany.strout@legislature.maine.gov",
     "id": "ocd-person/2ffd13d7-b22a-4bea-8bc0-eaa6c0a53c17",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/0cea9b69-973d-411d-bbd7-b5c6e1e6d559_TSTROUT.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1459",
@@ -57137,7 +57147,8 @@
     "email": "amy.kuhn@legislature.maine.gov",
     "id": "ocd-person/d9825f86-280b-4b70-9a6e-2bb7f02e239a",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a99f9866-50ae-4e3a-8eee-10a3e0d00dce_AKUHN.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1474",
@@ -57221,7 +57232,8 @@
     "email": "sam.zager@legislature.maine.gov",
     "id": "ocd-person/59c5505d-902d-4b6a-b3d5-8e036e640348",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b6cd2a0d-2b96-4103-a43b-bea5aef4a435_Zager.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1418",
@@ -57239,7 +57251,8 @@
     "email": "matt.moonen@legislature.maine.gov",
     "id": "ocd-person/7f03a30f-5a77-49b2-8c92-57f7a4238052",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5ce2da1b-2227-407f-8f25-9cc5647cf4c5_moonen.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/118"
@@ -57275,7 +57288,8 @@
     "email": "charles.skold@legislature.maine.gov",
     "id": "ocd-person/d87034c7-fd93-4ba1-a61b-f4ea810506c9",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/f62e4eee-633b-458e-9410-219176bec3a2_CSKOLD.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1475",
@@ -57293,7 +57307,8 @@
     "email": "william.faulkingham@legislature.maine.gov",
     "id": "ocd-person/43c2650b-6248-46f9-a553-8c2bd0bab294",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b1dc14b4-920f-4f14-99c9-bce559bceb76_FaulkinghamNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1379",
@@ -57311,7 +57326,8 @@
     "email": "deqa.dhalac@legislature.maine.gov",
     "id": "ocd-person/3080d13f-59de-437a-b405-a2313be6ee89",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/57526b13-6bb7-4ccf-b3e4-136ae6208e84_DHALAC.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1476"
@@ -57342,7 +57358,8 @@
     "email": "matthew.beck@legislature.maine.gov",
     "id": "ocd-person/dec943c1-07d5-479a-972f-a3c1cc6a2714",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/10b00e2f-ff9f-4f15-b72a-1b8ed89dc9a8_BECK.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1509"
@@ -57374,7 +57391,8 @@
     "email": "sophia.warren@legislature.maine.gov",
     "id": "ocd-person/140459ab-ba63-410a-819c-aec28c2f2f66",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/cf752b53-787f-40ea-980b-165536a3a6c7_Warren.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1413"
@@ -57391,7 +57409,8 @@
     "email": "kelly.murphy@legislature.maine.gov",
     "id": "ocd-person/8abb4c0b-ed96-442e-8483-93a05845dcc5",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/17a7b5d3-e413-418b-bad4-831e543f1099_MURPHY.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1477",
@@ -57409,7 +57428,8 @@
     "email": "andrew.gattine@legislature.maine.gov",
     "id": "ocd-person/81123167-ba38-419a-92e5-fe0102d6a553",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a5278ffe-f50e-4998-83fb-cad702fc9659_gattam.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/68"
@@ -57441,7 +57461,8 @@
     "email": "suzanne.salisbury@legislature.maine.gov",
     "id": "ocd-person/d43df0c7-0dfd-4640-9881-f37611c15830",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/51e7366f-0985-40da-ad18-0933d15e2d99_SalisburyNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1415",
@@ -57512,7 +57533,8 @@
     "email": "lori.gramlich@legislature.maine.gov",
     "id": "ocd-person/3cdb36ad-77a1-401d-8479-630ae970300b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/d346883e-e53b-4578-bd40-44eb245624e9_gramlich.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1342"
@@ -57544,7 +57566,8 @@
     "email": "marc.malon@legislature.maine.gov",
     "id": "ocd-person/48305a9e-8f2a-4cea-8689-b93491c82ad5",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/24740258-3b61-4d37-9179-239dbb5b64ee_MMALON.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1478"
@@ -57561,7 +57584,8 @@
     "email": "traci.gere@legislature.maine.gov",
     "id": "ocd-person/10c768fb-c5ef-448e-9759-d76f6c313909",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/593607d8-2dcf-4adc-8351-ebf61eeda842_Gere2021.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1408",
@@ -57579,7 +57603,8 @@
     "email": "daniel.sayre@legislature.maine.gov",
     "id": "ocd-person/f9010476-1b1e-4407-b672-b81cd0ee8ae6",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5eaede44-a899-42af-a114-5ea2bc5af4db_DSAYRE.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1479",
@@ -57631,7 +57656,8 @@
     "email": "mark.blier@legislature.maine.gov",
     "id": "ocd-person/134a1697-216a-4761-827f-840f72c640a0",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/0b41e77d-6373-4758-bc30-be7babfa921e_BlierNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1344",
@@ -57649,7 +57675,8 @@
     "email": "david.woodsome@legislature.maine.gov",
     "id": "ocd-person/30414bf4-13ad-4bd5-a1d9-3cf11be6464d",
     "image": "https://legislature.maine.gov/uploads/visual_edit/woodsome-5x7-2.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1480",
@@ -57683,7 +57710,8 @@
     "email": "wayne.parry@legislature.maine.gov",
     "id": "ocd-person/8a75e2da-2389-4052-9592-1e607ba2dfc1",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/64b98aaf-c97d-41c4-88d7-3139d1d72339_Parry.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/124",
@@ -57701,7 +57729,8 @@
     "email": "lucas.lanigan@legislature.maine.gov",
     "id": "ocd-person/85c0e0b8-2654-4da5-96e6-8745ec68d0af",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/beba31fd-c03d-41e8-91d9-97bf04b13254_LANIGAN.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1481",
@@ -57748,7 +57777,8 @@
     "email": "jeffrey.adams@legislature.maine.gov",
     "id": "ocd-person/2288cf22-64f4-4f1f-b5e3-b1ada5c72914",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/19be31f4-e0c7-4466-bcc7-ba2191307f59_ADAMS.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1469",
@@ -57781,7 +57811,8 @@
     "email": "gerry.runte@legislature.maine.gov",
     "id": "ocd-person/7dea9101-48ec-4f1a-871e-a4f1c98b8914",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a2caaeac-ae5a-4ffd-b7a6-45e1840bba4b_RUNTE.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1470",
@@ -57800,7 +57831,8 @@
     "email": "holly.sargent@legislature.maine.gov",
     "id": "ocd-person/82f5c446-4f81-4c54-98ae-7b302003d39d",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/191052f1-463d-4a44-bfdc-ecde7bb45ec0_SARGENT.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1471",
@@ -57818,7 +57850,8 @@
     "email": "thomas.lavigne@legislature.maine.gov",
     "id": "ocd-person/be3df38c-150a-4e3c-8c16-6e97bdbeadc4",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/fc7494df-6e51-45a2-9716-43f8d0f0b162_LAVIGNE.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1472",
@@ -57836,7 +57869,8 @@
     "email": "tiffany.roberts@legislature.maine.gov",
     "id": "ocd-person/524f6cce-8333-442a-aff3-2e92bd9df894",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/524ac892-9d68-4268-8883-b94a2e993161_Roberts.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1385"
@@ -57853,7 +57887,8 @@
     "email": "holly.eaton@legislature.maine.gov",
     "id": "ocd-person/cd08563e-987c-4c06-9487-4a22015e18a9",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/56d51271-b0dc-43ea-8f70-423d544537d5_EATON.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1461",
@@ -57871,7 +57906,8 @@
     "email": "michele.meyer@legislature.maine.gov",
     "id": "ocd-person/e26fdc8a-3099-4ea4-ad2d-1ccdc45ce1e6",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b1004d88-844a-4d6d-9e4a-e6a329b430c9_meyer.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1337"
@@ -57888,7 +57924,8 @@
     "email": "kristi.mathieson@legislature.maine.gov",
     "id": "ocd-person/375e5fda-9367-4ce3-a209-1c772c32219f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/61a4ca7c-418f-4f26-a7eb-e355ea89333e_Mathieson.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1406",
@@ -57940,7 +57977,8 @@
     "email": "mathew.mcintyre@legislature.maine.gov",
     "id": "ocd-person/95538c83-57ab-4334-92a9-1991de0c3c9f",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/3194672c-489a-4fb8-a53b-e826685a318e_McIntyre-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3111",
@@ -57958,7 +57996,8 @@
     "email": "richard.campbell@legislature.maine.gov",
     "id": "ocd-person/0f9ba178-89fb-439e-afa2-c327414d966d",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/8be4f86f-6d8b-4193-a213-a97eb6b5ac5b_camprh.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/21",
@@ -57976,7 +58015,8 @@
     "email": "roger.albert@legislature.maine.gov",
     "id": "ocd-person/c76a67f9-4d87-4a73-8d89-eea7cd8a3a98",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/ce15102a-72b1-4d16-adcc-ec90fdd077e0_ALBERT.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1454",
@@ -58013,7 +58053,8 @@
     "email": "ambureen.rana@legislature.maine.gov",
     "id": "ocd-person/8f61f208-cf99-489a-aa36-847438b0ed60",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/1f89f046-4256-4341-9236-68c67e6efd77_ARANA.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1464",
@@ -58031,7 +58072,8 @@
     "email": "laura.supica@legislature.maine.gov",
     "id": "ocd-person/a65cc42d-ae91-4f47-8269-4673f106682f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/1a8dbf21-c24a-4e1c-89e3-53030c1ecfe5_Supica.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1438",
@@ -58064,7 +58106,8 @@
     "email": "sean.faircloth@legislature.maine.gov",
     "id": "ocd-person/9db9a9ba-552e-446f-b5a3-58f74596a115",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/2c8093b5-54a4-4729-881d-dfa0a55451b2_Faircloth-S-2026.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/430",
@@ -58097,7 +58140,8 @@
     "email": "james.dill@legislature.maine.gov",
     "id": "ocd-person/a3281b8a-e758-4804-a964-e8db96d043a8",
     "image": "https://legislature.maine.gov/uploads/visual_edit/dill-5x7.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/253"
@@ -58114,7 +58158,8 @@
     "email": "gary.drinkwater@legislature.maine.gov",
     "id": "ocd-person/7893adc7-d4fb-42e4-bae0-1258ce673096",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3b421f7d-d986-4022-886f-90d3f5e19f79_drinkwater.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1376",
@@ -58132,7 +58177,8 @@
     "email": "irene.gifford@legislature.maine.gov",
     "id": "ocd-person/e603c478-27c7-4f68-ba31-4ef3732ab916",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/af5019e3-ac57-47c4-bc0e-b9eb39973a6f_GIFFORD.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1465",
@@ -58168,7 +58214,8 @@
     "email": "mark.babin@legislature.maine.gov",
     "id": "ocd-person/a3a29593-781a-462d-93cc-685be03b3b56",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/05fa532f-1a27-4521-af69-ceecf5c3311e_BABIN.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1455",
@@ -58186,7 +58233,8 @@
     "email": "james.white@legislature.maine.gov",
     "id": "ocd-person/54f9af68-0a59-4cd7-a448-40725e8781ab",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/4f4a6b7f-2c72-4910-848e-2f14ebf20832_WHITEJ.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1466",
@@ -58204,7 +58252,8 @@
     "email": "chad.perkins@legislature.maine.gov",
     "id": "ocd-person/1793f579-da58-422f-bc22-36da20ce246c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a6f40ce5-a695-480d-92cf-cfe044f027ac_CPERKINS.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1467",
@@ -58237,7 +58286,8 @@
     "email": "kenneth.fredette@legislature.maine.gov",
     "id": "ocd-person/1c52b583-18c3-4e12-ae7a-2b07d589f753",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/2eb41d60-324f-4af1-ac82-41e394b822ca_fredkw.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/65",
@@ -58270,7 +58320,8 @@
     "email": "jim.thorne@legislature.maine.gov",
     "id": "ocd-person/e4f0e3da-2e65-4986-96ad-1ef21f9da73d",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/92dc9462-f2b9-4767-8dec-39b147b90d53_ThorneNEWNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1431",
@@ -58288,7 +58339,8 @@
     "email": "kimberly.haggan@legislature.maine.gov",
     "id": "ocd-person/59048d8e-de6a-4f84-aa27-0ae867742214",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/633ecbdc-c8fb-433c-b17a-cfd59543905d_Haggan-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3113",
@@ -58321,7 +58373,8 @@
     "email": "benjamin.hymes@legislature.maine.gov",
     "id": "ocd-person/f52b3788-349b-4b6c-84a3-72d02a953616",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/04372b02-d30f-4b91-a71e-0d7e188b385f_HYMES.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1497",
@@ -58339,7 +58392,8 @@
     "email": "jan.dodge@legislature.maine.gov",
     "id": "ocd-person/b7b97724-7abc-44fb-bace-d3606d3fadb2",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3966d66f-a9d5-4de6-963e-cbe39eacecb3_JDODGE.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1366"
@@ -58356,7 +58410,8 @@
     "email": "timothy.guerrette@legislature.maine.gov",
     "id": "ocd-person/2e5b6467-1014-4771-9aae-2c401029ed01",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/140ecd56-dda0-495a-8f55-a372f209dcea_TGUERRETTE.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1456",
@@ -58407,7 +58462,8 @@
     "email": "valli.geiger@legislature.maine.gov",
     "id": "ocd-person/0842c8ba-66a3-4896-aede-def84a65605b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/b7429307-4ee4-4919-b291-30007ac4f3d6_GeigerNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1430",
@@ -58455,7 +58511,8 @@
     "email": "abden.simmons@legislature.maine.gov",
     "id": "ocd-person/b6cdaab7-6aec-4c65-a239-e18c6e839fbc",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/75e9b804-f745-4f44-9817-146eb1a8c378_simmas[1].jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/144",
@@ -58473,7 +58530,8 @@
     "email": "lydia.crafts@legislature.maine.gov",
     "id": "ocd-person/b795e4ca-6b0d-4101-902d-8db5c1b54485",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/aee526c2-f213-42e1-b859-11325b8c555a_Crafts.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1429",
@@ -58510,7 +58568,8 @@
     "email": "holly.stover@legislature.maine.gov",
     "id": "ocd-person/468ba602-86c5-4293-85b2-45e87313c1c3",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/fc29e232-5948-4268-8919-22a92f6ab7ab_stover.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1363"
@@ -58556,7 +58615,8 @@
     "email": "david.sinclair@legislature.maine.gov",
     "id": "ocd-person/8dd63807-ac15-408c-97de-c8e9195a6a42",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/10a6470d-cab7-4912-8ce5-b2ed172f4f28_SinclairCropped3.JPG",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1508"
@@ -58592,7 +58652,8 @@
     "email": "sally.cluchey@legislature.maine.gov",
     "id": "ocd-person/d91a8965-c40d-481f-af61-5acb9b953fd3",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/c6886b51-5eda-49d0-b7ad-a5315555764c_SCLUCHEY.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1501",
@@ -58612,7 +58673,8 @@
     "email": "michael.lemelin@legislature.maine.gov",
     "id": "ocd-person/feb330d7-8122-4547-b38a-38279732a9ce",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/2f05ff55-e46c-41ce-b4b9-5d144bc7b7ee_LemelinNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1428",
@@ -58630,7 +58692,8 @@
     "email": "karen.montell@legislature.maine.gov",
     "id": "ocd-person/80900bc0-7e26-4195-a0af-ec56b9f34fe0",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/509661e8-e573-4bef-b8ed-47c5c0a586a4_MONTELL.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1502"
@@ -58677,7 +58740,8 @@
     "email": "tavis.hasenfus@legislature.maine.gov",
     "id": "ocd-person/194ff967-ad0b-4f2d-8cb7-ef1e062b235c",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/7caf9ecd-04e1-4e00-b772-b38616cac2ab_HasenfusNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1427",
@@ -58728,7 +58792,8 @@
     "email": "donald.ardell@legislature.maine.gov",
     "id": "ocd-person/1b986e08-1270-49ba-b6d0-941a950d3008",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3bf42df4-0f16-418b-ad61-621fd8c4c1e0_ARDELL.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1457",
@@ -58746,7 +58811,8 @@
     "email": "william.bridgeo@legislature.maine.gov",
     "id": "ocd-person/44cd2c44-aa58-4129-bc5f-eefc64bf836f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/3f618227-f773-43c5-9a0e-d081871faa0e_WBRIDGEO.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1504",
@@ -58779,7 +58845,8 @@
     "email": "katrina.smith@legislature.maine.gov",
     "id": "ocd-person/b07e421b-8c1f-473d-aa7a-10d71e8a443b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5d2a8b6b-bea9-4f98-ad05-6d20c8f83aa6_KSMITH.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1505",
@@ -58797,7 +58864,8 @@
     "email": "paul.flynn@legislature.maine.gov",
     "id": "ocd-person/ff5fbabd-df54-46a9-a36c-e78dad524105",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/901b5f84-dce7-4b2b-880f-7db6e971a263_Flynn-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3120",
@@ -58853,7 +58921,8 @@
     "email": "robert.nutting@legislature.maine.gov",
     "id": "ocd-person/32f4600c-1bc1-4758-8d94-69878c863e00",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/10857e45-bb21-4dfb-92af-ab7059898dbe_nuttrw.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/218",
@@ -58901,7 +58970,8 @@
     "email": "dean.cray@legislature.maine.gov",
     "id": "ocd-person/8bc14822-ff62-4ffe-bf42-4114bd5bd99b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/898a0677-23f7-4936-a1a4-c913ae94227c_CRAY.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/249",
@@ -58919,7 +58989,8 @@
     "email": "gregory.swallow@legislature.maine.gov",
     "id": "ocd-person/90989c27-4cd8-409e-8325-9bd50dac9cf4",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/e42361cf-f827-42a9-85de-64b34fc21ab3_swallow.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1381",
@@ -58986,7 +59057,8 @@
     "email": "michael.soboleski@legislature.maine.gov",
     "id": "ocd-person/fc107a79-150e-414f-b796-960c96d75eb6",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/cb4e1505-8bc4-478c-a23c-d677f2d58e50_MSOBOLESKI.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1482",
@@ -59038,7 +59110,8 @@
     "email": "sheila.lyman@legislature.maine.gov",
     "id": "ocd-person/7498179f-e3de-47b7-9aee-9abee716522a",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/07bd7878-b32c-4a23-b44a-9f56e3353fdf_LymanNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1424",
@@ -59056,7 +59129,8 @@
     "email": "tammy.schmersal-burgess@legislature.maine.gov",
     "id": "ocd-person/444d3040-a7ee-4559-8d5f-bfc515617605",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/c0bba107-42c6-442e-aea6-3cdc8e53c9eb_TBURGESS.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1483",
@@ -59092,7 +59166,8 @@
     "email": "michael.lance@legislature.maine.gov",
     "id": "ocd-person/a2494f1d-e78d-4a29-b631-5c40b3fe43d8",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/506f411f-8742-4cf7-b70e-23fb22504635_Lance-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3125",
@@ -59110,7 +59185,8 @@
     "email": "tracy.quint@legislature.maine.gov",
     "id": "ocd-person/3853d2fe-2580-4041-abb1-b4136172e9c0",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/a2caf281-9523-418e-b5a2-1a0635438985_QuintNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1443",
@@ -59129,7 +59205,8 @@
     "email": "caldwell.jackson@legislature.maine.gov",
     "id": "ocd-person/cf1f0a32-7107-44ea-96f2-1f3c604d87cc",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/4a816ecf-f3c1-49e1-88e9-f7a4d18cb5de_JACKSON.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1485",
@@ -59166,7 +59243,8 @@
     "email": "nathan.wadsworth@legislature.maine.gov",
     "id": "ocd-person/bed16528-b0ae-40e0-89a0-7303b946fb71",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/2925429e-835c-40cd-8b4d-3176e74732b9_wadsnj.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/46",
@@ -59184,7 +59262,8 @@
     "email": "marygrace.cimino@legislature.maine.gov",
     "id": "ocd-person/ef0c0f85-eacc-4f97-9dba-d0781c40f274",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/ce529467-4c75-45cf-be2a-29c267886c71_Cimino-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3127",
@@ -59202,7 +59281,8 @@
     "email": "mark.walker@legislature.maine.gov",
     "id": "ocd-person/d16d8ff0-3e6f-4970-9baf-767c9eb09fab",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/006156d6-d589-47bc-a865-871a85279134_MWALKER.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1487",
@@ -59220,7 +59300,8 @@
     "email": "kimberly.pomerleau@legislature.maine.gov",
     "id": "ocd-person/410a9d92-cdb2-4927-b589-72e32d525883",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/be0d0db4-52a9-40c7-8300-6cbb2e7e652d_POMERLEAU.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1488",
@@ -59238,7 +59319,8 @@
     "email": "rolf.olsen@legislature.maine.gov",
     "id": "ocd-person/df555146-b927-4268-b8cf-d3d7b0848b14",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/00f934af-625c-437b-93c8-aa709cdce2e1_Olsen-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3128",
@@ -59290,7 +59372,8 @@
     "email": "adam.lee@legislature.maine.gov",
     "id": "ocd-person/dff0e200-fd8c-4ada-ac3d-e014a529dd59",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/cc770c67-4f1f-4e24-a168-4a359d33b108_ALEE.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1491",
@@ -59309,7 +59392,8 @@
     "email": "arthur.mingo@legislature.maine.gov",
     "id": "ocd-person/28891c40-a850-4e37-a339-4f60976ab515",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/a95e40c7-2d4d-43b4-9294-4c29dced0cc4_Mingo-2024.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3107",
@@ -59342,7 +59426,8 @@
     "email": "joshua.morris@legislature.maine.gov",
     "id": "ocd-person/64a07a85-a469-4c9d-9b7c-bf4de46ade74",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/78e82de0-6a49-4118-9325-db07c8e934df_morris.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1359",
@@ -59360,7 +59445,8 @@
     "email": "stephen.wood@legislature.maine.gov",
     "id": "ocd-person/94645c8f-f06c-485e-b5fa-797e3590ea30",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/1e90c36e-1b64-464a-8371-c4bb4bad5925_woodsj[1].jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/40",
@@ -59393,7 +59479,8 @@
     "email": "scott.harriman@legislature.maine.gov",
     "id": "ocd-person/07984348-1057-4adf-9816-8407548bdb35",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/ddd48478-638e-42c1-93e2-0353f0175cad_Harriman-S-2026.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/MemberProfiles/Details/3141",
@@ -59411,7 +59498,8 @@
     "email": "mana.abdi@legislature.maine.gov",
     "id": "ocd-person/0bb988f9-6dca-4fd8-ac06-3603af31094f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/0b0aefe9-d3ab-435e-bf39-4028eaabde3a_MABDI.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1492",
@@ -59429,7 +59517,8 @@
     "email": "michel.lajoie@legislature.maine.gov",
     "id": "ocd-person/c3185181-4ae9-42ce-8bf5-9a2f04c2422b",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5dfb974c-7ace-4bd3-86bf-d975d1ac8aa1_lajoma.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/212"
@@ -59446,7 +59535,8 @@
     "email": "richard.mason@legislature.maine.gov",
     "id": "ocd-person/6c313875-2dc9-4ef5-b869-c3cc0b7d5c97",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/00d3edf9-afa9-42a9-894e-6f123441a00b_MasonNEW.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/158",
@@ -59483,7 +59573,8 @@
     "email": "cheryl.golek@legislature.maine.gov",
     "id": "ocd-person/cef7caa9-828c-4272-a694-2aa16a5397ea",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/bedcf53e-b367-42a7-9db6-a1c317f925af_GOLEK.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1494",
@@ -59501,7 +59592,8 @@
     "email": "brian.reynolds@legislature.maine.gov",
     "id": "ocd-person/81ab0331-83cd-4551-bf74-b732623c86b8",
     "image": "https://legislature.maine.gov/house/Repository/MemberProfiles/909de2c4-7928-4af4-8767-3f32cbb0fab6_Reynolds-R-2025.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/3140"
@@ -59518,7 +59610,8 @@
     "email": "aaron.dana@legislature.maine.gov",
     "id": "ocd-person/906cd606-c6ff-41e5-87a6-e038b711fa61",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/27852f04-e612-46a5-9727-1bbd1d5e48e0_DANA.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/house/house/MemberProfiles/Details/1507"
@@ -59536,7 +59629,8 @@
     "email": "susan.bernard@legislature.maine.gov",
     "id": "ocd-person/2c0651f3-bbea-49c8-9da3-a713953ff4d8",
     "image": "https://legislature.maine.gov/uploads/visual_edit/bernard-susan.jpg",
-    "imageChecked": "2026-10-21",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/DIstrict1",
@@ -59554,7 +59648,8 @@
     "email": "david.haggan@legislature.maine.gov",
     "id": "ocd-person/b3f3ab98-9169-42f8-b7d7-c04b3bdfb545",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/ef1b37a7-5997-414d-9ae4-6f38e8f619d8_haggdg.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District10",
@@ -59574,7 +59669,8 @@
     "email": "chip.curry@legislature.maine.gov",
     "id": "ocd-person/6d397c09-c2d3-41ff-b33a-c42efae4f187",
     "image": "https://legislature.maine.gov/uploads/visual_edit/chipcurry-web-1024x683.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District11",
@@ -59593,7 +59689,8 @@
     "email": "anne.beebe-center@legislature.maine.gov",
     "id": "ocd-person/db11e611-94a4-4451-8486-f941a532789d",
     "image": "https://legislature.maine.gov/uploads/visual_edit/beebe-center-1024x1024.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District12",
@@ -59612,7 +59709,8 @@
     "email": "cameron.reny@legislature.maine.gov",
     "id": "ocd-person/38a3d5d7-cc62-4479-bfba-03d40099e7cd",
     "image": "https://legislature.maine.gov/uploads/visual_edit/reny-2.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District13",
@@ -59631,7 +59729,8 @@
     "email": "craig.hickman@legislature.maine.gov",
     "id": "ocd-person/5a475e6f-5277-425e-bb09-1c55facbc736",
     "image": "https://legislature.maine.gov/uploads/visual_edit/hickman-1024x1024.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District14",
@@ -59650,7 +59749,8 @@
     "email": "dick.bradstreet@legislature.maine.gov",
     "id": "ocd-person/ec504278-9872-4842-a99c-80b31e563707",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/25f23c49-eaab-420a-8fdd-b4d2afb931bc_bradrt.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District15",
@@ -59669,7 +59769,8 @@
     "email": "scott.cyrway@legislature.maine.gov",
     "id": "ocd-person/73dfc0b1-9ce4-4d8e-8119-1dc7396fbb2c",
     "image": "https://legislature.maine.gov/uploads/visual_edit/cyrway-5x7-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District16",
@@ -59690,7 +59791,8 @@
     "email": "jeffrey.timberlake@legislature.maine.gov",
     "id": "ocd-person/3ef077c6-482d-4dc2-92ef-69ac2a09bf06",
     "image": "https://legislature.maine.gov/uploads/visual_edit/timberlake-jeff-3.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District17",
@@ -59709,7 +59811,8 @@
     "email": "richard.bennett@legislature.maine.gov",
     "id": "ocd-person/4276be86-7dfa-4817-9792-52622b93ff40",
     "image": "https://legislature.maine.gov/uploads/visual_edit/bennett-5x7.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District18",
@@ -59747,7 +59850,8 @@
     "email": "trey.stewart@legislature.maine.gov",
     "id": "ocd-person/bd417e77-81d9-4e60-8b2a-b940da10bc37",
     "image": "https://legislature.maine.gov/uploads/visual_edit/stewart-harold-trey-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District2",
@@ -59767,7 +59871,8 @@
     "email": "bruce.bickford@legislature.maine.gov",
     "id": "ocd-person/0b3965de-8fe2-42b4-bc21-115d6b2b470f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/6512eb18-497f-48cf-8e14-5c46c8827181_bickba.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District20",
@@ -59786,7 +59891,8 @@
     "email": "margaret.rotundo@legislature.maine.gov",
     "id": "ocd-person/062977a2-a482-4c4f-b053-75cae4bdce31",
     "image": "https://legislature.maine.gov/uploads/visual_edit/rotundo.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District21",
@@ -59805,7 +59911,8 @@
     "email": "james.libby@legislature.maine.gov",
     "id": "ocd-person/32c9dbd7-beb7-481e-b0f4-22f3eaa00e50",
     "image": "https://legislature.maine.gov/uploads/visual_edit/libby-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District22",
@@ -59824,7 +59931,8 @@
     "email": "mattie.daughtry@legislature.maine.gov",
     "id": "ocd-person/863a9ef0-5916-40d6-9929-7a7b498af0ec",
     "image": "https://legislature.maine.gov/uploads/visual_edit/daughtry-matthea-2.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District23",
@@ -59843,7 +59951,8 @@
     "email": "denise.tepler@legislature.maine.gov",
     "id": "ocd-person/0321d169-de06-4377-8cd5-6cdb51471393",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/da8c36fc-c7af-419a-b9a9-a0b4080be157_teplda[1].jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District24",
@@ -59862,7 +59971,8 @@
     "email": "teresa.pierce@legislature.maine.gov",
     "id": "ocd-person/0d692e7b-535a-498b-8072-a258806fecb4",
     "image": "https://legislature.maine.gov/uploads/visual_edit/pierce-web-748x1024.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District25",
@@ -59882,7 +59992,8 @@
     "email": "timothy.nangle@legislature.maine.gov",
     "id": "ocd-person/2715d740-16c6-49ec-9224-d3d9a24e47ee",
     "image": "https://legislature.maine.gov/uploads/visual_edit/nangle.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District26",
@@ -59901,7 +60012,8 @@
     "email": "jill.duson@legislature.maine.gov",
     "id": "ocd-person/c2268745-e66c-42d5-93bf-3b52819006e9",
     "image": "https://legislature.maine.gov/uploads/visual_edit/duson-3.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District27",
@@ -59920,7 +60032,8 @@
     "email": "rachel.talbotross@legislature.maine.gov",
     "id": "ocd-person/a3fd29b8-0e0e-4559-a71f-6f7cf20be60f",
     "image": "https://legislature.maine.gov/house/house/Repository/MemberProfiles/5a851e9e-6f42-4467-adb4-dbfc44dee0ad_talbr_[1].jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District28",
@@ -59939,7 +60052,8 @@
     "email": "anne.carney@legislature.maine.gov",
     "id": "ocd-person/50f75f0e-328c-413c-8733-de2872c5b7b0",
     "image": "https://legislature.maine.gov/uploads/visual_edit/carney-web-1-1024x854.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District29",
@@ -59958,7 +60072,8 @@
     "email": "brad.farrin@legislature.maine.gov",
     "id": "ocd-person/72193c8f-2b94-4e56-bff4-482bde6037eb",
     "image": "https://legislature.maine.gov/uploads/visual_edit/farrin-bradlee-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District3",
@@ -59977,7 +60092,8 @@
     "email": "stacy.brenner@legislature.maine.gov",
     "id": "ocd-person/b060c143-2734-491d-b28f-f6e4e2c77cb8",
     "image": "https://legislature.maine.gov/uploads/visual_edit/brenner-1022x1024.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District30",
@@ -59996,7 +60112,8 @@
     "email": "donna.bailey@legislature.maine.gov",
     "id": "ocd-person/d071215f-4839-4c4c-ab4d-f3c7179004a6",
     "image": "https://legislature.maine.gov/uploads/visual_edit/bailey-donna-6.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District31",
@@ -60015,7 +60132,8 @@
     "email": "henry.ingwersen@legislature.maine.gov",
     "id": "ocd-person/050d357e-3b22-4647-942f-56c9d8755194",
     "image": "https://legislature.maine.gov/uploads/visual_edit/ingwersen-1024x1024.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District32",
@@ -60034,7 +60152,8 @@
     "email": "matthew.harrington@legislature.maine.gov",
     "id": "ocd-person/f4b39a4f-3a31-4e15-9b0a-459cb260f535",
     "image": "https://legislature.maine.gov/uploads/visual_edit/harrington-matt.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District33",
@@ -60054,7 +60173,8 @@
     "email": "joe.rafferty@legislature.maine.gov",
     "id": "ocd-person/8c2c2996-5a72-4c9a-a0d9-958099f3a304",
     "image": "https://legislature.maine.gov/uploads/visual_edit/rafferty-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District34",
@@ -60073,7 +60193,8 @@
     "email": "mark.lawrence@legislature.maine.gov",
     "id": "ocd-person/ce4a4a85-e41d-410f-bfba-07f7f5b9dee0",
     "image": "https://legislature.maine.gov/uploads/visual_edit/lawrence-5x7-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District35",
@@ -60092,7 +60213,8 @@
     "email": "stacey.guerin@legislature.maine.gov",
     "id": "ocd-person/3439fe0c-fb43-4977-ac8c-1dd1f8f10e96",
     "image": "https://legislature.maine.gov/uploads/visual_edit/guerin-headshot-outdoors-rgb.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District4",
@@ -60111,7 +60233,8 @@
     "email": "russell.black@legislature.maine.gov",
     "id": "ocd-person/fa3e8ae3-757e-44fb-9451-6bf381d748ce",
     "image": "https://legislature.maine.gov/uploads/visual_edit/black-5x7.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District5",
@@ -60129,7 +60252,8 @@
     "email": "marianne.moore@legislature.maine.gov",
     "id": "ocd-person/24bd9e6e-f10d-4e0d-a4b1-72bbe45f4e0d",
     "image": "https://legislature.maine.gov/uploads/visual_edit/moore-5x7.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District6",
@@ -60148,7 +60272,8 @@
     "email": "nicole.grohoski@legislature.maine.gov",
     "id": "ocd-person/e53a09e6-a38e-4622-97e4-c40bf2d93faa",
     "image": "https://legislature.maine.gov/uploads/visual_edit/senator-grohoski-photo-web.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District7",
@@ -60168,7 +60293,8 @@
     "email": "mike.tipping@legislature.maine.gov",
     "id": "ocd-person/a18c5356-5572-4a99-8a7c-e86105afb821",
     "image": "https://legislature.maine.gov/uploads/visual_edit/tipping-1.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District8",
@@ -60187,7 +60313,8 @@
     "email": "joe.baldacci@legislature.maine.gov",
     "id": "ocd-person/34231d57-22e2-4f2f-be41-d2734fa6211f",
     "image": "https://legislature.maine.gov/uploads/visual_edit/baldacci-1024x683.jpg",
-    "imageChecked": "2026-10-19",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://legislature.maine.gov/District9",
@@ -63001,7 +63128,8 @@
     "email": "rep.paul.anderson@house.mn.gov",
     "id": "ocd-person/ab35dde5-226a-4427-9344-c74d8291a75f",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/12A.gif?v=112221",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15301"
@@ -63678,7 +63806,8 @@
     "email": "rep.bidal.duran@house.mn.gov",
     "id": "ocd-person/8a84172a-6b96-4b28-a9ab-bf11625528a3",
     "image": "https://www.house.mn.gov/hinfo/memberimgls94/02A.gif?v=112221",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-26",
     "imageStatus": "ok",
     "links": [
      "https://www.house.mn.gov/members/profile/15629"
