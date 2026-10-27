@@ -2037,7 +2037,8 @@ def _voting(args):
 def _photo_routes(root):
     """The images every route besides the campaign sites' reached or passed
     over - a court's, a statewide candidate's, an attorney general's
-    office's, a judge's and a profile's portrait cache - for validate's
+    office's, a judge's, a profile's portrait cache, a legislator's and an
+    election office's guide's - for validate's
     ``NOT_A_PORTRAIT`` staleness check (``photos.not_a_portrait`` records
     what each refused)."""
     from . import court_photos, courts, judge_links, officers, portraits, statewide_photos
@@ -2071,6 +2072,15 @@ def _photo_routes(root):
         # And a file the legislature offers that the checks set aside
         # (a seat's file older than its member, one over the caps).
         out.update([entry.get("image"), entry.get("offered")])
+    # An election office's guide: the addresses a refusal of a hosted
+    # photograph is keyed on, and what a person refused of the guides.
+    from . import guide_photos
+    guides = guide_photos.load_cache(root) or {}
+    for rec in (guides.get("photos") or {}).values():
+        if isinstance(rec, dict):
+            out.update(guide_photos.own_addresses(rec.get("state"), rec.get("page"),
+                                                  rec.get("photo")))
+    out.update(refused_urls(guides.get("notPortraits")))
     out.discard(None)
     return out
 

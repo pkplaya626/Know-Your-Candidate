@@ -203,6 +203,37 @@ def _stale(enrichment, routes, table):
     return [u for i in issues if i.code == "stale-portrait-override" for u in i.detail]
 
 
+def _forms(url):
+    """Every way a cache may write *url*: as given, JSON-escaped,
+    percent-encoded, and for a Commons upload its thumbnails' path and its
+    File: page, the name in either spelling."""
+    import json
+    import re
+    import urllib.parse
+    out = {url, json.dumps(url)[1:-1], urllib.parse.quote(url, safe=":/")}
+    commons = re.match(r"https://upload\.wikimedia\.org/wikipedia/[^/]+/"
+                       r"([0-9a-f]/[0-9a-f]{2})/([^/]+)$", url)
+    if commons:
+        name = urllib.parse.unquote(commons.group(2))
+        for spelt in {name, urllib.parse.quote(name)}:
+            out |= {f"/{commons.group(1)}/{spelt}/", f"File:{spelt}",
+                    f"File:{spelt.replace('_', ' ')}"}
+    return out
+
+
+def _held_in(data, urls):
+    """Which of *urls* some file under the folder *data* still holds, in any
+    form (:func:`_forms`)."""
+    forms = {u: _forms(u) for u in urls}
+    found = set()
+    for folder, _dirs, files in os.walk(data):
+        for name in files:
+            with open(os.path.join(folder, name), encoding="utf-8", errors="replace") as handle:
+                text = handle.read()
+            found |= {u for u, said in forms.items() if any(f in text for f in said)}
+    return found
+
+
 class TestTheStalenessCheckSeesEveryRoute(unittest.TestCase):
     """validate.check_portrait_overrides, with cli._photo_routes, must count
     as still offered every address any route's cache offers or records as
@@ -213,7 +244,7 @@ class TestTheStalenessCheckSeesEveryRoute(unittest.TestCase):
     COMMONS = "https://commons.wikimedia.org/wiki/File:Pat_Doe_crowd.jpg"
 
     def cases(self):
-        from kyc import courts, judge_links, legphotos, officers, statelegs
+        from kyc import courts, guide_photos, judge_links, legphotos, officers, statelegs
         upload = judge_links.source_url(self.COMMONS)
         u = REFUSED
         return {
@@ -259,6 +290,13 @@ class TestTheStalenessCheckSeesEveryRoute(unittest.TestCase):
                 "ocd-person/a": {"image": u}}}, u),
             "a legislature's file set aside": (legphotos.CACHE_PATH, {"people": {
                 "ocd-person/a": {"image": None, "offered": u, "withheld": "older"}}}, u),
+            "a guide's hosted photograph": (guide_photos.CACHE_PATH, {"photos": {
+                "person:P1": {"state": "OR", "page": "https://sos.example.gov/book#page=3",
+                              "photo": "photos/abc.jpg"}}}, "photos/abc.jpg"),
+            "a guide's candidate page": (guide_photos.CACHE_PATH, {"photos": {
+                "person:P1": {"state": "WA", "page": u, "photo": "photos/abc.jpg"}}}, u),
+            "a guide's refusal": (guide_photos.CACHE_PATH, {
+                "photos": {}, "notPortraits": {"H-WA-04-2026": [u]}}, u),
         }
 
     def enrichment_cases(self):
@@ -303,17 +341,30 @@ class TestTheStalenessCheckSeesEveryRoute(unittest.TestCase):
         issues = validate.check_portrait_overrides(enrich.load_cache(ROOT),
                                                    cli._photo_routes(ROOT))
         stale = [u for i in issues if i.code == "stale-portrait-override" for u in i.detail]
-        if not stale:
-            return
-        forms = {u: {u, json.dumps(u)[1:-1]} for u in stale}
-        found = set()
-        data = os.path.join(ROOT, "candidate_profiles_site", "data")
-        for folder, _dirs, files in os.walk(data):
-            for name in files:
-                with open(os.path.join(folder, name), encoding="utf-8", errors="replace") as handle:
-                    text = handle.read()
-                found |= {u for u, said in forms.items() if any(f in text for f in said)}
+        found = _held_in(os.path.join(ROOT, "candidate_profiles_site", "data"), stale)
         self.assertEqual(sorted(found), [], "stale to the check, yet a data file holds them")
+
+    def test_the_search_finds_a_file_in_any_form_a_cache_writes_it(self):
+        """A route may hold a Commons file only as a scaled thumbnail, its
+        name percent-encoded, or as its File: page (the review of PR #159:
+        two of the day's three files were held only so)."""
+        import json
+        import tempfile
+        upload = "https://upload.wikimedia.org/wikipedia/commons/2/23/Pat_Doe_(cropped).jpg"
+        held = {
+            "thumbnail": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/"
+                         "Pat_Doe_%28cropped%29.jpg/250px-Pat_Doe_%28cropped%29.jpg",
+            "file page": "https://commons.wikimedia.org/wiki/File:Pat_Doe_(cropped).jpg",
+            "encoded file page": "https://commons.wikimedia.org/wiki/File:Pat_Doe_%28cropped%29.jpg",
+            "as written": upload,
+            "another address": "https://example.org/x.jpg",
+        }
+        for label, address in held.items():
+            with self.subTest(label), tempfile.TemporaryDirectory() as data:
+                with open(os.path.join(data, "c.json"), "w", encoding="utf-8") as handle:
+                    json.dump({"photo": address}, handle)
+                self.assertEqual(_held_in(data, [upload, REFUSED]),
+                                 set() if label == "another address" else {upload})
 
 
 class TestARefusalOutlivesAReadThatConcludesNothing(unittest.TestCase):
@@ -416,7 +467,7 @@ class TestARefusalOutlivesAReadThatConcludesNothing(unittest.TestCase):
                                             return_value={"Pat Doe": roster + "/doe"}):
                 court_photos.add_justice_photos(read, {"XX": page}, {"XX": {
                     "photoRefused": {"Pat Doe": [REFUSED]}}}, get=fail, pause=0)
-            self.assertEqual(read["XX"]["photoRefused"], {"Pat Doe": [REFUSED]})
+            self.assertEqual(read["XX"].get("photoRefused"), {"Pat Doe": [REFUSED]})
             # Read whole, and offering nothing: the refusal goes.
             read = {"XX": {"members": ["Pat Doe"]}}
             court_photos.add_justice_photos(read, {"XX": "<p>Justices</p>"}, {"XX": {
@@ -445,12 +496,12 @@ class TestARefusalOutlivesAReadThatConcludesNothing(unittest.TestCase):
         # The office's site did not answer: the row is the association's.
         rows = {"XX": {"name": "Pat Doe", "unconfirmed": True, "unreadable": True}}
         officers.add_ag_photos(rows, {}, old, pause=0)
-        self.assertEqual(rows["XX"]["notPortraits"], [REFUSED])
+        self.assertEqual(rows["XX"].get("notPortraits"), [REFUSED])
         # Confirmed, but the pages with the photograph did not answer.
         rows = {"XX": {"name": "Pat Doe"}}
         with unittest.mock.patch.object(officers, "ag_photo", return_value=(None, "unknown")):
             officers.add_ag_photos(rows, {"XX": []}, old, pause=0, get=lambda u: "")
-        self.assertEqual(rows["XX"]["notPortraits"], [REFUSED])
+        self.assertEqual(rows["XX"].get("notPortraits"), [REFUSED])
         # Read whole, and offering nothing: the refusal goes.
         rows = {"XX": {"name": "Pat Doe"}}
         with unittest.mock.patch.object(officers, "ag_photo", return_value=(None, "none")):
@@ -497,15 +548,129 @@ class TestARefusalOutlivesAReadThatConcludesNothing(unittest.TestCase):
         self.assertIsNone(cache[key]["url"])
         self.assertEqual(nominee_photos.replaced(cache[key]), [REFUSED])
 
-    def test_a_profile_resolved_again_keeps_what_it_replaces(self):
-        old = {"url": REFUSED, "via": "wikipedia", "replaces": ["https://e.org/older.jpg"]}
+    def test_a_record_that_only_holds_a_refusal_resolves_nothing(self):
+        """The review of PR #159: a filer with no article has no portrait
+        record, and a record made only to hold a refusal must not stop
+        portraits resolving them once their ballot page links one."""
+        from kyc import nominee_photos
+        profile = {"id": "H6XX01000", "name": "Jane Filer", "state": "XX",
+                   "isCandidate": True, "source": "fec-field"}
+        key = portraits.profile_key(profile)
+        cache = {}
+        nominee_photos.record_passed(cache, {key: [REFUSED]}, [profile])
+        later = dict(profile, wikipedia="Jane Filer", wikipediaVia="election-page")
+        self.assertFalse(portraits.route_ok(later, cache[key]))
+        # What portraits then resolves keeps the refusal, and is a record
+        # like any other.
+        found = portraits.resolved_over(cache[key], {
+            "url": "https://upload.wikimedia.org/x/Jane_Filer.jpg", "via": "wikipedia",
+            "title": "Jane Filer", "linked": "Jane Filer", "name": "Jane Filer"})
+        self.assertEqual(found["replaces"], [REFUSED])
+        self.assertNotIn(nominee_photos.REFUSALS_ONLY, found)
+        # A record portraits resolved to nothing stays resolved.
+        self.assertTrue(portraits.route_ok(later, {"url": None, "via": "unresolved"}))
+
+    def test_a_profile_resolved_again_keeps_what_another_route_refused(self):
+        from kyc import nominee_photos
+        old = {"url": REFUSED, "via": nominee_photos.WIKIDATA,
+               "replaces": ["https://e.org/older.jpg"]}
         with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
             new = portraits.resolved_over(old, {"url": None, "via": "unresolved", "name": "P"})
         self.assertEqual(new["replaces"], sorted([REFUSED, "https://e.org/older.jpg"]))
+        # Its own route's refused file goes with the route it re-read: an
+        # article the profile no longer links offers it no more.
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
+            new = portraits.resolved_over({"url": REFUSED, "via": "wikipedia"},
+                                          {"url": None, "via": "unresolved", "name": "P"})
+        self.assertNotIn("replaces", new)
         # Resolved again to the very file, it replaces nothing new.
         with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
-            again = portraits.resolved_over({"url": REFUSED}, {"url": REFUSED})
+            again = portraits.resolved_over({"url": REFUSED, "via": nominee_photos.WIKIDATA},
+                                            {"url": REFUSED})
         self.assertNotIn("replaces", again)
+
+    def test_a_court_members_kept_photograph_a_person_refused_is_recorded(self):
+        from kyc import court_photos, courts as court_module
+        roster = "https://courts.example.gov/justices"
+        court_module.COURTS["XX"] = {"url": roster}
+
+        def fail(url, **kw):
+            raise court_module.CourtsError("timed out")
+        try:
+            read = {"XX": {"members": ["Pat Doe"]}}
+            with unittest.mock.patch.object(court_photos, "bio_pages",
+                                            return_value={"Pat Doe": roster + "/doe"}), \
+                    unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
+                court_photos.add_justice_photos(read, {"XX": "<p>Justices</p>"}, {"XX": {
+                    "photos": {"Pat Doe": {"photo": REFUSED}}}}, get=fail, pause=0)
+        finally:
+            del court_module.COURTS["XX"]
+        self.assertNotIn("photos", read["XX"])
+        self.assertEqual(read["XX"].get("photoRefused"), {"Pat Doe": [REFUSED]})
+
+    def test_an_unreadable_offices_old_photograph_a_person_refused_is_recorded(self):
+        rows = {"XX": {"name": "Pat Doe", "unconfirmed": True, "unreadable": True}}
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
+            officers.add_ag_photos(rows, {}, {"XX": {"name": "Pat Doe", "photo": REFUSED}},
+                                   pause=0)
+        self.assertEqual(rows["XX"].get("notPortraits"), [REFUSED])
+        # Another holder's old photograph is not this one's.
+        rows = {"XX": {"name": "Lee Roe", "unconfirmed": True, "unreadable": True}}
+        with unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
+            officers.add_ag_photos(rows, {}, {"XX": {"name": "Pat Doe", "photo": REFUSED}},
+                                   pause=0)
+        self.assertNotIn("notPortraits", rows["XX"])
+
+    def campaign(self):
+        return {"id": "H6XX01000", "name": "Pat Doe", "state": "XX"}
+
+    def test_a_campaign_about_page_that_concludes_nothing_is_marked(self):
+        from kyc import enrich
+        about = "https://doe.example.com/about"
+        record = {"url": "https://doe.example.com/", "safe": enrich.SAFE}
+        with unittest.mock.patch.object(enrich, "about_link", return_value=about), \
+                unittest.mock.patch.object(enrich, "fetch", return_value=(about, 503, "")), \
+                unittest.mock.patch.object(enrich, "assess", return_value=(None, "503")), \
+                unittest.mock.patch.object(enrich, "portrait", return_value=[]), \
+                unittest.mock.patch.object(enrich.time, "sleep"):
+            enrich.look_for_portrait(record, self.campaign(), enrich.parse_page(""), record["url"],
+                                     pause=0)
+        self.assertEqual(record.get("portraitUnread"), about)
+        old = dict(record, notPortraits=[REFUSED])
+        old.pop("portraitUnread")
+        self.assertEqual(enrich._keep(old, record)["notPortraits"], [REFUSED])
+
+    def drawn(self, before, about_markup):
+        """render_portraits over one site whose home page has no portrait
+        and links an About page drawn as *about_markup* (None: not drawn)."""
+        from kyc import enrich
+        url = "https://doe.example.com/"
+        profile = self.campaign()
+        cache = {"people": {profile["id"]: {"drawn": before}}}
+
+        def reader(pages):
+            code = next(iter(pages))
+            if pages[code] == url:
+                return {code: "<html>home</html>"}, []
+            return ({code: about_markup} if about_markup is not None else {}), []
+
+        def pictures(page, base, who):
+            return [(REFUSED, "Pat Doe")] if base.endswith("/about") else []
+        with unittest.mock.patch.object(enrich, "render_wanted",
+                                        return_value=[(profile, "k", url)]), \
+                unittest.mock.patch.object(enrich, "assess", return_value=(enrich.SAFE, "ok")), \
+                unittest.mock.patch.object(enrich, "about_link", return_value=url + "about"), \
+                unittest.mock.patch.object(enrich, "portrait", side_effect=pictures), \
+                unittest.mock.patch.dict(overrides.NOT_A_PORTRAIT, TABLE):
+            enrich.render_portraits([profile], cache, reader=reader, log=lambda *a: None)
+        return cache["people"][profile["id"]]["drawn"]
+
+    def test_a_campaign_about_page_not_drawn_keeps_its_refusals(self):
+        before = {"url": "https://doe.example.com/", "safe": True, "notPortraits": [REFUSED]}
+        self.assertEqual(self.drawn(before, None).get("notPortraits"), [REFUSED])
+
+    def test_what_a_drawn_about_page_refused_is_recorded(self):
+        self.assertEqual(self.drawn(None, "<html>about</html>").get("notPortraits"), [REFUSED])
 
 
 class TestACommonsPhotographsYear(unittest.TestCase):

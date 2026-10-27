@@ -728,6 +728,11 @@ def _unresolved(profile):
     return {"url": None, "via": "unresolved", "name": profile["name"]}
 
 
+# A portrait cache record made only to hold what a person refused for
+# someone no route had resolved (:func:`record_passed`): not a resolution.
+REFUSALS_ONLY = "refusalsOnly"
+
+
 def resolve_all(profiles, cache, history=None, legislators=None, log=print,
                 sparql=None, api=None, getter=None, legislator_photos=None):
     """Look for a portrait by each route for everyone :func:`wanted`, in
@@ -894,14 +899,16 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
 def record_passed(cache, passed, people):
     """Put what a person refused of each one's routes (*passed*, ``{key:
     [url]}``) on their record as what it ``replaces``, in place. A person
-    with no record yet - a filer no other route resolves - gets an
-    unresolved one to hold it: the first version kept a refusal only on a
-    record that existed, so one met on a whole read was dropped."""
+    with no record yet - a filer no other route resolves - gets one that
+    only holds it (``REFUSALS_ONLY``): the first version kept a refusal only
+    on a record that existed, so one met on a whole read was dropped. Such
+    a record resolves nothing, so ``portraits.route_ok`` sends its profile
+    to be resolved once it links an article, as though it had no record."""
     from .portraits import profile_key
     names = {profile_key(p): p["name"] for p in people}
     for key, urls in passed.items():
         if urls and key not in cache and key in names:
-            cache[key] = _unresolved({"name": names[key]})
+            cache[key] = dict(_unresolved({"name": names[key]}), **{REFUSALS_ONLY: True})
         if urls and key in cache and cache[key].get("url") not in urls:
             cache[key]["replaces"] = sorted(urls)
 

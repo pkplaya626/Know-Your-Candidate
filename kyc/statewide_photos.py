@@ -777,9 +777,9 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
     def unread(k):
         return concluded_nothing(k) or not wikipedia
 
-    if not wikipedia:
-        misses = {k: why for k, why in ((previous or {}).get("misses") or {}).items()
-                  if k not in records}
+    for k, why in ((previous or {}).get("misses") or {}).items():
+        if unread(k) and k not in records and k not in misses:
+            misses[k] = why
     cache = {"read": datetime.date.today().isoformat(),
              "photos": {k: records[k] for k in sorted(records)},
              "misses": {k: misses[k] for k in sorted(misses)}}

@@ -1306,21 +1306,26 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
             if about:
                 abouts[_code(i)] = (profile, url, about, before)
     if abouts:
+        from .photos import keep_refused
         more, problems = reader({code: about for code, (_p, _u, about, _b) in abouts.items()})
         for line in problems[:5]:
             log(f"    [drawn] {line}")
         for code, (profile, url, about, before) in abouts.items():
             if more.get(code) is None:
                 # Not drawn: what the last good read refused stays (rule 8).
-                from .photos import keep_refused
                 if (before or {}).get("url") == url:
                     keep_refused(people[profile["id"]]["drawn"], before)
                 continue
             record, _page = _drawn_read(profile, about, more[code], today)
+            # What either page refused stays with the record kept: the
+            # About page's portrait, or else the home page's record.
             if record.get("portrait"):
                 record["url"] = url                      # the site it stands for
-                people[profile["id"]]["drawn"] = record
+                people[profile["id"]]["drawn"] = keep_refused(record,
+                                                              people[profile["id"]]["drawn"])
                 found += 1
+            else:
+                keep_refused(people[profile["id"]]["drawn"], record)
     log(f"  enrich: {found} portrait(s) found on drawn pages")
     return found
 

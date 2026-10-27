@@ -786,6 +786,30 @@ class TestThePhotoRoutes(unittest.TestCase):
         self.assertEqual([lvl for lvl, code, _m, _d in found
                           if code == "judge-portrait-overridden"], ["error"])
 
+    def test_an_unsure_read_records_the_kept_portrait_a_person_refused(self):
+        """A read that concludes nothing (a wide frame whose crops were not
+        read) withholds the last portrait read where a person has refused
+        it since, and records the file, or the entry would read as stale
+        (the refresh of 2026-10-27)."""
+        from unittest import mock
+        from kyc import overrides
+        name = "Ann Example at a hearing.jpg"
+        url = up(name)
+        kept = {"wikidata": "Q1", "portrait": {
+            "url": url, "set": [[120, url]], "credit": "Wikimedia Commons",
+            "source": jl.file_page(url), "licence": "CC BY-SA 4.0", "route": "item",
+            "evidence": "Wikidata Q1 carries the FJC id", "read": "2026-10-01",
+            "bytes": 20_000, "width": 120, "height": 150}}
+        item = entity("Q1", "example-ann", images=[name])
+        report = {}
+        with mock.patch.dict(overrides.NOT_A_PORTRAIT, {url: ("2026-10-25", "a drawing")}):
+            joined, problems = jl.join({"fjc-100": JUDGE}, {"100": "example-ann"}, wd(item),
+                                       {url: (1600, 900)}, {"100": kept}, today="2026-10-19",
+                                       report=report)
+        self.assertNotIn("portrait", joined["100"])
+        self.assertIn("crops were not read", problems[0])
+        self.assertEqual(report["notPortraits"], {"100": [url]})
+
     # ---- a justice's official portrait (the owner's decision of 2026-10-20)
 
     OFFICIAL = "Ann Example official portrait.jpg"

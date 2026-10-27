@@ -939,7 +939,7 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
     get = get or _get
     problems = []
     for code, row in sorted(rows.items()):
-        old =(previous or {}).get(code) or {}
+        old = (previous or {}).get(code) or {}
         if row.get("unconfirmed") and row.get("unreadable") and old.get("name") == row.get("name"):
             # The office's site concluded nothing: what its last good read
             # of the same holder refused stays recorded (rule 8), with the
