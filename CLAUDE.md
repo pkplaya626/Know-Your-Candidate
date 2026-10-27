@@ -1014,7 +1014,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     General <anyone> Brown" on Utah's site could be Washington's Nick Brown.
     A site that refuses the request, or draws itself with JavaScript (fewer
     than 300 visible characters), concludes nothing (rule 8) and is tried
-    again before the listing is shown as an association's, attributed; the
+    again before the listing is shown as an association's, attributed, with
+    the words that this site's automated check could not read the office's
+    site - never that the site "refuses automated requests", since a
+    refusal, a timeout and a page drawn by script look alike to the read
+    (rule 19): ncdoj.gov, said to refuse them, had only timed out; the
     office's page read by hand (`overrides.OFFICERS_READ_BY_HAND`, rule 57's
     way) confirms the roster's holder where its quoted words pass this test.
     Text inside an HTML comment is not on the page: North Carolina's keeps a

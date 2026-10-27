@@ -2061,7 +2061,8 @@ Carolina the Republican Jeff Jackson beat in 2024, and printed "Maryland" and
 covered all fifty - give each candidate and their party, and a name is shown
 only when the attorney general's own office, linked from USA.gov's page for
 the state, names that person beside the title: 48 of 50 on 2026-10-05.
-Where the office's site refuses a script, a person reads the office's own
+Where this site's automated read of the office's site concludes nothing
+(each entry records what its reader saw), a person reads the office's own
 page in their own browser, rule 57's way (`overrides.OFFICERS_READ_BY_HAND`:
 the holder, the page, the day and its words quoted, each piece as it
 stands). The entry confirms only the holder the roster names, and only where
@@ -2075,8 +2076,12 @@ and validate says so (`officers-by-hand`); past
 entry whose words do not name the holder beside the title stops the build.
 Where nothing confirms a listing, the page says in whole sentences who lists
 the person, that this site has not confirmed it on the office's own site and
-why (it refuses automated requests, or does not name them), with that site
-linked in the sentence. A few offices need another official page
+why (this site's automated check could not read the site, or the site does not name
+them), with that site linked in the sentence. "Could not read" is all the
+record says: a refusal, a timeout, a page drawn by script or the attorney
+general's own page behind the front page not answering look alike to it, so
+the page never says the office's site refuses automated requests (rule 19;
+ncdoj.gov timed out from 2026-10-20 to 22 and answered the next day). A few offices need another official page
 (`officers.OFFICE_PAGES`: Wyoming's staff page, Kansas's state portal) and a
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.

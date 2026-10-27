@@ -1985,7 +1985,7 @@ COURT_ROSTERS = {
 
 # Statewide officers the office's own page names, read by hand in a person's
 # browser (rule 57's way), where kyc/officers.py's own read concludes
-# nothing - the office's site refuses a script (rule 8) - or the
+# nothing (rule 8; each entry records what its reader saw) - or the
 # association's roster does not speak for the office (NASS's "Currently Not a
 # NASS Member", rule 55). Keyed (state, office), office "ag" or "sos"; each is
 # (the holder the roster names, the office's own page, the day read, the
