@@ -262,6 +262,84 @@ def not_a_portrait(*urls, passed_over=None, table=None, judge=False):
     return ""
 
 
+def withheld_files(urls, refusals=None, doubts=None, judge=False):
+    """Record which of *urls* - the addresses of a record kept from an
+    earlier read (rule 8) - a person's lists withhold: a ``NOT_A_PORTRAIT``
+    file in *refusals*, a ``PORTRAIT_LICENCE_DOUBTS`` file in *doubts*. A
+    record dropped for it still stands for the entry that dropped it, or
+    ``validate``'s staleness checks would call that entry stale on the day
+    it bites (the refresh of 2026-10-27: Mayes Middleton's and JoCasta
+    Zamarripa's Commons files). Returns whether any was withheld."""
+    from . import overrides
+
+    doubted = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
+    hit = False
+    for url in urls:
+        if not url:
+            continue
+        if not_a_portrait(url, passed_over=refusals, judge=judge):
+            hit = True
+        elif url in doubted:
+            hit = True
+            if doubts is not None and url not in doubts:
+                doubts.append(url)
+    return hit
+
+
+# A cache written before each refusal named whose it was (a flat list) keeps
+# that list under this key, until a read that reaches everything lets it go.
+UNATTRIBUTED = "(read before refusals named whose they were)"
+
+
+def refusal_map(value):
+    """``{key: [url]}`` from a cache's refusals: the form that names whose
+    each is (a race's, a judge's), or a flat list as caches wrote it before
+    (under :data:`UNATTRIBUTED`)."""
+    if isinstance(value, dict):
+        return {k: list(v) for k, v in value.items() if v}
+    return {UNATTRIBUTED: list(value)} if value else {}
+
+
+def refused_urls(value):
+    """Every address in a cache's refusals, whichever form (:func:`refusal_map`)."""
+    return {u for urls in refusal_map(value).values() for u in urls}
+
+
+def keep_refusals(now, before, unread, whole=False):
+    """*now* (``{key: [url]}``, this read's refusals) with what *before*
+    (the last cache's, either form) recorded for each key this read
+    concluded nothing about (``unread(key)``): a read that concludes
+    nothing keeps the refusals its last good read recorded (rule 8), and a
+    read that reached the key lets them go. *before*'s unattributed list is
+    kept, less what this read met, unless the read was *whole*. Returns a
+    new ``{key: sorted urls}``."""
+    out = {k: list(v) for k, v in (now or {}).items() if v}
+    met = {u for urls in out.values() for u in urls}
+    for k, urls in refusal_map(before).items():
+        if k == UNATTRIBUTED:
+            if whole:
+                continue
+            urls = [u for u in urls if u not in met]
+        elif not unread(k):
+            continue
+        for url in urls:
+            if url not in out.setdefault(k, []):
+                out[k].append(url)
+    return {k: sorted(v) for k, v in sorted(out.items()) if v}
+
+
+def keep_refused(record, old):
+    """*record* with *old*'s ``notPortraits`` added, for a read that
+    concluded nothing about part of what *old*'s read reached (rule 8)."""
+    urls = list(record.get("notPortraits") or [])
+    for url in (old or {}).get("notPortraits") or ():
+        if url not in urls:
+            urls.append(url)
+    if urls:
+        record["notPortraits"] = urls
+    return record
+
+
 def host_of(url):
     import urllib.parse
     try:

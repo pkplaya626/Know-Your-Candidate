@@ -884,13 +884,26 @@ def resolve_all(profiles, cache, history=None, legislators=None, log=print,
     # Each record keeps what a person refused of what that person's routes
     # offered (``replaces``): what it stands in for, which validate's
     # staleness check counts as still offered.
-    for key, urls in passed.items():
-        if key in cache and cache[key].get("url") not in urls:
-            cache[key]["replaces"] = sorted(urls)
+    record_passed(cache, passed, people)
     log(f"  nominee portraits: {counts['wikidata']} from Wikidata, {counts['legislature']} "
         f"from a legislature ({counts['heavy']} over the caps, shown all the same), "
         f"{counts['kept']} kept from an earlier read")
     return counts
+
+
+def record_passed(cache, passed, people):
+    """Put what a person refused of each one's routes (*passed*, ``{key:
+    [url]}``) on their record as what it ``replaces``, in place. A person
+    with no record yet - a filer no other route resolves - gets an
+    unresolved one to hold it: the first version kept a refusal only on a
+    record that existed, so one met on a whole read was dropped."""
+    from .portraits import profile_key
+    names = {profile_key(p): p["name"] for p in people}
+    for key, urls in passed.items():
+        if urls and key not in cache and key in names:
+            cache[key] = _unresolved({"name": names[key]})
+        if urls and key in cache and cache[key].get("url") not in urls:
+            cache[key]["replaces"] = sorted(urls)
 
 
 def replaced(record):

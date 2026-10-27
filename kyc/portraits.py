@@ -979,9 +979,9 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
 
     for profile in todo:
         key = profile_key(profile)
-        cache[key] = resolved.get(key) or {
+        cache[key] = resolved_over(cache.get(key), resolved.get(key) or {
             "url": None, "via": "unresolved", "name": profile["name"],
-        }
+        })
 
     size_all(cache, log=log)
     credit_all(cache, log=log)
@@ -1031,6 +1031,21 @@ def curated_record(profile, entry, old=None, manifest=None):
     if replaces:
         record["replaces"] = replaces
     return record
+
+
+def resolved_over(old, new):
+    """*new*, a record resolved over *old*: what a person refused of *old*
+    (``photos.refused``) and what it already ``replaces`` stay recorded as
+    what *new* ``replaces``, as :func:`curated_record` keeps them - still a
+    file a route offered, for validate's staleness check, and a fallback to
+    be looked at (``portrait-fallback-unseen``)."""
+    from .photos import refused
+    old = old or {}
+    stood = {u for u in addresses(old) if refused(u)} | set(old.get("replaces") or ())
+    stood -= set(addresses(new))
+    if stood:
+        new["replaces"] = sorted(stood)
+    return new
 
 
 def sync_curated(profiles, cache, manifest=None):

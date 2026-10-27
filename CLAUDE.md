@@ -728,7 +728,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     reader, a court's, an attorney general's office's, a statewide
     candidate's guide or article, a judge's), and records what it refused
     in that route's cache (`notPortraits`) for `validate`'s staleness
-    check. A curated row takes its campaign's
+    check - under whose it is (a race, a judge, a court's member), so a
+    read that concludes nothing keeps the refusals its last good read
+    recorded, and a kept record a list withholds is recorded as refused,
+    not dropped: the refresh of 2026-10-27 failed on three entries called
+    stale that way (`photos.keep_refusals`, `withheld_files`). A stale
+    entry is a warning for a person, never a failed refresh; the test fails
+    only on one a data file still holds. A curated row takes its campaign's
     portrait as a filer does: Brian Bengs's sat in the cache while his
     profile showed the silhouette. A sitting member never does: their
     portrait comes by their bioguide id. Issue headings come from one heading level of a page

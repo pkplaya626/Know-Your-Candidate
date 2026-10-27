@@ -755,7 +755,7 @@ class TestThePhotoRoutes(unittest.TestCase):
                                          {name: (255, 357)}, report=report)
         self.assertNotIn("portrait", joined["100"])
         self.assertIn("PORTRAIT_LICENCE_DOUBTS", problems[0])
-        self.assertEqual(report["doubted"], [up(name)])
+        self.assertEqual(report["doubted"], {"100": [up(name)]})
 
     def test_a_kept_portrait_is_asked_of_the_overrides_again(self):
         """A doubt or a refusal added after a file was read withholds it,

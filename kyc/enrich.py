@@ -1066,6 +1066,10 @@ def look_for_portrait(record, profile, page, final, pause=1.0):
             about_final, about_status, about_markup = fetch(about)
             where, base = parse_page(about_markup), about_final
             verdict, _reason = assess(profile, about, about_final, about_status, where)
+            if verdict is None:
+                # It concluded nothing: what the last good read refused
+                # there is kept (_keep, rule 8).
+                record["portraitUnread"] = about
             if verdict is not SAFE or host_of(about_final) != host_of(final):
                 break
         pictures = portrait(where, base, profile)
@@ -1293,19 +1297,24 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
         if markup is None:
             continue                                     # kept as it was (rule 8)
         record, page = _drawn_read(profile, url, markup, today)
-        people.setdefault(profile["id"], {})["drawn"] = record
+        before = people.setdefault(profile["id"], {}).get("drawn")
+        people[profile["id"]]["drawn"] = record
         if record.get("portrait"):
             found += 1
         elif record["safe"] is SAFE:
             about = about_link(page, url)
             if about:
-                abouts[_code(i)] = (profile, url, about)
+                abouts[_code(i)] = (profile, url, about, before)
     if abouts:
-        more, problems = reader({code: about for code, (_p, _u, about) in abouts.items()})
+        more, problems = reader({code: about for code, (_p, _u, about, _b) in abouts.items()})
         for line in problems[:5]:
             log(f"    [drawn] {line}")
-        for code, (profile, url, about) in abouts.items():
+        for code, (profile, url, about, before) in abouts.items():
             if more.get(code) is None:
+                # Not drawn: what the last good read refused stays (rule 8).
+                from .photos import keep_refused
+                if (before or {}).get("url") == url:
+                    keep_refused(people[profile["id"]]["drawn"], before)
                 continue
             record, _page = _drawn_read(profile, about, more[code], today)
             if record.get("portrait"):
@@ -1345,6 +1354,12 @@ def _keep(old, new):
         return None
     if new.get("safe") is None and old and old.get("url") == new.get("url"):
         return dict(old, lastTry={"status": new.get("status"), "reason": new.get("reason")})
+    if new.get("portraitUnread") and not new.get("portrait") and old \
+            and old.get("url") == new.get("url"):
+        # The About page concluded nothing: the refusals its last good read
+        # recorded stay (rule 8).
+        from .photos import keep_refused
+        keep_refused(new, old)
     return new
 
 

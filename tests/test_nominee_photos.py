@@ -329,7 +329,12 @@ class TestWikidataByFecId(unittest.TestCase):
                 self.assertFalse(portraits.route_ok(nominee(), record), table)
                 again = {}
                 resolve_wikidata(again)
-                self.assertEqual(again, {}, table)
+                # No portrait; the refusal is kept on an unresolved record,
+                # so the entry still guards a file a route offers.
+                key = portraits.profile_key(nominee())
+                self.assertEqual(list(again), [key], table)
+                self.assertIsNone(again[key]["url"], table)
+                self.assertEqual(again[key]["replaces"], [INFO["url"].split("?", 1)[0]], table)
         wide = {}
         resolve_wikidata(wide, getter=Getter({THUMB: image(jpeg(330, 220))}))
         self.assertEqual(wide, {})
