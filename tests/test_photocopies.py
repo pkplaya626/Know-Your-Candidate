@@ -19,7 +19,7 @@ import zlib
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import judge_links, photocopies, portraits, share  # noqa: E402
+from kyc import judge_links, overrides, photocopies, portraits, share  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 HEAVY = "https://oksenate.gov/sites/default/files/Bergstrom.jpg"
@@ -702,7 +702,15 @@ class TestJusticesYears(unittest.TestCase):
         cache = judge_links.load_cache(ROOT)
         official = [e["portrait"] for e in cache["judges"].values()
                     if (e.get("portrait") or {}).get("route") == "official"]
-        self.assertEqual(len(official), 9)
+        # How many of the table's files the week's read took as recorded is
+        # the read's; a justice it did not is the Court's own and is said
+        # so (portraitUnconfirmed, justice-portrait-unread). Only the table's
+        # justices are ever pictured by this route.
+        named = getattr(overrides, "JUSTICE_PORTRAITS", {})
+        self.assertEqual(len(named), 9)
+        self.assertLessEqual(len(official), len(named))
+        took = {nid for nid in named if judge_links.official_portrait(cache, nid)}
+        self.assertEqual(len(took), len(official))
         shown = [e["portrait"] for e in cache["judges"].values() if e.get("portrait")]
         self.assertTrue(all("year" in p or p.get("yearUnstated") for p in shown))
         self.assertTrue(all(p.get("creditForm") == portraits.CREDIT_FORM for p in shown

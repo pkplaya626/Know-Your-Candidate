@@ -207,8 +207,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2499 tests, no dependencies
-npm install && npm test                       # 3471 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2500 tests, no dependencies
+npm install && npm test                       # 3473 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2867,6 +2867,12 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
   before-and-after district maps, `tests/test_frame.py` for the site's frame (about, 404, footers, header tags), `tests/test_site.py` for summary
   figures, emitted files and page wiring, `tests/render_test.js` for anything
   visible on a page.
+- A check tests the rule, not the day's data: it makes the state it tests
+  (a link the check missed, an office read by hand, a court unread, a
+  photograph copied) and asks the real record for whichever is true, since a
+  refresh changes which links answer and which offices can be read. On
+  2026-10-26 seven checks written against the day before failed the daily
+  refresh, which had found three links live and read an office itself.
 - When changing profile fields, update the field tables in `README.md`.
 - Builds must stay reproducible under `SOURCE_DATE_EPOCH`, for `geo.js` as
   well as the people files.
