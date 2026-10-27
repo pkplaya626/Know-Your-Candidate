@@ -360,11 +360,17 @@
    "title": "Attorney General"
   },
   "NC": {
-   "disputed": [
-    "Dan Bishop (R)",
-    "Jeff Jackson (D)"
+   "alsoListed": [
+    "Dan Bishop (R)"
    ],
-   "office": "https://ncdoj.gov/"
+   "confirmationKept": true,
+   "confirmedOn": "2026-10-26",
+   "listedBy": "Democratic Attorneys General Association",
+   "name": "Jeff Jackson",
+   "office": "https://ncdoj.gov/",
+   "party": "D",
+   "partyKey": "D",
+   "title": "Attorney General"
   },
   "ND": {
    "listedBy": "Republican Attorneys General Association",
