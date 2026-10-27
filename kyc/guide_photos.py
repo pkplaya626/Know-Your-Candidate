@@ -65,7 +65,7 @@ import urllib.parse
 import urllib.request
 import zlib
 
-from . import pdfread
+from . import pdfread, tls
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "guide_photos.json")
 ROUTE = "election-guide"
@@ -351,11 +351,14 @@ def get(url, limit=MAX_JSON):
     this machine's resolver cannot look up is looked up again at dns.google
     before the read is given up (rule 78: this machine's resolver failed for
     oregon.gov on 2026-10-25 while dns.google answered), and the server is
-    then asked at that address, its certificate checked for the name."""
+    then asked at that address, its certificate checked for the name.
+    Alaska's server sends the wrong intermediate certificate; the context
+    completes its chain from the certificate's own issuer (kyc/tls.py)."""
     _pace(url)
     try:
         request = urllib.request.Request(url, headers=UA)
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:
+        with urllib.request.urlopen(request, timeout=TIMEOUT,
+                                    context=tls.context()) as response:
             data = response.read(limit + 1)
     except urllib.error.URLError as exc:
         import socket
@@ -374,7 +377,7 @@ def _address(host):
     query = "https://dns.google/resolve?name=" + urllib.parse.quote(host) + "&type=A"
     try:
         with urllib.request.urlopen(urllib.request.Request(query, headers=UA),
-                                    timeout=15) as response:
+                                    timeout=15, context=tls.context()) as response:
             answer = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, OSError, ValueError):
         return None
@@ -387,7 +390,6 @@ def _address(host):
 def _get_resolved(url, limit, hops=5):
     import http.client
     import socket
-    import ssl
 
     for _ in range(hops):
         parts = urllib.parse.urlsplit(url)
@@ -404,7 +406,7 @@ def _get_resolved(url, limit, hops=5):
                 self.sock = self._context.wrap_socket(sock, server_hostname=self.host)
 
         conn = Pinned(parts.hostname, parts.port or 443, timeout=TIMEOUT,
-                      context=ssl.create_default_context())
+                      context=tls.context())
         try:
             conn.request("GET", parts.path + ("?" + parts.query if parts.query else ""),
                          headers=dict(UA, Host=parts.hostname))

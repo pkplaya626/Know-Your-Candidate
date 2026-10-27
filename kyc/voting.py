@@ -46,6 +46,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import tls
 from .normalize import US_STATES
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "voting_links.json")
@@ -253,7 +254,8 @@ class VotingError(RuntimeError):
 def _get(url, timeout=60):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with urllib.request.urlopen(request, timeout=timeout,
+                                    context=tls.context()) as response:
             return response.read().decode("utf-8", errors="replace")
     except OSError as exc:
         raise VotingError(f"could not fetch {url}: {exc}") from exc
@@ -327,7 +329,11 @@ def _status(url, timeout=25):
         "User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml",
         "Accept-Language": "en-US,en;q=0.9"})
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        # Alaska's server sends the wrong intermediate certificate: the
+        # context completes its chain from the certificate's own issuer
+        # (kyc/tls.py), never by checking less.
+        with urllib.request.urlopen(request, timeout=timeout,
+                                    context=tls.context()) as response:
             return response.status, response.geturl()
     except urllib.error.HTTPError as exc:
         return exc.code, exc.geturl() or url

@@ -3165,7 +3165,9 @@ async function testStates() {
       links.every((a) => a.target === "_blank" && /noopener/.test(a.rel)));
     check("it names NASS's Can I Vote and the dates it was listed and opened",
       !!box.querySelector('a[href^="https://www.nass.org/"]') && /listed (?:it|them) on \d{4}-\d{2}-\d{2}/.test(box.textContent) &&
-        /Each link opened \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
+        // Opened that day, every link or each as the check found it: which
+        // answer is the week's record, checked for every state below.
+        /(Each link opened|Links checked|” opened) \d{4}-\d{2}-\d{2}/.test(box.textContent), box.textContent);
     // The deadlines are Texas's own, dated and linked; vote.gov's compiled
     // page is not shown beside them (rules 50 and 53; STATEGOV-11).
     check("no vote.gov deadlines link where the state's own dates are shown",
@@ -3252,127 +3254,223 @@ async function testStates() {
     const meta = guVote.window.kycBuildMeta.voting;
     const missed = meta._unreached.GU || [];
     const hand = ((meta._byHand || {}).GU || {}).info;
-    // The weekly check could not open it; a person did (round three), so it
-    // is said opened by hand - and never "Each link opened" on the check's day.
+    // Where the weekly check could not open it, it is said opened by hand
+    // if a person did (round three), else unconfirmed - and never "Each
+    // link opened" on the check's day. Whichever this week's check found.
     check("Guam's link the check could not reach is never said opened by the check",
-      missed.indexOf("info") !== -1 && !/Each link opened/.test(gu) &&
-        (hand ? /opened by hand/.test(gu) : /could not be confirmed/.test(gu)), gu);
+      missed.indexOf("info") !== -1
+        ? !/Each link opened/.test(gu) && (hand ? /opened by hand/.test(gu) : /could not be confirmed/.test(gu))
+        : /Each link opened/.test(gu) && !/opened by hand|could not be confirmed/.test(gu), gu);
   });
 
   /* Links the weekly check could not open, opened by hand in a person's
-   * browser on 2026-10-26 (overrides.VOTING_LINKS_BY_HAND): counted as
-   * opened, in the same words, on their own day; a portal that asks for
-   * proof of being a person is said so. Built on CAMPAIGN_NOW, within
-   * the days a reading counts; a later day counts it no more. */
+   * browser (overrides.VOTING_LINKS_BY_HAND): counted as opened, in the
+   * same words, on their own day; a portal that asks for proof of being a
+   * person is said so. A reading counts only while the check has found its
+   * link neither live nor dead (voting.by_hand), and which links answer
+   * changes with every refresh: on 2026-10-26 the check opened New
+   * Hampshire's, Oklahoma's and Alabama's, and seven checks written
+   * against the day before failed it. So each case is made here, on the
+   * page's own record (`_unreached`, `_byHand`), and drawn by
+   * KYC.ballot.votingBlock; what the real record says is checked both ways
+   * for every jurisdiction, below. Built on CAMPAIGN_NOW, within the days
+   * a reading counts; a later day counts it no more. The case makes the
+   * links too, and the check's day: the page names only the links its
+   * record holds, and the pipeline leaves out one the check found dead, so
+   * a case drawn on the day's links failed the day one of them died. Each
+   * kind the case names is shown, with "See a sample ballot" opened by
+   * the check beside them. */
+  const CHECKED = "2026-10-20";
+  const votingNote = (page, code, place, mine) => {
+    const meta = page.window.kycBuildMeta.voting;
+    const kinds = new Set((mine.unreached || []).concat(Object.keys(mine.byHand || {}), ["sample"]));
+    const links = {};
+    for (const k of kinds) links[k] = "https://elections.example.gov/" + k;
+    const saved = { _unreached: meta._unreached, _byHand: meta._byHand, _opened: meta._opened,
+                    links: meta[code], had: Object.prototype.hasOwnProperty.call(meta, code) };
+    meta._unreached = Object.assign({}, saved._unreached, { [code]: mine.unreached || [] });
+    meta._byHand = Object.assign({}, saved._byHand, { [code]: mine.byHand || {} });
+    meta._opened = CHECKED;
+    meta[code] = links;
+    const box = page.D.createElement("div");
+    try {
+      box.innerHTML = page.window.KYC.ballot.votingBlock(code, place);
+    } finally {
+      meta._unreached = saved._unreached;
+      meta._byHand = saved._byHand;
+      meta._opened = saved._opened;
+      if (saved.had) meta[code] = saved.links; else delete meta[code];
+    }
+    const note = box.querySelector(".state-note");
+    return note ? note.textContent : "";
+  };
+  // The quoted labels a clause names just before *words*: "“A”, “B” and
+  // “C” opened by hand <day>" gives A, B and C (and the day).
+  const namedBefore = (note, words) => {
+    const out = new Map();
+    const re = new RegExp("((?:“[^”]+”(?:, | and )?)+) " + words, "g");
+    for (const m of note.matchAll(re)) {
+      for (const q of m[1].matchAll(/“([^”]+)”/g)) out.set(q[1], m[2] || "");
+    }
+    return out;
+  };
+  const DAY = "2026-10-19";
   const azVote = await buildPage("states/az.html");
   const akVote = await buildPage("states/ak.html");
-  suite("states/az.html — links opened by hand are counted as opened, on their day", () => {
-    const meta = azVote.window.kycBuildMeta.voting;
-    const hand = (meta._byHand || {}).AZ || {};
-    const note = azVote.D.querySelector("#voting .state-note").textContent;
-    const words = { status: "Check your registration", polling: "Find your polling place",
-                    absentee: "Vote absentee or early", results: "Official results" };
-    const kinds = Object.keys(hand);
-    check("Arizona's three lookups were opened by hand", ["status", "polling", "absentee"].every((k) =>
-      hand[k] && hand[k][1] === "opened"), JSON.stringify(hand));
-    // "Links checked <day>; ..." while any link is unconfirmed; once every
-    // one the check missed was opened by hand, "“...” opened <day>; ...".
-    const said = /(?:Links checked|” opened) [\d-]+; ([^;]*) opened by hand ([\d-]+)(.*)$/.exec(note);
-    check("each is said opened by hand, with its day",
-      !!said && kinds.every((k) => said[1].indexOf("“" + words[k] + "”") !== -1) && said[2] === hand.polling[0],
-      note);
-    check("and none of them among the links that could not be confirmed",
-      !!said && kinds.every((k) => said[3].indexOf("“" + words[k] + "”") === -1), note);
+  const nhHand = await buildPage("states/nh.html");
+  const okHand = await buildPage("states/ok.html");
+  const alHand = await buildPage("states/al.html");
+  suite("states/ok.html — a link the check missed, opened by hand", () => {
+    const note = votingNote(okHand, "OK", "Oklahoma",
+      { unreached: ["results"], byHand: { results: [DAY, "opened"] } });
+    check("said opened by hand, on its day, never unconfirmed",
+      /“Official results” opened by hand 2026-10-19\./.test(note) && !/could not be confirmed/.test(note), note);
+    // "Each link opened <the check's day>" would claim the check opened the
+    // link only a person did (rule 79): the sentence names what the check
+    // opened, on its day, then what a person did, on theirs.
+    check("the links the check opened are named on the check's day, apart",
+      !/Each link opened/.test(note) &&
+        new RegExp("“[^”]+” opened " + CHECKED + "; “Official results” opened by hand").test(note) &&
+        !new RegExp("“Official results”[^;.]* opened " + CHECKED).test(note), note);
+  });
+  suite("states/ok.html — a link the check found live", () => {
+    // A reading by hand of a link the check opens counts for nothing: the
+    // pipeline drops it, and the page never says a person opened it.
+    const note = votingNote(okHand, "OK", "Oklahoma", { unreached: [], byHand: { results: [DAY, "opened"] } });
+    check("said opened on the check's day, never by hand",
+      new RegExp("Each link opened " + CHECKED + "\\.").test(note) &&
+        !/by hand|could not be confirmed/.test(note), note);
+  });
+  suite("states/al.html — a link nobody could open", () => {
+    const note = votingNote(alHand, "AL", "Alabama", { unreached: ["results"], byHand: {} });
+    check("could not be confirmed, that day, and nothing else on the page",
+      /; “Official results” could not be confirmed by this site's automated check that day\./.test(note) &&
+        !/opened by hand|Each link opened/.test(note), note);
+  });
+  suite("states/nh.html — a portal that asks for people, beside links opened by hand", () => {
+    const note = votingNote(nhHand, "NH", "New Hampshire", {
+      unreached: ["absentee", "polling", "register", "status"],
+      byHand: { absentee: [DAY, "opened"], register: [DAY, "opened"],
+                polling: [DAY, "human-check"], status: [DAY, "human-check"] } });
+    const said = /; ([^;]*) opened by hand 2026-10-19/.exec(note);
+    check("absentee and registration pages opened by hand, a portal that asks for people",
+      !!said && /“Vote absentee or early”/.test(said[1]) && /“Register to vote”/.test(said[1]) &&
+        /“Check your registration” and “Find your polling place” lead to New Hampshire's own portal, which asks visitors to show they are people, so this site cannot open them itself\./.test(note) &&
+        !/could not be confirmed/.test(note) && !/captcha|CAPTCHA|bot|HTTP|script/.test(note), note);
+    const one = votingNote(akVote, "AK", "Alaska", {
+      unreached: ["absentee", "register"], byHand: { absentee: [DAY, "human-check"], register: [DAY, "opened"] } });
+    check("one link behind the check is said in the singular, and is never also said opened",
+      /“Vote absentee or early” leads to Alaska's own portal, which asks visitors to show they are people, so this site cannot open it itself\./.test(one) &&
+        !/“Vote absentee or early”[^.]*(could not be confirmed|opened by hand)/.test(one) &&
+        /“Register to vote” opened by hand 2026-10-19/.test(one) && !/“Register to vote”[^.]*lead/.test(one), one);
+  });
+  suite("states/az.html — readings by hand on two days, and one past its days", () => {
+    const note = votingNote(azVote, "AZ", "Arizona", {
+      unreached: ["absentee", "polling", "status"],
+      byHand: { status: ["2026-10-18", "opened"], polling: [DAY, "opened"], absentee: [DAY, "opened"] } });
+    check("each day's links are said opened by hand on that day",
+      /“Check your registration” opened by hand 2026-10-18; “Find your polling place” and “Vote absentee or early” opened by hand 2026-10-19\./.test(note) &&
+        !/could not be confirmed/.test(note), note);
     // Past BY_HAND_DAYS on the reader's calendar, a reading no longer counts.
-    const saved = hand.polling[0];
-    hand.polling[0] = "2026-08-01";
-    const box = azVote.D.createElement("div");
-    box.innerHTML = azVote.window.KYC.ballot.votingBlock("AZ", "Arizona");
-    hand.polling[0] = saved;
-    const later = box.querySelector(".state-note").textContent;
+    const later = votingNote(azVote, "AZ", "Arizona", {
+      unreached: ["polling"], byHand: { polling: ["2026-08-01", "opened"] } });
     check("a reading older than the days it counts for is not counted",
       /“Find your polling place”[^.]*could not be confirmed by this site's automated check/.test(later) &&
         !/“Find your polling place”[^;]*opened by hand/.test(later), later);
   });
-  suite("states/ak.html — a portal that asks for proof of being a person says so", () => {
-    const hand = (akVote.window.kycBuildMeta.voting._byHand || {}).AK || {};
-    const note = akVote.D.querySelector("#voting .state-note").textContent;
-    // NOTES.md: only the early-voting page asked; the registration page and
-    // the voter portal opened by hand with no check.
-    check("only Alaska's early-voting link is behind a check for people",
-      hand.absentee && hand.absentee[1] === "human-check" && hand.register && hand.register[1] === "opened" &&
-        hand.status && hand.status[1] === "opened", JSON.stringify(hand));
-    check("said in plain words, not as a failed check",
-      /“Vote absentee or early” leads to Alaska's own portal, which asks visitors to show they are people, so this site cannot open it itself\./.test(note) &&
-        !/“Vote absentee or early”[^.]*could not be confirmed/.test(note) &&
-        !/captcha|CAPTCHA|bot|HTTP|script/.test(note), note);
-    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
-    check("the registration page and the voter portal opened by hand, never behind the check",
-      !!said && /“Register to vote”/.test(said[1]) && /“Check your registration”/.test(said[1]) &&
-        !/“Register to vote”[^.]*lead/.test(note) &&
-        !/(“Register to vote”|“Check your registration”)[^;]*could not be confirmed/.test(note), note);
-  });
-  const nhHand = await buildPage("states/nh.html");
-  suite("states/nh.html — the voting block says each link's own state", () => {
-    const note = nhHand.D.querySelector("#voting .state-note").textContent;
-    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
-    check("absentee and registration pages opened by hand, a portal that asks for people",
-      !!said && /“Vote absentee or early”/.test(said[1]) && /“Register to vote”/.test(said[1]) &&
-        /“Check your registration” and “Find your polling place” lead to New Hampshire's own portal, which asks visitors to show they are people/.test(note) &&
-        !/“Register to vote”[^;]* could not be confirmed/.test(note), note);
-  });
-  /* Where every link the check missed was opened by hand, "Each link opened
-   * <the check's day>" would claim the check opened them (rule 79): the
-   * sentence names what the check opened, then what a person did. */
-  const riHand = await buildPage("states/ri.html");
-  const nyHand = await buildPage("states/ny.html");
-  suite("states/ri.html — links opened by hand are never said opened on the check's day", () => {
-    const meta = riHand.window.kycBuildMeta.voting;
-    const note = riHand.D.querySelector("#voting .state-note").textContent;
-    const missed = (meta._unreached || {}).RI || [];
-    check("the weekly check missed Rhode Island's four lookups",
-      ["polling", "register", "status", "absentee"].every((k) => missed.indexOf(k) !== -1), JSON.stringify(missed));
-    check("what the check opened, on its day, then what a person opened, on theirs",
-      !/Each link opened/.test(note) &&
-        new RegExp("“[^”]+” opened " + meta._opened + "; [^;]* opened by hand 2026-10-26\\.").test(note) &&
-        !/could not be confirmed/.test(note), note);
-  });
-  suite("states/ny.html — the second round of links opened by hand", () => {
-    const note = nyHand.D.querySelector("#voting .state-note").textContent;
-    const said = /([^;]*) opened by hand 2026-10-26/.exec(note);
-    check("New York's absentee page and voter lookup opened by hand",
-      !!said && ["Vote absentee or early", "Find your polling place", "Check your registration"].every((w) =>
-        said[1].indexOf("“" + w + "”") !== -1), note);
-    check("and none of them called unconfirmed",
-      !/(“Vote absentee or early”|“Find your polling place”|“Check your registration”)[^;]*could not be confirmed/.test(note),
-      note);
+  /* The record as this build holds it, every jurisdiction: a link is said
+   * opened by hand on its day exactly when the check did not find it live
+   * (a dead one is not shown) and a reading of it still counts; said behind
+   * a check for people exactly when that was recorded; unconfirmed exactly
+   * when neither; and "Each link opened" only when the check opened them
+   * all. Whatever this week's check found. */
+  suite("every state page — each link's state, as the record holds it", () => {
+    const W = okHand.window;
+    const meta = W.kycBuildMeta.voting;
+    const today = new W.Date();
+    const iso = (d) => d.getFullYear() + "-" + ("0" + (d.getMonth() + 1)).slice(-2) + "-" + ("0" + d.getDate()).slice(-2);
+    const counts = (day) => {
+      const until = new W.Date(day + "T00:00:00");
+      until.setDate(until.getDate() + meta._byHandDays);
+      return iso(today) <= iso(until);
+    };
+    const codes = Object.keys(meta).filter((c) => /^[A-Z]{2}$/.test(c));
+    const wrong = [];
+    let byHandSeen = 0;
+    for (const code of codes) {
+      const box = W.document.createElement("div");
+      box.innerHTML = W.KYC.ballot.votingBlock(code, W.KYC.stateName(code));
+      const el = box.querySelector(".state-note");
+      if (!el || !meta._opened) continue;
+      const note = el.textContent;
+      const labels = Object.assign({}, { status: "Check your registration", polling: "Find your polling place",
+        sample: "See a sample ballot", absentee: "Vote absentee or early",
+        deadlines: "Registration deadlines (vote.gov)", register: "Register to vote",
+        info: "Election information", results: "Official results" }, (meta._labels || {})[code] || {});
+      const shown = Object.keys(meta[code]).filter((k) => meta[code][k]);
+      const unreached = ((meta._unreached || {})[code] || []).filter((k) => shown.indexOf(k) !== -1);
+      const hand = (meta._byHand || {})[code] || {};
+      const live = (k) => !!hand[k] && counts(hand[k][0]);
+      const opened = namedBefore(note, "opened by hand ([\\d-]+)");
+      const asks = namedBefore(note, "leads? to [^.]* own portal, which asks visitors");
+      const unknown = namedBefore(note, "could not be confirmed");
+      for (const k of shown) {
+        const missed = unreached.indexOf(k) !== -1;
+        const wantHand = missed && live(k) && hand[k][1] === "opened";
+        const wantAsks = missed && live(k) && hand[k][1] === "human-check";
+        const wantUnknown = missed && !wantHand && !wantAsks;
+        if (wantHand) byHandSeen += 1;
+        if (opened.has(labels[k]) !== wantHand || (wantHand && opened.get(labels[k]) !== hand[k][0]) ||
+            asks.has(labels[k]) !== wantAsks || unknown.has(labels[k]) !== wantUnknown) {
+          wrong.push(code + " " + k + ": " + note.slice(note.indexOf("Links checked") >= 0 ? note.indexOf("Links checked") : -200));
+        }
+      }
+      if (/Each link opened/.test(note) !== (unreached.length === 0)) wrong.push(code + ": " + note.slice(-200));
+    }
+    check("each link is said opened by hand, behind a check, unconfirmed or opened, as the record holds it",
+      codes.length > 50 && wrong.length === 0, wrong.slice(0, 4).join(" | "));
+    check("the record's readings by hand are drawn somewhere, or none counts this week",
+      byHandSeen > 0 || codes.every((c) => !Object.keys((meta._byHand || {})[c] || {}).length),
+      String(byHandSeen));
   });
   /* Round three (NOTES.md, 2026-10-26): the curated pages opened by hand,
    * and two results links that showed readers an error repointed through
    * overrides.VOTING_LINKS - Oklahoma's "403 - Forbidden" and New
    * Hampshire's "Forbidden". Alabama's results page did not load in a
-   * person's browser either, and stays unconfirmed (rule 8). */
-  const okHand = await buildPage("states/ok.html");
-  const alHand = await buildPage("states/al.html");
+   * person's browser either, and has no reading by hand (rule 8). Which of
+   * them the weekly check opens is the record's, checked above. A link the
+   * check finds dead is left out of the record (voting.for_page, said by
+   * test_voting), so each is checked where the record holds it, and a
+   * page without it links no other address in its place. */
   const resultsLink = (page) => [...page.D.querySelectorAll("#voting a")].find((a) =>
     a.textContent.trim() === "Official results");
+  const OK_RESULTS = "https://oklahoma.gov/elections/elections-results/election-results/2026-election-results.html";
+  const NH_RESULTS = "https://www.sos.nh.gov/2026-election-results";
+  const repointed = (page, code, url) => {
+    const a = resultsLink(page);
+    const held = page.window.kycBuildMeta.voting[code].results;
+    return held ? held === url && !!a && a.getAttribute("href") === url : !a;
+  };
   suite("states/ok.html and nh.html — results links that answered 'Forbidden' are repointed", () => {
     const ok = resultsLink(okHand);
     const nh = resultsLink(nhHand);
     check("Oklahoma's goes to the State Election Board's own 2026 results page",
-      !!ok && ok.getAttribute("href") ===
-        "https://oklahoma.gov/elections/elections-results/election-results/2026-election-results.html",
-      ok && ok.outerHTML);
+      repointed(okHand, "OK", OK_RESULTS), ok && ok.outerHTML);
     check("the address the old one redirected to, which no page of the Board's was seen to link, is not linked",
       !okHand.D.querySelector('a[href^="https://results.okelections.gov"]'));
     check("New Hampshire's goes to the office's own 2026 results page",
-      !!nh && nh.getAttribute("href") === "https://www.sos.nh.gov/2026-election-results", nh && nh.outerHTML);
+      repointed(nhHand, "NH", NH_RESULTS), nh && nh.outerHTML);
     check("neither old address is linked anywhere on the pages",
       !okHand.D.querySelector('a[href^="https://results.okelections.us"]') &&
         !nhHand.D.querySelector('a[href*="elections/elections/election-results"]'));
+    // Oklahoma's results page is opened by the check or by hand, never left
+    // unconfirmed (a person opened the address shown, 2026-10-26).
     const okNote = okHand.D.querySelector("#voting .state-note").textContent;
-    check("Oklahoma's results page opened by hand, not called unconfirmed",
-      /“Official results” opened by hand 2026-10-26/.test(okNote) && !/could not be confirmed/.test(okNote),
+    check("Oklahoma's results page opened, by the check or by hand, not called unconfirmed",
+      !/“Official results”[^.]*could not be confirmed/.test(okNote) &&
+        (!okHand.window.kycBuildMeta.voting.OK.results ? !/Official results/.test(okNote)
+          : /“Official results” opened by hand 2026-10-26/.test(okNote) ||
+            (((okHand.window.kycBuildMeta.voting._unreached || {}).OK || []).indexOf("results") === -1)),
       okNote);
   });
   /* "As its site links it" is said only of a page the record shows the
@@ -3386,14 +3484,24 @@ async function testStates() {
     const meta = okHand.window.kycBuildMeta.voting;
     const okNote = okHand.D.querySelector("#voting .state-note").textContent;
     check("Oklahoma's results page is one the record shows the Board's site linking",
-      ((meta._siteLinked || {}).OK || []).indexOf("results") !== -1, JSON.stringify(meta._siteLinked));
+      !meta.OK.results || ((meta._siteLinked || {}).OK || []).indexOf("results") !== -1,
+      JSON.stringify(meta._siteLinked));
     check("and is said so",
-      /“Official results” is Oklahoma's election office's own page, as its site links it\./.test(okNote), okNote);
+      !meta.OK.results ||
+        /“Official results” is Oklahoma's election office's own page, as its site links it\./.test(okNote), okNote);
+    // Drawn on a record the check makes, the results link held whatever
+    // this week's check found of it.
     const saved = meta._siteLinked;
+    const savedLinks = meta.OK;
     meta._siteLinked = Object.assign({}, saved, { OK: [] });
+    meta.OK = Object.assign({}, savedLinks, { results: OK_RESULTS });
     const box = okHand.D.createElement("div");
-    box.innerHTML = okHand.window.KYC.ballot.votingBlock("OK", "Oklahoma");
-    meta._siteLinked = saved;
+    try {
+      box.innerHTML = okHand.window.KYC.ballot.votingBlock("OK", "Oklahoma");
+    } finally {
+      meta._siteLinked = saved;
+      meta.OK = savedLinks;
+    }
     const bare = box.querySelector(".state-note").textContent;
     check("a page the record does not show linked is the office's own page, never 'as its site links it'",
       /“Official results” is Oklahoma's election office's own page\./.test(bare) && !/site links/.test(bare), bare);
@@ -3415,24 +3523,38 @@ async function testStates() {
         /“Vote absentee or early”[^.]* election office's own pages?, as its site links (it|them)\./.test(coNote),
       coNote);
   });
-  suite("states/nh.html — vote.gov's registration page and the results opened by hand", () => {
+  /* The pages read by hand in round three are opened, by the check or by a
+   * person, and never left unconfirmed; Alabama's results page has no
+   * reading by hand, so it is the check's to open or leave unconfirmed.
+   * Whichever this week's check found (the record, checked above). */
+  const missedOn = (page, code) => (page.window.kycBuildMeta.voting._unreached || {})[code] || [];
+  const openedEither = (note, code, page, kind, label) => {
+    const quoted = "“" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "”";
+    return !new RegExp(quoted + "[^.]*could not be confirmed").test(note) &&
+      (missedOn(page, code).indexOf(kind) === -1
+        ? !new RegExp(quoted + "[^;.]* opened by hand").test(note)
+        : namedBefore(note, "opened by hand ([\\d-]+)").get(label) === "2026-10-26");
+  };
+  suite("states/nh.html — vote.gov's registration page and the results, opened", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
     check("vote.gov's page is said for what it is",
       /“Registration deadlines \(vote\.gov\)” is the page for New Hampshire on vote\.gov/.test(note), note);
-    const said = /; ([^;]*) opened by hand 2026-10-26/.exec(note);
-    check("and is among the links opened by hand, with the results page",
-      !!said && /“Registration deadlines \(vote\.gov\)”/.test(said[1]) && /“Official results”/.test(said[1]), note);
-    check("no link on New Hampshire's page is called unconfirmed", !/could not be confirmed/.test(note), note);
+    check("it and the results page are opened, by the check or by hand on 2026-10-26, never unconfirmed",
+      openedEither(note, "NH", nhHand, "deadlines", "Registration deadlines (vote.gov)") &&
+        openedEither(note, "NH", nhHand, "results", "Official results"), note);
   });
-  suite("states/gu.html and al.html — Guam's page opened by hand; Alabama's results did not load", () => {
+  suite("states/gu.html and al.html — Guam's page opened; Alabama's results as the check found them", () => {
     const gu = guVote.D.querySelector("#voting .state-note").textContent;
-    check("Guam's election-information page opened by hand",
-      /“2026 general election: early voting and sample ballots” opened by hand 2026-10-26/.test(gu) &&
-        !/could not be confirmed/.test(gu) && !/Each link opened/.test(gu), gu);
+    check("Guam's election-information page opened, by the check or by hand on 2026-10-26",
+      openedEither(gu, "GU", guVote, "info", "2026 general election: early voting and sample ballots"), gu);
     const al = alHand.D.querySelector("#voting .state-note").textContent;
-    check("Alabama's results page still could not be confirmed, and nothing else on its page",
-      /; “Official results” could not be confirmed by this site's automated check that day\./.test(al) &&
-        !/opened by hand/.test(al), al);
+    const alShown = !!alHand.window.kycBuildMeta.voting.AL.results;
+    check("Alabama's results page is never said opened by hand, and unconfirmed only where the check missed it",
+      !/opened by hand/.test(al) &&
+        (!alShown ? !/Official results/.test(al)
+          : missedOn(alHand, "AL").indexOf("results") !== -1
+          ? /; “Official results” could not be confirmed by this site's automated check that day\./.test(al)
+          : !/could not be confirmed/.test(al)), al);
   });
 
   const nd = await buildPage("states/nd.html");
@@ -3605,9 +3727,12 @@ async function testStates() {
   suite("states/nh.html — vote.gov's deadlines only where the record gives none (PR #94 review)", () => {
     const kinds = [...nhVote.D.querySelectorAll("#voting .state-links a")].map((a) => a.getAttribute("data-kind"));
     const deadlines = nhVote.D.querySelector('#voting .state-links a[data-kind="deadlines"]');
+    // Just before "Register to vote" wherever that link is shown: a link the
+    // weekly check finds dead is left out (voting.for_page), whichever it is.
     check("'Registration deadlines (vote.gov)' is a button, just before 'Register to vote'",
       !!deadlines && deadlines.textContent.trim() === "Registration deadlines (vote.gov)" &&
-        kinds.indexOf("deadlines") === kinds.indexOf("register") - 1, kinds.join(" "));
+        (kinds.indexOf("register") === -1 ? !nhVote.window.kycBuildMeta.voting.NH.register
+          : kinds.indexOf("deadlines") === kinds.indexOf("register") - 1), kinds.join(" "));
     const note = nhVote.D.querySelector("#voting .state-note").textContent;
     check("vote.gov is the federal government's voting site, not the EAC's",
       /vote\.gov, the federal government's voting site/.test(note) && !/Election Assistance/.test(note), note);
@@ -8050,6 +8175,11 @@ async function testLegislatures() {
           p.imageCredit.by === "Montana Legislature" && /legmt\.gov/.test(p.imageCredit.page)),
         credited.filter((p) => !/legmt\.gov/.test(p.image)).map((p) => p.name).join(", "));
       const p = credited[0];
+      // The photograph as its host serves it: a heavy one is shown as a
+      // copy made here (rule 101), whichever a week's weighing finds, and
+      // the copy's credit and fallback are checked with the copies below.
+      const keptCopy = p && p.photoCopy;
+      if (p) delete p.photoCopy;
       if (p) {
         const id = Object.keys(state.chambers.upper.members).find((k) =>
           state.chambers.upper.members[k].includes(p));
@@ -8068,6 +8198,7 @@ async function testLegislatures() {
         check("a portrait that fails to load takes its credit with it",
           !card.querySelector(".leg-photo") && !card.querySelector(".leg-credit"));
       }
+      if (keptCopy) p.photoCopy = keptCopy;
       /* Michigan's House Democrats' files load as one pixel and fire no
        * error: the card drew an empty 56x70 box under "Photo: Michigan House
        * Democrats". A load whose naturalWidth is 1 or less is a failed load
@@ -9146,9 +9277,11 @@ async function testStateGov() {
     if (pictured) {
       const ag = data.states[pictured].ag;
       pick("#/?state=" + pictured + "&mode=ag");
+      // As its host serves it, or as the copy made here of that very file
+      // (rule 101), whichever a week's weighing finds.
       check("a confirmed attorney general's row carries their photograph",
         [...D.querySelectorAll("#delegation .gov-officer-photo")].some((i) =>
-          i.getAttribute("src") === ag.photo));
+          i.getAttribute("src") === ag.photo || i.getAttribute("data-photo-original") === ag.photo));
       const sources = (D.querySelector("#delegation .gov-sources") || {}).textContent || "";
       check("and the sources say whose photograph it is (rule 87)",
         sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
@@ -9332,8 +9465,28 @@ async function testStateGov() {
   const tx = await buildPage("states/tx.html");
   const al = await buildPage("states/al.html");
   const ut = await buildPage("states/ut.html");
+  // Draws *code*'s block with its *key* row (an officer or a court)
+  // replaced by *row*, and puts the record back. Whether a court's roster
+  // was read this week, kept, read by hand or dated is the week's record:
+  // a shape the real data may not hold today is made with this.
+  const drawWith = (page, code, key, row) => {
+    const states = page.window.kycStateGov.states;
+    const saved = states[code][key];
+    states[code][key] = row;
+    try {
+      return page.window.KYC.stategov.render(code);
+    } finally {
+      states[code][key] = saved;
+    }
+  };
+  const drawn = (page, html) => {
+    const box = page.D.createElement("div");
+    box.innerHTML = html;
+    return box;
+  };
   suite("state pages — each state's highest court", () => {
-    const court = tx.window.kycStateGov.states.TX.court;
+    const states = tx.window.kycStateGov.states;
+    const court = states.TX.court;
     const section = tx.D.getElementById("state-government");
     const names = [...section.querySelectorAll(".gov-court-name")].map((li) => li.textContent);
     check("the court's members are listed, as the court lists them",
@@ -9344,21 +9497,56 @@ async function testStateGov() {
       /Court of Criminal Appeals/.test(section.textContent) && /Presiding Judge/.test(section.textContent));
     check("the roster links to the court's own page",
       !!section.querySelector('a[href^="https://www.txcourts.gov/"][rel~="noopener"]'));
-    const alText = al.D.getElementById("state-government").textContent;
+    // Every court the record cannot read (Alabama's, while nobody can),
+    // and one made unreadable here: why, and no one named.
+    const unreadable = Object.keys(states).filter((c) => states[c].court && states[c].court.unreadable);
+    const made = drawn(tx, drawWith(tx, "TX", "court", { name: court.name, chosen: court.chosen, term: court.term,
+      word: court.word, seats: court.seats, unreadable: "The court's site could not be reached",
+      url: court.url }));
     check("a court whose roster cannot be read says why, and names no one",
-      /members are not listed here/.test(alText) && !al.D.querySelector("#state-government .gov-court-member"));
+      /The court's site could not be reached, so its members are not listed here/.test(made.textContent) &&
+        made.querySelectorAll(".gov-court-member").length ===
+          ((states.TX.criminalCourt || {}).members || []).length &&
+        unreadable.every((c) => {
+          const box = drawn(tx, tx.window.KYC.stategov.render(c));
+          return /members are not listed here/.test(box.textContent) &&
+            box.querySelectorAll(".gov-court-member").length ===
+              ((states[c].criminalCourt || {}).members || []).length;
+        }), unreadable.join(","));
+    // A court that names no chief says so; one that names one does not.
+    const noChief = drawn(tx, drawWith(tx, "TX", "court", Object.assign({}, court, { chief: "" })));
+    const utCourt = ut.window.kycStateGov.states.UT.court;
     const utText = ut.D.getElementById("state-government").textContent;
-    check("a court with no chief listed says so", /lists no chief justice/.test(utText), utText.slice(0, 120));
+    check("a court with no chief listed says so",
+      /lists no chief justice/.test(noChief.textContent) && !/Chief Justice/.test(
+        [...noChief.querySelectorAll(".gov-court-name")].map((el) => el.textContent).join(" ")) &&
+        !utCourt.unreadable && (utCourt.chief ? !/lists no chief justice/.test(utText)
+                                              : /lists no chief justice/.test(utText)),
+      noChief.textContent.slice(0, 200));
     check("no party is shown for a justice", ![...section.querySelectorAll(".gov-court-member")]
       .some((li) => li.querySelector('[class^="party-"]')));
-    check("a court read this week does not claim to be read by hand or dated",
-      !/read by hand|, dated /.test(section.textContent));
+    // A roster is said read by hand exactly when it was, and dated exactly
+    // when its file gives a date: on every state's page, whatever the week
+    // read.
+    const wrong = Object.keys(states).filter((c) => {
+      const s = states[c];
+      const courts = [s.court, s.criminalCourt].filter((x) => x && x.members);
+      if (!courts.length) return false;
+      const lines = [...drawn(tx, tx.window.KYC.stategov.render(c)).querySelectorAll(".gov-court + p.faint")]
+        .map((el) => el.textContent);
+      return lines.length !== courts.length || courts.some((x, i) =>
+        /read by hand on/.test(lines[i]) !== !!x.readOn || /, dated /.test(lines[i]) !== !!x.revised);
+    });
+    check("a court is said read by hand, or dated, exactly where the record says so",
+      wrong.length === 0 && Object.keys(states).some((c) => states[c].court && states[c].court.read &&
+        !states[c].court.readOn && !states[c].court.revised), wrong.join(","));
   });
 
   // STATEGOV-12: ten courts showed no one. Four sites refuse every automated
   // reader, so their rosters were read by hand (overrides.COURT_ROSTERS) and
   // the page must say so and when; Rhode Island's roster is a PDF with its
-  // own date. Asked of the data, not of named people.
+  // own date. Asked of the data, not of named people, and of rows made here:
+  // which court a refresh reads, keeps or leaves to a reading by hand moves.
   const ny = await buildPage("states/ny.html");
   const ri = await buildPage("states/ri.html");
   suite("state pages — a court read by hand, or from a dated roster file", () => {
@@ -9368,14 +9556,31 @@ async function testStateGov() {
     check("New York's judges are listed, with the chief judge first",
       !!court && court.members.length > 0 && nyNames.length === court.members.length &&
       nyNames[0].indexOf(court.chief) === 0 && /Chief Judge$/.test(nyNames[0]), nyNames.join("; "));
+    // A roster read by hand: the court's own row, its read day replaced by
+    // a reading by hand.
+    const byHand = Object.assign({}, court, { readOn: "2026-10-19" });
+    delete byHand.read;
+    delete byHand.revised;
+    const handBox = drawn(ny, drawWith(ny, "NY", "court", byHand));
     check("and the page says they were read by hand, on which day, and why",
-      !!court.readOn && nyText.indexOf("read by hand on " + ny.window.KYC.dayMonthYear(court.readOn)) !== -1 &&
-      /refuses automated reading/.test(nyText), nyText.slice(0, 400));
+      handBox.textContent.indexOf("read by hand on " + ny.window.KYC.dayMonthYear("2026-10-19") +
+        ": the court's site refuses automated reading") !== -1, handBox.textContent.slice(0, 400));
+    check("New York's page says read by hand only where its record was",
+      court.readOn
+        ? nyText.indexOf("read by hand on " + ny.window.KYC.dayMonthYear(court.readOn)) !== -1 &&
+          /refuses automated reading/.test(nyText)
+        : !/read by hand/.test(nyText), nyText.slice(0, 400));
     const riCourt = ri.window.kycStateGov.states.RI.court;
     const riText = ri.D.getElementById("state-government").textContent;
-    check("Rhode Island's roster carries the date the court's file gives it",
-      !!riCourt.revised && riText.indexOf("dated " + ri.window.KYC.dayMonthYear(riCourt.revised)) !== -1 &&
-      !/read by hand/.test(riText), riText.slice(0, 400));
+    const dated = Object.assign({}, riCourt, { revised: "2026-09-01" });
+    delete dated.readOn;
+    const datedText = drawn(ri, drawWith(ri, "RI", "court", dated)).textContent;
+    check("a roster file carries the date the court's file gives it",
+      datedText.indexOf("dated " + ri.window.KYC.dayMonthYear("2026-09-01")) !== -1 &&
+        !/read by hand/.test(datedText), datedText.slice(0, 400));
+    check("Rhode Island's page is dated exactly when its record is",
+      riCourt.revised ? riText.indexOf("dated " + ri.window.KYC.dayMonthYear(riCourt.revised)) !== -1
+                      : !/, dated /.test(riText), riText.slice(0, 400));
     // Review of #98: a link that opens a PDF says so before a tap starts a
     // download; a page's link does not.
     const pdfLinks = [...ri.D.querySelectorAll("#state-government a")].filter((a) =>
@@ -9388,20 +9593,21 @@ async function testStateGov() {
       txLinks.map((a) => a.textContent).join(" | "));
     // The seat line is a sentence however the roster was read.
     const seatLines = [tx, ny, ri].map((p) => [...p.D.querySelectorAll("#state-government .gov-court + p.faint")]
-      .map((el) => el.textContent.trim())).flat();
-    check("each court's seat line ends as a sentence", seatLines.length >= 3 &&
+      .map((el) => el.textContent.trim())).flat().concat(
+      [handBox].map((b) => [...b.querySelectorAll(".gov-court + p.faint")].map((el) => el.textContent.trim())).flat());
+    check("each court's seat line ends as a sentence", seatLines.length >= 4 &&
       seatLines.every((t) => /\.$/.test(t)), seatLines.join(" | "));
     // The list of sources names each court with the day its roster was
     // read, and a hand read as one; a court with no read day is not dated.
     const txCourt = tx.window.kycStateGov.states.TX.court;
     const txSources = tx.D.querySelector("#state-government .gov-sources").textContent;
-    const nySources = ny.D.querySelector("#state-government .gov-sources").textContent;
     check("the sources name the court and the day its roster was read",
       !!txCourt.read && txSources.indexOf(txCourt.name + ": the court's own roster (" +
         tx.window.KYC.dateWords(txCourt.read) + ")") !== -1 && !/read by hand/.test(txSources), txSources);
+    const handSources = (handBox.querySelector(".gov-sources") || {}).textContent || "";
     check("and say a roster read by hand was",
-      nySources.indexOf(court.name + ": the court's own roster (read by hand, " +
-        ny.window.KYC.dateWords(court.readOn) + ")") !== -1, nySources);
+      handSources.indexOf(court.name + ": the court's own roster (read by hand, " +
+        ny.window.KYC.dateWords("2026-10-19") + ")") !== -1, handSources);
   });
 
   /* The owner's request of 2026-10-26, over Nevada's secretary of state:
@@ -9415,84 +9621,140 @@ async function testStateGov() {
   const nvGov = await buildPage("states/nv.html");
   const nhGov = await buildPage("states/nh.html");
   const alGov = await buildPage("states/al.html");
-  suite("state pages — an officer the office's own page names, read by hand", () => {
-    const officerRow = (p, word) => [...p.D.querySelectorAll("#state-government .gov-officer")]
+  /* Whether an office's own site confirms its holder, and whether a reading
+   * by hand stands in for it, is the week's record: on 2026-10-26 the
+   * refresh read New Hampshire's attorney general on doj.nh.gov itself, and
+   * a check that required the reading by hand failed it. So each shape is
+   * made here, on rows the test builds from the real ones, and drawn by
+   * KYC.stategov.render; the real rows are checked for whichever is true. */
+  const officerRowIn = (html, word) => {
+    const box = nhGov.D.createElement("div");
+    box.innerHTML = html;
+    return [...box.querySelectorAll(".gov-officer")]
       .find((li) => new RegExp(word, "i").test(li.querySelector(".gov-officer-role").textContent));
+  };
+  // The row the pipeline writes for a holder the office's own page names,
+  // read by hand (officers.for_state: an unconfirmed row whose site could
+  // not be read, or a non-member's NASS listing, with an entry in
+  // overrides.OFFICERS_READ_BY_HAND).
+  const readByHandRow = (off, extra) => {
+    const row = Object.assign({}, off, { name: "Jane Q. Roe",
+      readByHand: { url: "https://office.example.gov/about", read: "2026-10-19" } }, extra || {});
+    for (const field of ["unconfirmed", "unreadable", "notMember", "officeRead"]) delete row[field];
+    return row;
+  };
+  suite("state pages — an officer the office's own page names, read by hand", () => {
+    for (const [p, code, key, word, extra] of [
+      [nvGov, "NV", "sos", "Secretary of state", { partyFrom: "National Association of Secretaries of State" }],
+      [nhGov, "NH", "ag", "Attorney general", {}]]) {
+      const off = readByHandRow(p.window.kycStateGov.states[code][key], extra);
+      const row = officerRowIn(drawWith(p, code, key, off), word);
+      const line = row && row.querySelector(".gov-by-hand");
+      check(code + "'s " + word.toLowerCase() + " is named as the holder, never as a listing",
+        !!row && !!row.querySelector(".gov-officer-name") &&
+          row.querySelector(".gov-officer-name").textContent.indexOf("Jane Q. Roe") === 0 &&
+          !/not currently a|not confirmed|has not confirmed/.test(row.textContent), row && row.textContent);
+      check("and says the office's own page names them, read by hand on that day, linked",
+        !!line && line.textContent === "The office's own page names them, read by hand on " + p.window.KYC.dayMonthYear("2026-10-19") + "." &&
+          line.querySelector("a").getAttribute("href") === "https://office.example.gov/about" &&
+          /noopener/.test(line.querySelector("a").rel), line && line.textContent);
+      // The page read by hand names a non-member's secretary, not their
+      // party: that is still NASS's listing (rule 55); an attorney
+      // general's party stays its association's membership.
+      check(code === "NV" ? "Nevada's party is credited to NASS's listing"
+                          : "an attorney general's party stays its association's membership",
+        !!row && (code === "NV" ? /Party as the National Association of Secretaries of State lists it/.test(row.textContent)
+                                : !/Party as the/.test(row.textContent)), row && row.textContent);
+    }
+  });
+  suite("state pages — Nevada's secretary and New Hampshire's attorney general, as the record holds them", () => {
+    // Confirmed by the office's own site (no line read by hand, no word of
+    // a listing), read by hand (the line, its day, its page), or not
+    // confirmed (said so, and no line read by hand): whichever the week's
+    // read gave, the row says that and nothing else.
     for (const [p, code, key, word] of [[nvGov, "NV", "sos", "Secretary of state"],
                                          [nhGov, "NH", "ag", "Attorney general"]]) {
       const off = p.window.kycStateGov.states[code][key];
-      const row = officerRow(p, word);
+      const row = [...p.D.querySelectorAll("#state-government .gov-officer")]
+        .find((li) => new RegExp(word, "i").test(li.querySelector(".gov-officer-role").textContent));
       const line = row && row.querySelector(".gov-by-hand");
-      check(code + "'s " + word.toLowerCase() + " is named as the holder, never as a listing",
-        !!off.readByHand && !off.notMember && !off.unconfirmed && !!row && !!row.querySelector(".gov-officer-name") &&
-          row.querySelector(".gov-officer-name").textContent.indexOf(off.name) === 0 &&
-          !/not currently a|not confirmed|has not confirmed/.test(row.textContent), row && row.textContent);
-      check("and says the office's own page names them, read by hand on that day, linked",
-        !!line && line.textContent === "The office's own page names them, read by hand on " +
-          p.window.KYC.dayMonthYear(off.readByHand.read) + "." &&
-          line.querySelector("a").getAttribute("href") === off.readByHand.url &&
-          /noopener/.test(line.querySelector("a").rel), line && line.textContent);
+      const listing = !!row && /not currently a|not confirmed|has not confirmed/.test(row.textContent);
+      const ok = !row ? false
+        : off.unconfirmed || off.notMember ? listing && !line && !row.querySelector(".gov-officer-name")
+        : off.readByHand ? !listing && !!line &&
+            line.textContent === "The office's own page names them, read by hand on " +
+              p.window.KYC.dayMonthYear(off.readByHand.read) + "." &&
+            line.querySelector("a").getAttribute("href") === off.readByHand.url
+        : !listing && !line && !!row.querySelector(".gov-officer-name") &&
+            row.querySelector(".gov-officer-name").textContent.indexOf(off.name) === 0;
+      check(code + "'s " + word.toLowerCase() + ": confirmed by the site, read by hand, or not confirmed, and said so",
+        ok, (off.readByHand ? "read by hand: " : off.unconfirmed || off.notMember ? "unconfirmed: " : "confirmed: ") +
+          (row && row.textContent));
     }
-    // The page read by hand names Nevada's secretary, not his party: that is
-    // still the listing of an association he is not a member of (rule 55).
-    const nvRow = officerRow(nvGov, "Secretary of state");
-    check("Nevada's party is credited to NASS's listing",
-      !!nvRow && /Party as the National Association of Secretaries of State lists it/.test(nvRow.textContent),
-      nvRow && nvRow.textContent);
-    const nhRow = officerRow(nhGov, "Attorney general");
-    check("an attorney general's party stays its association's membership",
-      !!nhRow && !/Party as the/.test(nhRow.textContent), nhRow && nhRow.textContent);
   });
   suite("state pages — where the office's site cannot confirm a listing, whole sentences", () => {
     const W = nhGov.window;
     const states = W.kycStateGov.states;
-    const ag = states.NH.ag;
-    const sos = states.NV.sos;
-    const note = (code) => {
+    const ag = Object.assign({}, states.NH.ag, { name: "Jane Q. Roe", party: "R", partyKey: "R",
+      listedBy: "Republican Attorneys General Association", office: "https://ag.example.gov/" });
+    const sos = Object.assign({}, states.NV.sos, { name: "John Q. Doe", party: "D", partyKey: "D",
+      website: "https://sos.example.gov/" });
+    for (const row of [ag, sos]) delete row.readByHand;
+    delete sos.partyFrom;
+    const note = (code, key, row) => {
       const box = W.document.createElement("div");
-      box.innerHTML = W.KYC.stategov.render(code);
-      return [...box.querySelectorAll(".gov-officer-note")].map((p) => p);
+      box.innerHTML = drawWith(nhGov, code, key, row);
+      return [...box.querySelectorAll(".gov-officer-note")];
     };
-    // The shapes today's data no longer holds, drawn from the same rows.
-    states.NH.ag = Object.assign({}, ag, { unconfirmed: true, unreadable: true });
-    delete states.NH.ag.readByHand;
-    let p = note("NH").find((el) => /Attorneys General Association lists/.test(el.textContent));
+    let p = note("NH", "ag", Object.assign({}, ag, { unconfirmed: true, unreadable: true }))
+      .find((el) => /Attorneys General Association lists/.test(el.textContent));
     check("a site that refuses automated requests: who lists them, not confirmed, why, and the site linked",
-      !!p && /^The Republican Attorneys General Association lists John Formella \(Republican\) as its member here\. This site has not confirmed it on the office's own site, which refuses automated requests\.$/.test(p.textContent) &&
+      !!p && /^The Republican Attorneys General Association lists Jane Q\. Roe \(Republican\) as its member here\. This site has not confirmed it on the office's own site, which refuses automated requests\.$/.test(p.textContent) &&
         p.querySelector("a").textContent === "the office's own site" &&
         p.querySelector("a").getAttribute("href") === ag.office, p && p.textContent);
-    states.NH.ag = Object.assign({}, ag, { unconfirmed: true });
-    delete states.NH.ag.readByHand;
-    p = note("NH").find((el) => /Attorneys General Association lists/.test(el.textContent));
+    p = note("NH", "ag", Object.assign({}, ag, { unconfirmed: true }))
+      .find((el) => /Attorneys General Association lists/.test(el.textContent));
     check("a page read that does not name them says so",
       !!p && /This site has not confirmed it: the office's own site does not name them as attorney general\.$/.test(p.textContent),
       p && p.textContent);
-    states.NH.ag = ag;
-    states.NV.sos = Object.assign({}, sos, { notMember: true, officeRead: "unreadable" });
-    delete states.NV.sos.readByHand;
-    p = note("NV").find((el) => /Secretaries of State lists/.test(el.textContent));
+    p = note("NV", "sos", Object.assign({}, sos, { notMember: true, officeRead: "unreadable" }))
+      .find((el) => /Secretaries of State lists/.test(el.textContent));
     check("NASS's listing of a non-member: it does not speak for the office, and why the site did not confirm it",
-      !!p && /^The National Association of Secretaries of State lists Francisco V\. Aguilar \(Democratic\) as secretary of state, but the office is not currently a member, so that listing does not speak for it\. This site has not confirmed it on the office's own site, which refuses automated requests\.$/.test(p.textContent) &&
+      !!p && /^The National Association of Secretaries of State lists John Q\. Doe \(Democratic\) as secretary of state, but the office is not currently a member, so that listing does not speak for it\. This site has not confirmed it on the office's own site, which refuses automated requests\.$/.test(p.textContent) &&
         p.querySelector("a").getAttribute("href") === sos.website, p && p.textContent);
-    states.NV.sos = Object.assign({}, sos, { notMember: true });
-    delete states.NV.sos.readByHand;
-    p = note("NV").find((el) => /Secretaries of State lists/.test(el.textContent));
+    p = note("NV", "sos", Object.assign({}, sos, { notMember: true }))
+      .find((el) => /Secretaries of State lists/.test(el.textContent));
     check("and with no reason recorded, still a whole sentence",
       !!p && /This site has not confirmed it on the office's own site\.$/.test(p.textContent), p && p.textContent);
-    states.NV.sos = sos;
-    const every = note("NH").concat(note("NV")).map((el) => el.textContent);
+    const every = note("NH", "ag", Object.assign({}, ag, { unconfirmed: true }))
+      .concat(note("NV", "sos", Object.assign({}, sos, { notMember: true }))).map((el) => el.textContent);
     check("no note ends in a dangling \"The office's site.\"",
-      every.every((t) => !/The office's site\./.test(t)), every.join(" | "));
+      every.length > 0 && every.every((t) => !/The office's site\./.test(t)), every.join(" | "));
   });
+  /* Alabama's court could not be reached by a script or a person on
+   * 2026-10-26 (courts.UNREADABLE); a later read of it lists its members.
+   * The sentence is made here, and the real record checked either way. */
+  const AL_UNREACHED = "The court's site could not be reached by this site's automated reader, nor from " +
+    "a person's own browser on October 26, 2026";
+  const AL_SENTENCE = /^The court's site could not be reached by this site's automated reader, nor from a person's own browser on October 26, 2026, so its members are not listed here\. You can try the court's own page yourself\.$/;
   suite("states/al.html — a court nobody could reach, said as the record shows it", () => {
-    const court = alGov.window.kycStateGov.states.AL.court;
-    const p = [...alGov.D.querySelectorAll("#state-government .gov-officer-note")]
-      .find((el) => /court's site/.test(el.textContent));
+    const real = alGov.window.kycStateGov.states.AL.court;
+    const court = { name: real.name, chosen: real.chosen, term: real.term, word: real.word, seats: real.seats,
+      unreadable: AL_UNREACHED, url: "https://judicial.alabama.gov/appellate/supremecourt" };
+    const box = alGov.D.createElement("div");
+    box.innerHTML = drawWith(alGov, "AL", "court", court);
+    const p = [...box.querySelectorAll(".gov-officer-note")].find((el) => /court's site/.test(el.textContent));
     check("the court's site could not be reached, from a person's browser too, on that day",
-      !!court.unreadable && !court.members && !!p &&
-        /^The court's site could not be reached by this site's automated reader, nor from a person's own browser on October 26, 2026, so its members are not listed here\. You can try the court's own page yourself\.$/.test(p.textContent),
-      p && p.textContent);
+      !!p && AL_SENTENCE.test(p.textContent) && !box.querySelector(".gov-court-member"), p && p.textContent);
     check("its page linked in the sentence", !!p && p.querySelector("a").getAttribute("href") === court.url);
+    const section = alGov.D.getElementById("state-government");
+    const said = [...section.querySelectorAll(".gov-officer-note")].find((el) => /court's site/.test(el.textContent));
+    check("the page says what this week's record holds: unreachable, or the members the court lists",
+      real.unreadable
+        ? !real.members && !!said && AL_SENTENCE.test(said.textContent) && !section.querySelector(".gov-court-member")
+        : !said && (real.members || []).length > 0 &&
+          section.querySelectorAll(".gov-court-member").length >= real.members.length,
+      said ? said.textContent : String((real.members || []).length));
   });
 
   const dc = await buildPage("states/dc.html");
@@ -11384,7 +11646,10 @@ async function testFederal() {
       !retired.has(c.querySelector("[data-official]").getAttribute("data-official"))));
     check("each justice the Court pictures is pictured", d.supremeCourt.members.every((j, i) =>
       !j.portrait || (justices[i].querySelector("img.fed-photo") || {}).getAttribute &&
-        justices[i].querySelector("img.fed-photo").getAttribute("src") === j.portrait.url));
+        // As its host serves it, or as a copy made here of that very file
+        // (rule 101), whichever a week's weighing finds.
+        [justices[i].querySelector("img.fed-photo").getAttribute("src"),
+          justices[i].querySelector("img.fed-photo").getAttribute("data-photo-original")].indexOf(j.portrait.url) !== -1));
     // The owner's decision of 2026-10-20: the Court's official portraits as
     // Wikimedia Commons holds them; the Court's own named apart, never all
     // credited to its Collection over files that are Commons'.
@@ -15823,7 +16088,10 @@ async function testPhotoCopies() {
       const host = D.createElement("div");
       host.innerHTML = KYC.stategov.render("OK");
       if (off) {
-        const img = host.querySelector(".gov-officer-photo");
+        // That officer's own photograph: another row may show none this
+        // week, or a copy of its own (rule 101).
+        const img = [...host.querySelectorAll("img.gov-officer-photo")].find((i) =>
+          i.getAttribute("data-photo-original") === off.photo);
         check("an officer's row loads the copy", !!img && img.getAttribute("src") === "../" + COPY &&
           img.getAttribute("data-photo-original") === off.photo);
       }
@@ -15854,20 +16122,30 @@ async function testPhotoCopies() {
     const KYC = window.KYC;
     suite("states/az.html — a justice's and a statewide candidate's photograph, as the copy made here", () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
-      const s = window.kycStateGov.states.AZ;
-      const court = s.court || {};
-      const name = Object.keys(court.photos || {})[0];
-      const shot = name && court.photos[name];
-      const rows = Object.values((s.ballot2026 || {}).offices || {})
-        .flatMap((item) => ((item.candidates || {}).candidates || []));
-      const row = rows.find((p) => p.photo && p.photoCredit && !p.writeIn);
-      check("Arizona shows a justice's and a candidate's photograph to copy", !!shot && !!row);
-      if (!shot || !row) return;
+      // Arizona's, or, where a refresh left it without one of the two, the
+      // first state that shows both: which photographs a week's read finds
+      // is the record's, and the rule is the same for every state.
+      const pickFrom = (code) => {
+        const s = window.kycStateGov.states[code] || {};
+        const court = s.court || {};
+        const name = Object.keys(court.photos || {})[0];
+        const shot = name && court.photos[name];
+        const row = Object.values((s.ballot2026 || {}).offices || {})
+          .flatMap((item) => ((item.candidates || {}).candidates || []))
+          .find((p) => p.photo && p.photoCredit && !p.writeIn);
+        return shot && row ? { code, court, shot, row } : null;
+      };
+      const picked = pickFrom("AZ") ||
+        Object.keys(window.kycStateGov.states).sort().map(pickFrom).find(Boolean);
+      check("a state shows a justice's and a candidate's photograph to copy", !!picked);
+      if (!picked) return;
+      const { code, court, shot, row } = picked;
+      const whose = court.name + " of " + KYC.stateName(code);
       const keep = [shot.photoCopy, row.photoCopy];
       shot.photoCopy = { src: COPY, of: shot.photo, ofBytes: 2400000 };
       row.photoCopy = { src: COPY, of: row.photo };
       const host = D.createElement("div");
-      host.innerHTML = KYC.stategov.render("AZ");
+      host.innerHTML = KYC.stategov.render(code);
       const justice = [...host.querySelectorAll(".gov-court-photo")].find((img) =>
         img.getAttribute("data-photo-original") === shot.photo);
       const candidate = [...host.querySelectorAll(".gov-candidate-photo")].find((img) =>
@@ -15878,22 +16156,32 @@ async function testPhotoCopies() {
         !!candidate && candidate.getAttribute("src") === "../" + COPY);
       const note = (img) => img && img.closest("li").querySelector(".photo-copy-note");
       check("the justice's credit stays the court's and says it is a copy made here, with the weight",
-        !!note(justice) && /^Photo: Supreme Court of Arizona; a smaller copy made by this site of the original file \(2\.4 MB\)$/
-          .test(justice.closest("li").querySelector(".gov-photo-credit").textContent),
+        !!note(justice) && justice.closest("li").querySelector(".gov-photo-credit").textContent ===
+          "Photo: " + whose + "; a smaller copy made by this site of the original file (2.4 MB)",
         justice && justice.closest("li").querySelector(".gov-photo-credit").textContent);
       check("the candidate's credit says it is a copy made here", !!note(candidate));
       D.body.appendChild(host);
       justice.dispatchEvent(new window.Event("error"));
       check("a justice's copy that fails gives way to the original, and stops calling it a copy",
         host.contains(justice) && justice.getAttribute("src") === shot.photo && !note(justice) &&
-        /^Photo: Supreme Court of Arizona$/.test(
-          justice.closest("li").querySelector(".gov-photo-credit").textContent));
+        justice.closest("li").querySelector(".gov-photo-credit").textContent === "Photo: " + whose);
       host.remove();
-      shot.photoCopy = { src: COPY, of: "https://www.azcourts.gov/another.jpg" };
-      row.photoCopy = { src: COPY, of: "https://www.azcleanelections.gov/another.jpg" };
-      host.innerHTML = KYC.stategov.render("AZ");
+      shot.photoCopy = { src: COPY, of: "https://court.example.gov/another.jpg" };
+      row.photoCopy = { src: COPY, of: "https://guide.example.gov/another.jpg" };
+      host.innerHTML = KYC.stategov.render(code);
+      // The justice's and the candidate's own rows: another officer in the
+      // block may have a real copy made here (rule 101: Arizona's attorney
+      // general's, from 2026-10-26), and is rightly noted.
+      const rowOf = (cls, url) => {
+        const img = [...host.querySelectorAll(cls)].find((i) =>
+          i.getAttribute("src") === url || i.getAttribute("data-photo-original") === url);
+        return img && img.closest("li");
+      };
+      const own = [rowOf(".gov-court-photo", shot.photo), rowOf(".gov-candidate-photo", row.photo)];
       check("a copy of another address is never drawn for a justice or a candidate",
-        host.innerHTML.indexOf(COPY) === -1 && host.querySelectorAll(".photo-copy-note").length === 0);
+        own.every((li) => !!li && li.innerHTML.indexOf(COPY) === -1 && !li.querySelector(".photo-copy-note") &&
+          !li.querySelector("[data-photo-original]")),
+        own.map((li) => li && li.textContent).join(" | "));
       shot.photoCopy = keep[0];
       row.photoCopy = keep[1];
       if (!shot.photoCopy) delete shot.photoCopy;

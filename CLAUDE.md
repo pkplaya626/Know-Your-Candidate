@@ -207,8 +207,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2428 tests, no dependencies
-npm install && npm test                       # 3434 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2500 tests, no dependencies
+npm install && npm test                       # 3473 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -263,7 +263,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
    whose source cannot be read keeps its committed cache and the run goes on
    (`continue-on-error`). On 2026-10-19 one association's roster that did not
    resolve in DNS failed the whole daily refresh, money and results with it,
-   because four state-government commands ran as one step.
+   because four state-government commands ran as one step. And a kept cache
+   is not a fix: from at least 2026-10-23 every refresh kept Alaska's
+   certified list of 2026-10-17, its guide's photographs and its voting
+   links, because `www.elections.alaska.gov` sends the wrong intermediate
+   certificate and Python, unlike a browser, does not fetch the right one
+   from the certificate's Authority Information Access. A server that sends
+   the wrong intermediate is completed from its own certificate's issuer,
+   never trusted less: the intermediate is vendored under `kyc/certs/`
+   with its source, fingerprints and checks, and `kyc/tls.context()` adds
+   it to the default roots, verification on and partial chains off, for
+   every reader that fetches Alaska's site.
 
 9. **Never add a topical hint to a Wikipedia search.** `Dan Osborn NE politician`
    pushes his own article out of the results; `Dan Osborn` returns it first.
@@ -1011,7 +1021,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     commented-out "Attorney General Josh Stein". And a name counts only
     directly beside its title - an 80-character window confirmed "former
     attorney general Treg Taylor" on Alaska's page, and a governor standing
-    beside the attorney general.
+    beside the attorney general. A confirmation is the office's word on the
+    day its page was read (`confirmedOn`, with the listings it did not name,
+    `alsoListed`), and a site that concludes nothing keeps it while the same
+    association lists the same holder of the same party and no listing is
+    new (`officers.kept_confirmation`): ncdoj.gov did not answer on
+    2026-10-20, -21 and -22, and North Carolina's page read "The sources
+    disagree: Dan Bishop (R); Jeff Jackson (D)" over the office that had
+    named Jackson on every read. And a read is whole only when every page
+    it set out to read answered (`officers.OfficeRead`): one whose linked
+    attorney general's page (or that drew itself with JavaScript) did not
+    answer confirms whom it names only where one association lists someone -
+    with two, the unread page may name the other, which a whole read shows
+    as a dispute - and otherwise concludes nothing, never "does not name
+    them", nor drops a photograph. Past `KEPT_STALE_DAYS` a kept confirmation
+    is a warning (`officer-confirmation-kept`) to read the page by hand.
 
 57. **A court's members come from the court.** No national source lists
     sitting state justices, so `courts.COURTS` holds a recipe per court and
@@ -2843,6 +2867,12 @@ That check found a retirement note keyed `"Dick Durbin"` when the roster says
   before-and-after district maps, `tests/test_frame.py` for the site's frame (about, 404, footers, header tags), `tests/test_site.py` for summary
   figures, emitted files and page wiring, `tests/render_test.js` for anything
   visible on a page.
+- A check tests the rule, not the day's data: it makes the state it tests
+  (a link the check missed, an office read by hand, a court unread, a
+  photograph copied) and asks the real record for whichever is true, since a
+  refresh changes which links answer and which offices can be read. On
+  2026-10-26 seven checks written against the day before failed the daily
+  refresh, which had found three links live and read an office itself.
 - When changing profile fields, update the field tables in `README.md`.
 - Builds must stay reproducible under `SOURCE_DATE_EPOCH`, for `geo.js` as
   well as the people files.

@@ -21,6 +21,10 @@ know-your-candidate = "kyc.cli:main"
 [tool.setuptools]
 packages = ["kyc"]
 
+[tool.setuptools.package-data]
+# Vendored intermediate certificates (kyc/tls.py), not a dependency.
+kyc = ["certs/*.pem"]
+
 [tool.ruff]
 line-length = 96
 target-version = "py39"

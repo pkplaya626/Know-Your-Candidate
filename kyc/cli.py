@@ -2188,11 +2188,15 @@ def _officers(args):
         print(f"  [warn] {code}: NASS lists {nass} as {office}, NLGA {nlga}; neither is shown")
     ag = cache.get("ag", {})
     confirmed = sum(1 for row in ag.values() if row.get("name") and not row.get("unconfirmed"))
-    print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page; "
+    kept = sum(1 for row in ag.values() if row.get("confirmationKept"))
+    print(f"  {confirmed} of {len(STATES)} attorneys general confirmed on their office's own page"
+          + (f" ({kept} kept from an earlier read: the site did not answer)" if kept else "") + "; "
           f"{sum(1 for row in ag.values() if row.get('photo'))} with their office's photograph; "
           f"{sum(1 for row in ag.values() if row.get('photoHeavy'))} of them offered only above "
           "the caps (kept, and said)")
     for problem in cache.pop("agProblems", officers.ag_problems(ag)):
+        print(f"  [warn] {problem}")
+    for problem in cache.pop("sosProblems", []):
         print(f"  [warn] {problem}")
     if not args.check:
         print(f"[ok] wrote {officers.save_cache(cache, args.root)}")

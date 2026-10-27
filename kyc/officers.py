@@ -473,45 +473,110 @@ def acting(name, text):
     return bool(re.search(rf"\bacting attorney general (?:[a-z]+ ){{0,2}}{last}\b", _fold(text)))
 
 
-def _office_pages(url, pause):
-    """``[(url, html)]``: an office page and any page it links as its
-    attorney general's own ("Attorney General", "About the Attorney
-    General"), or ``None`` when the site refuses the request. A failed
-    request is tried once more before the office counts as unreadable: one
-    timeout on Tennessee's site made it read as unconfirmed (rule 8)."""
-    page = None
-    for wait in (2, 10, 0):
+# How long to wait after each failed request for an office's page before it
+# is tried again (tests set these to nothing).
+_RETRY_WAITS = (2, 10)
+_BOT_WALL = re.compile(r"<title>\s*(Access Denied|Just a moment|Not allowed)", re.I)
+
+
+def _get_answered(url):
+    """*url*'s page, or ``None`` when it did not answer after the retries:
+    one timeout on Tennessee's site made it read as unconfirmed (rule 8)."""
+    for wait in (*_RETRY_WAITS, None):
         try:
-            page = _get(url)
-            break
+            return _get(url)
         except OfficersError:
-            time.sleep(wait)
+            if wait is not None:
+                time.sleep(wait)
+    return None
+
+
+class OfficeRead(list):
+    """``[(url, html)]``, the pages of an office's site that answered, with
+    ``unread``: ``[(what, url)]`` for each page the read set out to read that
+    did not (a whole read's is empty, and it is the plain list it was)."""
+
+    def __init__(self, pages=(), unread=()):
+        super().__init__(pages)
+        self.unread = list(unread)
+
+
+def _unread_words(unread):
+    """'the attorney general's page https://... could not be read'."""
+    return " and ".join(f"{what} {url}" for what, url in unread) + " could not be read"
+
+
+def _office_pages(url, pause):
+    """An :class:`OfficeRead` of an office page and any page it links as its
+    attorney general's own ("Attorney General", "About the Attorney
+    General"), or ``None`` when the site refuses the request. Each request
+    is tried again before it counts as unanswered. A linked page that does
+    not answer makes the read partial (``unread``), never a whole read of
+    the front page alone: a front page that leaves the name to that page
+    would read as an office that does not name its attorney general."""
+    page = _get_answered(url)
     if page is None:
         return None
-    if re.search(r"<title>\s*(Access Denied|Just a moment|Not allowed)", page, re.I):
+    if _BOT_WALL.search(page):
         return None
     # A page that draws itself with JavaScript (Nevada's secretary of state)
     # says nothing either way: unreadable, not "does not name them".
     if len(visible_text(page)) < 300:
         return None
-    pages = [(url, page)]
+    pages = OfficeRead([(url, page)])
     for href, label in re.findall(r'<a\s+href="([^"]+)"[^>]*>\s*([^<]{0,40})</a>', page):
         if re.fullmatch(r"(About|Meet)?\s*(the\s+)?Attorney General", _text(label), re.I):
             target = urllib.parse.urljoin(url, html.unescape(href))
             if urllib.parse.urlparse(target).netloc == urllib.parse.urlparse(url).netloc:
                 time.sleep(pause)
-                try:
-                    pages.append((target, _get(target)))
-                except OfficersError:
-                    pass
+                linked = _get_answered(target)
+                # A bot wall, or a page that draws itself with JavaScript,
+                # says nothing either way, as the front page's would.
+                if (linked is None or _BOT_WALL.search(linked)
+                        or len(visible_text(linked)) < 300):
+                    pages.unread.append(("the attorney general's page", target))
+                else:
+                    pages.append((target, linked))
                 break
     return pages
 
 
+def _read_offices(urls, pause):
+    """One :class:`OfficeRead` of every page in *urls* (an ``OFFICE_PAGES``
+    entry, or the office's one front page) and the pages each links, or
+    ``None`` when none of them answered. One that does not answer while
+    another does makes the read partial: its words are not in the text."""
+    read = OfficeRead()
+    for url in urls:
+        found = _office_pages(url, pause)
+        if found is None:
+            read.unread.append(("the office's page", url))
+            continue
+        read.extend(found)
+        read.unread.extend(found.unread)
+    return read if read else None
+
+
+def office_read(urls, link, pause):
+    """``(pages, (link, text, unread))`` for :func:`attorneys_general`: the
+    pages of *urls* that answered (:func:`_read_offices`), and their visible
+    text (``None`` when none did) with the pages that did not."""
+    found = _read_offices(urls, pause)
+    if not found:
+        return OfficeRead(), (link, None, [])
+    # The pages stay an OfficeRead, so add_ag_photos knows a photograph may
+    # be on a page that did not answer.
+    return found, (link, " ".join(visible_text(page) for _, page in found), found.unread)
+
+
 def _office_text(url, pause):
-    """The visible text of :func:`_office_pages`, or ``None``."""
+    """``(text, unread)``: the visible text of :func:`_office_pages` (``None``
+    when the site refused or drew nothing) and the pages it set out to read
+    that did not answer (:class:`OfficeRead`)."""
     pages = _office_pages(url, pause)
-    return " ".join(visible_text(page) for _, page in pages) if pages else None
+    if not pages:
+        return None, []
+    return " ".join(visible_text(page) for _, page in pages), pages.unread
 
 
 # ------------------------------------------- attorneys general's photographs
@@ -875,11 +940,22 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
     for code, row in sorted(rows.items()):
         if not row.get("name") or row.get("unconfirmed") or row.get("disputed"):
             continue
+        if row.get("confirmationKept"):
+            # The office's site concluded nothing this run: its photograph
+            # stands as the confirming read left it (kept_confirmation), not
+            # dropped, re-read or reported as changed.
+            continue
+        # A partial read (OfficeRead.unread): the page that did not answer
+        # may be the one with the photograph, so finding none there
+        # concludes nothing and the last one read of this holder is kept.
+        unread = getattr(pages.get(code), "unread", None)
         read = list(pages.get(code) or [])
         # What a person refused is kept on the row (``notPortraits``) so
         # validate can tell a NOT_A_PORTRAIT entry still means something.
         passed_over = []
         found, why = ag_photo(row["name"], code, read, check=check, passed_over=passed_over)
+        if not found and unread:
+            why = "unknown"
         if not found:
             more = []
             seen = {url for url, _ in read}
@@ -943,14 +1019,86 @@ def photo_changes(code, old, row):
             f"(from {row.get('photoPage')}); look at it"]
 
 
-def attorneys_general(raga, daga, office_texts):
-    """``(rows, problems)``. *office_texts* is ``{code: (url, text or None)}``.
-    A row is the confirmed holder, an unconfirmed association listing, or a
-    dispute; *problems* says what a person should look at."""
+# A confirmation is the office's word on the day its page was read
+# (``confirmedOn``), with the other association listings that page did not
+# name (``alsoListed``, "Name (P)"). Where the office's site later concludes
+# nothing (a timeout, a refusal, a page drawn by script: rule 8), that
+# confirmation is kept - shown as the confirmed holder, as a court's last
+# good read is (rule 57) - only while nothing read since contradicts it: the
+# same association lists the same holder with the same party, and every
+# other listing is one the confirming read saw and did not name. On
+# 2026-10-20, -21 and -22 ncdoj.gov did not answer, and North Carolina's
+# page called its attorney general disputed between Jeff Jackson, whom the
+# office names, and Dan Bishop, whom RAGA still lists after he lost the
+# 2024 election. Past ``KEPT_STALE_DAYS`` the build says a person should
+# read the office's page by hand (overrides.OFFICERS_READ_BY_HAND).
+KEPT_STALE_DAYS = 14
+
+
+def _utc_today():
+    return datetime.datetime.now(datetime.timezone.utc).date().isoformat()
+
+
+def _listing(r, party):
+    return f"{r['name']} ({party})"
+
+
+def _as_shown(name):
+    """An association's spelling as the office writes it (``NAME_FORMS``)."""
+    return " ".join(NAME_FORMS.get(name, name).split())
+
+
+def kept_confirmation(old, listed, previous_day=None):
+    """The previous cache's confirmed row *old*, kept where the office's site
+    concluded nothing this run, or ``None``. *listed* is this run's
+    ``[(listing, party, association)]``; *previous_day* the previous cache's
+    ``fetched`` day, the day a row written before ``confirmedOn`` existed was
+    confirmed (every run reads every office). Kept only when the same
+    association lists the same holder with the same party and every other
+    listing this run is one the confirming read did not name
+    (``alsoListed``). A row written before this was recorded has no
+    ``alsoListed``, so a state two associations list is kept only once a
+    read has recorded what else it saw; a one-listing state needs nothing
+    more."""
+    old = old or {}
+    if not old.get("name") or old.get("unconfirmed") or old.get("disputed") or old.get("unlisted"):
+        return None
+    day = old.get("confirmedOn") or previous_day
+    if not day:
+        return None
+    holder = [(r, p) for r, p, source in listed if source == old.get("listedBy")
+              and p == old.get("party") and _as_shown(r["name"]) == old["name"]]
+    if len(holder) != 1:
+        return None
+    seen = old.get("alsoListed")
+    others = [_listing(r, p) for r, p, _ in listed if r is not holder[0][0]]
+    if others and (seen is None or any(o not in seen for o in others)):
+        return None
+    return dict(old, confirmedOn=day, confirmationKept=True)
+
+
+def attorneys_general(raga, daga, office_texts, previous=None, previous_day=None, today=None):
+    """``(rows, problems)``. *office_texts* is ``{code: (url, text or None,
+    unread)}``, *unread* (which may be left off) the pages the read set out
+    to read that did not answer (:class:`OfficeRead`). A row is the
+    confirmed holder, an unconfirmed association listing, or a dispute;
+    *problems* says what a person should look at. *previous* is the last
+    cache's rows and *previous_day* its ``fetched`` day: where an office's
+    site concludes nothing, its last confirmation is kept while nothing
+    read contradicts it (:func:`kept_confirmation`). A partial read
+    concludes only what it says: where one association lists someone, one
+    that names them beside the title confirms them; one that names nobody,
+    or a state two associations list (the page that did not answer may name
+    the other), concludes nothing, as a site that did not answer - never
+    "does not name them", never a dispute on its silence, and an earlier
+    confirmation is not kept where it names another listing. *today* dates
+    each confirmation (``confirmedOn``)."""
     from .government_maps import STATES
+    today = today or _utc_today()
     rows, problems = {}, []
     for code in STATES:
-        url, text = office_texts.get(code, ("", None))
+        url, text, *rest = office_texts.get(code, ("", None))
+        unread = (rest[0] if rest else None) or []
         listed = [(r, "R", "Republican Attorneys General Association") for r in [raga.get(code)] if r]
         listed += [(r, "D", "Democratic Attorneys General Association") for r in [daga.get(code)] if r]
         base = {"office": url} if url else {}
@@ -960,16 +1108,59 @@ def attorneys_general(raga, daga, office_texts):
             rows[code] = dict(base, unlisted=True)
             problems.append(f"{code}: neither association lists an attorney general")
             continue
+        unreadable = "the office's site could not be read"
+        named = []
+        if text is not None and unread:
+            unreadable = _unread_words(unread)
+            named = [(r, p, s) for r, p, s in listed
+                     if names_attorney_general(_as_shown(r["name"]), text, code)]
+            if not named:
+                text = None                     # what did not answer may name them
+            elif len(listed) > 1:
+                # Two associations list someone. A whole read of a site that
+                # names both is a dispute (rule 55), and the page that did
+                # not answer may name the other listing - a predecessor's
+                # name left beside the title on the front page is enough -
+                # so a partial read is never more sure than the whole read
+                # would be: it concludes nothing. An earlier confirmation is
+                # kept only where what answered names its holder and no one
+                # else (below).
+                text = None
+                problems.append(f"{code}: {unreadable}; the pages that answered name "
+                                + " and ".join(_as_shown(r["name"]) for r, _, _ in named)
+                                + " as attorney general; with two associations' listings "
+                                "a partial read confirms no one")
+            else:
+                problems.append(f"{code}: {unreadable}; the pages that answered name "
+                                f"{_as_shown(named[0][0]['name'])} as attorney general")
         if text is None:
-            if len(listed) > 1:
+            kept = kept_confirmation((previous or {}).get(code), listed, previous_day)
+            other = [r["name"] for r, p, s in named if kept and not (
+                s == kept.get("listedBy") and p == kept.get("party")
+                and _as_shown(r["name"]) == kept["name"])]
+            if other:
+                # Naming another listing beside the title contradicts the
+                # earlier confirmation, which stood only while every other
+                # listing went unnamed (kept_confirmation).
+                problems.append(f"{code}: its confirmation of {kept['name']} on "
+                                f"{kept['confirmedOn']} is not kept: the pages that answered "
+                                f"name {' and '.join(other)} as attorney general")
+                kept = None
+            if kept:
+                rows[code] = dict({k: v for k, v in kept.items()
+                                   if k not in ("office", "selection")}, **base)
+                problems.append(f"{code}: {unreadable}; its confirmation "
+                                f"of {kept['name']} on {kept['confirmedOn']} is kept"
+                                + (f" ({', '.join(kept['alsoListed'])} also listed, and not "
+                                   "named on that read)" if kept.get("alsoListed") else ""))
+            elif len(listed) > 1:
                 rows[code] = dict(base, disputed=[f"{r['name']} ({p})" for r, p, _ in listed])
-                problems.append(f"{code}: both associations list someone and the office "
-                                f"could not be read")
+                problems.append(f"{code}: both associations list someone and {unreadable}")
             else:
                 r, party, source = listed[0]
                 rows[code] = dict(base, unconfirmed=True, unreadable=True, name=r["name"],
                                   party=party, partyKey=party, listedBy=source)
-                problems.append(f"{code}: the office's site could not be read; {r['name']} is "
+                problems.append(f"{code}: {unreadable}; {r['name']} is "
                                 f"shown as {source}'s listing, unconfirmed")
             continue
         confirmed = []
@@ -983,9 +1174,13 @@ def attorneys_general(raga, daga, office_texts):
                                 f"does not name as attorney general")
         if len(confirmed) == 1:
             name, party, source, r = confirmed[0]
+            # A partial read reaches here only where one association lists
+            # someone and what answered names them (above), so ``alsoListed``
+            # is a whole read's: the listings the office did not name.
             rows[code] = dict(base, name=name, party=party, partyKey=party, listedBy=source,
                               title="Acting Attorney General" if acting(name, text)
-                              else "Attorney General")
+                              else "Attorney General", confirmedOn=today,
+                              alsoListed=[_listing(o, p) for o, p, _ in listed if o is not r])
         elif not confirmed and len(listed) > 1:
             # Both associations list someone and the office names neither:
             # neither listing stands for the office (RAGA's alone would be
@@ -1018,11 +1213,13 @@ def ag_problems(rows):
     return out
 
 
-def fetch_attorneys_general(pause=0.5, previous=None):
+def fetch_attorneys_general(pause=0.5, previous=None, previous_day=None):
     """``(rows, problems)`` from the live rosters, USA.gov and every office,
     each confirmed holder with their office's photograph (``add_ag_photos``;
     *previous* is the last cache's rows, whose photograph a read that
-    concludes nothing keeps)."""
+    concludes nothing keeps, and whose confirmation an office's site that
+    concludes nothing keeps: :func:`kept_confirmation`; *previous_day* is
+    that cache's ``fetched`` day)."""
     from .government_maps import STATES
     from .pages import state_name
     raga, daga = parse_raga(_get(RAGA_URL)), parse_daga(_get(DAGA_URL))
@@ -1030,31 +1227,61 @@ def fetch_attorneys_general(pause=0.5, previous=None):
     for code in STATES:
         slug = re.sub(r"[^a-z]+", "-", state_name(code).lower()).strip("-")
         url = usagov_office(_get(USAGOV_URL.format(slug=slug)))
-        pages = OFFICE_PAGES.get(code, [url])
-        read[code] = [pair for found in (_office_pages(p, pause) for p in pages) if found
-                      for pair in found]
-        texts[code] = (OFFICE_LINK.get(code, url),
-                       " ".join(visible_text(page) for _, page in read[code]) or None)
+        read[code], texts[code] = office_read(OFFICE_PAGES.get(code, [url]),
+                                              OFFICE_LINK.get(code, url), pause)
         time.sleep(pause)
-    rows, problems = attorneys_general(raga, daga, texts)
+    rows, problems = attorneys_general(raga, daga, texts, previous, previous_day)
     problems += add_ag_photos(rows, read, previous)
     return rows, problems
 
 
-def confirm_non_members(sos, pause=0.5):
+def confirm_non_members(sos, pause=0.5, previous=None, previous_day=None, today=None,
+                        problems=None):
     """A secretary of state NASS lists for a state that is not a member is
     not NASS speaking for its member; the office's own site, which NASS
     links, can still confirm it. Marks ``officeConfirms`` on each it does,
-    and ``officeRead`` on each it does not: ``"unreadable"`` where the site
-    refused or drew nothing (rule 8), ``"not-named"`` where it was read and
-    does not name them, so the page can say why."""
+    with the day (``confirmedOn``), and ``officeRead`` on each it does not:
+    ``"unreadable"`` where the site refused or drew nothing (rule 8), or a
+    page it links as the office's own did not answer and the rest does not
+    name them, ``"not-named"`` only where every page it set out to read
+    answered and none names them, so the page can say why. Where the site
+    concludes nothing, *previous* (the last
+    cache's ``sos``) keeps an ``officeConfirms`` of the very same name, with
+    its ``confirmedOn`` (else *previous_day*, the last cache's ``fetched``
+    day), as ``confirmationKept``; a site read that does not name them keeps
+    nothing. What was kept is appended to *problems*."""
+    today = today or _utc_today()
     for code, entry in sorted(sos.items()):
         if entry.get("member") is False and office_of(entry["title"]) == "Secretary of State":
-            text = _office_text(entry["website"], pause) if entry.get("website") else None
+            text, unread = (_office_text(entry["website"], pause) if entry.get("website")
+                            else (None, []))
+            old = (previous or {}).get(code) or {}
+            # A read is whole only when every page it set out to read
+            # answered: a partial one confirms what it names, and its
+            # silence concludes nothing (as a site that did not answer).
+            unreadable = (_unread_words(unread) if text and unread
+                          else "the secretary of state's site could not be read")
             if text and names_holder(entry["name"], text, "sos", code):
                 entry["officeConfirms"] = True
+                entry["confirmedOn"] = today
+                if unread and problems is not None:
+                    problems.append(f"{code}: {unreadable}; the pages that answered name "
+                                    f"{entry['name']} as secretary of state")
+            elif (entry.get("website") and (not text or unread) and old.get("officeConfirms")
+                    and old.get("name") == entry["name"]
+                    and office_of(old.get("title", "")) == "Secretary of State"
+                    and (old.get("confirmedOn") or previous_day)):
+                entry.update(officeConfirms=True, confirmationKept=True,
+                             confirmedOn=old.get("confirmedOn") or previous_day)
+                if problems is not None:
+                    problems.append(f"{code}: {unreadable}; "
+                                    f"its confirmation of {entry['name']} on "
+                                    f"{entry['confirmedOn']} is kept")
             elif entry.get("website"):
-                entry["officeRead"] = "not-named" if text else "unreadable"
+                entry["officeRead"] = "not-named" if text and not unread else "unreadable"
+                if text and unread and problems is not None:
+                    problems.append(f"{code}: {unreadable}; {entry['name']} is not confirmed "
+                                    "by the office")
             time.sleep(pause)
     return sos
 
@@ -1155,11 +1382,49 @@ def by_hand_unused(cache):
         elif entry["holder"] not in (name, " ".join(NAME_FORMS.get(name, name).split())):
             out.append(f"{where}: the roster now names {name}; the entry for {entry['holder']} "
                        "confirms nobody and should go")
+        elif row.get("confirmationKept"):
+            # The office's site did not answer this run; its last
+            # confirmation was only kept (kept_confirmation), so the site
+            # does not "now answer", and the reading by hand still stands.
+            continue
         elif office == "ag" and not (row.get("unconfirmed") and row.get("unreadable")):
             out.append(f"{where}: the office's own site now answers for {name}; the entry may go")
         elif office == "sos" and (row.get("member") is not False or row.get("officeConfirms")):
             out.append(f"{where}: NASS or the office's own site now answers for {name}; the "
                        "entry may go")
+    return out
+
+
+def kept_stale(cache, today=None):
+    """Every confirmation kept from an earlier read (``confirmationKept``)
+    more than ``KEPT_STALE_DAYS`` old and not since read by hand: the
+    office's site has not answered since, and a person should read its page
+    (overrides.OFFICERS_READ_BY_HAND). For validate
+    (``officer-confirmation-kept``). Aged on the UTC day, as ``confirmedOn``
+    is stamped."""
+    today = today or datetime.date.fromisoformat(_utc_today())
+    out = []
+    for office, label in (("ag", "attorney general"), ("sos", "secretary of state")):
+        for code, row in sorted(((cache or {}).get(office) or {}).items()):
+            if not row.get("confirmationKept"):
+                continue
+            hand = hand_confirms(code, office, row.get("name"))
+            if hand and str(hand[1]["read"]) >= str(row.get("confirmedOn") or "~"):
+                # Read by hand on or after the kept confirmation's day:
+                # by_hand_stale ages it. A reading older than the kept
+                # confirmation does not stand for the read since.
+                continue
+            try:
+                age = (today - datetime.date.fromisoformat(row.get("confirmedOn") or "")).days
+            except (TypeError, ValueError):
+                out.append(f"{code} {label}: {row.get('name')}'s kept confirmation carries no "
+                           f"day ({row.get('confirmedOn')!r})")
+                continue
+            if age > KEPT_STALE_DAYS:
+                out.append(f"{code} {label}: {row['name']}, confirmed by the office's site on "
+                           f"{row['confirmedOn']} ({age} days ago) and kept since, as the site "
+                           "has not answered; read the office's page by hand and record it in "
+                           "overrides.OFFICERS_READ_BY_HAND")
     return out
 
 
@@ -1173,9 +1438,16 @@ def fetch(previous=None):
     """``{"sos": {...}, "lt": {...}, "ag": {...}}`` from the live rosters,
     with the attorney-general problems to report. *previous* is the cache
     being replaced."""
-    ag, problems = fetch_attorneys_general(previous=(previous or {}).get("ag"))
-    return {"sos": confirm_non_members(parse_nass(_get(NASS_URL))),
-            "lt": parse_nlga(_get(NLGA_URL)), "ag": ag, "agProblems": problems}
+    previous = previous or {}
+    # The day the previous cache was read: a confirmed row it holds that
+    # predates ``confirmedOn`` was confirmed that day (kept_confirmation).
+    day = (previous.get("fetched") or "")[:10] or None
+    ag, problems = fetch_attorneys_general(previous=previous.get("ag"), previous_day=day)
+    sos_problems = []
+    sos = confirm_non_members(parse_nass(_get(NASS_URL)), previous=previous.get("sos"),
+                              previous_day=day, problems=sos_problems)
+    return {"sos": sos, "lt": parse_nlga(_get(NLGA_URL)), "ag": ag, "agProblems": problems,
+            "sosProblems": sos_problems}
 
 
 # ------------------------------------------------------------- for a state
@@ -1234,9 +1506,12 @@ def for_state(code, cache, disputes):
             out["lt"]["successor"] = _credited(_person(lt), NLGA_BY)
     if code in cache.get("ag", {}):
         out["ag"] = dict(cache["ag"][code])
-        out["ag"].pop("photoWeight", None)
-        out["ag"].pop("photoOversized", None)
-        out["ag"].pop("notPortraits", None)
+        # A kept confirmation is shown as the confirmed holder, in the same
+        # words (kept_confirmation; validate says when it grows old).
+        kept = out["ag"].pop("confirmationKept", None)
+        for field in ("photoWeight", "photoOversized", "notPortraits", "confirmedOn",
+                      "alsoListed"):
+            out["ag"].pop(field, None)
         from .photos import refused
         if out["ag"].get("photo") and refused(out["ag"]["photo"]):
             # A file a person refused since it was read (rule 38: someone
@@ -1248,14 +1523,16 @@ def for_state(code, cache, disputes):
             host = urllib.parse.urlsplit(out["ag"].get("photoPage") or "").hostname or ""
             out["ag"]["photoBy"] = ("the office's website (" + host.removeprefix("www.") + ")"
                                     if host else "the office's website")
-        hand = (out["ag"].get("unconfirmed") and out["ag"].get("unreadable")
+        hand = (((out["ag"].get("unconfirmed") and out["ag"].get("unreadable")) or kept)
                 and hand_confirms(code, "ag", out["ag"].get("name")))
         if hand:
             # The office's site refuses a script; its page, read by hand,
             # names them beside the title (overrides.OFFICERS_READ_BY_HAND).
+            # Where the site's last confirmation is kept, the reading by hand
+            # is what a person read since (KEPT_STALE_DAYS asks for one).
             name, entry = hand
             for field in ("unconfirmed", "unreadable"):
-                out["ag"].pop(field)
+                out["ag"].pop(field, None)
             out["ag"]["name"] = name
             out["ag"]["title"] = ("Acting Attorney General" if any(acting(name, w) for w in entry["words"])
                                   else "Attorney General")
@@ -1269,7 +1546,8 @@ def for_state(code, cache, disputes):
         person = _person(sos)
         if person.get("photo") and not _surname_in(sos["name"], person["photo"]):
             del person["photo"]
-        if sos.get("member") is False and not sos.get("officeConfirms"):
+        if sos.get("member") is False and (not sos.get("officeConfirms")
+                                           or sos.get("confirmationKept")):
             hand = hand_confirms(code, "sos", sos["name"])
             if hand:
                 # NASS does not speak for a non-member; the office's own
@@ -1279,6 +1557,8 @@ def for_state(code, cache, disputes):
                 # The page read by hand names the holder, not their party:
                 # that is still the non-member listing's, and said so.
                 person["partyFrom"] = NASS_BY
+            elif sos.get("officeConfirms"):
+                pass                             # the site's last confirmation, kept
             else:
                 person["notMember"] = True
                 if sos.get("officeRead"):
