@@ -570,13 +570,17 @@
 
   /** The sentence that says this site has not confirmed a listing on the
    *  office's own site, and why, with that site linked in its words:
-   *  *why* is "unreadable" (it refuses automated requests), "not-named"
-   *  (it was read and does not name them as *word*), or unknown. */
+   *  *why* is "unreadable" (this site's automated read of it concluded
+   *  nothing: a refusal, a timeout, a page drawn by script, or the
+   *  attorney general's own page behind it not answering; the cache does
+   *  not record which, so the sentence names none and never says the site
+   *  refuses scripts, rule 19), "not-named" (it was read and does not name them as *word*),
+   *  or unknown. */
   function notConfirmed(url, why, word) {
     if (!url) return "This site has not confirmed it with the office.";
     var site = link(url, "the office's own site");
     return why === "unreadable"
-      ? "This site has not confirmed it on " + site + ", which refuses automated requests."
+      ? "This site has not confirmed it: its automated check could not read " + site + "."
       : why === "not-named"
         ? "This site has not confirmed it: " + site + " does not name them as " +
           KYC.escapeHtml(word) + "."
@@ -611,8 +615,8 @@
         "one for this state, so this site names no holder." +
         (off.office ? " You can look on " + link(off.office, "the office's own site") + "." : "") + "</p>";
     } else if (off.unconfirmed) {
-      // Why it is not confirmed is the pipeline's to say: a site that refused
-      // the request, or a page that was read and does not name them.
+      // Why it is not confirmed is the pipeline's to say: a site this site's
+      // read could not read, or a page that was read and does not name them.
       body = '<p class="gov-officer-note">The ' + KYC.escapeHtml(off.listedBy) + " lists " + who(off) +
         " as its member here. " + notConfirmed(off.office, off.unreadable ? "unreadable" : "not-named",
           "attorney general") + "</p>";
@@ -658,8 +662,9 @@
         (facts.length ? '<p class="faint">' + KYC.escapeHtml(facts.join(" · ")) + "</p>" : "") +
         (links.length ? '<p class="gov-links">' + links.join(" · ") + "</p>" : "") +
         // Confirmed from the office's own page, read by hand in a person's
-        // browser because its site refuses automated requests, or because
-        // the association does not speak for it (rule 57's words).
+        // browser because this site's automated read concluded nothing (each
+        // entry says what its reader saw: overrides.OFFICERS_READ_BY_HAND),
+        // or because the association does not speak for it (rule 57's words).
         (off.readByHand ? '<p class="faint gov-by-hand">' + link(off.readByHand.url, "The office's own page") +
           " names them, read by hand on " + KYC.escapeHtml(KYC.dayMonthYear(off.readByHand.read)) +
           ".</p>" : "") +

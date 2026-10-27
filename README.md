@@ -2075,8 +2075,12 @@ and validate says so (`officers-by-hand`); past
 entry whose words do not name the holder beside the title stops the build.
 Where nothing confirms a listing, the page says in whole sentences who lists
 the person, that this site has not confirmed it on the office's own site and
-why (it refuses automated requests, or does not name them), with that site
-linked in the sentence. A few offices need another official page
+why (its automated check could not read the site, or the site does not name
+them), with that site linked in the sentence. "Could not read" is all the
+record says: a refusal, a timeout, a page drawn by script or the attorney
+general's own page behind the front page not answering look alike to it, so
+the page never says the office's site refuses automated requests (rule 19;
+ncdoj.gov timed out from 2026-10-20 to 22 and answered the next day). A few offices need another official page
 (`officers.OFFICE_PAGES`: Wyoming's staff page, Kansas's state portal) and a
 few a different front door (`OFFICE_LINK`: USA.gov's West Virginia link is a
 404). A page that draws itself with JavaScript concludes nothing.

@@ -509,7 +509,8 @@ def _unread_words(unread):
 def _office_pages(url, pause):
     """An :class:`OfficeRead` of an office page and any page it links as its
     attorney general's own ("Attorney General", "About the Attorney
-    General"), or ``None`` when the site refuses the request. Each request
+    General"), or ``None`` when the front page concludes nothing (no answer,
+    a refusal, a bot wall, a page drawn by script). Each request
     is tried again before it counts as unanswered. A linked page that does
     not answer makes the read partial (``unread``), never a whole read of
     the front page alone: a front page that leaves the name to that page
@@ -1241,7 +1242,8 @@ def confirm_non_members(sos, pause=0.5, previous=None, previous_day=None, today=
     not NASS speaking for its member; the office's own site, which NASS
     links, can still confirm it. Marks ``officeConfirms`` on each it does,
     with the day (``confirmedOn``), and ``officeRead`` on each it does not:
-    ``"unreadable"`` where the site refused or drew nothing (rule 8), or a
+    ``"unreadable"`` where the read concluded nothing (a refusal, a timeout,
+    a page drawn by script: rule 8; the page never says which), or a
     page it links as the office's own did not answer and the rest does not
     name them, ``"not-named"`` only where every page it set out to read
     answered and none names them, so the page can say why. Where the site
@@ -1288,13 +1290,14 @@ def confirm_non_members(sos, pause=0.5, previous=None, previous_day=None, today=
 
 # --------------------------------------------- officers confirmed by hand
 #
-# Where the office's own site refuses a script, or the association's roster
-# does not speak for the office, a person reads the office's page in their
-# own browser (overrides.OFFICERS_READ_BY_HAND, rule 57's way). An entry
-# confirms only the holder the roster names, and only where its quoted words
-# pass the same test as a read page's (names_holder). Past this many days
-# since the reading, the build says the page must be read again, as a court
-# roster read by hand does (courts.STALE_DAYS).
+# Where a script's read of the office's own site concludes nothing (rule 8),
+# or the association's roster does not speak for the office, a person reads
+# the office's page in their own browser (overrides.OFFICERS_READ_BY_HAND,
+# rule 57's way). An entry confirms only the holder the roster names, and
+# only where its quoted words pass the same test as a read page's
+# (names_holder). Past this many days since the reading, the build says the
+# page must be read again, as a court roster read by hand does
+# (courts.STALE_DAYS).
 BY_HAND_STALE_DAYS = 45
 BY_HAND_OFFICES = ("ag", "sos")
 
@@ -1526,8 +1529,9 @@ def for_state(code, cache, disputes):
         hand = (((out["ag"].get("unconfirmed") and out["ag"].get("unreadable")) or kept)
                 and hand_confirms(code, "ag", out["ag"].get("name")))
         if hand:
-            # The office's site refuses a script; its page, read by hand,
-            # names them beside the title (overrides.OFFICERS_READ_BY_HAND).
+            # A script's read of the office's site concluded nothing; its
+            # page, read by hand, names them beside the title
+            # (overrides.OFFICERS_READ_BY_HAND).
             # Where the site's last confirmation is kept, the reading by hand
             # is what a person read since (KEPT_STALE_DAYS asks for one).
             name, entry = hand
