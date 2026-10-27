@@ -9714,7 +9714,7 @@ async function testStateGov() {
     // check could not read the site and never that the site refuses
     // anything: ncdoj.gov timed out for three days and then answered (rule 19).
     check("a site this site's check could not read: who lists them, not confirmed, why, and the site linked",
-      !!p && /^The Republican Attorneys General Association lists Jane Q\. Roe \(Republican\) as its member here\. This site has not confirmed it: its automated check could not read the office's own site\.$/.test(p.textContent) &&
+      !!p && /^The Republican Attorneys General Association lists Jane Q\. Roe \(Republican\) as its member here\. This site has not confirmed it: this site's automated check could not read the office's own site\.$/.test(p.textContent) &&
         p.querySelector("a").textContent === "the office's own site" &&
         p.querySelector("a").getAttribute("href") === ag.office, p && p.textContent);
     p = note("NH", "ag", Object.assign({}, ag, { unconfirmed: true }))
@@ -9725,7 +9725,7 @@ async function testStateGov() {
     p = note("NV", "sos", Object.assign({}, sos, { notMember: true, officeRead: "unreadable" }))
       .find((el) => /Secretaries of State lists/.test(el.textContent));
     check("NASS's listing of a non-member: it does not speak for the office, and why the site did not confirm it",
-      !!p && /^The National Association of Secretaries of State lists John Q\. Doe \(Democratic\) as secretary of state, but the office is not currently a member, so that listing does not speak for it\. This site has not confirmed it: its automated check could not read the office's own site\.$/.test(p.textContent) &&
+      !!p && /^The National Association of Secretaries of State lists John Q\. Doe \(Democratic\) as secretary of state, but the office is not currently a member, so that listing does not speak for it\. This site has not confirmed it: this site's automated check could not read the office's own site\.$/.test(p.textContent) &&
         p.querySelector("a").getAttribute("href") === sos.website, p && p.textContent);
     const unread = note("NH", "ag", Object.assign({}, ag, { unconfirmed: true, unreadable: true }))
       .concat(note("NV", "sos", Object.assign({}, sos, { notMember: true, officeRead: "unreadable" })))

@@ -1106,7 +1106,8 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
 
 class TestReadByHand(unittest.TestCase):
     """An officer confirmed from the office's own page, read by hand in a
-    person's browser where the office's site refuses a script, or where the
+    person's browser where this site's read of the office's site concludes
+    nothing (each entry records what its reader saw), or where the
     association does not speak for the office (overrides.OFFICERS_READ_BY_HAND,
     the owner's request of 2026-10-26: "The National Association of
     Secretaries of State lists Francisco V. Aguilar ... not confirmed. The
@@ -1217,7 +1218,8 @@ class TestReadByHand(unittest.TestCase):
 
     def test_the_committed_entries_confirm_their_holders(self):
         # The owner's request: Nevada's secretary of state, and the
-        # attorneys general whose sites refuse a script, read by hand on
+        # attorneys general whose sites this site's script could not read
+        # (each entry records the refusal its reader saw), read by hand on
         # 2026-10-26 (research/by-hand-2026-10-26/NOTES.md).
         # A refresh that changes a holder or confirms one itself makes the
         # entry unused, which validate reports; it must not hold the refresh.

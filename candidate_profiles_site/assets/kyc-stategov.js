@@ -580,7 +580,7 @@
     if (!url) return "This site has not confirmed it with the office.";
     var site = link(url, "the office's own site");
     return why === "unreadable"
-      ? "This site has not confirmed it: its automated check could not read " + site + "."
+      ? "This site has not confirmed it: this site's automated check could not read " + site + "."
       : why === "not-named"
         ? "This site has not confirmed it: " + site + " does not name them as " +
           KYC.escapeHtml(word) + "."

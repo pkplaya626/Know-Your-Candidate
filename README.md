@@ -2061,7 +2061,8 @@ Carolina the Republican Jeff Jackson beat in 2024, and printed "Maryland" and
 covered all fifty - give each candidate and their party, and a name is shown
 only when the attorney general's own office, linked from USA.gov's page for
 the state, names that person beside the title: 48 of 50 on 2026-10-05.
-Where the office's site refuses a script, a person reads the office's own
+Where this site's automated read of the office's site concludes nothing
+(each entry records what its reader saw), a person reads the office's own
 page in their own browser, rule 57's way (`overrides.OFFICERS_READ_BY_HAND`:
 the holder, the page, the day and its words quoted, each piece as it
 stands). The entry confirms only the holder the roster names, and only where
@@ -2075,7 +2076,7 @@ and validate says so (`officers-by-hand`); past
 entry whose words do not name the holder beside the title stops the build.
 Where nothing confirms a listing, the page says in whole sentences who lists
 the person, that this site has not confirmed it on the office's own site and
-why (its automated check could not read the site, or the site does not name
+why (this site's automated check could not read the site, or the site does not name
 them), with that site linked in the sentence. "Could not read" is all the
 record says: a refusal, a timeout, a page drawn by script or the attorney
 general's own page behind the front page not answering look alike to it, so
