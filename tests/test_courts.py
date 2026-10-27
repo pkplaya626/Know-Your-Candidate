@@ -526,7 +526,13 @@ class TestCommitted(unittest.TestCase):
         for code, recipe in courts.COURTS.items():
             if recipe.get("browser") or recipe.get("format") == "pdf":
                 self.assertIn(code, cache["courts"], code)
-        self.assertTrue(cache["courts"]["RI"].get("revised"))
+        # A roster that dates itself is read with its date, or refused and
+        # the last good read kept (read_court, rule 8): whichever day it was
+        # read, the read in the cache says when the court revised it.
+        dated = [code for code, recipe in courts.COURTS.items() if recipe.get("dated")]
+        self.assertIn("RI", dated)
+        for code in dated:
+            datetime.date.fromisoformat(cache["courts"][code].get("revised") or "missing")
 
     def test_every_read_carries_its_day(self):
         cache = courts.load_cache(ROOT)

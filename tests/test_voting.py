@@ -8,6 +8,7 @@ replaced through an evidenced override or not shown, and a bot wall
 concludes nothing (rule 8).
 """
 
+import copy
 import os
 import sys
 import unittest
@@ -38,6 +39,17 @@ def cache_of(**states):
     for code, links in states.items():
         base[code].update(links)
     return {"source": voting.SOURCE, "states": base, "fetched": "2026-10-14T00:00:00+00:00"}
+
+
+def every_link_live(cache):
+    """*cache* with every link it shows found live by the weekly check.
+    What the page holds at an address is the code's and the overrides' to
+    say; whether this week's check found that address dead is the day's,
+    and a dead one is left off (voting.for_page), so a check of an address
+    makes the state it tests (CLAUDE.md, "Conventions")."""
+    live = {link["url"]: voting.LIVE for links in voting.effective(cache).values()
+            for link in links.values()}
+    return dict(cache, links=dict(cache.get("links") or {}, **live))
 
 
 class TestParse(unittest.TestCase):
@@ -349,7 +361,7 @@ class TestRoundThree(unittest.TestCase):
         # Hampshire's a "Forbidden" page, in a person's browser.
         cache = voting.load_cache(ROOT)
         shown = voting.effective(cache)
-        page = voting.for_page(cache)
+        page = voting.for_page(every_link_live(cache))
         for code, old, new in (
                 ("OK", "https://results.okelections.us/", OK_RESULTS),
                 ("NH", "https://www.sos.nh.gov/elections/elections/election-results",
@@ -368,7 +380,7 @@ class TestRoundThree(unittest.TestCase):
         url = voting.RESULTS["OH"]
         self.assertEqual(voting.effective(cache)["OH"]["results"],
                          {"url": url, "from": voting.OFFICE, "label": "Election data portal"})
-        page = voting.for_page(cache)
+        page = voting.for_page(every_link_live(cache))
         self.assertEqual(page["OH"]["results"], url)
         self.assertEqual(page["_labels"]["OH"]["results"], "Election data portal")
         # The reading by hand counts while the weekly check cannot open the
@@ -398,7 +410,7 @@ class TestAsItsSiteLinksIt(unittest.TestCase):
 
     def setUp(self):
         from kyc import voting_dates
-        self.page = voting.for_page(voting.load_cache(ROOT), voting_dates.load(ROOT))
+        self.page = voting.for_page(every_link_live(voting.load_cache(ROOT)), voting_dates.load(ROOT))
 
     def test_oklahomas_results_page_is_the_one_its_site_links(self):
         self.assertEqual(self.page["OK"]["results"], OK_RESULTS)
@@ -534,12 +546,32 @@ class TestValidate(unittest.TestCase):
     def test_no_cache_is_a_warning(self):
         self.assertEqual(self.codes({}), ["voting-links-missing"])
 
-    def test_the_committed_cache_is_complete_official_and_alive(self):
+    def test_the_committed_cache_is_complete_and_official(self):
+        # Which links the weekly check finds dead is the day's, not the
+        # code's: one found dead is left off the page and is the build's
+        # warning for a person to replace (rule 79), never a held refresh,
+        # which carries the money and the results too. Whatever this week's
+        # check found, none of it is sent to a reader.
         cache = voting.load_cache(ROOT)
         self.assertIsNotNone(cache)
         errors = [i for i in validate.check_voting_links(cache) if i.level == "error"]
         self.assertEqual(errors, [])
-        self.assertEqual(voting.dead_links(cache), [])
+        page = voting.for_page(cache)
+        for line in voting.dead_links(cache):
+            code, rest = line.split(" ", 1)
+            kind, url = rest.split(": ", 1)
+            self.assertNotEqual(page[code].get(kind), url, line)
+
+    def test_a_link_found_dead_is_left_off_and_warned_about(self):
+        cache = copy.deepcopy(voting.load_cache(ROOT))
+        code, kind = "OK", "results"
+        url = voting.effective(cache)[code][kind]["url"]
+        cache["links"] = dict(cache.get("links") or {}, **{url: voting.DEAD})
+        self.assertIn(f"{code} {kind}: {url}", voting.dead_links(cache))
+        self.assertNotIn(kind, voting.for_page(cache)[code])
+        dead = [i for i in validate.check_voting_links(cache) if i.code == "voting-links-dead"]
+        self.assertEqual([i.level for i in dead], ["warn"])
+        self.assertIn(f"{code} {kind}: {url}", dead[0].detail)
 
 
 class TestMorePages(unittest.TestCase):

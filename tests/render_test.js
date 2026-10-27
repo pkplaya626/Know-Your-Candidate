@@ -3274,18 +3274,32 @@ async function testStates() {
    * page's own record (`_unreached`, `_byHand`), and drawn by
    * KYC.ballot.votingBlock; what the real record says is checked both ways
    * for every jurisdiction, below. Built on CAMPAIGN_NOW, within the days
-   * a reading counts; a later day counts it no more. */
+   * a reading counts; a later day counts it no more. The case makes the
+   * links too, and the check's day: the page names only the links its
+   * record holds, and the pipeline leaves out one the check found dead, so
+   * a case drawn on the day's links failed the day one of them died. Each
+   * kind the case names is shown, with "See a sample ballot" opened by
+   * the check beside them. */
+  const CHECKED = "2026-10-20";
   const votingNote = (page, code, place, mine) => {
     const meta = page.window.kycBuildMeta.voting;
-    const saved = { _unreached: meta._unreached, _byHand: meta._byHand };
+    const kinds = new Set((mine.unreached || []).concat(Object.keys(mine.byHand || {}), ["sample"]));
+    const links = {};
+    for (const k of kinds) links[k] = "https://elections.example.gov/" + k;
+    const saved = { _unreached: meta._unreached, _byHand: meta._byHand, _opened: meta._opened,
+                    links: meta[code], had: Object.prototype.hasOwnProperty.call(meta, code) };
     meta._unreached = Object.assign({}, saved._unreached, { [code]: mine.unreached || [] });
     meta._byHand = Object.assign({}, saved._byHand, { [code]: mine.byHand || {} });
+    meta._opened = CHECKED;
+    meta[code] = links;
     const box = page.D.createElement("div");
     try {
       box.innerHTML = page.window.KYC.ballot.votingBlock(code, place);
     } finally {
       meta._unreached = saved._unreached;
       meta._byHand = saved._byHand;
+      meta._opened = saved._opened;
+      if (saved.had) meta[code] = saved.links; else delete meta[code];
     }
     const note = box.querySelector(".state-note");
     return note ? note.textContent : "";
@@ -3307,7 +3321,6 @@ async function testStates() {
   const okHand = await buildPage("states/ok.html");
   const alHand = await buildPage("states/al.html");
   suite("states/ok.html — a link the check missed, opened by hand", () => {
-    const meta = okHand.window.kycBuildMeta.voting;
     const note = votingNote(okHand, "OK", "Oklahoma",
       { unreached: ["results"], byHand: { results: [DAY, "opened"] } });
     check("said opened by hand, on its day, never unconfirmed",
@@ -3317,16 +3330,15 @@ async function testStates() {
     // opened, on its day, then what a person did, on theirs.
     check("the links the check opened are named on the check's day, apart",
       !/Each link opened/.test(note) &&
-        new RegExp("“[^”]+” opened " + meta._opened + "; “Official results” opened by hand").test(note) &&
-        !new RegExp("“Official results”[^;.]* opened " + meta._opened).test(note), note);
+        new RegExp("“[^”]+” opened " + CHECKED + "; “Official results” opened by hand").test(note) &&
+        !new RegExp("“Official results”[^;.]* opened " + CHECKED).test(note), note);
   });
   suite("states/ok.html — a link the check found live", () => {
-    const meta = okHand.window.kycBuildMeta.voting;
     // A reading by hand of a link the check opens counts for nothing: the
     // pipeline drops it, and the page never says a person opened it.
     const note = votingNote(okHand, "OK", "Oklahoma", { unreached: [], byHand: { results: [DAY, "opened"] } });
     check("said opened on the check's day, never by hand",
-      new RegExp("Each link opened " + meta._opened + "\\.").test(note) &&
+      new RegExp("Each link opened " + CHECKED + "\\.").test(note) &&
         !/by hand|could not be confirmed/.test(note), note);
   });
   suite("states/al.html — a link nobody could open", () => {
@@ -3426,20 +3438,28 @@ async function testStates() {
    * overrides.VOTING_LINKS - Oklahoma's "403 - Forbidden" and New
    * Hampshire's "Forbidden". Alabama's results page did not load in a
    * person's browser either, and has no reading by hand (rule 8). Which of
-   * them the weekly check opens is the record's, checked above. */
+   * them the weekly check opens is the record's, checked above. A link the
+   * check finds dead is left out of the record (voting.for_page, said by
+   * test_voting), so each is checked where the record holds it, and a
+   * page without it links no other address in its place. */
   const resultsLink = (page) => [...page.D.querySelectorAll("#voting a")].find((a) =>
     a.textContent.trim() === "Official results");
+  const OK_RESULTS = "https://oklahoma.gov/elections/elections-results/election-results/2026-election-results.html";
+  const NH_RESULTS = "https://www.sos.nh.gov/2026-election-results";
+  const repointed = (page, code, url) => {
+    const a = resultsLink(page);
+    const held = page.window.kycBuildMeta.voting[code].results;
+    return held ? held === url && !!a && a.getAttribute("href") === url : !a;
+  };
   suite("states/ok.html and nh.html — results links that answered 'Forbidden' are repointed", () => {
     const ok = resultsLink(okHand);
     const nh = resultsLink(nhHand);
     check("Oklahoma's goes to the State Election Board's own 2026 results page",
-      !!ok && ok.getAttribute("href") ===
-        "https://oklahoma.gov/elections/elections-results/election-results/2026-election-results.html",
-      ok && ok.outerHTML);
+      repointed(okHand, "OK", OK_RESULTS), ok && ok.outerHTML);
     check("the address the old one redirected to, which no page of the Board's was seen to link, is not linked",
       !okHand.D.querySelector('a[href^="https://results.okelections.gov"]'));
     check("New Hampshire's goes to the office's own 2026 results page",
-      !!nh && nh.getAttribute("href") === "https://www.sos.nh.gov/2026-election-results", nh && nh.outerHTML);
+      repointed(nhHand, "NH", NH_RESULTS), nh && nh.outerHTML);
     check("neither old address is linked anywhere on the pages",
       !okHand.D.querySelector('a[href^="https://results.okelections.us"]') &&
         !nhHand.D.querySelector('a[href*="elections/elections/election-results"]'));
@@ -3448,8 +3468,9 @@ async function testStates() {
     const okNote = okHand.D.querySelector("#voting .state-note").textContent;
     check("Oklahoma's results page opened, by the check or by hand, not called unconfirmed",
       !/“Official results”[^.]*could not be confirmed/.test(okNote) &&
-        (/“Official results” opened by hand 2026-10-26/.test(okNote) ||
-          (((okHand.window.kycBuildMeta.voting._unreached || {}).OK || []).indexOf("results") === -1)),
+        (!okHand.window.kycBuildMeta.voting.OK.results ? !/Official results/.test(okNote)
+          : /“Official results” opened by hand 2026-10-26/.test(okNote) ||
+            (((okHand.window.kycBuildMeta.voting._unreached || {}).OK || []).indexOf("results") === -1)),
       okNote);
   });
   /* "As its site links it" is said only of a page the record shows the
@@ -3463,14 +3484,24 @@ async function testStates() {
     const meta = okHand.window.kycBuildMeta.voting;
     const okNote = okHand.D.querySelector("#voting .state-note").textContent;
     check("Oklahoma's results page is one the record shows the Board's site linking",
-      ((meta._siteLinked || {}).OK || []).indexOf("results") !== -1, JSON.stringify(meta._siteLinked));
+      !meta.OK.results || ((meta._siteLinked || {}).OK || []).indexOf("results") !== -1,
+      JSON.stringify(meta._siteLinked));
     check("and is said so",
-      /“Official results” is Oklahoma's election office's own page, as its site links it\./.test(okNote), okNote);
+      !meta.OK.results ||
+        /“Official results” is Oklahoma's election office's own page, as its site links it\./.test(okNote), okNote);
+    // Drawn on a record the check makes, the results link held whatever
+    // this week's check found of it.
     const saved = meta._siteLinked;
+    const savedLinks = meta.OK;
     meta._siteLinked = Object.assign({}, saved, { OK: [] });
+    meta.OK = Object.assign({}, savedLinks, { results: OK_RESULTS });
     const box = okHand.D.createElement("div");
-    box.innerHTML = okHand.window.KYC.ballot.votingBlock("OK", "Oklahoma");
-    meta._siteLinked = saved;
+    try {
+      box.innerHTML = okHand.window.KYC.ballot.votingBlock("OK", "Oklahoma");
+    } finally {
+      meta._siteLinked = saved;
+      meta.OK = savedLinks;
+    }
     const bare = box.querySelector(".state-note").textContent;
     check("a page the record does not show linked is the office's own page, never 'as its site links it'",
       /“Official results” is Oklahoma's election office's own page\./.test(bare) && !/site links/.test(bare), bare);
@@ -3517,9 +3548,11 @@ async function testStates() {
     check("Guam's election-information page opened, by the check or by hand on 2026-10-26",
       openedEither(gu, "GU", guVote, "info", "2026 general election: early voting and sample ballots"), gu);
     const al = alHand.D.querySelector("#voting .state-note").textContent;
+    const alShown = !!alHand.window.kycBuildMeta.voting.AL.results;
     check("Alabama's results page is never said opened by hand, and unconfirmed only where the check missed it",
       !/opened by hand/.test(al) &&
-        (missedOn(alHand, "AL").indexOf("results") !== -1
+        (!alShown ? !/Official results/.test(al)
+          : missedOn(alHand, "AL").indexOf("results") !== -1
           ? /; “Official results” could not be confirmed by this site's automated check that day\./.test(al)
           : !/could not be confirmed/.test(al)), al);
   });
@@ -3694,9 +3727,12 @@ async function testStates() {
   suite("states/nh.html — vote.gov's deadlines only where the record gives none (PR #94 review)", () => {
     const kinds = [...nhVote.D.querySelectorAll("#voting .state-links a")].map((a) => a.getAttribute("data-kind"));
     const deadlines = nhVote.D.querySelector('#voting .state-links a[data-kind="deadlines"]');
+    // Just before "Register to vote" wherever that link is shown: a link the
+    // weekly check finds dead is left out (voting.for_page), whichever it is.
     check("'Registration deadlines (vote.gov)' is a button, just before 'Register to vote'",
       !!deadlines && deadlines.textContent.trim() === "Registration deadlines (vote.gov)" &&
-        kinds.indexOf("deadlines") === kinds.indexOf("register") - 1, kinds.join(" "));
+        (kinds.indexOf("register") === -1 ? !nhVote.window.kycBuildMeta.voting.NH.register
+          : kinds.indexOf("deadlines") === kinds.indexOf("register") - 1), kinds.join(" "));
     const note = nhVote.D.querySelector("#voting .state-note").textContent;
     check("vote.gov is the federal government's voting site, not the EAC's",
       /vote\.gov, the federal government's voting site/.test(note) && !/Election Assistance/.test(note), note);
