@@ -4023,39 +4023,6 @@
    "wikidata": "Q118140234",
    "wikipedia": "Susan K. DeClercq"
   },
-  "13761081": {
-   "portrait": {
-    "by": "United States District Court for the District of Delaware",
-    "bytes": 26312,
-    "credit": "Wikimedia Commons",
-    "creditForm": 4,
-    "evidence": "Wikidata Q123020856 carries the FJC id hall-jennifer-lynne of fjc.gov/node/13761081; born 1976 by Wikidata and the article, as the directory; the item's image (P18) is this file",
-    "file": [
-     579,
-     770
-    ],
-    "height": 332,
-    "licence": "Public domain",
-    "read": "2026-10-28",
-    "route": "item",
-    "set": [
-     [
-      120,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg/120px-Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg"
-     ],
-     [
-      250,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg/250px-Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg"
-     ]
-    ],
-    "source": "https://commons.wikimedia.org/wiki/File:Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg",
-    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg/120px-Jennifer_L._Hall%2C_U.S._Magistrate_Judge.jpg",
-    "width": 250,
-    "year": 2021
-   },
-   "wikidata": "Q123020856",
-   "wikipedia": "Jennifer L. Hall"
-  },
   "13761086": {
    "portrait": {
     "by": "U.S. Senate Judiciary Committee",
@@ -11260,10 +11227,6 @@
    },
    "wikidata": "Q4752548",
    "wikipedia": "Ancer L. Haggerty"
-  },
-  "1381631": {
-   "wikidata": "Q5082264",
-   "wikipedia": "Charles S. Haight Jr."
   },
   "1381726": {
    "wikidata": "Q5234683",
@@ -34778,39 +34741,6 @@
    "wikidata": "Q57242791",
    "wikipedia": "Brian C. Buescher"
   },
-  "6830641": {
-   "portrait": {
-    "by": "United States Court of Appeals for the Ninth Circuit",
-    "bytes": 10325,
-    "credit": "Wikimedia Commons",
-    "creditForm": 4,
-    "evidence": "Wikidata Q60664497 carries the FJC id liburdi-michael-thomas of fjc.gov/node/6830641; born 1977 by Wikidata and the article, as the directory; the item's image (P18) is this file",
-    "file": [
-     170,
-     228
-    ],
-    "height": 228,
-    "licence": "Public domain",
-    "read": "2026-10-28",
-    "route": "item",
-    "set": [
-     [
-      120,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Michael_T_Liburdi.jpg/120px-Michael_T_Liburdi.jpg"
-     ],
-     [
-      170,
-      "https://upload.wikimedia.org/wikipedia/commons/7/71/Michael_T_Liburdi.jpg"
-     ]
-    ],
-    "source": "https://commons.wikimedia.org/wiki/File:Michael_T_Liburdi.jpg",
-    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Michael_T_Liburdi.jpg/120px-Michael_T_Liburdi.jpg",
-    "width": 170,
-    "year": 2020
-   },
-   "wikidata": "Q60664497",
-   "wikipedia": "Michael T. Liburdi"
-  },
   "6831146": {
    "portrait": {
     "by": "U.S. Senate Judiciary Committee",
@@ -34843,39 +34773,6 @@
    },
    "wikidata": "Q60665695",
    "wikipedia": "Peter D. Welte"
-  },
-  "6831671": {
-   "portrait": {
-    "by": "United States District Court for the Northern District of Texas",
-    "bytes": 15809,
-    "credit": "Wikimedia Commons",
-    "creditForm": 4,
-    "evidence": "Wikidata Q23303090 carries the FJC id hendrix-james-wesley of fjc.gov/node/6831671; born 1977 by Wikidata and the article, as the directory; the item's image (P18) is this file",
-    "file": [
-     200,
-     300
-    ],
-    "height": 300,
-    "licence": "Public domain",
-    "read": "2026-10-28",
-    "route": "item",
-    "set": [
-     [
-      120,
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/James_Wesley_Hendrix_headshot.jpg/120px-James_Wesley_Hendrix_headshot.jpg"
-     ],
-     [
-      200,
-      "https://upload.wikimedia.org/wikipedia/commons/5/56/James_Wesley_Hendrix_headshot.jpg"
-     ]
-    ],
-    "source": "https://commons.wikimedia.org/wiki/File:James_Wesley_Hendrix_headshot.jpg",
-    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/James_Wesley_Hendrix_headshot.jpg/120px-James_Wesley_Hendrix_headshot.jpg",
-    "width": 200,
-    "year": 2019
-   },
-   "wikidata": "Q23303090",
-   "wikipedia": "James Wesley Hendrix"
   },
   "6834676": {
    "portrait": {
@@ -37877,6 +37774,7 @@
   "Jeremy Christen Daniel: https://upload.wikimedia.org/wikipedia/commons/d/dd/Jeremy_C_Daniel.jpg is wider than a portrait (756x587) and no crop of it depicts Q117229604 alone; not shown as a portrait",
   "Hernán Diego Vera: https://upload.wikimedia.org/wikipedia/commons/6/69/Hernan_D._Vera.png is wider than a portrait (2347x1829) and no crop of it depicts Q108461673 alone; not shown as a portrait",
   "Myong Jin Joun: https://upload.wikimedia.org/wikipedia/commons/b/b4/Myong_J._Joun.jpg is wider than a portrait (729x558) and no crop of it depicts Q113337051 alone; not shown as a portrait",
+  "Jennifer Lynne Hall: Wikidata Q123020856, the item of the article carrying their FJC id, carries another FJC id (hall-jennifer-lynne); not used",
   "S. Kato Crews: https://upload.wikimedia.org/wikipedia/commons/6/6f/S._Kato_Crews.jpg is wider than a portrait (698x552) and no crop of it depicts Q116870391 alone; not shown as a portrait",
   "Jasmine Hyejung Yoon: https://upload.wikimedia.org/wikipedia/commons/6/62/Header_NA_Yoon_US-Senate-Collection.jpg is in overrides.PORTRAIT_LICENCE_DOUBTS (public domain, from the Senate Press Gallery, author {{Unknown}}); not shown until a person decides",
   "Melissa Raye DuBose: https://upload.wikimedia.org/wikipedia/commons/c/c5/Melissa-R-DuBose-02-08-24.jpg is wider than a portrait (845x608) and no crop of it depicts Q124827216 alone; not shown as a portrait",
@@ -37893,6 +37791,7 @@
   "Robert Jensen Bryan: Wikidata Q7346094 for bryan-robert-jensen gives a year of birth of 1943, the directory 1934; not used",
   "Robert N. Chatigny: Wikidata Q7347921 for chatigny-robert-n gives a year of birth of 1952, the directory 1951; not used",
   "Robert E. Cowen: https://upload.wikimedia.org/wikipedia/commons/6/6f/Judge_Robert_E._Cowen_2020.jpg is wider than a portrait (4032x3024) and no crop of it depicts Q7343157 alone; not shown as a portrait",
+  "Charles Sherman Haight, Jr.: Wikidata Q5082264, the item of the article carrying their FJC id, carries another FJC id (haight-charles-sherman-jr); not used",
   "Patrick Errol Higginbotham: https://upload.wikimedia.org/wikipedia/commons/6/6b/Higginbotham_Patrick_E.jpg is in overrides.PORTRAIT_LICENCE_DOUBTS (public domain on the uploader's reasoning that 'it must be his official portrait'; taken from innsofcourt.org); not shown until a person decides",
   "Edith Hollan Jones: https://upload.wikimedia.org/wikipedia/commons/2/2f/Edith_Jones_in_Iraq.jpg is wider than a portrait (800x600) and no crop of it depicts Q377110 alone; not shown as a portrait",
   "Edward J. Lodge: https://upload.wikimedia.org/wikipedia/commons/4/4d/Edward_J._Lodge.jpg is wider than a portrait (599x396) and no crop of it depicts Q5344198 alone; not shown as a portrait",
@@ -37974,6 +37873,8 @@
   "Robert Rees Summerhays: https://upload.wikimedia.org/wikipedia/commons/7/79/Robert_R._Summerhays.jpg is wider than a portrait (1920x1080) and no crop of it depicts Q47488346 alone; not shown as a portrait",
   "Roy Kalman Altman: Wikidata Q52274240 for altman-roy-kalman gives a year of birth of 2000, the directory 1982; not used",
   "Greg Gerard Guidry: Wikidata Q16194094 for guidry-greg-gerard gives a year of birth of 1961, the directory 1960; not used",
+  "Michael Thomas Liburdi: Wikidata Q60664497, the item of the article carrying their FJC id, carries another FJC id (liburdi-michael-thomas); not used",
+  "James Wesley Hendrix: Wikidata Q23303090, the item of the article carrying their FJC id, carries another FJC id (hendrix-james-wesley); not used",
   "Jeffrey Vincent Brown: Wikidata Q16186162 for brown-jeffrey-vincent gives a year of birth of 1954, the directory 1970; not used",
   "Robert Joshua Luck: https://upload.wikimedia.org/wikipedia/commons/a/ab/Florida-Supreme-Court-Justice-Robert-Luck-2019.jpg is wider than a portrait (3350x2428) and 2 crops of it depict Q60736961 alone; not shown as a portrait",
   "Sarah Elizabeth Pitlyk: Q66459258 has 2 images; none shown",
