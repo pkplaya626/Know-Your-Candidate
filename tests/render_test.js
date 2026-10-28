@@ -12837,8 +12837,13 @@ async function testSharePages() {
       const img = (/<meta property="og:image" content="([^"]*)">/.exec(html) || [])[1];
       const url = img ? unescapeHtml(img) : "";
       const sizes = (p.photoSet || []).map((s) => s[1]);
-      // A campaign's heavy portrait unfurls as the smaller copy made here
-      // (rule 101), on the site's own host, and only the copy of that file.
+      // A heavy portrait unfurls as the smaller copy made here (rule 101),
+      // on the site's own host, and only the copy of that file: a
+      // campaign's, or a legislature's or its caucus's by the nominee route
+      // (kyc/share.py chooses it for the same routes). The check once took
+      // a copy for a campaign's alone, and the refresh of 2026-10-28, which
+      // tied Carrie Buck's and Jeremy Moss's copies to their profiles,
+      // failed on it.
       const copy = p.photoCopy && p.photoCopy.of === p.photo_url ? p.photoCopy : null;
       // An office's photograph a person chose, hosted here unmodified
       // because its page draws it with no address of its own (Brent
@@ -12849,8 +12854,9 @@ async function testSharePages() {
       const ok = /\/assets\/social-card\.png$/.test(url) ||
         (hosted ? url === host + (copy ? copy.src : p.photo_url) :
         sizes.length ? sizes.indexOf(url) !== -1
-          : copy && p.photoSource === "campaign-site" && !!p.photoCredit
-            ? url === "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/" + copy.src
+          : copy && (p.photoSource === "campaign-site" || p.photoSource === "state-legislature" ||
+                     p.photoSource === "curated") && !!p.photoCredit
+            ? url === host + copy.src
             : url === p.photo_url && ((/^https:\/\/clerk\.house\.gov\//.test(url) &&
               (p.photoSource === "clerk.house.gov" || p.photoSource === "cross-link")) ||
             ((p.photoSource === "campaign-site" || p.photoSource === "state-legislature" ||
