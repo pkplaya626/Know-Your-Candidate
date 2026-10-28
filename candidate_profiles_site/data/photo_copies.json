@@ -54427,6 +54427,21 @@
    ],
    "width": 360
   },
+  "https://live-al-ago.pantheonsite.io/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg": {
+   "bytes": 10190,
+   "etag": "\"655152e5-27ce\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Sun, 12 Nov 2023 22:34:13 GMT",
+   "read": "2026-10-28",
+   "records": [
+    "officer:AL:ag:Steve Marshall"
+   ],
+   "width": 283
+  },
   "https://malegislature.gov/Legislators/Profile/170/ACM1.jpg": {
    "bytes": 23933,
    "gone": 0,
@@ -71236,18 +71251,6 @@
     "officer:MN:ag:Keith Ellison"
    ],
    "width": 134
-  },
-  "https://www.alabamaag.gov/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg": {
-   "bytes": 6797,
-   "etag": "\"iX7C15z5FnaOiFb/yhi0n6z3TFvWdXEi/mTmfis59UY\"",
-   "gone": 0,
-   "kinds": [
-    "officer"
-   ],
-   "read": "2026-10-25",
-   "records": [
-    "officer:AL:ag:Steve Marshall"
-   ]
   },
   "https://www.arcourts.gov/sites/default/files/styles/justice_portrait/public/2019-06/JusticeWomack.jpg?itok=ucjmWHfd": {
    "bytes": 5893,

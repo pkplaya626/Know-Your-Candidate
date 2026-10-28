@@ -26,10 +26,10 @@
    "office": "https://www.alabamaag.gov/",
    "party": "R",
    "partyKey": "R",
-   "photo": "https://www.alabamaag.gov/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
+   "photo": "https://live-al-ago.pantheonsite.io/wp-content/uploads/2023/04/Steve-Marshall-headshot-283x300.jpg",
    "photoPage": "https://www.alabamaag.gov/",
    "photoWeight": {
-    "bytes": 8784,
+    "bytes": 10190,
     "height": 300,
     "width": 283
    },
@@ -403,7 +403,7 @@
    "photo": "https://dojmt.gov/wp-content/uploads/2024/01/austin-knudsen-about-200x200.png",
    "photoPage": "https://dojmt.gov/attorney-generals-office/",
    "photoWeight": {
-    "bytes": 16549,
+    "bytes": 5758,
     "height": 200,
     "width": 200
    },
@@ -655,8 +655,8 @@
    "title": "Attorney General"
   },
   "TN": {
-   "confirmationKept": true,
-   "confirmedOn": "2026-10-26",
+   "alsoListed": [],
+   "confirmedOn": "2026-10-28",
    "listedBy": "Republican Attorneys General Association",
    "name": "Jonathan Skrmetti",
    "office": "https://www.tn.gov/attorneygeneral.html",
@@ -796,7 +796,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-28T11:29:38+00:00",
+ "fetched": "2026-10-28T14:40:16+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
