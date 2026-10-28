@@ -207,8 +207,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2500 tests, no dependencies
-npm install && npm test                       # 3473 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2522 tests, no dependencies
+npm install && npm test                       # 3474 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -728,7 +728,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     reader, a court's, an attorney general's office's, a statewide
     candidate's guide or article, a judge's), and records what it refused
     in that route's cache (`notPortraits`) for `validate`'s staleness
-    check. A curated row takes its campaign's
+    check, under whose it is, and a read that concludes nothing keeps the
+    refusals its last good read recorded (the refresh of 2026-10-27 called
+    three entries stale, `photos.keep_refusals`). A curated row takes its campaign's
     portrait as a filer does: Brian Bengs's sat in the cache while his
     profile showed the silhouette. A sitting member never does: their
     portrait comes by their bioguide id. Issue headings come from one heading level of a page

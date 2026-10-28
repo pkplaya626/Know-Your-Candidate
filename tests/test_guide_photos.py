@@ -441,6 +441,23 @@ class TestWashington(Root):
             cache, problems = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d")}))
         self.assertEqual(cache["photos"], {})
 
+    def test_a_refusal_is_recorded_and_outlives_a_read_that_concludes_nothing(self):
+        """What a person refused of a guide is recorded for validate's
+        staleness check, by race; a guide that cannot be read keeps it
+        (rule 8), and a read that reaches the race lets it go."""
+        from kyc.photos import refused_urls
+        page = "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895"
+        table = {page: ("2026-10-25", "a group photograph")}
+        with mock.patch.dict("kyc.overrides.NOT_A_PORTRAIT", table):
+            cache, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d")}))
+            self.assertEqual(refused_urls(cache.get("notPortraits")), {page})
+            guide_photos.save_cache(cache, self.root)
+            again, _ = self.fetch({})
+            self.assertEqual(refused_urls(again.get("notPortraits")), {page})
+            guide_photos.save_cache(again, self.root)
+        whole, _ = self.fetch(self.wa_pages({"1601895": jpeg(seed=b"d")}))
+        self.assertNotIn("notPortraits", whole)
+
     def test_a_statement_for_another_race_is_refused(self):
         pages = self.wa_pages({"1601895": jpeg(seed=b"d")})
         pages[guide_photos.WA_RECORD.format(race="186950")] = wa_record("186952", [

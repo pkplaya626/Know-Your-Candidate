@@ -650,12 +650,16 @@ def held_back(portrait):
     return refused(source_url((portrait or {}).get("source")), judge=True) or None
 
 
-def _keep(last_entry, name, problems):
+def _keep(last_entry, name, problems, refused=None, doubts=None):
     """*last_entry* as kept from the last read, without a portrait the
-    overrides now withhold (said in *problems*)."""
+    overrides now withhold (said in *problems*, and its file recorded in
+    *refused* or *doubts*: what a person withheld still stands for the
+    entry that withheld it)."""
+    from .photos import withheld_files
     entry = dict(last_entry)
     why = held_back(entry.get("portrait"))
     if why:
+        withheld_files([source_url(entry["portrait"].get("source"))], refused, doubts, judge=True)
         del entry["portrait"]
         problems.append(f"{name}: {why}; the kept portrait is not shown")
     return entry
@@ -663,7 +667,7 @@ def _keep(last_entry, name, problems):
 
 def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=None,
          crops=None, bio=None, weights=None, wanted=None, report=None, today=None,
-         bio_missed=None):
+         bio_missed=None, previous_refused=None):
     """``({nid: {"wikidata", "wikipedia"?, "portrait"?}}, problems)``.
 
     *judges* is ``{id: record}`` (judiciary.json's), *slugs* ``{nid:
@@ -686,9 +690,13 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     nothing (rule 8): the last portrait read of the same file is kept, and
     a judge whose page was not read keeps the last entry whole - as does a
     judge no item carries whose ``{{FJC Bio}}`` search is neither in *bio*
-    nor in *bio_missed*, since that search was not read."""
+    nor in *bio_missed*, since that search was not read.
+
+    The ``doubted`` and ``notPortraits`` *report* receives are ``{nid:
+    [url]}``, and a judge this run concluded nothing about keeps what
+    *previous_refused* (the last cache) recorded for them (rule 8)."""
     from . import overrides
-    from .photos import not_a_portrait
+    from .photos import keep_refusals, not_a_portrait, withheld_files
     from .portraits import thumb_set, title_is_about
 
     articles, crops, bio = articles or {}, crops or {}, bio or {}
@@ -696,7 +704,14 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
     weights, credits = weights or {}, credits or {}
     today = today or datetime.date.today().isoformat()
     doubts = getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {})
-    out, problems, oversized, doubted, passed_over = {}, [], [], set(), []
+    out, problems, oversized, doubted, passed_over = {}, [], [], {}, {}
+    unread = set()                       # judges this run concluded nothing about
+
+    def keep(nid, last_entry, name):
+        unread.add(nid)
+        return _keep(last_entry, name, problems, passed_over.setdefault(nid, []),
+                     doubted.setdefault(nid, []))
+
     for judge in judges.values():
         nid = judge.get("nid") or judge["id"].replace("fjc-", "")
         slug = slugs.get(nid)
@@ -704,8 +719,9 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
         name = judge.get("name") or ""
         if not slug:
             # The FJC page was never read for an id: nothing concluded.
+            unread.add(nid)
             if last_entry:
-                out[nid] = _keep(last_entry, name, problems)
+                out[nid] = keep(nid, last_entry, name)
             continue
         items, via = wikidata.get(slug_key(slug)), None
         if items is None:
@@ -719,8 +735,9 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
                                 f"search for an article whose {{{{FJC Bio}}}} names nid {nid} "
                                 "was not read; "
                                 + ("the last entry is kept" if last_entry else "nothing linked"))
+                unread.add(nid)
                 if last_entry:
-                    out[nid] = _keep(last_entry, name, problems)
+                    out[nid] = keep(nid, last_entry, name)
                 continue
             qid, item, via = bio[nid]
             items = {qid: item}
@@ -764,8 +781,9 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
             problems.append(f"{name}: Wikidata {qid} for {slug} gives no year of birth and its "
                             f"article {title!r} was not read; "
                             + ("the last entry is kept" if last_entry else "nothing used"))
+            unread.add(nid)
             if last_entry:
-                out[nid] = _keep(last_entry, name, problems)
+                out[nid] = keep(nid, last_entry, name)
             continue
         if not born and not said:
             problems.append(f"{name}: Wikidata {qid} for {slug} gives no year of birth"
@@ -868,10 +886,10 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
             size = sizes.get(url) if url else None
             if not url or not thumb_set(url, 1):
                 why = f"{name}: {ref} is not a photograph Wikimedia scales; not shown"
-            elif not_a_portrait(url, passed_over=passed_over, judge=True):
+            elif not_a_portrait(url, passed_over=passed_over.setdefault(nid, []), judge=True):
                 why = f"{name}: {url} is in overrides.NOT_A_PORTRAIT; not shown"
             elif url in doubts:
-                doubted.add(url)
+                doubted.setdefault(nid, []).append(url)
                 why = (f"{name}: {url} is in overrides.PORTRAIT_LICENCE_DOUBTS "
                        f"({doubts[url][1]}); not shown until a person decides")
             elif not size:
@@ -917,11 +935,14 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
         if portrait:
             entry["portrait"] = portrait
         elif unsure:
+            unread.add(nid)
             kept = last_entry.get("portrait")
             sources = {file_page(commons_url(r)) for r in possible if commons_url(r)}
             if kept and kept.get("evidence") and kept.get("source") in sources \
                     and held_back(kept):
                 problems.append(f"{unsure}; the last portrait read, {held_back(kept)}, is not shown")
+                withheld_files([source_url(kept.get("source"))], passed_over.setdefault(nid, []),
+                               doubted.setdefault(nid, []), judge=True)
             elif kept and kept.get("evidence") and kept.get("source") in sources:
                 entry["portrait"] = kept
                 problems.append(f"{unsure}; the last portrait read is kept")
@@ -932,8 +953,13 @@ def join(judges, slugs, wikidata, sizes, previous=None, credits=None, articles=N
         out[nid] = entry
     if report is not None:
         report["oversized"] = sorted(oversized)
-        report["doubted"] = sorted(doubted)
-        report["notPortraits"] = sorted(passed_over)
+        # A judge this run concluded nothing about keeps what the last
+        # good read refused for them (rule 8); one read lets it go.
+        before = previous_refused or {}
+        report["doubted"] = keep_refusals(doubted, before.get("doubted"), unread.__contains__,
+                                          whole=not unread)
+        report["notPortraits"] = keep_refusals(passed_over, before.get("notPortraits"),
+                                               unread.__contains__, whole=not unread)
     return out, problems
 
 
@@ -1229,7 +1255,7 @@ def refresh(judiciary_cache, root=".", read=None, sizes_of=None, weigh_of=None, 
         tried |= set(todo)
     report = {}
     joined, problems = join(*args, articles=articles, crops=crops, bio=bio, weights=weights,
-                            report=report, bio_missed=bio_missed)
+                            report=report, bio_missed=bio_missed, previous_refused=previous)
     cache = {"read": datetime.date.today().isoformat(),
              "sources": {"fjc": "https://www.fjc.gov/history/judges",
                          "wikidata": "https://www.wikidata.org/wiki/Property:P2736",
@@ -1256,6 +1282,7 @@ def problems(cache, elsewhere=()):
     if not cache:
         return []
     from . import overrides
+    from .photos import refused_urls
 
     out = []
     judges = cache.get("judges") or {}
@@ -1299,7 +1326,7 @@ def problems(cache, elsewhere=()):
                     list(cache["oversized"])))
     if "doubted" in cache:
         stale = sorted(set(getattr(overrides, "PORTRAIT_LICENCE_DOUBTS", {}))
-                       - set(cache["doubted"]) - set(elsewhere))
+                       - refused_urls(cache["doubted"]) - set(elsewhere))
         if stale:
             out.append(("warn", "judge-licence-doubt-stale",
                         f"{len(stale)} overrides.PORTRAIT_LICENCE_DOUBTS entries name no file a "

@@ -50,6 +50,7 @@ import unicodedata
 import urllib.parse
 
 from . import official_photos
+from .photos import withheld_files
 
 # Words an image may carry beside a name: titles, likeness words, sizes and
 # a photographer's or a content system's counters. Anything else is a word
@@ -290,18 +291,20 @@ def bio_pages(roster_url, page, members):
 
 
 def photo_for(name, members, pages, place_words=(), measure=None, lighter=None,
-              refused=None):
+              refused=None, passed_over=None):
     """``(record, why)`` for one member: the first image on *pages*
     (``[(url, html)]``, the roster first) whose words are theirs
     (:func:`judge`), at the size ``official_photos.choose`` takes - one
     offered only above the caps is shown all the same and said
     (``portraitHeavy``); or ``None`` and why not. An image any of whose
     sizes is in *refused* (``overrides.NOT_A_PORTRAIT``) is passed over and
-    named in the record's ``notPortraits`` (``photos.not_a_portrait``)."""
+    named in the record's ``notPortraits`` (``photos.not_a_portrait``), and
+    in *passed_over* - where it is kept when no record is made."""
     from .photos import not_a_portrait
     measure = measure or official_photos.weigh
     why_not = official_photos.NONE
-    tried, passed_over = set(), []
+    tried = set()
+    passed_over = [] if passed_over is None else passed_over
     for page_url, page in pages:
         for image in official_photos.images(page_url, page):
             if image["src"] in tried:
@@ -347,17 +350,24 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
         roster = pages.get(code)
         recipe = court_module.COURTS.get(code) or {}
         before = ((previous or {}).get(code) or {}).get("photos") or {}
+        # What the court's pages offered a member that a person refused,
+        # where no photograph of theirs was taken (``photoRefused``): what
+        # keeps such an entry from reading as stale (refused_offered).
+        refused_before = ((previous or {}).get(code) or {}).get("photoRefused") or {}
         if roster is None or recipe.get("format") == "pdf":
             # Not read this time, or a roster file with no images: what was
-            # read before of the same members stands.
+            # read before of the same members stands, and what it refused.
             kept = {n: r for n, r in before.items() if n in read.get("members", [])}
             if kept:
                 read["photos"] = kept
+            still = {n: u for n, u in refused_before.items() if n in read.get("members", [])}
+            if still:
+                read["photoRefused"] = still
             continue
         url = recipe["url"]
         place = set(_split(state_name(code[:2]))) | set(_split((HIGH_COURTS.get(code[:2]) or ("",))[0]))
         links = bio_pages(url, roster, read["members"]) if not recipe.get("browser") else {}
-        photos, misses = {}, {}
+        photos, misses, refusals = {}, {}, {}
         for name in read["members"]:
             read_pages = [(url, roster)]
             if name in links:
@@ -366,16 +376,31 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
                     read_pages.append((links[name], get(links[name])))
                 except court_module.CourtsError:
                     misses[name] = official_photos.UNKNOWN
-            found, why = photo_for(name, read["members"], read_pages, place, measure)
+            passed_over = []
+            found, why = photo_for(name, read["members"], read_pages, place, measure,
+                                   passed_over=passed_over)
             if found:
                 photos[name] = found
                 continue
             why = misses.get(name) or why
+            if why == official_photos.UNKNOWN:
+                # A read that concludes nothing keeps the refusals its last
+                # good read recorded (rule 8).
+                for old in [refused_before.get(name) or [],
+                            (before.get(name) or {}).get("notPortraits") or []]:
+                    passed_over.extend(u for u in old if u not in passed_over)
+            if passed_over:
+                refusals[name] = passed_over
             if why == official_photos.UNKNOWN and name in before:
                 # Kept from the last read (rule 8), but asked again of the
-                # lists a person keeps: a file refused since is not kept.
+                # lists a person keeps: a file refused since is not kept,
+                # and is recorded as passed over.
                 held = official_photos.held_back(before[name], judge=True)
                 if held:
+                    withheld_files(official_photos.addresses(before[name]), passed_over,
+                                   judge=True)
+                    if passed_over:
+                        refusals[name] = passed_over
                     problems.append(f"{code}: {name}'s photograph could not be read, and the "
                                     f"last one read is withheld: {held}")
                     misses[name] = "withheld"
@@ -401,10 +426,13 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
                 problems.append(f"{code}: photograph dropped for {name} (was {was})")
         read.pop("photos", None)
         read.pop("photoMisses", None)
+        read.pop("photoRefused", None)
         if photos:
             read["photos"] = photos
         if misses:
             read["photoMisses"] = misses
+        if refusals:
+            read["photoRefused"] = {n: sorted(set(u)) for n, u in sorted(refusals.items())}
     return problems
 
 
@@ -469,11 +497,16 @@ def read_problems(cache):
 
 def refused_offered(cache):
     """Every image a court's read passed over as ``NOT_A_PORTRAIT``: what
-    keeps an entry for a justice's image from reading as stale."""
+    keeps an entry for a justice's image from reading as stale: on a
+    photograph taken (its ``notPortraits``), for a member none was taken
+    for (``photoRefused``), and a kept photograph's own file."""
     out = set()
     for read in ((cache or {}).get("courts") or {}).values():
         for rec in (read.get("photos") or {}).values():
             out.update(rec.get("notPortraits") or ())
+            out.update(official_photos.addresses(rec))
+        for urls in (read.get("photoRefused") or {}).values():
+            out.update(urls)
     return out
 
 

@@ -979,9 +979,9 @@ def resolve_all(profiles, root=".", refresh=False, workers=8, log=print):
 
     for profile in todo:
         key = profile_key(profile)
-        cache[key] = resolved.get(key) or {
+        cache[key] = resolved_over(cache.get(key), resolved.get(key) or {
             "url": None, "via": "unresolved", "name": profile["name"],
-        }
+        })
 
     size_all(cache, log=log)
     credit_all(cache, log=log)
@@ -1031,6 +1031,26 @@ def curated_record(profile, entry, old=None, manifest=None):
     if replaces:
         record["replaces"] = replaces
     return record
+
+
+def resolved_over(old, new):
+    """*new*, a record resolved over *old*, keeping what the routes this
+    resolution does not read refused: what *old* already ``replaces`` (the
+    nominee routes', which ``nominee_photos`` reads again and rewrites), and
+    *old*'s own file a person refused where a nominee route found it - still
+    a file a route offered, for validate's staleness check, and a fallback
+    to be looked at (``portrait-fallback-unseen``). A refused file of this
+    module's own routes goes with them: the resolution read them again."""
+    from . import nominee_photos
+    from .photos import refused
+    old = old or {}
+    stood = set(old.get("replaces") or ())
+    if old.get("via") in nominee_photos.ROUTES:
+        stood |= {u for u in addresses(old) if refused(u)}
+    stood -= set(addresses(new))
+    if stood:
+        new["replaces"] = sorted(stood)
+    return new
 
 
 def sync_curated(profiles, cache, manifest=None):
@@ -1122,6 +1142,11 @@ def route_ok(profile, record, legislators=None, legislator_photos=None):
         entry = curated(profile)
         return (bool(entry) and entry["url"] == record.get("url")
                 and curated_seated(entry, legislators))
+    if record.get(nominee_photos.REFUSALS_ONLY):
+        # A record that only holds what a person refused resolves nothing:
+        # the profile is resolved as though it had none (resolved_over
+        # keeps the refusals on what it finds).
+        return False
     if via in _ID_ROUTES:
         return True
     if via in nominee_photos.ROUTES:

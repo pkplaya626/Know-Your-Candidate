@@ -934,11 +934,22 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
     none, the attorney general's own page they link (:func:`bio_links`) is
     read too. *previous* is the last cache's rows. Returns the problems to
     report."""
-    from .photos import not_a_portrait
+    from .photos import not_a_portrait, withheld_files
 
     get = get or _get
     problems = []
     for code, row in sorted(rows.items()):
+        old = (previous or {}).get(code) or {}
+        if row.get("unconfirmed") and row.get("unreadable") and old.get("name") == row.get("name"):
+            # The office's site concluded nothing: what its last good read
+            # of the same holder refused stays recorded (rule 8), with the
+            # photograph it took if a person has refused that since.
+            refused_then = list(old.get("notPortraits") or [])
+            withheld_files([old.get("photo")] + [h.get("url") for h in old.get("photoHeavy") or []],
+                           refused_then)
+            row.pop("notPortraits", None)
+            if refused_then:
+                row["notPortraits"] = refused_then
         if not row.get("name") or row.get("unconfirmed") or row.get("disputed"):
             continue
         if row.get("confirmationKept"):
@@ -974,10 +985,13 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                 found = again
                 why = "unknown" if "unknown" in (why, why_again) else why_again
         time.sleep(pause)
-        old = (previous or {}).get(code) or {}
         row.pop("photoOversized", None)
         row.pop("photoHeavy", None)
         row.pop("notPortraits", None)
+        if not found and why == "unknown" and old.get("name") == row["name"]:
+            # A read that concludes nothing keeps the refusals its last good
+            # read recorded (rule 8), the photograph it kept or not.
+            passed_over.extend(u for u in old.get("notPortraits") or () if u not in passed_over)
         if not found and why == "unknown" and old.get("photo") and old.get("name") == row["name"] \
                 and not not_a_portrait(old["photo"], passed_over=passed_over):
             found = {k: old[k] for k in ("photo", "photoPage", "photoWeight", "photoHeavy")

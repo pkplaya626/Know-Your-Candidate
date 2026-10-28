@@ -72,6 +72,7 @@ import unicodedata
 import urllib.parse
 
 from . import official_photos
+from .photos import keep_refusals, refused_urls, withheld_files
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "statewide_photos.json")
 OFFICES = ("governor", "lt", "ag", "sos")
@@ -238,7 +239,7 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_o
                 continue
             time.sleep(pause)
             k = key(code, office, hit["name"])
-            if not_a_portrait(url, passed_over=passed_over, table=refused):
+            if not_a_portrait(url, passed_over=_bucket(passed_over, k), table=refused):
                 problems.append(f"{k}: {url} is in overrides.NOT_A_PORTRAIT; not used")
                 continue
             chosen, weight, why, heavy = official_photos.choose([(0, url)], measure, widest=1.0)
@@ -251,6 +252,13 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_o
             records[k] = official_photos.record(chosen, page, f"{by}: {words}", weight,
                                                 by=by, route="guide", portraitHeavy=heavy)
     return records, problems, unknown
+
+
+def _bucket(passed_over, k):
+    """Where a refusal for the race key *k* is recorded: its own list in a
+    ``{key: [url]}`` (what :func:`fetch` keeps, so a read that concludes
+    nothing can keep it), or *passed_over* itself when it is a list."""
+    return passed_over.setdefault(k, []) if isinstance(passed_over, dict) else passed_over
 
 
 # ------------------------------------------------------- members by id
@@ -667,7 +675,7 @@ def read_wikipedia(lists, refused=None, measure=None, log=print, passed_over=Non
                 k = key(code, office, person["name"])
                 try:
                     found, why = wiki_photo(code, office, person, links, title, refused, measure,
-                                            passed_over=passed_over)
+                                            passed_over=_bucket(passed_over, k))
                 except Exception as exc:
                     found, why = None, official_photos.UNKNOWN
                     problems.append(f"{k}: {exc}")
@@ -700,9 +708,10 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
     problems = []
     records, more, unknown = read_members(lists, snapshot)
     problems += more
-    # What a person refused (photos.not_a_portrait), kept in the cache so
-    # validate can tell a NOT_A_PORTRAIT entry still means something.
-    passed_over = []
+    # What a person refused (photos.not_a_portrait), kept in the cache by
+    # race so validate can tell a NOT_A_PORTRAIT entry still means
+    # something, and a race this run concluded nothing about keeps it.
+    passed_over, doubts = {}, {}
     guides, more, unknown_g = read_guides(lists, passed_over=passed_over)
     problems += more
     unknown |= unknown_g
@@ -716,17 +725,26 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
         for k, rec in wiki.items():
             records.setdefault(k, rec)
     before = (previous or {}).get("photos") or {}
+
+    def concluded_nothing(k):
+        return k in unknown or k.rsplit("|", 1)[0] in unknown or k.split("|", 1)[0] in unknown
+
     for k, rec in before.items():
-        held = k in unknown or k.rsplit("|", 1)[0] in unknown or k.split("|", 1)[0] in unknown
+        held = concluded_nothing(k)
         kept = k not in records and "photo" in rec and (
             held or (not wikipedia and rec.get("route") == "wikipedia"))
         if not kept:
             continue
         # Kept from the last read (rule 8), but asked again of the lists a
         # person keeps and of the licence test: a doubt added since
-        # withholds it, whatever this run could read.
+        # withholds it, whatever this run could read. A file a person's list
+        # withholds is recorded as passed over, as a read refusing it would
+        # (the refresh of 2026-10-27 dropped Mayes Middleton's and JoCasta
+        # Zamarripa's, and their entries read as stale).
         why_held = withheld_why(k, rec)
         if why_held:
+            withheld_files(official_photos.addresses(rec), passed_over.setdefault(k, []),
+                           doubts.setdefault(k, []))
             problems.append(f"{k}: the last photograph read is withheld: {why_held}")
             continue
         records[k] = rec
@@ -752,11 +770,24 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
             del records[k]
     # A record kept from a read before credits carried a year is dated.
     date_credits({"photos": records}, log=log)
+    # A race this run concluded nothing about - its read failed, or the
+    # races' articles were not read (--no-wikipedia) - keeps what its last
+    # good read refused and why it found none (rule 8): Heather Baxter's
+    # refused Commons file left the cache on a day the articles went unread.
+    def unread(k):
+        return concluded_nothing(k) or not wikipedia
+
+    for k, why in ((previous or {}).get("misses") or {}).items():
+        if unread(k) and k not in records and k not in misses:
+            misses[k] = why
     cache = {"read": datetime.date.today().isoformat(),
              "photos": {k: records[k] for k in sorted(records)},
              "misses": {k: misses[k] for k in sorted(misses)}}
-    if passed_over:
-        cache["notPortraits"] = sorted(passed_over)
+    whole = wikipedia and not unknown
+    for field, now in (("notPortraits", passed_over), ("licenceDoubts", doubts)):
+        kept = keep_refusals(now, (previous or {}).get(field), unread, whole)
+        if kept:
+            cache[field] = kept
     return cache, problems
 
 
@@ -810,8 +841,10 @@ def withheld(cache):
 def doubted(cache):
     """The ``PORTRAIT_LICENCE_DOUBTS`` and ``NOT_A_PORTRAIT`` entries a
     cached record stands for: what keeps those entries from reading as
-    stale to the judges' and the campaign sites' checks."""
-    out = set((cache or {}).get("notPortraits") or ())
+    stale to the judges' and the campaign sites' checks. The refusals are
+    ``{race key: [url]}``, or the flat list a cache wrote before."""
+    cache = cache or {}
+    out = refused_urls(cache.get("notPortraits")) | refused_urls(cache.get("licenceDoubts"))
     for rec in ((cache or {}).get("photos") or {}).values():
         out.update(official_photos.addresses(rec))
     return out

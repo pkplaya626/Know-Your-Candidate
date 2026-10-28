@@ -66,6 +66,7 @@ import urllib.request
 import zlib
 
 from . import pdfread, tls
+from .photos import keep_refusals
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "guide_photos.json")
 ROUTE = "election-guide"
@@ -474,11 +475,18 @@ def wa_statements(answer, race_id):
     return out
 
 
-def read_washington(wanted, getter=get, log=print):
+def _refused_into(refusals, target):
+    """The list a reader records a race's or office's refusals in, where
+    *refusals* (``{target: [address]}``) is given."""
+    return None if refusals is None else refusals.setdefault(target, [])
+
+
+def read_washington(wanted, getter=get, log=print, refusals=None):
     """``(photos, problems, unread)``: for each race in *wanted* (``{race id:
     [profile]}``), the guide's photograph of each person it joins, as
     ``{person key: record}``; *unread* the races a read concluded nothing
-    about."""
+    about. A photograph a person refused is recorded in *refusals*
+    (``{race id: [address]}``)."""
     photos, problems, unread = {}, [], set()
     races = [r for r in sorted(wanted) if r.startswith("H-WA-")]
     if not races:
@@ -531,7 +539,8 @@ def read_washington(wanted, getter=get, log=print):
             words = (f"the voters' guide's statement for '{name}' {party}, U.S. Representative, "
                      f"Congressional District {int(rid[5:7])} (ballot {entry['ballot']}), "
                      "carries this photograph")
-            record, why = photo_record("WA", rid, "house", name, page, address, words, data)
+            record, why = photo_record("WA", rid, "house", name, page, address, words, data,
+                                       refused_into=_refused_into(refusals, rid))
             if why:
                 problems.append(f"WA {rid}: {name}'s photograph: {why}; not used")
                 continue
@@ -546,9 +555,11 @@ def profile_key_of(profile):
 
 
 def photo_record(code, race, office, name, page, source, words, data, colour_space=None,
-                 extra=None):
+                 extra=None, refused_into=None):
     """``(record, "")`` for a guide's photograph, or ``(None, why)`` when it
-    fails a test every route asks (:func:`drawable`, :func:`unfit`)."""
+    fails a test every route asks (:func:`drawable`, :func:`unfit`). An
+    address of it a person refused (``NOT_A_PORTRAIT``) is added to the list
+    *refused_into*: what keeps that entry from reading as stale."""
     why = drawable(data, colour_space)
     if why:
         return None, why
@@ -558,6 +569,9 @@ def photo_record(code, race, office, name, page, source, words, data, colour_spa
     photo = "photos/" + hosted_name(weight)
     refusal = unfit(weight, *own_addresses(code, page, photo))
     if refusal:
+        if refused_into is not None:
+            from .photos import withheld_files
+            withheld_files(own_addresses(code, page, photo), refused_into)
         return None, refusal
     record = {"state": code, "race": race, "office": office, "name": name, "page": page,
               "from": source, "evidence": words, "read": today(), "photo": photo,
@@ -668,7 +682,7 @@ def ak_statement(data, office, name):
     return raw, space, words, ""
 
 
-def read_alaska(wanted, getter=get, log=print):
+def read_alaska(wanted, getter=get, log=print, refusals=None):
     """``(photos, problems, unread)`` as :func:`read_washington`, for the
     candidate list's statements: *wanted* is ``{race id or "AK|office":
     [people]}`` (profiles for ``S-AK-2026`` and ``H-AK-00-2026``, statewide
@@ -741,7 +755,8 @@ def read_alaska(wanted, getter=get, log=print):
             record, why = photo_record("AK", race, office, entry["name"], entry["pdf"],
                                        entry["pdf"], words, raw, space,
                                        {"list": AK_LIST + ("#" + urllib.parse.quote(
-                                           entry["anchor"], safe="%+") if entry["anchor"] else "")})
+                                           entry["anchor"], safe="%+") if entry["anchor"] else "")},
+                                       refused_into=_refused_into(refusals, target))
             if why:
                 problems.append(f"AK {office}: {entry['name']}'s photograph: {why}; not used")
                 continue
@@ -853,7 +868,7 @@ def or_photo(image, doc):
     return jpx.png(width, height, rows), hashlib.sha256(data).hexdigest(), ""
 
 
-def read_oregon(wanted, getter=get, log=print):
+def read_oregon(wanted, getter=get, log=print, refusals=None):
     """``(photos, problems, unread)`` as :func:`read_washington`, from the
     county books of the State Voters' Pamphlet: each book is read in the
     order the pamphlet's page lists them until every race and office wanted
@@ -917,7 +932,8 @@ def read_oregon(wanted, getter=get, log=print):
             race = "" if target.startswith("OR|") else target
             record, why = photo_record("OR", race, office, entry["name"], page, book, words, png,
                                        extra={"method": "decoded", "sourceSha256": source_sha,
-                                              "decoder": DECODER})
+                                              "decoder": DECODER},
+                                       refused_into=_refused_into(refusals, target))
             if why:
                 problems.append(f"OR {target}: {entry['name']}'s photograph: {why}; not used")
                 continue
@@ -1073,9 +1089,9 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     want.update(want_sw)
     log(f"  guide photographs: {sum(len(v) for v in want.values())} people in "
         f"{len(want)} races or offices without one ({', '.join(sorted(GUIDES))})")
-    photos, problems, unread = {}, [], set()
+    photos, problems, unread, refusals = {}, [], set(), {}
     for reader in (read_washington, read_alaska, read_oregon):
-        found, more, gone_unread = reader(wanted, getter=getter, log=log)
+        found, more, gone_unread = reader(wanted, getter=getter, log=log, refusals=refusals)
         problems += more
         unread |= gone_unread
         for key, rec in found.items():
@@ -1096,6 +1112,15 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
              "guides": {code: dict(GUIDES[code]) for code in sorted(GUIDES)},
              "elsewhere": dict(ELSEWHERE),
              "photos": {}}
+    # What a person refused of a guide's photographs, by race or office, for
+    # validate's staleness check; a race or office this read did not reach,
+    # or concluded nothing about, keeps what its last good read refused
+    # (rule 8).
+    refused = keep_refusals(refusals, (previous or {}).get("notPortraits"),
+                            lambda t: t not in wanted or t in unread
+                            or bool(set(want.get(t) or ()) & unread))
+    if refused:
+        cache["notPortraits"] = refused
     manifest = photocopies.load(root)
     hosted = manifest.setdefault("hosted", {})
     # A file hosted by a person's choice (overrides.CANDIDATE_PHOTOS) is not
