@@ -646,6 +646,12 @@
      "total": 378426.0
     },
     {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 4,
+     "total": 209596.78
+    },
+    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
      "count": 2,
@@ -1133,6 +1139,12 @@
      "total": 382430.0
     },
     {
+     "committee": "OUR VOICE OUR VOTE ARIZONA PAC",
+     "committeeId": "C00752576",
+     "count": 1,
+     "total": 46000.0
+    },
+    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
      "count": 5,
@@ -1223,6 +1235,12 @@
   "H2CA03157": {
    "oppose": [
     {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 2,
+     "total": 925452.0
+    },
+    {
      "committee": "AFSCME WORKING FAMILIES FUND",
      "committeeId": "C90011172",
      "count": 1,
@@ -1275,6 +1293,12 @@
   },
   "H2CA13115": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 7,
+     "total": 2778591.09
+    },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
@@ -1737,7 +1761,14 @@
    ]
   },
   "H2IA02111": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 14,
+     "total": 4233692.65
+    }
+   ],
    "support": [
     {
      "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
@@ -2166,7 +2197,14 @@
    ]
   },
   "H2NC02287": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 8,
+     "total": 3905713.82
+    }
+   ],
    "support": [
     {
      "committee": "ROLLING SEA ACTION FUND",
@@ -2393,7 +2431,14 @@
    ]
   },
   "H2NM02191": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 14,
+     "total": 1867098.04
+    }
+   ],
    "support": [
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -2646,7 +2691,14 @@
    ]
   },
   "H2OH01194": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 5,
+     "total": 1566117.12
+    }
+   ],
    "support": [
     {
      "committee": "OHIO CITIZEN ACTION",
@@ -2686,7 +2738,14 @@
    ]
   },
   "H2OH09031": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 15,
+     "total": 2906424.88
+    }
+   ],
    "support": [
     {
      "committee": "HMP",
@@ -2795,6 +2854,12 @@
      "committeeId": "C00492140",
      "count": 9,
      "total": 345417.12
+    },
+    {
+     "committee": "THE LINCOLN PROJECT",
+     "committeeId": "C00725820",
+     "count": 1,
+     "total": 20000.0
     },
     {
      "committee": "UNITY IN ACTION PAC",
@@ -3134,7 +3199,14 @@
    ]
   },
   "H2TX23082": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 16,
+     "total": 2903034.25
+    }
+   ],
    "support": [
     {
      "committee": "HMP",
@@ -3216,6 +3288,12 @@
      "total": 921966.56
     },
     {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 3,
+     "total": 224279.09
+    },
+    {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
      "count": 1,
@@ -3278,7 +3356,14 @@
    ]
   },
   "H2WA03217": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 11,
+     "total": 2602385.29
+    }
+   ],
    "support": [
     {
      "committee": "WELCOMEPAC",
@@ -3364,6 +3449,12 @@
   },
   "H4AZ01194": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 8,
+     "total": 3144812.35
+    },
     {
      "committee": "BOLD AMERICA",
      "committeeId": "C00854299",
@@ -3462,6 +3553,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "OUR VOICE OUR VOTE ARIZONA PAC",
+     "committeeId": "C00752576",
+     "count": 1,
+     "total": 54000.0
+    },
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
@@ -3927,6 +4024,12 @@
      "total": 121646.7
     },
     {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 1,
+     "total": 54218.08
+    },
+    {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
      "count": 26,
@@ -4297,7 +4400,14 @@
    ]
   },
   "H4MI08218": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 11,
+     "total": 1602759.09
+    }
+   ],
    "support": [
     {
      "committee": "WELCOMEPAC",
@@ -4741,6 +4851,12 @@
   },
   "H4PA10104": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 9,
+     "total": 1923012.53
+    },
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
@@ -5198,6 +5314,12 @@
   "H6AK01092": {
    "oppose": [
     {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 1,
+     "total": 200000.0
+    },
+    {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
      "count": 1,
@@ -5295,6 +5417,12 @@
   "H6AZ05190": {
    "oppose": [
     {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 3,
+     "total": 979088.94
+    },
+    {
      "committee": "HMP",
      "committeeId": "C00495028",
      "count": 2,
@@ -5358,7 +5486,14 @@
    ]
   },
   "H6AZ06099": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 13,
+     "total": 2276828.24
+    }
+   ],
    "support": [
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
@@ -5898,6 +6033,12 @@
   "H6CA22190": {
    "oppose": [
     {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 18,
+     "total": 3578983.45
+    },
+    {
      "committee": "NEW DEMOCRAT MAJORITY",
      "committeeId": "C00859660",
      "count": 4,
@@ -5926,12 +6067,6 @@
      "committeeId": "C00737411",
      "count": 11,
      "total": 301406.32
-    },
-    {
-     "committee": "CLF",
-     "committeeId": "C00504530",
-     "count": 5,
-     "total": 86096.85
     },
     {
      "committee": "314 ACTION FUND",
@@ -6726,6 +6861,12 @@
   "H6CO08013": {
    "oppose": [
     {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 14,
+     "total": 3719481.83
+    },
+    {
      "committee": "WOMEN VOTE",
      "committeeId": "C00473918",
      "count": 10,
@@ -6780,6 +6921,12 @@
      "committeeId": "C90015181",
      "count": 14,
      "total": 736623.28
+    },
+    {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 5,
+     "total": 199392.37
     },
     {
      "committee": "LGBTQ CONNECTION PAC",
@@ -7277,6 +7424,12 @@
   },
   "H6FL11126": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 3,
+     "total": 1430344.0
+    },
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
@@ -8028,6 +8181,12 @@
   },
   "H6IA03268": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 16,
+     "total": 2252300.67
+    },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
@@ -8925,7 +9084,14 @@
    ]
   },
   "H6ME02171": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 7,
+     "total": 2240689.46
+    }
+   ],
    "support": [
     {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
@@ -9087,6 +9253,12 @@
   "H6MI07298": {
    "oppose": [
     {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 12,
+     "total": 2772859.51
+    },
+    {
      "committee": "CRUSH MAGA PAC",
      "committeeId": "C00879221",
      "count": 3,
@@ -9157,7 +9329,14 @@
    ]
   },
   "H6MI10276": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 5,
+     "total": 2659832.86
+    }
+   ],
    "support": [
     {
      "committee": "PRO-CHOICE MAJORITY ACTION",
@@ -9921,7 +10100,14 @@
    "support": []
   },
   "H6NE02174": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 9,
+     "total": 1418067.54
+    }
+   ],
    "support": [
     {
      "committee": "FIGHT FOR NEBRASKA PAC",
@@ -10653,7 +10839,14 @@
    ]
   },
   "H6NY03247": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 1,
+     "total": 210035.0
+    }
+   ],
    "support": [
     {
      "committee": "ACTIVATE AMERICA",
@@ -10940,6 +11133,12 @@
   "H6NY17171": {
    "oppose": [
     {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 10,
+     "total": 3086233.46
+    },
+    {
      "committee": "PROGRESSIVE CHAMPIONS PAC",
      "committeeId": "C00950352",
      "count": 1,
@@ -11128,7 +11327,14 @@
    "support": []
   },
   "H6OH07168": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 3,
+     "total": 1126780.54
+    }
+   ],
    "support": [
     {
      "committee": "JOBS AND DEMOCRACY PAC",
@@ -11448,6 +11654,12 @@
      "total": 27762.0
     },
     {
+     "committee": "GET OUT THE VOTE PAC",
+     "committeeId": "C00839407",
+     "count": 1,
+     "total": 15340.93
+    },
+    {
      "committee": "STRAIGHT AHEAD ORGANIZATION",
      "committeeId": "C90022914",
      "count": 1,
@@ -11520,6 +11732,12 @@
   },
   "H6PA07188": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 5,
+     "total": 2310915.81
+    },
     {
      "committee": "LEAD LEFT PAC",
      "committeeId": "C00948208",
@@ -11724,6 +11942,12 @@
   },
   "H6PA08293": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 12,
+     "total": 2364142.19
+    },
     {
      "committee": "THE GOVERNING MAJORITY FUND",
      "committeeId": "C00737411",
@@ -12817,6 +13041,12 @@
   },
   "H6TX15162": {
    "oppose": [
+    {
+     "committee": "CLF",
+     "committeeId": "C00504530",
+     "count": 13,
+     "total": 3142538.1
+    },
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
@@ -14338,6 +14568,12 @@
      "committeeId": "C00935015",
      "count": 7,
      "total": 1621515.14
+    },
+    {
+     "committee": "314 ACTION FUND",
+     "committeeId": "C00633248",
+     "count": 4,
+     "total": 1037379.76
     },
     {
      "committee": "AB PAC",
@@ -16128,6 +16364,12 @@
      "total": 1000000.0
     },
     {
+     "committee": "PAF",
+     "committeeId": "C00754069",
+     "count": 2,
+     "total": 313520.8
+    },
+    {
      "committee": "MICHIGAN DEMOCRATIC STATE CENTRAL COMMITTEE",
      "committeeId": "C00031054",
      "count": 1,
@@ -17274,6 +17516,12 @@
      "total": 50000.0
     },
     {
+     "committee": "THE LINCOLN PROJECT",
+     "committeeId": "C00725820",
+     "count": 1,
+     "total": 5750.0
+    },
+    {
      "committee": "MAINE DEMOCRATIC PARTY",
      "committeeId": "C00179408",
      "count": 2,
@@ -17526,6 +17774,12 @@
      "total": 119706.43
     },
     {
+     "committee": "PAF",
+     "committeeId": "C00754069",
+     "count": 2,
+     "total": 59430.12
+    },
+    {
      "committee": "CITIZENS AGAINST AIPAC CORRUPTION",
      "committeeId": "C00879080",
      "count": 3,
@@ -17624,6 +17878,12 @@
      "committeeId": "C00341396",
      "count": 1,
      "total": 17600.0
+    },
+    {
+     "committee": "TURN LEFT PAC",
+     "committeeId": "C00839894",
+     "count": 1,
+     "total": 3000.0
     }
    ],
    "support": [
@@ -18748,6 +19008,12 @@
      "committeeId": "C00956425",
      "count": 1,
      "total": 368660.0
+    },
+    {
+     "committee": "ANTI-WOKE FUND",
+     "committeeId": "C00894717",
+     "count": 4,
+     "total": 179104.23
     }
    ]
   },
@@ -18860,6 +19126,12 @@
      "committeeId": "C00918268",
      "count": 3,
      "total": 90909.71
+    },
+    {
+     "committee": "PAF",
+     "committeeId": "C00754069",
+     "count": 2,
+     "total": 26020.8
     }
    ],
    "support": [
@@ -18994,6 +19266,12 @@
      "committeeId": "C00835041",
      "count": 2,
      "total": 45559.38
+    },
+    {
+     "committee": "PAF",
+     "committeeId": "C00754069",
+     "count": 2,
+     "total": 26020.8
     },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
@@ -19394,5 +19672,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-26"
+ "read": "2026-10-28"
 }

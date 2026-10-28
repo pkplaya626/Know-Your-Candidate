@@ -40,7 +40,7 @@
    "height": 973,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
    "type": "image/jpeg",
    "width": 807
@@ -76,7 +76,7 @@
    "height": 1329,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
    "type": "image/jpeg",
    "width": 1113
@@ -91,7 +91,7 @@
    "height": 1080,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
    "type": "image/jpeg",
    "width": 1048
@@ -107,7 +107,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=35",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "66ea811e6896720ac02bc62b9b5c3010c9f84783b2d484f24f5b97eb2d924964",
    "sourceSha256": "d122af6046b6eed47f96087ce2655a2a0cfbb0eade51b1fcfcee3ebe63740193",
    "type": "image/png",
@@ -124,7 +124,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=32",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "84307b6eaed61e0ed24d50dc543a3bd7348fdbb76c929ccf970682e5b0a501ea",
    "sourceSha256": "b2e4071d718473886045f92064729322e5dc73d3167fd4e837026b3efb1459f5",
    "type": "image/png",
@@ -140,7 +140,7 @@
    "height": 857,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
    "type": "image/jpeg",
    "width": 751
@@ -156,7 +156,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=34",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "8c34d6c5670d0ded7391a04d3ff7495b02c8ca2c37a190853f6dddb57305ee91",
    "sourceSha256": "1e241eeb55ad58da4c179ed0503de827562e16f28aa8698fc648e2bf217702cd",
    "type": "image/png",
@@ -193,7 +193,7 @@
    "height": 2705,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
    "type": "image/jpeg",
    "width": 2254
@@ -209,7 +209,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book11_web.pdf#page=32",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "96b6ab3f3d932a2970abc41bca9190449abd06cc859298e1c3021e7b87aafdbc",
    "sourceSha256": "f8493c2c95b33d3dee1b6ea3c0d65ff1d045dd418c8e9da01ef7c906d9728cfb",
    "type": "image/png",
@@ -225,7 +225,7 @@
    "height": 433,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
    "type": "image/jpeg",
    "width": 361
@@ -240,7 +240,7 @@
    "height": 906,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
    "type": "image/jpeg",
    "width": 759
@@ -255,7 +255,7 @@
    "height": 1096,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
    "type": "image/jpeg",
    "width": 906
@@ -270,7 +270,7 @@
    "height": 501,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
    "type": "image/jpeg",
    "width": 418
@@ -285,7 +285,7 @@
    "height": 584,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
    "type": "image/jpeg",
    "width": 486
@@ -300,7 +300,7 @@
    "height": 619,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
    "type": "image/jpeg",
    "width": 517
@@ -316,7 +316,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=36",
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "sha256": "d879b05c460beddb58ed25185a9c132c1933bef5a02b778c9f87a53526bb4a71",
    "sourceSha256": "4268d7b64f5798df27a236fd858a87408dd132d06719a2f87e9669edd2a26d43",
    "type": "image/png",
@@ -353,7 +353,7 @@
    "height": 1320,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
    "type": "image/jpeg",
    "width": 1095
@@ -384,7 +384,7 @@
    "height": 907,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
    "type": "image/jpeg",
    "width": 758
@@ -33428,21 +33428,6 @@
    ],
    "width": 280
   },
-  "https://i0.wp.com/senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg?w=500&ssl=1": {
-   "bytes": 42240,
-   "etag": "\"461c6fa8c3126996\"",
-   "gone": 0,
-   "height": 700,
-   "kinds": [
-    "person"
-   ],
-   "lastModified": "Sun, 25 Oct 2026 23:55:41 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "person:FEC_H6MI11191"
-   ],
-   "width": 500
-  },
   "https://i0.wp.com/www.nga.org/wp-content/uploads/2018/01/Governor-Ivey-2019-Headshot-scaled.jpg?w=500&ssl=1": {
    "bytes": 34912,
    "etag": "\"1ea81a9a68cb39da\"",
@@ -39783,35 +39768,38 @@
    "bytes": 3918638,
    "copy": {
     "box": [
-     168,
-     210
+     540,
+     675
     ],
-    "bytes": 8297,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "01899db2981966ec291e.jpg",
+    "bytes": 47617,
+    "chrome": "Chrome/155.0.8059.39",
+    "file": "10f52ef6c7d28d02e843.jpg",
     "for": [
-     "legislator:NV:ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1"
+     "legislator:NV:ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
+     "person:FEC_H6NV01331"
     ],
     "from": [
      2964,
      2964
     ],
-    "height": 210,
-    "made": "2026-10-25",
+    "height": 675,
+    "made": "2026-10-28",
     "quality": 0.86,
-    "sha256": "01899db2981966ec291e1048d99fe559455d83e1aa9377abbbedd6a9b083a27f",
-    "width": 210
+    "sha256": "10f52ef6c7d28d02e843a973cb1b169e790838f5e6f6c245221d25a1de65e01b",
+    "width": 675
    },
    "etag": "\"5108380c662db1:0\"",
    "gone": 0,
    "height": 2964,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Thu, 09 Jan 2025 18:44:23 GMT",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "records": [
-    "legislator:NV:ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1"
+    "legislator:NV:ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
+    "person:FEC_H6NV01331"
    ],
    "sha256": "3e8f8e72b378542004719ab7f5b717b0ee01cb37341380e1cf4cb0d99e87c5f2",
    "width": 2964
@@ -69501,35 +69489,38 @@
    "bytes": 656824,
    "copy": {
     "box": [
-     168,
-     210
+     540,
+     675
     ],
-    "bytes": 11523,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "df2a1055bdfe305fd616.jpg",
+    "bytes": 82476,
+    "chrome": "Chrome/155.0.8059.39",
+    "file": "af95ea51ccc777fa1646.jpg",
     "for": [
-     "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44"
+     "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44",
+     "person:FEC_H6MI11191"
     ],
     "from": [
      1500,
      2100
     ],
-    "height": 235,
-    "made": "2026-10-25",
+    "height": 756,
+    "made": "2026-10-28",
     "quality": 0.86,
-    "sha256": "df2a1055bdfe305fd6162fda03dd6fabf68bcf7f87c27eb681bbaade49ac99c1",
-    "width": 168
+    "sha256": "af95ea51ccc777fa16468e10fabf76b42bfdea35e0cc14f81a006f4842b47eac",
+    "width": 540
    },
    "etag": "\"63c05f7d-a05b8\"",
    "gone": 0,
    "height": 2100,
    "kinds": [
-    "legislator"
+    "legislator",
+    "person"
    ],
    "lastModified": "Thu, 12 Jan 2023 19:29:01 GMT",
-   "read": "2026-10-25",
+   "read": "2026-10-28",
    "records": [
-    "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44"
+    "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44",
+    "person:FEC_H6MI11191"
    ],
    "sha256": "e96c482c0849e48e0e05fd76ee32111270106a214a41c9adf70919aec12abede",
    "width": 1500
@@ -90372,7 +90363,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "records": [
     "legislator:GA:ocd-person/6f986b42-14f6-4147-9466-c49294331db9"
    ],
@@ -91664,7 +91655,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-10-26",
+   "read": "2026-10-28",
    "records": [
     "legislator:GA:ocd-person/4b162447-89a7-4ffc-acbf-617e1ad87e2a"
    ],
@@ -103387,6 +103378,15 @@
     "officer:FL:ag:James Uthmeier"
    ],
    "width": 225
+  },
+  "https://www.naag.org/wp-content/uploads/2025/01/ag-NC-Jackson-Jeff-2025-225x300.png": {
+   "error": "HTTP 403",
+   "kinds": [
+    "officer"
+   ],
+   "records": [
+    "officer:NC:ag:Jeff Jackson"
+   ]
   },
   "https://www.naag.org/wp-content/uploads/2025/01/ag-UT-Brown-Derek-225x300.png": {
    "bytes": 30412,
