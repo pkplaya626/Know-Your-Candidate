@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-28T15:10:37+00:00",
+ "fetched": "2026-10-29T15:35:53+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
@@ -311,12 +311,12 @@
   "https://www.votercheck.necvr.ne.gov/VoterView/": "live",
   "https://www.voterview.ar-nova.org/": "live",
   "https://www.voterview.ar-nova.org/voterview": "live",
-  "https://www.votetexas.gov/register-to-vote/index.html": "live",
-  "https://www.votetexas.gov/voting/early-voting.html": "live",
+  "https://www.votetexas.gov/register-to-vote/index.html": "unknown",
+  "https://www.votetexas.gov/voting/early-voting.html": "unknown",
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
   "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "live"
  },
- "linksChecked": "2026-10-28",
+ "linksChecked": "2026-10-29",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
