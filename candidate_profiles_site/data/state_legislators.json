@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-28T14:41:00+00:00",
+ "fetched": "2026-10-29T15:04:13+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -1394,6 +1394,7 @@
     "imageChecked": "2026-10-25",
     "imageStatus": "ok",
     "links": [
+     "https://aksenatedems.com/sen-kawasaki/",
      "https://alaskasenate.org/kawasaki/",
      "https://www.akleg.gov/basis/mbr_info.asp?session=33",
      "https://www.akleg.gov/basis/Member/Detail/30?code=kaw",
@@ -8299,6 +8300,10 @@
     "districtId": "027",
     "email": "lfink@azleg.gov",
     "id": "ocd-person/981d0aee-d239-4acc-9da8-1332481e57ee",
+    "image": "https://www.azvoterguide.com/wp-content/uploads/2024/06/Fink16-photo.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://www.azleg.gov/house-member/?legislature=57&session=129&legislator=2369"
     ],
@@ -12409,6 +12414,20 @@
    },
    {
     "chamber": "lower",
+    "district": "32",
+    "districtId": "032",
+    "id": "ocd-person/135499ed-a471-4567-afcc-53c16112f0d6",
+    "image": "https://images.squarespace-cdn.com/content/v1/5d1a28b95422a10001b1aada/1649269619359-0E7ARKVM3YXNYITKRFNP/Maria+Gonzalez.jpg?format=500w",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "ok",
+    "name": "María González",
+    "party": "Democratic",
+    "partyKey": "D",
+    "state": "CO"
+   },
+   {
+    "chamber": "lower",
     "district": "33",
     "districtId": "033",
     "email": "kenny.nguyen.house@coleg.gov",
@@ -14156,7 +14175,7 @@
     "id": "ocd-person/5af50689-4e90-49b1-8544-7a00048dad99",
     "image": "https://www.cthousegop.com/bolinsky/wp-content/uploads/sites/8/2016/12/Bolinsky-Bio-Web-Sized.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27106%27&dist_name=Bolinsky,%20Mitch",
@@ -14557,7 +14576,7 @@
     "id": "ocd-person/03642345-7acb-4294-91b5-84dcc3c18cc7",
     "image": "https://www.cthousegop.com/odea/wp-content/uploads/sites/46/2018/05/ODea-Headshot-683x1024.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27125%27&dist_name=O%27Dea,%20Tom",
@@ -15272,7 +15291,7 @@
     "id": "ocd-person/79d4059c-5faa-443f-a842-7b494ea2d57e",
     "image": "https://www.cthousegop.com/carney/wp-content/uploads/sites/13/2016/11/Carney-2017-Web-Bio-Pict-216x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27023%27&dist_name=Carney,%20Devin%20R.",
@@ -15503,7 +15522,7 @@
     "id": "ocd-person/02cd12d5-6a88-4834-b9b5-11fb491f6b4b",
     "image": "https://www.cthousegop.com/haines/wp-content/uploads/sites/77/2021/12/BD3A1188-sized-232x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27034%27&dist_name=Haines,%20Irene%20M.",
@@ -15766,7 +15785,7 @@
     "id": "ocd-person/2342cde8-078f-4dd8-8879-f9fdaa036a94",
     "image": "https://www.cthousegop.com/dubitsky/wp-content/uploads/sites/23/2019/01/2-Dubitsky-headshot-cropped-v2-050318-5673-265x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27047%27&dist_name=Dubitsky,%20Doug",
@@ -15881,7 +15900,7 @@
     "id": "ocd-person/ffa361d0-7471-450e-aee8-cb0c32ee2742",
     "image": "https://www.cthousegop.com/vail/wp-content/uploads/sites/66/2016/11/Vail-Bio-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27052%27&dist_name=Kurt,%20Vail",
@@ -16011,7 +16030,7 @@
     "id": "ocd-person/5e47f657-ab56-4673-bebb-5a7c1a0410db",
     "image": "https://www.cthousegop.com/hall/wp-content/uploads/sites/34/2016/11/hall-bio-pict-big.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27059%27&dist_name=Hall,%20Carol",
@@ -16069,7 +16088,7 @@
     "id": "ocd-person/b57c3599-c0b0-4fd3-a48c-2bfd32d95071",
     "image": "https://www.cthousegop.com/zawistowski/wp-content/uploads/sites/71/2016/11/Zawistowski-Bio-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27061%27&dist_name=Zawistowski,%20Tami",
@@ -16110,7 +16129,7 @@
     "id": "ocd-person/fc3cb4e1-f784-46ac-9d54-1dd44cb817b0",
     "image": "https://www.cthousegop.com/case/wp-content/uploads/sites/15/2016/11/Case-2017-Web-Bio-Pict.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27063%27&dist_name=Jay,%20Case",
@@ -16206,7 +16225,7 @@
     "id": "ocd-person/df318645-047c-46a5-be61-682a7272e6b6",
     "image": "https://www.cthousegop.com/polletta/wp-content/uploads/sites/74/2017/04/Polletta-Web-Bio.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27068%27&dist_name=Polletta,%20Joe",
@@ -16378,7 +16397,7 @@
     "id": "ocd-person/e7f7ad52-69a8-4306-8dfe-02368f74d75b",
     "image": "https://www.cthousegop.com/piscopo/wp-content/uploads/sites/52/2016/11/Piscopo-Bio-Pict-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27076%27&dist_name=Piscopo,%20John",
@@ -16586,7 +16605,7 @@
     "id": "ocd-person/1d02baaa-ab25-4607-b33f-40948893f928",
     "image": "https://www.cthousegop.com/candelora/wp-content/uploads/sites/12/2022/02/Candelora-2022-Bio-Photo-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27086%27&dist_name=Candelora,%20Vincent%20J.",
@@ -16607,7 +16626,7 @@
     "id": "ocd-person/12835342-bb95-428a-ace3-78c51c3e8443",
     "image": "https://www.cthousegop.com/yaccarino/wp-content/uploads/sites/70/2020/11/Yaccarino-Headshot-240x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27087%27&dist_name=Yaccarino,%20Dave%20W.",
@@ -16647,7 +16666,7 @@
     "id": "ocd-person/cddc0b8f-51e5-4ed1-af05-41de718801f3",
     "image": "https://www.cthousegop.com/zupkus/wp-content/uploads/sites/73/2016/11/Zupkus_Bio_Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27089%27&dist_name=089-Lezlye%20Zupkus",
@@ -16687,7 +16706,7 @@
     "id": "ocd-person/02ce0fa3-ac25-42dd-9f5e-ee44b7e9d542",
     "image": "https://www.cthousegop.com/fishbein/wp-content/uploads/sites/28/2019/01/sm_Fishbein-headshot-020117-7754.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27090%27&dist_name=Fishbein,%20Craig%20C.",
@@ -17279,7 +17298,7 @@
     "id": "ocd-person/f0f89d15-9682-4a2e-8096-57700ac5b8dc",
     "image": "https://www.cthousegop.com/harding/wp-content/uploads/sites/35/2016/11/Harding_Bio_Photo_Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27107%27&dist_name=Harding,%20Stephen%20G.",
@@ -23451,7 +23470,7 @@
     "id": "ocd-person/af51c2db-8871-45a4-803d-314fa2b9d18d",
     "image": "https://www.legis.ga.gov/api/images/default-source/portraits/bentley-patty-811.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://www.house.ga.gov/Representatives/en-US/member.aspx?Member=811&Session=27",
@@ -72424,6 +72443,10 @@
     "districtId": "098",
     "email": "dporter@house.ms.gov",
     "id": "ocd-person/da9d953d-a95f-4166-9b94-e6c5e5b40c86",
+    "image": "https://www.pepperodom.com/wp-content/uploads/2019/05/daryl-porter-683x1024.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://billstatus.ls.state.ms.us/members/house/porter.xml"
     ],
@@ -86010,6 +86033,10 @@
     "districtId": "513",
     "email": "dillon.dumont@gc.nh.gov",
     "id": "ocd-person/8be0bff9-f1a4-410d-9177-0080a7c40f0a",
+    "image": "https://www.hudsonnh.gov/sites/default/files/styles/full_node_primary/public/imageattachments/directory/53200/d._dumont_-_4-21-23.jpg?itok=u_RPt8Z2",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=11348",
      "https://gencourt.state.nh.us/house/members/member.aspx?pid=11348"
@@ -86862,6 +86889,7 @@
     "districtId": "503",
     "email": "marc.plamondon@gc.nh.gov",
     "id": "ocd-person/a5b1edc7-c0a1-49fe-824c-a9177a8e1218",
+    "image": "https://d1fdloi71mui9q.cloudfront.net/wxHeDOlTmrng9JXrmHMA_PzA4v4H07EpaEbgi",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=10998",
      "https://gencourt.state.nh.us/house/members/member.aspx?pid=10998",
@@ -87203,6 +87231,10 @@
     "districtId": "536",
     "email": "john.suiter@gc.nh.gov",
     "id": "ocd-person/fe4b2b32-0709-486c-910c-fa3bcfc54056",
+    "image": "https://www.ledgertranscript.com/attachments/35/47349035.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=11369",
      "https://gencourt.state.nh.us/house/members/member.aspx?pid=11369"
@@ -87319,6 +87351,10 @@
     "districtId": "504",
     "email": "ray.newman@gc.nh.gov",
     "id": "ocd-person/f68b34d8-19af-449e-a4cc-3d2729bb9e23",
+    "image": "https://www.citizenscount.org/sites/default/files/styles/candidate_detail_page_-_thumb/public/candidate-images/raynewman.jpg?itok=fz_-ogHQ",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=9107",
      "https://gencourt.state.nh.us/downloads/Members.txt",
@@ -87667,6 +87703,10 @@
     "districtId": "505",
     "email": "heather.raymond@gc.nh.gov",
     "id": "ocd-person/e1e26c8f-3b7f-42bf-89e2-33331ff83bb3",
+    "image": "https://nhhousedems.org/wp-content/uploads/2022/09/632c91a44ffa8-768x1152.jpeg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=10779",
      "https://gencourt.state.nh.us/house/members/member.aspx?pid=10779",
@@ -87862,6 +87902,7 @@
     "districtId": "509",
     "email": "william.dolan@gc.nh.gov",
     "id": "ocd-person/967b5d85-d526-49ad-941a-1401fa855998",
+    "image": "http://dolanforrep.com/wp-content/uploads/2022/10/Professional-Photo-SMALL.jpg",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=10784",
      "https://www.gencourt.state.nh.us/house/members/member.aspx?pid=10784"
@@ -90752,6 +90793,10 @@
     "districtId": "812",
     "email": "biggamehunter53@aol.com",
     "id": "ocd-person/78fa874f-3651-424e-a8c7-094b2d89de95",
+    "image": "https://straffordcountydemocraticcommittee.org/wp-content/uploads/2024/08/John-Stone-Candidate-Profile-300x300.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=11284",
      "https://gencourt.state.nh.us/house/members/member.aspx?pid=11284"
@@ -91030,6 +91075,10 @@
     "district": "Strafford 20",
     "email": "allan.howland@gc.nh.gov",
     "id": "ocd-person/69b94b6a-d5d5-430b-a4b9-c62c8414cb75",
+    "image": "https://www.ci.durham.nh.us/sites/default/files/styles/full_node_primary/public/imageattachments/administration/page/19301/allan_howland_2_-_town_council.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=10903",
      "https://www.gencourt.state.nh.us/house/members/member.aspx?pid=10903"
@@ -91255,6 +91304,10 @@
     "districtId": "809",
     "email": "amy.malone@gc.nh.gov",
     "id": "ocd-person/47ad413d-8b61-4b5b-8be6-9c999fb1a682",
+    "image": "https://straffordcountydemocraticcommittee.org/wp-content/uploads/2024/08/Amy-Malone-NH-candidate-300x300.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=11278",
      "https://gencourt.state.nh.us/house/members/member.aspx?pid=11278"
@@ -93774,8 +93827,8 @@
     "id": "ocd-person/5dcef6ac-7dbe-4c65-a53b-670c89a615e7",
     "links": [
      "https://www.njleg.state.nj.us/legislative-roster/406/senator-cryan",
-     "https://www.njsendems.org/senators/joseph-cryan/",
-     "http://www.njleg.state.nj.us/members/bio.asp?Leg=204"
+     "https://www.njleg.state.nj.us/members/bio.asp?Leg=204",
+     "https://www.njsendems.org/senators/joseph-cryan/"
     ],
     "name": "Joe Cryan",
     "party": "Democratic",
@@ -95440,23 +95493,6 @@
    },
    {
     "chamber": "lower",
-    "district": "64",
-    "districtId": "064",
-    "email": "andrea.reeb@nmlegis.gov",
-    "id": "ocd-person/c4caca3c-faa3-445f-91e0-cce9edd53a5a",
-    "image": "https://www.nmlegis.gov/Images/Legislators/House/HREEB.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
-    "links": [
-     "https://www.nmlegis.gov/Members/Legislator?SponCode=HREEB"
-    ],
-    "name": "Andi Reeb",
-    "party": "Republican",
-    "partyKey": "R",
-    "state": "NM"
-   },
-   {
-    "chamber": "lower",
     "district": "65",
     "districtId": "065",
     "email": "derrick.lente@nmlegis.gov",
@@ -95849,7 +95885,7 @@
     "id": "ocd-person/02d806fd-fb8f-4d66-b9b8-6dacd2bd9656",
     "image": "https://antthorntonfornm.com/wp-content/uploads/2024/02/Ant-Thornton-768x768.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-28",
+    "imageChecked": "2026-10-29",
     "imageStatus": "notImage",
     "links": [
      "https://www.nmlegis.gov/Members/Legislator?SponCode=STHOR"
@@ -104148,25 +104184,6 @@
      "https://ohiohouse.gov/members/gary-click"
     ],
     "name": "Gary Click",
-    "party": "Republican",
-    "partyKey": "R",
-    "state": "OH"
-   },
-   {
-    "chamber": "lower",
-    "district": "89",
-    "districtId": "089",
-    "email": "rep89@ohiohouse.gov",
-    "id": "ocd-person/cb2ddd04-e5b0-4c96-b217-d02b732eb896",
-    "image": "https://www.legislature.ohio.gov/assets/people/d-j-swearingen/headshots/thumbnails/medium/d-j-swearingen-january-2021-headshot_medium.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
-    "links": [
-     "https://ohiohouse.gov/d-j-swearingen",
-     "https://www.ohiohouse.gov/d-j-swearingen",
-     "https://www.ohiohouse.gov/members/d-j-swearingen"
-    ],
-    "name": "D.J. Swearingen",
     "party": "Republican",
     "partyKey": "R",
     "state": "OH"
@@ -116173,6 +116190,10 @@
     "districtId": "036",
     "email": "rep-spears@rilegislature.gov",
     "id": "ocd-person/2c3d82e7-8bdc-4da9-bbab-e42bb5e223fb",
+    "image": "https://www.rilegislature.gov/representatives/Pictures/Tina%20Spears.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://www.rilegislature.gov/representatives/spears/pages/biography.aspx",
      "https://www.rilegislature.gov/representatives/spears/Pages/Biography.aspx"
@@ -116658,6 +116679,10 @@
     "districtPhone": "401-426-9389",
     "email": "rep-voas@rilegislature.gov",
     "id": "ocd-person/f0206346-2c07-4316-a556-cee7fe595e9a",
+    "image": "https://www.rilegislature.gov/representatives/Pictures/Brandon%20Voas.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://www.rilegislature.gov/representatives/voas/pages/biography.aspx",
      "https://www.rilegislature.gov/representatives/voas/Pages/Biography.aspx"
@@ -116674,6 +116699,10 @@
     "districtPhone": "401-222-2447",
     "email": "rep-cruz@rilegislature.gov",
     "id": "ocd-person/386a8117-95b5-441f-91d0-665effac1af4",
+    "image": "https://www.rilegislature.gov/representatives/Pictures/Cruz%20preferred%20pic.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://www.rilegislature.gov/representatives/cruz/Pages/Biography.aspx"
     ],
@@ -117051,6 +117080,10 @@
     "districtPhone": "401-206-1030",
     "email": "rep-finkelman@rilegislature.gov",
     "id": "ocd-person/202a1def-abb3-4f77-8ef1-5c453d2d5423",
+    "image": "https://www.rilegislature.gov/representatives/Pictures/Alex%20Finkelman.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://www.rilegislature.gov/representatives/finkelman/Pages/biography.aspx",
      "https://www.rilegislature.gov/representatives/finkelman/Pages/Biography.aspx"
@@ -121660,6 +121693,10 @@
     "districtId": "022",
     "email": "kevin.vandiepen@sdlegislature.gov",
     "id": "ocd-person/e94f9d65-3b95-40cb-b3c2-74126023b55f",
+    "image": "https://www.plainsman.com/uploads/original/20240109-142336-0a240151fba44bcc2fecc73323c1cfdd.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://sdlegislature.gov/Legislators/Profile/4699/Detail",
      "https://sdlegislature.gov/Legislators/Profile/4825/Detail"
@@ -121739,6 +121776,10 @@
     "districtId": "024",
     "email": "mike.weisgram@sdlegislature.gov",
     "id": "ocd-person/f611d7e5-8438-49da-a323-374bbf0af218",
+    "image": "https://bloximages.chicago2.vip.townnews.com/capjournal.com/content/tncms/assets/v3/editorial/5/dd/5dd71c64-93d9-11ea-a386-83ab371b2512/5eb9d679c54ee.image.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://sdlegislature.gov/Legislators/Profile/3789/Detail",
      "https://sdlegislature.gov/Legislators/Profile/4429/Detail",
@@ -122071,6 +122112,10 @@
     "districtId": "031",
     "email": "mary.fitzgerald@sdlegislature.gov",
     "id": "ocd-person/e03644b8-7ddd-4ae0-a734-6f6e76e735ba",
+    "image": "https://bloximages.chicago2.vip.townnews.com/capjournal.com/content/tncms/assets/v3/editorial/6/bb/6bb95f06-3413-11eb-b8a6-77bddc8623d9/5fc6d265841ef.image.png?resize=630%2C630",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://sdlegislature.gov/Legislators/Profile/3785/Detail",
      "https://sdlegislature.gov/Legislators/Profile/4358/Detail",
@@ -123787,6 +123832,10 @@
     "districtId": "035",
     "email": "rep.william.slater@capitol.tn.gov",
     "id": "ocd-person/33aa517f-98cc-4c9a-8bae-5b41542555fa",
+    "image": "https://bloximages.newyork1.vip.townnews.com/gallatinnews.com/content/tncms/assets/v3/editorial/e/3b/e3b758f4-03a2-11ed-9c70-97c00c9ae5a8/62d0609f6cb1e.image.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-29",
+    "imageStatus": "broken",
     "links": [
      "https://wapp.capitol.tn.gov/apps/legislatorinfo/member.aspx?district=H35",
      "https://wapp.capitol.tn.gov/apps/legislatorinfo/member?district=H35"

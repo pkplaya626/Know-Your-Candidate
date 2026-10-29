@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-28T14:41:23+00:00",
+ "fetched": "2026-10-29T15:04:38+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -12354,16 +12354,6 @@
    "state": "KS",
    "withheld": "the file the source names is gone"
   },
-  "ocd-person/c4caca3c-faa3-445f-91e0-cce9edd53a5a": {
-   "chamber": "lower",
-   "credit": "New Mexico Legislature",
-   "district": "64",
-   "name": "Andi Reeb",
-   "notSeated": "the legislature's page for them is a former member's (https://www.nmlegis.gov/Members/Former_Legislator?SponCode=HREEB)",
-   "read": "2026-10-19",
-   "state": "NM",
-   "withheld": "the legislature's page for them is a former member's (https://www.nmlegis.gov/Members/Former_Legislator?SponCode=HREEB)"
-  },
   "ocd-person/c51517ec-db1e-433d-a1d0-683547ae34a2": {
    "chamber": "lower",
    "credit": "Kansas Legislature",
@@ -12756,16 +12746,6 @@
    "sha": "8e445b3ab50da28e",
    "state": "CT",
    "width": 152
-  },
-  "ocd-person/cb2ddd04-e5b0-4c96-b217-d02b732eb896": {
-   "chamber": "lower",
-   "credit": "Ohio General Assembly",
-   "district": "89",
-   "name": "D.J. Swearingen",
-   "notSeated": "the chamber's directory lists the seat as vacant",
-   "read": "2026-10-19",
-   "state": "OH",
-   "withheld": "the chamber's directory lists the seat as vacant"
   },
   "ocd-person/cb7f246f-5619-4086-8e6a-79614bcbaca6": {
    "chamber": "lower",
