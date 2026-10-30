@@ -12783,19 +12783,19 @@
   {
    "candidate_id": "H4OR04141",
    "candidate_status": "N",
-   "cash_on_hand_end_period": "0.00",
-   "coverage_end_date": null,
-   "coverage_start_date": null,
-   "disbursements": 0.0,
+   "cash_on_hand_end_period": "3616.45",
+   "coverage_end_date": "2026-09-30",
+   "coverage_start_date": "2026-01-01",
+   "disbursements": 4247.55,
    "district_number": 4,
-   "has_raised_funds": false,
+   "has_raised_funds": true,
    "incumbent_challenge": "C",
    "last_f2_date": null,
    "name": "FILIP, JUSTIN",
    "office": "H",
    "party": "PG",
    "party_full": "PACIFIC GREEN",
-   "receipts": 0.0,
+   "receipts": 4636.0,
    "state": "OR"
   },
   {
@@ -14313,7 +14313,7 @@
   {
    "candidate_id": "H4WI06048",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "600072.64",
+   "cash_on_hand_end_period": "615524.89",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
    "disbursements": 1115971.85,
@@ -14325,7 +14325,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 1193554.78,
+   "receipts": 1209007.03,
    "state": "WI"
   },
   {
@@ -14464,7 +14464,7 @@
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
-   "last_f2_date": "2026-09-15",
+   "last_f2_date": "2026-10-28",
    "name": "HILL, BILL",
    "office": "H",
    "party": "IND",
@@ -35247,10 +35247,10 @@
   {
    "candidate_id": "H6KY03223",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "32360.60",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "40280.83",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
-   "disbursements": 42618.1,
+   "disbursements": 43767.87,
    "district_number": 3,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -35259,7 +35259,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 75078.7,
+   "receipts": 84148.7,
    "state": "KY"
   },
   {
@@ -48385,6 +48385,24 @@
    "state": "NY"
   },
   {
+   "candidate_id": "H6NY12453",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 12,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-28",
+   "name": "SOLOMON, GAVIN",
+   "office": "H",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "NY"
+  },
+  {
    "candidate_id": "H6NY13204",
    "candidate_status": "N",
    "cash_on_hand_end_period": "0.00",
@@ -53499,10 +53517,10 @@
   {
    "candidate_id": "H6RI01153",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "1832.40",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "1465.44",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-04-01",
-   "disbursements": 13578.04,
+   "disbursements": 13970.0,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -53511,7 +53529,7 @@
    "office": "H",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 15410.44,
+   "receipts": 15435.44,
    "state": "RI"
   },
   {
@@ -53841,10 +53859,10 @@
   {
    "candidate_id": "H6SC01334",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "311518.29",
+   "cash_on_hand_end_period": "308018.29",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-10-01",
-   "disbursements": 980477.52,
+   "disbursements": 983977.52,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -56740,7 +56758,7 @@
    "candidate_id": "H6TX08225",
    "candidate_status": "C",
    "cash_on_hand_end_period": "409.91",
-   "coverage_end_date": "2026-06-30",
+   "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-09-25",
    "disbursements": 11564.53,
    "district_number": 8,
@@ -59871,10 +59889,10 @@
   {
    "candidate_id": "H6TX31169",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "12397.55",
-   "coverage_end_date": "2026-06-30",
+   "cash_on_hand_end_period": "9151.43",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-12-04",
-   "disbursements": 66280.72,
+   "disbursements": 79969.82,
    "district_number": 31,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -59883,7 +59901,7 @@
    "office": "H",
    "party": "GRE",
    "party_full": "GREEN PARTY",
-   "receipts": 78678.27,
+   "receipts": 89121.25,
    "state": "TX"
   },
   {
@@ -61818,7 +61836,7 @@
    "cash_on_hand_end_period": "598734.27",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-07-01",
-   "disbursements": 4006026.95,
+   "disbursements": 4008644.79,
    "district_number": 1,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -61827,7 +61845,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 4604761.22,
+   "receipts": 4607379.06,
    "state": "VA"
   },
   {
@@ -68230,7 +68248,7 @@
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "I",
-   "last_f2_date": "2026-08-04",
+   "last_f2_date": "2026-10-29",
    "name": "COONS, CHRISTOPHER A.",
    "office": "S",
    "party": "DEM",
@@ -69033,10 +69051,10 @@
   {
    "candidate_id": "S4MS00187",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "4862.52",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "4046.64",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-01",
-   "disbursements": 105063.33,
+   "disbursements": 106254.1,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -69045,7 +69063,7 @@
    "office": "S",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 104310.83,
+   "receipts": 104685.72,
    "state": "MS"
   },
   {
@@ -69252,7 +69270,7 @@
    "cash_on_hand_end_period": "179.59",
    "coverage_end_date": "2026-06-30",
    "coverage_start_date": "2023-01-01",
-   "disbursements": 14237.84,
+   "disbursements": 14144.09,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -75606,7 +75624,7 @@
    "cash_on_hand_end_period": "22819.80",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-10-01",
-   "disbursements": 167719.91,
+   "disbursements": 167744.91,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "O",
@@ -75615,7 +75633,7 @@
    "office": "S",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 190539.71,
+   "receipts": 190564.71,
    "state": "MT"
   },
   {
@@ -77267,6 +77285,24 @@
    "has_raised_funds": false,
    "incumbent_challenge": null,
    "last_f2_date": "2026-10-24",
+   "name": "SOLOMON, GAVIN",
+   "office": "S",
+   "party": "W",
+   "party_full": "WRITE-IN",
+   "receipts": 0.0,
+   "state": "NY"
+  },
+  {
+   "candidate_id": "S6NY00649",
+   "candidate_status": "N",
+   "cash_on_hand_end_period": "0.00",
+   "coverage_end_date": null,
+   "coverage_start_date": null,
+   "disbursements": 0.0,
+   "district_number": 0,
+   "has_raised_funds": false,
+   "incumbent_challenge": null,
+   "last_f2_date": "2026-10-28",
    "name": "SOLOMON, GAVIN",
    "office": "S",
    "party": "W",
@@ -80319,7 +80355,7 @@
   {
    "candidate_id": "S8MA00268",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "85152.41",
+   "cash_on_hand_end_period": "78521.98",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-01-01",
    "disbursements": 159433.7,
@@ -80331,7 +80367,7 @@
    "office": "S",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 245728.59,
+   "receipts": 239098.16,
    "state": "MA"
   },
   {
@@ -80461,6 +80497,6 @@
    "state": "WY"
   }
  ],
- "count": 4470,
+ "count": 4472,
  "cycle": 2026
 }
