@@ -1823,6 +1823,12 @@
      "total": 753923.89
     },
     {
+     "committee": "AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL EMPLOYEES  P E O P L E",
+     "committeeId": "C00011114",
+     "count": 2,
+     "total": 604500.0
+    },
+    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
      "count": 1,
@@ -2747,6 +2753,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL EMPLOYEES  P E O P L E",
+     "committeeId": "C00011114",
+     "count": 2,
+     "total": 584500.0
+    },
     {
      "committee": "HMP",
      "committeeId": "C00495028",
@@ -4016,6 +4028,12 @@
      "committeeId": "C00495028",
      "count": 19,
      "total": 2276246.22
+    },
+    {
+     "committee": "AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL EMPLOYEES  P E O P L E",
+     "committeeId": "C00011114",
+     "count": 2,
+     "total": 329500.0
     },
     {
      "committee": "TRUST BRIGADE",
@@ -5683,6 +5701,12 @@
      "committeeId": "C00004036",
      "count": 1,
      "total": 48832.62
+    },
+    {
+     "committee": "AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL EMPLOYEES  P E O P L E",
+     "committeeId": "C00011114",
+     "count": 1,
+     "total": 42305.42
     }
    ]
   },
@@ -6076,6 +6100,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL EMPLOYEES  P E O P L E",
+     "committeeId": "C00011114",
+     "count": 2,
+     "total": 578900.0
+    },
     {
      "committee": "LEADERS WE DESERVE",
      "committeeId": "C00843110",
@@ -8160,8 +8190,8 @@
     {
      "committee": "END CITIZENS UNITED",
      "committeeId": "C00573261",
-     "count": 2,
-     "total": 57187.07
+     "count": 4,
+     "total": 113084.21
     }
    ],
    "support": [
@@ -9447,6 +9477,12 @@
   "H6MI10359": {
    "oppose": [
     {
+     "committee": "AMERICAN FEDERATION OF STATE COUNTY & MUNICIPAL EMPLOYEES  P E O P L E",
+     "committeeId": "C00011114",
+     "count": 2,
+     "total": 459500.0
+    },
+    {
      "committee": "HMP",
      "committeeId": "C00495028",
      "count": 4,
@@ -9635,8 +9671,8 @@
     {
      "committee": "CONGRESSIONAL PROGRESSIVE CAUCUS PAC",
      "committeeId": "C00513176",
-     "count": 2,
-     "total": 144000.0
+     "count": 4,
+     "total": 150662.5
     },
     {
      "committee": "AMERICAN PRIORITIES (AP)",
@@ -9871,6 +9907,12 @@
      "committeeId": "C00418897",
      "count": 1,
      "total": 67500.0
+    },
+    {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 2,
+     "total": 50000.0
     }
    ],
    "support": [
@@ -10955,6 +10997,12 @@
      "total": 3300.0
     },
     {
+     "committee": "UAW - V - CAP (UAW VOLUNTARY COMMUNITY ACTION PROGRAM) 'INT'L UNION UNITED AUTOMOBILE AEROSPACE & AGRICULTURAL IMPLEMENT WORKERS OF AMERICA UAW",
+     "committeeId": "C00002840",
+     "count": 2,
+     "total": 1280.0
+    },
+    {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
      "committeeId": "C00453704",
      "count": 3,
@@ -11007,6 +11055,12 @@
      "committeeId": "C00453704",
      "count": 2,
      "total": 731.07
+    },
+    {
+     "committee": "UAW - V - CAP (UAW VOLUNTARY COMMUNITY ACTION PROGRAM) 'INT'L UNION UNITED AUTOMOBILE AEROSPACE & AGRICULTURAL IMPLEMENT WORKERS OF AMERICA UAW",
+     "committeeId": "C00002840",
+     "count": 1,
+     "total": 583.98
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -12672,6 +12726,17 @@
     }
    ],
    "support": []
+  },
+  "H6TN09498": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "GO TIGERS PAC",
+     "committeeId": "C00697581",
+     "count": 1,
+     "total": 12411.64
+    }
+   ]
   },
   "H6TX02244": {
    "oppose": [
@@ -15246,6 +15311,12 @@
      "total": 556259.93
     },
     {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 2,
+     "total": 50000.0
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
@@ -15608,6 +15679,12 @@
      "committeeId": "C00745745",
      "count": 1,
      "total": 64618.1
+    },
+    {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 2,
+     "total": 50000.0
     }
    ],
    "support": []
@@ -16368,6 +16445,12 @@
      "committeeId": "C00754069",
      "count": 2,
      "total": 313520.8
+    },
+    {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 1,
+     "total": 100000.0
     },
     {
      "committee": "MICHIGAN DEMOCRATIC STATE CENTRAL COMMITTEE",
@@ -17772,6 +17855,12 @@
      "committeeId": "C00341396",
      "count": 22,
      "total": 119706.43
+    },
+    {
+     "committee": "END CITIZENS UNITED",
+     "committeeId": "C00573261",
+     "count": 1,
+     "total": 100000.0
     },
     {
      "committee": "PAF",
@@ -19672,5 +19761,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-29"
+ "read": "2026-10-30"
 }
