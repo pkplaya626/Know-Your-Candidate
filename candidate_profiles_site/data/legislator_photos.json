@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-30T14:50:55+00:00",
+ "fetched": "2026-10-31T14:18:01+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -2012,24 +2012,6 @@
    "state": "NM",
    "width": 300
   },
-  "ocd-person/1f501dde-37ba-49b3-ac83-0c77102ed8c3": {
-   "bytes": 241570,
-   "chamber": "lower",
-   "credit": "Vermont General Assembly",
-   "district": "Addison-4",
-   "evidence": "alt \"Representative Mari Cordes\"; page \"Representative Mari Cordes\"",
-   "height": 1200,
-   "image": "https://legislature.vermont.gov/Documents/Legislators/Cordes,Mari%20021.jpg",
-   "key": "member page",
-   "lastModified": "2025-01-18",
-   "lastModifiedAt": "2025-01-18T21:13:24",
-   "name": "Mari Cordes",
-   "page": "https://legislature.vermont.gov/people/single/2026/30939",
-   "read": "2026-10-25",
-   "sha": "4ab883a8a974f050",
-   "state": "VT",
-   "width": 1200
-  },
   "ocd-person/20082672-8aa7-4d49-bad7-fe5a92d1720d": {
    "bytes": 33533,
    "chamber": "lower",
@@ -2132,6 +2114,15 @@
    "read": "2026-10-19",
    "state": "KS",
    "withheld": "the file the source names is gone"
+  },
+  "ocd-person/20e614c9-dd9b-46ed-a3d4-aa1606f0a561": {
+   "chamber": "lower",
+   "credit": "Vermont General Assembly",
+   "district": "Franklin-8",
+   "name": "Jack Brigham",
+   "read": "2026-10-31",
+   "state": "VT",
+   "withheld": "https://legislature.vermont.gov/images/profile.png is offered on 3 members' pages"
   },
   "ocd-person/21b098a3-5f30-40c7-9169-1d4b92402a99": {
    "bytes": 68411,
@@ -11964,24 +11955,6 @@
    "state": "VT",
    "width": 1414
   },
-  "ocd-person/bd5d142d-90c3-41f6-b8af-7591316951da": {
-   "bytes": 296642,
-   "chamber": "lower",
-   "credit": "Vermont General Assembly",
-   "district": "Rutland-11",
-   "evidence": "alt \"Representative Jim Harrison\"; page \"Representative Jim Harrison\"",
-   "height": 1200,
-   "image": "https://legislature.vermont.gov/Documents/Legislators/Harrison,Jim%20012.jpg",
-   "key": "member page",
-   "lastModified": "2025-01-18",
-   "lastModifiedAt": "2025-01-18T19:19:46",
-   "name": "Jim Harrison",
-   "page": "https://legislature.vermont.gov/people/single/2026/28878",
-   "read": "2026-10-25",
-   "sha": "b2fe70ebef8e1f37",
-   "state": "VT",
-   "width": 1200
-  },
   "ocd-person/bd6e2ebb-5fc3-4a04-9def-d9e581c39783": {
    "bytes": 24181,
    "chamber": "lower",
@@ -12254,6 +12227,15 @@
    "state": "OK",
    "width": 125
   },
+  "ocd-person/c2b1d69e-f1d6-43a6-acb5-d980fdf1ed8c": {
+   "chamber": "lower",
+   "credit": "Vermont General Assembly",
+   "district": "Chittenden-18",
+   "name": "Kevin Scully",
+   "read": "2026-10-31",
+   "state": "VT",
+   "withheld": "https://legislature.vermont.gov/images/profile.png is offered on 3 members' pages"
+  },
   "ocd-person/c2eda1fb-6dc5-4326-a4b5-a295f26ee399": {
    "bytes": 19644,
    "chamber": "lower",
@@ -12432,25 +12414,6 @@
    "sha": "3813e752b65aa862",
    "state": "OK",
    "width": 125
-  },
-  "ocd-person/c5bca102-7637-45de-90fb-183c2c024f43": {
-   "bytes": 311950,
-   "chamber": "upper",
-   "credit": "Vermont General Assembly",
-   "district": "Orange",
-   "evidence": "alt \"Senator Larry Hart\"; page \"Senator Larry Hart\"",
-   "heavy": true,
-   "height": 1200,
-   "image": "https://legislature.vermont.gov/Documents/Legislators/Hart,Larry%20033.jpg",
-   "key": "member page",
-   "lastModified": "2025-01-18",
-   "lastModifiedAt": "2025-01-18T19:35:26",
-   "name": "Larry Hart",
-   "page": "https://legislature.vermont.gov/people/single/2026/40393",
-   "read": "2026-10-25",
-   "sha": "he4c82bcb0f81c23",
-   "state": "VT",
-   "width": 1200
   },
   "ocd-person/c5ea395a-7594-4585-b193-000e05f08005": {
    "bytes": 64936,
@@ -15038,6 +15001,15 @@
    "sha": "89c91d6f4a8055bc",
    "state": "NJ",
    "width": 250
+  },
+  "ocd-person/f1771de2-3410-4df0-8f0f-20aeb127a8f0": {
+   "chamber": "lower",
+   "credit": "Vermont General Assembly",
+   "district": "Washington-Orange",
+   "name": "David Soucy",
+   "read": "2026-10-31",
+   "state": "VT",
+   "withheld": "https://legislature.vermont.gov/images/profile.png is offered on 3 members' pages"
   },
   "ocd-person/f1d83642-4aa6-4fea-80f1-4c3f422c63ed": {
    "bytes": 49257,

@@ -1,5 +1,5 @@
 {
- "asOf": "2026-10-30",
+ "asOf": "2026-10-31",
  "changes": {
   "offices": {
    "agriculture": {
@@ -1324,7 +1324,7 @@
    "wikipedia": "https://en.wikipedia.org/"
   }
  },
- "fetched": "2026-10-30T15:04:51+00:00",
+ "fetched": "2026-10-31T14:29:25+00:00",
  "offices": [
   {
    "body": "Department of State",
