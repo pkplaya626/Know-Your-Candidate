@@ -40,7 +40,7 @@
    "height": 973,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
    "type": "image/jpeg",
    "width": 807
@@ -76,7 +76,7 @@
    "height": 1329,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
    "type": "image/jpeg",
    "width": 1113
@@ -91,7 +91,7 @@
    "height": 1080,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
    "type": "image/jpeg",
    "width": 1048
@@ -107,7 +107,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=35",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "66ea811e6896720ac02bc62b9b5c3010c9f84783b2d484f24f5b97eb2d924964",
    "sourceSha256": "d122af6046b6eed47f96087ce2655a2a0cfbb0eade51b1fcfcee3ebe63740193",
    "type": "image/png",
@@ -124,7 +124,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=32",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "84307b6eaed61e0ed24d50dc543a3bd7348fdbb76c929ccf970682e5b0a501ea",
    "sourceSha256": "b2e4071d718473886045f92064729322e5dc73d3167fd4e837026b3efb1459f5",
    "type": "image/png",
@@ -140,7 +140,7 @@
    "height": 857,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
    "type": "image/jpeg",
    "width": 751
@@ -156,7 +156,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=34",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "8c34d6c5670d0ded7391a04d3ff7495b02c8ca2c37a190853f6dddb57305ee91",
    "sourceSha256": "1e241eeb55ad58da4c179ed0503de827562e16f28aa8698fc648e2bf217702cd",
    "type": "image/png",
@@ -193,7 +193,7 @@
    "height": 2705,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
    "type": "image/jpeg",
    "width": 2254
@@ -209,7 +209,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book11_web.pdf#page=32",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "96b6ab3f3d932a2970abc41bca9190449abd06cc859298e1c3021e7b87aafdbc",
    "sourceSha256": "f8493c2c95b33d3dee1b6ea3c0d65ff1d045dd418c8e9da01ef7c906d9728cfb",
    "type": "image/png",
@@ -225,7 +225,7 @@
    "height": 433,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
    "type": "image/jpeg",
    "width": 361
@@ -240,7 +240,7 @@
    "height": 906,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
    "type": "image/jpeg",
    "width": 759
@@ -255,7 +255,7 @@
    "height": 1096,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
    "type": "image/jpeg",
    "width": 906
@@ -270,7 +270,7 @@
    "height": 501,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
    "type": "image/jpeg",
    "width": 418
@@ -285,7 +285,7 @@
    "height": 584,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
    "type": "image/jpeg",
    "width": 486
@@ -300,7 +300,7 @@
    "height": 619,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
    "type": "image/jpeg",
    "width": 517
@@ -316,7 +316,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=36",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "d879b05c460beddb58ed25185a9c132c1933bef5a02b778c9f87a53526bb4a71",
    "sourceSha256": "4268d7b64f5798df27a236fd858a87408dd132d06719a2f87e9669edd2a26d43",
    "type": "image/png",
@@ -353,7 +353,7 @@
    "height": 1320,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
    "type": "image/jpeg",
    "width": 1095
@@ -384,7 +384,7 @@
    "height": 907,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
    "type": "image/jpeg",
    "width": 758
@@ -51538,6 +51538,43 @@
    ],
    "width": 1200
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Benson,John%20002.jpg": {
+   "bytes": 2834031,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7619,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "6eae4e6af5e91b11c1bf.jpg",
+    "for": [
+     "legislator:VT:ocd-person/b2efb3b2-d580-404c-ace4-313fc17a1952"
+    ],
+    "from": [
+     3284,
+     4379
+    ],
+    "height": 224,
+    "made": "2026-10-31",
+    "quality": 0.86,
+    "sha256": "6eae4e6af5e91b11c1bf56847df21f599ac2a52ae5a52e5e02efccee0735aedd",
+    "width": 168
+   },
+   "etag": "\"2b3e6f-64e00adbbda80\"",
+   "gone": 0,
+   "height": 4379,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Fri, 27 Mar 2026 12:31:22 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:VT:ocd-person/b2efb3b2-d580-404c-ace4-313fc17a1952"
+   ],
+   "sha256": "acd9b15882756ce2ac3ea0d517f7739858ec273cb278bcadcb4d274a0c34435d",
+   "width": 3284
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Berbeco,Daisy%20036.jpg": {
    "bytes": 287543,
    "etag": "\"46337-62c00f4073880\"",
@@ -52216,21 +52253,6 @@
    "sha256": "1a5b623e22d6ef0741d786be3652cf2146db2e137fa2b986a73a7b6d94971530",
    "width": 1414
   },
-  "https://legislature.vermont.gov/Documents/Legislators/Cordes,Mari%20021.jpg": {
-   "bytes": 241570,
-   "etag": "\"3afa2-62c017f624500\"",
-   "gone": 0,
-   "height": 1200,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Sat, 18 Jan 2025 21:13:24 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/1f501dde-37ba-49b3-ac83-0c77102ed8c3"
-   ],
-   "width": 1200
-  },
   "https://legislature.vermont.gov/Documents/Legislators/Critchlow,Wendy.jpg": {
    "bytes": 50858,
    "etag": "\"c6aa-62a448be88309\"",
@@ -52625,21 +52647,6 @@
    "sha256": "b281588c79c182b0b92d04b229144d2e25a1edde6735ef207e2958cc1d412533",
    "width": 2000
   },
-  "https://legislature.vermont.gov/Documents/Legislators/HSurprenant.jpg": {
-   "bytes": 58859,
-   "etag": "\"e5eb-5b82886c60cad\"",
-   "gone": 0,
-   "height": 360,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Tue, 05 Jan 2021 15:04:42 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/a424d253-1d98-4865-a5b7-998d3ffd1bc8"
-   ],
-   "width": 360
-  },
   "https://legislature.vermont.gov/Documents/Legislators/Hardy.Ruth.jpg": {
    "bytes": 45956,
    "etag": "\"b384-5f3cbba983080\"",
@@ -52692,21 +52699,6 @@
    "sha256": "1fa4ac72664e2bd6b0aef53aa20d6dcbaf0c2b05fd363afb7889b39ed96b63ee",
    "width": 1233
   },
-  "https://legislature.vermont.gov/Documents/Legislators/Harrison,Jim%20012.jpg": {
-   "bytes": 296642,
-   "etag": "\"486c2-62bffe8ffd880\"",
-   "gone": 0,
-   "height": 1200,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Sat, 18 Jan 2025 19:19:46 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/bd5d142d-90c3-41f6-b8af-7591316951da"
-   ],
-   "width": 1200
-  },
   "https://legislature.vermont.gov/Documents/Legislators/Harrison,Wendy.jpg": {
    "bytes": 53981,
    "etag": "\"d2dd-61044658ada81\"",
@@ -52721,43 +52713,6 @@
     "legislator:VT:ocd-person/5d4b135e-4bed-4f7f-960a-250691fca6a8"
    ],
    "width": 360
-  },
-  "https://legislature.vermont.gov/Documents/Legislators/Hart,Larry%20033.jpg": {
-   "bytes": 311950,
-   "copy": {
-    "box": [
-     168,
-     210
-    ],
-    "bytes": 9904,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "aa8457b3cbb0cba7cadb.jpg",
-    "for": [
-     "legislator:VT:ocd-person/c5bca102-7637-45de-90fb-183c2c024f43"
-    ],
-    "from": [
-     1200,
-     1200
-    ],
-    "height": 210,
-    "made": "2026-10-25",
-    "quality": 0.86,
-    "sha256": "aa8457b3cbb0cba7cadbe6d8cba538d8667a31df3b16dcea63d8689597bf81c6",
-    "width": 210
-   },
-   "etag": "\"4c28e-62c0021071b80\"",
-   "gone": 0,
-   "height": 1200,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Sat, 18 Jan 2025 19:35:26 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/c5bca102-7637-45de-90fb-183c2c024f43"
-   ],
-   "sha256": "98e6041d9adafd42f2dc6dfe43e775b37f876ebcda665991bb8e7a8ac668a129",
-   "width": 1200
   },
   "https://legislature.vermont.gov/Documents/Legislators/Hashim.Nader.jpg": {
    "bytes": 1343773,
@@ -52848,21 +52803,6 @@
    ],
    "width": 320
   },
-  "https://legislature.vermont.gov/Documents/Legislators/Hooper,Robert.jpg": {
-   "bytes": 39889,
-   "etag": "\"9bd1-5f3cbbb8c5480\"",
-   "gone": 0,
-   "height": 320,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Fri, 03 Feb 2023 13:33:54 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/dec4c236-1cd1-465f-969c-0bb4b8a04992"
-   ],
-   "width": 320
-  },
   "https://legislature.vermont.gov/Documents/Legislators/Houghton,%20Lori.jpg": {
    "bytes": 1561811,
    "copy": {
@@ -52914,6 +52854,21 @@
     "legislator:VT:ocd-person/3d835c85-50e3-4a02-8891-baa377f63fa5"
    ],
    "width": 320
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Hoyt,Mike.jpg": {
+   "bytes": 53693,
+   "etag": "\"d1bd-659556feb4c98\"",
+   "gone": 0,
+   "height": 600,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 18 Aug 2026 17:15:45 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:VT:ocd-person/d799cf20-3603-4035-88b8-20d7bb45f627"
+   ],
+   "width": 600
   },
   "https://legislature.vermont.gov/Documents/Legislators/Hunter,Rob%20006.jpg": {
    "bytes": 287463,
@@ -53205,6 +53160,58 @@
    "sha256": "7e14dc10e73a41880b43d1c332da456d33735d98681e7a8bb20b0449e0020136",
    "width": 1414
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Long,%20Kumulia.jpg": {
+   "bytes": 43029,
+   "etag": "\"a815-65d2bda608740\"",
+   "gone": 0,
+   "height": 271,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 06 Oct 2026 13:19:49 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:VT:ocd-person/89c4edc3-e069-4f8f-a0b4-f57986aff04f"
+   ],
+   "width": 202
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Lueders,%20Karen.jpg": {
+   "bytes": 2549636,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 9530,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "256b00927deabbb58e82.jpg",
+    "for": [
+     "legislator:VT:ocd-person/337c5ad5-3e6d-483b-949f-fd0e2dbe985c"
+    ],
+    "from": [
+     3641,
+     3641
+    ],
+    "height": 210,
+    "made": "2026-10-31",
+    "quality": 0.86,
+    "sha256": "256b00927deabbb58e82e971c424c0b967448ec5619201398acc35e785afe7cd",
+    "width": 210
+   },
+   "etag": "\"26e784-647a3c2e47a37\"",
+   "gone": 0,
+   "height": 3641,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 05 Jan 2026 13:08:55 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:VT:ocd-person/337c5ad5-3e6d-483b-949f-fd0e2dbe985c"
+   ],
+   "sha256": "45fa765082fb758ea73f5ca4470ae6568061a46f9973cc5c3f6c215f30888da0",
+   "width": 3641
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Lyons,Ginny.jpg": {
    "bytes": 58709,
    "etag": "\"e555-5f3cbbe4a3c00\"",
@@ -53362,21 +53369,6 @@
    "sha256": "c5b5d672f53de8a34fbec9bcafb6dff1196c7a4898893874b9cb74bdac3e3ae7",
    "width": 1414
   },
-  "https://legislature.vermont.gov/Documents/Legislators/McFaun,Topper.jpg": {
-   "bytes": 62409,
-   "etag": "\"f3c9-5f3cbbfb87200\"",
-   "gone": 0,
-   "height": 320,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Fri, 03 Feb 2023 13:35:04 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/a7c7d0f6-8795-4f50-928b-15b6c3831ac4"
-   ],
-   "width": 320
-  },
   "https://legislature.vermont.gov/Documents/Legislators/McGill,Jubilee.jpg": {
    "bytes": 63439,
    "etag": "\"f7cf-5f3cbbfd6f680\"",
@@ -53406,6 +53398,43 @@
     "legislator:VT:ocd-person/ede0cb44-cafd-43ef-9b1c-3e6efdd759e7"
    ],
    "width": 320
+  },
+  "https://legislature.vermont.gov/Documents/Legislators/Morley,John.jpg": {
+   "bytes": 694023,
+   "copy": {
+    "box": [
+     168,
+     210
+    ],
+    "bytes": 7783,
+    "chrome": "Chrome/156.0.8078.47",
+    "file": "c4eb5f014864840a7a00.jpg",
+    "for": [
+     "legislator:VT:ocd-person/3925fa66-5990-42d3-b3d0-5ee83143d931"
+    ],
+    "from": [
+     1920,
+     1920
+    ],
+    "height": 210,
+    "made": "2026-10-31",
+    "quality": 0.86,
+    "sha256": "c4eb5f014864840a7a006f96610003a0288291bca21fa74cc3e331e636593eb2",
+    "width": 210
+   },
+   "etag": "\"a9707-6463f9ceba4c5\"",
+   "gone": 0,
+   "height": 1920,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 18 Dec 2025 20:14:49 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:VT:ocd-person/3925fa66-5990-42d3-b3d0-5ee83143d931"
+   ],
+   "sha256": "c69a663576c8f877896dd06b63c3ff1f7edcbf81a7666fc9e869e0876347ab94",
+   "width": 1920
   },
   "https://legislature.vermont.gov/Documents/Legislators/Morrissey,Mary%20012.jpg": {
    "bytes": 60760,
@@ -54151,6 +54180,21 @@
    ],
    "width": 1200
   },
+  "https://legislature.vermont.gov/Documents/Legislators/Taylor.Valorie.jpg": {
+   "bytes": 34542,
+   "etag": "\"86ee-65a954a1967fc\"",
+   "gone": 0,
+   "height": 282,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Thu, 03 Sep 2026 14:51:40 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:VT:ocd-person/70ab2e29-6232-4074-9539-2a514aa21dcf"
+   ],
+   "width": 250
+  },
   "https://legislature.vermont.gov/Documents/Legislators/Tomlinson,Chloe%20001.jpg": {
    "bytes": 270730,
    "etag": "\"4218a-62c0057bead00\"",
@@ -54165,21 +54209,6 @@
     "legislator:VT:ocd-person/239a4f3b-c9b4-474b-8e2a-eda545f0ef43"
    ],
    "width": 1200
-  },
-  "https://legislature.vermont.gov/Documents/Legislators/Toof,Casey.jpg": {
-   "bytes": 36739,
-   "etag": "\"8f83-5f3cbc6a27700\"",
-   "gone": 0,
-   "height": 320,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Fri, 03 Feb 2023 13:37:00 GMT",
-   "read": "2026-10-25",
-   "records": [
-    "legislator:VT:ocd-person/704de547-43b6-4dfa-bf95-c4137f263e00"
-   ],
-   "width": 320
   },
   "https://legislature.vermont.gov/Documents/Legislators/Torre,Dara%20001.jpg": {
    "bytes": 3420668,
@@ -85102,6 +85131,21 @@
    ],
    "width": 640
   },
+  "https://www.kslegislature.gov/static/li_pics/rep_alcala_john_1.jpg": {
+   "bytes": 10624,
+   "etag": "\"6adf5401-b223\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/f29363f0-8ac1-4c25-a8a7-74db5cefd9a4"
+   ],
+   "width": 205
+  },
   "https://www.kslegislature.gov/static/li_pics/rep_amyx_mike_1.jpg": {
    "bytes": 9478,
    "etag": "\"6adf5401-f2c0\"",
@@ -85114,6 +85158,96 @@
    "read": "2026-10-26",
    "records": [
     "legislator:KS:ocd-person/05204bb3-1917-4f12-848e-b83f68f5fddf"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_anderson_avery_1.jpg": {
+   "bytes": 6394,
+   "etag": "\"6adf5401-314c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/4544fc4e-fff8-4bbe-bc29-4e28c6be3179"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_awerkamp_francis_1.jpg": {
+   "bytes": 9010,
+   "etag": "\"6adf5401-b164\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/aa7fa5a0-596b-4f52-9af5-732b76f875e9"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_barrett_bradley_1.jpg": {
+   "bytes": 10916,
+   "etag": "\"6adf5401-4b19\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/cb7f246f-5619-4086-8e6a-79614bcbaca6"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_bergquist_emil_1.jpg": {
+   "bytes": 12516,
+   "etag": "\"6adf5401-5dcd\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/06e5710d-2c6a-4baa-829f-803417539415"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_blex_doug_1.jpg": {
+   "bytes": 11438,
+   "etag": "\"6adf5401-7e88\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/050b34c6-14a3-4998-a67a-13c02217a666"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_bloom_lewis_1.jpg": {
+   "bytes": 22672,
+   "etag": "\"6adf5401-9225\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/e6316819-6e7e-4560-9acf-a7c28e5cfbe7"
    ],
    "width": 205
   },
@@ -85132,6 +85266,1101 @@
    ],
    "width": 205
   },
+  "https://www.kslegislature.gov/static/li_pics/rep_bohi_lauren_1.jpg": {
+   "bytes": 5282,
+   "etag": "\"6adf5401-2c30\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/20c5c197-1683-45a4-a6f6-32b9cab0ba93"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_borjon_jesse_1.jpg": {
+   "bytes": 6966,
+   "etag": "\"6adf5401-9e35\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/0c2ba27f-4208-475d-a625-a12c5f0581b5"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_brantley_sherri_1.jpg": {
+   "bytes": 8908,
+   "etag": "\"6adf5401-3696\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/cf31199e-7382-4bbe-9359-92c92b428861"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_brunk_steve_1.jpg": {
+   "bytes": 6702,
+   "etag": "\"6adf5401-38f9\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/434a4028-6a95-4e5c-8f5e-98c8762f6570"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_bryce_ron_1.jpg": {
+   "bytes": 6596,
+   "etag": "\"6adf5401-f7aa\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/61d402db-ed53-4310-9c6b-c392755834a6"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_buehler_david_1.jpg": {
+   "bytes": 6632,
+   "etag": "\"6adf5401-f6aa\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/0a2abc46-725c-4637-bf38-dc83cb7f90fd"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_butler_nathan_1.jpg": {
+   "bytes": 10018,
+   "etag": "\"6adf5401-11137\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/529d7e5b-3acd-467b-b6b2-bf4314fcf633"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_caiharr_carolyn_1.jpg": {
+   "bytes": 7318,
+   "etag": "\"6adf5401-2b03\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/f1e5ad82-52f7-4a6a-b028-40df8a3f929b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_carr_ford_1.jpg": {
+   "bytes": 5456,
+   "etag": "\"6adf5401-3e06\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/96643a66-5a00-41ba-9aa6-fc126a92849c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_chauncey_shawn_1.jpg": {
+   "bytes": 7092,
+   "etag": "\"6adf5401-339e\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/97a9a84c-4616-44eb-845c-1e7064c41066"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_clayton_stephanie_1.jpg": {
+   "bytes": 13514,
+   "etag": "\"6adf5401-66e6\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/6c410bc7-76fd-4488-aca4-5158a5a55d70"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_collins_kenneth_1.jpg": {
+   "bytes": 7378,
+   "etag": "\"6adf5401-d619\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/9d1f2540-8f56-49c1-be08-2ee7b7faed8e"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_corbet_ken_1.jpg": {
+   "bytes": 11414,
+   "etag": "\"6adf5401-b521\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/afee9b4c-c30b-4cba-b5a2-e20a186c75b1"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_croft_chris_1.jpg": {
+   "bytes": 7404,
+   "etag": "\"6adf5401-5f21\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/e0cd5e74-7229-4c04-be9e-aa688868e703"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_curtis_pam_1.jpg": {
+   "bytes": 8804,
+   "etag": "\"6adf5401-8db1\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/57e6524f-40c5-4708-89ad-c80570bf31b1"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_droge_duane_1.jpg": {
+   "bytes": 6876,
+   "etag": "\"6adf5401-917f\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/75db09fb-b9dd-4c6f-ae73-bfde55d7dd62"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_ellis_ronald_1.jpg": {
+   "bytes": 7758,
+   "etag": "\"6adf5401-6de8\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/6daed22d-40c3-492c-948a-d3de94499e53"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_essex_robyn_1.jpg": {
+   "bytes": 12046,
+   "etag": "\"6adf5401-657f\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d034154f-ba03-4c97-ac96-c4023968f9b3"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_estes_susan_2.jpg": {
+   "bytes": 10492,
+   "etag": "\"6adf5b89-4395\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:54:17 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/075f264c-efcf-408f-baf8-b3f9306bae36"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_fairchild_brett_1.jpg": {
+   "bytes": 6518,
+   "etag": "\"6adf5401-4fe3\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/ca3f1bf6-44e0-4d67-b242-3cd29905723c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_francis_shannon_1.jpg": {
+   "bytes": 10904,
+   "etag": "\"6adf5401-612e\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/cc0df3af-9c8b-4834-a629-c16e4c8debcb"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_gardner_fred_1.jpg": {
+   "bytes": 8292,
+   "etag": "\"6adf5401-4d94\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/3ebdf5bf-c602-4181-914d-fd63b564ea2b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_goddard_dan_1.jpg": {
+   "bytes": 5402,
+   "etag": "\"6adf5401-3b19\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/2d7cf122-fd6c-406c-a158-de6c61ff0afa"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_goetz_jason_1.jpg": {
+   "bytes": 6094,
+   "etag": "\"6adf5401-41d1\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/55f1cbff-5420-44f1-8d6e-1970317cd150"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_haskins_kirk_1.jpg": {
+   "bytes": 6138,
+   "etag": "\"6adf5401-31a4\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/a81f29c0-88a5-4984-a36e-214eddb912fb"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_hawkins_daniel_1.jpg": {
+   "bytes": 7308,
+   "etag": "\"6adf5401-4590\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/26eb8f32-d499-4b8b-82c6-8fef014633a3"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_hoffman_kyle_1.jpg": {
+   "bytes": 14158,
+   "etag": "\"6adf5401-6509\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c51517ec-db1e-433d-a1d0-683547ae34a2"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_hoheisel_nick_1.jpg": {
+   "bytes": 14468,
+   "etag": "\"6adf5401-5454\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/df19b642-2877-4b6d-ab29-bbdd26deaa26"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_howe_steven_1.jpg": {
+   "bytes": 9068,
+   "etag": "\"6adf5401-d705\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/e5b4d1e8-40a3-4f75-af3a-36fc7e84a228"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_howerton_cyndi_1.jpg": {
+   "bytes": 20776,
+   "etag": "\"6adf5401-8a23\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c333ddca-e5a2-4638-910c-a816bcddd666"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_huebert_steve_1.jpg": {
+   "bytes": 7486,
+   "etag": "\"6adf5401-b9f7\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/528160f1-93ab-49f0-89d5-c00cf6e87b81"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_humphries_susan_1.jpg": {
+   "bytes": 9416,
+   "etag": "\"6adf5401-72d1\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/4ab616b7-79d2-4d89-ae25-cd4ea4e8c4c8"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_james_ricky_1.jpg": {
+   "bytes": 5966,
+   "etag": "\"6adf5401-3892\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/241d0891-9169-443e-be77-d3d00a57f401"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_johnson_timothy_1.jpg": {
+   "bytes": 6720,
+   "etag": "\"6adf5401-33a6\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/ecff64bf-dfd7-4df4-a1c2-681348e68fa8"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_kessler_tom_1.jpg": {
+   "bytes": 4822,
+   "etag": "\"6adf5401-5382\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/9cef565d-6e73-4090-80bc-a752310efc4c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_king_mike_1.jpg": {
+   "bytes": 7394,
+   "etag": "\"6adf5401-35c9\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/59368846-3703-44a5-a898-d7ab00c32c8b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_lewis_bob_1.jpg": {
+   "bytes": 7424,
+   "etag": "\"6adf5401-4b7a\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/05ca3b77-c9d8-4d8e-92bf-603b2f71eda6"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_long_martin_1.jpg": {
+   "bytes": 9360,
+   "etag": "\"6adf5401-13cfe\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/ef29753b-3048-4126-bc08-353befde18ab"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_martinez_angela_1.jpg": {
+   "bytes": 5758,
+   "etag": "\"6adf5b89-3d89\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:54:17 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/a587476a-1201-4d9f-b8b7-ac6f74b3f6ce"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_mcdonald_nikki_1.jpg": {
+   "bytes": 8348,
+   "etag": "\"6adf5401-3c36\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/7bb01d00-be23-4fb4-ab33-074c2826b69e"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_mcnorton_kyle_1.jpg": {
+   "bytes": 6142,
+   "etag": "\"6adf5401-30a5\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/2abcd1bf-54b0-4abe-a716-065895d88d6b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_melton_lynn_1.jpg": {
+   "bytes": 5632,
+   "etag": "\"6adf54e7-31b0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:25:59 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c1529b6d-c377-4491-9397-d61c1301243a"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_meyer_heather_1.jpg": {
+   "bytes": 14100,
+   "etag": "\"6adf5401-bba2\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/eaf4ca2d-ba48-4c99-88cc-2845e7237143"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_minnix_jim_1.jpg": {
+   "bytes": 17574,
+   "etag": "\"6adf5401-7f71\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/ca29b8ff-9845-40ba-a196-458cef943041"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_moser_lisa_1.jpg": {
+   "bytes": 10034,
+   "etag": "\"6adf5401-530c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/019607dd-e8e2-4c2e-b4cc-e95ccddb54a2"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_mosley_brooklynne_1.jpg": {
+   "bytes": 11238,
+   "etag": "\"6adf5401-4430\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/7191d22a-a111-4e14-b3d2-87c4084bea1b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_neelly_lance_1.jpg": {
+   "bytes": 8910,
+   "etag": "\"6adf5401-5aae\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/a1546322-9d4b-467c-a65a-57dddcc9c4cf"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_neighbor_cindy_1.jpg": {
+   "bytes": 13936,
+   "etag": "\"6adf5401-87ac\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/eafd24b5-d096-4fa0-92c4-3b4ced58c40f"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_ohaebosim_kc_1.jpg": {
+   "bytes": 8674,
+   "etag": "\"6adf5401-9b0a\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/16ed9e2b-5a1b-48b1-99c9-651a55061060"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_osman_dan_1.jpg": {
+   "bytes": 17516,
+   "etag": "\"6adf5401-7ae5\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d9b94e4b-d2b0-4139-8135-cba9ff03e8b7"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_ousley_jarrod_1.jpg": {
+   "bytes": 9972,
+   "etag": "\"6adf5401-4f67\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/65fa3818-4803-4821-8533-51a7802694ec"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_pickert_sandy_1.jpg": {
+   "bytes": 8680,
+   "etag": "\"6adf5401-febf\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/8e21a303-1c30-4c02-a8f8-8eacccb6873c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_poetter_samantha_1.jpg": {
+   "bytes": 14678,
+   "etag": "\"6adf5401-c2c4\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/31351496-5fc5-44fc-911f-0e7547a50a72"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_poskin_mari_lynn_1.jpg": {
+   "bytes": 10702,
+   "etag": "\"6adf5401-7d64\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/46d9caea-ab2c-4a6e-a08c-ebc927403dc8"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_proctor_pat_1.jpg": {
+   "bytes": 8348,
+   "etag": "\"6adf5401-77eb\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/fcd23935-0e7e-4896-9381-45ca745e8903"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_rahjes_ken_1.jpg": {
+   "bytes": 7494,
+   "etag": "\"6adf5401-9511\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/782cdea1-59a1-4930-8126-ffd1264420f9"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_rhiley_bill_1.jpg": {
+   "bytes": 8948,
+   "etag": "\"6adf5401-f988\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d01abc3e-cce3-450e-8d2c-41491b5bbde6"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_roeser_angelina_1.jpg": {
+   "bytes": 9468,
+   "etag": "\"6adf5401-3f7a\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/372f4e97-d36e-41c3-aae3-fd69da828ee5"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_roth_webster_1.jpg": {
+   "bytes": 8658,
+   "etag": "\"6adf5401-ff7f\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/41909a90-1eff-473a-8cb7-3c8770f667f4"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_ruiz_louis_1.jpg": {
+   "bytes": 10396,
+   "etag": "\"6adf5401-7397\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/6a7f0eed-6a34-4bd2-842c-2978ca9c6008"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_ruiz_susan_1.jpg": {
+   "bytes": 7880,
+   "etag": "\"6adf5401-4bce\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c06bc779-d072-495b-95f8-e5f4e67bdd4c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_sanders_clarke_1.jpg": {
+   "bytes": 5794,
+   "etag": "\"6adf5401-5bbb\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/3df522a5-5542-4ad4-b1bf-54736e60c601"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_sappington_courtney_1.jpg": {
+   "bytes": 10312,
+   "etag": "\"6adf5401-4848\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/3618106c-5f38-4df6-bf12-d58576bd7c93"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_sawyer_tom_1.jpg": {
+   "bytes": 11972,
+   "etag": "\"6adf5401-5c57\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/e6ca4faa-17ec-4256-9265-fbba8afcbb0e"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_schmoe_rebecca_1.jpg": {
+   "bytes": 6518,
+   "etag": "\"6adf5401-f869\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/23c34f8e-b06b-4de9-91c3-44892dbb2b7d"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_schreiber_mark_1.jpg": {
+   "bytes": 8596,
+   "etag": "\"6adf5401-7205\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/1748d756-be07-4eaf-be90-82992092e990"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_schwertfeger_kevin_1.jpg": {
+   "bytes": 11212,
+   "etag": "\"6adf5401-44f2\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d0ddb22e-8135-4ca0-856a-4c00c29f1d47"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_seiwert_joe_1.jpg": {
+   "bytes": 8980,
+   "etag": "\"6adf5401-4c43\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/29dad718-27f5-4cbb-9a2c-56fad33e4569"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_simmons_alexis_1.jpg": {
+   "bytes": 10256,
+   "etag": "\"6adf5401-443a\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/f3a06f5c-fe9a-42c9-ad04-82e1532b6979"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_smith_adam_1.jpg": {
+   "bytes": 11478,
+   "etag": "\"6adf5401-ad59\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c1802270-0126-4be5-b7e7-1a9a472f5fd7"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_smith_charles_1.jpg": {
+   "bytes": 8576,
+   "etag": "\"6adf5401-616a\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/8b617466-af12-4848-8cca-ed088fb196da"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_steele_megan_1.jpg": {
+   "bytes": 4532,
+   "etag": "\"6adf5401-5185\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/2b9bf649-25fe-4910-8ee9-fe1de5e978da"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_stiens_angela_1.jpg": {
+   "bytes": 9528,
+   "etag": "\"6adf5401-2ece\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/e0cddd71-639c-4b74-8dea-bc189418034d"
+   ],
+   "width": 205
+  },
   "https://www.kslegislature.gov/static/li_pics/rep_stogsdill_jerry_1.jpg": {
    "bytes": 9300,
    "etag": "\"6adf5401-7620\"",
@@ -85144,6 +86373,201 @@
    "read": "2026-10-26",
    "records": [
     "legislator:KS:ocd-person/4a358caf-0fad-4d45-8fa7-3c5ef062a544"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_sutton_william_1.jpg": {
+   "bytes": 5262,
+   "etag": "\"6adf5401-461d\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/dc23fc2c-0f64-4fab-96ec-951f0efbe7bb"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_sweely_kyler_1.jpg": {
+   "bytes": 5826,
+   "etag": "\"6adf5401-3252\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/630804aa-ee95-4839-9b15-7522ef06d5dd"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_tarwater_sean_1.jpg": {
+   "bytes": 9168,
+   "etag": "\"6adf5401-73f9\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/a65df523-1cb7-4ee3-ac85-1eec82b3fe2c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_turk_adam_1.jpg": {
+   "bytes": 6094,
+   "etag": "\"6adf5401-f4b6\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d7dd1de1-73e2-438a-bf25-c70e12ede30d"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_turner_carl_1.jpg": {
+   "bytes": 7602,
+   "etag": "\"6adf5401-65cf\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/71b474cb-1732-41fc-b525-4d53911cbbbe"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_vanhouden_charles_1.jpg": {
+   "bytes": 8358,
+   "etag": "\"6adf5401-37fd\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/bb92c4f1-d89e-4147-9b09-5fc1f56fca1c"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_vaughn_lindsay_1.jpg": {
+   "bytes": 8912,
+   "etag": "\"6adf5401-6eee\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/4a16a87e-2567-4361-9874-aaee47278840"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_waggoner_paul_1.jpg": {
+   "bytes": 10088,
+   "etag": "\"6adf5401-9b4c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/8dc23ca9-1ad8-466d-83d4-453f1bf324b0"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_wasinger_barbara_1.jpg": {
+   "bytes": 4416,
+   "etag": "\"6adf5401-41e6\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/7aac5ab6-1590-4cfe-8c02-d61f292497c8"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_waymaster_troy_1.jpg": {
+   "bytes": 7412,
+   "etag": "\"6adf5401-2ac7\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/655437d6-f80f-4e14-b061-c28a8977cf0f"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_weigel_virgil_1.jpg": {
+   "bytes": 9454,
+   "etag": "\"6adf5401-7624\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/acb8f24a-aecd-43a5-887c-be8bbf963e3d"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_wilborn_rick_1.jpg": {
+   "bytes": 9636,
+   "etag": "\"6adf5401-7a2f\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d9e298ca-0584-41ff-bb18-082072dfe73f"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_willcott_sean_1.jpg": {
+   "bytes": 6394,
+   "etag": "\"6adf5401-2db5\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c4b83a00-d449-498a-915f-7a7943110545"
    ],
    "width": 205
   },
@@ -85162,6 +86586,231 @@
    ],
    "width": 205
   },
+  "https://www.kslegislature.gov/static/li_pics/rep_williams_laura_1.jpg": {
+   "bytes": 15292,
+   "etag": "\"6adf5401-1284e\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/0ebc0742-f24c-4ab3-9155-7a4c37e2fa87"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_winn_valdenia_1.jpg": {
+   "bytes": 13644,
+   "etag": "\"6adf5401-3dd2\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/8d608ede-12f3-4ec4-8206-2c3dde0db6b7"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_wolf_dawn_1.jpg": {
+   "bytes": 7944,
+   "etag": "\"6adf5401-3599\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/39cab563-99a8-4412-8112-7b88b0911714"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/rep_woodard_brandon_1.jpg": {
+   "bytes": 7774,
+   "etag": "\"6adf5401-38c0\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c56cf970-39c2-4821-8723-a85dfe09cd6b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_billinger_rick_1.jpg": {
+   "bytes": 10630,
+   "etag": "\"6adf5401-9d09\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/e5d951f2-88c7-47d4-ac28-08c175ba440d"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_blasi_chase_1.jpg": {
+   "bytes": 10860,
+   "etag": "\"6adf5401-1c763\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c0c78c6c-d725-4f3b-8ae5-11446753d9a7"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_blew_marie_1.jpg": {
+   "bytes": 11264,
+   "etag": "\"6adf5401-5a67\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/80f9f23c-fa36-43ef-b97e-a9563bd4237b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_claeys_joseph_1.jpg": {
+   "bytes": 9674,
+   "etag": "\"6adf5401-1e165\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/918f677f-eac8-4e2d-acc9-eb2c3e4de80f"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_clifford_william_1.jpg": {
+   "bytes": 8190,
+   "etag": "\"6adf5401-4a45\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/463dcd61-1bf6-4182-ae6f-a840e43ea7fe"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_corson_ethan_1.jpg": {
+   "bytes": 7516,
+   "etag": "\"6adf5401-8633\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/76d729c5-1b4d-4966-8c99-5ac8b74d8719"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_erickson_renee_1.jpg": {
+   "bytes": 5172,
+   "etag": "\"6adf5401-6f7b\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/3093633a-62dc-4e93-a305-258a20bfd0f2"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_fagg_michael_1.jpg": {
+   "bytes": 10344,
+   "etag": "\"6adf5401-d02c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/a0787678-986f-459f-bba3-38d46ef55d8b"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_francisco_marci_1.jpg": {
+   "bytes": 7342,
+   "etag": "\"6adf5401-7193\"",
+   "gone": 0,
+   "height": 302,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/4fca7c3e-1f7c-455e-b555-a293ff578e60"
+   ],
+   "width": 202
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_gossage_beverly_1.jpg": {
+   "bytes": 10196,
+   "etag": "\"6adf5401-5366\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/35630402-1f6a-4a3e-b6cf-48c1b93bd6ae"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_hill_scott_1.jpg": {
+   "bytes": 6926,
+   "etag": "\"6adf5401-64df\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/64c3ae14-1ec8-46ed-b317-bcd9722319f5"
+   ],
+   "width": 205
+  },
   "https://www.kslegislature.gov/static/li_pics/sen_masterson_ty_1.jpg": {
    "bytes": 11582,
    "etag": "\"6adf5401-a76b\"",
@@ -85177,6 +86826,141 @@
    ],
    "width": 205
   },
+  "https://www.kslegislature.gov/static/li_pics/sen_owens_stephen_1.jpg": {
+   "bytes": 8852,
+   "etag": "\"6adf5401-9d00\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/413cc3ff-a3b9-465b-827d-4aeb4b0b42c1"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_peck_virgil_1.jpg": {
+   "bytes": 11438,
+   "etag": "\"6adf5401-b14e\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/90f4cf61-cce8-4f87-8495-c0dc298c8d27"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_petersen_mike_1.jpg": {
+   "bytes": 6706,
+   "etag": "\"6adf5401-6e6e\"",
+   "gone": 0,
+   "height": 302,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/4d244ceb-6d50-4670-93db-22ad153b3961"
+   ],
+   "width": 202
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_pettey_pat_1.jpg": {
+   "bytes": 8210,
+   "etag": "\"6adf5401-5335\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/148ed29a-4c96-4e69-9791-29b2bd3f09b6"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_ryckman_ronald_1.jpg": {
+   "bytes": 7920,
+   "etag": "\"6adf5401-408e\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/43caafd7-9177-40f4-b515-0681ef5930f3"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_schmidt_patrick_1.jpg": {
+   "bytes": 8002,
+   "etag": "\"6adf5401-724c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/8a08b0a9-eeff-495c-8fc8-7bbfe3e4dc26"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_shallenburger_tim_1.jpg": {
+   "bytes": 9886,
+   "etag": "\"6adf5401-9a78\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/c091ed05-ad26-42f2-b7e8-a830404cb152"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_shane_doug_1.jpg": {
+   "bytes": 8860,
+   "etag": "\"6adf5401-69d1\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/d0ae10e6-5c26-4be4-af00-036b23664127"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_starnes_brad_1.jpg": {
+   "bytes": 10594,
+   "etag": "\"6adf5401-546a\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/2b66826b-7af3-4053-8d3b-90dbcf4f0740"
+   ],
+   "width": 205
+  },
   "https://www.kslegislature.gov/static/li_pics/sen_sykes_dinah_1.jpg": {
    "bytes": 12454,
    "etag": "\"6adf5401-d3b9\"",
@@ -85189,6 +86973,81 @@
    "read": "2026-10-26",
    "records": [
     "legislator:KS:ocd-person/549c712e-1cc1-4ca7-9ef7-b09bb36d7229"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_thomas_adam_1.jpg": {
+   "bytes": 7802,
+   "etag": "\"6adf5401-402e\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/2c46aedb-f7a4-4f9a-bade-5ae192acc2a3"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_thompson_mike_1.jpg": {
+   "bytes": 13608,
+   "etag": "\"6adf5401-b2a8\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/97943c08-7d1f-400e-b71d-7a20e939b1d9"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_titus_kenny_1.jpg": {
+   "bytes": 13038,
+   "etag": "\"6adf5401-61ff\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/8a353296-bd2d-4fd6-b1b9-d8b3c8b3f771"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_tyson_caryn_1.jpg": {
+   "bytes": 10292,
+   "etag": "\"6adf5401-7aad\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/cc84252c-b7c6-484d-a036-dd38a90b1b04"
+   ],
+   "width": 205
+  },
+  "https://www.kslegislature.gov/static/li_pics/sen_warren_kellie_1.jpg": {
+   "bytes": 10682,
+   "etag": "\"6adf5401-916c\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
+   "read": "2026-10-31",
+   "records": [
+    "legislator:KS:ocd-person/85a66c0d-6f9e-4a55-947e-4d3dc28af0d8"
    ],
    "width": 205
   },
@@ -90363,7 +92222,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "records": [
     "legislator:GA:ocd-person/6f986b42-14f6-4147-9466-c49294331db9"
    ],
@@ -91690,7 +93549,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-10-30",
+   "read": "2026-10-31",
    "records": [
     "legislator:GA:ocd-person/4b162447-89a7-4ffc-acbf-617e1ad87e2a"
    ],

@@ -1,5 +1,5 @@
 {
- "fetched": "2026-10-30T14:50:37+00:00",
+ "fetched": "2026-10-31T14:17:45+00:00",
  "source": "Open States (Plural Policy), current legislators",
  "states": {
   "AK": [
@@ -5887,7 +5887,7 @@
     "id": "ocd-person/be626067-db01-4481-b096-d2792ff189c8",
     "image": "http://www.arkleg.state.ar.us/assembly/2011/Member%20Pictures/Steele_t.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://arkansashouse.org/district/72",
@@ -11488,7 +11488,8 @@
     "email": "senator.reyes@senate.ca.gov",
     "id": "ocd-person/19f694d8-b409-40e5-9f87-d8e3e84afc7f",
     "image": "https://www.assembly.ca.gov/sites/assembly.ca.gov/files/memberphotos/ad-50_reyes_e17_resized.jpg",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
     "imageStatus": "broken",
     "links": [
      "https://sd29.senate.ca.gov/"
@@ -14175,7 +14176,7 @@
     "id": "ocd-person/5af50689-4e90-49b1-8544-7a00048dad99",
     "image": "https://www.cthousegop.com/bolinsky/wp-content/uploads/sites/8/2016/12/Bolinsky-Bio-Web-Sized.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27106%27&dist_name=Bolinsky,%20Mitch",
@@ -14576,7 +14577,7 @@
     "id": "ocd-person/03642345-7acb-4294-91b5-84dcc3c18cc7",
     "image": "https://www.cthousegop.com/odea/wp-content/uploads/sites/46/2018/05/ODea-Headshot-683x1024.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27125%27&dist_name=O%27Dea,%20Tom",
@@ -15291,7 +15292,7 @@
     "id": "ocd-person/79d4059c-5faa-443f-a842-7b494ea2d57e",
     "image": "https://www.cthousegop.com/carney/wp-content/uploads/sites/13/2016/11/Carney-2017-Web-Bio-Pict-216x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27023%27&dist_name=Carney,%20Devin%20R.",
@@ -15522,7 +15523,7 @@
     "id": "ocd-person/02cd12d5-6a88-4834-b9b5-11fb491f6b4b",
     "image": "https://www.cthousegop.com/haines/wp-content/uploads/sites/77/2021/12/BD3A1188-sized-232x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27034%27&dist_name=Haines,%20Irene%20M.",
@@ -15785,7 +15786,7 @@
     "id": "ocd-person/2342cde8-078f-4dd8-8879-f9fdaa036a94",
     "image": "https://www.cthousegop.com/dubitsky/wp-content/uploads/sites/23/2019/01/2-Dubitsky-headshot-cropped-v2-050318-5673-265x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27047%27&dist_name=Dubitsky,%20Doug",
@@ -15900,7 +15901,7 @@
     "id": "ocd-person/ffa361d0-7471-450e-aee8-cb0c32ee2742",
     "image": "https://www.cthousegop.com/vail/wp-content/uploads/sites/66/2016/11/Vail-Bio-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27052%27&dist_name=Kurt,%20Vail",
@@ -16030,7 +16031,7 @@
     "id": "ocd-person/5e47f657-ab56-4673-bebb-5a7c1a0410db",
     "image": "https://www.cthousegop.com/hall/wp-content/uploads/sites/34/2016/11/hall-bio-pict-big.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27059%27&dist_name=Hall,%20Carol",
@@ -16088,7 +16089,7 @@
     "id": "ocd-person/b57c3599-c0b0-4fd3-a48c-2bfd32d95071",
     "image": "https://www.cthousegop.com/zawistowski/wp-content/uploads/sites/71/2016/11/Zawistowski-Bio-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27061%27&dist_name=Zawistowski,%20Tami",
@@ -16129,7 +16130,7 @@
     "id": "ocd-person/fc3cb4e1-f784-46ac-9d54-1dd44cb817b0",
     "image": "https://www.cthousegop.com/case/wp-content/uploads/sites/15/2016/11/Case-2017-Web-Bio-Pict.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27063%27&dist_name=Jay,%20Case",
@@ -16225,7 +16226,7 @@
     "id": "ocd-person/df318645-047c-46a5-be61-682a7272e6b6",
     "image": "https://www.cthousegop.com/polletta/wp-content/uploads/sites/74/2017/04/Polletta-Web-Bio.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27068%27&dist_name=Polletta,%20Joe",
@@ -16397,7 +16398,7 @@
     "id": "ocd-person/e7f7ad52-69a8-4306-8dfe-02368f74d75b",
     "image": "https://www.cthousegop.com/piscopo/wp-content/uploads/sites/52/2016/11/Piscopo-Bio-Pict-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27076%27&dist_name=Piscopo,%20John",
@@ -16605,7 +16606,7 @@
     "id": "ocd-person/1d02baaa-ab25-4607-b33f-40948893f928",
     "image": "https://www.cthousegop.com/candelora/wp-content/uploads/sites/12/2022/02/Candelora-2022-Bio-Photo-Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27086%27&dist_name=Candelora,%20Vincent%20J.",
@@ -16626,7 +16627,7 @@
     "id": "ocd-person/12835342-bb95-428a-ace3-78c51c3e8443",
     "image": "https://www.cthousegop.com/yaccarino/wp-content/uploads/sites/70/2020/11/Yaccarino-Headshot-240x300.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27087%27&dist_name=Yaccarino,%20Dave%20W.",
@@ -16666,7 +16667,7 @@
     "id": "ocd-person/cddc0b8f-51e5-4ed1-af05-41de718801f3",
     "image": "https://www.cthousegop.com/zupkus/wp-content/uploads/sites/73/2016/11/Zupkus_Bio_Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://www.cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27089%27&dist_name=089-Lezlye%20Zupkus",
@@ -16706,7 +16707,7 @@
     "id": "ocd-person/02ce0fa3-ac25-42dd-9f5e-ee44b7e9d542",
     "image": "https://www.cthousegop.com/fishbein/wp-content/uploads/sites/28/2019/01/sm_Fishbein-headshot-020117-7754.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27090%27&dist_name=Fishbein,%20Craig%20C.",
@@ -17298,7 +17299,7 @@
     "id": "ocd-person/f0f89d15-9682-4a2e-8096-57700ac5b8dc",
     "image": "https://www.cthousegop.com/harding/wp-content/uploads/sites/35/2016/11/Harding_Bio_Photo_Web.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://cga.ct.gov/asp/CGABillStatus/CGAMemberBills.asp?dist_code=%27107%27&dist_name=Harding,%20Stephen%20G.",
@@ -23470,7 +23471,7 @@
     "id": "ocd-person/af51c2db-8871-45a4-803d-314fa2b9d18d",
     "image": "https://www.legis.ga.gov/api/images/default-source/portraits/bentley-patty-811.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://www.house.ga.gov/Representatives/en-US/member.aspx?Member=811&Session=27",
@@ -41679,8 +41680,9 @@
     "email": "dan.hawkins@house.ks.gov",
     "id": "ocd-person/26eb8f32-d499-4b8b-82c6-8fef014633a3",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_hawkins_daniel_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_hawkins_daniel_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_hawkins_daniel_1/"
@@ -41697,8 +41699,9 @@
     "email": "joe.seiwert@house.ks.gov",
     "id": "ocd-person/29dad718-27f5-4cbb-9a2c-56fad33e4569",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_seiwert_joe_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_seiwert_joe_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_seiwert_joe_1/"
@@ -41715,8 +41718,9 @@
     "email": "kyler.sweely@house.ks.gov",
     "id": "ocd-person/630804aa-ee95-4839-9b15-7522ef06d5dd",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_sweely_kyler_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_sweely_kyler_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_sweely_kyler_1/"
@@ -41733,8 +41737,9 @@
     "email": "angela.martinez@house.ks.gov",
     "id": "ocd-person/a587476a-1201-4d9f-b8b7-ac6f74b3f6ce",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_martinez_angela_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_martinez_angela_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_martinez_angela_1/"
@@ -41751,8 +41756,9 @@
     "email": "paul.waggoner@house.ks.gov",
     "id": "ocd-person/8dc23ca9-1ad8-466d-83d4-453f1bf324b0",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_waggoner_paul_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_waggoner_paul_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_waggoner_paul_1/"
@@ -41788,8 +41794,9 @@
     "email": "lisa.moser@house.ks.gov",
     "id": "ocd-person/019607dd-e8e2-4c2e-b4cc-e95ccddb54a2",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_moser_lisa_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_moser_lisa_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_moser_lisa_1/"
@@ -41806,8 +41813,9 @@
     "email": "dawn.wolf@house.ks.gov",
     "id": "ocd-person/39cab563-99a8-4412-8112-7b88b0911714",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_wolf_dawn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_wolf_dawn_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_wolf_dawn_1/"
@@ -41824,8 +41832,9 @@
     "email": "brandon.woodard@house.ks.gov",
     "id": "ocd-person/c56cf970-39c2-4821-8723-a85dfe09cd6b",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_woodard_brandon_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_woodard_brandon_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_woodard_brandon_1/"
@@ -41842,8 +41851,9 @@
     "email": "troy.waymaster@house.ks.gov",
     "id": "ocd-person/655437d6-f80f-4e14-b061-c28a8977cf0f",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_waymaster_troy_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_waymaster_troy_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_waymaster_troy_1/"
@@ -41860,8 +41870,9 @@
     "email": "ron.bryce@house.ks.gov",
     "id": "ocd-person/61d402db-ed53-4310-9c6b-c392755834a6",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_bryce_ron_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_bryce_ron_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_bryce_ron_1/"
@@ -41878,8 +41889,9 @@
     "email": "ken.rahjes@house.ks.gov",
     "id": "ocd-person/782cdea1-59a1-4930-8126-ffd1264420f9",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_rahjes_ken_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_rahjes_ken_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_rahjes_ken_1/"
@@ -41896,8 +41908,9 @@
     "email": "barb.wasinger@house.ks.gov",
     "id": "ocd-person/7aac5ab6-1590-4cfe-8c02-d61f292497c8",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_wasinger_barbara_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_wasinger_barbara_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_wasinger_barbara_1/"
@@ -41914,8 +41927,9 @@
     "email": "sherri.brantley@house.ks.gov",
     "id": "ocd-person/cf31199e-7382-4bbe-9359-92c92b428861",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_brantley_sherri_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_brantley_sherri_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_brantley_sherri_1/"
@@ -41932,8 +41946,9 @@
     "email": "brett.fairchild@house.ks.gov",
     "id": "ocd-person/ca3f1bf6-44e0-4d67-b242-3cd29905723c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_fairchild_brett_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_fairchild_brett_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_fairchild_brett_1/"
@@ -41950,8 +41965,9 @@
     "email": "kevin.schwertfeger@house.ks.gov",
     "id": "ocd-person/d0ddb22e-8135-4ca0-856a-4c00c29f1d47",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_schwertfeger_kevin_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_schwertfeger_kevin_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_schwertfeger_kevin_1/"
@@ -41987,8 +42003,9 @@
     "email": "kyle.hoffman@house.ks.gov",
     "id": "ocd-person/c51517ec-db1e-433d-a1d0-683547ae34a2",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_hoffman_kyle_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_hoffman_kyle_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_hoffman_kyle_1/"
@@ -42005,8 +42022,9 @@
     "email": "adam.turk@house.ks.gov",
     "id": "ocd-person/d7dd1de1-73e2-438a-bf25-c70e12ede30d",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_turk_adam_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_turk_adam_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_turk_adam_1/"
@@ -42023,8 +42041,9 @@
     "email": "jim.minnix@house.ks.gov",
     "id": "ocd-person/ca29b8ff-9845-40ba-a196-458cef943041",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_minnix_jim_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_minnix_jim_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_minnix_jim_1/"
@@ -42041,8 +42060,9 @@
     "email": "jason.goetz@house.ks.gov",
     "id": "ocd-person/55f1cbff-5420-44f1-8d6e-1970317cd150",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_goetz_jason_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_goetz_jason_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_goetz_jason_1/"
@@ -42059,8 +42079,9 @@
     "email": "doug.blex@house.ks.gov",
     "id": "ocd-person/050b34c6-14a3-4998-a67a-13c02217a666",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_blex_doug_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_blex_doug_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_blex_doug_1/"
@@ -42077,8 +42098,9 @@
     "email": "adam.smith@house.ks.gov",
     "id": "ocd-person/c1802270-0126-4be5-b7e7-1a9a472f5fd7",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_smith_adam_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_smith_adam_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_smith_adam_1/"
@@ -42133,8 +42155,9 @@
     "email": "bob.lewis@house.ks.gov",
     "id": "ocd-person/05ca3b77-c9d8-4d8e-92bf-603b2f71eda6",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_lewis_bob_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_lewis_bob_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_lewis_bob_1/"
@@ -42151,8 +42174,9 @@
     "email": "marty.long@house.ks.gov",
     "id": "ocd-person/ef29753b-3048-4126-bc08-353befde18ab",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_long_martin_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_long_martin_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_long_martin_1/",
@@ -42170,8 +42194,9 @@
     "email": "shannon.francis@house.ks.gov",
     "id": "ocd-person/cc0df3af-9c8b-4834-a629-c16e4c8debcb",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_francis_shannon_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_francis_shannon_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_francis_shannon_1/"
@@ -42188,8 +42213,9 @@
     "email": "duane.droge@house.ks.gov",
     "id": "ocd-person/75db09fb-b9dd-4c6f-ae73-bfde55d7dd62",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_droge_duane_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_droge_duane_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_droge_duane_1/"
@@ -42226,8 +42252,9 @@
     "email": "lauren.bohi@house.ks.gov",
     "id": "ocd-person/20c5c197-1683-45a4-a6f6-32b9cab0ba93",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_bohi_lauren_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_bohi_lauren_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_bohi_lauren_1/"
@@ -42282,8 +42309,9 @@
     "email": "cindy.neighbor@house.ks.gov",
     "id": "ocd-person/eafd24b5-d096-4fa0-92c4-3b4ced58c40f",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_neighbor_cindy_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_neighbor_cindy_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_neighbor_cindy_1/"
@@ -42300,8 +42328,9 @@
     "email": "stephanie.clayton@house.ks.gov",
     "id": "ocd-person/6c410bc7-76fd-4488-aca4-5158a5a55d70",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_clayton_stephanie_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_clayton_stephanie_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_clayton_stephanie_1/"
@@ -42318,8 +42347,9 @@
     "email": "ken.collins@house.ks.gov",
     "id": "ocd-person/9d1f2540-8f56-49c1-be08-2ee7b7faed8e",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_collins_kenneth_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_collins_kenneth_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_collins_kenneth_1/"
@@ -42336,8 +42366,9 @@
     "email": "mari-lynn.poskin@house.ks.gov",
     "id": "ocd-person/46d9caea-ab2c-4a6e-a08c-ebc927403dc8",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_poskin_mari_lynn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_poskin_mari_lynn_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_poskin_mari_lynn_1/"
@@ -42373,8 +42404,9 @@
     "email": "lindsay.vaughn@house.ks.gov",
     "id": "ocd-person/4a16a87e-2567-4361-9874-aaee47278840",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_vaughn_lindsay_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_vaughn_lindsay_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_vaughn_lindsay_1/"
@@ -42391,8 +42423,9 @@
     "email": "susan.ruiz@house.ks.gov",
     "id": "ocd-person/c06bc779-d072-495b-95f8-e5f4e67bdd4c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_ruiz_susan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_ruiz_susan_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_ruiz_susan_1/"
@@ -42409,8 +42442,9 @@
     "email": "jarrod.ousley@house.ks.gov",
     "id": "ocd-person/65fa3818-4803-4821-8533-51a7802694ec",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_ousley_jarrod_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_ousley_jarrod_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_ousley_jarrod_1/"
@@ -42446,8 +42480,9 @@
     "email": "chip.vanhouden@house.ks.gov",
     "id": "ocd-person/bb92c4f1-d89e-4147-9b09-5fc1f56fca1c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_vanhouden_charles_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_vanhouden_charles_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_vanhouden_charles_1/"
@@ -42464,8 +42499,9 @@
     "email": "sean.tarwater@house.ks.gov",
     "id": "ocd-person/a65df523-1cb7-4ee3-ac85-1eec82b3fe2c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_tarwater_sean_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_tarwater_sean_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_tarwater_sean_1/"
@@ -42482,8 +42518,9 @@
     "email": "carl.turner@house.ks.gov",
     "id": "ocd-person/71b474cb-1732-41fc-b525-4d53911cbbbe",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_turner_carl_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_turner_carl_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_turner_carl_1/"
@@ -42500,8 +42537,9 @@
     "email": "heather.meyer@house.ks.gov",
     "id": "ocd-person/eaf4ca2d-ba48-4c99-88cc-2845e7237143",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_meyer_heather_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_meyer_heather_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_meyer_heather_1/"
@@ -42518,8 +42556,9 @@
     "email": "chuck.smith@house.ks.gov",
     "id": "ocd-person/8b617466-af12-4848-8cca-ed088fb196da",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_smith_charles_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_smith_charles_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_smith_charles_1/"
@@ -42536,8 +42575,9 @@
     "email": "laura.williams@house.ks.gov",
     "id": "ocd-person/0ebc0742-f24c-4ab3-9155-7a4c37e2fa87",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_williams_laura_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_williams_laura_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_williams_laura_1/",
@@ -42555,8 +42595,9 @@
     "email": "louis.ruiz@house.ks.gov",
     "id": "ocd-person/6a7f0eed-6a34-4bd2-842c-2978ca9c6008",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_ruiz_louis_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_ruiz_louis_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_ruiz_louis_1/"
@@ -42573,8 +42614,9 @@
     "email": "pam.curtis@house.ks.gov",
     "id": "ocd-person/57e6524f-40c5-4708-89ad-c80570bf31b1",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_curtis_pam_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_curtis_pam_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_curtis_pam_1/"
@@ -42591,8 +42633,9 @@
     "email": "carolyn.caiharr@house.ks.gov",
     "id": "ocd-person/f1e5ad82-52f7-4a6a-b028-40df8a3f929b",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_caiharr_carolyn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_caiharr_carolyn_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_caiharr_carolyn_1/"
@@ -42609,8 +42652,9 @@
     "email": "valdenia.winn@house.ks.gov",
     "id": "ocd-person/8d608ede-12f3-4ec4-8206-2c3dde0db6b7",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_winn_valdenia_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_winn_valdenia_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_winn_valdenia_1/"
@@ -42646,8 +42690,9 @@
     "email": "lynn.melton@house.ks.gov",
     "id": "ocd-person/c1529b6d-c377-4491-9397-d61c1301243a",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_melton_lynn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_melton_lynn_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_melton_lynn_1/"
@@ -42683,8 +42728,9 @@
     "email": "timothy.johnson@house.ks.gov",
     "id": "ocd-person/ecff64bf-dfd7-4df4-a1c2-681348e68fa8",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_johnson_timothy_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_johnson_timothy_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_johnson_timothy_1/"
@@ -42701,8 +42747,9 @@
     "email": "angela.stiens@house.ks.gov",
     "id": "ocd-person/e0cddd71-639c-4b74-8dea-bc189418034d",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_stiens_angela_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_stiens_angela_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_stiens_angela_1/"
@@ -42719,8 +42766,9 @@
     "email": "rick.james@house.ks.gov",
     "id": "ocd-person/241d0891-9169-443e-be77-d3d00a57f401",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_james_ricky_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_james_ricky_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_james_ricky_1/"
@@ -42737,8 +42785,9 @@
     "email": "david.buehler@house.ks.gov",
     "id": "ocd-person/0a2abc46-725c-4637-bf38-dc83cb7f90fd",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_buehler_david_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_buehler_david_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_buehler_david_1/"
@@ -42755,8 +42804,9 @@
     "email": "pat.proctor@house.ks.gov",
     "id": "ocd-person/fcd23935-0e7e-4896-9381-45ca745e8903",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_proctor_pat_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_proctor_pat_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_proctor_pat_1/"
@@ -42773,8 +42823,9 @@
     "email": "lance.neelly@house.ks.gov",
     "id": "ocd-person/a1546322-9d4b-467c-a65a-57dddcc9c4cf",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_neelly_lance_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_neelly_lance_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_neelly_lance_1/"
@@ -42791,8 +42842,9 @@
     "email": "bill.sutton@house.ks.gov",
     "id": "ocd-person/dc23fc2c-0f64-4fab-96ec-951f0efbe7bb",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_sutton_william_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_sutton_william_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_sutton_william_1/"
@@ -42844,8 +42896,9 @@
     "email": "brooklynne.mosley@house.ks.gov",
     "id": "ocd-person/7191d22a-a111-4e14-b3d2-87c4084bea1b",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_mosley_brooklynne_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_mosley_brooklynne_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_mosley_brooklynne_1/"
@@ -42862,8 +42915,9 @@
     "email": "ronald.ellis@house.ks.gov",
     "id": "ocd-person/6daed22d-40c3-492c-948a-d3de94499e53",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_ellis_ronald_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_ellis_ronald_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_ellis_ronald_1/"
@@ -42880,8 +42934,9 @@
     "email": "dan.osman@house.ks.gov",
     "id": "ocd-person/d9b94e4b-d2b0-4139-8135-cba9ff03e8b7",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_osman_dan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_osman_dan_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_osman_dan_1/"
@@ -42898,8 +42953,9 @@
     "email": "nikki.mcdonald@house.ks.gov",
     "id": "ocd-person/7bb01d00-be23-4fb4-ab33-074c2826b69e",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_mcdonald_nikki_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_mcdonald_nikki_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_mcdonald_nikki_1/"
@@ -42916,8 +42972,9 @@
     "email": "courtney.sappington@house.ks.gov",
     "id": "ocd-person/3618106c-5f38-4df6-bf12-d58576bd7c93",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_sappington_courtney_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_sappington_courtney_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_sappington_courtney_1/"
@@ -42934,8 +42991,9 @@
     "email": "kyle.mcnorton@house.ks.gov",
     "id": "ocd-person/2abcd1bf-54b0-4abe-a716-065895d88d6b",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_mcnorton_kyle_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_mcnorton_kyle_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_mcnorton_kyle_1/"
@@ -42952,8 +43010,9 @@
     "email": "megan.steele@house.ks.gov",
     "id": "ocd-person/2b9bf649-25fe-4910-8ee9-fe1de5e978da",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_steele_megan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_steele_megan_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_steele_megan_1/"
@@ -42970,8 +43029,9 @@
     "email": "jesse.borjon@house.ks.gov",
     "id": "ocd-person/0c2ba27f-4208-475d-a625-a12c5f0581b5",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_borjon_jesse_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_borjon_jesse_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_borjon_jesse_1/"
@@ -42988,8 +43048,9 @@
     "email": "kirk.haskins@house.ks.gov",
     "id": "ocd-person/a81f29c0-88a5-4984-a36e-214eddb912fb",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_haskins_kirk_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_haskins_kirk_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_haskins_kirk_1/"
@@ -43006,8 +43067,9 @@
     "email": "ken.corbet@house.ks.gov",
     "id": "ocd-person/afee9b4c-c30b-4cba-b5a2-e20a186c75b1",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_corbet_ken_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_corbet_ken_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_corbet_ken_1/"
@@ -43043,8 +43105,9 @@
     "email": "virgil.weigel@house.ks.gov",
     "id": "ocd-person/acb8f24a-aecd-43a5-887c-be8bbf963e3d",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_weigel_virgil_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_weigel_virgil_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_weigel_virgil_1/"
@@ -43061,8 +43124,9 @@
     "email": "john.alcala@house.ks.gov",
     "id": "ocd-person/f29363f0-8ac1-4c25-a8a7-74db5cefd9a4",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_alcala_john_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_alcala_john_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_alcala_john_1/"
@@ -43079,8 +43143,9 @@
     "email": "alexis.simmons@house.ks.gov",
     "id": "ocd-person/f3a06f5c-fe9a-42c9-ad04-82e1532b6979",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_simmons_alexis_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_simmons_alexis_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_simmons_alexis_1/"
@@ -43097,8 +43162,9 @@
     "email": "rebecca.schmoe@house.ks.gov",
     "id": "ocd-person/23c34f8e-b06b-4de9-91c3-44892dbb2b7d",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_schmoe_rebecca_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_schmoe_rebecca_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_schmoe_rebecca_1/"
@@ -43115,8 +43181,9 @@
     "email": "samantha.poetter@house.ks.gov",
     "id": "ocd-person/31351496-5fc5-44fc-911f-0e7547a50a72",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_poetter_samantha_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_poetter_samantha_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_poetter_samantha_1/"
@@ -43133,8 +43200,9 @@
     "email": "mark.schreiber@house.ks.gov",
     "id": "ocd-person/1748d756-be07-4eaf-be90-82992092e990",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_schreiber_mark_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_schreiber_mark_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_schreiber_mark_1/"
@@ -43151,8 +43219,9 @@
     "email": "francis.awerkamp@house.ks.gov",
     "id": "ocd-person/aa7fa5a0-596b-4f52-9af5-732b76f875e9",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_awerkamp_francis_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_awerkamp_francis_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_awerkamp_francis_1/"
@@ -43169,8 +43238,9 @@
     "email": "sean.willcott@house.ks.gov",
     "id": "ocd-person/c4b83a00-d449-498a-915f-7a7943110545",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_willcott_sean_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_willcott_sean_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_willcott_sean_1/"
@@ -43206,8 +43276,9 @@
     "email": "lewis.bloom@house.ks.gov",
     "id": "ocd-person/e6316819-6e7e-4560-9acf-a7c28e5cfbe7",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_bloom_lewis_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_bloom_lewis_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_bloom_lewis_1/"
@@ -43224,8 +43295,9 @@
     "email": "shawn.chauncey@house.ks.gov",
     "id": "ocd-person/97a9a84c-4616-44eb-845c-1e7064c41066",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_chauncey_shawn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_chauncey_shawn_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_chauncey_shawn_1/"
@@ -43261,8 +43333,9 @@
     "email": "angel.roeser@house.ks.gov",
     "id": "ocd-person/372f4e97-d36e-41c3-aae3-fd69da828ee5",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_roeser_angelina_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_roeser_angelina_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_roeser_angelina_1/"
@@ -43279,8 +43352,9 @@
     "email": "nate.butler@house.ks.gov",
     "id": "ocd-person/529d7e5b-3acd-467b-b6b2-bf4314fcf633",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_butler_nathan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_butler_nathan_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_butler_nathan_1/"
@@ -43297,8 +43371,9 @@
     "email": "clarke.sanders@house.ks.gov",
     "id": "ocd-person/3df522a5-5542-4ad4-b1bf-54736e60c601",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_sanders_clarke_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_sanders_clarke_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_sanders_clarke_1/"
@@ -43315,8 +43390,9 @@
     "email": "dan.goddard@house.ks.gov",
     "id": "ocd-person/2d7cf122-fd6c-406c-a158-de6c61ff0afa",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_goddard_dan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_goddard_dan_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_goddard_dan_1/"
@@ -43352,8 +43428,9 @@
     "email": "steven.howe@house.ks.gov",
     "id": "ocd-person/e5b4d1e8-40a3-4f75-af3a-36fc7e84a228",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_howe_steven_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_howe_steven_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_howe_steven_1/"
@@ -43370,8 +43447,9 @@
     "email": "avery.anderson@house.ks.gov",
     "id": "ocd-person/4544fc4e-fff8-4bbe-bc29-4e28c6be3179",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_anderson_avery_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_anderson_avery_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_anderson_avery_1/"
@@ -43388,8 +43466,9 @@
     "email": "richard.wilborn@house.ks.gov",
     "id": "ocd-person/d9e298ca-0584-41ff-bb18-082072dfe73f",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_wilborn_rick_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_wilborn_rick_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_wilborn_rick_1/"
@@ -43406,8 +43485,9 @@
     "email": "mike.king@house.ks.gov",
     "id": "ocd-person/59368846-3703-44a5-a898-d7ab00c32c8b",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_king_mike_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_king_mike_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_king_mike_1/"
@@ -43443,8 +43523,9 @@
     "email": "brad.barrett@house.ks.gov",
     "id": "ocd-person/cb7f246f-5619-4086-8e6a-79614bcbaca6",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_barrett_bradley_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_barrett_bradley_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_barrett_bradley_1/"
@@ -43480,8 +43561,9 @@
     "email": "robyn.essex@house.ks.gov",
     "id": "ocd-person/d034154f-ba03-4c97-ac96-c4023968f9b3",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_essex_robyn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_essex_robyn_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_essex_robyn_1/"
@@ -43498,8 +43580,9 @@
     "email": "webster.roth@house.ks.gov",
     "id": "ocd-person/41909a90-1eff-473a-8cb7-3c8770f667f4",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_roth_webster_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_roth_webster_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_roth_webster_1/"
@@ -43516,8 +43599,9 @@
     "email": "chris.croft@house.ks.gov",
     "id": "ocd-person/e0cd5e74-7229-4c04-be9e-aa688868e703",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_croft_chris_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_croft_chris_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_croft_chris_1/"
@@ -43534,8 +43618,9 @@
     "email": "bill.rhiley@house.ks.gov",
     "id": "ocd-person/d01abc3e-cce3-450e-8d2c-41491b5bbde6",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_rhiley_bill_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_rhiley_bill_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_rhiley_bill_1/"
@@ -43609,8 +43694,9 @@
     "email": "ford.carr@house.ks.gov",
     "id": "ocd-person/96643a66-5a00-41ba-9aa6-fc126a92849c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_carr_ford_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_carr_ford_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_carr_ford_1/"
@@ -43627,8 +43713,9 @@
     "email": "steve.brunk@house.ks.gov",
     "id": "ocd-person/434a4028-6a95-4e5c-8f5e-98c8762f6570",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_brunk_steve_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_brunk_steve_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_brunk_steve_1/"
@@ -43664,8 +43751,9 @@
     "email": "susan.estes@house.ks.gov",
     "id": "ocd-person/075f264c-efcf-408f-baf8-b3f9306bae36",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_estes_susan_2.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_estes_susan_2/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_estes_susan_2/"
@@ -43682,8 +43770,9 @@
     "email": "sandy.pickert@house.ks.gov",
     "id": "ocd-person/8e21a303-1c30-4c02-a8f8-8eacccb6873c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_pickert_sandy_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_pickert_sandy_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_pickert_sandy_1/"
@@ -43700,8 +43789,9 @@
     "email": "kc.ohaebosim@house.ks.gov",
     "id": "ocd-person/16ed9e2b-5a1b-48b1-99c9-651a55061060",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_ohaebosim_kc_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_ohaebosim_kc_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_ohaebosim_kc_1/"
@@ -43718,8 +43808,9 @@
     "email": "fred.gardner@house.ks.gov",
     "id": "ocd-person/3ebdf5bf-c602-4181-914d-fd63b564ea2b",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_gardner_fred_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_gardner_fred_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_gardner_fred_1/"
@@ -43736,8 +43827,9 @@
     "email": "steve.huebert@house.ks.gov",
     "id": "ocd-person/528160f1-93ab-49f0-89d5-c00cf6e87b81",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_huebert_steve_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_huebert_steve_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_huebert_steve_1/",
@@ -43755,8 +43847,9 @@
     "email": "emil.bergquist@house.ks.gov",
     "id": "ocd-person/06e5710d-2c6a-4baa-829f-803417539415",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_bergquist_emil_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_bergquist_emil_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_bergquist_emil_1/"
@@ -43831,8 +43924,9 @@
     "email": "tom.sawyer@house.ks.gov",
     "id": "ocd-person/e6ca4faa-17ec-4256-9265-fbba8afcbb0e",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_sawyer_tom_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_sawyer_tom_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_sawyer_tom_1/"
@@ -43849,8 +43943,9 @@
     "email": "tom.kessler@house.ks.gov",
     "id": "ocd-person/9cef565d-6e73-4090-80bc-a752310efc4c",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_kessler_tom_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_kessler_tom_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_kessler_tom_1/"
@@ -43867,8 +43962,9 @@
     "email": "nick.hoheisel@house.ks.gov",
     "id": "ocd-person/df19b642-2877-4b6d-ab29-bbdd26deaa26",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_hoheisel_nick_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_hoheisel_nick_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_hoheisel_nick_1/"
@@ -43885,8 +43981,9 @@
     "email": "cyndi.howerton@house.ks.gov",
     "id": "ocd-person/c333ddca-e5a2-4638-910c-a816bcddd666",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_howerton_cyndi_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_howerton_cyndi_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_howerton_cyndi_1/"
@@ -43903,8 +44000,9 @@
     "email": "susan.humphries@house.ks.gov",
     "id": "ocd-person/4ab616b7-79d2-4d89-ae25-cd4ea4e8c4c8",
     "image": "https://www.kslegislature.gov/static/li_pics/rep_humphries_susan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/legislators/rep_humphries_susan_1/",
      "https://www.kslegislature.gov/li/b2025_26/members/rep_humphries_susan_1/"
@@ -43940,8 +44038,9 @@
     "email": "mike.thompson@senate.ks.gov",
     "id": "ocd-person/97943c08-7d1f-400e-b71d-7a20e939b1d9",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_thompson_mike_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_thompson_mike_1/",
      "https://www.kslegislature.gov/senators/sen_thompson_mike_1/"
@@ -43958,8 +44057,9 @@
     "email": "kellie.warren@senate.ks.gov",
     "id": "ocd-person/85a66c0d-6f9e-4a55-947e-4d3dc28af0d8",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_warren_kellie_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_warren_kellie_1/",
      "https://www.kslegislature.gov/senators/sen_warren_kellie_1/"
@@ -43976,8 +44076,9 @@
     "email": "caryn.tyson@senate.ks.gov",
     "id": "ocd-person/cc84252c-b7c6-484d-a036-dd38a90b1b04",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_tyson_caryn_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_tyson_caryn_1/",
      "https://www.kslegislature.gov/senators/sen_tyson_caryn_1/"
@@ -43994,8 +44095,9 @@
     "email": "tim.shallenburger@senate.ks.gov",
     "id": "ocd-person/c091ed05-ad26-42f2-b7e8-a830404cb152",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_shallenburger_tim_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_shallenburger_tim_1/",
      "https://www.kslegislature.gov/senators/sen_shallenburger_tim_1/"
@@ -44012,8 +44114,9 @@
     "email": "michael.fagg@senate.ks.gov",
     "id": "ocd-person/a0787678-986f-459f-bba3-38d46ef55d8b",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_fagg_michael_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_fagg_michael_1/",
      "https://www.kslegislature.gov/senators/sen_fagg_michael_1/"
@@ -44030,8 +44133,9 @@
     "email": "virgil.peck@senate.ks.gov",
     "id": "ocd-person/90f4cf61-cce8-4f87-8495-c0dc298c8d27",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_peck_virgil_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_peck_virgil_1/",
      "https://www.kslegislature.gov/senators/sen_peck_virgil_1/"
@@ -44086,8 +44190,9 @@
     "email": "kenny.titus@senate.ks.gov",
     "id": "ocd-person/8a353296-bd2d-4fd6-b1b9-d8b3c8b3f771",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_titus_kenny_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_titus_kenny_1/",
      "https://www.kslegislature.gov/senators/sen_titus_kenny_1/"
@@ -44104,8 +44209,9 @@
     "email": "patrick.schmidt@senate.ks.gov",
     "id": "ocd-person/8a08b0a9-eeff-495c-8fc8-7bbfe3e4dc26",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_schmidt_patrick_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_schmidt_patrick_1/",
      "https://www.kslegislature.gov/senators/sen_schmidt_patrick_1/"
@@ -44122,8 +44228,9 @@
     "email": "marci.francisco@senate.ks.gov",
     "id": "ocd-person/4fca7c3e-1f7c-455e-b555-a293ff578e60",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_francisco_marci_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_francisco_marci_1/",
      "https://www.kslegislature.gov/senators/sen_francisco_marci_1/"
@@ -44178,8 +44285,9 @@
     "email": "brad.starnes@senate.ks.gov",
     "id": "ocd-person/2b66826b-7af3-4053-8d3b-90dbcf4f0740",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_starnes_brad_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://starnes4senate.com/",
      "https://www.kslegislature.gov/li/b2025_26/members/sen_starnes_brad_1/",
@@ -44197,8 +44305,9 @@
     "email": "adam.thomas@senate.ks.gov",
     "id": "ocd-person/2c46aedb-f7a4-4f9a-bade-5ae192acc2a3",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_thomas_adam_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_thomas_adam_1/",
      "https://www.kslegislature.gov/senators/sen_thomas_adam_1/"
@@ -44215,8 +44324,9 @@
     "email": "scott.hill@senate.ks.gov",
     "id": "ocd-person/64c3ae14-1ec8-46ed-b317-bcd9722319f5",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_hill_scott_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_hill_scott_1/",
      "https://www.kslegislature.gov/senators/sen_hill_scott_1/"
@@ -44253,8 +44363,9 @@
     "email": "chase.blasi@senate.ks.gov",
     "id": "ocd-person/c0c78c6c-d725-4f3b-8ae5-11446753d9a7",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_blasi_chase_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_blasi_chase_1/",
      "https://www.kslegislature.gov/senators/sen_blasi_chase_1/"
@@ -44271,8 +44382,9 @@
     "email": "joseph.claeys@senate.ks.gov",
     "id": "ocd-person/918f677f-eac8-4e2d-acc9-eb2c3e4de80f",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_claeys_joseph_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_claeys_joseph_1/",
      "https://www.kslegislature.gov/senators/sen_claeys_joseph_1/"
@@ -44289,8 +44401,9 @@
     "email": "mike.petersen@senate.ks.gov",
     "id": "ocd-person/4d244ceb-6d50-4670-93db-22ad153b3961",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_petersen_mike_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_petersen_mike_1/",
      "https://www.kslegislature.gov/senators/sen_petersen_mike_1/"
@@ -44345,8 +44458,9 @@
     "email": "renee.erickson@senate.ks.gov",
     "id": "ocd-person/3093633a-62dc-4e93-a305-258a20bfd0f2",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_erickson_renee_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_erickson_renee_1/",
      "https://www.kslegislature.gov/senators/sen_erickson_renee_1/"
@@ -44363,8 +44477,9 @@
     "email": "stephen.owens@senate.ks.gov",
     "id": "ocd-person/413cc3ff-a3b9-465b-827d-4aeb4b0b42c1",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_owens_stephen_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_owens_stephen_1/",
      "https://www.kslegislature.gov/senators/sen_owens_stephen_1/"
@@ -44400,8 +44515,9 @@
     "email": "torymarie.blew@senate.ks.gov",
     "id": "ocd-person/80f9f23c-fa36-43ef-b97e-a9563bd4237b",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_blew_marie_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_blew_marie_1/",
      "https://www.kslegislature.gov/senators/sen_blew_marie_1/"
@@ -44472,8 +44588,9 @@
     "email": "doug.shane@senate.ks.gov",
     "id": "ocd-person/d0ae10e6-5c26-4be4-af00-036b23664127",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_shane_doug_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_shane_doug_1/",
      "https://www.kslegislature.gov/senators/sen_shane_doug_1/"
@@ -44490,8 +44607,9 @@
     "email": "ron.ryckman@senate.ks.gov",
     "id": "ocd-person/43caafd7-9177-40f4-b515-0681ef5930f3",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_ryckman_ronald_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_ryckman_ronald_1/",
      "https://www.kslegislature.gov/senators/sen_ryckman_ronald_1/"
@@ -44508,8 +44626,9 @@
     "email": "william.clifford@senate.ks.gov",
     "id": "ocd-person/463dcd61-1bf6-4182-ae6f-a840e43ea7fe",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_clifford_william_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_clifford_william_1/",
      "https://www.kslegislature.gov/senators/sen_clifford_william_1/"
@@ -44545,8 +44664,9 @@
     "email": "rick.billinger@senate.ks.gov",
     "id": "ocd-person/e5d951f2-88c7-47d4-ac28-08c175ba440d",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_billinger_rick_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_billinger_rick_1/",
      "https://www.kslegislature.gov/senators/sen_billinger_rick_1/"
@@ -44582,8 +44702,9 @@
     "email": "pat.pettey@senate.ks.gov",
     "id": "ocd-person/148ed29a-4c96-4e69-9791-29b2bd3f09b6",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_pettey_pat_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_pettey_pat_1/",
      "https://www.kslegislature.gov/senators/sen_pettey_pat_1/"
@@ -44600,8 +44721,9 @@
     "email": "ethan.corson@senate.ks.gov",
     "id": "ocd-person/76d729c5-1b4d-4966-8c99-5ac8b74d8719",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_corson_ethan_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_corson_ethan_1/",
      "https://www.kslegislature.gov/senators/sen_corson_ethan_1/"
@@ -44637,8 +44759,9 @@
     "email": "beverly.gossage@senate.ks.gov",
     "id": "ocd-person/35630402-1f6a-4a3e-b6cf-48c1b93bd6ae",
     "image": "https://www.kslegislature.gov/static/li_pics/sen_gossage_beverly_1.jpg",
-    "imageChecked": "2026-10-17",
-    "imageStatus": "broken",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
      "https://www.kslegislature.gov/li/b2025_26/members/sen_gossage_beverly_1/",
      "https://www.kslegislature.gov/senators/sen_gossage_beverly_1/"
@@ -90047,7 +90170,8 @@
     "email": "buzz.scherr@gc.nh.gov",
     "id": "ocd-person/214295d3-da3e-45cb-89bc-80de2be1a071",
     "image": "https://bloximages.newyork1.vip.townnews.com/unionleader.com/content/tncms/assets/v3/editorial/c/73/c73dbee6-e3fd-59b7-b09b-cb7ac9197a64/60b10625b5ec1.image.jpg",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
     "imageStatus": "broken",
     "links": [
      "https://gc.nh.gov/house/members/member.aspx?pid=11267",
@@ -92119,7 +92243,8 @@
     "email": "asmmcclellan@njleg.org",
     "id": "ocd-person/4ebe8d6e-9814-4f68-aa9f-148c0942eaab",
     "image": "http://www.njleg.state.nj.us/members/memberphotos/mcclellan_antwan_2020.jpg",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
     "imageStatus": "broken",
     "links": [
      "https://www.njassemblygop.com/212/Antwan-McClellan",
@@ -92139,7 +92264,8 @@
     "email": "asmsimonsen@njleg.org",
     "id": "ocd-person/7f9ebe1c-d4fa-4dd0-8948-7cf6248ffb6d",
     "image": "http://www.njleg.state.nj.us/members/memberphotos/simonsen_erik_2020.jpg",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
     "imageStatus": "broken",
     "links": [
      "https://www.njassemblygop.com/235/Erik-Simonsen",
@@ -92278,7 +92404,8 @@
     "email": "asmscharfenberger@njleg.org",
     "id": "ocd-person/4323bf03-63e6-4f8b-9b2e-3554df7723bf",
     "image": "http://www.njleg.state.nj.us/members/memberphotos/scharfenberger_gerard_2020a.jpg",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
     "imageStatus": "broken",
     "links": [
      "https://www.njassemblygop.com/234/Gerry-Scharfenberger",
@@ -95890,7 +96017,8 @@
     "email": "natalie.figueroa@nmlegis.gov",
     "id": "ocd-person/48969449-b004-4ca3-a72b-8508e95e0051",
     "image": "https://www.nmlegis.gov/Images/Legislators/House/HFIGU.jpg",
-    "imageChecked": "2026-10-17",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
     "imageStatus": "broken",
     "links": [
      "https://www.linkedin.com/in/natalie-figueroa-150a0670/",
@@ -95913,7 +96041,7 @@
     "id": "ocd-person/02d806fd-fb8f-4d66-b9b8-6dacd2bd9656",
     "image": "https://antthorntonfornm.com/wp-content/uploads/2024/02/Ant-Thornton-768x768.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-30",
+    "imageChecked": "2026-10-31",
     "imageStatus": "notImage",
     "links": [
      "https://www.nmlegis.gov/Members/Legislator?SponCode=STHOR"
@@ -135159,16 +135287,17 @@
     "chamber": "lower",
     "district": "Addison-4",
     "districtId": "A-4",
-    "email": "mcordes@leg.state.vt.us",
-    "id": "ocd-person/1f501dde-37ba-49b3-ac83-0c77102ed8c3",
+    "email": "Karen.Lueders@vtleg.gov",
+    "id": "ocd-person/337c5ad5-3e6d-483b-949f-fd0e2dbe985c",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Lueders,%20Karen.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
-     "https://legislature.vermont.gov/people/single/2020/30939",
-     "https://legislature.vermont.gov/people/single/2022/30939",
-     "https://legislature.vermont.gov/people/single/2024/30939",
-     "https://legislature.vermont.gov/people/single/2026/30939"
+     "https://legislature.vermont.gov/people/single/2026/41827"
     ],
-    "name": "Mari Cordes",
-    "party": "Democratic/Progressive",
+    "name": "Karen Lueders",
+    "party": "Democratic",
     "partyKey": "D",
     "state": "VT"
    },
@@ -135768,27 +135897,6 @@
     "chamber": "lower",
     "district": "Chittenden-18",
     "districtId": "C18",
-    "email": "rhooper@leg.state.vt.us",
-    "id": "ocd-person/dec4c236-1cd1-465f-969c-0bb4b8a04992",
-    "image": "https://legislature.vermont.gov/Documents/Legislators/Hooper,Robert.jpg",
-    "imageBody": true,
-    "imageChecked": "2026-10-25",
-    "imageStatus": "ok",
-    "links": [
-     "https://legislature.vermont.gov/people/single/2020/30948",
-     "https://legislature.vermont.gov/people/single/2022/30948",
-     "https://legislature.vermont.gov/people/single/2024/30948",
-     "https://legislature.vermont.gov/people/single/2026/30948"
-    ],
-    "name": "Bob Hooper",
-    "party": "Democratic",
-    "partyKey": "D",
-    "state": "VT"
-   },
-   {
-    "chamber": "lower",
-    "district": "Chittenden-18",
-    "districtId": "C18",
     "email": "code@leg.state.vt.us",
     "id": "ocd-person/e9036574-9eac-4f0c-9bd2-1b425e96bb8c",
     "image": "https://legislature.vermont.gov/Documents/Legislators/Ode,Carol.jpg",
@@ -135803,6 +135911,20 @@
      "https://legislature.vermont.gov/people/single/2026/27161"
     ],
     "name": "Carol Ode",
+    "party": "Democratic",
+    "partyKey": "D",
+    "state": "VT"
+   },
+   {
+    "chamber": "lower",
+    "district": "Chittenden-18",
+    "districtId": "C18",
+    "email": "Kevin.Scully@vtleg.gov",
+    "id": "ocd-person/c2b1d69e-f1d6-43a6-acb5-d980fdf1ed8c",
+    "links": [
+     "https://legislature.vermont.gov/people/single/2026/43533"
+    ],
+    "name": "Kevin Scully",
     "party": "Democratic",
     "partyKey": "D",
     "state": "VT"
@@ -136239,18 +136361,16 @@
     "chamber": "lower",
     "district": "Chittenden-Franklin",
     "districtId": "C-F",
-    "email": "cataylor@leg.state.vt.us",
-    "id": "ocd-person/8a7c0a35-c3bc-4b94-a1c3-c726c8ecaaae",
-    "image": "https://3.files.edl.io/f264/22/08/30/162354-6ed2c7ed-c20a-4c29-a9b7-5c9e39e327f9.jpg",
+    "email": "Kumulia.Long@vtleg.gov",
+    "id": "ocd-person/89c4edc3-e069-4f8f-a0b4-f57986aff04f",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Long,%20Kumulia.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-25",
+    "imageChecked": "2026-10-31",
     "imageStatus": "ok",
     "links": [
-     "https://legislature.vermont.gov/Documents/SmallMaps/2022/House/Chittenden-Franklin.pdf",
-     "https://legislature.vermont.gov/people/single/2024/37400",
-     "https://legislature.vermont.gov/people/single/2026/37400"
+     "https://legislature.vermont.gov/people/single/2026/43336"
     ],
-    "name": "Chris Taylor",
+    "name": "Kumulia Long",
     "party": "Republican",
     "partyKey": "R",
     "state": "VT"
@@ -136513,20 +136633,12 @@
     "chamber": "lower",
     "district": "Franklin-8",
     "districtId": "F-8",
-    "email": "ctoof@leg.state.vt.us",
-    "id": "ocd-person/704de547-43b6-4dfa-bf95-c4137f263e00",
-    "image": "https://legislature.vermont.gov/Documents/Legislators/Toof,Casey.jpg",
-    "imageBody": true,
-    "imageChecked": "2026-10-25",
-    "imageStatus": "ok",
+    "email": "John.Brigham@vtleg.gov",
+    "id": "ocd-person/20e614c9-dd9b-46ed-a3d4-aa1606f0a561",
     "links": [
-     "https://legislature.vermont.gov/Documents/SmallMaps/2022/House/Franklin-8.pdf",
-     "https://legislature.vermont.gov/people/single/2020/30955",
-     "https://legislature.vermont.gov/people/single/2022/30955",
-     "https://legislature.vermont.gov/people/single/2024/30955",
-     "https://legislature.vermont.gov/people/single/2026/30955"
+     "https://legislature.vermont.gov/people/single/2026/43013"
     ],
-    "name": "Casey Toof",
+    "name": "Jack Brigham",
     "party": "Republican",
     "partyKey": "R",
     "state": "VT"
@@ -136962,16 +137074,16 @@
     "chamber": "lower",
     "district": "Rutland-11",
     "districtId": "R11",
-    "email": "jharrison@leg.state.vt.us",
-    "id": "ocd-person/bd5d142d-90c3-41f6-b8af-7591316951da",
+    "email": "valorie.taylor@vtleg.gov",
+    "id": "ocd-person/70ab2e29-6232-4074-9539-2a514aa21dcf",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Taylor.Valorie.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
-     "https://legislature.vermont.gov/Documents/SmallMaps/2022/House/Rutland-11.pdf",
-     "https://legislature.vermont.gov/people/single/2020/28878",
-     "https://legislature.vermont.gov/people/single/2022/28878",
-     "https://legislature.vermont.gov/people/single/2024/28878",
-     "https://legislature.vermont.gov/people/single/2026/28878"
+     "https://legislature.vermont.gov/people/single/2026/41956"
     ],
-    "name": "Jim Harrison",
+    "name": "Valorie Taylor",
     "party": "Republican",
     "partyKey": "R",
     "state": "VT"
@@ -137401,6 +137513,20 @@
     "chamber": "lower",
     "district": "Washington-Orange",
     "districtId": "WAO",
+    "id": "ocd-person/f1771de2-3410-4df0-8f0f-20aeb127a8f0",
+    "links": [
+     "http://legislature.vermont.gov/people/single/2018.1/29008",
+     "https://legislature.vermont.gov/people/single/2026/43427"
+    ],
+    "name": "David Soucy",
+    "party": "Republican",
+    "partyKey": "R",
+    "state": "VT"
+   },
+   {
+    "chamber": "lower",
+    "district": "Washington-Orange",
+    "districtId": "WAO",
     "email": "ggalfetti@leg.state.vt.us",
     "id": "ocd-person/39c4dae9-aee7-46f6-858d-e1eece72d79e",
     "image": "https://bloximages.chicago2.vip.townnews.com/timesargus.com/content/tncms/assets/v3/editorial/5/b7/5b7b1ad0-59f6-5da2-a83a-277b3e4e2423/633744ae63ab9.image.jpg?resize=1200%2C1645",
@@ -137413,27 +137539,6 @@
      "https://legislature.vermont.gov/people/single/2026/37372"
     ],
     "name": "Gina Galfetti",
-    "party": "Republican",
-    "partyKey": "R",
-    "state": "VT"
-   },
-   {
-    "chamber": "lower",
-    "district": "Washington-Orange",
-    "districtId": "WAO",
-    "email": "fmcfaun@leg.state.vt.us",
-    "id": "ocd-person/a7c7d0f6-8795-4f50-928b-15b6c3831ac4",
-    "image": "https://legislature.vermont.gov/Documents/Legislators/McFaun,Topper.jpg",
-    "imageBody": true,
-    "imageChecked": "2026-10-25",
-    "imageStatus": "ok",
-    "links": [
-     "https://legislature.vermont.gov/people/single/2020/14579",
-     "https://legislature.vermont.gov/people/single/2022/14579",
-     "https://legislature.vermont.gov/people/single/2024/14579",
-     "https://legislature.vermont.gov/people/single/2026/14579"
-    ],
-    "name": "Topper McFaun",
     "party": "Republican",
     "partyKey": "R",
     "state": "VT"
@@ -137751,20 +137856,16 @@
     "chamber": "lower",
     "district": "Windsor-4",
     "districtId": "Y-4",
-    "email": "hsurprenant@leg.state.vt.us",
-    "id": "ocd-person/a424d253-1d98-4865-a5b7-998d3ffd1bc8",
-    "image": "https://legislature.vermont.gov/Documents/Legislators/HSurprenant.jpg",
+    "email": "Michael.Hoyt@vtleg.gov",
+    "id": "ocd-person/d799cf20-3603-4035-88b8-20d7bb45f627",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Hoyt,Mike.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-25",
+    "imageChecked": "2026-10-31",
     "imageStatus": "ok",
     "links": [
-     "https://legislature.vermont.gov/Documents/SmallMaps/2022/House/Windsor-4.pdf",
-     "https://legislature.vermont.gov/Documents/SmallMaps/WDR-4-1.pdf",
-     "https://legislature.vermont.gov/people/single/2022/34695",
-     "https://legislature.vermont.gov/people/single/2024/34695",
-     "https://legislature.vermont.gov/people/single/2026/34695"
+     "https://legislature.vermont.gov/people/single/2026/41882"
     ],
-    "name": "Heather Surprenant",
+    "name": "Michael Hoyt",
     "party": "Democratic",
     "partyKey": "D",
     "state": "VT"
@@ -138275,12 +138376,16 @@
     "chamber": "upper",
     "district": "Orange",
     "districtId": "ORA",
-    "email": "lhart@leg.state.vt.us",
-    "id": "ocd-person/c5bca102-7637-45de-90fb-183c2c024f43",
+    "email": "John.Benson@vtleg.gov",
+    "id": "ocd-person/b2efb3b2-d580-404c-ace4-313fc17a1952",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Benson,John%20002.jpg",
+    "imageBody": true,
+    "imageChecked": "2026-10-31",
+    "imageStatus": "ok",
     "links": [
-     "https://legislature.vermont.gov/people/single/2026/40393"
+     "https://legislature.vermont.gov/people/single/2026/41940"
     ],
-    "name": "Larry Hart",
+    "name": "John Benson",
     "party": "Republican",
     "partyKey": "R",
     "state": "VT"
@@ -138289,16 +138394,16 @@
     "chamber": "upper",
     "district": "Orleans",
     "districtId": "ORL",
-    "email": "sdouglass@leg.state.vt.us",
-    "id": "ocd-person/a7824782-070e-47c0-992e-2a508f3da243",
-    "image": "https://s3.amazonaws.com/ballotpedia-api4/files/thumbs/200/300/Samuel_Douglass.png",
+    "email": "John.Morley@vtleg.gov",
+    "id": "ocd-person/3925fa66-5990-42d3-b3d0-5ee83143d931",
+    "image": "https://legislature.vermont.gov/Documents/Legislators/Morley,John.jpg",
     "imageBody": true,
-    "imageChecked": "2026-10-25",
+    "imageChecked": "2026-10-31",
     "imageStatus": "ok",
     "links": [
-     "https://legislature.vermont.gov/people/single/2026/40394"
+     "https://legislature.vermont.gov/people/single/2026/41884"
     ],
-    "name": "Sam Douglass",
+    "name": "John S Morley",
     "party": "Republican",
     "partyKey": "R",
     "state": "VT"

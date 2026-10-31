@@ -1,5 +1,5 @@
 {
- "asked": 2621,
+ "asked": 2623,
  "candidates": {
   "H0AL01055": {
    "oppose": [],
@@ -2089,8 +2089,8 @@
     {
      "committee": "JUSTICE DEMOCRATS PAC",
      "committeeId": "C00630665",
-     "count": 3,
-     "total": 173167.53
+     "count": 11,
+     "total": 428888.39
     },
     {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
@@ -9567,6 +9567,12 @@
    ],
    "support": [
     {
+     "committee": "JUSTICE DEMOCRATS PAC",
+     "committeeId": "C00630665",
+     "count": 12,
+     "total": 460546.7
+    },
+    {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
      "committeeId": "C00490375",
      "count": 1,
@@ -9577,12 +9583,6 @@
      "committeeId": "C00606962",
      "count": 14,
      "total": 297869.11
-    },
-    {
-     "committee": "JUSTICE DEMOCRATS PAC",
-     "committeeId": "C00630665",
-     "count": 3,
-     "total": 173167.53
     },
     {
      "committee": "AMERICAN PRIORITIES (AP)",
@@ -19761,5 +19761,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-30"
+ "read": "2026-10-31"
 }
