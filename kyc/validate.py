@@ -878,7 +878,7 @@ def check_results(profiles, races):
         if rid:
             contesting[rid].append(profile)
 
-    crowded, empty, beaten, retired, two_won = [], [], [], [], []
+    crowded, empty, beaten, retired, two_won, beside = [], [], [], [], [], []
     for race in races:
         if not race.get("settled"):
             continue
@@ -910,6 +910,19 @@ def check_results(profiles, races):
                      set(summary.get("otherElected") or ()))
         if len(won) > 1:
             two_won.append(f"{race['id']}: " + ", ".join(won))
+        # A race the results decided - its winner, or the two in its runoff
+        # - holds nobody still awaiting it: they read "Awaiting result: the
+        # results this site last read had not marked a winner" under "Won
+        # by" (the November rehearsal of 2026-11-01, certified lists'
+        # candidates whom the page's November table left out).
+        if won or summary.get("otherRunoff") or any(
+                p.get("raceStatus") == "runoff" for p in people):
+            # A name the results hold with no profile counts as much.
+            waiting = sorted({p["name"] for p in people
+                              if p.get("raceStatus") in ("nominee", "qualified")} |
+                             set(summary.get("otherNominees") or ()))
+            if waiting:
+                beside.append(f"{race['id']}: " + ", ".join(waiting))
         for pid in race["incumbentIds"]:
             member = by_id[pid]
             if member.get("contestRaceId") not in (None, race["id"]):
@@ -926,6 +939,12 @@ def check_results(profiles, races):
         issues.append(Issue("error", "multiple-elected",
                             f"{len(two_won)} races read as electing more than one "
                             f"person", two_won))
+    if beside:
+        # A warning, not an error: one race's words must not hold every
+        # other race's result back from the refresh.
+        issues.append(Issue("warn", "nominee-beside-result",
+                            f"{len(beside)} races read as decided with someone in them "
+                            f"still awaiting the result", beside))
     if crowded:
         issues.append(Issue("error", "multiple-nominees",
                             f"{len(crowded)} races give one party more than one "
@@ -1785,6 +1804,13 @@ def check_voting_links(cache):
                      for code, links in voting.effective(cache).items()
                      for kind, link in links.items() if not voting.official(link["url"], code))
     issues = []
+    # A sample ballot is shown only with its record: the office's page that
+    # links it, the words, the day, all on the jurisdiction's own domains.
+    unrecorded = voting.sample_problems()
+    if unrecorded:
+        issues.append(Issue("error", "voting-sample-unrecorded",
+                            f"{len(unrecorded)} sample-ballot pages in kyc/voting.py lack their "
+                            f"record or have one that does not hold", unrecorded))
     if foreign:
         issues.append(Issue("error", "voting-links-not-official",
                             f"{len(foreign)} voting links are not on their state's own "

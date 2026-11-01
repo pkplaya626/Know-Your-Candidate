@@ -1682,9 +1682,36 @@ class TestGeneralElectionNight(NoGap):
     ])
     GENERAL = "2026 Georgia's 5th congressional district election"
 
-    def general(self, alpha=False, delta=False):
-        return box(self.GENERAL, ("Ann Alpha", 49, alpha), ("Dee Delta", 48, delta),
-                   ("Ed Epsilon", 3, False))
+    def general(self, alpha=False, delta=False, votes=None):
+        # Georgia elects by a majority (O.C.G.A. 21-2-501): the one marked
+        # holds one, unless the case sets the count.
+        a, d = votes or ((52, 45) if alpha and not delta else (45, 52) if delta and not alpha
+                         else (49, 48))
+        return box(self.GENERAL, ("Ann Alpha", a, alpha), ("Dee Delta", d, delta),
+                   ("Ed Epsilon", 100 - a - d, False))
+
+    def test_a_georgia_leader_marked_short_of_a_majority_is_not_elected(self):
+        # The review of PR #168: a mark on 49.4% beside a Libertarian's
+        # 2.5% is a December runoff to come, not a win - nobody is elected
+        # or defeated until the runoff's table appears.
+        cache = self.run_build(datetime.date(2026, 11, 4),
+                               self.general(alpha=True, votes=(49, 48)))
+        self.assertEqual(self.statuses(cache), {
+            "alpha": "nominee", "beta": "eliminated", "delta": "nominee", "epsilon": "nominee"})
+        # A write-in line of its own counts toward the whole: 50 of 101.
+        text = (self.general(alpha=True, votes=(50, 47)).replace(
+            "{{Election box end}}",
+            "{{Election box write-in with party link|votes=1}}\n{{Election box end}}"))
+        out = results.resolve_race(results.parse_boxes(text), general_held=True,
+                                   general_runoff=True)
+        self.assertEqual(out["Ann Alpha"], "nominee")
+        # Once its runoff table is up, the November table's two are in it.
+        cache = self.run_build(datetime.date(2026, 11, 4),
+                               self.general(alpha=True, votes=(49, 48)),
+                               box("Runoff results", ("Ann Alpha", 0, False),
+                                   ("Dee Delta", 0, False)))
+        self.assertEqual((self.statuses(cache)["alpha"], self.statuses(cache)["epsilon"]),
+                         ("runoff", "defeated"))
 
     def run_build(self, today, *tables):
         page = "\n==District 5==\n" + self.primaries + "\n" + "\n".join(tables) + "\n"
@@ -1794,6 +1821,183 @@ class TestGeneralElectionNight(NoGap):
         self.assertTrue(member["seekingReelection2026"])
 
 
+NOVEMBER_2024 = os.path.join(FIXTURES, "november_2024")
+
+
+def november_2024(name):
+    """A 2024 page's results tables for one seat, as fetched for the
+    November rehearsal of 2026-11-01 (the revision is in the file's first
+    line)."""
+    with open(os.path.join(NOVEMBER_2024, name), encoding="utf-8") as handle:
+        return "\n" + handle.read()
+
+
+def as_2024():
+    """Read a 2024 page as that cycle's: a table titled with another year
+    than the cycle's is another election's."""
+    from unittest import mock
+    return mock.patch.object(results, "CYCLE", 2024)
+
+
+class TestNovember2024Rehearsal(unittest.TestCase):
+    """The November reading run over 2024's pages, as they stood the morning
+    after Election Day and once certified."""
+
+    def test_a_november_table_titled_by_its_seat_is_read(self):
+        # "Alabama's 1st congressional district, 2024": no word "election",
+        # so the table was never read - 83 seats of the 2024 pages, in
+        # eleven states, whose winners were marked on the certified revision.
+        with as_2024():
+            statuses = page_statuses(november_2024("al_1_certified.txt"), 1,
+                                     has_runoff=True, general_held=True)
+            self.assertEqual(results._stage("Florida's 7th congressional district, 2024"),
+                             "general")
+            self.assertEqual(results._stage("2024 Delaware's at-large congressional district"),
+                             "general")
+        self.assertEqual(statuses, {"Barry Moore": "elected", "Tom Holmes": "defeated",
+                                    "Jerry Carl": "eliminated"})
+        # A primary or a runoff for the seat stays what it is.
+        self.assertEqual(results._stage(
+            "Alabama's 2nd congressional district Republican primary runoff, 2026"), "runoff")
+        self.assertEqual(results._stage(
+            "Alabama's 2nd congressional district Democratic primary, 2026"), "primary")
+        self.assertEqual(results._stage("Florida's 7th congressional district, 2026"), "general")
+        self.assertIsNone(results._stage("Statehood Green results"))
+        # A past seat's own page is read by its words (kyc/seat_history.py).
+        self.assertEqual(results._stage(
+            "Alabama's 2nd congressional district Republican primary runoff, 2024",
+            cycle=None), "runoff")
+
+    def test_a_table_titled_with_another_year_is_another_election(self):
+        # The review of PR #168: a 2024-titled table left above TX-28's
+        # unmarked 2026 table was read as this November's, and its mark
+        # elected the 2024 winner.
+        for title in ("Texas's 28th congressional district, 2024",
+                      "2024 Texas's 28th congressional district election",
+                      "2024 United States Senate election in Texas",
+                      "Republican primary results, 2024"):
+            self.assertIsNone(results._stage(title), title)
+        # A party's assembly places names on the primary ballot; neither it
+        # nor a seat-titled one is the general.
+        self.assertIsNone(results._stage(
+            "Colorado's 5th congressional district Republican assembly"))
+        self.assertIsNone(results._stage("Republican assembly results"))
+        old = box("Texas's 28th congressional district, 2024",
+                  ("Henry Cuellar", 100, True), ("Jay Furman", 80, False))
+        new = box("2026 Texas's 28th congressional district election",
+                  ("Henry Cuellar", 0, False), ("Tano Tijerina", 0, False))
+        out = results.resolve_race(results.parse_boxes(old + "\n" + new), general_held=True)
+        self.assertEqual(out, {"Henry Cuellar": "nominee", "Tano Tijerina": "nominee"})
+
+    def test_a_ranked_choice_final_round_with_a_majority_is_read(self):
+        # Maine's 2nd district, as certified: one table, the final round,
+        # Golden 50.35%.
+        with as_2024():
+            statuses = page_statuses(november_2024("me_2_certified.txt"), 2,
+                                     general_held=True, ranked_choice=True)
+        self.assertEqual((statuses["Jared Golden"], statuses["Austin Theriault"]),
+                         ("elected", "defeated"))
+
+    def test_ranked_choice_first_choices_are_a_lead_not_a_win(self):
+        # Maine's 2nd district in 2018: Poliquin led the first choices with
+        # 46.3% and Golden won the tabulated rounds. A page that marks the
+        # first-choice leader before the rounds decides nothing.
+        first = box("Maine's 2nd congressional district, 2026",
+                    ("Bruce Poliquin", 134184, True), ("Jared Golden", 132013, False),
+                    ("Tiffany Bond", 16552, False), ("Will Hoar", 6875, False))
+        boxes = results.parse_boxes(first)
+        self.assertEqual(results.resolve_race(boxes, general_held=True)["Bruce Poliquin"],
+                         "elected")                       # elsewhere a plurality wins
+        statuses = results.resolve_race(boxes, general_held=True, ranked_choice=True)
+        self.assertEqual(set(statuses.values()), {"nominee"})
+        # A table with no counts at all (marked the morning after) is no
+        # majority either.
+        unknown = results.parse_boxes(first.replace("134,184", "").replace("132,013", ""))
+        self.assertEqual(results.resolve_race(unknown, general_held=True,
+                                              ranked_choice=True)["Bruce Poliquin"], "nominee")
+        # Once the final round is up, the same mark on the first choices is
+        # read beside it.
+        final = box("Maine's 2nd congressional district, 2026 (final round)",
+                    ("Jared Golden", 142440, True), ("Bruce Poliquin", 138931, False))
+        both = results.parse_boxes(first.replace("winning candidate", "candidate") + "\n" + final)
+        statuses = results.resolve_race(both, general_held=True, ranked_choice=True)
+        self.assertEqual((statuses["Jared Golden"], statuses["Bruce Poliquin"],
+                          statuses["Tiffany Bond"]), ("elected", "defeated", "defeated"))
+
+    def test_a_withdrawn_bullet_is_read_to_the_name(self):
+        # Two bullets on 2026's pages, read on 2026-11-01, that reach the
+        # November reading once Louisiana's page decides: no comma before the
+        # words about LA-5's Dixon McMakin, a comma inside KY-6's aside.
+        text = "\n".join([
+            "===Withdrawn===",
+            "*[[Dixon McMakin]] (Republican) [[Louisiana State House of Representatives|"
+            "state representative]] from the 68th district (2024–present)<ref>x</ref>",
+            "*Adam Perez Arquette ''(endorsed Alvarado, remained on ballot)''<ref>y</ref>",
+            "*[[John Smith (politician)|John Smith]] Jr., businessman",
+            "*[[Jane Roe]] (Democratic)",
+        ])
+        names = [r["name"] for title, rows in results.candidate_lists(text) for r in rows]
+        self.assertEqual(names, ["Dixon McMakin", "Adam Perez Arquette", "John Smith Jr.",
+                                 "Jane Roe"])
+
+    def test_the_build_counts_maine_and_alaska_by_ranked_choice(self):
+        self.assertEqual(set(results.RANKED_CHOICE), {"ME", "AK"})
+
+    def test_ranked_choice_counts_every_vote_and_every_nominee(self):
+        # The review of PR #168, on the shape of Alaska's at-large table on
+        # 2026-11-01: two named rows and two "TBD" slots. A mark on Begich
+        # beside Hill alone, with no count for the slots, is no majority.
+        tbd = ("{{Election box candidate with party link|party=TBD|candidate=TBD|votes=}}\n"
+               "{{Election box candidate with party link|party=TBD|candidate=TBD|votes=}}\n")
+        table = box("2026 Alaska's at-large congressional district election",
+                    ("Nick Begich", 120000, True), ("Bill Hill", 10000, False))
+        slots = table.replace("{{Election box end}}", tbd + "{{Election box end}}")
+        out = results.resolve_race(results.parse_boxes(slots), general_held=True,
+                                   ranked_choice=True)
+        self.assertEqual(set(out.values()), {"nominee"})
+        # Maine, a Senate table: Collins 300,000, Platner 290,000 and 20,000
+        # write-ins in a line of its own - 49.2% of the ballots counted.
+        maine = box("2026 United States Senate election in Maine",
+                    ("Susan Collins", 300000, True), ("Graham Platner", 290000, False))
+        write_in = maine.replace(
+            "{{Election box end}}",
+            "{{Election box write-in with party link|votes=20,000}}\n{{Election box end}}")
+        out = results.resolve_race(results.parse_boxes(write_in), general_held=True,
+                                   ranked_choice=True)
+        self.assertEqual(out["Susan Collins"], "nominee")
+        # Its own total says the same where the write-ins are not a line.
+        total = maine.replace(
+            "{{Election box end}}",
+            "{{Election box total no change|votes=610,000|percentage=100}}\n"
+            "{{Election box end}}")
+        out = results.resolve_race(results.parse_boxes(total), general_held=True,
+                                   ranked_choice=True)
+        self.assertEqual(out["Susan Collins"], "nominee")
+        # Elsewhere a plurality wins: the same table elects her.
+        self.assertEqual(results.resolve_race(results.parse_boxes(total),
+                                              general_held=True)["Susan Collins"], "elected")
+        # A November table that leaves out a nominee the infobox names
+        # decides nothing either, whatever the count.
+        boxes = results.parse_boxes(table) + [(results.INFOBOX_TITLE, [
+            {"name": n, "won": False, "withdrawn": False, "votes": None, "party": None,
+             "article": None} for n in ("Nick Begich", "Eric Hafner")])]
+        out = results.resolve_race(boxes, general_held=True, ranked_choice=True)
+        self.assertEqual(out["Nick Begich"], "nominee")
+        # With every nominee counted and a majority of the whole, it does.
+        whole = table.replace("{{Election box end}}",
+                              "{{Election box total no change|votes=140,000}}\n"
+                              "{{Election box end}}")
+        out = results.resolve_race(results.parse_boxes(whole), general_held=True,
+                                   ranked_choice=True)
+        self.assertEqual((out["Nick Begich"], out["Bill Hill"]), ("elected", "defeated"))
+
+    def test_before_election_day_the_seat_titled_table_is_the_ballot(self):
+        with as_2024():
+            statuses = page_statuses(november_2024("al_1_certified.txt"), 1, has_runoff=True)
+        self.assertEqual(statuses, {"Barry Moore": "nominee", "Tom Holmes": "nominee",
+                                    "Jerry Carl": "eliminated"})
+
+
 class TestAnotherSpellingOnThePage(NoGap):
     """ID-1, 2026-10-14: the November table writes "Sarah Zabel Peterson", the
     infobox "Sarah Zabel"; the filing is ZABEL, SARAH."""
@@ -1864,6 +2068,28 @@ class TestValidateElected(unittest.TestCase):
                       self.codes([("a", "Ann One", "elected"), ("b", "Bo Two", "elected")]))
         self.assertIn("multiple-elected",
                       self.codes([("a", "Ann One", "elected")], other=["Cy Three"]))
+
+    def test_a_nominee_beside_a_result_is_reported(self):
+        # The November rehearsal of 2026-11-01: a certified list's candidate
+        # the page's November table left out read "Awaiting result" under
+        # "Won by".
+        self.assertIn("nominee-beside-result",
+                      self.codes([("a", "Ann One", "elected"), ("b", "Bo Two", "nominee")]))
+        self.assertIn("nominee-beside-result",
+                      self.codes([("a", "Ann One", "runoff"), ("b", "Bo Two", "nominee")]))
+        self.assertNotIn("nominee-beside-result",
+                         self.codes([("a", "Ann One", "nominee"), ("b", "Bo Two", "nominee")]))
+        # A name the results hold with no profile here counts as much.
+        from kyc import validate
+        people = [{"id": "a", "name": "Ann One", "party": "Democrat", "raceStatus": "elected",
+                   "raceId": "H-GA-05-2026", "isCandidate": True},
+                  {"id": "b", "name": "Bo Two", "party": "Democrat", "raceStatus": "defeated",
+                   "raceId": "H-GA-05-2026", "isCandidate": True}]
+        race = dict(self.race, results={"otherNominees": ["Cy Unprofiled"]})
+        found = [i for i in validate.check_results(people, [race])
+                 if i.code == "nominee-beside-result"]
+        self.assertEqual(len(found), 1)
+        self.assertIn("Cy Unprofiled", " ".join(found[0].detail))
 
 
 class TestSenateDateFallback(unittest.TestCase):

@@ -2603,7 +2603,7 @@ _BALLOT_SOURCES = """\
                     official text and source.</p>
                 <p><strong>Not listed here:</strong> the candidates for the state legislature,
                     local ballot questions, and judicial and local contests. Where a state's
-                    election office links a sample ballot, the page links it.</p>"""
+                    election office offers a sample ballot, the page links it.</p>"""
 
 
 def render_ballot_page(host):
