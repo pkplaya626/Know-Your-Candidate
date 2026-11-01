@@ -15457,6 +15457,78 @@ async function testPeopleSplit() {
     failed.window.close();
   }
 
+  // The words can arrive seconds after the first matches are drawn: a
+  // reader who has since appended cards, opened a race's fold or is on a
+  // card keeps their place when the list is drawn again (PR #172 review;
+  // rule 45's "redrew the grid from its first card").
+  {
+    const type = (b, q) => {
+      const input = b.D.getElementById("searchInput");
+      input.value = q;
+      input.dispatchEvent(new b.window.Event("search"));
+    };
+    const label = (b) => b.D.getElementById("resultsLabel").textContent;
+    const cards = (b) => b.D.querySelectorAll("#results .card[data-id]");
+    // Everyone in Texas, out of the race too: more than one window of cards.
+    const grid = await buildPage("index.html", { people: "index", hash: "#/?eliminated=show",
+      hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(grid, "texas");
+    await until(() => /Still reading/.test(label(grid)), 5000);
+    const first = cards(grid).length;
+    const more = grid.D.getElementById("gridMore");
+    if (more) more.click();
+    const appended = cards(grid).length;
+    const on = cards(grid)[Math.min(appended - 1, first + 5)];
+    const onId = on && on.getAttribute("data-id");
+    if (on) on.focus();
+    grid.release();
+    await until(() => grid.window.KYC.wordsHeld() && !/Still reading/.test(label(grid)), 8000);
+    await settle(30);
+    const after = cards(grid).length;
+    const focused = grid.D.activeElement;
+
+    const races = await buildPage("index.html", { people: "index", hash: "#/?view=race",
+      hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(races, "texas");
+    await until(() => /Still reading/.test(label(races)), 5000);
+    const outs = [...races.D.querySelectorAll("#results details.race-out[data-out-race]")];
+    const out = outs[Math.min(2, outs.length - 1)];
+    const outKey = out && out.getAttribute("data-out-race");
+    if (out) openFold(races.window, out);
+    races.release();
+    await until(() => races.window.KYC.wordsHeld() && !/Still reading/.test(label(races)), 8000);
+    await settle(30);
+    const reopened = outKey && races.D.querySelector('#results details[data-out-race="' + outKey + '"]');
+    const openNow = [...races.D.querySelectorAll("#results details[open]")];
+
+    const still = await buildPage("index.html", { people: "index", hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(still, "texas");
+    await until(() => /Still reading/.test(label(still)), 5000);
+    still.release();
+    await until(() => still.window.KYC.wordsHeld() && !/Still reading/.test(label(still)), 8000);
+    await settle(30);
+    suite("index.html — the words arriving keep the reader's place", () => {
+      check("no page errors", [grid, races, still].every((b) => b.errors.length === 0),
+        [grid, races, still].flatMap((b) => b.errors).join(" | "));
+      check("the reader had appended cards past the first window", first > 0 && appended > first,
+        first + " then " + appended);
+      check("the list drawn again holds at least as many cards", after >= appended, after + " / " + appended);
+      check("and the card the reader was on keeps the focus",
+        !!onId && !!focused && focused.getAttribute("data-id") === onId &&
+          grid.D.getElementById("results").contains(focused),
+        onId + " / " + (focused && focused.getAttribute && focused.getAttribute("data-id")));
+      check("a race's fold the reader opened stays open, its people drawn",
+        !!reopened && reopened.open && reopened.querySelectorAll(".card").length > 0 &&
+          openNow.length === 1, (outKey || "no fold") + " / " + openNow.length + " open");
+      check("a reader who has not moved sees the list drawn as it is now, from its first window",
+        cards(still).length > 0 && cards(still).length <= 120, String(cards(still).length));
+    });
+    [grid, races, still].forEach((b) => b.window.close());
+  }
+
   // The directory of states counts every state's races from the index.
   {
     const full = await buildPage("states/index.html");

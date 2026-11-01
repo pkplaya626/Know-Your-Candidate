@@ -493,6 +493,101 @@
     });
   }
 
+  /* The words can arrive seconds after the first matches are drawn on a
+   * slow phone, and by then a reader may have scrolled on (the grid
+   * appending its next cards), opened a race's folds or be on a card.
+   * Redrawn from the first card, all of that was lost, the defect rule 45
+   * names ("closing a profile redrew the grid from its first card"; PR
+   * #172 review). So a reader who has not moved since the draw sees it
+   * drawn again as it would be now, the new matches in their places, and
+   * one who has keeps their place: as many cards as were drawn, the folds
+   * they opened, the card they were on, and the first thing in view where
+   * it was on the screen. */
+  var drawnTop = 0;
+  var windowAtLeast = 0;
+
+  function scroller(node) {
+    for (var at = node && node.parentElement; at && at !== doc.body; at = at.parentElement) {
+      var y = global.getComputedStyle ? global.getComputedStyle(at).overflowY : "";
+      if ((y === "auto" || y === "scroll") && at.scrollHeight > at.clientHeight) return at;
+    }
+    return doc.scrollingElement || doc.documentElement;
+  }
+
+  /** Where *node* is: its race (or none) and its own key, a card's id or a
+   *  fold's, so the same thing is found in the list drawn again. */
+  function placeKey(node) {
+    var race = node.closest("section[id]");
+    var where = race && race !== node ? race.id + "|" : "|";
+    if (node.matches("details")) {
+      var key = node.getAttribute("data-out-race") || node.getAttribute("data-fold");
+      if (key) return "fold" + where + key;
+      var all = race ? race.querySelectorAll("details") : [];
+      return "fold" + where + "#" + Array.prototype.indexOf.call(all, node);
+    }
+    if (node.matches("section[id]")) return "race|" + node.id;
+    return "card" + where + (node.getAttribute("data-id") || "");
+  }
+
+  function findPlace(grid, key) {
+    var found = null;
+    Array.prototype.some.call(grid.querySelectorAll("details, section[id], [data-id]"), function (node) {
+      if (placeKey(node) === key) { found = node; return true; }
+      return false;
+    });
+    return found;
+  }
+
+  function keepPlace(draw) {
+    var grid = doc.getElementById("results");
+    var box = grid && scroller(grid);
+    var opened = grid ? grid.querySelectorAll("details[open]") : [];
+    var active = doc.activeElement;
+    var on = grid && active && active !== grid && grid.contains(active) ? active : null;
+    var drawn = grid && grid.classList.contains("card-grid") ? grid.querySelectorAll(".card[data-id]").length : 0;
+    if (!grid || (Math.abs(box.scrollTop - drawnTop) < 2 && !opened.length && !on && drawn <= PAGE)) {
+      draw();
+      return;
+    }
+    var open = Array.prototype.map.call(opened, placeKey);
+    var focus = on ? (on.matches("summary") && on.parentElement.matches("details")
+      ? { key: placeKey(on.parentElement), summary: true }
+      : on.closest("[data-id]") ? { key: placeKey(on.closest("[data-id]")) } : null) : null;
+    var anchor = null;
+    var top = 0;
+    Array.prototype.some.call(grid.querySelectorAll("[data-id], section[id]"), function (node) {
+      var r = node.getBoundingClientRect();
+      if (r.bottom <= 0 || (!r.height && !r.width)) return false;
+      anchor = placeKey(node);
+      top = r.top;
+      return true;
+    });
+    windowAtLeast = drawn;
+    try {
+      draw();
+    } finally {
+      windowAtLeast = 0;
+    }
+    open.forEach(function (key) {
+      var fold = findPlace(grid, key);
+      if (!fold || fold.open) return;
+      fold.open = true;
+      // A race's people out of the race are drawn now, not on the toggle
+      // event the browser sends later, so the place below is found.
+      if (fold.matches("[data-out-race]")) KYC.cards.fillOut(fold);
+    });
+    if (anchor) {
+      var again = findPlace(grid, anchor);
+      if (again) box.scrollTop += again.getBoundingClientRect().top - top;
+    }
+    drawnTop = box.scrollTop;
+    if (focus) {
+      var node = findPlace(grid, focus.key);
+      if (node && focus.summary) node = node.querySelector("summary");
+      if (node && node.focus) node.focus({ preventScroll: true });
+    }
+  }
+
   /** Whether a query's matches may still grow once the words are in. */
   function wordsPending() {
     return !!state.q && !KYC.wordsHeld();
@@ -617,7 +712,14 @@
     if (senate) senate.setAttribute("aria-pressed", String(state.view === "senate"));
   }
 
+  /** The results drawn, and where the reader is when they are (keepPlace). */
   function render() {
+    drawResults();
+    var grid = doc.getElementById("results");
+    if (grid) drawnTop = scroller(grid).scrollTop;
+  }
+
+  function drawResults() {
     var grid = doc.getElementById("results");
     var empty = doc.getElementById("noResults");
     var label = doc.getElementById("resultsLabel");
@@ -667,7 +769,7 @@
     }
     renderLabel(label, gridLabel());
     grid.className = "card-grid";
-    renderWindow(grid, visible, 0);
+    renderWindow(grid, visible, 0, Math.max(PAGE, windowAtLeast));
   }
 
   /* The grid can hold 2,500 cards with every filter off. Building them all
@@ -684,8 +786,11 @@
     return -1;
   }
 
-  function renderWindow(grid, items, from) {
-    var slice = items.slice(from, from + PAGE);
+  function renderWindow(grid, items, from, count) {
+    // *count*: the first window may hold more than a page, as many cards as
+    // the reader had appended when the list is drawn again (keepPlace).
+    var size = count || PAGE;
+    var slice = items.slice(from, from + size);
     var unknown = firstUnknownAge(items);
     var html = slice.map(function (item, i) {
       var divider = from + i === unknown
@@ -694,7 +799,7 @@
         : "";
       return divider + card(item);
     }).join("");
-    var more = from + PAGE < items.length;
+    var more = from + size < items.length;
     if (from === 0) {
       grid.innerHTML = html;
     } else {
@@ -704,16 +809,16 @@
     }
     if (observer) { observer.disconnect(); observer = null; }
     if (!more) return;
-    var remaining = items.length - from - PAGE;
+    var remaining = items.length - from - size;
     grid.insertAdjacentHTML("beforeend",
       '<button type="button" class="btn grid-more" id="gridMore" data-from="' +
-      (from + PAGE) + '">Show ' + Math.min(PAGE, remaining) + " more of " +
+      (from + size) + '">Show ' + Math.min(PAGE, remaining) + " more of " +
       remaining.toLocaleString() + "</button>");
     var sentinel = doc.getElementById("gridMore");
     if (global.IntersectionObserver) {
       observer = new global.IntersectionObserver(function (entries) {
         if (entries.some(function (e) { return e.isIntersecting; })) {
-          renderWindow(grid, items, from + PAGE);
+          renderWindow(grid, items, from + size);
         }
       }, { rootMargin: "600px 0px" });
       observer.observe(sentinel);
@@ -1131,9 +1236,10 @@
     // a challenger whose text mentions him ahead of the Speaker.
     visible.sort(state.q ? function (a, b) { return score(a) - score(b) || order(a, b); } : order);
     listDrawn = true;
-    // The words arrived for the query drawn: the same view, found again.
+    // The words arrived for the query drawn: the same view, found again,
+    // where the reader left it (keepPlace).
     if (opts && opts.keep) {
-      render();
+      keepPlace(render);
       return;
     }
     if (opts && opts.quiet) {
