@@ -138,6 +138,8 @@
     fold = {
       phone: null,
       opened: {},
+      // Who opened the folded House delegation, or null while it is folded.
+      delegation: null,
       // Each borrowed part goes back before what followed it.
       homes: [findrep, tiles, links].filter(Boolean).map(function (node) {
         return { node: node, parent: node.parentNode, next: node.nextSibling };
@@ -287,11 +289,36 @@
       section.hidden = false;
       showBody(section, !phone || !!fold.opened[section.getAttribute("data-race")]);
     });
+    showDelegation(!phone || !!fold.delegation);
     // A search in the box holds on a turned tablet: the two layouts must
     // not disagree about what it shows.
     searchRaces(searchQuery());
     openAllWords();
     showJumpBar();
+  }
+
+  /* On a phone the House delegation's cards fold behind their heading,
+   * which keeps its balance ("43 D / 9 R"), and a button that shows them:
+   * California's 52 cards were some 8,000px between the reader and the
+   * races. The senators stay open, every race's row leads with who holds
+   * its seat, and "Find who represents you" answers above (rule 27). The
+   * cards stay in the page, hidden until found, as a race's body does. */
+  function showDelegation(open) {
+    var grid = el("delegationCards");
+    var button = doc.querySelector("[data-delegation-toggle]");
+    if (!grid || !button) return;
+    if (open) grid.removeAttribute("hidden");
+    else grid.setAttribute("hidden", "until-found");
+    button.parentNode.hidden = !fold.phone;
+    button.setAttribute("aria-expanded", String(open));
+    var count = button.getAttribute("data-count");
+    button.textContent = (open ? "Fold the " : "Show all ") + count;
+  }
+
+  function setDelegation(open, why) {
+    if (!fold || !el("delegationCards")) return;
+    fold.delegation = open ? (fold.delegation || why || "reader") : null;
+    if (fold.phone) showDelegation(open);
   }
 
   function showBody(section, open) {
@@ -402,15 +429,18 @@
     doc.addEventListener("beforematch", function (event) {
       var section = event.target && event.target.closest && event.target.closest("section.race-foldable");
       if (section) setOpen(section, true, "find");
+      if (event.target && event.target.id === "delegationCards") setDelegation(true, "find");
     }, true);
     global.addEventListener("beforeprint", function () {
       if (!fold || !fold.phone) return;
+      if (!fold.delegation) setDelegation(true, "print");
       raceSections().forEach(function (s) {
         if (!fold.opened[s.getAttribute("data-race")]) setOpen(s, true, "print");
       });
     });
     global.addEventListener("afterprint", function () {
       if (!fold) return;
+      if (fold.delegation === "print") setDelegation(false);
       raceSections().forEach(function (s) {
         if (fold.opened[s.getAttribute("data-race")] === "print") setOpen(s, false);
       });
@@ -724,7 +754,15 @@
           return '<p class="state-note">District ' + v.district + ": " +
             KYC.escapeHtml(KYC.vacancyNote(v)) + "</p>";
         }).join(""),
-        '<div class="card-grid">' + house.map(cards.card).join("") + "</div>",
+        // On a phone (foldLayout), the cards fold behind a button.
+        foldable
+          ? '<p class="delegation-fold" hidden><button type="button" class="btn delegation-toggle" ' +
+            'data-delegation-toggle aria-controls="delegationCards" aria-expanded="true" data-count="' +
+            KYC.escapeAttr(plural(house.length, "representative")) + '">Fold the ' +
+            KYC.escapeHtml(plural(house.length, "representative")) + "</button></p>"
+          : "",
+        '<div class="card-grid"' + (foldable ? ' id="delegationCards"' : "") + ">" +
+          house.map(cards.card).join("") + "</div>",
         "</section>"
       );
     }
@@ -987,6 +1025,14 @@
     filterStatus();
   }
 
+  function searchDelegation(q) {
+    var grid = el("delegationCards");
+    if (!fold || !fold.phone || !grid) return;
+    var hit = !!q && Array.prototype.some.call(grid.children, function (cell) { return !cell.hidden; });
+    if (hit && !fold.delegation) setDelegation(true, "search");
+    if (!hit && fold.delegation === "search") setDelegation(false);
+  }
+
   function searchQuery() {
     var input = el("stateSearch");
     return input ? input.value.trim().toLowerCase() : "";
@@ -1014,6 +1060,7 @@
           c.parentNode.classList.contains("card-cell")) ? c.parentNode : c;
         cell.hidden = !!q && !(item && KYC.matchesQuery(item, q));
       });
+      searchDelegation(q);
       searchRaces(q);
     }, 120);
     input.addEventListener("input", run);
@@ -1043,6 +1090,11 @@
         barForJump(closing);
         if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: "auto" });
         closing.querySelector(".race-row").focus({ preventScroll: true });
+        return;
+      }
+      var members = event.target.closest("[data-delegation-toggle]");
+      if (members) {
+        setDelegation(members.getAttribute("aria-expanded") !== "true", "reader");
         return;
       }
       if (event.target.closest("[data-jump-find]")) {

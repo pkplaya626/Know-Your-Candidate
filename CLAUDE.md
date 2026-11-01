@@ -2624,7 +2624,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     it, the key and the zoom chips under it, and the moves folded below.
     `testDistrictsPhonePlans` numbers every district of each plan, shown in
     turn, at 280px, on every redrawn state the district files hold (rule
-    43).
+    43). On a folded page the House delegation's cards
+    fold behind its heading's balance and a "Show all" button, hidden until
+    found, the senators open and every race row leading with its holder; a
+    search naming a member, find-in-page and printing open them. Whether
+    rule 27 allows this was put to the owner, and it is the branch's last
+    code commit, so a revert of it alone, and a rebuild, removes it.
 100. **A legislator's portrait is the legislature's, named beside them,
     and a seat's file is dated before it is believed.** 1,022 of 7,323
     state legislators had no portrait (audit 2026-10-17, STATEGOV-13;
