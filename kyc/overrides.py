@@ -1295,8 +1295,9 @@ GUIDE_NAME_FORMS = {
 # (photos.applies). A picture of a person - a framed photograph on a shelf
 # or a wall, a poster, a book jacket - is not a person in the frame and
 # refuses nothing (decided for the owner, 2026-10-25). A screen showing a
-# face is not decided: a rally's screen is usually a live feed of someone
-# there, so Donna Miller's stays refused until the owner rules on screens.
+# face is refused like a person in the frame (the owner's decision of
+# 2026-11-01): a rally's screen is usually a live feed of someone there, so
+# Donna Miller's stays refused.
 OTHERS_IN_FRAME = "others in the frame"
 
 # Images that a route would take as a person's portrait but that are not one,
@@ -1535,8 +1536,9 @@ NOT_A_PORTRAIT = {
         ("2026-10-25", "JoCasta Zamarripa (WI secretary of state candidate): another person's "
                        "hand and fingers at the left edge", OTHERS_IN_FRAME),
     # A screen is not a framed picture: at a rally it is usually a live feed
-    # of a person there. Kept refused until the owner rules on screens; her
-    # shown portrait is the county's (portraits.json, curated) either way.
+    # of a person there, and the owner ruled on 2026-11-01 that a face on one
+    # is refused like a person in the frame. Her shown portrait is the
+    # county's (portraits.json, curated).
     "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg":
         ("2026-10-25", "Donna Miller (IL): a person's face on the rally's LED screen behind her, "
                        "at the upper right", OTHERS_IN_FRAME),

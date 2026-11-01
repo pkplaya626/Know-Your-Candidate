@@ -669,10 +669,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     even in part, does - so John Giles's guide photograph and Dave
     Sunday's office photograph (framed photographs on the shelves) and
     Adam Hamawy's (one on the wall) are shown again, as Alex Vindman's (a
-    book jacket) always was. A face on a screen is not decided - at a
-    rally it is usually a live feed of someone there - so Donna Miller's
-    May Day file stays refused until the owner rules on screens (her
-    profile shows the county's portrait either way). The background-people rule
+    book jacket) always was. A face on a screen behind them is refused
+    like a person in the frame (the owner's decision of 2026-11-01): at a
+    rally it is usually a live feed of someone there, so Donna Miller's
+    May Day file stays refused (her profile shows the county's portrait
+    either way). The background-people rule
     is for candidates' and officials' photographs: asked about the
     federal judges' Senate Judiciary hearing stills, about 40% of the
     1,012 portraits the judges' item route shows, the owner said "keep"

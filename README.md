@@ -1244,8 +1244,8 @@ person looking at a photograph judges it by one test: the candidate alone
 of the 65px phone card), is a likeness; anything else goes in
 `NOT_A_PORTRAIT` with what was seen. A picture of a person behind them (a
 framed photograph, a poster, a book jacket) is not a person in the frame
-and refuses nothing; a face on a screen, often a live feed, is not decided
-and still refuses. The background-people rule is for
+and refuses nothing; a face on a screen, often a live feed, refuses like a
+person in the frame (the owner, 2026-11-01). The background-people rule is for
 candidates' and officials' photographs: of the federal judges' Senate
 Judiciary hearing stills the owner said "keep" (2026-10-25), so an entry
 whose only finding is other people in the frame (`OTHERS_IN_FRAME`)
