@@ -97,6 +97,13 @@
   var SPLIT_FILL = "var(--split)";
   var I_FILL = "var(--party-i-fill)";
 
+  /* "In the general election runoff" -> "in the general election runoff",
+   * for a status's words inside a sentence. */
+  function lowerFirst(text) {
+    text = String(text || "");
+    return text.charAt(0).toLowerCase() + text.slice(1);
+  }
+
   /** A party's colour, lighter in weight: a majority short of the whole
    *  delegation, or an open seat (--party-r-tint, --party-d-tint in
    *  kyc.css). A step of lightness from the party's own colour, which a
@@ -208,7 +215,9 @@
           status === "advanced" ? " in a primary runoff" :
           status === "elected" ? (own ? " re-elected" : " elected") :
           status === "defeated" ? (own ? " lost re-election" : " lost the election") :
-          status === "runoff" ? " in the general election runoff" :
+          // The status table's words for the race's December round, never
+          // a copy of them here (rule 12).
+          status === "runoff" ? " " + lowerFirst(KYC.raceStatusOf(defender, "long").label) :
           status === "nominee" && counted ? " awaiting result" :
           // Through a top-two or top-four primary, nobody is renominated.
           status === "nominee" && defender.allPartyPrimary ? " advanced to November" :
