@@ -16180,6 +16180,74 @@ async function testRaceFilters() {
   });
 }
 
+/* On a phone a folded state's House delegation folds behind its heading's
+ * balance and a button; the senators stay open, and every race row leads
+ * with who holds its seat (rule 27; the owner's question, PR body). */
+async function testDelegationFold() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("states/ca.html", { now, setup: (w) => phoneWidth(w, true) });
+    const { window, D, errors } = page;
+    const KYC = window.KYC;
+    const grid = D.getElementById("delegationCards");
+    const button = D.querySelector("[data-delegation-toggle]");
+    const house = KYC.people().filter((p) => KYC.seated(p) && p.state === "CA" && /House/.test(p.chamber));
+    suite(`states/ca.html on a phone ${when} — the House delegation folded to its balance`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the heading keeps its balance by party", !!D.querySelector("#delegation h2 .balance") &&
+        /\d+ D/.test(D.querySelector("#delegation h2 .balance").textContent));
+      check("its cards are in the page, hidden until found, behind one button that names how many",
+        grid.getAttribute("hidden") === "until-found" && grid.querySelectorAll(".card").length === house.length &&
+          !button.parentNode.hidden && button.getAttribute("aria-expanded") === "false" &&
+          button.textContent === "Show all " + house.length + " representatives" &&
+          button.getAttribute("aria-controls") === "delegationCards", button.textContent);
+      check("the senators stay open", !D.querySelector("#senators .card-grid").hidden &&
+        D.querySelectorAll("#senators .card").length === 2);
+      check("the delegation still comes before the races (rule 27)",
+        !!(D.getElementById("delegation").compareDocumentPosition(D.getElementById("races")) & window.Node.DOCUMENT_POSITION_FOLLOWING));
+      const held = [...D.querySelectorAll("section.race-foldable")].filter((s) => /^H-/.test(s.getAttribute("data-race")));
+      check("every House race's row leads with whether and by whom its seat is held",
+        held.every((s) => s.querySelector(".race-row-held") && s.querySelector(".race-row-held").textContent.trim()),
+        held.filter((s) => !s.querySelector(".race-row-held")).map((s) => s.getAttribute("data-race")).join(","));
+      button.click();
+      check("the button shows every card, and says it folds them", !grid.hasAttribute("hidden") &&
+        button.getAttribute("aria-expanded") === "true" && button.textContent === "Fold the " + house.length + " representatives");
+      button.click();
+      check("and folds them again", grid.getAttribute("hidden") === "until-found");
+      // The browser's find in a folded card opens the delegation.
+      grid.dispatchEvent(new window.Event("beforematch", { bubbles: true }));
+      check("find-in-page opens it", !grid.hasAttribute("hidden") && button.getAttribute("aria-expanded") === "true");
+      button.click();
+      window.dispatchEvent(new window.Event("beforeprint"));
+      check("printing opens it", !grid.hasAttribute("hidden"));
+      window.dispatchEvent(new window.Event("afterprint"));
+      check("and folds back what printing opened", grid.getAttribute("hidden") === "until-found");
+      turn(window, false);
+      check("1000px and wider: every card shown, no button", !grid.hasAttribute("hidden") && button.parentNode.hidden);
+      turn(window, true);
+      check("turned back, folded again", grid.getAttribute("hidden") === "until-found");
+      const input = D.getElementById("stateSearch");
+      input.value = house[0].name;
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html on a phone ${when} — the page's search reaches a folded member`, () => {
+      check("a search naming a member opens the delegation", !grid.hasAttribute("hidden"));
+      const input = D.getElementById("stateSearch");
+      input.value = "";
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html on a phone ${when} — and cleared, folds back what it opened`, () => {
+      check("folded again", grid.getAttribute("hidden") === "until-found");
+    });
+  }
+  const wy = await buildPage("states/wy.html", { setup: (w) => phoneWidth(w, true) });
+  suite("states/wy.html on a phone — a state that does not fold keeps its delegation open", () => {
+    check("no button, cards shown", !wy.D.querySelector("[data-delegation-toggle]") &&
+      !wy.D.querySelector("#delegation .card-grid").hidden);
+  });
+}
+
 async function testStatePhone() {
   const PAGES = ["ca", "tx", "fl", "ny", "la", "ok", "wa", "il", "ga", "al"];
   const built = {};
@@ -17074,6 +17142,7 @@ async function testGuidePhotos() {
   if (!only || only === "states" || only === "statephone") await testStatePhone();
   if (!only || only === "states" || only === "statephone" || only === "jumpbar") await testJumpBar();
   if (!only || only === "states" || only === "statephone" || only === "racefilters") await testRaceFilters();
+  if (!only || only === "states" || only === "statephone" || only === "delegation") await testDelegationFold();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
 if (!only || only === "states") await testCertifiedBallots();
