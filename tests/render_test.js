@@ -12972,6 +12972,205 @@ function plainList(html, attr, id) {
   return m ? plainItems(m[1]) : [];
 }
 
+/* An official's share page (o/<id>.html, kyc/official_share.py; rule 96,
+ * TECH-09): the President, the Vice President, the Cabinet and every
+ * federal judge, each in the words the officials' dialog gives them
+ * (KYC.official.shareWords, one table), with the picture and credit the
+ * dialog shows, by its route only (rules 24, 82, 87, 101). Compared for
+ * every official on both clocks - the campaign's and after Election Day,
+ * since the pages land after it - and every case of the fixture asked of
+ * the page code. */
+async function testOfficialSharePages() {
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /\.html$/.test(f));
+  const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+  // Each court's file, as its page loads it: the record a court's page opens.
+  const courts = {};
+  fs.readdirSync(path.join(SITE, "data", "judiciary")).forEach((f) => {
+    if (!/\.js$/.test(f) || f === "index.js") return;
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "judiciary", f), "utf8"), sandbox);
+    Object.assign(courts, sandbox.window.kycCourt || {});
+  });
+  const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "official_share_words.json"), "utf8"));
+  for (const [clock, now] of [["the campaign's clock", CAMPAIGN_NOW], ["after Election Day", "2026-11-05T12:00:00"]]) {
+    const hub = await buildPage("federal/index.html", { now });
+    await settle(50);
+    const W = hub.window;
+    const K = W.KYC;
+    const onHub = K.official.officials();
+    const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
+    const text = (doc, sel) => {
+      const el = doc.querySelector(sel);
+      return el ? el.textContent : "";
+    };
+    const creditText = (credit) => {
+      const div = W.document.createElement("div");
+      div.innerHTML = K.photoCreditHtml(credit);
+      return div.textContent;
+    };
+    suite(`officials' share pages — one each, in the dialog's words (rule 96), ${clock}`, () => {
+      check("the federal page loads", hub.errors.length === 0, hub.errors.join(" | "));
+      // Everyone the dialog answers to: the hub's, and each court's judges.
+      const want = new Set(Object.keys(onHub));
+      Object.keys(courts).forEach((cid) => (courts[cid].judges || []).concat(courts[cid].retired || [])
+        .forEach((j) => want.add(j.id)));
+      const have = new Set(files.map((f) => f.replace(/\.html$/, "")));
+      const missing = [...want].filter((id) => !have.has(id));
+      const extra = [...have].filter((id) => !want.has(id));
+      check("a share page for everyone the dialog answers to, and none for anyone else",
+        missing.length === 0 && extra.length === 0 && have.size > 1000,
+        `${have.size} pages; missing ${missing.slice(0, 4)}; extra ${extra.slice(0, 4)}`);
+      check("no official is a profile (rule 27): none shares an id with one",
+        [...have].every((id) => /^(x-|fjc-)/.test(id)));
+      const wrong = [];
+      const images = [];
+      let photos = 0;
+      files.forEach((f) => {
+        const id = f.replace(/\.html$/, "");
+        const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
+        const doc = parse(html);
+        const view = (doc.getElementById("shareView") || { getAttribute: () => "" }).getAttribute("href");
+        const m = /^\.\.\/(federal\/index|courts\/([a-z0-9-]+))\.html#\/official\/(.+)$/.exec(view || "");
+        if (!m || m[3] !== id) { wrong.push(`${id}: view ${view}`); return; }
+        let found = null;
+        if (m[2]) {
+          const court = courts[m[2]] || {};
+          const rec = (court.judges || []).concat(court.retired || []).filter((j) => j.id === id)[0];
+          if (rec) found = { kind: "judge", person: rec };
+        } else {
+          found = onHub[id] || null;
+        }
+        if (!found) { wrong.push(`${id}: nobody at ${view}`); return; }
+        const words = K.official.shareWords(found);
+        const shown = {
+          kind: text(doc, ".share-kind"),
+          office: text(doc, ".share-office"),
+          inLaw: text(doc, ".share-in-law"),
+          party: text(doc, ".share-party"),
+          status: text(doc, ".share-status"),
+          appointedBy: text(doc, ".share-appointed").replace(/^Appointed by /, ""),
+          nominated: text(doc, ".share-nominated").replace(/\.$/, ""),
+          source: text(doc, ".share-source").replace(/^Source: /, ""),
+        };
+        Object.keys(shown).forEach((k) => {
+          const expect = k === "source" ? words.source.replace(/\.?$/, ".") : words[k];
+          if (shown[k] !== expect) wrong.push(`${id} ${k}: "${shown[k]}" for "${expect}"`);
+        });
+        if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
+        if (words.status && desc.indexOf(words.status) === -1) wrong.push(`${id}: description's status`);
+        if (found.kind === "judge" && words.appointedBy && desc.indexOf("appointed by " + words.appointedBy) === -1) {
+          wrong.push(`${id}: description's President`);
+        }
+        // A party only where the dialog gives one: never a judge's or a
+        // Cabinet officer's.
+        if (found.kind !== "leader" && (shown.party || (found.person.party && desc.indexOf(found.person.party) !== -1))) {
+          wrong.push(`${id}: a party`);
+        }
+        // The picture: the dialog's, by its route, or the site's card.
+        const img = (doc.querySelector('meta[property="og:image"]') || { content: "" }).content;
+        if (/\/assets\/social-card\.png$/.test(img)) {
+          if (doc.querySelector(".share-photo-credit")) wrong.push(`${id}: a credit with no photograph`);
+          return;
+        }
+        photos += 1;
+        const pic = K.official.picture(found.person, 116);
+        const p = found.person;
+        const copy = p.photo ? K.copyOf(p.photo, p.photoCopy) : null;
+        const ok = !!pic && !/Special:/.test(img) && (p.photo
+          ? (copy ? img === host + copy.src
+            : (p.photoSet || []).some((s) => s[0] === img) || img === p.photo)
+          : !!(p.portrait && p.portrait.licence) && /^https:\/\/upload\.wikimedia\.org\//.test(img) &&
+            ((p.portrait.set || []).some((s) => s[1] === img) || img === p.portrait.url));
+        if (!ok) images.push(`${id}: ${img}`);
+        else if (text(doc, ".share-photo-credit") !== creditText(pic.credit)) {
+          wrong.push(`${id}: credit "${text(doc, ".share-photo-credit")}" for "${creditText(pic.credit)}"`);
+        }
+      });
+      check("every official's share page says what the dialog says, from one table",
+        wrong.length === 0, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("a share image is the dialog's photograph by its route, credited as the dialog credits it, " +
+        "or the site's card", images.length === 0 && photos > 500,
+        images.slice(0, 4).join(" | ") || `${photos} photographs`);
+      const off = fixture.cases.filter(([kind, person, office, words]) => {
+        const got = K.official.shareWords({ kind, person, office: office || undefined });
+        return JSON.stringify(Object.keys(words).sort().map((k) => [k, words[k]])) !==
+          JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
+      });
+      check("every case of the words table, asked of the page code (tests/fixtures/official_share_words.json)",
+        fixture.cases.length >= 30 && off.length === 0,
+        off.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${fixture.cases.length} cases`);
+    });
+  }
+
+  // The dialog draws those words, and its Copy link shares the page.
+  const hub = await buildPage("federal/index.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  const tne = await buildPage("courts/tn-e.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  suite("the officials' dialog — the share page's words, and its address to share", () => {
+    const drawn = [];
+    const check1 = (page, id) => {
+      const { window: w, D } = page;
+      const K = w.KYC;
+      K.official.open(id);
+      const found = K.official.officials()[id];
+      const words = K.official.shareWords(found);
+      const kind = D.getElementById("officialModalKind").textContent;
+      const meta = D.getElementById("officialModalMeta");
+      const status = meta.querySelector(".official-status");
+      if (kind !== words.kind) drawn.push(`${id}: kind ${kind}`);
+      if ((status ? status.textContent.trim() : "") !== words.status) drawn.push(`${id}: status`);
+      if (words.office && meta.textContent.indexOf(words.office) === -1) drawn.push(`${id}: office`);
+      if (words.appointedBy && meta.textContent.indexOf("Appointed by " + words.appointedBy) === -1) {
+        drawn.push(`${id}: appointed`);
+      }
+      if (D.getElementById("officialModalBody").textContent.indexOf(words.source.replace(/\.$/, "")) === -1 &&
+          D.getElementById("officialModalSource").textContent.indexOf(words.source) === -1) {
+        drawn.push(`${id}: source`);
+      }
+      K.official.close();
+    };
+    const d = hub.window.kycFederal;
+    const ids = [d.president.id, d.vicePresident.id]
+      .concat(d.offices.filter((o) => o.holder).slice(0, 4).map((o) => o.holder.id))
+      .concat((d.former || []).slice(0, 2).map((p) => p.id))
+      .concat(d.supremeCourt.members.map((j) => j.id))
+      .concat((d.supremeCourt.retired || []).map((j) => j.id));
+    ids.forEach((id) => check1(hub, id));
+    (tne.window.kycCourt["tn-e"].judges || []).forEach((j) => check1(tne, j.id));
+    check("the dialog draws its head from the same words, on the hub and a court's page",
+      drawn.length === 0 && ids.length > 12, drawn.slice(0, 5).join(" | "));
+  });
+
+  const W = hub.window;
+  const K = W.KYC;
+  const someone = W.kycFederal.supremeCourt.members[0];
+  K.official.open(someone.id);
+  const copy = hub.D.getElementById("officialModalCopy");
+  let copied = null;
+  Object.defineProperty(W.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  copy.click();
+  await settle(0);
+  const viaShare = copied;
+  K.official.close();
+  K.official.open("x-nobody-of-that-name");
+  copied = null;
+  hub.D.getElementById("officialModalCopy").click();
+  await settle(0);
+  const nobody = copied;
+  K.official.close();
+  suite("Copy link in the officials' dialog — the share page's address (TECH-09)", () => {
+    // From the site's root: the federal page sits a folder down.
+    const want = new W.URL("../o/" + someone.id + ".html", W.location.href).href;
+    check("an official's link is their share page", viaShare === want && /\/o\/fjc-\d+\.html$/.test(want),
+      `${viaShare} for ${want}`);
+    check("a link nobody here answers to stays the view's, with no share page to unfurl",
+      typeof nobody === "string" && /#\/official\/x-nobody-of-that-name$/.test(nobody), String(nobody));
+  });
+}
+
 /* Rule 96: a profile's and a race's share page, and a state page's plain
  * lists, are written by the pipeline (kyc/share.py) in the words the page
  * code gives the same people. Every one is compared with KYC.standing as
@@ -16925,6 +17124,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();
   if (!only || only === "share") await testSharePages();
+  if (!only || only === "share") await testOfficialSharePages();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

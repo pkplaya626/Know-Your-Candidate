@@ -147,6 +147,7 @@ CI asserts that a rebuild changes nothing.
 | `summary.py` | Chamber balance, election headline figures, per-state figures |
 | `pages.py` | The shared page template, the state pages, the states directory and the sitemap |
 | `share.py` | A share page for every profile (`p/<id>.html`) and race (`r/<raceId>.html`), and the plain lists the state pages are written with, in the profile dialog's status words (rule 96) |
+| `official_share.py` | A share page for every federal official and judge (`o/<id>.html`: the President, the Vice President, the Cabinet, every judge), in the officials' dialog's words, with its portrait and credit only by the dialog's routes (rule 96) |
 | `government.py` | Know Your Government, the guide: renders its pages and refuses a broken link or an uncited section |
 | `government_text.py` | The guide's words and the sources each section was checked against |
 | `government_maps.py` | What the guide's maps say about each state, every value with its source |

@@ -95,6 +95,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
+                                             o/*.html           (generated share pages: one per federal official and judge, kyc/official_share.py)
                                              photos/*.jpg       (smaller copies of heavy portraits, by hash: photocopies)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
@@ -2496,6 +2497,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     copy it. A shared race opens its state page at the race and holds it
     there while the page above it draws (`kyc-state.js` `holdPlace`, until
     the reader moves): it once landed 3,000px short on a phone.
+    Officials and judges open in `KYC.official` behind `#/official/<id>`
+    and unfurled as the home page too, so each has `o/<id>.html`
+    (`kyc/official_share.py`): everyone the dialog answers to, a judge on
+    the page of the court whose file holds them, the justices, the
+    Cabinet and who left it this term on the federal page's. Its words are
+    the dialog's head, from one table (`shareWords`, `SOURCES`), compared
+    for every official on both clocks and over every case of
+    `tests/fixtures/official_share_words.json`: a judge's service with
+    both sources where they differ (rule 82), the appointing President,
+    never a party but the President's and Vice President's, a nomination
+    in the future tense without the list's as-of day. Its image is the
+    dialog's by the dialog's route, credited as the dialog credits it: the
+    White House's sizes of its one file or the copy made here on the
+    site's host (rules 42, 101), a judge's Commons portrait with its
+    licence recorded (rules 82, 87); the Court's own, without one, is the
+    card. A folder whose pages were not rendered (no federal build) is
+    never swept as orphans. The dialog's "Copy link" shares the page, and
+    an id nobody answers to shares the view.
 
 97. **The search answers what a reader types about government, from the
     data the page about it shows, and never guesses.** "governor", "Texas
