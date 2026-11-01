@@ -34,10 +34,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import agent
+
 from .photos import MAX_PORTRAIT_BYTES, MAX_PORTRAIT_PX, too_heavy
 
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/154.0 Safari/537.36")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 WIKIMEDIA_AGENT = "know-your-candidate/2.1 (open-source civic data project)"
 # One request a second to any one host.

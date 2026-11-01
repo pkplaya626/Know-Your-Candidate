@@ -34,7 +34,7 @@ import re
 import time
 import urllib.request
 
-from . import federal_offices
+from . import agent, federal_offices
 from .officers import KEPT_STALE_DAYS, _fold, same_person, says_nothing, visible_text
 
 EXECUTIVE_URL = "https://unitedstates.github.io/congress-legislators/executive.json"
@@ -43,8 +43,7 @@ VOTE_MENU_URL = ("https://www.senate.gov/legislative/LIS/roll_call_lists/"
 VOTE_URL = ("https://www.senate.gov/legislative/LIS/roll_call_votes/vote{congress}{session}/"
             "vote_{congress}_{session}_{number}.htm")
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "federal_executive.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 
 class FederalError(RuntimeError):

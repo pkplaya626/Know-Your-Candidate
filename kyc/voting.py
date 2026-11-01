@@ -46,12 +46,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import tls
+from . import agent, tls
 from .normalize import US_STATES
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "voting_links.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/154.0 Safari/537.36")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 # The kind of page, and the NASS page that lists it for every state.
 PAGES = {

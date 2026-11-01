@@ -31,8 +31,9 @@ import re
 import time
 import urllib.request
 
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+from . import agent
+
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 PAUSE = 2.0
 
 # The seats and the term each court's statute gives it.

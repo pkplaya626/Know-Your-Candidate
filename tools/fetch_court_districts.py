@@ -26,10 +26,8 @@ import urllib.request
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 sys.path.insert(0, ROOT)
 
-from kyc import court_districts  # noqa: E402
+from kyc import agent, court_districts  # noqa: E402
 
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
 
 
 def main(argv=None):
@@ -37,7 +35,7 @@ def main(argv=None):
     parser.add_argument("--check", action="store_true", help="read and check; write nothing")
     args = parser.parse_args(argv)
     request = urllib.request.Request(court_districts.SOURCE_URL,
-                                     headers={"User-Agent": USER_AGENT})
+                                     headers=agent.HEADERS)
     with urllib.request.urlopen(request, timeout=120) as response:
         page = response.read().decode("utf-8", errors="replace")
     states = court_districts.parse(page)

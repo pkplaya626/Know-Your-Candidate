@@ -40,7 +40,7 @@ import time
 import urllib.parse
 import urllib.request
 
-from . import federal_courts
+from . import agent, federal_courts
 
 SERVICE_URL = "https://www.fjc.gov/sites/default/files/history/federal-judicial-service.csv"
 JUDGES_URL = "https://www.fjc.gov/sites/default/files/history/judges.csv"
@@ -55,8 +55,7 @@ PORTRAITS_URL = "https://www.supremecourt.gov/about/biographies.aspx"
 PORTRAIT_CREDIT = "Collection of the Supreme Court of the United States"
 COURT_PAUSE = 1.0
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "judiciary.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 # A read listing fewer sitting judges than this share of the last one is a
 # truncated file, not a wave of retirements: refused, and the last kept.
 SHRINK = 0.9
