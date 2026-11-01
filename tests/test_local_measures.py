@@ -239,6 +239,24 @@ class TheRules(Hosts, unittest.TestCase):
         found = local_measures.problems(data)
         self.assertTrue(any("only its source's title" in p for p in found), found)
 
+    def test_complete_words_that_are_only_a_label_are_refused(self):
+        # San Diego's reference ballot is footed "Composite Page 20" and
+        # titled "Composite Ballot": its name, not words saying it holds
+        # every contest, so the City of San Diego and Chula Vista, which it
+        # prints no question of, stay "unlisted".
+        for label in ("Composite Page 20", "COMPOSITE BALLOT", "Sample Ballot",
+                      "EN_20 Composite Page 20"):
+            data = cache()
+            b = data["counties"]["48026"]["own"]["basis"]
+            b["source"]["quote"] = "OFFICIAL BALLOT ... " + label
+            b["complete"] = label
+            found = local_measures.problems(data)
+            self.assertTrue(any("48026" in p and "only a label" in p for p in found),
+                            (label, found))
+        # Words that say the list is whole still stand.
+        data = cache()
+        self.assertEqual(local_measures.problems(data), [])
+
     def test_no_government_is_said_of_a_county_never_a_city(self):
         data = cache()
         rec = data["counties"]["48027"]

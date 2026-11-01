@@ -594,23 +594,31 @@
      "place": "0666000",
      "status": "unlisted",
      "basis": {
-      "from": "list",
+      "from": "ballots",
       "source": {
-       "url": "https://www.sandiego.gov/sites/default/files/2026-07/1-2026-07-notice-of-election-general-eng.pdf",
-       "title": "Notice of Election, November 3, 2026 General Municipal Election",
-       "quote": "NOTICE IS HEREBY GIVEN that a General Municipal Election will be held in the City of San Diego on Tuesday, the 3rd day of November 2026, for the following Officers:"
+       "url": "https://www.sdvote.com/content/dam/rov/en/election/facsimile-reference-ballot/english-reference-ballot.pdf",
+       "title": "Official Ballot, San Diego County, California, Gubernatorial General Election, November 3, 2026 (English reference ballot)",
+       "quote": "CITY OF SAN DIEGO MEMBER, CITY COUNCIL DISTRICT NO. 2 Vote for One ... MEASURES SUBMITTED TO THE VOTERS ... CITY CITY OF CORONADO MEASURE D"
       },
-      "found": "names four City Council offices, for Districts 2, 4, 6 and 8, and no measure"
+      "found": "prints the City of San Diego's contests for City Council, Districts 2, 4, 6 and 8, and among its measures no City of San Diego question; the city questions it prints are Coronado's, Lemon Grove's, Oceanside's, Santee's and Solana Beach's"
      }
     },
     {
      "name": "City of Chula Vista",
      "place": "0613392",
-     "status": "notFound",
-     "why": "This site's automated reading could not open the City of Chula Vista's City Clerk pages, which would list a city measure."
+     "status": "unlisted",
+     "basis": {
+      "from": "ballots",
+      "source": {
+       "url": "https://www.sdvote.com/content/dam/rov/en/election/facsimile-reference-ballot/english-reference-ballot.pdf",
+       "title": "Official Ballot, San Diego County, California, Gubernatorial General Election, November 3, 2026 (English reference ballot)",
+       "quote": "CITY OF CHULA VISTA MAYOR Vote for One ... MEASURES SUBMITTED TO THE VOTERS ... CITY CITY OF CORONADO MEASURE D"
+      },
+      "found": "prints the City of Chula Vista's contests for Mayor, City Council Districts 1 and 2 and City Attorney, and among its measures no City of Chula Vista question; the city questions it prints are Coronado's, Lemon Grove's, Oceanside's, Santee's and Solana Beach's"
+     }
     }
    ],
-   "notes": ""
+   "notes": "{\"cities2026-11-01\": \"The Registrar's English reference ballot (PDF title 'Composite Ballot - General 2026'; HTTP 200, 366,927 bytes, Last-Modified 13 Oct 2026, 23 pages), read whole: its 'MEASURES SUBMITTED TO THE VOTERS' pages print twenty local measures (A-E, G, H, J-N, P-T, Y, AA, BB), city questions only for Coronado (D), Lemon Grove (E), Oceanside (R, S), Santee (Y) and Solana Beach (C), and none for the City of San Diego or Chula Vista, whose candidate contests it prints (Composite Pages 13 and 10). No words in it say it holds every contest ('Composite' is its name and page footer), so both cities are 'unlisted', not 'none'. Letters F, U, V, W, X and Z are not printed; nothing read says why.\", \"citySanDiego\": \"sandiego.gov, read 2026-11-01: the City Clerk's 2026 Election Information page ('The 2026 general election will be to elect Councilmembers to the following offices: Council District 2 ... 8'), its Notice of Election ('for the following Officers:' four council seats; the basis until 2026-11-01), Notice of Nominees, and Petition and Ballot Measures page ('Current City Petitions None at this time'); The People's Business, July 13, 2026, Item 330: the ordinance calling the election 'for the purpose of electing four Councilmembers'. None lists a city question or says there is none.\", \"chulaVista\": \"www.chulavistaca.gov (home, City Clerk, Elections) answered the project's agent and WebFetch with HTTP 403 'Access Denied' (Akamai), 2026-11-01: the City Clerk's own pages are unread and wait for a person. News (leads only, rule 50) says the council voted in July 2026 to pull a charter amendment off the November ballot.\"}"
   },
   "06059": {
    "state": "CA",

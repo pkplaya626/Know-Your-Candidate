@@ -86,6 +86,8 @@ _FIPS = re.compile(r"^\d{5}$")
 _PLACE = re.compile(r"^\d{7}$")
 _NOT_A_TITLE = re.compile(r"https?:|www\.|\blinked\b|\bdescribed as\b|\bedition:|\bquery:", re.I)
 _CUT = re.compile(r"\.\.\.|…")
+_ONLY_A_LABEL = re.compile(r"^\W*(?:EN_\d+\W*)?(?:composite|facsimile|reference|sample|"
+                           r"official)(?:\W+(?:ballot|page))*(?:\W+\d+)?\W*$", re.I)
 _OFF_THE_BALLOT = re.compile(r"\bwithdrawn\b|\bremoved from the ballot\b|\bstricken from the "
                              r"ballot\b|\btaken off the ballot\b", re.I)
 
@@ -274,6 +276,13 @@ def basis_problems(where, fips, state, b):
         # Tarrant's "Districts in Election", quoted as showing the list was
         # whole, was only the document's name.
         out.append(f"{where}: its 'complete' words are only its source's title")
+    elif complete is not None and _ONLY_A_LABEL.match(str(complete)):
+        # San Diego's reference ballot is titled "Composite Ballot" and footed
+        # "Composite Page 20", and prints no City of San Diego or Chula Vista
+        # question: a label says what the document is called, not that it
+        # holds every contest.
+        out.append(f"{where}: its 'complete' words are only a label of the document "
+                   f"({complete!r}), not words saying it holds every contest")
     if "every" in b and b["every"] is not True:
         out.append(f"{where}: 'every' is true or absent")
     return out
