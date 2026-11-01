@@ -229,6 +229,16 @@ class TestARunThatConcludesNothing(unittest.TestCase):
                                             get=lambda url, **k: whole, pause=0,
                                             measure=measure_from({}))
             self.assertNotIn("Kari Gray", courts["XX"].get("photos") or {})
+            # The roster pictures her and her page says nothing: shown, and
+            # never also counted as a photograph that could not be read.
+            pictured = roster + '<img src="/gray.jpg" alt="Justice Kari Gray">'
+            courts = {"XX": {"members": ["Kari Gray"]}}
+            court_photos.add_justice_photos(
+                courts, {"XX": pictured}, None, get=lambda url, **k: "", pause=0,
+                measure=measure_from({"https://courts.example.gov/gray.jpg": SMALL}))
+            self.assertIn("Kari Gray", courts["XX"]["photos"])
+            self.assertNotIn("Kari Gray", courts["XX"].get("photoMisses") or {})
+            self.assertEqual(court_photos.counts({"courts": courts})["unknown"], 0)
         finally:
             del court_module.COURTS["XX"]
 

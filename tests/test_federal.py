@@ -248,12 +248,41 @@ class TestWhenThePresidentsPageSaysNothing(unittest.TestCase):
             got = self.fetch(previous, answer)["president"]
             self.assertEqual((got["photo"], got["photoSet"]),
                              (self.PHOTO, previous["president"]["photoSet"]), answer)
+        # A long page without the main content this reader reads (a
+        # redesign) concludes nothing too.
+        shapeless = "<html><body>" + "<p>The President of the United States.</p>" * 20
+        self.assertEqual(self.fetch(previous, shapeless)["president"]["photo"], self.PHOTO)
         # A page read whole that shows no portrait drops it.
         whole = "<main>" + "<p>The President of the United States.</p>" * 20 + "</main>"
         self.assertIsNone(self.fetch(previous, whole)["president"]["photo"])
-        # Someone else never inherits it.
-        previous["president"]["name"] = "Someone Else"
-        self.assertIsNone(self.fetch(previous, "")["president"]["photo"])
+        # Someone else never inherits it: by the Wikidata id both carry
+        # (rule 17), whatever the name, and by name only without one.
+        other = copy.deepcopy(previous)
+        other["president"]["ids"] = dict(other["president"].get("ids") or {}, wikidata="Q1")
+        self.assertIsNone(self.fetch(other, "")["president"]["photo"])
+        other["president"]["ids"].pop("wikidata")
+        other["president"]["name"] = "Someone Else"
+        self.assertIsNone(self.fetch(other, "")["president"]["photo"])
+
+    def test_a_kept_portrait_is_dated_and_ages(self):
+        previous = copy.deepcopy(self.fetch(None, None))
+        previous["president"]["photo"] = self.PHOTO
+        previous["president"]["photoSet"] = []
+        previous["asOf"] = "2026-10-01"
+        kept = self.fetch(previous, "")
+        self.assertEqual(kept["president"]["photoKept"], "2026-10-01")
+        # Kept again, it keeps the day it was last read whole.
+        kept["asOf"] = "2026-10-15"
+        self.assertEqual(self.fetch(kept, "")["president"]["photoKept"], "2026-10-01")
+        codes = [code for _level, code, _m, _d in federal.problems(kept, today="2026-10-16")]
+        self.assertIn("federal-portrait-kept", codes)
+        self.assertNotIn("federal-portrait-kept",
+                         [code for _l, code, _m, _d in federal.problems(kept, today="2026-10-10")])
+        # A page read whole clears it.
+        page = '<main><img src="https://www.whitehouse.gov/wp-content/uploads/2026/11/p2.jpg"></main>'
+        read = self.fetch(kept, page)["president"]
+        self.assertEqual(read["photo"], "https://www.whitehouse.gov/wp-content/uploads/2026/11/p2.jpg")
+        self.assertNotIn("photoKept", read)
 
 
 class TestTheAgenciesOwnSites(unittest.TestCase):

@@ -147,6 +147,23 @@ def _get(url, timeout=40):
         raise StatewidePhotoError(f"could not read {url}: {exc}") from exc
 
 
+# What a guide's page holds when it is the page its parser reads: Arizona's
+# list items carry the commission's pictures, California's statement pages
+# their candidates' blocks.
+_GUIDE_SHAPE = {"AZ": '<img class="pic"', "CA": '<div class="grid-parent clearfix">'}
+
+
+def _in_shape(code, url, page):
+    """*page*, if it is one its guide's parser reads. Any other answer - an
+    empty challenge (coag.gov answered a script HTTP 202 with no body,
+    2026-11-01), a bot wall, a page drawn by script, a redesign - concludes
+    nothing (rules 8 and 24), never "the guide pictures no one": it raises,
+    and the last photographs read are kept."""
+    if _GUIDE_SHAPE[code] not in (page or ""):
+        raise StatewidePhotoError(f"{url} answered with nothing this reader reads")
+    return page
+
+
 def parse_arizona(page):
     """``[(office, name, ticket, picture url, words)]`` from the Clean
     Elections Commission's candidate list: each ``<li>`` of the state
@@ -213,7 +230,8 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_o
     sources = []
     if "AZ" in lists:
         try:
-            sources.append(("AZ", AZ_LIST, AZ_BY, parse_arizona(get(AZ_LIST))))
+            sources.append(("AZ", AZ_LIST, AZ_BY, parse_arizona(_in_shape("AZ", AZ_LIST,
+                                                                          get(AZ_LIST)))))
         except StatewidePhotoError as exc:
             problems.append(f"AZ: {exc}; the last photographs read are kept")
             unknown.add("AZ")
@@ -224,7 +242,8 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_o
             url = CA_GUIDE.format(CA_PAGES[office])
             time.sleep(pause)
             try:
-                sources.append(("CA", url, CA_BY, parse_california(get(url), office)))
+                sources.append(("CA", url, CA_BY,
+                                parse_california(_in_shape("CA", url, get(url)), office)))
             except StatewidePhotoError as exc:
                 problems.append(f"CA {office}: {exc}; the last photographs read are kept")
                 unknown.add(f"CA|{office}")

@@ -111,6 +111,23 @@ class TestTheOfficialGuides(unittest.TestCase):
         self.assertEqual(rec["by"], sp.CA_BY)
         self.assertEqual(official_photos.record_problems(rec, "x"), [])
 
+    def test_a_guide_page_that_says_nothing_concludes_nothing(self):
+        """coag.gov answered a script HTTP 202 with no body (2026-11-01). A
+        guide answering so, with a bot wall, a page drawn by script or a
+        redesign is not a guide that pictures no one: its key is unknown,
+        and fetch keeps the last photographs read (rules 8 and 24)."""
+        lists = {"AZ": {"governor": [{"name": "Katie Hobbs"}]},
+                 "CA": {"ag": [{"name": "Michael E. Gates"}]}}
+        for said in ("", "<html><head><title>Just a moment...</title></head></html>",
+                     "<html><body><div id=app></div><script>render()</script></body></html>",
+                     "<html><body><main>" + "<p>The 2026 guide.</p>" * 40 + "</main></body></html>"):
+            records, problems, unknown = sp.read_guides(lists, measure=measure_from({}), pause=0,
+                                                        get=lambda u: said)
+            self.assertEqual(records, {})
+            self.assertEqual(unknown, {"AZ", "CA|ag"}, said)
+            self.assertTrue(all("the last photographs read are kept" in p for p in problems),
+                            problems)
+
     def test_a_guide_photograph_a_person_refused_is_not_used(self):
         lists = {"CA": {"ag": [{"name": "Michael E. Gates"}]}}
         page = ('<div class="grid-parent clearfix"><img src="/img/gates.jpg" '

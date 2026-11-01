@@ -35,7 +35,7 @@ import time
 import urllib.request
 
 from . import federal_offices
-from .officers import _fold, same_person, says_nothing, visible_text
+from .officers import KEPT_STALE_DAYS, _fold, same_person, says_nothing, visible_text
 
 EXECUTIVE_URL = "https://unitedstates.github.io/congress-legislators/executive.json"
 VOTE_MENU_URL = ("https://www.senate.gov/legislative/LIS/roll_call_lists/"
@@ -138,6 +138,14 @@ def photo_set(tag, photo):
         if url.split("?")[0] == photo:
             out.append([url, int(width)])
     return sorted(out, key=lambda pair: pair[1])
+
+
+def same_holder(a, b):
+    """Whether two records of the President or Vice President are one
+    person: by the Wikidata ids both carry (rule 17), by name only where
+    one lacks it."""
+    x, y = ((a.get("ids") or {}).get("wikidata"), (b.get("ids") or {}).get("wikidata"))
+    return x == y if x and y else same_person(a.get("name", ""), b.get("name", ""))
 
 
 def portrait(page):
@@ -257,19 +265,20 @@ def confirm_on_page(office, name, read=None, pause=0.5):
              if key == office["key"] and same_person(holder, name)]
     seen = None
     for url in office["pages"]:
-        text = None
+        page = None
         # A failed request is tried once more before the page counts as
         # unreadable: one timeout must not read as "not named" (rule 8).
         for _attempt in range(2):
             try:
-                text = visible_text(read(url))
+                page = read(url)
                 break
             except FederalError:
                 time.sleep(pause)
-        if text is None:
+        # A bot wall, an empty challenge or a script-drawn shell says
+        # nothing either way, as no answer (officers.says_nothing).
+        if page is None or says_nothing(page):
             continue
-        if len(text) < 300:
-            continue                 # an error page or a script-drawn shell
+        text = visible_text(page)
         seen = url
         if names_holder(name, text, office["pageTitle"], forms):
             found = {"status": "confirmed", "url": url}
@@ -493,11 +502,17 @@ def fetch(previous=None, today=None, read=None, log=print, history_read=None):
             # The page did not answer, or said nothing - a challenge with
             # no body, a bot wall, a page drawn by script, or one without the
             # main content this reader reads: the same person's last
-            # portrait stands (rule 8). Only a page read whole drops it.
+            # portrait stands (rule 8), dated by the day it was last read
+            # whole, which problems() ages. Only a page read whole drops it.
             kept = (previous or {}).get(key) or {}
-            if kept.get("photo") and same_person(kept.get("name", ""), person["name"]):
+            if kept.get("photo") and same_holder(kept, person):
                 person["photo"], person["photoSet"] = kept["photo"], kept.get("photoSet") or []
-                log(f"  [warn] the {title}'s page could not be read; the last portrait is kept")
+                person["photoKept"] = kept.get("photoKept") or (previous or {}).get("asOf") or today
+                log(f"  [warn] the {title}'s page could not be read; the portrait last read on "
+                    f"{person['photoKept']} is kept")
+            else:
+                log(f"  [warn] the {title}'s page could not be read; there is no earlier "
+                    "portrait of them to keep")
     entries = parse_cabinet(read(federal_offices.CABINET_URL))
     held, unknown = assign(entries)
     if unknown:
@@ -629,6 +644,15 @@ def problems(cache, today=None):
         if not person or not (person.get("termStart", "") <= today < person.get("termEnd", "")):
             out.append(("error", "federal-term-ended",
                         f"the {title}'s term in the cache does not cover {today}; run 'federal'",
+                        [person.get("name", "?")]))
+        # A portrait kept while the page said nothing (rule 8) ages as a
+        # kept confirmation does (officers.KEPT_STALE_DAYS).
+        kept = person.get("photo") and person.get("photoKept")
+        if kept and (datetime.date.fromisoformat(today)
+                     - datetime.date.fromisoformat(kept)).days > KEPT_STALE_DAYS:
+            out.append(("warn", "federal-portrait-kept",
+                        f"the {title}'s portrait was last read on {kept}; their White House "
+                        "page has said nothing a reader can read since. Look at it",
                         [person.get("name", "?")]))
     keys = {o["key"] for o in cache.get("offices") or []}
     missing = [o["office"] for o in federal_offices.DEPARTMENTS if o["key"] not in keys]

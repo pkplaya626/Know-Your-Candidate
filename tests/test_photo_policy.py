@@ -55,8 +55,8 @@ class TestOneRefusalTest(unittest.TestCase):
         with unittest.mock.patch.object(statewide_photos, "parse_arizona",
                                         return_value=[("governor", "PAT DOE", None, REFUSED, "")]):
             records, problems, _ = statewide_photos.read_guides(
-                {"AZ": {"governor": [{"name": "PAT DOE"}]}}, get=lambda u: "", pause=0,
-                refused=TABLE, passed_over=passed)
+                {"AZ": {"governor": [{"name": "PAT DOE"}]}}, get=lambda u: '<img class="pic"',
+                pause=0, refused=TABLE, passed_over=passed)
         self.assertEqual(records, {})
         self.assertEqual(passed, [REFUSED])
         self.assertIn(REFUSED, statewide_photos.doubted({"notPortraits": passed}))

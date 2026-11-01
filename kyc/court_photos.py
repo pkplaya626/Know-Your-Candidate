@@ -389,6 +389,9 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
             found, why = photo_for(name, read["members"], read_pages, place, measure,
                                    passed_over=passed_over)
             if found:
+                # Pictured from the roster: their own page's silence is no
+                # miss, or counts() would say both of one justice.
+                misses.pop(name, None)
                 photos[name] = found
                 continue
             why = misses.get(name) or why
