@@ -2378,6 +2378,19 @@ def _judiciary(args):
 
     previous = judiciary.load_cache(args.root)
     links_only = getattr(args, "links_only", False)
+    chiefs_only = getattr(args, "chiefs_only", False)
+    disclosures_only = getattr(args, "disclosures_only", False)
+    if chiefs_only or disclosures_only:
+        if not previous:
+            print(f"[error] no {judiciary.CACHE_PATH}; run 'judiciary'", file=sys.stderr)
+            return 2
+        if chiefs_only:
+            _court_chiefs(previous, previous, args)
+            if not args.check:
+                print(f"[ok] wrote {judiciary.save_cache(previous, args.root)}")
+        if disclosures_only:
+            _judge_disclosures(previous, args)
+        return 0
     if args.check or links_only:
         cache = previous
         if not cache:
@@ -2395,6 +2408,9 @@ def _judiciary(args):
         cache["territorial"], trouble = territorial_courts.fetch((previous or {}).get("territorial"))
         for line in trouble:
             print(f"  [warn] territorial court: {line}; its last roster stands")
+        # A chief the directory's record cannot settle, from the court's own
+        # site (kyc/court_chiefs.py); a page not read keeps the last read.
+        _court_chiefs(cache, previous, args)
     # A retired justice is listed apart and never counted as sitting.
     judges = {k: j for k, j in cache["judges"].items() if not j.get("retiredJustice")}
     active = sum(1 for j in judges.values() if j["status"] == "active")
@@ -2438,7 +2454,53 @@ def _judiciary(args):
             for line in links["problems"][:10]:
                 print(f"           - {line}")
             print(f"[ok] wrote {judge_links.CACHE_PATH}")
+        if not links_only:
+            _judge_disclosures(cache, args)
     return 1 if failed else 0
+
+
+def _court_chiefs(cache, previous, args):
+    """Each court's own word on its chief, where a recipe reads it
+    (kyc/court_chiefs.py), into *cache*'s ``courtChiefs``. With ``--check``
+    the committed reads are only reported."""
+    from . import court_chiefs
+
+    if not args.check:
+        reads, trouble = court_chiefs.fetch(cache["judges"], (previous or {}).get("courtChiefs"))
+        cache["courtChiefs"] = reads
+        for line in trouble:
+            print(f"  [warn] court chief: {line}")
+    for cid, entry in sorted((cache.get("courtChiefs") or {}).items()):
+        said = entry.get("words") or entry.get("refused") or "not read"
+        print(f"  {cid}: the court's site: {said} ({entry.get('read') or 'never read'})")
+    for level, code, message, detail in court_chiefs.problems(cache):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
+
+
+def _judge_disclosures(cache, args):
+    """The judges' financial disclosure reports as CourtListener holds them,
+    joined by FJC id (kyc/judge_disclosures.py). A failed read keeps the
+    committed cache and fails nothing (rule 8)."""
+    from . import judge_disclosures
+
+    previous = judge_disclosures.load_cache(args.root)
+    judges = {k: j for k, j in cache["judges"].items()}
+    if args.check:
+        found = previous
+    else:
+        try:
+            found = judge_disclosures.fetch(judges, previous)
+        except judge_disclosures.JudgeDisclosuresError as exc:
+            print(f"  [warn] judges' disclosures: {exc}; the committed cache is unchanged")
+            found = previous
+        else:
+            print(f"[ok] wrote {judge_disclosures.save_cache(found, args.root)}")
+    for level, code, message, detail in judge_disclosures.problems(found, judges):
+        print(f"  [{level}] {code}: {message}")
+        for line in detail[:10]:
+            print(f"           - {line}")
 
 
 def _federal(args):
@@ -2900,6 +2962,12 @@ def build_parser():
     jud.add_argument("--links-only", action="store_true",
                      help="read only the judges' Wikipedia articles and portraits "
                           "(kyc/judge_links.py), for the committed directory")
+    jud.add_argument("--chiefs-only", action="store_true",
+                     help="read only each court's own word on its chief where the directory's "
+                          "record cannot settle it (kyc/court_chiefs.py)")
+    jud.add_argument("--disclosures-only", action="store_true",
+                     help="read only the judges' financial disclosures as CourtListener holds "
+                          "them (kyc/judge_disclosures.py), for the committed directory")
 
     og = add("oge", help="financial disclosures of the President, the Vice President and the "
                          "Cabinet, from the Office of Government Ethics")
