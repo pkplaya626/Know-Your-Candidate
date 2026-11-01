@@ -5780,9 +5780,6 @@ html.has-jumpbar { scroll-padding-top: calc(var(--header-h) + var(--jump-h, 49px
   margin: 0 0 var(--s-3);
 }
 .race-shared { margin: 0; font-size: var(--t-sm); color: var(--text-muted); }
-/* The House delegation folded on a phone (kyc-state.js showDelegation). */
-.delegation-fold { margin: 0 0 var(--s-3); }
-.delegation-toggle { min-height: 44px; }
 /* Chips over the rows (kyc-state.js raceFilterBar): the site's chips,
  * neutral, never a party's or a status's colour. */
 .race-filters { display: flex; flex-wrap: wrap; gap: var(--s-2); width: 100%; }
