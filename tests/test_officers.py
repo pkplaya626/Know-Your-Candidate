@@ -1056,6 +1056,35 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0, get=get)
         self.assertNotIn("photo", rows["AR"])
 
+    def test_a_biography_page_that_says_nothing_keeps_the_same_persons_last_photo(self):
+        """coag.gov's firewall answered the refresh's runner HTTP 202 with no
+        body (2026-11-01), which was read as a page showing no photograph,
+        and Phil Weiser's was dropped. A challenge, a bot wall or a page
+        drawn by script concludes nothing (rule 8)."""
+        old = {"AR": {"name": "Tim Griffin", "photo": "https://ag.example.gov/old.jpg",
+                      "photoPage": "https://ag.example.gov/meet-tim/"}}
+        # The front page's headshot is not an image: only the biography page
+        # could show one.
+        check = self.weigh({})
+        for said in ("", "<html><head><title>Just a moment...</title></head></html>",
+                     "<html><body><div id=app></div><script>render()</script></body></html>"):
+            rows = {"AR": {"name": "Tim Griffin"}}
+            problems = officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0,
+                                              get=lambda url, timeout=60: said)
+            self.assertEqual(rows["AR"].get("photo"), "https://ag.example.gov/old.jpg", said)
+            self.assertIn("AR: Tim Griffin's photograph could not be read; the last one read is "
+                          "kept", problems)
+            self.assertFalse([p for p in problems if "dropped" in p], problems)
+        # A biography page read whole that shows none drops it, and says so.
+        page = ("<html><body><p>" + "The office of the Attorney General serves Arkansas. " * 10 +
+                "</p></body></html>")
+        rows = {"AR": {"name": "Tim Griffin"}}
+        problems = officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0,
+                                          get=lambda url, timeout=60: page)
+        self.assertNotIn("photo", rows["AR"])
+        self.assertIn("AR: photograph dropped for Tim Griffin (was https://ag.example.gov/old.jpg)",
+                      problems)
+
     def test_a_colleague_sharing_letters_or_a_surname_is_not_the_attorney_general(self):
         """A substring test took "Carrie-Smith-Headshot" for Chris Carr and
         "jane-stanford-portrait" for Aaron Ford, and nothing looked at a
