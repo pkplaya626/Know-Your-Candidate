@@ -1551,4 +1551,18 @@ def problems(cache, races):
     if missing:
         out.append(("warn", "seat-history-uncovered",
                     f"{len(missing)} races have no last election in the cache", missing))
+    if "seats" not in cache:
+        out.append(("warn", "seat-history-strip-missing",
+                    "the cache holds no elections before the last; run: python "
+                    "build_profile_site.py seats", []))
+        return out
+    strip_held = sorted(f"{r['id']} {c['year']}: {c['withheld']}"
+                        for r in races for c in (r.get("seatHistory") or {}).get("cells") or []
+                        if c.get("withheld") and not (r["chamber"] == "House" and
+                                                      c["year"] == HOUSE_YEAR))
+    if strip_held:
+        out.append(("warn", "seat-history-strip-withheld",
+                    f"{len(strip_held)} earlier results in the seats' strips are not shown: the "
+                    "Clerk's and the second source's disagree or no second source covers them",
+                    strip_held))
     return out

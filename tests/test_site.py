@@ -456,11 +456,14 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     # The race folds (kyc-cards.js fold()) draw their body only once
     # KYC.peopleFull says the race's state is whole. outsideDetail is the
     # dialog's (kyc-profile.js, which opens a record once its file is in),
-    # in the folds' words (rule 12).
+    # in the folds' words (rule 12). The seat fold's strip (seatStrip) is
+    # a race's field the index leaves out (emit.RACE_INDEX_LEAVES_OUT): its
+    # fold waits for the state's file unless the race already holds it.
     FOLD_DRAWN = {"kyc-cards.js": ("moneyBlock", "moneyRow", "outsideLine", "outsideOtherLine",
                                    "outsideLead", "outsideDetail",
-                                   "compareTable", "compareCell", "platformFrom")}
-    FOLD_ENTRIES = {"kyc-cards.js": ("moneyBlock", "compareBlock")}
+                                   "compareTable", "compareCell", "platformFrom",
+                                   "lastTimeBlock", "seatStrip")}
+    FOLD_ENTRIES = {"kyc-cards.js": ("moneyBlock", "compareBlock", "lastTimeBlock")}
     # Reads a history record's own `wikipedia`, not the profile's.
     SAFE_HELPERS = ("officesHeld",)
     # A field the index carries, whole, on every record whose card reads it
@@ -487,7 +490,8 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     def check(self, modules):
         found = index_field_reads(
             {n: t for n, t in modules.items() if n not in self.EXEMPT and n != "kyc.js"},
-            modules["kyc.js"], emit.INDEX_LEAVES_OUT, self.FOLD_DRAWN, self.FOLD_ENTRIES,
+            modules["kyc.js"], emit.INDEX_LEAVES_OUT | emit.RACE_INDEX_LEAVES_OUT,
+            self.FOLD_DRAWN, self.FOLD_ENTRIES,
             self.SAFE_HELPERS)
         return [(m, f, what) for m, f, what in found
                 if what.split(".")[-1] not in self.CARD_KEEPS.get((m, f), ())]
