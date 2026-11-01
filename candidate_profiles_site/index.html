@@ -26,7 +26,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="assets/kyc.css?v=26c0a2014d">
-<script src="assets/kyc.js?v=665e9afe60"></script>
+<script src="assets/kyc.js?v=44ec2dee97"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
@@ -418,8 +418,9 @@
     </main>
 </div>
 
-<!-- Loaded only when wanted (KYC.loadData, KYC.loadPeople): the officials
-     and the search's places and bodies when a search is typed, the ballot
+<!-- Loaded only when wanted (KYC.loadData, KYC.loadPeople): the officials,
+     the search's places and bodies, and the profiles' own words the search
+     reads (careers, schools, platforms: KYC.loadWords) when a search is typed, the ballot
      questions when one names a question (rule 97), a chamber's roll calls
      when a member's profile is opened, a state's full records (rule 94) when
      one of its people is opened or its race's money is. Named here, inert,
@@ -432,6 +433,7 @@
 <script src="data/measures.js?v=c89c22ff6f"></script>
 <script src="data/votes/house.js?v=0c0b83db52"></script>
 <script src="data/votes/senate.js?v=cf1cd91b55"></script>
+<script src="data/people/words.js?v=de4a99747b"></script>
 <script src="data/people/ak.js?v=3accb59ca4"></script>
 <script src="data/people/al.js?v=e3cfb5b2c7"></script>
 <script src="data/people/ar.js?v=c466572f3e"></script>
@@ -490,7 +492,7 @@
 <script src="data/people/wy.js?v=7c84e20f6d"></script>
 </template>
 <script src="data/people/meta.js?v=b20b9e53f1"></script>
-<script src="data/people/index.js?v=fd61b843e8"></script>
+<script src="data/people/index.js?v=252e36a2d7"></script>
 <script src="data/odds.js"></script>
 <script src="data/lookup/index.js?v=e132c6e7e6"></script>
 <script src="assets/kyc-odds.js?v=c1d28927af"></script>
@@ -499,6 +501,6 @@
 <script src="assets/kyc-findrep.js?v=45fc0e8859"></script>
 <script src="assets/kyc-senate.js?v=073a8c2331"></script>
 <script src="assets/kyc-search.js?v=760ec6174e"></script>
-<script src="assets/kyc-directory.js?v=510a90ffe9"></script>
+<script src="assets/kyc-directory.js?v=97d957b6c1"></script>
 </body>
 </html>

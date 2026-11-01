@@ -441,8 +441,13 @@
    * profiles. */
   function emptyLabel(officials, answers) {
     var note = state.q ? KYC.queryNote(state.q) : "";
-    var html = KYC.escapeHtml("No profiles" + (narrowed() || " match these filters") +
-      (narrowed() && activeFilters() ? " with these filters" : "") + (note ? ". " + note : "."));
+    // Until the profiles' words are in, nothing found by name, place or
+    // office is not "no profiles": their careers and platforms may hold it.
+    var pending = wordsPending();
+    var html = KYC.escapeHtml((pending ? "No profile’s name, place or office matches" +
+        (narrowed() || " these filters") : "No profiles" + (narrowed() || " match these filters")) +
+      (narrowed() && activeFilters() ? " with these filters" : "") + (note ? ". " + note : ".")) +
+      wordsNote();
     if (hiddenOut && state.eliminated === "hide" && state.view !== "senate") {
       html += " " + KYC.escapeHtml(plural(hiddenOut, "person", "people") + " out of the race " +
         "(lost a primary, withdrew, or not on the ballot) " + (hiddenOut === 1 ? "matches" : "match") +
@@ -460,6 +465,49 @@
 
   function plural(n, one, many) {
     return n.toLocaleString() + " " + (n === 1 ? one : many);
+  }
+
+  /* -------------------------------------------------- the profiles' words */
+
+  /* What the search reads and no card draws - careers, schools, platforms,
+   * committees, funding, the campaign's words (emit.INDEX_WORDS) - is its
+   * own file, loaded the first time a query is typed (KYC.loadWords), so a
+   * reader who never searches never waits for it. Until it is in, the grid
+   * lists who matches by name, place or office and says it is still
+   * reading the rest; where it failed to load, it says the search looked
+   * at names, places and offices only. Never "no profiles" for a person
+   * whose words would have matched (rule 19). */
+  var words = { loading: false, failed: false, failedFor: null };
+
+  function wantWords() {
+    if (!state.q || KYC.wordsHeld() || words.loading) return;
+    // A failed load is asked for again with the next query, not in a loop.
+    if (words.failed && words.failedFor === state.q) return;
+    words.loading = true;
+    words.failed = false;
+    KYC.loadWords().then(function (ok) {
+      words.loading = false;
+      words.failed = !ok;
+      words.failedFor = ok ? null : state.q;
+      if (listDrawn && state.q) apply({ keep: true });
+    });
+  }
+
+  /** Whether a query's matches may still grow once the words are in. */
+  function wordsPending() {
+    return !!state.q && !KYC.wordsHeld();
+  }
+
+  /** The sentence the results line ends with while a query's words are
+   *  not in, as markup; "" once they are. */
+  function wordsNote() {
+    if (!wordsPending()) return "";
+    return ' <span class="search-words" role="status">' + KYC.escapeHtml(words.failed
+      ? "The profiles’ own words (careers, schools, platforms, committees) did not load, so " +
+        "this search looked at names, places and offices only. Search again, or reload the " +
+        "page, to try again."
+      : "Still reading the profiles’ own words (careers, schools, platforms, committees) for " +
+        "this search: anyone they match is added in a moment.") + "</span>";
   }
 
   /* The results line says what is hidden, with the switch beside it:
@@ -494,7 +542,7 @@
     // A closest-first order reorders the cards by market prices: said here
     // as the races view says it, or it reads as an order of the people.
     return html + challengerNote() + (closeSource() ? " " + KYC.escapeHtml(cardOrderWords()) : "") +
-      KYC.escapeHtml(zipWords());
+      KYC.escapeHtml(zipWords()) + wordsNote();
   }
 
   function cardOrderWords() {
@@ -542,15 +590,16 @@
       showOut: state.eliminated === "show",
     });
     if (view.people) {
-      label.textContent = "Showing " + view.people.toLocaleString() + " profiles across " +
-        view.seats.toLocaleString() + " Senate seat" + (view.seats === 1 ? "" : "s") + narrowed() +
-        (zipWords() ? "." + zipWords() : "");
+      renderLabel(label, KYC.escapeHtml("Showing " + view.people.toLocaleString() +
+        " profiles across " + view.seats.toLocaleString() + " Senate seat" +
+        (view.seats === 1 ? "" : "s") + narrowed() + (zipWords() ? "." + zipWords() : "")) +
+        wordsNote());
     } else {
       renderLabel(label, emptyLabel(officials, answers));
     }
     grid.className = "senate-view";
     grid.innerHTML = view.html;
-    empty.hidden = view.people > 0 || officials || answers;
+    empty.hidden = view.people > 0 || officials || answers || wordsPending();
     showLegend(view.people > 0);
   }
 
@@ -589,7 +638,9 @@
       // "Nothing matches" under the official who did (GRID-07), or the
       // office or place that did (rule 97), or over a match the
       // out-of-the-race switch hides: the line says which.
-      empty.hidden = officials || answers || (hiddenOut > 0 && state.eliminated === "hide");
+      // Nor while the profiles' words, which may match, are not in.
+      empty.hidden = officials || answers || (hiddenOut > 0 && state.eliminated === "hide") ||
+        wordsPending();
       showLegend(false);
       return;
     }
@@ -607,7 +658,7 @@
       renderLabel(label, KYC.escapeHtml("Showing " + plural(list.length, "race", "races") +
         narrowed() + ": " + plural(people, "person", "people") + " on the ballot or holding " +
         "the seat" + (out ? ", and " + out.toLocaleString() + " out of the race folded under " +
-        "each" : "") + ". " + raceOrderWords() + zipWords()));
+        "each" : "") + ". " + raceOrderWords() + zipWords()) + wordsNote());
       grid.className = "";
       // The races, then which party the markets expect to hold each chamber.
       grid.innerHTML = raceSections(list) +
@@ -1065,6 +1116,7 @@
    * drawn underneath a profile someone landed on directly - writing it then
    * would replace the profile link they arrived on. */
   function apply(opts) {
+    wantWords();
     syncStateLink();
     syncViewToggles();
     syncSort();
@@ -1079,6 +1131,11 @@
     // a challenger whose text mentions him ahead of the Speaker.
     visible.sort(state.q ? function (a, b) { return score(a) - score(b) || order(a, b); } : order);
     listDrawn = true;
+    // The words arrived for the query drawn: the same view, found again.
+    if (opts && opts.keep) {
+      render();
+      return;
+    }
     if (opts && opts.quiet) {
       drawnFor = "{}";
       render();

@@ -221,10 +221,38 @@
   var indexIn = false;     // whether the index of everyone is in
   var partial = {};        // id -> true for a record the index holds in part
   var refusedPeople = [];  // the files refused, as the index or a state code
+  var wordsIn = false;     // whether the words file is in (data/people/words.js)
   var lastPeopleFile;
+
+  /* data/people/words.js: what the grid's search reads and no card draws
+   * (emit.INDEX_WORDS) - careers, schools, platforms - for everyone the
+   * index holds, loaded the first time a query is typed. Each person's
+   * words fill the index's record, never replacing a field it holds; a
+   * search cached on a record is dropped, to be read again with them. */
+  function takeWords(file) {
+    var build = (global.kycBuildMeta || {}).signature;
+    if (build && file.build !== build) {
+      if (refusedPeople.indexOf("words") === -1) refusedPeople.push("words");
+      return;
+    }
+    if (wordsIn) return;
+    var held = {};
+    people().forEach(function (p) { held[p.id] = p; });
+    file.people.forEach(function (w) {
+      var known = held[w.id];
+      if (!known) return;
+      Object.keys(w).forEach(function (key) { if (!(key in known)) known[key] = w[key]; });
+      delete known.__tiers;
+    });
+    wordsIn = true;
+    if (doc && typeof global.CustomEvent === "function") {
+      doc.dispatchEvent(new global.CustomEvent("kyc:words"));
+    }
+  }
 
   function takePeople(file) {
     lastPeopleFile = file;
+    if (file && file.words && file.people) { takeWords(file); return; }
     if (!file || !file.people || !file.races) return;
     var what = file.index ? "index" : String(file.state || "");
     var build = (global.kycBuildMeta || {}).signature;
@@ -248,6 +276,8 @@
       if (!file.index) {
         Object.keys(p).forEach(function (key) { if (!(key in known)) known[key] = p[key]; });
         delete partial[p.id];
+        // Its words may have come with it: searched again with them.
+        delete known.__tiers;
       }
     });
     var heldRace = {};
@@ -2782,6 +2812,24 @@
     return loadPeopleFile("people/index.js", function () { return indexIn; });
   }
 
+  /** Whether every record the page holds carries its words, the fields the
+   *  search reads (emit.INDEX_WORDS): the words file is in, or no record is
+   *  held in part (a state's page, or every state's file in). */
+  function wordsHeld() {
+    if (wordsIn) return true;
+    for (var id in partial) if (Object.prototype.hasOwnProperty.call(partial, id)) return false;
+    return true;
+  }
+
+  /** A promise of whether every record's words are in: at once where they
+   *  are, else once data/people/words.js has loaded. False where it failed
+   *  to load or was refused, and a failed load can be asked for again. */
+  function loadWords() {
+    if (wordsHeld()) return Promise.resolve(true);
+    if (!onDemandSrc("people/words.js")) return Promise.resolve(false);
+    return loadPeopleFile("people/words.js", wordsHeld);
+  }
+
   /** A promise of the person *id* names (an FEC id they were merged from
    *  among them), held whole; null where no profile has that id. Rejects
    *  when a file it needed did not load. */
@@ -3702,6 +3750,8 @@
     peopleProblem: peopleProblem,
     loadPeople: loadPeople,
     loadIndex: loadIndex,
+    loadWords: loadWords,
+    wordsHeld: wordsHeld,
     loadPerson: loadPerson,
     indexHeld: function () { return indexIn; },
     canLoadPeople: function (file) { return !!onDemandSrc(file); },

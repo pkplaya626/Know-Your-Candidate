@@ -176,7 +176,7 @@ class TestEmit(unittest.TestCase):
             for name in os.listdir(os.path.join(tmp, emit.PEOPLE_DIR)):
                 with open(os.path.join(tmp, emit.PEOPLE_DIR, name), encoding="utf-8") as f:
                     texts.append(f.read())
-        self.assertEqual(len(texts), len(emit.people_codes()) + 2)
+        self.assertEqual(len(texts), len(emit.people_codes()) + 3)
         for text in texts:
             self.assertNotIn("</script>", text)
             self.assertNotIn("<!--", text)
@@ -197,7 +197,7 @@ class TestEmit(unittest.TestCase):
         # character, so the file is renamed into place rather than opened.
         with tempfile.TemporaryDirectory() as tmp:
             written = emit.write_people([member()], {}, root=tmp)
-            self.assertEqual(len(written), len(emit.people_codes()) + 2)
+            self.assertEqual(len(written), len(emit.people_codes()) + 3)
             for path, size in written:
                 self.assertTrue(os.path.exists(path))
                 self.assertFalse(os.path.exists(path + ".tmp"))
@@ -233,13 +233,34 @@ class TestPeopleFiles(unittest.TestCase):
             index = read_people(os.path.join(tmp, emit.PEOPLE_INDEX_FILE))
             texas = read_people(emit.people_file("TX", tmp))
             wyoming = read_people(emit.people_file("WY", tmp))
+            words = read_people(os.path.join(tmp, emit.PEOPLE_WORDS_FILE))
         self.assertTrue(index["index"])
         self.assertEqual([p["id"] for p in index["people"]], [p["id"] for p in profiles])
         self.assertEqual([r["id"] for r in index["races"]], ["S-TX-2026", "S-CA-2026"])
         for record in index["people"]:
             self.assertEqual(set(record) & emit.INDEX_LEAVES_OUT, set(), record["id"])
-        # What a card and the search read stays: the search's own fields.
-        self.assertEqual(index["people"][0]["education"], "B.A.")
+            # The search's words are their own file's, loaded when a query
+            # is typed: no card draws them.
+            self.assertEqual(set(record) & set(emit.INDEX_WORDS), set(), record["id"])
+        # What a card reads stays.
+        self.assertEqual(index["people"][0]["state"], "TX")
+        # The words file holds each person's words as the whole record does,
+        # and nothing else but the id they are filed under.
+        self.assertEqual(words["words"], list(emit.INDEX_WORDS))
+        self.assertEqual(words["build"], index["build"])
+        self.assertNotIn("races", words)
+        by_id = {p["id"]: p for p in profiles}
+        self.assertEqual(words["people"][0]["education"], "B.A.")
+        for record in words["people"]:
+            self.assertEqual(set(record) - {"id"}, set(record) & set(emit.INDEX_WORDS))
+            for key in set(record) - {"id"}:
+                self.assertEqual(record[key], by_id[record["id"]][key])
+        # Index and words together are the index's record of the whole one.
+        for record in index["people"]:
+            whole = by_id[record["id"]]
+            self.assertEqual({k: whole[k] for k in emit.INDEX_WORDS if k in whole},
+                             {k: v for w in words["people"] if w["id"] == record["id"]
+                              for k, v in w.items() if k != "id"})
         # A state's file holds its people whole, and its races, no one else's.
         self.assertEqual(texas["people"], profiles[:2])
         self.assertEqual([r["id"] for r in texas["races"]], ["S-TX-2026"])
@@ -290,7 +311,7 @@ class TestPeopleFiles(unittest.TestCase):
             profiles[2]["name"] = "Renamed"
             rewritten = emit.write_people(profiles, {}, root=tmp, races=races)
         # A change anywhere is a new build, which every file names.
-        self.assertEqual(len(rewritten), len(emit.people_codes()) + 2)
+        self.assertEqual(len(rewritten), len(emit.people_codes()) + 3)
 
     def test_what_no_build_writes_is_not_left_to_be_served(self):
         profiles, races = self.people()
@@ -321,7 +342,7 @@ class TestPeopleFiles(unittest.TestCase):
             profiles[0]["education"] = "M.A."
             stale = {os.path.basename(p) for p, why in emit.check_people(profiles, races, None, tmp)
                      if why == "stale"}
-        self.assertEqual(stale, {"index.js"} | {f"{c.lower()}.js" for c in emit.people_codes()})
+        self.assertEqual(stale, {"index.js", "words.js"} | {f"{c.lower()}.js" for c in emit.people_codes()})
 
     def test_someone_filed_under_another_states_race_stops_the_split(self):
         profiles, races = self.people()
@@ -347,7 +368,35 @@ class TestPeopleFiles(unittest.TestCase):
         self.assertEqual(sum(len(f["races"]) for f in states), len(index["races"]))
         for record in index["people"]:
             self.assertEqual(record, emit.index_record(whole[record["id"]]))
+        # The words file is the same build's, and with the index is every
+        # field the index's records had before the words were split off.
+        words = read_people(os.path.join(ROOT, emit.PEOPLE_WORDS_FILE))
+        self.assertEqual(words["build"], meta["signature"])
+        held = {w["id"]: w for w in words["people"]}
+        for record in index["people"]:
+            again = dict(record, **{k: v for k, v in held.get(record["id"], {}).items() if k != "id"})
+            self.assertEqual(again, {k: v for k, v in whole[record["id"]].items()
+                                     if k in record or k in emit.INDEX_WORDS}, record["id"])
         self.assertFalse(os.path.exists(os.path.join(ROOT, emit.LEGACY_PROFILES_FILE)))
+
+    def test_the_grid_names_the_words_file_and_does_not_load_it_first(self):
+        """The profiles' words are loaded when a query is typed: a grid that
+        loaded them before its first card would wait on them again, and one
+        that did not name them would find nobody by a career or a school."""
+        with open(os.path.join(ROOT, emit.SITE_DIR, "index.html"), encoding="utf-8") as f:
+            html = f.read()
+        self.assertIn("data/people/words.js", emit.on_demand_sources(html))
+        self.assertNotIn("data/people/words.js", emit.script_sources(html))
+        result = {p: (ok, note) for p, ok, note in emit.check_pages(ROOT)}
+        self.assertTrue(result["index.html"][0], result["index.html"][1])
+        with tempfile.TemporaryDirectory() as tmp:
+            site = os.path.join(tmp, emit.SITE_DIR)
+            os.makedirs(site)
+            with open(os.path.join(site, "index.html"), "w", encoding="utf-8") as f:
+                f.write(html.replace('<script src="data/people/words.js', '<script src="data/people/wordz.js'))
+            ok, note = {p: (ok, n) for p, ok, n in emit.check_pages(tmp)}["index.html"]
+        self.assertFalse(ok)
+        self.assertIn("does not name data/people/words.js", note)
 
     def test_a_state_page_loading_everyone_is_reported(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -487,7 +536,7 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     def check(self, modules):
         found = index_field_reads(
             {n: t for n, t in modules.items() if n not in self.EXEMPT and n != "kyc.js"},
-            modules["kyc.js"], emit.INDEX_LEAVES_OUT, self.FOLD_DRAWN, self.FOLD_ENTRIES,
+            modules["kyc.js"], emit.INDEX_LEAVES_OUT | set(emit.INDEX_WORDS), self.FOLD_DRAWN, self.FOLD_ENTRIES,
             self.SAFE_HELPERS)
         return [(m, f, what) for m, f, what in found
                 if what.split(".")[-1] not in self.CARD_KEEPS.get((m, f), ())]
@@ -506,9 +555,13 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
         modules = self.modules()
         modules["kyc-cards.js"] += ("\n  function card2(item) {\n"
                                     "    return item.receipts + KYC.moneyAmount(item, 'x') +"
-                                    " moneyRow(item) + item.districtOffices;\n  }\n")
+                                    " moneyRow(item) + item.districtOffices + item.education +"
+                                    " KYC.platformItems(item);\n  }\n")
         modules["kyc-map.js"] += "\n  function x(p) { return KYC.cards.compareCell(p); }\n"
         found = {(m, f, what) for m, f, what in self.check(modules)}
+        # The search's words are the words file's, never a card's.
+        self.assertIn(("kyc-cards.js", "card2", "item.education"), found)
+        self.assertIn(("kyc-cards.js", "card2", "KYC.platformItems"), found)
         self.assertIn(("kyc-cards.js", "card2", "item.receipts"), found)
         self.assertIn(("kyc-cards.js", "card2", "KYC.moneyAmount"), found)
         self.assertIn(("kyc-cards.js", "card2", "moneyRow()"), found)

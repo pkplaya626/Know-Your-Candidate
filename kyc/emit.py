@@ -16,6 +16,9 @@ PEOPLE_DIR = os.path.join(DATA_DIR, "people")
 PEOPLE_META_FILE = os.path.join(PEOPLE_DIR, "meta.js")
 # Everyone's card and search fields, and every race: the grid and the map.
 PEOPLE_INDEX_FILE = os.path.join(PEOPLE_DIR, "index.js")
+# What the grid's free-text search reads and no card draws (INDEX_WORDS):
+# loaded on the grid the first time a reader types a query.
+PEOPLE_WORDS_FILE = os.path.join(PEOPLE_DIR, "words.js")
 # The file whose signature is the build's, which ``verify`` compares.
 DATA_FILE = PEOPLE_META_FILE
 # The single file the split replaced: a build removes it, verify refuses it.
@@ -98,6 +101,14 @@ PAGE_REQUIREMENTS = {
         "assets/kyc-usmap.js",
         "assets/kyc-map.js",
     ),
+}
+
+# What a page names inert in its onDemandData template, to load when it is
+# wanted, beyond the votes and people files every page that opens profiles
+# names: the grid's search reads the profiles' words (INDEX_WORDS) from
+# their own file, loaded the first time a query is typed.
+PAGE_ON_DEMAND = {
+    "index.html": ("data/people/words.js",),
 }
 
 # Your ballot (rule 92): the data its lists are drawn from, then the modules
@@ -372,6 +383,19 @@ INDEX_LEAVES_OUT = frozenset({
     "termEndYear", "wikipediaVia", "wikipediaWithheld",
 })
 
+# What the grid's free-text search reads (kyc.js SEARCH_FIELDS) and no card,
+# map panel, filter, sort or race list draws: the profile's own words -
+# careers, schools, platforms, committees, funding, voting record, the
+# campaign's quote. They were 45% of the index's gzipped weight, loaded by
+# every reader of the grid and the map before the first card, and read by
+# none who did not type a query. The index leaves them for the words file
+# (data/people/words.js), which the grid loads the first time a query is
+# typed and takes into the index's records (kyc.js takePeople); until it is
+# in, the grid says it is still reading them, never "no profiles" (rule 19).
+# A state's file holds them as it holds every field.
+INDEX_WORDS = ("education", "previous_professions", "committees", "platforms",
+               "funding_sources", "voting_alignment", "campaignQuote")
+
 
 class PeopleSplitError(ValueError):
     """The profiles cannot be split by state without losing someone."""
@@ -442,10 +466,20 @@ INDEX_KEEPS_FOR_THE_CARD = {"districtOffices": _card_calls_a_district_office}
 
 def index_record(profile):
     """A profile as the index holds it: without :data:`INDEX_LEAVES_OUT`,
-    but for a field its card reads (:data:`INDEX_KEEPS_FOR_THE_CARD`)."""
+    but for a field its card reads (:data:`INDEX_KEEPS_FOR_THE_CARD`), and
+    without its words (:data:`INDEX_WORDS`), which the words file holds."""
     return {k: v for k, v in profile.items()
-            if k not in INDEX_LEAVES_OUT
-            or (k in INDEX_KEEPS_FOR_THE_CARD and INDEX_KEEPS_FOR_THE_CARD[k](profile))}
+            if k not in INDEX_WORDS and (
+                k not in INDEX_LEAVES_OUT
+                or (k in INDEX_KEEPS_FOR_THE_CARD and INDEX_KEEPS_FOR_THE_CARD[k](profile)))}
+
+
+def words_record(profile):
+    """A profile as the words file holds it: its id and the
+    :data:`INDEX_WORDS` it has, as its whole record holds them; None where
+    it has none."""
+    words = {k: profile[k] for k in INDEX_WORDS if k in profile}
+    return dict({"id": profile.get("id")}, **words) if words else None
 
 
 def people_payloads(profiles, races=None, summary=None):
@@ -462,7 +496,9 @@ def people_payloads(profiles, races=None, summary=None):
     build = data_signature(profiles, races, summary)
     races = list(races or [])
     out = {"index": {"build": build, "index": True,
-                     "people": [index_record(p) for p in profiles], "races": races}}
+                     "people": [index_record(p) for p in profiles], "races": races},
+           "words": {"build": build, "words": list(INDEX_WORDS),
+                     "people": [w for w in map(words_record, profiles) if w]}}
     for code in people_codes():
         out[code] = {"build": build, "state": code,
                      "people": [p for p in profiles if p.get("state") == code],
@@ -476,7 +512,11 @@ def people_signature(payload):
 
 
 def _people_path(key, root="."):
-    return os.path.join(root, PEOPLE_INDEX_FILE) if key == "index" else people_file(key, root)
+    if key == "index":
+        return os.path.join(root, PEOPLE_INDEX_FILE)
+    if key == "words":
+        return os.path.join(root, PEOPLE_WORDS_FILE)
+    return people_file(key, root)
 
 
 def write_people(profiles, stats, root=".", races=None, summary=None):
@@ -512,11 +552,13 @@ def write_people(profiles, stats, root=".", races=None, summary=None):
         signature = people_signature(payload)
         if read_signature(path=path) == signature:
             continue
-        what = ("everyone's card and search fields, and every race" if key == "index"
-                else f"{key}'s people and races")
+        what = ("everyone's card fields, and every race" if key == "index"
+                else "the profiles' words the grid's search reads (loaded when a query is typed)"
+                if key == "words" else f"{key}'s people and races")
         text = (
             _BANNER.format(source="the roster CSVs at the repository root", built=built)
-            + f"// {what}: {len(payload['people'])} profiles, {len(payload['races'])} races\n"
+            + f"// {what}: {len(payload['people'])} profiles"
+            + (f", {len(payload['races'])} races" if "races" in payload else "") + "\n"
             + f"window.kycPeopleFile = {_json(payload)};\n"
             + 'window.kycPeopleFileMeta = {"signature":"' + signature + '"};\n'
         )
@@ -1408,6 +1450,7 @@ def check_pages(root="."):
     """
     results = []
     checks = dict(PAGE_REQUIREMENTS)
+    on_demand = dict(PAGE_ON_DEMAND)
     for folder, required in ((STATES_DIR, STATE_PAGE_REQUIREMENTS),
                              (DISTRICT_PAGES_DIR, DISTRICT_PAGE_REQUIREMENTS),
                              (LEGISLATURE_PAGES_DIR, LEGISLATURE_PAGE_REQUIREMENTS),
@@ -1452,6 +1495,14 @@ def check_pages(root="."):
         loaded = script_sources(text)
 
         problems = inline_script_problems(text)
+        lazy_wanted = [src for src in on_demand.get(page, ()) if src not in on_demand_sources(text)]
+        if lazy_wanted:
+            problems.append("its onDemandData template does not name " + ", ".join(lazy_wanted))
+        # A file a page loads when wanted is not also loaded before it draws.
+        early = [src for src in on_demand.get(page, ()) if src in loaded]
+        if early:
+            problems.append("loads " + ", ".join(early) + " before it draws, which it should "
+                            "load only when wanted")
         # The profile dialog loads a member's votes on demand, from the files
         # the page names in its inert template (KYC.loadData): a page that
         # opens profiles and names none would say the votes failed to load.
