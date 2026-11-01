@@ -40,10 +40,25 @@
    "height": 973,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
    "type": "image/jpeg",
    "width": 807
+  },
+  "395297bde1fe2d67a664.jpg": {
+   "by": "from the Utah Lieutenant Governor's Office's Voter Information Pamphlet",
+   "bytes": 86333,
+   "for": [
+    "person:FEC_H6UT04024"
+   ],
+   "from": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf",
+   "height": 599,
+   "method": "unmodified",
+   "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=24",
+   "read": "2026-11-01",
+   "sha256": "395297bde1fe2d67a664def420d3f6c5f69e7e6f3cf170df14f4744951f77001",
+   "type": "image/jpeg",
+   "width": 399
   },
   "3f11f3a06ce1188320a5.jpg": {
    "by": "from the Alaska Division of Elections' Official Election Pamphlet",
@@ -76,7 +91,7 @@
    "height": 1329,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
    "type": "image/jpeg",
    "width": 1113
@@ -91,7 +106,7 @@
    "height": 1080,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
    "type": "image/jpeg",
    "width": 1048
@@ -107,7 +122,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=35",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "66ea811e6896720ac02bc62b9b5c3010c9f84783b2d484f24f5b97eb2d924964",
    "sourceSha256": "d122af6046b6eed47f96087ce2655a2a0cfbb0eade51b1fcfcee3ebe63740193",
    "type": "image/png",
@@ -124,7 +139,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=32",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "84307b6eaed61e0ed24d50dc543a3bd7348fdbb76c929ccf970682e5b0a501ea",
    "sourceSha256": "b2e4071d718473886045f92064729322e5dc73d3167fd4e837026b3efb1459f5",
    "type": "image/png",
@@ -140,7 +155,7 @@
    "height": 857,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
    "type": "image/jpeg",
    "width": 751
@@ -156,7 +171,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=34",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "8c34d6c5670d0ded7391a04d3ff7495b02c8ca2c37a190853f6dddb57305ee91",
    "sourceSha256": "1e241eeb55ad58da4c179ed0503de827562e16f28aa8698fc648e2bf217702cd",
    "type": "image/png",
@@ -193,10 +208,25 @@
    "height": 2705,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
    "type": "image/jpeg",
    "width": 2254
+  },
+  "9484fc6ce5c2e8fc2629.jpg": {
+   "by": "from the Utah Lieutenant Governor's Office's Voter Information Pamphlet",
+   "bytes": 161145,
+   "for": [
+    "person:FEC_H6UT03182"
+   ],
+   "from": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf",
+   "height": 540,
+   "method": "unmodified",
+   "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=16",
+   "read": "2026-11-01",
+   "sha256": "9484fc6ce5c2e8fc26297d2accbc392af1602dab9fc866771d8346116e1764b2",
+   "type": "image/jpeg",
+   "width": 434
   },
   "96b6ab3f3d932a2970ab.png": {
    "by": "from the Oregon Secretary of State's State Voters' Pamphlet",
@@ -209,7 +239,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book11_web.pdf#page=32",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "96b6ab3f3d932a2970abc41bca9190449abd06cc859298e1c3021e7b87aafdbc",
    "sourceSha256": "f8493c2c95b33d3dee1b6ea3c0d65ff1d045dd418c8e9da01ef7c906d9728cfb",
    "type": "image/png",
@@ -225,10 +255,25 @@
    "height": 433,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
    "type": "image/jpeg",
    "width": 361
+  },
+  "ac1170898cbf3a540004.jpg": {
+   "by": "from the Utah Lieutenant Governor's Office's Voter Information Pamphlet",
+   "bytes": 275947,
+   "for": [
+    "person:FEC_H6UT01160"
+   ],
+   "from": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf",
+   "height": 944,
+   "method": "unmodified",
+   "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=11",
+   "read": "2026-11-01",
+   "sha256": "ac1170898cbf3a54000465fe5c9e3dcefa5a451180e33a9e96c4be775c78aa92",
+   "type": "image/jpeg",
+   "width": 630
   },
   "b3b2f41ae57ccc6ccb0d.jpg": {
    "by": "from the Alaska Division of Elections' Official Election Pamphlet",
@@ -240,7 +285,7 @@
    "height": 906,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
    "type": "image/jpeg",
    "width": 759
@@ -255,10 +300,46 @@
    "height": 1096,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
    "type": "image/jpeg",
    "width": 906
+  },
+  "c05c0d9dc26b407606b7.jpg": {
+   "by": "from the Utah Lieutenant Governor's Office's Voter Information Pamphlet",
+   "bytes": 248687,
+   "copy": {
+    "box": [
+     540,
+     675
+    ],
+    "bytes": 41337,
+    "chrome": "Chrome/156.0.8078.76",
+    "file": "72971e1b9696abcf80a2.jpg",
+    "for": [
+     "person:FEC_H6UT01244"
+    ],
+    "from": [
+     928,
+     1392
+    ],
+    "height": 810,
+    "made": "2026-11-01",
+    "quality": 0.86,
+    "sha256": "72971e1b9696abcf80a21c1b9d4f0d8921f6c3beb9bb05cea8cca98cfc082515",
+    "width": 540
+   },
+   "for": [
+    "person:FEC_H6UT01244"
+   ],
+   "from": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf",
+   "height": 1392,
+   "method": "unmodified",
+   "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=9",
+   "read": "2026-11-01",
+   "sha256": "c05c0d9dc26b407606b77ff43b68a7b59edb5043a961d201dfe978a7c518574b",
+   "type": "image/jpeg",
+   "width": 928
   },
   "c8108e6fb86765427c8f.jpg": {
    "by": "from the Washington Secretary of State's voters' guide",
@@ -270,7 +351,7 @@
    "height": 501,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
    "type": "image/jpeg",
    "width": 418
@@ -285,7 +366,7 @@
    "height": 584,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
    "type": "image/jpeg",
    "width": 486
@@ -300,7 +381,7 @@
    "height": 619,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
    "type": "image/jpeg",
    "width": 517
@@ -316,7 +397,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=36",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "d879b05c460beddb58ed25185a9c132c1933bef5a02b778c9f87a53526bb4a71",
    "sourceSha256": "4268d7b64f5798df27a236fd858a87408dd132d06719a2f87e9669edd2a26d43",
    "type": "image/png",
@@ -353,7 +434,7 @@
    "height": 1320,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
    "type": "image/jpeg",
    "width": 1095
@@ -384,7 +465,7 @@
    "height": 907,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
    "type": "image/jpeg",
    "width": 758

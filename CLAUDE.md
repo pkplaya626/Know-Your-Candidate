@@ -207,7 +207,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2548 tests, no dependencies
+python -m unittest discover tests             # 2561 tests, no dependencies
 npm install && npm test                       # 3485 real-DOM checks (needs jsdom)
 ```
 
@@ -464,15 +464,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     caps is shown smaller from the same file where a resizer serves it,
     else as it is, and said (rule 87), and as rule 101's smaller copy once
     one is made. The election offices that print candidates' photographs
-    (Washington's voters' guide, Alaska's and Oregon's pamphlets) serve
-    them only base64 inside JSON or inside PDFs, with no file to link; by
-    the owner's decision of 2026-10-25 they are a route of their own, kept
-    here as copies (`kyc/guide_photos.py`, rule 101) and shown only where
-    every other route leaves the silhouette. The guide's own page must name
-    the person beside the photograph, for that office: the statement record
-    (Washington), the statement's heading under the candidate list's link
-    beside the name (Alaska), the column under the office's heading with the
-    name beside the photograph (Oregon). The name joins in the words of the
+    (Washington's voters' guide, Alaska's, Oregon's and Utah's pamphlets)
+    serve them only base64 inside JSON or inside PDFs, with no file to
+    link; by the owner's decision of 2026-10-25 they are a route of their
+    own, kept here as copies (`kyc/guide_photos.py`, rule 101) and shown
+    only where every other route leaves the silhouette. Arizona's Clean
+    Elections Commission's candidate list, its voter education guide, is
+    the same route for the House, but its pictures have addresses of their
+    own, so they are linked there, never hosted (`method` "linked"). The
+    guide's own page must name the person beside the photograph, for that
+    office: the statement record (Washington), the statement's heading
+    under the candidate list's link beside the name (Alaska), the column
+    under the office's heading with the name beside the photograph
+    (Oregon), the page headed "Congressional District N" and the name
+    (Utah: one page per candidate, its photographs tagged with an sRGB ICC
+    profile, which a browser draws as the PDF does, `icc_is_srgb`), the
+    entry holding the picture and the name in bold under the district's
+    heading (Arizona). A refusal of Utah's is keyed on the hosted file, not
+    the page number of a pamphlet the office may reissue. The name joins in the words of the
     filing, the profile or the office's list, in any order - never a
     surname alone, a short form or an initial only through an evidenced
     `overrides.GUIDE_NAME_FORMS` entry (Oregon's "David Russ" is the filing
@@ -648,7 +657,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     script with a bot wall (Mary Silva's 403, Jena Nelson's 202), is drawn
     in the courts' headless Chrome (`render_portraits`, forty a run, a
     dozen to a browser run) and read by them again, never across a
-    redirect to another host. The image is the one the campaign's own page
+    redirect to another host - but a site the static read followed to a new
+    host that still names the candidate, whose portrait the static read
+    takes from that host, is drawn at that host (`enrich.drawn_address`):
+    drawn at the filed address, seventeen of the November ballot's sites
+    were refused at the redirect and never drawn (2026-11-01). The image is the one the campaign's own page
     draws, wherever it is hosted (a site builder's CDN serves the site's
     files), and the cache keeps that page, the words that named them
     (`portraitEvidence`: an alt text naming them, else the file name) and
@@ -669,10 +682,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     even in part, does - so John Giles's guide photograph and Dave
     Sunday's office photograph (framed photographs on the shelves) and
     Adam Hamawy's (one on the wall) are shown again, as Alex Vindman's (a
-    book jacket) always was. A face on a screen is not decided - at a
-    rally it is usually a live feed of someone there - so Donna Miller's
-    May Day file stays refused until the owner rules on screens (her
-    profile shows the county's portrait either way). The background-people rule
+    book jacket) always was. A face on a screen behind them is refused
+    like a person in the frame (the owner's decision of 2026-11-01): at a
+    rally it is usually a live feed of someone there, so Donna Miller's
+    May Day file stays refused (her profile shows the county's portrait
+    either way). The background-people rule
     is for candidates' and officials' photographs: asked about the
     federal judges' Senate Judiciary hearing stills, about 40% of the
     1,012 portraits the judges' item route shows, the owner said "keep"
@@ -2797,7 +2811,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     An election office's guide that prints a candidate's photograph with
     no address of its own - Washington's voters' guide (base64 inside its
     JSON), Alaska's statement PDFs, Oregon's pamphlet (JPEG 2000 inside
-    county PDFs) - is shown from a file hosted here, by the owner's same
+    county PDFs), Utah's Voter Information Pamphlet (one PDF, a page per
+    candidate for Congress) - is shown from a file hosted here, by the owner's same
     decision (official guides' photographs with no address of their own,
     hosted as unmodified copies, credited and sourced). `guidephotos`
     (`kyc/guide_photos.py`) writes it under `photos/`, named by its own

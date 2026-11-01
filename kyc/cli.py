@@ -201,7 +201,8 @@ def _build(args):
         profiles, guide_photos.load_cache(args.root), photocopies.load(args.root))
     if stats["guide_photos"]:
         print(f"  election offices' guides: {stats['guide_photos']} nominees' photographs "
-              "(hosted here, unmodified or decoded losslessly)")
+              "(hosted here, unmodified or decoded losslessly, or linked where the guide "
+              "gives the file an address)")
     # Whose photograph each portrait is, once every source has had its say;
     # then the smaller copy of a heavy one this site made (rule 101).
     from .photos import assign_credits

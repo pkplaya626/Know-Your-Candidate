@@ -188,11 +188,24 @@ class TestAJudgeIsNotRefusedForPeopleBehindThem(unittest.TestCase):
     def test_a_picture_of_a_person_is_no_person_in_the_frame(self):
         # Decided for the owner, 2026-10-25: a framed photograph, a poster, a
         # book jacket behind someone refuses nothing. A screen showing a face
-        # (a rally's live feed) is not decided, and stays refused.
+        # (a rally's live feed) is refused like a person (the owner,
+        # 2026-11-01).
         import re
         pictures = re.compile(r"\b(framed|poster|book jacket)\b", re.I)
         for url, entry in overrides.NOT_A_PORTRAIT.items():
             self.assertIsNone(pictures.search(entry[1]), url)
+
+    def test_a_face_on_a_screen_refuses_like_a_person(self):
+        # The owner's decision of 2026-11-01: a face on a screen behind a
+        # candidate (a rally's live feed) is refused like a person in the
+        # frame, by every candidate's and official's route.
+        import re
+        screens = [(url, entry) for url, entry in overrides.NOT_A_PORTRAIT.items()
+                   if re.search(r"\bscreen\b", entry[1], re.I)]
+        self.assertTrue(screens)        # Donna Miller's May Day file
+        for url, entry in screens:
+            self.assertTrue(photos.applies(entry), url)
+            self.assertTrue(photos.refused(url), url)
 
 
 def _stale(enrichment, routes, table):

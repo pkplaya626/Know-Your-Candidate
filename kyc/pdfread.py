@@ -467,16 +467,50 @@ class _Font:
             self.table, self.lengths = _cmap(data)
         # A simple font's glyph widths (/Widths from /FirstChar, in
         # thousandths of the font size), to know where a run of text ends;
-        # None where the font gives none (a standard font, a two-byte one).
+        # None where the font gives none (a standard font, a two-byte one
+        # whose codes are not its CIDs).
         self.widths, self.missing = None, 0
         widths = doc.resolve(info.get("Widths"))
-        if not self.two_byte and isinstance(widths, list):
+        if self.two_byte:
+            self._cid_widths(doc, info)
+        elif isinstance(widths, list):
             first = int(doc.resolve(info.get("FirstChar")) or 0)
             self.widths = {first + i: float(doc.resolve(w) or 0)
                            for i, w in enumerate(widths)}
             described = doc.resolve(info.get("FontDescriptor")) or {}
             self.missing = float(doc.resolve(described.get("MissingWidth")) or 0) \
                 if isinstance(described, dict) else 0
+
+    def _cid_widths(self, doc, info):
+        """A two-byte font's glyph widths, from its descendant CIDFont's /W
+        and /DW (PDF 32000-1 9.7.4.3), where its codes are the CIDs
+        themselves (/Identity-H): Utah's Voter Information Pamphlet sets
+        every letter as a run of its own in such a font, and without the
+        widths each letter read as a word ("P e t e r C r o s b y")."""
+        if doc.resolve(info.get("Encoding")) != "Identity-H":
+            return
+        kids = doc.resolve(info.get("DescendantFonts"))
+        cid = doc.resolve(kids[0]) if isinstance(kids, list) and kids else None
+        if not isinstance(cid, dict):
+            return
+        table = {}
+        spec = doc.resolve(cid.get("W")) or []
+        i = 0
+        while isinstance(spec, list) and i < len(spec):
+            first = doc.resolve(spec[i])
+            nxt = doc.resolve(spec[i + 1]) if i + 1 < len(spec) else None
+            if isinstance(nxt, list):
+                for k, w in enumerate(nxt):
+                    table[int(first) + k] = float(doc.resolve(w) or 0)
+                i += 2
+            elif i + 2 < len(spec):
+                for c in range(int(first), int(nxt) + 1):
+                    table[c] = float(doc.resolve(spec[i + 2]) or 0)
+                i += 3
+            else:
+                return                       # a /W this reader cannot follow
+        self.widths = table
+        self.missing = float(doc.resolve(cid.get("DW")) or 1000)
 
     def advance(self, pieces, size, char_spacing, word_spacing, scale):
         """How far a run shown by Tj or TJ moves the text point, in text
@@ -485,7 +519,12 @@ class _Font:
             return None
         tx = 0.0
         for piece in pieces:
-            if isinstance(piece, bytes):
+            if isinstance(piece, bytes) and self.two_byte:
+                for k in range(0, len(piece) - 1, 2):
+                    code = piece[k] << 8 | piece[k + 1]
+                    tx += (self.widths.get(code, self.missing) / 1000 * size
+                           + char_spacing) * scale
+            elif isinstance(piece, bytes):
                 for code in piece:
                     tx += (self.widths.get(code, self.missing) / 1000 * size + char_spacing
                            + (word_spacing if code == 32 else 0)) * scale

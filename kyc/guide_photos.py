@@ -19,6 +19,18 @@ but offers no image address to link:
   (:mod:`kyc.jpx`, standard library only - the reversible coding gives back
   every pixel as coded, and on 2026-10-25 they matched Chrome's own PDF
   renderer one for one) and kept as a PNG (method "decoded").
+* **Arizona's Citizens Clean Elections Commission** lists every candidate
+  for the U.S. House under the district's heading, each entry holding the
+  picture the candidate gave its voter education guide and their name in
+  bold. Its pictures have addresses of their own, so they are linked there
+  (method "linked"), never hosted: rule 101's hosting is for the guides
+  that give a photograph none.
+* **Utah's Voter Information Pamphlet** (the Lieutenant Governor's Office)
+  is one PDF with a page for each candidate for Congress who sent a
+  profile: the district's heading, the candidate's name under it, and the
+  photograph they submitted beside it. Its photographs are JPEGs tagged
+  with an sRGB ICC profile, which a browser draws as the PDF does
+  (:func:`icc_is_srgb`).
 
 On 2026-10-25 the owner allowed this site to host such official photographs
 as unmodified copies, credited and sourced ("more content is better than
@@ -122,6 +134,30 @@ GUIDES = {
                  "no browser draws: decoded losslessly here (kyc/jpx.py, the reversible "
                  "5/3 wavelet, every pixel as coded) and hosted as PNG, credited and linked "
                  "to its page, by the owner's decision of 2026-10-25.",
+    },
+    "AZ": {
+        "by": "Arizona Citizens Clean Elections Commission",
+        "credit": "from the Arizona Citizens Clean Elections Commission's candidate list",
+        "title": "Find My Candidates - Citizens Clean Elections Commission (all candidates, "
+                 "November 3, 2026 General Election)",
+        "url": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+        "linked": "https://www.azcleanelections.gov",
+        "terms": "Each picture has an address of its own on the Commission's site and is "
+                 "linked there, credited to the list it is printed in, not hosted here; the "
+                 "Commission's site states no terms of reuse.",
+    },
+    "UT": {
+        "by": "Utah Lieutenant Governor's Office",
+        "credit": "from the Utah Lieutenant Governor's Office's Voter Information Pamphlet",
+        "title": "Utah's Official Voter Information Pamphlet, General Election, Tuesday, "
+                 "November 3, 2026",
+        "url": "https://vote.utah.gov/current-election-information/",
+        "terms": "The pamphlet says 'Federal candidates were given the opportunity to submit "
+                 "a statement and a photograph'; utah.gov's disclaimer lets anyone 'view, "
+                 "copy, or distribute information found within these web pages ... for "
+                 "personal or informational use ... if the documents are not modified in any "
+                 "respect'. Hosted unmodified, credited and linked to its page, by the owner's "
+                 "decision of 2026-10-25.",
     },
 }
 
@@ -325,8 +361,12 @@ def own_addresses(code, page, photo):
     ``candidate.ashx`` answers for the whole race, and an Oregon page
     (``book#page=N``) holds two columns and its book every county's
     candidates, so an entry keyed on either would withdraw someone else's
-    photograph (the review of PR #138)."""
-    return (photo,) if code == "OR" else (page, photo)
+    photograph (the review of PR #138). Utah's pamphlet gives each candidate
+    a page, but numbered within one PDF the office may reissue: an amended
+    pamphlet's page 13 can be another candidate's, so only the hosted file
+    is theirs. Arizona's list is one page for every candidate; the picture's
+    own address is one candidate's."""
+    return (photo,) if code in ("OR", "UT", "AZ") else (page, photo)
 
 
 def hosted_name(weight):
@@ -566,7 +606,11 @@ def photo_record(code, race, office, name, page, source, words, data, colour_spa
     weight = measure(data)
     if not weight["width"]:
         return None, "its size cannot be read"
-    photo = "photos/" + hosted_name(weight)
+    # A guide whose photographs have addresses of their own (Arizona's) is
+    # linked, never hosted: rule 101's hosting is for the guides that give a
+    # photograph no address.
+    linked = bool(GUIDES[code].get("linked"))
+    photo = source if linked else "photos/" + hosted_name(weight)
     refusal = unfit(weight, *own_addresses(code, page, photo))
     if refusal:
         if refused_into is not None:
@@ -578,6 +622,8 @@ def photo_record(code, race, office, name, page, source, words, data, colour_spa
               "by": GUIDES[code]["credit"]}
     record.update({k: weight[k] for k in ("sha256", "bytes", "width", "height", "type")})
     record.update(extra or {})
+    if linked:
+        record["method"] = "linked"
     record["_data"] = data
     return record, ""
 
@@ -946,6 +992,308 @@ DECODER = ("kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, ever
            "pass - lossless, written as PNG")
 
 
+# ------------------------------------------------------------------ Arizona
+
+AZ_GUIDE = "https://www.azcleanelections.gov/Custom/CandidateList?location="
+AZ_HOST = "https://www.azcleanelections.gov"
+_AZ_HOUSE = re.compile(r"^U\.S\. House of Rep\. - District (\d{1,2})$")
+_AZ_NO_PICTURE = "/Custom/Picture/0"
+
+
+def az_entries(page):
+    """``[{"heading", "district", "name", "printed", "party", "picture"}]``:
+    each entry under the Clean Elections Commission's "FEDERAL -
+    LEGISLATIVE" heading - one ``<li>`` holding the candidate's picture,
+    their name in bold, and the office and party, under the office's own
+    heading. A write-in's mark is not a word of their name."""
+    out = []
+    start = (page or "").find('<h3 class="branch">FEDERAL - LEGISLATIVE</h3>')
+    if start < 0:
+        return out
+    end = page.find('<h3 class="branch">', start + 10)
+    block = page[start:end if end > 0 else len(page)]
+    for heading, body in re.findall(r"<h3>([^<]+)</h3>\s*<ul class=\"people\">(.*?)</ul>",
+                                    block, re.S):
+        heading = " ".join(html.unescape(heading).split())
+        house = _AZ_HOUSE.match(heading)
+        for item in re.findall(r"<li>(.*?)</li>", body, re.S):
+            pic = re.search(r'<img class="pic" src="([^"]+)"', item)
+            name = re.search(r"<b>([^<]+)</b>", item)
+            office = re.search(r'<span class="office">([^<]+)</span>', item)
+            party = re.search(r'<span class="party">([^<]*)</span>', item)
+            if not (pic and name and office):
+                continue
+            printed = " ".join(html.unescape(name.group(1)).split())
+            out.append({"heading": heading, "district": int(house.group(1)) if house else None,
+                        "printed": printed,
+                        "name": re.sub(r"\s*\(Write-In\)$", "", printed),
+                        "office": " ".join(html.unescape(office.group(1)).split()),
+                        "party": " ".join(html.unescape(party.group(1)).split()) if party else "",
+                        "picture": html.unescape(pic.group(1))})
+    return out
+
+
+def read_arizona(wanted, getter=get, log=print, refusals=None):
+    """``(photos, problems, unread)`` as :func:`read_washington`, for the
+    Citizens Clean Elections Commission's candidate list (its voter
+    education guide, A.R.S. 16-949), which prints each candidate for the
+    U.S. House under the district's heading, their picture and their name
+    in one entry. *wanted* is ``{race id: [profiles]}``."""
+    photos, problems, unread = {}, [], set()
+    keys = [k for k in sorted(wanted) if k.startswith("H-AZ-")]
+    if not keys:
+        return photos, problems, unread
+    try:
+        entries = az_entries(getter(AZ_GUIDE).decode("utf-8", "replace"))
+    except GuidePhotoError as exc:
+        problems.append(f"AZ: {exc}; the last photographs read are kept")
+        return photos, problems, set(keys)
+    shared = {}
+    for entry in entries:
+        shared[entry["picture"]] = shared.get(entry["picture"], 0) + 1
+    for target in keys:
+        district = int(target.split("-")[2])
+        mine = [e for e in entries if e["district"] == district and e["office"] == e["heading"]]
+        # A list with no entry for a district on the ballot has changed its
+        # layout: it concludes nothing (rules 8 and 36).
+        if not mine:
+            problems.append(f"AZ {target}: the Commission's list has no entry under 'U.S. House "
+                            f"of Rep. - District {district}'; the last photographs read are kept")
+            unread.add(target)
+            continue
+        joined, more = join("AZ", mine, wanted[target], profile_key_of, person_words)
+        problems += more
+        for i, key in sorted(joined.items()):
+            entry = mine[i]
+            # The list's stand-in for no picture, or a file it shows for more
+            # than one candidate, is nobody's photograph.
+            if entry["picture"] == _AZ_NO_PICTURE or shared[entry["picture"]] > 1:
+                continue
+            source = urllib.parse.urljoin(AZ_HOST + "/", entry["picture"])
+            try:
+                data = getter(source)
+            except GuidePhotoError as exc:
+                problems.append(f"AZ {target}: {exc}; the last photograph read is kept")
+                unread.add(key)
+                continue
+            words = (f"the Clean Elections Commission's candidate list, under its heading "
+                     f"'{entry['heading']}', prints '{entry['printed']}' in bold beside the "
+                     f"picture {entry['picture']}, in one entry with the office "
+                     f"'{entry['office']}' and the party '{entry['party']}'")
+            record, why = photo_record("AZ", target, "house", entry["name"], AZ_GUIDE, source,
+                                       words, data, None, {"list": AZ_GUIDE},
+                                       refused_into=_refused_into(refusals, target))
+            if why:
+                problems.append(f"AZ {target}: {entry['name']}'s photograph: {why}; not used")
+                continue
+            record["for"] = key
+            photos[key] = record
+    return photos, problems, unread
+
+
+# ------------------------------------------------------------------ Utah
+
+UT_INDEX = "https://vote.utah.gov/current-election-information/"
+UT_PAMPHLET = re.compile(
+    r"https://vote\.utah\.gov/wp-content/uploads/\d{4}/\d{2}/2026-Voter-Information-Pamphlet\.pdf")
+UT_MAX_PDF = 64 * 1024 * 1024
+_UT_HEAD = re.compile(r"^Congressional District (\d{1,2})$")
+# The lines under a profile's name: its labels, and the pages of those who
+# sent none.
+_UT_LABELS = {"CONTACT EMAIL", "WEBSITE", "CITY OF RESIDENCE", "YEARS OF RESIDENCE", "AGE",
+              "OCCUPATION", "NO PROFILE SUBMITTED"}
+
+# The sRGB colorants (D50-adapted, as an ICC v2/v4 profile gives them) and
+# tone curve: an ICCBased image whose profile is sRGB is drawn by a browser
+# as the PDF draws it, since a browser takes an untagged JPEG as sRGB.
+_SRGB_XYZ = {b"rXYZ": (0.4361, 0.2225, 0.0139), b"gXYZ": (0.3851, 0.7169, 0.0971),
+             b"bXYZ": (0.1431, 0.0606, 0.7141), b"wtpt": (0.9642, 1.0, 0.8249)}
+_SRGB_CURVE = (2.4, 0.9479, 0.0521, 0.0774, 0.04045)
+
+
+def icc_is_srgb(profile):
+    """Whether an ICC profile's bytes describe sRGB, read from its colorants,
+    white point and tone curves (never its name): an RGB profile whose
+    colorants are sRGB's within 0.002 and whose three curves are sRGB's
+    parametric curve (type 3 or 4, within 0.002). Utah's pamphlet tags every
+    photograph with Skia's compact sRGB profile."""
+    profile = bytes(profile or b"")
+    if len(profile) < 132 or profile[16:20] != b"RGB ":
+        return False
+    count = struct.unpack(">I", profile[128:132])[0]
+    tags = {}
+    for i in range(min(count, 64)):
+        at = 132 + 12 * i
+        if at + 12 > len(profile):
+            return False
+        sig, off, size = struct.unpack(">4sII", profile[at:at + 12])
+        tags[sig] = profile[off:off + size]
+    for sig, want in _SRGB_XYZ.items():
+        body = tags.get(sig) or b""
+        if body[:4] != b"XYZ " or len(body) < 20:
+            return False
+        got = [v / 65536 for v in struct.unpack(">iii", body[8:20])]
+        if any(abs(a - b) > 0.002 for a, b in zip(got, want)):
+            return False
+    for sig in (b"rTRC", b"gTRC", b"bTRC"):
+        body = tags.get(sig) or b""
+        if body[:4] != b"para" or len(body) < 12:
+            return False
+        kind = struct.unpack(">H", body[8:10])[0]
+        if kind not in (3, 4) or len(body) < 12 + 4 * 5:
+            return False
+        got = [v / 65536 for v in struct.unpack(">5i", body[12:32])]
+        if any(abs(a - b) > 0.002 for a, b in zip(got, _SRGB_CURVE)):
+            return False
+        if kind == 4 and len(body) >= 40 and any(
+                v != 0 for v in struct.unpack(">2i", body[32:40])):
+            return False
+    return True
+
+
+def pdf_colour_space(doc, info):
+    """An image's colour space as :func:`drawable` asks it: its name; an
+    ICC-based space whose profile is sRGB (:func:`icc_is_srgb`) with three
+    components as ``DeviceRGB``; any other ICC-based one as ``ICCBased``."""
+    space = doc.resolve(info.get("ColorSpace"))
+    if isinstance(space, str):
+        return str(space)
+    if isinstance(space, list) and space and space[0] == "ICCBased" and len(space) > 1:
+        stream = doc.resolve(space[1])
+        if isinstance(stream, pdfread.Stream) and doc.resolve(stream.info.get("N")) == 3:
+            try:
+                profile, _ = pdfread.decode(stream, stop_at_image=False)
+            except pdfread.PDFError:
+                return "ICCBased"
+            if icc_is_srgb(profile):
+                return "DeviceRGB"
+        return "ICCBased"
+    return str(space)
+
+
+def ut_pamphlet(index):
+    """The pamphlet's address the Lieutenant Governor's election page links,
+    or None where it links none, or more than one."""
+    found = sorted(set(m.group(0) for m in UT_PAMPHLET.finditer(index or "")))
+    return found[0] if len(found) == 1 else None
+
+
+def ut_profiles(doc):
+    """``[{"page", "district", "name", "lines", "images", "read"}]``: each
+    page of the pamphlet's federal candidates, headed "Congressional
+    District N", the candidate's name under it (on one line or two, down to
+    the first label or address), and the images it draws."""
+    out = []
+    for n, page in enumerate(doc.pages(), start=1):
+        read = pdfread.read_page(doc, page)
+        lines = pdfread.page_text(read).split("\n")
+        head = _UT_HEAD.match(" ".join(lines[0].split())) if lines else None
+        if not head:
+            continue
+        name = []
+        for line in lines[1:4]:
+            line = " ".join(line.split())
+            if line in _UT_LABELS or "@" in line or "." in line.replace(". ", "").rstrip("."):
+                break
+            name.append(line)
+        images = {}
+        for drawn in read["images"]:
+            images.setdefault(drawn["ref"] or id(drawn["stream"]), drawn)
+        out.append({"page": n, "district": int(head.group(1)), "name": " ".join(name),
+                    "lines": lines, "images": list(images.values()),
+                    "none": "NO PROFILE SUBMITTED" in lines})
+    return out
+
+
+def ut_photo(doc, entry):
+    """``(jpeg bytes, colour space, words, "")`` from one candidate's page,
+    or ``(None, None, None, why)``: the page must draw one photograph, a
+    JPEG with no mask, beside the heading and the name."""
+    if len(entry["images"]) != 1:
+        return None, None, None, (f"the page draws {len(entry['images'])} images, not one "
+                                  "photograph")
+    drawn = entry["images"][0]
+    info = drawn["stream"].info
+    for key in ("SMask", "Mask", "Decode", "ImageMask"):
+        if info.get(key):
+            return None, None, None, f"the image carries /{key}"
+    try:
+        raw, image_filter = pdfread.decode(drawn["stream"])
+    except pdfread.PDFError as exc:
+        return None, None, None, f"the image cannot be read ({exc})"
+    if image_filter != "DCTDecode":
+        return None, None, None, f"the image is {image_filter or 'raw samples'}, not a JPEG"
+    space = pdf_colour_space(doc, info)
+    box = drawn["box"]
+    tagged = (" (tagged with an sRGB ICC profile)"
+              if isinstance(doc.resolve(info.get("ColorSpace")), list) and space == "DeviceRGB"
+              else "")
+    words = (f"page {entry['page']} of the Voter Information Pamphlet is headed "
+             f"'{' '.join(entry['lines'][0].split())}' and '{entry['name']}', and draws one "
+             f"photograph ({info.get('Width')}x{info.get('Height')}{tagged}, at "
+             f"{box[0]:.0f},{box[1]:.0f}-{box[2]:.0f},{box[3]:.0f} pt) beside them; the "
+             "pamphlet says 'Federal candidates were given the opportunity to submit a "
+             "statement and a photograph'")
+    return raw, space, words, ""
+
+
+def read_utah(wanted, getter=get, log=print, refusals=None):
+    """``(photos, problems, unread)`` as :func:`read_washington`, for Utah's
+    Voter Information Pamphlet, which the Lieutenant Governor's Office
+    publishes as one PDF with a page for each candidate for Congress: a
+    heading naming the district, the candidate's name, and the photograph
+    they submitted. *wanted* is ``{race id: [profiles]}``."""
+    photos, problems, unread = {}, [], set()
+    keys = [k for k in sorted(wanted) if k.startswith("H-UT-")]
+    if not keys:
+        return photos, problems, unread
+    try:
+        index = getter(UT_INDEX).decode("utf-8", "replace")
+        pdf = ut_pamphlet(index)
+        if not pdf:
+            raise GuidePhotoError(f"{UT_INDEX} links no single 2026 Voter Information Pamphlet")
+        data = getter(pdf, limit=UT_MAX_PDF)
+        doc = pdfread.Document(data)
+        pages = ut_profiles(doc)
+    except GuidePhotoError as exc:
+        problems.append(f"UT: {exc}; the last photographs read are kept")
+        return photos, problems, set(keys)
+    except pdfread.PDFError as exc:
+        problems.append(f"UT: {UNREADABLE_PDF} ({exc}); the last photographs read are kept")
+        return photos, problems, set(keys)
+    for target in keys:
+        district = int(target.split("-")[2])
+        entries = [p for p in pages if p["district"] == district and p["name"]]
+        # A pamphlet with no page for a district on the ballot has changed
+        # its layout: it concludes nothing (rules 8 and 36).
+        if not entries:
+            problems.append(f"UT {target}: the pamphlet has no page headed 'Congressional "
+                            f"District {district}'; the last photographs read are kept")
+            unread.add(target)
+            continue
+        joined, more = join("UT", entries, wanted[target], profile_key_of, person_words)
+        problems += more
+        for i, key in sorted(joined.items()):
+            entry = entries[i]
+            if entry["none"] and not entry["images"]:
+                continue                             # sent no profile
+            raw, space, words, why = ut_photo(doc, entry)
+            if why:
+                problems.append(f"UT {target}: {entry['name']}'s page {entry['page']}: {why}; "
+                                "not used")
+                continue
+            page = f"{pdf}#page={entry['page']}"
+            record, why = photo_record("UT", target, "house", entry["name"], page, pdf, words,
+                                       raw, space, {"list": UT_INDEX},
+                                       refused_into=_refused_into(refusals, target))
+            if why:
+                problems.append(f"UT {target}: {entry['name']}'s photograph: {why}; not used")
+                continue
+            record["for"] = key
+            photos[key] = record
+    return photos, problems, unread
+
+
 # ------------------------------------------------------------------ who
 
 def race_of(profile):
@@ -1090,7 +1438,7 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     log(f"  guide photographs: {sum(len(v) for v in want.values())} people in "
         f"{len(want)} races or offices without one ({', '.join(sorted(GUIDES))})")
     photos, problems, unread, refusals = {}, [], set(), {}
-    for reader in (read_washington, read_alaska, read_oregon):
+    for reader in (read_washington, read_alaska, read_oregon, read_utah, read_arizona):
         found, more, gone_unread = reader(wanted, getter=getter, log=log, refusals=refusals)
         problems += more
         unread |= gone_unread
@@ -1129,6 +1477,14 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     keep = {name: hosted[name] for name in chosen}
     for key, rec in sorted(photos.items()):
         data = rec.pop("_data", None)
+        if rec.get("method") == "linked":
+            # Shown from the guide's own address: nothing hosted here.
+            cache["photos"][key] = rec
+            was = ((previous or {}).get("photos") or {}).get(key) or {}
+            if was.get("photo") != rec["photo"]:
+                problems.append(f"{key}: photograph {'changed' if was.get('photo') else 'added'}: "
+                                f"{rec['photo']} (from {rec['page']}); look at it")
+            continue
         name = rec["photo"][len("photos/"):]
         if data is not None:
             path = os.path.join(root, photocopies.PHOTOS_DIR, name)
@@ -1205,11 +1561,15 @@ def record_problems(key, rec, manifest=None):
             out.append(f"guide_photos {key}: its {field} is not an https address")
     if rec.get("state") and rec["state"] not in GUIDES:
         out.append(f"guide_photos {key}: {rec['state']} is no guide this site reads")
-    if rec.get("photo") and not is_hosted(rec["photo"]):
+    if rec.get("method") == "linked":
+        host = (GUIDES.get(rec.get("state")) or {}).get("linked")
+        if not host or not str(rec.get("photo") or "").startswith(host + "/"):
+            out.append(f"guide_photos {key}: {rec.get('photo')} is not on the guide's own host")
+    elif rec.get("photo") and not is_hosted(rec["photo"]):
         out.append(f"guide_photos {key}: {rec['photo']} is not a file under photos/")
     if rec.get("for") and rec["for"] != key:
         out.append(f"guide_photos {key}: kept for {rec['for']}")
-    if rec.get("method", "unmodified") not in ("unmodified", "decoded"):
+    if rec.get("method", "unmodified") not in ("unmodified", "decoded", "linked"):
         out.append(f"guide_photos {key}: method {rec.get('method')!r}")
     if rec.get("method") == "decoded" and not (rec.get("sourceSha256") and rec.get("decoder")
                                                and rec.get("type") == "image/png"):
@@ -1337,6 +1697,8 @@ def copy_heavy(cache, root=".", maker=None, log=print):
     from . import photocopies
     shown = photocopies.Shown()
     for key, rec in sorted(((cache or {}).get("photos") or {}).items()):
+        if rec.get("method") == "linked":
+            continue                    # not hosted here: photocopies weighs it
         kind = "person" if key.startswith("person:") else "candidate"
         shown.add(rec["photo"], kind, key, {}, True)
     return photocopies.copy_hosted(root, shown, maker=maker, log=log)
