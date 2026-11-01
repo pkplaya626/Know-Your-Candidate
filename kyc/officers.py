@@ -479,6 +479,14 @@ _RETRY_WAITS = (2, 10)
 _BOT_WALL = re.compile(r"<title>\s*(Access Denied|Just a moment|Not allowed)", re.I)
 
 
+def says_nothing(page):
+    """Whether a page that answered says nothing either way (rule 8): a bot
+    wall's, a challenge with no body (coag.gov's firewall answered the
+    refresh's runner HTTP 202 and nothing else, 2026-11-01), or a page that
+    draws itself with JavaScript (Nevada's secretary of state)."""
+    return bool(_BOT_WALL.search(page)) or len(visible_text(page)) < 300
+
+
 def _get_answered(url):
     """*url*'s page, or ``None`` when it did not answer after the retries:
     one timeout on Tennessee's site made it read as unconfirmed (rule 8)."""
@@ -516,13 +524,8 @@ def _office_pages(url, pause):
     the front page alone: a front page that leaves the name to that page
     would read as an office that does not name its attorney general."""
     page = _get_answered(url)
-    if page is None:
-        return None
-    if _BOT_WALL.search(page):
-        return None
-    # A page that draws itself with JavaScript (Nevada's secretary of state)
-    # says nothing either way: unreadable, not "does not name them".
-    if len(visible_text(page)) < 300:
+    # Unreadable, not "does not name them".
+    if page is None or says_nothing(page):
         return None
     pages = OfficeRead([(url, page)])
     for href, label in re.findall(r'<a\s+href="([^"]+)"[^>]*>\s*([^<]{0,40})</a>', page):
@@ -531,10 +534,8 @@ def _office_pages(url, pause):
             if urllib.parse.urlparse(target).netloc == urllib.parse.urlparse(url).netloc:
                 time.sleep(pause)
                 linked = _get_answered(target)
-                # A bot wall, or a page that draws itself with JavaScript,
-                # says nothing either way, as the front page's would.
-                if (linked is None or _BOT_WALL.search(linked)
-                        or len(visible_text(linked)) < 300):
+                # Saying nothing either way, as the front page's would.
+                if linked is None or says_nothing(linked):
                     pages.unread.append(("the attorney general's page", target))
                 else:
                     pages.append((target, linked))
@@ -983,6 +984,11 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                 again, why_again = ag_photo(row["name"], code, more, check=check,
                                             passed_over=passed_over)
                 found = again
+                # Finding none on a page that says nothing concludes nothing,
+                # as a page that did not answer: Phil Weiser's photograph was
+                # dropped on 2026-11-01 over coag.gov's empty challenge.
+                if not found and any(says_nothing(page) for _, page in more):
+                    why_again = "unknown"
                 why = "unknown" if "unknown" in (why, why_again) else why_again
         time.sleep(pause)
         row.pop("photoOversized", None)
@@ -1008,6 +1014,10 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                                 f"{heavy['why']} ({heavy['url']}); "
                                 + ("kept at full size and said" if heavy["kept"]
                                    else "taken smaller from the same file"))
+        elif why == "unknown":
+            # Not "show no photograph": the pages were not all read (rule 19).
+            problems.append(f"{code}: {row['name']}'s photograph could not be read, and no "
+                            "earlier one of them is kept")
         else:
             problems.append(f"{code}: the office's own pages show no photograph of "
                             f"{row['name']} that passes the checks")

@@ -111,6 +111,34 @@ class TestTheOfficialGuides(unittest.TestCase):
         self.assertEqual(rec["by"], sp.CA_BY)
         self.assertEqual(official_photos.record_problems(rec, "x"), [])
 
+    def test_a_guide_page_that_says_nothing_concludes_nothing(self):
+        """coag.gov answered a script HTTP 202 with no body (2026-11-01). A
+        guide answering so, with a bot wall, a page drawn by script or a
+        redesign is not a guide that pictures no one: its key is unknown,
+        and fetch keeps the last photographs read (rules 8 and 24)."""
+        lists = {"AZ": {"governor": [{"name": "Katie Hobbs"}]},
+                 "CA": {"ag": [{"name": "Michael E. Gates"}]}}
+        for said in ("", "<html><head><title>Just a moment...</title></head></html>",
+                     "<html><body><div id=app></div><script>render()</script></body></html>",
+                     "<html><body><main>" + "<p>The 2026 guide.</p>" * 40 + "</main></body></html>",
+                     # A redesign that keeps some of the markup: the list's
+                     # pictures for other offices only, statement blocks
+                     # whose names are no longer <h2> headings.
+                     '<li><img class="pic" src="/Custom/Picture/12"><b>Jo Roe</b>'
+                     '<span class="office">State Senator</span></li>'
+                     '<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
+                     'alt="Michael E. Gates"><h3>Michael E. Gates | REPUBLICAN</h3></div>'):
+            records, problems, unknown = sp.read_guides(lists, measure=measure_from({}), pause=0,
+                                                        get=lambda u: said)
+            self.assertEqual(records, {})
+            self.assertEqual(unknown, {"AZ", "CA|ag"}, said)
+            self.assertTrue(all("the last photographs read are kept" in p for p in problems),
+                            problems)
+        # Statements read, none with a photograph: read, not unknown.
+        page = ('<div class="grid-parent clearfix"><img src="/img/no-photo.png" '
+                'alt="No Photo Submitted"><h2>Rob Bonta | DEMOCRATIC</h2></div>')
+        self.assertEqual(sp.parse_california(page, "ag"), [])
+
     def test_a_guide_photograph_a_person_refused_is_not_used(self):
         lists = {"CA": {"ag": [{"name": "Michael E. Gates"}]}}
         page = ('<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
