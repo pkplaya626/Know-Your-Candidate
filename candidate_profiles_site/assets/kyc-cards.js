@@ -1554,8 +1554,7 @@
       body = '<span class="strip-none">The Clerk&rsquo;s statistics list no result for this ' +
         "district</span>";
     }
-    var where = cell.atLarge ? '<span class="strip-held">Elected at large: the whole state</span>' : "";
-    return '<li class="strip-cell">' + head + body + where + stripHolders(cell) + "</li>";
+    return '<li class="strip-cell">' + head + body + stripHolders(cell) + "</li>";
   }
 
   function stripYears(era) {
@@ -1579,17 +1578,22 @@
       ": " + title + by + "." + link;
   }
 
-  function stripEraHead(race, strip, era, now) {
+  function stripEraHead(race, strip, era, cells, now) {
     if (race.chamber === "Senate") return "";
     var past = KYC.electionStatus(undefined, now).phase === "post-election";
+    var numbered = cells.some(function (c) { return c.district != null && !c.atLarge; });
+    var atLarge = cells.some(function (c) { return c.atLarge; });
     if (era.same) {
       return '<p class="strip-era">' + KYC.escapeHtml((strip.eras.length > 1 ? "On " : "All on ") +
         "the lines this district " + (past ? "was" : "is") + " elected on in 2026 (" +
         stripYears(era) + ")") + "</p>";
     }
     return '<p class="strip-era strip-other">' + KYC.escapeHtml("On other lines than this " +
-      "race’s: " + stripYears(era) + ". The results are those of the district numbered " +
-      (race.district || 0) + " on that map, which is not the map this race is fought on.") + "</p>";
+      "race’s: " + stripYears(era) + "." + (numbered ? " The results are those of the " +
+      "district numbered " + (race.district || 0) + " on that map, which is not the map this " +
+      "race " + (past ? "was" : "is") + " fought on." : "") + (atLarge ? " " +
+      KYC.stateName(race.state) + " elected one member at large then: the results are the " +
+      "whole state’s." : "")) + "</p>";
   }
 
   function seatStrip(race, now) {
@@ -1608,7 +1612,7 @@
       }
       var cells = strip.cells.filter(function (c) { return c.era === i; });
       if (!cells.length) return;
-      parts.push(stripEraHead(race, strip, era, now) + '<ol class="strip-cells">' +
+      parts.push(stripEraHead(race, strip, era, cells, now) + '<ol class="strip-cells">' +
         cells.map(function (c) { return stripCell(race, c, scale); }).join("") + "</ol>");
     });
     if (breaks[2026]) parts.push('<p class="strip-break">' + stripChange(race, breaks[2026]) + "</p>");

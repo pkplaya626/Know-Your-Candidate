@@ -64,9 +64,9 @@ LEGISLATORS_URLS = (
     "https://unitedstates.github.io/congress-legislators/legislators-current.json",
     "https://unitedstates.github.io/congress-legislators/legislators-historical.json",
 )
-# The strip's terms: those served in the Congresses its elections chose,
-# from the 116th's first day to the day the 119th's House terms end.
-TERMS_FROM = "2019-01-03"
+# The strip's terms: those served from 2018's election day (a special's
+# winner is seated within days) to the day the 119th's House terms end.
+TERMS_FROM = "2018-11-06"
 TERMS_TO = "2027-01-03"
 
 # A House seat the Clerk lists every other cycle: Puerto Rico's Resident
@@ -975,7 +975,8 @@ def read_terms(fetch=_download):
     from congress-legislators' terms, keyed by the seat and never by a name:
     ``{"house": {"TX-35": [term]}, "senate": {"GA-3": [term]}}``, each term
     ``{"id", "name", "party", "start", "end", "how"?}``. One person's terms
-    in a row in one seat are one (an appointee who won the special)."""
+    in a row in one seat, come by the same way, are one; an appointment and
+    the term its appointee then won stay two."""
     out = {"house": {}, "senate": {}}
     for url in LEGISLATORS_URLS:
         for person in json.loads(fetch(url)):
@@ -1007,7 +1008,8 @@ def read_terms(fetch=_download):
             joined = []
             for term in terms:
                 last = joined[-1] if joined else None
-                if last and last["id"] == term["id"] and term["start"] <= last["end"]:
+                if last and last["id"] == term["id"] and term["start"] <= last["end"] \
+                        and last.get("how") == term.get("how"):
                     last["end"] = max(last["end"], term["end"])
                     continue
                 joined.append(dict(term))
@@ -1312,6 +1314,11 @@ def _holders(terms, start, end):
     for term in terms or []:
         if term["end"] <= start or term["start"] >= end:
             continue
+        if term["start"] <= start and term["end"] <= late:
+            # Whoever held it until the winner was seated: Kelly Loeffler
+            # until January 20, 2021, under the special Raphael Warnock won
+            # on January 5.
+            continue
         holder = {"id": term["id"], "name": term["name"], "party": term["party"]}
         if term["start"] > late:
             holder["from"] = term["start"]
@@ -1325,10 +1332,13 @@ def _holders(terms, start, end):
 
 def _mark_winner(cell):
     """Mark the holder who is the counted winner, seated with the term
-    (``winner``), so the page need not name them twice. A name compared
-    only to leave a holder unremarked, never to attribute a result
-    (:func:`_same_person`): anyone seated late, or who left early, is
-    named with their dates whoever they are."""
+    (``winner``), so the page need not name them twice. Only someone who
+    served the whole term from its first day is compared, and by surname
+    alone, since the Clerk prints the ballot's name ("Rob Wittman") and
+    congress-legislators the member's ("Robert J. Wittman"): a comparison
+    that leaves a holder unremarked, never one that attributes a result.
+    Anyone seated late, or who left early, is named with their dates
+    whoever they are (Adelita Grijalva after Raúl Grijalva)."""
     result = cell.get("result") or {}
     if not result.get("candidates"):
         return
@@ -1336,7 +1346,8 @@ def _mark_winner(cell):
     if result.get("rankedChoice") == "first-choices":
         return                       # a lead in first choices is not a win
     for holder in cell.get("holders") or []:
-        if "from" not in holder and "until" not in holder and _same_person(holder["name"], winner):
+        if "from" not in holder and "until" not in holder and \
+                surname(holder["name"]) == surname(winner):
             holder["winner"] = True
 
 

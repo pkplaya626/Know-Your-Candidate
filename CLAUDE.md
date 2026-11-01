@@ -60,7 +60,7 @@ data/local_sites.json       ──┤   (each local government's listed website,
 data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
-data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
+data/seat_history.json      ──┤   (each seat's elections, 2018-2024: the Clerk's statistics, checked; seats)
 data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/photo_copies.json      ──┤   (each heavy portrait's original and its copy, and each photograph hosted here: rule 101)
@@ -2173,6 +2173,29 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     appointment, on what day. From the day after Election Day the fold is
     "Before 2026", not "Last time" (rule 63), and a ranked-choice count's
     first choices are a lead, never a win.
+    The same fold draws the seat's strip, every election from 2018 to 2024
+    (`seat_history.seat_strip`, VISUALS-33), each year's count read and
+    checked as the last one is, and who served the term it chose from
+    congress-legislators' terms by bioguide id. A House district's years
+    are grouped by the lines they were fought on and break at each change:
+    the census maps from 2022 (not in a state elected at large throughout),
+    each mid-decade map (`districts.REDRAWN_BEFORE`, from the state's own
+    enacting record, checked against the Census Bureau's list for each
+    Congress: North Carolina's for 2020; Alabama's, Georgia's,
+    Louisiana's, New York's and North Carolina's for 2024) and 2026's
+    (`REDRAWN`). Years on other lines than the race's sit under a line
+    saying they are the district that had its number on that map, which is
+    not the map the race is fought on, in dashed cells; a redrawn
+    district's own "last election" still shows no 2024 figure. The reader
+    found more in the earlier files, each now read, never guessed: a
+    footnote marker before a count inside a district's run (Louisiana's
+    5th, 2020, whose runoff counts sit among the open primary's), a later
+    ranked-choice round's counts footnoted beside first choices (Maine's
+    2nd, 2022: the final round between the two), one runoff footnote per
+    candidate (Mississippi's 2018 special, refused unless they name one
+    day), and a district listed with no count (North Carolina's 9th,
+    2018, `no-result`, never "withheld"). The strip is the state's file's,
+    not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule 94).
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own
