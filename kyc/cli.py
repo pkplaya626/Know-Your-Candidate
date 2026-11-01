@@ -304,6 +304,7 @@ def _build(args):
                           voting=voting_mod.load_cache(args.root) or {},
                           federal=federal_mod.load_cache(args.root),
                           judiciary=judiciary_mod.load_cache(args.root),
+                          judge_disclosures=_load_judge_disclosures(args.root),
                           vacancies=vacancies_mod.load_cache(args.root),
                           history=lineage,
                           voting_dates=voting_dates_mod.load(args.root),
@@ -2457,6 +2458,11 @@ def _judiciary(args):
         if not links_only:
             _judge_disclosures(cache, args)
     return 1 if failed else 0
+
+
+def _load_judge_disclosures(root):
+    from . import judge_disclosures
+    return judge_disclosures.load_cache(root)
 
 
 def _court_chiefs(cache, previous, args):

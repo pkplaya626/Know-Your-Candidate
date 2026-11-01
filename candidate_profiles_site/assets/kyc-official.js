@@ -262,6 +262,28 @@
       "Federal Judicial Center id, checked to carry their surname; never a search by name.";
   }
 
+  // A judge's financial disclosure reports as CourtListener holds them: what
+  // the link is, which years it holds, and how it was found. A judge it
+  // holds none for reads "lists no reports", never that none was filed
+  // (rule 19): CourtListener holds the reports it has obtained.
+  function disclosuresNote(held) {
+    var src = (federal().sources || {}).disclosures || {};
+    var of = src.export ? " (its data of " + KYC.escapeHtml(KYC.dateWords(src.export)) + ")" : "";
+    var how = "Found through the Federal Judicial Center’s id for this judge on CourtListener’s " +
+      "record, checked to carry their surname and, where both give one, their year of birth; " +
+      "never a search by name.";
+    if (!held.reports) {
+      return "Financial disclosure reports: CourtListener lists no reports for this judge" + of +
+        ". " + how;
+    }
+    var years = held.first === held.last ? "for " + KYC.escapeHtml(held.first)
+      : "for " + KYC.escapeHtml(held.first) + " to " + KYC.escapeHtml(held.last);
+    return "Financial disclosure reports, as CourtListener holds them: " +
+      KYC.escapeHtml(String(held.reports)) + (held.reports === 1 ? " report, " : " reports, ") +
+      years + of + ". CourtListener holds the reports the Free Law Project has obtained, so " +
+      "a later year may not be there. " + how;
+  }
+
   function panel(icon, title, body) {
     return '<section class="panel"><h3 class="panel-head">' + KYC.icon(icon) + " " +
       KYC.escapeHtml(title) + "</h3>" + body + "</section>";
@@ -648,8 +670,14 @@
           encodeURIComponent(String(judge.wikipedia).replace(/ /g, "_")), "Wikipedia") : "") +
         (judge.wikidata ? linkChip("https://www.wikidata.org/wiki/" + encodeURIComponent(judge.wikidata),
           "Wikidata") : "") +
-        (c && c.site ? linkChip(c.site, "The court’s website") : "") + "</div>" +
-        (judge.wikipedia || judge.wikidata ? '<p class="faint">' + linksNote(judge) + "</p>" : "")) +
+        (c && c.site ? linkChip(c.site, "The court’s website") : "") +
+        // Their reports as CourtListener holds them, joined by the FJC's
+        // judge id (kyc/judge_disclosures.py, FEDERAL-05).
+        (judge.disclosures && judge.disclosures.url
+          ? linkChip(judge.disclosures.url, "Financial disclosures") : "") + "</div>" +
+        (judge.wikipedia || judge.wikidata ? '<p class="faint">' + linksNote(judge) + "</p>" : "") +
+        (judge.disclosures ? '<p class="faint" id="officialDisclosures">' +
+          disclosuresNote(judge.disclosures) + "</p>" : "")) +
       "</div>";
     el("officialModalSource").textContent = "Federal Judicial Center, Biographical Directory of " +
       "Article III Federal Judges, as of " + KYC.dateWords((federal().asOf || {}).judiciary || "");

@@ -310,13 +310,31 @@
       encodeURIComponent(judge.id)) + '">' + esc(judge.name) + "</a>";
   }
 
+  /** The court's own site's words on its chief, quoted and dated, for the
+   *  court page's note beside the directory's record. */
+  function chiefByCourtWords(named) {
+    return "The court’s own website lists “" + esc(named.words) + "” (" +
+      '<a href="' + KYC.escapeAttr(named.source) + '" target="_blank" rel="noopener noreferrer">' +
+      "its page of judges</a>, read by this site on " + day(named.read) + "): " +
+      "the two are shown side by side, and neither is taken over the other.";
+  }
+
   function chiefCell(c, prefix) {
     if (c.chief) return judgeLink(c, c.chief, prefix);
     // The directory lists its chief on senior status too: the court's page
     // says why nobody is named (28 U.S.C. 136(a)).
     if (c.listed && c.chiefUnsettled) {
-      return '<span class="faint">Not settled (see <a href="' + KYC.escapeAttr(prefix + c.id +
-        ".html#chiefUnsettled") + '">the court’s page</a>)</span>';
+      var see = '<a href="' + KYC.escapeAttr(prefix + c.id + ".html#chiefUnsettled") +
+        '">the court’s page</a>';
+      // What the court's own site says, beside the directory's record that
+      // cannot say (kyc/court_chiefs.py): attributed, never the directory's.
+      var named = c.chiefByCourt;
+      if (named) {
+        return judgeLink(c, { id: named.judge, name: named.name }, prefix) +
+          ' <span class="faint">(as the court’s own site names its chief; the directory’s ' +
+          "record is not settled: see " + see + ")</span>";
+      }
+      return '<span class="faint">Not settled (see ' + see + ")</span>";
     }
     // A territorial court's chief, as the court's own site names them.
     var own = c.courtListed;
@@ -1215,8 +1233,10 @@
     if (unsettled) {
       html += '<p class="state-note" id="chiefUnsettled">The directory lists ' + esc(unsettled.name) +
         " as this court’s chief judge and also on senior status. A chief judge must be in " +
-        "regular active service (28 U.S.C. 136(a)), so nobody is shown as chief until the " +
-        "record is settled.</p>";
+        "regular active service (28 U.S.C. 136(a)), so the directory’s record cannot say who " +
+        "is chief" + (court.chiefByCourt ? "" : ", and nobody is shown as chief until the " +
+        "record is settled") + "." + (court.chiefByCourt ? " " + chiefByCourtWords(court.chiefByCourt)
+        : "") + "</p>";
     }
     html += appointerStrip(court, id === "scotus" ? "The justices, by the President who appointed them"
       : "Active judges, by the President who appointed them");
