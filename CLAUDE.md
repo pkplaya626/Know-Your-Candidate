@@ -2507,7 +2507,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `tests/fixtures/official_share_words.json`: a judge's service with
     both sources where they differ (rule 82), the appointing President,
     never a party but the President's and Vice President's, a nomination
-    in the future tense without the list's as-of day. Its image is the
+    in the future tense without the list's as-of day, and a departure the
+    courts' announced list has for the judge ("Will take senior status",
+    `vacancies.announced_departures`, on the dialog too): Leslie
+    Southwick's first page unfurled as "Active service" alone. Its
+    description is the name and those words and nothing of its own - a
+    former officer's leads with "Former, this term", since "Pam Bondi:
+    Attorney General", cut short, read as still in office - and the
+    render suite takes each word out of it and finds only the joins.
+    Where it sends a reader without scripts, it says what that page's
+    plain text holds: the federal page's lists no one who left the
+    Cabinet and no retired justice. Its image is the
     dialog's by the dialog's route, credited as the dialog credits it: the
     White House's sizes of its one file or the copy made here on the
     site's host (rules 42, 101), a judge's Commons portrait with its
