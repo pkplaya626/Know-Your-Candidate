@@ -827,6 +827,11 @@ def sub_articles(text, title):
 
 # ---------------------------------------------------------------- resolving
 
+# A November table titled by its seat alone: "Florida's 1st congressional
+# district, 2024", "2024 Delaware's at-large congressional district".
+_SEAT_TITLE = re.compile(r"\bcongressional district\b", re.I)
+
+
 def _stage(title):
     lowered = title.lower()
     if "runoff" in lowered or "run-off" in lowered:
@@ -834,6 +839,13 @@ def _stage(title):
     if "primary" in lowered or "convention" in lowered or "caucus" in lowered:
         return "primary"
     if "election" in lowered or "general" in lowered:
+        return "general"
+    if _SEAT_TITLE.search(lowered):
+        # The 2024 pages of Alabama, Arkansas, Florida, Georgia, Kentucky,
+        # Maine, New Hampshire, New York, Pennsylvania, West Virginia and
+        # Delaware titled their November tables this way: 83 seats whose
+        # result, marked on the certified revision, was never read (the
+        # November rehearsal of 2026-11-01).
         return "general"
     return None
 

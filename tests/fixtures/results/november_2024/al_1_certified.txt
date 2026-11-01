@@ -1,0 +1,50 @@
+<!-- 2024 United States House of Representatives elections in Alabama, District 1: revision 1269134765 (2025-01-13), results tables only -->
+==District 1==
+{{Election box begin no change |title=Republican primary results}}
+{{Election box winning candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = [[Barry Moore (Alabama politician)|Barry Moore]] (incumbent)
+  |votes      = 53,956
+  |percentage = 51.7
+}}{{Election box candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = [[Jerry Carl]] (incumbent)
+  |votes      = 50,312
+  |percentage = 48.3
+}}{{Election box total no change
+  |votes      = 104,268
+  |percentage = 100.0
+}}{{Election box end}}
+
+{{Election box begin no change|title=Democratic primary results}}
+{{Election box unopposed candidate with party link|party=Democratic Party (United States)|candidate=Tom Holmes}}
+{{Election box unopposed total no change}}
+{{Election box end}}
+
+{{Election box begin no change |title=Alabama's 1st congressional district, 2024}}
+{{Election box winning candidate with party link no change
+  |party      = Republican Party (United States)
+  |candidate  = [[Barry Moore (Alabama politician)|Barry Moore]] (incumbent)
+  |votes      = 258,619
+  |percentage = 78.4%
+  |Change = -5.2%
+}}{{Election box candidate with party link no change
+  |party      = Democratic Party (United States)
+  |candidate  = Tom Holmes
+  |votes      = 70,929
+  |percentage = 21.5%
+  |Change = N/A
+}}
+{{Election box write-in with party link no change
+ | votes= 306
+ | percentage= 0.1%
+ |Change = -0.6%
+}}
+{{Election box total no change
+  |votes      = 329,854
+  |percentage = 100.0%
+}}
+{{Election box hold with party link no swing
+  |winner     = Republican Party (United States)
+}}
+{{Election box end}}

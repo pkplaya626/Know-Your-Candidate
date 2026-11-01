@@ -1794,6 +1794,45 @@ class TestGeneralElectionNight(NoGap):
         self.assertTrue(member["seekingReelection2026"])
 
 
+NOVEMBER_2024 = os.path.join(FIXTURES, "november_2024")
+
+
+def november_2024(name):
+    """A 2024 page's results tables for one seat, as fetched for the
+    November rehearsal of 2026-11-01 (the revision is in the file's first
+    line)."""
+    with open(os.path.join(NOVEMBER_2024, name), encoding="utf-8") as handle:
+        return "\n" + handle.read()
+
+
+class TestNovember2024Rehearsal(unittest.TestCase):
+    """The November reading run over 2024's pages, as they stood the morning
+    after Election Day and once certified."""
+
+    def test_a_november_table_titled_by_its_seat_is_read(self):
+        # "Alabama's 1st congressional district, 2024": no word "election",
+        # so the table was never read - 83 seats of the 2024 pages, in
+        # eleven states, whose winners were marked on the certified revision.
+        statuses = page_statuses(november_2024("al_1_certified.txt"), 1,
+                                 has_runoff=True, general_held=True)
+        self.assertEqual(statuses, {"Barry Moore": "elected", "Tom Holmes": "defeated",
+                                    "Jerry Carl": "eliminated"})
+        self.assertEqual(results._stage("Florida's 7th congressional district, 2024"), "general")
+        self.assertEqual(results._stage("2024 Delaware's at-large congressional district"),
+                         "general")
+        # A primary or a runoff for the seat stays what it is.
+        self.assertEqual(results._stage(
+            "Alabama's 2nd congressional district Republican primary runoff, 2024"), "runoff")
+        self.assertEqual(results._stage(
+            "Alabama's 2nd congressional district Democratic primary, 2024"), "primary")
+        self.assertIsNone(results._stage("Statehood Green results"))
+
+    def test_before_election_day_the_seat_titled_table_is_the_ballot(self):
+        statuses = page_statuses(november_2024("al_1_certified.txt"), 1, has_runoff=True)
+        self.assertEqual(statuses, {"Barry Moore": "nominee", "Tom Holmes": "nominee",
+                                    "Jerry Carl": "eliminated"})
+
+
 class TestAnotherSpellingOnThePage(NoGap):
     """ID-1, 2026-10-14: the November table writes "Sarah Zabel Peterson", the
     infobox "Sarah Zabel"; the filing is ZABEL, SARAH."""
