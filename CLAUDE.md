@@ -2196,7 +2196,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     closeness (rule 79).
     A race's money is its campaigns' own totals as bars in neutral ink on
     one scale, the party only in the name chip, each row with its own
-    through-date. Closest races are ordered by one market's prices, the
+    through-date, wherever a race is shown: the map's panel drew none
+    (VISUALS-20's remainder) and now draws the race block's own fold for
+    each of the picked state's 2026 races, closed, from the state's file
+    when opened (rule 94). Closest races are ordered by one market's prices, the
     gap between its two highest, never a blend (rule 40). In the grid's
     races view every new fold is drawn when opened (GRID-14's budget).
 

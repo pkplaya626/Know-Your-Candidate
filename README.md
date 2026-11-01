@@ -1788,7 +1788,11 @@ through-date), the last election folded, and "Compare the ballot": party,
 offices held, money, the campaign's own platform headings with where they
 came from, and its site. The grid's sort menu orders races closest first by
 one market's prices - Kalshi's or Polymarket's, the gap between its two
-highest, never a blend of the two.
+highest, never a blend of the two. The map's panel draws the same money fold
+for each 2026 race of the state picked: the Senate race's beside its people,
+before the markets, and the House races' one per district under "Money in
+each race". Each is closed until opened, and then loads the state's own
+people file, saying so while it loads and if it fails.
 
 ## State pages
 
@@ -3370,6 +3374,7 @@ neutral ink for judges, races and navigation (audit 2026-10-17).
 | The states as a map-like grid of links, a dot where a Senate seat is on the 2026 ballot | States & territories | `kycBuildMeta.stateGrid` (`tiles.STATE_GRID`) |
 | A state's government at a glance: governor, whether the governor is running in the section's own words (rule 79), each chamber's seats, the high court's size and selection (no party) | a state page's State government | `data/stategov.js` |
 | Funding sources as one bar | the profile's campaign finance | `fundingBreakdown`, of `fundingBase` or the receipts |
+| A race's money: each campaign's raised, spent and cash on hand as bars in neutral ink on one scale per race, the party only in the name chip, each row its own through-date | every race block (state pages, the grid's races view, the profile dialog) and the map's panel, each 2026 race of the state picked | `receipts`, `disbursements`, `cashOnHand`, `financeAsOf` from the state's people file; `results.belowThreshold` |
 | Polling averages as dots on one axis of at least thirty points, a row per aggregator, in the market bars' candidate order (the compact panel prints the line only) | every race's markets block | `data/odds.js` |
 | The federal courts as a ladder, a judge senior by the courts' list but not yet the directory said on every count holding one (rule 82) | Federal government, the federal courts | `data/federal.js` |
 | A court's active bench by year commissioned, a row per appointing President, the axis ending at the latest commission | each federal court's page | `data/judiciary/<court>.js` |
