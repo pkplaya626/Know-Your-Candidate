@@ -379,6 +379,66 @@ class TestPeopleFiles(unittest.TestCase):
                                      if k in record or k in emit.INDEX_WORDS}, record["id"])
         self.assertFalse(os.path.exists(os.path.join(ROOT, emit.LEGACY_PROFILES_FILE)))
 
+    def test_a_state_page_loads_its_own_government_and_the_rest_once_drawn(self):
+        """Phone plan 3b: every state page loaded all 56 jurisdictions'
+        governments, every race's market prices and every ballot's
+        questions - some 140 KB gzipped - before its first race."""
+        payload = {"states": {"TX": {"governor": {"name": "A"}}, "CA": {"governor": {"name": "B"}}},
+                   "sources": {"ncsl": ["x"]}}
+        self.assertEqual(emit.stategov_state_payload(payload, "TX"),
+                         {"states": {"TX": {"governor": {"name": "A"}}}, "sources": {"ncsl": ["x"]}})
+        # A place the build holds no entry for still has its file.
+        self.assertEqual(emit.stategov_state_payload(payload, "GU"),
+                         {"states": {}, "sources": {"ncsl": ["x"]}})
+        with tempfile.TemporaryDirectory() as tmp:
+            written = emit.write_stategov_states(payload, tmp)
+            self.assertEqual(len(written), len(emit.people_codes()))
+            self.assertEqual(emit.check_stategov_states(payload, tmp), [])
+            self.assertEqual(emit.write_stategov_states(payload, tmp), [])
+            payload["states"]["TX"]["governor"]["name"] = "C"
+            self.assertEqual(emit.check_stategov_states(payload, tmp),
+                             [(emit.stategov_state_file("TX", tmp), "stale")])
+            stray = os.path.join(tmp, emit.STATEGOV_DIR, "zz.js")
+            with open(stray, "w", encoding="utf-8") as f:
+                f.write("window.kycStateGov = {};\n")
+            self.assertIn((stray, "not a file this build writes"), emit.check_stategov_states(payload, tmp))
+            emit.write_stategov_states(payload, tmp)
+            self.assertFalse(os.path.exists(stray))
+            self.assertEqual(emit.check_stategov_states(payload, tmp), [])
+        # The committed pages: a state's own government file, the prices and
+        # the questions named on demand and not loaded before the first draw;
+        # a district page's prices the same.
+        result = {p: (ok, note) for p, ok, note in emit.check_pages(ROOT)}
+        for page, own, later in (("states/tx.html", "../data/stategov/tx.js",
+                                  ("../data/odds.js", "../data/measures.js")),
+                                 ("districts/tx.html", None, ("../data/odds.js",))):
+            self.assertTrue(result[page][0], result[page][1])
+            with open(os.path.join(ROOT, emit.SITE_DIR, *page.split("/")), encoding="utf-8") as f:
+                html = f.read()
+            loaded = emit.script_sources(html)
+            if own:
+                self.assertIn(own, loaded)
+                self.assertNotIn("../data/stategov.js", loaded)
+            for src in later:
+                self.assertNotIn(src, loaded, page)
+                self.assertIn(src, emit.on_demand_sources(html), page)
+        # The directory of states still counts every state's: the whole file.
+        with open(os.path.join(ROOT, emit.SITE_DIR, "states", "index.html"), encoding="utf-8") as f:
+            self.assertIn("../data/stategov.js", emit.script_sources(f.read()))
+        # A state page that loads the prices before it draws is reported.
+        with tempfile.TemporaryDirectory() as tmp:
+            site = os.path.join(tmp, emit.SITE_DIR)
+            os.makedirs(os.path.join(site, "states"))
+            with open(os.path.join(ROOT, emit.SITE_DIR, "states", "tx.html"), encoding="utf-8") as f:
+                html = f.read()
+            with open(os.path.join(site, "states", "tx.html"), "w", encoding="utf-8") as f:
+                f.write(html.replace('<script src="../data/lookup/index.js',
+                                     '<script src="../data/odds.js"></script>\n'
+                                     '<script src="../data/lookup/index.js'))
+            ok, note = {p: (o, n) for p, o, n in emit.check_pages(tmp)}["states/tx.html"]
+        self.assertFalse(ok)
+        self.assertIn("loads ../data/odds.js before it draws", note)
+
     def test_the_grid_names_the_words_file_and_does_not_load_it_first(self):
         """The profiles' words are loaded when a query is typed: a grid that
         loaded them before its first card would wait on them again, and one

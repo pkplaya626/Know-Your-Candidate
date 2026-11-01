@@ -479,7 +479,10 @@ function buildPage(page, opts) {
   opts = opts || {};
   const errors = [];
   const vc = new VirtualConsole();
-  vc.on("jsdomError", (e) => errors.push("jsdomError: " + e.message));
+  // A file a suite blocks failing to load is what it set up, not an error.
+  const blockedLoad = (message) => /Could not load script/.test(message) &&
+    (opts.block || []).some((b) => message.indexOf(b) !== -1);
+  vc.on("jsdomError", (e) => { if (!blockedLoad(e.message)) errors.push("jsdomError: " + e.message); });
   vc.on("error", (...a) => errors.push("console.error: " + a.join(" ")));
 
   // jsdom does not fetch <script src>, so inline every local script in
@@ -530,9 +533,15 @@ function buildPage(page, opts) {
   html = html.replace(/<!--inert-(\d+)-->/g, (m, i) => inert[Number(i)]);
 
   const served = [];
+  // A blocked file that the page names on demand (a state page's prices and
+  // questions) fails when it is asked for, as a blocked tag fails to load.
+  const blocked = (opts.block || []).map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const refuse = blocked.length
+    ? new RegExp((opts.refuse ? "(?:" + opts.refuse.source + ")|" : "") + "(?:" + blocked.join("|") + ")$")
+    : opts.refuse;
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    resources: siteResources(served, opts.refuse),
+    resources: siteResources(served, refuse),
     url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -570,9 +579,25 @@ function buildPage(page, opts) {
   // earlier version fired the event by hand, jsdom then fired its own, and
   // every page module booted twice - two listeners per control, so a single
   // click toggled the race view on and straight back off.
+  // A state's and a district's pages load the market prices and the
+  // statewide questions once drawn (named on demand): the page is handed
+  // over once each it asked for is in, or refused (opts.block, opts.refuse),
+  // as most suites read the page whole. One that asks how the page reads
+  // before they arrive says so (opts.early).
+  const LAZY = [["data/odds.js", "kycOdds"], ["data/measures.js", "kycMeasures"]];
+  const settled = async () => {
+    if (opts.early) return packed;
+    const asked = () => LAZY.filter(([file]) => [...window.document.head.querySelectorAll("script[src]")]
+      .some((s) => s.getAttribute("src").split("?")[0].endsWith(file)));
+    const refused = (file) => (opts.block || []).some((b) => file.endsWith(b)) ||
+      (opts.refuse && opts.refuse.test("/" + file));
+    await until(() => asked().every(([file, name]) => window[name] !== undefined || refused(file)), 8000);
+    if (asked().length) await new Promise((r) => setTimeout(r, 20));
+    return packed;
+  };
   return new Promise((resolve) => {
-    if (window.document.readyState !== "loading") return resolve(packed);
-    window.document.addEventListener("DOMContentLoaded", () => resolve(packed));
+    if (window.document.readyState !== "loading") return resolve(settled());
+    window.document.addEventListener("DOMContentLoaded", () => resolve(settled()));
   });
 }
 
@@ -9746,6 +9771,9 @@ async function testStateGov() {
   suite("state pages — where the office's site cannot confirm a listing, whole sentences", () => {
     const W = nhGov.window;
     const states = W.kycStateGov.states;
+    // A state's page holds its own government (data/stategov/<st>.js), and
+    // this draws Nevada's office on New Hampshire's: it is given Nevada's.
+    if (!states.NV) states.NV = JSON.parse(JSON.stringify(nvGov.window.kycStateGov.states.NV));
     const ag = Object.assign({}, states.NH.ag, { name: "Jane Q. Roe", party: "R", partyKey: "R",
       listedBy: "Republican Attorneys General Association", office: "https://ag.example.gov/" });
     const sos = Object.assign({}, states.NV.sos, { name: "John Q. Doe", party: "D", partyKey: "D",
@@ -16777,9 +16805,90 @@ async function testGuidePhotos() {
   }
 }
 
+/* A state's page draws its races and its plain questions first, and loads
+ * the market prices and the questions in full once drawn (phone plan 3b);
+ * a district page loads the prices when a profile shows them. Each, once
+ * in, draws exactly what the page drew when it loaded them first, and a
+ * file that does not load is said where it would have been drawn. */
+async function testLazyStateData() {
+  const preload = (files) => (window) => {
+    files.forEach((file) => window.eval(fs.readFileSync(path.join(SITE, "data", file), "utf8")));
+  };
+  const allSlotsFilled = (b) => !b.D.querySelector(".odds-slot");
+  // On the campaign clock, and the day after Election Day, when the prices
+  // are final and the questions in the past tense (rule 63).
+  for (const [code, now] of [["ca"], ["tx"], ["wy"], ["nh"], ["ca", "2026-11-05T09:00:00"],
+    ["wy", "2026-11-05T09:00:00"]]) {
+    const page = `states/${code}.html`;
+    const early = await buildPage(page, { early: true, now });
+    const slots = early.D.querySelectorAll("#stateContent .odds-slot").length;
+    const races = early.D.querySelectorAll("#stateContent section.race").length;
+    const plain = early.D.getElementById("measures");
+    const plainWords = plain ? plain.textContent : "";
+    const loadedFirst = early.window.kycOdds !== undefined || early.window.kycMeasures !== undefined;
+    await until(() => early.window.kycOdds !== undefined && early.window.kycMeasures !== undefined &&
+      allSlotsFilled(early), 8000);
+    await settle(30);
+    const first = await buildPage(page, { setup: preload(["odds.js", "measures.js"]), now });
+    await settle(30);
+    const a = first.D.getElementById("stateContent").innerHTML;
+    const b = early.D.getElementById("stateContent").innerHTML;
+    suite(`${page}${now ? " after Election Day" : ""} — the prices and the questions load once the races are drawn`, () => {
+      check("no page errors", early.errors.length === 0 && first.errors.length === 0,
+        early.errors.concat(first.errors).join(" | "));
+      check("neither was loaded before the first draw", !loadedFirst);
+      check("each race drawn holds a slot for its prices", races > 0 && slots === races, `${slots} / ${races}`);
+      check("the questions stand as the page was written, with no word of a failure",
+        !plain || (!plain.querySelector(".measures-failed") && !!plain.querySelector("[data-measure]") ===
+          /<li data-measure="/.test(fs.readFileSync(path.join(SITE, page), "utf8"))), plainWords.replace(/s+/g, " ").trim().slice(0, 80));
+      check("once in, the page is what it is when they load first", a === b && a.length > 1000,
+        firstDifference(a, b));
+      check("every slot filled", allSlotsFilled(early));
+    });
+    early.window.close();
+    first.window.close();
+  }
+  {
+    const failed = await buildPage("states/ca.html", { block: ["data/odds.js"] });
+    await until(() => !!failed.D.querySelector(".odds-failed"), 8000);
+    const races = failed.D.querySelectorAll("#stateContent section.race").length;
+    suite("states/ca.html — market prices that did not load are said where each race shows them", () => {
+      check("no page errors", failed.errors.length === 0, failed.errors.join(" | "));
+      check("every race's place for its prices says they did not load",
+        races > 0 && failed.D.querySelectorAll("#stateContent .odds-failed").length === races,
+        failed.D.querySelectorAll("#stateContent .odds-failed").length + " / " + races);
+      check("in words, never a blank", /did not load/.test(
+        (failed.D.querySelector("#stateContent .odds-failed") || {}).textContent || ""));
+    });
+    failed.window.close();
+  }
+  {
+    // A district page draws no race's prices until a profile shows them.
+    const page = await buildPage("districts/tx.html", { early: true });
+    await settle(50);
+    const before = page.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
+    const card = page.D.querySelector("#districtsApp .card[data-id]");
+    const person = card && page.window.KYC.byId(card.getAttribute("data-id"));
+    if (card) card.click();
+    await until(() => page.window.kycOdds !== undefined && !page.D.querySelector(".odds-slot"), 8000);
+    const box = page.D.getElementById("profileModalRaceOdds");
+    const title = (page.D.getElementById("profileModalRaceTitle") || {}).textContent;
+    const want = person && page.window.KYC.races().filter((r) => r.label === title)[0];
+    suite("districts/tx.html — the prices load when a profile shows them", () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      check("not before", before === 0 && !!person, String(before));
+      check("then the dialog shows them as the prices are drawn everywhere",
+        !!box && !!want && box.innerHTML === page.window.KYC.odds.render(want, { compact: true, collapsed: true }),
+        box ? box.innerHTML.slice(0, 80) : "no box");
+    });
+    page.window.close();
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
+  if (!only || only === "split") await testLazyStateData();
   if (!only || only === "index.html" || only === "votes") await testVotes();
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "charts") await testCharts();

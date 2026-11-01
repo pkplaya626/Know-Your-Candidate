@@ -110,8 +110,17 @@ The profiles are written in the files each page needs (CLAUDE.md rule 94):
 | File | Holds | Loaded by |
 |------|-------|-----------|
 | `data/people/meta.js` | `kycBuildMeta`: the build's figures, its signature, each chamber's left-right scores (`chamberScores`) | every page with people, `ballot.html`, and the guide's Congress page |
-| `data/people/index.js` | every profile without the fields in `emit.INDEX_LEAVES_OUT` (but a member's district offices where their card's "Contact office" calls one, `emit.INDEX_KEEPS_FOR_THE_CARD`), and every race | `index.html`, `map.html`, `states/index.html`; elsewhere on demand |
+| `data/people/index.js` | every profile without the fields in `emit.INDEX_LEAVES_OUT` (but a member's district offices where their card's "Contact office" calls one, `emit.INDEX_KEEPS_FOR_THE_CARD`) and without its words (`emit.INDEX_WORDS`), and every race | `index.html`, `map.html`, `states/index.html`; elsewhere on demand |
+| `data/people/words.js` | each profile's words the grid's search reads and no card draws (`emit.INDEX_WORDS`: education, careers, committees, platform, funding, voting record, the campaign's quote), by id | `index.html`, the first time a query is typed (`KYC.loadWords`); until it is in, the results line says the search is still reading them, and where it fails, that the search looked at names, places and offices only |
 | `data/people/<st>.js` | one state's profiles whole, and its races | `states/<st>.html`, `districts/<st>.html`; on `ballot.html`, the states an answer is in, before it is drawn; elsewhere on demand (`KYC.loadPeople`) |
+
+A state's page loads its own state's part of `data/stategov.js`
+(`data/stategov/<st>.js`, signed and checked by `verify`), and names
+`data/odds.js` and `data/measures.js` on demand: it draws its races with a
+slot for each race's prices (`kyc-odds.js`, filled once the file is in, or
+said not to have loaded) and its statewide questions as the plain list it
+is written with (rule 96), drawn in full once `measures.js` is in. A
+district page names `data/odds.js` the same way.
 
 Each people file assigns `window.kycPeopleFile`, which `assets/kyc.js` takes
 into `window.legislatorsData` and `window.kycRaces` (`KYC.people()`,
