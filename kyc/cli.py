@@ -622,7 +622,8 @@ def _build(args):
     shared = [w for w in written if os.path.normpath(os.path.dirname(w)) in share_dirs]
     print(f"[ok] wrote {len(states)} state pages under {emit.STATES_DIR}, "
           f"{len(maps)} district pages under {emit.DISTRICT_PAGES_DIR} and "
-          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)}")
+          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)} profiles "
+          "and races, and the federal officials'")
     from . import assets
     restamped = assets.stamp_templates(args.root)
     if restamped:

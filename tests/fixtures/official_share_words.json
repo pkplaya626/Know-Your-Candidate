@@ -1,0 +1,854 @@
+{
+ "cases": [
+  [
+   "leader",
+   {
+    "id": "x-a",
+    "name": "A",
+    "office": "President of the United States",
+    "party": "Republican",
+    "since": "2025-01-20",
+    "until": "2029-01-20"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "President of the United States",
+    "nominated": "",
+    "office": "",
+    "party": "Republican",
+    "source": "The term’s dates and party are from congress-legislators’ record of executive terms; the portrait is the White House’s.",
+    "status": "In office since Jan. 20, 2025; term ends Jan. 20, 2029"
+   }
+  ],
+  [
+   "leader",
+   {
+    "id": "x-a",
+    "name": "A",
+    "office": "President of the United States",
+    "party": null,
+    "since": "2025-01-20",
+    "until": null
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "President of the United States",
+    "nominated": "",
+    "office": "",
+    "party": "",
+    "source": "The term’s dates and party are from congress-legislators’ record of executive terms; the portrait is the White House’s.",
+    "status": "In office since Jan. 20, 2025; term ends "
+   }
+  ],
+  [
+   "officer",
+   {
+    "id": "x-b",
+    "name": "B",
+    "page": {},
+    "title": "Secretary of the Treasury"
+   },
+   {
+    "body": "Department of the Treasury",
+    "office": "Secretary of the Treasury"
+   },
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Department of the Treasury",
+    "nominated": "",
+    "office": "Secretary of the Treasury",
+    "party": "",
+    "source": "Listed by the White House among the President’s Cabinet; checked on the office’s own page and against the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": ""
+   }
+  ],
+  [
+   "officer",
+   {
+    "id": "x-b",
+    "name": "B",
+    "page": {
+     "acting": true
+    },
+    "title": "Secretary of the Treasury"
+   },
+   {
+    "body": "Department of the Treasury",
+    "office": "Secretary of the Treasury"
+   },
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Department of the Treasury",
+    "nominated": "",
+    "office": "Secretary of the Treasury",
+    "party": "",
+    "source": "Listed by the White House among the President’s Cabinet; checked on the office’s own page and against the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting"
+   }
+  ],
+  [
+   "officer",
+   {
+    "id": "x-b",
+    "name": "B",
+    "page": {},
+    "title": "Treasury Secretary"
+   },
+   {
+    "body": "Department of the Treasury",
+    "office": "Secretary of the Treasury"
+   },
+   {
+    "appointedBy": "",
+    "inLaw": "The office in law: Secretary of the Treasury",
+    "kind": "Department of the Treasury",
+    "nominated": "",
+    "office": "Treasury Secretary",
+    "party": "",
+    "source": "Listed by the White House among the President’s Cabinet; checked on the office’s own page and against the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": ""
+   }
+  ],
+  [
+   "officer",
+   {
+    "id": "x-b",
+    "name": "B",
+    "page": {
+     "acting": true
+    },
+    "title": "Treasury Secretary"
+   },
+   {
+    "body": "Department of the Treasury",
+    "office": "Secretary of the Treasury"
+   },
+   {
+    "appointedBy": "",
+    "inLaw": "The office in law: Secretary of the Treasury",
+    "kind": "Department of the Treasury",
+    "nominated": "",
+    "office": "Treasury Secretary",
+    "party": "",
+    "source": "Listed by the White House among the President’s Cabinet; checked on the office’s own page and against the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting"
+   }
+  ],
+  [
+   "officer",
+   {
+    "id": "x-b",
+    "name": "B",
+    "page": {},
+    "title": null
+   },
+   {
+    "body": "Department of the Treasury",
+    "office": "Secretary of the Treasury"
+   },
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Department of the Treasury",
+    "nominated": "",
+    "office": "Secretary of the Treasury",
+    "party": "",
+    "source": "Listed by the White House among the President’s Cabinet; checked on the office’s own page and against the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": ""
+   }
+  ],
+  [
+   "officer",
+   {
+    "id": "x-b",
+    "name": "B",
+    "page": {
+     "acting": true
+    },
+    "title": null
+   },
+   {
+    "body": "Department of the Treasury",
+    "office": "Secretary of the Treasury"
+   },
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Department of the Treasury",
+    "nominated": "",
+    "office": "Secretary of the Treasury",
+    "party": "",
+    "source": "Listed by the White House among the President’s Cabinet; checked on the office’s own page and against the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": {
+       "shown": {
+        "date": "2025-02-13",
+        "precision": "day"
+       }
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office Feb. 13, 2025"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": {
+       "shown": {
+        "date": "2025-03-01",
+        "precision": "month"
+       }
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office March 2025"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": {
+       "shown": {
+        "date": "2025",
+        "precision": "year"
+       }
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office 2025"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": {
+       "overlap": true,
+       "shown": null
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office; the date is not shown: both sources put it after the successor took office"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": {
+       "differs": true,
+       "shown": null
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office; the sources differ on the date"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": {
+       "shown": null
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office; the date is not in both sources"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": false,
+      "end": null,
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office; the date is not in both sources"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": {
+       "shown": {
+        "date": "2025-02-13",
+        "precision": "day"
+       }
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended Feb. 13, 2025"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": {
+       "shown": {
+        "date": "2025-03-01",
+        "precision": "month"
+       }
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended March 2025"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": {
+       "shown": {
+        "date": "2025",
+        "precision": "year"
+       }
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended 2025"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": {
+       "overlap": true,
+       "shown": null
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended; the date is not shown: both sources put it after the successor took office"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": {
+       "differs": true,
+       "shown": null
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended; the sources differ on the date"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": {
+       "shown": null
+      },
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended; the date is not in both sources"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [
+     {
+      "acting": true,
+      "end": null,
+      "office": "Secretary of Labor"
+     }
+    ],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "Acting Secretary of Labor",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Acting service ended; the date is not in both sources"
+   }
+  ],
+  [
+   "former",
+   {
+    "held": [],
+    "id": "x-c",
+    "name": "C"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Former, this term",
+    "nominated": "",
+    "office": "",
+    "party": "",
+    "source": "The Cabinet’s changes since the term began: who held each office from Wikidata, checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown without a party.",
+    "status": "Left office; the date is not in both sources"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "name": "D",
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "ak",
+      "title": "Judge"
+     }
+    ],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "U.S. District Court for the District of Alaska",
+    "nominated": "",
+    "office": "Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Active service"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "name": "D",
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "ak",
+      "title": "Judge"
+     }
+    ],
+    "status": "senior"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "U.S. District Court for the District of Alaska",
+    "nominated": "",
+    "office": "Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Senior status"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "listedSenior": {
+     "since": "2026-10-05"
+    },
+    "name": "D",
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "ak",
+      "title": "Judge"
+     }
+    ],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "U.S. District Court for the District of Alaska",
+    "nominated": "",
+    "office": "Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Senior status from Oct. 5, 2026 by the courts’ list of vacancies; the FJC directory still lists active service"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "name": "D",
+    "nominatedTo": {
+     "asOf": "2026-10-05",
+     "id": "scotus",
+     "name": "U.S. Court of Appeals for the Fifth Circuit",
+     "nominated": "2026-09-30"
+    },
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "ca5",
+      "title": "Chief Judge"
+     }
+    ],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "U.S. Court of Appeals for the Fifth Circuit",
+    "nominated": "Nominated to the Court of Appeals for the Fifth Circuit on Sept. 30, 2026, pending in the Senate, as the courts’ list of announced vacancies has it",
+    "office": "Chief Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Active service"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "name": "D",
+    "nominatedTo": {
+     "asOf": "2026-10-05",
+     "id": "ca9",
+     "name": "Court of Appeals for the Ninth Circuit"
+    },
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "ak",
+      "title": "Judge"
+     }
+    ],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "U.S. District Court for the District of Alaska",
+    "nominated": "Nominated to the Court of Appeals for the Ninth Circuit, pending in the Senate, as the courts’ list of announced vacancies has it",
+    "office": "Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Active service"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "justice": {
+     "role": "Chief Justice"
+    },
+    "name": "D",
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "scotus",
+      "title": "Chief Justice"
+     }
+    ],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "Supreme Court",
+    "nominated": "",
+    "office": "Chief Justice",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Active service"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "justice": {
+     "role": "Associate Justice"
+    },
+    "name": "D",
+    "retiredJustice": true,
+    "seats": [
+     {
+      "appointedBy": "Barack Obama",
+      "court": "scotus",
+      "title": "Associate Justice"
+     }
+    ],
+    "status": "senior"
+   },
+   null,
+   {
+    "appointedBy": "Barack Obama",
+    "inLaw": "",
+    "kind": "Supreme Court",
+    "nominated": "",
+    "office": "Associate Justice",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Retired justice, not a member of the Court"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "name": "D",
+    "seats": [
+     {
+      "court": "zz-unknown"
+     }
+    ],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Federal judge",
+    "nominated": "",
+    "office": "Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Active service"
+   }
+  ],
+  [
+   "judge",
+   {
+    "id": "fjc-1",
+    "name": "D",
+    "seats": [],
+    "status": "active"
+   },
+   null,
+   {
+    "appointedBy": "",
+    "inLaw": "",
+    "kind": "Federal judge",
+    "nominated": "",
+    "office": "Judge",
+    "party": "",
+    "source": "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+    "status": "Active service"
+   }
+  ]
+ ]
+}
