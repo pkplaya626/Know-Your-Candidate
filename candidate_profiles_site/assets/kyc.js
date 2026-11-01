@@ -222,6 +222,7 @@
   var partial = {};        // id -> true for a record the index holds in part
   var refusedPeople = [];  // the files refused, as the index or a state code
   var wordsIn = false;     // whether the words file is in (data/people/words.js)
+  var earlyWords = null;   // the words file, arrived before the index
   var lastPeopleFile;
 
   /* data/people/words.js: what the grid's search reads and no card draws
@@ -236,6 +237,9 @@
       return;
     }
     if (wordsIn) return;
+    // Asked for beside the index (a link with a query), they can arrive
+    // first: kept until there are records to fill.
+    if (!indexIn) { earlyWords = file; return; }
     var held = {};
     people().forEach(function (p) { held[p.id] = p; });
     file.people.forEach(function (w) {
@@ -285,10 +289,11 @@
     file.races.forEach(function (r) { if (!heldRace[r.id]) raceList.push(r); });
     if (file.index) indexIn = true;
     else fullStates[what] = true;
-    // A link that arrives with a query ("#/?q=nurse") will search the
-    // words: asked for now, beside the page's other scripts, not after
-    // them (only where the page names them: the grid).
-    if (file.index && queryInAddress() && onDemandSrc("people/words.js")) loadWords();
+    if (file.index && earlyWords) {
+      var words = earlyWords;
+      earlyWords = null;
+      takeWords(words);
+    }
     // What was built from the arrays is built again from them.
     profileIndex = null;
     racePositions = null;
@@ -304,6 +309,25 @@
       set: takePeople,
     });
   } catch (e) { /* a page without the property cannot hold people files */ }
+
+  /* The build's figures (data/people/meta.js) arrive just before the
+   * index. A link that arrives with a query ("#/?q=nurse") will search the
+   * profiles' words, so they are asked for then, to come beside the index
+   * rather than after it (only where the page names them: the grid). */
+  var buildMeta = global.kycBuildMeta;
+  try {
+    Object.defineProperty(global, "kycBuildMeta", {
+      configurable: true,
+      enumerable: true,
+      get: function () { return buildMeta; },
+      set: function (meta) {
+        buildMeta = meta;
+        if (meta && !wordsIn && queryInAddress() && onDemandSrc("people/words.js")) {
+          loadPeopleFile("people/words.js", function () { return wordsIn || !!earlyWords; });
+        }
+      },
+    });
+  } catch (e) { /* the figures are then a plain global, as before */ }
 
   /** Every profile the page holds: the array every view reads. */
   function people() {
