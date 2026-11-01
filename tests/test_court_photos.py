@@ -196,6 +196,42 @@ class TestARunThatConcludesNothing(unittest.TestCase):
         self.assertEqual(courts["XX"]["photos"]["Kari Gray"]["read"], "2026-10-19")
         self.assertTrue(any("could not be read" in p for p in problems))
 
+    def test_a_justices_own_page_that_says_nothing_keeps_the_last_photograph(self):
+        """coag.gov answered a script HTTP 202 with no body (2026-11-01), and
+        the attorney general's reader took it for a page showing no
+        photograph. A justice's own page answering so, a bot wall's page or
+        one drawn by script concludes nothing either (rule 8)."""
+        before = {"XX": {"photos": {"Kari Gray": official_photos.record(
+            "https://courts.example.gov/gray.jpg", "https://courts.example.gov/justices/gray",
+            "alt 'Justice Kari Gray'", SMALL, read="2026-10-19")}}}
+        # The roster names her and links her own page, and shows no image.
+        roster = '<a href="/justices/gray">Justice Kari Gray</a>'
+        from kyc import courts as court_module
+        court_module.COURTS["XX"] = {"url": ROSTER}
+        try:
+            for said in ("", "<html><head><title>Just a moment...</title></head></html>",
+                         "<html><body><div id=app></div><script>render()</script></body></html>"):
+                courts = {"XX": {"members": ["Kari Gray"]}}
+                got = []
+
+                def get(url, **k):
+                    got.append(url)
+                    return said
+                court_photos.add_justice_photos(courts, {"XX": roster}, before, get=get, pause=0,
+                                                measure=measure_from({}))
+                self.assertEqual(got, ["https://courts.example.gov/justices/gray"])
+                self.assertEqual((courts["XX"].get("photos") or {}).get("Kari Gray", {}).get("read"),
+                                 "2026-10-19", said)
+            # Her page read whole with no photograph of her: not kept.
+            whole = "<html><body><p>" + "Justice Kari Gray joined the court in 2019. " * 10 + "</p>"
+            courts = {"XX": {"members": ["Kari Gray"]}}
+            court_photos.add_justice_photos(courts, {"XX": roster}, before,
+                                            get=lambda url, **k: whole, pause=0,
+                                            measure=measure_from({}))
+            self.assertNotIn("Kari Gray", courts["XX"].get("photos") or {})
+        finally:
+            del court_module.COURTS["XX"]
+
 
 class TestEveryCachedPhotographIsWhole(unittest.TestCase):
     def test_a_record_without_its_evidence_or_weight_is_refused(self):

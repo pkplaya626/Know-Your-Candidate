@@ -35,7 +35,7 @@ import time
 import urllib.request
 
 from . import federal_offices
-from .officers import _fold, same_person, visible_text
+from .officers import _fold, same_person, says_nothing, visible_text
 
 EXECUTIVE_URL = "https://unitedstates.github.io/congress-legislators/executive.json"
 VOTE_MENU_URL = ("https://www.senate.gov/legislative/LIS/roll_call_lists/"
@@ -484,9 +484,20 @@ def fetch(previous=None, today=None, read=None, log=print, history_read=None):
             continue
         person["page"] = listed[1]
         try:
-            person["photo"], person["photoSet"] = portrait(read(listed[1]))
+            page = read(listed[1])
         except FederalError as exc:
             log(f"  [warn] {exc}")
+            page = None
+        person["photo"], person["photoSet"] = portrait(page) if page else (None, [])
+        if not person["photo"] and (page is None or says_nothing(page) or "<main" not in page):
+            # The page did not answer, or said nothing - a challenge with
+            # no body, a bot wall, a page drawn by script, or one without the
+            # main content this reader reads: the same person's last
+            # portrait stands (rule 8). Only a page read whole drops it.
+            kept = (previous or {}).get(key) or {}
+            if kept.get("photo") and same_person(kept.get("name", ""), person["name"]):
+                person["photo"], person["photoSet"] = kept["photo"], kept.get("photoSet") or []
+                log(f"  [warn] the {title}'s page could not be read; the last portrait is kept")
     entries = parse_cabinet(read(federal_offices.CABINET_URL))
     held, unknown = assign(entries)
     if unknown:

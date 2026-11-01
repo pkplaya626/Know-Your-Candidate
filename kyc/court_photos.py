@@ -342,6 +342,7 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
     (rule 8). Returns the problems to report."""
     from . import courts as court_module
     from .government_maps import HIGH_COURTS
+    from .officers import says_nothing
     from .pages import state_name
 
     get = get or court_module._get
@@ -373,9 +374,17 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
             if name in links:
                 time.sleep(pause)
                 try:
-                    read_pages.append((links[name], get(links[name])))
+                    page = get(links[name])
                 except court_module.CourtsError:
                     misses[name] = official_photos.UNKNOWN
+                else:
+                    # A challenge with no body, a bot wall or a page drawn by
+                    # script concludes nothing, as a page that did not answer
+                    # (rule 8): coag.gov answered the attorney general's
+                    # reader that way on 2026-11-01 (officers.says_nothing).
+                    if says_nothing(page):
+                        misses[name] = official_photos.UNKNOWN
+                    read_pages.append((links[name], page))
             passed_over = []
             found, why = photo_for(name, read["members"], read_pages, place, measure,
                                    passed_over=passed_over)

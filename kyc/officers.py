@@ -479,7 +479,7 @@ _RETRY_WAITS = (2, 10)
 _BOT_WALL = re.compile(r"<title>\s*(Access Denied|Just a moment|Not allowed)", re.I)
 
 
-def _says_nothing(page):
+def says_nothing(page):
     """Whether a page that answered says nothing either way (rule 8): a bot
     wall's, a challenge with no body (coag.gov's firewall answered the
     refresh's runner HTTP 202 and nothing else, 2026-11-01), or a page that
@@ -525,7 +525,7 @@ def _office_pages(url, pause):
     would read as an office that does not name its attorney general."""
     page = _get_answered(url)
     # Unreadable, not "does not name them".
-    if page is None or _says_nothing(page):
+    if page is None or says_nothing(page):
         return None
     pages = OfficeRead([(url, page)])
     for href, label in re.findall(r'<a\s+href="([^"]+)"[^>]*>\s*([^<]{0,40})</a>', page):
@@ -535,7 +535,7 @@ def _office_pages(url, pause):
                 time.sleep(pause)
                 linked = _get_answered(target)
                 # Saying nothing either way, as the front page's would.
-                if linked is None or _says_nothing(linked):
+                if linked is None or says_nothing(linked):
                     pages.unread.append(("the attorney general's page", target))
                 else:
                     pages.append((target, linked))
@@ -987,7 +987,7 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                 # Finding none on a page that says nothing concludes nothing,
                 # as a page that did not answer: Phil Weiser's photograph was
                 # dropped on 2026-11-01 over coag.gov's empty challenge.
-                if not found and any(_says_nothing(page) for _, page in more):
+                if not found and any(says_nothing(page) for _, page in more):
                     why_again = "unknown"
                 why = "unknown" if "unknown" in (why, why_again) else why_again
         time.sleep(pause)

@@ -212,6 +212,50 @@ class TestWhenTheSenateCannotBeRead(unittest.TestCase):
         self.assertNotIn("senateUnread", kept)
 
 
+class TestWhenThePresidentsPageSaysNothing(unittest.TestCase):
+    """coag.gov answered a script HTTP 202 with no body (2026-11-01), which
+    the attorney general's reader took for a page showing no photograph. The
+    President's or Vice President's own page that does not answer, or
+    answers with nothing to read, concludes nothing: the same person's last
+    portrait stands (rule 8)."""
+
+    PHOTO = "https://www.whitehouse.gov/wp-content/uploads/2025/06/p.jpg"
+
+    def fetch(self, previous, answer):
+        pages = {federal.EXECUTIVE_URL: fixture("executive.json"),
+                 federal_offices.ADMINISTRATION_URL: fixture("administration.html"),
+                 federal_offices.CABINET_URL: fixture("cabinet.html")}
+        admin = federal.parse_administration(pages[federal_offices.ADMINISTRATION_URL])
+        own = {admin["President"][1], admin["Vice President"][1]}
+
+        def read(url):
+            if url in pages:
+                return pages[url]
+            if url in own and answer is not None:
+                return answer
+            raise federal.FederalError(f"HTTP Error 503 for {url}")
+
+        with mock.patch.object(federal.time, "sleep", lambda _s: None):
+            return federal.fetch(previous=previous, today="2026-10-16", read=read,
+                                 log=lambda *_a: None)
+
+    def test_the_same_persons_last_portrait_stands(self):
+        previous = copy.deepcopy(self.fetch(None, None))
+        previous["president"]["photo"] = self.PHOTO
+        previous["president"]["photoSet"] = [[self.PHOTO + "?resize=300,375", 300]]
+        for answer in (None, "", "<html><head><title>Just a moment...</title></head></html>",
+                       "<html><body><div id=app></div><script>render()</script></body></html>"):
+            got = self.fetch(previous, answer)["president"]
+            self.assertEqual((got["photo"], got["photoSet"]),
+                             (self.PHOTO, previous["president"]["photoSet"]), answer)
+        # A page read whole that shows no portrait drops it.
+        whole = "<main>" + "<p>The President of the United States.</p>" * 20 + "</main>"
+        self.assertIsNone(self.fetch(previous, whole)["president"]["photo"])
+        # Someone else never inherits it.
+        previous["president"]["name"] = "Someone Else"
+        self.assertIsNone(self.fetch(previous, "")["president"]["photo"])
+
+
 class TestTheAgenciesOwnSites(unittest.TestCase):
     """FEDERAL-07: every office links its agency's own website, read from
     USA.gov's directory, whatever its head-name check concluded."""
