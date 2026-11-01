@@ -16840,7 +16840,7 @@ async function testLazyStateData() {
       check("each race drawn holds a slot for its prices", races > 0 && slots === races, `${slots} / ${races}`);
       check("the questions stand as the page was written, with no word of a failure",
         !plain || (!plain.querySelector(".measures-failed") && !!plain.querySelector("[data-measure]") ===
-          /<li data-measure="/.test(fs.readFileSync(path.join(SITE, page), "utf8"))), plainWords.replace(/s+/g, " ").trim().slice(0, 80));
+          /<li data-measure="/.test(fs.readFileSync(path.join(SITE, page), "utf8"))), plainWords.replace(/\s+/g, " ").trim().slice(0, 80));
       check("once in, the page is what it is when they load first", a === b && a.length > 1000,
         firstDifference(a, b));
       check("every slot filled", allSlotsFilled(early));
