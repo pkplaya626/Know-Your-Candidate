@@ -430,6 +430,75 @@ class TestOverlay(unittest.TestCase):
                                                  "ballot")]), rows)
         self.assertEqual(race["status"], {"S6NE00129": "elected", "S6NE00152": "defeated"})
 
+    def test_after_the_count_everyone_else_the_list_prints_lost(self):
+        # The November rehearsal of 2026-11-01: the page's November table,
+        # copied from the major parties' primaries, marks its winner and
+        # names neither an unaffiliated filer nor a candidate with no
+        # filing that the list prints. Left "nominee", both read "Awaiting result"
+        # under a race badged "Won by".
+        page = {"page": "x", "status": {"H4CO04100": "elected", "H6CO04200": "defeated"},
+                "unmatched": {}, "ambiguous": [], "decided": {"general": True, "parties": []}}
+        rows = [row("H4CO04100", "BOEBERT, LAUREN", "CO", 4, "REP"),
+                row("H6CO04200", "DOE, JANE", "CO", 4, "DEM"),
+                row("H6CO04300", "MANGERIS, DOUGLAS", "CO", 4, "UNA")]
+        listed = spec([("Lauren Boebert", "Republican", "ballot"),
+                       ("Jane Doe", "Democratic", "ballot"),
+                       ("Douglas Mangeris", "Unaffiliated", "ballot"),
+                       ("Chad Humphrey", "Approval Voting", "ballot"),
+                       ("Pat Writein", "", "write-in")],
+                      source="Colorado Secretary of State")
+        race = results.certify_race(page, listed, rows)
+        self.assertEqual(race["status"], {"H4CO04100": "elected", "H6CO04200": "defeated",
+                                          "H6CO04300": "defeated"})
+        self.assertEqual(race["unmatched"], {"Chad Humphrey": "defeated"})
+        self.assertEqual(race["certifiedIds"], {"H6CO04300": "defeated"})
+        summary = results.race_summary({"races": {"H-CO-04-2026": race}}, "H-CO-04-2026")
+        self.assertEqual((summary["elected"], summary["defeated"], summary["nominees"]),
+                         (1, 2, 0))
+        self.assertEqual(summary["otherNominees"], ["Chad Humphrey"])   # still on that ballot
+        self.assertEqual(summary["otherElected"], [])
+
+    def test_a_general_runoff_puts_everyone_else_on_the_list_out(self):
+        page = {"page": "x", "status": {"S6TX00100": "runoff", "S6TX00200": "runoff"},
+                "unmatched": {}, "ambiguous": [], "decided": {"general": True, "parties": []}}
+        rows = [row("S6TX00100", "ALPHA, ANN", "TX", 0, "REP", "S"),
+                row("S6TX00200", "BETA, BEA", "TX", 0, "DEM", "S"),
+                row("S6TX00300", "GAMMA, GUS", "TX", 0, "LIB", "S")]
+        race = results.certify_race(page, spec([("Ann Alpha", "Republican", "ballot"),
+                                                ("Bea Beta", "Democratic", "ballot"),
+                                                ("Gus Gamma", "Libertarian", "ballot")]), rows)
+        self.assertEqual(race["status"], {"S6TX00100": "runoff", "S6TX00200": "runoff",
+                                          "S6TX00300": "defeated"})
+
+    def test_before_the_count_the_list_only_puts_people_on_the_ballot(self):
+        page = {"page": "x", "status": {"H4CO04100": "nominee"}, "unmatched": {},
+                "ambiguous": [], "decided": {"general": True, "parties": []}}
+        rows = [row("H4CO04100", "BOEBERT, LAUREN", "CO", 4, "REP"),
+                row("H6CO04300", "MANGERIS, DOUGLAS", "CO", 4, "UNA")]
+        race = results.certify_race(page, spec([("Lauren Boebert", "Republican", "ballot"),
+                                                ("Douglas Mangeris", "Unaffiliated", "ballot"),
+                                                ("Chad Humphrey", "Approval Voting", "ballot")]),
+                                    rows)
+        self.assertEqual(race["status"], {"H4CO04100": "nominee", "H6CO04300": "nominee"})
+        self.assertEqual(race["unmatched"], {"Chad Humphrey": "nominee"})
+
+    def test_the_page_count_for_a_name_the_list_spells_its_own_way_stands(self):
+        # The page's "Chad Humphrey" lost in November; the list prints him
+        # "CHAD HUMPHREY" (one person, one status) - and so does a winner
+        # with no filing: the list says who was printed, never who won.
+        page = {"page": "x", "status": {"H4CO04100": "defeated"},
+                "unmatched": {"Chad Humphrey": "defeated", "Sam Nofiling": "elected"},
+                "ambiguous": [], "decided": {"general": True, "parties": []}}
+        rows = [row("H4CO04100", "BOEBERT, LAUREN", "CO", 4, "REP")]
+        race = results.certify_race(page, spec([("Lauren Boebert", "Republican", "ballot"),
+                                                ("CHAD HUMPHREY", "Approval Voting", "ballot"),
+                                                ("Samuel Nofiling", "Democratic", "ballot")]),
+                                    rows)
+        self.assertEqual(race["unmatched"], {"Chad Humphrey": "defeated",
+                                             "Samuel Nofiling": "elected"})
+        summary = results.race_summary({"races": {"H-CO-04-2026": race}}, "H-CO-04-2026")
+        self.assertEqual(summary["otherElected"], ["Samuel Nofiling"])
+
     def test_the_build_lays_the_list_over_the_page_and_keeps_it_in_the_cache(self):
         field = {"candidates": [row("H4AS00036", "AMATA, AUMUA", "AS", 0, "REP")]}
         lists = {"AS": {"source": "American Samoa Election Office", "url": "https://x",

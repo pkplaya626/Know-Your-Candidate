@@ -1975,7 +1975,7 @@ def certify_race(race, spec, rows, aliases=None):
     complete = bool(spec.get("complete"))
     names = race.setdefault("names", {})
     other_party = race.setdefault("unmatchedParty", {})
-    changed, named, loose, unprinted = {}, set(), [], []
+    changed, named, loose, unprinted, printed_ids = {}, set(), [], [], set()
     for item in spec["entries"]:
         name, kind = item["name"], item["kind"]
         cids = _certified_ids(name, rows, aliases)
@@ -1995,12 +1995,16 @@ def certify_race(race, spec, rows, aliases=None):
         # the list's: one person, one status - but not to capitals: Texas
         # prints "ALEX MCMENEMY", and the page's "Alex McMenemy" is his name.
         popped = [n for n in unmatched if _one_person(n, name) and (cids or n != name)]
+        # What the page's November count said of that spelling stands: the
+        # list says who was printed, never who won.
+        counted = {unmatched[n] for n in popped if unmatched[n] in (ELECTED, DEFEATED, RUNOFF)}
+        counted = counted.pop() if len(counted) == 1 else None
         for page_name in popped:
             unmatched.pop(page_name)
             other_party.pop(page_name, None)
         if not cids:
             loose.append(dict(item, name=popped[0] if popped and name.isupper()
-                              else _cased(name)))
+                              else _cased(name), counted=counted))
             continue
         for cid in cids:
             # The state's spelling, whatever the entry says of them: Florida
@@ -2018,7 +2022,8 @@ def certify_race(race, spec, rows, aliases=None):
                 race.setdefault("listParty", {})[cid] = list_party_words(item.get("party"))
             now = status.get(cid)
             if kind == BALLOT:
-                new = now if now in (ELECTED, DEFEATED, RUNOFF) else NOMINEE
+                printed_ids.add(cid)
+                new = now if now in (ELECTED, DEFEATED, RUNOFF) else (counted or NOMINEE)
                 if key:
                     party[cid] = key
                     if _names_a_party(item.get("party"), key):
@@ -2036,13 +2041,31 @@ def certify_race(race, spec, rows, aliases=None):
     # list's spelling, with the list's party.
     for item in loose:
         if item["kind"] == BALLOT:
-            unmatched[item["name"]] = NOMINEE
+            unmatched[item["name"]] = item.get("counted") or NOMINEE
             if item.get("party"):
                 other_party[item["name"]] = list_party_words(item["party"])
         elif item["kind"] == LIST_WITHDREW:
             unmatched.setdefault(item["name"], WITHDRAWN)
         elif item["kind"] == LOST_PRIMARY:
             unmatched.setdefault(item["name"], ELIMINATED)
+    # After the count: the page has marked the seat's winner, or the two in
+    # its general runoff (resolve_race does neither before the day after
+    # Election Day). Everyone else the list prints was on that ballot and
+    # lost it, whether or not the page's November table names them - those
+    # tables are copied from the major parties' primaries. Left "nominee",
+    # Colorado's, Florida's, Iowa's, Nebraska's and Texas's minor-party and
+    # unaffiliated candidates read "Awaiting result: the results this site
+    # last read had not marked a winner" under a race badged "Won by" (the
+    # November rehearsal of 2026-11-01).
+    counts = list(status.values()) + list(unmatched.values())
+    if ELECTED in counts or RUNOFF in counts:
+        for cid in sorted(printed_ids):
+            if status.get(cid) == NOMINEE:
+                status[cid] = DEFEATED
+                changed[cid] = DEFEATED
+        for item in loose:
+            if item["kind"] == BALLOT and unmatched.get(item["name"]) == NOMINEE:
+                unmatched[item["name"]] = DEFEATED
     if complete:
         printed = [i["name"] for i in spec["entries"] if i["kind"] == BALLOT]
         loose_printed = [i["name"] for i in loose if i["kind"] == BALLOT] + unprinted
