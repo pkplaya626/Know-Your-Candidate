@@ -2261,6 +2261,10 @@ LOCAL_MEASURE_SOURCES = {
         "Wake County's file store, which https://www.wake.gov/departments-government/board-elections "
         "links its election documents from (read 2026-11-01)"),
     "wake.gov": (("37183",), "Wake County", _DOTGOV + "wake.gov: County, 'Wake County Information Services', Raleigh, NC"),
+    "https://apps.meckboe.org/pages/SampleBallots/": (("37119",), "Mecklenburg County Board of Elections",
+        "the Board's sample ballots, each linked as '2026 General Election Sample Ballots: Click Here for "
+        "your Sample Ballot' from its address search (https://apps.meckboe.org/addressSearch_New.aspx), "
+        "which https://vote.mecknc.gov/ links as 'Look-Up Districts by Address' (read 2026-11-01)"),
     "franklincountyohio.gov": (("39049",), "Franklin County Board of Elections",
                                _DOTGOV + "franklincountyohio.gov: County, 'Franklin County Data Center', Columbus, OH"),
     "phila.gov": (("42101",), "Philadelphia City Commissioners",
