@@ -120,13 +120,24 @@ class TestTheOfficialGuides(unittest.TestCase):
                  "CA": {"ag": [{"name": "Michael E. Gates"}]}}
         for said in ("", "<html><head><title>Just a moment...</title></head></html>",
                      "<html><body><div id=app></div><script>render()</script></body></html>",
-                     "<html><body><main>" + "<p>The 2026 guide.</p>" * 40 + "</main></body></html>"):
+                     "<html><body><main>" + "<p>The 2026 guide.</p>" * 40 + "</main></body></html>",
+                     # A redesign that keeps some of the markup: the list's
+                     # pictures for other offices only, statement blocks
+                     # whose names are no longer <h2> headings.
+                     '<li><img class="pic" src="/Custom/Picture/12"><b>Jo Roe</b>'
+                     '<span class="office">State Senator</span></li>'
+                     '<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
+                     'alt="Michael E. Gates"><h3>Michael E. Gates | REPUBLICAN</h3></div>'):
             records, problems, unknown = sp.read_guides(lists, measure=measure_from({}), pause=0,
                                                         get=lambda u: said)
             self.assertEqual(records, {})
             self.assertEqual(unknown, {"AZ", "CA|ag"}, said)
             self.assertTrue(all("the last photographs read are kept" in p for p in problems),
                             problems)
+        # Statements read, none with a photograph: read, not unknown.
+        page = ('<div class="grid-parent clearfix"><img src="/img/no-photo.png" '
+                'alt="No Photo Submitted"><h2>Rob Bonta | DEMOCRATIC</h2></div>')
+        self.assertEqual(sp.parse_california(page, "ag"), [])
 
     def test_a_guide_photograph_a_person_refused_is_not_used(self):
         lists = {"CA": {"ag": [{"name": "Michael E. Gates"}]}}

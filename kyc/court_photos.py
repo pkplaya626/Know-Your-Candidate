@@ -527,7 +527,8 @@ def counts(cache):
     "shape"}`` over every read court, for the build's report: of the
     photographs the court offers only above the caps (rule 87), *smaller*
     those shown smaller from the same file, *heavy* those shown at full
-    size."""
+    size. *unknown* counts the justices whose photograph could not be read
+    this run; one kept from an earlier read (rule 8) is among *shown* too."""
     out = {"members": 0, "shown": 0, "smaller": 0, "heavy": 0, "none": 0, "unknown": 0,
            "shape": 0}
     for code, read in ((cache or {}).get("courts") or {}).items():

@@ -147,30 +147,18 @@ def _get(url, timeout=40):
         raise StatewidePhotoError(f"could not read {url}: {exc}") from exc
 
 
-# What a guide's page holds when it is the page its parser reads: Arizona's
-# list items carry the commission's pictures, California's statement pages
-# their candidates' blocks.
-_GUIDE_SHAPE = {"AZ": '<img class="pic"', "CA": '<div class="grid-parent clearfix">'}
-
-
-def _in_shape(code, url, page):
-    """*page*, if it is one its guide's parser reads. Any other answer - an
-    empty challenge (coag.gov answered a script HTTP 202 with no body,
-    2026-11-01), a bot wall, a page drawn by script, a redesign - concludes
-    nothing (rules 8 and 24), never "the guide pictures no one": it raises,
-    and the last photographs read are kept."""
-    if _GUIDE_SHAPE[code] not in (page or ""):
-        raise StatewidePhotoError(f"{url} answered with nothing this reader reads")
-    return page
-
-
 def parse_arizona(page):
     """``[(office, name, ticket, picture url, words)]`` from the Clean
     Elections Commission's candidate list: each ``<li>`` of the state
     executive's sections pairs ``/Custom/Picture/<n>`` with ``<b>Name</b>``
     and the office. Picture 0 is the commission's silhouette (it answers
-    200), so it is no one's photograph."""
+    200), so it is no one's photograph. A list with no statewide item this
+    reader reads - an empty challenge (coag.gov answered a script HTTP 202
+    with no body, 2026-11-01), a bot wall, a page drawn by script, a
+    redesign - raises: it concludes nothing (rules 8 and 24), never "the
+    guide pictures no one", and the last photographs read are kept."""
     out = []
+    read = 0
     for item in re.findall(r"<li>(.*?)</li>", page or "", re.S):
         pic = re.search(r'<img class="pic" src="(/Custom/Picture/(\d+))"', item)
         name = re.search(r"<b>(.*?)</b>", item, re.S)
@@ -178,7 +166,10 @@ def parse_arizona(page):
         if not (pic and name and office):
             continue
         office_text = " ".join(html.unescape(office.group(1)).split())
-        if office_text not in AZ_OFFICES or pic.group(2) == "0":
+        if office_text not in AZ_OFFICES:
+            continue
+        read += 1
+        if pic.group(2) == "0":
             continue
         raw = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", name.group(1))).split())
         ticket = re.search(r"\(([^)]+)\)\s*$", raw)
@@ -187,6 +178,8 @@ def parse_arizona(page):
                  + (f", '{' '.join(party.group(1).split())}'" if party else ""))
         out.append((AZ_OFFICES[office_text], _plain_name(raw), ticket.group(1) if ticket else None,
                     urllib.parse.urljoin(AZ_LIST, pic.group(1)), words))
+    if not read:
+        raise StatewidePhotoError(f"{AZ_LIST} holds no statewide candidate this reader reads")
     return out
 
 
@@ -194,14 +187,18 @@ def parse_california(page, office):
     """``[(office, name, None, image url, words)]`` from one of the guide's
     statement pages: each candidate's block holds one image and one
     heading, "Name | PARTY"; the image is taken only where its alt text is
-    the heading's name. "No Photo Submitted" is no photograph."""
+    the heading's name. "No Photo Submitted" is no photograph, but a block
+    read. A page with no block this reader reads raises, as Arizona's list
+    does (:func:`parse_arizona`)."""
     out = []
+    read = 0
     blocks = re.split(r'<div class="grid-parent clearfix">', page or "")[1:]
     for block in blocks:
         heads = re.findall(r"<h2>(.*?)</h2>", block, re.S)
         imgs = re.findall(r"<img\b[^>]*>", block, re.I)
         if len(heads) != 1 or len(imgs) != 1:
             continue
+        read += 1
         head = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", heads[0])).split())
         name = head.split("|", 1)[0].strip()
         alt = official_photos._attr(imgs[0], "alt")
@@ -214,6 +211,9 @@ def parse_california(page, office):
         out.append((office, _plain_name(name), None, url,
                     f"the statement's block pairs the image alt-texted '{alt}' with the heading "
                     f"'{head}'"))
+    if not read:
+        raise StatewidePhotoError(f"{CA_GUIDE.format(CA_PAGES[office])} holds no candidate's "
+                                  "statement this reader reads")
     return out
 
 
@@ -230,8 +230,7 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_o
     sources = []
     if "AZ" in lists:
         try:
-            sources.append(("AZ", AZ_LIST, AZ_BY, parse_arizona(_in_shape("AZ", AZ_LIST,
-                                                                          get(AZ_LIST)))))
+            sources.append(("AZ", AZ_LIST, AZ_BY, parse_arizona(get(AZ_LIST))))
         except StatewidePhotoError as exc:
             problems.append(f"AZ: {exc}; the last photographs read are kept")
             unknown.add("AZ")
@@ -242,8 +241,7 @@ def read_guides(lists, measure=None, pause=1.0, get=None, refused=None, passed_o
             url = CA_GUIDE.format(CA_PAGES[office])
             time.sleep(pause)
             try:
-                sources.append(("CA", url, CA_BY,
-                                parse_california(_in_shape("CA", url, get(url)), office)))
+                sources.append(("CA", url, CA_BY, parse_california(get(url), office)))
             except StatewidePhotoError as exc:
                 problems.append(f"CA {office}: {exc}; the last photographs read are kept")
                 unknown.add(f"CA|{office}")
