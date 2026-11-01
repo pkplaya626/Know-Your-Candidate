@@ -3433,6 +3433,42 @@ async function testStates() {
       byHandSeen > 0 || codes.every((c) => !Object.keys((meta._byHand || {})[c] || {}).length),
       String(byHandSeen));
   });
+  /* The sample-ballot pages read on 2026-11-01 (kyc/voting.py
+   * SAMPLE_EVIDENCE): 44 jurisdictions' blocks had none. Each is drawn as
+   * its record labels it, credited to the election office, and said "as its
+   * site links it" exactly when the record names the office's page that
+   * links it - never of Rhode Island's, which its office names in a release
+   * and links nowhere this site read (rule 79). */
+  suite("every state page — the sample ballots read on 2026-11-01", () => {
+    const W = okHand.window;
+    const meta = W.kycBuildMeta.voting;
+    const added = ["AR", "CO", "CT", "DE", "HI", "ID", "IN", "KS", "KY", "MA", "MD", "MO", "MS",
+      "NC", "OK", "RI", "TN", "VA", "VT", "WA", "WV", "VI"];
+    const wrong = [];
+    for (const code of added) {
+      const url = (meta[code] || {}).sample;
+      if (!url) { wrong.push(code + ": no sample link"); continue; }
+      const label = ((meta._labels || {})[code] || {}).sample || "See a sample ballot";
+      const box = W.document.createElement("div");
+      box.innerHTML = W.KYC.ballot.votingBlock(code, W.KYC.stateName(code));
+      // A sample-ballot look-up can share its address with NASS's link
+      // (Arkansas's VoterView): the button is the one with its own label.
+      const a = [...box.querySelectorAll("a")].find((x) => x.getAttribute("href") === url &&
+        x.textContent.trim() === label);
+      if (!a) wrong.push(code + ": not drawn as " + label);
+      const note = (box.querySelector(".state-note") || { textContent: "" }).textContent;
+      const at = note.indexOf("“" + label + "”");
+      const sentence = at === -1 ? "" : note.slice(at, note.indexOf(".", at + label.length + 2));
+      if (!/own page/.test(sentence)) wrong.push(code + ": not credited to the office: " + note.slice(0, 300));
+      const linked = ((meta._siteLinked || {})[code] || []).indexOf("sample") !== -1;
+      const said = /as its site links/.test(sentence);
+      if (code !== "VI" && said !== linked) wrong.push(code + ": 'as its site links it' " + said + " vs " + linked);
+    }
+    check("each drawn with its label, credited to its office, 'as its site links it' only with the record",
+      wrong.length === 0, wrong.slice(0, 4).join(" | "));
+    check("Rhode Island's is never 'as its site links it'",
+      !!(meta.RI || {}).sample && ((meta._siteLinked || {}).RI || []).indexOf("sample") === -1);
+  });
   /* Round three (NOTES.md, 2026-10-26): the curated pages opened by hand,
    * and two results links that showed readers an error repointed through
    * overrides.VOTING_LINKS - Oklahoma's "403 - Forbidden" and New
@@ -3488,7 +3524,7 @@ async function testStates() {
       JSON.stringify(meta._siteLinked));
     check("and is said so",
       !meta.OK.results ||
-        /“Official results” is Oklahoma's election office's own page, as its site links it\./.test(okNote), okNote);
+        /(“[^”]+” and )?“Official results” (is|are) Oklahoma's election office's own pages?, as its site links (it|them)\./.test(okNote), okNote);
     // Drawn on a record the check makes, the results link held whatever
     // this week's check found of it.
     const saved = meta._siteLinked;
@@ -3504,7 +3540,7 @@ async function testStates() {
     }
     const bare = box.querySelector(".state-note").textContent;
     check("a page the record does not show linked is the office's own page, never 'as its site links it'",
-      /“Official results” is Oklahoma's election office's own page\./.test(bare) && !/site links/.test(bare), bare);
+      /“Official results” (is|are) Oklahoma's election office's own pages?\./.test(bare) && !/site links/.test(bare), bare);
     const mdMeta = mdLinked.window.kycBuildMeta.voting;
     const mdNote = mdLinked.D.querySelector("#voting .state-note").textContent;
     const mdLinks = (mdMeta._siteLinked || {}).MD || [];
@@ -3515,7 +3551,7 @@ async function testStates() {
         mdLinks.indexOf("polling") !== -1 && mdLinks.indexOf("results") !== -1,
       JSON.stringify(mdLinks));
     check("and both are its office's own pages 'as its site links them'",
-      /“Find your polling place” and “Official results” are Maryland's election office's own pages, as its site links them\./.test(mdNote) &&
+      /“Find your polling place”(, “[^”]+”)? and “Official results” are Maryland's election office's own pages, as its site links them\./.test(mdNote) &&
         !mdLinked.D.querySelector('a[href*="voting/where.html"]'), mdNote);
     const coNote = coLinked.D.querySelector("#voting .state-note").textContent;
     check("Colorado's mail-ballot FAQ, linked from its FAQs page, is said so",
@@ -14600,6 +14636,16 @@ async function testBallot() {
       cards.map((c) => c.office).join(" | "));
     check("and no candidates for an office not on it", !ky.out.querySelector(".gov-candidates"));
     check("the order line names no statewide offices", !/then statewide offices/.test(ky.text));
+  });
+
+  suite("Your ballot: the state's sample ballot, where its office links one", () => {
+    const meta = ky.window.kycBuildMeta.voting;
+    const url = (meta.KY || {}).sample;
+    const a = url && [...ky.out.querySelectorAll("a")].find((x) => x.getAttribute("href") === url);
+    check("Kentucky's sample ballots by county, linked from the last card",
+      !!a && a.textContent.trim() === ((meta._labels || {}).KY || {}).sample &&
+        /The election office links a sample ballot/.test(ky.text) && !/hold no sample ballot/.test(ky.text),
+      (ky.text.match(/.{80}sample ballot.{80}/) || [""])[0]);
   });
 
   const dc = await ballotFor("#/?zip=20001");

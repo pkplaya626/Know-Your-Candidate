@@ -676,5 +676,92 @@ class TestMorePages(unittest.TestCase):
         self.assertTrue(all("(unknown)" in line for line in unchecked[0].detail))
 
 
+
+class TestSampleBallotRecords(unittest.TestCase):
+    """The sample-ballot pages read on 2026-11-01 (44 jurisdictions had none): each
+    is the jurisdiction's own page, on its own domains, with the office's
+    page that links it, the words, and the day (rules 79 and 84); "as its
+    site links it" only where the record names that page."""
+
+    ADDED = {"AR", "CO", "CT", "DE", "HI", "ID", "IN", "KS", "KY", "MA", "MD", "MO", "MS", "NC",
+             "OK", "RI", "TN", "VA", "VT", "WA", "WV"}
+
+    def test_the_record_holds(self):
+        self.assertEqual(voting.sample_problems(), [])
+
+    def test_every_page_and_linking_page_is_the_jurisdictions_own(self):
+        from kyc import voting_dates
+        for code, record in voting.SAMPLE_EVIDENCE.items():
+            url = (voting.SAMPLE_BALLOTS.get(code)
+                   or voting.TERRITORY_LINKS.get(code, {}).get("sample", (None,))[0])
+            for page in (url, record["linkedFrom"]):
+                if page:
+                    ok, why = voting_dates.official_source(page, code)
+                    self.assertTrue(ok, f"{code}: {page}: {why}")
+                    self.assertTrue(voting.official(page, code), f"{code}: {page}")
+            self.assertRegex(record["read"], r"^\d{4}-\d{2}-\d{2}$")
+            self.assertTrue(record["linkWords"].strip() and record["pageWords"].strip(), code)
+
+    def test_every_added_page_is_shown_with_its_label(self):
+        shown = voting.for_page(every_link_live(cache_of()))
+        for code in self.ADDED:
+            self.assertEqual(shown[code]["sample"], voting.SAMPLE_BALLOTS[code], code)
+            label = voting.SAMPLE_EVIDENCE[code]["label"]
+            if label:
+                self.assertEqual(shown["_labels"][code]["sample"], label, code)
+            self.assertNotIn("sample", shown["_nass"][code], code)
+        self.assertEqual(shown["VI"]["sample"], voting.TERRITORY_LINKS["VI"]["sample"][0])
+        self.assertEqual(shown["_labels"]["VI"]["sample"], "Sample ballots by district (PDF)")
+
+    def test_as_its_site_links_it_only_with_a_linking_page(self):
+        shown = voting.for_page(every_link_live(cache_of()))
+        for code in self.ADDED:
+            linked = bool(voting.SAMPLE_EVIDENCE[code]["linkedFrom"])
+            self.assertEqual("sample" in shown["_siteLinked"][code], linked, code)
+        # Rhode Island's office names its portal in a release and links it
+        # nowhere this site read.
+        self.assertIsNone(voting.SAMPLE_EVIDENCE["RI"]["linkedFrom"])
+        self.assertNotIn("sample", shown["_siteLinked"]["RI"])
+
+    def test_a_page_without_its_record_fails(self):
+        saved = voting.SAMPLE_EVIDENCE.pop("VA")
+        try:
+            problems = voting.sample_problems()
+            codes = [i.code for i in validate.check_voting_links(cache_of())]
+        finally:
+            voting.SAMPLE_EVIDENCE["VA"] = saved
+        self.assertTrue(any(p.startswith("VA:") for p in problems), problems)
+        self.assertIn("voting-sample-unrecorded", codes)
+
+    def test_a_record_off_the_jurisdictions_domains_fails(self):
+        for field, url in (("linkedFrom", "https://vote.gov/register/virginia"),
+                           ("linkedFrom", "https://www.sos.wa.gov/elections"),
+                           ("linkedFrom", "https://www.vote411.org/virginia")):
+            record = voting.SAMPLE_EVIDENCE["VA"]
+            saved = record[field]
+            record[field] = url
+            try:
+                problems = voting.sample_problems()
+            finally:
+                record[field] = saved
+            self.assertTrue(any(url in p for p in problems), (url, problems))
+
+    def test_a_record_with_no_words_or_day_fails(self):
+        record = voting.SAMPLE_EVIDENCE["CT"]
+        for field, value in (("pageWords", " "), ("read", "Nov 1"), ("label", "")):
+            saved = record[field]
+            record[field] = value
+            try:
+                self.assertNotEqual(voting.sample_problems(), [], field)
+            finally:
+                record[field] = saved
+
+    def test_a_vendor_host_counts_for_its_own_state_only(self):
+        url = voting.SAMPLE_BALLOTS["WV"]
+        self.assertTrue(voting.official(url, "WV"))
+        self.assertFalse(voting.official(url, "VA"))
+        self.assertFalse(voting.official("https://drive.google.com/file/d/x/view", "GU"))
+
+
 if __name__ == "__main__":
     unittest.main()
