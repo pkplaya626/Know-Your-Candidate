@@ -3556,6 +3556,76 @@ html.has-zip .ballot-result { min-height: 100vh; }
   border-radius: var(--radius-sm);
   background: var(--surface-2);
 }
+/* A phone's switch between a redrawn state's two plans (kyc-districts.js
+ * layout()): one plan at a time, the 2026 plan first. */
+.plan-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+.plan-switch[hidden] { display: none; }
+.plan-switch-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 48px;
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--t-sm);
+  text-align: left;
+  cursor: pointer;
+}
+.plan-switch-label {
+  font-size: var(--t-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.plan-switch-title { font-weight: 700; }
+.plan-switch-btn[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+  background: var(--surface-1);
+}
+.plan-switch-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.inset-zoom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-2);
+  margin: var(--s-2) 0 var(--s-3);
+}
+.inset-zoom-label { font-size: var(--t-sm); font-weight: 600; color: var(--text-muted); }
+.inset-zoom .chip { min-height: 40px; font: inherit; font-size: var(--t-sm); cursor: pointer; }
+.inset { scroll-margin-top: calc(var(--header-h) + var(--s-2)); }
+.districts-after { margin-top: var(--s-5); }
+.districts-after .districts-lede { margin-top: 0; }
+.movers-fold {
+  margin: var(--s-4) 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+}
+.movers-fold > summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  font-weight: 700;
+  cursor: pointer;
+}
+.movers-count { font-weight: 400; color: var(--text-muted); }
+.movers-fold .districts-movers { padding: 0 var(--s-3) var(--s-3); }
+/* Its summary is the heading there. */
+.movers-fold .districts-movers > .state-heading { display: none; }
+
 .inset-row {
   display: flex;
   flex-wrap: wrap;

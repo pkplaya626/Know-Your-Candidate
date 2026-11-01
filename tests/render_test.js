@@ -15821,6 +15821,143 @@ function rowProblems(window, D) {
   return out;
 }
 
+/* ===================================== a redrawn state's districts, phone */
+
+/* Below 1000px a redrawn state's district page shows one plan at a time
+ * behind a switch, the 2026 plan first, and draws only that one: Texas's
+ * 2026 map began 5,459px down on a phone (VISUALS-02). */
+async function testDistrictsPhonePlans() {
+  const both = (window) => (w) => { phoneWidth(w, true); drawnAt(window)(w); };
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("districts/tx.html", { now, setup: both(302) });
+    await settle(30);
+    const { window, D, errors } = page;
+    const state = window.kycDistricts.TX;
+    const grid = D.getElementById("planGrid");
+    const cards = () => [...grid.children];
+    const shownCard = () => cards().filter((c) => !c.hidden);
+    const numbered = (card, plan) => {
+      const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+      return Object.keys(plan.districts).filter((n) => !written.has(n));
+    };
+    const before = (a, b) => !!a && !!b && !!(a.compareDocumentPosition(b) & window.Node.DOCUMENT_POSITION_FOLLOWING);
+    suite(`districts/tx.html on a phone ${when} — one plan at a time, the 2026 plan first`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const buttons = [...D.querySelectorAll(".plan-switch [data-plan-show]")];
+      check("a switch of two buttons is shown, the 2026 plan's first and pressed",
+        !D.querySelector(".plan-switch").hidden && buttons.length === 2 &&
+          buttons[0].getAttribute("data-plan-show") === "1" && buttons[0].getAttribute("aria-pressed") === "true" &&
+          buttons[1].getAttribute("aria-pressed") === "false",
+        buttons.map((b) => b.textContent + "=" + b.getAttribute("aria-pressed")).join(" | "));
+      check("each button names its plan by the plan's own label and title (rule 75)",
+        buttons.every((b) => {
+          const plan = state.plans[Number(b.getAttribute("data-plan-show"))];
+          return b.textContent === plan.label + " " + plan.title;
+        }), buttons.map((b) => b.textContent).join(" | "));
+      check("only the 2026 plan is drawn: the other card is an empty placeholder, hidden",
+        cards().length === 2 && shownCard().length === 1 && shownCard()[0] === cards()[1] &&
+          cards()[0].hidden && !cards()[0].querySelector("svg"),
+        cards().map((c) => (c.hidden ? "hidden " : "shown ") + c.querySelectorAll("svg").length).join(" | "));
+      check("every district on the 2026 plan is numbered somewhere, at 302px (rule 43)",
+        numbered(cards()[1], state.plans[1]).length === 0, numbered(cards()[1], state.plans[1]).join(","));
+      check("Find my district and the picker sit above the map",
+        before(D.getElementById("districtPick"), grid) &&
+          (!D.getElementById("locateMe") || before(D.getElementById("locateMe"), grid)));
+      const fold = D.querySelector(".districts-after .movers-fold");
+      check("Running in a different district is folded, closed, below the map, its summary counting the members",
+        !!fold && !fold.open && before(grid, fold) && !!fold.querySelector(".mover-group") &&
+          /^Running in a different district \d+ members?$/.test(fold.querySelector("summary").textContent),
+        fold && fold.querySelector("summary").textContent);
+      check("the hero's lede and links follow the map",
+        !!D.querySelector(".districts-after .districts-lede") && !!D.querySelector(".districts-after .state-links") &&
+          !D.querySelector(".state-hero .districts-lede"));
+      const chips = [...shownCard()[0].querySelectorAll(".inset-zoom [data-zoom]")];
+      check("a Zoom chip for each inset, by its title, under the statewide map",
+        chips.map((c) => c.textContent).join("|") === state.insets.map((i) => i.title).join("|") &&
+          before(shownCard()[0].querySelector(".district-statewide"), chips[0]),
+        chips.map((c) => c.textContent).join("|"));
+      const jumps = [];
+      const real = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () { jumps.push(this); };
+      chips[chips.length - 1].click();
+      window.Element.prototype.scrollIntoView = real;
+      check("a chip jumps to its inset, on the shown plan",
+        jumps.length === 1 && jumps[0].getAttribute("data-inset") === chips[chips.length - 1].textContent &&
+          shownCard()[0].contains(jumps[0]), jumps.map((j) => j.getAttribute("data-inset")).join(","));
+    });
+    suite(`districts/tx.html on a phone ${when} — the other plan, drawn on its first switch and kept`, () => {
+      const kept = cards()[1];
+      D.querySelector('[data-plan-show="0"]').click();
+      check("the 2024 plan is drawn and shown, the 2026 one hidden",
+        shownCard().length === 1 && shownCard()[0] === cards()[0] && !!cards()[0].querySelector(".district-statewide") &&
+          cards()[1] === kept && kept.hidden);
+      check("every district on the 2024 plan is numbered somewhere, at 302px (rule 43)",
+        numbered(cards()[0], state.plans[0]).length === 0, numbered(cards()[0], state.plans[0]).join(","));
+      check("the switch says which is shown, and so does its live region",
+        D.querySelector('[data-plan-show="0"]').getAttribute("aria-pressed") === "true" &&
+          D.getElementById("planShown").textContent === "Showing the " + state.plans[0].title + ", used for " +
+          state.plans[0].used + ".", D.getElementById("planShown").textContent);
+      const old = cards()[0];
+      D.querySelector('[data-plan-show="1"]').click();
+      check("switching back shows the 2026 card as drawn, not drawn again",
+        cards()[1] === kept && !kept.hidden && cards()[0] === old && old.hidden);
+      // A pick changes both plans: the hidden one is drawn again only when shown.
+      D.getElementById("districtPick").value = "9";
+      D.getElementById("districtPick").dispatchEvent(new window.Event("change", { bubbles: true }));
+      check("a pick redraws the shown plan with it", cards()[1] !== kept &&
+        [...cards()[1].querySelectorAll(".district-num.is-focus")].some((n) => n.textContent === "9"));
+      check("and leaves the hidden plan as it was until it is shown", cards()[0] === old);
+      D.querySelector('[data-plan-show="0"]').click();
+      check("shown, the 2024 plan is drawn again with the pick",
+        cards()[0] !== old && [...cards()[0].querySelectorAll(".district-num.is-focus")].some((n) => n.textContent === "9"));
+    });
+    suite(`districts/tx.html ${when} — a tablet turned past 1000px is the desktop page, and back`, () => {
+      turn(window, false);
+      check("both plans drawn side by side, no switch",
+        cards().length === 2 && cards().every((c) => !c.hidden && c.querySelector(".district-statewide")) &&
+          D.querySelector(".plan-switch").hidden && !grid.classList.contains("single"));
+      check("the moves, lede and links are back where the desktop page has them",
+        before(D.querySelector(".districts-movers"), D.getElementById("districtPick")) &&
+          !!D.querySelector(".state-hero .districts-lede") && !!D.querySelector(".state-hero .state-links") &&
+          D.querySelector(".districts-after").hidden);
+      check("no Zoom chips on a desktop", !D.querySelector(".inset-zoom"));
+      turn(window, true);
+      check("turned back, one plan again, the one the reader had picked",
+        shownCard().length === 1 && shownCard()[0] === cards()[0] &&
+          D.querySelector('[data-plan-show="0"]').getAttribute("aria-pressed") === "true");
+      check("still no page errors", errors.length === 0, errors.join(" | "));
+    });
+  }
+  // A state that was not redrawn has one plan: no switch on a phone, its
+  // lede after the map all the same.
+  const ny = await buildPage("districts/ny.html", { setup: both(286) });
+  suite("districts/ny.html on a phone — one plan, no switch", () => {
+    check("no page errors", ny.errors.length === 0, ny.errors.join(" | "));
+    check("no switch", !ny.D.querySelector(".plan-switch"));
+    const card = ny.D.querySelector(".plan-card");
+    const plan = ny.window.kycDistricts.NY.plans[0];
+    const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+    check("every district numbered at 286px", Object.keys(plan.districts).every((n) => written.has(n)));
+    check("zoom chips for its insets", card.querySelectorAll(".inset-zoom [data-zoom]").length ===
+      ny.window.kycDistricts.NY.insets.length);
+  });
+  // The rule 43 check at the phone's own narrowest width: each plan in turn.
+  for (const code of ["TX", "CA", "NC", "FL"]) {
+    const page = await buildPage("districts/" + code.toLowerCase() + ".html", { setup: both(280) });
+    const state = page.window.kycDistricts[code];
+    suite(`districts/${code.toLowerCase()}.html on a phone at 280px — every district numbered on each plan`, () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      [1, 0].forEach((i) => {
+        page.D.querySelector(`[data-plan-show="${i}"]`).click();
+        const card = page.D.getElementById("planGrid").children[i];
+        const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+        const missing = Object.keys(state.plans[i].districts).filter((n) => !written.has(n));
+        check(`the ${state.plans[i].title}, shown`, !card.hidden && missing.length === 0, missing.join(","));
+      });
+    });
+  }
+}
+
 async function testStatePhone() {
   const PAGES = ["ca", "tx", "fl", "ny", "la", "ok", "wa", "il", "ga", "al"];
   const built = {};
@@ -16727,6 +16864,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testContactActions();
   if (!only || only === "index.html") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
+  if (!only || only === "redistricting" || only === "districtphone") await testDistrictsPhonePlans();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();
   if (!only || only === "links") await testDeepLinks();
