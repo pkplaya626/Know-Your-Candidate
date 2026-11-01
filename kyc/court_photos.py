@@ -342,6 +342,7 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
     (rule 8). Returns the problems to report."""
     from . import courts as court_module
     from .government_maps import HIGH_COURTS
+    from .officers import says_nothing
     from .pages import state_name
 
     get = get or court_module._get
@@ -373,13 +374,24 @@ def add_justice_photos(courts, pages, previous=None, get=None, pause=1.0, measur
             if name in links:
                 time.sleep(pause)
                 try:
-                    read_pages.append((links[name], get(links[name])))
+                    page = get(links[name])
                 except court_module.CourtsError:
                     misses[name] = official_photos.UNKNOWN
+                else:
+                    # A challenge with no body, a bot wall or a page drawn by
+                    # script concludes nothing, as a page that did not answer
+                    # (rule 8): coag.gov answered the attorney general's
+                    # reader that way on 2026-11-01 (officers.says_nothing).
+                    if says_nothing(page):
+                        misses[name] = official_photos.UNKNOWN
+                    read_pages.append((links[name], page))
             passed_over = []
             found, why = photo_for(name, read["members"], read_pages, place, measure,
                                    passed_over=passed_over)
             if found:
+                # Pictured from the roster: their own page's silence is no
+                # miss, or counts() would say both of one justice.
+                misses.pop(name, None)
                 photos[name] = found
                 continue
             why = misses.get(name) or why
@@ -515,7 +527,8 @@ def counts(cache):
     "shape"}`` over every read court, for the build's report: of the
     photographs the court offers only above the caps (rule 87), *smaller*
     those shown smaller from the same file, *heavy* those shown at full
-    size."""
+    size. *unknown* counts the justices whose photograph could not be read
+    this run; one kept from an earlier read (rule 8) is among *shown* too."""
     out = {"members": 0, "shown": 0, "smaller": 0, "heavy": 0, "none": 0, "unknown": 0,
            "shape": 0}
     for code, read in ((cache or {}).get("courts") or {}).items():
