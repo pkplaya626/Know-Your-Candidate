@@ -38,6 +38,7 @@ Nothing here is dated by the build, and an unchanged page is not rewritten
 import json
 import os
 import re
+from decimal import ROUND_HALF_UP, Decimal
 
 from .share import _e, _https, _page
 
@@ -128,6 +129,18 @@ def nominated_parts(to):
             + ", pending in the Senate, as the courts’ list of announced vacancies has it"]
 
 
+# Leaving the seat, as the courts' list of announced vacancies has it
+# (``LEAVING`` in kyc-official.js; vacancies.announced_departures).
+LEAVING = {"Senior": "Will take senior status", "Retired": "Will retire",
+           "Resigned": "Will resign"}
+
+
+def leaving_text(leaving):
+    """``leavingText``: the future tense, or "" for none."""
+    said = LEAVING.get((leaving or {}).get("reason"))
+    return f"{said}, as the courts’ list of announced vacancies has it" if said else ""
+
+
 def court_names():
     from .federal_courts import COURTS
     return {cid: court["name"] for cid, court in COURTS.items()}
@@ -140,7 +153,7 @@ def share_words(found, courts=None):
     person = found["person"]
     kind = found["kind"]
     out = {"kind": "", "office": "", "inLaw": "", "status": "", "party": "", "appointedBy": "",
-           "nominated": "", "source": SOURCES.get(kind, "")}
+           "nominated": "", "leaving": "", "source": SOURCES.get(kind, "")}
     if kind == "leader":
         out["kind"] = person.get("office") or ""
         out["party"] = person.get("party") or ""
@@ -171,6 +184,7 @@ def share_words(found, courts=None):
         out["appointedBy"] = first.get("appointedBy") or ""
         if person.get("nominatedTo"):
             out["nominated"] = "".join(nominated_parts(person["nominatedTo"]))
+        out["leaving"] = leaving_text(person.get("leaving"))
     return out
 
 
@@ -217,10 +231,14 @@ def officials(fed, per_court):
 # --------------------------------------------------------------- picture
 
 def weight_words(n):
-    """``weightWords``: "12.4 MB", "820 KB"."""
+    """``weightWords``: "12.4 MB", "820 KB". Rounded as ``toFixed`` rounds,
+    the exact value of the double half up: Python's own format rounds a tie
+    to even, and 2,250,000 bytes would read "2.2 MB" here and "2.3 MB" in
+    the dialog."""
     n = float(n or 0)
     if n >= 1e6:
-        return re.sub(r"\.0$", "", f"{n / 1e6:.1f}") + " MB"
+        tenths = Decimal(n / 1e6).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP)
+        return re.sub(r"\.0$", "", str(tenths)) + " MB"
     return f"{max(1, int(n / 1e3 + 0.5))} KB"
 
 
@@ -309,42 +327,51 @@ def picture(found, host=None):
 
 # ----------------------------------------------------------------- pages
 
-def describe(found, words, courts=None):
-    """``(og title, description)`` for *found*'s share page, in the
-    dialog's words."""
-    courts = court_names() if courts is None else courts
+def describe(found, words):
+    """``(og title, description)`` for *found*'s share page: the name and
+    the words of the dialog's head (:func:`share_words`), and nothing of
+    its own - a description cut short by an unfurler must not read as more
+    than the dialog says. A former officer's leads with "Former, this
+    term", or "Pam Bondi: Attorney General" would unfurl as though she
+    still held the office."""
     name = found["person"].get("name") or ""
     kind = found["kind"]
+
+    def sentence(*parts):
+        return " ".join(f"{p}." for p in parts if p)
+
     if kind == "leader":
         lead = f"{name} ({words['party']})" if words["party"] else name
         return lead, f"{lead}, {words['kind']}: {words['status']}."
     if kind == "officer":
-        return name, (f"{name}: {words['office']}, {words['kind']}"
-                      + (f" ({words['status'].lower()})" if words["status"] else "")
-                      + ". A member of the President’s Cabinet, as the White House lists it.")
+        return name, sentence(f"{name}: {words['office']}, {words['kind']}", words["status"])
     if kind == "former":
-        return name, f"{name}: {words['office']}, this term. {words['status']}."
-    first = (found["person"].get("seats") or [{}])[0]
-    court = courts.get(first.get("court")) or words["kind"]
+        return name, sentence(f"{name} — {words['kind']}: {words['office']}", words["status"])
     said = words["status"] + (f"; appointed by {words['appointedBy']}" if words["appointedBy"] else "")
-    return name, (f"{name}: {words['office']}, {court}. {said}."
-                  + (f" {words['nominated']}." if words["nominated"] else ""))
+    return name, sentence(f"{name}: {words['office']}, {words['kind']}", said, words["leaving"],
+                          words["nominated"])
 
 
 def _view(found, oid, courts):
-    from .pages import _possessive
-
+    """``(the view's address, its link's words, what a reader without
+    scripts can read instead)``. The court's page lists its judges, retired
+    ones too, in plain text; the federal page lists who serves now, so a
+    page about someone who left the Cabinet, or a retired justice, says it
+    does not list them."""
     if found.get("court"):
         cid = found["court"]
         name = courts.get(cid) or cid
         return (f"../courts/{cid}.html#/official/{oid}",
                 f"Open their record on the {name}’s page",
-                f'<a href="../courts/{_e(cid)}.html">{_e(_possessive(name))} page</a> lists its '
+                f'<a href="../courts/{_e(cid)}.html">the {_e(name)}’s page</a> lists its '
                 "judges in plain text.")
+    gone = ("those who have left the Cabinet this term" if found["kind"] == "former"
+            else "the retired justices" if found["person"].get("retiredJustice") else "")
     return (f"../federal/index.html#/official/{oid}",
             "Open their record on the federal government’s page",
             '<a href="../federal/index.html">the federal government’s page</a> lists the '
-            "President, the Vice President, the Cabinet and the Supreme Court in plain text.")
+            "President, the Vice President, the Cabinet and the Supreme Court in plain text"
+            + (f", though not {gone}." if gone else "."))
 
 
 def render_official(oid, found, host, courts=None):
@@ -352,7 +379,7 @@ def render_official(oid, found, host, courts=None):
     courts = court_names() if courts is None else courts
     words = share_words(found, courts)
     name = found["person"].get("name") or ""
-    og_title, description = describe(found, words, courts)
+    og_title, description = describe(found, words)
     image, credit = picture(found, host)
     body = [f'<p class="share-kind">{_e(words["kind"])}</p>']
     if words["office"]:
@@ -367,6 +394,8 @@ def render_official(oid, found, host, courts=None):
         body.append(f'<p class="share-appointed">Appointed by {_e(words["appointedBy"])}</p>')
     if words["nominated"]:
         body.append(f'<p class="share-nominated">{_e(words["nominated"])}.</p>')
+    if words["leaving"]:
+        body.append(f'<p class="share-leaving">{_e(words["leaving"])}.</p>')
     if image:
         body.append(f'<p class="share-photo-credit faint">{credit_html(credit)}</p>')
     source = words["source"]
@@ -449,15 +478,24 @@ def words_table():
         {"status": "senior", "retiredJustice": True,
          "seats": [dict(seat, court="scotus", title="Associate Justice")],
          "justice": {"role": "Associate Justice"}},
+        {"status": "active", "seats": [seat], "leaving": {"reason": "Senior"}},
+        {"status": "senior", "seats": [seat], "leaving": {"reason": "Retired"}},
+        {"status": "active", "seats": [seat], "leaving": {"reason": "Resigned"}},
+        {"status": "active", "seats": [seat], "leaving": {"reason": "Deceased"}},
         {"status": "active", "seats": [{"court": "zz-unknown"}]},
         {"status": "active", "seats": []},
     ]
     for judge in judges:
         cases.append(("judge", dict(judge, id="fjc-1", name="D"), None))
     courts = court_names()
+    # A copy's credit gives its original's weight: the ties round alike on
+    # both sides (2,250,000 bytes is "2.3 MB" in the dialog).
+    weights = (0, 1, 499, 500, 820_400, 999_499, 999_500, 1_000_000, 1_050_000, 2_250_000,
+               2_350_000, 2_750_000, 12_400_000, 12_449_999, 12_450_000)
     return {"cases": [[kind, person, office, share_words({"kind": kind, "person": person,
                                                            "office": office}, courts)]
-                      for kind, person, office in cases]}
+                      for kind, person, office in cases],
+            "weights": [[n, weight_words(n)] for n in weights]}
 
 
 def words_table_text():

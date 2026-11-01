@@ -13050,17 +13050,32 @@ async function testOfficialSharePages() {
           status: text(doc, ".share-status"),
           appointedBy: text(doc, ".share-appointed").replace(/^Appointed by /, ""),
           nominated: text(doc, ".share-nominated").replace(/\.$/, ""),
+          leaving: text(doc, ".share-leaving").replace(/\.$/, ""),
           source: text(doc, ".share-source").replace(/^Source: /, ""),
         };
-        Object.keys(shown).forEach((k) => {
+        Object.keys(words).forEach((k) => {
           const expect = k === "source" ? words.source.replace(/\.?$/, ".") : words[k];
           if (shown[k] !== expect) wrong.push(`${id} ${k}: "${shown[k]}" for "${expect}"`);
         });
         if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        // The description is the name and the head's words, every one of
+        // them, and nothing of its own: take each out, and only the joins
+        // are left. A former officer's leads with "Former, this term".
         const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
-        if (words.status && desc.indexOf(words.status) === -1) wrong.push(`${id}: description's status`);
-        if (found.kind === "judge" && words.appointedBy && desc.indexOf("appointed by " + words.appointedBy) === -1) {
-          wrong.push(`${id}: description's President`);
+        const said = { leader: ["kind", "party", "status"], officer: ["office", "kind", "status"],
+                       former: ["kind", "office", "status"],
+                       judge: ["kind", "office", "status", "appointedBy", "leaving", "nominated"] }[found.kind];
+        let rest = desc;
+        said.concat().sort((a, b) => words[b].length - words[a].length).forEach((k) => {
+          if (!words[k]) return;
+          const at = rest.indexOf(words[k]);
+          if (at === -1) wrong.push(`${id}: the description lacks ${k} "${words[k]}"`);
+          else rest = rest.slice(0, at) + "|" + rest.slice(at + words[k].length);
+        });
+        rest = rest.replace(found.person.name, "|").replace("; appointed by |", "|");
+        if (!/^[|\s.,:;()—]*$/.test(rest)) wrong.push(`${id}: the description's own words "${rest}"`);
+        if (found.kind === "former" && desc.indexOf(words.kind) > desc.indexOf(words.office)) {
+          wrong.push(`${id}: a former officer's description must lead with "${words.kind}"`);
         }
         // A party only where the dialog gives one: never a judge's or a
         // Cabinet officer's.
@@ -13100,6 +13115,15 @@ async function testOfficialSharePages() {
       check("every case of the words table, asked of the page code (tests/fixtures/official_share_words.json)",
         fixture.cases.length >= 30 && off.length === 0,
         off.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${fixture.cases.length} cases`);
+      check("each case leaving the seat is in the future tense, and only the list's reasons are said",
+        fixture.cases.filter(([kind, person]) => kind === "judge" && person.leaving).length >= 3 &&
+        fixture.cases.every(([kind, person, office, words]) => !words.leaving || /^Will /.test(words.leaving)));
+      // A copy's credit gives its original's weight: rounded alike on both
+      // sides, ties too (Python rounds a tie to even, toFixed up).
+      const weighed = (fixture.weights || []).filter(([n, words]) => K.weightWords(n) !== words);
+      check("an original's weight in a copy's credit, as the page writes it",
+        (fixture.weights || []).length >= 10 && weighed.length === 0,
+        weighed.slice(0, 4).map(([n, w]) => `${n}: ${w} for ${K.weightWords(n)}`).join(" | "));
     });
   }
 
@@ -13108,6 +13132,11 @@ async function testOfficialSharePages() {
   await settle(50);
   const tne = await buildPage("courts/tn-e.html", { now: CAMPAIGN_NOW });
   await settle(50);
+  // A court with a judge leaving their seat, as the announced list has it,
+  // whichever court that is on the day (Southwick's Fifth Circuit once).
+  const goingCourt = Object.keys(courts).sort().find((cid) => (courts[cid].judges || []).some((j) => j.leaving));
+  const going = goingCourt ? await buildPage(`courts/${goingCourt}.html`, { now: CAMPAIGN_NOW }) : null;
+  if (going) await settle(50);
   suite("the officials' dialog — the share page's words, and its address to share", () => {
     const drawn = [];
     const check1 = (page, id) => {
@@ -13121,6 +13150,8 @@ async function testOfficialSharePages() {
       const status = meta.querySelector(".official-status");
       if (kind !== words.kind) drawn.push(`${id}: kind ${kind}`);
       if ((status ? status.textContent.trim() : "") !== words.status) drawn.push(`${id}: status`);
+      const leaving = meta.querySelector(".official-leaving");
+      if ((leaving ? leaving.textContent.trim() : "") !== words.leaving) drawn.push(`${id}: leaving`);
       if (words.office && meta.textContent.indexOf(words.office) === -1) drawn.push(`${id}: office`);
       if (words.appointedBy && meta.textContent.indexOf("Appointed by " + words.appointedBy) === -1) {
         drawn.push(`${id}: appointed`);
@@ -13139,6 +13170,7 @@ async function testOfficialSharePages() {
       .concat((d.supremeCourt.retired || []).map((j) => j.id));
     ids.forEach((id) => check1(hub, id));
     (tne.window.kycCourt["tn-e"].judges || []).forEach((j) => check1(tne, j.id));
+    if (going) (going.window.kycCourt[goingCourt].judges || []).forEach((j) => check1(going, j.id));
     check("the dialog draws its head from the same words, on the hub and a court's page",
       drawn.length === 0 && ids.length > 12, drawn.slice(0, 5).join(" | "));
   });

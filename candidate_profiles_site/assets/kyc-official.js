@@ -226,14 +226,24 @@
       ", pending in the Senate, as the courts’ list of announced vacancies has it"];
   }
 
+  /* Leaving the seat, as the courts' list of announced vacancies has it
+   * (kyc/vacancies.py announced_departures): it has not happened, so the
+   * future tense, as the court's own table says it (rule 82). */
+  var LEAVING = { Senior: "Will take senior status", Retired: "Will retire", Resigned: "Will resign" };
+
+  function leavingText(leaving) {
+    var said = LEAVING[(leaving || {}).reason];
+    return said ? said + ", as the courts’ list of announced vacancies has it" : "";
+  }
+
   /** ``{kind, office, inLaw, status, party, appointedBy, nominated,
-   *  source}``: every word the dialog's head gives *found* (an entry of
-   *  ``officials()``), each "" where it says none. No party for a judge or
-   *  a Cabinet officer; a judge's appointing President instead. */
+   *  leaving, source}``: every word the dialog's head gives *found* (an
+   *  entry of ``officials()``), each "" where it says none. No party for a
+   *  judge or a Cabinet officer; a judge's appointing President instead. */
   function shareWords(found) {
     var p = found.person;
     var out = { kind: "", office: "", inLaw: "", status: "", party: "", appointedBy: "",
-                nominated: "", source: SOURCES[found.kind] || "" };
+                nominated: "", leaving: "", source: SOURCES[found.kind] || "" };
     if (found.kind === "leader") {
       out.kind = p.office || "";
       out.party = p.party || "";
@@ -260,6 +270,7 @@
       out.status = judgeStatus(p);
       out.appointedBy = first.appointedBy || "";
       if (p.nominatedTo) out.nominated = nominatedParts(p.nominatedTo).join("");
+      out.leaving = leavingText(p.leaving);
     }
     return out;
   }
@@ -655,6 +666,8 @@
     el("officialModalMeta").innerHTML =
       "<span>" + KYC.icon("landmark") + " <strong>" + KYC.escapeHtml(words.office) + "</strong></span>" +
       '<span class="official-status">' + KYC.escapeHtml(words.status) + "</span>" +
+      (words.leaving ? '<span class="official-leaving">' + KYC.escapeHtml(words.leaving) +
+        "</span>" : "") +
       (words.appointedBy ? '<span class="official-appointed">Appointed by <strong>' +
         KYC.escapeHtml(words.appointedBy) + "</strong></span>" : "");
 

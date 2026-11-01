@@ -120,6 +120,83 @@ class TestWords(unittest.TestCase):
         self.assertIn("<strong>In office since Jan. 20, 2025; term ends Jan. 20, 2029</strong>", page)
 
 
+    def test_a_departure_the_list_announces_is_in_the_future_tense(self):
+        # Rule 82: Judge Southwick unfurled as "Active service" while his
+        # court's table said "Will take senior status".
+        person = judge(leaving={"reason": "Senior"})
+        words = official_share.share_words(found(person=person))
+        self.assertEqual(words["status"], "Active service")
+        self.assertEqual(words["leaving"], "Will take senior status, as the courts’ list of "
+                                           "announced vacancies has it")
+        page = official_share.render_official("fjc-1", found(person=person), "example.org")
+        self.assertIn('<p class="share-leaving">Will take senior status, as the courts’ list of '
+                      "announced vacancies has it.</p>", page)
+        _title, desc = official_share.describe(found(person=person), words)
+        self.assertIn("Active service; appointed by Barack Obama. Will take senior status", desc)
+        # Only the list's reasons: nothing invented for another.
+        self.assertEqual(official_share.share_words(found(person=judge(leaving={"reason": "Deceased"})))
+                         ["leaving"], "")
+        self.assertEqual(official_share.share_words(found(person=judge()))["leaving"], "")
+
+
+class TestDescription(unittest.TestCase):
+    """The description is the name and the dialog's words, nothing more."""
+
+    def test_a_former_officer_leads_with_former(self):
+        person = {"id": "x-c", "name": "Pam Bondi",
+                  "held": [{"office": "Attorney General", "end": {"shown": {"date": "2026-04-02"}}}]}
+        f = found("former", person)
+        _title, desc = official_share.describe(f, official_share.share_words(f))
+        self.assertEqual(desc, "Pam Bondi — Former, this term: Attorney General. Left office "
+                               "April 2, 2026.")
+
+    def test_a_cabinet_officer_in_the_dialogs_words_alone(self):
+        office = {"office": "Secretary of the Treasury", "body": "Department of the Treasury"}
+        holder = {"id": "x-b", "name": "Scott Bessent", "title": "Secretary of the Treasury"}
+        f = found("officer", holder, office)
+        _title, desc = official_share.describe(f, official_share.share_words(f))
+        self.assertEqual(desc, "Scott Bessent: Secretary of the Treasury, Department of the Treasury.")
+        acting = found("officer", dict(holder, page={"acting": True}), office)
+        _title, desc = official_share.describe(acting, official_share.share_words(acting))
+        self.assertEqual(desc, "Scott Bessent: Secretary of the Treasury, Department of the "
+                               "Treasury. Acting.")
+
+
+class TestFallback(unittest.TestCase):
+    """What a reader without scripts is sent to, in words that are true."""
+
+    def test_a_judges_court_page_with_its_article_and_a_curly_apostrophe(self):
+        page = official_share.render_official("fjc-1", found(), "example.org")
+        self.assertIn('Without it, <a href="../courts/ak.html">the U.S. District Court for the '
+                      "District of Alaska’s page</a> lists its judges in plain text.", page)
+        self.assertNotIn("&#x27;s page", page)
+
+    def test_the_federal_page_does_not_list_who_left_or_retired(self):
+        former = found("former", {"id": "x-c", "name": "C", "held": [{"office": "Secretary of Labor"}]})
+        self.assertIn("in plain text, though not those who have left the Cabinet this term.",
+                      official_share.render_official("x-c", former, "example.org"))
+        retired = found(person=judge(retiredJustice=True, status="senior", justice={"role": "Associate Justice"},
+                                     seats=[dict(SEAT, court="scotus", title="Associate Justice")]),
+                        court=None)
+        self.assertIn("in plain text, though not the retired justices.",
+                      official_share.render_official("fjc-1", retired, "example.org"))
+        sitting = found(person=judge(justice={"role": "Chief Justice"},
+                                     seats=[dict(SEAT, court="scotus", title="Chief Justice")]), court=None)
+        self.assertIn("the Cabinet and the Supreme Court in plain text.</p>",
+                      official_share.render_official("fjc-1", sitting, "example.org"))
+
+
+class TestWeight(unittest.TestCase):
+
+    def test_ties_round_up_as_tofixed_does(self):
+        # Python's format rounds 2.25 to "2.2"; the dialog's toFixed says "2.3".
+        self.assertEqual(official_share.weight_words(2_250_000), "2.3 MB")
+        self.assertEqual(official_share.weight_words(2_750_000), "2.8 MB")
+        self.assertEqual(official_share.weight_words(12_450_000), "12.4 MB")  # 12.4499... as a double
+        self.assertEqual(official_share.weight_words(1_000_000), "1 MB")
+        self.assertEqual(official_share.weight_words(820_400), "820 KB")
+
+
 class TestPicture(unittest.TestCase):
     """Only what the dialog shows, by its route (rules 24, 42, 82, 87, 101)."""
 
@@ -253,6 +330,12 @@ class TestBuiltAndVerified(unittest.TestCase):
         self.assertEqual(found, {fed["president"]["id"] + ".html": "stale", "fjc-0.html": "orphaned"})
         self.write()
         self.assertFalse(os.path.exists(os.path.join(folder, "fjc-0.html")))
+
+        # write_sitemap, on its own, wants the same pages verify does.
+        with mock.patch.object(federal_build, "build", lambda root: real_build()):
+            path = emit.write_sitemap([], self.root, races=[])
+        with open(path, encoding="utf-8") as f:
+            self.assertEqual(f.read(), xml)
 
         # Without the federal build, none is written and none removed.
         def broken(root):

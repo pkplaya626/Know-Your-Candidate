@@ -775,10 +775,26 @@ def sitemap_text(profiles, host, races=None, officials=()):
                          officials=list(officials or ()) if races is not None else ())
 
 
+def official_ids(root="."):
+    """Every federal official's and judge's share page id
+    (kyc/official_share.py), or none without the federal build."""
+    from . import federal_build, official_share
+
+    try:
+        fed, fed_courts, _search, _problems = federal_build.build(root)
+    except federal_build.FederalBuildError:
+        return []
+    return official_share.ids(fed, fed_courts)
+
+
 def write_sitemap(profiles, root=".", races=None):
     """Write ``sitemap.xml`` listing the pages and every state. Returns the
-    path, or ``None`` when no custom domain is configured."""
-    text = sitemap_text(profiles, canonical_host(root), races)
+    path, or ``None`` when no custom domain is configured. With *races*,
+    the share pages too, the officials' with them, from the same federal
+    build :func:`render_state_pages` writes them from, or this sitemap
+    would want what verify's does not."""
+    text = sitemap_text(profiles, canonical_host(root), races,
+                        official_ids(root) if races is not None else ())
     if text is None:
         return None
     path = os.path.join(root, SITEMAP_FILE)
