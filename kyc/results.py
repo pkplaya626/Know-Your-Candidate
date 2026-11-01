@@ -604,7 +604,7 @@ def _list_kind(heading):
 def _bullet_name(line):
     """``* [[Janet Mills]], governor of Maine ...`` -> raw ``[[Janet Mills]]``."""
     text = re.split(r"<ref|<!--", line, maxsplit=1)[0]
-    depth, i = 0, 0
+    depth, paren, i = 0, 0, 0
     while i < len(text):
         two = text[i:i + 2]
         if two in ("[[", "{{"):
@@ -615,10 +615,32 @@ def _bullet_name(line):
             depth = max(depth - 1, 0)
             i += 2
             continue
-        if text[i] in ",;:" and depth == 0:
-            return text[:i]
+        # A comma inside a closed aside is the aside's: "Adam Perez Arquette
+        # ''(endorsed Alvarado, remained on ballot)''" was cut to "Adam Perez
+        # Arquette (endorsed Alvarado", a name no filing fits.
+        if text[i] == "(" and depth == 0 and ")" in text[i:]:
+            paren += 1
+        elif text[i] == ")" and paren:
+            paren -= 1
+        elif text[i] in ",;:" and depth == 0 and not paren:
+            return _linked_name(text[:i])
         i += 1
-    return text
+    return _linked_name(text)
+
+
+# A bullet that opens with the person's link, then their party, then words
+# about them with no comma between: "[[Dixon McMakin]] (Republican) [[Louisiana
+# State House of Representatives|state representative]] from the 68th
+# district" read as a person named "Dixon McMakin state representative from
+# the 68th district" (LA-5's Withdrawn list, 2026-11-01). Lower-case words or
+# another link after the name and its asides are not the name; a suffix is
+# written in capitals ("[[John Smith]] Jr.").
+_LINKED_NAME = re.compile(r"\s*\[\[[^\[\]]+\]\](?:\s*'*\([^()]*\)'*)*(?=\s*(?:\[\[|[a-z]))")
+
+
+def _linked_name(raw):
+    match = _LINKED_NAME.match(raw)
+    return match.group(0) if match else raw
 
 
 # A heading that lists people who are on, or running for, a ballot line, and

@@ -1861,6 +1861,22 @@ class TestNovember2024Rehearsal(unittest.TestCase):
         self.assertEqual((statuses["Jared Golden"], statuses["Bruce Poliquin"],
                           statuses["Tiffany Bond"]), ("elected", "defeated", "defeated"))
 
+    def test_a_withdrawn_bullet_is_read_to_the_name(self):
+        # Two bullets on 2026's pages, read on 2026-11-01, that reach the
+        # November reading once Louisiana's page decides: no comma before the
+        # words about LA-5's Dixon McMakin, a comma inside KY-6's aside.
+        text = "\n".join([
+            "===Withdrawn===",
+            "*[[Dixon McMakin]] (Republican) [[Louisiana State House of Representatives|"
+            "state representative]] from the 68th district (2024–present)<ref>x</ref>",
+            "*Adam Perez Arquette ''(endorsed Alvarado, remained on ballot)''<ref>y</ref>",
+            "*[[John Smith (politician)|John Smith]] Jr., businessman",
+            "*[[Jane Roe]] (Democratic)",
+        ])
+        names = [r["name"] for title, rows in results.candidate_lists(text) for r in rows]
+        self.assertEqual(names, ["Dixon McMakin", "Adam Perez Arquette", "John Smith Jr.",
+                                 "Jane Roe"])
+
     def test_the_build_counts_maine_and_alaska_by_ranked_choice(self):
         self.assertEqual(set(results.RANKED_CHOICE), {"ME", "AK"})
 
@@ -1940,6 +1956,17 @@ class TestValidateElected(unittest.TestCase):
                       self.codes([("a", "Ann One", "elected"), ("b", "Bo Two", "elected")]))
         self.assertIn("multiple-elected",
                       self.codes([("a", "Ann One", "elected")], other=["Cy Three"]))
+
+    def test_a_nominee_beside_a_result_is_reported(self):
+        # The November rehearsal of 2026-11-01: a certified list's candidate
+        # the page's November table left out read "Awaiting result" under
+        # "Won by".
+        self.assertIn("nominee-beside-result",
+                      self.codes([("a", "Ann One", "elected"), ("b", "Bo Two", "nominee")]))
+        self.assertIn("nominee-beside-result",
+                      self.codes([("a", "Ann One", "runoff"), ("b", "Bo Two", "nominee")]))
+        self.assertNotIn("nominee-beside-result",
+                         self.codes([("a", "Ann One", "nominee"), ("b", "Bo Two", "nominee")]))
 
 
 class TestSenateDateFallback(unittest.TestCase):

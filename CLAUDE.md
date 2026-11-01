@@ -1186,7 +1186,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     that ballot `defeated`, and no mark or two marks change nothing.
     Georgia's general runoff (`overrides.GENERAL_RUNOFFS`) is a runoff table
     naming no party whose people were all on the November ballot - a June
-    party runoff titled "Runoff results" holds a loser who never was. Who
+    party runoff titled "Runoff results" holds a loser who never was.
+    Rehearsed on 2024's pages as they stood the morning after Election Day
+    and once certified (2026-11-01), the reading called no race wrongly, but
+    a table titled by its seat alone ("Florida's 1st congressional district,
+    2024") was never read as the November one - 83 seats in eleven states;
+    a ranked-choice count (`RANKED_CHOICE`: Maine, Alaska) elects only
+    beside a majority in a table that marks the winner, since first choices
+    are a lead (Poliquin led Maine's 2nd in 2018 and lost); and a certified
+    list's other candidates, whom the page's November table leaves out, lost
+    once the page marks its winner - left "nominee", they read "Awaiting
+    result" under "Won by". Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
