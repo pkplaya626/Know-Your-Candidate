@@ -452,19 +452,20 @@
     // The statewide questions on the ballot (rule 95), after the races, as
     // a printed ballot puts them; "" where nothing is recorded.
     var measures = KYC.ballot.measuresSection(code);
-    // Where data/measures.js did not load, the plain list the page was
-    // written with stays, under a line saying so (rules 76, 96): drawn
-    // from nothing, it vanished without a word (PR #123 review).
+    // data/measures.js is loaded once the page is drawn (named on demand,
+    // rule 76): until it is in, the plain list the page was written with
+    // stands where the section goes (rule 96), drawn over when it arrives
+    // (measuresArrived). Where it did not load, the plain list stays, under
+    // a line saying so: drawn from nothing, it vanished without a word (PR
+    // #123 review).
     var keptMeasures = false;
+    var measuresLater = false;
     if (!measures && KYC.ballot.measuresMissing()) {
+      measuresLater = KYC.ballot.measuresPending();
       var written = target.querySelector("#measures");
       if (written) {
         var kept = written.cloneNode(true);
-        var heading = kept.querySelector("h2");
-        var holder = doc.createElement("div");
-        holder.innerHTML = KYC.ballot.measuresFailedLine(code, true);
-        if (heading) heading.parentNode.insertBefore(holder.firstChild, heading.nextSibling);
-        else kept.insertBefore(holder.firstChild, kept.firstChild);
+        if (!measuresLater) measuresFailed(kept, code);
         measures = kept.outerHTML;
         keptMeasures = !!kept.querySelector("[data-measure]");
       }
@@ -624,6 +625,35 @@
     target.innerHTML = html.join("");
     if (KYC.findRep) KYC.findRep.mountAll(target);
     if (foldable) initFold();
+    if (measuresLater) {
+      KYC.ballot.loadMeasures(function (ok) { measuresArrived(target, code, ok); });
+    }
+  }
+
+  /** The line saying the questions did not load, under *section*'s heading. */
+  function measuresFailed(section, code) {
+    if (section.querySelector(".measures-failed")) return;
+    var heading = section.querySelector("h2");
+    var holder = doc.createElement("div");
+    holder.innerHTML = KYC.ballot.measuresFailedLine(code, true);
+    if (heading) heading.parentNode.insertBefore(holder.firstChild, heading.nextSibling);
+    else section.insertBefore(holder.firstChild, section.firstChild);
+  }
+
+  /** data/measures.js has loaded (*ok*) or failed: the questions drawn in
+   *  full over the plain list, or the plain list kept and said so. */
+  function measuresArrived(target, code, ok) {
+    var written = target.querySelector("#measures");
+    if (!ok) {
+      if (written) measuresFailed(written, code);
+      return;
+    }
+    var html = KYC.ballot.measuresSection(code);
+    if (!html) return;
+    var holder = doc.createElement("div");
+    holder.innerHTML = html;
+    if (written) written.parentNode.replaceChild(holder.firstChild, written);
+    else target.appendChild(holder.firstChild);
   }
 
   /** What else the state's November 3 ballot elects, from the same table the

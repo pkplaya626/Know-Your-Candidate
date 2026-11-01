@@ -15192,6 +15192,12 @@ async function sameOnBoth(full, slim, routes, ids, wait) {
       const done = (b) => !/Looking up/.test((b.D.getElementById("findrep") || {}).textContent || "");
       await until(() => done(full) && done(slim), 8000);
     }
+    // A query loads the profiles' words (data/people/words.js) on the
+    // grid as it ships, and draws again when they are in.
+    if (/[?&]q=/.test(route) && slim.window.KYC.wordsHeld) {
+      await until(() => slim.window.KYC.wordsHeld(), 8000);
+      await settle(30);
+    }
     const a = shown(full.D, ids);
     const b = shown(slim.D, ids);
     out.push({ route, same: a === b, why: a === b ? "" : firstDifference(a, b), size: a.length });
@@ -15199,8 +15205,15 @@ async function sameOnBoth(full, slim, routes, ids, wait) {
   return out;
 }
 
+/* The people files a page fetched once built: the index and the states'
+ * files, not the words the grid's search reads (servedWords). */
 function servedPeople(built) {
-  return built.served.filter((s) => /\/data\/people\//.test(s)).map((s) => s.split("?")[0]);
+  return built.served.filter((s) => /\/data\/people\//.test(s) && !/\/words\.js/.test(s))
+    .map((s) => s.split("?")[0]);
+}
+
+function servedWords(built) {
+  return built.served.filter((s) => /\/data\/people\/words\.js/.test(s));
 }
 
 async function testPeopleSplit() {
@@ -15244,6 +15257,10 @@ async function testPeopleSplit() {
       check("the globals keep their shape: legislatorsData, kycRaces, kycBuildMeta",
         Array.isArray(slim.window.legislatorsData) && Array.isArray(slim.window.kycRaces) &&
           slim.window.kycRaces.length === index.races.length && !!slim.window.kycBuildMeta.signature);
+      check("nor the profiles' words the search reads, before a query is typed",
+        servedWords(slim).length === 0 && !slim.window.KYC.wordsHeld() &&
+          slim.window.legislatorsData.every((p) => !("platforms" in p) && !("education" in p)),
+        servedWords(slim).join(" "));
     });
     const routes = ["#/", "#/?sort=name", "#/?sort=age-desc", "#/?sort=age-asc", "#/?sort=senate26",
       "#/?sort=close-kalshi", "#/?sort=close-polymarket", "#/?view=race", "#/?view=senate",
@@ -15251,12 +15268,47 @@ async function testPeopleSplit() {
       "#/?role=candidate", "#/?role=member&state=TX", "#/?election=senateUp26", "#/?election=notSeeking",
       "#/?election=unchallenged", "#/?state=CA&view=race", "#/?q=nurse", "#/?q=veteran",
       "#/?q=speaker", "#/?q=pelo", "#/?q=texas", "#/?q=j.d.", "#/?q=warren", "#/?q=vance",
-      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show"];
+      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show", "#/?q=harvard",
+      "#/?q=abortion&view=race", "#/?q=appropriations&view=senate", "#/?q=TX-3", "#/?q=farmer&role=candidate"];
     const ids = ["results", "resultsLabel", "officialResults", "activeFilters", "findrep", "noResults"];
     const compared = await sameOnBoth(full, slim, routes, ids, 200);
     suite("index.html — every view the same from the index as from everyone's whole records", () => {
       compared.forEach((c) => check(`${c.route} draws the same`, c.same && c.size > 200, c.why || c.size));
       check("still no state's file loaded", servedPeople(slim).length === 0, servedPeople(slim).join(" "));
+      check("the profiles' words loaded once, for the first query",
+        servedWords(slim).length === 1 && slim.window.KYC.wordsHeld(), servedWords(slim).join(" "));
+    });
+
+    // Every query finds exactly whom it finds from everyone's whole
+    // records, in the same order, once the words are in: names, careers,
+    // schools, issues, offices held, committees, states and districts
+    // however written (rule 5).
+    const QUERIES = ["pelosi", "pelo", "Mike Rogers", "j.d. vance", "jd vance", "diaz-balart",
+      "Díaz-Balart", "nurse", "farmer", "attorney", "veteran", "teacher", "small business owner",
+      "harvard", "west point", "university of texas", "stanford law", "abortion", "immigration",
+      "border security", "medicare", "climate", "second amendment", "governor", "state senator",
+      "mayor", "city council", "appropriations", "armed services", "pac", "individual",
+      "dw-nominate", "speaker", "Senator Warren", "Rep. Crockett", "kansas", "Kansas", "texas",
+      "IN", "in", "me", "new york", "TX-3", "tx 3", "TX-03", "TX3", "texas 3rd", "ca-12",
+      "AK-AL", "Ohio delegation", "democratic", "republican nurse", "zzqx nobody"];
+    const finds = (w, q) => w.KYC.people().map((p) => [p.id, w.KYC.queryScore(p, q)])
+      .filter((r) => r[1] >= 0).map((r) => r.join(":")).sort().join(",");
+    const snippets = (w, q) => w.KYC.people().map((p) => {
+      const s = w.KYC.queryScore(p, q) === 3 ? w.KYC.searchSnippet(p, q) : null;
+      return s ? p.id + "=" + s.label + ":" + s.text : "";
+    }).filter(Boolean).sort().join("|");
+    suite("index.html — a query finds the same people from the index and its words (rule 94)", () => {
+      QUERIES.forEach((q) => {
+        const a = finds(full.window, q);
+        const b = finds(slim.window, q);
+        check(`"${q}" finds the same people, scored the same`, a === b,
+          a === b ? (a ? a.split(",").length : 0) + " found" : firstDifference(a, b));
+      });
+      const s = QUERIES.filter((q) => snippets(full.window, q) !== snippets(slim.window, q));
+      check("and says where in their words it found each, the same", s.length === 0, s.join(", "));
+      const careers = finds(full.window, "nurse").split(",").filter((r) => /:3$/.test(r)).length;
+      check("a career word finds people by their words alone (the file is read, not skipped)",
+        careers > 0, String(careers));
     });
 
     // A race's money and its ballot side by side are the state's file's:
@@ -15315,6 +15367,54 @@ async function testPeopleSplit() {
     slim.window.KYC.profile.close();
     full.window.close();
     slim.window.close();
+  }
+
+  // While the words load the grid says so, and where they fail it says the
+  // search looked at names, places and offices only: never "No profiles"
+  // for someone their words would have found (rule 19).
+  {
+    const type = (b, q) => {
+      const input = b.D.getElementById("searchInput");
+      input.value = q;
+      input.dispatchEvent(new b.window.Event("search"));
+    };
+    const label = (b) => b.D.getElementById("resultsLabel").textContent;
+    const slim = await buildPage("index.html", { people: "index" });
+    await settle(100);
+    type(slim, "harvard");
+    const reading = label(slim);
+    const readingEmpty = slim.D.getElementById("noResults").hidden;
+    await until(() => slim.window.KYC.wordsHeld() && !/Still reading/.test(label(slim)), 8000);
+    const read = label(slim);
+    const failed = await buildPage("index.html", { people: "index", refuse: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(failed, "harvard");
+    await until(() => /did not load/.test(label(failed)), 8000);
+    const failedLine = label(failed);
+    const failedEmpty = failed.D.getElementById("noResults").hidden;
+    type(failed, "nurse");
+    await until(() => servedWords(failed).length === 2, 8000);
+    suite("index.html — a query while the profiles' words load, and if they fail", () => {
+      check("while they load it says so, never that no profile matches",
+        /Still reading the profiles’ own words/.test(reading) && !/^\s*No profiles/.test(reading) && readingEmpty,
+        reading);
+      check("then it draws whom they match, and the line says nothing more of it",
+        /^Showing/.test(read.trim()) && !/own words/.test(read) &&
+          slim.D.querySelectorAll("#results .card").length > 0, read);
+      check("where they failed, it says the search looked at names, places and offices only",
+        /did not load, so this search looked at names, places and offices only/.test(failedLine) &&
+          !/^\s*No profiles/.test(failedLine) && failedEmpty, failedLine);
+      check("and a new query asks for them again", servedWords(failed).length === 2,
+        servedWords(failed).join(" "));
+      // But the refusal itself, which is the failure this checks.
+      const errors = slim.errors.concat(failed.errors.filter((e) =>
+        !/Could not load script: "https:\/\/kyc\.local\/data\/people\/words\.js/.test(e)));
+      check("no page errors but the refused file", errors.length === 0, errors.join(" | "));
+      check("where they failed, the line reads as a sentence",
+        /^No profile found by name, place or office matching “harvard”\./.test(failedLine.trim()), failedLine);
+    });
+    slim.window.close();
+    failed.window.close();
   }
 
   // The directory of states counts every state's races from the index.

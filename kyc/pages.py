@@ -768,11 +768,18 @@ def states_static(codes):
 # it counts. A state's page lists its statewide questions (rule 95); the
 # directory of states lists none, and does not load them.
 _STATE_MEASURES = "../data/measures.js"
+# A state's page draws its races and its government before the market
+# prices (a slot in each race, kyc-odds.js) and its questions (the plain
+# list it is written with, kyc-state.js), which it loads once drawn: named
+# on demand (rule 76's template), they are 80 KB gzipped of every state's
+# data a phone waited for before the first race. Its government is its own
+# state's part of data/stategov.js (data/stategov/<st>.js).
+_STATE_LATER = ("odds.js", "measures.js")
 _STATE_SCRIPTS = (
     "../data/people/meta.js",
     "../data/people/{people}",
     "../data/odds.js",
-    "../data/stategov.js",
+    "../data/{stategov}",
     _STATE_MEASURES,
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
@@ -784,10 +791,11 @@ _STATE_SCRIPTS = (
     "../assets/kyc-state.js",
 )
 
+# A district page draws its races before their market prices, which it
+# loads once drawn (named on demand: kyc-odds.js fills each race's slot).
 _DISTRICT_SCRIPTS = (
     "../data/people/meta.js",
     "../data/people/{code}.js",
-    "../data/odds.js",
     "../data/districts/{code}.js",
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
@@ -814,10 +822,14 @@ _PROFILE_DIALOG = "assets/kyc-profile.js"
 
 
 def _state_scripts(code=None):
-    """A state page's scripts, or the directory of states' (*code* None)."""
+    """A state page's scripts, or the directory of states' (*code* None),
+    and what it names on demand (paths under data/)."""
     people = f"{code.lower()}.js" if code else "index.js"
-    return tuple(src.replace("{people}", people) for src in _STATE_SCRIPTS
-                 if code or src != _STATE_MEASURES)
+    stategov = f"stategov/{code.lower()}.js" if code else "stategov.js"
+    later = {"../data/" + name for name in _STATE_LATER} if code else {_STATE_MEASURES}
+    return (tuple(src.replace("{people}", people).replace("{stategov}", stategov)
+                  for src in _STATE_SCRIPTS if src not in later),
+            _STATE_LATER if code else ())
 
 
 def _scripts(sources, also=()):
@@ -967,7 +979,7 @@ def render_state(code, host, summary=None, profiles=None, races=None, measures=N
         main=_state_main(state_static(code, info, profiles, races, summary, measures)),
         # Puerto Rico's seat has no 2026 race, and no election that day.
         footer=_state_sources(code, not (code in TERRITORIES and info.get("houseTerm"))),
-        scripts=_scripts(_state_scripts(code)),
+        scripts=_scripts(*_state_scripts(code)),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code))],
     )
 
@@ -989,7 +1001,7 @@ def render_states_index(host, codes=()):
         nav_current="states",
         main=_state_main(states_static(codes)),
         crumbs=[_HOME, (section_name("states"), "states/index.html")],
-        scripts=_scripts(_state_scripts()),
+        scripts=_scripts(*_state_scripts()),
     )
 
 
@@ -1574,7 +1586,7 @@ def render_district_page(code, host, summary=None):
         nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
         main=main,
-        scripts=_scripts(scripts),
+        scripts=_scripts(scripts, ("odds.js",)),
         crumbs=[_HOME, (section_name("states"), "states/index.html"), (name, page_path(code)),
                 (headline, path)],
         # What this page holds is all drawn: say so, and where the same

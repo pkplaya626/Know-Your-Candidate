@@ -444,8 +444,8 @@
     // Until the profiles' words are in, nothing found by name, place or
     // office is not "no profiles": their careers and platforms may hold it.
     var pending = wordsPending();
-    var html = KYC.escapeHtml((pending ? "No profile’s name, place or office matches" +
-        (narrowed() || " these filters") : "No profiles" + (narrowed() || " match these filters")) +
+    var html = KYC.escapeHtml((pending ? "No profile found by name, place or office" +
+        (narrowed() || " with these filters") : "No profiles" + (narrowed() || " match these filters")) +
       (narrowed() && activeFilters() ? " with these filters" : "") + (note ? ". " + note : ".")) +
       wordsNote();
     if (hiddenOut && state.eliminated === "hide" && state.view !== "senate") {

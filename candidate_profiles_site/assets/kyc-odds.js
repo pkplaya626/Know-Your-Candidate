@@ -290,7 +290,57 @@
   }
 
   /** The race's block. *opts.compact* drops the poll table for one line. */
+  /* A state's and a district's pages draw their races before the prices
+   * arrive: data/odds.js is named on demand there (rule 76's template) and
+   * loaded once a race is drawn, and each race's place for its prices is a
+   * slot, filled where the file is in and said where it did not load. The
+   * prices themselves are drawn by render() alone, as everywhere (rule 12),
+   * and the file stays the odds job's alone (rule 41). */
+  var waiting = null;   // null, "loading" or "failed"
+
+  function lazy() {
+    return !global.kycOdds && !!KYC.onDemandSrc && !!KYC.onDemandSrc("odds.js");
+  }
+
+  function slot(race, opts) {
+    want();
+    return '<div class="odds-slot" data-odds-race="' + KYC.escapeAttr(race.id) + '"' +
+      (opts.compact ? " data-odds-compact" : "") + (opts.collapsed ? " data-odds-collapsed" : "") +
+      (waiting === "failed" ? ">" + FAILED_LINE : ">") + "</div>";
+  }
+
+  var FAILED_LINE = '<p class="odds-note odds-failed">The prediction markets and polling ' +
+    "averages this site quotes for its races did not load. Reload the page to try again.</p>";
+
+  function want() {
+    if (waiting === "loading") return;
+    waiting = "loading";
+    KYC.loadData("odds.js", "kycOdds", function (ok) {
+      waiting = ok ? null : "failed";
+      fill();
+    });
+  }
+
+  /** Every slot on the page, filled with its race's prices once they are
+   *  in (or emptied, for a race with none), or told they did not load. */
+  function fill() {
+    var doc = global.document;
+    var byId = {};
+    KYC.races().forEach(function (r) { byId[r.id] = r; });
+    Array.prototype.forEach.call(doc.querySelectorAll(".odds-slot"), function (el) {
+      if (waiting === "failed") { el.innerHTML = FAILED_LINE; return; }
+      var race = byId[el.getAttribute("data-odds-race")];
+      var html = race ? render(race, { compact: el.hasAttribute("data-odds-compact"),
+        collapsed: el.hasAttribute("data-odds-collapsed") }) : "";
+      if (!html) { el.parentNode.removeChild(el); return; }
+      var holder = doc.createElement("div");
+      holder.innerHTML = html;
+      el.parentNode.replaceChild(holder.firstChild, el);
+    });
+  }
+
   function render(race, opts) {
+    if (race && lazy()) return slot(race, opts || {});
     var odds = race && (data().races || {})[race.id];
     if (!odds) return "";
     opts = opts || {};

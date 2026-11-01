@@ -29,6 +29,8 @@ ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
 # Each state's governor and which party holds each chamber (kyc/stategov.py).
 STATEGOV_FILE = os.path.join(DATA_DIR, "stategov.js")
+# The same, one state's part per file, for that state's own page.
+STATEGOV_DIR = os.path.join(DATA_DIR, "stategov")
 # The statewide questions on each jurisdiction's ballot (kyc/ballot_measures.py),
 # for Your ballot and the state pages.
 MEASURES_FILE = os.path.join(DATA_DIR, "measures.js")
@@ -141,9 +143,7 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/people/meta.js",
     "../data/people/{code}.js",
-    "../data/odds.js",
-    "../data/stategov.js",
-    "../data/measures.js",
+    "../data/stategov/{code}.js",
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
@@ -154,11 +154,20 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-state.js",
 )
 
+# A state's page draws its races, government and plain questions first,
+# and loads the market prices and the questions in full once drawn: named
+# on demand, never loaded before the first race (phone plan 3b).
+STATE_PAGE_ON_DEMAND = ("../data/odds.js", "../data/measures.js")
+
 # The directory of states, in the same folder: every state's counts and
-# races, from the index of everyone.
-STATES_INDEX_REQUIREMENTS = tuple(
-    src.replace("{code}", "index") for src in STATE_PAGE_REQUIREMENTS
-    if src != "../data/measures.js")
+# races, from the index of everyone, and every state's government.
+STATES_INDEX_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/people/meta.js",
+    "../data/people/index.js",
+    "../data/odds.js",
+    "../data/stategov.js",
+) + STATE_PAGE_REQUIREMENTS[4:]
 
 
 def people_on_demand(loaded):
@@ -177,7 +186,6 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/people/meta.js",
     "../data/people/{code}.js",
-    "../data/odds.js",
     "../data/districts/{code}.js",
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
@@ -186,6 +194,9 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../assets/kyc-findrep.js",
     "../assets/kyc-districts.js",
 )
+
+# Its races' market prices, loaded once the page is drawn.
+DISTRICT_PAGE_ON_DEMAND = ("../data/odds.js",)
 
 # A state's legislature page: the districts and people, then the map, then
 # the page module that reads both.
@@ -1037,6 +1048,68 @@ def write_stategov(payload, root="."):
     return path, _atomic_write(path, text)
 
 
+def stategov_state_payload(payload, code):
+    """One state's part of the state-government payload, for its own page:
+    its entry (none where the build holds none) and every source the
+    entries cite. A state's page draws its own government and nothing of
+    another state's; the map, the directory of states, the legislatures'
+    directory, the search and Your ballot load the whole file."""
+    states = payload.get("states") or {}
+    return {"states": {code: states[code]} if code in states else {},
+            "sources": payload.get("sources") or {}}
+
+
+def stategov_state_file(code, root="."):
+    """``candidate_profiles_site/data/stategov/tx.js``."""
+    return os.path.join(root, STATEGOV_DIR, f"{code.lower()}.js")
+
+
+def write_stategov_states(payload, root="."):
+    """Emit ``data/stategov/<st>.js`` for every state, D.C. and territory,
+    each only when its signature changed, and remove any other file there.
+    Returns ``[(path, size)]`` for the files written."""
+    os.makedirs(os.path.join(root, STATEGOV_DIR), exist_ok=True)
+    written, expected = [], set()
+    for code in people_codes():
+        part = stategov_state_payload(payload, code)
+        path = stategov_state_file(code, root)
+        expected.add(os.path.basename(path))
+        signature = stategov_signature(part)
+        if read_signature(path=path) == signature:
+            continue
+        text = (
+            _BANNER.format(source="kyc/stategov.py (one state's part of data/stategov.js)",
+                           built=build_timestamp())
+            + f"window.kycStateGov = {_json(part)};\n"
+            + 'window.kycStateGovMeta = {"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    for name in os.listdir(os.path.join(root, STATEGOV_DIR)):
+        if name.endswith(".js") and name not in expected:
+            os.remove(os.path.join(root, STATEGOV_DIR, name))
+    return written
+
+
+def check_stategov_states(payload, root="."):
+    """``[(path, problem)]`` for the per-state files missing, stale or not
+    written by this build."""
+    problems, expected = [], set()
+    for code in people_codes():
+        path = stategov_state_file(code, root)
+        expected.add(os.path.basename(path))
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != stategov_signature(stategov_state_payload(payload, code)):
+            problems.append((path, "stale"))
+    folder = os.path.join(root, STATEGOV_DIR)
+    if os.path.isdir(folder):
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".js") and name not in expected:
+                problems.append((os.path.join(folder, name), "not a file this build writes"))
+    return problems
+
+
 def write_measures(payload, root="."):
     """Emit ``candidate_profiles_site/data/measures.js``: each jurisdiction's
     statewide questions in the page's words (kyc/ballot_measures.py, rule
@@ -1464,6 +1537,10 @@ def check_pages(root="."):
                     code = name[:-len(".html")]
                     checks[f"{os.path.basename(folder)}/{name}"] = tuple(
                         src.replace("{code}", code) for src in required)
+                    later = {STATES_DIR: STATE_PAGE_ON_DEMAND,
+                             DISTRICT_PAGES_DIR: DISTRICT_PAGE_ON_DEMAND}.get(folder)
+                    if later and name != "index.html":
+                        on_demand[f"{os.path.basename(folder)}/{name}"] = later
     # The directory of states counts every state's races: it loads the
     # index of everyone, as the grid does, not a state's file (rule 94).
     if "states/index.html" in checks:
