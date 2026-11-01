@@ -2194,8 +2194,28 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     2nd, 2022: the final round between the two), one runoff footnote per
     candidate (Mississippi's 2018 special, refused unless they name one
     day), and a district listed with no count (North Carolina's 9th,
-    2018, `no-result`, never "withheld"). The strip is the state's file's,
-    not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule 94).
+    2018, `no-result`, never "withheld"). The first full read put counts
+    beside the wrong names, each now refused: a party printed alone is a
+    fusion line only in New York and Connecticut (`FUSION_STATES`) -
+    anywhere else it is a candidate the Clerk did not name, nobody's
+    (Virginia's 2nd in 2020 gave Scott Taylor David Foster's 9,170 votes) -
+    and New Hampshire's "Scatter", Nevada's "None of These Candidates",
+    Maine's "Exhausted Ballot" and Puerto Rico's "Unadjudicated" had been
+    added to the candidate above them; a line naming no one and no party
+    the file prints after a name is an error. The check read less than it
+    could: a House runoff is checked against the runoff's table, never the
+    open primary's; "Election box  winning" with two spaces, a footnote in
+    a name's field and a box ending "{{end}}" are read; a title leading to
+    the national article is not a state's page. Two names with no footnote
+    in a ranked-choice state (Maine's 2nd, 2018) are the final round only
+    where the second compilation's final round has those counts and its
+    first round does not, and the cell says whose reading that is. What
+    the sources disagree on stays withheld: Wikipedia's 99,655 for Ohio's
+    4th runner-up in 2018 (the Clerk's 89,412 adds up), the Clerk's 63,606
+    for Texas's 14th in 2022 (the percentages say 68,606). The strip is the
+    state's file's, not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule
+    94), and its classes are its own: drawn as `seat-strip`, the
+    legislature's seat squares, it set each word on a line of its own.
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own
