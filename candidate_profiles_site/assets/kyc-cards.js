@@ -480,6 +480,20 @@
     unchallenged: function (race) { return !!(race.settled && !race.contested && race.results); },
   };
 
+  /* The head badge's words for a race nobody challenges, on both clocks:
+   * a ballot that held no challenger still held none after Election Day.
+   * The state page's chip read "Uncontested" from that day over heads
+   * that said this, two names for one thing (rule 12; PR #176 review). */
+  var NO_CHALLENGER = "No challenger on the ballot";
+
+  /** A filter's words on a chip: the head badges' own, for the races it
+   *  keeps. */
+  function raceFilterWords(key) {
+    if (key === "open") return "Open seats" + (KYC.recordPhase() ? " in 2026" : "");
+    if (key === "unchallenged") return NO_CHALLENGER;
+    return "All";
+  }
+
   /** How many of *list* each filter keeps, and "all". */
   function raceFilterCounts(list) {
     var out = { all: list.length };
@@ -538,7 +552,7 @@
     } else if (RACE_FILTERS.unchallenged(race)) {
       var gone = res.eliminated + res.withdrawn + res.unlisted;
       badges.push(headBadge("count", "badge-neutral",
-        "No challenger on the ballot" + (gone ? " · " + gone + " out" : ""),
+        NO_CHALLENGER + (gone ? " · " + gone + " out" : ""),
         "The primary has been held. Of those who filed with the FEC, " +
         res.eliminated + " lost, " + res.withdrawn + " withdrew and " +
         res.unlisted + " were not on the primary ballot."));
@@ -1526,6 +1540,7 @@
     contactOf: contactOf,
     raceBadges: raceBadges,
     raceFilters: RACE_FILTERS,
+    raceFilterWords: raceFilterWords,
     raceFilterCounts: raceFilterCounts,
     raceBadgeItems: raceBadgeItems,
     headBadgeHtml: headBadgeHtml,

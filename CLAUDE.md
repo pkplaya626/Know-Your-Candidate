@@ -2599,11 +2599,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     scrolled away a bar under the header holds the same select (a copy of
     the block's, one list) and a way back; it is fixed, so showing it moves
     nothing, it grows the page's scroll-padding by its height so a jump
-    lands below it, and it is not shown on a screen under 500px tall.
+    lands below it, and it is not shown on a screen under 500px tall. The
+    padding is set before a jump scrolls, by where the jump will leave the
+    block (`barForJump`), never only once the observer sees the block go:
+    its review found every jump made from the block or by a link (the
+    select, a square, the lookup's answer, a `#race-` address) landing at
+    the header's padding, and the bar shown a moment later over the top of
+    the race; a jump back to the block takes the padding off first.
     Chips over the rows pick out open seats and races with no challenger
-    on the ballot ("Uncontested" from the day after Election Day), counted
-    by the race heads' own tests (`KYC.cards.raceFilters`, which the
-    grid's chip uses too), with a live "Showing N of M races" line; the
+    on the ballot, in the race heads' own words on both clocks
+    (`KYC.cards.raceFilterWords`: "Uncontested" over heads saying "No
+    challenger on the ballot" was two names for one thing), counted by the
+    heads' own tests (`KYC.cards.raceFilters`, which the grid's chip uses
+    too), with a live "Showing N of M races" line, and the button below it
+    opens and counts the races shown ("Open these 4 races", never "Open all
+    52" under "Showing 4 of 52"); the
     filter is in the address (`#/?races=open`), a jump to a race it leaves
     out shows every race again, and a search never brings one back. And a
     redrawn state's district page shows one plan at a time below 1000px,
@@ -2613,7 +2623,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     begins about 550px down, with Find my district and the picker above
     it, the key and the zoom chips under it, and the moves folded below.
     `testDistrictsPhonePlans` numbers every district of each plan, shown in
-    turn, at 280px (rule 43).
+    turn, at 280px, on every redrawn state the district files hold (rule
+    43).
 100. **A legislator's portrait is the legislature's, named beside them,
     and a seat's file is dated before it is believed.** 1,022 of 7,323
     state legislators had no portrait (audit 2026-10-17, STATEGOV-13;

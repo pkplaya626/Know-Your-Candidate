@@ -15959,8 +15959,19 @@ async function testDistrictsPhonePlans() {
     check("zoom chips for its insets", card.querySelectorAll(".inset-zoom [data-zoom]").length ===
       ny.window.kycDistricts.NY.insets.length);
   });
-  // The rule 43 check at the phone's own narrowest width: each plan in turn.
-  for (const code of ["TX", "CA", "NC", "FL"]) {
+  // The rule 43 check at the phone's own narrowest width: each plan in turn,
+  // on every redrawn state - every district file holding two plans - not a
+  // sample of them (PR #176 review: AL, LA, OH, TN and UT were left out).
+  const redrawn = fs.readdirSync(path.join(SITE, "data", "districts")).filter((f) => /^[a-z]{2}\.js$/.test(f)).map((f) => {
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "districts", f), "utf8"), sandbox);
+    return sandbox.window.kycDistricts || {};
+  }).flatMap((maps) => Object.keys(maps).filter((code) => (maps[code].plans || []).length === 2));
+  suite("the redrawn states, read from the district files", () => {
+    check("several, Texas and California among them", redrawn.length >= 4 && redrawn.includes("TX") && redrawn.includes("CA"),
+      redrawn.join(","));
+  });
+  for (const code of redrawn) {
     const page = await buildPage("districts/" + code.toLowerCase() + ".html", { setup: both(280) });
     const state = page.window.kycDistricts[code];
     suite(`districts/${code.toLowerCase()}.html on a phone at 280px — every district numbered on each plan`, () => {
@@ -16014,6 +16025,22 @@ async function testJumpBar() {
       check("its select offers exactly the block's places, in the same order",
         copy.length > 50 && copy.join("|") === block.join("|"), copy.length + " against " + block.length);
       check("and is named for what it does", D.getElementById("raceJumpBar").getAttribute("aria-label") === "Jump to a race or section");
+      // A jump from the block itself, the bar still hidden: the padding the
+      // bar needs is on before the scroll, or the bar the observer shows a
+      // moment later covers the race the jump landed on (PR #176 review).
+      const landed = [];
+      const own = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () {
+        landed.push({ id: this.id, padded: root.classList.contains("has-jumpbar"), bar: !bar.hidden });
+      };
+      const blockSelect = D.getElementById("raceJumpSelect");
+      const pick = [...blockSelect.options].filter((o) => /^race-H-CA-32/.test(o.value))[0].value;
+      blockSelect.value = pick;
+      blockSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+      window.Element.prototype.scrollIntoView = own;
+      const first = landed.filter((j) => j.id === pick)[0];
+      check("a pick from the block, the bar hidden, turns the bar and its padding on before it scrolls",
+        !!first && first.padded && first.bar, JSON.stringify(landed));
       watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
       check("once the block has scrolled away under the header, the bar shows and the page's scroll padding grows",
         !bar.hidden && root.classList.contains("has-jumpbar"));
@@ -16034,16 +16061,43 @@ async function testJumpBar() {
         jumps.join(","));
       check("and the bar's select goes back to its first option", select.value === "");
       jumps.length = 0;
+      let backPadded = null;
+      window.Element.prototype.scrollIntoView = function () {
+        jumps.push(this.id || this.className);
+        if (this.id === "find-race") backPadded = root.classList.contains("has-jumpbar") || !bar.hidden;
+      };
       D.querySelector("[data-jump-find]").click();
       window.Element.prototype.scrollIntoView = real;
       check("its button goes back to Find your race and puts the reader on its select",
         jumps.indexOf("find-race") !== -1 && D.activeElement === D.getElementById("raceJumpSelect"), jumps.join(","));
+      check("with the bar and its padding gone before it scrolls, so the block lands under the header alone",
+        backPadded === false);
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
       turn(window, false);
       check("a desktop never shows it, past the block or not", bar.hidden && !root.classList.contains("has-jumpbar"));
       turn(window, true);
       check("turned back to a phone past the block, it shows again", !bar.hidden);
       watch.fire({ isIntersecting: true, boundingClientRect: { top: 200, bottom: 800 } });
       check("and hides, its padding with it, when the block comes back", bar.hidden && !root.classList.contains("has-jumpbar"));
+    });
+  }
+  // A race reached by its address (a shared race's page, Your ballot, a
+  // district page) lands below the bar the observer will show.
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const landed = [];
+    const phone = phoneOfHeight(844);
+    const linked = await buildPage("states/ca.html", { now, hash: "#race-H-CA-32-2026", setup: (w) => {
+      phone(w);
+      w.Element.prototype.scrollIntoView = function () {
+        landed.push({ id: this.id, padded: w.document.documentElement.classList.contains("has-jumpbar") });
+      };
+    } });
+    suite(`states/ca.html#race-H-CA-32-2026 on a phone ${when} — a linked race lands below the bar`, () => {
+      check("no page errors", linked.errors.length === 0, linked.errors.join(" | "));
+      const jumps = landed.filter((j) => j.id === "race-H-CA-32-2026");
+      check("every jump to it is made with the bar's padding on", jumps.length > 0 && jumps.every((j) => j.padded),
+        JSON.stringify(landed.slice(0, 6)));
+      check("and the bar shows", !linked.D.querySelector(".jumpbar").hidden);
     });
   }
   const short = await buildPage("states/ca.html", { setup: phoneOfHeight(420) });
@@ -16094,9 +16148,11 @@ async function testRaceFilters() {
       const past = when === "after Election Day";
       const words = [].concat(...PAGES.map((st) => [...built[st].D.querySelectorAll(".race-filters [data-race-filter]")]
         .map((c) => c.firstChild.textContent.trim())));
-      check(past ? "after Election Day the no-challenger chip reads Uncontested" : "the no-challenger chip is the head badge's words",
-        words.indexOf(past ? "Uncontested" : "No challenger on the ballot") !== -1 &&
-          words.indexOf(past ? "No challenger on the ballot" : "Uncontested") === -1, [...new Set(words)].join(" | "));
+      // One name for one thing, on both clocks: the chip is the heads' words
+      // (KYC.cards.raceFilterWords), never "Uncontested" over heads saying
+      // "No challenger on the ballot" (rule 12; PR #176 review).
+      check(`the no-challenger chip is the head badge's words${past ? ", after Election Day too" : ""}`,
+        words.indexOf("No challenger on the ballot") !== -1 && words.indexOf("Uncontested") === -1, [...new Set(words)].join(" | "));
     });
 
     const { window, D } = built.ca;
@@ -16115,6 +16171,16 @@ async function testRaceFilters() {
         status.getAttribute("aria-live") === "polite", status.textContent);
       check("with Show all beside it", !D.querySelector(".race-filter-all").hidden);
       check("the filter is in the address", /#\/\?races=open$/.test(window.location.href), window.location.href);
+      // The button below the line counts what the line counts, and opens
+      // only those (rule 73; PR #176 review: "Open all 52 races").
+      const openAll = D.querySelector("[data-race-open-all]");
+      const these = want.length === 1 ? "Open this race" : `Open these ${want.length} races`;
+      check("Open all counts the races shown", openAll.textContent === these, openAll.textContent);
+      openAll.click();
+      check("and opens those alone", want.every((s) => s.classList.contains("is-open")) &&
+        sections.filter((s) => want.indexOf(s) === -1).every((s) => !s.classList.contains("is-open")));
+      check("then offers to fold them", openAll.textContent === these.replace(/^Open/, "Fold"), openAll.textContent);
+      openAll.click();
       // A search inside the filter keeps the filter.
       const outsider = sections.filter((s) => want.indexOf(s) === -1)[0];
       const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;

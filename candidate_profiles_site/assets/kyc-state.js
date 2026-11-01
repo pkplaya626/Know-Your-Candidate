@@ -229,6 +229,23 @@
     }
   }
 
+  /** Before a jump to *target*: show the bar, and its padding, if the
+   *  jump will leave "Find your race" above the screen, and hide it if
+   *  not. Set only once the observer saw the block go, the padding came a
+   *  moment after every jump made from the block or by a link - its
+   *  select, a square, the lookup's answer, a #race- address - and the bar
+   *  then covered the top of the race the jump had landed on (PR #176
+   *  review). The observer still has the last word as the page moves. */
+  function barForJump(target) {
+    if (!jumpBar || !target) return;
+    var block = el("find-race");
+    if (!block || block.hidden) return;
+    // 4: DOCUMENT_POSITION_FOLLOWING - the target comes after the block.
+    jumpBar.past = target !== block && !block.contains(target) &&
+      !!(block.compareDocumentPosition(target) & 4);
+    showJumpBar();
+  }
+
   function raceSections() {
     return Array.prototype.slice.call(doc.querySelectorAll("#stateContent section.race-foldable"));
   }
@@ -296,13 +313,23 @@
     openAllWords();
   }
 
+  /** The races the button opens and folds: those shown. Under a filter or
+   *  a search it said "Open all 52 races" below "Showing 4 of 52 races",
+   *  and opened the 48 hidden ones too (rule 73; PR #176 review). */
+  function shownSections() {
+    return raceSections().filter(function (s) { return !s.hidden; });
+  }
+
   function openAllWords() {
     var button = doc.querySelector("[data-race-open-all]");
     if (!button || !fold) return;
-    var sections = raceSections();
+    var sections = shownSections();
+    var every = sections.length === raceSections().length;
     var all = sections.length && sections.every(function (s) { return !!fold.opened[s.getAttribute("data-race")]; });
-    button.textContent = all ? "Fold all " + sections.length + " races" : "Open all " + sections.length + " races";
+    var what = sections.length === 1 ? "this race" : (every ? "all " : "these ") + plural(sections.length, "race");
+    button.textContent = (all ? "Fold " : "Open ") + what;
     button.setAttribute("aria-pressed", String(!!all));
+    button.hidden = !sections.length;
   }
 
   /** Bring *id* into view - a race opened first where the page folds -
@@ -320,6 +347,7 @@
     // render on the way past (content-visibility), so a phone's jump to
     // CA-40 stopped 850px short, below the screen (PR #126 review). The
     // address's own #race- link was always instant and always landed.
+    barForJump(target);
     if (target.scrollIntoView) target.scrollIntoView({ block: "start", behavior: "auto" });
     var focus = section && fold && fold.phone ? section.querySelector(".race-row") : target;
     if (focus.focus) {
@@ -403,13 +431,10 @@
    * (#/?races=open), so a shared link shows the same rows. */
   var raceFilter = "all";
 
-  /** A chip's words: the head badge's own words for the races it keeps,
-   *  in the past from the day after Election Day (rule 63). */
+  /** A chip's words: the head badge's own words for the races it keeps
+   *  (KYC.cards.raceFilterWords, one helper, rule 12). */
   function filterWords(key) {
-    var past = KYC.electionStatus(2026).phase === "post-election" || KYC.recordPhase();
-    if (key === "open") return "Open seats" + (KYC.recordPhase() ? " in 2026" : "");
-    if (key === "unchallenged") return past ? "Uncontested" : "No challenger on the ballot";
-    return "All";
+    return cards.raceFilterWords(key);
   }
 
   function raceFilterBar(list) {
@@ -459,6 +484,7 @@
     if (status.textContent !== words) status.textContent = words;
     var all = doc.querySelector(".race-filter-all");
     if (all) all.hidden = !on;
+    openAllWords();
   }
 
   /* A non-voting member's title, as summary.py gives it: Puerto Rico's
@@ -842,6 +868,7 @@
     if (race && fold && fold.phone && !filterPasses(race)) setRaceFilter("all", true);
     if (race && fold && fold.phone) setOpen(race, true, "reader");
     var jump = function () {
+      barForJump(section);
       if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
     };
     jump();
@@ -1013,6 +1040,7 @@
         var closing = close.closest("section.race-foldable");
         setOpen(closing, false);
         // At once, as every jump on this page is (goTo).
+        barForJump(closing);
         if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: "auto" });
         closing.querySelector(".race-row").focus({ preventScroll: true });
         return;
@@ -1035,7 +1063,7 @@
         return;
       }
       if (event.target.closest("[data-race-open-all]")) {
-        var sections = raceSections();
+        var sections = shownSections();
         var all = sections.every(function (s) { return !!fold.opened[s.getAttribute("data-race")]; });
         sections.forEach(function (s) { setOpen(s, !all, "reader"); });
         return;
