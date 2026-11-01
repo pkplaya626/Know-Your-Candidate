@@ -44877,10 +44877,10 @@
   {
    "candidate_id": "H6NJ07300",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "12245.81",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "10069.80",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-05-01",
-   "disbursements": 44216.19,
+   "disbursements": 58842.2,
    "district_number": 7,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -44889,7 +44889,7 @@
    "office": "H",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 56462.0,
+   "receipts": 68912.0,
    "state": "NJ"
   },
   {
@@ -51521,7 +51521,7 @@
    "candidate_status": "C",
    "cash_on_hand_end_period": "5412.46",
    "coverage_end_date": "2026-10-14",
-   "coverage_start_date": "2026-04-01",
+   "coverage_start_date": "2026-03-10",
    "disbursements": 11616.21,
    "district_number": 1,
    "has_raised_funds": true,
@@ -62805,10 +62805,10 @@
   {
    "candidate_id": "H6VA07312",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "12245.81",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "10069.80",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-05-01",
-   "disbursements": 44216.19,
+   "disbursements": 58842.2,
    "district_number": 7,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -62817,7 +62817,7 @@
    "office": "H",
    "party": "IND",
    "party_full": "INDEPENDENT",
-   "receipts": 56462.0,
+   "receipts": 68912.0,
    "state": "VA"
   },
   {
