@@ -917,8 +917,10 @@ def check_results(profiles, races):
         # candidates whom the page's November table left out).
         if won or summary.get("otherRunoff") or any(
                 p.get("raceStatus") == "runoff" for p in people):
-            waiting = sorted(p["name"] for p in people
-                             if p.get("raceStatus") in ("nominee", "qualified"))
+            # A name the results hold with no profile counts as much.
+            waiting = sorted({p["name"] for p in people
+                              if p.get("raceStatus") in ("nominee", "qualified")} |
+                             set(summary.get("otherNominees") or ()))
             if waiting:
                 beside.append(f"{race['id']}: " + ", ".join(waiting))
         for pid in race["incumbentIds"]:

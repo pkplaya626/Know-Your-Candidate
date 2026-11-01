@@ -458,6 +458,37 @@ class TestOverlay(unittest.TestCase):
         self.assertEqual(summary["otherNominees"], ["Chad Humphrey"])   # still on that ballot
         self.assertEqual(summary["otherElected"], [])
 
+    def test_a_ranked_choice_win_over_a_table_short_of_the_list_is_no_result(self):
+        # The review of PR #168: Alaska's at-large November table of
+        # 2026-11-01 names Begich and Hill and two "TBD" slots; the list
+        # prints four. A mark on Begich read as a majority made Hafner and
+        # McDermott "defeated" by a count that never named them.
+        page = {"page": "x", "status": {"H2AK01083": "elected", "H6AK01092": "defeated"},
+                "party": {}, "unmatched": {}, "ambiguous": [],
+                "decided": {"general": True, "parties": ["all"]}}
+        rows = [row("H2AK01083", "BEGICH, NICHOLAS III", "AK", 0, "REP"),
+                row("H6AK01092", "HILL, BILL", "AK", 0, "IND"),
+                row("H2AK00143", "MCDERMOTT, JIM C", "AK", 0, "LIB"),
+                row("H4AK00164", "ERIC, HAFNER", "AK", 0, "DEM")]
+        listed = spec([("Nick Begich", "Republican", "ballot"),
+                       ("Eric Hafner", "Democrat", "ballot"),
+                       ("Bill Hill", "Nonpartisan", "ballot"),
+                       ('James C. "Jim" McDermott', "Libertarian", "ballot"),
+                       ("Ann Lateleaver", "Nonpartisan", "withdrawn")])
+        race = results.certify_race(dict(page, status=dict(page["status"])), listed, rows,
+                                    ranked_choice=True)
+        self.assertEqual(set(race["status"].values()), {"nominee"})
+        summary = results.race_summary({"races": {"H-AK-00-2026": race}}, "H-AK-00-2026")
+        self.assertEqual((summary["elected"], summary["defeated"]), (0, 0))
+        # A count that names all four stands, and so does a plurality state's.
+        whole = dict(page, status={"H2AK01083": "elected", "H6AK01092": "defeated",
+                                   "H2AK00143": "defeated", "H4AK00164": "defeated"})
+        race = results.certify_race(whole, listed, rows, ranked_choice=True)
+        self.assertEqual(race["status"]["H2AK01083"], "elected")
+        self.assertEqual(race["status"]["H4AK00164"], "defeated")
+        race = results.certify_race(dict(page, status=dict(page["status"])), listed, rows)
+        self.assertEqual(race["status"]["H2AK00143"], "defeated")
+
     def test_a_general_runoff_puts_everyone_else_on_the_list_out(self):
         page = {"page": "x", "status": {"S6TX00100": "runoff", "S6TX00200": "runoff"},
                 "unmatched": {}, "ambiguous": [], "decided": {"general": True, "parties": []}}
