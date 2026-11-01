@@ -347,6 +347,13 @@ def city_problems(fips, state, c, measures, counties):
         out.append(f"{where}: unknown field(s) {', '.join(sorted(extra))} for '{status}'")
     mine = [m for m in measures if m["jurisdiction"].get("kind") == "city"
             and m["jurisdiction"].get("place") == c.get("place")]
+    for m in mine:
+        # Los Angeles's Measure SC amends the City Charter, and the Registrar
+        # lists it under the school district, whose voters decide it: shown
+        # with the city's questions, it must say whose they are.
+        if m["jurisdiction"].get("name") != c.get("name") and not str(m.get("voters") or "").strip():
+            out.append(f"{where}: a question of {m['jurisdiction'].get('name')!r} listed with the "
+                       "city's, and not said who votes on it ('voters')")
     if status == "listed":
         if not mine:
             out.append(f"{where}: 'listed', and none of its questions is listed")

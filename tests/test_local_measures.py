@@ -264,6 +264,19 @@ class TheRules(Hosts, unittest.TestCase):
         found = local_measures.problems(data)
         self.assertTrue(any("48029" in p and "not an official source" in p for p in found), found)
 
+    def test_another_bodys_question_with_the_citys_says_who_votes(self):
+        # Los Angeles's Measure SC amends the City Charter, and the Registrar
+        # lists it under the school district, whose voters decide it.
+        data = cache()
+        data["counties"]["48030"]["measures"].append(measure(
+            jurisdiction={"kind": "city", "name": "Austin Independent School District",
+                          "place": "4805000"}, designation="Proposition B"))
+        found = local_measures.problems(data)
+        self.assertTrue(any("48030 City of Austin" in p and "'voters'" in p for p in found), found)
+        data["counties"]["48030"]["measures"][-1]["voters"] = (
+            "Listed by the Clerk under the school district, whose voters decide it.")
+        self.assertEqual(local_measures.problems(data), [])
+
     def test_an_unused_host_is_reported(self):
         self.assertNotIn("votetravis.gov", local_measures.unused_hosts(cache()))
         self.assertIn("sdvote.com", local_measures.unused_hosts(cache()))

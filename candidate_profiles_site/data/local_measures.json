@@ -179,6 +179,25 @@
      },
      "read": "2026-11-01",
      "notes": "{\"textNote\": \"The ballot question as printed in the Registrar-Recorder/County Clerk's 'Measures Appearing on the Ballot' (Revised 8/14/26).\", \"designationNote\": \"The page's margin prints its letters together, 'EE PRK PRT FD SC L', in the order of the measures on the page.\"}"
+    },
+    {
+     "jurisdiction": {
+      "kind": "city",
+      "name": "Los Angeles Unified School District",
+      "place": "0644000"
+     },
+     "designation": "SC",
+     "title": "CAMPAIGN FINANCE RULES RELATED TO BOARD OF EDUCATION ELECTIONS. CHARTER AMENDMENT_ .",
+     "text": "Shall the Los Angeles City Charter be amended to clarify the campaign finance rules for Board of Education elections and allow for changes by ordinance?",
+     "kind": "charter amendment",
+     "source": {
+      "url": "https://content.lavote.gov/docs/rrcc/documents/measures-appearing-on-the-ballot---november-3-2026-rev-8-14-2026-v-4.pdf",
+      "title": "Measures Appearing on the Ballot, General Election November 3, 2026 (Revised 8/14/26)",
+      "quote": "LOS ANGELES UNIFIED SCHOOL DISTRICT – (1) VOTE PASSAGE – Majority Vote 50%+1 SC CAMPAIGN FINANCE RULES RELATED TO BOARD OF EDUCATION ELECTIONS. CHARTER AMENDMENT_ . Shall the Los Angeles City Charter be amended to clarify the campaign finance rules for Board of Education elections and allow for changes by ordinance?"
+     },
+     "read": "2026-11-01",
+     "voters": "The Registrar-Recorder/County Clerk lists this question under “LOS ANGELES UNIFIED SCHOOL DISTRICT – (1)”, not among the “CITY OF LOS ANGELES – (7)” questions: it is decided by the school district's voters, not the city's. It is shown with the city's questions because it amends the Los Angeles City Charter.",
+     "notes": "{\"textNote\": \"The ballot question as printed in the Registrar-Recorder/County Clerk's 'Measures Appearing on the Ballot' (Revised 8/14/26), page 8.\", \"placement\": \"2026-11-01: the list downloaded again with the project's user agent (HTTP 200, application/pdf, 410,872 bytes, Last-Modified 14 Aug 2026, 14 pages); page 8 rendered and looked at. Under 'LOCAL JURISDICTION MEASURES – (66) Continued' it prints the City of Los Angeles's EE, PRK, PRT and FD under the green band 'CITY OF LOS ANGELES – (7) (Cont.)', then a band of its own, 'LOS ANGELES UNIFIED SCHOOL DISTRICT – (1) VOTE PASSAGE – Majority Vote 50%+1', over SC. The first research dropped SC as a district that does not cover the county; the implementer asked whether it belongs under the City of Los Angeles, whose Charter it amends. It is placed with the city's questions, labelled with the school district's name and the list's own heading, so a reader is told whose question it is (a check now requires 'voters' wherever a question of another body is listed with a city's).\", \"kindWords\": \"CHARTER AMENDMENT_ .\"}"
     }
    ],
    "own": {
