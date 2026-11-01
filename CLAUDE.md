@@ -47,6 +47,7 @@ data/statewide_candidates.json ┤  (who is on the ballot for governor and the s
 data/statewide_photos.json  ──┤   (those candidates' photographs, by the routes rule 91 names: ballotphotos)
 data/guide_photos.json      ──┤   (the election offices' guides' photographs, hosted under photos/: guidephotos)
 data/ballot_measures.json   ──┤   (each jurisdiction's statewide questions, from its own list: hand-edited, kyc/ballot_measures.py)
+data/local_measures.json    ──┤   (the 50 most populous counties' local questions, from their own documents: hand-edited, kyc/local_measures.py)
 data/federal_executive.json ──┤   (President, VP, Cabinet: White House, office pages, Senate votes)
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
@@ -72,6 +73,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/stategov.js   (governors, chamber control, trifectas)
                                              data/measures.js   (the statewide questions: kyc/ballot_measures.py)
+                                             data/localmeasures/*.js (the counties covered, and one state's local questions: kyc/local_measures.py)
                                              data/search.js     (the search's places and bodies: kyc/search_index.py)
                                              data/legislature/*.js (one state legislature per state)
                                              data/local/*.js    (one state's counties and governments)
@@ -119,6 +121,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              assets/kyc-federal.js
                                              assets/kyc-share.js
                                              assets/kyc-findrep.js
+                                             assets/kyc-localmeasures.js
                                              assets/kyc-ballot.js
 ```
 
@@ -133,6 +136,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `census_governments.json`, `state_legislators.json`, `legislator_photos.json`, `executives.json`,
   `partisan_composition.json`, `statewide_officers.json`, `courts.json`, `voting_links.json`, `voting_dates.json`,
   `statewide_candidates.json`, `statewide_photos.json`, `guide_photos.json`, `ballot_measures.json`,
+  `local_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
   `judge_links.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
@@ -2806,6 +2810,54 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     2026-10-25, 18 have one: Bill Hill's statement holds a CMYK JPEG no
     browser draws as printed (rule 24), and the pamphlet pictures no Jason
     Faler.
+
+102. **A local question is the county's or the city's own words, and the
+    page says which counties it speaks for.** Two days before the election
+    every county page and Your ballot said local questions were "not listed
+    here", over ballots that held ten City of Austin propositions, seven City
+    of Los Angeles charter amendments and New York City's five questions. By
+    the owner's decision of 2026-11-01 ("largest places first") they are
+    listed for the 50 most populous counties, by the Census Bureau's Vintage
+    2024 estimates: each county's own questions, those of districts that
+    cover the whole county, and those of its cities of 250,000 people or
+    more. They are a hand-edited cache, `data/local_measures.json`
+    (`kyc/local_measures.py`), researched county by county from the county
+    election office's or the city clerk's own sample ballot or list of
+    measures, or the state election office's list of local questions - never
+    Ballotpedia, news or another compilation, which were leads (rule 50) -
+    and drawn by one implementation on the county pages and Your ballot
+    (`KYC.localMeasures`, rule 12) from one file per state, loaded only where
+    a county's questions are shown (rule 94). Being on .gov is not enough
+    (rule 84): every source is on a host `overrides.LOCAL_MEASURE_SOURCES`
+    names for that county, with its evidence (the .gov registry's row, the
+    Census listing's address, the page that links it), or the state
+    election office's own domain; the five Bay Area registrars' joint notice
+    stands for Contra Costa and Santa Clara only through Alameda's entry,
+    which says so. "None" needs a document's own words (rule 19): a
+    statement or a count of the questions (Clark County's "Number of Ballot
+    Questions: 4 (2 state questions and 2 Boulder City questions)"), a ballot
+    or list that says it holds every contest (Orange County, Florida's "shows
+    ALL contests"), every ballot style read whole, or no county government
+    (Middlesex). A list that merely holds none - Los Angeles County's
+    measures list for Long Beach, the NYC Board's for each borough's own - is
+    `unlisted`: the page says what it lists and that this site does not say
+    there is none; the first research read called four such lists "none" and
+    five others not, on the same kind of document. A county whose office's
+    site no script could read (Broward, Duval, Hillsborough, Maricopa's own,
+    Chicago's Board) is "not found", with why, never "none" and never the
+    news's list. A question whose text is a scan no text could be read from
+    (Oakland's Measures EE and FF) is listed with its title and says so, and
+    a text transcribed from a scan or holding a symbol the file's text layer
+    does not map (Riverside's and San Bernardino's "½¢") says that under it.
+    A summary is said to be the office's printed summary. A city most of
+    which lies in another covered county is drawn from that county's record
+    (`elsewhere`): Dallas's Proposition A under Collin and Denton, New York
+    City's questions under Queens, Manhattan and the Bronx. A question of a
+    district that does not cover the county (LAUSD's Measure SC, which
+    amends the City Charter) is not listed, and every county's block says
+    what is covered, beside the state's own sample ballot for the rest. The
+    page never says what a yes or a no vote does, and is in the past tense
+    from the day after the election, reading no result.
 
 ## District maps
 

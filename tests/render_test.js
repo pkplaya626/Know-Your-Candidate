@@ -300,7 +300,7 @@ async function testMeasures() {
       !/No statewide question/.test(card.textContent),
       card ? card.textContent : "no card");
     check("Your ballot: the order note still names the card",
-      /then a note on statewide questions\./.test(
+      /then a note on statewide questions(, then (a note on )?local questions)?\./.test(
         (caBallotNoData.out.querySelector(".ballot-note") || { textContent: "" }).textContent));
   });
 
@@ -340,7 +340,9 @@ async function testMeasures() {
     check("no page errors", errors.length === 0, errors.join(" | "));
     const cards = [...out.querySelectorAll(".ballot-list > .ballot-contest")];
     const card = out.querySelector(".ballot-contest.ballot-measures");
-    check("one card, last in the list", !!card && cards[cards.length - 1] === card &&
+    // Only the local questions' card follows it (rule 102).
+    const last = cards.filter((c) => !/ballot-local/.test(c.className));
+    check("one card, last in the list but the local questions'", !!card && last[last.length - 1] === card &&
       card.querySelector(".ballot-office").textContent.trim() === "Statewide questions");
     check("the order note names them", /then the statewide questions/.test(out.textContent));
     const items = card ? [...card.querySelectorAll("li.measure")] : [];
@@ -368,7 +370,7 @@ async function testMeasures() {
       !/No statewide question is/.test(card(meBallot).textContent));
     // The order note names every card the list shows (PR #120 review).
     check("the order note names the card even where it says none or not found",
-      [txBallot, meBallot].every((b) => /then a note on statewide questions\./.test(
+      [txBallot, meBallot].every((b) => /then a note on statewide questions(, then (a note on )?local questions)?\./.test(
         (b.out.querySelector(".ballot-note") || { textContent: "" }).textContent)));
     check("after the day, in the past tense, said once", !!card(caBallotAfter) &&
       /questions were on the Nov 3, 2026 ballot/.test(card(caBallotAfter).textContent) &&
@@ -14454,6 +14456,154 @@ async function testCharts() {
   }
 }
 
+/* ======================================================= local questions */
+
+/* The local questions of the most populous counties (rule 102), drawn by one
+ * implementation (KYC.localMeasures) on Your ballot and the county pages.
+ * Each suite asks the record for what it holds, and the constructed states
+ * below make the words for every status, whatever the day's data says. */
+async function testLocalMeasures() {
+  // Austin, in Travis County, which this site covers; El Paso, which it does not.
+  const austin = await ballotFor("#/?zip=78701");
+  const elpaso = await ballotFor("#/?zip=79901");
+  const page = await buildPage("counties/tx.html", { hash: "#/?county=48453" });
+  await settle(50);
+  const wy = await buildPage("counties/wy.html", { hash: "#/?county=56021" });
+  await settle(50);
+  const after = await ballotFor("#/?zip=78701", { now: "2026-11-05T12:00:00" });
+
+  suite("Local questions: Your ballot in a covered county", () => {
+    const { window, out, errors } = austin;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const card = out.querySelector(".ballot-contest.ballot-local");
+    check("a card of local questions, last", !!card &&
+      [...out.querySelectorAll(".ballot-contest")].pop() === card);
+    const rec = window.kycLocalMeasuresTX && window.kycLocalMeasuresTX["48453"];
+    check("its state's file loaded on demand, and no other", !!rec && !window.kycLocalMeasuresCA);
+    const block = card && card.querySelector('.local-county-block[data-county="48453"]');
+    check("Travis County's block, under the county's name", !!block &&
+      /Travis County/.test(block.querySelector(".local-county-name").textContent));
+    const city = rec && rec.cities.find((c) => c.place === "4805000");
+    const shown = block ? [...block.querySelectorAll('.local-city[data-place="4805000"] .measure-name')]
+      .map((n) => n.firstChild.textContent.trim()) : [];
+    check("every City of Austin question the record holds, in its order, under “If you live in the City of Austin”",
+      !!city && city.status === "listed" && /If you live in the City of Austin/.test(block.textContent) &&
+      JSON.stringify(shown) === JSON.stringify(city.measures.map((m) => m.designation || m.title)),
+      shown.join(","));
+    check("each linked to its source document by name", block &&
+      [...block.querySelectorAll(".local-measure .measure-links a")].every((a) =>
+        /^https:\/\//.test(a.getAttribute("href")) && a.textContent.length > 5));
+    check("no yes-or-no in the site's own words", block && /does not say what a yes or a no vote does/.test(block.textContent) &&
+      !/a yes vote (means|would)|a no vote (means|would)/i.test(block.textContent));
+    check("what is covered, said", /50 most populous counties/.test(card.textContent) &&
+      /not listed here/.test(card.textContent));
+    check("the statewide card says the local ones follow, not that they are not listed",
+      /the next card says which of them this site lists/.test(out.querySelector(".ballot-measures").textContent));
+    check("the list's note names the local questions",
+      /then local questions/.test(out.textContent));
+  });
+
+  suite("Local questions: Your ballot in a county not covered", () => {
+    const { out, errors } = elpaso;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const card = out.querySelector(".ballot-contest.ballot-local");
+    check("the card says the county's questions are not listed here, beside the state's own pages",
+      !!card && /is not among the 50 most populous counties/.test(card.textContent) &&
+      /not listed here/.test(card.textContent) && !!card.querySelector("a[href]"));
+    check("drawn as off the ballot, as a statewide card with nothing is", /ballot-off/.test(card.className));
+    check("and the rest of the ballot still says local questions are not listed",
+      /local ballot questions, which this site does not list/.test(out.textContent));
+  });
+
+  suite("Local questions: a county page", () => {
+    const { D, window, errors } = page;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const section = D.getElementById("local-questions");
+    check("the county's panel has its local questions", !!section &&
+      /Local questions, Nov 3, 2026 ballot/.test(section.textContent));
+    const rec = window.kycLocalMeasuresTX["48453"];
+    const n = rec.cities.reduce((s, c) => s + (c.measures || []).length, 0) + (rec.own.measures || []).length;
+    check("every question the record holds", section && section.querySelectorAll(".local-measure").length === n,
+      String(n));
+    check("the same words as Your ballot's block", (() => {
+      const mine = section.querySelector(".local-city").textContent;
+      const theirs = austin.out.querySelector('.local-county-block[data-county="48453"] .local-city').textContent;
+      return mine === theirs;
+    })());
+    const other = wy.D.getElementById("local-questions");
+    check("a county not covered says so, with the way to its state's election pages", !!other &&
+      /is not among the 50 most populous counties/.test(other.textContent) &&
+      !!other.querySelector('a[href$="states/wy.html#voting"]'), other ? other.textContent.slice(0, 200) : "");
+    check("a page of a state with no covered county loads no state file", !wy.window.kycLocalMeasuresWY);
+  });
+
+  suite("Local questions: from the day after Election Day", () => {
+    const { out, errors } = after;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const card = out.querySelector(".ballot-contest.ballot-local");
+    check("in the past tense, reading no result",
+      !!card && /(was|were) on the Nov 3, 2026 ballot/.test(card.textContent) &&
+      !/ (is|are) on the Nov 3, 2026 ballot/.test(card.textContent) &&
+      /does not read the results of ballot questions/.test(card.textContent));
+  });
+
+  suite("Local questions: every status's words, on constructed records", () => {
+    const { window } = austin;
+    const LM = window.KYC.localMeasures;
+    const real = window.kycLocalMeasuresTX;
+    const src = (found, extra) => Object.assign({ from: "list", url: "https://votetravis.gov/x.pdf",
+      title: "A Ballot", found }, extra || {});
+    const make = (own, cities) => ({ "48453": { state: "TX", name: "Travis County", read: "2026-11-01",
+      office: { name: "Travis County Clerk", url: "https://votetravis.gov/" }, own, cities: cities || [] } });
+    const say = (own, cities) => {
+      window.kycLocalMeasuresTX = make(own, cities);
+      const div = window.document.createElement("div");
+      div.innerHTML = LM.countyBody("48453", { level: 4 });
+      return div.textContent;
+    };
+    const none = say({ status: "none", basis: src("prints no question of Travis County",
+      { from: "ballots", words: "shows ALL contests" }) });
+    check("none: said, with the document and its own words",
+      /No question of Travis County or of a district covering the whole county is on the Nov 3, 2026 ballot\./.test(none) &&
+      /A Ballot, read Nov. 1, 2026, prints no question of Travis County\. In its own words: “shows ALL contests”\./.test(none), none);
+    const unlisted = say({ status: "unlisted", basis: src("lists questions of cities only") });
+    check("unlisted: what the document lists, and never “none”",
+      /has not found a question of Travis County/.test(unlisted) && /does not say there is none/.test(unlisted) &&
+      !/No question of Travis County/.test(unlisted), unlisted);
+    const notFound = say({ status: "notFound", why: "Its site could not be read." });
+    check("not found: said, with why and the election office, never “none”",
+      /has not found an official list of the questions of Travis County/.test(notFound) &&
+      /does not say there are none\. Its site could not be read\./.test(notFound) &&
+      /Travis County Clerk/.test(notFound), notFound);
+    const partial = say({ status: "listed", partial: "Other questions may be missing.", measures: [{
+      j: "Travis County", jk: "county", designation: null, title: "Parks Bonds", kind: "Bond",
+      source: "https://votetravis.gov/x.pdf", sourceTitle: "A Ballot", read: "2026-11-01",
+      summary: true, text: "A summary of the bonds." }] });
+    check("a question with no designation is headed by its title; a summary is said to be one; what may be missing is said",
+      /One question of Travis County or of a district covering the whole county is on the Nov 3, 2026 ballot/.test(partial) &&
+      /Parks Bonds/.test(partial) && /The office’s printed summary, not the ballot’s own words/.test(partial) &&
+      /Other questions may be missing\./.test(partial), partial);
+    const missing = say({ status: "listed", measures: [{ j: "Travis County", jk: "county", designation: "Measure EE",
+      title: null, kind: null, source: "https://votetravis.gov/x.pdf", sourceTitle: "A Ballot", read: "2026-11-01",
+      missing: "A scan this site could not read." }] });
+    check("a text not read says why, and a kind not recorded says so",
+      /A scan this site could not read\./.test(missing) && /Kind not recorded here/.test(missing), missing);
+    const elsewhere = say({ status: "unlisted", basis: src("lists none") }, [{ name: "City of Austin", place: "4805000",
+      status: "listed", from: { fips: "48113", name: "Dallas County", office: "Dallas County Elections" },
+      measures: [{ j: "City of Austin", jk: "city", designation: "Proposition A", title: null, kind: "Bond",
+        source: "https://votetravis.gov/x.pdf", sourceTitle: "A Ballot", read: "2026-11-01", text: "Bonds?" }] }]);
+    check("a city listed under another county says which office lists it",
+      /The Dallas County Elections lists the City of Austin's questions; most of the city is in Dallas County\./.test(elsewhere),
+      elsewhere);
+    window.kycLocalMeasuresTX = undefined;
+    const failed = (() => { const d = window.document.createElement("div");
+      d.innerHTML = LM.countyBody("48453", { level: 4 }); return d.textContent; })();
+    check("a state file that did not load is said, never drawn as no questions",
+      /did not load/.test(failed) && !/No question/.test(failed), failed);
+    window.kycLocalMeasuresTX = real;
+  });
+}
+
 /* ============================================================ Your ballot */
 
 /* ballot.html (kyc-ballot.js, rule 92): every contest on one reader's
@@ -14504,8 +14654,8 @@ async function testBallot() {
     check("the caveat, and the way to an exact answer: the reader's location",
       /crosses district lines/.test(tx.text) &&
       !!out.querySelector(".ballot-state [data-ballot-locate]"));
-    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature|measures)/)[1]);
-    const rank = { federal: 0, statewide: 1, legislature: 2, measures: 3 };
+    const order = cards.map((c) => c.li.className.match(/ballot-(federal|statewide|legislature|measures|local)/)[1]);
+    const rank = { federal: 0, statewide: 1, legislature: 2, measures: 3, local: 4 };
     check("in ballot order: Congress, statewide offices, the legislature, the questions",
       order.every((k, i) => !i || rank[order[i - 1]] <= rank[k]) && order[0] === "federal" &&
       order.indexOf("statewide") !== -1 && order.indexOf("legislature") !== -1, order.join(","));
@@ -16498,6 +16648,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "findrep") await testFindRep();
   if (!only || only === "ballot" || only === "findrep") await testBallot();
   if (!only || only === "ballot" || only === "states") await testMeasures();
+  if (!only || only === "ballot" || only === "counties") await testLocalMeasures();
   if (!only || only === "findrep") await testFindRepNav();
   if (!only || only === "index.html") await testContactActions();
   if (!only || only === "index.html") await testPayLine();
