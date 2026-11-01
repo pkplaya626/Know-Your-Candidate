@@ -2694,14 +2694,21 @@ date both share. A judge is joined only through the FJC's judge id
 (`jid`, given beside the `nid` on the FJC's own judges file) that
 CourtListener's person record carries, never by name; the record must
 carry the directory's surname (a compound's other half and accents aside)
-and, where both give one, the same year of birth, or nothing is linked and
-the run reports it (`judge-disclosures-refused`). An id two records carry,
-or an alias's, joins no one.
+and, where both give one, the same year of birth - where either gives none,
+its first given name (or that name's initial) must be one of the
+directory's - or nothing is linked and the run reports it
+(`judge-disclosures-refused`). An id two records carry, or an alias's,
+joins no one. CourtListener keeps duplicate records: Judge Graber's
+reports are under one that carries no FJC id, while the one that carries
+it holds none. So a joined record with no reports is said to be just that,
+and linked for a reader to look, never "CourtListener lists no reports for
+this judge"; the duplicate is never joined by its name.
 
 | Field (on the judge) | Meaning |
 | --- | --- |
 | `disclosures.url` | CourtListener's page for the judge, at its "Financial Disclosures" section |
-| `disclosures.reports` | How many reports CourtListener holds; `0` reads "CourtListener lists no reports", never "none filed" |
+| `disclosures.reports` | How many reports the joined CourtListener record holds; `0` reads that the record carrying the FJC id lists none, never that CourtListener holds none or that none was filed |
+| `disclosures.record` | Only where `reports` is `0`: that record's own page, linked as "CourtListener record" |
 | `disclosures.first`, `disclosures.last` | The first and last years those reports cover |
 
 A judge no CourtListener record carries has no `disclosures`, and the

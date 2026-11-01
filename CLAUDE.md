@@ -1729,14 +1729,20 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     CourtListener record carrying the FJC's judge id (`jid`), from its
     public bulk files (its API needs an account), refused where its surname
     or year of birth disagrees with the directory's (Chatigny's 1952, Owen
-    for Richman); one it holds none for reads "CourtListener lists no
-    reports", never "none filed", with the years it does hold, since most
-    end in 2020. And where the directory lists a court's chief on senior
-    status too, the court's own site's word is read by a recipe
-    (`kyc/court_chiefs.py`, FEDERAL-17: one chief at most, a judge the
-    directory lists there by surname and given name, dated, warned stale)
-    and shown beside the directory's record, attributed, never in its
-    place. A justice's portrait is the Court's
+    for Richman), or, with no year to compare, its first given name. A
+    judge's link says the years it holds, since most end in 2020. Where the
+    joined record holds none, the dialog says exactly that of the record
+    carrying the FJC id and links it, never "CourtListener lists no reports
+    for this judge": its review found Judge Graber's fifteen reports, and
+    Judge Willett's three, filed under duplicate records carrying no FJC id,
+    which are never joined by name. And where the directory lists a court's
+    chief on senior status too, the court's own site's word is read by a
+    recipe (`kyc/court_chiefs.py`, FEDERAL-17: one chief at most, one named
+    in two headings being one, a judge the directory lists there by surname
+    and given name, dated, warned stale; a page in a shape the recipe does
+    not know keeps the last read) and shown beside the directory's record,
+    attributed, never in its place - on the hub, the court's page and the
+    judge's own dialog. A justice's portrait is the Court's
     official one as Commons holds it, credited to its photographer
     (`overrides.JUSTICE_PORTRAITS`, the owner's decision of 2026-10-20):
     the Court's photographs page asks for approval before publication, and

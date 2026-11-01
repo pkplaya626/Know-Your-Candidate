@@ -116,7 +116,8 @@ def _judge(record, links=None, disclosures=None):
     if joined.get("linkVia") and (out.get("wikipedia") or out.get("wikidata")):
         out["linkVia"] = joined["linkVia"]
     # Their financial disclosure reports, as CourtListener holds them: a
-    # link where it holds any, "lists no reports" where it holds none, and
+    # link where it holds any, the record itself where the one carrying
+    # their FJC id holds none (its words about that record alone), and
     # nothing where no CourtListener record carries their FJC id.
     from . import judge_disclosures
     held = judge_disclosures.for_judge(disclosures, record["id"].replace("fjc-", ""))

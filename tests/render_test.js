@@ -12465,7 +12465,7 @@ async function testFederal() {
 /** FEDERAL-17 and FEDERAL-05, on states the test makes (the Conventions):
  *  a court whose directory record cannot say who is chief, with and
  *  without the court's own site's word beside it; and a judge whose
- *  disclosures CourtListener holds, one it lists none for, and one it has
+ *  disclosures CourtListener holds, one whose joined record lists none, and one it has
  *  no record of - on the campaign clock and after Election Day. */
 async function testCourtChiefsAndDisclosures() {
   const probe = await buildPage("federal/index.html");

@@ -214,9 +214,9 @@ def given_agrees(judge, person):
 
 def join(judges, jids, people, twice, reports):
     """``({nid: entry}, refused)``. An entry is ``{"person", "slug",
-    "reports", "first", "last"}`` (``reports`` 0 and no years for a judge
-    CourtListener lists none for); a judge no person record carries is not
-    an entry."""
+    "reports", "first", "last"}`` (``reports`` 0 and no years where the
+    joined record lists none); a judge no person record carries is not an
+    entry."""
     out, refused = {}, []
     for key, judge in sorted(judges.items()):
         nid = key.replace("fjc-", "")
