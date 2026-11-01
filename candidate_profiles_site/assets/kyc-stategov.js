@@ -843,7 +843,7 @@
   function photoSources(s) {
     var gov = s.governor || {};
     var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage,
-      gov.headshot && KYC.copyOf(gov.headshot, gov.photoCopy)]];
+      gov.headshot && KYC.copyOf(gov.headshot, gov.photoCopy), gov.headshot]];
     [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
       .forEach(function (pair) {
         var off = pair[1] || {};
@@ -852,23 +852,56 @@
         var drawn = off.photo && !(off.disputed || off.unlisted || off.unconfirmed ||
           off.vacant || off.none || off.notMember);
         rows.push([pair[0], drawn && off.photoBy, off.photoPage,
-          drawn && KYC.copyOf(off.photo, off.photoCopy)]);
+          drawn && KYC.copyOf(off.photo, off.photoCopy), off.photo]);
       });
     // A smaller copy this site made of a heavy one says so, and links the
     // original (rule 101), as the credit line under a portrait does; the
     // note goes if the copy fails and the original is drawn
     // (KYC.retryOriginal removes every note naming that original).
+    // Each clause names the photograph it credits, by the address its <img>
+    // falls back to (KYC.photoHref of the original), so a photograph that
+    // fails for good takes its credit with it (dropPhotoCredit, rule 87).
     var said = rows.filter(function (row) { return row[1]; }).map(function (row) {
       var copy = row[3];
-      return KYC.escapeHtml(row[0].toLowerCase()) + ", " +
+      return '<span class="gov-photo-source" data-credits="' + KYC.escapeAttr(KYC.photoHref(row[4])) +
+        '">' + KYC.escapeHtml(row[0].toLowerCase()) + ", " +
         (row[2] ? link(row[2], row[1]) : KYC.escapeHtml(row[1])) +
         (copy ? '<span class="photo-copy-note" data-copy-of="' + KYC.escapeAttr(copy.of) +
           '"> (a smaller copy made by this site of ' +
           link(copy.of, "the original file" +
             (copy.ofBytes ? " (" + KYC.weightWords(copy.ofBytes) + ")" : "")) + ")</span>"
-          : "");
+          : "") + "</span>";
     });
-    return said.length ? " Photographs: " + said.join("; ") + "." : "";
+    return said.length ? '<span class="gov-photo-sources">' + PHOTOGRAPHS + said.join("; ") + ".</span>" : "";
+  }
+
+  /* The words that open the list of photographs' credits. */
+  var PHOTOGRAPHS = " Photographs: ";
+
+  /** A photograph at *address* (as its <img> loads it) that failed for good
+   *  takes its credit out of every list of sources naming it, as a credit
+   *  under a portrait goes with it (rule 87): the clauses left keep their
+   *  "; " and the final ".", and a list with none left goes, "Photographs:"
+   *  with it. One helper for the governor's portrait and every officer's
+   *  photograph (rule 12). */
+  function dropPhotoCredit(address) {
+    if (!address) return;
+    Array.prototype.forEach.call(global.document.querySelectorAll(".gov-photo-sources"), function (list) {
+      var clauses = Array.prototype.slice.call(list.querySelectorAll(".gov-photo-source"));
+      var left = clauses.filter(function (c) { return c.getAttribute("data-credits") !== address; });
+      if (left.length === clauses.length) return;
+      if (!left.length) {
+        list.remove();
+        return;
+      }
+      while (list.firstChild) list.removeChild(list.firstChild);
+      list.appendChild(global.document.createTextNode(PHOTOGRAPHS));
+      left.forEach(function (clause, i) {
+        if (i) list.appendChild(global.document.createTextNode("; "));
+        list.appendChild(clause);
+      });
+      list.appendChild(global.document.createTextNode("."));
+    });
   }
 
   /** A court's line in the list of sources: whose roster, and the day it
@@ -892,7 +925,9 @@
     // A copy that fails falls back to its original first (rule 101).
     if (img && img.tagName === "IMG" && KYC.retryOriginal(img, event)) return;
     if (img && img.classList && img.classList.contains("gov-officer-photo")) {
-      // The row keeps its column, as a holder never pictured does.
+      // The row keeps its column, as a holder never pictured does, and the
+      // list of sources stops crediting a photograph not shown (rule 87).
+      dropPhotoCredit(img.getAttribute("src"));
       var holder = global.document.createElement("span");
       holder.className = "gov-officer-photo gov-officer-nophoto";
       holder.setAttribute("aria-hidden", "true");
@@ -907,6 +942,7 @@
       if (credit) credit.remove();
       img.replaceWith(none);
     } else if (img && img.classList && img.classList.contains("gov-portrait")) {
+      dropPhotoCredit(img.getAttribute("src"));
       img.remove();
     }
   }, true);

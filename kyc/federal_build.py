@@ -66,6 +66,51 @@ def _holder(office):
     }
 
 
+def photo_urls(person):
+    """Every address of *person*'s photograph: the file and each size of it
+    in its ``photoSet`` (``[url, width]``)."""
+    person = person or {}
+    urls = [person.get("photo")]
+    for size in person.get("photoSet") or ():
+        urls += [part for part in (size if isinstance(size, (list, tuple)) else (size,))
+                 if isinstance(part, str)]
+    return [u for u in urls if u]
+
+
+def photo_addresses(executive):
+    """Every address of a photograph the federal cache holds - the
+    President's, the Vice President's and each Cabinet holder's - for
+    validate's ``NOT_A_PORTRAIT`` staleness check: an entry refusing one of
+    them guards a file this route offers."""
+    executive = executive or {}
+    people = [executive.get("president"), executive.get("vicePresident")] + [
+        o.get("holder") for o in executive.get("offices") or () if isinstance(o, dict)]
+    return {u for person in people if isinstance(person, dict) for u in photo_urls(person)}
+
+
+def withhold_refused(payload):
+    """Asks the President's, the Vice President's and each Cabinet holder's
+    photograph of the lists a person keeps (``photos.refused``:
+    ``overrides.NOT_A_PORTRAIT`` and ``PORTRAIT_LICENCE_DOUBTS``), as every
+    other route is asked at build time (rules 24 and 87). A refused file is
+    withheld - no photo, no sizes - and said: returns the build's warnings,
+    one per person, naming them and why."""
+    from .photos import refused
+
+    people = [payload.get("president"), payload.get("vicePresident")] + [
+        o.get("holder") for o in payload.get("offices") or ()]
+    said = []
+    for person in people:
+        if not person or not person.get("photo") and not person.get("photoSet"):
+            continue
+        why = refused(*photo_urls(person))
+        if why:
+            person["photo"], person["photoSet"] = None, []
+            title = person.get("office") or person.get("title") or ""
+            said.append(f"{person['name']} ({title}): photograph withheld, {why}")
+    return said
+
+
 def _when(value):
     """A date as the pages show it: the agreed ``{date, precision}``, and
     whether the sources gave one and disagreed."""
@@ -370,6 +415,9 @@ def build(root="."):
     payload["succession"], trouble = succession(payload, executive,
                                                 legislators.load_snapshot(root))
     problems += trouble
+    # A photograph a person refused never reaches a page (rules 24, 87),
+    # asked before a copy of it is attached.
+    problems += withhold_refused(payload)
     # The White House's photographs, as the smaller copies this site made
     # of the heavy ones (rule 101).
     from . import photocopies

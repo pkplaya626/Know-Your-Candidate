@@ -2115,6 +2115,10 @@ def _photo_routes(root):
             out.update(guide_photos.own_addresses(rec.get("state"), rec.get("page"),
                                                   rec.get("photo")))
     out.update(refused_urls(guides.get("notPortraits")))
+    # The President's, the Vice President's and the Cabinet's (the White
+    # House's and the offices' pages: federal_build.withhold_refused).
+    from . import federal, federal_build
+    out.update(federal_build.photo_addresses(federal.load_cache(root)))
     out.discard(None)
     return out
 

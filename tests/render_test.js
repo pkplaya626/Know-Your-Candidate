@@ -9368,6 +9368,145 @@ async function testStateGov() {
     }
   });
 
+  suite("state government — a photograph that fails takes its credit with it (rule 87)", () => {
+    // Which photographs a card draws is the week's read, so each case is
+    // made from whichever state carries what it needs, never by its code.
+    const drawn = (o) => !!(o && o.photo && o.photoBy && !(o.disputed || o.unlisted ||
+      o.unconfirmed || o.vacant || o.none || o.notMember));
+    const govShot = (s) => !!(s.governor && s.governor.headshot && s.governor.headshotBy);
+    const shots = (s) => (govShot(s) ? [s.governor.headshot] : [])
+      .concat(["lt", "ag", "sos"].filter((k) => drawn(s[k])).map((k) => s[k].photo));
+    // Every photograph on the card its own file: one failing names no other.
+    const distinct = (s) => new Set(shots(s)).size === shots(s).length;
+    // The copies a week's weighing made are set aside, so the first error
+    // is the photograph's own (the last case makes one).
+    const bare = (s) => [s.governor].concat(["lt", "ag", "sos"].map((k) => s[k])).filter(Boolean)
+      .filter((o) => "photoCopy" in o).map((o) => { const v = o.photoCopy; delete o.photoCopy; return [o, v]; });
+    const draw = (code) => {
+      const host = D.createElement("div");
+      host.innerHTML = KYC.stategov.render(code);
+      D.body.appendChild(host);
+      return host;
+    };
+    const list = (host) => host.querySelector(".gov-sources .gov-photo-sources");
+    const labels = (host) => [...host.querySelectorAll(".gov-sources .gov-photo-source")]
+      .map((c) => c.textContent.split(",")[0].trim());
+    // "; " between the clauses left, a final ".", and nothing else.
+    const wellFormed = (host) => {
+      const l = list(host);
+      if (!l) return true;
+      const parts = [...l.querySelectorAll(".gov-photo-source")].map((c) => c.textContent);
+      return parts.length > 0 && l.textContent === " Photographs: " + parts.join("; ") + ".";
+    };
+    const fail = (img) => img.dispatchEvent(new window.Event("error"));
+    const officerImg = (host, o) => [...host.querySelectorAll("img.gov-officer-photo")]
+      .find((i) => i.getAttribute("src") === KYC.photoHref(o.photo));
+
+    const withAg = stateCodes.find((c) => drawn(data.states[c].ag) && distinct(data.states[c]) &&
+      shots(data.states[c]).length > 1);
+    check("a state whose attorney general and another office are pictured", !!withAg);
+    if (withAg) {
+      const s = data.states[withAg];
+      const kept = bare(s);
+      try {
+        const host = draw(withAg);
+        const before = labels(host);
+        check("the list of sources credits the attorney general's photograph",
+          before.indexOf("attorney general") !== -1 && wellFormed(host), before.join(" | "));
+        const img = officerImg(host, s.ag);
+        check("the attorney general's row draws the photograph its clause names", !!img &&
+          [...host.querySelectorAll(".gov-photo-source")].some((c) =>
+            c.getAttribute("data-credits") === img.getAttribute("src")));
+        if (img) fail(img);
+        const after = labels(host);
+        check("a failed attorney general's photograph takes its clause, and only its clause",
+          !!img && !img.isConnected && after.indexOf("attorney general") === -1 &&
+          JSON.stringify(after) === JSON.stringify(before.filter((l) => l !== "attorney general")),
+          before.join(" | ") + " -> " + after.join(" | "));
+        check("and the list stays one sentence", wellFormed(host),
+          (list(host) || {}).textContent);
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    const withGov = stateCodes.find((c) => govShot(data.states[c]) && distinct(data.states[c]));
+    check("a state whose governor is pictured", !!withGov);
+    if (withGov) {
+      const s = data.states[withGov];
+      const kept = bare(s);
+      try {
+        const host = draw(withGov);
+        const before = labels(host);
+        const img = host.querySelector(".gov-portrait");
+        check("the list of sources credits the governor's headshot", before.indexOf("governor") !== -1 &&
+          !!img && img.getAttribute("src") === KYC.photoHref(s.governor.headshot));
+        if (img) fail(img);
+        const after = labels(host);
+        check("a failed governor's headshot takes the governor's clause with it",
+          !host.querySelector(".gov-portrait") && after.indexOf("governor") === -1 &&
+          JSON.stringify(after) === JSON.stringify(before.filter((l) => l !== "governor")),
+          before.join(" | ") + " -> " + after.join(" | "));
+        check("and what is left is one sentence", wellFormed(host), (list(host) || {}).textContent);
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    const every = stateCodes.find((c) => govShot(data.states[c]) && shots(data.states[c]).length > 1);
+    check("a state with the governor and an officer pictured", !!every);
+    if (every) {
+      const s = data.states[every];
+      const kept = bare(s);
+      try {
+        const host = draw(every);
+        check("its list of sources credits photographs", !!list(host));
+        [...host.querySelectorAll("img.gov-portrait, img.gov-officer-photo")].forEach(fail);
+        const text = host.querySelector(".gov-sources").textContent;
+        check("when every photograph fails, the sources say no 'Photographs:'",
+          !list(host) && !/Photographs:/.test(text) && !host.querySelector(".gov-photo-source"), text);
+        check("and still end in a full stop", /\.$/.test(text.trim()), text.slice(-120));
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    if (withAg) {
+      // A copy that fails gives way to its original (rule 101), which is
+      // shown, so its credit stays; only when the original fails too does
+      // the credit go.
+      const s = data.states[withAg];
+      const kept = bare(s);
+      const COPY = "photos/0a1b2c3d4e5f60718293.jpg?v=0a1b2c3d4e";
+      s.ag.photoCopy = { src: COPY, of: s.ag.photo };
+      try {
+        const host = draw(withAg);
+        const img = [...host.querySelectorAll("img.gov-officer-photo")]
+          .find((i) => i.getAttribute("data-photo-original") === KYC.photoHref(s.ag.photo));
+        check("the attorney general's row loads the copy", !!img && img.getAttribute("src") === KYC.siteRoot() + COPY);
+        if (img) {
+          fail(img);
+          check("a copy that fails falls back to its original", img.isConnected &&
+            img.getAttribute("src") === KYC.photoHref(s.ag.photo));
+          check("and the original keeps its credit, no longer called a copy",
+            labels(host).indexOf("attorney general") !== -1 && wellFormed(host) &&
+            ![...host.querySelectorAll(".photo-copy-note")].some((n) =>
+              n.getAttribute("data-copy-of") === s.ag.photo), (list(host) || {}).textContent);
+          fail(img);
+          check("then the original failing takes the credit", !img.isConnected &&
+            labels(host).indexOf("attorney general") === -1 && wellFormed(host));
+        }
+        host.remove();
+      } finally {
+        delete s.ag.photoCopy;
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+  });
+
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
     const uncredited = stateCodes.filter((c) => {
