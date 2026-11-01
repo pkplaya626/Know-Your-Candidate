@@ -1508,7 +1508,15 @@
     if (!result.candidates[1]) return name + ", the only candidate named";
     if (result.rankedChoice === "first-choices") return name + " led first choices by " + pts;
     if (result.kind === "runoff") return name + " won the runoff by " + pts;
-    if (result.kind === "rcv-final") return name + " won the final round by " + pts;
+    // The Clerk printed two names and the final round's counts without
+    // saying so (Maine's 2nd in 2018): the second compilation is what gives
+    // them as the final round's, and the cell says so (seat_history.
+    // final_round_check).
+    if (result.kind === "rcv-final") {
+      return name + " won the final round by " + pts + (result.roundFrom
+        ? '<span class="strip-held"> The Clerk prints these counts without naming the ' +
+          "round; Wikipedia&rsquo;s page gives them as the final round&rsquo;s.</span>" : "");
+    }
     return name + " won by " + pts;
   }
 

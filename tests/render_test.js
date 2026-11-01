@@ -14075,10 +14075,14 @@ async function testRaceMoney() {
     };
     check("every race's state file carries its strip", whole.length > 400 &&
       wholeRaces().every((r) => !r.lastElection || r.seatHistory), whole.length);
-    check("the index leaves the strip out, and its race's fold waits for the state's file",
+    // The fold waiting for the state's file on a page that holds only the
+    // index is testPeopleSplit's (the grid); a state page holds its own
+    // state's file, whose races carry the strip and draw it at once.
+    check("the index leaves the strip out, and the state page's own races draw it at once",
       allRaces().every((r) => !("seatHistory" in r)) && (() => {
-        const r = allRaces().filter((x) => x.lastElection && x.state !== "NC")[0];
-        return /data-fold=/.test(KYC.cards.lastTimeBlock(r, { lazy: false }));
+        const r = window.kycRaces.filter((x) => x.lastElection && x.state === "NC")[0];
+        return !!r && !!r.seatHistory &&
+          /class="seat-strip"/.test(KYC.cards.lastTimeBlock(r, { lazy: false }));
       })());
     const sample = whole.filter((r, i) => i % 3 === 0 || r.state === "NC" || r.state === "MT" ||
       r.chamber === "Senate");
@@ -14144,6 +14148,20 @@ async function testRaceMoney() {
         /Session Law 2019-249/.test(strip.textContent) && /2020 census/.test(strip.textContent) &&
         /Session Law 2023-145/.test(strip.textContent) && !/elected on in 2026/.test(strip.textContent),
       strip ? strip.textContent.slice(0, 300) : "no strip");
+    // A final round the Clerk prints without naming it is said to be the
+    // second compilation's reading (Maine's 2nd in 2018), made here from a
+    // copy of a real race so the check does not wait on the day's data.
+    const me = JSON.parse(JSON.stringify(whole.filter((r) => r.chamber === "House" &&
+      r.seatHistory.cells.some((c) => c.result && c.result.candidates[1]))[0]));
+    const cell = me.seatHistory.cells.find((c) => c.result && c.result.candidates[1]);
+    cell.result.kind = "rcv-final";
+    delete cell.result.rankedChoice;
+    cell.result.roundFrom = "second-compilation";
+    const meText = draw(me, campaign).querySelectorAll(".strip-cell")[
+      me.seatHistory.cells.indexOf(cell)].textContent;
+    check("a final round the Clerk does not name says whose reading it is",
+      /won the final round by/.test(meText) && /Wikipedia’s page gives them as the final round’s/.test(meText),
+      meText);
     const mt = whole.filter((r) => r.state === "MT" && r.district === 1)[0];
     check("Montana's 1st says its 2018 and 2020 results are the whole state's, elected at large",
       !!mt && /elected one member at large then: the results are the whole state’s/.test(
