@@ -2682,6 +2682,53 @@ counted. Each portrait in `judge_links.json` records its `route`, the
 them (`judge-portrait-unevidenced`). `judiciary --links-only` reads just
 these for the committed directory.
 
+### Judges' financial disclosures
+
+A judge's dialog links their financial disclosure reports as CourtListener
+(the Free Law Project) holds them (`kyc/judge_disclosures.py`, FEDERAL-05).
+CourtListener's API answers anyone without an account with HTTP 401, so
+the `judiciary` run reads its public quarterly bulk files instead, with no
+account or token: the people file (`people-db-people-<date>.csv.bz2`) and
+the reports file (`financial-disclosures-<date>.csv.bz2`) of the newest
+date both share. A judge is joined only through the FJC's judge id
+(`jid`, given beside the `nid` on the FJC's own judges file) that
+CourtListener's person record carries, never by name; the record must
+carry the directory's surname (a compound's other half and accents aside)
+and, where both give one, the same year of birth, or nothing is linked and
+the run reports it (`judge-disclosures-refused`). An id two records carry,
+or an alias's, joins no one.
+
+| Field (on the judge) | Meaning |
+| --- | --- |
+| `disclosures.url` | CourtListener's page for the judge, at its "Financial Disclosures" section |
+| `disclosures.reports` | How many reports CourtListener holds; `0` reads "CourtListener lists no reports", never "none filed" |
+| `disclosures.first`, `disclosures.last` | The first and last years those reports cover |
+
+A judge no CourtListener record carries has no `disclosures`, and the
+dialog says nothing. `data/judge_disclosures.json` keeps the export's date
+(`export`), the day read (`read`), each joined judge by nid and every
+refusal; the build warns once the export is 200 days old or the read 60
+(`judge-disclosures-stale`). `judiciary --disclosures-only` reads just
+these for the committed directory.
+
+### A chief judge the directory cannot settle
+
+Where the FJC directory lists a court's chief judge on senior status too
+(`judge-record-conflict`; 28 U.S.C. 136(a) requires a chief in regular
+active service), the directory names no chief, and the court's own site
+is read for its word (`kyc/court_chiefs.py`, FEDERAL-17), through a recipe
+per court (`court_chiefs.RECIPES`). Its read is refused if the page names
+two chiefs, none, or a chief the directory does not list on that court by
+surname and first given name; a page not read keeps its last read; each
+read carries its own day and is warned once 45 days old. The read is kept
+in `judiciary.json`'s `courtChiefs` and shown, attributed to the court, as
+`chiefByCourt` on the court's row: the hub's chief cell names the judge "as
+the court's own site names its chief", and the court page quotes the site
+beside the directory's record, neither taken over the other. A recipe for a
+court whose record is settled is warned unused (`court-chief-recipe-unused`);
+an unsettled court with no recipe is warned (`court-chief-no-recipe`).
+`judiciary --chiefs-only` reads just these for the committed directory.
+
 ### Changes in the Cabinet
 
 The executive refresh also records who has held each office since the

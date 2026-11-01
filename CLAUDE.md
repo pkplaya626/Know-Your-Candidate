@@ -52,6 +52,7 @@ data/federal_executive.json ──┤   (President, VP, Cabinet: White House, of
 data/judiciary.json         ──┤   (every sitting federal judge: FJC directory; the Supreme Court's own list)
 data/judicial_vacancies.json ─┤   (vacancies, announced vacancies and emergencies: uscourts.gov)
 data/judge_links.json       ──┤   (judges' articles and portraits: FJC slug -> Wikidata P2736)
+data/judge_disclosures.json ──┤   (judges' financial disclosures: CourtListener's bulk files, by FJC judge id)
 data/court_districts.json   ──┤   (which district court covers each county: 28 U.S.C. 81-131)
 data/political_history.json ──┤   (public offices held: congress-legislators; Wikidata the article confirms)
 data/oge_disclosures.json   ──┤   (the executive's financial reports: Office of Government Ethics, by office)
@@ -138,7 +139,7 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
   `statewide_candidates.json`, `statewide_photos.json`, `guide_photos.json`, `ballot_measures.json`,
   `local_measures.json`,
   `federal_executive.json`, `judiciary.json`, `judicial_vacancies.json`,
-  `judge_links.json`, `court_districts.json`,
+  `judge_links.json`, `judge_disclosures.json`, `court_districts.json`,
   `political_history.json`, `oge_disclosures.json`, `tribal_leaders.json`, `local_sites.json`,
   `seat_history.json`, `outside_spending.json`
   and `departed_members.json` are caches, but
@@ -197,6 +198,8 @@ python build_profile_site.py federal          # the President, VP and Cabinet (W
 python build_profile_site.py judiciary        # every sitting federal judge (FJC) and the Supreme Court as the Court lists it;
                                               # the territorial courts' judges from their own sites; judges' Wikidata links
 python build_profile_site.py judiciary --links-only  # only the judges' articles and portraits (rule 82), for the committed directory
+python build_profile_site.py judiciary --chiefs-only  # only a court's own word on its chief, where the directory's record cannot say (rule 82)
+python build_profile_site.py judiciary --disclosures-only  # only the judges' financial disclosures as CourtListener holds them (rule 82)
 python build_profile_site.py vacancies        # vacancies in the federal courts, as uscourts.gov lists them
 python build_profile_site.py history          # public offices each person has held (congress-legislators, Wikidata, Wikipedia)
 python build_profile_site.py oge              # the executive's financial reports (Office of Government Ethics), by office
@@ -1721,7 +1724,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     only over that is left out and counted (`judge-portraits-oversized`),
     never resized or copied here. Each portrait records its route, the
     evidence naming the judge, the day read and its weight, and the
-    build fails one without them. A justice's portrait is the Court's
+    build fails one without them. A judge's financial disclosures are
+    linked the same way (`kyc/judge_disclosures.py`, FEDERAL-05): the
+    CourtListener record carrying the FJC's judge id (`jid`), from its
+    public bulk files (its API needs an account), refused where its surname
+    or year of birth disagrees with the directory's (Chatigny's 1952, Owen
+    for Richman); one it holds none for reads "CourtListener lists no
+    reports", never "none filed", with the years it does hold, since most
+    end in 2020. And where the directory lists a court's chief on senior
+    status too, the court's own site's word is read by a recipe
+    (`kyc/court_chiefs.py`, FEDERAL-17: one chief at most, a judge the
+    directory lists there by surname and given name, dated, warned stale)
+    and shown beside the directory's record, attributed, never in its
+    place. A justice's portrait is the Court's
     official one as Commons holds it, credited to its photographer
     (`overrides.JUSTICE_PORTRAITS`, the owner's decision of 2026-10-20):
     the Court's photographs page asks for approval before publication, and
