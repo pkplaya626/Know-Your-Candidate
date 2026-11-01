@@ -51,7 +51,7 @@ CACHE_PATH = os.path.join("candidate_profiles_site", "data", "seat_history.json"
 CLERK_URL = "https://clerk.house.gov/member_info/electionInfo/{year}/statistics{year}.pdf"
 CLERK_TITLE = ("Clerk of the House, “Statistics of the Presidential and Congressional "
                "Election of {day}”")
-ELECTION_DAYS = {2020: "2020-11-03", 2022: "2022-11-08", 2024: "2024-11-05"}
+ELECTION_DAYS = {2018: "2018-11-06", 2020: "2020-11-03", 2022: "2022-11-08", 2024: "2024-11-05"}
 HOUSE_YEAR = 2024
 YEARS = (2020, 2022, 2024)
 
@@ -186,6 +186,10 @@ UNNAMED = re.compile(r"^(?:write-in|write-ins|scattering|all others|other write-
 # The rows a ranked-choice tabulation's final round adds (Maine's 2nd
 # district in 2024): what the counts above them are.
 RCV_ROUND = re.compile(r"^(?:continuing ballots|exhausted ballots)$", re.I)
+# A footnote saying the counts it marks are a ranked-choice count's later
+# round ("This vote count is from round 2 of Maine's ranked-choice general
+# election", 2022).
+RCV_NOTE = re.compile(r"round \d of \w+'s ranked-choice", re.I)
 
 
 def _label(line):
@@ -262,6 +266,8 @@ def _pair(tokens, where):
         elif len(labels) == 1 and len(counts) == 2 and ends_page \
                 and "," not in counts[1][2] and len(counts[1][2]) <= 3:
             counts = counts[:1]
+        elif len(labels) > 1 and len(counts) > len(labels):
+            counts, notes = _marked(counts, len(labels), ends_page, where)
         if len(counts) != len(labels):
             raise ClerkFormatError(
                 f"{where}: {len(labels)} names and {len(counts)} counts: "
@@ -270,6 +276,45 @@ def _pair(tokens, where):
             pairs.append((label[1], count[1], note))
         i += 2
     return pairs
+
+
+def _marked(counts, wanted, ends_page, where):
+    """A run of counts for *wanted* names that carries footnote markers: a
+    lone digit before the count it marks. Louisiana's 2020 5th district
+    footnotes the two runoff candidates' counts ("1", "49,183", "1",
+    "30,124") among seven unmarked ones, and Maine's 2022 2nd district the
+    final ranked-choice round's. The markers are read only where the lone
+    digits before a count are exactly the extra tokens (with the page
+    number after the last count, where a page ends there); any other
+    surplus is an error, never a guess. Returns ``(counts, notes)``."""
+    def lone(token):
+        return "," not in token[2] and len(token[2]) == 1 and token[1] > 0
+
+    def markers(run):
+        found = []
+        for j in range(len(run) - 1):
+            if lone(run[j]) and (not found or found[-1] != j - 1) and not lone(run[j + 1]):
+                found.append(j)
+        return found
+
+    runs = [counts]
+    last = counts[-1]
+    if ends_page and "," not in last[2] and len(last[2]) <= 3:
+        runs.append(counts[:-1])                       # the page number after it
+    for run in runs:
+        found = markers(run)
+        if found and len(run) - len(found) == wanted:
+            notes, kept, pending = [], [], None
+            for j, token in enumerate(run):
+                if j in found:
+                    pending = token[1]
+                    continue
+                kept.append(token)
+                notes.append(pending)
+                pending = None
+            return kept, notes
+    raise ClerkFormatError(f"{where}: {wanted} names and {len(counts)} counts that are not "
+                           f"footnoted counts: {[t[2] for t in counts]}")
 
 
 def _candidates(pairs, where, parties=frozenset()):
@@ -505,6 +550,15 @@ def _date_of(text):
         return None
 
 
+def _runoff_day(text):
+    """The day of the runoff a footnote says its counts are from, or None."""
+    if "runoff" not in (text or ""):
+        return None
+    found = (re.search(r"from \w+'s (\w+ \d{1,2}, \d{4}),", text) or
+             re.search(r"from the runoff election held on (\w+ \d{1,2}, \d{4})", text))
+    return _date_of(found.group(1)) if found else None
+
+
 def result_of(contest, footnotes, year, state=None):
     """The contest as the page shows it: who won, with what share, by what
     margin, all computed from the Clerk's counts.
@@ -532,14 +586,22 @@ def result_of(contest, footnotes, year, state=None):
     noted = [r for r in rows if r.get("note")]
     if noted:
         texts = {footnotes.get(r["note"], "") for r in noted}
-        if len(texts) != 1 or "runoff" not in next(iter(texts)):
-            raise ClerkFormatError(f"{year}: footnoted counts that are not one runoff's: {texts}")
         text = next(iter(texts))
-        found = re.search(r"from \w+'s (\w+ \d{1,2}, \d{4}),", text)
-        date = _date_of(found.group(1)) if found else None
-        if not date:
-            raise ClerkFormatError(f"{year}: a runoff footnote with no date: {text}")
-        rows, unnamed, kind = noted, 0, "runoff"
+        if len(texts) == 1 and RCV_NOTE.search(text) and len(noted) == 2:
+            # Maine's 2022 2nd district: the two the final round left, with
+            # that round's counts, beside the others' first choices. The
+            # result is the final round's, between the two.
+            rows, unnamed, kind = noted, 0, "rcv-final"
+        else:
+            # One footnote for the runoff (Georgia's 2020 Senate seats), or
+            # one per candidate naming the same runoff (Mississippi's 2018
+            # special: "This vote count is from the runoff election held on
+            # November 27, 2018. Mike Espy received ...").
+            dates = {_runoff_day(t) for t in texts}
+            if len(dates) != 1 or None in dates:
+                raise ClerkFormatError(f"{year}: footnoted counts that are not one runoff's: {texts}")
+            date = dates.pop()
+            rows, unnamed, kind = noted, 0, "runoff"
     elif contest.get("rcvRound"):
         kind = "rcv-final"
     rows.sort(key=lambda r: -r["votes"])
