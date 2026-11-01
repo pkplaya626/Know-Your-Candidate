@@ -14382,11 +14382,16 @@ async function testMapMoney() {
   const box = slim.D.getElementById("moneyRows");
   const closedAtFirst = folds(slim).every((f) => !f.open && f.hasAttribute("data-fold") &&
     !f.querySelector(".money-row"));
+  // Read before the click: a regression that drew the folds open would pass
+  // a check made after it.
+  const hiddenAtFirst = !!box && box.hidden === true && !!toggle &&
+    toggle.getAttribute("aria-expanded") === "false";
   const before = servedPeople(slim).length;
   if (toggle) toggle.click();
   const first = folds(slim)[0];
   openFold(slim.window, first);
   const loading = first.querySelector(".fold-body").textContent;
+  const loadingHtml = first.querySelector(".fold-body").innerHTML;
   await until(() => !!first.querySelector(".money-row"), 6000);
   const fullFirst = folds(full)[0];
   openFold(full.window, fullFirst);
@@ -14399,7 +14404,14 @@ async function testMapMoney() {
         new RegExp("^\\s*Money in each race " + txRaces.length + "$").test(toggle.textContent) &&
         folds(slim).every((f) => box.contains(f)), folds(slim).length + "/" + txRaces.length);
     check("folded until the reader asks: the delegation comes first",
-      closedAtFirst && box.hidden === false && toggle.getAttribute("aria-expanded") === "true");
+      hiddenAtFirst && closedAtFirst && box.hidden === false && toggle.getAttribute("aria-expanded") === "true",
+      "hidden at first " + hiddenAtFirst + ", folds closed " + closedAtFirst);
+    // The panel is a polite live region (map.html #delegation): a fold that
+    // fills when opened is kept out of it, or a screen reader reads a race's
+    // figures aloud; its loading line, a status of its own, still speaks.
+    check("the folds are kept out of the panel's live region",
+      slim.D.getElementById("delegation").getAttribute("aria-live") === "polite" &&
+        box.getAttribute("aria-live") === "off" && /role="status"/.test(loadingHtml), loadingHtml);
     check("each fold names its district, in the district's order",
       folds(slim).map((f) => f.querySelector("summary").textContent).join("|") ===
         txRaces.slice().sort((a, b) => Number(a.district) - Number(b.district))
@@ -14437,6 +14449,9 @@ async function testMapMoney() {
     check("one fold, named as on the state page, outside any count",
       nc.length === 1 && nc[0].querySelector("summary").textContent === "Money in the race" &&
         !slim.D.getElementById("showMoney"), nc.map((f) => f.querySelector("summary").textContent).join("|"));
+    check("kept out of the panel's live region, as the House view's are",
+      !!nc[0] && !!nc[0].closest('[aria-live="off"]') &&
+        nc[0].closest("[aria-live]") !== slim.D.getElementById("delegation"));
     check("before the markets, as a race block has it",
       !odds || !!(nc[0].compareDocumentPosition(odds) & 4));
     const problems = moneyFoldProblems(nc);

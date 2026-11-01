@@ -474,11 +474,16 @@
       return KYC.cards.moneyBlock(r, everyone, { lazy: true, scope: "map",
         summary: many ? "Money in " + name(r) : "Money in the race" });
     }).filter(Boolean);
-    if (blocks.length < 2) return blocks.join("");
+    if (!blocks.length) return "";
+    // The panel is a polite live region; a fold that fills when opened would
+    // have a screen reader read a whole race's figures aloud. The folds are
+    // kept out of it (aria-live="off"): the reader who opened one reads it,
+    // and its loading and failure lines (role="status") still speak.
+    if (blocks.length < 2) return '<div class="panel-money" aria-live="off">' + blocks[0] + "</div>";
     return '<button type="button" class="panel-subhead expander" id="showMoney"' +
       ' aria-expanded="false" aria-controls="moneyRows">' +
       KYC.icon("chevron") + " Money in each race <span>" + blocks.length + "</span></button>" +
-      '<div id="moneyRows" class="panel-money" hidden>' + blocks.join("") + "</div>";
+      '<div id="moneyRows" class="panel-money" aria-live="off" hidden>' + blocks.join("") + "</div>";
   }
 
   function showPanel(code) {
