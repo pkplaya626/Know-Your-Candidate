@@ -676,5 +676,115 @@ class TestStrip(unittest.TestCase):
                     self.assertFalse(any(e["same"] for e in strip["eras"]), race["id"])
 
 
+class TestTheFirstFullRead(unittest.TestCase):
+    """What the first read of 2018-2022 got wrong (2026-11-01), each a
+    count put beside the wrong name or a check that could not agree."""
+
+    def test_a_party_alone_outside_a_fusion_state_is_nobodys_votes(self):
+        # Virginia's 2nd, 2020: the Clerk prints "Independent" for David
+        # Foster's 9,170 votes. Read as a fusion line they were Scott
+        # Taylor's, and his 165,031 read 174,201.
+        lines = ["VIRGINIA", "FOR UNITED STATES REPRESENTATIVE", "1.",
+                 "Robert J. Wittman, Republican" + L, "Qasim Rashid, Independent" + L,
+                 "260,614", "186,923", "2.",
+                 "Elaine G. Luria, Democrat" + L, "Scott W. Taylor, Republican" + L,
+                 "Independent" + L, "Write-in" + L, "185,733", "165,031", "9,170", "343",
+                 "Recapitulation of Votes Cast in Virginia"]
+        va = sh.parse_statistics(lines, 2020)["VA"]["house"][2]
+        self.assertEqual([(r["name"], r["votes"]) for r in va["rows"]],
+                         [("Elaine G. Luria", 185733), ("Scott W. Taylor", 165031)])
+        self.assertEqual(va["unnamed"], 9513)
+
+    def test_scattered_and_none_of_these_and_exhausted_are_nobodys(self):
+        # New Hampshire's "Scatter" was added to the last candidate's count
+        # (Chris Pappas, 2022: +342), Nevada's "None of These Candidates" to
+        # a Senate candidate's, Maine's 2022 "Exhausted Ballot" (322,778) to
+        # Tiffany Bond's, Puerto Rico's "Unadjudicated" to its last name's.
+        lines = ["NEW HAMPSHIRE", "FOR UNITED STATES REPRESENTATIVE", "1.",
+                 "Karoline Leavitt, Republican" + L, "Chris Pappas, Democrat" + L,
+                 "Scatter" + L, "142,229", "167,391", "342",
+                 "Recapitulation of Votes Cast in New Hampshire"]
+        nh = sh.parse_statistics(lines, 2022)["NH"]["house"][1]
+        self.assertEqual(nh["rows"][1]["votes"], 167391)
+        self.assertEqual(nh["unnamed"], 342)
+        for label in ("None of These Candidates", "Exhausted Ballot", "Unadjudicated"):
+            self.assertTrue(sh.NOT_A_VOTE.match(label), label)
+
+    def test_a_line_naming_no_one_and_no_known_party_is_an_error(self):
+        lines = _house("1.", "Barry Moore, Republican" + L, "Tom Holmes, Democrat" + L,
+                       "Somebody" + L, "258,619", "70,929", "306")
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.parse_statistics(lines, 2020)
+
+    def test_a_row_template_with_two_spaces_and_a_footnoted_name_are_read(self):
+        # Alabama's 2nd in 2020 and Tennessee's 2022 districts write
+        # "{{Election box  winning candidate"; Oregon's 4th in 2018 sets a
+        # footnote in the name's field; the Northern Mariana Islands' 2020
+        # box ends "{{end}}".
+        text = ("{{Election box begin no change|title=General election}}\n"
+                "{{Election box  winning candidate with party link no change|party=Republican "
+                "Party (United States)|candidate=[[Barry Moore]]|votes=197,996}}\n"
+                "{{Election box candidate with party link no change|party=Democratic Party "
+                "(United States)|candidate=[[Art Robinson]]<ref>Co-nominated by Constitution "
+                "Party.</ref>|votes=105,286}}\n{{end}}")
+        boxes = sh.wiki_boxes(text)
+        self.assertEqual([(r["name"], r["votes"], r["won"]) for r in boxes[0][1]],
+                         [("Barry Moore", 197996, True), ("Art Robinson", 105286, False)])
+
+    def test_a_surname_written_as_two_words_is_the_same(self):
+        result = _result(("Harriet Hageman", "Republican", 132206),
+                         ("Lynnette GreyBull", "Democrat", 47250))
+        rows = [{"name": "Harriet Hageman", "votes": 132206, "won": True},
+                {"name": "Lynnette Grey Bull", "votes": 47250}]
+        self.assertEqual(sh._check(result, rows)[0], "agree")
+
+    def test_a_house_runoff_is_checked_against_the_runoff(self):
+        # Louisiana's 5th, 2020: the runoff's counts against the open
+        # primary's table "disagreed".
+        result = dict(_result(("Luke J. Letlow", "Republican", 49183),
+                              ("Lance Harris", "Republican", 30124)), kind="runoff")
+        section = ("{{Election box begin no change|title=Louisiana's 5th congressional district "
+                   "general election, 2020}}\n{{Election box winning candidate with party link "
+                   "no change|candidate=Luke Letlow|votes=67,118}}\n{{Election box candidate "
+                   "with party link no change|candidate=Lance Harris|votes=60,876}}\n"
+                   "{{Election box end}}\n{{Election box begin no change|title=Runoff results}}\n"
+                   "{{Election box winning candidate with party link no change|candidate=Luke "
+                   "Letlow|votes=49,183}}\n{{Election box candidate with party link no change|"
+                   "candidate=Lance Harris|votes=30,124}}\n{{Election box end}}")
+        self.assertEqual(sh.house_check(result, section)[0], "agree")
+
+    def test_two_names_whose_counts_are_the_final_round_are_the_final_round(self):
+        # Maine's 2nd, 2018: the Clerk prints Golden and Poliquin with the
+        # final round's counts and no footnote; as first choices Golden
+        # "led", which he did not.
+        result = dict(_result(("Jared F. Golden", "Democrat", 142440),
+                              ("Bruce Poliquin", "Republican", 138931), year=2018),
+                      allCandidates=2, rankedChoice="first-choices")
+        infobox = ("{{Infobox election\n| 1blank = First round\n| 2blank = Maximum round\n"
+                   "| nominee1 = '''[[Jared Golden]]'''\n| 1data1 = 132,013\n"
+                   "| 2data1 = '''142,440<br />50.62%'''\n| nominee2 = [[Bruce Poliquin]]\n"
+                   "| 1data2 = 134,184\n| 2data2 = 138,931<br />49.38%\n}}")
+        self.assertEqual(sh.house_check(result, infobox)[0], "agree")
+        self.assertEqual(result["kind"], "rcv-final")
+        self.assertNotIn("rankedChoice", result)
+        self.assertEqual(result["roundFrom"], "second-compilation")
+        # The first round's counts are first choices, and stay a lead.
+        first = dict(_result(("Jared F. Golden", "Democrat", 132013),
+                             ("Bruce Poliquin", "Republican", 134184), year=2018),
+                     allCandidates=2, rankedChoice="first-choices")
+        sh.house_check(first, infobox)
+        self.assertEqual(first.get("rankedChoice"), "first-choices")
+
+    def test_a_page_with_no_results_is_not_the_states_page(self):
+        # "2022 ... elections in Delaware" leads to the national article.
+        pages = {"2022 United States House of Representatives elections in Delaware":
+                 "Elections were held in every state. ''See'' each state's page.",
+                 "2022 United States House of Representatives election in Delaware":
+                 "{{Infobox election\n| nominee1 = Lisa Blunt Rochester\n"
+                 "| popular_vote1 = 178,416\n}}"}
+        sections, page = sh.house_page_sections("DE", read=pages.get, year=2022)
+        self.assertEqual(page, "2022 United States House of Representatives election in Delaware")
+
+
 if __name__ == "__main__":
     unittest.main()

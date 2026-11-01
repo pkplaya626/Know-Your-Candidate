@@ -196,14 +196,28 @@ def _sentence(line):
 
 # Lines that count ballots for no one, or for nobody named: they are not a
 # candidate, and a share is never taken of the ballots that chose nobody.
+# Nevada's "None of These Candidates" is a choice on its ballot that elects
+# no one (NRS 293.269), and Puerto Rico's 2020 "Unadjudicated" ballots
+# were not counted for anyone; Maine's 2022 table says "Exhausted Ballot".
 NOT_A_VOTE = re.compile(r"^(?:blank|blanks|blank votes|void|invalid|over ?votes|under ?votes|"
-                        r"continuing ballots|exhausted ballots|total)$", re.I)
-# Votes for someone the table does not name: counted in the total.
-UNNAMED = re.compile(r"^(?:write-in|write-ins|scattering|all others|other write-ins|"
+                        r"continuing ballots?|exhausted ballots?|none of these candidates|"
+                        r"unadjudicated|total)$", re.I)
+# Votes for someone the table does not name: counted in the total. New
+# Hampshire's tables say "Scatter".
+UNNAMED = re.compile(r"^(?:write-in|write-ins|scattering|scatter|all others|other write-ins|"
                      r"miscellaneous|others|other|write-in \(.*\))$", re.I)
 # The rows a ranked-choice tabulation's final round adds (Maine's 2nd
 # district in 2024): what the counts above them are.
-RCV_ROUND = re.compile(r"^(?:continuing ballots|exhausted ballots)$", re.I)
+RCV_ROUND = re.compile(r"^(?:continuing ballots?|exhausted ballots?)$", re.I)
+# The states whose tables print a candidate's other parties' lines under
+# them, a party and no one ("Nick LaLota, Republican" then "Conservative"):
+# New York's and Connecticut's fusion lines, every year from 2018 to 2024.
+# Anywhere else a party alone is a candidate the Clerk did not name -
+# Virginia's 2nd district in 2020 printed "Independent" for David Foster's
+# 9,170 votes, and Arizona's 2018 Senate table "Green" for Angela Green's -
+# whose votes count in the total and are nobody's we name. Read as fusion,
+# Foster's votes were added to Scott Taylor's.
+FUSION_STATES = frozenset({"NY", "CT"})
 # A footnote saying the counts it marks are a ranked-choice count's later
 # round ("This vote count is from round 2 of Maine's ranked-choice general
 # election", 2022).
@@ -335,12 +349,32 @@ def _marked(counts, wanted, ends_page, where):
                            f"footnoted counts: {[t[2] for t in counts]}")
 
 
-def _candidates(pairs, where, parties=frozenset()):
+def _party_only(label, parties, fusion=None):
+    """Does *label* name only parties, and no one ("Conservative",
+    "Conservative, Common Sense")? In a fusion state (*fusion*: the lines
+    the file prints with no comma, a party alone) a line with no comma is
+    one of the candidate's lines, whatever party it names (New York's
+    "Independence" line follows no candidate's name anywhere in 2020's
+    file), and so is one whose every part is such a line or a party;
+    elsewhere a label that is not a candidate's line and names no party
+    the file prints after a name is an error, never a guess."""
+    parts = [p.strip() for p in label.split(",")]
+    known = parties | fusion if fusion is not None else parties
+    if all(p in known for p in parts) or (fusion is not None and "," not in label):
+        return True
+    if "," not in label:
+        raise ClerkFormatError(f"a line {label!r} that names no one and no party")
+    return False
+
+
+def _candidates(pairs, where, parties=frozenset(), state=None, alone=frozenset()):
     """The block's people, one row each, with the ballots that named no one
-    and the unnamed votes apart. A label that names a party and no one is
-    another line of the candidate above it (New York's and Connecticut's
-    fusion lines: "Nick LaLota, Republican" then "Conservative"; New York's
-    5th district: "Paul King, Republican" then "Conservative, Common Sense").
+    and the unnamed votes apart. In :data:`FUSION_STATES` a label that names
+    a party and no one is another line of the candidate above it (New York's
+    and Connecticut's fusion lines: "Nick LaLota, Republican" then
+    "Conservative"; New York's 5th district: "Paul King, Republican" then
+    "Conservative, Common Sense"); anywhere else it is a candidate the Clerk
+    does not name, counted in the total (``unnamed``) and nobody's.
     *parties* is every party the file names after a candidate's name."""
     rows, unnamed, blank, rcv = [], 0, 0, False
     for label, votes, note in pairs:
@@ -358,7 +392,14 @@ def _candidates(pairs, where, parties=frozenset()):
         if UNNAMED.match(label):
             unnamed += votes
             continue
-        if "," not in label or label.split(",")[0].strip() in parties:
+        try:
+            party_only = _party_only(label, parties, alone if state in FUSION_STATES else None)
+        except ClerkFormatError as exc:
+            raise ClerkFormatError(f"{where}: {exc}") from None
+        if party_only and state not in FUSION_STATES:
+            unnamed += votes
+            continue
+        if party_only:
             if not rows:
                 raise ClerkFormatError(f"{where}: a party line {label!r} with no candidate")
             rows[-1]["lines"].append([label, votes])
@@ -395,21 +436,28 @@ def split_label(label):
 
 
 def party_names(lines):
-    """Every party the file names: what follows a candidate's name on a
-    line, and the lines that name a party alone."""
+    """Every party the file names after a candidate's name on a line. A
+    line that names a party alone is read as one only where the party is
+    among these: "Scatter" was once taken for a party, and New Hampshire's
+    scattered write-ins added to the last candidate's count."""
     found = set()
     for line in lines:
         label = _label(line.strip())
-        if not label or NOT_A_VOTE.match(label) or UNNAMED.match(label):
-            continue
-        if "," not in label:
-            found.add(label)
+        if not label or NOT_A_VOTE.match(label) or UNNAMED.match(label) or "," not in label:
             continue
         try:
             found.update(p.strip() for p in split_label(label)[1].split(","))
         except ClerkFormatError:
             continue
     return frozenset(found)
+
+
+def party_lines(lines):
+    """The labels the file prints with no comma that are not a ballot for
+    no one or votes for someone unnamed: a fusion state's party lines."""
+    return frozenset(label for label in (_label(line.strip()) for line in lines)
+                     if label and "," not in label and not NOT_A_VOTE.match(label)
+                     and not UNNAMED.match(label))
 
 
 def parse_statistics(lines, year, chambers=("house", "senate")):
@@ -428,6 +476,7 @@ def parse_statistics(lines, year, chambers=("house", "senate")):
     recap = False
     footnote = None
     parties = party_names(lines)
+    alone = party_lines(lines)
 
     def close():
         nonlocal block
@@ -443,7 +492,7 @@ def parse_statistics(lines, year, chambers=("house", "senate")):
                 entry.setdefault("houseEmpty", []).append(key[1])
             return
         where = f"{year} {state} {key}"
-        contest = _candidates(_pair(tokens, where), where, parties)
+        contest = _candidates(_pair(tokens, where), where, parties, state, alone)
         entry = states.setdefault(state, {"house": {}, "senate": [], "footnotes": {}})
         if key[0] == "house":
             if key[1] in entry["house"]:
@@ -745,7 +794,12 @@ def _find(name, rows):
     if not last:
         return None
     first = _fold(name).split()[0]
-    matches = [r for r in rows if last in _fold(r["name"]).split()]
+    def words(row):
+        # A surname written as two words is one spelling: the Clerk's
+        # "Lynnette GreyBull" is Wikipedia's "Lynnette Grey Bull".
+        found = _fold(row["name"]).split()
+        return found + [a + b for a, b in zip(found, found[1:])]
+    matches = [r for r in rows if last in words(r)]
     if len(matches) > 1:
         matches = [r for r in matches if _fold(r["name"]).split()[:1] == [first]]
     if not matches and len(last) >= 6:
@@ -776,8 +830,22 @@ def _summed(rows):
     return list(by_name.values())
 
 
+# A box ends with "{{Election box end}}" or, on some pages, a bare
+# "{{end}}" (the Northern Mariana Islands' 2020 page).
 _WBOX = re.compile(r"\{\{\s*Election box (?:open primary )?begin[^}]*?\|\s*title\s*=\s*([^\n|}]+)"
-                   r".*?\{\{\s*Election box end\s*\}\}", re.S | re.I)
+                   r".*?\{\{\s*(?:Election box end|end)\s*\}\}", re.S | re.I)
+# "{{Election box  winning candidate ..." with two spaces (Alabama's 2nd in
+# 2020, Tennessee's districts in 2022) is the same template; read as
+# written, the winner's or the runner-up's row was not read at all.
+_BOX_SPACES = re.compile(r"\{\{\s*Election box\s+", re.I)
+# A footnote set in a name's field ("[[Art Robinson]]<ref>Co-nominated by
+# Constitution Party.</ref>", Oregon's 4th in 2018) is not the name.
+_REFS = re.compile(r"<ref[^>/]*/>|<ref[^>]*>.*?</ref>", re.S | re.I)
+
+
+def _name(raw):
+    from .results import clean_name
+    return clean_name(_REFS.sub("", raw or ""))
 _OPEN_GENERAL = re.compile(r"\{\{\s*Election box open primary general election[^}]*\}\}", re.I)
 _COUNT = re.compile(r"\d{1,3}(?:,\d{3})+|\d+")
 
@@ -794,9 +862,10 @@ def wiki_boxes(text):
     """``[(stage, rows)]`` from a page's results boxes. An open primary's
     box holds both rounds (California's top two); the part after its
     "general election" marker is the general's."""
-    from .results import _ROW, _stage, clean_name, template_fields
+    from .results import _ROW, _stage, template_fields
     out = []
-    for match in _WBOX.finditer(text or ""):
+    text = _BOX_SPACES.sub("{{Election box ", text or "")
+    for match in _WBOX.finditer(text):
         body = match.group(0)
         parts = [(_stage(match.group(1), cycle=None) or "general", body)]
         split = _OPEN_GENERAL.search(body)
@@ -806,12 +875,12 @@ def wiki_boxes(text):
             rows = []
             for row in _ROW.finditer(part):
                 fields = template_fields(row.group("body"))
-                name = clean_name(fields.get("candidate", ""))
+                name = _name(fields.get("candidate", ""))
                 if not name:
                     continue
                 rows.append({"name": name, "votes": _votes(fields.get("votes")),
                              "won": row.group("kind").lower().startswith("winning"),
-                             "party": clean_name(fields.get("party", "")) or None})
+                             "party": _name(fields.get("party", "")) or None})
             if rows:
                 out.append((stage, rows))
     return out
@@ -820,28 +889,68 @@ def wiki_boxes(text):
 _INFOBOX = re.compile(r"\{\{\s*Infobox election\b", re.I)
 
 
-def infobox_rows(text):
-    """The first ``{{Infobox election}}``'s candidates and popular votes."""
-    from .results import clean_name, template_body, template_fields
+def _infobox_fields(text):
+    from .results import template_body, template_fields
     match = _INFOBOX.search(text or "")
     if not match:
+        return None
+    return template_fields("|" + template_body(text, match.start()).split("|", 1)[-1])
+
+
+def infobox_rows(text, round_=None):
+    """The first ``{{Infobox election}}``'s candidates and popular votes;
+    with *round_*, that round's counts (``"2data1"``) of a ranked-choice
+    election's infobox."""
+    fields = _infobox_fields(text)
+    if fields is None:
         return []
-    fields = template_fields("|" + template_body(text, match.start()).split("|", 1)[-1])
     rows = []
     for key, value in fields.items():
         found = re.fullmatch(r"(?:candidate|nominee)(\d+)", key)
         if not found:
             continue
-        name = clean_name(value)
+        name = _name(value)
         number = found.group(1)
-        # A ranked-choice election's infobox gives each round instead
-        # ("1data1" the first, as Alaska's 2024 page does): the first
-        # round is what the Clerk lists.
-        votes = _votes(fields.get(f"popular_vote{number}")) or _votes(fields.get(f"1data{number}"))
+        if round_:
+            votes = _votes(fields.get(f"{round_}data{number}"))
+        else:
+            # A ranked-choice election's infobox gives each round instead
+            # ("1data1" the first, as Alaska's 2024 page does): the first
+            # round is what the Clerk lists.
+            votes = _votes(fields.get(f"popular_vote{number}")) or \
+                _votes(fields.get(f"1data{number}"))
         if name:
             rows.append({"name": name, "votes": votes,
-                         "party": clean_name(fields.get(f"party{found.group(1)}", "")) or None})
+                         "party": _name(fields.get(f"party{found.group(1)}", "")) or None})
     return rows
+
+
+def infobox_rounds(text):
+    """The rounds a ranked-choice election's infobox gives (``1blank =
+    First round``, ``2blank = Maximum round``): their numbers, in order."""
+    fields = _infobox_fields(text) or {}
+    return sorted(int(m.group(1)) for k, v in fields.items()
+                  for m in [re.fullmatch(r"(\d)blank", k)]
+                  if m and re.search(r"round", v or "", re.I))
+
+
+def final_round_check(result, text):
+    """Is a ranked-choice contest the Clerk prints with two names and no
+    footnote its final round? Maine's 2nd district in 2018: the Clerk lists
+    Golden 142,440 and Poliquin 138,931, the counts of the final round
+    between the two the tabulation left, where four were on the ballot and
+    Poliquin led the first round; read as first choices, Golden "led first
+    choices", which he did not. It is the final round only where the second
+    compilation's own final round (its infobox's last round, of more than
+    one) names the same two with the same counts, and its first round does
+    not. Returns ``(verdict, differences)``: "agree" only then, else None."""
+    rounds = infobox_rounds(text)
+    if len(rounds) < 2 or len(result["candidates"]) != 2 or result.get("allCandidates") != 2:
+        return None, []
+    if _check(result, _summed(infobox_rows(text, rounds[0])))[0] == "agree":
+        return None, []
+    verdict, differences = _check(result, _summed(infobox_rows(text, rounds[-1])))
+    return ("agree", differences) if verdict == "agree" else (None, [])
 
 
 def wiki_check(result, text, stage="general"):
@@ -858,8 +967,12 @@ def wiki_check(result, text, stage="general"):
     boxes = wiki_boxes(text)
     if stage == "general" and not any(s == "general" for s, _ in boxes):
         # Pages that set the general's result only in the infobox
-        # (American Samoa's 2024 delegate election).
-        boxes = [("general", infobox_rows(text))]
+        # (American Samoa's 2024 delegate election). A ranked-choice
+        # tabulation's final round (Maine's 2nd in 2022) is checked
+        # against the infobox's last round.
+        rounds = infobox_rounds(text)
+        last = rounds[-1] if result.get("kind") == "rcv-final" and len(rounds) > 1 else None
+        boxes = [("general", infobox_rows(text, last))]
     for box_stage, rows in boxes:
         if box_stage != stage:
             continue
@@ -871,6 +984,26 @@ def wiki_check(result, text, stage="general"):
     if "agree" in verdicts:
         return "agree", differences
     return ("disagree" if verdicts else None), []
+
+
+def house_check(result, section):
+    """A House result against its district's section of the state's page.
+    A runoff's counts (Louisiana's 5th in 2020) are checked against the
+    runoff's table, never the first round's: against the open primary's,
+    Letlow's runoff count "disagreed". A ranked-choice contest the Clerk
+    prints with two names and no footnote that is the final round
+    (:func:`final_round_check`) becomes the final round's result, and says
+    the second compilation is what gives it as such (``roundFrom``)."""
+    stage = "runoff" if result["kind"] == "runoff" else "general"
+    verdict, differences = wiki_check(result, section, stage=stage)
+    if verdict != "agree" and result.get("rankedChoice") == "first-choices":
+        final, diff = final_round_check(result, section)
+        if final == "agree":
+            result["kind"] = "rcv-final"
+            result.pop("rankedChoice")
+            result["roundFrom"] = "second-compilation"
+            return final, diff
+    return verdict, differences
 
 
 def read_mit_senate(raw):
@@ -947,6 +1080,11 @@ def house_page_sections(state, read=_wiki_page, year=HOUSE_YEAR):
     for title in page_titles(state, "H", cycle=year):
         text = read(title)
         if text is None:
+            continue
+        if not _WBOX.search(_BOX_SPACES.sub("{{Election box ", text)) and \
+                not _INFOBOX.search(text):
+            # Not a results page: "2022 ... elections in Delaware" leads to
+            # the national article, which holds no state's boxes.
             continue
         sections = house_sections(text, at_large=True)
         if set(sections) == {0} and sub_articles(text, title):
@@ -1086,7 +1224,7 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
                 if not result:
                     continue
                 section = sections.get(district) or (sections.get(0) if len(contests) == 1 else None)
-                verdict, differences = wiki_check(result, section) if section else (None, [])
+                verdict, differences = house_check(result, section) if section else (None, [])
                 keep(store, f"{state}-{district}", result, verdict, differences,
                      {"by": "wikipedia", "page": page}, page)
             log(f"  {year} {state}: {len(contests)} House contest(s) read")
@@ -1161,7 +1299,7 @@ def _shown(result, chamber):
     """The page's copy of a cached result: what a race block draws. Its
     sources are the page's table (:func:`page_sources`), by year."""
     keys = ("year", "date", "kind", "total", "margin", "others", "othersShare",
-            "allCandidates", "note", "unopposedByName", "rankedChoice")
+            "allCandidates", "note", "unopposedByName", "rankedChoice", "roundFrom")
     out = {k: result[k] for k in keys if k in result}
     out["candidates"] = [{k: c[k] for k in ("name", "party", "votes", "share") if k in c}
                          for c in result["candidates"]]
@@ -1288,7 +1426,7 @@ STRIP_GRACE = SEATING_GRACE
 
 def _strip_result(result, chamber):
     """A cell's copy of a result: who won, by what, as the strip draws it."""
-    keys = ("year", "date", "kind", "margin", "rankedChoice", "allCandidates")
+    keys = ("year", "date", "kind", "margin", "rankedChoice", "allCandidates", "roundFrom")
     out = {k: result[k] for k in keys if k in result}
     out["candidates"] = [{k: c[k] for k in ("name", "party", "share") if k in c}
                          for c in result["candidates"]]
