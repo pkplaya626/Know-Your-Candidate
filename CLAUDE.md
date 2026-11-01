@@ -2594,6 +2594,26 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     other office they are running for. And a smooth scroll past the
     delegation's cards (content-visibility) stopped every jump 500-950px
     short of its race, so every jump on the page now scrolls at once.
+    The second phase (after Election Day) adds three things, each tested on
+    the campaign clock and after Election Day. Once "Find your race" has
+    scrolled away a bar under the header holds the same select (a copy of
+    the block's, one list) and a way back; it is fixed, so showing it moves
+    nothing, it grows the page's scroll-padding by its height so a jump
+    lands below it, and it is not shown on a screen under 500px tall.
+    Chips over the rows pick out open seats and races with no challenger
+    on the ballot ("Uncontested" from the day after Election Day), counted
+    by the race heads' own tests (`KYC.cards.raceFilters`, which the
+    grid's chip uses too), with a live "Showing N of M races" line; the
+    filter is in the address (`#/?races=open`), a jump to a race it leaves
+    out shows every race again, and a search never brings one back. And a
+    redrawn state's district page shows one plan at a time below 1000px,
+    the 2026 plan first, drawing the other only when it is first switched
+    to and keeping its markup while nothing it shows has changed (still
+    one remeasure at most): Texas's 2026 map began 5,459px down and now
+    begins about 550px down, with Find my district and the picker above
+    it, the key and the zoom chips under it, and the moves folded below.
+    `testDistrictsPhonePlans` numbers every district of each plan, shown in
+    turn, at 280px (rule 43).
 100. **A legislator's portrait is the legislature's, named beside them,
     and a seat's file is dated before it is believed.** 1,022 of 7,323
     state legislators had no portrait (audit 2026-10-17, STATEGOV-13;
