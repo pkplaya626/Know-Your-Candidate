@@ -19,6 +19,12 @@ but offers no image address to link:
   (:mod:`kyc.jpx`, standard library only - the reversible coding gives back
   every pixel as coded, and on 2026-10-25 they matched Chrome's own PDF
   renderer one for one) and kept as a PNG (method "decoded").
+* **Arizona's Citizens Clean Elections Commission** lists every candidate
+  for the U.S. House under the district's heading, each entry holding the
+  picture the candidate gave its voter education guide and their name in
+  bold. Its pictures have addresses of their own, so they are linked there
+  (method "linked"), never hosted: rule 101's hosting is for the guides
+  that give a photograph none.
 * **Utah's Voter Information Pamphlet** (the Lieutenant Governor's Office)
   is one PDF with a page for each candidate for Congress who sent a
   profile: the district's heading, the candidate's name under it, and the
@@ -128,6 +134,17 @@ GUIDES = {
                  "no browser draws: decoded losslessly here (kyc/jpx.py, the reversible "
                  "5/3 wavelet, every pixel as coded) and hosted as PNG, credited and linked "
                  "to its page, by the owner's decision of 2026-10-25.",
+    },
+    "AZ": {
+        "by": "Arizona Citizens Clean Elections Commission",
+        "credit": "from the Arizona Citizens Clean Elections Commission's candidate list",
+        "title": "Find My Candidates - Citizens Clean Elections Commission (all candidates, "
+                 "November 3, 2026 General Election)",
+        "url": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
+        "linked": "https://www.azcleanelections.gov",
+        "terms": "Each picture has an address of its own on the Commission's site and is "
+                 "linked there, credited to the list it is printed in, not hosted here; the "
+                 "Commission's site states no terms of reuse.",
     },
     "UT": {
         "by": "Utah Lieutenant Governor's Office",
@@ -347,8 +364,9 @@ def own_addresses(code, page, photo):
     photograph (the review of PR #138). Utah's pamphlet gives each candidate
     a page, but numbered within one PDF the office may reissue: an amended
     pamphlet's page 13 can be another candidate's, so only the hosted file
-    is theirs."""
-    return (photo,) if code in ("OR", "UT") else (page, photo)
+    is theirs. Arizona's list is one page for every candidate; the picture's
+    own address is one candidate's."""
+    return (photo,) if code in ("OR", "UT", "AZ") else (page, photo)
 
 
 def hosted_name(weight):
@@ -588,7 +606,11 @@ def photo_record(code, race, office, name, page, source, words, data, colour_spa
     weight = measure(data)
     if not weight["width"]:
         return None, "its size cannot be read"
-    photo = "photos/" + hosted_name(weight)
+    # A guide whose photographs have addresses of their own (Arizona's) is
+    # linked, never hosted: rule 101's hosting is for the guides that give a
+    # photograph no address.
+    linked = bool(GUIDES[code].get("linked"))
+    photo = source if linked else "photos/" + hosted_name(weight)
     refusal = unfit(weight, *own_addresses(code, page, photo))
     if refusal:
         if refused_into is not None:
@@ -600,6 +622,8 @@ def photo_record(code, race, office, name, page, source, words, data, colour_spa
               "by": GUIDES[code]["credit"]}
     record.update({k: weight[k] for k in ("sha256", "bytes", "width", "height", "type")})
     record.update(extra or {})
+    if linked:
+        record["method"] = "linked"
     record["_data"] = data
     return record, ""
 
@@ -968,6 +992,105 @@ DECODER = ("kyc/jpx.py: JPEG 2000, reversible 5/3 wavelet, no quantization, ever
            "pass - lossless, written as PNG")
 
 
+# ------------------------------------------------------------------ Arizona
+
+AZ_GUIDE = "https://www.azcleanelections.gov/Custom/CandidateList?location="
+AZ_HOST = "https://www.azcleanelections.gov"
+_AZ_HOUSE = re.compile(r"^U\.S\. House of Rep\. - District (\d{1,2})$")
+_AZ_NO_PICTURE = "/Custom/Picture/0"
+
+
+def az_entries(page):
+    """``[{"heading", "district", "name", "printed", "party", "picture"}]``:
+    each entry under the Clean Elections Commission's "FEDERAL -
+    LEGISLATIVE" heading - one ``<li>`` holding the candidate's picture,
+    their name in bold, and the office and party, under the office's own
+    heading. A write-in's mark is not a word of their name."""
+    out = []
+    start = (page or "").find('<h3 class="branch">FEDERAL - LEGISLATIVE</h3>')
+    if start < 0:
+        return out
+    end = page.find('<h3 class="branch">', start + 10)
+    block = page[start:end if end > 0 else len(page)]
+    for heading, body in re.findall(r"<h3>([^<]+)</h3>\s*<ul class=\"people\">(.*?)</ul>",
+                                    block, re.S):
+        heading = " ".join(html.unescape(heading).split())
+        house = _AZ_HOUSE.match(heading)
+        for item in re.findall(r"<li>(.*?)</li>", body, re.S):
+            pic = re.search(r'<img class="pic" src="([^"]+)"', item)
+            name = re.search(r"<b>([^<]+)</b>", item)
+            office = re.search(r'<span class="office">([^<]+)</span>', item)
+            party = re.search(r'<span class="party">([^<]*)</span>', item)
+            if not (pic and name and office):
+                continue
+            printed = " ".join(html.unescape(name.group(1)).split())
+            out.append({"heading": heading, "district": int(house.group(1)) if house else None,
+                        "printed": printed,
+                        "name": re.sub(r"\s*\(Write-In\)$", "", printed),
+                        "office": " ".join(html.unescape(office.group(1)).split()),
+                        "party": " ".join(html.unescape(party.group(1)).split()) if party else "",
+                        "picture": html.unescape(pic.group(1))})
+    return out
+
+
+def read_arizona(wanted, getter=get, log=print, refusals=None):
+    """``(photos, problems, unread)`` as :func:`read_washington`, for the
+    Citizens Clean Elections Commission's candidate list (its voter
+    education guide, A.R.S. 16-949), which prints each candidate for the
+    U.S. House under the district's heading, their picture and their name
+    in one entry. *wanted* is ``{race id: [profiles]}``."""
+    photos, problems, unread = {}, [], set()
+    keys = [k for k in sorted(wanted) if k.startswith("H-AZ-")]
+    if not keys:
+        return photos, problems, unread
+    try:
+        entries = az_entries(getter(AZ_GUIDE).decode("utf-8", "replace"))
+    except GuidePhotoError as exc:
+        problems.append(f"AZ: {exc}; the last photographs read are kept")
+        return photos, problems, set(keys)
+    shared = {}
+    for entry in entries:
+        shared[entry["picture"]] = shared.get(entry["picture"], 0) + 1
+    for target in keys:
+        district = int(target.split("-")[2])
+        mine = [e for e in entries if e["district"] == district and e["office"] == e["heading"]]
+        # A list with no entry for a district on the ballot has changed its
+        # layout: it concludes nothing (rules 8 and 36).
+        if not mine:
+            problems.append(f"AZ {target}: the Commission's list has no entry under 'U.S. House "
+                            f"of Rep. - District {district}'; the last photographs read are kept")
+            unread.add(target)
+            continue
+        joined, more = join("AZ", mine, wanted[target], profile_key_of, person_words)
+        problems += more
+        for i, key in sorted(joined.items()):
+            entry = mine[i]
+            # The list's stand-in for no picture, or a file it shows for more
+            # than one candidate, is nobody's photograph.
+            if entry["picture"] == _AZ_NO_PICTURE or shared[entry["picture"]] > 1:
+                continue
+            source = urllib.parse.urljoin(AZ_HOST + "/", entry["picture"])
+            try:
+                data = getter(source)
+            except GuidePhotoError as exc:
+                problems.append(f"AZ {target}: {exc}; the last photograph read is kept")
+                unread.add(key)
+                continue
+            words = (f"the Clean Elections Commission's candidate list, under its heading "
+                     f"'{entry['heading']}', prints '{entry['printed']}' in bold beside the "
+                     f"picture {entry['picture']}, in one entry with the office "
+                     f"'{entry['office']}' and the party '{entry['party']}'")
+            record, why = photo_record("AZ", target, "house", entry["name"], AZ_GUIDE, source,
+                                       words, data, None, {"list": AZ_GUIDE},
+                                       refused_into=_refused_into(refusals, target))
+            if why:
+                problems.append(f"AZ {target}: {entry['name']}'s photograph: {why}; not used")
+                continue
+            record["for"] = key
+            photos[key] = record
+    return photos, problems, unread
+
+
 # ------------------------------------------------------------------ Utah
 
 UT_INDEX = "https://vote.utah.gov/current-election-information/"
@@ -1315,7 +1438,7 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     log(f"  guide photographs: {sum(len(v) for v in want.values())} people in "
         f"{len(want)} races or offices without one ({', '.join(sorted(GUIDES))})")
     photos, problems, unread, refusals = {}, [], set(), {}
-    for reader in (read_washington, read_alaska, read_oregon, read_utah):
+    for reader in (read_washington, read_alaska, read_oregon, read_utah, read_arizona):
         found, more, gone_unread = reader(wanted, getter=getter, log=log, refusals=refusals)
         problems += more
         unread |= gone_unread
@@ -1354,6 +1477,14 @@ def fetch(root=".", profiles=None, stategov=None, getter=get, log=print):
     keep = {name: hosted[name] for name in chosen}
     for key, rec in sorted(photos.items()):
         data = rec.pop("_data", None)
+        if rec.get("method") == "linked":
+            # Shown from the guide's own address: nothing hosted here.
+            cache["photos"][key] = rec
+            was = ((previous or {}).get("photos") or {}).get(key) or {}
+            if was.get("photo") != rec["photo"]:
+                problems.append(f"{key}: photograph {'changed' if was.get('photo') else 'added'}: "
+                                f"{rec['photo']} (from {rec['page']}); look at it")
+            continue
         name = rec["photo"][len("photos/"):]
         if data is not None:
             path = os.path.join(root, photocopies.PHOTOS_DIR, name)
@@ -1430,11 +1561,15 @@ def record_problems(key, rec, manifest=None):
             out.append(f"guide_photos {key}: its {field} is not an https address")
     if rec.get("state") and rec["state"] not in GUIDES:
         out.append(f"guide_photos {key}: {rec['state']} is no guide this site reads")
-    if rec.get("photo") and not is_hosted(rec["photo"]):
+    if rec.get("method") == "linked":
+        host = (GUIDES.get(rec.get("state")) or {}).get("linked")
+        if not host or not str(rec.get("photo") or "").startswith(host + "/"):
+            out.append(f"guide_photos {key}: {rec.get('photo')} is not on the guide's own host")
+    elif rec.get("photo") and not is_hosted(rec["photo"]):
         out.append(f"guide_photos {key}: {rec['photo']} is not a file under photos/")
     if rec.get("for") and rec["for"] != key:
         out.append(f"guide_photos {key}: kept for {rec['for']}")
-    if rec.get("method", "unmodified") not in ("unmodified", "decoded"):
+    if rec.get("method", "unmodified") not in ("unmodified", "decoded", "linked"):
         out.append(f"guide_photos {key}: method {rec.get('method')!r}")
     if rec.get("method") == "decoded" and not (rec.get("sourceSha256") and rec.get("decoder")
                                                and rec.get("type") == "image/png"):
@@ -1562,6 +1697,8 @@ def copy_heavy(cache, root=".", maker=None, log=print):
     from . import photocopies
     shown = photocopies.Shown()
     for key, rec in sorted(((cache or {}).get("photos") or {}).items()):
+        if rec.get("method") == "linked":
+            continue                    # not hosted here: photocopies weighs it
         kind = "person" if key.startswith("person:") else "candidate"
         shown.add(rec["photo"], kind, key, {}, True)
     return photocopies.copy_hosted(root, shown, maker=maker, log=log)

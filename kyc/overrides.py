@@ -1292,6 +1292,12 @@ GUIDE_NAME_FORMS = {
         "District 3' and 'Kent S. Udell', prints 'kentudell.com'; the filing UDELL, KENT DR. "
         "(H6UT03182) names that site, KENTUDELL.COM, as its campaign's, and its committee "
         "C00938811 is 'KENT STEWART UDELL FOR CONGRESS' (FEC Form 1)"),
+    ("AZ", "Monica Alponte"): (
+        "person:FEC_H6AZ01488",
+        "the Citizens Clean Elections Commission's candidate list (read 2026-11-01) prints "
+        "'Monica Alponte', Libertarian, under 'U.S. House of Rep. - District 1'; the filing "
+        "ALPONTE, MONICA MARIA (H6AZ01488) is the only Alponte in AZ-1, and its own committee, "
+        "C00945287, is 'MONICA ALPONTE FOR CONGRESS' (FEC Form 1)"),
     ("UT", "Robert Moesinger"): (
         "person:FEC_H6UT02531",
         "Utah's Voter Information Pamphlet, page 13 (read 2026-11-01), headed 'Congressional "
@@ -1355,6 +1361,11 @@ NOT_A_PORTRAIT = {
     "photos/090c1a605a8a18bd1456.jpg":
         ("2026-11-01", "Robert Moesinger (UT-2): another person's long hair at the lower left "
                        "edge, cropped from a group photograph", OTHERS_IN_FRAME),
+    # The Clean Elections Commission's candidate list (guide_photos, read
+    # 2026-11-01).
+    "https://www.azcleanelections.gov/Custom/Picture/2556":
+        ("2026-11-01", "JoAnna Mendoza (AZ-6): a bearded man in a white shirt behind her at "
+                       "the upper left", OTHERS_IN_FRAME),
     "https://kaileebuller.com/wp-content/uploads/2026/03/Buller.jpg":
         ("2026-10-02", "a family photograph: four people in the snow"),
     "https://rickbrattin.com/wp-content/uploads/2026/02/Brattin-extended-scaled.png":

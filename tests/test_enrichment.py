@@ -1330,6 +1330,33 @@ class TestDrawnCampaignPages(unittest.TestCase):
         self.assertEqual(profile2["photos"][0], self.WIX)
         self.assertEqual(profile2["photoSource"], "campaign-site")
 
+    def test_a_site_the_static_read_followed_to_its_new_host_is_drawn_there(self):
+        # Seventeen of the November ballot's sites (2026-11-01) moved to a
+        # new host that still named the candidate; drawn at the filed
+        # address, the browser refused the redirect and they were never
+        # drawn. The drawn read is made at the address the static read took.
+        moved = "https://www.millerformontana.com/"
+        cache = {"people": {"FEC_H6MT02001": {"name": "Brian James Miller", "site": {
+            "url": "https://www.miller4montana.com", "final": moved, "safe": True,
+            "status": 200, "reason": "moved to millerformontana.com, still names the candidate"}}}}
+        self.assertEqual(enrich.drawn_address(cache["people"]["FEC_H6MT02001"]["site"]), moved)
+        home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
+                + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
+        found, drawn = self.run_render(
+            {moved: home}, cache, {self.WIX: (True, {"bytes": 47_000, "width": 432,
+                                                     "height": 681})})
+        self.assertEqual((found, drawn["url"], drawn["portrait"]), (1, moved, self.WIX))
+        profile = dict(self.PROFILE, campaignSite="https://www.miller4montana.com")
+        enrich.apply_cache([profile], cache)
+        self.assertEqual(profile["photos"][0], self.WIX)
+        # A move the static read did not accept, or one to plain http, is
+        # never drawn at its new address.
+        for site in ({"url": "https://a.example", "final": "https://b.example/", "safe": False,
+                      "reason": "reads as parked or expired"},
+                     {"url": "https://a.example", "final": "http://b.example/", "safe": True,
+                      "reason": "moved to b.example, still names the candidate"}):
+            self.assertEqual(enrich.drawn_address(site), "https://a.example")
+
     def test_validate_reads_a_drawn_portraits_evidence_and_fails_one_without(self):
         home = ("<html><head><title>Brian Miller for Congress</title></head><body>" + self.TEXT
                 + f'<img src="{self.WIX}" alt="Brian Miller"></body></html>')
