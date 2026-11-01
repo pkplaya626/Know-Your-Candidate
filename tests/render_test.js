@@ -16060,6 +16060,126 @@ async function testJumpBar() {
   });
 }
 
+/* The chips over a folded page's race rows: counted by the race heads' own
+ * tests, so a chip, its count and the badges never disagree (rule 73). */
+async function testRaceFilters() {
+  const PAGES = ["ca", "tx", "fl", "ny", "ga", "il"];
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const built = {};
+    for (const st of PAGES) built[st] = await buildPage("states/" + st + ".html", { now, setup: (w) => phoneWidth(w, true) });
+    suite(`state pages on a phone ${when} — the race filters' counts are the race heads' (rules 12, 73)`, () => {
+      const problems = [];
+      PAGES.forEach((st) => {
+        const { window, D, errors } = built[st];
+        if (errors.length) problems.push(st + ": " + errors.join(" | "));
+        const sections = [...D.querySelectorAll("section.race-foldable")];
+        // What each race's own head says, read from the page.
+        const heads = (word) => sections.filter((s) => [...s.querySelectorAll(".race-body .race-head .badge, .race-body .badge")]
+          .some((b) => b.textContent.trim().indexOf(word) === 0)).length;
+        const said = { open: heads("Open seat"), unchallenged: heads("No challenger on the ballot") };
+        const chips = {};
+        [...D.querySelectorAll(".race-filters [data-race-filter]")].forEach((c) => {
+          chips[c.getAttribute("data-race-filter")] = Number(c.querySelector(".race-filter-count").textContent);
+        });
+        if (chips.all !== sections.length) problems.push(st + ": All says " + chips.all + " over " + sections.length);
+        ["open", "unchallenged"].forEach((k) => {
+          const got = chips[k] || 0;
+          if (got !== said[k]) problems.push(`${st}: ${k} chip ${got}, heads ${said[k]}`);
+        });
+        const info = window.KYC.meta().states[st.toUpperCase()];
+        if ((chips.open || 0) !== (info.open || 0)) problems.push(`${st}: open chip ${chips.open} against the summary's ${info.open}`);
+      });
+      check("each chip counts the races whose head says so, and Open seats is the summary's count", problems.length === 0,
+        problems.slice(0, 6).join(" || "));
+      const past = when === "after Election Day";
+      const words = [].concat(...PAGES.map((st) => [...built[st].D.querySelectorAll(".race-filters [data-race-filter]")]
+        .map((c) => c.firstChild.textContent.trim())));
+      check(past ? "after Election Day the no-challenger chip reads Uncontested" : "the no-challenger chip is the head badge's words",
+        words.indexOf(past ? "Uncontested" : "No challenger on the ballot") !== -1 &&
+          words.indexOf(past ? "No challenger on the ballot" : "Uncontested") === -1, [...new Set(words)].join(" | "));
+    });
+
+    const { window, D } = built.ca;
+    const KYC = window.KYC;
+    const sections = [...D.querySelectorAll("section.race-foldable")];
+    const shown = () => sections.filter((s) => !s.hidden);
+    const status = D.getElementById("raceFilterStatus");
+    suite(`states/ca.html on a phone ${when} — picking out the open seats`, () => {
+      check("a group of chips over the rows, All pressed", D.querySelector(".race-filters").getAttribute("role") === "group" &&
+        D.querySelector('[data-race-filter="all"]').getAttribute("aria-pressed") === "true" && status.textContent === "");
+      D.querySelector('.race-filters [data-race-filter="open"]').click();
+      const want = sections.filter((s) => KYC.cards.raceFilters.open(KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0]));
+      check("only the open seats' rows are shown", shown().length === want.length && shown().every((s) => want.indexOf(s) !== -1),
+        shown().map((s) => s.getAttribute("data-race")).join(","));
+      check("the live line says how many, of how many", status.textContent === `Showing ${want.length} of ${sections.length} races` &&
+        status.getAttribute("aria-live") === "polite", status.textContent);
+      check("with Show all beside it", !D.querySelector(".race-filter-all").hidden);
+      check("the filter is in the address", /#\/\?races=open$/.test(window.location.href), window.location.href);
+      // A search inside the filter keeps the filter.
+      const outsider = sections.filter((s) => want.indexOf(s) === -1)[0];
+      const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;
+      const input = D.getElementById("stateSearch");
+      if (input) {
+        input.value = name;
+        input.dispatchEvent(new window.Event("input"));
+      }
+    });
+  }
+  // The search runs after its debounce: read it, then the jumps.
+  await settle(200);
+  for (const [now, when] of [[undefined, "on the campaign clock"]]) {
+    const page = await buildPage("states/ca.html", { now, hash: "#/?races=open", setup: (w) => phoneWidth(w, true) });
+    const { window, D } = page;
+    const KYC = window.KYC;
+    const sections = [...D.querySelectorAll("section.race-foldable")];
+    const shown = () => sections.filter((s) => !s.hidden);
+    const isOpen = (s) => KYC.cards.raceFilters.open(KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0]);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a shared filter, and jumps out of it`, () => {
+      check("the address's filter is applied as the page loads",
+        D.querySelector('[data-race-filter="open"]').getAttribute("aria-pressed") === "true" && shown().every(isOpen) &&
+          shown().length === sections.filter(isOpen).length);
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      const input = D.getElementById("stateSearch");
+      const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;
+      check("a race the filter leaves out is not brought back by a search alone", (() => {
+        input.value = name;
+        input.dispatchEvent(new window.Event("input"));
+        return true;
+      })());
+    });
+    await settle(200);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a search inside the filter`, () => {
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      check("the matching race outside the filter stays hidden", outsider.hidden && shown().every(isOpen));
+      const input = D.getElementById("stateSearch");
+      input.value = "";
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a jump to a race the filter leaves out`, () => {
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      const select = D.getElementById("raceJumpSelect");
+      select.value = "race-" + outsider.getAttribute("data-race");
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      check("shows every race again and opens the one asked for",
+        !outsider.hidden && outsider.classList.contains("is-open") && shown().length === sections.length &&
+          D.querySelector('[data-race-filter="all"]').getAttribute("aria-pressed") === "true");
+      check("and the address no longer names a filter", !/races=/.test(window.location.href), window.location.href);
+      D.querySelector('.race-filters [data-race-filter="open"]').click();
+      D.querySelector(".race-filter-all").click();
+      check("Show all shows every row and returns to the All chip",
+        shown().length === sections.length && D.activeElement === D.querySelector('.race-filters [data-race-filter="all"]'));
+    });
+  }
+  const desk = await buildPage("states/ca.html", { hash: "#/?races=open" });
+  suite("states/ca.html#/?races=open at 1000px and wider — no filter, every race shown", () => {
+    const sections = [...desk.D.querySelectorAll("section.race-foldable")];
+    check("every race shown, the fold bar with its chips hidden",
+      sections.every((s) => !s.hidden) && desk.D.querySelector(".race-fold-bar").hidden);
+    check("no page errors", desk.errors.length === 0, desk.errors.join(" | "));
+  });
+}
+
 async function testStatePhone() {
   const PAGES = ["ca", "tx", "fl", "ny", "la", "ok", "wa", "il", "ga", "al"];
   const built = {};
@@ -16953,6 +17073,7 @@ async function testGuidePhotos() {
   if (!only || only === "states") await testStates();
   if (!only || only === "states" || only === "statephone") await testStatePhone();
   if (!only || only === "states" || only === "statephone" || only === "jumpbar") await testJumpBar();
+  if (!only || only === "states" || only === "statephone" || only === "racefilters") await testRaceFilters();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
 if (!only || only === "states") await testCertifiedBallots();

@@ -469,13 +469,33 @@
       holder.name + " is not seeking re-election.";
   }
 
+  /* Which races a reader can pick out, by the tests the race's own head
+   * badges use, so a filter's count and the badges never disagree (rules
+   * 12, 73): an open seat is the head's "Open seat", and a race with no
+   * challenger is the head's "No challenger on the ballot" - its primary
+   * settled, and nobody but the holder on its November ballot, profile or
+   * not. The grid's chip and the state page's filter count with these. */
+  var RACE_FILTERS = {
+    open: function (race) { return !!race.openSeat; },
+    unchallenged: function (race) { return !!(race.settled && !race.contested && race.results); },
+  };
+
+  /** How many of *list* each filter keeps, and "all". */
+  function raceFilterCounts(list) {
+    var out = { all: list.length };
+    Object.keys(RACE_FILTERS).forEach(function (key) {
+      out[key] = list.filter(RACE_FILTERS[key]).length;
+    });
+    return out;
+  }
+
   /** The badges that summarise a race, as data (headBadge), in the order
    *  its head shows them. */
   function raceBadgeItems(race) {
     var badges = [];
     var outcome = outcomeBadge(race);
     if (outcome) badges.push({ key: "outcome", html: outcome, text: outcome.replace(/<[^>]*>/g, "") });
-    if (race.openSeat) {
+    if (RACE_FILTERS.open(race)) {
       badges.push(headBadge("open", "badge-warn", "Open seat", openSeatWhy(race)));
     } else if (race.holderMoved) {
       // Not open - a member is running here under the new number - but its
@@ -515,7 +535,7 @@
       var word = race.openSeat || !(race.incumbentIds || []).length ? "candidate" : "challenger";
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
         (race.settled ? " on the ballot" : "")));
-    } else if (race.settled && res) {
+    } else if (RACE_FILTERS.unchallenged(race)) {
       var gone = res.eliminated + res.withdrawn + res.unlisted;
       badges.push(headBadge("count", "badge-neutral",
         "No challenger on the ballot" + (gone ? " · " + gone + " out" : ""),
@@ -1505,6 +1525,8 @@
     card: card,
     contactOf: contactOf,
     raceBadges: raceBadges,
+    raceFilters: RACE_FILTERS,
+    raceFilterCounts: raceFilterCounts,
     raceBadgeItems: raceBadgeItems,
     headBadgeHtml: headBadgeHtml,
     sharedBadges: sharedBadges,

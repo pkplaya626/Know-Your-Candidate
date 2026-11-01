@@ -311,6 +311,9 @@
     var target = doc.getElementById(id);
     if (!target) return null;
     var section = target.closest ? target.closest("section.race-foldable") : null;
+    // A race the filter left out is shown with all the others: a jump to
+    // a race must never land on nothing.
+    if (section && fold && fold.phone && !filterPasses(section)) setRaceFilter("all");
     if (section && fold && fold.phone) setOpen(section, true, "reader");
     // At once, never animated: a smooth scroll's end is worked out before
     // it starts, and the delegation's cards above the races grow as they
@@ -389,6 +392,73 @@
     global.addEventListener("hashchange", function () {
       if (/^#race-/.test(global.location.hash)) jumpToSection();
     });
+  }
+
+  /* ------------------------------------------- filters over the race rows */
+
+  /* On a phone, chips over the rows pick out the open seats and the races
+   * with no challenger on the ballot, counted by the race heads' own tests
+   * (KYC.cards.raceFilters, rule 73), with a live line saying how many are
+   * shown and a way back to all of them. The filter is in the address
+   * (#/?races=open), so a shared link shows the same rows. */
+  var raceFilter = "all";
+
+  /** A chip's words: the head badge's own words for the races it keeps,
+   *  in the past from the day after Election Day (rule 63). */
+  function filterWords(key) {
+    var past = KYC.electionStatus(2026).phase === "post-election" || KYC.recordPhase();
+    if (key === "open") return "Open seats" + (KYC.recordPhase() ? " in 2026" : "");
+    if (key === "unchallenged") return past ? "Uncontested" : "No challenger on the ballot";
+    return "All";
+  }
+
+  function raceFilterBar(list) {
+    var counts = cards.raceFilterCounts(list);
+    var keys = ["all"].concat(Object.keys(cards.raceFilters).filter(function (k) { return counts[k]; }));
+    if (keys.length < 2) return "";
+    return '<div class="race-filters" role="group" aria-label="Show races">' + keys.map(function (k) {
+      return '<button type="button" class="chip race-filter" data-race-filter="' + k + '" aria-pressed="' +
+        String(k === "all") + '">' + KYC.escapeHtml(filterWords(k)) +
+        ' <span class="race-filter-count">' + counts[k] + "</span></button>";
+    }).join("") + "</div>" +
+      '<p class="race-filter-status"><span id="raceFilterStatus" role="status" aria-live="polite"></span> ' +
+      '<button type="button" class="link-button race-filter-all" data-race-filter="all" hidden>Show all</button></p>';
+  }
+
+  function raceById(id) {
+    return races.filter(function (r) { return r.id === id; })[0] || null;
+  }
+
+  function filterPasses(section) {
+    if (raceFilter === "all" || !cards.raceFilters[raceFilter]) return true;
+    var race = raceById(section.getAttribute("data-race"));
+    return !!race && cards.raceFilters[raceFilter](race);
+  }
+
+  /** Pick out *key*'s races ("all" for every one). *quiet*: from the
+   *  address, which already says so. */
+  function setRaceFilter(key, quiet) {
+    var chip = doc.querySelector('.race-filters [data-race-filter="' + key + '"]');
+    if (!chip || !cards.raceFilters[key]) key = "all";
+    raceFilter = key;
+    Array.prototype.forEach.call(doc.querySelectorAll(".race-filters [data-race-filter]"), function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-race-filter") === key));
+    });
+    searchRaces(searchQuery());
+    filterStatus();
+    if (!quiet && KYC.router) KYC.router.writeFilters({ races: key });
+  }
+
+  function filterStatus() {
+    var status = el("raceFilterStatus");
+    if (!status) return;
+    var sections = raceSections();
+    var shown = sections.filter(function (s) { return !s.hidden; }).length;
+    var on = raceFilter !== "all" && !!(fold && fold.phone);
+    var words = on ? "Showing " + shown + " of " + plural(sections.length, "race") : "";
+    if (status.textContent !== words) status.textContent = words;
+    var all = doc.querySelector(".race-filter-all");
+    if (all) all.hidden = !on;
   }
 
   /* A non-voting member's title, as summary.py gives it: Puerto Rico's
@@ -685,6 +755,7 @@
         foldable
           ? '<div class="race-fold-bar" hidden>' + (sharedLine
             ? '<p class="race-shared">All ' + all + " races: " + sharedLine + "</p>" : "") +
+            raceFilterBar(senateRaces.concat(houseRaces)) +
             '<button type="button" class="btn race-open-all" data-race-open-all>Open all ' + all +
             " races</button></div>"
           : "",
@@ -768,6 +839,7 @@
     // A race reached by a link (a shared race's page, the lookup's answer,
     // Your ballot, a district page) opens where the page folds.
     var race = section.closest && section.closest("section.race-foldable");
+    if (race && fold && fold.phone && !filterPasses(race)) setRaceFilter("all", true);
     if (race && fold && fold.phone) setOpen(race, true, "reader");
     var jump = function () {
       if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
@@ -777,6 +849,8 @@
     if (m[2] && m[1] === "findrep" && KYC.findRep) KYC.findRep.ask(m[2]);
     if (global.history && global.history.replaceState) {
       global.history.replaceState(global.history.state, "", global.location.pathname + global.location.search);
+      // The races still picked out, as the address said before the jump.
+      if (raceFilter !== "all") KYC.router.writeFilters({ races: raceFilter });
     }
   }
 
@@ -866,8 +940,10 @@
     var folded = KYC.foldText(q || "");
     raceSections().forEach(function (section) {
       var id = section.getAttribute("data-race");
+      // A race the filter leaves out stays out, whatever the search finds.
+      var kept = filterPasses(section);
       if (!q) {
-        section.hidden = false;
+        section.hidden = !kept;
         if (fold.opened[id] === "search") setOpen(section, false);
         return;
       }
@@ -877,10 +953,11 @@
       });
       var row = section.querySelector(".race-row");
       var named = !hit && !!row && KYC.foldText(row.textContent).indexOf(folded) !== -1;
-      section.hidden = !hit && !named;
-      if (hit && !fold.opened[id]) setOpen(section, true, "search");
-      if (!hit && fold.opened[id] === "search") setOpen(section, false);
+      section.hidden = (!hit && !named) || !kept;
+      if (hit && kept && !fold.opened[id]) setOpen(section, true, "search");
+      if ((!hit || !kept) && fold.opened[id] === "search") setOpen(section, false);
     });
+    filterStatus();
   }
 
   function searchQuery() {
@@ -947,6 +1024,16 @@
         if (picker && picker.focus) picker.focus({ preventScroll: true });
         return;
       }
+      var filter = event.target.closest("[data-race-filter]");
+      if (filter) {
+        setRaceFilter(filter.getAttribute("data-race-filter"));
+        // "Show all" goes back to the chips it undid.
+        if (filter.classList.contains("race-filter-all")) {
+          var chip = doc.querySelector('.race-filters [data-race-filter="all"]');
+          if (chip) chip.focus();
+        }
+        return;
+      }
       if (event.target.closest("[data-race-open-all]")) {
         var sections = raceSections();
         var all = sections.every(function (s) { return !!fold.opened[s.getAttribute("data-race")]; });
@@ -974,6 +1061,8 @@
   function applyRoute(route) {
     if (route.view === "profile" && KYC.profile.open(route.id, { fromRoute: true })) return;
     if (KYC.profile.isOpen()) KYC.profile.close();
+    // The races the address picks out (#/?races=open), where the page folds.
+    if (fold && route.view === "list") setRaceFilter(route.params.races || "all", true);
   }
 
   KYC.ready(function () {
