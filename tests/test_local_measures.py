@@ -245,7 +245,8 @@ class TheRules(Hosts, unittest.TestCase):
         # every contest, so the City of San Diego and Chula Vista, which it
         # prints no question of, stay "unlisted".
         for label in ("Composite Page 20", "COMPOSITE BALLOT", "Sample Ballot",
-                      "EN_20 Composite Page 20"):
+                      "EN_20 Composite Page 20", "Composite Ballot - General 2026",
+                      "Sample Ballot, Gubernatorial General Election 2026"):
             data = cache()
             b = data["counties"]["48026"]["own"]["basis"]
             b["source"]["quote"] = "OFFICIAL BALLOT ... " + label

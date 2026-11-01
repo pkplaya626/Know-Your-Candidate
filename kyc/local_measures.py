@@ -86,8 +86,13 @@ _FIPS = re.compile(r"^\d{5}$")
 _PLACE = re.compile(r"^\d{7}$")
 _NOT_A_TITLE = re.compile(r"https?:|www\.|\blinked\b|\bdescribed as\b|\bedition:|\bquery:", re.I)
 _CUT = re.compile(r"\.\.\.|…")
-_ONLY_A_LABEL = re.compile(r"^\W*(?:EN_\d+\W*)?(?:composite|facsimile|reference|sample|"
-                           r"official)(?:\W+(?:ballot|page))*(?:\W+\d+)?\W*$", re.I)
+# A document's label: a style or page code before it ("EN_20"), the kind of
+# ballot, a page number, and the election it is for ("General 2026").
+_ONLY_A_LABEL = re.compile(r"^\W*(?:[A-Z]{1,3}_?\d+\W*)?(?:composite|facsimile|reference|"
+                           r"sample|official)(?:\W+(?:ballot|page))*(?:\W+\d+)?"
+                           r"(?:\W+(?:(?:gubernatorial|presidential|statewide|consolidated|"
+                           r"general|primary|special|november|municipal|election)\W+)*"
+                           r"\d{4})?\W*$", re.I)
 _OFF_THE_BALLOT = re.compile(r"\bwithdrawn\b|\bremoved from the ballot\b|\bstricken from the "
                              r"ballot\b|\btaken off the ballot\b", re.I)
 
