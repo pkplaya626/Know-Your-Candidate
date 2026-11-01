@@ -174,6 +174,11 @@ class TestStatusTable(unittest.TestCase):
                       "In the general election runoff", "On the November ballot: awaiting result",
                       "In the December 12 general election",
                       "Ran in the December 12 general election: awaiting result",
+                      "Elected on December 12", "Lost the December 12 general election",
+                      "Re-elected on December 12", "Lost re-election on December 12",
+                      "Won the December 1 runoff", "Lost the December 1 runoff",
+                      "Re-elected in the December 1 runoff",
+                      "Lost re-election in the December 1 runoff",
                       "Advanced to the November ballot", "Not on the November 3 open-primary ballot"):
             self.assertIn(words, labels)
         self.assertEqual({row[0] for row in table["statuses"]}, set(share._RACE_STATUS))

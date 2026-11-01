@@ -572,6 +572,48 @@
     return (date && openRound(date, date < localDay(now || new Date()))) || RACE_STATUS.runoff;
   }
 
+  /* A result the December round decided, in that round's words (rule 75):
+   * Louisiana's December 12 general election, Georgia's December 1 general
+   * election runoff. "Elected in November" and "Lost the November
+   * election" were false of both (PR #170 review). The pipeline says which
+   * round decided it and when (`raceStatusDecided`: `{date, open}`,
+   * results.py); *open* is an open primary's general election, else a
+   * general election runoff. Null for any other status, or no date. */
+  function decidedRound(status, decided) {
+    var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String((decided || {}).date || ""));
+    if (!m || (status !== "elected" && status !== "defeated")) return null;
+    var month = ROUND_MONTHS[+m[1] - 1];
+    var day = month + " " + (+m[2]);
+    var short = month.slice(0, 3) + " " + (+m[2]);
+    var won = status === "elected";
+    var base = RACE_STATUS[status];
+    var round = decided.open ? "the " + day + " general election"
+      : "the " + day + " general election runoff";
+    var card = decided.open ? (won ? "Elected " : "Lost on ") + short
+      : (won ? "Won " : "Lost ") + short + " runoff";
+    var memberCard = (won ? "Re-elected " : "Lost re-election ") + short;
+    return { cls: base.cls, rank: base.rank, card: card, mate: card, short: base.short,
+      long: decided.open ? (won ? "Elected on " + day : "Lost " + round)
+        : (won ? "Won " : "Lost ") + "the " + day + " runoff",
+      title: (won ? "Won " : "Lost ") + round + (decided.open
+        ? ", between the top two of the open primary"
+        : ", after no candidate won a majority in November") + ", per Wikipedia's results page.",
+      member: { card: memberCard, mate: memberCard, short: base.member.short,
+        long: (won ? "Re-elected " : "Lost re-election ") + (decided.open ? "on " + day
+          : "in the " + day + " runoff"),
+        title: (won ? "Won" : "Lost") + " re-election to this seat in " + round +
+          ", per Wikipedia's results page." } };
+  }
+
+  /** The December round that decided *item*'s result, `{date, open}`, read
+   *  from the record contestStatus reads, or null. */
+  function decidedOf(item) {
+    if (!item) return null;
+    var record = !runsElsewhere(item) || item.raceStatusRace === item.contestRaceId ? item
+      : byId(item.alsoRunningId) || {};
+    return record.raceStatusDecided || null;
+  }
+
   /** A race the page holds, by id, or null. */
   function raceById(id) {
     var found = null;
@@ -642,7 +684,9 @@
    *  `{cls, label, title, rank, off}`, or null for no status. Options:
    *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
    *  record's raceStatusUnconfirmed; `appointed` - an appointee, who is
-   *  never "not running for re-election"; `now` - the clock, for tests. */
+   *  never "not running for re-election"; `round` - an open primary's
+   *  December round's date; `decided` - the December round that decided a
+   *  result (`raceStatusDecided`); `now` - the clock, for tests. */
   /* Through to November from an all-party primary - California's and
    * Washington's top two, Alaska's top four: nobody won a party's
    * nomination, and two of one party can both go through. The pipeline
@@ -670,6 +714,8 @@
     if (status === "runoff" && opts.round) {
       spec = runoffWords({ primaryKind: "open", generalRunoff: opts.round }, opts.now);
     }
+    // A result the December round decided, in its words (decidedRound).
+    if (opts.decided) spec = decidedRound(status, opts.decided) || spec;
     var listed = opts.source === "qualified";
     if (listed && LISTED[status]) spec = LISTED[status];
     var certified = opts.source === "certified" && CERTIFIED[status];
@@ -736,6 +782,7 @@
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
     return raceStatus(status, form, {
       round: race && race.primaryKind === "open" ? race.generalRunoff : undefined,
+      decided: record.raceStatusDecided || undefined,
       own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
         !(item.appointed && status !== "unlisted"),
       unconfirmed: !!item.raceStatusUnconfirmed,
@@ -878,6 +925,20 @@
       add(openRound(open.generalRunoff, true), "After that general election: in it, and the " +
         "results this site last read had not marked a winner.");
     }
+    // A result a December round decided, in its words (decidedRound), for
+    // each round someone on the page holds one from.
+    var rounds = {};
+    people().forEach(function (p) {
+      var d = p.raceStatusDecided;
+      if (d && d.date && !rounds[d.date + "/" + !!d.open]) {
+        rounds[d.date + "/" + !!d.open] = d;
+        ["elected", "defeated"].forEach(function (status) {
+          var spec = decidedRound(status, d);
+          add(spec);
+          member(spec);
+        });
+      }
+    });
     [{ maybeNamed: ["a similar name"] }, { unprinted: { kind: "write-in" } },
      { unprinted: { kind: "unopposed" } }, { ballotUnknown: true }].forEach(function (fake) {
       fake.isCandidate = true;
@@ -908,6 +969,10 @@
     var seat = item.contestLabel.replace(/ • /, " ");
     var status = contestStatus(item);
     var past = OFF_BALLOT[status] || status === "defeated";
+    // A loss in a December round is that round's (decidedRound).
+    var december = status === "defeated" && decidedRound(status, decidedOf(item));
+    var lost = december ? "l" + december.long.slice(1)
+      : status === "defeated" ? "lost in November" : "is not on its November ballot";
     var end = String(item.term_start || "").split(" - ")[1] || "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) end = "";
     if (item.renumbered) {
@@ -917,7 +982,7 @@
             label: "Ran in " + number + " (redrawn)",
             title: "Ran for re-election under the state's new district map, in " +
               item.contestLabel + ", and " +
-              (status === "defeated" ? "lost in November" : "is not on its November ballot") +
+              lost +
               "; holds " + item.officeLabel + (end ? " until " + end : "") + "." }
         : { cls: "badge-neutral", past: false, renumbered: true,
             label: "Running in " + number + " (redrawn)",
@@ -927,7 +992,7 @@
     if (past) {
       return { cls: "badge-neutral", past: true, label: "Ran for " + seat,
         title: "Ran for " + item.contestLabel + " in 2026 and " +
-          (status === "defeated" ? "lost in November" : "is not on its November ballot") +
+          lost +
           "; not seeking re-election to " + item.officeLabel +
           (end ? ", whose term ends " + end : "") + "." };
     }
@@ -3726,6 +3791,7 @@
     raceStatus: raceStatus,
     raceStatusOf: raceStatusOf,
     runoffWords: runoffWords,
+    decidedRound: decidedRound,
     standing: standing,
     otherCampaign: otherCampaign,
     contestLine: contestLine,

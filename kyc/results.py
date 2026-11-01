@@ -1129,12 +1129,15 @@ _COUNTY_CONVENTION = re.compile(r"\bcounty\b.*\bconvention\b", re.I)
 
 def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
                  general_held=False, general_runoff=False, general_runoff_held=False,
-                 ranked_choice=False):
+                 ranked_choice=False, late=None):
     """Who is still standing, from a race's results tables.
 
     Returns ``{name: status}`` for everyone named in a primary-stage table,
     on the general ballot, in the infobox, or in a Withdrawn / Eliminated
-    candidate list.
+    candidate list. *late*, a set, is given the names whose ELECTED or
+    DEFEATED the December round decided (an open primary's general
+    election, Georgia's general election runoff), so the page can say so in
+    that round's words, never "in November" (PR #170 review).
 
     The general-election table, when the page has one, is the authority: the
     people in it are the nominees and everyone else named in a primary or
@@ -1244,7 +1247,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             if status.get(row["name"]) in (None, ADVANCED):
                 status[row["name"]] = NOMINEE
     if general_held and open_primary:
-        _settle_open_primary(status, boxes)
+        _settle_open_primary(status, boxes, late)
     elif general_held:
         # A seat won only by a majority - ranked choice (Maine, Alaska), or a
         # December runoff below one (Georgia) - is not decided by a mark on a
@@ -1252,7 +1255,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
         needs_majority = ranked_choice or general_runoff
         _settle_general(status, generals, general_runoff_rows, general_runoff_held,
                         majority_of=(general_tables, {r["name"] for r in infobox})
-                        if needs_majority else None)
+                        if needs_majority else None, late=late)
     return status
 
 
@@ -1265,12 +1268,13 @@ def _unpartisan_runoff(title):
     return _stage(title) == "runoff" and not _PARTY_WORDS.search(title)
 
 
-def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None):
+def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None, late=None):
     """Who won in November, from the general table's marked winner.
 
     Someone already WITHDRAWN - listed as having withdrawn after the ballots
     were printed, their row left in the table - stays withdrawn unless the
-    table marks them the winner."""
+    table marks them the winner. The two a decided general runoff settles
+    go in *late* (:func:`resolve_race`)."""
     ballot = [r for r in generals if not r["withdrawn"]]
     names = {r["name"] for r in ballot
              if status.get(r["name"]) != WITHDRAWN or r["won"]}
@@ -1285,6 +1289,8 @@ def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None
             if row["withdrawn"]:
                 continue
             status[row["name"]] = (ELECTED if row["won"] else DEFEATED) if decided else RUNOFF
+            if decided and late is not None:
+                late.add(row["name"])
         return
     winners = {r["name"] for r in ballot if r["won"]}
     if len(winners) != 1:
@@ -1320,8 +1326,10 @@ def _majority(rows, winners):
     return bool(base) and 2 * marked[0]["votes"] > base
 
 
-def _settle_open_primary(status, boxes):
-    """An open primary's first round is the November election itself."""
+def _settle_open_primary(status, boxes, late=None):
+    """An open primary's first round is the November election itself. The
+    two its December general election settles go in *late*
+    (:func:`resolve_race`)."""
     final = {r["name"]: r for title, rows in boxes if _clean_title(title) == OPEN_RUNOFF_TITLE
              for r in rows}
     first = {r["name"] for title, rows in boxes if _clean_title(title) == OPEN_PRIMARY_TITLE
@@ -1329,6 +1337,8 @@ def _settle_open_primary(status, boxes):
     for name, current in list(status.items()):
         if name in final and not final[name]["withdrawn"]:
             status[name] = ELECTED if final[name]["won"] else DEFEATED
+            if late is not None:
+                late.add(name)
         elif current == NOMINEE:
             status[name] = ELECTED          # a majority on the first round
         elif current == ADVANCED:
@@ -2364,12 +2374,13 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             boxes.append((INFOBOX_TITLE, nominees))
         boxes.extend(candidate_lists(section))
         held = runoff_held({(state, office): slot}, state, office, today)
+        late = set()
         outcome = resolve_race(boxes, has_runoff=bool(slot.get("runoff")),
                                open_primary=is_open, runoff_held=held,
                                general_held=general_held(today),
                                general_runoff=state in _general_runoffs(),
                                general_runoff_held=general_runoff_held(state, today),
-                               ranked_choice=state in RANKED_CHOICE)
+                               ranked_choice=state in RANKED_CHOICE, late=late)
         if not outcome:
             if is_open and any(r.get("won") for _, rs in boxes for r in rs):
                 # Winners are marked, but not as a result the open-primary
@@ -2431,6 +2442,20 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             "ambiguous": ambiguous,
             "decided": coverage(boxes, open_primary=is_open, runoff_held=held),
         }
+        # Whose result the December round decided, and which round: an
+        # open primary's general election on the seat's own date, or the
+        # state's general election runoff (overrides.GENERAL_RUNOFFS). The
+        # page says it in that round's words (KYC.decidedRound), never "in
+        # November" (PR #170 review).
+        late_ids = sorted(cid for cid, name in names.items()
+                          if name in late and status.get(cid) in (ELECTED, DEFEATED))
+        if late_ids:
+            from . import overrides
+            date = slot.get("runoff") if is_open else (
+                overrides.GENERAL_RUNOFFS.get(state) or ("",))[0]
+            if date:
+                races[rid]["decidedIn"] = {"date": date, "open": bool(is_open),
+                                           "ids": late_ids}
 
     # An open-primary seat its page has not settled - before its count, or
     # after it while the page marks no result, cannot be fetched, is missing
@@ -2945,6 +2970,11 @@ def apply_cache(profiles, cache, field=None):
                     continue
             profile["raceStatus"] = status
             profile["raceStatusRace"] = rid
+            late = race.get("decidedIn") or {}
+            if status in (ELECTED, DEFEATED) and candidate_id in (late.get("ids") or ()):
+                # Decided in the December round, said in its words
+                # (KYC.decidedRound): {date, open}.
+                profile["raceStatusDecided"] = {"date": late["date"], "open": bool(late.get("open"))}
             kind = ALL_PARTY_PRIMARIES.get(rid.split("-")[1])
             if kind and status == NOMINEE:
                 # Through to November from an all-party primary: the page

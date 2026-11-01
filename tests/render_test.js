@@ -10319,6 +10319,63 @@ async function testLouisianaDecember() {
       long.label === "Ran in the December 12 general election: awaiting result" &&
         /had not marked a winner/.test(long.title), long.label + " / " + long.title);
   });
+
+  // On a phone, Louisiana's races fold to rows (rule 99): the December
+  // race's row says its round in the same words (PR #170 review).
+  const phone = await buildPage("states/la.html", { now: "2026-11-05T09:00:00", data: louisianaNight,
+    setup: (w) => phoneWidth(w, true) });
+  suite("states/la.html on a phone — the December race's row in Louisiana's words", () => {
+    const { december: d3 } = phone.window.__laNight || {};
+    check("no page errors", phone.errors.length === 0, phone.errors.join(" | "));
+    const sec = d3 && phone.D.getElementById("race-" + d3.id);
+    const row = sec && sec.querySelector(".race-row") ? readRow(sec) : null;
+    check("its row says the Dec 12 general election, never a runoff",
+      !!row && /Dec 12 general election/.test(row.text) && !/runoff/i.test(row.text),
+      row ? row.text : "no row");
+  });
+
+  // Decided on December 12: the two read that day's result, never "in
+  // November", and November 3's losers keep theirs (PR #170 review).
+  const decided = await buildPage("states/la.html", { now: "2026-12-14T09:00:00",
+    data: (window, meta) => {
+      louisianaNight(window, meta);
+      meta.election = Object.assign({}, meta.election, { resultsAsOf: "2026-12-13" });
+      const { december: r, inIt: two } = window.__laNight;
+      if (!r) return;
+      const round = { date: r.generalRunoff, open: true };
+      two[0].raceStatus = "elected";
+      two[1].raceStatus = "defeated";
+      two.forEach((p) => { p.raceStatusDecided = round; });
+    } });
+  suite("states/la.html — once December 12 is decided, its result in its own words", () => {
+    const { december: d4, inIt: two } = decided.window.__laNight || {};
+    if (!d4) { check("a race to read", false); return; }
+    const KYC = decided.window.KYC;
+    check("no page errors", decided.errors.length === 0, decided.errors.join(" | "));
+    const texts = two.map((p) => (cardOf(decided.D, d4, p) || {}).textContent || "");
+    check("its winner's card reads Elected Dec 12, its loser's Lost on Dec 12",
+      /(Re-e|E)lected Dec 12/.test(texts[0]) && /Lost (on|re-election) Dec 12/.test(texts[1]) &&
+        !texts.some((t) => /November/.test(t)), texts.join(" | "));
+    const longs = two.map((p) => KYC.standing(p, "long"));
+    check("and the profile says December 12, credited to the results",
+      /^(Re-elected|Elected) on December 12$/.test(longs[0].label) &&
+        /^Lost (the December 12 general election|re-election on December 12)$/.test(longs[1].label) &&
+        longs.every((s) => /December 12 general election/.test(s.title) && /Wikipedia/.test(s.title)),
+      longs.map((s) => s.label + " / " + s.title).join(" | "));
+    check("the race's head names its winner",
+      /Won by /.test((head(decided.D, d4) || {}).textContent || ""));
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("the grid's key holds the December round's results",
+      key.indexOf("Elected Dec 12") !== -1 && key.indexOf("Lost on Dec 12") !== -1, key.join(", "));
+    // Georgia's December 1 runoff, decided, in its own words.
+    const ga = { date: "2026-12-01", open: false };
+    check("a general election runoff's result is that runoff's",
+      KYC.raceStatus("elected", "long", { decided: ga }).label === "Won the December 1 runoff" &&
+        KYC.raceStatus("defeated", "card", { decided: ga }).label === "Lost Dec 1 runoff" &&
+        KYC.raceStatus("elected", "long", { decided: ga, own: true }).label ===
+          "Re-elected in the December 1 runoff" &&
+        KYC.raceStatus("elected", "long").label === "Elected in November");
+  });
 }
 
 /* The grid's search and its controls, as the audit of 2026-10-17 found
@@ -13089,19 +13146,21 @@ async function testSharePages() {
       return new window.Date(y, m - 1, d + 1, 12);
     };
     table.statuses.forEach((row) => {
-      const [status, allParty, source, round, held, own, appointed, unconfirmed, minor, post,
-        label, gone] = row;
+      const [status, allParty, source, round, held, decided, own, appointed, unconfirmed, minor,
+        post, label, gone] = row;
       const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
         unconfirmed: !!unconfirmed, minor: !!minor, allParty: allParty || undefined,
-        source: source || undefined, round: round || undefined,
+        source: source || undefined, round: round || undefined, decided: decided || undefined,
         now: held ? dayAfter(round) : post ? AFTER_DAY : CAMPAIGN_DAY });
       if (!spec || spec.label !== label || !!spec.off !== !!gone) {
-        off.push(`${row.slice(0, 10).join("/")}: "${spec && spec.label}" for "${label}"`);
+        off.push(`${JSON.stringify(row.slice(0, 11))}: "${spec && spec.label}" for "${label}"`);
       }
     });
     check("every status, member or not, appointed, unconfirmed, minor-party, all-party, " +
-      "certified or qualified, before and after Election Day, and an open primary's December " +
-      "round before and after its day", table.statuses.length > 1000 &&
+      "certified or qualified, before and after Election Day, an open primary's December " +
+      "round before and after its day, and a result each kind of December round decided",
+      table.statuses.length > 1000 && table.statuses.some((row) => row[5] && row[5].open) &&
+      table.statuses.some((row) => row[5] && !row[5].open) &&
       table.statuses.some((row) => row[3] && row[4]) && off.length === 0,
       off.slice(0, 4).join(" | ") || `${table.statuses.length} cases`);
     const credited = table.credits.filter(([status, source, name, credit]) =>

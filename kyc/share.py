@@ -114,6 +114,28 @@ def _open_round(date, held=False):
     return {"long": f"In the {words} general election"}
 
 
+def _decided_round(status, decided):
+    """KYC.decidedRound's long words: a result the December round decided
+    (``raceStatusDecided``, ``{date, open}``) in that round's words, never
+    "in November" - an open primary's general election, else a general
+    election runoff (Georgia's). None for any other status, or no date."""
+    if status not in ("elected", "defeated") or not decided:
+        return None
+    try:
+        _year, month, day = (int(part) for part in str(decided.get("date") or "").split("-"))
+        words = f"{_MONTHS[month - 1]} {day}"
+    except (ValueError, IndexError):
+        return None
+    won = status == "elected"
+    if decided.get("open"):
+        return {"long": f"Elected on {words}" if won else f"Lost the {words} general election",
+                "member": {"long": f"Re-elected on {words}" if won
+                           else f"Lost re-election on {words}"}}
+    return {"long": f"Won the {words} runoff" if won else f"Lost the {words} runoff",
+            "member": {"long": f"Re-elected in the {words} runoff" if won
+                       else f"Lost re-election in the {words} runoff"}}
+
+
 def december_round(race):
     """The date of *race*'s December round when it is an open primary's
     general election (``primaryKind`` "open"), else None: Georgia's runoff
@@ -167,10 +189,11 @@ def ballot_line(item, by_id):
 
 def _race_status(status, own=False, unconfirmed=False, appointed=False, source=None,
                  all_party=None, minor=False, post_election=False, open_round=None,
-                 round_held=False):
+                 round_held=False, decided=None):
     """KYC.raceStatus(status, "long", opts): ``(words, off)`` or None.
     *open_round* is the date of an open primary's December round
-    (``opts.round``), *round_held* whether it has passed."""
+    (``opts.round``), *round_held* whether it has passed; *decided* the
+    December round that decided a result (``opts.decided``)."""
     spec = _RACE_STATUS.get(status)
     if not spec:
         return None
@@ -178,6 +201,8 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
         spec = _ALL_PARTY
     if status == "runoff" and open_round:
         spec = _open_round(open_round, round_held) or spec
+    if decided:
+        spec = _decided_round(status, decided) or spec
     if source == "qualified" and status in _LISTED:
         spec = _LISTED[status]
     certified = _CERTIFIED.get(status) if source == "certified" else None
@@ -256,6 +281,9 @@ _FILERS = (
 # The December round the table's open-primary rows are asked about: any date
 # in December does, the cycle's own (overrides.OPEN_PRIMARY_SEATS) reads best.
 _TABLE_ROUND = "2026-12-12"
+# A result each kind of December round decided (_decided_round): an open
+# primary's general election, and a general election runoff (Georgia's).
+_TABLE_DECIDED = ({"date": _TABLE_ROUND, "open": True}, {"date": "2026-12-01", "open": False})
 
 
 def status_table():
@@ -267,25 +295,30 @@ def status_table():
     # A race whose December round is an open primary's general election
     # (_open_round), before that day and after it; the render suite reads
     # "held" as the day after it, so only after Election Day.
-    rounds = ((None, 0), (_TABLE_ROUND, 0), (_TABLE_ROUND, 1))
+    # And a result each kind of December round decided ("decided"), asked
+    # after the open primary's day.
+    rounds = ((None, 0, None), (_TABLE_ROUND, 0, None), (_TABLE_ROUND, 1, None),
+              (_TABLE_ROUND, 1, _TABLE_DECIDED[0]), (None, 0, _TABLE_DECIDED[1]))
     for status in sorted(_RACE_STATUS):
         # A top-four primary's words are a top-two's in the long form.
         for all_party in (None, "top-two"):
             for source in (None, "certified", "qualified"):
-                for round_date, held in rounds:
-                    if round_date and all_party:
+                for round_date, held, decided in rounds:
+                    if (round_date or decided) and all_party:
+                        continue
+                    if decided and status not in ("elected", "defeated"):
                         continue
                     for flags in itertools.product((0, 1), repeat=5):
                         own, appointed, unconfirmed, minor, post = flags
-                        if held and not post:
+                        if (held or decided) and not post:
                             continue
                         label, off = _race_status(
                             status, own=bool(own), unconfirmed=bool(unconfirmed),
                             appointed=bool(appointed), source=source, all_party=all_party,
                             minor=bool(minor), post_election=bool(post), open_round=round_date,
-                            round_held=bool(held))
-                        words.append([status, all_party, source, round_date, held] + list(flags)
-                                     + [label, int(off)])
+                            round_held=bool(held), decided=decided)
+                        words.append([status, all_party, source, round_date, held, decided]
+                                     + list(flags) + [label, int(off)])
     credits = [[status, source, name, _race_source(status, source, name)]
                for status in sorted(_RACE_STATUS)
                for source, name in ((None, None), ("certified", None),
@@ -296,8 +329,8 @@ def status_table():
         item = dict(fake, isCandidate=True, id="FAKE")
         spec = standing(item, {}, {})
         filers.append([fake, spec[0] if spec else None, status_source(item, {})])
-    return {"words": ["status", "allParty", "source", "round", "held", "own", "appointed",
-                      "unconfirmed", "minor", "post", "label", "off"],
+    return {"words": ["status", "allParty", "source", "round", "held", "decided", "own",
+                      "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "filers": filers}
 
 
@@ -374,7 +407,8 @@ def standing(item, by_id, races_by_id, post_election=False):
         open_round=open_round,
         # *post_election* is the day the results were read (post_election()).
         round_held=bool(open_round and isinstance(post_election, str)
-                        and open_round < post_election))
+                        and open_round < post_election),
+        decided=record.get("raceStatusDecided"))
     if spec:
         return spec
     words = _unsettled(item, races_by_id)

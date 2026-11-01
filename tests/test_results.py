@@ -1583,6 +1583,38 @@ class TestOpenPrimaryElectionNight(NoGap):
         results.apply_cache([winner], cache)
         self.assertEqual(share.status_words(winner, {}, races, "2026-11-05"),
                          "Elected in November")
+        self.assertNotIn("decidedIn", cache["races"]["H-LA-05-2026"])
+        self.assertNotIn("raceStatusDecided", winner)
+
+    def test_the_december_general_elections_result_is_said_as_its_own(self):
+        # The review of PR #170: once the December 12 table marks its
+        # winner, the two read "Elected in November" and "Lost the November
+        # election". The cache says which two the December round decided,
+        # and its date; the rest lost on November 3.
+        from kyc import races as races_mod, share
+        cache = self.run_build(datetime.date(2026, 12, 13), la5_box(LA5_NOVEMBER, *TOP_TWO),
+                               la5_box(LA5_DECEMBER, ("echols", 60000, True),
+                                       ("moore", 40000, False)))
+        out = self.statuses(cache)
+        self.assertEqual((out["echols"], out["moore"], out["cathey"]),
+                         ("elected", "defeated", "defeated"))
+        late = cache["races"]["H-LA-05-2026"]["decidedIn"]
+        self.assertEqual((late["date"], late["open"]), ("2026-12-12", True))
+        self.assertEqual(sorted(late["ids"]),
+                         sorted([LA5_PEOPLE["echols"][3], LA5_PEOPLE["moore"][3]]))
+        race = {"id": "H-LA-05-2026", "state": "LA", "chamber": "House", "year": 2026}
+        race.update(races_mod.ballot_kind(race))
+        people = [{"id": LA5_PEOPLE[key][3], "fecCandidateId": LA5_PEOPLE[key][3],
+                   "isCandidate": True, "state": "LA", "chamber": "House", "districtNum": 5,
+                   "party": LA5_PEOPLE[key][1].replace("Democratic", "Democrat"),
+                   "raceId": "H-LA-05-2026"}
+                  for key in ("echols", "moore", "cathey")]
+        results.apply_cache(people, cache)
+        self.assertEqual(people[0]["raceStatusDecided"], {"date": "2026-12-12", "open": True})
+        self.assertEqual([share.status_words(p, {}, {race["id"]: race}, "2026-12-13")
+                          for p in people],
+                         ["Elected on December 12", "Lost the December 12 general election",
+                          "Lost the November election"])
 
     def test_winners_that_are_not_a_complete_result_decide_nothing(self):
         for rows in (
@@ -1834,6 +1866,32 @@ class TestGeneralElectionNight(NoGap):
                                    ("Dee Delta", 1, True)))
         self.assertEqual(self.statuses(cache), {
             "alpha": "defeated", "beta": "eliminated", "delta": "elected", "epsilon": "defeated"})
+
+    def test_a_result_the_runoff_decided_says_so_never_november(self):
+        # The review of PR #170: the runoff's winner read "Elected in
+        # November" and its loser "Lost the November election". The cache
+        # says which two the December 1 runoff decided; November's loser
+        # (Epsilon) lost in November.
+        from kyc import share
+        cache = self.run_build(datetime.date(2026, 12, 2), self.general(),
+                               box("Runoff results", ("Ann Alpha", 0, False),
+                                   ("Dee Delta", 1, True)))
+        race = cache["races"]["H-GA-05-2026"]
+        self.assertEqual(race["decidedIn"], {"date": "2026-12-01", "open": False,
+                                             "ids": ["H6GA05201", "H6GA05204"]})
+        people = [{"id": cid, "fecCandidateId": cid, "isCandidate": True, "state": "GA",
+                   "chamber": "House", "districtNum": 5, "party": "Democrat",
+                   "raceId": "H-GA-05-2026"} for cid in ("H6GA05201", "H6GA05204", "H6GA05205")]
+        results.apply_cache(people, cache)
+        alpha, delta, epsilon = people
+        self.assertEqual(delta["raceStatusDecided"], {"date": "2026-12-01", "open": False})
+        self.assertNotIn("raceStatusDecided", epsilon)
+        words = [share.status_words(p, {}, {}, "2026-12-02") for p in people]
+        self.assertEqual(words, ["Lost the December 1 runoff", "Won the December 1 runoff",
+                                 "Lost the November election"])
+        # A win in November is November's.
+        cache = self.run_build(datetime.date(2026, 11, 4), self.general(alpha=True))
+        self.assertNotIn("decidedIn", cache["races"]["H-GA-05-2026"])
 
     def test_a_party_runoff_titled_without_its_party_is_not_the_general_runoff(self):
         # June's Republican runoff between Alpha and Beta, boxed as "Runoff

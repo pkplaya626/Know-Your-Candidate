@@ -97,10 +97,6 @@
   var SPLIT_FILL = "var(--split)";
   var I_FILL = "var(--party-i-fill)";
 
-  /** A party's colour, lighter in weight: a majority short of the whole
-   *  delegation, or an open seat (--party-r-tint, --party-d-tint in
-   *  kyc.css). A step of lightness from the party's own colour, which a
-   *  reader who cannot see hue still tells apart. */
   /* "In the general election runoff" -> "in the general election runoff",
    * for a status's words inside a sentence. */
   function lowerFirst(text) {
@@ -108,6 +104,10 @@
     return text.charAt(0).toLowerCase() + text.slice(1);
   }
 
+  /** A party's colour, lighter in weight: a majority short of the whole
+   *  delegation, or an open seat (--party-r-tint, --party-d-tint in
+   *  kyc.css). A step of lightness from the party's own colour, which a
+   *  reader who cannot see hue still tells apart. */
   function tint(key) {
     return "var(--party-" + key + "-tint)";
   }
