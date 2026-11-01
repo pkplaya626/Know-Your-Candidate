@@ -285,6 +285,10 @@
     file.races.forEach(function (r) { if (!heldRace[r.id]) raceList.push(r); });
     if (file.index) indexIn = true;
     else fullStates[what] = true;
+    // A link that arrives with a query ("#/?q=nurse") will search the
+    // words: asked for now, beside the page's other scripts, not after
+    // them (only where the page names them: the grid).
+    if (file.index && queryInAddress() && onDemandSrc("people/words.js")) loadWords();
     // What was built from the arrays is built again from them.
     profileIndex = null;
     racePositions = null;
@@ -2819,6 +2823,13 @@
     if (wordsIn) return true;
     for (var id in partial) if (Object.prototype.hasOwnProperty.call(partial, id)) return false;
     return true;
+  }
+
+  /** Whether the page's address carries a search (?q= in its hash or its
+   *  query string). */
+  function queryInAddress() {
+    var loc = global.location || {};
+    return /[?&]q=[^&]/.test(String(loc.hash || "")) || /[?&]q=[^&]/.test(String(loc.search || ""));
   }
 
   /** A promise of whether every record's words are in: at once where they

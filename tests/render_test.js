@@ -15422,6 +15422,10 @@ async function testPeopleSplit() {
     const failedEmpty = failed.D.getElementById("noResults").hidden;
     type(failed, "nurse");
     await until(() => servedWords(failed).length === 2, 8000);
+    // A shared link with a query asks for the words as the index arrives.
+    const linked = await buildPage("index.html", { people: "index", hash: "#/?q=nurse" });
+    await until(() => linked.window.KYC.wordsHeld() && !/Still reading/.test(label(linked)), 8000);
+    await settle(30);
     suite("index.html — a query while the profiles' words load, and if they fail", () => {
       check("while they load it says so, never that no profile matches",
         /Still reading the profiles’ own words/.test(reading) && !/^\s*No profiles/.test(reading) && readingEmpty,
@@ -15434,6 +15438,10 @@ async function testPeopleSplit() {
           !/^\s*No profiles/.test(failedLine) && failedEmpty, failedLine);
       check("and a new query asks for them again", servedWords(failed).length === 2,
         servedWords(failed).join(" "));
+      check("a link that arrives with a query asks for them once, and finds by them",
+        servedWords(linked).length === 1 && linked.D.querySelectorAll("#results .card").length > 0 &&
+          /^Showing/.test(label(linked).trim()) && linked.errors.length === 0,
+        servedWords(linked).length + " / " + label(linked).slice(0, 80));
       // But the refusal itself, which is the failure this checks.
       const errors = slim.errors.concat(failed.errors.filter((e) =>
         !/Could not load script: "https:\/\/kyc\.local\/data\/people\/words\.js/.test(e)));
