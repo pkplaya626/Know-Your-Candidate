@@ -347,6 +347,15 @@ def city_problems(fips, state, c, measures, counties):
         out.append(f"{where}: unknown field(s) {', '.join(sorted(extra))} for '{status}'")
     mine = [m for m in measures if m["jurisdiction"].get("kind") == "city"
             and m["jurisdiction"].get("place") == c.get("place")]
+    for m in mine:
+        # A city's questions are the city's own. Los Angeles's Measure SC
+        # amends the City Charter, but the Registrar prints it under the
+        # school district's own heading, apart from the city's seven: listed
+        # with them, it made the city's count eight against the document's
+        # seven, and the district's voters outside the city never saw it.
+        if m["jurisdiction"].get("name") != c.get("name"):
+            out.append(f"{where}: a question of {m['jurisdiction'].get('name')!r} is listed as the "
+                       "city's; a city's questions are its own")
     if status == "listed":
         if not mine:
             out.append(f"{where}: 'listed', and none of its questions is listed")
