@@ -166,7 +166,138 @@ SAMPLE_BALLOTS = {
     "SC": "https://vrems.scvotes.sc.gov/Voter/Login?PageMode=Sampleballot",
     "SD": "https://vip.sdsos.gov/VIPLogin.aspx",
     "WI": "https://myvote.wi.gov/en-us/Whats-On-My-Ballot",
+    # Read 2026-11-01, each with its record in SAMPLE_EVIDENCE below.
+    "AR": "https://www.voterview.ar-nova.org/voterview",
+    "CT": "https://portal.ct.gov/sots/election-services/town-ballots/2026-november-town-election-ballots",
+    "DE": "https://gis.elections.delaware.gov/apps/c10cf595f3614d9886927b7d396b2c87/explore",
+    "HI": "https://olvr.hawaii.gov/altballotsearch3.aspx",
+    "ID": "https://votertools.voteidaho.gov/TEDElectionLink/VoterServices/voter/el-sample-ballot",
+    "IN": "https://indianavoters.in.gov/",
+    "KS": "https://kansasvoterinfo.gov/",
+    "KY": "https://web.sos.ky.gov/electionballots/",
+    "MA": "https://www.sec.state.ma.us/WhereDoIVoteMA/WhereDoIVote",
+    "MD": "https://elections.maryland.gov/elections/2026/index.html#ballot_cert",
+    "MS": "https://www.sos.ms.gov/content/documents/Elections/2026/Sample%20Ballot%209-9-26.pdf",
+    "NC": "https://www.ncsbe.gov/voting/sample-ballot",
+    "OK": "https://okvoterportal.okelections.us/",
+    "RI": "https://vote.sos.ri.gov/",
+    "VA": "https://www.elections.virginia.gov/casting-a-ballot/polling-place-lookup/",
+    "VT": "https://vote.vermont.gov",
 }
+
+# The record behind each sample-ballot page added from 2026-11-01 (rules 79
+# and 84): {code: {"linkedFrom": the office's own page that links it, or None
+# where the office names it without a link, "linkWords": that link's words
+# (or the office's sentence naming it), "pageWords": the page's own words,
+# or the office's, saying it shows a sample ballot, "read": the day, "label":
+# what the button says, labelled as what it is}}. Every page and every
+# linking page is on the jurisdiction's own domains
+# (voting_dates.official_source), and "as its site links it" is said only of
+# an entry with a linking page (``site_linked``). The research notes are
+# kyc-audit-2026-10-17/research/sample-ballots-2026-11-01/NOTES.md. The
+# entries above them were opened on 2026-10-17 from the link each office's
+# home page gives it, before records were kept (SAMPLE_BEFORE_EVIDENCE).
+SAMPLE_EVIDENCE = {
+    "AR": {"linkedFrom": "https://www.sos.arkansas.gov/elections",
+           "linkWords": "Check Registration Status, Polling Sites, and Sample Ballots",
+           "pageWords": "Registration Information Confirm your address, party association, "
+                        "ballot statuses, and polling place locations.",
+           "read": "2026-11-01", "label": "Look up your sample ballot (VoterView)"},
+    "CT": {"linkedFrom": "https://portal.ct.gov/sots/election-services/town-ballots/ballots",
+           "linkWords": "November 3, 2026, State Election, Sample Town Ballots",
+           "pageWords": "November 3, 2026 State Election Sample Town Ballots (Click on town to "
+                        "view ballot) Please note: The sample ballots will be listed on a rolling "
+                        "basis as they become available. Updated 10/21/2026",
+           "read": "2026-11-01", "label": "Sample ballots by town"},
+    # The look-up answers a script 403; its ArcGIS item record titles it
+    # "Sample Ballot Lookup Tool" (arcgis.com/sharing/rest/content/items/
+    # c10cf595f3614d9886927b7d396b2c87).
+    "DE": {"linkedFrom": "https://elections.delaware.gov/elections/general/general.html",
+           "linkWords": "How can I get my sample ballot? Check out your sample ballot",
+           "pageWords": "Delaware voters may check out their sample ballot in preparation for "
+                        "voting. The sample ballot shows how your ballot will look when voting "
+                        "in-person on the voting machine.",
+           "read": "2026-11-01", "label": "Look up your sample ballot"},
+    "HI": {"linkedFrom": "https://elections.hawaii.gov/",
+           "linkWords": "View the 2026 General Election Voter Guide Read More",
+           "pageWords": "View Your Candidates and Ballot View the candidates and ballot "
+                        "associated with your street address.",
+           "read": "2026-11-01", "label": "See your candidates and ballot"},
+    "ID": {"linkedFrom": "https://voteidaho.gov/idaho-general-election/",
+           "linkWords": "View Your Personalized Sample Ballot See what will be on your ballot "
+                        "before you vote. Preview Your Sample Ballot",
+           "pageWords": "View Your Personalized Sample Ballot See what will be on your ballot "
+                        "before you vote.",
+           "read": "2026-11-01", "label": "Preview your sample ballot"},
+    # The Election Division's Indiana Voter Portal: its home page's tile
+    # opens the look-up in a dialog, so the portal itself is the address.
+    "IN": {"linkedFrom": "https://www.in.gov/sos/elections/",
+           "linkWords": "IndianaVoters.in.gov Learn More",
+           "pageWords": "WHO'S ON THE BALLOT",
+           "read": "2026-11-01", "label": "Who's on the ballot (Indiana Voter Portal)"},
+    # votekansas.gov redirects to the elections page that links VoterView;
+    # the office's press release of 2026-07-27 says what it shows.
+    "KS": {"linkedFrom": "https://sos.ks.gov/elections/elections.html",
+           "linkWords": "VoterView",
+           "pageWords": "by clicking the VoterView icon, voters can find the following: Polling "
+                        "Location Sample Ballot Advance Mail Ballot Tracker Voting History",
+           "read": "2026-11-01", "label": "Look up your sample ballot (VoterView)"},
+    "KY": {"linkedFrom": "https://www.sos.ky.gov/",
+           "linkWords": "Sample Ballots",
+           "pageWords": "Election Ballots ... Ballots from selected counties are listed below",
+           "read": "2026-11-01", "label": "Sample ballots by county (PDF)"},
+    "MA": {"linkedFrom": "https://www.sec.state.ma.us/divisions/elections/elections-and-voting.htm",
+           "linkWords": "2026 State Election Sample Ballot",
+           "pageWords": "Find my election information To find your election information: Enter "
+                        "your residential address.",
+           "read": "2026-11-01", "label": "Look up your sample ballot"},
+    "MD": {"linkedFrom": "https://elections.maryland.gov/elections/2026/vote2026/",
+           "linkWords": "View Sample Ballots",
+           "pageWords": "The State Board of Elections certified (PDF) the content and arrangement "
+                        "of the general election ballots on August 31, 2026 pursuant to EL "
+                        "§ 9-207(a)(2). The certified ballots are below.",
+           "read": "2026-11-01", "label": "Sample ballots by county (PDF)"},
+    # One composite ballot of every contest in the state, not a voter's own.
+    "MS": {"linkedFrom": "https://www.sos.ms.gov/elections-voting",
+           "linkWords": "Sample Ballot",
+           "pageWords": "SAMPLE Official Election Ballot STATE OF MISSISSIPPI Federal and "
+                        "Judicial Election Tuesday, November 3, 2026",
+           "read": "2026-11-01", "label": "Sample ballot of every contest in the state (PDF)"},
+    # Linked from the site's own menu (Voting > Sample Ballot).
+    "NC": {"linkedFrom": "https://www.ncsbe.gov/voting",
+           "linkWords": "Sample Ballot",
+           "pageWords": "Find Your Sample Ballot Are you looking for your sample ballot? If you "
+                        "are a registered voter in North Carolina, you can find it by entering "
+                        "your first and last name in the Voter Search.",
+           "read": "2026-11-01", "label": None},
+    "OK": {"linkedFrom": "https://oklahoma.gov/elections/ovp.html",
+           "linkWords": "OK Voter Portal Login",
+           "pageWords": "View a Sample Ballot for Your Precinct",
+           "read": "2026-11-01", "label": "View your sample ballot (OK Voter Portal: sign in)"},
+    # The portal answers a script 403; the Department of State names it in
+    # its release (ri.gov/press/view/51487) and links it nowhere it read.
+    "RI": {"linkedFrom": None,
+           "linkWords": "voters are encouraged to review a sample ballot online at vote.ri.gov "
+                        "to familiarize themselves with all races on their ballot, as well as "
+                        "local questions, if there are any in their community.",
+           "pageWords": "voters are encouraged to review a sample ballot online at vote.ri.gov",
+           "read": "2026-11-01", "label": "Review your sample ballot (Voter Information Center)"},
+    "VA": {"linkedFrom": "https://www.elections.virginia.gov/",
+           "linkWords": "What’s on Your Ballot?",
+           "pageWords": "Simply enter your full address (including ZIP code) in the field below "
+                        "to see: ... What's on your ballot for the current election.",
+           "read": "2026-11-01", "label": "What's on your ballot?"},
+    "VT": {"linkedFrom": "https://sos.vermont.gov/elections/voters",
+           "linkWords": "Vermont Voter Portal",
+           "pageWords": "The Vermont Voter Portal is your primary online resource for all "
+                        "election information unique to you. Log in using your personal "
+                        "information to: ... View sample ballots",
+           "read": "2026-11-01", "label": "View your sample ballot (Vermont Voter Portal: sign in)"},
+}
+# The pages curated before records were kept (opened 2026-10-17 from the
+# link each office's home page gives it). No entry joins this set.
+SAMPLE_BEFORE_EVIDENCE = frozenset({"AK", "AL", "DC", "LA", "MI", "MN", "ND", "NM", "SC",
+                                    "SD", "WI"})
 
 # "deadlines": vote.gov's page for the jurisdiction, from vote.gov/register's
 # own list (read 2026-10-17). Each lists the online, mail and in-person
@@ -443,6 +574,9 @@ def effective(cache):
             if code in table:
                 found = link(code, kind, table[code],
                              VOTE_GOV_FROM if kind == "deadlines" else OFFICE)
+                label = (SAMPLE_EVIDENCE.get(code) or {}).get("label") if kind == "sample" else None
+                if found and label and found["url"] == table[code]:
+                    found["label"] = label
                 if found:
                     shown[kind] = found
                 else:
@@ -481,7 +615,50 @@ def site_linked(code, kind, url):
     if fix and fix[1] == url and _SITE_LINKS.search(fix[3]):
         return True
     table = dict(CURATED).get(kind)
+    if kind == "sample" and code in SAMPLE_EVIDENCE:
+        # Only where the record names the office's page that links it: Rhode
+        # Island's office names its portal in a release and links it nowhere
+        # this site read.
+        return table.get(code) == url and bool(SAMPLE_EVIDENCE[code].get("linkedFrom"))
     return kind != "deadlines" and table is not None and table.get(code) == url
+
+
+SAMPLE_FIELDS = ("linkedFrom", "linkWords", "pageWords", "read", "label")
+
+
+def sample_problems():
+    """Every sample-ballot page without its record, or with a record that
+    does not hold: off the jurisdiction's own domains (rule 84; a compiled
+    table never), a linking page elsewhere, no words, no day."""
+    from . import voting_dates
+
+    out = []
+    for code in sorted(set(SAMPLE_BALLOTS) - SAMPLE_BEFORE_EVIDENCE - set(SAMPLE_EVIDENCE)):
+        out.append(f"{code}: {SAMPLE_BALLOTS[code]} has no record in SAMPLE_EVIDENCE")
+    for code, record in sorted(SAMPLE_EVIDENCE.items()):
+        where = f"{code} sample"
+        if code not in SAMPLE_BALLOTS:
+            out.append(f"{where}: a record for no page in SAMPLE_BALLOTS")
+            continue
+        if code in SAMPLE_BEFORE_EVIDENCE:
+            out.append(f"{where}: in SAMPLE_BEFORE_EVIDENCE and recorded; take it out of the set")
+        if set(record) != set(SAMPLE_FIELDS):
+            out.append(f"{where}: fields {sorted(record)}, not {sorted(SAMPLE_FIELDS)}")
+        for url in [SAMPLE_BALLOTS[code]] + [u for u in [record.get("linkedFrom")] if u]:
+            ok, why = voting_dates.official_source(url, code)
+            if not ok:
+                out.append(f"{where}: {url}: {why}")
+        for field in ("linkWords", "pageWords"):
+            if not str(record.get(field) or "").strip():
+                out.append(f"{where}: no {field}")
+        try:
+            datetime.date.fromisoformat(record.get("read") or "")
+        except (TypeError, ValueError):
+            out.append(f"{where}: the day {record.get('read')!r} is not YYYY-MM-DD")
+        label = record.get("label")
+        if label is not None and not (isinstance(label, str) and label.strip()):
+            out.append(f"{where}: an empty label")
+    return out
 
 
 def stale_overrides(cache):

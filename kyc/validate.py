@@ -1785,6 +1785,13 @@ def check_voting_links(cache):
                      for code, links in voting.effective(cache).items()
                      for kind, link in links.items() if not voting.official(link["url"], code))
     issues = []
+    # A sample ballot is shown only with its record: the office's page that
+    # links it, the words, the day, all on the jurisdiction's own domains.
+    unrecorded = voting.sample_problems()
+    if unrecorded:
+        issues.append(Issue("error", "voting-sample-unrecorded",
+                            f"{len(unrecorded)} sample-ballot pages in kyc/voting.py lack their "
+                            f"record or have one that does not hold", unrecorded))
     if foreign:
         issues.append(Issue("error", "voting-links-not-official",
                             f"{len(foreign)} voting links are not on their state's own "
