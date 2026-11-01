@@ -1365,6 +1365,11 @@ NOT_A_PORTRAIT = {
     "photos/090c1a605a8a18bd1456.jpg":
         ("2026-11-01", "Robert Moesinger (UT-2): another person's long hair at the lower left "
                        "edge, cropped from a group photograph", OTHERS_IN_FRAME),
+    # Offered by the narrow first-name route (enrich.first_name_portraits,
+    # read 2026-11-01): "bethany-portrait.jpg" on her campaign's home page.
+    "https://www.bethanymannforcongress.com/assets/bethany-portrait.jpg":
+        ("2026-11-01", "Bethany Mann (MO-3): a close selfie outdoors; two other people, one in a "
+                       "sun hat, behind her at the right edge", OTHERS_IN_FRAME),
     "https://tomsmithformi.com/assets/IMG_0051_1786034274828-B2BJy3rU.jpg":
         ("2026-11-01", "Tom Smith (MI-8): standing full length before flags on a stage, his "
                        "face brow to chin about a fifteenth of the card's height"),
@@ -1599,6 +1604,53 @@ NOT_A_PORTRAIT = {
 # photograph nobody has looked at in front of readers (the PR #139 review:
 # James Talarico's classroom photograph).
 SEEN_AFTER_A_REFUSAL = {
+}
+
+# Campaign-site photographs taken by the narrow first-name route (the
+# owner's decision of 2026-11-01, rule 38): the candidate's own campaign site,
+# an image whose file name or alt text carries their first name and a
+# likeness word ("headshot", "portrait", "profile") together
+# (enrich.first_name_portraits). A first name is a weaker tie than a surname
+# - a campaign pictures the candidate's family under first names - so each is
+# withheld, and named by validate (portrait-first-name-unseen), until a
+# person has looked at the file and recorded it here, keyed on the file the
+# page draws (the original, where a lighter rendition is shown): (the day,
+# what was seen - the candidate alone, nobody else in the frame, a face on a
+# screen included, and the face, brow to chin, as a share of the 4:5 card
+# that crops it from the top, as rule 38 measures it - and the page it was
+# on). One that fails the look goes in NOT_A_PORTRAIT instead. validate
+# reports an entry no cached campaign record offers any more
+# (stale-first-name-portrait).
+SEEN_FIRST_NAME_PORTRAITS = {
+    "https://bgp.stoke.dev/wp-content/uploads/2026/07/bernadette-headshot-about.png":
+        ("2026-11-01", "Bernadette Greene-Placentia (AZ-8) alone, arms folded, before a "
+                       "blurred shopfront and a tree, nobody else in the frame; 800x835, her "
+                       "face a fifth of the card's height (170 of 835px)",
+         "https://bgp4az.com/about/"),
+    "https://alexcookeforcongress.com/images/alexander-headshot.jpg":
+        ("2026-11-01", "Alexander Cooke (FL-21) alone in a suit before a blurred marina, nobody "
+                       "else in the frame; 1600x1541, his face about a sixth of the card's "
+                       "height (270 of 1541px)", "https://www.alexcookeforcongress.com/"),
+    "https://static.wixstatic.com/media/0ca2e0_eedd6ff3cd6d4b2b84bf8f9023b8b0fb~mv2.jpg/v1/fill/"
+    "w_269,h_307,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/America%20Colby%20Profile.jpg":
+        ("2026-11-01", "Colby Watson (NC-8) alone in a suit before a flag, nobody else in the "
+                       "frame; 269x307, his face more than a quarter of the card's height "
+                       "(85 of 307px)", "https://www.colbyforcongress.com/about"),
+    "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/"
+    "ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png":
+        ("2026-11-01", "Brinker Harding (NE-2) alone, cut out on a transparent background, "
+                       "nobody else in the frame; 1705x1911, his face about a sixth of the "
+                       "card's height (350 of 1911px)", "https://www.brinkerharding.com"),
+    "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new.jpg":
+        ("2026-11-01", "Teresa Benitez-Thompson (NV-2) alone before mountains, nobody else in "
+                       "the frame; 1317x1316, her face a quarter of the card's height (330 of "
+                       "1316px)", "https://electteresa.com/"),
+    "https://static.wixstatic.com/media/2ce4e2_6c687650676f42f9928870c3695e5b68~mv2.png/v1/crop/"
+    "x_0,y_2,w_972,h_885/fill/w_493,h_449,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/"
+    "Jerrad-Headshot2.png":
+        ("2026-11-01", "Jerrad Shane Christian (OH-12) alone, arms folded, on a white "
+                       "background, nobody else in the frame; 493x449, his face a third of the "
+                       "card's height (150 of 449px)", "https://www.christianforohio.com/"),
 }
 
 # Commons files a judge's route (kyc/judge_links.py) or a statewide

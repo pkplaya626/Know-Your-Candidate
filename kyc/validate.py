@@ -1503,6 +1503,25 @@ def check_refusal_fallbacks(profiles, portraits=None):
                   "overrides.SEEN_AFTER_A_REFUSAL or NOT_A_PORTRAIT", sorted(found))]
 
 
+def check_first_name_portraits(profiles, enrichment):
+    """A campaign portrait taken by the narrow first-name route (rule 38,
+    the owner's decision of 2026-11-01) is withheld until a person has
+    looked at it; each is named here until its file is in
+    ``overrides.SEEN_FIRST_NAME_PORTRAITS`` or ``NOT_A_PORTRAIT``."""
+    from .enrich import awaiting_look
+
+    found = sorted(f"{p['name']} ({p.get('officeLabel') or p.get('state')}): "
+                   f"{(r.get('portraitHeavy') or [{}])[0].get('url') or r.get('portrait')} "
+                   f"on {r.get('portraitPage')} ({r.get('portraitEvidence')})"
+                   for p, r in awaiting_look(profiles, enrichment))
+    if not found:
+        return []
+    return [Issue("warn", "portrait-first-name-unseen",
+                  f"{len(found)} campaign portraits named by the first name are withheld until "
+                  "a person looks at each: record it in overrides.SEEN_FIRST_NAME_PORTRAITS "
+                  "(the candidate alone, the face measured) or NOT_A_PORTRAIT", found)]
+
+
 def check_portrait_overrides(enrichment, elsewhere=()):
     """Every ``NOT_A_PORTRAIT`` entry must still be an image some site offers.
 
@@ -1526,6 +1545,20 @@ def check_portrait_overrides(enrichment, elsewhere=()):
         issues.append(Issue("warn", "stale-portrait-override",
                             f"{len(stale)} NOT_A_PORTRAIT entries match no image a cached "
                             "site offers", stale))
+    first_named = set()
+    for entry in (enrichment.get("people") or {}).values():
+        for key in ("site", "listed", "drawn"):
+            record = entry.get(key) or {}
+            if record.get("portraitRoute") == "first-name":
+                first_named.update([record.get("portrait")]
+                                   + [h.get("url") for h in record.get("portraitHeavy") or []])
+    stale_seen = sorted(u for u in getattr(overrides, "SEEN_FIRST_NAME_PORTRAITS", {})
+                        if u not in first_named)
+    if stale_seen:
+        issues.append(Issue("warn", "stale-first-name-portrait",
+                            f"{len(stale_seen)} SEEN_FIRST_NAME_PORTRAITS entries match no "
+                            "portrait a cached campaign site gives by the first-name route",
+                            stale_seen))
     unused = sorted(f"{pid}: {entry['url']}" for pid, entry in overrides.CAMPAIGN_PORTRAITS.items()
                     if entry["url"] not in offered)
     if unused:
@@ -1892,6 +1925,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_campaign_blocklist(campaigns)
     issues += check_campaign_sites(profiles, enrichment)
     issues += check_portrait_overrides(enrichment, photo_routes)
+    issues += check_first_name_portraits(profiles, enrichment)
     if portraits is not None:
         issues += check_photo_evidence(profiles, portraits, enrichment, guides,
                                        photo_manifest, legislators)

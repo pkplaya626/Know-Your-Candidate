@@ -4934,7 +4934,24 @@
   "FEC_H2MO03167": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://i0.wp.com/www.bethanymannforcongress.com/assets/bethany-portrait.jpg?w=500&ssl=1",
+    "portraitEvidence": "first name and \"portrait\" in file name \"bethany-portrait.jpg\"",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://www.bethanymannforcongress.com/assets/bethany-portrait.jpg",
+      "why": "574 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://www.bethanymannforcongress.com",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 37308,
+     "height": 666,
+     "width": 500
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.bethanymannforcongress.com"
@@ -4957,6 +4974,23 @@
      "Website privacy preferences"
     ],
     "issuesUrl": "https://www.bethanymannforcongress.com/platform",
+    "portrait": "https://i0.wp.com/www.bethanymannforcongress.com/assets/bethany-portrait.jpg?w=500&ssl=1",
+    "portraitEvidence": "first name and \"portrait\" in file name \"bethany-portrait.jpg\"",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://www.bethanymannforcongress.com/assets/bethany-portrait.jpg",
+      "why": "574 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://www.bethanymannforcongress.com",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 37308,
+     "height": 666,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -5272,7 +5306,24 @@
   "FEC_H4AZ08082": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://i0.wp.com/bgp.stoke.dev/wp-content/uploads/2026/07/bernadette-headshot-about.png?w=500&ssl=1",
+    "portraitEvidence": "first name and \"headshot\" in file name \"bernadette-headshot-about.png\"",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://bgp.stoke.dev/wp-content/uploads/2026/07/bernadette-headshot-about.png",
+      "why": "860 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://bgp4az.com/about/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 239772,
+     "height": 521,
+     "width": 500
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.bgp4az.com"
@@ -5296,6 +5347,23 @@
      "Unions and workers' rights"
     ],
     "issuesUrl": "https://bgp4az.com/priorities/",
+    "portrait": "https://i0.wp.com/bgp.stoke.dev/wp-content/uploads/2026/07/bernadette-headshot-about.png?w=500&ssl=1",
+    "portraitEvidence": "first name and \"headshot\" in file name \"bernadette-headshot-about.png\"",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://bgp.stoke.dev/wp-content/uploads/2026/07/bernadette-headshot-about.png",
+      "why": "860 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://bgp4az.com/about/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 239772,
+     "height": 521,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -5857,7 +5925,17 @@
   "FEC_H4OH12080": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://static.wixstatic.com/media/2ce4e2_6c687650676f42f9928870c3695e5b68~mv2.png/v1/crop/x_0,y_2,w_972,h_885/fill/w_493,h_449,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Jerrad-Headshot2.png",
+    "portraitEvidence": "first name and \"headshot\" in file name \"Jerrad-Headshot2.png\"",
+    "portraitPage": "https://www.christianforohio.com/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 109282,
+     "height": 449,
+     "width": 493
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.christianforohio.com/"
@@ -5867,6 +5945,16 @@
     "description": "Jerrad Christian is running for Congress in Ohio's 12th District to take back power for the working class against the billionaires and lobbyists that fund his MAGA opponent.",
     "final": "https://www.christianforohio.com/",
     "issuesUrl": "https://www.christianforohio.com/issues",
+    "portrait": "https://static.wixstatic.com/media/2ce4e2_6c687650676f42f9928870c3695e5b68~mv2.png/v1/crop/x_0,y_2,w_972,h_885/fill/w_493,h_449,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/Jerrad-Headshot2.png",
+    "portraitEvidence": "first name and \"headshot\" in file name \"Jerrad-Headshot2.png\"",
+    "portraitPage": "https://www.christianforohio.com/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 109282,
+     "height": 449,
+     "width": 493
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -7169,7 +7257,7 @@
   "FEC_H6CA47114": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.jennyraeca.com"
@@ -8211,6 +8299,23 @@
   "FEC_H6FL21109": {
    "checked": "2026-11-01",
    "drawn": {
+    "portrait": "https://i0.wp.com/alexcookeforcongress.com/images/alexander-headshot.jpg?w=500&ssl=1",
+    "portraitEvidence": "first name and \"headshot\" in file name \"alexander-headshot.jpg\"",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://alexcookeforcongress.com/images/alexander-headshot.jpg",
+      "why": "415 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://www.alexcookeforcongress.com/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 15510,
+     "height": 481,
+     "width": 500
+    },
     "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
@@ -8220,6 +8325,23 @@
    "site": {
     "description": "Alex Cooke — former Mayor of Juno Beach — is the independent candidate for U.S. Congress in Florida District 21. No party. No Corporate PACs. Fighting for the Treasure Coast on insurance, cost of living, and clean water.",
     "final": "https://www.alexcookeforcongress.com/",
+    "portrait": "https://i0.wp.com/alexcookeforcongress.com/images/alexander-headshot.jpg?w=500&ssl=1",
+    "portraitEvidence": "first name and \"headshot\" in file name \"alexander-headshot.jpg\"",
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://alexcookeforcongress.com/images/alexander-headshot.jpg",
+      "why": "415 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://www.alexcookeforcongress.com/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 15510,
+     "height": 481,
+     "width": 500
+    },
     "reason": "moved to alexcookeforcongress.com, still names the candidate",
     "safe": true,
     "status": 200,
@@ -11082,7 +11204,17 @@
   "FEC_H6NC08202": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://static.wixstatic.com/media/0ca2e0_eedd6ff3cd6d4b2b84bf8f9023b8b0fb~mv2.jpg/v1/fill/w_269,h_307,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/America%20Colby%20Profile.jpg",
+    "portraitEvidence": "first name and \"profile\" in file name \"America Colby Profile.jpg\"",
+    "portraitPage": "https://www.colbyforcongress.com/about",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 10582,
+     "height": 307,
+     "width": 269
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://colbyforcongress.com"
@@ -11097,6 +11229,16 @@
      "Healthcare"
     ],
     "issuesUrl": "https://www.colbyforcongress.com/issues",
+    "portrait": "https://static.wixstatic.com/media/0ca2e0_eedd6ff3cd6d4b2b84bf8f9023b8b0fb~mv2.jpg/v1/fill/w_269,h_307,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/America%20Colby%20Profile.jpg",
+    "portraitEvidence": "first name and \"profile\" in file name \"America Colby Profile.jpg\"",
+    "portraitPage": "https://www.colbyforcongress.com/about",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 10582,
+     "height": 307,
+     "width": 269
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11374,7 +11516,54 @@
   "FEC_H6NE02208": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=500w",
+    "portraitEvidence": "first name and \"headshot\" in file name \"HEADSHOT_BRINKER_NOBG_2_Compressed.png\"",
+    "portraitForms": [
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=100w",
+      100
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=300w",
+      300
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=500w",
+      500
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=750w",
+      750
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=1000w",
+      1000
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=1500w",
+      1500
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=2500w",
+      2500
+     ]
+    ],
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png",
+      "why": "2372 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://www.brinkerharding.com",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 219876,
+     "height": 560,
+     "width": 500
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.brinkerharding.com"
@@ -11383,6 +11572,53 @@
    "site": {
     "description": "My name is Brinker Harding – I am a fourth-generation Omahan, husband to Rebecca, dad to Elizabeth and Grace, business leader, Omaha City Councilman, and candidate for the United States Congress in Nebraska’s 2nd District.",
     "final": "https://www.brinkerharding.com",
+    "portrait": "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=500w",
+    "portraitEvidence": "first name and \"headshot\" in file name \"HEADSHOT_BRINKER_NOBG_2_Compressed.png\"",
+    "portraitForms": [
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=100w",
+      100
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=300w",
+      300
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=500w",
+      500
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=750w",
+      750
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=1000w",
+      1000
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=1500w",
+      1500
+     ],
+     [
+      "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png?format=2500w",
+      2500
+     ]
+    ],
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://images.squarespace-cdn.com/content/v1/686220fecacd134503b4365c/ad1c74a1-fae7-4c06-8247-688e088d63f4/HEADSHOT_BRINKER_NOBG_2_Compressed.png",
+      "why": "2372 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://www.brinkerharding.com",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 219876,
+     "height": 560,
+     "width": 500
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -11796,7 +12032,42 @@
   "FEC_H6NV02362": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-480x480.jpg",
+    "portraitEvidence": "first name and \"headshot\" in file name \"Teresa-headshot-square-new.jpg\"",
+    "portraitForms": [
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new.jpg",
+      1317
+     ],
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-1280x1279.jpg",
+      1280
+     ],
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-980x979.jpg",
+      980
+     ],
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-480x480.jpg",
+      480
+     ]
+    ],
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new.jpg",
+      "why": "349 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://electteresa.com/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 29496,
+     "height": 480,
+     "width": 480
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://electteresa.com/"
@@ -11814,6 +12085,41 @@
      "Fighting Antisemitism"
     ],
     "issuesUrl": "https://electteresa.com/policy/",
+    "portrait": "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-480x480.jpg",
+    "portraitEvidence": "first name and \"headshot\" in file name \"Teresa-headshot-square-new.jpg\"",
+    "portraitForms": [
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new.jpg",
+      1317
+     ],
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-1280x1279.jpg",
+      1280
+     ],
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-980x979.jpg",
+      980
+     ],
+     [
+      "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new-480x480.jpg",
+      480
+     ]
+    ],
+    "portraitHeavy": [
+     {
+      "kept": false,
+      "url": "https://electteresa.com/wp-content/uploads/2026/03/Teresa-headshot-square-new.jpg",
+      "why": "349 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://electteresa.com/",
+    "portraitRead": "2026-11-01",
+    "portraitRoute": "first-name",
+    "portraitWeight": {
+     "bytes": 29496,
+     "height": 480,
+     "width": 480
+    },
     "reason": "ok",
     "safe": true,
     "status": 200,
@@ -12986,7 +13292,7 @@
   "FEC_H6PA16379": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://justinwagnerforcongress.com"
@@ -15505,7 +15811,7 @@
   "FEC_S6CO00556": {
    "checked": "2026-11-01",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.bobchew2026.com"

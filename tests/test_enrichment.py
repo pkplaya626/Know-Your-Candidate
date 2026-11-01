@@ -2185,6 +2185,196 @@ class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
                 self.assertNotEqual(profile.get("campaignSite"), site["url"], profile["name"])
 
 
+class TestFirstNamePortraits(unittest.TestCase):
+    """The narrow first-name route (the owner's decision of 2026-11-01,
+    rule 38): the candidate's own campaign site, an image whose file name or
+    alt text carries their first name and a likeness word together, shown
+    only once a person has looked at it."""
+
+    PROFILE = {"id": "FEC_H6NV02362", "name": "Teresa Benitez-Thompson",
+               "filedName": "BENITEZ-THOMPSON, TERESA"}
+    BASE = "https://electteresa.com/"
+
+    def found(self, markup, profile=None):
+        return enrich.first_name_portraits(_page(markup), self.BASE, profile or self.PROFILE)
+
+    def test_a_first_name_and_a_likeness_word_together_name_it(self):
+        got = self.found('<img src="/wp-content/uploads/Teresa-headshot-square-new.jpg">'
+                         '<img src="/a.jpg" alt="Jerrad Headshot">'
+                         '<img src="/b.png" alt="Teresa Portrait">')
+        self.assertEqual(got, [
+            ("https://electteresa.com/wp-content/uploads/Teresa-headshot-square-new.jpg",
+             'first name and "headshot" in file name "Teresa-headshot-square-new.jpg"'),
+            ("https://electteresa.com/b.png", 'first name and "portrait" in alt text '
+                                              '"Teresa Portrait"')])
+        # A number run on is the upload's: "Jerrad-Headshot2.png".
+        jerrad = {"id": "FEC_H4OH12080", "name": "Jerrad Shane Christian"}
+        self.assertEqual(len(self.found('<img src="/Jerrad-Headshot2.png">', jerrad)), 1)
+
+    def test_a_first_name_alone_or_with_a_weaker_word_does_not(self):
+        """The proposal's family, QR-code and team images; "cropped", which
+        on the 248 sites read on 2026-11-01 named "Cropped+Family.png" and
+        five logos; a photograph's own word."""
+        markup = ('<img src="/about-teresa.webp">'
+                  '<img src="/teresa-cropped.jpg">'
+                  '<img src="/teresa-photo.jpg">'
+                  '<img src="/teresa-and-family-headshot.jpg">'
+                  '<img src="/x.jpg" alt="Teresa with her mom, portrait">'
+                  '<img src="/teresa-for-congress-headshot.png">'
+                  '<img src="/teresa-headshot-at-the-capitol-steps-2024.jpg">'
+                  '<img src="/teresa-headshot.svg">'
+                  '<img src="http://electteresa.com/teresa-headshot.jpg">')
+        self.assertEqual(self.found(markup), [])
+
+    def test_both_words_must_be_in_one_file_name_or_one_alt_text(self):
+        self.assertEqual(self.found('<img src="/teresa-1.jpg" alt="Headshot">'), [])
+        self.assertEqual(len(self.found('<img src="/1.jpg" alt="Teresa headshot">')), 1)
+
+    def test_never_a_middle_name_a_nickname_or_an_initial(self):
+        tripp = {"id": "FEC_H6ID02241", "name": "Tripp Charles Hutchinson",
+                 "filedName": "HUTCHINSON, TRIPP CHARLES"}
+        self.assertEqual(enrich.first_names(tripp), {"tripp"})
+        self.assertEqual(self.found('<img src="/charles-headshot.jpg">', tripp), [])
+        self.assertEqual(enrich.first_names({"name": "J. Thomas Smith"}), set())
+        robert = {"id": "X1", "name": "Robert Jones", "filedName": "JONES, ROBERT"}
+        self.assertEqual(self.found('<img src="/bob-headshot.jpg">', robert), [])
+        # The filing's own first name counts: the profile may write another.
+        filed = {"id": "X2", "name": "Bob Jones", "filedName": "JONES, ROBERT DR."}
+        self.assertEqual(enrich.first_names(filed), {"bob", "robert"})
+        # A short form only through an evidenced PORTRAIT_NAME_FORMS entry.
+        entry = {"X1": {"first": "Bob", "evidence": "the campaign's own site writes 'Bob Jones' "
+                                                    "(read 2026-11-01)"}}
+        with mock.patch.dict(enrich.overrides.PORTRAIT_NAME_FORMS, entry):
+            self.assertEqual(len(self.found('<img src="/bob-headshot.jpg">', robert)), 1)
+
+    def test_an_image_the_surname_names_is_not_offered_again(self):
+        jane = {"id": "H6TX01234", "name": "Jane Q Smith"}
+        self.assertEqual(self.found('<img src="/jane-smith-headshot.jpg">'
+                                    '<img src="/smith-jane-portrait.jpg">', jane), [])
+
+    def test_the_read_tries_the_surname_first_and_marks_a_first_name_portrait(self):
+        text = "<p>" + "Teresa Benitez-Thompson is running for Congress in Nevada. " * 12 + "</p>"
+        home = ("<html><head><title>Teresa Benitez-Thompson for Congress</title></head><body>"
+                + text + '<img src="/Teresa-headshot-square-new.jpg"></body></html>')
+        picture = "https://electteresa.com/Teresa-headshot-square-new.jpg"
+        weight = {"bytes": 29_496, "width": 480, "height": 480}
+        with mock.patch.object(enrich, "fetch", return_value=(self.BASE, 200, home)), \
+                mock.patch.object(enrich, "portrait_check", return_value=(True, weight)) as check, \
+                mock.patch.object(enrich.time, "sleep"):
+            record = enrich._read_one(self.PROFILE, self.BASE, extract=True)
+        self.assertEqual(record["portrait"], picture)
+        self.assertEqual(record["portraitRoute"], enrich.FIRST_NAME_ROUTE)
+        self.assertEqual(record["portraitEvidence"],
+                         'first name and "headshot" in file name "Teresa-headshot-square-new.jpg"')
+        self.assertEqual(record["portraitPage"], self.BASE)
+        # The likeness word lets a square frame through the shape test.
+        self.assertEqual(check.call_args.args, (picture, True))
+        # A page that also draws one named by the surname gives that one.
+        both = (home.replace("Benitez-Thompson", "Thompson")
+                .replace("</body>", '<img src="/teresa-thompson.jpg"></body>'))
+        with mock.patch.object(enrich, "fetch", return_value=(self.BASE, 200, both)), \
+                mock.patch.object(enrich, "portrait_check", return_value=(True, weight)), \
+                mock.patch.object(enrich.time, "sleep"):
+            record = enrich._read_one({"id": "X3", "name": "Teresa Thompson"}, self.BASE,
+                                      extract=True)
+        self.assertEqual(record["portrait"], "https://electteresa.com/teresa-thompson.jpg")
+        self.assertNotIn("portraitRoute", record)
+
+    def site(self, url="https://electteresa.com/Teresa-headshot-square-new.jpg"):
+        return {"url": "https://electteresa.com/", "safe": True, "reason": "ok",
+                "portrait": url, "portraitRoute": enrich.FIRST_NAME_ROUTE,
+                "portraitPage": self.BASE, "portraitRead": "2026-11-01",
+                "portraitEvidence": 'first name and "headshot" in file name "x"'}
+
+    def test_it_is_withheld_and_named_until_a_person_looks(self):
+        profile = _challenger(id="FEC_H6NV02362", name="Teresa Benitez-Thompson",
+                              campaignSite="https://electteresa.com/")
+        cache = {"people": {"FEC_H6NV02362": {"site": self.site()}}}
+        counts = enrich.apply_cache([profile], cache)
+        self.assertNotIn("photoSource", profile)
+        self.assertEqual(counts["portrait_awaiting_look"], 1)
+        issues = validate.check_first_name_portraits([profile], cache)
+        self.assertEqual([i.code for i in issues], ["portrait-first-name-unseen"])
+        self.assertIn("Teresa-headshot-square-new.jpg", issues[0].detail[0])
+        seen = {self.site()["portrait"]: ("2026-11-01", "her alone; a quarter of the card",
+                                          self.BASE)}
+        with mock.patch.dict(enrich.overrides.SEEN_FIRST_NAME_PORTRAITS, seen):
+            profile = _challenger(id="FEC_H6NV02362", name="Teresa Benitez-Thompson",
+                                  campaignSite="https://electteresa.com/")
+            enrich.apply_cache([profile], cache)
+            self.assertEqual(profile["photoSource"], "campaign-site")
+            self.assertEqual(profile["photos"][0], self.site()["portrait"])
+            self.assertEqual(validate.check_first_name_portraits([profile], cache), [])
+            stale = [u for i in validate.check_portrait_overrides(cache)
+                     if i.code == "stale-first-name-portrait" for u in i.detail]
+            self.assertNotIn(self.site()["portrait"], stale)
+
+    def test_a_look_at_the_original_covers_its_lighter_rendition(self):
+        heavy = "https://electteresa.com/Teresa-headshot-square-new.jpg"
+        record = dict(self.site("https://i0.wp.com/electteresa.com/x.jpg?w=500"),
+                      portraitHeavy=[{"url": heavy, "why": "415 KB, over 300 KB", "kept": False}])
+        self.assertFalse(enrich.first_name_seen(record))
+        with mock.patch.dict(enrich.overrides.SEEN_FIRST_NAME_PORTRAITS,
+                             {heavy: ("2026-11-01", "alone", self.BASE)}):
+            self.assertTrue(enrich.first_name_seen(record))
+        # One named by the surname needs no look.
+        self.assertTrue(enrich.first_name_seen({"portrait": heavy}))
+
+    def test_a_refusal_still_withholds_one_a_person_looked_at(self):
+        url = self.site()["portrait"]
+        profile = _challenger(id="FEC_H6NV02362", name="Teresa Benitez-Thompson",
+                              campaignSite="https://electteresa.com/")
+        cache = {"people": {"FEC_H6NV02362": {"site": self.site()}}}
+        with mock.patch.dict(enrich.overrides.SEEN_FIRST_NAME_PORTRAITS,
+                             {url: ("2026-11-01", "alone", self.BASE)}), \
+                mock.patch.dict(enrich.overrides.NOT_A_PORTRAIT,
+                                {url: ("2026-11-01", "another person at the edge")}):
+            enrich.apply_cache([profile], cache)
+            self.assertNotIn("photoSource", profile)
+            self.assertEqual(validate.check_first_name_portraits([profile], cache), [])
+
+    def test_a_member_never_takes_one(self):
+        profile = _challenger(id="FEC_H6NV02362", name="Teresa Benitez-Thompson",
+                              bioguide="B000001", campaignSite="https://electteresa.com/")
+        cache = {"people": {"FEC_H6NV02362": {"site": self.site()}}}
+        enrich.apply_cache([profile], cache)
+        self.assertNotIn("photoSource", profile)
+        self.assertEqual(validate.check_first_name_portraits([profile], cache), [])
+
+    def test_an_entry_no_cached_record_offers_is_stale(self):
+        with mock.patch.dict(enrich.overrides.SEEN_FIRST_NAME_PORTRAITS,
+                             {"https://gone.example/teresa-headshot.jpg": ("2026-11-01", "x", "y")}):
+            issues = validate.check_portrait_overrides({"people": {"X": {"site": self.site()}}})
+        self.assertIn("stale-first-name-portrait", [i.code for i in issues])
+
+    def test_every_recorded_look_is_dated_described_and_paged(self):
+        for url, (day, seen, page) in enrich.overrides.SEEN_FIRST_NAME_PORTRAITS.items():
+            self.assertTrue(url.startswith("https://"), url)
+            self.assertRegex(day, r"^\d{4}-\d{2}-\d{2}$")
+            self.assertIn("alone", seen)
+            self.assertIn("card", seen)
+            self.assertTrue(page.startswith("https://"), url)
+            self.assertNotIn(url, enrich.overrides.NOT_A_PORTRAIT)
+
+    def test_a_drawn_page_gives_a_first_name_portrait_only_where_no_surname_does(self):
+        text = "<p>" + "Teresa Benitez-Thompson is running for Congress in Nevada. " * 12 + "</p>"
+        markup = ("<html><head><title>Teresa Benitez-Thompson</title></head><body>" + text
+                  + '<img src="/Teresa-headshot.jpg"></body></html>')
+        weight = {"bytes": 29_496, "width": 480, "height": 600}
+        with mock.patch.object(enrich, "portrait_check", return_value=(True, weight)):
+            record, _page = enrich._drawn_read(self.PROFILE, self.BASE, markup, "2026-11-01")
+        self.assertEqual(record["portraitRoute"], enrich.FIRST_NAME_ROUTE)
+        self.assertEqual(record["portraitRead"], "2026-11-01")
+        # Its static record's first-name portrait gives way to the drawn
+        # page's named by the surname.
+        drawn = {"url": "https://electteresa.com/", "safe": True,
+                 "portrait": "https://electteresa.com/benitez-thompson.jpg"}
+        entry = {"drawn": drawn}
+        self.assertIs(enrich.portrait_record(entry, self.site()), drawn)
+        site = self.site()
+        self.assertIs(enrich.portrait_record({"drawn": record}, site), site)
+
+
 class TestPortraitOverrides(unittest.TestCase):
     """A person's look at an image outlasts the weekly re-read."""
 
