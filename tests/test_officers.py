@@ -1056,6 +1056,60 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0, get=get)
         self.assertNotIn("photo", rows["AR"])
 
+    def test_a_biography_page_that_says_nothing_keeps_the_same_persons_last_photo(self):
+        """coag.gov's firewall answered the refresh's runner HTTP 202 with no
+        body (2026-11-01), which was read as a page showing no photograph,
+        and Phil Weiser's was dropped. A challenge, a bot wall or a page
+        drawn by script concludes nothing (rule 8)."""
+        old = {"AR": {"name": "Tim Griffin", "photo": "https://ag.example.gov/old.jpg",
+                      "photoPage": "https://ag.example.gov/meet-tim/"}}
+        # The front page's headshot is not an image: only the biography page
+        # could show one.
+        check = self.weigh({})
+        for said in ("", "<html><head><title>Just a moment...</title></head></html>",
+                     "<html><body><div id=app></div><script>render()</script></body></html>"):
+            rows = {"AR": {"name": "Tim Griffin"}}
+            problems = officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0,
+                                              get=lambda url, timeout=60: said)
+            self.assertEqual(rows["AR"].get("photo"), "https://ag.example.gov/old.jpg", said)
+            self.assertIn("AR: Tim Griffin's photograph could not be read; the last one read is "
+                          "kept", problems)
+            self.assertFalse([p for p in problems if "dropped" in p], problems)
+        # A biography page read whole that shows none drops it, and says so.
+        page = ("<html><body><p>" + "The office of the Attorney General serves Arkansas. " * 10 +
+                "</p></body></html>")
+        rows = {"AR": {"name": "Tim Griffin"}}
+        problems = officers.add_ag_photos(rows, {"AR": [self.HOME]}, old, check=check, pause=0,
+                                          get=lambda url, timeout=60: page)
+        self.assertNotIn("photo", rows["AR"])
+        self.assertIn("AR: photograph dropped for Tim Griffin (was https://ag.example.gov/old.jpg)",
+                      problems)
+        # One of two pages says nothing, the other is read whole: the
+        # photograph may be on the one that said nothing, so it is kept.
+        home = (self.HOME[0], self.HOME[1].replace(
+            '<a href="/about-us/">About us</a>', '<a href="/bio/">Biography</a>'))
+        rows = {"AR": {"name": "Tim Griffin"}}
+        problems = officers.add_ag_photos(
+            rows, {"AR": [home]}, old, check=check, pause=0,
+            get=lambda url, timeout=60: "" if url.endswith("/meet-tim/") else page)
+        self.assertEqual(rows["AR"].get("photo"), "https://ag.example.gov/old.jpg")
+        # A new holder whose page says nothing inherits no one's photograph,
+        # and the run says it could not be read, not that the pages show none.
+        home = (self.HOME[0], '<a href="/meet-the-ag/">Meet the Attorney General</a>')
+        rows = {"AR": {"name": "Someone Else"}}
+        got = []
+
+        def silent(url, timeout=60):
+            got.append(url)
+            return ""
+        problems = officers.add_ag_photos(rows, {"AR": [home]}, old, check=check, pause=0,
+                                          get=silent)
+        self.assertIn("https://ag.example.gov/meet-the-ag/", got)
+        self.assertNotIn("photo", rows["AR"])
+        self.assertIn("AR: Someone Else's photograph could not be read, and no earlier one of "
+                      "them is kept", problems)
+        self.assertFalse([p for p in problems if "show no photograph" in p], problems)
+
     def test_a_colleague_sharing_letters_or_a_surname_is_not_the_attorney_general(self):
         """A substring test took "Carrie-Smith-Headshot" for Chris Carr and
         "jane-stanford-portrait" for Aaron Ford, and nothing looked at a
