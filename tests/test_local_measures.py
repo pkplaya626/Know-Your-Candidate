@@ -215,6 +215,55 @@ class TheRules(Hosts, unittest.TestCase):
         data["counties"]["48019"]["measures"][0]["source"]["title"] = "Ballot, linked from https://x"
         self.assertTrue(any("not the document's own name" in p for p in local_measures.problems(data)))
 
+    def test_a_question_its_source_marks_withdrawn_is_refused(self):
+        # Sacramento's list printed "WITHDRAWN -- Measure F: City of
+        # Sacramento" over a question the first cache listed as on the ballot.
+        for field, words in (("quote", "WITHDRAWN -- Proposition A: City of Austin"),
+                             ("text", "Removed from the ballot by order of the court.")):
+            data = cache()
+            m = data["counties"]["48025"]["measures"][0]
+            if field == "quote":
+                m["source"]["quote"] = words
+            else:
+                m["text"] = words
+            found = local_measures.problems(data)
+            self.assertTrue(any("48025" in p and "taken off the ballot" in p for p in found),
+                            (field, found))
+
+    def test_complete_words_that_are_only_the_title_are_refused(self):
+        # Tarrant's "Districts in Election" was the PDF's name, not words
+        # saying the list was whole.
+        data = cache()
+        b = data["counties"]["48026"]["own"]["basis"]
+        b["source"]["title"] = "This sample ballot shows ALL contests"
+        found = local_measures.problems(data)
+        self.assertTrue(any("only its source's title" in p for p in found), found)
+
+    def test_no_government_is_said_of_a_county_never_a_city(self):
+        data = cache()
+        rec = data["counties"]["48027"]
+        rec["own"] = {"status": "none", "basis": basis(**{"from": "noGovernment"})}
+        rec["own"]["basis"].pop("complete")
+        self.assertEqual(local_measures.problems(data), [])
+        rec["measures"] = []
+        rec["cities"] = [{"name": "City of Austin", "place": "4805000", "status": "none",
+                          "basis": dict(rec["own"]["basis"])}]
+        found = local_measures.problems(data)
+        self.assertTrue(any("never of a city" in p for p in found), found)
+
+    def test_another_countys_host_stands_only_through_its_one_document(self):
+        # Keyed on Alameda's host, any Alameda page passed for Santa Clara.
+        overrides.LOCAL_MEASURE_SOURCES["sdvote.com"] = (("48028",), "San Diego", "a test")
+        overrides.LOCAL_MEASURE_SOURCES["https://www.sdvote.com/joint.pdf"] = (
+            ("48029",), "San Diego", "the joint notice, a test")
+        data = cache()
+        for fips in ("48028", "48029"):
+            data["counties"][fips]["measures"][0]["source"]["url"] = "https://www.sdvote.com/joint.pdf"
+        self.assertEqual(local_measures.problems(data), [])
+        data["counties"]["48029"]["measures"][0]["source"]["url"] = "https://www.sdvote.com/other.pdf"
+        found = local_measures.problems(data)
+        self.assertTrue(any("48029" in p and "not an official source" in p for p in found), found)
+
     def test_an_unused_host_is_reported(self):
         self.assertNotIn("votetravis.gov", local_measures.unused_hosts(cache()))
         self.assertIn("sdvote.com", local_measures.unused_hosts(cache()))
@@ -261,6 +310,18 @@ class ThePage(Hosts, unittest.TestCase):
         with self.assertRaises(ValueError):
             local_measures.index(data)
 
+    def test_the_index_carries_each_states_sample_ballot(self):
+        # A county page loads no build figures, so the index carries the
+        # sample-ballot link KYC.sampleBallotLine words for both pages.
+        voting = {"TX": {"sample": "https://www.votetexas.gov/sample", "results": "x"},
+                  "WY": {"results": "y"},
+                  "_labels": {"TX": {"sample": "Look up your ballot"}},
+                  "_siteLinked": {"TX": ["sample"]}}
+        samples = local_measures.samples(voting)
+        self.assertEqual(samples, {"TX": {"url": "https://www.votetexas.gov/sample",
+                                          "linked": True, "label": "Look up your ballot"}})
+        self.assertEqual(local_measures.index(cache(), samples)["samples"], samples)
+
     def test_the_index_names_each_county_and_its_state(self):
         idx = local_measures.index(cache())
         self.assertEqual(idx["counties"]["48001"], ["TX", "County 48001"])
@@ -283,7 +344,7 @@ class TheCommittedCache(unittest.TestCase):
         self.assertEqual(ranks, list(range(1, 51)))
 
     def test_the_page_files_are_the_caches(self):
-        payloads = emit.local_measures_payloads(self.data)
+        payloads = emit.local_measures_payloads(self.data, local_measures.load_samples(ROOT))
         self.assertEqual(emit.check_local_measures(payloads, ROOT), [])
 
     def test_no_none_rests_on_a_list_that_does_not_say_it_is_whole(self):

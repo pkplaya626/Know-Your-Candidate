@@ -44,6 +44,13 @@
     return idx && idx.counties ? idx.counties[fips] || null : null;
   }
 
+  /** The state's sample-ballot page in KYC.sampleBallotLine's words, from
+   *  the index (a county page loads no build figures); "" where none. */
+  function sampleLine(code) {
+    var idx = index();
+    return KYC.sampleBallotLine(((idx && idx.samples) || {})[String(code).toUpperCase()]);
+  }
+
   function stateFileName(code) { return "kycLocalMeasures" + String(code).toUpperCase(); }
 
   function stateData(code) { return global[stateFileName(code)] || null; }
@@ -163,6 +170,14 @@
         esc(who) + " " + isAre(n, past) + on + ":</p>");
       out.push(list(part.measures, level));
       if (part.partial) out.push('<p class="measure-note local-partial">' + esc(part.partial) + "</p>");
+    } else if (part.status === "none" && b && b.from === "noGovernment") {
+      // A county with no government puts no question; that says nothing of
+      // the districts that cover it, which were not looked for (rule 19).
+      out.push('<p class="measures-lead">' + esc(part.county || "This county") + " has no " +
+        "county government to put a question" + on + ". This site " + (past ? "did" : "has") +
+        " not look" + (past ? "" : "ed") + " for questions of districts covering the whole " +
+        "county, and does not say there " + (past ? "were" : "are") + " none.</p>");
+      out.push(basisLine(b));
     } else if (part.status === "none") {
       out.push('<p class="measures-lead">No question ' + esc(who) + " " + (past ? "was" : "is") +
         on + ".</p>");
@@ -171,7 +186,7 @@
       out.push('<p class="measures-lead">This site ' + (past ? "did" : "has") + " not " +
         (past ? "find" : "found") + " a question " + esc(who) + on + ", and does not say there " +
         (past ? "was" : "is") + " none: the document it read does not say in its own words that " +
-        "it holds every contest.</p>");
+        "it " + (past ? "held" : "holds") + " every contest.</p>");
       out.push(basisLine(b));
     } else if (part.status === "notFound") {
       out.push('<p class="measures-lead">This site ' + (past ? "did" : "has") + " not " +
@@ -205,11 +220,22 @@
         " are one government; " + (past ? "its questions were" : "its questions are") +
         " listed under the city.</p>");
     } else {
-      out.push(partBody(rec.own, who, rec.read, rec.office, Math.min(level + 1, 6), past));
+      out.push(partBody(Object.assign({ county: rec.name }, rec.own), who, rec.read, rec.office,
+        Math.min(level + 1, 6), past));
     }
+    var skip = opts.skipPlaces || {};
     rec.cities.forEach(function (c) {
-      var lead = c.from ? '<p class="faint local-from">The ' + esc(c.from.office) + " lists the " +
-        esc(c.name) + "'s questions; most of the city is in " + esc(c.from.name) + ".</p>" : "";
+      // A city a ZIP code's other county already drew is drawn once.
+      if (skip[c.place]) {
+        out.push('<p class="faint local-drawn" data-place="' + KYC.escapeAttr(c.place) + '">' +
+          "The " + esc(c.name) + "'s questions are under " + esc(skip[c.place]) + ", above.</p>");
+        return;
+      }
+      skip[c.place] = rec.name;
+      // Where its questions are recorded, never why: "most of the city is
+      // in Kings County" was false of New York City.
+      var lead = c.from ? '<p class="faint local-from">This site records the ' + esc(c.name) +
+        "'s questions under " + esc(c.from.name) + ".</p>" : "";
       out.push('<section class="local-city" data-place="' + KYC.escapeAttr(c.place) + '">' +
         "<h" + level + ' class="local-city-name">If you live in the ' + esc(c.name) + "</h" + level + ">" +
         lead + partBody(c, "of the " + c.name, c.read || rec.read, rec.office, Math.min(level + 1, 6), past) +
@@ -256,6 +282,7 @@
     TOTAL: TOTAL,
     index: index,
     covered: covered,
+    sampleLine: sampleLine,
     record: record,
     prepare: prepare,
     countyBody: countyBody,

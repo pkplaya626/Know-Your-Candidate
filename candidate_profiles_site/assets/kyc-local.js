@@ -384,9 +384,11 @@
   function localQuestions(fips, name) {
     var LM = KYC.localMeasures;
     if (!LM) return "";
-    var where = "Its election office's pages are under " + '<a href="' +
+    // The state's own sample ballot, as Your ballot names it, else its
+    // election office's pages.
+    var where = LM.sampleLine(code) || ("Its election office's pages are under " + '<a href="' +
       KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
-      KYC.escapeHtml(KYC.findRep ? KYC.findRep.nameOf(code) : code) + "</a>.";
+      KYC.escapeHtml(KYC.findRep ? KYC.findRep.nameOf(code) : code) + "</a>.");
     var body = !LM.index() ? LM.missingLine()
       : LM.covered(fips) ? LM.countyBody(fips, { level: 4 })
       : LM.uncoveredLine(name, where);

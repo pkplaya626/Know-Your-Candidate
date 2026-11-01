@@ -124,6 +124,13 @@ async function testMeasures() {
     check("no colour, badge or word of the site's own takes a side", !section.querySelector(".badge, [style], .party, [class*=yes], [class*=oppose], [class*=support]") &&
       /does not say what a yes or a no vote does/.test(section.textContent));
     check("local questions are not listed here, and said so", /Local questions .* are not listed here/.test(section.textContent));
+    // Rule 102: the most populous counties' are listed on the county pages
+    // and Your ballot, and the line says where.
+    const localLine = section.querySelector(".measures-local");
+    check("and where the most populous counties' are listed", !!localLine &&
+      /for the 50 most populous counties, this site lists them on the county pages and on Your ballot/.test(localLine.textContent) &&
+      !!localLine.querySelector('a[href$="counties/ca.html"]') && !!localLine.querySelector('a[href$="ballot.html"]'),
+      localLine && localLine.textContent);
     const note = D.querySelector("#races .state-note");
     check("the race list's note points to them, and no longer calls them unlisted",
       !!note && !!note.querySelector('a[href="#measures"]') && !/ballot measures, which/.test(note.textContent),
@@ -14531,9 +14538,24 @@ async function testLocalMeasures() {
       return mine === theirs;
     })());
     const other = wy.D.getElementById("local-questions");
-    check("a county not covered says so, with the way to its state's election pages", !!other &&
+    // The state's own sample ballot where the record has one (the index
+    // carries it: a county page loads no build figures), else its pages.
+    const wySample = ((wy.window.kycLocalMeasuresIndex || {}).samples || {}).WY;
+    check("a county not covered says so, beside its state's sample ballot or election pages", !!other &&
       /is not among the 50 most populous counties/.test(other.textContent) &&
-      !!other.querySelector('a[href$="states/wy.html#voting"]'), other ? other.textContent.slice(0, 200) : "");
+      (wySample ? !!other.querySelector('a[href="' + wySample.url + '"]')
+        : !!other.querySelector('a[href$="states/wy.html#voting"]')), other ? other.textContent.slice(0, 200) : "");
+    const idx = wy.window.kycLocalMeasuresIndex;
+    const savedSamples = idx.samples;
+    idx.samples = { WY: { url: "https://sos.wyo.gov/sample", label: "Find your sample ballot", linked: true } };
+    const line = wy.window.KYC.localMeasures.sampleLine("wy");
+    idx.samples = {};
+    const noLine = wy.window.KYC.localMeasures.sampleLine("wy");
+    idx.samples = savedSamples;
+    check("the county page's sample-ballot sentence is Your ballot's (KYC.sampleBallotLine), from the index",
+      line === wy.window.KYC.sampleBallotLine({ url: "https://sos.wyo.gov/sample", label: "Find your sample ballot", linked: true }) &&
+      /^The sample-ballot page the election office's site links: <a href="https:\/\/sos\.wyo\.gov\/sample"[^>]*>Find your sample ballot<\/a>\.$/.test(line) &&
+      noLine === "", line);
     check("a page of a state with no covered county loads no state file", !wy.window.kycLocalMeasuresWY);
   });
 
@@ -14545,6 +14567,26 @@ async function testLocalMeasures() {
       !!card && /(was|were) on the Nov 3, 2026 ballot/.test(card.textContent) &&
       !/ (is|are) on the Nov 3, 2026 ballot/.test(card.textContent) &&
       /does not read the results of ballot questions/.test(card.textContent));
+    // Every status's words, past: "it holds every contest" stayed present.
+    const { window } = after;
+    const real = window.kycLocalMeasuresTX;
+    const src = (found, extra) => Object.assign({ from: "list", url: "https://votetravis.gov/x.pdf",
+      title: "A Ballot", found }, extra || {});
+    const said = (own) => {
+      window.kycLocalMeasuresTX = { "48453": { state: "TX", name: "Travis County", read: "2026-11-01",
+        office: { name: "Travis County Clerk", url: "https://votetravis.gov/" }, own, cities: [] } };
+      const div = window.document.createElement("div");
+      div.innerHTML = window.KYC.localMeasures.countyBody("48453", { level: 4 });
+      return div.textContent;
+    };
+    const unlisted = said({ status: "unlisted", basis: src("lists questions of cities only") });
+    const noGov = said({ status: "none", basis: src("has no county government", { from: "noGovernment" }) });
+    window.kycLocalMeasuresTX = real;
+    check("a list holding none, and a county with no government, in the past tense too",
+      /did not find a question of Travis County/.test(unlisted) && /that it held every contest/.test(unlisted) &&
+      !/ holds every contest/.test(unlisted) &&
+      /did not look for questions of districts/.test(noGov) && /does not say there were none/.test(noGov),
+      unlisted + " | " + noGov);
   });
 
   suite("Local questions: every status's words, on constructed records", () => {
@@ -14592,9 +14634,41 @@ async function testLocalMeasures() {
       status: "listed", from: { fips: "48113", name: "Dallas County", office: "Dallas County Elections" },
       measures: [{ j: "City of Austin", jk: "city", designation: "Proposition A", title: null, kind: "Bond",
         source: "https://votetravis.gov/x.pdf", sourceTitle: "A Ballot", read: "2026-11-01", text: "Bonds?" }] }]);
-    check("a city listed under another county says which office lists it",
-      /The Dallas County Elections lists the City of Austin's questions; most of the city is in Dallas County\./.test(elsewhere),
-      elsewhere);
+    // Where they are recorded, never why: "most of the city is in Kings
+    // County" was false of New York City, and the office named was not
+    // always the one whose document was cited (Garland, on Collin's ballot).
+    check("a city listed under another county says where this site records it, and nothing more",
+      /This site records the City of Austin's questions under Dallas County\./.test(elsewhere) &&
+      !/most of the city/.test(elsewhere) && !/Dallas County Elections lists/.test(elsewhere), elsewhere);
+    // A county with no government (Middlesex): no "none" about districts.
+    const noGov = say({ status: "none", basis: src("records the county's abolishment, so it has no county government to put a question",
+      { from: "noGovernment" }) });
+    check("no county government: said of the county alone, and districts said not looked for",
+      /Travis County has no county government to put a question on the Nov 3, 2026 ballot\./.test(noGov) &&
+      /has not looked for questions of districts covering the whole county, and does not say there are none\./.test(noGov) &&
+      !/No question of Travis County or of a district/.test(noGov), noGov);
+    // A ZIP code across two counties that both name a city draws it once.
+    const twice = (() => {
+      const austinCity = { name: "City of Austin", place: "4805000", status: "listed",
+        measures: [{ j: "City of Austin", jk: "city", designation: "Proposition A", title: null, kind: "Bond",
+          source: "https://votetravis.gov/x.pdf", sourceTitle: "A Ballot", read: "2026-11-01", text: "Bonds?" }] };
+      window.kycLocalMeasuresTX = Object.assign(make({ status: "unlisted", basis: src("lists none") }, [austinCity]),
+        { "48491": { state: "TX", name: "Williamson County", read: "2026-11-01",
+          office: { name: "Williamson County Elections", url: "https://wilco.gov/" },
+          own: { status: "unlisted", basis: src("lists none") }, cities: [austinCity] } });
+      const idx = window.kycLocalMeasuresIndex;
+      const had = idx.counties["48491"];
+      idx.counties["48491"] = ["TX", "Williamson County"];
+      const drawn = {};
+      const div = window.document.createElement("div");
+      div.innerHTML = LM.countyBody("48453", { level: 6, skipPlaces: drawn }) +
+        LM.countyBody("48491", { level: 6, skipPlaces: drawn });
+      if (had) idx.counties["48491"] = had; else delete idx.counties["48491"];
+      return div;
+    })();
+    check("a city two of the answer's counties name is drawn once, the second pointing to the first",
+      twice.querySelectorAll('.local-city[data-place="4805000"]').length === 1 &&
+      /The City of Austin's questions are under Travis County, above\./.test(twice.textContent), twice.textContent);
     window.kycLocalMeasuresTX = undefined;
     const failed = (() => { const d = window.document.createElement("div");
       d.innerHTML = LM.countyBody("48453", { level: 4 }); return d.textContent; })();

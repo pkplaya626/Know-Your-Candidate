@@ -542,7 +542,9 @@ def _build(args):
     # same way: a cache that breaks its rules is validate's error above.
     local_cache = local_measures_mod.load(args.root)
     if local_cache and not local_measures_mod.problems(local_cache):
-        written_lm = emit.write_local_measures(emit.local_measures_payloads(local_cache), args.root)
+        written_lm = emit.write_local_measures(
+            emit.local_measures_payloads(local_cache, local_measures_mod.load_samples(args.root)),
+            args.root)
         for lm_path, lm_size in written_lm:
             print(f"[ok] wrote {lm_path} ({lm_size / 1024:.0f} KB)")
         lm_stats = local_measures_mod.stats(local_cache)
@@ -1777,7 +1779,9 @@ def _verify(args):
     if unfit:
         problems.append(f"{local_measures_mod.CACHE_PATH}: {len(unfit)} problem(s): {unfit[0]}")
     else:
-        stale = emit.check_local_measures(emit.local_measures_payloads(local_cache), args.root)
+        stale = emit.check_local_measures(
+            emit.local_measures_payloads(local_cache, local_measures_mod.load_samples(args.root)),
+            args.root)
         problems.extend(f"{path} is {why}" for path, why in stale)
         if not stale:
             print(f"  ok  {emit.LOCAL_MEASURES_DIR} matches {local_measures_mod.CACHE_PATH}")

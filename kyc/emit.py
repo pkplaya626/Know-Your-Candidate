@@ -1215,10 +1215,11 @@ def local_measures_global(code):
     return "kycLocalMeasuresIndex" if code == "index" else f"kycLocalMeasures{code.upper()}"
 
 
-def local_measures_payloads(cache):
-    """``{"index": ..., "TX": ..., ...}``: every file's payload."""
+def local_measures_payloads(cache, samples=None):
+    """``{"index": ..., "TX": ..., ...}``: every file's payload. *samples*:
+    each state's sample-ballot page (``local_measures.load_samples``)."""
     from . import local_measures
-    out = {"index": local_measures.index(cache)}
+    out = {"index": local_measures.index(cache, samples)}
     out.update(local_measures.for_state(cache))
     return out
 

@@ -711,8 +711,13 @@ def measures_static(code, rec, past, summary=None, pad="                "):
                     f'{_out_link(rec["office"]["url"], rec["office"]["name"])}.</p>')
     if name == "Statewide":
         others = "Other local" if any(m.get("local") for m in rec.get("measures") or []) else "Local"
+        # The most populous counties' are listed elsewhere (rule 102): the
+        # line says where, as KYC.ballot's localLine does.
         rows.append(f'{pad}    <p class="measures-local">{others} questions - a county&#x27;s, a '
-                    "city&#x27;s or a school district&#x27;s - are not listed here.</p>")
+                    "city&#x27;s or a school district&#x27;s - are not listed here; for the 50 most "
+                    "populous counties, this site lists them on "
+                    f'<a href="../counties/{_e(code.lower())}.html">the county pages</a> and on '
+                    '<a href="../ballot.html">Your ballot</a>.</p>')
     rows.append(f"{pad}</section>")
     return "\n".join(rows)
 

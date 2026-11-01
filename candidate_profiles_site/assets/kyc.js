@@ -1579,6 +1579,20 @@
     return name + (/Islands$/.test(name) ? "'" : "'s");
   }
 
+  /** The election office's sample-ballot page in a sentence, said as the
+   *  record holds it: *rec* {url, label, linked}. "Links" only of a page the
+   *  record shows the office's site linking (voting.site_linked), and never
+   *  that it shows every contest - a label carries what the page is. One
+   *  sentence for Your ballot (from the build's figures) and a county page
+   *  (from the local questions' index, rule 102). "" where none. */
+  function sampleBallotLine(rec) {
+    if (!rec || !rec.url) return "";
+    return (rec.linked ? "The sample-ballot page the election office's site links: "
+      : "The election office's own sample-ballot page: ") +
+      '<a href="' + escapeAttr(rec.url) + '" target="_blank" rel="noopener noreferrer">' +
+      escapeHtml(rec.label || "See a sample ballot") + "</a>.";
+  }
+
   /** The vacancy record for *code*'s House district *n*, or null. */
   function vacancyOf(code, n) {
     var list = ((meta().states || {})[code] || {}).vacancies || [];
@@ -3595,6 +3609,7 @@
     vacancyNote: vacancyNote,
     vacancyOf: vacancyOf,
     possessive: possessive,
+    sampleBallotLine: sampleBallotLine,
     hasValue: hasValue,
     moneyAmount: moneyAmount,
     moneyShort: moneyShort,

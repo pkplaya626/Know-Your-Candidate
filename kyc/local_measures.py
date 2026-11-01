@@ -25,7 +25,9 @@ each covered city, one of these:
   is none or a count of the questions (``statement``), or a ballot or list
   whose own words say it holds every contest (``complete``, quoted), or every
   ballot style read whole (``every``), or no county government to put one
-  (``noGovernment``);
+  (``noGovernment``, which the page says of the county alone: it shows
+  nothing about districts that cover the county, which it says were not
+  looked for);
 - ``unlisted``: a document that lists none, but whose words do not say it is
   complete: the page says what it lists and does not say there is none
   (rule 19);
@@ -36,7 +38,9 @@ each covered city, one of these:
 
 The page says a question only in its official words, and never what a yes or
 a no vote does; no colour suggests a side. Questions decided at an earlier
-2026 election, or taken off the ballot by a court, are not listed. ``check``
+2026 election, or taken off the ballot by a court, are not listed, nor one
+the source marks withdrawn (Sacramento's list printed "WITHDRAWN -- Measure
+F" over a question the first cache listed). ``check``
 holds the cache to all of this; ``for_state`` and ``index`` write what
 ``data/localmeasures/`` holds, loaded only where a county's questions are
 shown (rule 94).
@@ -82,6 +86,8 @@ _FIPS = re.compile(r"^\d{5}$")
 _PLACE = re.compile(r"^\d{7}$")
 _NOT_A_TITLE = re.compile(r"https?:|www\.|\blinked\b|\bdescribed as\b|\bedition:|\bquery:", re.I)
 _CUT = re.compile(r"\.\.\.|…")
+_OFF_THE_BALLOT = re.compile(r"\bwithdrawn\b|\bremoved from the ballot\b|\bstricken from the "
+                             r"ballot\b|\btaken off the ballot\b", re.I)
 
 
 def load(root="."):
@@ -98,19 +104,29 @@ def _host(url):
     return (urlparse(str(url or "")).hostname or "").lower()
 
 
-def listed_host(url):
-    """``(key, counties, publisher, evidence)`` of the
-    ``overrides.LOCAL_MEASURE_SOURCES`` entry *url* falls under, or None."""
+def listed_hosts(url):
+    """Every ``(key, counties, publisher, evidence)`` of the
+    ``overrides.LOCAL_MEASURE_SOURCES`` entries *url* falls under, an
+    address's own entry (a key starting ``https://``) before its host's: a
+    host is a source for its own county, and for another county only through
+    the one document its evidence names."""
     from . import overrides
     url = str(url or "")
     host = _host(url)
+    prefixed, hosts = [], []
     for key, (counties, label, evidence) in overrides.LOCAL_MEASURE_SOURCES.items():
         if key.startswith("https://"):
             if url.startswith(key):
-                return key, counties, label, evidence
+                prefixed.append((key, counties, label, evidence))
         elif host == key or host.endswith("." + key):
-            return key, counties, label, evidence
-    return None
+            hosts.append((key, counties, label, evidence))
+    return prefixed + hosts
+
+
+def listed_host(url):
+    """The first of ``listed_hosts(url)``, or None."""
+    found = listed_hosts(url)
+    return found[0] if found else None
 
 
 def official(url, fips, state):
@@ -122,11 +138,13 @@ def official(url, fips, state):
         return False, "not an https address"
     if voting_dates.compiled(str(url)):
         return False, "a compiled table, a lead and never a source (rule 50)"
-    found = listed_host(url)
+    found = listed_hosts(url)
     if found:
-        _key, counties, label, _evidence = found
-        return (fips in counties), (label if fips in counties
-                                    else f"a source for {'/'.join(counties)}, not {fips}")
+        for _key, counties, label, _evidence in found:
+            if fips in counties:
+                return True, label
+        counties = sorted({c for entry in found for c in entry[1]})
+        return False, f"a source for {'/'.join(counties)}, not {fips}"
     ok, label = voting_dates.official_source(url, state)
     if ok:
         return True, label
@@ -251,6 +269,11 @@ def basis_problems(where, fips, state, b):
     quote = str((b.get("source") or {}).get("quote") or "")
     if complete is not None and str(complete) not in quote:
         out.append(f"{where}: its 'complete' words are not in its source's quote")
+    elif complete is not None and str(complete).strip().lower() in \
+            str((b.get("source") or {}).get("title") or "").lower():
+        # Tarrant's "Districts in Election", quoted as showing the list was
+        # whole, was only the document's name.
+        out.append(f"{where}: its 'complete' words are only its source's title")
     if "every" in b and b["every"] is not True:
         out.append(f"{where}: 'every' is true or absent")
     return out
@@ -334,6 +357,9 @@ def city_problems(fips, state, c, measures, counties):
         out += basis_problems(where, fips, state, c.get("basis"))
         if status == "none" and isinstance(c.get("basis"), dict):
             out += _none_problems(where, c["basis"])
+        if (c.get("basis") or {}).get("from") == "noGovernment":
+            out.append(f"{where}: 'noGovernment' speaks of a county with no government, "
+                       "never of a city")
     elif status == "notFound":
         if not str(c.get("why") or "").strip():
             out.append(f"{where}: not found, and not said why")
@@ -384,6 +410,14 @@ def measure_problems(fips, state, i, m):
         out.append(f"{where}: 'summary' is true or absent")
     if m.get("kind") not in KINDS:
         out.append(f"{where}: unknown kind {m.get('kind')!r}")
+    said = " ".join(str(x or "") for x in (m.get("text"), m.get("title"),
+                                           (m.get("source") or {}).get("quote")))
+    gone = _OFF_THE_BALLOT.search(said)
+    if gone:
+        # Sacramento's list printed "WITHDRAWN -- Measure F" over a question
+        # the first cache listed as on the ballot, its quote cut after it.
+        out.append(f"{where}: its source says {gone.group(0)!r}: a question taken off the "
+                   "ballot is not listed")
     out += _source_problems(where, fips, state, m.get("source"))
     out += _date_problems(where, m.get("read"))
     return out
@@ -399,18 +433,20 @@ def check(data):
 
 def unused_hosts(data):
     """``overrides.LOCAL_MEASURE_SOURCES`` entries no address in *data*
-    falls under: a stale entry is invisible and quietly wrong."""
+    rests on - the entry that makes an address a source for its county: a
+    stale entry is invisible and quietly wrong."""
     from . import overrides
     used = set()
-    for rec in ((data or {}).get("counties") or {}).values():
+    for fips, rec in ((data or {}).get("counties") or {}).items():
         urls = [rec.get("office", {}).get("url")]
         urls += [m.get("source", {}).get("url") for m in rec.get("measures") or []]
         for part in [rec.get("own") or {}] + list(rec.get("cities") or []):
             urls.append(((part.get("basis") or {}).get("source") or {}).get("url"))
         for url in urls:
-            found = listed_host(url)
-            if found:
-                used.add(found[0])
+            for entry in listed_hosts(url):
+                if fips in entry[1]:
+                    used.add(entry[0])
+                    break
     return sorted(set(overrides.LOCAL_MEASURE_SOURCES) - used)
 
 
@@ -510,9 +546,34 @@ def for_state(data):
     return out
 
 
-def index(data):
+def samples(voting):
+    """``{state: {url, label?, linked}}``: each state's sample-ballot page as
+    the build's voting record holds it (``voting.for_page``), for a county
+    page to name beside "not listed here" - the county pages load no build
+    figures, and Your ballot's words for the link are the same
+    (``KYC.sampleBallotLine``)."""
+    out = {}
+    for code, links in sorted((voting or {}).items()):
+        if code.startswith("_") or not isinstance(links, dict) or not links.get("sample"):
+            continue
+        entry = {"url": links["sample"],
+                 "linked": "sample" in ((voting.get("_siteLinked") or {}).get(code) or [])}
+        label = ((voting.get("_labels") or {}).get(code) or {}).get("sample")
+        if label:
+            entry["label"] = label
+        out[code] = entry
+    return out
+
+
+def load_samples(root="."):
+    """``samples`` of the committed voting record."""
+    from . import voting, voting_dates
+    return samples(voting.for_page(voting.load_cache(root), voting_dates.load(root)))
+
+
+def index(data, sample_ballots=None):
     """What ``data/localmeasures/index.js`` holds: which counties are
-    covered, and on what ranking."""
+    covered, on what ranking, and each state's sample-ballot page."""
     check(data)
     cover = data["coverage"]
     return {
@@ -521,6 +582,7 @@ def index(data):
                      for fips, rec in sorted(data["counties"].items())},
         "cityPopulation": cover["cityPopulation"],
         "ranking": cover["ranking"],
+        "samples": sample_ballots or {},
     }
 
 

@@ -227,12 +227,12 @@
      "text": "Shall Illinois adopt the Millionaire Amendment for Property Tax Relief and Education, which would enact a 3% income tax surcharge only on millionaires and use 50% of this new revenue to provide property tax relief for residential and commercial taxpayers and 50% to improve state funding for public education?",
      "kind": null,
      "source": {
-      "url": "https://www.cookcountyclerkil.gov/api/Candidate/GetAllReferenda?electionCode=110326&language=en",
+      "url": "https://www.cookcountyclerkil.gov/elections/current-elections/view-all-referenda",
       "title": "View All Referenda, November 3, 2026 (the Clerk's list)",
       "quote": "{\"TaxCode\":\"03-CCTY-000\",\"SortOder_Title\":3,\"SortOrder_Ballot\":1804,\"ShortTitle\":\"\",\"LongTitle\":\"Cook County, Millionaire Tax Amendment\",\"ReferendumText\":\"Shall Illinois adopt the Millionaire Amendment for Property Tax Relief and Education, which would enact a 3% income tax surcharge only on millionaires and use 50% of this new revenue to provide property tax relief for residential and commercial taxpayers and 50% to improve state funding for public education?\" ...} - the first record of the list the Clerk's 'View All Referenda' page draws for election 110326, followed by 'Village of Alsip, Term Limits'."
      },
      "read": "2026-11-01",
-     "notes": "{\"designationNote\": \"The Clerk's list prints no number or letter; its title is 'Cook County, Millionaire Tax Amendment'.\", \"kindNote\": \"The Clerk's list prints no kind. News reports call it a non-binding advisory question placed by the Cook County Board in July 2026; the Board's resolution was not read.\", \"note\": \"The Clerk's list covers suburban Cook County. Whether the same question is printed on ballots inside Chicago is the Chicago Board of Election Commissioners' word, which could not be read (Cloudflare).\"}"
+     "notes": "{\"designationNote\": \"The Clerk's list prints no number or letter; its title is 'Cook County, Millionaire Tax Amendment'.\", \"kindNote\": \"The Clerk's list prints no kind. News reports call it a non-binding advisory question placed by the Cook County Board in July 2026; the Board's resolution was not read.\", \"note\": \"The Clerk's list covers suburban Cook County. Whether the same question is printed on ballots inside Chicago is the Chicago Board of Election Commissioners' word, which could not be read (Cloudflare).\", \"readThrough\": \"Read through the JSON the page draws from: https://www.cookcountyclerkil.gov/api/Candidate/GetAllReferenda?electionCode=110326&language=en\"}"
     }
    ],
    "own": {
@@ -266,7 +266,7 @@
       "place": "4835000"
      },
      "designation": "Proposition A",
-     "title": "Houston Freedom Act",
+     "title": null,
      "text": "Shall the City Charter of the City of Houston be amended to 1) require the Houston Police Department to make enforcement of Class A and Class B misdemeanor marijuana possession its lowest law-enforcement priority with related reporting requirements and 2) prohibit Houston police officers from requesting or executing \"no-knock\" search warrants?",
      "kind": "charter amendment",
      "source": {
@@ -275,7 +275,7 @@
       "quote": "NOTICE OF CITY OF HOUSTON, TEXAS, CHARTER AMENDMENT ELECTION TUESDAY, NOVEMBER 3, 2026 ... The Election will submit to the qualified voters of the City of Houston a proposition to amend the City Charter to deprioritize enforcement of certain marijuana offenses and ban no-knock warrants. ... CITY OF HOUSTON PROPOSITION A ... Ballot Language for Charter Amendment Proposition A / City of Houston, Proposition A / Shall the City Charter of the City of Houston be amended to ..."
      },
      "read": "2026-11-01",
-     "notes": "{\"titleNote\": \"The notice prints the amendment as adding 'a new Article X, to be titled \\\"Houston Freedom Act\\\"'; the ballot itself heads it 'City of Houston, Proposition A' with no other title.\", \"kindWords\": \"Ballot Language for Charter Amendment Proposition A\", \"alsoOn\": \"The county's master sample ballot prints 'CITY OF HOUSTON, PROPOSITION A'.\"}"
+     "notes": "{\"titleNote\": \"The notice prints the amendment as adding 'a new Article X, to be titled \\\"Houston Freedom Act\\\"'; the ballot itself heads it 'City of Houston, Proposition A' with no other title.\", \"kindWords\": \"Ballot Language for Charter Amendment Proposition A\", \"alsoOn\": \"The county's master sample ballot prints 'CITY OF HOUSTON, PROPOSITION A'.\", \"titleWithheld\": \"The first cache showed 'Houston Freedom Act' as the title; it is the name of the new charter article, and the ballot heads the question 'City of Houston, Proposition A' alone (review of PR #169).\"}"
     }
    ],
    "own": {
@@ -524,7 +524,7 @@
      "status": "listed"
     },
     {
-     "name": "City of Gilbert",
+     "name": "Town of Gilbert",
      "place": "0427400",
      "status": "notFound",
      "why": "This site's automated reading could not open the Town of Gilbert's election page."
@@ -918,7 +918,8 @@
       "quote": "General, Joint, and Special Election - November 3, 2026 ... Notice of General, Joint, and Special Election ... Dallas County Special Election for the purpose of approving or rejecting a tax rate that exceeds the voter-approval tax rate for the 2026 tax year. ... DALLAS COUNTY PROPOSITION A / THIS IS A TAX INCREASE / \"Approving the ad valorem tax rate of $0.248650 ...\""
      },
      "read": "2026-11-01",
-     "notes": "{\"kindWords\": \"Dallas County Special Election for the purpose of approving or rejecting a tax rate that exceeds the voter-approval tax rate for the 2026 tax year.\", \"note\": \"The scanned Election Order signed by the County Judge (dallascounty.org, tax-rate-info) prints the official ballot as '... a rate is $0.02400 per $100 valuation than the voter-approval tax rate ...' without 'that' and 'higher' and without 'THIS IS A TAX INCREASE'; the text above is the Elections Department's notice of October 2026. The ballot as printed could not be checked (sample ballot unreadable here).\"}"
+     "notes": "{\"kindWords\": \"Dallas County Special Election for the purpose of approving or rejecting a tax rate that exceeds the voter-approval tax rate for the 2026 tax year.\", \"note\": \"The scanned Election Order signed by the County Judge (dallascounty.org, tax-rate-info) prints the official ballot as '... a rate is $0.02400 per $100 valuation than the voter-approval tax rate ...' without 'that' and 'higher' and without 'THIS IS A TAX INCREASE'; the text above is the Elections Department's notice of October 2026. The ballot as printed could not be checked (sample ballot unreadable here).\"}",
+     "textNote": "As the Elections Department's notice prints it. The election order the County Judge signed prints the ballot's words without “that”, “higher” and “THIS IS A TAX INCREASE”; this site could not read the printed sample ballot to say which it carries."
     },
     {
      "jurisdiction": {
@@ -1341,8 +1342,8 @@
        "title": "Districts in Election, 11/03/2026 Joint General and Special Elections",
        "quote": "Districts in Election ... 522 - 11/03/2026 - Joint General and Special Elections"
       },
-      "found": "names every political subdivision in the election, and the City of Fort Worth is not among them",
-      "complete": "Districts in Election"
+      "found": "lists the political subdivisions in election 522, the joint general and special elections of November 3, 2026, and the City of Fort Worth is not among them",
+      "complete": "Districts in Election ... 522 - 11/03/2026 - Joint General and Special Elections"
      }
     },
     {
@@ -1356,8 +1357,8 @@
        "title": "Districts in Election, 11/03/2026 Joint General and Special Elections",
        "quote": "Districts in Election ... 522 - 11/03/2026 - Joint General and Special Elections"
       },
-      "found": "names every political subdivision in the election, and the City of Arlington is not among them",
-      "complete": "Districts in Election"
+      "found": "lists the political subdivisions in election 522, the joint general and special elections of November 3, 2026, and the City of Arlington is not among them",
+      "complete": "Districts in Election ... 522 - 11/03/2026 - Joint General and Special Elections"
      }
     }
    ],
@@ -1592,7 +1593,7 @@
       "title": "Incorporation of and Abolishment of Counties",
       "quote": "Middlesex July 11, 1997 48:1 / 1997"
      },
-     "found": "records Middlesex County's abolishment on July 11, 1997, so it has no county government to put a question; this site did not look for questions of districts or towns"
+     "found": "records Middlesex County's abolishment on July 11, 1997, so it has no county government to put a question"
     }
    },
    "cities": [],
@@ -1717,26 +1718,7 @@
     "url": "https://elections.saccounty.gov/"
    },
    "read": "2026-11-01",
-   "measures": [
-    {
-     "jurisdiction": {
-      "kind": "city",
-      "name": "City of Sacramento",
-      "place": "0664000"
-     },
-     "designation": "Measure F",
-     "title": null,
-     "text": "Shall the measure amending the City of Sacramento Charter – to provide a mechanism to terminate the Sacramento City Employees’ Retirement System (SCERS) when conditions are met; ensure that the City of Sacramento’s obligations to remaining members, surviving spouses, and other beneficiaries are fulfilled; with any surplus funds remaining after termination to be used to establish or contribute to a housing revolving loan fund and to finance affordable housing and market-rate housing with affordable financing components – be adopted?",
-     "kind": "charter amendment",
-     "source": {
-      "url": "https://elections.saccounty.gov/content/vre/us/en/election-information/current-measure-information.html",
-      "title": "Current Measure Information, November 3, 2026, General Election",
-      "quote": "November 3, 2026, General Election | Letter, District, Measure Question, Full Text, Audio, Votes Required Information ... Measure F: City of Sacramento | Shall the measure amending the City of Sacramento Charter - to provide a mechanism to terminate the Sacramento City Employees' Retirement System (SCERS) ..."
-     },
-     "read": "2026-11-01",
-     "notes": "{\"titleNote\": \"The page prints no title for Measure F, only 'Measure F: City of Sacramento' over its question.\", \"textNote\": \"The measure question as printed on the county's Current Measure Information page.\", \"kindWords\": \"Shall the measure amending the City of Sacramento Charter\"}"
-    }
-   ],
+   "measures": [],
    "own": {
     "status": "unlisted",
     "basis": {
@@ -1753,10 +1735,19 @@
     {
      "name": "City of Sacramento",
      "place": "0664000",
-     "status": "listed"
+     "status": "unlisted",
+     "basis": {
+      "from": "list",
+      "source": {
+       "url": "https://elections.saccounty.gov/content/vre/us/en/election-information/current-measure-information.html",
+       "title": "Current Measure Information, November 3, 2026, General Election",
+       "quote": "November 3, 2026, General Election | Letter, District, Measure Question, Full Text ... WITHDRAWN -- Measure F: City of Sacramento Shall the measure amending the City of Sacramento Charter ..."
+      },
+      "found": "marks the City of Sacramento's Measure F withdrawn (“WITHDRAWN -- Measure F: City of Sacramento”) and lists no other question of the City"
+     }
     }
    ],
-   "notes": "No measure of the County of Sacramento itself or of a countywide district is on the page; the page does not say in words that there is none."
+   "notes": "No measure of the County of Sacramento itself or of a countywide district is on the page; the page does not say in words that there is none. The page prints 'WITHDRAWN -- Measure F: City of Sacramento' over the city's charter amendment question (re-read 2026-11-01 by the review of PR #169), so it is not listed."
   },
   "12099": {
    "state": "FL",
@@ -3195,7 +3186,7 @@
      "from": "ballots",
      "source": {
       "url": "https://www.votedenton.gov/wp-content/uploads/2026/09/1126-Active-Contest-List.pdf",
-      "title": "Preview Ballot, General & Special Elections, November 3, 2026 (Precinct ALL-ALL)",
+      "title": "Preview Ballot, General & Special Elections, November 3, 2026",
       "quote": "Preview Ballot 09/09/2026 14:30:23 ... General & Special Elections November 3, 2026 ... Denton County ... Precinct ALL-ALL"
      },
      "found": "prints propositions of towns, cities and utility districts, and none of Denton County or a countywide district",
@@ -3240,7 +3231,7 @@
       "name": "County of Fresno"
      },
      "designation": "Measure A",
-     "title": "Fresno County Hotel Tax",
+     "title": null,
      "text": null,
      "kind": "tax",
      "source": {
@@ -3250,7 +3241,7 @@
      },
      "read": "2026-11-01",
      "textMissing": "The office's notice is a scanned image. This site has transcribed it, but no second reader has yet checked the transcription word for word, so it is not shown here; the text is in the source.",
-     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transient Occupancy Tax Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transient Occupancy Tax Measure' (dated July 13, 2026), in the filed affidavit of publication. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"A County of Fresno Transient Occupancy Tax Measure; 'Majority (50% + 1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"transcription\": \"Shall the measure to establish a tax paid only by guests staying in overnight short-term lodging in the unincorporated area of Fresno County at the rate of 12% of the rent for the stay, estimated to raise $4,500,000 annually, until changed or repealed, in general revenue for the County of Fresno, which provides public safety, wildfire/disaster response, 911, road maintenance, behavioral and public health, water infrastructure, parks, and other public services, be adopted?\", \"transcriptionIsSummary\": false}"
+     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transient Occupancy Tax Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transient Occupancy Tax Measure' (dated July 13, 2026), in the filed affidavit of publication. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"A County of Fresno Transient Occupancy Tax Measure; 'Majority (50% + 1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"transcription\": \"Shall the measure to establish a tax paid only by guests staying in overnight short-term lodging in the unincorporated area of Fresno County at the rate of 12% of the rent for the stay, estimated to raise $4,500,000 annually, until changed or repealed, in general revenue for the County of Fresno, which provides public safety, wildfire/disaster response, 911, road maintenance, behavioral and public health, water infrastructure, parks, and other public services, be adopted?\", \"transcriptionIsSummary\": false, \"titleWithheld\": \"Transcribed from the scan as 'Fresno County Hotel Tax'; withheld until a second reader checks the scans (review of PR #169). The Registrar's election page, read through a summarizer only (its address answers a script 403), lists Measure A 'Fresno County Transient Occupancy Tax Measure', Measure S 'Fresno County Transportation Improvement Act Measure' and Measure D 'City of Fresno Transactions & Use Tax Measure'. Its press release of October 31, 2026 ('Identifies Printing Error on Limited Number of Ballots') concerns only the Fresno Unified School District trustee contests.\"}"
     },
     {
      "jurisdiction": {
@@ -3258,7 +3249,7 @@
       "name": "County of Fresno"
      },
      "designation": "Measure S",
-     "title": "Fresno County Transportation Improvement Act",
+     "title": null,
      "text": null,
      "kind": "tax",
      "source": {
@@ -3268,7 +3259,7 @@
      },
      "read": "2026-11-01",
      "textMissing": "The office's notice is a scanned image. This site has transcribed it, but no second reader has yet checked the transcription word for word, so it is not shown here; the text is in the source.",
-     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transportation Improvement Act Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transportation Improvement Act Measure' (dated August 19, 2026). Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"County Counsel's impartial analysis: 'a County of Fresno ordinance imposing a half-cent (0.5%) transactions and use tax (sales tax) for thirty years ... The Measure qualified for the ballot by an initiative petition ... submitted to the voters at the November 3, 2026 election as required by Assembly Bill 1923 (Stats. 2026, ch. 108).'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"courtNote\": \"News in August 2026 reported the Board of Supervisors would sue over this measure's placement; the Registrar's page still lists Measure S (read 2026-11-01) and no removal is stated there.\", \"transcription\": \"Shall the measure to impose a new half-cent sales tax to pay for streets and street repairs, busses, bike lanes, and safety improvements; free transit services for seniors, veterans, people with disabilities, and students; initially providing approximately $113 million annually for 30 years, requiring independent oversight and annual audits, be adopted?\", \"transcriptionIsSummary\": false}"
+     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transportation Improvement Act Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transportation Improvement Act Measure' (dated August 19, 2026). Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"County Counsel's impartial analysis: 'a County of Fresno ordinance imposing a half-cent (0.5%) transactions and use tax (sales tax) for thirty years ... The Measure qualified for the ballot by an initiative petition ... submitted to the voters at the November 3, 2026 election as required by Assembly Bill 1923 (Stats. 2026, ch. 108).'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"courtNote\": \"News in August 2026 reported the Board of Supervisors would sue over this measure's placement; the Registrar's page still lists Measure S (read 2026-11-01) and no removal is stated there.\", \"transcription\": \"Shall the measure to impose a new half-cent sales tax to pay for streets and street repairs, busses, bike lanes, and safety improvements; free transit services for seniors, veterans, people with disabilities, and students; initially providing approximately $113 million annually for 30 years, requiring independent oversight and annual audits, be adopted?\", \"transcriptionIsSummary\": false, \"titleWithheld\": \"Transcribed from the scan as 'Fresno County Transportation Improvement Act'; withheld until a second reader checks the scans (review of PR #169). The Registrar's election page, read through a summarizer only (its address answers a script 403), lists Measure A 'Fresno County Transient Occupancy Tax Measure', Measure S 'Fresno County Transportation Improvement Act Measure' and Measure D 'City of Fresno Transactions & Use Tax Measure'. Its press release of October 31, 2026 ('Identifies Printing Error on Limited Number of Ballots') concerns only the Fresno Unified School District trustee contests.\"}"
     },
     {
      "jurisdiction": {
@@ -3277,7 +3268,7 @@
       "place": "0627000"
      },
      "designation": "Measure D",
-     "title": "APPROVAL OF FRESNO PUBLIC SAFETY, INFRASTRUCTURE RESTORATION, AND CITY SERVICES TAX ORDINANCE",
+     "title": null,
      "text": null,
      "kind": "tax",
      "source": {
@@ -3287,7 +3278,7 @@
      },
      "read": "2026-11-01",
      "textMissing": "The office's notice is a scanned image. This site has transcribed it, but no second reader has yet checked the transcription word for word, so it is not shown here; the text is in the source.",
-     "notes": "{\"titleNote\": \"The heading under 'SYNOPSIS OF MEASURE' in the Registrar's notice; the letter assignments call it 'City of Fresno Transactions and Use Tax Measure'.\", \"textNote\": \"The 'SYNOPSIS OF MEASURE' as printed in the Registrar's 'Measure to be Voted On and Notice of Date Fixed for Submitting Arguments on the City of Fresno Transactions & Use Tax Measure' (dated August 14, 2026) - a synopsis, not the ballot question, which no readable document on the page prints. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication. The print is small; figures especially need checking.\", \"transcribedFromScan\": true, \"kindWords\": \"D City of Fresno Transactions and Use Tax Measure; 'Majority (50%+1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"transcription\": \"The proposed ordinance would impose a 0.5% [half-cent per dollar] sales and use tax within the City of Fresno for a period of 10 years or upon implementation of a County of Fresno transportation infrastructure tax, whichever occurs first. It is estimated to raise approximately $65 million annually while retaining City of Fresno's current tax rate. Proceeds would belong to the City of Fresno and could not be taken by, and would not be shared with, the State, County, or any other agency. As a general tax, revenues raised would be directed into the City's general fund and be available for any general City purpose, including but not limited to transportation infrastructure, repairing streets, roads and sidewalks, building safe routes to schools, providing public safety and assisting 9-1-1 emergency response, maintaining public transportation systems, local airports, and other general services provided by the City.\", \"transcriptionIsSummary\": true}"
+     "notes": "{\"titleNote\": \"The heading under 'SYNOPSIS OF MEASURE' in the Registrar's notice; the letter assignments call it 'City of Fresno Transactions and Use Tax Measure'.\", \"textNote\": \"The 'SYNOPSIS OF MEASURE' as printed in the Registrar's 'Measure to be Voted On and Notice of Date Fixed for Submitting Arguments on the City of Fresno Transactions & Use Tax Measure' (dated August 14, 2026) - a synopsis, not the ballot question, which no readable document on the page prints. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication. The print is small; figures especially need checking.\", \"transcribedFromScan\": true, \"kindWords\": \"D City of Fresno Transactions and Use Tax Measure; 'Majority (50%+1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"transcription\": \"The proposed ordinance would impose a 0.5% [half-cent per dollar] sales and use tax within the City of Fresno for a period of 10 years or upon implementation of a County of Fresno transportation infrastructure tax, whichever occurs first. It is estimated to raise approximately $65 million annually while retaining City of Fresno's current tax rate. Proceeds would belong to the City of Fresno and could not be taken by, and would not be shared with, the State, County, or any other agency. As a general tax, revenues raised would be directed into the City's general fund and be available for any general City purpose, including but not limited to transportation infrastructure, repairing streets, roads and sidewalks, building safe routes to schools, providing public safety and assisting 9-1-1 emergency response, maintaining public transportation systems, local airports, and other general services provided by the City.\", \"transcriptionIsSummary\": true, \"titleWithheld\": \"Transcribed from the scan as 'APPROVAL OF FRESNO PUBLIC SAFETY, INFRASTRUCTURE RESTORATION, AND CITY SERVICES TAX ORDINANCE'; withheld until a second reader checks the scans (review of PR #169). The Registrar's election page, read through a summarizer only (its address answers a script 403), lists Measure A 'Fresno County Transient Occupancy Tax Measure', Measure S 'Fresno County Transportation Improvement Act Measure' and Measure D 'City of Fresno Transactions & Use Tax Measure'. Its press release of October 31, 2026 ('Identifies Printing Error on Limited Number of Ballots') concerns only the Fresno Unified School District trustee contests.\"}"
     }
    ],
    "own": {

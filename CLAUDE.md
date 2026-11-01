@@ -2831,14 +2831,32 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (rule 84): every source is on a host `overrides.LOCAL_MEASURE_SOURCES`
     names for that county, with its evidence (the .gov registry's row, the
     Census listing's address, the page that links it), or the state
-    election office's own domain; the five Bay Area registrars' joint notice
-    stands for Contra Costa and Santa Clara only through Alameda's entry,
-    which says so. "None" needs a document's own words (rule 19): a
+    election office's own domain; a host stands for its own county alone,
+    and for another only through an entry keyed on the one document's
+    address its evidence names (the five Bay Area registrars' joint notice
+    for Contra Costa and Santa Clara, Collin's ballot for Garland's
+    precincts): keyed on the host, any Alameda page would have passed for
+    Santa Clara. A question its own source marks withdrawn is not on the
+    ballot: Sacramento's list printed "WITHDRAWN -- Measure F: City of
+    Sacramento" over a question the first cache listed, its quote cut after
+    the prefix, and the page told Sacramento's readers Measure F was on
+    their ballot; `problems` refuses a question whose source's words say
+    withdrawn or removed, and the city is `unlisted` on that page's words.
+    A title is the question's as printed: Houston's "Houston Freedom Act"
+    named the charter article the question adds, and Fresno's titles came
+    from the same unchecked scans as their withheld texts, so each is null.
+    "None" needs a document's own words (rule 19): a
     statement or a count of the questions (Clark County's "Number of Ballot
     Questions: 4 (2 state questions and 2 Boulder City questions)"), a ballot
     or list that says it holds every contest (Orange County, Florida's "shows
     ALL contests"), every ballot style read whole, or no county government
-    (Middlesex). A list that merely holds none - Los Angeles County's
+    (Middlesex) - which speaks of the county alone: the first page said no
+    question "of Middlesex County or of a district covering the whole
+    county" was on the ballot over a basis saying districts were not looked
+    for, so the page says the county has no government to put one and that
+    districts were not looked for. Words quoted as saying a list is whole
+    are more than its name: Tarrant's "Districts in Election" was the PDF's
+    title. A list that merely holds none - Los Angeles County's
     measures list for Long Beach, the NYC Board's for each borough's own - is
     `unlisted`: the page says what it lists and that this site does not say
     there is none; the first research read called four such lists "none" and
@@ -2855,10 +2873,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     A summary is said to be the office's printed summary. A city most of
     which lies in another covered county is drawn from that county's record
     (`elsewhere`): Dallas's Proposition A under Collin and Denton, New York
-    City's questions under Queens, Manhattan and the Bronx. A question of a
+    City's questions under Queens, Manhattan and the Bronx. The page says
+    where they are recorded, never why: "most of the city is in Kings
+    County" was false of New York City. A ZIP code across two such counties
+    draws a city once (75252 drew Dallas's and Garland's twice). A question of a
     district that does not cover the county (LAUSD's Measure SC, which
     amends the City Charter) is not listed, and every county's block says
-    what is covered, beside the state's own sample ballot for the rest. The
+    what is covered, beside the state's own sample ballot for the rest
+    (`KYC.sampleBallotLine`, one sentence for Your ballot and the county
+    pages, which take the link from the index); a state page's "not listed
+    here" says where the most populous counties' are. The
     page never says what a yes or a no vote does, and is in the past tense
     from the day after the election, reading no result.
 

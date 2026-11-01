@@ -2166,11 +2166,17 @@ _DOTGOV = "the .gov registry (CISA dotgov-data current-full.csv, read 2026-11-01
 LOCAL_MEASURE_SOURCES = {
     "lavote.gov": (("06037",), "Los Angeles County Registrar-Recorder/County Clerk",
                    _DOTGOV + "lavote.gov: County, 'County of Los Angeles', Downey, CA"),
-    "alamedacountyca.gov": (("06001", "06013", "06085"), "Alameda County Registrar of Voters",
-        _DOTGOV + "alamedacountyca.gov: County, 'Alameda County', Oakland, CA. For Contra Costa "
-        "(06013) and Santa Clara (06085) only its copy of the five registrars' joint Notice of "
-        "General Election for the Public Transit Revenue Measure District (Measure RTM), which "
-        "names both counties' registrars; their own sites could not be read"),
+    "alamedacountyca.gov": (("06001",), "Alameda County Registrar of Voters",
+        _DOTGOV + "alamedacountyca.gov: County, 'Alameda County', Oakland, CA"),
+    # Another county's source only through the one document: a host entry
+    # would let any Alameda page stand for Contra Costa or Santa Clara.
+    "https://acvote.alamedacountyca.gov/acvote-assets/02_election_information/PDFs/20261103/"
+    "Measures/public_transit_revenue_measure.pdf": (("06013", "06085"),
+        "Alameda County Registrar of Voters",
+        _DOTGOV + "alamedacountyca.gov: County, 'Alameda County', Oakland, CA. Its copy of the "
+        "five registrars' joint Notice of General Election for the Public Transit Revenue "
+        "Measure District (Measure RTM), which names the Contra Costa (06013) and Santa Clara "
+        "(06085) registrars; their own sites could not be read"),
     "cuyahogacounty.gov": (("39035",), "Cuyahoga County Board of Elections",
                            _DOTGOV + "cuyahogacounty.gov: County, 'Cuyahoga County', Cleveland, OH"),
     "oaklandcountymi.gov": (("26125",), "Oakland County Clerk",
@@ -2245,10 +2251,14 @@ LOCAL_MEASURE_SOURCES = {
                     _DOTGOV + "phoenix.gov: City, 'City Of Phoenix', Phoenix, AZ"),
     "clarkcountynv.gov": (("32003",), "Clark County Election Department",
                           _DOTGOV + "clarkcountynv.gov: County, 'Clark County Nevada', Las Vegas, NV"),
-    "collincountytx.gov": (("48085", "48113"), "Collin County Elections",
-        _DOTGOV + "collincountytx.gov: County, 'Collin County Government', McKinney, TX. For Dallas "
-        "County (48113) only its all-race sample ballot's City of Garland proposition, for "
-        "Garland's precincts in Collin County"),
+    "collincountytx.gov": (("48085",), "Collin County Elections",
+        _DOTGOV + "collincountytx.gov: County, 'Collin County Government', McKinney, TX"),
+    "https://www.collincountytx.gov/docs/default-source/elections/sample-ballots/"
+    "20261103_joint-general-and-special-election_all-race-sample-ballot_final.pdf": (
+        ("48113",), "Collin County Elections",
+        _DOTGOV + "collincountytx.gov: County, 'Collin County Government', McKinney, TX. For "
+        "Dallas County (48113) only this all-race sample ballot's City of Garland proposition, "
+        "for Garland's precincts in Collin County"),
     "contracostavote.gov": (("06013",), "Contra Costa County Elections Division",
         _DOTGOV + "contracostavote.gov: County, 'Contra Costa County Clerk-Recorder-Elections "
         "Department', Martinez, CA"),

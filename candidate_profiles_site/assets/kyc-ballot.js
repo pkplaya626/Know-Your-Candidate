@@ -747,8 +747,13 @@
         "county's, a city's or a school district's - are not among these; the next card says " +
         "which of them this site lists.</p>";
     }
+    // The most populous counties' are listed elsewhere (rule 102).
     return '<p class="measures-local">' + (others ? "Other local" : "Local") + " questions - a " +
-      "county's, a city's or a school district's - are not listed here." + (whole ? " " + whole
+      "county's, a city's or a school district's - are not listed here; for the " +
+      "50 most populous counties, this site lists them on " +
+      '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" + String(code).toLowerCase() +
+        ".html") + '">the county pages</a> and on <a href="' +
+      KYC.escapeAttr(KYC.siteRoot() + "ballot.html") + '">Your ballot</a>.' + (whole ? " " + whole
         : " The election office's own pages are under " + '<a href="' +
           KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
           esc(placeName(code)) + "</a>.") + "</p>";
@@ -933,11 +938,14 @@
    *  election office links a sample ballot, every contest on it" of it
    *  (PR #166 review). "" where none is linked. */
   function sampleLine(code) {
-    var sample = sampleLink(code);
-    if (!sample) return "";
-    var linked = (((KYC.meta().voting || {})._siteLinked || {})[code] || []).indexOf("sample") !== -1;
-    return (linked ? "The sample-ballot page the election office's site links: "
-      : "The election office's own sample-ballot page: ") + sample + ".";
+    var url = votingOf(code).sample;
+    if (!url) return "";
+    var voting = KYC.meta().voting || {};
+    return KYC.sampleBallotLine({
+      url: url,
+      label: ((voting._labels || {})[code] || {}).sample,
+      linked: ((voting._siteLinked || {})[code] || []).indexOf("sample") !== -1,
+    });
   }
 
   function resultsLink(code) {
@@ -1314,13 +1322,18 @@
     var where = sample || ("The election office's own pages are under " + '<a href="' +
       KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
       esc(placeName(code)) + "</a>.");
+    // A city two of the answer's counties both name (Dallas and Garland, in
+    // ZIP 75252's Collin and Dallas counties) is drawn once, under the
+    // first county that names it.
+    var drawn = {};
     var body = !LM.index() ? LM.missingLine() : parts.map(function (p) {
       var fips = p[0];
       var name = ((ctx.names || {})[fips]) || (LM.covered(fips) || [])[1] || fips;
       var share = typeof p[1] === "number" ? " (" + KYC.findRep.pct(p[1]) + " of the ZIP area's land)" : "";
       return '<section class="local-county-block" data-county="' + KYC.escapeAttr(fips) + '">' +
         '<h5 class="local-county-name">' + esc(name) + esc(share) + "</h5>" +
-        (LM.covered(fips) ? LM.countyBody(fips, { level: 6 }) : LM.uncoveredLine(name, where)) +
+        (LM.covered(fips) ? LM.countyBody(fips, { level: 6, skipPlaces: drawn })
+          : LM.uncoveredLine(name, where)) +
         "</section>";
     }).join("");
     return {

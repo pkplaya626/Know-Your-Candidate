@@ -2357,8 +2357,10 @@ and Your ballot load; one implementation draws both (`KYC.ballot`).
 
 The page never says what a yes or a no vote does in its own words - where
 the official text says so (Arizona's, Ohio's), it is quoted - and nothing is
-coloured by side. Local questions are "not listed here", with the state's
-sample ballot where its office links one. "Statewide" is a state's word: the
+coloured by side. Local questions are "not listed here", saying that the 50
+most populous counties' are listed on the county pages and Your ballot (see
+"Local questions" below), with the state's sample ballot where its office
+links one. "Statewide" is a state's word: the
 District's are "District-wide", a territory's "Territory-wide", and Puerto
 Rico, which holds no election that day, lists none; neither the District
 nor a territory is told of a county's questions. A list's or guide's title is
@@ -2390,9 +2392,10 @@ those of districts that cover the whole county, and those of each city of
 cache researched county by county on 2026-11-01 from the county election
 office's or the city clerk's own sample ballot or list of measures, or the
 state election office's list of local questions; Ballotpedia, news and other
-compilations were leads only (rule 50). 105 questions in 50 counties and 46
+compilations were leads only (rule 50). 104 questions in 50 counties and 46
 cities: 12 parts (a county's own, or a city's) with none, on a document's own
-words; 24 whose document lists none but does not say it is whole; 13 for which
+words; 25 whose document lists none but does not say it is whole (the City of
+Sacramento's among them: its one question, Measure F, is marked withdrawn); 13 for which
 no official list could be read (Broward, Duval, Hillsborough and Maricopa's
 own; Chicago, San Jose, Chula Vista, Irving, Gilbert, Glendale, Jacksonville,
 Tampa; Nassau). `kyc/local_measures.py` writes `data/localmeasures/index.js`
@@ -2409,10 +2412,11 @@ and Your ballot load; one implementation draws both (`KYC.localMeasures`,
 | A note on the text: one symbol the file's text layer does not map (Riverside's and San Bernardino's "½¢") | this site | `.note` (`textNote`) |
 | The source document, by its own name, and the day read | the office | `.source`, `.sourceTitle`, `.read` |
 | What the list may be missing, where an office's own list could not be read | this site | `own.partial` |
-| "No question of <county> or of a district covering the whole county is on the Nov 3, 2026 ballot", and the document it rests on: a statement or count of the questions, a ballot or list whose own words say it holds every contest (quoted), every ballot style read whole, or no county government | the document | `own.basis` (`from`, `found`, `complete`, `every`) |
+| "No question of <county> or of a district covering the whole county is on the Nov 3, 2026 ballot", and the document it rests on: a statement or count of the questions, a ballot or list whose own words say it holds every contest (quoted, and more than the document's name), or every ballot style read whole | the document | `own.basis` (`from`, `found`, `complete`, `every`) |
+| "<county> has no county government to put a question on the Nov 3, 2026 ballot. This site has not looked for questions of districts covering the whole county, and does not say there are none" (Middlesex) | the document | `own.basis` (`from` "noGovernment") |
 | "This site has not found a question ... and does not say there is none", and what the document it read lists | the document | `own.status` "unlisted", `own.basis` |
 | "This site has not found an official list ...", why, and the election office's own site | the office | `own.status` "notFound", `own.why`, `office` |
-| "If you live in the City of <name>", and the same for the city; a city most of which lies in another covered county is drawn from that county's record, and says which office lists it | the city's record | `cities[]` (`status` "elsewhere", `listedIn`) |
+| "If you live in the City of <name>" (or the Town of Gilbert), and the same for the city; a city most of which lies in another covered county is drawn from that county's record, and says "This site records the City of <name>'s questions under <county>"; on Your ballot, a city two of the answer's counties name is drawn once, the second saying it is above | the city's record | `cities[]` (`status` "elsewhere", `listedIn`) |
 
 The page never says what a yes or a no vote does in its own words, nothing is
 coloured by side, and every county's block says what is covered: elsewhere,
@@ -2434,12 +2438,16 @@ source, list or office that is not the county's, a covered city's or the
 state election office's own (`voting_dates.official_source`, or an evidenced
 `overrides.LOCAL_MEASURE_SOURCES` entry naming the counties it may speak for:
 the .gov registry's row, the Census listing's address, the page that links
-it), an unquoted source, a compiled table, a "none" whose document's words do
-not say it is whole, a "listed" with nothing listed or a "none" with
-something, a city question whose city the record does not cover, a city
-listed under a county that does not list it, any field the record does not
-define (a "yes means" has none), and a date outside the cycle; an override no
-record cites is a warning.
+it; a host speaks for its own county, and for another only through an entry
+keyed on the one document's address), an unquoted source, a compiled table,
+a question whose source's words say it was withdrawn or removed from the
+ballot (Sacramento's Measure F), a "none" whose document's words do not say
+it is whole or whose "complete" words are only the document's title, a
+"no county government" said of a city, a "listed" with nothing listed or a
+"none" with something, a city question whose city the record does not cover,
+a city listed under a county that does not list it, any field the record
+does not define (a "yes means" has none), and a date outside the cycle; an
+override no record cites is a warning.
 
 ## State high courts
 
@@ -2955,7 +2963,10 @@ Each county's panel lists its local questions on the November 3 ballot,
 under "Local questions, Nov 3, 2026 ballot": for the 50 most populous
 counties, from `data/localmeasures/<st>.js` as Your ballot draws them (see
 "Local questions" above); for every other county, that its questions are
-not listed here, with the way to the state's own election pages.
+not listed here, beside the state's own sample ballot in Your ballot's words
+(`KYC.sampleBallotLine`, the link carried in `data/localmeasures/index.js`,
+since a county page loads no build figures), else the way to the state's own
+election pages.
 
 ### Cities and towns
 
