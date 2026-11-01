@@ -332,7 +332,7 @@
    "height": 250,
    "page": "https://bioguide.congress.gov/search/bio/T000278",
    "photo": "https://www.congress.gov/img/member/t000278_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 200
   },
@@ -430,7 +430,7 @@
    "height": 263,
    "page": "https://bioguide.congress.gov/search/bio/B001302",
    "photo": "https://www.congress.gov/img/member/b001302_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 175
   },
@@ -605,7 +605,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/lt-governor-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/lt-governor/ma.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "guide",
    "width": 207
   },
@@ -638,7 +638,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/sos-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/sos/wagner.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "guide",
    "width": 207
   },
@@ -823,7 +823,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/D000032",
    "photo": "https://www.congress.gov/img/member/d000032_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 175
   },
@@ -1324,7 +1324,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/J000307",
    "photo": "https://www.congress.gov/img/member/j000307_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 175
   },
@@ -1379,7 +1379,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/K000367",
    "photo": "https://www.congress.gov/img/member/k000367_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 180
   },
@@ -2011,7 +2011,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/B001243",
    "photo": "https://www.congress.gov/img/member/b001243_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 180
   },
@@ -2087,7 +2087,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/P000610",
    "photo": "https://www.congress.gov/img/member/p000610_200.jpg",
-   "read": "2026-10-31",
+   "read": "2026-11-01",
    "route": "member",
    "width": 175
   },
@@ -2220,5 +2220,5 @@
    "width": 250
   }
  },
- "read": "2026-10-31"
+ "read": "2026-11-01"
 }
