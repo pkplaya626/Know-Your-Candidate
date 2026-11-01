@@ -736,13 +736,24 @@
    *  district's" is a state's: the District and the territories hold
    *  neither counties nor such questions, and are told only where the
    *  whole ballot is (rule 75). */
-  function localLine(code, others) {
+  function localLine(code, others, localCard) {
     var whole = sampleLine(code);
     if (questionScope(code) !== "Statewide") {
       return whole ? '<p class="measures-local">' + whole + "</p>" : "";
     }
+    // On Your ballot a card of local questions follows (rule 102).
+    if (localCard) {
+      return '<p class="measures-local">' + (others ? "Other local" : "Local") + " questions - a " +
+        "county's, a city's or a school district's - are not among these; the next card says " +
+        "which of them this site lists.</p>";
+    }
+    // The most populous counties' are listed elsewhere (rule 102).
     return '<p class="measures-local">' + (others ? "Other local" : "Local") + " questions - a " +
-      "county's, a city's or a school district's - are not listed here." + (whole ? " " + whole
+      "county's, a city's or a school district's - are not listed here; for the " +
+      "50 most populous counties, this site lists them on " +
+      '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" + String(code).toLowerCase() +
+        ".html") + '">the county pages</a> and on <a href="' +
+      KYC.escapeAttr(KYC.siteRoot() + "ballot.html") + '">Your ballot</a>.' + (whole ? " " + whole
         : " The election office's own pages are under " + '<a href="' +
           KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
           esc(placeName(code)) + "</a>.") + "</p>";
@@ -811,7 +822,7 @@
       out.push('<p class="measures-results">This site does not read the results of ballot ' +
         "questions" + (results ? ": " + results : "") + ".</p>");
     }
-    out.push(localLine(code, local.length > 0));
+    out.push(localLine(code, local.length > 0, opts && opts.localCard));
     return out.join("");
   }
 
@@ -927,11 +938,14 @@
    *  election office links a sample ballot, every contest on it" of it
    *  (PR #166 review). "" where none is linked. */
   function sampleLine(code) {
-    var sample = sampleLink(code);
-    if (!sample) return "";
-    var linked = (((KYC.meta().voting || {})._siteLinked || {})[code] || []).indexOf("sample") !== -1;
-    return (linked ? "The sample-ballot page the election office's site links: "
-      : "The election office's own sample-ballot page: ") + sample + ".";
+    var url = votingOf(code).sample;
+    if (!url) return "";
+    var voting = KYC.meta().voting || {};
+    return KYC.sampleBallotLine({
+      url: url,
+      label: ((voting._labels || {})[code] || {}).sample,
+      linked: ((voting._siteLinked || {})[code] || []).indexOf("sample") !== -1,
+    });
   }
 
   function resultsLink(code) {
@@ -1221,7 +1235,7 @@
   }
 
   /** What the ballot may also hold that this site does not list. */
-  function unlistedSection(code, anything) {
+  function unlistedSection(code, anything, someLocal) {
     var info = stateInfo(code);
     var place = esc(placeName(code));
     // A place with nothing this site covers on its ballot (Puerto Rico,
@@ -1241,7 +1255,8 @@
         "contest " + (past ? "was" : "is") + ", this site does not record."
       : code === "DC" ? dcContests(past)
       : info.territory ? esc(TERRITORY_UNLISTED.replace("may also hold", hold))
-      : "Your ballot " + hold + " " + esc(UNLISTED) + ".";
+      : "Your ballot " + hold + " " + esc(someLocal ? UNLISTED.replace("local ballot questions",
+        "local ballot questions other than those listed above") : UNLISTED) + ".";
     var sample = sampleLink(code);
     // A candidate list above that is itself a sample ballot (Guam's
     // territorial offices) is named, or "no sample ballot" contradicted
@@ -1292,6 +1307,42 @@
       (results ? ": " + results : "") + ".</p>";
   }
 
+  /** The local questions of the counties the answer reaches (rule 102):
+   *  for each county this site covers, its own questions, its countywide
+   *  districts' and its large cities', from KYC.localMeasures; for any
+   *  other, that its questions are not listed here, beside the state's own
+   *  sample ballot. Null where the answer names no county (D.C., a
+   *  territory) or the place holds no election that day. */
+  function localCard(code, ctx) {
+    var LM = KYC.localMeasures;
+    if (!LM || noElection(code) || !ctx.county || !ctx.county.length) return null;
+    var parts = ctx.county.map(function (p) { return Array.isArray(p) ? p : [p, null]; });
+    var any = !!LM.index() && parts.some(function (p) { return !!LM.covered(p[0]); });
+    var sample = sampleLine(code);
+    var where = sample || ("The election office's own pages are under " + '<a href="' +
+      KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
+      esc(placeName(code)) + "</a>.");
+    // A city two of the answer's counties both name (Dallas and Garland, in
+    // ZIP 75252's Collin and Dallas counties) is drawn once, under the
+    // first county that names it.
+    var drawn = {};
+    var body = !LM.index() ? LM.missingLine() : parts.map(function (p) {
+      var fips = p[0];
+      var name = ((ctx.names || {})[fips]) || (LM.covered(fips) || [])[1] || fips;
+      var share = typeof p[1] === "number" ? " (" + KYC.findRep.pct(p[1]) + " of the ZIP area's land)" : "";
+      return '<section class="local-county-block" data-county="' + KYC.escapeAttr(fips) + '">' +
+        '<h5 class="local-county-name">' + esc(name) + esc(share) + "</h5>" +
+        (LM.covered(fips) ? LM.countyBody(fips, { level: 6, skipPlaces: drawn })
+          : LM.uncoveredLine(name, where)) +
+        "</section>";
+    }).join("");
+    return {
+      any: any,
+      html: contest("ballot-local" + (any ? "" : " ballot-off"), "Local questions", "", body,
+        "contest-" + code + "-local"),
+    };
+  }
+
   /** One state's ballot. *ctx*: the districts the answer reaches - *race*
    *  (the House, on the 2026 race's map), *upper* and *lower* (the state
    *  legislature) - each ``[[id, share]]`` or ids; *leg*, the legislature
@@ -1304,13 +1355,15 @@
     // a card whether there are any or not, since "none" and "not found"
     // are each something to say (rule 19).
     // A list that did not load is said in the same card, never dropped.
+    var local = localCard(code, ctx);
     var questions = !noElection(code) && measuresMissing() ? measuresFailedLine(code)
-      : measuresBody(code, { level: 5 });
+      : measuresBody(code, { level: 5, localCard: !!local });
     var asked = hasMeasures(code);
     var cards = senateCards(code).concat(houseCards(code, ctx.race, ctx))
       .concat(statewide).concat(legislature)
       .concat(questions ? [contest("ballot-measures" + (asked ? "" : " ballot-off"),
-        measuresName(code), "", questions, "contest-" + code + "-measures")] : []);
+        measuresName(code), "", questions, "contest-" + code + "-measures")] : [])
+      .concat(local ? [local.html] : []);
     // The order said as what it is: this site's, which a printed ballot
     // may not follow.
     // Whether anything this site covers is on this ballot at all.
@@ -1323,7 +1376,7 @@
     var anything = KYC.findRep.senateRaces(code).length > 0 || !!legislature.anyUp ||
       ctx.race.some(function (part) {
         return KYC.findRep.houseRace(code, Array.isArray(part) ? part[0] : part);
-      }) || statewideUp || asked;
+      }) || statewideUp || asked || !!(local && local.any);
     var order = ["Congress"];
     if (statewideUp) order.push(wide(code).toLowerCase() + " offices");
     if (legislature.anyUp) order.push("the state legislature");
@@ -1332,6 +1385,7 @@
     // review).
     if (asked) order.push("the " + measuresName(code).toLowerCase());
     else if (questions) order.push("a note on " + measuresName(code).toLowerCase());
+    if (local) order.push(local.any ? "local questions" : "a note on local questions");
     var past = held();
     // A place that holds no election on November 3 has no ballot to speak
     // of, before the day or after it.
@@ -1351,7 +1405,7 @@
             : ". Your printed ballot may list them in another order.</p>") : "") +
         '<ol class="ballot-list">' + cards.join("") + "</ol>" +
       "</section>" +
-      unlistedSection(code, anything) +
+      unlistedSection(code, anything, !!(local && local.any)) +
       "</article>";
   }
 
@@ -1391,7 +1445,7 @@
           (crosses ? " (" + KYC.findRep.pct(KYC.findRep.landIn(f.entry)) + " of its land)" : ""),
         zip: zip5, race: parts.race, upper: parts.upper, lower: parts.lower,
         leg: f.leg, legFailed: f.legFailed, redrawn: !!f.data.next && !KYC.recordPhase(),
-        notes: notes, actions: actions,
+        notes: notes, actions: actions, county: parts.county, names: f.data.names,
       }));
     });
     return out.join("") + printRow();
@@ -1419,7 +1473,7 @@
       head: "Your ballot: your location, " + esc(fr.nameOf(hit.code)),
       race: fr.reach(f[key.race]), upper: fr.reach(lf.upper), lower: fr.reach(lf.lower),
       leg: hit.leg, legFailed: hit.legFailed, redrawn: !!hit.data.next && !KYC.recordPhase(),
-      notes: notes,
+      notes: notes, county: fr.reach(f.co), names: hit.data.names,
     }) + printRow();
   }
 
@@ -1437,6 +1491,18 @@
   }
 
   function note(text) { return '<p class="findrep-note">' + text + "</p>"; }
+
+  /** The county codes in *parts* (``[[id, share]]`` or ids). */
+  function countyIds(parts) {
+    return (parts || []).map(function (p) { return Array.isArray(p) ? p[0] : p; });
+  }
+
+  /** Loads the local questions of the counties an answer reaches (rule
+   *  102), then draws; a file that did not load is said in its card. */
+  function withLocal(ids, draw) {
+    var LM = KYC.localMeasures;
+    return (LM ? LM.prepare(ids) : Promise.resolve([])).then(draw, draw);
+  }
 
   function askZip(zip5, write) {
     page.zip = zip5;
@@ -1458,8 +1524,13 @@
           show(KYC.findRep.peopleFailed(failed, "The races and candidates"));
           return;
         }
-        show(zipBallot(zip5, found));
-        if (found.length === 1) KYC.findRep.remember(found[0].code);
+        var ids = [];
+        found.forEach(function (f) { ids = ids.concat(countyIds(KYC.findRep.zipParts(f).county)); });
+        return withLocal(ids, function () {
+          if (ticket !== page.ticket) return;
+          show(zipBallot(zip5, found));
+          if (found.length === 1) KYC.findRep.remember(found[0].code);
+        });
       });
     }, function () {
       if (ticket !== page.ticket) return;
@@ -1495,8 +1566,11 @@
             show(KYC.findRep.peopleFailed(failed, "The races and candidates"));
             return;
           }
-          show(pointBallot(hit, acc));
-          if (hit.code) KYC.findRep.remember(hit.code);
+          return withLocal(hit.found ? countyIds(KYC.findRep.reach(hit.found.co)) : [], function () {
+            if (ticket !== page.ticket) return;
+            show(pointBallot(hit, acc));
+            if (hit.code) KYC.findRep.remember(hit.code);
+          });
         });
       }, function () {
         if (ticket !== page.ticket) return;

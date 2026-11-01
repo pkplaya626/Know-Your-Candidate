@@ -2195,6 +2195,165 @@ MEASURE_SOURCES_ELSEWHERE = {
         "2026 general election, linked from https://www.gtcountysc.gov/398/Upcoming-Elections"),
 }
 
+# The local ballot questions (data/local_measures.json, kyc/local_measures.py):
+# the hosts each county's record may cite, by the county codes they may speak
+# for, who publishes there, and how that is known. A state election office's
+# own domain (voting_dates.official_source) needs no entry. Being a .gov host
+# is not enough (rule 84): a county's host counts only for that county, and a
+# city's only for the counties the city lies in. A .gov host's evidence is the
+# CISA .gov registry's row for it (dotgov-data current-full.csv, read
+# 2026-11-01); any other host's is the page that links it, read that day.
+# {host (or a URL prefix): (county codes, publisher, evidence)}. A host
+# matches itself and its subdomains.
+_DOTGOV = "the .gov registry (CISA dotgov-data current-full.csv, read 2026-11-01) lists "
+LOCAL_MEASURE_SOURCES = {
+    "lavote.gov": (("06037",), "Los Angeles County Registrar-Recorder/County Clerk",
+                   _DOTGOV + "lavote.gov: County, 'County of Los Angeles', Downey, CA"),
+    "alamedacountyca.gov": (("06001",), "Alameda County Registrar of Voters",
+        _DOTGOV + "alamedacountyca.gov: County, 'Alameda County', Oakland, CA"),
+    # Another county's source only through the one document: a host entry
+    # would let any Alameda page stand for Contra Costa or Santa Clara.
+    "https://acvote.alamedacountyca.gov/acvote-assets/02_election_information/PDFs/20261103/"
+    "Measures/public_transit_revenue_measure.pdf": (("06013", "06085"),
+        "Alameda County Registrar of Voters",
+        _DOTGOV + "alamedacountyca.gov: County, 'Alameda County', Oakland, CA. Its copy of the "
+        "five registrars' joint Notice of General Election for the Public Transit Revenue "
+        "Measure District (Measure RTM), which names the Contra Costa (06013) and Santa Clara "
+        "(06085) registrars; their own sites could not be read"),
+    "cuyahogacounty.gov": (("39035",), "Cuyahoga County Board of Elections",
+                           _DOTGOV + "cuyahogacounty.gov: County, 'Cuyahoga County', Cleveland, OH"),
+    "oaklandcountymi.gov": (("26125",), "Oakland County Clerk",
+                            _DOTGOV + "oaklandcountymi.gov: County, 'Oakland County Michigan', Pontiac, MI"),
+    "westchestergov.com": (("36119",), "Westchester County Board of Elections",
+        "the Census Bureau's 2022 Government Units listing gives http://www.westchestergov.com as "
+        "the County of Westchester's website, and it now redirects to westchestercountyny.gov"),
+    "westchestercountyny.gov": (("36119",), "Westchester County Board of Elections",
+        _DOTGOV + "westchestercountyny.gov: County, 'County of Westchester', White Plains, NY"),
+    "dallascityhall.com": (("48113",), "City of Dallas City Secretary",
+        "the Census Bureau's 2022 Government Units listing gives http://www.dallascityhall.com as "
+        "the City of Dallas's website"),
+    "https://content.civicplus.com/api/assets/az-pimacounty/": (("04019",), "Pima County Elections Department",
+        "Pima County's own file store, linked as '2026 General Election Proposition Text (PDF)' "
+        "from https://www.pima.gov/810/Upcoming-Elections"),
+    "pima.gov": (("04019",), "Pima County", _DOTGOV + "pima.gov: County, 'Pima County Government', Tucson, AZ"),
+    "maricopa.gov": (("04013",), "Maricopa County Elections Department",
+                     _DOTGOV + "maricopa.gov: County, 'Maricopa County', Phoenix, AZ"),
+    "bexar.gov": (("48029",), "Bexar County Elections Department",
+                  _DOTGOV + "bexar.gov: County, 'Bexar County', San Antonio, TX"),
+    "saccounty.gov": (("06067",), "Sacramento County Voter Registration and Elections",
+                      _DOTGOV + "saccounty.gov: County, 'County of Sacramento', Sacramento, CA"),
+    "sbcounty.gov": (("06071",), "San Bernardino County Registrar of Voters",
+                     _DOTGOV + "sbcounty.gov: County, 'San Bernardino County', San Bernardino, CA"),
+    "fultoncountyga.gov": (("13121",), "Fulton County Registration and Elections",
+                           _DOTGOV + "fultoncountyga.gov: County, 'Fulton County Government', Atlanta, GA"),
+    "https://hctxdnnstg.blob.core.windows.net/harrisvotes/": (("48201",), "Harris County Clerk",
+        "the file store harrisvotes.com links its November 3, 2026 sample ballot from "
+        "(https://www.harrisvotes.com/, read 2026-11-01)"),
+    "harrisvotes.com": (("48201",), "Harris County Clerk",
+        "linked as the county's voter site from https://www.harriscountytx.gov/ (read 2026-11-01)"),
+    "houstontx.gov": (("48201",), "City of Houston",
+                      _DOTGOV + "houstontx.gov: City, 'City of Houston', Houston, TX"),
+    "kingcounty.gov": (("53033",), "King County Elections",
+                       _DOTGOV + "kingcounty.gov: County, 'King County Information Technology (KCIT)', Seattle, WA"),
+    "ocvote.gov": (("06059",), "Orange County Registrar of Voters",
+                   _DOTGOV + "ocvote.gov: County, 'Orange County Registrar of Voters', Santa Ana, CA"),
+    "https://s3.us-west-1.amazonaws.com/wakegov.com.if-us-west-1/": (("37183",), "Wake County Board of Elections",
+        "Wake County's file store, which https://www.wake.gov/departments-government/board-elections "
+        "links its election documents from (read 2026-11-01)"),
+    "wake.gov": (("37183",), "Wake County", _DOTGOV + "wake.gov: County, 'Wake County Information Services', Raleigh, NC"),
+    "franklincountyohio.gov": (("39049",), "Franklin County Board of Elections",
+                               _DOTGOV + "franklincountyohio.gov: County, 'Franklin County Data Center', Columbus, OH"),
+    "phila.gov": (("42101",), "Philadelphia City Commissioners",
+                  _DOTGOV + "phila.gov: City, 'Office of Innovation and Technology', Philadelphia, PA"),
+    "santaclaracounty.gov": (("06085",), "Santa Clara County Registrar of Voters",
+                             _DOTGOV + "santaclaracounty.gov: County, 'County of Santa Clara', San Jose, CA"),
+    "voteinfo.net": (("06065",), "Riverside County Registrar of Voters",
+        "the California Secretary of State's county elections offices page "
+        "(https://www.sos.ca.gov/elections/voting-resources/county-elections-offices, read "
+        "2026-11-01) gives www.voteinfo.net as Riverside County's"),
+    "sdvote.com": (("06073",), "San Diego County Registrar of Voters",
+        "the California Secretary of State's county elections offices page "
+        "(https://www.sos.ca.gov/elections/voting-resources/county-elections-offices, read "
+        "2026-11-01) gives www.sdvote.com as San Diego County's"),
+    "sandiego.gov": (("06073",), "City of San Diego City Clerk",
+                     _DOTGOV + "sandiego.gov: City, 'The City of San Diego', San Diego, CA"),
+    "voteorangefl.gov": (("12095",), "Orange County Supervisor of Elections",
+                         _DOTGOV + "voteorangefl.gov: County, 'Orange County Supervisor of Elections', Orlando, FL"),
+    "votetravis.gov": (("48453",), "Travis County Clerk, Elections Division",
+                       _DOTGOV + "votetravis.gov: County, \"Travis County Clerk's Office\", Austin, TX"),
+    "alleghenycounty.us": (("42003",), "Allegheny County Elections Division",
+        "the Census Bureau's 2022 Government Units listing gives http://www.alleghenycounty.us as "
+        "the County of Allegheny's website"),
+    "browardvotes.gov": (("12011",), "Broward County Supervisor of Elections",
+                         _DOTGOV + "browardvotes.gov: County, 'Broward County Supervisor of Elections', Fort Lauderdale, FL"),
+    "chandleraz.gov": (("04013",), "City of Chandler City Clerk",
+                       _DOTGOV + "chandleraz.gov: City, 'City of Chandler', Chandler, AZ"),
+    "mesaaz.gov": (("04013",), "City of Mesa City Clerk",
+                   _DOTGOV + "mesaaz.gov: City, 'City Of Mesa', Mesa, AZ"),
+    "phoenix.gov": (("04013",), "City of Phoenix City Clerk",
+                    _DOTGOV + "phoenix.gov: City, 'City Of Phoenix', Phoenix, AZ"),
+    "clarkcountynv.gov": (("32003",), "Clark County Election Department",
+                          _DOTGOV + "clarkcountynv.gov: County, 'Clark County Nevada', Las Vegas, NV"),
+    "collincountytx.gov": (("48085",), "Collin County Elections",
+        _DOTGOV + "collincountytx.gov: County, 'Collin County Government', McKinney, TX"),
+    "https://www.collincountytx.gov/docs/default-source/elections/sample-ballots/"
+    "20261103_joint-general-and-special-election_all-race-sample-ballot_final.pdf": (
+        ("48113",), "Collin County Elections",
+        _DOTGOV + "collincountytx.gov: County, 'Collin County Government', McKinney, TX. For "
+        "Dallas County (48113) only this all-race sample ballot's City of Garland proposition, "
+        "for Garland's precincts in Collin County"),
+    "contracostavote.gov": (("06013",), "Contra Costa County Elections Division",
+        _DOTGOV + "contracostavote.gov: County, 'Contra Costa County Clerk-Recorder-Elections "
+        "Department', Martinez, CA"),
+    "cookcountyclerkil.gov": (("17031",), "Cook County Clerk",
+                              _DOTGOV + "cookcountyclerkil.gov: County, 'Cook County Clerk', Chicago, IL"),
+    "dallascountyvotes.org": (("48113",), "Dallas County Elections Department",
+        "linked as the county's elections site from https://www.dallascounty.org/ (read 2026-11-01)"),
+    "duvalelections.gov": (("12031",), "Duval County Supervisor of Elections",
+                           _DOTGOV + "duvalelections.gov: County, 'Duval County Supervisor of Elections', Jacksonville, FL"),
+    "fairfaxcounty.gov": (("51059",), "Fairfax County Office of Elections",
+                          _DOTGOV + "fairfaxcounty.gov: County, 'Fairfax County Government', Fairfax, VA"),
+    "fresnocountyca.gov": (("06019",), "Fresno County Clerk/Registrar of Voters",
+                           _DOTGOV + "fresnocountyca.gov: County, 'County of Fresno', Clovis, CA"),
+    "gwinnettcounty.com": (("13135",), "Gwinnett County Voter Registrations and Elections",
+        "the Census Bureau's 2022 Government Units listing gives http://www.gwinnettcounty.com/ as "
+        "the County of Gwinnett's website"),
+    "hennepincounty.gov": (("27053",), "Hennepin County Elections",
+                           _DOTGOV + "hennepincounty.gov: County, 'Hennepin County', Minneapolis, MN"),
+    "mecknc.gov": (("37119",), "Mecklenburg County Board of Elections",
+                   _DOTGOV + "mecknc.gov: County, 'Mecklenburg County', Charlotte, NC"),
+    "miamidade.gov": (("12086",), "Miami-Dade Elections Department",
+                      _DOTGOV + "miamidade.gov: County, 'Miami Dade County', Miami, FL"),
+    "votemiamidade.gov": (("12086",), "Miami-Dade Elections Department",
+        _DOTGOV + "votemiamidade.gov: County, 'Miami-Dade County Elections Department', Miami, FL"),
+    "montgomerycountymd.gov": (("24031",), "Montgomery County Board of Elections",
+        _DOTGOV + "montgomerycountymd.gov: County, 'Montgomery County Maryland', Rockville, MD"),
+    "nassaucountyny.gov": (("36059",), "Nassau County Board of Elections",
+                           _DOTGOV + "nassaucountyny.gov: County, 'Nassau County', Mineola, NY"),
+    "palmbeachschools.org": (("12099",), "School District of Palm Beach County",
+        "the school district's own site (its title 'Home - Palm Beach County School District', read "
+        "2026-11-01), for its own referendum only: the Supervisor of Elections' site could not be "
+        "read, and the Census listing's address for the district, palmbeach.k12.fl.us, no longer "
+        "resolves"),
+    "saltlakecounty.gov": (("49035",), "Salt Lake County Clerk",
+                           _DOTGOV + "saltlakecounty.gov: County, 'Salt Lake County', SLC, UT"),
+    "suffolkcountyny.gov": (("36103",), "Suffolk County Board of Elections",
+                            _DOTGOV + "suffolkcountyny.gov: County, 'Suffolk County Government', Hauppauge, NY"),
+    "tarrantcountytx.gov": (("48439",), "Tarrant County Elections",
+                            _DOTGOV + "tarrantcountytx.gov: County, 'Tarrant County', Fort Worth, TX"),
+    "vote.nyc": (("36047", "36081", "36061", "36005"), "Board of Elections in the City of New York",
+        "the Board's own site; its 'Appendix A, Proposed Questions, 2026 General Election' is linked "
+        "from https://vote.nyc/page/ballot-proposals (MEASURE_SOURCES_ELSEWHERE)"),
+    "votedenton.gov": (("48121",), "Denton County Elections",
+        _DOTGOV + "votedenton.gov: County, 'Denton County Elections Administration', Denton, TX"),
+    "votehillsborough.gov": (("12057",), "Hillsborough County Supervisor of Elections",
+        _DOTGOV + "votehillsborough.gov: County, 'Hillsborough County Supervisor of Elections', Tampa, FL"),
+    "votepalmbeach.gov": (("12099",), "Palm Beach County Supervisor of Elections",
+        _DOTGOV + "votepalmbeach.gov: County, 'Palm Beach County Supervisor of Elections', West Palm Beach, FL"),
+    "waynecountymi.gov": (("26163",), "Wayne County Clerk",
+                          _DOTGOV + "waynecountymi.gov: County, 'Charter County of Wayne', Detroit, MI"),
+}
+
 # A holder whose name the list of candidates prints with another given name,
 # where only a short form and its full form differ (rule 56: a different
 # first name is never taken on a surname alone). {(state, office, holder as

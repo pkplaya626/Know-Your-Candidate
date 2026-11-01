@@ -377,6 +377,25 @@
         "every county and city around it is in this one.</span>" : "") + "</p>";
   }
 
+  /* The county's local questions on the November 3 ballot (rule 102), from
+   * KYC.localMeasures, the one implementation Your ballot draws them with:
+   * listed for the 50 most populous counties, and said to be not listed
+   * here for any other, beside the way to the state's own election pages. */
+  function localQuestions(fips, name) {
+    var LM = KYC.localMeasures;
+    if (!LM) return "";
+    // The state's own sample ballot, as Your ballot names it, else its
+    // election office's pages.
+    var where = LM.sampleLine(code) || ("Its election office's pages are under " + '<a href="' +
+      KYC.escapeAttr(KYC.stateUrl(code) + "#voting") + '">how to vote in ' +
+      KYC.escapeHtml(KYC.findRep ? KYC.findRep.nameOf(code) : code) + "</a>.");
+    var body = !LM.index() ? LM.missingLine()
+      : LM.covered(fips) ? LM.countyBody(fips, { level: 4 })
+      : LM.uncoveredLine(name, where);
+    return '<section class="local-questions" id="local-questions">' +
+      '<h3 class="local-group">Local questions, Nov 3, 2026 ballot</h3>' + body + "</section>";
+  }
+
   function showCounty(fips) {
     var rows = state.governments[fips] || [];
     var county = state.counties[fips];
@@ -385,7 +404,7 @@
     el("localPanelTitle").textContent = county.name;
     el("localPanelBody").innerHTML =
       '<p class="local-total">' + (n ? plural(n, "local government") : "No local governments of its own") +
-      " in 2022</p>" + courtLine(fips) +
+      " in 2022</p>" + courtLine(fips) + localQuestions(fips, county.name) +
       (why ? '<p class="gov-officer-note local-why">' + KYC.escapeHtml(why.note) + "</p>" +
         (why.filed ? countyButton(why.filed) : "") : "") +
       (rows.length

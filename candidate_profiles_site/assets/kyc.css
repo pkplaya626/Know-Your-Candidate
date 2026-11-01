@@ -3270,7 +3270,26 @@ html.has-zip .ballot-result { min-height: 100vh; }
   mask-image: linear-gradient(to bottom, var(--text) 60%, transparent);
 }
 .measure-more { justify-self: start; font-size: var(--t-sm); }
+/* The local questions of the most populous counties (rule 102), on the
+ * county pages and Your ballot, in the statewide questions' style: a
+ * county's own first, then each large city's under its own heading. */
+.local-questions,
+.local-county-block,
+.local-city { display: grid; gap: var(--s-2); min-width: 0; }
+.local-questions > p,
+.local-county-block > p,
+.local-city > p,
+.ballot-local > p { margin: 0; max-width: 70ch; }
+.local-questions { margin-top: var(--s-3); }
+.local-county-block + .local-county-block { margin-top: var(--s-3); }
+.local-county-name,
+.local-city-name { margin: var(--s-2) 0 0; font-size: var(--t-md); font-weight: 700; }
+.local-from,
+.local-coverage,
+.local-uncovered,
+.measure-summary { margin: 0; font-size: var(--t-sm); color: var(--text-muted); }
 @media print {
+  .ballot-contest.ballot-local { break-inside: auto; }
   .ballot-contest.ballot-measures { break-inside: auto; }
   .measure { break-inside: avoid; }
   .measure-text.is-folded { max-height: none; overflow: visible; -webkit-mask-image: none; mask-image: none; }

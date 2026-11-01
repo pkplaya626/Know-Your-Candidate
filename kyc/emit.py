@@ -112,11 +112,13 @@ BALLOT_PAGE_REQUIREMENTS = (
     "data/stategov.js",
     "data/measures.js",
     "data/lookup/index.js",
+    "data/localmeasures/index.js",
     "assets/kyc-odds.js",
     "assets/kyc-cards.js",
     "assets/kyc-profile.js",
     "assets/kyc-stategov.js",
     "assets/kyc-findrep.js",
+    "assets/kyc-localmeasures.js",
     "assets/kyc-ballot.js",
 )
 
@@ -214,8 +216,10 @@ COUNTIES_PAGE_REQUIREMENTS = (
     "../data/local/{code}.js",
     "../data/courtcounties.js",
     "../data/lookup/index.js",
+    "../data/localmeasures/index.js",
     "../assets/kyc-regionmap.js",
     "../assets/kyc-findrep.js",
+    "../assets/kyc-localmeasures.js",
     "../assets/kyc-local.js",
 )
 
@@ -604,7 +608,13 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     # manifest.
     out[ABOUT_FILE] = pages.render_about(host, dates, codes)
     out[NOT_FOUND_FILE] = pages.render_404(host, codes)
-    out[BALLOT_FILE] = pages.render_ballot_page(host)
+    # The states whose counties' local questions are listed (rule 102): a
+    # cache that breaks its rules is shown nowhere.
+    from . import local_measures
+    local_cache = local_measures.load(root)
+    local_states = (sorted({rec["state"] for rec in local_cache["counties"].values()})
+                    if local_cache and not local_measures.problems(local_cache) else [])
+    out[BALLOT_FILE] = pages.render_ballot_page(host, local_states)
     out[MANIFEST_FILE] = pages.webmanifest()
     # The guide's Congress page names members from the profiles themselves:
     # it loads none (rule 94).
@@ -621,7 +631,8 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
         out[os.path.join(LEGISLATURE_PAGES_DIR, f"{code.lower()}.html")] = (
             pages.render_legislature_page(code, host, summary, dates))
         out[os.path.join(COUNTIES_PAGES_DIR, f"{code.lower()}.html")] = (
-            pages.render_counties_page(code, host, pages.listing_date(code, root)))
+            pages.render_counties_page(code, host, pages.listing_date(code, root),
+                                       local=code in local_states))
     from . import federal_build, federal_courts
     # The names, written into the federal pages too (FEDERAL-12): from the
     # same payload as data/federal.js, so verify sees a page that disagrees.
@@ -1186,6 +1197,77 @@ def write_local(maps, root="."):
         )
         written.append((path, _atomic_write(path, text)))
     return written
+
+
+# The local questions of the most populous counties (kyc/local_measures.py,
+# rule 102): an index of the counties covered, and one file per state,
+# loaded only where a county's questions are shown (rule 94).
+LOCAL_MEASURES_DIR = os.path.join(DATA_DIR, "localmeasures")
+
+
+def local_measures_file(code, root="."):
+    """``data/localmeasures/tx.js``, or ``index.js`` for *code* "index"."""
+    return os.path.join(root, LOCAL_MEASURES_DIR, f"{code.lower()}.js")
+
+
+def local_measures_global(code):
+    """The variable a state's file assigns: ``kycLocalMeasuresTX``."""
+    return "kycLocalMeasuresIndex" if code == "index" else f"kycLocalMeasures{code.upper()}"
+
+
+def local_measures_payloads(cache, samples=None):
+    """``{"index": ..., "TX": ..., ...}``: every file's payload. *samples*:
+    each state's sample-ballot page (``local_measures.load_samples``)."""
+    from . import local_measures
+    out = {"index": local_measures.index(cache, samples)}
+    out.update(local_measures.for_state(cache))
+    return out
+
+
+def write_local_measures(payloads, root="."):
+    """Emit the index and one file per state whose content changed, and
+    remove a state's file the cache no longer holds."""
+    folder = os.path.join(root, LOCAL_MEASURES_DIR)
+    os.makedirs(folder, exist_ok=True)
+    written = []
+    for code, payload in sorted(payloads.items()):
+        path = local_measures_file(code, root)
+        signature = measures_signature(payload)
+        if read_signature(path=path) == signature:
+            continue
+        name = local_measures_global(code)
+        text = (
+            _BANNER.format(source="kyc/local_measures.py, data/local_measures.json",
+                           built=build_timestamp())
+            + f"window.{name} = {_json(payload)};\n"
+            + f'window.{name}Meta = {{"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    wanted = {f"{code.lower()}.js" for code in payloads}
+    for leftover in sorted(os.listdir(folder)):
+        if leftover.endswith(".js") and leftover not in wanted:
+            os.remove(os.path.join(folder, leftover))
+            written.append((os.path.join(folder, leftover), 0))
+    return written
+
+
+def check_local_measures(payloads, root="."):
+    """``[(path, why)]`` for each file that is missing, stale or left over."""
+    problems = []
+    for code, payload in sorted(payloads.items()):
+        path = local_measures_file(code, root)
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != measures_signature(payload):
+            problems.append((path, "stale"))
+    folder = os.path.join(root, LOCAL_MEASURES_DIR)
+    wanted = {f"{code.lower()}.js" for code in payloads}
+    if os.path.isdir(folder):
+        for leftover in sorted(os.listdir(folder)):
+            if leftover.endswith(".js") and leftover not in wanted:
+                problems.append((os.path.join(folder, leftover), "left over"))
+    return problems
 
 
 def check_local(maps, root="."):
