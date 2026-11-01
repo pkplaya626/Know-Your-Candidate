@@ -9475,6 +9475,32 @@ async function testStateGov() {
     }
 
     if (withAg) {
+      // No state today pictures one office alone, so the case is made: the
+      // attorney general's photograph the only one the card credits, its
+      // clause the whole list, and its failure the list's end.
+      const s = data.states[withAg];
+      const kept = bare(s);
+      const others = [[s.governor, "headshot"], [s.lt, "photo"], [s.sos, "photo"]]
+        .filter(([o, k]) => o && k in o).map(([o, k]) => [o, k, o[k]]);
+      others.forEach(([o, k]) => { o[k] = null; });
+      try {
+        const host = draw(withAg);
+        check("a card picturing one office credits it in one clause",
+          JSON.stringify(labels(host)) === JSON.stringify(["attorney general"]) && wellFormed(host),
+          (list(host) || {}).textContent);
+        const img = officerImg(host, s.ag);
+        if (img) fail(img);
+        const text = host.querySelector(".gov-sources").textContent;
+        check("and its one photograph failing leaves no 'Photographs:' and a full stop",
+          !!img && !list(host) && !/Photographs:/.test(text) && /\.$/.test(text.trim()), text.slice(-120));
+        host.remove();
+      } finally {
+        others.forEach(([o, k, v]) => { o[k] = v; });
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    if (withAg) {
       // A copy that fails gives way to its original (rule 101), which is
       // shown, so its credit stays; only when the original fails too does
       // the credit go.

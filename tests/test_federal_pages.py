@@ -567,6 +567,14 @@ class TestTheFederalPortraitsAskTheRefusalLists(unittest.TestCase):
                 o["holder"] for o in executive["offices"] if o.get("holder")]:
             for url in federal_build.photo_urls(person):
                 self.assertIn(url, addresses)
+        # And validate's staleness check is told of them: a NOT_A_PORTRAIT
+        # entry refusing the President's photograph guards a file this route
+        # offers, never reported stale.
+        from kyc import cli
+        routes = cli._photo_routes(ROOT)
+        if executive["president"].get("photo"):
+            self.assertIn(executive["president"]["photo"], routes)
+        self.assertLessEqual(addresses, routes)
 
 
 if __name__ == "__main__":
