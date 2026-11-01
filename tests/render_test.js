@@ -15827,7 +15827,12 @@ function rowProblems(window, D) {
  * behind a switch, the 2026 plan first, and draws only that one: Texas's
  * 2026 map began 5,459px down on a phone (VISUALS-02). */
 async function testDistrictsPhonePlans() {
-  const both = (window) => (w) => { phoneWidth(w, true); drawnAt(window)(w); };
+  // A browser that can share a location, so Find my district is drawn.
+  const both = (width) => (w) => {
+    phoneWidth(w, true);
+    drawnAt(width)(w);
+    Object.defineProperty(w.navigator, "geolocation", { value: { getCurrentPosition() {} }, configurable: true });
+  };
   for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
     const page = await buildPage("districts/tx.html", { now, setup: both(302) });
     await settle(30);
@@ -15860,9 +15865,10 @@ async function testDistrictsPhonePlans() {
         cards().map((c) => (c.hidden ? "hidden " : "shown ") + c.querySelectorAll("svg").length).join(" | "));
       check("every district on the 2026 plan is numbered somewhere, at 302px (rule 43)",
         numbered(cards()[1], state.plans[1]).length === 0, numbered(cards()[1], state.plans[1]).join(","));
-      check("Find my district and the picker sit above the map",
-        before(D.getElementById("districtPick"), grid) &&
-          (!D.getElementById("locateMe") || before(D.getElementById("locateMe"), grid)));
+      check("Find my district and the picker sit on one row above the map",
+        before(D.getElementById("districtPick"), grid) && !!D.getElementById("locateMe") &&
+          D.querySelector(".districts-locate.has-pick").contains(D.getElementById("districtPick")) &&
+          D.querySelector(".districts-tools").hidden);
       const fold = D.querySelector(".districts-after .movers-fold");
       check("Running in a different district is folded, closed, below the map, its summary counting the members",
         !!fold && !fold.open && before(grid, fold) && !!fold.querySelector(".mover-group") &&
@@ -15871,6 +15877,10 @@ async function testDistrictsPhonePlans() {
       check("the hero's lede and links follow the map",
         !!D.querySelector(".districts-after .districts-lede") && !!D.querySelector(".districts-after .state-links") &&
           !D.querySelector(".state-hero .districts-lede"));
+      const legend = D.querySelector(".party-legend");
+      check("the key, the toggles and the how-to sit under the shown map, inside its card",
+        !!legend && shownCard()[0].contains(legend) && before(shownCard()[0].querySelector(".district-statewide"), legend) &&
+          shownCard()[0].contains(D.getElementById("compareToggle")) && shownCard()[0].contains(D.querySelector(".districts-howto")));
       const chips = [...shownCard()[0].querySelectorAll(".inset-zoom [data-zoom]")];
       check("a Zoom chip for each inset, by its title, under the statewide map",
         chips.map((c) => c.textContent).join("|") === state.insets.map((i) => i.title).join("|") &&
@@ -15901,6 +15911,7 @@ async function testDistrictsPhonePlans() {
       D.querySelector('[data-plan-show="1"]').click();
       check("switching back shows the 2026 card as drawn, not drawn again",
         cards()[1] === kept && !kept.hidden && cards()[0] === old && old.hidden);
+      check("and the key goes with the shown card", kept.contains(D.querySelector(".party-legend")));
       // A pick changes both plans: the hidden one is drawn again only when shown.
       D.getElementById("districtPick").value = "9";
       D.getElementById("districtPick").dispatchEvent(new window.Event("change", { bubbles: true }));
@@ -15921,6 +15932,13 @@ async function testDistrictsPhonePlans() {
           !!D.querySelector(".state-hero .districts-lede") && !!D.querySelector(".state-hero .state-links") &&
           D.querySelector(".districts-after").hidden);
       check("no Zoom chips on a desktop", !D.querySelector(".inset-zoom"));
+      check("the key and toggles are back above the maps, in the desktop order",
+        before(D.querySelector(".party-legend"), grid) && D.querySelector(".districts-controls").contains(D.querySelector(".party-legend")) &&
+          D.querySelector(".districts-tools").contains(D.getElementById("compareToggle")) &&
+          D.querySelector(".districts-tools").contains(D.getElementById("districtPick")) &&
+          !D.querySelector(".districts-tools").hidden && !D.querySelector(".districts-locate.has-pick") &&
+          before(D.getElementById("districtPick"), D.getElementById("compareToggle")) &&
+          before(D.querySelector(".districts-howto"), D.querySelector(".party-legend")));
       turn(window, true);
       check("turned back, one plan again, the one the reader had picked",
         shownCard().length === 1 && shownCard()[0] === cards()[0] &&

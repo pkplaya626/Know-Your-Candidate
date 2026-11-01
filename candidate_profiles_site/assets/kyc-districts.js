@@ -1196,6 +1196,15 @@
     return JSON.stringify([focusBy, drawnAt, pin, phone]);
   }
 
+  /* The phone's key and toggles (layout() fills it), held here: the card
+   * it sits in is drawn again on every pick. */
+  var keysNode = null;
+
+  function placeKeys(card) {
+    var under = card.querySelector(".inset-zoom") || card.querySelector(".map-frame");
+    if (keysNode && under) under.parentNode.insertBefore(keysNode, under.nextSibling);
+  }
+
   function cardFrom(html) {
     var holder = doc.createElement("div");
     holder.innerHTML = html;
@@ -1218,6 +1227,9 @@
       }
       var card = cardFrom(planCard(state.plans[shown], shown));
       grid.replaceChild(card, grid.children[shown]);
+      // The key and the toggles, under the shown map and its zoom chips,
+      // not under the whole card's insets and close-up.
+      placeKeys(card);
       drawnFor[shown] = drawKey();
       Array.prototype.forEach.call(grid.children, function (child, i) {
         child.hidden = i !== shown;
@@ -1306,27 +1318,50 @@
     var app = el("districtsApp");
     var after = app.querySelector(".districts-after");
     var fold = app.querySelector(".movers-fold");
+    var keys = keysNode || (keysNode = app.querySelector(".districts-keys"));
+    var locate = app.querySelector(".districts-locate");
+    var tools = app.querySelector(".districts-tools");
     if (!homes) {
+      // In document order: they go home in reverse, each before what
+      // followed it, which is home by then.
       homes = [
         doc.querySelector("#districtsContent .state-hero .districts-lede"),
         doc.querySelector("#districtsContent .state-hero .state-links"),
         app.querySelector(".districts-movers"),
+        locate ? app.querySelector(".districts-pick") : null,
+        app.querySelector("#compareToggle") && app.querySelector("#compareToggle").parentNode,
+        app.querySelector("#ghostToggle") && app.querySelector("#ghostToggle").parentNode,
+        app.querySelector(".districts-howto"),
+        app.querySelector(".districts-controls > .party-legend"),
       ].filter(Boolean).map(function (node) {
         return { node: node, parent: node.parentNode, next: node.nextSibling };
       });
+      homes.toolsHidden = tools.hidden;
     }
-    homes.forEach(function (home) {
-      if (!phone) {
+    if (!phone) {
+      homes.slice().reverse().forEach(function (home) {
         home.parent.insertBefore(home.node, home.next && home.next.parentNode === home.parent ? home.next : null);
-      } else if (home.node.classList.contains("districts-movers")) {
-        fold.appendChild(home.node);
-      } else {
-        after.insertBefore(home.node, fold);
-      }
-    });
+      });
+    } else {
+      // Find my district and the picker on one row above the map; the
+      // toggles, the how-to and the key just under it; the hero's words and
+      // the moves after them.
+      homes.forEach(function (home) {
+        var node = home.node;
+        if (node.classList.contains("districts-movers")) fold.appendChild(node);
+        else if (node.classList.contains("districts-pick")) locate.insertBefore(node, el("locateNote"));
+        else if (node.classList.contains("party-legend")) keys.insertBefore(node, keys.firstChild);
+        else if (node.parentNode === tools || node.classList.contains("districts-howto")) keys.appendChild(node);
+        else after.insertBefore(node, fold);
+      });
+    }
+    if (locate) locate.classList.toggle("has-pick", phone);
+    tools.hidden = phone && !!locate ? true : homes.toolsHidden;
     after.hidden = !phone;
     var grid = el("planGrid");
     grid.classList.toggle("single", !redrawn() || onePlan());
+    // The switch names the plan shown: its card does not say it again.
+    grid.classList.toggle("one-plan", onePlan());
     var toggle = app.querySelector(".plan-switch");
     if (toggle) toggle.hidden = !onePlan();
     updateSwitch(false);
@@ -1355,6 +1390,7 @@
       Array.prototype.forEach.call(el("planGrid").children, function (child, n) {
         child.hidden = n !== shown;
       });
+      placeKeys(el("planGrid").children[shown]);
     }
     updateSwitch(true);
   }
@@ -1498,7 +1534,7 @@
     }
     html.push("</div>");
     if (many) {
-      html.push('<p class="state-note">', redrawn() ? "Or click" : "Or click",
+      html.push('<p class="state-note districts-howto">', "Or click",
         " a district on ", redrawn() ? "either map" : "the map",
         "; turn on Compare, or Shift-click, to compare up to ", String(MAX_FOCUS), ".",
         redrawn() ? " Shares of area describe land, not people." : "", "</p>");
@@ -1508,7 +1544,7 @@
       "</section>",
       '<div class="plan-grid', redrawn() ? "" : " single", '" id="planGrid"></div>',
       // On a phone (layout()): what the page says before its maps, after them.
-      '<div class="districts-after" hidden>',
+      '<div class="districts-after" hidden><div class="districts-keys"></div>',
       grouped.length
         ? '<details class="movers-fold"><summary>Running in a different district <span class="movers-count">' +
           KYC.escapeHtml(list.length + " member" + (list.length === 1 ? "" : "s")) + "</span></summary></details>"

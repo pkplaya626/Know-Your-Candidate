@@ -3604,7 +3604,27 @@ html.has-zip .ballot-result { min-height: 100vh; }
 .inset-zoom-label { font-size: var(--t-sm); font-weight: 600; color: var(--text-muted); }
 .inset-zoom .chip { min-height: 40px; font: inherit; font-size: var(--t-sm); cursor: pointer; }
 .inset { scroll-margin-top: calc(var(--header-h) + var(--s-2)); }
-.districts-after { margin-top: var(--s-5); }
+.plan-grid.one-plan .plan-head > .state-kicker,
+.plan-grid.one-plan .plan-head > .plan-title { display: none; }
+/* Find my district beside the picker, the note under both. */
+.districts-locate.has-pick {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: var(--s-1) var(--s-3);
+}
+.districts-locate.has-pick > .field-note,
+.districts-locate.has-pick > .state-note { grid-column: 1 / -1; }
+.districts-locate.has-pick .districts-pick {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  font-size: var(--t-xs);
+}
+.districts-locate.has-pick .districts-pick .select { width: 100%; }
+.districts-keys .districts-toggle { display: flex; }
+.districts-after { margin-top: var(--s-4); }
+.districts-keys { margin: var(--s-3) 0; }
 .districts-after .districts-lede { margin-top: 0; }
 .movers-fold {
   margin: var(--s-4) 0;
@@ -3614,10 +3634,7 @@ html.has-zip .ballot-result { min-height: 100vh; }
 }
 .movers-fold > summary {
   min-height: 48px;
-  display: flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: var(--s-2) var(--s-3);
+  padding: var(--s-3);
   font-weight: 700;
   cursor: pointer;
 }
