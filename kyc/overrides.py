@@ -1361,6 +1361,9 @@ NOT_A_PORTRAIT = {
     "photos/090c1a605a8a18bd1456.jpg":
         ("2026-11-01", "Robert Moesinger (UT-2): another person's long hair at the lower left "
                        "edge, cropped from a group photograph", OTHERS_IN_FRAME),
+    "https://tomsmithformi.com/assets/IMG_0051_1786034274828-B2BJy3rU.jpg":
+        ("2026-11-01", "Tom Smith (MI-8): standing full length before flags on a stage, his "
+                       "face brow to chin about a fifteenth of the card's height"),
     # The Clean Elections Commission's candidate list (guide_photos, read
     # 2026-11-01).
     "https://www.azcleanelections.gov/Custom/Picture/2556":

@@ -3674,6 +3674,15 @@
   },
   "CAND_37": {
    "checked": "2026-10-25",
+   "drawn": {
+    "notPortraits": [
+     "https://jamieforlouisiana.com/assets/general/tractor-portrait.jpg"
+    ],
+    "read": "2026-11-01",
+    "reason": "ok",
+    "safe": true,
+    "url": "https://jamieforlouisiana.com"
+   },
    "name": "Jamie Davis",
    "site": {
     "description": "Jamie Davis won the Democratic primary in all 64 parishes. Now he takes on the Washington insiders to lower costs, save rural hospitals, and put Louisiana first. Election Day is November 3.",
@@ -4592,7 +4601,7 @@
   "FEC_H0GA14048": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://cowanforcongress.com"
@@ -5402,7 +5411,7 @@
   "FEC_H4GA03100": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.maurakeller.com"
@@ -5676,7 +5685,7 @@
   "FEC_H4NJ10135": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.carmenbucco.com"
@@ -6914,7 +6923,7 @@
     "notPortraits": [
      "https://samgallucci.com/assets/samfamily-BetoMA7c.webp"
     ],
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://samgallucci.com/"
@@ -7479,7 +7488,7 @@
   "FEC_H6CT02196": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://votegeorgeforcongress.com"
@@ -7607,7 +7616,7 @@
   "FEC_H6FL02331": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://rogersforflorida.com"
@@ -7640,7 +7649,7 @@
   "FEC_H6FL03099": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.sethharpforcongress.com/"
@@ -7694,7 +7703,7 @@
   "FEC_H6FL04246": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.mikesell.org"
@@ -7959,7 +7968,7 @@
   "FEC_H6FL15200": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://kimberlyoverman.com"
@@ -8460,7 +8469,7 @@
   "FEC_H6GA09284": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://caitlynforgeorgia.com"
@@ -8729,6 +8738,15 @@
   },
   "FEC_H6IA04167": {
    "checked": "2026-10-25",
+   "drawn": {
+    "notPortraits": [
+     "https://irp.cdn-website.com/a2163ddd/dms3rep/multi/opt/MCGOWAN-BIO-1406h.png"
+    ],
+    "read": "2026-11-01",
+    "reason": "ok",
+    "safe": true,
+    "url": "https://mcgowanforiowa.com/"
+   },
    "listed": {
     "final": "https://mcgowanforiowa.com/",
     "notPortraits": [
@@ -8757,7 +8775,7 @@
   "FEC_H6ID02241": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://votefortripp.com/"
@@ -8788,7 +8806,7 @@
   "FEC_H6IL01191": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://christianmaxwellforcongress.com/"
@@ -9319,7 +9337,7 @@
   "FEC_H6IN09242": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://bradmeyer.org"
@@ -9564,7 +9582,7 @@
   "FEC_H6KY06234": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.bowman2026.com"
@@ -9596,6 +9614,15 @@
   },
   "FEC_H6LA01258": {
    "checked": "2026-10-25",
+   "drawn": {
+    "notPortraits": [
+     "https://laurenjewett.com/images/campaign/lauren-jewett-jefferson.png"
+    ],
+    "read": "2026-11-01",
+    "reason": "ok",
+    "safe": true,
+    "url": "https://www.laurenjewett.com"
+   },
    "name": "Lauren Jewett",
    "site": {
     "description": "Teacher. Union member. Community leader. Running to put Louisiana families first.",
@@ -10049,7 +10076,7 @@
   "FEC_H6MA09206": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.macallister4congress.com"
@@ -10207,7 +10234,7 @@
   "FEC_H6MI02216": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.ambrose4congress.com"
@@ -10308,7 +10335,23 @@
   "FEC_H6MI08312": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "portrait": "https://tomsmithformi.com/assets/IMG_0051_1786034274828-B2BJy3rU.jpg",
+    "portraitEvidence": "alt text \"Tom Smith Portrait\"",
+    "portraitHeavy": [
+     {
+      "kept": true,
+      "url": "https://tomsmithformi.com/assets/IMG_0051_1786034274828-B2BJy3rU.jpg",
+      "why": "4854 KB, over 300 KB"
+     }
+    ],
+    "portraitPage": "https://tomsmithformi.com/about",
+    "portraitRead": "2026-11-01",
+    "portraitWeight": {
+     "bytes": 4854691,
+     "height": 4284,
+     "width": 5712
+    },
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://tomsmithformi.com/"
@@ -10604,16 +10647,10 @@
   "FEC_H6MO05254": {
    "checked": "2026-10-25",
    "drawn": {
-    "portrait": "https://jordanjherrera.com/wp-content/uploads/2025/05/Jordan_Herrera_IMG_9126-768x1024.jpeg",
-    "portraitEvidence": "alt text \"Jordan_Herrera_IMG_9126\"",
-    "portraitPage": "https://jordanjherrera.com/about/",
-    "portraitRead": "2026-10-25",
-    "portraitWeight": {
-     "bytes": 90212,
-     "height": 1024,
-     "width": 768
-    },
-    "read": "2026-10-25",
+    "notPortraits": [
+     "https://jordanjherrera.com/wp-content/uploads/2025/05/Jordan_Herrera_IMG_9126-768x1024.jpeg"
+    ],
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.jordanjherrera.com"
@@ -11457,7 +11494,7 @@
   "FEC_H6NJ05221": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.seankirrane.com"
@@ -11523,7 +11560,7 @@
   "FEC_H6NJ09264": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://rosiepinofornj.com"
@@ -11955,7 +11992,7 @@
   "FEC_H6NY14251": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://votefordiamant.com"
@@ -12330,7 +12367,7 @@
   "FEC_H6OH14248": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.mariajukicforcongress.com"
@@ -12416,7 +12453,7 @@
   "FEC_H6OK04155": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://mitchelljacob.com"
@@ -12587,7 +12624,7 @@
   "FEC_H6PA01181": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.bobharvieforcongress.com"
@@ -13636,7 +13673,7 @@
   "FEC_H6TX09140": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://alexandramealer.com"
@@ -13930,7 +13967,7 @@
   "FEC_H6TX23273": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.katyforcongress.com"
@@ -14094,6 +14131,15 @@
   },
   "FEC_H6TX31169": {
    "checked": "2026-10-25",
+   "drawn": {
+    "notPortraits": [
+     "https://assets.nationbuilder.com/themes/69d46ee99be3286671f3d5a8/attachments/original/1776836856/11089a203ea7bb260717a77ab963cb40942791be.png?1776836856"
+    ],
+    "read": "2026-11-01",
+    "reason": "ok",
+    "safe": true,
+    "url": "https://www.stokerfortexas.com"
+   },
    "name": "Gregory James Stoker",
    "site": {
     "description": "Greg Stoker is an anti-war former U.S. Army Ranger running for congress and neighbor who refuses corporate and foreign-influenced money.",
@@ -14954,7 +15000,7 @@
   "FEC_H6WI07223": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.alfonsoforwisconsin.com"
@@ -15473,7 +15519,7 @@
   "FEC_S6IL00680": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.whit4ilsenate.com"
@@ -15563,7 +15609,7 @@
   "FEC_S6MI00442": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.lydialynnchristensen.com"
@@ -15674,7 +15720,7 @@
   "FEC_S6NC00563": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.dublinforcongress.com/"
@@ -15754,7 +15800,7 @@
   "FEC_S6OK04163": {
    "checked": "2026-10-25",
    "drawn": {
-    "read": "2026-10-25",
+    "read": "2026-11-01",
     "reason": "ok",
     "safe": true,
     "url": "https://www.jasmineforok.com/"
