@@ -1092,6 +1092,10 @@ BLOCKED_CAMPAIGN_HOSTS = {
                                       "an address record at two resolvers"),
     "gordonchaffin.com": ("unrelated", "2026-10-17",
                           "'High Skill Dog Care', a business page; nothing about a campaign"),
+    # Found by `enrich` on 2026-11-01 and fetched again by hand that day.
+    "danielbutierez4congress2024.com": ("dead", "2026-11-01",
+                                        "parked: www and bare serve only a script sending "
+                                        "visitors to /lander, GoDaddy's parking lander"),
 }
 
 # Local governments' websites, as the Census Bureau's 2022 listing gives them,
@@ -1280,6 +1284,30 @@ GUIDE_NAME_FORMS = {
         "'RussIsForUS.com' and is 'furnished by David Russ Is For US'; the filing RUSS, DAVID "
         "HONORABLE (H2OR01240) names that site, russisforus.com, as its campaign's (FEC "
         "Form 1)"),
+    ("UT", "Riley Owen"): (
+        "person:FEC_H6UT01244",
+        "Utah's Voter Information Pamphlet, page 9 (read 2026-11-01), headed 'Congressional "
+        "District 1' and 'Riley Owen', prints 'info@utahriley.com' and 'utahriley.com'; the "
+        "filing OWEN, RILEY MONTGOMERY (H6UT01244) is the only Owen in UT-1, and its own "
+        "committee, C00940411, is 'RILEY OWEN FOR UTAH' (FEC Form 1)"),
+    ("UT", "Kent S. Udell"): (
+        "person:FEC_H6UT03182",
+        "Utah's Voter Information Pamphlet, page 16 (read 2026-11-01), headed 'Congressional "
+        "District 3' and 'Kent S. Udell', prints 'kentudell.com'; the filing UDELL, KENT DR. "
+        "(H6UT03182) names that site, KENTUDELL.COM, as its campaign's, and its committee "
+        "C00938811 is 'KENT STEWART UDELL FOR CONGRESS' (FEC Form 1)"),
+    ("AZ", "Monica Alponte"): (
+        "person:FEC_H6AZ01488",
+        "the Citizens Clean Elections Commission's candidate list (read 2026-11-01) prints "
+        "'Monica Alponte', Libertarian, under 'U.S. House of Rep. - District 1'; the filing "
+        "ALPONTE, MONICA MARIA (H6AZ01488) is the only Alponte in AZ-1, and its own committee, "
+        "C00945287, is 'MONICA ALPONTE FOR CONGRESS' (FEC Form 1)"),
+    ("UT", "Robert Moesinger"): (
+        "person:FEC_H6UT02531",
+        "Utah's Voter Information Pamphlet, page 13 (read 2026-11-01), headed 'Congressional "
+        "District 2' and 'Robert Moesinger', prints 'https://www.improveourelections.org/'; "
+        "the filing MOESINGER, ROBERT MICHAEL (H6UT02531) names that site as its campaign's, "
+        "and its committee C00944306 is 'ROBERT MOESINGER FOR CONGRESS' (FEC Form 1)"),
 }
 
 
@@ -1295,8 +1323,9 @@ GUIDE_NAME_FORMS = {
 # (photos.applies). A picture of a person - a framed photograph on a shelf
 # or a wall, a poster, a book jacket - is not a person in the frame and
 # refuses nothing (decided for the owner, 2026-10-25). A screen showing a
-# face is not decided: a rally's screen is usually a live feed of someone
-# there, so Donna Miller's stays refused until the owner rules on screens.
+# face is refused like a person in the frame (the owner's decision of
+# 2026-11-01): a rally's screen is usually a live feed of someone there, so
+# Donna Miller's stays refused.
 OTHERS_IN_FRAME = "others in the frame"
 
 # Images that a route would take as a person's portrait but that are not one,
@@ -1331,6 +1360,19 @@ OTHERS_IN_FRAME = "others in the frame"
 # tractor (an eleventh), Lauren Jewett by a seal (a fifteenth) and Jordan
 # Herrera in a vehicle's hatch (a thirteenth) do not.
 NOT_A_PORTRAIT = {
+    # Utah's Voter Information Pamphlet, page 13 (read 2026-11-01), hosted
+    # here as the guide's file (guide_photos, rule 101).
+    "photos/090c1a605a8a18bd1456.jpg":
+        ("2026-11-01", "Robert Moesinger (UT-2): another person's long hair at the lower left "
+                       "edge, cropped from a group photograph", OTHERS_IN_FRAME),
+    "https://tomsmithformi.com/assets/IMG_0051_1786034274828-B2BJy3rU.jpg":
+        ("2026-11-01", "Tom Smith (MI-8): standing full length before flags on a stage, his "
+                       "face brow to chin about a fifteenth of the card's height"),
+    # The Clean Elections Commission's candidate list (guide_photos, read
+    # 2026-11-01).
+    "https://www.azcleanelections.gov/Custom/Picture/2556":
+        ("2026-11-01", "JoAnna Mendoza (AZ-6): a bearded man in a white shirt behind her at "
+                       "the upper left", OTHERS_IN_FRAME),
     "https://kaileebuller.com/wp-content/uploads/2026/03/Buller.jpg":
         ("2026-10-02", "a family photograph: four people in the snow"),
     "https://rickbrattin.com/wp-content/uploads/2026/02/Brattin-extended-scaled.png":
@@ -1535,8 +1577,9 @@ NOT_A_PORTRAIT = {
         ("2026-10-25", "JoCasta Zamarripa (WI secretary of state candidate): another person's "
                        "hand and fingers at the left edge", OTHERS_IN_FRAME),
     # A screen is not a framed picture: at a rally it is usually a live feed
-    # of a person there. Kept refused until the owner rules on screens; her
-    # shown portrait is the county's (portraits.json, curated) either way.
+    # of a person there, and the owner ruled on 2026-11-01 that a face on one
+    # is refused like a person in the frame. Her shown portrait is the
+    # county's (portraits.json, curated).
     "https://upload.wikimedia.org/wikipedia/commons/a/a1/Cook_County_Commissioner_Donna_Miller_at_May_Day_2025.jpg":
         ("2026-10-25", "Donna Miller (IL): a person's face on the rally's LED screen behind her, "
                        "at the upper right", OTHERS_IN_FRAME),

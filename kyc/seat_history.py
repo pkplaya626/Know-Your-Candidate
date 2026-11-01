@@ -713,7 +713,7 @@ def wiki_boxes(text):
     out = []
     for match in _WBOX.finditer(text or ""):
         body = match.group(0)
-        parts = [(_stage(match.group(1)) or "general", body)]
+        parts = [(_stage(match.group(1), cycle=None) or "general", body)]
         split = _OPEN_GENERAL.search(body)
         if split:
             parts = [("primary", body[:split.start()]), ("general", body[split.end():])]

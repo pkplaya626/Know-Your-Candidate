@@ -23,6 +23,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from kyc import guide_photos, pdfread, photocopies, statewide_photos  # noqa: E402
 
+GUIDES_LINKED = {code: g["linked"] for code, g in guide_photos.GUIDES.items() if g.get("linked")}
+
 
 def jpeg(width=300, height=400, components=3, adobe=None, pad=2000, seed=b""):
     """A JPEG's markers (no picture): enough for its size and components."""
@@ -914,16 +916,26 @@ class TestTheCommittedCache(unittest.TestCase):
         manifest = photocopies.load(self.ROOT)
         self.assertEqual(guide_photos.problems(cache, manifest), [])
         for key, rec in (cache.get("photos") or {}).items():
-            entry = manifest["hosted"][rec["photo"][len("photos/"):]]
-            self.assertIn(key, entry["for"])
             self.assertTrue(rec["page"].startswith(("https://voter.votewa.gov/",
                                                     "https://elections.alaska.gov/",
-                                                    "https://sos.oregon.gov/")), key)
+                                                    "https://sos.oregon.gov/",
+                                                    "https://vote.utah.gov/",
+                                                    "https://www.azcleanelections.gov/")), key)
+            if rec.get("method") == "linked":
+                # A guide that gives the file an address of its own is linked
+                # there, never hosted (Arizona's).
+                self.assertTrue(rec["photo"].startswith(GUIDES_LINKED[rec["state"]] + "/"), key)
+                continue
+            entry = manifest["hosted"][rec["photo"][len("photos/"):]]
+            self.assertIn(key, entry["for"])
 
     def test_every_decoded_photograph_names_its_source_and_every_other_is_unmodified(self):
         cache = guide_photos.load_cache(self.ROOT)
         manifest = photocopies.load(self.ROOT)
         for key, rec in (cache.get("photos") or {}).items():
+            if rec.get("method") == "linked":
+                self.assertEqual(rec["state"], "AZ", key)
+                continue
             entry = manifest["hosted"][rec["photo"][len("photos/"):]]
             if rec["state"] == "OR":
                 self.assertEqual(entry["method"], "decoded", key)
@@ -1123,6 +1135,9 @@ class TestTheCredit(unittest.TestCase):
         manifest = photocopies.load(TestTheCommittedCache.ROOT)
         for key, rec in cache["photos"].items():
             self.assertEqual(rec["by"], guide_photos.GUIDES[rec["state"]]["credit"], key)
+            if rec.get("method") == "linked":
+                self.assertNotIn("converted", guide_photos.credit(rec), key)
+                continue
             entry = manifest["hosted"][rec["photo"][len("photos/"):]]
             self.assertEqual(entry["by"], rec["by"], key)
             self.assertEqual("converted" in guide_photos.credit(rec),
@@ -1152,6 +1167,261 @@ class TestTheBuildsCheck(Root):
         # The manifest does not hold the file for them.
         self.assertEqual([i.code for i in validate.check_photo_evidence(
             shown, {}, {}, cache, {"hosted": {}})], ["photo-unevidenced"])
+
+
+# ------------------------------------------------------------- Utah, Arizona
+
+def icc_profile(primaries=None):
+    """A minimal RGB ICC profile with sRGB's colorants and curve, or other
+    *primaries* for the red colorant."""
+    import struct
+    red = primaries or (0.4361, 0.2225, 0.0139)
+    tags = [(b"rXYZ", red), (b"gXYZ", (0.3851, 0.7169, 0.0971)),
+            (b"bXYZ", (0.1431, 0.0606, 0.7141)), (b"wtpt", (0.9642, 1.0, 0.8249))]
+    bodies = [(sig, b"XYZ \x00\x00\x00\x00" + struct.pack(">3i", *[round(v * 65536) for v in xyz]))
+              for sig, xyz in tags]
+    curve = b"para\x00\x00\x00\x00" + struct.pack(">HH", 3, 0) + struct.pack(
+        ">5i", *[round(v * 65536) for v in (2.4, 0.9479, 0.0521, 0.0774, 0.04045)])
+    bodies += [(sig, curve) for sig in (b"rTRC", b"gTRC", b"bTRC")]
+    head = bytearray(128)
+    head[12:16], head[16:20], head[20:24] = b"mntr", b"RGB ", b"XYZ "
+    table, data = b"", b""
+    offset = 128 + 4 + 12 * len(bodies)
+    for sig, body in bodies:
+        table += struct.pack(">4sII", sig, offset + len(data), len(body))
+        data += body
+    out = bytes(head) + struct.pack(">I", len(bodies)) + table + data
+    return out[:0] + struct.pack(">I", len(out)) + out[4:]
+
+
+def multi_pdf(pages):
+    """A PDF of several pages, each ``(lines, [(jpeg, space)])``; a space of
+    ``("ICC", profile bytes)`` is an ICCBased one."""
+    objects = {1: None, 2: (b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>", None)}
+    kids = []
+    n = 3
+    for lines, images in pages:
+        names, draws = [], ""
+        for i, (data, space) in enumerate(images):
+            if isinstance(space, tuple):
+                objects[n] = (f"<< /N 3 /Length {len(space[1])} >>".encode(), space[1])
+                space_ref = f"[/ICCBased {n} 0 R]"
+                n += 1
+            else:
+                space_ref = f"/{space}"
+            objects[n] = (f"<< /Type /XObject /Subtype /Image /Width 300 /Height 400 "
+                          f"/ColorSpace {space_ref} /BitsPerComponent 8 /Filter /DCTDecode "
+                          f"/Length {len(data)} >>").encode(), data
+            names.append(f"/Im{i} {n} 0 R")
+            draws += f"q 137 0 0 206 414 439 cm /Im{i} Do Q\n"
+            n += 1
+        body = ("BT /F1 12 Tf 50 700 Td " + " ".join(f"({line}) Tj 0 -14 Td" for line in lines)
+                + " ET\n" + draws).encode()
+        objects[n] = (f"<< /Length {len(body)} >>".encode(), body)
+        content = n
+        n += 1
+        objects[n] = (f"<< /Type /Page /Parent 1 0 R /MediaBox [0 0 612 792] /Contents "
+                      f"{content} 0 R /Resources << /Font << /F1 2 0 R >> /XObject << "
+                      f"{' '.join(names)} >> >> >>").encode(), None
+        kids.append(n)
+        n += 1
+    objects[1] = (f"<< /Type /Pages /Kids [{' '.join(f'{k} 0 R' for k in kids)}] /Count "
+                  f"{len(kids)} >>").encode(), None
+    objects[n] = b"<< /Type /Catalog /Pages 1 0 R >>", None
+    out = b"%PDF-1.4\n"
+    for num in sorted(objects):
+        head, stream = objects[num]
+        out += f"{num} 0 obj\n".encode() + head
+        if stream is not None:
+            out += b"\nstream\n" + stream + b"\nendstream"
+        out += b"\nendobj\n"
+    return out + f"trailer\n<< /Root {n} 0 R >>\n%%EOF\n".encode()
+
+
+UT_PDF = ("https://vote.utah.gov/wp-content/uploads/2026/09/"
+          "2026-Voter-Information-Pamphlet.pdf")
+
+
+class TestPdfReadTwoByteFonts(unittest.TestCase):
+    def test_a_cid_fonts_widths_join_its_letters(self):
+        # Utah's pamphlet sets every letter as a run of its own in an
+        # Identity-H font: read without the descendant font's /W, "Peter
+        # Crosby" was "P e t e r C r o s b y".
+        letters = [(50, 1), (55, 2), (60, 3), (70, 4)]       # P e t | gap | x
+        body = "".join(f"BT /F1 10 Tf 1 0 0 1 {x} 700 Tm <{c:04X}> Tj ET\n" for x, c in letters)
+        cmap = (b"/CIDInit /ProcSet findresource begin begincmap 1 begincodespacerange "
+                b"<0000> <FFFF> endcodespacerange 4 beginbfchar <0001> <0050> <0002> <0065> "
+                b"<0003> <0074> <0004> <0078> endbfchar endcmap end")
+        objects = {
+            1: b"<< /Type /Pages /Kids [2 0 R] /Count 1 >>",
+            2: b"<< /Type /Page /Parent 1 0 R /MediaBox [0 0 504 720] /Contents 3 0 R "
+               b"/Resources << /Font << /F1 4 0 R >> >> >>",
+            4: b"<< /Type /Font /Subtype /Type0 /BaseFont /X /Encoding /Identity-H "
+               b"/DescendantFonts [6 0 R] /ToUnicode 7 0 R >>",
+            5: b"<< /Type /Catalog /Pages 1 0 R >>",
+            6: b"<< /Type /Font /Subtype /CIDFontType2 /BaseFont /X /DW 1000 "
+               b"/W [1 [500 500 500] 4 4 600] >>",
+        }
+        out = b"%PDF-1.4\n"
+        for num in sorted(objects):
+            out += f"{num} 0 obj\n".encode() + objects[num] + b"\nendobj\n"
+        stream = body.encode()
+        out += b"3 0 obj\n<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + \
+            b"\nendstream\nendobj\n"
+        out += b"7 0 obj\n<< /Length " + str(len(cmap)).encode() + b" >>\nstream\n" + cmap + \
+            b"\nendstream\nendobj\ntrailer\n<< /Root 5 0 R >>\n%%EOF\n"
+        doc = pdfread.Document(out)
+        read = pdfread.read_page(doc, doc.pages()[0])
+        self.assertEqual(read["ends"][:3], [55.0, 60.0, 65.0])
+        self.assertEqual(pdfread.page_text(read), "Pet x")
+
+
+class TestUtah(Root):
+    INDEX = (f'<a href="{UT_PDF}">2026 Voter Information Pamphlet</a>'
+             '<a href="https://vote.utah.gov/wp-content/uploads/2026/10/2026-Voter-Information-'
+             'Pamphlet-Ballot-Questions-Amendment-A.pdf">A</a>').encode()
+
+    def pages(self, crosby=None, space=None):
+        crosby = crosby or jpeg(seed=b"crosby", pad=4000)
+        return [
+            (["CANDIDATES", "The following pages list the candidates"], []),
+            (["Congressional District 2", "Peter Crosby", "peter@example.org", "CONTACT EMAIL"],
+             [(crosby, space or ("ICC", icc_profile()))]),
+            (["Congressional District 2", "Daniel Cottam", "NO PROFILE SUBMITTED"], []),
+            (["Congressional District 1", "Elias Henry", "Montgomery", "elias@example.org",
+              "CONTACT EMAIL"], [(jpeg(seed=b"elias"), "DeviceRGB")]),
+        ]
+
+    def people(self):
+        return [profile("FEC_H6UT01160", "Peter Crosby", "CROSBY, PETER", district=2, state="UT"),
+                profile("FEC_H6UT01179", "Daniel Cottam", "COTTAM, DANIEL", district=2,
+                        state="UT"),
+                profile("FEC_H6UT01999", "Elias Henry Montgomery", "MONTGOMERY, ELIAS HENRY",
+                        district=1, state="UT")]
+
+    def getter(self, pages):
+        return {guide_photos.UT_INDEX: self.INDEX, UT_PDF: multi_pdf(pages)}
+
+    def test_a_candidates_page_joins_and_its_photograph_is_hosted_unmodified(self):
+        crosby = jpeg(seed=b"crosby", pad=4000)
+        cache, problems = self.fetch(self.getter(self.pages(crosby)), self.people())
+        self.assertEqual(sorted(cache["photos"]), ["person:FEC_H6UT01160", "person:FEC_H6UT01999"])
+        rec = cache["photos"]["person:FEC_H6UT01160"]
+        self.assertEqual(rec["page"], UT_PDF + "#page=2")
+        self.assertEqual(rec["from"], UT_PDF)
+        self.assertIn("headed 'Congressional District 2' and 'Peter Crosby'", rec["evidence"])
+        self.assertIn("tagged with an sRGB ICC profile", rec["evidence"])
+        name = hashlib.sha256(crosby).hexdigest()[:20] + ".jpg"
+        with open(os.path.join(self.root, photocopies.PHOTOS_DIR, name), "rb") as handle:
+            self.assertEqual(handle.read(), crosby)
+        # A name the pamphlet sets on two lines is read whole.
+        self.assertEqual(cache["photos"]["person:FEC_H6UT01999"]["name"],
+                         "Elias Henry Montgomery")
+        self.assertEqual(guide_photos.problems(cache, photocopies.load(self.root)), [])
+
+    def test_an_icc_profile_that_is_not_srgb_gives_none(self):
+        other = ("ICC", icc_profile(primaries=(0.6097, 0.3111, 0.0195)))   # Adobe RGB's red
+        cache, problems = self.fetch(self.getter(self.pages(space=other)), self.people())
+        self.assertNotIn("person:FEC_H6UT01160", cache["photos"])
+        self.assertTrue(any("ICCBased" in p for p in problems), problems)
+
+    def test_a_refusal_is_keyed_on_the_hosted_file_never_the_page_number(self):
+        # An amended pamphlet's page 2 may be another candidate's.
+        self.assertEqual(guide_photos.own_addresses("UT", UT_PDF + "#page=2", "photos/x.jpg"),
+                         ("photos/x.jpg",))
+
+    def test_a_page_that_links_no_pamphlet_concludes_nothing(self):
+        pages = self.getter(self.pages())
+        pages[guide_photos.UT_INDEX] = b"<p>No pamphlet yet</p>"
+        photos, problems, unread = guide_photos.read_utah(
+            {"H-UT-02-2026": self.people()[:2]}, getter=Getter(pages))
+        self.assertEqual((photos, unread), ({}, {"H-UT-02-2026"}))
+
+    def test_a_pamphlet_with_no_page_for_the_district_concludes_nothing(self):
+        pages = self.getter(self.pages()[:1])
+        photos, problems, unread = guide_photos.read_utah(
+            {"H-UT-02-2026": self.people()[:2]}, getter=Getter(pages))
+        self.assertEqual((photos, unread), ({}, {"H-UT-02-2026"}))
+
+
+class TestTheSrgbTest(unittest.TestCase):
+    def test_srgbs_colorants_and_curve_and_nothing_else(self):
+        self.assertTrue(guide_photos.icc_is_srgb(icc_profile()))
+        self.assertFalse(guide_photos.icc_is_srgb(icc_profile(primaries=(0.6097, 0.3111, 0.0195))))
+        self.assertFalse(guide_photos.icc_is_srgb(b""))
+        cmyk = bytearray(icc_profile())
+        cmyk[16:20] = b"CMYK"
+        self.assertFalse(guide_photos.icc_is_srgb(bytes(cmyk)))
+
+
+AZ_LIST_PAGE = """
+<section id="secBL1"><h3 class="branch">FEDERAL - LEGISLATIVE</h3>
+<section><h3>U.S. House of Rep. - District 6</h3>
+<ul class="people">
+<li><img class="pic" src="/Custom/Picture/2557" /><img class="viewmore" src="/CmsItem/Image/763" />
+<div><b>Jereme Lance Peters</b><span class="office">U.S. House of Rep. - District 6</span>
+<span class="party">Libertarian</span></div></li>
+<li><img class="pic" src="/Custom/Picture/0" /><div><b>Pat Nobody (Write-In)</b>
+<span class="office">U.S. House of Rep. - District 6</span><span class="party">NON</span></div></li>
+<li><img class="pic" src="/Custom/Picture/2558" /><div><b>Gary &quot;G&quot; Swing</b>
+<span class="office">U.S. House of Rep. - District 6</span><span class="party">Green</span></div></li>
+</ul></section></section>
+<section id="secBL2"><h3 class="branch">STATE - EXECUTIVE</h3>
+<section><h3>Governor</h3><ul class="people"><li><img class="pic" src="/Custom/Picture/9" />
+<div><b>Someone Else</b><span class="office">Governor</span></div></li></ul></section></section>
+"""
+
+
+class TestArizona(Root):
+    PIC = "https://www.azcleanelections.gov/Custom/Picture/2557"
+
+    def pages(self, peters=None):
+        return {guide_photos.AZ_GUIDE: AZ_LIST_PAGE.encode(),
+                self.PIC: peters or jpeg(seed=b"peters"),
+                "https://www.azcleanelections.gov/Custom/Picture/2558": jpeg(seed=b"swing"),
+                "https://www.azcleanelections.gov/Custom/Picture/0": jpeg(seed=b"none")}
+
+    def people(self):
+        return [profile("FEC_H6AZ06214", "Jereme Lance Peters", "PETERS, JEREME LANCE",
+                        district=6, state="AZ"),
+                profile("FEC_H6AZ06999", "Pat Nobody", "NOBODY, PAT", district=6, state="AZ"),
+                profile("FEC_H6AZ06998", "Gary Swing", "SWING, GARY", district=6, state="AZ")]
+
+    def test_the_entry_names_them_beside_the_picture_and_it_is_linked_not_hosted(self):
+        cache, problems = self.fetch(self.pages(), self.people())
+        rec = cache["photos"]["person:FEC_H6AZ06214"]
+        self.assertEqual((rec["photo"], rec["from"], rec["method"]), (self.PIC, self.PIC, "linked"))
+        self.assertEqual(rec["page"], guide_photos.AZ_GUIDE)
+        self.assertIn("under its heading 'U.S. House of Rep. - District 6', prints 'Jereme Lance "
+                      "Peters' in bold beside the picture /Custom/Picture/2557", rec["evidence"])
+        self.assertEqual(os.listdir(os.path.join(self.root, photocopies.PHOTOS_DIR)), [])
+        self.assertEqual(photocopies.load(self.root)["hosted"], {})
+        self.assertEqual(guide_photos.problems(cache, photocopies.load(self.root)), [])
+        # A quoted nickname is no word of the name; the list's stand-in for
+        # no picture is nobody's.
+        self.assertIn("person:FEC_H6AZ06998", cache["photos"])
+        self.assertNotIn("person:FEC_H6AZ06999", cache["photos"])
+
+    def test_a_linked_photograph_off_the_guides_host_is_unsound(self):
+        cache, _ = self.fetch(self.pages(), self.people())
+        rec = dict(cache["photos"]["person:FEC_H6AZ06214"], photo="https://elsewhere.example/p.jpg")
+        self.assertTrue(guide_photos.record_problems("person:FEC_H6AZ06214", rec))
+
+    def test_a_refusal_is_keyed_on_the_pictures_own_address(self):
+        self.assertEqual(guide_photos.own_addresses("AZ", guide_photos.AZ_GUIDE, self.PIC),
+                         (self.PIC,))
+        with mock.patch.dict("kyc.overrides.NOT_A_PORTRAIT",
+                             {self.PIC: ("2026-11-01", "test: someone behind them")}):
+            cache, problems = self.fetch(self.pages(), self.people())
+        self.assertNotIn("person:FEC_H6AZ06214", cache["photos"])
+        self.assertIn("person:FEC_H6AZ06998", cache["photos"])
+
+    def test_a_list_with_no_entry_for_the_district_concludes_nothing(self):
+        pages = self.pages()
+        pages[guide_photos.AZ_GUIDE] = b"<h3 class=\"branch\">FEDERAL - LEGISLATIVE</h3>"
+        photos, problems, unread = guide_photos.read_arizona(
+            {"H-AZ-06-2026": self.people()}, getter=Getter(pages))
+        self.assertEqual((photos, unread), ({}, {"H-AZ-06-2026"}))
 
 
 if __name__ == "__main__":

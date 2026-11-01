@@ -98,6 +98,15 @@ ALL_PARTY_PRIMARIES = {
     "AK": ("top-four", "AS 15.25.010"),
 }
 
+# States that count their November races for Congress by ranked choice: a
+# candidate with no majority of the first choices is not elected until the
+# rounds are tabulated, a week or more later (Maine's 2nd district in 2018:
+# Bruce Poliquin led the first choices and Jared Golden won).
+RANKED_CHOICE = {
+    "ME": "21-A M.R.S. 723-A",
+    "AK": "AS 15.15.350",
+}
+
 
 class ResultsError(RuntimeError):
     pass
@@ -492,17 +501,27 @@ def parse_boxes(text):
 
     A row is ``{"name", "won", "withdrawn", "votes"}``. ``won`` comes only from
     the template's own name - "winning candidate" - never from the count.
+    Each row also carries ``boxVotes``: every vote its table counts - the
+    larger of the table's own total and the sum of its lines, placeholders
+    and write-ins included - or ``None`` while a line it holds has no count
+    (a "TBD" slot). A majority is of that, never of the named rows alone.
     """
     boxes = []
     for match in _BOX.finditer(text or ""):
         title = match.group(1).strip()
-        rows = []
+        rows, lines, uncounted = [], [], False
         for row in _ROW.finditer(match.group(0)):
             fields = template_fields(row.group("body"))
             raw = fields.get("candidate", "")
             name = clean_name(raw)
+            count = _count(fields.get("votes"))
             if not name or _PLACEHOLDER.match(name):
+                if count is None:
+                    uncounted = True
+                else:
+                    lines.append(count)
                 continue
+            lines.append(count or 0)
             votes = fields.get("votes", "").replace(",", "")
             rows.append({
                 "name": name,
@@ -514,9 +533,34 @@ def parse_boxes(text):
                 "party": clean_name(fields.get("party", "")) or None,
                 "article": link_target(raw),
             })
+        total = 0
+        for other in _BOX_COUNTED.finditer(match.group(0)):
+            count = _count(template_fields(other.group("body")).get("votes"))
+            if other.group("kind").lower() == "total":
+                total = max(total, count or 0)          # the larger, if two
+            elif count is None:
+                uncounted = True
+            else:
+                lines.append(count)
+        total = max(total, sum(lines))
+        for row in rows:
+            row["boxVotes"] = None if uncounted else total
         if rows:
             boxes.append((title, rows))
     return boxes
+
+
+# A table's other counted lines: its total, and a write-in tally kept in a
+# template of its own ("Election box write-in with party link").
+_BOX_COUNTED = re.compile(
+    r"\{\{Election box (?P<kind>total|write-in)[^|}]*"
+    r"(?P<body>(?:[^{}]|\{\{(?:[^{}]|\{\{[^{}]*\}\})*\}\})*)\}\}", re.I)
+
+
+def _count(value):
+    """``"197,151"`` -> 197151; anything else (blank, "TBD", a ref) -> None."""
+    digits = re.sub(r"<ref.*", "", value or "", flags=re.S).replace(",", "").strip()
+    return int(digits) if digits.isdigit() else None
 
 
 _INFOBOX = re.compile(r"\{\{\s*Infobox election\b", re.I)
@@ -595,7 +639,7 @@ def _list_kind(heading):
 def _bullet_name(line):
     """``* [[Janet Mills]], governor of Maine ...`` -> raw ``[[Janet Mills]]``."""
     text = re.split(r"<ref|<!--", line, maxsplit=1)[0]
-    depth, i = 0, 0
+    depth, paren, i = 0, 0, 0
     while i < len(text):
         two = text[i:i + 2]
         if two in ("[[", "{{"):
@@ -606,10 +650,32 @@ def _bullet_name(line):
             depth = max(depth - 1, 0)
             i += 2
             continue
-        if text[i] in ",;:" and depth == 0:
-            return text[:i]
+        # A comma inside a closed aside is the aside's: "Adam Perez Arquette
+        # ''(endorsed Alvarado, remained on ballot)''" was cut to "Adam Perez
+        # Arquette (endorsed Alvarado", a name no filing fits.
+        if text[i] == "(" and depth == 0 and ")" in text[i:]:
+            paren += 1
+        elif text[i] == ")" and paren:
+            paren -= 1
+        elif text[i] in ",;:" and depth == 0 and not paren:
+            return _linked_name(text[:i])
         i += 1
-    return text
+    return _linked_name(text)
+
+
+# A bullet that opens with the person's link, then their party, then words
+# about them with no comma between: "[[Dixon McMakin]] (Republican) [[Louisiana
+# State House of Representatives|state representative]] from the 68th
+# district" read as a person named "Dixon McMakin state representative from
+# the 68th district" (LA-5's Withdrawn list, 2026-11-01). Lower-case words or
+# another link after the name and its asides are not the name; a suffix is
+# written in capitals ("[[John Smith]] Jr.").
+_LINKED_NAME = re.compile(r"\s*\[\[[^\[\]]+\]\](?:\s*'*\([^()]*\)'*)*(?=\s*(?:\[\[|[a-z]))")
+
+
+def _linked_name(raw):
+    match = _LINKED_NAME.match(raw)
+    return match.group(0) if match else raw
 
 
 # A heading that lists people who are on, or running for, a ballot line, and
@@ -827,13 +893,47 @@ def sub_articles(text, title):
 
 # ---------------------------------------------------------------- resolving
 
-def _stage(title):
+# A November table titled by its seat alone: "Florida's 1st congressional
+# district, 2024", "2024 Delaware's at-large congressional district".
+_SEAT_TITLE = re.compile(r"\bcongressional district\b", re.I)
+
+
+_YEAR = re.compile(r"\b(?:19|20)\d\d\b")
+
+
+def _stage(title, cycle=True):
+    """A results table's stage from its title: "primary", "runoff",
+    "general" or None (not read).
+
+    A table titled with another year than *cycle* (``True``: the cycle
+    this site reads, :data:`CYCLE`) is another election's: a past cycle's
+    result left in a 2026 section ("Texas's 28th congressional district,
+    2024", as the 2024 pages titled theirs) would otherwise be read beside
+    this year's, and its mark taken for a 2026 winner. ``cycle=None`` reads
+    the words alone, for a past cycle's own page (kyc/seat_history.py).
+    """
     lowered = title.lower()
+    if cycle is True:
+        cycle = CYCLE
+    if cycle is not None and any(int(y) != cycle for y in _YEAR.findall(lowered)):
+        return None
     if "runoff" in lowered or "run-off" in lowered:
         return "runoff"
+    # A state party's assembly (Colorado's) places candidates on the primary
+    # ballot and decides no nomination: it is neither the primary nor the
+    # general, and is not read.
+    if "assembly" in lowered:
+        return None
     if "primary" in lowered or "convention" in lowered or "caucus" in lowered:
         return "primary"
     if "election" in lowered or "general" in lowered:
+        return "general"
+    if _SEAT_TITLE.search(lowered):
+        # The 2024 pages of Alabama, Arkansas, Florida, Georgia, Kentucky,
+        # Maine, New Hampshire, New York, Pennsylvania, West Virginia and
+        # Delaware titled their November tables this way: 83 seats whose
+        # result, marked on the certified revision, was never read (the
+        # November rehearsal of 2026-11-01).
         return "general"
     return None
 
@@ -1028,7 +1128,8 @@ _COUNTY_CONVENTION = re.compile(r"\bcounty\b.*\bconvention\b", re.I)
 
 
 def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
-                 general_held=False, general_runoff=False, general_runoff_held=False):
+                 general_held=False, general_runoff=False, general_runoff_held=False,
+                 ranked_choice=False):
     """Who is still standing, from a race's results tables.
 
     Returns ``{name: status}`` for everyone named in a primary-stage table,
@@ -1065,7 +1166,10 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
     the November ballot is DEFEATED, and once *general_runoff_held* its marked
     winner is ELECTED. An open primary's first round is the November election
     itself: its majority winner is ELECTED, its top two are in a RUNOFF, and
-    the rest are DEFEATED.
+    the rest are DEFEATED. Where the count is by *ranked_choice* (Maine,
+    Alaska), a marked winner is ELECTED only beside a majority of the votes
+    in a November table that marks them: first choices are a lead, never a
+    win, until the rounds are tabulated.
     """
     if open_primary:
         boxes = _open_rounds(boxes, runoff_held)
@@ -1075,7 +1179,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             # all, so nothing is inferred from anyone's absence either.
             return {}
     primaries, runoffs, generals, infobox, lists = {}, {}, [], [], {}
-    general_runoff_rows = []
+    general_runoff_rows, general_tables = [], []
     for raw_title, rows in _canonical(boxes):
         title = _clean_title(raw_title)
         if title == INFOBOX_TITLE:
@@ -1096,6 +1200,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             primaries.setdefault(title, []).extend(rows)
         elif stage == "general":
             generals.extend(rows)
+            general_tables.append(rows)
 
     status = _resolve_tables(primaries, runoffs, generals, has_runoff or open_primary)
 
@@ -1141,7 +1246,13 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
     if general_held and open_primary:
         _settle_open_primary(status, boxes)
     elif general_held:
-        _settle_general(status, generals, general_runoff_rows, general_runoff_held)
+        # A seat won only by a majority - ranked choice (Maine, Alaska), or a
+        # December runoff below one (Georgia) - is not decided by a mark on a
+        # leader short of it.
+        needs_majority = ranked_choice or general_runoff
+        _settle_general(status, generals, general_runoff_rows, general_runoff_held,
+                        majority_of=(general_tables, {r["name"] for r in infobox})
+                        if needs_majority else None)
     return status
 
 
@@ -1154,7 +1265,7 @@ def _unpartisan_runoff(title):
     return _stage(title) == "runoff" and not _PARTY_WORDS.search(title)
 
 
-def _settle_general(status, generals, runoff_rows, runoff_held):
+def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None):
     """Who won in November, from the general table's marked winner.
 
     Someone already WITHDRAWN - listed as having withdrawn after the ballots
@@ -1178,8 +1289,35 @@ def _settle_general(status, generals, runoff_rows, runoff_held):
     winners = {r["name"] for r in ballot if r["won"]}
     if len(winners) != 1:
         return                      # count continuing, or a page mid-edit
+    if majority_of is not None:
+        tables, nominees = majority_of
+        if not any(_majority(rows, winners) for rows in tables):
+            return                  # first choices, or a count short of a majority
+        if not nominees <= {r["name"] for r in generals}:
+            return                  # a November table that leaves out a nominee
     for name in names:
         status[name] = ELECTED if name in winners else DEFEATED
+
+
+def _majority(rows, winners):
+    """True when one table marks a winner holding a majority of every vote
+    it counts.
+
+    Of every vote, not of the rows that name someone: a table listing two
+    candidates and two "TBD" slots, or dropping its write-ins, would make a
+    first-choice leader on 49% a majority. The table's own total and its
+    write-in lines count (``boxVotes``), withdrawn candidates' votes count,
+    and a line with no count concludes nothing.
+    """
+    marked = [r for r in rows if r["won"] and not r["withdrawn"] and r["name"] in winners]
+    votes = [r.get("votes") for r in rows]
+    if len(marked) != 1 or any(v is None for v in votes):
+        return False
+    counted = [r["boxVotes"] for r in rows if "boxVotes" in r]
+    if any(c is None for c in counted):
+        return False
+    base = max(counted + [sum(votes)])
+    return bool(base) and 2 * marked[0]["votes"] > base
 
 
 def _settle_open_primary(status, boxes):
@@ -1924,7 +2062,7 @@ def _one_person(a, b):
     return len(x) >= 2 and x[:-1] == y[:-1] and _near(x[-1], y[-1])
 
 
-def certify_race(race, spec, rows, aliases=None):
+def certify_race(race, spec, rows, aliases=None, ranked_choice=False):
     """Lay a state's certified list over a race's results (rule 77).
 
     *race* is the results page's entry, or ``None`` for a seat no page
@@ -1945,6 +2083,12 @@ def certify_race(race, spec, rows, aliases=None):
       theirs; and a page name on its November ballot that the list does
       not name is not counted on it.
 
+    - After the count, everyone else the list prints lost to the page's
+      marked winner, or to the two in its runoff. Where the count is by
+      *ranked_choice* (Maine, Alaska), a winner the page marked in November
+      tables that leave out anyone the list prints is no result: the seat
+      is read as before the count.
+
     Every status the list set is recorded under ``certifiedIds``, so the
     page credits the list for it and not the results page.
     """
@@ -1963,7 +2107,7 @@ def certify_race(race, spec, rows, aliases=None):
     complete = bool(spec.get("complete"))
     names = race.setdefault("names", {})
     other_party = race.setdefault("unmatchedParty", {})
-    changed, named, loose, unprinted = {}, set(), [], []
+    changed, named, loose, unprinted, printed_ids = {}, set(), [], [], set()
     for item in spec["entries"]:
         name, kind = item["name"], item["kind"]
         cids = _certified_ids(name, rows, aliases)
@@ -1983,12 +2127,16 @@ def certify_race(race, spec, rows, aliases=None):
         # the list's: one person, one status - but not to capitals: Texas
         # prints "ALEX MCMENEMY", and the page's "Alex McMenemy" is his name.
         popped = [n for n in unmatched if _one_person(n, name) and (cids or n != name)]
+        # What the page's November count said of that spelling stands: the
+        # list says who was printed, never who won.
+        counted = {unmatched[n] for n in popped if unmatched[n] in (ELECTED, DEFEATED, RUNOFF)}
+        counted = counted.pop() if len(counted) == 1 else None
         for page_name in popped:
             unmatched.pop(page_name)
             other_party.pop(page_name, None)
         if not cids:
             loose.append(dict(item, name=popped[0] if popped and name.isupper()
-                              else _cased(name)))
+                              else _cased(name), counted=counted))
             continue
         for cid in cids:
             # The state's spelling, whatever the entry says of them: Florida
@@ -2006,7 +2154,8 @@ def certify_race(race, spec, rows, aliases=None):
                 race.setdefault("listParty", {})[cid] = list_party_words(item.get("party"))
             now = status.get(cid)
             if kind == BALLOT:
-                new = now if now in (ELECTED, DEFEATED, RUNOFF) else NOMINEE
+                printed_ids.add(cid)
+                new = now if now in (ELECTED, DEFEATED, RUNOFF) else (counted or NOMINEE)
                 if key:
                     party[cid] = key
                     if _names_a_party(item.get("party"), key):
@@ -2024,13 +2173,52 @@ def certify_race(race, spec, rows, aliases=None):
     # list's spelling, with the list's party.
     for item in loose:
         if item["kind"] == BALLOT:
-            unmatched[item["name"]] = NOMINEE
+            unmatched[item["name"]] = item.get("counted") or NOMINEE
             if item.get("party"):
                 other_party[item["name"]] = list_party_words(item["party"])
         elif item["kind"] == LIST_WITHDREW:
             unmatched.setdefault(item["name"], WITHDRAWN)
         elif item["kind"] == LOST_PRIMARY:
             unmatched.setdefault(item["name"], ELIMINATED)
+    # After the count: the page has marked the seat's winner, or the two in
+    # its general runoff (resolve_race does neither before the day after
+    # Election Day). Everyone else the list prints was on that ballot and
+    # lost it, whether or not the page's November table names them - those
+    # tables are copied from the major parties' primaries. Left "nominee",
+    # Colorado's, Florida's, Iowa's, Nebraska's and Texas's minor-party and
+    # unaffiliated candidates read "Awaiting result: the results this site
+    # last read had not marked a winner" under a race badged "Won by" (the
+    # November rehearsal of 2026-11-01).
+    counts = list(status.values()) + list(unmatched.values())
+    uncounted = ([cid for cid in sorted(printed_ids) if status.get(cid) == NOMINEE] +
+                 [i["name"] for i in loose
+                  if i["kind"] == BALLOT and unmatched.get(i["name"]) == NOMINEE])
+    if ranked_choice and ELECTED in counts and uncounted:
+        # The review of PR #168: Alaska's at-large table of 2026-11-01 names
+        # two of the four the list prints. A mark on Begich there, read as a
+        # majority, made Eric Hafner and Jim McDermott "defeated" by a count
+        # that never named them. Nobody's November status stands.
+        withdrew = {cid for i in spec["entries"] if i["kind"] == LIST_WITHDREW
+                    for cid in _certified_ids(i["name"], rows, aliases)}
+        for cid, now in list(status.items()):
+            if now not in (ELECTED, DEFEATED):
+                continue
+            status[cid] = WITHDRAWN if cid in withdrew else NOMINEE
+            if cid in printed_ids or cid in withdrew:
+                changed[cid] = status[cid]
+            else:
+                changed.pop(cid, None)
+        for page_name, now in list(unmatched.items()):
+            if now in (ELECTED, DEFEATED):
+                unmatched[page_name] = NOMINEE
+    elif ELECTED in counts or RUNOFF in counts:
+        for cid in sorted(printed_ids):
+            if status.get(cid) == NOMINEE:
+                status[cid] = DEFEATED
+                changed[cid] = DEFEATED
+        for item in loose:
+            if item["kind"] == BALLOT and unmatched.get(item["name"]) == NOMINEE:
+                unmatched[item["name"]] = DEFEATED
     if complete:
         printed = [i["name"] for i in spec["entries"] if i["kind"] == BALLOT]
         loose_printed = [i["name"] for i in loose if i["kind"] == BALLOT] + unprinted
@@ -2177,7 +2365,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                                open_primary=is_open, runoff_held=held,
                                general_held=general_held(today),
                                general_runoff=state in _general_runoffs(),
-                               general_runoff_held=general_runoff_held(state, today))
+                               general_runoff_held=general_runoff_held(state, today),
+                               ranked_choice=state in RANKED_CHOICE)
         if not outcome:
             if is_open and any(r.get("won") for _, rs in boxes for r in rs):
                 # Winners are marked, but not as a result the open-primary
@@ -2264,7 +2453,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             if (races.get(rid) or {}).get("source") == "qualified":
                 continue
             races[rid] = certify_race(races.get(rid), dict(spec, entries=entries),
-                                      by_race.get(rid, []), (aliases or {}).get(rid))
+                                      by_race.get(rid, []), (aliases or {}).get(rid),
+                                      ranked_choice=state in RANKED_CHOICE)
             if rid in pending:
                 pending.remove(rid)
             for cid in races[rid].get("certifiedHeld") or []:

@@ -1210,6 +1210,27 @@ def _code(i):
     return "CAMPAIGN-" + letters
 
 
+def drawn_address(record):
+    """The address a site's drawn read is made at: the one its static read
+    found working (``working``), else - where the static read followed the
+    filed address to another host and that page still named the candidate
+    (``moved to ...``, :func:`assess`), the page its portrait is read from -
+    the address it moved to (``final``), else the filed one. The browser is
+    never followed across a redirect to another host (rule 38): seventeen
+    of the November ballot's sites the static read had accepted at their new
+    address were refused on 2026-11-01 as "taken from" the filed one, and so
+    never drawn. The drawn page is held to every test again at that address."""
+    record = record or {}
+    if record.get("working"):
+        return record["working"]
+    final, url = record.get("final") or "", record.get("url") or ""
+    if (record.get("safe") is SAFE and final.startswith("https://")
+            and str(record.get("reason") or "").startswith("moved to ")
+            and host_of(final) != host_of(url)):
+        return final
+    return url
+
+
 def render_wanted(profiles, cache, today=None, limit=RENDER_LIMIT):
     """``[(profile, key, site record)]``: the people still running with no
     portrait by any route whose site's static read found none - it read as
@@ -1225,7 +1246,7 @@ def render_wanted(profiles, cache, today=None, limit=RENDER_LIMIT):
         entry = people.get(profile.get("id")) or {}
         for key in ("site", "listed"):
             record = entry.get(key) or {}
-            url = record.get("working") or record.get("url") or ""
+            url = drawn_address(record)
             if (not url.startswith("https://") or record.get("safe") is False
                     or record.get("portrait") or record.get("portraitHeavy")
                     or overrides.blocked_campaign_host(url)):
@@ -1626,7 +1647,7 @@ def portrait_record(entry, site):
     if site.get("portrait") or site.get("portraitHeavy"):
         return site
     drawn = (entry or {}).get("drawn") or {}
-    if drawn.get("safe") is True and drawn.get("url") in (site.get("url"), site.get("working")):
+    if drawn.get("safe") is True and drawn.get("url") in (site.get("url"), drawn_address(site)):
         return drawn
     return site
 

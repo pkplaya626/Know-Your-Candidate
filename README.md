@@ -73,7 +73,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
-| `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
+| `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
 | `npm install && npm test` | Render every page in jsdom and drive the UI (3434 checks) |
 
@@ -1245,8 +1245,8 @@ person looking at a photograph judges it by one test: the candidate alone
 of the 65px phone card), is a likeness; anything else goes in
 `NOT_A_PORTRAIT` with what was seen. A picture of a person behind them (a
 framed photograph, a poster, a book jacket) is not a person in the frame
-and refuses nothing; a face on a screen, often a live feed, is not decided
-and still refuses. The background-people rule is for
+and refuses nothing; a face on a screen, often a live feed, refuses like a
+person in the frame (the owner, 2026-11-01). The background-people rule is for
 candidates' and officials' photographs: of the federal judges' Senate
 Judiciary hearing stills the owner said "keep" (2026-10-25), so an entry
 whose only finding is other people in the frame (`OTHERS_IN_FRAME`)
@@ -1262,15 +1262,17 @@ review: refusing James Talarico's Commons crop put forward his campaign's
 classroom photograph, children in the frame). Each record keeps the page, the words naming the person
 beside the image (`evidence`, `portraitEvidence`), the day read and the
 bytes and pixel size; `validate` fails a shown one without them
-(`photo-unevidenced`). Washington's voters' guide and Alaska's and Oregon's
-pamphlets print candidates' photographs, but only base64 inside JSON or
-inside PDFs, so there is no file to link. By the owner's decision of
-2026-10-25 they are kept here (`guidephotos`, `kyc/guide_photos.py`) for
+(`photo-unevidenced`). Washington's voters' guide and Alaska's, Oregon's
+and Utah's pamphlets print candidates' photographs, but only base64 inside
+JSON or inside PDFs, so there is no file to link. By the owner's decision
+of 2026-10-25 they are kept here (`guidephotos`, `kyc/guide_photos.py`) for
 anyone no other route pictures: the guide's own page must name the person
 beside the photograph for that office, in the words of their filing,
 profile or the office's list (a short form only through an evidenced
 `overrides.GUIDE_NAME_FORMS` entry), and the name must fit one person in
-the race. The file is the very bytes the guide holds, or for Oregon the
+the race. Arizona's Clean Elections Commission's candidate list pictures
+the House candidates too, at addresses of their own, so its pictures are
+linked there, never hosted. The file is the very bytes the guide holds, or for Oregon the
 pixels of its JPEG 2000 decoded losslessly by `kyc/jpx.py` (checked pixel
 for pixel against Chrome's own PDF renderer) and written as PNG; it is
 credited to the guide where it was found and linked to the candidate's

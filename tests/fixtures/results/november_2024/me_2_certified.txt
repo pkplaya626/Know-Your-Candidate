@@ -1,0 +1,14 @@
+<!-- 2024 United States House of Representatives elections in Maine, District 2: revision 1265988097 (2024-12-29), results tables only -->
+==District 2==
+{{Election box begin no change|title=Democratic primary results}}
+{{Election box winning candidate with party link no change|party=Democratic Party (United States)|candidate=[[Jared Golden]] (incumbent)|votes=23,183|percentage=100.00}}
+{{Election box total no change|votes=23,183|percentage=100.00}}
+{{Election box end}}
+
+{{Election box begin no change|title=Republican primary results}}
+{{Election box winning candidate with party link no change|party=Republican Party (United States)|candidate=[[Austin Theriault]]|votes=26,934|percentage=66.9}}{{Election box candidate with party link no change|party=Republican Party (United States)|candidate=[[Mike Soboleski]]|votes=13,340|percentage=33.1}}
+{{Election box total no change|votes=40,274|percentage=100.0}}
+{{Election box end}}
+
+{{Election box begin no change|title=Maine's 2nd congressional district, 2024}}{{Election box winning candidate with party link no change|party=Democratic Party (United States)|candidate=[[Jared Golden]] (incumbent)|votes=197,151|percentage=50.35}}
+{{Election box candidate with party link no change|party=Republican Party (United States)|candidate=[[Austin Theriault]]|votes=194445|percentage=49.65}}{{Election box total no change|votes=391,596|percentage=100.00}}{{Election box end}}
