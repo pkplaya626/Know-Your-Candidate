@@ -694,7 +694,8 @@ class TestSampleBallotRecords(unittest.TestCase):
         for code, record in voting.SAMPLE_EVIDENCE.items():
             url = (voting.SAMPLE_BALLOTS.get(code)
                    or voting.TERRITORY_LINKS.get(code, {}).get("sample", (None,))[0])
-            for page in (url, record["linkedFrom"]):
+            self.assertTrue(record["wordsFrom"], code)
+            for page in (url, record["linkedFrom"], record["wordsFrom"]):
                 if page:
                     ok, why = voting_dates.official_source(page, code)
                     self.assertTrue(ok, f"{code}: {page}: {why}")
@@ -722,6 +723,46 @@ class TestSampleBallotRecords(unittest.TestCase):
         # nowhere this site read.
         self.assertIsNone(voting.SAMPLE_EVIDENCE["RI"]["linkedFrom"])
         self.assertNotIn("sample", shown["_siteLinked"]["RI"])
+
+    def test_north_carolinas_page_is_not_said_linked(self):
+        # The first record named /voting as linking /voting/sample-ballot;
+        # no page read links it (its address is only in the home page's
+        # search settings), so the block said "as its site links them" of a
+        # link nobody saw (PR #166 review).
+        shown = voting.for_page(every_link_live(cache_of()))
+        self.assertIsNone(voting.SAMPLE_EVIDENCE["NC"]["linkedFrom"])
+        self.assertNotIn("sample", shown["_siteLinked"]["NC"])
+        self.assertFalse(voting.site_linked("NC", "sample", voting.SAMPLE_BALLOTS["NC"]))
+
+    def test_words_read_off_the_jurisdictions_domains_fail(self):
+        # Delaware's first words were its look-up's ArcGIS item's, on
+        # arcgis.com; Kansas's and Rhode Island's are releases on their own.
+        for code, url in (("DE", "https://www.arcgis.com/sharing/rest/content/items/x"),
+                          ("KS", "https://www.vote411.org/kansas"), ("RI", None)):
+            record = voting.SAMPLE_EVIDENCE[code]
+            saved = record["wordsFrom"]
+            record["wordsFrom"] = url
+            try:
+                problems = voting.sample_problems()
+            finally:
+                record["wordsFrom"] = saved
+            self.assertTrue(any(p.startswith(f"{code} sample") for p in problems), problems)
+        self.assertEqual(voting.sample_problems(), [])
+
+    def test_a_link_never_opened_is_said_so_apart(self):
+        # A link added since the weekly check last ran was never looked at:
+        # "not yet opened", never "could not be confirmed" (rule 19).
+        cache = every_link_live(cache_of())
+        url = voting.SAMPLE_BALLOTS["NC"]
+        links = dict(cache["links"])
+        del links[url]
+        refused = voting.SAMPLE_BALLOTS["RI"]
+        links[refused] = voting.UNKNOWN
+        shown = voting.for_page(dict(cache, links=links))
+        self.assertIn("sample", shown["_unreached"]["NC"])
+        self.assertEqual(shown["_unopened"].get("NC"), ["sample"])
+        self.assertIn("sample", shown["_unreached"]["RI"])
+        self.assertNotIn("RI", shown["_unopened"])
 
     def test_a_page_without_its_record_fails(self):
         saved = voting.SAMPLE_EVIDENCE.pop("VA")

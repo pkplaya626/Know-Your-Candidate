@@ -339,6 +339,16 @@
       var opened = Object.keys(byDay).sort().map(function (day) {
         return quoted(byDay[day], labels) + " opened by hand " + KYC.escapeHtml(day);
       });
+      // A link added since the check last ran was never looked at: "not
+      // yet opened", never "could not be confirmed", which says it looked
+      // (rule 19; voting._unopened).
+      var never = (all._unopened || {})[code] || [];
+      var fresh = missed.filter(function (k) { return never.indexOf(k) !== -1; });
+      missed = missed.filter(function (k) { return never.indexOf(k) === -1; });
+      if (fresh.length) {
+        opened.push(quoted(fresh, labels) + (fresh.length === 1 ? " was" : " were") +
+          " added since and not yet opened by this site's automated check");
+      }
       if (!missed.length && !human.length && !opened.length) {
         out.push("Each link opened " + KYC.escapeHtml(all._opened) + ".");
       } else if (!missed.length && !human.length) {
@@ -727,9 +737,7 @@
    *  neither counties nor such questions, and are told only where the
    *  whole ballot is (rule 75). */
   function localLine(code, others) {
-    var sample = sampleLink(code);
-    var whole = sample ? "The election office's sample ballot shows every question on it: " +
-      sample + "." : "";
+    var whole = sampleLine(code);
     if (questionScope(code) !== "Statewide") {
       return whole ? '<p class="measures-local">' + whole + "</p>" : "";
     }
@@ -836,7 +844,7 @@
       "load, so this page cannot say whether any is on this ballot. Reload the page, or see " +
       '<a href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#measures") + '">' +
       esc(placeName(code)) + "'s page</a>" +
-      (sample ? " or the election office's sample ballot: " + sample : "") + ".</p>";
+      (sample ? " or the election office's sample-ballot page: " + sample : "") + ".</p>";
   }
 
   /** The state page's section: its own heading and the same list. */
@@ -908,6 +916,22 @@
     return '<a class="' + (cls || "") + '" href="' + KYC.escapeAttr(url) +
       '" target="_blank" rel="noopener noreferrer">' + (cls === "btn" ? KYC.icon("link") + " " : "") +
       esc(labels.sample || "See a sample ballot") + "</a>";
+  }
+
+  /** The sample-ballot link in a sentence, said as the record holds it:
+   *  "links" only of a page the record shows the office's site linking
+   *  (voting.site_linked), and never that it shows every contest - a
+   *  label carries what the page is (one composite ballot, a look-up that
+   *  "may" show it, an app's page). Rhode Island's office names its portal
+   *  in a release and links it nowhere this site read; Your ballot said "The
+   *  election office links a sample ballot, every contest on it" of it
+   *  (PR #166 review). "" where none is linked. */
+  function sampleLine(code) {
+    var sample = sampleLink(code);
+    if (!sample) return "";
+    var linked = (((KYC.meta().voting || {})._siteLinked || {})[code] || []).indexOf("sample") !== -1;
+    return (linked ? "The sample-ballot page the election office's site links: "
+      : "The election office's own sample-ballot page: ") + sample + ".";
   }
 
   function resultsLink(code) {
@@ -1227,7 +1251,7 @@
       '<h3 class="ballot-heading">' + (!anything ? "The rest of your ballot"
         : past ? "Also on the ballot, not listed here" : "Also on your ballot, not listed here") + "</h3>" +
       '<p class="ballot-note">' + words + " " + (sample
-        ? "The election office links a sample ballot, every contest on it: " + sample + "."
+        ? sampleLine(code)
         : "This site's voting links hold no sample ballot for " + place +
           (cited ? " (the candidate lists above cite " + link(cited.url, cited.source) + ")" : "") +
           "; its election office's pages are under " +
