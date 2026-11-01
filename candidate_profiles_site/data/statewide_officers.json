@@ -101,6 +101,13 @@
    "office": "https://coag.gov/",
    "party": "D",
    "partyKey": "D",
+   "photo": "https://coag.gov/app/uploads/2019/06/phil-weiser-pillars-copy-200x300.png",
+   "photoPage": "https://coag.gov/about-us/colorado-attorney-general/",
+   "photoWeight": {
+    "bytes": 86486,
+    "height": 300,
+    "width": 200
+   },
    "title": "Attorney General"
   },
   "CT": {
