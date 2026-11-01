@@ -373,6 +373,18 @@ INDEX_LEAVES_OUT = frozenset({
 })
 
 
+# A race's fields the index leaves out, for the same reason: the seat
+# fold's strip of elections since 2018 (kyc/seat_history.py seat_strip,
+# VISUALS-33) is drawn only when a reader opens the fold, which waits for
+# the state's file. kyc.js takePeople fills the index's race from it.
+RACE_INDEX_LEAVES_OUT = frozenset({"seatHistory"})
+
+
+def index_race(race):
+    """A race as the index holds it: without :data:`RACE_INDEX_LEAVES_OUT`."""
+    return {k: v for k, v in race.items() if k not in RACE_INDEX_LEAVES_OUT}
+
+
 class PeopleSplitError(ValueError):
     """The profiles cannot be split by state without losing someone."""
 
@@ -462,7 +474,8 @@ def people_payloads(profiles, races=None, summary=None):
     build = data_signature(profiles, races, summary)
     races = list(races or [])
     out = {"index": {"build": build, "index": True,
-                     "people": [index_record(p) for p in profiles], "races": races}}
+                     "people": [index_record(p) for p in profiles],
+                     "races": [index_race(r) for r in races]}}
     for code in people_codes():
         out[code] = {"build": build, "state": code,
                      "people": [p for p in profiles if p.get("state") == code],

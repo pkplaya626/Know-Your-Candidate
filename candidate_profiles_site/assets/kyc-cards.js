@@ -1480,13 +1480,170 @@
       "</a>, compiled from each state’s certified results." + checked + "</p>";
   }
 
+  /* ------------------------------------------------- the seat's strip */
+
+  /* The seat's elections from 2018 to 2024 (VISUALS-33,
+   * kyc/seat_history.py seat_strip), in the seat fold under its last
+   * election: who won each, by what margin, and who served the term it
+   * chose, from the Clerk's statistics checked as the last election is and
+   * congress-legislators' terms by bioguide id. A House district's years
+   * are grouped by the lines they were fought on, and a group on other
+   * lines than this race's says so and gives the number the district had
+   * on that map: a result on other lines is never set beside this
+   * district as its own (rule 90). Bars are neutral ink, the party only a
+   * chip (rule 88); everything is page text and boxes (rule 46). The strip
+   * is the state's file's, not the index's (emit.RACE_INDEX_LEAVES_OUT),
+   * so the fold waits for it (rule 94). *now* is for tests. */
+  function stripChip(party) {
+    var abbr = KYC.partyAbbr({ party: party });
+    return abbr ? ' <span class="party-chip ' + KYC.partyClass({ party: party }) + '">' +
+      KYC.escapeHtml(abbr) + "</span>" : "";
+  }
+
+  function stripWhat(result) {
+    var won = result.candidates[0];
+    var name = KYC.escapeHtml(won.name) + stripChip(won.party);
+    var pts = result.margin != null ? result.margin.toFixed(1) + " points" : "";
+    if (result.kind === "unopposed") return name + ", unopposed";
+    if (!result.candidates[1]) return name + ", the only candidate named";
+    if (result.rankedChoice === "first-choices") return name + " led first choices by " + pts;
+    if (result.kind === "runoff") return name + " won the runoff by " + pts;
+    if (result.kind === "rcv-final") return name + " won the final round by " + pts;
+    return name + " won by " + pts;
+  }
+
+  function stripHolders(cell) {
+    var holders = cell.holders || [];
+    if (!holders.length) {
+      return cell.result ? '<span class="strip-held">congress-legislators lists no one ' +
+        "serving this seat in the term it chose</span>" : "";
+    }
+    if (holders.every(function (h) { return h.winner; })) return "";
+    return '<span class="strip-held">Served: ' + holders.map(function (h) {
+      var dates = [];
+      if (h.from) dates.push("from " + KYC.dateWords(h.from));
+      if (h.until) dates.push("until " + KYC.dateWords(h.until));
+      if (h.how === "appointment") dates.push("appointed");
+      return KYC.escapeHtml(h.name) + stripChip(h.party) +
+        (dates.length ? " " + KYC.escapeHtml("(" + dates.join(", ") + ")") : "");
+    }).join("; ") + "</span>";
+  }
+
+  function stripCell(race, cell, scale) {
+    var head = '<span class="strip-year">' + cell.year +
+      (race.chamber === "Senate" && cell.result && cell.result.term === "unexpired"
+        ? " special" : "") + "</span>";
+    var body;
+    if (cell.result) {
+      var r = cell.result;
+      var bar = r.margin != null && r.candidates[1]
+        ? '<span class="strip-track" aria-hidden="true"><span class="strip-fill" style="width:' +
+          Math.max(2, Math.min(100, Math.round(100 * r.margin / scale))) + '%"></span></span>'
+        : "";
+      body = '<span class="strip-who">' + stripWhat(r) + "</span>" + bar;
+    } else if (cell.withheld) {
+      body = '<span class="strip-none">Not shown: ' + (cell.withheld === "disagree"
+        ? "the Clerk&rsquo;s count and the compilation it is checked against disagree"
+        : "no second compilation confirms the Clerk&rsquo;s count") + "</span>";
+    } else if (cell.none === "no-election") {
+      body = '<span class="strip-none">No election to this seat that year: its term is four years</span>';
+    } else if (cell.none === "no-district") {
+      body = '<span class="strip-none">No district numbered ' + (race.district || 0) +
+        " on that map</span>";
+    } else {
+      body = '<span class="strip-none">The Clerk&rsquo;s statistics list no result for this ' +
+        "district</span>";
+    }
+    var where = cell.atLarge ? '<span class="strip-held">Elected at large: the whole state</span>' : "";
+    return '<li class="strip-cell">' + head + body + where + stripHolders(cell) + "</li>";
+  }
+
+  function stripYears(era) {
+    return era.from === era.to ? "the " + era.from + " election"
+      : "the elections of " + era.from + " to " + era.to;
+  }
+
+  function stripChange(race, change) {
+    var plan = (KYC.meta().districtMaps || {})[race.state];
+    var by = change.drawnBy ? ", drawn by " + KYC.escapeHtml(change.drawnBy) : "";
+    if (change.kind === "census") {
+      return "New lines from " + change.year + ": the map drawn after the 2020 census.";
+    }
+    var title = change.url
+      ? '<a href="' + KYC.escapeAttr(change.url) + '" target="_blank" rel="noopener noreferrer">' +
+        KYC.escapeHtml(change.title) + "</a>"
+      : KYC.escapeHtml(change.title);
+    var link = change.kind === "redrawn" && plan ? ' <a href="' + KYC.escapeAttr(KYC.siteRoot() +
+      plan.page + "#/?d=" + (race.district || 0)) + '">See where its area came from &rsaquo;</a>' : "";
+    return (change.kind === "redrawn" ? "New lines for " : "New lines from ") + change.year +
+      ": " + title + by + "." + link;
+  }
+
+  function stripEraHead(race, strip, era, now) {
+    if (race.chamber === "Senate") return "";
+    var past = KYC.electionStatus(undefined, now).phase === "post-election";
+    if (era.same) {
+      return '<p class="strip-era">' + KYC.escapeHtml((strip.eras.length > 1 ? "On " : "All on ") +
+        "the lines this district " + (past ? "was" : "is") + " elected on in 2026 (" +
+        stripYears(era) + ")") + "</p>";
+    }
+    return '<p class="strip-era strip-other">' + KYC.escapeHtml("On other lines than this " +
+      "race’s: " + stripYears(era) + ". The results are those of the district numbered " +
+      (race.district || 0) + " on that map, which is not the map this race is fought on.") + "</p>";
+  }
+
+  function seatStrip(race, now) {
+    var strip = race.seatHistory;
+    if (!strip || !strip.cells || !strip.cells.length) return "";
+    var scale = 20;
+    strip.cells.forEach(function (c) {
+      if (c.result && c.result.margin != null && c.result.margin > scale) scale = c.result.margin;
+    });
+    var breaks = {};
+    (strip.breaks || []).forEach(function (b) { breaks[b.year] = b; });
+    var parts = [];
+    strip.eras.forEach(function (era, i) {
+      if (i > 0 && breaks[era.from]) {
+        parts.push('<p class="strip-break">' + stripChange(race, breaks[era.from]) + "</p>");
+      }
+      var cells = strip.cells.filter(function (c) { return c.era === i; });
+      if (!cells.length) return;
+      parts.push(stripEraHead(race, strip, era, now) + '<ol class="strip-cells">' +
+        cells.map(function (c) { return stripCell(race, c, scale); }).join("") + "</ol>");
+    });
+    if (breaks[2026]) parts.push('<p class="strip-break">' + stripChange(race, breaks[2026]) + "</p>");
+    var sources = KYC.meta().lastElectionSources || {};
+    var years = strip.cells.map(function (c) { return c.year; }).filter(function (y, i, all) {
+      return all.indexOf(y) === i && sources[String(y)];
+    });
+    var counts = years.map(function (y) {
+      return '<a href="' + KYC.escapeAttr(sources[String(y)].url) +
+        '" target="_blank" rel="noopener noreferrer">' + y + "</a>";
+    }).join(", ");
+    // A number, never "this district": on other lines it was another one.
+    var heading = race.chamber === "Senate" ? "Elections to this seat since 2018"
+      : "Elections for " + KYC.escapeHtml(race.state + "-" + (race.district || "AL")) +
+        " since 2018";
+    return '<section class="seat-strip"><h4 class="strip-title">' + heading + "</h4>" +
+      parts.join("") +
+      '<p class="race-note race-results">Counts: the Clerk of the House&rsquo;s statistics (' +
+      counts + "), each shown where a second compilation (" +
+      (race.chamber === "Senate" ? "MIT&rsquo;s Senate returns, else " : "") +
+      "Wikipedia&rsquo;s page for that election) names the same winner and runner-up. Margins " +
+      "are of the votes cast for a candidate. Who served: congress-legislators&rsquo; terms, " +
+      "by member.</p></section>";
+  }
+
   function lastTimeBlock(race, opts) {
     opts = opts || {};
     var last = race && race.lastElection;
     if (!last) return "";
+    // The strip is the state's file's (rule 94): a race the index holds
+    // waits for it; one whose file is in draws at once.
+    var wait = race.seatHistory ? null : race.state;
     return fold("race-last", lastTimeSummary(race, last, opts.now), opts,
-      (opts.scope || "race") + ":last:" + race.id, null,
-      function () { return lastTimeBody(race, last); });
+      (opts.scope || "race") + ":last:" + race.id, wait,
+      function () { return lastTimeBody(race, last) + seatStrip(race, opts.now); });
   }
 
   KYC.cards = {

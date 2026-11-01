@@ -53,7 +53,25 @@ CLERK_TITLE = ("Clerk of the House, “Statistics of the Presidential and Congre
                "Election of {day}”")
 ELECTION_DAYS = {2018: "2018-11-06", 2020: "2020-11-03", 2022: "2022-11-08", 2024: "2024-11-05"}
 HOUSE_YEAR = 2024
-YEARS = (2020, 2022, 2024)
+# The seat's strip (VISUALS-33): every House election and every election to
+# a Senate seat's class from 2018 to 2024, each read and checked as the last
+# one is. The last election (``lastElection``) stays 2024's for the House.
+YEARS = (2018, 2020, 2022, 2024)
+
+# congress-legislators, for who held each seat after each election: by
+# bioguide id, never by a name (rule 17).
+LEGISLATORS_URLS = (
+    "https://unitedstates.github.io/congress-legislators/legislators-current.json",
+    "https://unitedstates.github.io/congress-legislators/legislators-historical.json",
+)
+# The strip's terms: those served in the Congresses its elections chose,
+# from the 116th's first day to the day the 119th's House terms end.
+TERMS_FROM = "2019-01-03"
+TERMS_TO = "2027-01-03"
+
+# A House seat the Clerk lists every other cycle: Puerto Rico's Resident
+# Commissioner serves four years (48 U.S.C. 891), elected in 2020 and 2024.
+FOUR_YEAR_SEATS = {"PR": (2020, 2024)}
 
 # MIT Election Data and Science Lab, "U.S. Senate statewide 1976-2024"
 # (Harvard Dataverse, doi:10.7910/DVN/PEJ5QU).
@@ -418,6 +436,11 @@ def parse_statistics(lines, year, chambers=("house", "senate")):
         key, tokens = block
         block = None
         if not tokens:
+            if key[0] == "house":
+                # A district listed with no count: North Carolina's 9th in
+                # 2018, "See explanation below" (no result was certified).
+                entry = states.setdefault(state, {"house": {}, "senate": [], "footnotes": {}})
+                entry.setdefault("houseEmpty", []).append(key[1])
             return
         where = f"{year} {state} {key}"
         contest = _candidates(_pair(tokens, where), where, parties)
@@ -917,10 +940,11 @@ def _wiki_page(title):
         return None
 
 
-def house_page_sections(state, read=_wiki_page):
-    """``{district: section}`` from a state's 2024 House results page(s)."""
+def house_page_sections(state, read=_wiki_page, year=HOUSE_YEAR):
+    """``{district: section}`` from a state's House results page(s) for
+    *year*."""
     from .results import page_titles, house_sections, sub_articles
-    for title in page_titles(state, "H", cycle=HOUSE_YEAR):
+    for title in page_titles(state, "H", cycle=year):
         text = read(title)
         if text is None:
             continue
@@ -933,14 +957,77 @@ def house_page_sections(state, read=_wiki_page):
     return {}, None
 
 
+def senate_class_of(term_ends):
+    """The class of the Senate seat a term ending on *term_ends* belongs to:
+    a class's terms end every six years (class I in 2025 and 2031)."""
+    try:
+        year = int(str(term_ends)[:4])
+    except ValueError:
+        return None
+    for senate_class, ends in SENATE_TERM_ENDS.items():
+        if (year - int(ends[:4])) % 6 == 0:
+            return senate_class
+    return None
+
+
+def read_terms(fetch=_download):
+    """Who served in each seat from :data:`TERMS_FROM` to :data:`TERMS_TO`,
+    from congress-legislators' terms, keyed by the seat and never by a name:
+    ``{"house": {"TX-35": [term]}, "senate": {"GA-3": [term]}}``, each term
+    ``{"id", "name", "party", "start", "end", "how"?}``. One person's terms
+    in a row in one seat are one (an appointee who won the special)."""
+    out = {"house": {}, "senate": {}}
+    for url in LEGISLATORS_URLS:
+        for person in json.loads(fetch(url)):
+            ids = person.get("id") or {}
+            bioguide = ids.get("bioguide")
+            names = person.get("name") or {}
+            name = names.get("official_full") or " ".join(
+                n for n in (names.get("first"), names.get("last")) if n)
+            if not bioguide or not name:
+                continue
+            for term in person.get("terms") or []:
+                start, end = term.get("start") or "", term.get("end") or ""
+                if not start or not end or end <= TERMS_FROM or start >= TERMS_TO:
+                    continue
+                if term.get("type") == "rep":
+                    store, key = out["house"], f"{term.get('state')}-{term.get('district') or 0}"
+                elif term.get("type") == "sen" and term.get("class") in SENATE_TERM_ENDS:
+                    store, key = out["senate"], f"{term.get('state')}-{term['class']}"
+                else:
+                    continue
+                record = {"id": bioguide, "name": name, "party": term.get("party") or "",
+                          "start": start, "end": end}
+                if term.get("how") == "appointment":
+                    record["how"] = "appointment"
+                store.setdefault(key, []).append(record)
+    for store in out.values():
+        for key, terms in store.items():
+            terms.sort(key=lambda t: (t["start"], t["id"]))
+            joined = []
+            for term in terms:
+                last = joined[-1] if joined else None
+                if last and last["id"] == term["id"] and term["start"] <= last["end"]:
+                    last["end"] = max(last["end"], term["end"])
+                    continue
+                joined.append(dict(term))
+            store[key] = joined
+    return out
+
+
 def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=None):
-    """Read the Clerk's statistics and the second sources; the cache."""
+    """Read the Clerk's statistics for every year of :data:`YEARS`, the
+    second sources and the seats' terms; the cache.
+
+    ``house`` holds 2024's House results (the race's last election) and
+    ``houseEarlier`` the earlier years' by year; ``senate`` every election
+    to the class of a Senate seat on the ballot; ``seats`` the districts the
+    Clerk lists each year (0 for a seat elected at large), ``noResult`` the
+    districts it lists with no count, and ``terms`` who served each seat."""
     today = today or datetime.date.today().isoformat()
     clerk = {}
     for year in YEARS:
-        # Only 2024's House: the other years are read for their Senate seats.
-        clerk[year] = read_clerk(year, fetch=fetch, chambers=(
-            ("house", "senate") if year == HOUSE_YEAR else ("senate",)))
+        clerk[year] = read_clerk(year, fetch=fetch)
         log(f"  read the Clerk's {year} statistics: {len(clerk[year])} states and territories")
     try:
         mit = read_mit(fetch=fetch)
@@ -949,8 +1036,13 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
         log(f"  [warn] MIT's Senate returns unreadable ({exc}); the Senate is checked "
             "against Wikipedia alone")
         mit = {}
+    terms = read_terms(fetch=fetch)
+    log(f"  read congress-legislators' terms: {len(terms['house'])} House seats, "
+        f"{len(terms['senate'])} Senate seats")
 
-    cache = {"read": today, "years": list(YEARS), "house": {}, "senate": {}, "withheld": []}
+    cache = {"read": today, "years": list(YEARS), "house": {}, "senate": {}, "withheld": [],
+             "houseEarlier": {str(y): {} for y in YEARS if y != HOUSE_YEAR},
+             "seats": {}, "noResult": {}, "terms": terms}
     wiki_cache = {}
 
     def wiki(title):
@@ -971,29 +1063,42 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
                                       **({"page": page} if page else {}), "result": result})
 
     house_states = sorted({r["state"] for r in race_list if r["chamber"] == "House"})
-    for state in house_states:
-        contests = (clerk[HOUSE_YEAR].get(state) or {}).get("house") or {}
-        sections, page = house_page_sections(state, read=wiki)
-        for district, contest in sorted(contests.items()):
-            result = result_of(contest, clerk[HOUSE_YEAR][state]["footnotes"], HOUSE_YEAR, state)
-            if not result:
+    for year in YEARS:
+        store = cache["house"] if year == HOUSE_YEAR else cache["houseEarlier"][str(year)]
+        seats = cache["seats"].setdefault(str(year), {})
+        for state in house_states:
+            entry = clerk[year].get(state) or {}
+            contests = entry.get("house") or {}
+            empty = entry.get("houseEmpty") or []
+            if not contests and not empty:
+                if year in FOUR_YEAR_SEATS.get(state, YEARS):
+                    raise ClerkFormatError(f"the Clerk's {year} statistics list no House "
+                                           f"election in {state}")
                 continue
-            section = sections.get(district) or (sections.get(0) if len(contests) == 1 else None)
-            verdict, differences = wiki_check(result, section) if section else (None, [])
-            keep(cache["house"], f"{state}-{district}", result, verdict, differences,
-                 {"by": "wikipedia", "page": page}, page)
-        log(f"  {state}: {len(contests)} House contest(s) read")
+            seats[state] = sorted(set(contests) | set(empty))
+            for district in empty:
+                cache["noResult"].setdefault(str(year), []).append(f"{state}-{district}")
+            sections, page = house_page_sections(state, read=wiki, year=year)
+            for district, contest in sorted(contests.items()):
+                result = result_of(contest, entry["footnotes"], year, state)
+                if not result:
+                    continue
+                section = sections.get(district) or (sections.get(0) if len(contests) == 1 else None)
+                verdict, differences = wiki_check(result, section) if section else (None, [])
+                keep(store, f"{state}-{district}", result, verdict, differences,
+                     {"by": "wikipedia", "page": page}, page)
+            log(f"  {year} {state}: {len(contests)} House contest(s) read")
 
-    # Only the elections to the seats on the ballot: a seat's term ends when
-    # its class's does (senate_last).
-    wanted = {(r["state"], SENATE_TERM_ENDS.get(r.get("senateClass")))
-              for r in race_list if r["chamber"] == "Senate"}
+    # The elections to the classes of the seats on the ballot: a seat's
+    # term ends when its class's does (senate_last), and the strip holds
+    # every election to that class from 2018, specials included.
+    wanted = {(r["state"], r.get("senateClass")) for r in race_list if r["chamber"] == "Senate"}
     from .results import page_titles
-    for state, ends in sorted(wanted):
+    for state, senate_class in sorted(wanted, key=lambda w: (w[0], w[1] or 0)):
         for year in YEARS:
             entry = clerk[year].get(state) or {}
             for contest in entry.get("senate") or []:
-                if contest["termEnds"] != ends:
+                if senate_class_of(contest["termEnds"]) != senate_class:
                     continue
                 result = result_of(contest, entry.get("footnotes") or {}, year, state)
                 if not result:
@@ -1012,6 +1117,8 @@ def build(race_list, log=print, fetch=_download, read_wiki=_wiki_page, today=Non
                     checked = {"by": "wikipedia", "page": page}
                 keep(cache["senate"], f"{state}-{year}-{contest['term']}", result, verdict,
                      differences, checked, page)
+    for key in cache["noResult"]:
+        cache["noResult"][key].sort()
     return cache
 
 
@@ -1169,6 +1276,203 @@ def seated_since(race, result, record, snapshot):
     return found
 
 
+# ------------------------------------------------------------- the strip
+
+# How long after a Congress's first day a member may have been sworn in and
+# still be the one the election chose to begin it, and how long before its
+# end they may leave and still have served it out (SEATING_GRACE's reason).
+STRIP_GRACE = SEATING_GRACE
+
+
+def _strip_result(result, chamber):
+    """A cell's copy of a result: who won, by what, as the strip draws it."""
+    keys = ("year", "date", "kind", "margin", "rankedChoice", "allCandidates")
+    out = {k: result[k] for k in keys if k in result}
+    out["candidates"] = [{k: c[k] for k in ("name", "party", "share") if k in c}
+                         for c in result["candidates"]]
+    if chamber == "Senate":
+        out["term"] = result.get("term")
+    checked = result.get("checked") or {}
+    if checked.get("by") == "mit":
+        out["checkedBy"] = "mit"
+    elif checked.get("page"):
+        out["checkedBy"] = checked["page"]
+    return out
+
+
+def _holders(terms, start, end):
+    """Who served the seat between *start* and *end*, by congress-legislators'
+    terms: ``[{"id", "name", "party", "from"?, "until"?, "how"?}]``, a date
+    only where it is not the window's own (a member seated late, a death)."""
+    late = (datetime.date.fromisoformat(start) +
+            datetime.timedelta(days=STRIP_GRACE)).isoformat()
+    early = (datetime.date.fromisoformat(end) -
+             datetime.timedelta(days=STRIP_GRACE)).isoformat()
+    out = []
+    for term in terms or []:
+        if term["end"] <= start or term["start"] >= end:
+            continue
+        holder = {"id": term["id"], "name": term["name"], "party": term["party"]}
+        if term["start"] > late:
+            holder["from"] = term["start"]
+        if term["end"] < early:
+            holder["until"] = term["end"]
+        if term.get("how"):
+            holder["how"] = term["how"]
+        out.append(holder)
+    return out
+
+
+def _mark_winner(cell):
+    """Mark the holder who is the counted winner, seated with the term
+    (``winner``), so the page need not name them twice. A name compared
+    only to leave a holder unremarked, never to attribute a result
+    (:func:`_same_person`): anyone seated late, or who left early, is
+    named with their dates whoever they are."""
+    result = cell.get("result") or {}
+    if not result.get("candidates"):
+        return
+    winner = result["candidates"][0]["name"]
+    if result.get("rankedChoice") == "first-choices":
+        return                       # a lead in first choices is not a win
+    for holder in cell.get("holders") or []:
+        if "from" not in holder and "until" not in holder and _same_person(holder["name"], winner):
+            holder["winner"] = True
+
+
+def house_breaks(state, seats):
+    """``{year: change}``: each election from 2020 to 2026 that *state*
+    held on lines other than the election's before it. The map drawn after
+    the 2020 census was used from 2022 wherever a state has more than one
+    seat (a state elected at large in every year of *seats* has no lines to
+    change); every other change is ``districts.REDRAWN_BEFORE``'s, and 2026's
+    ``REDRAWN``'s. A change is ``{"kind": "census"}``, or ``{"kind":
+    "enacted" | "redrawn", "title", "drawnBy", "url"?}``."""
+    from .districts import REDRAWN, REDRAWN_BEFORE
+    out = {}
+    known = [seats.get(str(y), {}).get(state) for y in YEARS]
+    at_large = all(s == [0] for s in known if s is not None)
+    for year in (2020, 2022, 2024):
+        record = REDRAWN_BEFORE.get(state, {}).get(year)
+        if record:
+            out[year] = {"kind": "enacted", "title": record["title"],
+                         "drawnBy": record["drawnBy"], "url": record["url"]}
+        elif year == 2022 and not at_large:
+            out[year] = {"kind": "census"}
+    if state in REDRAWN:
+        after = REDRAWN[state]["after"]
+        out[2026] = {"kind": "redrawn", "title": after["title"],
+                     "drawnBy": after.get("drawnBy") or ""}
+    return out
+
+
+def _house_strip(race, cache):
+    state, district = race["state"], race.get("district") or 0
+    seats = cache.get("seats") or {}
+    terms = (cache.get("terms") or {}).get("house") or {}
+    breaks = house_breaks(state, seats)
+    withheld = {(w["seat"], w["year"]): w["why"] for w in cache.get("withheld") or []}
+    # Each year's lines: the eras between the breaks, the last one the
+    # 2026 map's unless 2026 broke it.
+    eras, current = [], None
+    for year in YEARS:
+        if current is None or year in breaks:
+            current = {"from": year, "to": year}
+            eras.append(current)
+        current["to"] = year
+    for era in eras:
+        era["same"] = not any(era["from"] < y <= 2026 for y in breaks)
+    cells = []
+    for year in YEARS:
+        era = next(i for i, e in enumerate(eras) if e["from"] <= year <= e["to"])
+        cell = {"year": year, "era": era}
+        listed = (seats.get(str(year)) or {}).get(state)
+        if listed is None:
+            cell["none"] = "no-election"
+            cells.append(cell)
+            continue
+        number = district if district in listed else (0 if listed == [0] else None)
+        if number is None:
+            cell["none"] = "no-district"
+            cells.append(cell)
+            continue
+        if number != district:
+            cell["atLarge"] = True
+        key = f"{state}-{number}"
+        cell["district"] = number
+        store = cache.get("house") if year == HOUSE_YEAR else \
+            (cache.get("houseEarlier") or {}).get(str(year))
+        result = (store or {}).get(key)
+        if result:
+            cell["result"] = _strip_result(result, "House")
+        elif (key, year) in withheld:
+            cell["withheld"] = withheld[(key, year)]
+        elif key in ((cache.get("noResult") or {}).get(str(year)) or []):
+            cell["none"] = "no-result"
+        else:
+            cell["withheld"] = "unchecked"
+        cell["holders"] = _holders(terms.get(key), f"{year + 1}-01-03", f"{year + 3}-01-03")
+        _mark_winner(cell)
+        cells.append(cell)
+    changes = [dict(change, year=year) for year, change in sorted(breaks.items())]
+    return {"eras": eras, "cells": cells, "breaks": changes}
+
+
+def _senate_strip(race, cache):
+    state, senate_class = race["state"], race.get("senateClass")
+    terms = (cache.get("terms") or {}).get("senate") or {}
+    found = []
+    for key, result in (cache.get("senate") or {}).items():
+        if key.startswith(state + "-") and senate_class_of(result.get("termEnds")) == senate_class:
+            found.append((result["date"], {"result": _strip_result(result, "Senate"),
+                                           "ends": result["termEnds"]}))
+    for item in cache.get("withheld") or []:
+        result = item.get("result") or {}
+        if item["seat"].startswith(state + "-") and result.get("termEnds") and \
+                senate_class_of(result["termEnds"]) == senate_class:
+            found.append((result["date"], {"withheld": item["why"], "ends": result["termEnds"],
+                                           "term": result.get("term")}))
+    cells = []
+    for date, item in sorted(found, key=lambda f: f[0]):
+        # The Clerk's year, not the day's: Georgia's 2020 special was
+        # decided in its runoff of January 5, 2021.
+        year = (item.get("result") or {}).get("year") or int(date[:4])
+        cell = {"year": year, "era": 0}
+        ends = item.pop("ends")
+        cell.update(item)
+        # Who served the term it chose: the winner is seated within days
+        # of a special, on January 3 after a regular election.
+        start = date if (item.get("result") or {}).get("term") == "unexpired" or \
+            item.get("term") == "unexpired" else f"{year + 1}-01-03"
+        cell["holders"] = _holders(terms.get(f"{state}-{senate_class}"), start, ends)
+        _mark_winner(cell)
+        cells.append(cell)
+    return {"eras": [{"from": YEARS[0], "to": YEARS[-1], "same": True}],
+            "cells": cells, "breaks": []}
+
+
+def seat_strip(race, cache):
+    """The seat's elections from 2018 to 2024 (VISUALS-33), as a race's
+    seat fold draws them: ``{"eras", "cells", "breaks"}``, or None where the
+    cache holds no strip (one read before the strip was).
+
+    A House district's elections are grouped by the lines they were fought
+    on (``eras``), each era saying whether it is the lines this district is
+    elected on in 2026 (``same``): a result on other lines is the district
+    of that number on that map, labelled as such, never this district's
+    (rule 90). A cell is ``{"year", "era", "district"?, "result" |
+    "withheld" | "none", "holders"}``; *none* is "no-election" (Puerto
+    Rico's four-year seat), "no-district" (no district of that number on
+    that map) or "no-result" (the Clerk lists none: North Carolina's 9th in
+    2018). A Senate seat's lines never change; its cells are the elections
+    to its class, specials included."""
+    if not cache or "seats" not in cache:
+        return None
+    if race["chamber"] == "House":
+        return _house_strip(race, cache)
+    return _senate_strip(race, cache)
+
+
 def apply(races, cache, record=None, snapshot=None):
     """Attach ``lastElection`` to each race: the seat's last result as the
     page shows it, ``{"redrawn": True}`` for a district redrawn since, or
@@ -1176,14 +1480,23 @@ def apply(races, cache, record=None, snapshot=None):
     A result whose seat has been filled since by a special election or an
     appointment carries ``seatedSince`` (:func:`seated_since`): the result
     is then the last *regular* election, and the page says so.
+    Each race also carries ``seatHistory``, the seat's elections from 2018
+    (:func:`seat_strip`), where the cache holds them.
     Returns how many races carry a result."""
     from .districts import REDRAWN
     if not cache:
         return 0
     shown = 0
-    withheld = {w["seat"]: w for w in cache.get("withheld") or []}
+    # The House's withheld results by seat are 2024's; the earlier years'
+    # are the strip's (Senate keys carry their year).
+    withheld = {w["seat"]: w for w in cache.get("withheld") or []
+                if w.get("year") == HOUSE_YEAR or not re.fullmatch(r"[A-Z]{2}-\d+", w["seat"])}
     for race in races:
         race.pop("lastElection", None)
+        race.pop("seatHistory", None)
+        strip = seat_strip(race, cache)
+        if strip:
+            race["seatHistory"] = strip
         if race["chamber"] == "House":
             if race["state"] in REDRAWN:
                 race["lastElection"] = {"redrawn": True, "year": HOUSE_YEAR}
