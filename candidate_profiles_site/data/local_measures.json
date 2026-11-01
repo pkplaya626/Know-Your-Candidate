@@ -1956,10 +1956,10 @@
    "measures": [],
    "own": {
     "status": "notFound",
-    "why": "No official list of Nassau County's November 3, 2026 questions was found: the Board of Elections' pages link no 2026 general election sample ballot."
+    "why": "No official list of Nassau County's November 3, 2026 questions was found: the Board of Elections' pages link no 2026 general election sample ballot, and its 2026 candidate list names candidates only."
    },
    "cities": [],
-   "notes": "No city of 250,000 or more lies in Nassau County. No official list of Nassau County (or countywide district) questions for November 3, 2026 was found. Read: the Board of Elections pages on nassaucountyny.gov (/566/Board-of-Elections, /386/Board-of-Elections, /580/Voting-Info-Services, /2303/Election-Information, /5857/Public-Notices), which link no 2026 general election sample ballot; the 2026 general election candidate list (candidates only). Web searches for a 2026 Nassau sample ballot or county proposition found only an older sample ballot (DocumentCenter/View/35481, not 2026) and no 2026 county question. Not recorded as 'none'."
+   "notes": "No city of 250,000 or more lies in Nassau County. No official list of Nassau County (or countywide district) questions for November 3, 2026 was found. Read: the Board of Elections pages on nassaucountyny.gov (/566/Board-of-Elections, /386/Board-of-Elections, /580/Voting-Info-Services, /2303/Election-Information, /5857/Public-Notices), which link no 2026 general election sample ballot; the 2026 general election candidate list (candidates only). Web searches for a 2026 Nassau sample ballot or county proposition found only an older sample ballot (DocumentCenter/View/35481, not 2026) and no 2026 county question. Not recorded as 'none'. Looked again on 2026-11-01 (a second search): /566/Board-of-Elections, /2303/Election-Information, /5857/Public-Notices, /580/Voting-Info-Services and the county's home page, read with the project's own user agent (all HTTP 200), link a 'Candidate List - General Election 2026' (DocumentCenter/View/54522, 'Candidate List - 2026 *This candidate list is subject to change', candidates only, no proposal), the 2026 early-voting flyer, the 2026 elected officials list, and the state's voter lookup; no sample ballot, proposal or referendum. A search of nassaucountyny.gov finds only the older sample ballot (DocumentCenter/View/35481, naming candidates not on the 2026 list). Still 'not found', never 'none'."
   },
   "36005": {
    "state": "NY",
