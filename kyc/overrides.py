@@ -1280,6 +1280,24 @@ GUIDE_NAME_FORMS = {
         "'RussIsForUS.com' and is 'furnished by David Russ Is For US'; the filing RUSS, DAVID "
         "HONORABLE (H2OR01240) names that site, russisforus.com, as its campaign's (FEC "
         "Form 1)"),
+    ("UT", "Riley Owen"): (
+        "person:FEC_H6UT01244",
+        "Utah's Voter Information Pamphlet, page 9 (read 2026-11-01), headed 'Congressional "
+        "District 1' and 'Riley Owen', prints 'info@utahriley.com' and 'utahriley.com'; the "
+        "filing OWEN, RILEY MONTGOMERY (H6UT01244) is the only Owen in UT-1, and its own "
+        "committee, C00940411, is 'RILEY OWEN FOR UTAH' (FEC Form 1)"),
+    ("UT", "Kent S. Udell"): (
+        "person:FEC_H6UT03182",
+        "Utah's Voter Information Pamphlet, page 16 (read 2026-11-01), headed 'Congressional "
+        "District 3' and 'Kent S. Udell', prints 'kentudell.com'; the filing UDELL, KENT DR. "
+        "(H6UT03182) names that site, KENTUDELL.COM, as its campaign's, and its committee "
+        "C00938811 is 'KENT STEWART UDELL FOR CONGRESS' (FEC Form 1)"),
+    ("UT", "Robert Moesinger"): (
+        "person:FEC_H6UT02531",
+        "Utah's Voter Information Pamphlet, page 13 (read 2026-11-01), headed 'Congressional "
+        "District 2' and 'Robert Moesinger', prints 'https://www.improveourelections.org/'; "
+        "the filing MOESINGER, ROBERT MICHAEL (H6UT02531) names that site as its campaign's, "
+        "and its committee C00944306 is 'ROBERT MOESINGER FOR CONGRESS' (FEC Form 1)"),
 }
 
 
@@ -1332,6 +1350,11 @@ OTHERS_IN_FRAME = "others in the frame"
 # tractor (an eleventh), Lauren Jewett by a seal (a fifteenth) and Jordan
 # Herrera in a vehicle's hatch (a thirteenth) do not.
 NOT_A_PORTRAIT = {
+    # Utah's Voter Information Pamphlet, page 13 (read 2026-11-01), hosted
+    # here as the guide's file (guide_photos, rule 101).
+    "photos/090c1a605a8a18bd1456.jpg":
+        ("2026-11-01", "Robert Moesinger (UT-2): another person's long hair at the lower left "
+                       "edge, cropped from a group photograph", OTHERS_IN_FRAME),
     "https://kaileebuller.com/wp-content/uploads/2026/03/Buller.jpg":
         ("2026-10-02", "a family photograph: four people in the snow"),
     "https://rickbrattin.com/wp-content/uploads/2026/02/Brattin-extended-scaled.png":
