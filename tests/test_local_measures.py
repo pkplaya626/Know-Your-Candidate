@@ -264,17 +264,20 @@ class TheRules(Hosts, unittest.TestCase):
         found = local_measures.problems(data)
         self.assertTrue(any("48029" in p and "not an official source" in p for p in found), found)
 
-    def test_another_bodys_question_with_the_citys_says_who_votes(self):
-        # Los Angeles's Measure SC amends the City Charter, and the Registrar
-        # lists it under the school district, whose voters decide it.
+    def test_another_bodys_question_is_never_a_citys(self):
+        # Los Angeles's Measure SC amends the City Charter, but the Registrar
+        # prints it under the school district's own heading: listed with the
+        # city's questions it made their count eight against the list's seven,
+        # and a note saying who votes on it does not make it the city's.
         data = cache()
         data["counties"]["48030"]["measures"].append(measure(
             jurisdiction={"kind": "city", "name": "Austin Independent School District",
-                          "place": "4805000"}, designation="Proposition B"))
+                          "place": "4805000"}, designation="Proposition B",
+            voters="Listed by the Clerk under the school district's own heading."))
         found = local_measures.problems(data)
-        self.assertTrue(any("48030 City of Austin" in p and "'voters'" in p for p in found), found)
-        data["counties"]["48030"]["measures"][-1]["voters"] = (
-            "Listed by the Clerk under the school district, whose voters decide it.")
+        self.assertTrue(any("48030 City of Austin" in p and "Austin Independent School District" in p
+                            and "listed as the city's" in p for p in found), found)
+        data["counties"]["48030"]["measures"][-1]["jurisdiction"]["name"] = "City of Austin"
         self.assertEqual(local_measures.problems(data), [])
 
     def test_an_unused_host_is_reported(self):
