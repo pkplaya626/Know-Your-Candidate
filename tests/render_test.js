@@ -22,14 +22,16 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
  * and nothing reaches the network: the pages load nothing from another host
  * (CLAUDE.md), and a stylesheet is nothing a test reads. *served* lists the
  * site's files a page asked for. */
-function siteResources(served, refuse) {
+function siteResources(served, refuse, held) {
   return {
-    interceptors: [requestInterceptor((request) => {
+    interceptors: [requestInterceptor(async (request) => {
       const u = new URL(request.url);
       if (u.hostname !== "kyc.local") return new Response("", { status: 403 });
       if (/\.css$/.test(u.pathname)) return new Response("", { headers: { "Content-Type": "text/css" } });
       const file = path.join(SITE, ...decodeURIComponent(u.pathname).split("/").filter(Boolean));
       served.push(u.pathname + u.search);
+      // opts.hold: a file that arrives only when the suite releases it.
+      if (held && held.match.test(u.pathname)) await held.until;
       if (refuse && refuse.test(u.pathname)) return new Response("", { status: 503 });
       if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return new Response("", { status: 404 });
       return new Response(fs.readFileSync(file), {
@@ -539,9 +541,11 @@ function buildPage(page, opts) {
   const refuse = blocked.length
     ? new RegExp((opts.refuse ? "(?:" + opts.refuse.source + ")|" : "") + "(?:" + blocked.join("|") + ")$")
     : opts.refuse;
+  let release = () => {};
+  const held = opts.hold ? { match: opts.hold, until: new Promise((r) => { release = r; }) } : null;
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    resources: siteResources(served, refuse),
+    resources: siteResources(served, refuse, held),
     url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -572,7 +576,7 @@ function buildPage(page, opts) {
   });
 
   const { window } = dom;
-  const packed = { window, D: window.document, errors, served,
+  const packed = { window, D: window.document, errors, served, release: () => release(),
     sources: sources.map((m) => m[1].split("?v=")[0]) };
 
   // Wait for jsdom's own DOMContentLoaded rather than dispatching one. An
@@ -16855,6 +16859,79 @@ async function testLazyStateData() {
     });
     early.window.close();
     first.window.close();
+  }
+  {
+    // A link to one question (the search's answers link
+    // states/<st>.html#measure-<ST>-<n>, rule 97) lands on it in the plain
+    // list, and again on it drawn in full once data/measures.js is in, held
+    // there while the page grows; a reader who moved first is left where
+    // they are. Before, it landed nowhere and left the reader at the top
+    // (PR #172 review). jsdom lays nothing out, so the jumps are counted.
+    const file = fs.readFileSync(path.join(SITE, "states", "ca.html"), "utf8");
+    const want = /<li data-measure="1" id="measure-CA-1">/.test(file) ? "measure-CA-1" : null;
+    const open = async (hash) => {
+      const sizes = [];
+      const jumps = [];
+      const page = await buildPage("states/ca.html", { early: true, hash, hold: /\/data\/measures\.js$/,
+        setup: (w) => {
+          w.ResizeObserver = function (cb) {
+            const me = { cb, on: false };
+            sizes.push(me);
+            this.observe = () => { me.on = true; };
+            this.disconnect = () => { me.on = false; };
+          };
+          w.HTMLElement.prototype.scrollIntoView = function () {
+            jumps.push({ id: this.id, inPage: this.isConnected, full: this.classList.contains("measure") ||
+              !!this.querySelector(".measure") });
+          };
+        } });
+      await settle(30);
+      const grow = () => sizes.forEach((o) => { if (o.on) o.cb([]); });
+      return { page, jumps, grow };
+    };
+    const arrived = (page) => until(() => page.window.kycMeasures !== undefined &&
+      !!page.D.querySelector("#measures .measure"), 8000);
+    const one = await open("#" + want);
+    const before = one.jumps.slice();
+    one.page.release();
+    await arrived(one.page);
+    await settle(30);
+    const after = one.jumps.slice(before.length);
+    one.grow();
+    const regrown = one.jumps.slice(before.length + after.length);
+    const section = await open("#measures");
+    section.page.release();
+    await arrived(section.page);
+    await settle(30);
+    section.grow();
+    const moved = await open("#" + want);
+    const movedBefore = moved.jumps.length;
+    moved.page.window.dispatchEvent(new moved.page.window.WheelEvent("wheel", { deltaY: 100 }));
+    moved.page.release();
+    await arrived(moved.page);
+    await settle(30);
+    moved.grow();
+    suite("states/ca.html#measure-CA-1 — a link to a question lands on it while the questions load", () => {
+      check("no page errors", [one, section, moved].every((o) => o.page.errors.length === 0),
+        [one, section, moved].flatMap((o) => o.page.errors).join(" | "));
+      check("the plain list carries the question's id", !!want);
+      check("it jumps to the question in the plain list, before the file is in",
+        before.length === 1 && before[0].id === want && before[0].inPage && !before[0].full,
+        JSON.stringify(before));
+      check("and to the question drawn in full once it is in, never to the plain one gone",
+        after.length >= 1 && after.every((j) => j.id === want && j.inPage && j.full), JSON.stringify(after));
+      check("held there as the page goes on growing", regrown.length === 1 && regrown[0].id === want &&
+        regrown[0].inPage && regrown[0].full, JSON.stringify(regrown));
+      check("the fragment is dropped from the address", one.page.window.location.hash === "",
+        one.page.window.location.hash);
+      const last = section.jumps[section.jumps.length - 1] || {};
+      check("a link to the section is held on the section drawn in full",
+        section.jumps.length >= 3 && last.id === "measures" && last.inPage && last.full,
+        JSON.stringify(section.jumps));
+      check("a reader who moved before the file arrived is left where they are",
+        movedBefore === 1 && moved.jumps.length === 1, JSON.stringify(moved.jumps));
+    });
+    [one, section, moved].forEach((o) => o.page.window.close());
   }
   {
     const failed = await buildPage("states/ca.html", { block: ["data/odds.js"] });

@@ -667,7 +667,11 @@ def measures_static(code, rec, past, summary=None, pad="                "):
         out = [f'{pad}    <ol class="share-list" data-measures="{kind}">']
         for i, m in entries:
             title = f": {_e(m['title'])}" if m.get("title") else ""
-            out.append(f'{pad}        <li data-measure="{i}">{_e(m["designation"])}{title} '
+            # The id the full section gives the question (KYC.ballot's
+            # measureItem), so a link to it (the search's answers, rule 97)
+            # lands on it before data/measures.js is in.
+            out.append(f'{pad}        <li data-measure="{i}" id="{_e(f"measure-{code}-{i}")}">'
+                       f'{_e(m["designation"])}{title} '
                        f'({_out_link(m["source"], "source")})</li>')
         return out + [f"{pad}    </ol>"]
 
