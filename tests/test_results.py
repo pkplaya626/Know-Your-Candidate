@@ -1412,11 +1412,12 @@ LA5_PEOPLE = {
 LA5_ABSENT = ("SMITH, JOHN", "H6LA05199")
 
 
-def la5_box(title, *rows):
+def la5_box(title, *rows, total=None):
     """A results box shaped like the real LA-5 one on 2026-10-02.
 
     Each row is ``(key, votes, won)``; ``votes=None`` is the blank count the
-    box carries until election night.
+    box carries until election night. *total* is the box's own total line,
+    blank by default.
     """
     out = ["{{Election box begin no change", f"| title={title}", "}}"]
     for key, votes, won in rows:
@@ -1428,7 +1429,9 @@ def la5_box(title, *rows):
                 f" | votes      = {'' if votes is None else format(votes, ',')}",
                 " | percentage = ",
                 "}}"]
-    out += ["{{Election box total no change", "| votes = ", "}}", "{{Election box end}}"]
+    out += ["{{Election box total no change",
+            f"| votes = {'' if total is None else format(total, ',')}", "}}",
+            "{{Election box end}}"]
     return "\n".join(out)
 
 
@@ -1526,6 +1529,60 @@ class TestOpenPrimaryElectionNight(NoGap):
         out = self.statuses(cache)
         self.assertEqual((out["echols"], out["moore"], out["cathey"]),
                          ("elected", "defeated", "defeated"))
+
+    def test_a_majority_is_of_every_vote_the_table_counts(self):
+        # Louisiana elects outright only with a majority of the votes cast.
+        # A table that names three of its candidates and counts the rest in
+        # its total gives the leader 55% of the named rows and 46% of the
+        # vote: that is a December 12 general election, not a win.
+        rows = [("echols", 55000, True), ("moore", 30000, False), ("cathey", 15000, False)]
+        logged = []
+        cache = self.run_build(datetime.date(2026, 11, 4),
+                               la5_box(LA5_NOVEMBER, *rows, total=120000), log=logged)
+        self.assertEqual(cache["races"], {})
+        self.assertTrue(any("[warn] H-LA-05-2026" in line for line in logged))
+        # The same table whose total is its rows' sum elects the leader.
+        cache = self.run_build(datetime.date(2026, 11, 4),
+                               la5_box(LA5_NOVEMBER, *rows, total=100000))
+        out = self.statuses(cache)
+        self.assertEqual((out["echols"], out["moore"], out["cathey"]),
+                         ("elected", "defeated", "defeated"))
+
+    def test_a_marked_top_two_is_in_the_december_round_whatever_the_total(self):
+        cache = self.run_build(datetime.date(2026, 11, 4),
+                               la5_box(LA5_NOVEMBER, *TOP_TWO, total=100000))
+        out = self.statuses(cache)
+        self.assertEqual((out["echols"], out["moore"], out["cathey"]),
+                         ("runoff", "runoff", "defeated"))
+
+    def test_the_december_round_reads_as_louisianas_general_election(self):
+        # The status the results give the two is "runoff"; the words a
+        # reader sees are the race's own (share.py and KYC.raceStatus): the
+        # December 12 general election, never Georgia's runoff (rule 75).
+        from kyc import races as races_mod, share
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO))
+        race = {"id": "H-LA-05-2026", "state": "LA", "chamber": "House", "year": 2026}
+        race.update(races_mod.ballot_kind(race))
+        self.assertEqual((race["primaryKind"], race["generalRunoff"]), ("open", "2026-12-12"))
+        filer = {"id": LA5_PEOPLE["moore"][3], "fecCandidateId": LA5_PEOPLE["moore"][3],
+                 "isCandidate": True, "state": "LA", "chamber": "House", "districtNum": 5,
+                 "party": "Democrat", "raceId": "H-LA-05-2026"}
+        winner = {"id": LA5_PEOPLE["echols"][3], "fecCandidateId": LA5_PEOPLE["echols"][3],
+                  "isCandidate": True, "state": "LA", "chamber": "House", "districtNum": 5,
+                  "party": "Republican", "raceId": "H-LA-05-2026"}
+        results.apply_cache([filer, winner], cache)
+        self.assertEqual(filer["raceStatus"], "runoff")
+        races = {race["id"]: race}
+        self.assertEqual(share.status_words(filer, {}, races, "2026-11-05"),
+                         "In the December 12 general election")
+        self.assertEqual(share.status_words(filer, {}, races, "2026-12-13"),
+                         "Ran in the December 12 general election: awaiting result")
+        # A majority on November 3 is a win in November.
+        cache = self.run_build(datetime.date(2026, 11, 4), la5_box(
+            LA5_NOVEMBER, ("echols", 55000, True), ("moore", 45000, False), total=100000))
+        results.apply_cache([winner], cache)
+        self.assertEqual(share.status_words(winner, {}, races, "2026-11-05"),
+                         "Elected in November")
 
     def test_winners_that_are_not_a_complete_result_decide_nothing(self):
         for rows in (

@@ -1384,17 +1384,20 @@ def _open_rounds(boxes, runoff_held=True):
 
 
 def _first_round_decided(rows):
-    """True when an open primary's marked winners are a complete result."""
+    """True when an open primary's marked winners are a complete result.
+
+    One marked winner is elected only with a majority of every vote the
+    table counts (:func:`_majority`: its total, a line naming no one, a
+    withdrawn candidate's votes), never of the named rows alone, as in
+    November everywhere else (rule 63): a leader on 46% of a table that
+    names some of its candidates and counts the rest in its total would
+    otherwise read "Elected" over a December 12 general election."""
     winners = {r["name"] for r in rows if r["won"] and not r["withdrawn"]}
     if len(winners) == 2:
         return True
     if len(winners) != 1:
         return False
-    votes = [r.get("votes") for r in rows]
-    if any(v is None for v in votes) or not sum(votes):
-        return False
-    top = max(r["votes"] for r in rows if r["name"] in winners)
-    return 2 * top > sum(votes)
+    return _majority(rows, winners)
 
 
 def _losers(primaries, runoffs):
