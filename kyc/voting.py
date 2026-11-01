@@ -541,6 +541,19 @@ LIVE = "live"
 UNKNOWN = "unknown"
 
 
+def gone_everywhere(host, doh=None):
+    """Whether *host* has no address at both public resolvers (dns.google
+    and Cloudflare, ``localsites.doh``), not only here. Rule 35: a lookup
+    that fails on this machine is not a dead name. The rehearsal of rule
+    103 (2026-11-01) found this machine's resolver failing for every mt.gov
+    name while both public resolvers answered, and Montana's three voting
+    links would have been called dead and left off its page."""
+    if doh is None:
+        from .localsites import doh
+    answers = doh(host, None)
+    return len(answers) == 2 and all(a in ("nxdomain", "noaddress") for a in answers)
+
+
 def _status(url, timeout=25):
     """One request: ``(HTTP status, the URL it ended on)``, ``("nxdomain",
     url)``, or ``(None, url)`` for inconclusive."""
@@ -566,7 +579,8 @@ def _status(url, timeout=25):
             try:
                 socket.getaddrinfo(_host(url), 443)
             except OSError:
-                return "nxdomain", url
+                if gone_everywhere(_host(url)):
+                    return "nxdomain", url
         return None, url
     except (OSError, ValueError):
         return None, url

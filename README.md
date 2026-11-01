@@ -358,6 +358,20 @@ They are gone:
 
 CI fails if any of them come back.
 
+### Who the pipeline's requests say they are
+
+Every request the pipeline sends says who sends it: `kyc/agent.py`'s
+`USER_AGENT`, the project's name and its public repository (rule 103). Until
+2026-11-01 ten readers and one tool sent a desktop Chrome's string, and two
+asked again as a browser when refused; both fallbacks are gone. A server that
+refuses this project concludes nothing: the reader keeps its last good read
+and says so - an office page's confirmation stands, dated, while the page
+cannot be read; a voting link that answers with a challenge is "could not be
+confirmed", never opened or dead; a court whose page answers with a bot
+wall's keeps its last roster - and a page a reader needs is read by hand.
+`tests/test_agent.py` fails on a browser's product token in any User-Agent
+string in `kyc/`, `tools/` or `.github/`.
+
 ### Accessibility
 
 - No `user-scalable=no`. Blocking pinch-zoom fails WCAG 1.4.4.

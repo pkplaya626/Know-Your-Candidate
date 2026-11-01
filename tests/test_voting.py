@@ -119,6 +119,14 @@ class TestLiveness(unittest.TestCase):
         for code in (403, 429, 503, None):
             self.assertEqual(self.check({u: [(code, u)]})[u], voting.UNKNOWN)
 
+    def test_a_name_is_gone_only_where_the_public_resolvers_say_so(self):
+        # Rule 35: this machine's resolver failed every mt.gov name on
+        # 2026-11-01 while dns.google answered.
+        self.assertFalse(voting.gone_everywhere("app.mt.gov", doh=lambda h, g: ("exists",)))
+        self.assertFalse(voting.gone_everywhere("x.gov", doh=lambda h, g: (None,)))
+        self.assertFalse(voting.gone_everywhere("x.gov", doh=lambda h, g: ("nxdomain", "servfail")))
+        self.assertTrue(voting.gone_everywhere("x.gov", doh=lambda h, g: ("nxdomain", "noaddress")))
+
     def test_a_challenge_that_answers_success_is_not_live(self):
         # Rule 103: asked as this project, a firewall may answer 202 with no
         # body, or a bot wall's page under 200; neither opened the link.
