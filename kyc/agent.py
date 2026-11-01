@@ -39,11 +39,22 @@ WALL_TITLES = (r"(?:Access Denied|Just a moment|Not allowed|Attention Required|"
                r"One more step|Verifying you are human|Radware Bot Manager|"
                r"Bot Verification|DDoS-Guard|Sucuri WebSite Firewall)\b")
 _WALL_TITLE = re.compile(r"^\s*" + WALL_TITLES, re.I)
+_WALL_PAGE = re.compile(r"<title[^>]*>\s*" + WALL_TITLES, re.I)
 
 
 def turned_away(title):
     """Whether a page's title is a bot wall's or a challenge's."""
     return bool(_WALL_TITLE.search(title or ""))
+
+
+def walled(page):
+    """Whether a page that answered says nothing of what was asked: an empty
+    body (coag.gov's firewall answered HTTP 202 and nothing else,
+    2026-11-01) or a bot wall's or challenge's page. *page* is markup, as
+    text or as its first bytes."""
+    if isinstance(page, (bytes, bytearray)):
+        page = bytes(page).decode("utf-8", "replace")
+    return not (page or "").strip() or bool(_WALL_PAGE.search(page))
 
 
 def browser_tokens(agent):

@@ -190,9 +190,9 @@ def weigh(url, timeout=30, headers=None):
         if wait > 0:
             time.sleep(wait)
         _LAST[host] = time.monotonic()
-    agent = WIKIMEDIA_AGENT if host.endswith("wikimedia.org") else USER_AGENT
+    sender = WIKIMEDIA_AGENT if host.endswith("wikimedia.org") else USER_AGENT
     request = urllib.request.Request(url, headers=dict({
-        "User-Agent": agent, "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8",
+        "User-Agent": sender, "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*;q=0.8",
         "Range": "bytes=0-524287"}, **(headers or {})))
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
@@ -210,7 +210,10 @@ def weigh(url, timeout=30, headers=None):
                 rest = response.read(MAX_PORTRAIT_BYTES * 20)
                 total = len(head) + len(rest)
     except urllib.error.HTTPError as exc:
-        return (False if exc.code in (404, 410) else None), None
+        # A 404 from another host (a redirect to a bot wall's) says nothing
+        # of the file (rule 8).
+        own = (urllib.parse.urlsplit(exc.geturl() or url).hostname or "").lower() == host
+        return (False if exc.code in (404, 410) and own else None), None
     except Exception:
         return None, None
     size = _image_size(head)

@@ -147,11 +147,23 @@ def check(cid, judges):
     return sorted(judges, key=lambda j: not j["chief"])
 
 
+def _read_saying(read, cid, url):
+    """*url*'s page, or :class:`TerritorialCourtError` where it says nothing
+    (``agent.walled``: a 202 with no body, a bot wall's page). Asked as this
+    project, never as a browser (rule 103), a challenge in a roster's place
+    would have read as a court naming no judge, and in a judge's page's
+    place as one judge fewer (rule 8)."""
+    page = read(url)
+    if agent.walled(page):
+        raise TerritorialCourtError(f"{cid}: {url} answered with a bot wall's page or nothing")
+    return page
+
+
 def read_court(cid, read=None, live=False):
     """One court's district judges, as its own site lists them."""
     read = read or _get
     court = COURTS[cid]
-    page = read(court["url"])
+    page = _read_saying(read, cid, court["url"])
     if court["recipe"] == "lines":
         judges = read_lines(page)
     elif court["recipe"] == "banner":
@@ -165,7 +177,7 @@ def read_court(cid, read=None, live=False):
         for link in links:
             if live:
                 time.sleep(PAUSE)
-            judge = read_judge_page(read(base + link))
+            judge = read_judge_page(_read_saying(read, cid, base + link))
             if judge:
                 judges.append(dict(judge, page=base + link))
     return check(cid, judges)

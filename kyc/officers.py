@@ -477,7 +477,6 @@ def acting(name, text):
 # How long to wait after each failed request for an office's page before it
 # is tried again (tests set these to nothing).
 _RETRY_WAITS = (2, 10)
-_BOT_WALL = re.compile(r"<title[^>]*>\s*" + agent.WALL_TITLES, re.I)
 
 
 def says_nothing(page):
@@ -485,7 +484,7 @@ def says_nothing(page):
     wall's, a challenge with no body (coag.gov's firewall answered the
     refresh's runner HTTP 202 and nothing else, 2026-11-01), or a page that
     draws itself with JavaScript (Nevada's secretary of state)."""
-    return bool(_BOT_WALL.search(page)) or len(visible_text(page)) < 300
+    return agent.walled(page) or len(visible_text(page)) < 300
 
 
 def _get_answered(url):

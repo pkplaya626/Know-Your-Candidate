@@ -553,6 +553,8 @@ def _status(url, timeout=25):
         # (kyc/tls.py), never by checking less.
         with urllib.request.urlopen(request, timeout=timeout,
                                     context=tls.context()) as response:
+            if turned_away(response.status, response.read(_HEAD_BYTES)):
+                return None, response.geturl()
             return response.status, response.geturl()
     except urllib.error.HTTPError as exc:
         return exc.code, exc.geturl() or url
@@ -572,6 +574,18 @@ def _status(url, timeout=25):
 
 def _host(url):
     return (urllib.parse.urlsplit(url or "").hostname or "").lower()
+
+
+# Enough of a page to hold its <title>.
+_HEAD_BYTES = 32768
+
+
+def turned_away(status, head):
+    """Whether a success says nothing of the page (rule 8): a 202, an empty
+    body, or a bot wall's page under a 200 (``agent.walled``). Such a link
+    is "unknown", never "live": the page says "each link opened" only of a
+    link that opened (rule 79)."""
+    return status == 202 or agent.walled(head)
 
 
 def check_links(urls, status=_status, pause=1.0, sleep=time.sleep):
