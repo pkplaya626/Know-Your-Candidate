@@ -5750,6 +5750,27 @@ button.local-county-link {
 .find-race-statewide { margin: 0; font-size: var(--t-sm); line-height: 1.6; }
 .find-race-kicker { font-weight: 700; }
 .find-race-more { color: var(--text-muted); }
+/* The jump bar (kyc-state.js initJumpBar): fixed under the sticky header
+ * once "Find your race" has scrolled away, so showing it moves nothing;
+ * under the drawer's scrim. While it shows, a jump lands below it too. */
+.jumpbar {
+  position: fixed;
+  top: var(--header-h);
+  left: 0;
+  right: 0;
+  z-index: 43;
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: var(--s-1) var(--s-4);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-1);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.08);
+}
+.jumpbar[hidden] { display: none; }
+.jumpbar .select { flex: 1 1 auto; min-width: 0; min-height: 40px; font-size: 16px; }
+.jumpbar-back { flex: 0 0 auto; min-height: 40px; white-space: nowrap; }
+html.has-jumpbar { scroll-padding-top: calc(var(--header-h) + var(--jump-h, 49px) + var(--s-2)); }
 .race-fold-bar {
   display: flex;
   flex-wrap: wrap;

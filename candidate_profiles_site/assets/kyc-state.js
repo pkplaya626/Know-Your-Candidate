@@ -152,11 +152,80 @@
       option.textContent = voting.textContent.trim();
       group.insertBefore(option, group.firstChild);
     }
+    initJumpBar();
     foldLayout();
     var query = foldQuery();
     if (query) {
       if (query.addEventListener) query.addEventListener("change", foldLayout);
       else if (query.addListener) query.addListener(foldLayout);
+    }
+  }
+
+  /* -------------------------------------------- the jump bar on a phone */
+
+  /* Once "Find your race" has scrolled away, getting to a second race meant
+   * scrolling back up as much as fifteen screens. A bar under the header
+   * then holds the same select and a way back to the block. It is fixed,
+   * so showing it moves nothing on the page, and while it shows the page's
+   * scroll-padding grows by its height, so every jump lands below it (rule
+   * 44). Not on a screen shorter than 500px (a phone on its side), where
+   * the header and the bar would take a third of it. Nothing is stored. */
+  var SHORT_QUERY = "(max-height: 499.98px)";
+  var jumpBar = null;
+
+  function initJumpBar() {
+    var block = el("find-race");
+    var select = el("raceJumpSelect");
+    if (!block || !select) return;
+    var bar = doc.createElement("nav");
+    bar.className = "jumpbar";
+    bar.setAttribute("aria-label", "Jump to");
+    bar.hidden = true;
+    // The block's own select, copied once it holds every option (the
+    // voting block's is added in initFold): one list, two places.
+    var copy = select.cloneNode(true);
+    copy.id = "raceJumpBar";
+    copy.setAttribute("aria-label", "Jump to a race or section");
+    copy.options[0].textContent = "Jump to…";
+    bar.appendChild(copy);
+    var back = doc.createElement("button");
+    back.type = "button";
+    back.className = "btn jumpbar-back";
+    back.setAttribute("data-jump-find", "");
+    back.innerHTML = '<span aria-hidden="true">↑</span> Find your race';
+    bar.appendChild(back);
+    el("stateContent").appendChild(bar);
+    jumpBar = { bar: bar, past: false, short: null };
+    try {
+      jumpBar.short = global.matchMedia ? global.matchMedia(SHORT_QUERY) : null;
+    } catch (e) {
+      jumpBar.short = null;
+    }
+    if (jumpBar.short) {
+      if (jumpBar.short.addEventListener) jumpBar.short.addEventListener("change", showJumpBar);
+      else if (jumpBar.short.addListener) jumpBar.short.addListener(showJumpBar);
+    }
+    if (!global.IntersectionObserver) return;
+    // Past the block once its bottom is under the header.
+    var header = doc.querySelector(".app-header");
+    var top = header ? Math.round(header.getBoundingClientRect().height) : 0;
+    new global.IntersectionObserver(function (entries) {
+      var entry = entries[entries.length - 1];
+      jumpBar.past = !entry.isIntersecting && entry.boundingClientRect.top < top;
+      showJumpBar();
+    }, { rootMargin: "-" + top + "px 0px 0px 0px" }).observe(block);
+  }
+
+  function showJumpBar() {
+    if (!jumpBar) return;
+    var show = !!(fold && fold.phone && jumpBar.past && !(jumpBar.short && jumpBar.short.matches));
+    if (jumpBar.bar.hidden === !show) return;
+    jumpBar.bar.hidden = !show;
+    var root = doc.documentElement;
+    root.classList.toggle("has-jumpbar", show);
+    if (show) {
+      var height = Math.round(jumpBar.bar.getBoundingClientRect().height);
+      if (height) root.style.setProperty("--jump-h", height + "px");
     }
   }
 
@@ -205,6 +274,7 @@
     // not disagree about what it shows.
     searchRaces(searchQuery());
     openAllWords();
+    showJumpBar();
   }
 
   function showBody(section, open) {
@@ -261,8 +331,11 @@
    * Enter, never on each arrow. The select goes back to "Choose…", so the
    * same race can be picked again. */
   function initJumpSelect() {
-    var select = doc.querySelector("[data-race-jump]");
-    if (!select) return;
+    // The block's, and the jump bar's copy of it.
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-race-jump]"), bindJumpSelect);
+  }
+
+  function bindJumpSelect(select) {
     var keyed = false;
     var go = function () {
       var id = select.value;
@@ -865,6 +938,13 @@
         // At once, as every jump on this page is (goTo).
         if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: "auto" });
         closing.querySelector(".race-row").focus({ preventScroll: true });
+        return;
+      }
+      if (event.target.closest("[data-jump-find]")) {
+        // Back to the block, ready to pick again from its select.
+        goTo("find-race");
+        var picker = el("raceJumpSelect");
+        if (picker && picker.focus) picker.focus({ preventScroll: true });
         return;
       }
       if (event.target.closest("[data-race-open-all]")) {

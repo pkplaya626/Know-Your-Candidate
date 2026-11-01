@@ -15976,6 +15976,90 @@ async function testDistrictsPhonePlans() {
   }
 }
 
+/* ============================== a folded state page's jump bar and filters */
+
+/* A phone of *height* px: the fold's width query, the bar's height query,
+ * and an IntersectionObserver whose callback the suite calls itself. */
+function phoneOfHeight(height) {
+  return (w) => {
+    phoneWidth(w, true);
+    const width = w.matchMedia;
+    w.matchMedia = (query) => /max-height: 499/.test(query)
+      ? { media: query, matches: height < 500, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} }
+      : width(query);
+    w.__observed = [];
+    w.IntersectionObserver = class {
+      constructor(fn, opts) { this.fn = fn; this.opts = opts; }
+      observe(node) { w.__observed.push({ node, fire: (entry) => this.fn([Object.assign({ target: node }, entry)]) }); }
+      disconnect() {}
+    };
+  };
+}
+
+async function testJumpBar() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("states/ca.html", { now, setup: phoneOfHeight(844) });
+    const { window, D, errors } = page;
+    const bar = D.querySelector(".jumpbar");
+    const root = D.documentElement;
+    const watch = window.__observed.filter((o) => o.node.id === "find-race")[0];
+    suite(`states/ca.html on a phone ${when} — the jump bar (rule 44)`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("a bar named Jump to, hidden while Find your race is on screen",
+        !!bar && bar.tagName === "NAV" && bar.getAttribute("aria-label") === "Jump to" && bar.hidden &&
+          !root.classList.contains("has-jumpbar"));
+      check("it watches the Find your race block, below the header", !!watch);
+      const block = [...D.querySelectorAll("#raceJumpSelect option")].map((o) => o.value);
+      const copy = [...D.querySelectorAll("#raceJumpBar option")].map((o) => o.value);
+      check("its select offers exactly the block's places, in the same order",
+        copy.length > 50 && copy.join("|") === block.join("|"), copy.length + " against " + block.length);
+      check("and is named for what it does", D.getElementById("raceJumpBar").getAttribute("aria-label") === "Jump to a race or section");
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      check("once the block has scrolled away under the header, the bar shows and the page's scroll padding grows",
+        !bar.hidden && root.classList.contains("has-jumpbar"));
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: 2000, bottom: 2600 } });
+      check("never for a block below the screen", bar.hidden);
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      // A pick from the bar opens its race and goes there, as the block's does.
+      const select = D.getElementById("raceJumpBar");
+      const value = [...select.options].filter((o) => /^race-H-CA-40/.test(o.value))[0].value;
+      const jumps = [];
+      const real = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () { jumps.push(this.id || this.className); };
+      select.value = value;
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      const section = D.getElementById(value).closest("section.race-foldable");
+      check("a pick from the bar opens its race and jumps to it",
+        jumps.indexOf(value) !== -1 && section.querySelector(".race-row").getAttribute("aria-expanded") === "true",
+        jumps.join(","));
+      check("and the bar's select goes back to its first option", select.value === "");
+      jumps.length = 0;
+      D.querySelector("[data-jump-find]").click();
+      window.Element.prototype.scrollIntoView = real;
+      check("its button goes back to Find your race and puts the reader on its select",
+        jumps.indexOf("find-race") !== -1 && D.activeElement === D.getElementById("raceJumpSelect"), jumps.join(","));
+      turn(window, false);
+      check("a desktop never shows it, past the block or not", bar.hidden && !root.classList.contains("has-jumpbar"));
+      turn(window, true);
+      check("turned back to a phone past the block, it shows again", !bar.hidden);
+      watch.fire({ isIntersecting: true, boundingClientRect: { top: 200, bottom: 800 } });
+      check("and hides, its padding with it, when the block comes back", bar.hidden && !root.classList.contains("has-jumpbar"));
+    });
+  }
+  const short = await buildPage("states/ca.html", { setup: phoneOfHeight(420) });
+  suite("states/ca.html on a phone on its side (420px tall) — no jump bar", () => {
+    const watch = short.window.__observed.filter((o) => o.node.id === "find-race")[0];
+    watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+    check("past the block, still hidden: the header and the bar would take a third of the screen",
+      short.D.querySelector(".jumpbar").hidden && !short.D.documentElement.classList.contains("has-jumpbar"));
+  });
+  // A state that does not fold has no bar at all.
+  const wy = await buildPage("states/wy.html", { setup: phoneOfHeight(844) });
+  suite("states/wy.html on a phone — no fold, no bar", () => {
+    check("no bar", !wy.D.querySelector(".jumpbar"));
+  });
+}
+
 async function testStatePhone() {
   const PAGES = ["ca", "tx", "fl", "ny", "la", "ok", "wa", "il", "ga", "al"];
   const built = {};
@@ -16868,6 +16952,7 @@ async function testGuidePhotos() {
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "states" || only === "statephone") await testStatePhone();
+  if (!only || only === "states" || only === "statephone" || only === "jumpbar") await testJumpBar();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
 if (!only || only === "states") await testCertifiedBallots();
