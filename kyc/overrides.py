@@ -1092,6 +1092,10 @@ BLOCKED_CAMPAIGN_HOSTS = {
                                       "an address record at two resolvers"),
     "gordonchaffin.com": ("unrelated", "2026-10-17",
                           "'High Skill Dog Care', a business page; nothing about a campaign"),
+    # Found by `enrich` on 2026-11-01 and fetched again by hand that day.
+    "danielbutierez4congress2024.com": ("dead", "2026-11-01",
+                                        "parked: www and bare serve only a script sending "
+                                        "visitors to /lander, GoDaddy's parking lander"),
 }
 
 # Local governments' websites, as the Census Bureau's 2022 listing gives them,
