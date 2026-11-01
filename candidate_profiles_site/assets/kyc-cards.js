@@ -1586,7 +1586,10 @@
       ": " + title + by + "." + link;
   }
 
-  function stripEraHead(race, strip, era, cells, now) {
+  /* *again*: an earlier era on other lines has said what that means, so
+   * this one names its district's number and no more (North Carolina's 1st
+   * repeated the whole sentence four times on a phone). */
+  function stripEraHead(race, strip, era, cells, now, again) {
     if (race.chamber === "Senate") return "";
     var past = KYC.electionStatus(undefined, now).phase === "post-election";
     var numbered = cells.some(function (c) { return c.district != null && !c.atLarge; });
@@ -1595,6 +1598,11 @@
       return '<p class="strip-era">' + KYC.escapeHtml((strip.eras.length > 1 ? "On " : "All on ") +
         "the lines this district " + (past ? "was" : "is") + " elected on in 2026 (" +
         stripYears(era) + ")") + "</p>";
+    }
+    if (again && numbered && !atLarge) {
+      return '<p class="strip-era strip-other">' + KYC.escapeHtml("On other lines than this " +
+        "race’s: " + stripYears(era) + ", the district numbered " + (race.district || 0) +
+        " on that map.") + "</p>";
     }
     return '<p class="strip-era strip-other">' + KYC.escapeHtml("On other lines than this " +
       "race’s: " + stripYears(era) + "." + (numbered ? " The results are those of the " +
@@ -1614,14 +1622,16 @@
     var breaks = {};
     (strip.breaks || []).forEach(function (b) { breaks[b.year] = b; });
     var parts = [];
+    var said = false;
     strip.eras.forEach(function (era, i) {
       if (i > 0 && breaks[era.from]) {
         parts.push('<p class="strip-break">' + stripChange(race, breaks[era.from]) + "</p>");
       }
       var cells = strip.cells.filter(function (c) { return c.era === i; });
       if (!cells.length) return;
-      parts.push(stripEraHead(race, strip, era, cells, now) + '<ol class="strip-cells">' +
+      parts.push(stripEraHead(race, strip, era, cells, now, said) + '<ol class="strip-cells">' +
         cells.map(function (c) { return stripCell(race, c, scale); }).join("") + "</ol>");
+      said = said || (!era.same && cells.some(function (c) { return c.district != null && !c.atLarge; }));
     });
     if (breaks[2026]) parts.push('<p class="strip-break">' + stripChange(race, breaks[2026]) + "</p>");
     var sources = KYC.meta().lastElectionSources || {};
@@ -1636,7 +1646,7 @@
     var heading = race.chamber === "Senate" ? "Elections to this seat since 2018"
       : "Elections for " + KYC.escapeHtml(race.state + "-" + (race.district || "AL")) +
         " since 2018";
-    return '<section class="seat-strip"><h4 class="strip-title">' + heading + "</h4>" +
+    return '<section class="seat-history"><h4 class="strip-title">' + heading + "</h4>" +
       parts.join("") +
       '<p class="race-note race-results">Counts: the Clerk of the House&rsquo;s statistics (' +
       counts + "), each shown where a second compilation (" +

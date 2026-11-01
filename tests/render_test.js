@@ -14082,7 +14082,7 @@ async function testRaceMoney() {
       allRaces().every((r) => !("seatHistory" in r)) && (() => {
         const r = window.kycRaces.filter((x) => x.lastElection && x.state === "NC")[0];
         return !!r && !!r.seatHistory &&
-          /class="seat-strip"/.test(KYC.cards.lastTimeBlock(r, { lazy: false }));
+          /class="seat-history"/.test(KYC.cards.lastTimeBlock(r, { lazy: false }));
       })());
     const sample = whole.filter((r, i) => i % 3 === 0 || r.state === "NC" || r.state === "MT" ||
       r.chamber === "Senate");
@@ -14090,7 +14090,7 @@ async function testRaceMoney() {
     sample.forEach((r) => {
       [campaign, after].forEach((now) => {
         const box = draw(r, now);
-        const strip = box.querySelector(".seat-strip");
+        const strip = box.querySelector(".seat-history");
         const s = r.seatHistory;
         const past = now === after;
         if (!strip) { bad.push(r.id + ": no strip"); return; }
@@ -14142,11 +14142,14 @@ async function testRaceMoney() {
     const nc = races.filter((r) => /^race-H-NC/.test(r.id))[0];
     const fold = nc && nc.querySelector(".race-last");
     if (fold) openFold(window, fold);
-    const strip = fold && fold.querySelector(".seat-strip");
+    const strip = fold && fold.querySelector(".seat-history");
     check("North Carolina's districts break at all four of its maps since 2018, none of them its 2026 lines",
       !!strip && strip.querySelectorAll(".strip-break").length === 4 &&
         /Session Law 2019-249/.test(strip.textContent) && /2020 census/.test(strip.textContent) &&
-        /Session Law 2023-145/.test(strip.textContent) && !/elected on in 2026/.test(strip.textContent),
+        /Session Law 2023-145/.test(strip.textContent) && !/elected on in 2026/.test(strip.textContent) &&
+        // What "other lines" means is said once, not before each of its four maps.
+        (strip.textContent.match(/which is not the map this race/g) || []).length === 1 &&
+        (strip.textContent.match(/, the district numbered 1 on that map\./g) || []).length === 3,
       strip ? strip.textContent.slice(0, 300) : "no strip");
     // A final round the Clerk prints without naming it is said to be the
     // second compilation's reading (Maine's 2nd in 2018), made here from a
@@ -15589,7 +15592,7 @@ async function testPeopleSplit() {
     const lastFold = (b) => b.D.querySelector('#results .race-last[data-fold]');
     openFold(slim.window, lastFold(slim));
     openFold(full.window, lastFold(full));
-    await until(() => !!lastFold(slim).querySelector(".seat-strip"), 5000);
+    await until(() => !!lastFold(slim).querySelector(".seat-history"), 5000);
     suite("index.html — a race's money and comparison load the state's records when opened", () => {
       check("it says it is loading, and draws nothing from the cards meanwhile",
         /Loading Georgia/.test(loading) && !/No data/.test(loading), loading);
@@ -15601,7 +15604,7 @@ async function testPeopleSplit() {
         compare(slim).innerHTML === compare(full).innerHTML,
         firstDifference(compare(full).innerHTML, compare(slim).innerHTML));
       check("and the seat's last election with its strip since 2018, filled into the index's race",
-        !!lastFold(slim).querySelector(".seat-strip") &&
+        !!lastFold(slim).querySelector(".seat-history") &&
           lastFold(slim).innerHTML === lastFold(full).innerHTML &&
           slim.window.kycRaces.filter((r) => r.state === "GA").every((r) => !!r.seatHistory) &&
           slim.window.kycRaces.filter((r) => r.state !== "GA").every((r) => !r.seatHistory),

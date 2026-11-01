@@ -5459,7 +5459,7 @@ button.local-county-link {
  * other lines than this race's in dashed cells under their own line, and
  * each change of lines between them on a line of its own. Two across on a
  * phone's width, four where there is room. */
-.seat-strip { margin-top: var(--s-3); padding-top: var(--s-2); border-top: 1px solid var(--border); }
+.seat-history { margin-top: var(--s-3); padding-top: var(--s-2); border-top: 1px solid var(--border); }
 .strip-title { margin: 0 0 var(--s-1); font-size: var(--t-sm); font-weight: 600; }
 .strip-era { margin: var(--s-2) 0 var(--s-1); font-size: var(--t-xs); color: var(--text-muted); }
 .strip-break {

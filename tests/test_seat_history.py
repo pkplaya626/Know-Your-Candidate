@@ -9,6 +9,7 @@ error. A district redrawn for 2026 never carries the old district's result
 """
 
 import json
+import re
 import os
 import sys
 import unittest
@@ -674,6 +675,27 @@ class TestStrip(unittest.TestCase):
                 # Nothing on a redrawn state's 2024 lines is this race's.
                 if race["state"] in REDRAWN:
                     self.assertFalse(any(e["same"] for e in strip["eras"]), race["id"])
+
+
+class TestTheStripsClassIsItsOwn(unittest.TestCase):
+    """The strip was first drawn as <section class="seat-strip">, the class
+    of the legislature pages' seat squares (KYC.seatStrip): its grid of one
+    column per seat laid the heading, each era and each change of lines side
+    by side, a word to a line, at 390px. Every class the strip draws is
+    styled once, by its own rule."""
+
+    def test_no_other_module_or_rule_uses_the_strips_classes(self):
+        assets = os.path.join(ROOT, "candidate_profiles_site", "assets")
+        css = open(os.path.join(assets, "kyc.css"), encoding="utf-8").read()
+        self.assertEqual(len(re.findall(r"^\.seat-history\s*\{", css, re.M)), 1)
+        for name in os.listdir(assets):
+            if not name.endswith(".js"):
+                continue
+            text = open(os.path.join(assets, name), encoding="utf-8").read()
+            if name != "kyc-cards.js":
+                self.assertNotRegex(text, r"seat-history|strip-(?:cell|era|break|title)", name)
+        self.assertNotRegex(open(os.path.join(assets, "kyc-cards.js"), encoding="utf-8").read(),
+                            r"class=\"seat-strip")
 
 
 class TestTheFirstFullRead(unittest.TestCase):
