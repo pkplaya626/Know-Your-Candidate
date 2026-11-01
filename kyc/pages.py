@@ -2148,6 +2148,12 @@ def render_counties_page(code, host, listed=None, local=False):
         "                    place boundaries, joined to its government by name only where the join is",
         "                    one to one. Names are shown in title case; the listing prints them in",
         "                    capitals.</p>",
+        "                <p><strong>Local questions on the November 3, 2026 ballot:</strong> for the",
+        "                    50 most populous counties (the Census Bureau's 2024 estimates) only, each",
+        "                    county's own, its countywide districts' and its cities' of 250,000 people",
+        "                    or more, from the county election office's, the city clerk's or the state",
+        "                    election office's own sample ballot or list, each with its source and the",
+        "                    day it was read.</p>",
         "                <p><strong>Where there is no county government:</strong> "
         + "; ".join(f'<a href="{_e(url)}" rel="noopener">{_e(label)}</a>' for label, url in why)
         + ".</p>",
@@ -2640,8 +2646,8 @@ def render_ballot_page(host, local_states=()):
         "                        your location: the races for Congress and who is in them, the",
         "                        statewide offices and their candidates, whether your seats in the",
         "                        state legislature are up, and the statewide questions in their official",
-        "                        words, with the local ones of the most populous counties. Who",
-        "                        represents you now is another question:",
+        "                        words, with the local ones of the most populous counties.",
+        "                        Who represents you now is another question:",
         '                        <a href="index.html#findrep">find who represents you</a>.</p>',
         "                </header>",
         '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',

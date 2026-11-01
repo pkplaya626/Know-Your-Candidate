@@ -317,7 +317,7 @@
      },
      "designation": "Question 1",
      "title": "General Obligation Bond: Enhance Public Safety",
-     "text": "Shall Mesa be authorized to issue and sell $150,000,000 of general obligation bonds to provide funding to support fire and medical, police, and public safety improvements, facilities, and communication systems, associated equipment, apparatuses, and technology, municipal improvements that support community and public safety, and acquisition of land for such purposes?",
+     "text": null,
      "kind": "bond",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -325,7 +325,8 @@
       "quote": "City of Mesa 2026 General Election ... Question 1. General Obligation Bond: Enhance Public Safety ... Shall Mesa be authorized to issue and sell $150,000,000 of general obligation bonds to pro ..."
      },
      "read": "2026-11-01",
-     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\"}"
+     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
+     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"Shall Mesa be authorized to issue and sell $150,000,000 of general obligation bonds to provide funding to support fire and medical, police, and public safety improvements, facilities, and communication systems, associated equipment, apparatuses, and technology, municipal improvements that support community and public safety, and acquisition of land for such purposes?\"}"
     },
     {
      "jurisdiction": {
@@ -335,7 +336,7 @@
      },
      "designation": "Question 2",
      "title": "General Obligation Bond: Enhance Transportation Improvements for Safer and Less Congested Streets",
-     "text": "Shall Mesa be authorized to issue and sell $135,000,000 of general obligation bonds to provide funding to support safer and less congested streets, including for arterial street improvements, pavement reconstruction, street improvements, streetlights, traffic signals, communication infrastructure, shared use paths, associated improvements, and the acquisition of land for such purposes?",
+     "text": null,
      "kind": "bond",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -343,7 +344,8 @@
       "quote": "City of Mesa 2026 General Election ... Question 2. General Obligation Bond: Enhance Transportation Improvements for Safer and Less Congested Streets ... Shall Mesa be authorized to issue and sell $135,000,000 of general obligation bonds to pro ..."
      },
      "read": "2026-11-01",
-     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\"}"
+     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
+     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"Shall Mesa be authorized to issue and sell $135,000,000 of general obligation bonds to provide funding to support safer and less congested streets, including for arterial street improvements, pavement reconstruction, street improvements, streetlights, traffic signals, communication infrastructure, shared use paths, associated improvements, and the acquisition of land for such purposes?\"}"
     },
     {
      "jurisdiction": {
@@ -353,7 +355,7 @@
      },
      "designation": "Question 3",
      "title": "Charter Amendment: Section 209(A) Relating to Council Meeting Procedures and Public Notice",
-     "text": "To conform with state law, shall Mesa City Charter Section 209(A) relating to Council meetings be amended to require that the procedures for fixing the time and place of regular meetings and giving public notice of meetings, and the purposes for executive sessions be in accordance with state law?",
+     "text": null,
      "kind": "charter amendment",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -361,7 +363,8 @@
       "quote": "City of Mesa 2026 General Election ... Question 3. Charter Amendment: Section 209(A) Relating to Council Meeting Procedures and Public Notice ... To conform with state law, shall Mesa City Charter Section 209(A) relating to Council meet ..."
      },
      "read": "2026-11-01",
-     "notes": "{\"authority\": \"Ordinance No. 6017 (Question 3)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\"}"
+     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
+     "notes": "{\"authority\": \"Ordinance No. 6017 (Question 3)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"To conform with state law, shall Mesa City Charter Section 209(A) relating to Council meetings be amended to require that the procedures for fixing the time and place of regular meetings and giving public notice of meetings, and the purposes for executive sessions be in accordance with state law?\"}"
     },
     {
      "jurisdiction": {
@@ -371,7 +374,7 @@
      },
      "designation": "Question 4",
      "title": "Charter Amendment: Section 211 Relating to Ordinance Posting and Publication",
-     "text": "To conform with state law modernization efforts, shall Mesa City Charter Section 211 relating to ordinances be amended to require ordinances to be posted on the City’s website, posted at one physical location in Mesa, and published in accordance with state law?",
+     "text": null,
      "kind": "charter amendment",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -379,7 +382,8 @@
       "quote": "City of Mesa 2026 General Election ... Question 4. Charter Amendment: Section 211 Relating to Ordinance Posting and Publication ... To conform with state law modernization efforts, shall Mesa City Charter Section 211 relat ..."
      },
      "read": "2026-11-01",
-     "notes": "{\"authority\": \"Ordinance No. 6016 (Question 4)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\"}"
+     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
+     "notes": "{\"authority\": \"Ordinance No. 6016 (Question 4)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"To conform with state law modernization efforts, shall Mesa City Charter Section 211 relating to ordinances be amended to require ordinances to be posted on the City’s website, posted at one physical location in Mesa, and published in accordance with state law?\"}"
     },
     {
      "jurisdiction": {
@@ -1125,7 +1129,7 @@
      },
      "read": "2026-11-01",
      "textNote": "One symbol, shown here as “½¢”, is drawn in the office's file in a way this site could not read as text; check it against the source.",
-     "notes": "{\"textNote\": \"The ballot statement as the Board of Supervisors' Resolution (July 14, 2026) fixes it. That file is a scan whose text layer reads 'continuing the exitingYzP voter-approved'; the Registrar's Notice of Election prints the same question in a font whose text layer drops digits and reads 'continuing the existing � voterapproved'. '½¢' is this reading of that one symbol and needs a person to confirm it against either PDF.\", \"textUncertain\": \"the symbol after 'existing' (read as ½¢)\", \"kindWords\": \"RCTC Ordinance No. 26-001, imposing a removal of the 2039 sunset date and maintainin g a rate of one-half percent for the retail transaction and use tax shall be submitted to the voters of the County of Riverside\", \"textSource\": {\"url\": \"https://media.rivcocob.org/proceeds/2026/p2026_07_14_files/03.13001.pdf\", \"words\": \"BE IT FURTHER RESOLVED AND ORDERED that the ballot statement to be submitted to voters of the County of Riverside for the proposed Ordinance No. 26-001 shall be as follows: \\\"Riverside County Traffic Relief, Pothole/Road Repair Investment Renewal Without raising tax rates, shall the measure ...\"}, \"listedAt\": {\"url\": \"https://voteinfo.net/sites/g/files/aldnop371/files/2026-10/ElectionSummaryReportRPT%20%285%29.pdf\", \"words\": \"General Election County of Riverside November 3, 2026 Zero Report ... Measure A - Riverside County Traffic Relief, Pothole/Road Repair Investment Renewal (Vote for 1)\"}}"
+     "notes": "{\"textNote\": \"The ballot statement as the Board of Supervisors' Resolution (July 14, 2026) fixes it. That file is a scan whose text layer reads 'continuing the exitingYzP voter-approved'; the Registrar's Notice of Election prints the same question in a font whose text layer drops digits and reads 'continuing the existing [an unmapped glyph] voterapproved'. '½¢' is this reading of that one symbol and needs a person to confirm it against either PDF.\", \"textUncertain\": \"the symbol after 'existing' (read as ½¢)\", \"kindWords\": \"RCTC Ordinance No. 26-001, imposing a removal of the 2039 sunset date and maintainin g a rate of one-half percent for the retail transaction and use tax shall be submitted to the voters of the County of Riverside\", \"textSource\": {\"url\": \"https://media.rivcocob.org/proceeds/2026/p2026_07_14_files/03.13001.pdf\", \"words\": \"BE IT FURTHER RESOLVED AND ORDERED that the ballot statement to be submitted to voters of the County of Riverside for the proposed Ordinance No. 26-001 shall be as follows: \\\"Riverside County Traffic Relief, Pothole/Road Repair Investment Renewal Without raising tax rates, shall the measure ...\"}, \"listedAt\": {\"url\": \"https://voteinfo.net/sites/g/files/aldnop371/files/2026-10/ElectionSummaryReportRPT%20%285%29.pdf\", \"words\": \"General Election County of Riverside November 3, 2026 Zero Report ... Measure A - Riverside County Traffic Relief, Pothole/Road Repair Investment Renewal (Vote for 1)\"}}"
     }
    ],
    "own": {
@@ -3237,7 +3241,7 @@
      },
      "designation": "Measure A",
      "title": "Fresno County Hotel Tax",
-     "text": "Shall the measure to establish a tax paid only by guests staying in overnight short-term lodging in the unincorporated area of Fresno County at the rate of 12% of the rent for the stay, estimated to raise $4,500,000 annually, until changed or repealed, in general revenue for the County of Fresno, which provides public safety, wildfire/disaster response, 911, road maintenance, behavioral and public health, water infrastructure, parks, and other public services, be adopted?",
+     "text": null,
      "kind": "tax",
      "source": {
       "url": "https://www.fresnocountyca.gov/files/sharedassets/county/v/2/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/measures/proof-of-publication.pdf",
@@ -3245,8 +3249,8 @@
       "quote": "NOTICE IS HEREBY GIVEN to the qualified electors of Fresno County, California, that on Tuesday, November 3, 2026, at the Consolidated Statewide General Election, there will be submitted to the voters the following measure: Fresno County Hotel Tax. Shall the measure ..."
      },
      "read": "2026-11-01",
-     "textNote": "Transcribed by this site from the office's scanned notice, which has no text layer; check it word for word against the source.",
-     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transient Occupancy Tax Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transient Occupancy Tax Measure' (dated July 13, 2026), in the filed affidavit of publication. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"A County of Fresno Transient Occupancy Tax Measure; 'Majority (50% + 1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}}"
+     "textMissing": "The office's notice is a scanned image. This site has transcribed it, but no second reader has yet checked the transcription word for word, so it is not shown here; the text is in the source.",
+     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transient Occupancy Tax Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transient Occupancy Tax Measure' (dated July 13, 2026), in the filed affidavit of publication. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"A County of Fresno Transient Occupancy Tax Measure; 'Majority (50% + 1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"transcription\": \"Shall the measure to establish a tax paid only by guests staying in overnight short-term lodging in the unincorporated area of Fresno County at the rate of 12% of the rent for the stay, estimated to raise $4,500,000 annually, until changed or repealed, in general revenue for the County of Fresno, which provides public safety, wildfire/disaster response, 911, road maintenance, behavioral and public health, water infrastructure, parks, and other public services, be adopted?\", \"transcriptionIsSummary\": false}"
     },
     {
      "jurisdiction": {
@@ -3255,7 +3259,7 @@
      },
      "designation": "Measure S",
      "title": "Fresno County Transportation Improvement Act",
-     "text": "Shall the measure to impose a new half-cent sales tax to pay for streets and street repairs, busses, bike lanes, and safety improvements; free transit services for seniors, veterans, people with disabilities, and students; initially providing approximately $113 million annually for 30 years, requiring independent oversight and annual audits, be adopted?",
+     "text": null,
      "kind": "tax",
      "source": {
       "url": "https://www.fresnocountyca.gov/files/sharedassets/county/v/1/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/measures/fresno-co-transportation/publication_redacted.pdf",
@@ -3263,8 +3267,8 @@
       "quote": "NOTICE IS HEREBY GIVEN to the qualified electors of Fresno County, California, that on Tuesday, November 3, 2026, at the Consolidated Statewide General Election, there will be submitted to the voters the following measure: Fresno County Transportation Improvement Act. Shall the measure ..."
      },
      "read": "2026-11-01",
-     "textNote": "Transcribed by this site from the office's scanned notice, which has no text layer; check it word for word against the source.",
-     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transportation Improvement Act Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transportation Improvement Act Measure' (dated August 19, 2026). Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"County Counsel's impartial analysis: 'a County of Fresno ordinance imposing a half-cent (0.5%) transactions and use tax (sales tax) for thirty years ... The Measure qualified for the ballot by an initiative petition ... submitted to the voters at the November 3, 2026 election as required by Assembly Bill 1923 (Stats. 2026, ch. 108).'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"courtNote\": \"News in August 2026 reported the Board of Supervisors would sue over this measure's placement; the Registrar's page still lists Measure S (read 2026-11-01) and no removal is stated there.\"}"
+     "textMissing": "The office's notice is a scanned image. This site has transcribed it, but no second reader has yet checked the transcription word for word, so it is not shown here; the text is in the source.",
+     "notes": "{\"titleNote\": \"The label printed before the question in the Registrar's notice; the letter assignments call it 'County of Fresno Transportation Improvement Act Measure'.\", \"textNote\": \"The measure as printed in the Registrar's 'Notice of Date Fixed for Submitting Arguments on the Fresno County Transportation Improvement Act Measure' (dated August 19, 2026). Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication.\", \"transcribedFromScan\": true, \"kindWords\": \"County Counsel's impartial analysis: 'a County of Fresno ordinance imposing a half-cent (0.5%) transactions and use tax (sales tax) for thirty years ... The Measure qualified for the ballot by an initiative petition ... submitted to the voters at the November 3, 2026 election as required by Assembly Bill 1923 (Stats. 2026, ch. 108).'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"courtNote\": \"News in August 2026 reported the Board of Supervisors would sue over this measure's placement; the Registrar's page still lists Measure S (read 2026-11-01) and no removal is stated there.\", \"transcription\": \"Shall the measure to impose a new half-cent sales tax to pay for streets and street repairs, busses, bike lanes, and safety improvements; free transit services for seniors, veterans, people with disabilities, and students; initially providing approximately $113 million annually for 30 years, requiring independent oversight and annual audits, be adopted?\", \"transcriptionIsSummary\": false}"
     },
     {
      "jurisdiction": {
@@ -3274,8 +3278,7 @@
      },
      "designation": "Measure D",
      "title": "APPROVAL OF FRESNO PUBLIC SAFETY, INFRASTRUCTURE RESTORATION, AND CITY SERVICES TAX ORDINANCE",
-     "text": "The proposed ordinance would impose a 0.5% [half-cent per dollar] sales and use tax within the City of Fresno for a period of 10 years or upon implementation of a County of Fresno transportation infrastructure tax, whichever occurs first. It is estimated to raise approximately $65 million annually while retaining City of Fresno's current tax rate. Proceeds would belong to the City of Fresno and could not be taken by, and would not be shared with, the State, County, or any other agency. As a general tax, revenues raised would be directed into the City's general fund and be available for any general City purpose, including but not limited to transportation infrastructure, repairing streets, roads and sidewalks, building safe routes to schools, providing public safety and assisting 9-1-1 emergency response, maintaining public transportation systems, local airports, and other general services provided by the City.",
-     "summary": true,
+     "text": null,
      "kind": "tax",
      "source": {
       "url": "https://www.fresnocountyca.gov/files/sharedassets/county/v/1/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/measures/fresno-use-tax/filed-affidavit-of-pub-city-of-fresno_redacted.pdf",
@@ -3283,8 +3286,8 @@
       "quote": "Notice is hereby given that a special municipal election for the following measure is to be voted on at the Consolidated Statewide General Election to be held in the City of Fresno on Tuesday, November 3, 2026. SYNOPSIS OF MEASURE ..."
      },
      "read": "2026-11-01",
-     "textNote": "Transcribed by this site from the office's scanned notice, which has no text layer; check it word for word against the source.",
-     "notes": "{\"titleNote\": \"The heading under 'SYNOPSIS OF MEASURE' in the Registrar's notice; the letter assignments call it 'City of Fresno Transactions and Use Tax Measure'.\", \"textNote\": \"The 'SYNOPSIS OF MEASURE' as printed in the Registrar's 'Measure to be Voted On and Notice of Date Fixed for Submitting Arguments on the City of Fresno Transactions & Use Tax Measure' (dated August 14, 2026) - a synopsis, not the ballot question, which no readable document on the page prints. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication. The print is small; figures especially need checking.\", \"transcribedFromScan\": true, \"kindWords\": \"D City of Fresno Transactions and Use Tax Measure; 'Majority (50%+1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}}"
+     "textMissing": "The office's notice is a scanned image. This site has transcribed it, but no second reader has yet checked the transcription word for word, so it is not shown here; the text is in the source.",
+     "notes": "{\"titleNote\": \"The heading under 'SYNOPSIS OF MEASURE' in the Registrar's notice; the letter assignments call it 'City of Fresno Transactions and Use Tax Measure'.\", \"textNote\": \"The 'SYNOPSIS OF MEASURE' as printed in the Registrar's 'Measure to be Voted On and Notice of Date Fixed for Submitting Arguments on the City of Fresno Transactions & Use Tax Measure' (dated August 14, 2026) - a synopsis, not the ballot question, which no readable document on the page prints. Transcribed by this research from the scanned notice (no text layer); a person should check it word for word against the image before publication. The print is small; figures especially need checking.\", \"transcribedFromScan\": true, \"kindWords\": \"D City of Fresno Transactions and Use Tax Measure; 'Majority (50%+1) Required to Pass'\", \"listedAt\": {\"url\": \"https://www.fresnocountyca.gov/files/sharedassets/county/v/3/county-clerk-registrar-of-voters/1_election-pages/2026_3_nov_statewide-general/press/26-08-12-fresno-county-measure-letter-assignments-for-november-2026-amended.pdf\", \"words\": \"In accordance with Election Code 13116 ... the following identification letters have been assigned to the local measures submitted for inclusion on the November 3, 2026, Consolidated General Election ballot: A County of Fresno Transient Occupancy Tax Measure B City of Sanger ... D City of Fresno Transactions and Use Tax Measure ... S County of Fresno Transportation Improvement Act Measure ... There are a total of nine (9) local measures. The letter \\\"C\\\" will not be utilized. ... Amended 8/14/26\"}, \"transcription\": \"The proposed ordinance would impose a 0.5% [half-cent per dollar] sales and use tax within the City of Fresno for a period of 10 years or upon implementation of a County of Fresno transportation infrastructure tax, whichever occurs first. It is estimated to raise approximately $65 million annually while retaining City of Fresno's current tax rate. Proceeds would belong to the City of Fresno and could not be taken by, and would not be shared with, the State, County, or any other agency. As a general tax, revenues raised would be directed into the City's general fund and be available for any general City purpose, including but not limited to transportation infrastructure, repairing streets, roads and sidewalks, building safe routes to schools, providing public safety and assisting 9-1-1 emergency response, maintaining public transportation systems, local airports, and other general services provided by the City.\", \"transcriptionIsSummary\": true}"
     }
    ],
    "own": {

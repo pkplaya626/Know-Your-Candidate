@@ -2846,9 +2846,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     site no script could read (Broward, Duval, Hillsborough, Maricopa's own,
     Chicago's Board) is "not found", with why, never "none" and never the
     news's list. A question whose text is a scan no text could be read from
-    (Oakland's Measures EE and FF) is listed with its title and says so, and
-    a text transcribed from a scan or holding a symbol the file's text layer
-    does not map (Riverside's and San Bernardino's "½¢") says that under it.
+    (Oakland's Measures EE and FF), or whose transcription no second reader
+    has checked (Fresno's A, S and D, transcribed from scans; Mesa's four,
+    read through a bot wall in parts), is listed with its title and says why
+    its text is not shown, the transcription waiting in the record's notes;
+    a text holding a symbol the file's text layer does not map (Riverside's
+    and San Bernardino's "½¢") says so under it.
     A summary is said to be the office's printed summary. A city most of
     which lies in another covered county is drawn from that county's record
     (`elsewhere`): Dallas's Proposition A under Collin and Denton, New York

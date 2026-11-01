@@ -2404,9 +2404,9 @@ and Your ballot load; one implementation draws both (`KYC.localMeasures`,
 |-------|--------|-------|
 | "<n> questions of <county> or of a district covering the whole county are on the Nov 3, 2026 ballot" | the county's record | `own.status` "listed", `own.measures` |
 | Each question's designation and title as printed (null where the office prints none: Wake's and Fairfax's bonds are headed by title alone) | the question's source | `measures[].designation`, `.title` |
-| Its text as printed, folded after about four lines; or "The office's printed summary, not the ballot's own words", over a summary; or why its text is not shown (a scan no text could be read from) | the question's source | `.text`, `.summary`, `.missing` (`text`, `summary`, `textMissing`) |
+| Its text as printed, folded after about four lines; or "The office's printed summary, not the ballot's own words", over a summary; or why its text is not shown (a scan no text could be read from: Oakland's EE and FF; a transcription no second reader has checked: Fresno's A, S and D, Mesa's four) | the question's source | `.text`, `.summary`, `.missing` (`text`, `summary`, `textMissing`) |
 | Its kind (bond, tax, tax exemption, charter amendment, ordinance, franchise, spending limit, lease of city property) and its jurisdiction; who votes on it where that is not the whole jurisdiction | the source | `.kind`, `.j`, `.voters` (`kind`, `jurisdiction`, `voters`) |
-| A note on the text: transcribed from a scan, one symbol not read as text | this site | `.note` (`textNote`) |
+| A note on the text: one symbol the file's text layer does not map (Riverside's and San Bernardino's "½¢") | this site | `.note` (`textNote`) |
 | The source document, by its own name, and the day read | the office | `.source`, `.sourceTitle`, `.read` |
 | What the list may be missing, where an office's own list could not be read | this site | `own.partial` |
 | "No question of <county> or of a district covering the whole county is on the Nov 3, 2026 ballot", and the document it rests on: a statement or count of the questions, a ballot or list whose own words say it holds every contest (quoted), every ballot style read whole, or no county government | the document | `own.basis` (`from`, `found`, `complete`, `every`) |
