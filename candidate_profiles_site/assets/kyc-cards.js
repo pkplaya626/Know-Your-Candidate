@@ -283,9 +283,11 @@
     }
     var runoff = namesWith(race, "runoff", res.otherRunoff);
     if (runoff.length) {
-      return '<span class="badge badge-warn" title="' + KYC.escapeAttr(
-        "No candidate won a majority in November. In the runoff, per the published " +
-        "results: " + runoff.join(", ") + ".") + '">Going to a runoff</span>';
+      // Its December round in its own words: an open primary's is its
+      // general election (KYC.runoffWords, the people's table).
+      var words = KYC.runoffWords(race);
+      return '<span class="badge ' + words.cls + '" title="' + KYC.escapeAttr(
+        words.raceTitle + runoff.join(", ") + ".") + '">' + KYC.escapeHtml(words.race) + "</span>";
     }
     var asOf = (KYC.meta().election || {}).resultsAsOf;
     return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
