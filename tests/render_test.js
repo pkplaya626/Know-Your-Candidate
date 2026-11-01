@@ -3579,13 +3579,14 @@ async function testStates() {
    * reading by hand, so it is the check's to open or leave unconfirmed.
    * Whichever this week's check found (the record, checked above). */
   const missedOn = (page, code) => (page.window.kycBuildMeta.voting._unreached || {})[code] || [];
-  const openedEither = (note, code, page, kind, label) => {
-    const quoted = "“" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "”";
-    return !new RegExp(quoted + "[^.]*could not be confirmed").test(note) &&
+  // Each clause is read for the labels it names, so another link's state
+  // that day ("“Find your polling place” could not be confirmed") says
+  // nothing about this one.
+  const openedEither = (note, code, page, kind, label) =>
+    !namedBefore(note, "could not be confirmed").has(label) &&
       (missedOn(page, code).indexOf(kind) === -1
-        ? !new RegExp(quoted + "[^;.]* opened by hand").test(note)
+        ? !namedBefore(note, "opened by hand").has(label)
         : namedBefore(note, "opened by hand ([\\d-]+)").get(label) === "2026-10-26");
-  };
   suite("states/nh.html — vote.gov's registration page and the results, opened", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
     check("vote.gov's page is said for what it is",
@@ -3600,12 +3601,11 @@ async function testStates() {
       openedEither(gu, "GU", guVote, "info", "2026 general election: early voting and sample ballots"), gu);
     const al = alHand.D.querySelector("#voting .state-note").textContent;
     const alShown = !!alHand.window.kycBuildMeta.voting.AL.results;
+    const alUnconfirmed = namedBefore(al, "could not be confirmed").has("Official results");
     check("Alabama's results page is never said opened by hand, and unconfirmed only where the check missed it",
-      !/opened by hand/.test(al) &&
+      !namedBefore(al, "opened by hand").has("Official results") &&
         (!alShown ? !/Official results/.test(al)
-          : missedOn(alHand, "AL").indexOf("results") !== -1
-          ? /; “Official results” could not be confirmed by this site's automated check that day\./.test(al)
-          : !/could not be confirmed/.test(al)), al);
+          : missedOn(alHand, "AL").indexOf("results") !== -1 ? alUnconfirmed : !alUnconfirmed), al);
   });
 
   const nd = await buildPage("states/nd.html");
@@ -9338,16 +9338,33 @@ async function testStateGov() {
         sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
     }
     // A named holder without a photograph keeps the photograph's column, so
-    // the row lines up with the pictured rows above it.
+    // the row lines up with the pictured rows above it. Made so here from a
+    // confirmed holder, since a refresh changes who has a photograph, and
+    // found by its own office line: a holder running for governor is named
+    // in the governor's row too (Colorado's Phil Weiser, 2026-11-01).
     const bare = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.name &&
-      !data.states[c].ag.photo && !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed);
+      !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed && !data.states[c].ag.unlisted);
+    check("a confirmed attorney general to draw without a photograph", !!bare);
     if (bare) {
-      pick("#/?state=" + bare + "&mode=ag");
-      const row = [...D.querySelectorAll("#delegation .gov-officer")].find((li) =>
-        li.textContent.indexOf(data.states[bare].ag.name) !== -1);
-      check("an unpictured attorney general's row keeps the photograph's column",
-        !!row && !row.classList.contains("gov-officer-text") &&
-        !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"));
+      const ag = data.states[bare].ag;
+      const saved = Object.keys(ag).filter((k) => /^photo/.test(k)).map((k) => [k, ag[k]]);
+      saved.forEach(([k]) => delete ag[k]);
+      try {
+        // Another state first: the same address again draws nothing anew.
+        pick("#/?state=" + stateCodes.find((c) => c !== bare) + "&mode=ag");
+        pick("#/?state=" + bare + "&mode=ag");
+        const row =[...D.querySelectorAll("#delegation .gov-officer")].find((li) => {
+          const role = li.querySelector(".gov-officer-role");
+          const name = li.querySelector(".gov-officer-name");
+          return !!role && /^Attorney general$/i.test(role.textContent.trim()) &&
+            !!name && name.textContent.indexOf(ag.name) !== -1;
+        });
+        check("an unpictured attorney general's row keeps the photograph's column",
+          !!row && !row.classList.contains("gov-officer-text") &&
+          !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"), bare);
+      } finally {
+        saved.forEach(([k, v]) => { ag[k] = v; });
+      }
     }
   });
 
