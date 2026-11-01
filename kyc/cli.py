@@ -36,6 +36,7 @@ from . import federal as federal_mod
 from . import judiciary as judiciary_mod
 from . import vacancies as vacancies_mod
 from . import ballot_measures as measures_mod
+from . import local_measures as local_measures_mod
 from . import search_index as search_index_mod
 
 
@@ -309,6 +310,7 @@ def _build(args):
                           # {} when the cache is missing, so validate's
                           # error says so under --check too (PR #120 review).
                           measures=measures_mod.load(args.root) or {},
+                          local_measures=local_measures_mod.load(args.root) or {},
                           portraits=portraits.load_cache(args.root),
                           photo_routes=_photo_routes(args.root),
                           guides=guide_photos.load_cache(args.root),
@@ -534,6 +536,22 @@ def _build(args):
     else:
         print(f"[error] {measures_mod.CACHE_PATH} is missing or breaks its rules; "
               f"{emit.MEASURES_FILE} not written", file=sys.stderr)
+        return 2
+
+    # The local questions of the most populous counties (rule 102), the
+    # same way: a cache that breaks its rules is validate's error above.
+    local_cache = local_measures_mod.load(args.root)
+    if local_cache and not local_measures_mod.problems(local_cache):
+        written_lm = emit.write_local_measures(emit.local_measures_payloads(local_cache), args.root)
+        for lm_path, lm_size in written_lm:
+            print(f"[ok] wrote {lm_path} ({lm_size / 1024:.0f} KB)")
+        lm_stats = local_measures_mod.stats(local_cache)
+        print(f"[ok] local measures: {lm_stats['measures']} in {lm_stats['counties']} counties and "
+              f"{lm_stats['cities']} cities; {lm_stats['none']} with none, {lm_stats['unlisted']} "
+              f"listing none, {lm_stats['notFound']} with no official list read")
+    else:
+        print(f"[error] {local_measures_mod.CACHE_PATH} is missing or breaks its rules; "
+              f"{emit.LOCAL_MEASURES_DIR} not written", file=sys.stderr)
         return 2
 
     # The federal executive and courts (kyc/federal_build.py): one file for
@@ -1752,6 +1770,17 @@ def _verify(args):
     else:
         print(f"  ok  {emit.MEASURES_FILE} matches {measures_mod.CACHE_PATH} "
               f"({measures_committed[:16]}...)")
+
+    # The local questions (rule 102): each file is the cache's.
+    local_cache = local_measures_mod.load(args.root)
+    unfit = local_measures_mod.problems(local_cache) if local_cache else ["missing"]
+    if unfit:
+        problems.append(f"{local_measures_mod.CACHE_PATH}: {len(unfit)} problem(s): {unfit[0]}")
+    else:
+        stale = emit.check_local_measures(emit.local_measures_payloads(local_cache), args.root)
+        problems.extend(f"{path} is {why}" for path, why in stale)
+        if not stale:
+            print(f"  ok  {emit.LOCAL_MEASURES_DIR} matches {local_measures_mod.CACHE_PATH}")
 
     from . import federal_build
     try:

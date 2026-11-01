@@ -699,7 +699,7 @@
    "rank": 7,
    "office": {
     "name": "Miami-Dade Elections Department",
-    "url": "https://www.miamidade.gov/global/elections/home.page"
+    "url": "https://www.votemiamidade.gov/elections/home.page"
    },
    "read": "2026-11-01",
    "measures": [
@@ -1155,7 +1155,7 @@
    "rank": 11,
    "office": {
     "name": "Clark County Election Department",
-    "url": "https://www.clarkcountynv.gov/government/departments/elections/index.php"
+    "url": "https://www.clarkcountynv.gov/government/departments/elections/"
    },
    "read": "2026-11-01",
    "measures": [],
@@ -1450,7 +1450,7 @@
    "rank": 17,
    "office": {
     "name": "Broward County Supervisor of Elections",
-    "url": "https://www.browardvotes.gov/"
+    "url": "https://browardvotes.gov/"
    },
    "read": "2026-11-01",
    "measures": [],
@@ -1632,7 +1632,7 @@
    "rank": 22,
    "office": {
     "name": "Alameda County Registrar of Voters",
-    "url": "https://acvote.alamedacountyca.gov/"
+    "url": "https://acvote.alamedacountyca.gov/index"
    },
    "read": "2026-11-01",
    "measures": [
@@ -1861,7 +1861,8 @@
     }
    ],
    "own": {
-    "status": "same"
+    "status": "same",
+    "city": "4260000"
    },
    "cities": [
     {
@@ -1878,7 +1879,7 @@
    "rank": 27,
    "office": {
     "name": "Suffolk County Board of Elections",
-    "url": "https://www.suffolkcountyny.gov/Departments/BOE"
+    "url": "https://suffolkcountyny.gov/Board-Of-Elections"
    },
    "read": "2026-11-01",
    "measures": [],
@@ -2215,7 +2216,7 @@
    "rank": 32,
    "office": {
     "name": "Franklin County Board of Elections",
-    "url": "https://vote.franklincountyohio.gov/"
+    "url": "https://vote.franklincountyohio.gov/home"
    },
    "read": "2026-11-01",
    "measures": [
@@ -2801,7 +2802,7 @@
    "rank": 40,
    "office": {
     "name": "Mecklenburg County Board of Elections",
-    "url": "https://www.mecknc.gov/BOE"
+    "url": "https://vote.mecknc.gov/"
    },
    "read": "2026-11-01",
    "measures": [
@@ -3041,7 +3042,7 @@
    "rank": 44,
    "office": {
     "name": "Montgomery County Board of Elections",
-    "url": "https://www.montgomerycountymd.gov/elections/"
+    "url": "https://www.montgomerycountymd.gov/elections"
    },
    "read": "2026-11-01",
    "measures": [],
@@ -3067,7 +3068,7 @@
    "rank": 45,
    "office": {
     "name": "Pima County Elections Department",
-    "url": "https://www.pima.gov/810/Upcoming-Elections"
+    "url": "https://www.pima.gov/upcoming-elections-and-events"
    },
    "read": "2026-11-01",
    "measures": [
@@ -3304,7 +3305,7 @@
    "rank": 49,
    "office": {
     "name": "Westchester County Board of Elections",
-    "url": "https://citizenparticipation.westchestergov.com/"
+    "url": "https://citizenparticipation.westchestercountyny.gov/"
    },
    "read": "2026-11-01",
    "measures": [],
@@ -3329,7 +3330,7 @@
    "rank": 50,
    "office": {
     "name": "Gwinnett County Voter Registrations and Elections",
-    "url": "https://www.gwinnettcounty.com/departments/elections"
+    "url": "https://www.gwinnettcounty.com/government/departments/elections"
    },
    "read": "2026-11-01",
    "measures": [

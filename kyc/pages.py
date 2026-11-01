@@ -815,7 +815,7 @@ def _state_scripts(code=None):
                  if code or src != _STATE_MEASURES)
 
 
-def _scripts(sources):
+def _scripts(sources, also=()):
     """The page's script tags. A page that opens the profile dialog also
     names, inert, the files it loads only when wanted (KYC.loadData): the
     vote files the dialog loads when a member is opened, and the people
@@ -828,7 +828,8 @@ def _scripts(sources):
     if not dialog:
         return tags
     prefix = dialog[0][:-len(_PROFILE_DIALOG)]
-    names = [VOTES_FILES[chamber] for chamber in sorted(VOTES_FILES)] + people_on_demand(sources)
+    names = ([VOTES_FILES[chamber] for chamber in sorted(VOTES_FILES)] + people_on_demand(sources)
+             + list(also))
     lazy = "\n".join(f'<script src="{_e(prefix)}data/{_e(name)}"></script>' for name in names)
     return ("<!-- Loaded only when wanted (KYC.loadData, KYC.loadPeople). -->\n"
             f'<template id="onDemandData">\n{lazy}\n</template>\n' + tags)
@@ -2073,10 +2074,12 @@ _COUNTIES_SIDEBAR = """
 """
 
 
-def render_counties_page(code, host, listed=None):
+def render_counties_page(code, host, listed=None, local=False):
     """A state's counties and every local government in each. The page
     carries the state code only; ``assets/kyc-local.js`` draws it from
-    ``data/local/<st>.js``."""
+    ``data/local/<st>.js``. *local*: whether some of its counties' local
+    questions are listed (rule 102), so the page loads its state's file of
+    them."""
     from . import county_areas
     from .government import jump_options
     from .government_maps import STATES
@@ -2151,7 +2154,10 @@ def render_counties_page(code, host, listed=None):
     ])
     scripts = [s.replace("{code}", code.lower()) for s in (
         "../data/local/{code}.js", "../data/courtcounties.js", "../data/lookup/index.js",
-        "../assets/kyc-regionmap.js", "../assets/kyc-findrep.js", "../assets/kyc-local.js")]
+        "../data/localmeasures/index.js") + (
+        ("../data/localmeasures/{code}.js",) if local else ()) + (
+        "../assets/kyc-regionmap.js", "../assets/kyc-findrep.js", "../assets/kyc-localmeasures.js",
+        "../assets/kyc-local.js")]
     return render_page(
         title=_e(f"{title} — Know Your Candidate"),
         og_title=_e(title),
@@ -2569,11 +2575,13 @@ _BALLOT_SCRIPTS = (
     "data/stategov.js",
     "data/measures.js",
     "data/lookup/index.js",
+    "data/localmeasures/index.js",
     "assets/kyc-odds.js",
     "assets/kyc-cards.js",
     "assets/kyc-profile.js",
     "assets/kyc-stategov.js",
     "assets/kyc-findrep.js",
+    "assets/kyc-localmeasures.js",
     "assets/kyc-ballot.js",
 )
 
@@ -2600,13 +2608,17 @@ _BALLOT_SOURCES = """\
                     location falls in from the Census Bureau's boundaries and ZIP Code
                     Tabulation Areas; the key dates from each election office's own pages; the
                     statewide questions from each election office's own list, each with its
-                    official text and source.</p>
+                    official text and source; the local questions of the 50 most populous
+                    counties (the Census Bureau's 2024 estimates) - each county's own, its
+                    countywide districts' and its cities' of 250,000 people or more - from the
+                    county election office's, the city clerk's or the state election office's
+                    own sample ballot or list, each with its source.</p>
                 <p><strong>Not listed here:</strong> the candidates for the state legislature,
-                    local ballot questions, and judicial and local contests. Where a state's
-                    election office offers a sample ballot, the page links it.</p>"""
+                    local ballot questions elsewhere, and judicial and local contests. Where a
+                    state's election office offers a sample ballot, the page links it.</p>"""
 
 
-def render_ballot_page(host):
+def render_ballot_page(host, local_states=()):
     """ballot.html, Your ballot (rule 92): every contest on one reader's
     ballot that the site can name, from a ZIP code or a location looked up
     on the device. The page is drawn by ``assets/kyc-ballot.js``; the
@@ -2628,7 +2640,8 @@ def render_ballot_page(host):
         "                        your location: the races for Congress and who is in them, the",
         "                        statewide offices and their candidates, whether your seats in the",
         "                        state legislature are up, and the statewide questions in their official",
-        "                        words. Who represents you now is another question:",
+        "                        words, with the local ones of the most populous counties. Who",
+        "                        represents you now is another question:",
         '                        <a href="index.html#findrep">find who represents you</a>.</p>',
         "                </header>",
         '                <section class="state-section findrep ballot-ask" id="ballotAsk" data-ballot-ask></section>',
@@ -2653,7 +2666,9 @@ def render_ballot_page(host):
         footer=_BALLOT_SOURCES,
         built="stamp",
         crumbs=[_HOME, (name, path)],
-        scripts=_scripts(_BALLOT_SCRIPTS),
+        # Each state's local questions (rule 102), loaded when an answer
+        # reaches one of its covered counties.
+        scripts=_scripts(_BALLOT_SCRIPTS, [f"localmeasures/{c.lower()}.js" for c in local_states]),
         noscript=("This page looks your ZIP code up in your browser, and needs JavaScript to "
                   "do it, as the maps, filters and search on the rest of this site do."),
     )

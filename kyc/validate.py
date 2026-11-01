@@ -1850,7 +1850,8 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         results=None, field=None, enrichment=None, odds=None, district_maps=None,
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
         history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
-        photo_routes=(), guides=None, photo_manifest=None, legislators=None, officers=None):
+        photo_routes=(), guides=None, photo_manifest=None, legislators=None, officers=None,
+        local_measures=None):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -1916,6 +1917,33 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         issues += check_statewide_candidates(statewide, snapshot)
     if measures is not None:
         issues += check_ballot_measures(measures)
+    if local_measures is not None:
+        issues += check_local_measures(local_measures)
+    return issues
+
+
+def check_local_measures(data):
+    """The local questions of the most populous counties (kyc/local_measures.py,
+    rule 102): every measure, list and basis an official page's - the county's,
+    a covered city's or the state election office's, or an evidenced host -
+    quoted; a "none" only on a document's own words; a county or city no
+    official source could be read for said to be not found, never "none"
+    (rule 19). An error, as the statewide questions' are; an evidenced host
+    no record cites is a warning, since a stale entry is quietly wrong."""
+    from . import local_measures
+    if not data:
+        return [Issue("error", "local-measures-missing",
+                      f"no {local_measures.CACHE_PATH}; no page lists the local questions")]
+    issues = []
+    found = local_measures.problems(data)
+    if found:
+        issues.append(Issue("error", "local-measures", f"{len(found)} problems in the local ballot "
+                            "measures (kyc/local_measures.py)", found))
+    unused = local_measures.unused_hosts(data)
+    if unused:
+        issues.append(Issue("warn", "local-measures-host-unused",
+                            f"{len(unused)} overrides.LOCAL_MEASURE_SOURCES entries no record cites",
+                            unused))
     return issues
 
 
