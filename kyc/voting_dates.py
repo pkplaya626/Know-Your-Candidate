@@ -137,7 +137,10 @@ JURISDICTION_DOMAINS = {
     "RI": ("ri.gov",), "SC": ("sc.gov", "scvotes.gov", "scstatehouse.gov"),
     "SD": ("sd.gov", "sdsos.gov", "sdlegislature.gov"), "TN": ("tn.gov",),
     "TX": ("texas.gov", "votetexas.gov"), "UT": ("utah.gov",), "VA": ("virginia.gov",),
-    "VI": ("vivote.gov", "vi.gov"), "VT": ("vermont.gov",), "WA": ("wa.gov",),
+    "VI": ("vivote.gov", "vi.gov"), "VT": ("vermont.gov",),
+    # votewa.gov is the Secretary of State's VoteWA, linked from sos.wa.gov
+    # (read 2026-11-01); NASS lists voter.votewa.gov too.
+    "WA": ("wa.gov", "votewa.gov"),
     "WI": ("wi.gov", "wisconsin.gov"), "WV": ("wv.gov",), "WY": ("wyo.gov", "wyoming.gov"),
 }
 

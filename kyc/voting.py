@@ -81,6 +81,10 @@ OFFICIAL_HOSTS = {
     # Texas's election-night results, linked as "Election Results" from the
     # Secretary of State's votetexas.gov (checked 2026-10-17).
     "txelections.civixapps.com": "TX",
+    # West Virginia's sample-ballot look-up (Democracy Live's OmniBallot),
+    # linked as "2026 General Sample Ballot Lookup" from sos.wv.gov/elections
+    # (read 2026-11-01); the subdomain is West Virginia's alone.
+    "wv.omniballot.us": "WV",
     # The Commonwealth Election Commission of the Northern Mariana Islands,
     # and Puerto Rico's State Elections Commission (CEE); vote.gov lists both.
     "votecnmi.gov.mp": "MP",
@@ -183,6 +187,11 @@ SAMPLE_BALLOTS = {
     "RI": "https://vote.sos.ri.gov/",
     "VA": "https://www.elections.virginia.gov/casting-a-ballot/polling-place-lookup/",
     "VT": "https://vote.vermont.gov",
+    "CO": "https://myballot.coloradosos.gov",
+    "MO": "https://s1.sos.mo.gov/elections/voterlookup/",
+    "TN": "https://sos.tn.gov/elections/services/download-the-govotetn-app",
+    "WA": "https://voter.votewa.gov/portal2023/login.aspx",
+    "WV": "https://wv.omniballot.us/sites/54/ballot/app/sb/vr",
 }
 
 # The record behind each sample-ballot page added from 2026-11-01 (rules 79
@@ -293,11 +302,55 @@ SAMPLE_EVIDENCE = {
                         "election information unique to you. Log in using your personal "
                         "information to: ... View sample ballots",
            "read": "2026-11-01", "label": "View your sample ballot (Vermont Voter Portal: sign in)"},
+    # Go Vote Colorado's "What do you want to do?" list; the look-up is
+    # drawn by script.
+    "CO": {"linkedFrom": "https://www.sos.state.co.us/voter/pages/pub/home.xhtml",
+           "linkWords": "View my sample ballot",
+           "pageWords": "What do you want to do? ... View my sample ballot",
+           "read": "2026-11-01", "label": "View your sample ballot"},
+    # The office's own words hedge it ("may be able"), and the label says so.
+    "MO": {"linkedFrom": "https://www.sos.mo.gov/elections/goVoteMissouri/electionday",
+           "linkWords": "Voter Information Lookup",
+           "pageWords": "Where can I see a sample ballot? You may be able to view your sample "
+                        "ballot at our Voter Information Lookup. Sample ballots can also be "
+                        "viewed at the polling place or at the office of your local election "
+                        "authority.",
+           "read": "2026-11-01", "label": "Voter Information Lookup (may show your sample ballot)"},
+    # The office's page for its GoVoteTN app; the app's web form answers a
+    # script 403 and no page read links it.
+    "TN": {"linkedFrom": "https://sos.tn.gov/elections",
+           "linkWords": "Download the GoVoteTN App",
+           "pageWords": "The easiest way for Tennessee voters to find their Election Day polling "
+                        "locations, view and mark sample ballots, see their elected officials, "
+                        "districts and county election commission information as well as access "
+                        "online election results is through the GoVoteTN app",
+           "read": "2026-11-01", "label": "View and mark a sample ballot (GoVoteTN app)"},
+    "WA": {"linkedFrom": "https://www.sos.wa.gov/elections/data-research/election-data-and-maps/"
+                         "election-results-and-voters-pamphlets/2026-general-election-voters-guide",
+           "linkWords": "VoteWA",
+           "pageWords": "Select a format to learn more about what's on your ballot or log in to "
+                        "VoteWA to view a voters' guide customized to the measures and races on "
+                        "your ballot.",
+           "read": "2026-11-01",
+           "label": "Your voters' guide, the races on your ballot (VoteWA: sign in)"},
+    # Democracy Live's OmniBallot, under West Virginia's own subdomain
+    # (OFFICIAL_HOSTS); drawn by script.
+    "WV": {"linkedFrom": "https://sos.wv.gov/elections",
+           "linkWords": "2026 General Sample Ballot Lookup",
+           "pageWords": "2026 General Election 2026 General Early Voting Locations 2026 General "
+                        "Sample Ballot Lookup 2026 General Candidate Listing",
+           "read": "2026-11-01", "label": "Look up your sample ballot"},
+    # A territory's page is in TERRITORY_LINKS, labelled there.
+    "VI": {"linkedFrom": "https://vivote.gov/",
+           "linkWords": "2026 General Election",
+           "pageWords": "Sample Ballots 2026 General Election St. Croix District St. Croix 2026 "
+                        "General Election St. Thomas St. John District St. Thomas/St. John",
+           "read": "2026-11-01", "label": None},
 }
 # The pages curated before records were kept (opened 2026-10-17 from the
 # link each office's home page gives it). No entry joins this set.
-SAMPLE_BEFORE_EVIDENCE = frozenset({"AK", "AL", "DC", "LA", "MI", "MN", "ND", "NM", "SC",
-                                    "SD", "WI"})
+SAMPLE_BEFORE_EVIDENCE = frozenset({"AK", "AL", "DC", "LA", "MI", "MN", "MP", "ND", "NM",
+                                    "SC", "SD", "WI"})
 
 # "deadlines": vote.gov's page for the jurisdiction, from vote.gov/register's
 # own list (read 2026-10-17). Each lists the online, mail and in-person
@@ -345,7 +398,11 @@ TERRITORY_LINKS = {
     "VI": {"status": ("https://app.vivote.gov/lookup", None),
            "polling": ("https://vivote.gov/elections/polling-places/", "Find your voting center"),
            "absentee": ("https://vivote.gov/voters/absentee-ballot/", "Vote absentee"),
-           "register": ("https://vivote.gov/voters/register-to-vote/", None)},
+           "register": ("https://vivote.gov/voters/register-to-vote/", None),
+           # Its 2026 general election page, which lists one sample ballot
+           # a district (read 2026-11-01; SAMPLE_EVIDENCE).
+           "sample": ("https://vivote.gov/?elections=2026-general-election",
+                      "Sample ballots by district (PDF)")},
     "MP": {"status": ("https://www.votecnmi.gov.mp/voter/are-you-a-registered-voter.php",
                       "Check your registration (account needed)"),
            "polling": ("https://www.votecnmi.gov.mp/polling-places.php", None),
@@ -633,18 +690,23 @@ def sample_problems():
     from . import voting_dates
 
     out = []
-    for code in sorted(set(SAMPLE_BALLOTS) - SAMPLE_BEFORE_EVIDENCE - set(SAMPLE_EVIDENCE)):
-        out.append(f"{code}: {SAMPLE_BALLOTS[code]} has no record in SAMPLE_EVIDENCE")
+    pages = dict(SAMPLE_BALLOTS)
+    pages.update({code: links["sample"][0] for code, links in TERRITORY_LINKS.items()
+                  if "sample" in links})
+    for code in sorted(set(pages) - SAMPLE_BEFORE_EVIDENCE - set(SAMPLE_EVIDENCE)):
+        out.append(f"{code}: {pages[code]} has no record in SAMPLE_EVIDENCE")
     for code, record in sorted(SAMPLE_EVIDENCE.items()):
         where = f"{code} sample"
-        if code not in SAMPLE_BALLOTS:
-            out.append(f"{where}: a record for no page in SAMPLE_BALLOTS")
+        if code not in pages:
+            out.append(f"{where}: a record for no sample-ballot page")
             continue
+        if code in TERRITORY_LINKS and record.get("label") is not None:
+            out.append(f"{where}: a territory's label is TERRITORY_LINKS's, not the record's")
         if code in SAMPLE_BEFORE_EVIDENCE:
             out.append(f"{where}: in SAMPLE_BEFORE_EVIDENCE and recorded; take it out of the set")
         if set(record) != set(SAMPLE_FIELDS):
             out.append(f"{where}: fields {sorted(record)}, not {sorted(SAMPLE_FIELDS)}")
-        for url in [SAMPLE_BALLOTS[code]] + [u for u in [record.get("linkedFrom")] if u]:
+        for url in [pages[code]] + [u for u in [record.get("linkedFrom")] if u]:
             ok, why = voting_dates.official_source(url, code)
             if not ok:
                 out.append(f"{where}: {url}: {why}")
