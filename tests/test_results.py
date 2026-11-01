@@ -1827,6 +1827,43 @@ class TestNovember2024Rehearsal(unittest.TestCase):
             "Alabama's 2nd congressional district Democratic primary, 2024"), "primary")
         self.assertIsNone(results._stage("Statehood Green results"))
 
+    def test_a_ranked_choice_final_round_with_a_majority_is_read(self):
+        # Maine's 2nd district, as certified: one table, the final round,
+        # Golden 50.35%.
+        statuses = page_statuses(november_2024("me_2_certified.txt"), 2,
+                                 general_held=True, ranked_choice=True)
+        self.assertEqual((statuses["Jared Golden"], statuses["Austin Theriault"]),
+                         ("elected", "defeated"))
+
+    def test_ranked_choice_first_choices_are_a_lead_not_a_win(self):
+        # Maine's 2nd district in 2018: Poliquin led the first choices with
+        # 46.3% and Golden won the tabulated rounds. A page that marks the
+        # first-choice leader before the rounds decides nothing.
+        first = box("Maine's 2nd congressional district, 2026",
+                    ("Bruce Poliquin", 134184, True), ("Jared Golden", 132013, False),
+                    ("Tiffany Bond", 16552, False), ("Will Hoar", 6875, False))
+        boxes = results.parse_boxes(first)
+        self.assertEqual(results.resolve_race(boxes, general_held=True)["Bruce Poliquin"],
+                         "elected")                       # elsewhere a plurality wins
+        statuses = results.resolve_race(boxes, general_held=True, ranked_choice=True)
+        self.assertEqual(set(statuses.values()), {"nominee"})
+        # A table with no counts at all (marked the morning after) is no
+        # majority either.
+        unknown = results.parse_boxes(first.replace("134,184", "").replace("132,013", ""))
+        self.assertEqual(results.resolve_race(unknown, general_held=True,
+                                              ranked_choice=True)["Bruce Poliquin"], "nominee")
+        # Once the final round is up, the same mark on the first choices is
+        # read beside it.
+        final = box("Maine's 2nd congressional district, 2026 (final round)",
+                    ("Jared Golden", 142440, True), ("Bruce Poliquin", 138931, False))
+        both = results.parse_boxes(first.replace("winning candidate", "candidate") + "\n" + final)
+        statuses = results.resolve_race(both, general_held=True, ranked_choice=True)
+        self.assertEqual((statuses["Jared Golden"], statuses["Bruce Poliquin"],
+                          statuses["Tiffany Bond"]), ("elected", "defeated", "defeated"))
+
+    def test_the_build_counts_maine_and_alaska_by_ranked_choice(self):
+        self.assertEqual(set(results.RANKED_CHOICE), {"ME", "AK"})
+
     def test_before_election_day_the_seat_titled_table_is_the_ballot(self):
         statuses = page_statuses(november_2024("al_1_certified.txt"), 1, has_runoff=True)
         self.assertEqual(statuses, {"Barry Moore": "nominee", "Tom Holmes": "nominee",

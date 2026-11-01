@@ -98,6 +98,15 @@ ALL_PARTY_PRIMARIES = {
     "AK": ("top-four", "AS 15.25.010"),
 }
 
+# States that count their November races for Congress by ranked choice: a
+# candidate with no majority of the first choices is not elected until the
+# rounds are tabulated, a week or more later (Maine's 2nd district in 2018:
+# Bruce Poliquin led the first choices and Jared Golden won).
+RANKED_CHOICE = {
+    "ME": "21-A M.R.S. 723-A",
+    "AK": "AS 15.15.350",
+}
+
 
 class ResultsError(RuntimeError):
     pass
@@ -1040,7 +1049,8 @@ _COUNTY_CONVENTION = re.compile(r"\bcounty\b.*\bconvention\b", re.I)
 
 
 def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
-                 general_held=False, general_runoff=False, general_runoff_held=False):
+                 general_held=False, general_runoff=False, general_runoff_held=False,
+                 ranked_choice=False):
     """Who is still standing, from a race's results tables.
 
     Returns ``{name: status}`` for everyone named in a primary-stage table,
@@ -1077,7 +1087,10 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
     the November ballot is DEFEATED, and once *general_runoff_held* its marked
     winner is ELECTED. An open primary's first round is the November election
     itself: its majority winner is ELECTED, its top two are in a RUNOFF, and
-    the rest are DEFEATED.
+    the rest are DEFEATED. Where the count is by *ranked_choice* (Maine,
+    Alaska), a marked winner is ELECTED only beside a majority of the votes
+    in a November table that marks them: first choices are a lead, never a
+    win, until the rounds are tabulated.
     """
     if open_primary:
         boxes = _open_rounds(boxes, runoff_held)
@@ -1087,7 +1100,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             # all, so nothing is inferred from anyone's absence either.
             return {}
     primaries, runoffs, generals, infobox, lists = {}, {}, [], [], {}
-    general_runoff_rows = []
+    general_runoff_rows, general_tables = [], []
     for raw_title, rows in _canonical(boxes):
         title = _clean_title(raw_title)
         if title == INFOBOX_TITLE:
@@ -1108,6 +1121,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             primaries.setdefault(title, []).extend(rows)
         elif stage == "general":
             generals.extend(rows)
+            general_tables.append(rows)
 
     status = _resolve_tables(primaries, runoffs, generals, has_runoff or open_primary)
 
@@ -1153,7 +1167,8 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
     if general_held and open_primary:
         _settle_open_primary(status, boxes)
     elif general_held:
-        _settle_general(status, generals, general_runoff_rows, general_runoff_held)
+        _settle_general(status, generals, general_runoff_rows, general_runoff_held,
+                        majority_of=general_tables if ranked_choice else None)
     return status
 
 
@@ -1166,7 +1181,7 @@ def _unpartisan_runoff(title):
     return _stage(title) == "runoff" and not _PARTY_WORDS.search(title)
 
 
-def _settle_general(status, generals, runoff_rows, runoff_held):
+def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None):
     """Who won in November, from the general table's marked winner.
 
     Someone already WITHDRAWN - listed as having withdrawn after the ballots
@@ -1190,8 +1205,20 @@ def _settle_general(status, generals, runoff_rows, runoff_held):
     winners = {r["name"] for r in ballot if r["won"]}
     if len(winners) != 1:
         return                      # count continuing, or a page mid-edit
+    if majority_of is not None and not any(_majority(rows, winners) for rows in majority_of):
+        return                      # first choices, before the rounds are tabulated
     for name in names:
         status[name] = ELECTED if name in winners else DEFEATED
+
+
+def _majority(rows, winners):
+    """True when one table marks a winner holding a majority of its counted vote."""
+    rows = [r for r in rows if not r["withdrawn"]]
+    marked = [r for r in rows if r["won"] and r["name"] in winners]
+    votes = [r.get("votes") for r in rows]
+    if len(marked) != 1 or any(v is None for v in votes) or not sum(votes):
+        return False
+    return 2 * marked[0]["votes"] > sum(votes)
 
 
 def _settle_open_primary(status, boxes):
@@ -2212,7 +2239,8 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                                open_primary=is_open, runoff_held=held,
                                general_held=general_held(today),
                                general_runoff=state in _general_runoffs(),
-                               general_runoff_held=general_runoff_held(state, today))
+                               general_runoff_held=general_runoff_held(state, today),
+                               ranked_choice=state in RANKED_CHOICE)
         if not outcome:
             if is_open and any(r.get("won") for _, rs in boxes for r in rs):
                 # Winners are marked, but not as a result the open-primary
