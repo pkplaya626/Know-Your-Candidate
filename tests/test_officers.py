@@ -1084,6 +1084,31 @@ class TestAttorneyGeneralPhotos(unittest.TestCase):
         self.assertNotIn("photo", rows["AR"])
         self.assertIn("AR: photograph dropped for Tim Griffin (was https://ag.example.gov/old.jpg)",
                       problems)
+        # One of two pages says nothing, the other is read whole: the
+        # photograph may be on the one that said nothing, so it is kept.
+        home = (self.HOME[0], self.HOME[1].replace(
+            '<a href="/about-us/">About us</a>', '<a href="/bio/">Biography</a>'))
+        rows = {"AR": {"name": "Tim Griffin"}}
+        problems = officers.add_ag_photos(
+            rows, {"AR": [home]}, old, check=check, pause=0,
+            get=lambda url, timeout=60: "" if url.endswith("/meet-tim/") else page)
+        self.assertEqual(rows["AR"].get("photo"), "https://ag.example.gov/old.jpg")
+        # A new holder whose page says nothing inherits no one's photograph,
+        # and the run says it could not be read, not that the pages show none.
+        home = (self.HOME[0], '<a href="/meet-the-ag/">Meet the Attorney General</a>')
+        rows = {"AR": {"name": "Someone Else"}}
+        got = []
+
+        def silent(url, timeout=60):
+            got.append(url)
+            return ""
+        problems = officers.add_ag_photos(rows, {"AR": [home]}, old, check=check, pause=0,
+                                          get=silent)
+        self.assertIn("https://ag.example.gov/meet-the-ag/", got)
+        self.assertNotIn("photo", rows["AR"])
+        self.assertIn("AR: Someone Else's photograph could not be read, and no earlier one of "
+                      "them is kept", problems)
+        self.assertFalse([p for p in problems if "show no photograph" in p], problems)
 
     def test_a_colleague_sharing_letters_or_a_surname_is_not_the_attorney_general(self):
         """A substring test took "Carrie-Smith-Headshot" for Chris Carr and

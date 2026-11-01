@@ -22966,6 +22966,21 @@
    ],
    "width": 335
   },
+  "https://coag.gov/app/uploads/2019/06/phil-weiser-pillars-copy-200x300.png": {
+   "bytes": 86486,
+   "etag": "\"66e004bb-151d6\"",
+   "gone": 0,
+   "height": 300,
+   "kinds": [
+    "officer"
+   ],
+   "lastModified": "Tue, 10 Sep 2024 08:35:07 GMT",
+   "read": "2026-10-25",
+   "records": [
+    "officer:CO:ag:Phil Weiser"
+   ],
+   "width": 200
+  },
   "https://courts.delaware.gov/supreme/agency/img/supreme_griffiths.jpg": {
    "bytes": 505015,
    "copy": {

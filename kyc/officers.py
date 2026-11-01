@@ -1014,6 +1014,10 @@ def add_ag_photos(rows, pages, previous=None, check=None, pause=1.0, get=None):
                                 f"{heavy['why']} ({heavy['url']}); "
                                 + ("kept at full size and said" if heavy["kept"]
                                    else "taken smaller from the same file"))
+        elif why == "unknown":
+            # Not "show no photograph": the pages were not all read (rule 19).
+            problems.append(f"{code}: {row['name']}'s photograph could not be read, and no "
+                            "earlier one of them is kept")
         else:
             problems.append(f"{code}: the office's own pages show no photograph of "
                             f"{row['name']} that passes the checks")
