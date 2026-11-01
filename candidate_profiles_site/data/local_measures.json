@@ -317,7 +317,8 @@
      },
      "designation": "Question 1",
      "title": "General Obligation Bond: Enhance Public Safety",
-     "text": null,
+     "text": "Shall Mesa be authorized to issue and sell $150,000,000 of general obligation bonds to provide funding to support fire and medical, police, and public safety improvements, facilities, and communication systems, associated equipment, apparatuses, and technology, municipal improvements that support community and public safety, and acquisition of land for such purposes?",
+     "textNote": "Read from the City Clerk's page in parts and joined; checked word for word by a second reading of the page on 2026-11-01.",
      "kind": "bond",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -325,8 +326,7 @@
       "quote": "City of Mesa 2026 General Election ... Question 1. General Obligation Bond: Enhance Public Safety ... Shall Mesa be authorized to issue and sell $150,000,000 of general obligation bonds to pro ..."
      },
      "read": "2026-11-01",
-     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
-     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"Shall Mesa be authorized to issue and sell $150,000,000 of general obligation bonds to provide funding to support fire and medical, police, and public safety improvements, facilities, and communication systems, associated equipment, apparatuses, and technology, municipal improvements that support community and public safety, and acquisition of land for such purposes?\"}"
+     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"secondReading\": \"2026-11-01: the page read again through WebFetch only (it answers a plain script with Akamai's 'Access Denied', which this project does not get past), asked to quote every question as printed; it came back in segments, joined here. Title and text agree word for word with the first reading.\"}"
     },
     {
      "jurisdiction": {
@@ -336,7 +336,8 @@
      },
      "designation": "Question 2",
      "title": "General Obligation Bond: Enhance Transportation Improvements for Safer and Less Congested Streets",
-     "text": null,
+     "text": "Shall Mesa be authorized to issue and sell $135,000,000 of general obligation bonds to provide funding to support safer and less congested streets, including for arterial street improvements, pavement reconstruction, street improvements, streetlights, traffic signals, communication infrastructure, shared use paths, associated improvements, and the acquisition of land for such purposes?",
+     "textNote": "Read from the City Clerk's page in parts and joined; checked word for word by a second reading of the page on 2026-11-01.",
      "kind": "bond",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -344,8 +345,7 @@
       "quote": "City of Mesa 2026 General Election ... Question 2. General Obligation Bond: Enhance Transportation Improvements for Safer and Less Congested Streets ... Shall Mesa be authorized to issue and sell $135,000,000 of general obligation bonds to pro ..."
      },
      "read": "2026-11-01",
-     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
-     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"Shall Mesa be authorized to issue and sell $135,000,000 of general obligation bonds to provide funding to support safer and less congested streets, including for arterial street improvements, pavement reconstruction, street improvements, streetlights, traffic signals, communication infrastructure, shared use paths, associated improvements, and the acquisition of land for such purposes?\"}"
+     "notes": "{\"authority\": \"Resolution No. 12538 (Bond Questions 1 and 2)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"secondReading\": \"2026-11-01: the page read again through WebFetch only (it answers a plain script with Akamai's 'Access Denied', which this project does not get past), asked to quote every question as printed; it came back in segments, joined here. Title and text agree word for word with the first reading.\"}"
     },
     {
      "jurisdiction": {
@@ -355,7 +355,8 @@
      },
      "designation": "Question 3",
      "title": "Charter Amendment: Section 209(A) Relating to Council Meeting Procedures and Public Notice",
-     "text": null,
+     "text": "To conform with state law, shall Mesa City Charter Section 209(A) relating to Council meetings be amended to require that the procedures for fixing the time and place of regular meetings and giving public notice of meetings, and the purposes for executive sessions be in accordance with state law?",
+     "textNote": "Read from the City Clerk's page in parts and joined; checked word for word by a second reading of the page on 2026-11-01.",
      "kind": "charter amendment",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -363,8 +364,7 @@
       "quote": "City of Mesa 2026 General Election ... Question 3. Charter Amendment: Section 209(A) Relating to Council Meeting Procedures and Public Notice ... To conform with state law, shall Mesa City Charter Section 209(A) relating to Council meet ..."
      },
      "read": "2026-11-01",
-     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
-     "notes": "{\"authority\": \"Ordinance No. 6017 (Question 3)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"To conform with state law, shall Mesa City Charter Section 209(A) relating to Council meetings be amended to require that the procedures for fixing the time and place of regular meetings and giving public notice of meetings, and the purposes for executive sessions be in accordance with state law?\"}"
+     "notes": "{\"authority\": \"Ordinance No. 6017 (Question 3)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"secondReading\": \"2026-11-01: the page read again through WebFetch only (it answers a plain script with Akamai's 'Access Denied', which this project does not get past), asked to quote every question as printed; it came back in segments, joined here. Title and text agree word for word with the first reading.\"}"
     },
     {
      "jurisdiction": {
@@ -374,7 +374,8 @@
      },
      "designation": "Question 4",
      "title": "Charter Amendment: Section 211 Relating to Ordinance Posting and Publication",
-     "text": null,
+     "text": "To conform with state law modernization efforts, shall Mesa City Charter Section 211 relating to ordinances be amended to require ordinances to be posted on the City’s website, posted at one physical location in Mesa, and published in accordance with state law?",
+     "textNote": "Read from the City Clerk's page in parts and joined; checked word for word by a second reading of the page on 2026-11-01.",
      "kind": "charter amendment",
      "source": {
       "url": "https://www.mesaaz.gov/Government/City-Clerk/Elections/GeneralElection",
@@ -382,8 +383,7 @@
       "quote": "City of Mesa 2026 General Election ... Question 4. Charter Amendment: Section 211 Relating to Ordinance Posting and Publication ... To conform with state law modernization efforts, shall Mesa City Charter Section 211 relat ..."
      },
      "read": "2026-11-01",
-     "textMissing": "This site could read the City of Mesa's page only in parts, and no second reader has yet checked the joined text word for word, so it is not shown here; it is in the source.",
-     "notes": "{\"authority\": \"Ordinance No. 6016 (Question 4)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"joinedText\": \"To conform with state law modernization efforts, shall Mesa City Charter Section 211 relating to ordinances be amended to require ordinances to be posted on the City’s website, posted at one physical location in Mesa, and published in accordance with state law?\"}"
+     "notes": "{\"authority\": \"Ordinance No. 6016 (Question 4)\", \"note\": \"Read through WebFetch (the page refuses a plain script with Akamai 'Access Denied'); quoted in segments and joined. The ballot itself is on Maricopa County's voter dashboard, not read.\", \"secondReading\": \"2026-11-01: the page read again through WebFetch only (it answers a plain script with Akamai's 'Access Denied', which this project does not get past), asked to quote every question as printed; it came back in segments, joined here. Title and text agree word for word with the first reading.\"}"
     },
     {
      "jurisdiction": {
