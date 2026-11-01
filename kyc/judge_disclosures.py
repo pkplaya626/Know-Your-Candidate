@@ -19,11 +19,19 @@ A judge is joined only through that id (rule 32), never by a name search,
 and an id is not proof on its own (rule 82): the person's record must carry
 the judge's surname as the directory writes it (accents, case and a
 compound's other half aside: "DeArcy Hall" is CourtListener's "Hall"), and
-a year of birth the directory's agrees with where both give one. What
-disagrees gives nothing and is reported. A joined judge with reports links
-their CourtListener page at its "Financial Disclosures" section; one with
-none reads "CourtListener lists no reports", never that none was filed
-(rule 19). A read that fails, or comes back short, keeps the cache (rule 8).
+a year of birth the directory's agrees with where both give one; where
+either gives none, its first given name (or that name's initial) must be
+one of the directory's given names, or a record carrying a namesake
+colleague's id would pass on the surname alone. What disagrees gives
+nothing and is reported. A joined judge with reports links their
+CourtListener page at its "Financial Disclosures" section. One whose joined
+record holds none is said to be exactly that - the record carrying their
+FJC id lists no reports - and that record is linked so a reader can look:
+CourtListener keeps duplicate records, and Judge Graber's fifteen reports
+are filed under one that carries no FJC id. It never reads that
+CourtListener holds none for the judge, let alone that none was filed
+(rule 19), and a duplicate is never joined by its name (rule 32). A read
+that fails, or comes back short, keeps the cache (rule 8).
 
 The result is ``data/judge_disclosures.json``.
 """
@@ -47,7 +55,8 @@ BUCKET = "https://com-courtlistener-storage.s3-us-west-2.amazonaws.com/"
 LISTING = BUCKET + "?list-type=2&prefix=bulk-data/"
 PEOPLE = "people-db-people-"
 REPORTS = "financial-disclosures-"
-PERSON_PAGE = "https://www.courtlistener.com/person/{id}/{slug}/#disclosures"
+PERSON_RECORD = "https://www.courtlistener.com/person/{id}/{slug}/"
+PERSON_PAGE = PERSON_RECORD + "#disclosures"
 SITE = "https://www.courtlistener.com/"
 USER_AGENT = "know-your-candidate/2.1 (open-source civic data project)"
 PAUSE = 1.0
@@ -122,6 +131,7 @@ def read_people(data):
         by_id[fid] = {"id": row["id"].strip(), "slug": row["slug"].strip(),
                       "last": row.get("name_last", "").strip(),
                       "first": row.get("name_first", "").strip(),
+                      "middle": row.get("name_middle", "").strip(),
                       "dob": row.get("date_dob", "").strip(),
                       "alias": bool((row.get("is_alias_of_id") or "").strip())}
     return by_id, twice
@@ -177,6 +187,31 @@ def directory_surname(judge):
     return (judge.get("sortName") or "").split(",")[0].strip()
 
 
+_SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
+
+
+def _given_words(text):
+    """A name's words, folded, with brackets dropped as the letters they
+    hold ("R[obert]" is "Robert") and suffixes left out."""
+    return [w for w in _fold(re.sub(r"[\[\]]", "", text or "")) if w not in _SUFFIXES]
+
+
+def given_agrees(judge, person):
+    """CourtListener's first given name is one of the directory's given
+    names: the same word, or an initial of it ("W." for William), or the
+    directory's initial for it. The directory's given names are its full
+    name's words other than the surname's, and its sort name's."""
+    theirs = _given_words(person.get("first"))
+    if not theirs:
+        return False
+    first = theirs[0]
+    surname = set(_given_words(directory_surname(judge)))
+    given = (_given_words((judge.get("sortName") or "").partition(",")[2])
+             + [w for w in _given_words(judge.get("name")) if w not in surname])
+    return any(w == first or (len(first) == 1 and w[0] == first)
+               or (len(w) == 1 and first[0] == w) for w in given)
+
+
 def join(judges, jids, people, twice, reports):
     """``({nid: entry}, refused)``. An entry is ``{"person", "slug",
     "reports", "first", "last"}`` (``reports`` 0 and no years for a judge
@@ -202,9 +237,17 @@ def join(judges, jids, people, twice, reports):
             continue
         born = ((judge.get("born") or {}).get("year") or "").strip()
         theirs = person["dob"][:4]
-        if born and re.fullmatch(r"\d{4}", theirs) and theirs != born:
+        both_years = bool(re.fullmatch(r"\d{4}", born) and re.fullmatch(r"\d{4}", theirs))
+        if both_years and theirs != born:
             refused.append(f"{name}: CourtListener's record for FJC id {jid} gives a birth year "
                            f"of {theirs}, the directory {born}")
+            continue
+        # With no year to compare, the surname alone would join a record
+        # carrying a namesake colleague's id: the given name must agree too.
+        if not both_years and not given_agrees(judge, person):
+            refused.append(f"{name}: CourtListener's record for FJC id {jid} has the given name "
+                           f"{person['first']!r} and no year of birth to compare; the directory's "
+                           f"given names do not include it")
             continue
         years = sorted(reports.get(person["id"]) or [])
         entry = {"person": person["id"], "slug": person["slug"], "reports": len(years)}
@@ -244,14 +287,17 @@ def fetch(judges, previous=None, read=None, today=None, log=print):
 # ------------------------------------------------------------ the pages
 
 def for_judge(cache, nid):
-    """What a judge's dialog shows: ``{"url", "reports", "first", "last"}``,
-    ``{"reports": 0}`` for a joined judge CourtListener lists none for, or
+    """What a judge's dialog shows: ``{"url", "reports", "first", "last"}``
+    (the record's "Financial Disclosures" section); ``{"record", "reports":
+    0}`` for a joined judge whose record lists none, the record itself linked
+    so a reader can look, since the words are about that record only; or
     None for a judge no record joins."""
     entry = ((cache or {}).get("judges") or {}).get(nid)
     if not entry:
         return None
     if not entry.get("reports"):
-        return {"reports": 0}
+        return {"record": PERSON_RECORD.format(id=entry["person"], slug=entry["slug"]),
+                "reports": 0}
     return {"url": PERSON_PAGE.format(id=entry["person"], slug=entry["slug"]),
             "reports": entry["reports"], "first": entry["first"], "last": entry["last"]}
 

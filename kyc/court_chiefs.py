@@ -15,8 +15,10 @@ the directory's record, attributed to the court, never in place of it
 Rule 57's checks hold: a page naming two chiefs is refused, and so is a
 chief the directory does not list on that court by surname *and* first
 given name (``vacancies.judge_of``'s test: a surname alone would point at a
-colleague of that name). A page that cannot be read keeps the last read
-(rule 8), each read carries its own day, and a read older than
+colleague of that name); one chief named in two headings is one chief. A
+page that cannot be read, or reads in a shape the recipe does not know (no
+judge's heading, none titled chief), keeps the last read (rule 8), each
+read carries its own day, and a read older than
 ``STALE_DAYS`` is a build warning. A recipe for a court whose directory
 record is settled is read all the same but not shown, and the build says
 the recipe can go.
@@ -50,13 +52,21 @@ RECIPES = {
 
 _HEADING = re.compile(r"(?is)<h([2-6])\b[^>]*>(.*?)</h\1>")
 _TITLED = re.compile(r"^(?:The\s+)?(?:Hon\.?|Honorable)?\s*(.+?),\s*((?:Chief\s+|Senior\s+)?"
+                     r"(?:U\.\s?S\.\s+|United\s+States\s+)?"
                      r"(?:District|Circuit|Magistrate|Bankruptcy)?\s*Judge)\s*$", re.I)
 _CHIEF = re.compile(r"^Chief\b", re.I)
 _SUFFIX = re.compile(r",?\s+(?:Jr\.?|Sr\.?|II|III|IV)$", re.I)
 
 
 class CourtChiefError(RuntimeError):
-    """A court's page could not be read, or is not what its recipe knows."""
+    """A court's page could not be read, or did not pass the checks."""
+
+
+class CourtChiefUnread(CourtChiefError):
+    """A court's page is not in a shape its recipe knows: no judge's heading,
+    or none titled chief. That concludes nothing (rule 8; the review of PR
+    #138): a renamed title ("Chief United States District Judge") would
+    otherwise replace a good read with a refusal while nothing had changed."""
 
 
 def _get(url, timeout=60):
@@ -65,7 +75,7 @@ def _get(url, timeout=60):
         with urllib.request.urlopen(request, timeout=timeout) as response:
             return response.read().decode("utf-8", errors="replace")
     except OSError as exc:
-        raise CourtChiefError(f"could not fetch {url}: {exc}") from exc
+        raise CourtChiefUnread(f"could not fetch {url}: {exc}") from exc
 
 
 def _text(fragment):
@@ -117,21 +127,28 @@ def directory_judge(name, cid, judges):
 
 def read_court(cid, page, judges):
     """The chief court *cid*'s page names, checked: ``{"chief", "title",
-    "words", "judge"}``. Raises on two chiefs, on none, and on a chief the
-    directory does not list on this court."""
+    "words", "judge"}``. Raises ``CourtChiefError`` on two different chiefs
+    and on a chief the directory does not list on this court, and
+    ``CourtChiefUnread`` on a page in a shape the recipe does not know (no
+    judge's heading, none titled chief), which concludes nothing."""
     recipe = RECIPES[cid]["recipe"]
     if recipe != "headings":
         raise CourtChiefError(f"{cid}: no reader for recipe {recipe!r}")
     rows = read_headings(page)
     if not rows:
-        raise CourtChiefError(f"{cid}: the page lists no judge as its recipe knows")
-    chiefs = [r for r in rows if _CHIEF.match(r["title"])
-              and not re.search(r"magistrate|bankruptcy", r["title"], re.I)]
+        raise CourtChiefUnread(f"{cid}: the page lists no judge as its recipe knows")
+    chiefs = []
+    for row in rows:
+        if not _CHIEF.match(row["title"]) or re.search(r"magistrate|bankruptcy", row["title"], re.I):
+            continue
+        # One chief named in two headings is one chief.
+        if sort_form(row["name"]).lower() not in [sort_form(c["name"]).lower() for c in chiefs]:
+            chiefs.append(row)
     if len(chiefs) > 1:
         raise CourtChiefError(f"{cid}: the page names {len(chiefs)} chief judges: "
                               + "; ".join(r["words"] for r in chiefs))
     if not chiefs:
-        raise CourtChiefError(f"{cid}: the page names no chief judge")
+        raise CourtChiefUnread(f"{cid}: the page names no chief judge as its recipe knows")
     chief = chiefs[0]
     jid = directory_judge(chief["name"], cid, judges)
     if not jid:
@@ -143,8 +160,10 @@ def read_court(cid, page, judges):
 
 def fetch(judges, previous=None, read=None, today=None):
     """``({court id: entry}, problems)`` for every court with a recipe. A
-    page that cannot be read keeps *previous*'s entry (rule 8); a page that
-    reads but fails a check is refused, and nothing from it is shown."""
+    page that cannot be read, or that reads in a shape the recipe does not
+    know, keeps *previous*'s entry (rule 8); a page that reads but
+    contradicts the checks (two chiefs, a chief the directory does not list
+    here) is refused, and nothing from it is shown."""
     live = read is None
     read = read or _get
     today = today or datetime.date.today().isoformat()
@@ -155,13 +174,14 @@ def fetch(judges, previous=None, read=None, today=None):
         url = RECIPES[cid]["url"]
         try:
             page = read(url)
-        except CourtChiefError as exc:
+            entry = read_court(cid, page, judges)
+        except CourtChiefUnread as exc:
+            # A page not read, or read in a shape the recipe does not know,
+            # concludes nothing: the last read stands.
             problems.append(str(exc))
             old = (previous or {}).get(cid)
             out[cid] = old if old else {"unread": True, "source": url}
             continue
-        try:
-            entry = read_court(cid, page, judges)
         except CourtChiefError as exc:
             problems.append(str(exc))
             out[cid] = {"refused": str(exc), "source": url, "read": today}

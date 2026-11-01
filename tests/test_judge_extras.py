@@ -83,16 +83,44 @@ class TestTheCourtsWordOnItsChief(unittest.TestCase):
         with self.assertRaises(court_chiefs.CourtChiefError):
             court_chiefs.read_court("nc-m", page, judges())
 
-    def test_no_chief_is_refused_not_guessed(self):
+    def test_no_chief_is_not_guessed(self):
         page = NCMD.replace("Chief District Judge", "District Judge")
-        with self.assertRaisesRegex(court_chiefs.CourtChiefError, "no chief"):
+        with self.assertRaisesRegex(court_chiefs.CourtChiefUnread, "no chief"):
             court_chiefs.read_court("nc-m", page, judges())
+
+    def test_one_chief_in_two_headings_is_one_chief(self):
+        page = NCMD.replace("</body>", "<h2>Catherine C. Eagles, Chief District Judge</h2></body>")
+        self.assertEqual(court_chiefs.read_court("nc-m", page, judges())["judge"], "fjc-1")
+
+    def test_a_united_states_title_is_read(self):
+        page = NCMD.replace(", Chief District Judge", ", Chief United States District Judge")
+        read = court_chiefs.read_court("nc-m", page, judges())
+        self.assertEqual((read["judge"], read["title"]),
+                         ("fjc-1", "Chief United States District Judge"))
+
+    def test_a_page_in_a_shape_the_recipe_does_not_know_keeps_the_last_read(self):
+        # The PR #181 review: a renamed title, or no judge's heading at all,
+        # stored a refusal over the good read while nothing had changed.
+        old = {"chief": "Catherine C. Eagles", "title": "Chief District Judge",
+               "words": "Catherine C. Eagles, Chief District Judge", "judge": "fjc-1",
+               "source": "x", "read": "2026-10-01"}
+        for page in (NCMD.replace(", Chief District Judge", ", Presiding Jurist"),
+                     "<html><body><p>Our judges</p></body></html>"):
+            reads, trouble = court_chiefs.fetch(judges(), {"nc-m": old}, today=TODAY,
+                                                read=lambda url, page=page: page)
+            self.assertEqual(reads["nc-m"], old)
+            self.assertTrue(trouble)
+            self.assertEqual(court_chiefs.shown(cache(reads["nc-m"]), "nc-m")["read"],
+                             "2026-10-01")
+        reads, _ = court_chiefs.fetch(judges(), None, today=TODAY,
+                                      read=lambda url: "<html><body></body></html>")
+        self.assertTrue(reads["nc-m"]["unread"])
 
     def test_a_page_not_read_keeps_the_last_read(self):
         old = {"chief": "Catherine C. Eagles", "read": "2026-10-01", "judge": "fjc-1"}
 
         def fail(url):
-            raise court_chiefs.CourtChiefError("timed out")
+            raise court_chiefs.CourtChiefUnread("timed out")
         reads, trouble = court_chiefs.fetch(judges(), {"nc-m": old}, read=fail, today=TODAY)
         self.assertEqual(reads["nc-m"], old)
         self.assertTrue(trouble)
@@ -231,8 +259,57 @@ class TestJudgesDisclosures(unittest.TestCase):
         self.assertIn("200", self.cache["judges"])
         self.assertIn("700", self.cache["judges"])
 
-    def test_joined_with_none_reads_lists_none_not_a_link(self):
-        self.assertEqual(judge_disclosures.for_judge(self.cache, "200"), {"reports": 0})
+    def test_joined_with_none_links_that_record_not_its_disclosures(self):
+        # The words are about the record carrying the id, so that record is
+        # linked for a reader to look; no "#disclosures", since it has none.
+        self.assertEqual(judge_disclosures.for_judge(self.cache, "200"), {
+            "record": "https://www.courtlistener.com/person/2/lashann-hall/", "reports": 0})
+
+    def test_a_duplicate_record_without_the_id_is_never_joined_by_name(self):
+        # The PR #181 review: Judge Graber's record carrying her FJC id holds
+        # no reports, and her fifteen are under a same-name record carrying
+        # none. The duplicate is not joined (rule 32), and what is shown is
+        # about the joined record only.
+        people = PEOPLE + [["12", "", "lashann-dearcy-hall", "LaShann", "DeArcy Hall", "", ""]]
+        reports = REPORTS + [["9", "2019", "12"], ["10", "2020", "12"]]
+        held = judge_disclosures.fetch(DIRECTORY, read=reader(people_file(people),
+                                                              reports_file(reports)),
+                                       today=TODAY, log=lambda *a: None)
+        self.assertEqual(held["judges"]["200"]["person"], "2")
+        shown = judge_disclosures.for_judge(held, "200")
+        self.assertEqual(shown["reports"], 0)
+        self.assertNotIn("url", shown)
+        self.assertNotIn("#disclosures", shown["record"])
+
+    def test_with_no_year_to_compare_the_given_name_must_agree(self):
+        # Two judges of one surname whose CourtListener records carry each
+        # other's ids, with no year of birth on either side.
+        fjc = FJC + '"900","90","Smith"\n"901","91","Smith"\n"902","92","Brown"\n"903","93","Gray"\n'
+        directory = dict(DIRECTORY, **{
+            "fjc-900": {"name": "John Robert Smith", "sortName": "Smith, John"},
+            "fjc-901": {"name": "Mary Smith", "sortName": "Smith, Mary"},
+            "fjc-902": {"name": "William Brown", "sortName": "Brown, William"},
+            "fjc-903": {"name": "Robert Gray", "sortName": "Gray, Robert"}})
+        people = PEOPLE + [["90", "90", "mary-smith", "Mary", "Smith", "", ""],
+                           ["91", "91", "john-smith", "John", "Smith", "", ""],
+                           ["92", "92", "w-brown", "W.", "Brown", "", ""],
+                           ["93", "93", "robert-gray", "R[obert]", "Gray", "", ""]]
+        read = reader(people_file(people))
+
+        def with_fjc(url):
+            if url == judge_disclosures.judiciary.JUDGES_URL:
+                return fjc.encode("utf-8")
+            return read(url)
+        held = judge_disclosures.fetch(directory, read=with_fjc, today=TODAY,
+                                       log=lambda *a: None)
+        self.assertNotIn("900", held["judges"])
+        self.assertNotIn("901", held["judges"])
+        self.assertIn("given name 'Mary'", " ".join(held["refused"]))
+        # An initial, and a name the record writes in brackets, agree.
+        self.assertIn("902", held["judges"])
+        self.assertIn("903", held["judges"])
+        # A year that agrees settles it whatever the given name.
+        self.assertIn("100", held["judges"])
 
     def test_a_disagreeing_surname_or_birth_year_gives_nothing(self):
         self.assertNotIn("300", self.cache["judges"])
@@ -285,7 +362,7 @@ class TestJudgesDisclosures(unittest.TestCase):
         record = {"id": "fjc-100", "name": "Jane Smith", "status": "active", "seats": []}
         self.assertEqual(federal_build._judge(record, None, self.cache)["disclosures"]["reports"], 3)
         self.assertEqual(federal_build._judge(dict(record, id="fjc-200"), None,
-                                              self.cache)["disclosures"], {"reports": 0})
+                                              self.cache)["disclosures"]["reports"], 0)
         self.assertNotIn("disclosures", federal_build._judge(dict(record, id="fjc-800"), None,
                                                              self.cache))
 

@@ -12495,6 +12495,7 @@ async function testCourtChiefsAndDisclosures() {
   };
   const DISCLOSED = { url: "https://www.courtlistener.com/person/1/pat-example/#disclosures",
     reports: 3, first: "2018", last: "2020" };
+  const NONE_LISTED = { record: "https://www.courtlistener.com/person/2/pat-example/", reports: 0 };
   for (const now of [CAMPAIGN_NOW, "2026-11-05T09:00:00"]) {
     const when = now === CAMPAIGN_NOW ? "campaign" : "after Election Day";
     for (const named of [true, false]) {
@@ -12549,10 +12550,36 @@ async function testCourtChiefsAndDisclosures() {
             !/court’s own website/.test(text), text);
         }
       });
+
+      // The judge's own dialog says the same beside the seat (rule 82: the
+      // row, the dialog and the hub; the PR #181 review found it silent).
+      page.window.KYC.official.open(page.window.__unsettled.id);
+      await settle(20);
+      suite(`courts/${id}.html — the unsettled chief's dialog, ${named ? "with" : "without"} the ` +
+        `court's own word (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const line = D.querySelector("#officialModalBody .chief-by-court");
+        const text = line ? line.textContent : "";
+        check("the directory's two words are said", text.indexOf("The directory also lists this " +
+          "judge as the court’s chief judge, which a judge on senior status cannot be (28 U.S.C. " +
+          "136(a))") === 0, text);
+        if (named) {
+          check("the court's own word beside them, quoted, linked and dated", text.indexOf(
+            "the court’s own website lists “Pat Q. Example, Chief District Judge” (its page of " +
+            "judges, read by this site on " + w.KYC.dateWords("2026-10-30") + "). Neither is taken " +
+            "over the other.") !== -1 && !!line.querySelector('a[href="https://www.example.uscourts.gov/judges"]'),
+          text);
+        } else {
+          check("with nothing read, nobody is shown as chief", /Nobody is shown as the court’s chief/.test(
+            text) && !/own website/.test(text), text);
+        }
+      });
+      page.window.KYC.official.close && page.window.KYC.official.close();
     }
 
     // The dialog's disclosures: held, none listed, no record.
-    const cases = [["held", DISCLOSED], ["none listed", { reports: 0 }], ["no record", null]];
+    const cases = [["held", DISCLOSED], ["none listed", NONE_LISTED], ["no record", null]];
     for (const [what, held] of cases) {
       let judgeId = null;
       const page = await buildPage("courts/" + id + ".html", { now, loaded: (w) => {
@@ -12584,10 +12611,20 @@ async function testCourtChiefsAndDisclosures() {
           check("says how it was found: by the FJC id, never a name", /Federal Judicial Center’s id/.test(text) &&
             /never a search by name/.test(text), text);
         } else if (what === "none listed") {
-          check("no link", !chip);
-          check("'CourtListener lists no reports', its data dated", text.indexOf(
-            "Financial disclosure reports: CourtListener lists no reports for this judge (its data of " +
-            w.KYC.dateWords("2026-09-30") + ").") === 0, text);
+          // The PR #181 review: Judge Graber's reports are under a duplicate
+          // record carrying no FJC id, so the words speak of the joined
+          // record alone, which is linked for a reader to look.
+          const record = [...body.querySelectorAll("a.link-chip")].find((a) =>
+            a.textContent === "CourtListener record");
+          check("no 'Financial disclosures' link; the record itself is linked", !chip && !!record &&
+            record.getAttribute("href") === NONE_LISTED.record, record && record.getAttribute("href"));
+          check("the words are about the record carrying the FJC id, its data dated", text.indexOf(
+            "Financial disclosure reports: the CourtListener record that carries this judge’s Federal " +
+            "Judicial Center id lists no reports (its data of " + w.KYC.dateWords("2026-09-30") +
+            ").") === 0 && /cannot say whether CourtListener holds reports for them under another/.test(
+            text), text);
+          check("never that CourtListener holds none for the judge",
+            !/lists no reports for this judge/.test(body.textContent), text);
         } else {
           check("no link and no word", !chip && !note);
         }

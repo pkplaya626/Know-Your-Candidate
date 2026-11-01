@@ -263,18 +263,23 @@
   }
 
   // A judge's financial disclosure reports as CourtListener holds them: what
-  // the link is, which years it holds, and how it was found. A judge it
-  // holds none for reads "lists no reports", never that none was filed
-  // (rule 19): CourtListener holds the reports it has obtained.
+  // the link is, which years it holds, and how it was found. Where the
+  // record carrying the judge's FJC id holds none, the words are about that
+  // record alone, linked for a reader to look: CourtListener keeps duplicate
+  // records, and Judge Graber's reports are under one carrying no FJC id
+  // (the PR #181 review). Never "CourtListener lists no reports for this
+  // judge", nor that none was filed (rule 19).
   function disclosuresNote(held) {
     var src = (federal().sources || {}).disclosures || {};
     var of = src.export ? " (its data of " + KYC.escapeHtml(KYC.dateWords(src.export)) + ")" : "";
     var how = "Found through the Federal Judicial Center’s id for this judge on CourtListener’s " +
-      "record, checked to carry their surname and, where both give one, their year of birth; " +
-      "never a search by name.";
+      "record, checked to carry their surname and, where both give one, their year of birth " +
+      "(else their given name); never a search by name.";
     if (!held.reports) {
-      return "Financial disclosure reports: CourtListener lists no reports for this judge" + of +
-        ". " + how;
+      return "Financial disclosure reports: the CourtListener record that carries this " +
+        "judge’s Federal Judicial Center id lists no reports" + of + ". This site joins a judge " +
+        "to CourtListener only through that id, so it cannot say whether CourtListener holds " +
+        "reports for them under another of its records. " + how;
     }
     var years = held.first === held.last ? "for " + KYC.escapeHtml(held.first)
       : "for " + KYC.escapeHtml(held.first) + " to " + KYC.escapeHtml(held.last);
@@ -584,10 +589,24 @@
         parts.push((judge.retiredJustice ? "retired since " : "senior status since ") +
           KYC.escapeHtml(KYC.dateWords(seat.seniorSince)));
       }
+      // A chief the directory also lists on senior status: both of its
+      // words said, and the court's own site's beside them, attributed and
+      // dated, neither taken over the other (rule 82; kyc/court_chiefs.py).
+      var chief = "";
+      if (seat.chiefUnsettled) {
+        var named = c && c.chiefByCourt;
+        chief = '<br><span class="faint chief-by-court">The directory also lists this judge as ' +
+          "the court’s chief judge, which a judge on senior status cannot be (28 U.S.C. 136(a))" +
+          (named ? "; the court’s own website lists “" + KYC.escapeHtml(named.words) + "” (" +
+            '<a href="' + KYC.escapeAttr(named.source) + '" target="_blank" rel="noopener noreferrer">' +
+            "its page of judges</a>, read by this site on " + KYC.escapeHtml(KYC.dateWords(named.read)) +
+            "). Neither is taken over the other." : ". Nobody is shown as the court’s chief until " +
+            "the record is settled.") + "</span>";
+      }
       return "<li><strong>" + KYC.escapeHtml(seat.title || "Judge") + "</strong>, " +
         (here || !c ? KYC.escapeHtml(name)
           : '<a href="' + KYC.escapeAttr(courtUrl(seat.court)) + '">' + KYC.escapeHtml(name) + "</a>") +
-        "<br>" + parts.join("; ") + "</li>";
+        "<br>" + parts.join("; ") + chief + "</li>";
     }).join("");
   }
 
@@ -674,7 +693,10 @@
         // Their reports as CourtListener holds them, joined by the FJC's
         // judge id (kyc/judge_disclosures.py, FEDERAL-05).
         (judge.disclosures && judge.disclosures.url
-          ? linkChip(judge.disclosures.url, "Financial disclosures") : "") + "</div>" +
+          ? linkChip(judge.disclosures.url, "Financial disclosures") : "") +
+        // A record holding no reports is linked as the record it is.
+        (judge.disclosures && !judge.disclosures.url && judge.disclosures.record
+          ? linkChip(judge.disclosures.record, "CourtListener record") : "") + "</div>" +
         (judge.wikipedia || judge.wikidata ? '<p class="faint">' + linksNote(judge) + "</p>" : "") +
         (judge.disclosures ? '<p class="faint" id="officialDisclosures">' +
           disclosuresNote(judge.disclosures) + "</p>" : "")) +
