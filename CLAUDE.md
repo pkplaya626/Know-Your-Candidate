@@ -774,8 +774,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     by validate (`portrait-first-name-unseen`), until a person has looked
     at the file and recorded it in `overrides.SEEN_FIRST_NAME_PORTRAITS`
     (the day, the candidate alone and the face measured on the card, the
-    page) or refused it in `NOT_A_PORTRAIT`; an entry no cached record
-    offers is `stale-first-name-portrait`. On the 289 people for Congress
+    page, and the bytes and pixel size of the file the card shows: a look
+    is at a picture, not an address, and another photograph saved over
+    "alexander-headshot.jpg" goes back behind the gate) or refused it in
+    `NOT_A_PORTRAIT`; an entry no cached record offers is
+    `stale-first-name-portrait`. The review of PR #186 found the gate
+    resting on one field of a hand-editable cache: a record that lost
+    `portraitRoute` would have shown unlooked. The route is known by its
+    evidence's words too (`enrich.first_name_route`), and one shown without
+    its look fails the build (`photo-unevidenced`). On the 289 people for Congress
     without a photograph swept on 2026-11-01 it found images for nine; two
     are landscape frames the shape test refuses (Jenny Rae le Roux's, Bob
     Chew's), and of the seven the pipeline's reader took, six show the

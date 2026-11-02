@@ -1052,8 +1052,11 @@ name as the profile or the filing writes it and "headshot", "portrait" or
 "profile" in the same file name or alt text ("Teresa-headshot-square-new.jpg").
 Such a portrait (`portraitRoute: "first-name"`) is withheld, and named by the
 build (`portrait-first-name-unseen`), until a person has looked at its file and
-recorded it in `overrides.SEEN_FIRST_NAME_PORTRAITS` or refused it in
-`NOT_A_PORTRAIT`.
+recorded it in `overrides.SEEN_FIRST_NAME_PORTRAITS` - with the bytes and
+pixel size of the file shown, so another picture at the same address goes back
+behind the gate - or refused it in `NOT_A_PORTRAIT`. The route is known by its
+evidence's words as well as by `portraitRoute`, and one shown without its look
+fails the build (`photo-unevidenced`).
 
 **Every linked campaign site is read, members' included.** A site serving
 visible gambling spam or a parking page comes off the profile at once and is

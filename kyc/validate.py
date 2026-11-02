@@ -1430,6 +1430,14 @@ def check_photo_evidence(profiles, portraits=None, enrichment=None, guides=None,
                 missing.append("weight")
             elif too_heavy(weight) and not (record.get("portraitHeavy") or [{}])[0].get("kept"):
                 missing.append("note that it is over the caps")
+            # Named by the first name alone (rule 38, the owner's decision of
+            # 2026-11-01): shown only once a person has looked at that very
+            # file, known by its route or by the words that named it.
+            from .enrich import first_name_seen
+            if not first_name_seen(record):
+                missing.append("look recorded in overrides.SEEN_FIRST_NAME_PORTRAITS for "
+                               "this file at this size, though it is named by the first "
+                               "name alone")
             if missing:
                 found.append(f"{p['name']} (campaign-site): no {', '.join(missing)}")
         elif source == "curated":
@@ -1531,6 +1539,8 @@ def check_portrait_overrides(enrichment, elsewhere=()):
     Commons file: ``court_photos.refused_offered``,
     ``statewide_photos.doubted``).
     """
+    from .enrich import first_name_route
+
     if not enrichment:
         return []
     offered = set(elsewhere or ())
@@ -1549,7 +1559,7 @@ def check_portrait_overrides(enrichment, elsewhere=()):
     for entry in (enrichment.get("people") or {}).values():
         for key in ("site", "listed", "drawn"):
             record = entry.get(key) or {}
-            if record.get("portraitRoute") == "first-name":
+            if first_name_route(record):
                 first_named.update([record.get("portrait")]
                                    + [h.get("url") for h in record.get("portraitHeavy") or []])
     stale_seen = sorted(u for u in getattr(overrides, "SEEN_FIRST_NAME_PORTRAITS", {})

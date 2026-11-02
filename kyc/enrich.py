@@ -1219,17 +1219,44 @@ def take_first_name_portrait(record, profile, page, base, refused=None, today=No
     return taken
 
 
+FIRST_NAME_EVIDENCE = "first name and "
+
+
+def first_name_route(record):
+    """``True`` when *record*'s portrait came by the narrow first-name route:
+    by its ``portraitRoute``, or by the words that named it (the PR #186
+    review: the gate must not rest on one field of a hand-editable cache,
+    which a hand edit or a carry-over copying fields one by one could drop,
+    and the portrait would then show unlooked)."""
+    record = record or {}
+    return (record.get("portraitRoute") == FIRST_NAME_ROUTE
+            or str(record.get("portraitEvidence") or "").startswith(FIRST_NAME_EVIDENCE))
+
+
+_LOOK_SIZE = ("bytes", "width", "height")
+
+
 def first_name_seen(record):
     """``True`` when *record*'s portrait came by the surname, or came by the
     first-name route and a person has looked at it: its file (the original,
     where a lighter rendition is shown) is in
-    ``overrides.SEEN_FIRST_NAME_PORTRAITS``."""
+    ``overrides.SEEN_FIRST_NAME_PORTRAITS`` with the bytes and pixel size of
+    the file the card shows as the record now gives them. A look is at a
+    picture, not an address: a campaign that saves another photograph over
+    the same file name (a family photograph over "alexander-headshot.jpg")
+    goes back behind the gate and is named (portrait-first-name-unseen)."""
     record = record or {}
-    if record.get("portraitRoute") != FIRST_NAME_ROUTE:
+    if not first_name_route(record):
         return True
     seen = getattr(overrides, "SEEN_FIRST_NAME_PORTRAITS", {})
     heavy = (record.get("portraitHeavy") or [{}])[0].get("url")
-    return any(u in seen for u in (record.get("portrait"), heavy) if u)
+    weight = record.get("portraitWeight") or {}
+    for url in (record.get("portrait"), heavy):
+        entry = seen.get(url) if url else None
+        size = entry[3] if entry and len(entry) > 3 and isinstance(entry[3], dict) else None
+        if size and all(size.get(k) and size.get(k) == weight.get(k) for k in _LOOK_SIZE):
+            return True
+    return False
 
 
 def _weigh(url):
@@ -1390,10 +1417,11 @@ def render_wanted(profiles, cache, today=None, limit=RENDER_LIMIT):
         for key in ("site", "listed"):
             record = entry.get(key) or {}
             url = drawn_address(record)
-            # A first-name portrait (a person must look first) does not stop
-            # the drawn page being asked for one named by the surname.
+            # A first-name portrait waiting for a person's look does not stop
+            # the drawn page being asked for one named by the surname; once
+            # a person has looked at it, it stops it as a surname's does.
             named = ((record.get("portrait") or record.get("portraitHeavy"))
-                     and record.get("portraitRoute") != FIRST_NAME_ROUTE)
+                     and first_name_seen(record))
             if (not url.startswith("https://") or record.get("safe") is False
                     or named or overrides.blocked_campaign_host(url)):
                 continue
@@ -1436,8 +1464,9 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
     """Read the sites :func:`render_wanted` names as a browser draws them -
     the home page, then its About page when the home page has no portrait -
     and keep what each gives as the person's ``drawn`` record. Returns how
-    many portraits were found. No Chrome, or a page the browser could not
-    read, keeps every earlier drawn record (rule 8)."""
+    many portraits were found, those named by the first name alone among
+    them (the caller saves the cache on any). No Chrome, or a page the
+    browser could not read, keeps every earlier drawn record (rule 8)."""
     from .courts import read_with_browser
 
     one_run = reader or (lambda pages: read_with_browser(pages, root=root))
@@ -1462,7 +1491,9 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
     drawn, problems = reader(homes)
     for line in problems[:5]:
         log(f"    [drawn] {line}")
-    found, abouts = 0, {}
+    # A portrait named by the first name alone is counted apart: it shows
+    # only once a person has looked at it (first_name_seen).
+    found, first_named, abouts = 0, 0, {}
     for i, (profile, _key, url) in enumerate(wanted):
         markup = drawn.get(_code(i))
         if markup is None:
@@ -1470,7 +1501,7 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
         record, page = _drawn_read(profile, url, markup, today)
         before = people.setdefault(profile["id"], {}).get("drawn")
         people[profile["id"]]["drawn"] = record
-        if record.get("portrait") and record.get("portraitRoute") != FIRST_NAME_ROUTE:
+        if record.get("portrait") and not first_name_route(record):
             found += 1
         elif record["safe"] is SAFE:
             # A home page's first-name portrait gives way to the About
@@ -1478,6 +1509,10 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
             about = about_link(page, url)
             if about:
                 abouts[_code(i)] = (profile, url, about, before)
+            elif record.get("portrait"):
+                first_named += 1
+        elif record.get("portrait"):
+            first_named += 1
     if abouts:
         from .photos import keep_refused
         more, problems = reader({code: about for code, (_p, _u, about, _b) in abouts.items()})
@@ -1496,15 +1531,22 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
             # surname's beats a first name's; between two first names'
             # the home page's stands.
             if record.get("portrait") and (not home.get("portrait")
-                                           or record.get("portraitRoute") != FIRST_NAME_ROUTE):
+                                           or not first_name_route(record)):
                 record["url"] = url                      # the site it stands for
                 people[profile["id"]]["drawn"] = keep_refused(record, home)
-                found += 1
+                kept = record
             else:
                 keep_refused(home, record)
-                found += bool(home.get("portrait"))
-    log(f"  enrich: {found} portrait(s) found on drawn pages")
-    return found
+                kept = home
+            if kept.get("portrait"):
+                if first_name_route(kept):
+                    first_named += 1
+                else:
+                    found += 1
+    log(f"  enrich: {found} portrait(s) found on drawn pages"
+        + (f", and {first_named} named by the first name alone, each shown once a person "
+           "has looked at it" if first_named else ""))
+    return found + first_named
 
 
 # --------------------------------------------------------------------- cache
@@ -1806,8 +1848,8 @@ def portrait_record(entry, site):
     if site.get("portrait") or site.get("portraitHeavy"):
         # A first-name portrait gives way to the drawn page's named by the
         # surname, as on one read (look_for_portrait).
-        if (site.get("portraitRoute") == FIRST_NAME_ROUTE and drawn_ok
-                and drawn.get("portrait") and drawn.get("portraitRoute") != FIRST_NAME_ROUTE):
+        if (first_name_route(site) and drawn_ok
+                and drawn.get("portrait") and not first_name_route(drawn)):
             return drawn
         return site
     if drawn_ok:
