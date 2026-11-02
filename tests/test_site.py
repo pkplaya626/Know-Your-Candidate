@@ -1440,6 +1440,18 @@ class TestOddsWorkflow(unittest.TestCase):
         self.assertIn("gh workflow run deploy.yml", self.text)
         self.assertIn("actions: write", self.text)
 
+    def test_a_push_after_main_moved_goes_on_top_of_it(self):
+        """A merge during the read made the push a non-fast-forward on
+        2026-11-01, and the prices waited twelve hours: the commit is put on
+        the new main and pushed again, still only the odds files, and a
+        rebase that conflicts fails the run rather than forcing anything."""
+        self.assertIn("git rebase origin/main", self.text)
+        self.assertIn("git rebase --abort", self.text)
+        self.assertIn('git diff --name-only origin/main HEAD | grep -Ev "$allowed"', self.text)
+        self.assertNotIn("--force", self.text)
+        self.assertLess(self.text.index("git rebase origin/main"),
+                        self.text.index("gh workflow run deploy.yml"))
+
     def test_the_roster_refresh_leaves_prices_to_it(self):
         self.assertNotIn("build_profile_site.py odds", self.refresh)
 
