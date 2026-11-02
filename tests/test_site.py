@@ -890,6 +890,42 @@ class TestStatePages(unittest.TestCase):
                                   None, {"states": {"TX": gov}})
         self.assertIn("Pat Holder (Republican), Governor of Texas", html)
 
+    def test_the_plain_race_for_governor_credits_each_name_to_its_own_document(self):
+        """PR #191 review: the plain race credited write-ins (Georgia's,
+        Maine's) to the list that does not hold them, dropped why a county's
+        list stands in for the state's (Arkansas), and the surname-only and
+        printed-ballot forms (Massachusetts) the cards say (rule 91)."""
+        from kyc import pages
+        gov = {"governor": {"name": "Pat Holder", "party": "Republican", "partyKey": "R",
+                            "profile": "https://www.nga.org/governors/maine/"},
+               "ballot2026": {"offices": {"governor": {"up": True, "candidates": {
+                   "url": "https://county.example/notice", "source": "the county's notice",
+                   "read": "2026-10-18",
+                   "notStateList": "The Secretary of State publishes no statewide list",
+                   "writeIns": {"url": "https://sos.example/writeins", "source": "the write-in list",
+                                "read": "2026-10-20"},
+                   "candidates": [
+                       {"name": "James", "surnameOnly": True, "party": "Independent",
+                        "runningMate": "Kittredge", "ballotName": "JAMES AND KITTREDGE"},
+                       {"name": "Ann Able", "party": "Democratic", "printed": "ABLE, ANN"},
+                       {"name": "Di Dunn", "writeIn": True}]}}}}}
+        _, race = pages.governor_static("ME", gov, False)
+        self.assertIn("Not the state’s own list. The Secretary of State publishes no "
+                      "statewide list.", race)
+        self.assertIn("James (the list gives a surname only) (Independent), with Kittredge for "
+                      "lieutenant governor; printed on the ballot as “JAMES AND KITTREDGE”",
+                      race)
+        self.assertIn("the list prints “ABLE, ANN”", race)
+        self.assertIn("first name first, in ordinary capitals", race)
+        self.assertIn("; write-in candidates: ", race)
+        self.assertIn("https://sos.example/writeins", race)
+        self.assertIn("the write-in list", race)
+        # The same document for both is credited once.
+        gov["ballot2026"]["offices"]["governor"]["candidates"]["writeIns"]["url"] = \
+            "https://county.example/notice"
+        _, race = pages.governor_static("ME", gov, False)
+        self.assertNotIn("write-in candidates: ", race)
+
     def test_a_territory_reads_as_a_delegate(self):
         from kyc import pages
         html = pages.render_state("GU", "example.org",

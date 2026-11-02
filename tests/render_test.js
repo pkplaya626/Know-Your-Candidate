@@ -17017,11 +17017,21 @@ async function testGovernorCards() {
       codes.every((c) => noProfile(html(sg.governorCard(c) + sg.governorRace(c)))));
     check("every photograph on a card says whose it is, and a card without one shows none",
       codes.every((c) => !photoProblems(html(sg.governorCard(c) + sg.governorRace(c)))));
-    check("a party's colour only for a party (rule 88)", races.every((c) =>
-      [...html(sg.governorRace(c)).querySelectorAll(".gov-party")].every((p) =>
-        !p.classList.contains("party-r") || /Republican/.test(p.textContent)) &&
-      [...html(sg.governorRace(c)).querySelectorAll(".gov-party")].every((p) =>
-        !p.classList.contains("party-d") || /Democrat/.test(p.textContent))));
+    // A fusion line ("Republican; Conservative") is several parties, and a
+    // bucketing of the list's words beside KYC.partyKey disagreed with it
+    // (PR #191 review): a candidate's party words are ink, as the list rows'.
+    check("a candidate's party words carry no party's colour (rules 12, 88)", races.every((c) =>
+      [...html(sg.governorRace(c)).querySelectorAll(".gcard-candidate .gov-party")].every((p) =>
+        ![...p.classList].some((k) => /^party-/.test(k)))));
+    // The NGA lists one unbroken span for a re-elected governor, so a count
+    // of terms read from it said "First term" of Bill Lee and Tate Reeves in
+    // their second (PR #191 review). Made: a record carrying a count.
+    const saved = data.TN.governor.terms;
+    data.TN.governor.terms = 1;
+    check("no card counts a governor's terms, which no second source checks",
+      codes.every((c) => !/\bterms?\b/i.test(html(sg.governorCard(c)).querySelector(".gov-who").textContent)),
+      html(sg.governorCard("TN")).querySelector(".gov-who").textContent);
+    data.TN.governor.terms = saved;
   });
 
   suite("states/ga.html — the governor's card in State government, the race for governor its own section", () => {
@@ -17095,6 +17105,11 @@ async function testGovernorCards() {
       row.textContent.indexOf(words.ballot[0][0] + ":") !== -1);
     check("and the holder line the race says", !words.held ||
       row.querySelector(".race-row-held").textContent === words.held);
+    // Said once: the race's own line under the row is hidden while folded,
+    // as a race for Congress's title is (PR #191 review).
+    check("folded, the race's own holder line is left to the row",
+      /\.races-folded \.race-body \.gov-race > \.gov-holder-status \{ display: none; \}/
+        .test(fs.readFileSync(path.join(SITE, "assets/kyc.css"), "utf8")));
     row.click();
     check("tapped, it opens", fold.querySelector(".race-body").getAttribute("hidden") === null &&
       row.getAttribute("aria-expanded") === "true");
@@ -17151,6 +17166,112 @@ async function testGovernorCards() {
       D.getElementById("resultsLabel").textContent.slice(0, 120));
   }
 
+  /* The Governors view read as the grid reads a query (rule 5; PR #191
+   * review): "Kansas" found Arkansas, "va" Nevada and Pennsylvania. */
+  {
+    const { window, D } = grid;
+    const go = async (hash) => {
+      window.location.hash = hash;
+      window.dispatchEvent(new window.Event("hashchange"));
+      await new Promise((r) => setTimeout(r, 30));
+    };
+    const shownStates = () => [...D.querySelectorAll("#results .gcard")].map((c) => c.getAttribute("data-gov-state"));
+    const states = window.kycStateGov.states;
+    suite("index.html — the Governors view reads a state's name or code as that state (rule 5)", () => {});
+    for (const [q, code] of [["kansas", "KS"], ["Kansas", "KS"], ["virginia", "VA"], ["va", "VA"], ["AR", "AR"],
+      ["ga", "GA"]]) {
+      if (!states[code]) continue;
+      await go("#/?chamber=governors&q=" + encodeURIComponent(q));
+      check("“" + q + "” is " + code + "'s governor alone", shownStates().join() === code,
+        shownStates().join() + " | " + D.getElementById("resultsLabel").textContent.slice(0, 90));
+      check("“" + q + "”: the line names the state it read, not a Congress seat",
+        D.getElementById("resultsLabel").textContent.indexOf("Showing 1 governor in " +
+          window.KYC.stateName(code)) === 0, D.getElementById("resultsLabel").textContent.slice(0, 90));
+    }
+    await go("#/?chamber=governors&view=race&q=kansas");
+    check("grouped by race, “kansas” is Kansas's race alone (if it is on the ballot)",
+      [...D.querySelectorAll("#results .gov-view-race")].every((s) => s.id === "governor-race-KS"));
+    // A governor's name: their card, and no second line for them above it.
+    const holder = states.GA.governor.name;
+    await go("#/?chamber=governors&q=" + encodeURIComponent(holder));
+    await until(() => !D.getElementById("officialResults").hidden ||
+      window.kycFederal !== undefined, 4000);
+    await new Promise((r) => setTimeout(r, 50));
+    check("a governor's name: their card", shownStates().join() === "GA", shownStates().join());
+    check("named once: no “Other officials” line for the governor whose card is shown",
+      D.getElementById("officialResults").textContent.indexOf(holder) === -1);
+    // A candidate's name: no governor, and the way to their race.
+    const candidate = (listOf("GA") || []).find((p) => !p.writeIn &&
+      !Object.keys(states).some((c) => states[c].governor && states[c].governor.name === p.name));
+    if (candidate) {
+      await go("#/?chamber=governors&q=" + encodeURIComponent(candidate.name));
+      const line = D.getElementById("resultsLabel");
+      check("a candidate's name: no governor, never “matches matching”, and a way to the race",
+        !shownStates().length && /^No governor matching/.test(line.textContent) &&
+        !/matches matching/.test(line.textContent) && !!line.querySelector("[data-gov-races]"),
+        line.textContent.slice(0, 120));
+      line.querySelector("[data-gov-races]").click();
+      check("which shows the race that lists them",
+        !!D.querySelector("#results #governor-race-GA") &&
+        D.querySelector("#results #governor-race-GA").textContent.indexOf(candidate.name) !== -1);
+    }
+
+    /* No Congress-only filter is pressed over governors (PR #191 review:
+     * "Not seeking re-election" stayed pressed over every governor). */
+    suite("index.html — the Governors view presses no filter it does not apply", () => {});
+    await go("#/?chamber=governors&election=notSeeking&role=member&eliminated=show");
+    const pressed = () => [...D.querySelectorAll("[data-group][aria-pressed=true]")]
+      .map((c) => c.getAttribute("data-group") + ":" + c.getAttribute("data-value"));
+    check("only the Governors chip is pressed", pressed().join() === "chamber:governors", pressed().join());
+    check("the filter count says so", D.getElementById("filtersCount").textContent === "(1 on)",
+      D.getElementById("filtersCount").textContent);
+    check("every governor shown", shownStates().length === Object.keys(states).filter((c) => states[c].governor).length);
+    check("the sidebar marks neither Congress nor its candidates as the page",
+      !D.querySelector('.site-nav [data-nav="congress"][aria-current], .site-nav [data-nav="candidates"][aria-current]'));
+    D.querySelector('[data-group="election"][data-value="notSeeking"]').click();
+    check("choosing a Congress filter shows Congress's profiles, filtered",
+      pressed().join() === "chamber:all,election:notSeeking" && !D.querySelector("#results .gcard") &&
+        !!D.querySelector("#results .card"), pressed().join());
+    await go("#/?chamber=governors&sort=name");
+    check("the sort menu says it orders Congress's cards", /Governors and their races are listed by state/
+      .test(D.getElementById("sortNote").textContent) && !D.getElementById("sortNote").hidden);
+    await go("#/");
+  }
+
+  /* A failed load is said, and not asked for again on every draw (PR #191
+   * review: a refused stategov.js was asked for 21 times and the line read
+   * "Loading" for good). */
+  const refused = await buildPage("index.html", { refuse: /\/data\/stategov\.js$/ });
+  {
+    const { D } = refused;
+    const asked = () => refused.served.filter((s) => /^\/data\/stategov\.js/.test(s)).length;
+    const chip = D.querySelector('[data-group="chamber"][data-value="governors"]');
+    chip.click();
+    await until(() => /did not load/.test(D.getElementById("resultsLabel").textContent), 4000);
+    await new Promise((r) => setTimeout(r, 200));
+    suite("index.html — the governors' data refused", () => {
+      check("the line says it did not load", /did not load/.test(D.getElementById("resultsLabel").textContent),
+        D.getElementById("resultsLabel").textContent);
+      check("asked for once", asked() === 1, asked() + " requests");
+    });
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    await new Promise((r) => setTimeout(r, 100));
+    check("a redraw does not ask again", asked() === 1, asked() + " requests");
+    chip.click();
+    await until(() => asked() === 2, 2000);
+    await new Promise((r) => setTimeout(r, 100));
+    check("choosing the governors again asks once more", asked() === 2, asked() + " requests");
+  }
+
+  const pastGrid = await buildPage("index.html", { now: "2026-11-05T09:00:00",
+    hash: "#/?chamber=governors&view=race&state=GA" });
+  await until(() => pastGrid.D.querySelectorAll("#results .gov-view-race").length > 0, 8000);
+  suite("index.html after Election Day — one race for governor reads in the singular", () => {
+    const line = pastGrid.D.getElementById("resultsLabel").textContent;
+    check("“Showing 1 race for governor that was on the Nov 3, 2026 ballot”",
+      /^Showing 1 race for governor that was on the Nov 3, 2026 ballot in Georgia/.test(line), line.slice(0, 100));
+  });
+
   const map = await buildPage("map.html", { hash: "#/?state=GA&mode=governor" });
   suite("map.html — the state panel shows the governor's card and the race for governor", () => {
     const panel = map.D.getElementById("delegation");
@@ -17166,6 +17287,31 @@ async function testGovernorCards() {
     map.window.dispatchEvent(new map.window.Event("hashchange"));
     check("and in the 2026 governor's races view", map.D.querySelectorAll("#delegation .gcard-candidate").length ===
       listOf("GA").length);
+    // Another office's view leads with that office: the governor's card and
+    // a line to the race, not its cards (PR #191 review: the attorney
+    // general moved 550px down).
+    const pointer = '#delegation a[href$="states/ga.html#governor-race"]';
+    for (const mode of ["ag", "sos", "lt", "legislature", "trifecta"]) {
+      map.window.location.hash = "#/?state=GA&mode=" + mode;
+      map.window.dispatchEvent(new map.window.Event("hashchange"));
+      check("the " + mode + " view: the governor's card, and a line to the race on the state page",
+        map.D.querySelectorAll("#delegation .gcard").length === 1 &&
+        !map.D.querySelector("#delegation .gcard-candidate") && !!map.D.querySelector(pointer));
+    }
+    // The 2026 races view shows the state's races: the governor's is one.
+    map.window.location.hash = "#/?state=GA&mode=senate2026";
+    map.window.dispatchEvent(new map.window.Event("hashchange"));
+    check("the 2026 Senate races view points to the race for governor, never as a profile or a count",
+      !!map.D.querySelector(pointer) && !map.D.querySelector("#delegation .gcard") &&
+      noProfile(map.D.querySelector(pointer).parentNode));
+    const noRace = Object.keys(data).find((c) => !(data[c].ballot2026 && data[c].ballot2026.offices.governor &&
+      data[c].ballot2026.offices.governor.up) && data[c].governor);
+    if (noRace) {
+      map.window.location.hash = "#/?state=" + noRace + "&mode=senate2026";
+      map.window.dispatchEvent(new map.window.Event("hashchange"));
+      check("and a state whose governor is not on the ballot has no such line",
+        !map.D.querySelector('#delegation a[href$="#governor-race"]'));
+    }
   });
 }
 

@@ -396,24 +396,6 @@
     return "Governor of " + (place || KYC.stateName(code));
   }
 
-  function ordinal(n) {
-    var s = ["th", "st", "nd", "rd"];
-    var v = n % 100;
-    return n + (s[(v - 20) % 10] || s[v] || s[0]);
-  }
-
-  /** The party mark a list's party words carry: a party's colour only for
-   *  the two parties, "another party" for any other named one, and none for
-   *  a candidate the list gives no party, or says has none (rule 88). */
-  function partyMark(party) {
-    var p = String(party || "");
-    var r = /Republican/.test(p);
-    var d = /Democrat/.test(p);
-    if (r !== d) return r ? "party-r" : "party-d";
-    if (!p || r || /nonpartisan|no (political )?party|unaffiliated|not designated|unenrolled/i.test(p)) return "";
-    return "party-i";
-  }
-
   /* The empty circle a card keeps where it has no photograph, or where its
    * photograph failed to load: never a broken image. */
   var NO_PORTRAIT = '<span class="gov-portrait-none" aria-hidden="true"></span>';
@@ -453,9 +435,12 @@
     var href = governorHref(code, "governor", opts.here);
     var name = href ? '<a class="gcard-link" href="' + KYC.escapeAttr(href) + '">' +
       KYC.escapeHtml(gov.name) + "</a>" : KYC.escapeHtml(gov.name);
-    var held = [gov.since ? "In office since " + gov.since : "",
-      gov.terms ? (gov.terms === 1 ? "First term" : ordinal(gov.terms) + " consecutive term") +
-        ", as the NGA lists terms" : ""].filter(Boolean);
+    // Since when, only where Wikidata agrees with the NGA (stategov, rule
+    // 54). No count of terms: the NGA lists one unbroken span for a
+    // re-elected governor, so a count read from it said "First term" of
+    // Bill Lee and Tate Reeves in their second (PR #191 review), and no
+    // second source checks it.
+    var held = gov.since ? "In office since " + gov.since : "";
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join(" · ");
     return '<article class="gov-card gcard"' + (opts.here ? ' id="governor"' : "") +
       ' data-gov-state="' + KYC.escapeAttr(code) + '" aria-label="' + KYC.escapeAttr(title) + '">' +
@@ -464,7 +449,7 @@
       '<p class="gov-name">' + name + "</p>" +
       '<p class="gov-party party-' + KYC.escapeAttr(String(gov.partyKey || "i").toLowerCase()) + '">' +
       KYC.escapeHtml(gov.party) + "</p>" +
-      (held.length ? '<p class="faint">' + KYC.escapeHtml(held.join(" · ")) + "</p>" : "") +
+      (held ? '<p class="faint">' + KYC.escapeHtml(held) + "</p>" : "") +
       '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
       link(gov.profile, "NGA biography") + "</p>" +
       (contact && !opts.brief ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
@@ -480,14 +465,17 @@
     var photo = person.writeIn ? { img: "", credit: "" }
       : cardPhoto(person.photo, person.photoCopy, person.photoCredit);
     var name = person.record ? link(person.record, person.name) : KYC.escapeHtml(person.name);
-    var mark = partyMark(person.party);
     return '<article class="gcard gcard-candidate' + (person.writeIn ? " gcard-writein" : "") + '">' +
       '<div class="gcard-holder">' + photo.img + '<div class="gov-who">' +
       '<p class="gov-name"' +
       (person.printed ? ' title="' + KYC.escapeAttr("The list prints: " + person.printed) + '"' : "") +
       ">" + name + "</p>" +
       (person.surnameOnly ? '<p class="faint">The list gives a surname only.</p>' : "") +
-      (person.party ? '<p class="gov-party' + (mark ? " " + mark : "") + '">' +
+      // The list's party words in ink, as its rows have them: a fusion
+      // line ("Republican; Conservative") is several parties, and a second
+      // bucketing beside KYC.partyKey disagreed with it (rules 12, 88; PR
+      // #191 review). Only the sitting governor's card carries a colour.
+      (person.party ? '<p class="gov-party gcard-party-words">' +
         KYC.escapeHtml(person.party) + "</p>" : "") +
       (person.writeIn ? '<p class="faint">Write-in candidate</p>' : "") +
       (person.runningMate ? '<p class="gcard-mate">With ' + KYC.escapeHtml(person.runningMate) +
@@ -962,6 +950,17 @@
       (court.note ? '<p class="faint">' + KYC.escapeHtml(court.note) + "</p>" : "");
   }
 
+  /** Where the race for governor's cards are, in a sentence: the state
+   *  page's own section (*here*), or from any other page the state page's.
+   *  "" where the governor is not on this ballot. */
+  function racePointer(code, here) {
+    if (!governorUp(code)) return "";
+    return '<p class="gov-race-pointer">' + (after() ? "The candidates who were" : "The candidates") +
+      " on the Nov 3, 2026 ballot for governor are under " +
+      '<a class="state-jump" href="' + KYC.escapeAttr((here ? "" : KYC.stateUrl(code)) + "#governor-race") +
+      '">' + KYC.escapeHtml(raceHeading(code)) + (here ? "" : " ›") + "</a>.</p>";
+  }
+
   /** Everything known about who runs one state, as HTML. *opts.links* adds
    * the links to its legislature and county pages. */
   function render(code, opts) {
@@ -973,12 +972,14 @@
     }
     // The governor's card, and the race for governor as cards under it; on
     // the state page the race has a section of its own among the 2026
-    // races (*opts.raceApart*), and this says where it is.
-    var html = governorCard(code, { here: !!(opts && opts.here) }) + (opts && opts.raceApart
-      ? (governorUp(code) ? '<p class="gov-race-pointer">' + (after() ? "The candidates who were" :
-        "The candidates") + " on the Nov 3, 2026 ballot for governor are under " +
-        '<a class="state-jump" href="#governor-race">' + KYC.escapeHtml(raceHeading(code)) + "</a>.</p>" : "")
-      : governorRace(code, { status: false }));
+    // races (*opts.raceApart*), and this says where it is. The map's panel
+    // for another office (*opts.raceLink*) points to the state page's race
+    // rather than pushing the office the reader chose a screen down (PR
+    // #191 review).
+    var html = governorCard(code, { here: !!(opts && opts.here) }) +
+      (opts && opts.raceApart ? racePointer(code, true)
+        : opts && opts.raceLink ? racePointer(code, false)
+        : governorRace(code, { status: false }));
     var place = s.territory ? "The territory" : "The state";
     if (s.lt || s.ag || s.sos) {
       html += '<p class="panel-subhead">' + (s.territory ? "Territorial" : "Statewide") +
@@ -1270,6 +1271,7 @@
     governorListed: governorListed,
     governorOf: governorOf,
     raceHeading: raceHeading,
+    racePointer: racePointer,
     loaded: function () { return !!global.kycStateGov; },
     codes: function () { return Object.keys(gd().states); },
     titles: TITLES,

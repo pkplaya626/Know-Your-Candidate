@@ -452,6 +452,15 @@
       }).join(" and ") + ".";
   }
 
+  /** The 2026 races view's line to the state's race for governor, on its
+   *  state page (KYC.stategov.racePointer): the panel shows the state's
+   *  2026 races, and the governor's is one of them. A governor is never a
+   *  profile and in none of this panel's counts (rule 27). */
+  function governorPointer(code) {
+    return KYC.stategov && KYC.stategov.racePointer && KYC.stategov.loaded()
+      ? KYC.stategov.racePointer(code, false) : "";
+  }
+
   function showPanel(code) {
     var list = doc.getElementById("delegation");
     var counts = tally(code);
@@ -468,7 +477,12 @@
 
     if (stateMode()) {
       doc.getElementById("panelCounts").innerHTML = KYC.stategov.badge(code, mode);
-      list.innerHTML = '<div class="stategov">' + KYC.stategov.render(code, { links: true }) + "</div>";
+      // The race for governor's cards in the governor's own views; in
+      // another office's, a line to them on the state page, so the office
+      // the reader chose is not pushed a screen down (PR #191 review).
+      var governorViews = mode === "governor" || mode === "governor2026";
+      list.innerHTML = '<div class="stategov">' +
+        KYC.stategov.render(code, { links: true, raceLink: !governorViews }) + "</div>";
       list.scrollTop = 0;
       return;
     }
@@ -488,7 +502,7 @@
       list.innerHTML =
         '<div class="empty-state">' + KYC.icon("info") + "<p>" + (mode === "senate2026"
           ? noSenateRace(code) : "Nothing to show for " + KYC.escapeHtml(code) + " in this view.") +
-        "</p></div>";
+        "</p></div>" + (mode === "senate2026" ? governorPointer(code) : "");
       return;
     }
 
@@ -603,6 +617,7 @@
           return KYC.odds.render(r, { compact: true, collapsed: true });
         }).join("");
       }
+      html += governorPointer(code);
     }
     var seatedRest = seated.filter(function (x) { return !listed[x.id]; });
     if (seatedRest.length) {

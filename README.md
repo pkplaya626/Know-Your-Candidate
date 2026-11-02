@@ -1847,11 +1847,19 @@ for governor is a section of its own after the races for Congress
 (`#governor-race`): one card per candidate on the election office's list,
 in its words (rule 91). On a phone, where the races fold, it folds to a row
 of its own, apart from the races for Congress and their count. The map's
-state panel draws the same cards in the governor, statewide-officer,
-legislature and trifecta views, and the grid's **Governors** chip shows
-every sitting governor's card, or, grouped by race, every race for governor
+state panel draws the governor's card in every state-government view, and
+the race's cards in the governor and 2026 governor's races views; the
+statewide-officer, legislature and trifecta views, and the 2026 Senate
+races view, give a line to the race on the state page instead
+(`KYC.stategov.racePointer`). The grid's **Governors** chip shows every
+sitting governor's card, or, grouped by race, every race for governor
 (`#/?chamber=governors`, `&view=race`), loading `data/stategov.js` the
-first time it is shown. One module draws them all (`KYC.stategov`:
+first time it is shown, once (a failed load is said, and asked again only
+when the chip is chosen again). Its search reads a state's name or code as
+that state and other words where a word starts (rule 5); a candidate's name
+offers their race. The member, election and eliminated filters are
+Congress's: none is pressed over the governors, and choosing one shows
+Congress's profiles. One module draws them all (`KYC.stategov`:
 `governorCard`, `governorRace`).
 
 A governor's card is a card, never a profile (rule 27): it has no dialog,
@@ -1860,8 +1868,8 @@ for Congress includes it. Its name links to the state page's section.
 
 | Card | Shows | From |
 |---|---|---|
-| Sitting governor | Office ("Governor of the U.S. Virgin Islands", rule 75) with its ballot mark (rule 79), the holder line, photograph and its credit, name, party, "In office since" (where Wikidata agrees with the NGA), the run of consecutive terms as the NGA lists them, the office's site, the NGA biography, phone and address | `data/stategov.js` (`governor`, `ballot2026.offices.governor`) |
-| Candidate for governor | Name as the list writes it (its own form on hover), party in words, the running mate beside the nominee, the name printed on the ballot, a photograph only by rule 91's routes and its credit; write-ins apart and said to be | `ballot2026.offices.governor.candidates` |
+| Sitting governor | Office ("Governor of the U.S. Virgin Islands", rule 75) with its ballot mark (rule 79), the holder line, photograph and its credit, name, party, "In office since" (where Wikidata agrees with the NGA; no count of terms, which the NGA's one unbroken span gets wrong for a re-elected governor), the office's site, the NGA biography, phone and address | `data/stategov.js` (`governor`, `ballot2026.offices.governor`) |
+| Candidate for governor | Name as the list writes it (its own form on hover), party in words (in ink: a fusion line is several parties), the running mate beside the nominee, the name printed on the ballot, a photograph only by rule 91's routes and its credit; write-ins apart and said to be | `ballot2026.offices.governor.candidates` |
 
 A candidate's card holds no money, platform or filing, and is never joined
 to a profile by a name (rule 25). After Election Day the race is in the

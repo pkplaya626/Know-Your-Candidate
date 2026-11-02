@@ -5790,6 +5790,9 @@ button.local-county-link {
   .races-folded .badge-shared { display: none; }
   /* A badge the race's row above already gives (kyc-cards headBadgeHtml). */
   .races-folded .badge-in-row { display: none; }
+  /* The race for governor's holder line, which its row above already says
+   * (kyc-state.js governorRow; PR #191 review). */
+  .races-folded .race-body .gov-race > .gov-holder-status { display: none; }
 }
 @media print {
   .race-row-title,

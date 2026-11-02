@@ -627,23 +627,46 @@ def governor_static(code, gov_state, post, pad="                "):
         return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])
 
     def item(person):
+        # The card's words (KYC.stategov.candidateCard): a surname-only
+        # name said to be one, the party, the running mate, the name the
+        # ballot prints, and the list's own form of the name.
+        surname = " (the list gives a surname only)" if person.get("surnameOnly") else ""
         party = f" ({_e(person['party'])})" if person.get("party") else ""
         mate = (f", with {_e(person['runningMate'])} for lieutenant governor"
                 if person.get("runningMate") else "")
-        return f"{pad}        <li>{_e(person['name'])}{party}{mate}</li>"
+        ballot = (f"; printed on the ballot as “{_e(person['ballotName'])}”"
+                  if person.get("ballotName") else "")
+        printed = (f"; the list prints “{_e(person['printed'])}”"
+                   if person.get("printed") else "")
+        return f"{pad}        <li>{_e(person['name'])}{surname}{party}{mate}{ballot}{printed}</li>"
 
     people = listed.get("candidates") or []
     printed = [p for p in people if not p.get("writeIn")]
     write_ins = [p for p in people if p.get("writeIn")]
     rows.append(f"{pad}    <p>" + ("Candidates who were on the Nov 3, 2026 ballot" if post
                                    else "Candidates on the Nov 3, 2026 ballot") + "</p>")
+    if listed.get("notStateList"):
+        # A list that is not the state's own says why (rule 91), as the
+        # cards do (listParts' `uncertified`).
+        rows.append(f"{pad}    <p>Not the state’s own list. {_e(listed['notStateList'])}.</p>")
     rows += [f'{pad}    <ul class="share-list">'] + [item(p) for p in printed] + [f"{pad}    </ul>"]
     if write_ins:
         rows.append(f"{pad}    <p>Write-in candidates (" + ("their names were" if post else "names")
                     + " not printed on the ballot)</p>")
         rows += [f'{pad}    <ul class="share-list">'] + [item(p) for p in write_ins] + [f"{pad}    </ul>"]
-    rows.append(f"{pad}    <p>In surname order, not ballot order. Source: "
-                f"{_out_link(listed['url'], listed['source'])} (read {time_html(listed.get('read'))})."
+    # The write-ins' own document, where they come from another than the
+    # list's (listParts' credit): never the list's credit for names it
+    # does not hold.
+    others = listed.get("writeIns") or {}
+    write_in_credit = (f"; write-in candidates: {_out_link(others['url'], others['source'])}"
+                       f" (read {time_html(others.get('read'))})"
+                       if others.get("url") and others.get("url") != listed.get("url") else "")
+    recased = ("Names are written first name first, in ordinary capitals and without a title the "
+               "ballot prints; the list writes them its own way. "
+               if any(p.get("printed") for p in people) else "")
+    rows.append(f"{pad}    <p>In surname order, not ballot order. {recased}Source: "
+                f"{_out_link(listed['url'], listed['source'])} (read {time_html(listed.get('read'))})"
+                f"{write_in_credit}."
                 + (" This site does not read the state's results and names no winner." if post else "")
                 + "</p>")
     return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])

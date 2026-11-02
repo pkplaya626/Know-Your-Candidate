@@ -2346,7 +2346,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     race's (rule 73). A candidate's card holds the list's words alone, in
     the order and with the notes the list block gives (`listParts`, one
     source of them), and its photograph's copy is made for the card's 72px
-    circle (`photocopies.BOXES` "governor-candidate", rule 101).
+    circle (`photocopies.BOXES` "governor-candidate", rule 101). Its
+    review found a count no second source checks: the NGA lists one
+    unbroken span for a re-elected governor, so Bill Lee and Tate Reeves,
+    in their second terms, read "First term" - the card counts no terms.
+    The Governors view reads a query as the grid does (rule 5: "Kansas" is
+    not Arkansas's governor), presses none of Congress's filters (a pressed
+    "Not seeking re-election" over every governor was a claim about each),
+    and asks once for a file that failed; a candidate's party words are
+    ink, since a fusion line is several parties (rule 88).
 
 92. **"Who is on my ballot" is its own question, answered from the views
     that already answer its parts, and an address keeps a ZIP code, never
