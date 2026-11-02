@@ -1062,7 +1062,17 @@ alt text calls it a headshot, portrait or profile: the first full run took a
 T-shirt, a clipboard icon, four logos, two collages and eight group or family
 photographs, each carrying the right name. `overrides.NOT_A_PORTRAIT` holds the few that pass
 every rule and are still not a likeness; the weekly re-read would undo a
-correction made in the cache.
+correction made in the cache. Where no image carries the surname, one narrow
+route reads the first name (the owner's decision of 2026-11-01): the first
+name as the profile or the filing writes it and "headshot", "portrait" or
+"profile" in the same file name or alt text ("Teresa-headshot-square-new.jpg").
+Such a portrait (`portraitRoute: "first-name"`) is withheld, and named by the
+build (`portrait-first-name-unseen`), until a person has looked at its file and
+recorded it in `overrides.SEEN_FIRST_NAME_PORTRAITS` - with the bytes and
+pixel size of the file shown, so another picture at the same address goes back
+behind the gate - or refused it in `NOT_A_PORTRAIT`. The route is known by its
+evidence's words as well as by `portraitRoute`, and one shown without its look
+fails the build (`photo-unevidenced`).
 
 **Every linked campaign site is read, members' included.** A site serving
 visible gambling spam or a parking page comes off the profile at once and is

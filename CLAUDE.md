@@ -751,7 +751,47 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     three entries stale, `photos.keep_refusals`). A curated row takes its campaign's
     portrait as a filer does: Brian Bengs's sat in the cache while his
     profile showed the silhouette. A sitting member never does: their
-    portrait comes by their bioguide id. Issue headings come from one heading level of a page
+    portrait comes by their bioguide id. One narrow route takes a first
+    name instead of the surname (the owner's decision of 2026-11-01 on the
+    photo research's proposal, "with a look at each before it shows"):
+    on the candidate's own campaign site, read as above, an image whose
+    file name or alt text carries their first name - as the profile or
+    their filing writes it, never a middle name or a nickname, a short form
+    only through an evidenced `overrides.PORTRAIT_NAME_FORMS` entry
+    (`first`) - and "headshot", "portrait" or "profile" in that same file
+    name or alt text ("Teresa-headshot-square-new.jpg", "Jerrad-Headshot2.png";
+    `enrich.first_name_portraits`). "Cropped" is not such a word: on the
+    248 sites read that day it named "Cropped+Family.png", "Family Leg
+    Up_cropped.jpg" and five logos. A first name alone ties less than a
+    surname - a campaign pictures the candidate's family under first names
+    ("colby and fam no background.png") - so the route is asked only where
+    no image named by the surname is found, home page and About page and
+    drawn page alike, every other test still applies (the words a logo, a
+    crowd or someone else's presence gives, the shape, `NOT_A_PORTRAIT`,
+    `PORTRAIT_LICENCE_DOUBTS`, the weight rules and credits), the record
+    says `portraitRoute` "first-name" and its evidence 'first name and
+    "headshot" in file name ...', and the portrait is withheld, and named
+    by validate (`portrait-first-name-unseen`), until a person has looked
+    at the file and recorded it in `overrides.SEEN_FIRST_NAME_PORTRAITS`
+    (the day, the candidate alone and the face measured on the card, the
+    page, and the bytes and pixel size of the file the card shows: a look
+    is at a picture, not an address, and another photograph saved over
+    "alexander-headshot.jpg" goes back behind the gate) or refused it in
+    `NOT_A_PORTRAIT`; an entry no cached record offers is
+    `stale-first-name-portrait`. The review of PR #186 found the gate
+    resting on one field of a hand-editable cache: a record that lost
+    `portraitRoute` would have shown unlooked. The route is known by its
+    evidence's words too (`enrich.first_name_route`), and one shown without
+    its look fails the build (`photo-unevidenced`). On the 289 people for Congress
+    without a photograph swept on 2026-11-01 it found images for nine; two
+    are landscape frames the shape test refuses (Jenny Rae le Roux's, Bob
+    Chew's), and of the seven the pipeline's reader took, six show the
+    candidate alone and are recorded, and Bethany Mann's selfie, with two
+    people behind her, is refused. Five November nominees who showed the
+    silhouette gain a photograph (Alexander Cooke, Colby Watson, Brinker
+    Harding, Teresa Benitez-Thompson, Jerrad Christian), and Bernadette
+    Greene-Placentia's campaign headshot stands ahead of the Clean
+    Elections Commission's guide photograph. Issue headings come from one heading level of a page
     that is not a ballot-question page ("Tyler votes NO" under a measure is
     not his platform), and never a line naming anyone else in the race -
     "Rob Wittman has allowed healthcare prices to skyrocket" is an attack
