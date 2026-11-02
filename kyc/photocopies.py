@@ -85,6 +85,10 @@ BOXES = {
     # statewide candidate in the election office's list (rules 57, 91).
     "justice": (32, 32),
     "candidate": (32, 32),
+    # .gov-portrait: a candidate for governor, drawn as a card in the
+    # governor's own 72px circle (kyc-stategov.js candidateCard). Keyed as
+    # every candidate is (key_of "candidate"); only the box is larger.
+    "governor-candidate": (72, 72),
     # .card-photo: a profile's card, 4:5, as wide as its column - the
     # Senate view's holder column at most 180px (.senate-holder
     # .card-grid); the dialog's .modal-portrait img is 116x145.
@@ -333,7 +337,7 @@ def may_copy(url, kind, code="", own=()):
     if kind in ("legislator", "person"):
         from .legphotos import official_host
         return bool(code) and official_host(code, url)
-    return kind not in ("justice", "candidate")
+    return kind not in ("justice", "candidate", "governor-candidate")
 
 
 def caucus_own(url, credit):
@@ -467,7 +471,10 @@ def stategov_photos(payload):
                 # is copied where the holder's card's may be; any other only
                 # from a government's host.
                 own = (host_of(url),) if url == holders.get(office) else ()
-                yield (row, url, "candidate", key_of("candidate", row, code, office), code,
+                # A candidate for governor is drawn as a card, in a larger
+                # box (BOXES "governor-candidate"); the key is a candidate's.
+                kind = "governor-candidate" if office == "governor" else "candidate"
+                yield (row, url, kind, key_of("candidate", row, code, office), code,
                        bool(credit.get("by") or credit.get("licence")), own)
 
 

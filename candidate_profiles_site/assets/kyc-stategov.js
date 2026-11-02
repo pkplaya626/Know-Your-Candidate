@@ -15,11 +15,15 @@
   "use strict";
 
   var KYC = global.KYC;
-  var data = global.kycStateGov || { states: {}, sources: {} };
+  /* Read when asked, not when this module loads: the grid loads
+   * data/stategov.js only when its governors are first shown (rule 94's
+   * on-demand pattern, KYC.loadData), after this module has started. */
+  var EMPTY = { states: {}, sources: {} };
+  function gd() { return global.kycStateGov || EMPTY; }
   var PARTY = { D: "Democratic", R: "Republican" };
 
   function state(code) {
-    return data.states[code] || null;
+    return gd().states[code] || null;
   }
 
   var FILL = {
@@ -298,33 +302,34 @@
       (url ? ": " + link(url, "the official results") : "") + ".";
   }
 
-  /** The candidates the election office lists for an office on the
-   *  November 3 ballot, under the office (rule 91): each name and party as
-   *  the list prints them, the running mate on a joint ticket, write-in
-   *  candidates apart, credited to the list and the day it was read. No
-   *  money or platform, and no link to a profile: nothing on the list says
-   *  a candidate is the person of the same name elsewhere on this site
-   *  (rule 25). A photograph only by the routes rule 91 names, with whose
-   *  it is beside it. After the election it is in the past tense and
-   *  points to the state's results. */
-  function candidatesBlock(code, key) {
+  /** What every view of an office's candidates says around the names, in
+   *  one place (rule 12): the list's heads, the line that says the list was
+   *  not read, the note on a list that is not the state's own, and the
+   *  source line - "In surname order, not ballot order", the document named
+   *  as what it is and the day it was read, and after the election where
+   *  the state's results are. null where the office is not on the ballot. */
+  function listParts(code, key) {
     var item = ballotItem(code, key);
-    if (!item || !item.up) return "";
+    if (!item || !item.up) return null;
     var past = after();
     var list = item.candidates;
+    var out = { past: past, list: list, item: item };
     if (!list) {
       // An office on the ballot whose list has not been read is said so,
       // not left blank beside offices that list their candidates.
-      return '<div class="gov-candidates"><p class="gov-candidates-none">' +
+      out.none = '<p class="gov-candidates-none">' +
         (past ? "Who was on the Nov 3, 2026 ballot for this office is not listed here"
           : "The candidates for this office are not listed here") +
-        ": no election office's list of them has been read." + (past ? resultsLine(code) : "") +
-        "</p></div>";
+        ": no election office's list of them has been read." + (past ? resultsLine(code) : "") + "</p>";
+      return out;
     }
-    var printed = list.candidates.filter(function (p) { return !p.writeIn; });
-    var writeIns = list.candidates.filter(function (p) { return p.writeIn; });
-    var pictured = list.candidates.some(function (p) { return p.photo && p.photoCredit; });
-    var row = function (p) { return candidateRow(p, key, pictured && !p.writeIn); };
+    out.printed = list.candidates.filter(function (p) { return !p.writeIn; });
+    out.writeIns = list.candidates.filter(function (p) { return p.writeIn; });
+    out.head = past ? "Candidates who were on the Nov 3, 2026 ballot" : "Candidates on the Nov 3, 2026 ballot";
+    out.writeInHead = "Write-in candidates (" + (past ? "their names were" : "names") +
+      " not printed on the ballot)";
+    out.uncertified = list.notStateList ? '<p class="gov-candidates-uncertified">Not the state’s own list. ' +
+      KYC.escapeHtml(list.notStateList) + ".</p>" : "";
     // The document is named as what it is - "the Florida Division of
     // Elections’ candidate listing", "Clark County Registrar of Voters’
     // notice of general election" - and called certified only where its
@@ -336,21 +341,223 @@
           " (read " + KYC.escapeHtml(KYC.dateWords(list.writeIns.read)) + ")"
         : "") + ".";
     var recased = list.candidates.some(function (p) { return p.printed; });
+    out.source = '<p class="faint gov-candidates-source">In surname order, not ballot order. ' +
+      (recased ? "Names are written first name first, in ordinary capitals and without a " +
+        "title the ballot prints; the list writes them its own way. " : "") + credit +
+      (past ? resultsLine(code) : "") + "</p>";
+    return out;
+  }
+
+  /** The candidates the election office lists for an office on the
+   *  November 3 ballot, under the office (rule 91): each name and party as
+   *  the list prints them, the running mate on a joint ticket, write-in
+   *  candidates apart, credited to the list and the day it was read. No
+   *  money or platform, and no link to a profile: nothing on the list says
+   *  a candidate is the person of the same name elsewhere on this site
+   *  (rule 25). A photograph only by the routes rule 91 names, with whose
+   *  it is beside it. After the election it is in the past tense and
+   *  points to the state's results. The governor's are cards
+   *  (governorRace), in the same words. */
+  function candidatesBlock(code, key) {
+    var parts = listParts(code, key);
+    if (!parts) return "";
+    if (parts.none) return '<div class="gov-candidates">' + parts.none + "</div>";
+    var list = parts.list;
+    var pictured = list.candidates.some(function (p) { return p.photo && p.photoCredit; });
+    var row = function (p) { return candidateRow(p, key, pictured && !p.writeIn); };
     return '<div class="gov-candidates">' +
-      '<p class="gov-candidates-head">' + (past ? "Candidates who were on the Nov 3, 2026 ballot"
-        : "Candidates on the Nov 3, 2026 ballot") + "</p>" +
-      (list.notStateList ? '<p class="gov-candidates-uncertified">Not the state’s own list. ' +
-        KYC.escapeHtml(list.notStateList) + ".</p>" : "") +
-      '<ul class="gov-candidate-list">' + printed.map(row).join("") + "</ul>" +
-      (writeIns.length
-        ? '<p class="gov-candidates-head gov-writein-head">Write-in candidates (' +
-          (past ? "their names were" : "names") + " not printed on the ballot)</p>" +
-          '<ul class="gov-candidate-list gov-writein-list">' + writeIns.map(row).join("") + "</ul>"
-        : "") +
-      '<p class="faint gov-candidates-source">In surname order, not ballot order. ' +
-        (recased ? "Names are written first name first, in ordinary capitals and without a " +
-          "title the ballot prints; the list writes them its own way. " : "") + credit +
-        (past ? resultsLine(code) : "") + "</p></div>";
+      '<p class="gov-candidates-head">' + parts.head + "</p>" + parts.uncertified +
+      '<ul class="gov-candidate-list">' + parts.printed.map(row).join("") + "</ul>" +
+      (parts.writeIns.length
+        ? '<p class="gov-candidates-head gov-writein-head">' + parts.writeInHead + "</p>" +
+          '<ul class="gov-candidate-list gov-writein-list">' + parts.writeIns.map(row).join("") + "</ul>"
+        : "") + parts.source + "</div>";
+  }
+
+  /* ------------------------------------------------------- governor cards */
+
+  /* The governor and the people on the ballot for governor, as cards: the
+   * sitting governor's in the state government section, the map's panel
+   * and the grid's Governors view; the candidates' in the state page's race
+   * for governor, the map's panel and the grid's races. One implementation
+   * for every page (rule 12). A governor card is a card, never a profile
+   * (rule 27): no #/profile/ link, no data-id, never in a count of who sits
+   * in or runs for Congress. A candidate's card holds what the election
+   * office's list says - name, party, running mate - and a photograph only
+   * by the routes rule 91 names; never money, a platform or a filing, and
+   * never joined to a profile by a name (rule 25). */
+
+  /** "Governor of Georgia", "Governor of the U.S. Virgin Islands": the
+   *  place in its own words (rule 75), from the lookup index every page
+   *  that draws a governor loads (lookup.place_info). */
+  function governorOf(code) {
+    var i = global.kycLookupIndex;
+    var place = i && i.states && i.states[code] && i.states[code].place;
+    return "Governor of " + (place || KYC.stateName(code));
+  }
+
+  function ordinal(n) {
+    var s = ["th", "st", "nd", "rd"];
+    var v = n % 100;
+    return n + (s[(v - 20) % 10] || s[v] || s[0]);
+  }
+
+  /** The party mark a list's party words carry: a party's colour only for
+   *  the two parties, "another party" for any other named one, and none for
+   *  a candidate the list gives no party, or says has none (rule 88). */
+  function partyMark(party) {
+    var p = String(party || "");
+    var r = /Republican/.test(p);
+    var d = /Democrat/.test(p);
+    if (r !== d) return r ? "party-r" : "party-d";
+    if (!p || r || /nonpartisan|no (political )?party|unaffiliated|not designated|unenrolled/i.test(p)) return "";
+    return "party-i";
+  }
+
+  /* The empty circle a card keeps where it has no photograph, or where its
+   * photograph failed to load: never a broken image. */
+  var NO_PORTRAIT = '<span class="gov-portrait-none" aria-hidden="true"></span>';
+
+  /** A card's photograph and the line saying whose it is (rule 87), the
+   *  smaller copy this site made of a heavy one drawn as the original's
+   *  (rule 101). The empty circle where there is none, or no credit. */
+  function cardPhoto(url, copy, credit) {
+    var line = url && credit ? KYC.photoCreditHtml(KYC.copyCredit(credit, url, copy)) : "";
+    if (!url || !line) return { img: NO_PORTRAIT, credit: "" };
+    return {
+      img: '<img class="gov-portrait" ' + KYC.photoAttrs(url, copy) +
+        ' alt="" width="72" height="72" loading="lazy" decoding="async">',
+      credit: '<p class="gov-photo-credit gcard-credit">' + line + "</p>",
+    };
+  }
+
+  /** The address of the state page's governor section, or race, from any
+   *  other page; "" on the state page itself, which is where they are. */
+  function governorHref(code, part, here) {
+    return here ? "" : KYC.stateUrl(code) + "#" + part;
+  }
+
+  /** The sitting governor's card. *opts.here*: drawn on the state's own
+   *  page, where the card carries the section's anchor; elsewhere the name
+   *  links to it. The ballot mark sits on the office's line, above the
+   *  holder, and the holder line under it (rule 79). *opts.brief* leaves
+   *  out the office's phone and address (the grid's cards). */
+  function governorCard(code, opts) {
+    opts = opts || {};
+    var s = state(code);
+    if (!s || !s.governor) return "";
+    var gov = s.governor;
+    var title = governorOf(code);
+    var photo = cardPhoto(gov.headshot, gov.photoCopy,
+      gov.headshotBy ? { by: gov.headshotBy, page: gov.headshotPage } : null);
+    var href = governorHref(code, "governor", opts.here);
+    var name = href ? '<a class="gcard-link" href="' + KYC.escapeAttr(href) + '">' +
+      KYC.escapeHtml(gov.name) + "</a>" : KYC.escapeHtml(gov.name);
+    var held = [gov.since ? "In office since " + gov.since : "",
+      gov.terms ? (gov.terms === 1 ? "First term" : ordinal(gov.terms) + " consecutive term") +
+        ", as the NGA lists terms" : ""].filter(Boolean);
+    var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join(" · ");
+    return '<article class="gov-card gcard"' + (opts.here ? ' id="governor"' : "") +
+      ' data-gov-state="' + KYC.escapeAttr(code) + '" aria-label="' + KYC.escapeAttr(title) + '">' +
+      officeLine("gov-role", title, officeMark(code, "governor")) + openSeat(code, "governor") +
+      '<div class="gcard-holder">' + photo.img + '<div class="gov-who">' +
+      '<p class="gov-name">' + name + "</p>" +
+      '<p class="gov-party party-' + KYC.escapeAttr(String(gov.partyKey || "i").toLowerCase()) + '">' +
+      KYC.escapeHtml(gov.party) + "</p>" +
+      (held.length ? '<p class="faint">' + KYC.escapeHtml(held.join(" · ")) + "</p>" : "") +
+      '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
+      link(gov.profile, "NGA biography") + "</p>" +
+      (contact && !opts.brief ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
+      photo.credit + "</div></div></article>";
+  }
+
+  /** One candidate on the election office's list for governor, as a card,
+   *  in the list's words (candidateRow's, rule 91): the name first name
+   *  first with the list's own form on hover, the party in words, the
+   *  running mate beside the nominee, the name printed on the ballot, and a
+   *  write-in said to be one. */
+  function candidateCard(person, code) {
+    var photo = person.writeIn ? { img: "", credit: "" }
+      : cardPhoto(person.photo, person.photoCopy, person.photoCredit);
+    var name = person.record ? link(person.record, person.name) : KYC.escapeHtml(person.name);
+    var mark = partyMark(person.party);
+    return '<article class="gcard gcard-candidate' + (person.writeIn ? " gcard-writein" : "") + '">' +
+      '<div class="gcard-holder">' + photo.img + '<div class="gov-who">' +
+      '<p class="gov-name"' +
+      (person.printed ? ' title="' + KYC.escapeAttr("The list prints: " + person.printed) + '"' : "") +
+      ">" + name + "</p>" +
+      (person.surnameOnly ? '<p class="faint">The list gives a surname only.</p>' : "") +
+      (person.party ? '<p class="gov-party' + (mark ? " " + mark : "") + '">' +
+        KYC.escapeHtml(person.party) + "</p>" : "") +
+      (person.writeIn ? '<p class="faint">Write-in candidate</p>' : "") +
+      (person.runningMate ? '<p class="gcard-mate">With ' + KYC.escapeHtml(person.runningMate) +
+        " for lieutenant governor</p>" : "") +
+      (person.ballotName ? '<p class="faint">Printed on the ballot as “' +
+        KYC.escapeHtml(person.ballotName) + "”</p>" : "") +
+      photo.credit + "</div></div></article>";
+  }
+
+  /** The race's name, for its heading, its jump and its row: "2026 race
+   *  for governor of Georgia". */
+  function raceHeading(code) {
+    return "2026 race for " + governorOf(code).replace(/^Governor/, "governor");
+  }
+
+  /** Whether the state's governor is elected on November 3. */
+  function governorUp(code) {
+    var item = ballotItem(code, "governor");
+    return !!(item && item.up);
+  }
+
+  /** The race for governor as cards: one per candidate on the election
+   *  office's list, write-in candidates apart, the list cited with its day
+   *  and called certified only where its own words say so (listParts), and
+   *  after the election in the past tense beside the state's results, never
+   *  a winner (rule 91). *opts.status*: false leaves out the holder line
+   *  where the governor's card right above it says it; *opts.role* names
+   *  the holder in it, where no card is near. "" where the governor is not
+   *  on this ballot. */
+  function governorRace(code, opts) {
+    opts = opts || {};
+    var parts = listParts(code, "governor");
+    if (!parts) return "";
+    var status = opts.status === false ? "" : openSeat(code, "governor", opts.role ? { role: true } : null);
+    if (parts.none) {
+      return '<div class="gov-race">' + status + '<div class="gov-candidates">' + parts.none + "</div></div>";
+    }
+    var card = function (p) { return candidateCard(p, code); };
+    return '<div class="gov-race" data-gov-race="' + KYC.escapeAttr(code) + '">' + status +
+      '<p class="gov-candidates-head">' + parts.head + "</p>" + parts.uncertified +
+      '<div class="gcard-grid">' + parts.printed.map(card).join("") + "</div>" +
+      (parts.writeIns.length
+        ? '<p class="gov-candidates-head gov-writein-head">' + parts.writeInHead + "</p>" +
+          '<div class="gcard-grid gcard-writeins">' + parts.writeIns.map(card).join("") + "</div>"
+        : "") + parts.source + "</div>";
+  }
+
+  function textOf(html) {
+    var d = global.document.createElement("div");
+    d.innerHTML = html;
+    return d.textContent.replace(/\s+/g, " ").trim();
+  }
+
+  /** The race for governor in a folded row's words (KYC.cards.raceRow's
+   *  form, rule 99), each from the race's own helpers: the holder line, the
+   *  list's own head over its names with their parties, write-ins apart, or
+   *  the line saying no list was read. Text only: a row is a button. null
+   *  where the governor is not on this ballot. */
+  function governorRowWords(code) {
+    var parts = listParts(code, "governor");
+    if (!parts) return null;
+    var named = function (p) { return p.name + (p.party ? " (" + p.party + ")" : ""); };
+    return {
+      held: textOf(openSeat(code, "governor")),
+      ballot: parts.none ? [] : [[parts.head, parts.printed.map(named)]]
+        .concat([[parts.writeIns.length > 1 ? "Write-in candidates" : "Write-in candidate",
+          parts.writeIns.map(named)]])
+        .filter(function (g) { return g[1].length; }),
+      none: parts.none ? textOf(parts.none) : "",
+    };
   }
 
   /** The office's label with its ballot mark beside it. */
@@ -370,7 +577,7 @@
   }
 
   function any(test) {
-    return Object.keys(data.states).some(function (c) { return test(data.states[c]); });
+    return Object.keys(gd().states).some(function (c) { return test(gd().states[c]); });
   }
 
   /** The legend for one of the map's state views: [[fill, label]]. "Vacant"
@@ -551,7 +758,7 @@
   }
 
   function source(key) {
-    var s = data.sources[key];
+    var s = gd().sources[key];
     if (!s) return "";
     return '<a href="' + KYC.escapeAttr(s[1]) + '" target="_blank" rel="noopener noreferrer">' +
       KYC.escapeHtml(s[0]) + "</a>" + (s[2] ? " (" + KYC.escapeHtml(KYC.dateWords(s[2])) + ")" : "");
@@ -764,23 +971,14 @@
         ? "The District of Columbia has an elected mayor and a council of 13, not a governor and legislature."
         : "No governor is listed for " + KYC.escapeHtml(KYC.stateName(code)) + ".") + "</p>";
     }
-    var gov = s.governor;
-    var key = KYC.escapeAttr(gov.partyKey.toLowerCase());
-    var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join(" · ");
-    var html = '<div class="gov-card">' +
-      (gov.headshot
-        ? '<img class="gov-portrait" ' + KYC.photoAttrs(gov.headshot, gov.photoCopy) +
-          ' alt="" width="72" height="72" loading="lazy" decoding="async">'
-        : "") +
-      '<div class="gov-who">' +
-      officeLine("gov-role", "Governor", officeMark(code, "governor")) + openSeat(code, "governor") +
-      '<p class="gov-name">' + KYC.escapeHtml(gov.name) + "</p>" +
-      '<p class="gov-party party-' + key + '">' + KYC.escapeHtml(gov.party) + "</p>" +
-      (gov.since ? '<p class="faint">In office since ' + KYC.escapeHtml(gov.since) + "</p>" : "") +
-      '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
-      link(gov.profile, "NGA biography") + "</p>" +
-      (contact ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
-      "</div></div>" + candidatesBlock(code, "governor");
+    // The governor's card, and the race for governor as cards under it; on
+    // the state page the race has a section of its own among the 2026
+    // races (*opts.raceApart*), and this says where it is.
+    var html = governorCard(code, { here: !!(opts && opts.here) }) + (opts && opts.raceApart
+      ? (governorUp(code) ? '<p class="gov-race-pointer">' + (after() ? "The candidates who were" :
+        "The candidates") + " on the Nov 3, 2026 ballot for governor are under " +
+        '<a class="state-jump" href="#governor-race">' + KYC.escapeHtml(raceHeading(code)) + "</a>.</p>" : "")
+      : governorRace(code, { status: false }));
     var place = s.territory ? "The territory" : "The state";
     if (s.lt || s.ag || s.sos) {
       html += '<p class="panel-subhead">' + (s.territory ? "Territorial" : "Statewide") +
@@ -817,7 +1015,7 @@
         '<a class="sidebar-link" href="' + KYC.escapeAttr(KYC.siteRoot() + "counties/" + lower + ".html") +
         '">Counties and local governments ›</a></p>';
     }
-    var ncsl = data.sources.ncsl && data.sources.ncsl[2];
+    var ncsl = gd().sources.ncsl && gd().sources.ncsl[2];
     html += '<p class="gov-sources faint">Governor: ' + source("nga") + ". " +
       (s.lt ? "Lieutenant governor: " + source("nlga") + ". " : "") +
       (s.ag ? "Attorney general: the office's own site, with party from " + source("raga") +
@@ -825,7 +1023,7 @@
       (s.sos ? "Secretary of state: " + source("nass") + ". " : "") +
       (ballot(code) ? "What is on the Nov 3 ballot: each state's constitution, statutes and " +
         "election office, linked from each mark (checked " +
-        KYC.escapeHtml(KYC.dateWords((data.sources.ballot2026 || [])[2] || "")) + "). " +
+        KYC.escapeHtml(KYC.dateWords((gd().sources.ballot2026 || [])[2] || "")) + "). " +
         (["governor", "lt", "ag", "sos"].some(function (k) { return (ballotItem(code, k) || {}).candidates; })
           ? "The candidates for each office on it: an election office's list, named under the " +
             "office as the document it is. " : "") : "") +
@@ -839,11 +1037,10 @@
   }
 
   /** Whose each photograph on the card is (rule 87): the roster's
-   *  association, or the office whose page it was taken from. */
+   *  association, or the office whose page it was taken from. The
+   *  governor's card says whose its photograph is under it (governorCard). */
   function photoSources(s) {
-    var gov = s.governor || {};
-    var rows = [["governor", gov.headshot && gov.headshotBy, gov.headshotPage,
-      gov.headshot && KYC.copyOf(gov.headshot, gov.photoCopy)]];
+    var rows = [];
     [["lieutenant governor", s.lt], ["attorney general", s.ag], ["secretary of state", s.sos]]
       .forEach(function (pair) {
         var off = pair[1] || {};
@@ -907,7 +1104,19 @@
       if (credit) credit.remove();
       img.replaceWith(none);
     } else if (img && img.classList && img.classList.contains("gov-portrait")) {
-      img.remove();
+      // A governor's or a candidate's card keeps its empty circle, and no
+      // credit for a photograph it does not show.
+      var card = img.closest && img.closest(".gcard");
+      var said = card && card.querySelector(".gcard-credit");
+      if (said) said.remove();
+      if (card) {
+        var circle = global.document.createElement("span");
+        circle.className = "gov-portrait-none";
+        circle.setAttribute("aria-hidden", "true");
+        img.replaceWith(circle);
+      } else {
+        img.remove();
+      }
     }
   }, true);
 
@@ -943,12 +1152,20 @@
    *  words ("the attorney general and secretary of state"), or "". The
    *  sentence that says so named "the governor" in states that elect none
    *  (PR #109 review). */
-  function listsCandidates(code) {
+  function listsCandidates(code, opts) {
     var offices = ["governor", "lt", "ag", "sos"].filter(function (k) {
+      if (k === "governor" && opts && opts.governor === false) return false;
       var item = ballotItem(code, k);
       return !!(item && item.up && item.candidates);
     }).map(function (k) { return BALLOT_WORD[k]; });
     return offices.length ? "the " + andList(offices) : "";
+  }
+
+  /** Whether the election office's list of candidates for governor was
+   *  read: the state page's race for governor lists them. */
+  function governorListed(code) {
+    var item = ballotItem(code, "governor");
+    return !!(item && item.up && item.candidates);
   }
 
   /* ----------------------------------------------------------- at a glance */
@@ -1044,6 +1261,17 @@
     officeMark: officeMark,
     openSeat: openSeat,
     candidatesBlock: candidatesBlock,
+    // The governor's card and the race for governor as cards (rule 12):
+    // the state pages, the map's panel and the grid's Governors view.
+    governorCard: governorCard,
+    governorRace: governorRace,
+    governorRowWords: governorRowWords,
+    governorUp: governorUp,
+    governorListed: governorListed,
+    governorOf: governorOf,
+    raceHeading: raceHeading,
+    loaded: function () { return !!global.kycStateGov; },
+    codes: function () { return Object.keys(gd().states); },
     titles: TITLES,
     state: state,
     look: look,

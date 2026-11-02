@@ -113,8 +113,11 @@ class TestBoxes(unittest.TestCase):
 
     def test_the_boxes_are_the_stylesheets(self):
         text = css()
+        # A governor candidate's card draws the photograph in the governor's
+        # own circle, the largest box a statewide candidate's is drawn in.
         for kind, selector in (("legislator", ".leg-photo"), ("federal", ".modal-portrait img"),
-                               ("governor", ".gov-portrait"), ("officer", ".gov-officer-photo")):
+                               ("governor", ".gov-portrait"), ("officer", ".gov-officer-photo"),
+                               ("governor-candidate", ".gov-portrait")):
             decls = block(text, selector)
             self.assertEqual(photocopies.BOXES[kind], (px(decls, "width"), px(decls, "height")),
                              selector)
@@ -129,6 +132,23 @@ class TestBoxes(unittest.TestCase):
         self.assertEqual(photocopies.BOXES["person"][0], int(widest.group(1)))
         self.assertEqual(photocopies.box_for(["legislator"]), [168, 210])
         self.assertEqual(photocopies.box_for(["legislator", "federal"]), [348, 435])
+
+    def test_a_candidate_for_governor_is_copied_for_the_card(self):
+        """A candidate for governor is drawn as a card in the governor's
+        72px circle (kyc-stategov.js candidateCard): their copy covers that
+        box, keyed as every statewide candidate is; the other offices' lists
+        keep the 32px box."""
+        payload = {"states": {"GA": {"ballot2026": {"offices": {
+            "governor": {"up": True, "candidates": {"candidates": [
+                {"name": "Pat Holder", "photo": "https://sos.ga.gov/a.jpg"}]}},
+            "ag": {"up": True, "candidates": {"candidates": [
+                {"name": "Lee Counsel", "photo": "https://sos.ga.gov/b.jpg"}]}}}}}}}
+        walked = {(kind, key) for _r, _u, kind, key, *_ in photocopies.stategov_photos(payload)}
+        self.assertIn(("governor-candidate", "candidate:GA:governor:Pat Holder"), walked)
+        self.assertIn(("candidate", "candidate:GA:ag:Lee Counsel"), walked)
+        self.assertEqual(photocopies.box_for(["governor-candidate"]), [216, 216])
+        self.assertTrue(photocopies.may_copy("https://sos.ga.gov/a.jpg", "governor-candidate"))
+        self.assertFalse(photocopies.may_copy("https://www.ajc.com/a.jpg", "governor-candidate"))
 
 
 class TestRun(unittest.TestCase):
@@ -670,9 +690,9 @@ class TestStateGovHook(unittest.TestCase):
         self.assertEqual(walked[("justice", "justice:GA:court:Jane Roe")],
                          (self.COURT, True, ("www.gasupreme.us",)))
         # The holder's office photograph, as the holder's card may be copied.
-        self.assertEqual(walked[("candidate", "candidate:GA:governor:Pat Holder")],
+        self.assertEqual(walked[("governor-candidate", "candidate:GA:governor:Pat Holder")],
                          (self.NGA, True, ("www.nga.org",)))
-        self.assertEqual(walked[("candidate", "candidate:GA:governor:Sam Smith")],
+        self.assertEqual(walked[("governor-candidate", "candidate:GA:governor:Sam Smith")],
                          (self.CAMPAIGN, True, ()))
         self.assertIn(("governor", "governor:GA:Pat Holder"), walked)
         self.assertEqual(len(walked), 7)
@@ -702,8 +722,8 @@ class TestStateGovHook(unittest.TestCase):
         shown = photocopies.Shown().add_stategov(payload)
         self.assertIn(self.COURT, shown.urls)
         self.assertIn(self.GUIDE, shown.urls)
-        self.assertEqual(shown.urls[self.NGA]["kinds"], {"governor", "candidate"})
-        self.assertEqual(shown.linked, {self.CAMPAIGN: {"candidate"},
+        self.assertEqual(shown.urls[self.NGA]["kinds"], {"governor", "governor-candidate"})
+        self.assertEqual(shown.linked, {self.CAMPAIGN: {"governor-candidate"},
                                         "https://i0.wp.com/x.org/doe.png": {"justice"}})
         self.assertEqual([c for _, c, _ in shown.issues], ["photo-copy-host"])
 
