@@ -581,7 +581,7 @@
     return { cls: "badge-neutral", rank: 1,
       card: "Awaiting the " + short + " runoff result",
       long: "Ran in the " + day + " general election runoff: awaiting result",
-      mate: "Awaiting the " + short + " runoff result", short: "Awaiting result",
+      mate: "Awaiting the " + short + " runoff result", short: "Awaiting runoff result",
       title: "Ran in the " + day + " general election runoff, between the top two after no " +
         "candidate won a majority in November. " + waiting,
       race: "Awaiting the " + short + " runoff result",
@@ -969,7 +969,7 @@
       return false;
     });
     if (runoff) {
-      add(heldRunoff(runoff.generalRunoff), "After a general election runoff: in it, and the " +
+      add(heldRunoff(runoff.generalRunoff), "After a general election runoff: ran in it, and the " +
         "results this site last read had not marked a winner.");
     }
     // A result a December round decided, in its words (decidedRound), for

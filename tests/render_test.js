@@ -8165,6 +8165,15 @@ async function testGuideMaps() {
         chip("awaiting") === K.raceStatus("nominee", "card",
           { now: new window.Date(Date.UTC(2026, 10, 5, 12)) }).label &&
         chip("awaiting") !== chip("nominee"), chip("awaiting"));
+      // Georgia's runoff in both tenses: its step's own day, passed with no
+      // result read, in the one table's words (heldRunoff).
+      check("the runoff's step gives its past tense from the table, dated by the step",
+        chip("runoff-held") === K.raceStatus("runoff", "card", { runoffDay: "2026-12-01",
+          now: new window.Date(Date.UTC(2026, 11, 5, 12)) }).label &&
+        chip("runoff-held") === "Awaiting the Dec 1 runoff result" &&
+        chip("runoff") === "In the runoff" &&
+        D.querySelector('.guide-status[data-status="runoff-held"]').closest("li")
+          .getAttribute("data-date") === "2026-12-01", chip("runoff-held"));
       check("on the campaign clock Election Day is next and nothing is past",
         D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-11-03" &&
         !D.querySelector(".guide-timeline-steps li.is-past"));
@@ -10328,6 +10337,9 @@ async function testGeorgiaRunoffPast() {
         two.every((p) => badge.getAttribute("title").indexOf(p.name) !== -1),
       h && h.textContent);
     const long = KYC.standing(two[0], "long");
+    check("the short form (the map's panel, the lookup's answer) names the runoff, " +
+      "not a November result", KYC.standing(two[0], "short").label === "Awaiting runoff result",
+      KYC.standing(two[0], "short").label);
     check("the profile's words: ran in it, awaiting result, as of the last read, credited",
       long.label === LONG && /had not marked a winner/.test(long.title) && /2026-12-04/.test(long.title) &&
         /Wikipedia/.test(long.title), long.label + " / " + long.title);

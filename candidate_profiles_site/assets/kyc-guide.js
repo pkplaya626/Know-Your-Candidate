@@ -390,9 +390,16 @@
   /* Each step names the status as it reads at that step, whatever today
    * is: a nominee "On the November ballot" before Election Day and
    * "Awaiting result" after it, until a winner is marked. */
-  function statusSpec(key) {
-    return key === "awaiting" ? KYC.raceStatus("nominee", "card", { now: AFTER_ELECTION })
-      : KYC.raceStatus(key, "card", { now: BEFORE_ELECTION });
+  function statusSpec(key, day) {
+    if (key === "awaiting") return KYC.raceStatus("nominee", "card", { now: AFTER_ELECTION });
+    // A general election runoff once its day (the step's own date) has
+    // passed with no result read: the table's past tense (heldRunoff).
+    if (key === "runoff-held") {
+      var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(day || "");
+      return m ? KYC.raceStatus("runoff", "card", { runoffDay: day,
+        now: new Date(Date.UTC(+m[1], +m[2] - 1, +m[3] + 4, 12)) }) : null;
+    }
+    return KYC.raceStatus(key, "card", { now: BEFORE_ELECTION });
   }
 
   function initTimeline(now) {
@@ -423,7 +430,9 @@
       });
     });
     Array.prototype.forEach.call(doc.querySelectorAll(".guide-status[data-status]"), function (chip) {
-      var spec = KYC.raceStatus && statusSpec(chip.getAttribute("data-status"));
+      var step = chip.closest("li[data-date]");
+      var spec = KYC.raceStatus && statusSpec(chip.getAttribute("data-status"),
+        step && step.getAttribute("data-date"));
       if (!spec) return;
       chip.textContent = spec.label;
       if (spec.cls) chip.classList.add(spec.cls);
