@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-01",
+ "asOf": "2026-11-02",
  "current": [
   {
    "code": "01 - MA",
@@ -387,7 +387,7 @@
   }
  ],
  "emergenciesUnmatched": [],
- "fetched": "2026-11-01T15:42:36+00:00",
+ "fetched": "2026-11-02T21:55:27+00:00",
  "future": [
   {
    "announced": "2026-07-15",
@@ -600,7 +600,7 @@
    }
   }
  ],
- "read": "2026-11-01",
+ "read": "2026-11-02",
  "sources": {
   "current": "https://www.uscourts.gov/data-news/judicial-vacancies/current-judicial-vacancies",
   "emergencies": "https://www.uscourts.gov/data-news/judicial-vacancies/judicial-emergencies",
