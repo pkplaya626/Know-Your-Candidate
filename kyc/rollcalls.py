@@ -46,7 +46,7 @@ import urllib.error
 import urllib.request
 import xml.etree.ElementTree as ET
 
-from . import cycle
+from . import agent, cycle
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "roll_calls.json")
 
@@ -90,8 +90,7 @@ DELEGATE_RULE = {
     "read": "2026-10-18",
 }
 
-USER_AGENT = ("know-your-candidate/2.1 (open-source civic data project; "
-              "https://github.com/pkplaya626/Know-Your-Candidate)")
+USER_AGENT = agent.USER_AGENT   # rule 103: the one shared constant
 # Neither office publishes a limit. One request a second to each, never
 # faster, and a run that is refused stops and keeps what it has (rule 8).
 PAUSE = 1.0

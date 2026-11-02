@@ -36,7 +36,7 @@ class FakeHttp:
         self.table = table
         self.asked = []
 
-    def get(self, url, limit=None, browser=False):
+    def get(self, url, limit=None):
         self.asked.append(url)
         if url not in self.table:
             return legphotos.Answer(None, {}, b"", url)
@@ -239,9 +239,36 @@ class TestRecipes(unittest.TestCase):
         # The record is someone else's, in another district: refused.
         moved = rec("Carolyn Jackson", district="2", links=jackson["links"], pid="ocd-person/x")
         self.assertIn("refused", legphotos.read_indiana(FakeHttp(table), "IN", [moved])["ocd-person/x"])
-        # Without the app's own template, nothing is built.
+        # Without the app's own template, nothing is built, and the read
+        # says it concluded nothing (rule 8).
         table["https://iga.in.gov/static/js/main.abc123.js"] = (200, "nothing", {})
-        self.assertEqual(legphotos.read_indiana(FakeHttp(table), "IN", [jackson]), {})
+        with self.assertRaises(legphotos.Unread):
+            legphotos.read_indiana(FakeHttp(table), "IN", [jackson])
+
+    def test_indiana_refusing_this_script_keeps_every_members_last_read(self):
+        # Rule 103: the IGA is asked as this project, never as a browser. A
+        # refusal, an empty shell or a challenge concludes nothing: every
+        # Indiana member keeps their last entry, and the run says so.
+        jackson = rec("Carolyn Jackson", links=["https://iga.in.gov/legislative/2026/legislators/"
+                                                "legislator_carolyn_jackson_1"])
+        old = {"name": "Carolyn Jackson", "chamber": "lower", "district": "1", "read": "2026-09-01",
+               "image": "https://iga.in.gov/images/legislators/124/2026/house/x.jpg",
+               "evidence": "the IGA record: Representative Carolyn Jackson", "state": "IN"}
+        for refusal in ({"https://iga.in.gov/api/getSessionYears": (403, "Forbidden", {})},
+                        {"https://iga.in.gov/api/getSessionYears": (202, "", {})},
+                        {"https://iga.in.gov/api/getSessionYears":
+                         (200, "<title>Just a moment...</title>", {})}):
+            with self.subTest(refusal=refusal):
+                http = FakeHttp(refusal)
+                with self.assertRaises(legphotos.Unread):
+                    legphotos.read_indiana(http, "IN", [jackson])
+                said = []
+                cache, report = legphotos.refresh({"IN": [jackson]}, {"people": {jackson["id"]: old}},
+                                                  http=http, today="2026-11-01", force=True,
+                                                  log=said.append, workers=1)
+                self.assertEqual(cache["people"][jackson["id"]], old)
+                self.assertEqual(report["IN"]["kept"], 1)
+                self.assertTrue(any("the last entries stand" in line for line in said), said)
 
     def test_colorado_takes_its_lists_own_smaller_rendition(self):
         src = ("https://leg.colorado.gov/rails/active_storage/representations/redirect/abc/def/"
@@ -430,8 +457,8 @@ class TestMemberPage(unittest.TestCase):
             http = FakeHttp({url: (200, page if answered == url else page.replace("Former ", ""), {})})
             original_get = http.get
 
-            def get(u, limit=None, browser=False, original_get=original_get, answered=answered):
-                ans = original_get(u, limit, browser)
+            def get(u, limit=None, original_get=original_get, answered=answered):
+                ans = original_get(u, limit)
                 ans.url = answered
                 return ans
             http.get = get
@@ -651,7 +678,7 @@ class TestSettle(unittest.TestCase):
     def test_a_host_that_answers_nothing_is_not_asked_all_run(self):
         http = legphotos.Http(pause=0)
         calls = []
-        http._get = lambda url, limit, browser: calls.append(url) or legphotos.Answer(None, {}, b"", url)
+        http._get = lambda url, limit: calls.append(url) or legphotos.Answer(None, {}, b"", url)
         original = legphotos.time.sleep
         legphotos.time.sleep = lambda s: None
         try:

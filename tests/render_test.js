@@ -553,6 +553,16 @@ function buildPage(page, opts) {
         removeListener() {},
       });
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
+      // opts.federal: the federal data as a refresh might write it, changed
+      // as data/federal.js assigns it, before any page module reads it.
+      if (opts.federal) {
+        let held;
+        Object.defineProperty(window, "kycFederal", {
+          configurable: true, enumerable: true,
+          get() { return held; },
+          set(value) { held = value; opts.federal(value); },
+        });
+      }
       // opts.written: the data as a later refresh would write it, before the rewind.
       const rewind = opts.now === undefined ? rewindToCampaign : null;
       const phase = opts.now === null ? null : phaseAt(opts.now || CAMPAIGN_NOW);
@@ -11844,6 +11854,46 @@ async function testFormerIncumbent() {
  * never with a party; a page lists who sits and never counts vacancies. */
 const PARTY_WORDS = /\b(Republican|Democrat(ic)?|Independent)\b/;
 
+/* Rule 103: an office's page that named its head and cannot be read since
+ * (state.gov refused this project on 2026-11-01) keeps its confirmation,
+ * and the page says when it was read - never as though read today. */
+async function testFederalKeptConfirmation() {
+  const DAY = "2026-10-30";
+  let office = null;
+  const hub = await buildPage("federal/index.html", {
+    federal: (d) => {
+      office = (d.offices || []).find((o) => o.holder && o.holder.page &&
+        o.holder.page.status === "confirmed");
+      if (office) office.holder.page = Object.assign({}, office.holder.page, { kept: true, read: DAY });
+    },
+  });
+  await settle(50);
+  const { window, D, errors } = hub;
+  suite("federal/index.html — a confirmation kept while the office's page cannot be read", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("an office's page confirmed its head", !!office);
+    if (!office) return;
+    const day = window.KYC.dateWords(DAY);
+    const card = [...D.querySelectorAll("#cabinet .fed-officer")].find((r) =>
+      r.querySelector(".fed-office").textContent === office.office);
+    check("the card says when the page last named them",
+      !!card && card.textContent.indexOf("Named on the office's site when last read, " + day) !== -1,
+      card && card.textContent);
+    window.KYC.official.open(office.holder.id);
+    const modal = D.getElementById("officialModal");
+    const text = modal ? modal.textContent : "";
+    check("the dialog says the page has not been read since",
+      text.indexOf("when it was last read, on " + day + "; it could not be read since") !== -1, text.slice(0, 300));
+    window.KYC.official.close();
+    const fresh = window.kycFederal.offices.find((o) => o !== office && o.holder && o.holder.page &&
+      o.holder.page.status === "confirmed" && !o.holder.page.kept);
+    const other = fresh && [...D.querySelectorAll("#cabinet .fed-officer")].find((r) =>
+      r.querySelector(".fed-office").textContent === fresh.office);
+    check("a page read this time says nothing of a last read",
+      !fresh || (!!other && other.textContent.indexOf("when last read") === -1));
+  });
+}
+
 async function testFederal() {
   const hub = await buildPage("federal/index.html");
   await settle(50);
@@ -16874,6 +16924,7 @@ async function testGuidePhotos() {
   if (!only || only === "guide") await testGuide();
   if (!only || only === "guide") await testBillFlow();
   if (!only || only === "federal") await testFederal();
+  if (!only || only === "federal") await testFederalKeptConfirmation();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "photos" || only === "legislature") await testPhotoCopies();
   if (!only || only === "photos") await testGuidePhotos();

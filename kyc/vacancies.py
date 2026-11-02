@@ -27,15 +27,14 @@ import os
 import re
 import urllib.request
 
-from . import federal_courts
+from . import agent, federal_courts
 
 BASE = "https://www.uscourts.gov/data-news/judicial-vacancies/"
 CURRENT_URL = BASE + "current-judicial-vacancies"
 FUTURE_URL = BASE + "future-judicial-vacancies"
 EMERGENCIES_URL = BASE + "judicial-emergencies"
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "judicial_vacancies.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 STALE_DAYS = 14
 
 

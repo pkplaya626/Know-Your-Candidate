@@ -2923,6 +2923,80 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     page never says what a yes or a no vote does, and is in the past tense
     from the day after the election, reading no result.
 
+103. **A request says who sends it.** Nine readers and one tool (`courts`,
+    `enrich`, `federal`, `judiciary`, `officers`, `official_photos`,
+    `territorial_courts`, `vacancies`, `voting`,
+    `tools/fetch_court_districts.py`) sent a desktop Chrome's User-Agent
+    string, and two more sent one when a server refused the honest one:
+    `legphotos` asked Indiana's IGA as a browser, and `photocopies` asked
+    again as one after a 401, 403 or 406. A script
+    dressed as a person's browser to be let in where scripts were not
+    wanted is not this project's to send. By the owner's decision of
+    2026-11-01 ("now") every one of them sends `kyc/agent.py`'s
+    `USER_AGENT` - the project's name and its public repository, never a
+    person's name or address, and no browser's product token (rule 12: one
+    constant; `rollcalls` shares it) - and both fallbacks are gone. A
+    refusal concludes nothing (rule 8): the reader keeps its last good read
+    and says so, and a page that refuses every script is read by hand where
+    a reader needs it (rule 57's way). Rehearsed the evening it changed,
+    asked as this project: Indiana's IGA answered all 59 requests (28
+    portraits, as before); 30 campaign sites of 30 read as before; the
+    FJC, the Court and the territorial courts answered every request;
+    state.gov, war.gov, usda.gov, commerce.gov, hhs.gov, transportation.gov
+    and ed.gov refused (six of them had refused the browser's string too),
+    while dol.gov, dhs.gov and odni.gov, unread as a browser, now confirm
+    their heads; senate.gov's roll-call XML refuses this machine whatever
+    the string; and vote.gov refused all 56 of its pages, as it had
+    refused the browser's string the same morning. The rehearsal
+    found where a refusal still read as a finding, each now refused and
+    tested:
+    - `federal` overwrote an office page's confirmation with "could not be
+      read" (state.gov named Marco Rubio that morning): a confirmation now
+      stands, dated (`read`) and marked `kept`, while the page cannot be
+      read and the holder is the same, and ages into
+      `federal-confirmation-kept` after `officers.KEPT_STALE_DAYS`.
+    - `voting` called a 202, an empty body or a bot wall's page "live", and
+      a name this machine's resolver could not find "dead": Montana's
+      three links (every mt.gov name failed here; dns.google answered)
+      would have left its page. A success that says nothing is "unknown"
+      (`agent.walled`), and a name is gone only where dns.google and
+      Cloudflare say so too (`voting.gone_everywhere`, rule 35).
+    - `judiciary` checked the justices' portraits with HEAD, and a
+      challenge's 200 of HTML would have withdrawn all nine: it reads the
+      file's first bytes, and a refusal, a 202 or a wall's page concludes
+      nothing; a portraits page that says nothing keeps the last.
+    - a territorial court's challenge page read as a court naming no
+      judge; it keeps the last roster.
+    - `enrich` and `localsites` took a firewall's 406 or a geographic
+      block's 451, a 404 at a bot wall's host after a redirect, or a wall's
+      page as a verdict on a campaign's or a government's site; each is
+      inconclusive now, after the spam and parking tests (a parking chain's
+      "Security Check" is still parking). `official_photos` and
+      `photocopies` read a 404 at a bot wall's host the same way. Only a
+      wall's own host (`agent.WALL_HOSTS`: Radware's perfdrive.com,
+      DataDome's captcha-delivery.com): the first fix excused a 404 from
+      any other host, so a lapsed campaign domain sent to a registrar's
+      "not found" page would have stayed linked as safe (PR #185 review).
+    - A wall's page is known by the document's own first title, never an
+      inline SVG's, and a phrase an ordinary page might open with ("One
+      more step", "Not allowed", "Security Check", "Access Denied") only
+      as the whole title or beside a wall vendor's name: "One more step to
+      register to vote" would have made a state's lookup "could not be
+      confirmed".
+    - `legphotos` counted the members of a state whose read failed as
+      nobody asked; they are counted as kept, and Indiana's read that
+      concludes nothing raises `Unread` and says the last entries stand.
+    One test says what a wall's page is (`agent.walled`, beside
+    `officers.says_nothing`). `tests/test_agent.py` fails on a browser's
+    product token in any User-Agent string in `kyc/`, `tools/` or
+    `.github/`, on a module constant that would send one, and on a headless
+    Chrome told to pose as another (`setUserAgent`, `--user-agent`), as CI
+    greps for `onclick=`. The headless Chrome readers (`courts`' browser
+    recipes, `enrich.render_portraits`, `members`) send
+    Chrome's own headless string and pose as nothing else. The readers that
+    already said who they were keep their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
+    convention and names no browser.
+
 ## District maps
 
 `kyc/districts.REDRAWN` lists the states whose 2026 House map differs from

@@ -46,12 +46,11 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import tls
+from . import agent, tls
 from .normalize import US_STATES
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "voting_links.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/154.0 Safari/537.36")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 # The kind of page, and the NASS page that lists it for every state.
 PAGES = {
@@ -542,6 +541,19 @@ LIVE = "live"
 UNKNOWN = "unknown"
 
 
+def gone_everywhere(host, doh=None):
+    """Whether *host* has no address at both public resolvers (dns.google
+    and Cloudflare, ``localsites.doh``), not only here. Rule 35: a lookup
+    that fails on this machine is not a dead name. The rehearsal of rule
+    103 (2026-11-01) found this machine's resolver failing for every mt.gov
+    name while both public resolvers answered, and Montana's three voting
+    links would have been called dead and left off its page."""
+    if doh is None:
+        from .localsites import doh
+    answers = doh(host, None)
+    return len(answers) == 2 and all(a in ("nxdomain", "noaddress") for a in answers)
+
+
 def _status(url, timeout=25):
     """One request: ``(HTTP status, the URL it ended on)``, ``("nxdomain",
     url)``, or ``(None, url)`` for inconclusive."""
@@ -554,6 +566,8 @@ def _status(url, timeout=25):
         # (kyc/tls.py), never by checking less.
         with urllib.request.urlopen(request, timeout=timeout,
                                     context=tls.context()) as response:
+            if turned_away(response.status, response.read(_HEAD_BYTES)):
+                return None, response.geturl()
             return response.status, response.geturl()
     except urllib.error.HTTPError as exc:
         return exc.code, exc.geturl() or url
@@ -565,7 +579,8 @@ def _status(url, timeout=25):
             try:
                 socket.getaddrinfo(_host(url), 443)
             except OSError:
-                return "nxdomain", url
+                if gone_everywhere(_host(url)):
+                    return "nxdomain", url
         return None, url
     except (OSError, ValueError):
         return None, url
@@ -573,6 +588,18 @@ def _status(url, timeout=25):
 
 def _host(url):
     return (urllib.parse.urlsplit(url or "").hostname or "").lower()
+
+
+# Enough of a page to hold its <title>.
+_HEAD_BYTES = 32768
+
+
+def turned_away(status, head):
+    """Whether a success says nothing of the page (rule 8): a 202, an empty
+    body, or a bot wall's page under a 200 (``agent.walled``). Such a link
+    is "unknown", never "live": the page says "each link opened" only of a
+    link that opened (rule 79)."""
+    return status == 202 or agent.walled(head)
 
 
 def check_links(urls, status=_status, pause=1.0, sleep=time.sleep):
