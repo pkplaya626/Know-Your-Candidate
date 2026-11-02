@@ -307,8 +307,26 @@
     "name": "Maricopa County Elections Department",
     "url": "https://elections.maricopa.gov/"
    },
-   "read": "2026-11-01",
+   "read": "2026-11-02",
    "measures": [
+    {
+     "jurisdiction": {
+      "kind": "county",
+      "name": "Maricopa County"
+     },
+     "designation": "Proposition 413",
+     "title": "PROPOSITION RELATING TO TRANSACTION PRIVILEGE TAX FOR JAIL FACILITIES",
+     "text": "OFFICIAL TITLE: COUNTY JAILS: TRANSACTION PRIVILEGE TAX OF ONE-FIFTH OF ONE CENT, the same rate as the existing jail facilities excise tax expiring in March 2027. DESCRIPTIVE TITLE: Pursuant to authority granted by the State of Arizona, the County seeks voter approval of a transaction privilege tax set at the rate allowed under A.R.S. § 42-6109.02, section A, one-fifth of one cent to be used for county jail facilities and programs. A \"YES\" vote shall have the effect of approving a sales tax of one-fifth of one cent ($0.002) for county jail facilities and programs, the same rate as the current tax that is expiring. A \"NO\" vote shall have the effect of rejecting a sales tax of one-fifth of one cent ($0.002) for jail facilities and programs.",
+     "textNote": "The ballot format of Proposition 413 as the county's publicity pamphlet prints it (page 5): its official title, descriptive title and the effect of a yes and a no vote, all on the ballot.",
+     "kind": "tax",
+     "source": {
+      "url": "https://elections.maricopa.gov/asset/jcr:5af11871-7e96-4ad1-a13a-5492f096c005/2026%20General%20Election%20Publicity%20Pamphlet%20-%20Maricopa%20County%20-%20Website%20Version.pdf",
+      "title": "2026 Publicity Pamphlet, Proposition 413 (Maricopa County Elections Department)",
+      "quote": "BALLOT FORMAT OF PROPOSITION 413 PROPOSITION 413 PROPOSITION RELATING TO TRANSACTION PRIVILEGE TAX FOR JAIL FACILITIES OFFICIAL TITLE: COUNTY JAILS: TRANSACTION PRIVILEGE TAX OF ONE-FIFTH OF ONE CENT, the same rate as the existing jail facilities excise tax expiring in March 2027."
+     },
+     "read": "2026-11-02",
+     "notes": "{\"how\": \"The county's County Propositions page (https://elections.maricopa.gov/candidates/county-ballot-measures.html) refuses scripts; the owner opened it in his browser on 2026-11-02: 'Proposition 413 will appear on the 2026 General Election Ballot, and a publicity pamphlet will be sent to each Maricopa County household with a registered voter in the fall.' The county's What's on My Ballot page links the pamphlet, which answered this site's own user agent on 2026-11-02 (HTTP 200, 3,211,390 bytes, 32 pages, sha256 deffb8b8c662373fc396f875428bfc06f94a46d274fdb8604f0f338e4bc5a858); by 05:24 UTC that day it answered the same agent with a Cloudflare challenge (HTTP 403), so the second reader read the first reader's copy of that file. The quoted sentence is the only one of the propositions page recorded here; this site does not say Proposition 413 is the county's only question.\", \"pamphletMessage\": \"Page 3: 'The purpose of this voter information pamphlet is to give residents a clear overview of the Maricopa County Jail Facilities Excise Tax proposal (Proposition 413), which will appear on the General Election ballot on November 3, 2026.'\", \"authority\": \"Page 6: 'RESOLUTION AND CALL FOR ELECTION FOR A TRANSACTION PRIVILEGE TAX FOR JAIL FACILITIES', a resolution of the Maricopa County Board of Supervisors.\", \"countywideDistricts\": \"Whether a district covering the whole county (the Special Health Care District, the Community College District) has a question on this ballot was not found either way.\"}"
+    },
     {
      "jurisdiction": {
       "kind": "city",
@@ -495,8 +513,8 @@
     }
    ],
    "own": {
-    "status": "notFound",
-    "why": "This site's automated reading could not open the Maricopa County Elections Department's county ballot measures page, and found no other official text of a county question; whether a countywide district has one was not found either."
+    "status": "listed",
+    "partial": "This site read the county's own question from its publicity pamphlet for Proposition 413, which does not say whether it is the county's only one. Whether a district covering the whole county (the Special Health Care District, the Community College District) has a question on this ballot is not settled here either: this site found no list of theirs either way."
    },
    "cities": [
     {
@@ -536,7 +554,7 @@
      "why": "The City of Glendale's clerk's election page was not at its address, and this site found no other list of the city's questions."
     }
    ],
-   "notes": "Maricopa County's own measure(s): a search shows the County Elections Department's 'County Ballot Measures' page saying 'Proposition 413 will appear on the 2026 General Election Ballot' (news calls it an extension of the county's one-fifth-cent jail/public safety excise tax), but that page refused this read (Cloudflare) and no other official text was found. Countywide districts (Maricopa County Special Health Care District, Maricopa County Community College District): nothing found either way. Town of Gilbert and City of Glendale: their own election pages could not be read (Gilbert 403, Glendale 404); the Clean Elections Commission's Maricopa list names no measure of either. Not 'none'."
+   "notes": "Maricopa County's own measure(s): on 2026-11-01 a search showed the County Elections Department's 'County Ballot Measures' page saying 'Proposition 413 will appear on the 2026 General Election Ballot' (news called it an extension of the county's one-fifth-cent jail/public safety excise tax), but that page refused that read (Cloudflare) and no other official text had been found. Countywide districts (Maricopa County Special Health Care District, Maricopa County Community College District): nothing found either way. Town of Gilbert and City of Glendale: their own election pages could not be read (Gilbert 403, Glendale 404); the Clean Elections Commission's Maricopa list names no measure of either. Not 'none'. 2026-11-02: the County Propositions page, opened in the owner's browser, names Proposition 413; its text is the publicity pamphlet's ballot format (page 5), read with this site's own user agent. Countywide districts: still nothing found either way."
   },
   "06073": {
    "state": "CA",
