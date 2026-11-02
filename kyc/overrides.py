@@ -2279,8 +2279,6 @@ LOCAL_MEASURE_SOURCES = {
         "the California Secretary of State's county elections offices page "
         "(https://www.sos.ca.gov/elections/voting-resources/county-elections-offices, read "
         "2026-11-01) gives www.sdvote.com as San Diego County's"),
-    "sandiego.gov": (("06073",), "City of San Diego City Clerk",
-                     _DOTGOV + "sandiego.gov: City, 'The City of San Diego', San Diego, CA"),
     "voteorangefl.gov": (("12095",), "Orange County Supervisor of Elections",
                          _DOTGOV + "voteorangefl.gov: County, 'Orange County Supervisor of Elections', Orlando, FL"),
     "votetravis.gov": (("48453",), "Travis County Clerk, Elections Division",
