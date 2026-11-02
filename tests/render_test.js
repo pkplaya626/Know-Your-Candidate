@@ -14053,6 +14053,25 @@ async function testRaceMoney() {
     check("a ranked-choice count's first choices are a lead, not a win, in the summary",
       rcv.every((r) => / led first choices by \d+\.\d points$/.test(holder(KYC.cards.lastTimeBlock(r,
         { lazy: false, now: campaign })).querySelector("summary").textContent)), rcv.length);
+    // ... and in the table: "Won" beside a first-choice row only with more
+    // than half of every vote counted (Begich's 48.4% in Alaska, 2024, was
+    // badged "Won"). Made so from a copy of any two-candidate result.
+    const two = shown.find((r) => r.lastElection.candidates[1] && !r.lastElection.redrawn &&
+      !r.lastElection.withheld && r.lastElection.kind !== "unopposed" &&
+      r.lastElection.rankedChoice !== "first-choices");
+    const badges = (r) => [...holder(KYC.cards.lastTimeBlock(r, { lazy: false, now: campaign }))
+      .querySelectorAll(".last-table .badge")].map((b) => b.textContent);
+    const ranked = (share) => {
+      const r = JSON.parse(JSON.stringify(two));
+      r.lastElection.rankedChoice = "first-choices";
+      r.lastElection.candidates[0].votes = Math.round(r.lastElection.total * share);
+      return r;
+    };
+    check("a first-choice leader short of a majority is badged a lead, never 'Won'",
+      !!two && JSON.stringify(badges(ranked(0.484))) === '["Led first choices"]', two && two.id);
+    check("and one with more than half of every vote counted won outright",
+      !!two && JSON.stringify(badges(ranked(0.53))) === '["Won"]' &&
+        JSON.stringify(badges(two)) === '["Won"]', two && two.id);
     const unchecked = all.filter((r) => r.lastElection && r.lastElection.withheld === "unchecked");
     check("a result the second compilation does not confirm says so, not that it was unread",
       unchecked.every((r) => /does not confirm it/.test(holder(KYC.cards.lastTimeBlock(r,

@@ -1445,9 +1445,16 @@
       rows = '<p class="race-note">' + KYC.escapeHtml(last.candidates[0].name + " (" +
         last.candidates[0].party + ") was unopposed. " + (last.note || "")) + "</p>";
     } else {
+      // First choices are a lead (rule 90): the top row is "Won" only beside
+      // more than half of every vote counted, a first-round win. Nick Begich
+      // led Alaska's 2024 first choices with 48.4% and was badged "Won".
+      var outright = last.rankedChoice !== "first-choices" ||
+        2 * last.candidates[0].votes > last.total;
+      var topBadge = ' <span class="badge badge-neutral">' + (outright ? "Won" : "Led first choices") +
+        "</span>";
       rows = '<table class="last-table"><tbody>' + last.candidates.map(function (c, i) {
         return "<tr><th scope=\"row\">" + KYC.escapeHtml(c.name) + ' <span class="faint">' +
-          KYC.escapeHtml(c.party) + "</span>" + (i === 0 ? ' <span class="badge badge-neutral">Won</span>' : "") +
+          KYC.escapeHtml(c.party) + "</span>" + (i === 0 ? topBadge : "") +
           "</th><td>" + pct(c.share) + "</td><td class=\"faint\">" +
           c.votes.toLocaleString("en-US") + " votes</td></tr>";
       }).join("") + (last.others ? '<tr><th scope="row">Everyone else</th><td>' +
