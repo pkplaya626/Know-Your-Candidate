@@ -975,6 +975,22 @@ class TestTheTerritorialCourts(unittest.TestCase):
         self.assertEqual(out["mp"], {"unread": True, "source": tc.COURTS["mp"]["url"]})
         self.assertEqual(len(problems), 3)
 
+    def test_a_challenge_in_a_pages_place_keeps_the_last_roster(self):
+        # Rule 103: asked as this project, a firewall may answer 202 with no
+        # body or a bot wall's page; neither is a court naming no judge.
+        before = {"gu": {"judges": [{"name": "A", "title": "Chief Judge", "chief": True}],
+                         "read": "2026-10-01", "source": "x", "seats": 1, "statute": "s"}}
+        for answer in ("", "<html><head><title>Just a moment...</title></head></html>"):
+            out, problems = tc.fetch(before, read=lambda url, answer=answer: answer)
+            self.assertEqual(out["gu"], before["gu"])
+            self.assertEqual(len(problems), 3)
+        # A Virgin Islands judge's own page that says nothing keeps the roster too.
+        pages = {"https://www.vid.uscourts.gov/judges-info": fixture("territorial_vi_list.html")}
+        for slug in ("robert-molloy", "evan-rikhye", "emile-henderson-iii"):
+            pages[f"https://www.vid.uscourts.gov/content/honorable-{slug}"] = ""
+        with self.assertRaises(tc.TerritorialCourtError):
+            tc.read_court("vi", read=pages.__getitem__)
+
     def test_the_built_pages_carry_the_courts_own_list(self):
         payload, courts, _search, _ = federal_build.build(ROOT)
         for cid in tc.COURTS:

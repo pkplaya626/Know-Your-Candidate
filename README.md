@@ -358,6 +358,22 @@ They are gone:
 
 CI fails if any of them come back.
 
+### Who the pipeline's requests say they are
+
+Every reader that sent a browser's string now sends `kyc/agent.py`'s
+`USER_AGENT`, the project's name and its public repository (rule 103); the
+others already named the project in their own strings, and the headless
+Chrome readers send Chrome's own headless string, posing as nothing else.
+Until 2026-11-01 nine readers and one tool sent a desktop Chrome's string,
+and two more asked again as a browser when refused; both fallbacks are gone. A server that
+refuses this project concludes nothing: the reader keeps its last good read
+and says so - an office page's confirmation stands, dated, while the page
+cannot be read; a voting link that answers with a challenge is "could not be
+confirmed", never opened or dead; a court whose page answers with a bot
+wall's keeps its last roster - and a page a reader needs is read by hand.
+`tests/test_agent.py` fails on a browser's product token in any User-Agent
+string in `kyc/`, `tools/` or `.github/`.
+
 ### Accessibility
 
 - No `user-scalable=no`. Blocking pinch-zoom fails WCAG 1.4.4.
@@ -2407,11 +2423,12 @@ office's or the city clerk's own sample ballot or list of measures, or the
 state election office's list of local questions; Ballotpedia, news and other
 compilations were leads only (rule 50). 104 questions in 50 counties and 46
 cities: 12 parts (a county's own, or a city's) with none, on a document's own
-words; 25 whose document lists none but does not say it is whole (the City of
-Sacramento's among them: its one question, Measure F, is marked withdrawn); 13 for which
-no official list could be read (Broward, Duval, Hillsborough and Maricopa's
-own; Chicago, San Jose, Chula Vista, Irving, Gilbert, Glendale, Jacksonville,
-Tampa; Nassau). `kyc/local_measures.py` writes `data/localmeasures/index.js`
+words; 26 whose document lists none but does not say it is whole (the City of
+Sacramento's among them: its one question, Measure F, is marked withdrawn; and
+the City of San Diego and Chula Vista, which the Registrar's composite reference
+ballot prints contests for and no question of); 12 for which no official list
+could be read (Broward, Duval, Hillsborough and Maricopa's own; Chicago, San
+Jose, Irving, Gilbert, Glendale, Jacksonville, Tampa; Nassau). `kyc/local_measures.py` writes `data/localmeasures/index.js`
 (which counties are covered) and one file per state, which the county pages
 and Your ballot load; one implementation draws both (`KYC.localMeasures`,
 `assets/kyc-localmeasures.js`).

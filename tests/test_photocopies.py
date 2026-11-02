@@ -51,6 +51,7 @@ class FakeNet:
         self.files = {}
         self.answers = {}
         self.reads = []
+        self.sent = []
         self.fetches = []
 
     def jpeg(self, url, size, width=3000, height=4000, etag='"a"'):
@@ -60,6 +61,7 @@ class FakeNet:
 
     def prober(self, url, entry=None, headers=None):
         self.reads.append(url)
+        self.sent.append(headers)
         if url in self.answers:
             return dict(self.answers[url])
         body, width, height, etag = self.files[url]
@@ -252,6 +254,39 @@ class TestRun(unittest.TestCase):
         self.run_once(s)
         self.assertIsNone(photocopies.current(self.cache(), HEAVY))
         self.assertEqual(self.photos(), [])
+
+    def test_a_refusal_is_asked_once_as_this_project_and_concludes_nothing(self):
+        # Rule 103: a 401, 403 or 406 was asked again as a browser; now the
+        # file stays unweighed and the copy made before stands (rule 8).
+        self.net.jpeg(HEAVY, 9_000_000)
+        s = shown((HEAVY, "legislator"))
+        self.run_once(s)
+        for code in (401, 403, 406):
+            self.net.reads, self.net.sent = [], []
+            self.net.answers[HEAVY] = {"status": "error", "why": f"HTTP {code}", "code": code}
+            self.run_once(s)
+            self.assertEqual(self.net.reads, [HEAVY], code)
+            self.assertIs(self.net.sent[0], photocopies.UA, code)
+            self.assertIsNotNone(photocopies.current(self.cache(), HEAVY), code)
+
+    def test_a_404_is_the_files_unless_a_bot_walls_host_gave_it(self):
+        import io
+        import urllib.error
+        from unittest import mock
+
+        def refused(final):
+            def opener(url, headers, timeout=None):
+                raise urllib.error.HTTPError(final, 404, "Not Found", {}, io.BytesIO(b""))
+            return opener
+        for final, status in (
+                (HEAVY, "gone"),
+                ("https://www.oksenate.gov/missing", "gone"),
+                ("https://registrar.example/notfound", "gone"),
+                ("https://validate.perfdrive.com/?ssa=1", "error"),
+                ("https://geo.captcha-delivery.com/captcha/", "error")):
+            with mock.patch.object(photocopies, "_open", refused(final)):
+                read = photocopies._probe_once(HEAVY, None, photocopies.UA, 1024)
+            self.assertEqual(read["status"], status, final)
 
     def test_a_copy_no_record_shows_is_removed(self):
         self.net.jpeg(HEAVY, 9_000_000)

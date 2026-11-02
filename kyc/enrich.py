@@ -39,7 +39,7 @@ import urllib.request
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 
-from . import overrides
+from . import agent, overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
 from .photos import campaign_credit, lighter_rendition, parse_srcset, too_heavy
@@ -51,9 +51,8 @@ from .results import OFF_BALLOT
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "enrichment.json")
 
 _UA_WEB = {
-    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                   "(KHTML, like Gecko) Chrome/129.0 Safari/537.36 "
-                   "know-your-candidate/2.1 (open-source civic data project)"),
+    # Who sends it, never a browser's string (rule 103).
+    "User-Agent": agent.USER_AGENT,
     "Accept": "text/html,application/xhtml+xml",
     "Accept-Language": "en-US,en;q=0.9",
     # Brotli needs a third-party package; ask for what the standard library reads.
@@ -68,6 +67,10 @@ STALE_DAYS = 6
 
 # Site verdicts. ``None`` - could not tell - is the third state (rule 8).
 SAFE, REFUSED = True, False
+# Statuses that turn a script away without saying anything of the site
+# (rule 8): a bot wall's 401 or 403, a firewall's 406 for an unfamiliar
+# user agent (ModSecurity's), a geographic block's 451, a rate limit's 429.
+TURNED_AWAY = frozenset({401, 403, 406, 429, 451})
 HIJACKED = "reads as hijacked"
 PARKED = "reads as parked or expired"
 UNNAMED = "does not name the candidate"
@@ -510,8 +513,14 @@ def assess(profile, url, final, status, page):
     """
     if status is None:
         return None, "unreachable"
-    if status in (401, 403, 429) or status >= 500 or 200 < status < 300:
+    if status in TURNED_AWAY or status >= 500 or 200 < status < 300:
         return None, f"HTTP {status}"
+    if status in (404, 410) and agent.wall_host(final):
+        # A redirect to a bot wall's host that answers 404 (rule 79's
+        # Radware page) says nothing of the campaign's own site. Any other
+        # host's 404 is the site's answer: a lapsed domain sent to a
+        # registrar's "not found" page is gone (rule 39).
+        return None, f"HTTP {status} from {host_of(final)}"
     if 300 <= status < 400:
         return REFUSED, f"redirects in a loop through {host_of(final)}"
     if status >= 400:
@@ -526,6 +535,10 @@ def assess(profile, url, final, status, page):
     if (_PARKED.search(head) or (len(body) < 2000 and _PARKED.search(body))
             or _PARKING_CODE.search(page.small)):
         return REFUSED, PARKED
+    if agent.turned_away(page.title):
+        # A bot wall's page in the site's place, after the spam and parking
+        # tests: a parking chain's "Security Check" is still parking.
+        return None, f"a bot wall's page ({page.title[:40]})"
     text = " ".join([head, body, page.hidden] + [h for _, h in page.headings])
     # On the page, not in the address: a lapsed "janesmith2026.com" still has
     # her name in it.

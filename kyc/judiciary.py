@@ -37,10 +37,11 @@ import json
 import os
 import re
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
-from . import federal_courts
+from . import agent, federal_courts
 
 SERVICE_URL = "https://www.fjc.gov/sites/default/files/history/federal-judicial-service.csv"
 JUDGES_URL = "https://www.fjc.gov/sites/default/files/history/judges.csv"
@@ -55,8 +56,7 @@ PORTRAITS_URL = "https://www.supremecourt.gov/about/biographies.aspx"
 PORTRAIT_CREDIT = "Collection of the Supreme Court of the United States"
 COURT_PAUSE = 1.0
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "judiciary.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 # A read listing fewer sitting judges than this share of the last one is a
 # truncated file, not a wave of retirements: refused, and the last kept.
 SHRINK = 0.9
@@ -519,18 +519,30 @@ def build(service_text, judges_text, scotus_page, today, portraits_page=None, im
     }
 
 
-def _image_ok(url):
-    """True when *url* answers with an image, False on a 404 or another
-    type, None when the request concludes nothing (rule 8)."""
+def _image_ok(url, opener=urllib.request.urlopen):
+    """True when *url* answers with an image, False on a 404 or 410 or a page
+    in the image's place, None when the request concludes nothing (rule 8):
+    a refusal, a 202 with a challenge, a bot wall's page. Read with a GET of
+    the file's first bytes, since HEAD lies (rule 51) and a challenge's
+    answer to HEAD is a 200 of HTML, which would have withdrawn every
+    justice's portrait asked as this project (rule 103)."""
     time.sleep(COURT_PAUSE)
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT}, method="HEAD")
+    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT,
+                                                   "Range": "bytes=0-4095"})
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
-            return response.headers.get("Content-Type", "").startswith("image/")
+        with opener(request, timeout=30) as response:
+            status = response.status
+            kind = response.headers.get("Content-Type", "")
+            head = response.read(4096)
     except urllib.error.HTTPError as exc:
-        return False if exc.code == 404 else None
+        return False if exc.code in (404, 410) else None
     except OSError:
         return None
+    if status == 202:
+        return None
+    if kind.startswith("image/") or head[:3] == b"\xff\xd8\xff" or head[:8] == b"\x89PNG\r\n\x1a\n":
+        return True
+    return None if agent.walled(head) else False
 
 
 def fetch(previous=None, today=None, read=None, image_ok=None):
@@ -544,6 +556,9 @@ def fetch(previous=None, today=None, read=None, image_ok=None):
         portraits_page = read(PORTRAITS_URL)
     except JudiciaryError:
         portraits_page = None       # inconclusive: the last run's portraits stand
+    from .officers import says_nothing
+    if portraits_page is not None and says_nothing(portraits_page):
+        portraits_page = None       # a challenge or a bot wall's page: the same
     cache = build(read(SERVICE_URL), read(JUDGES_URL), scotus, today, portraits_page,
                   image_ok or (_image_ok if live else None))
     if portraits_page is None and previous:

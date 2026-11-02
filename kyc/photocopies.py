@@ -115,12 +115,9 @@ GONE_AFTER = 2
 UA = {"User-Agent": "Mozilla/5.0 (compatible; know-your-candidate/2.1; civic data project)",
       "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
       "Accept-Encoding": "gzip"}
-# The image is already drawn in every reader's browser; a host that refuses
-# this script but serves a browser (Indiana's, legphotos.BROWSER_UA) is
-# asked again as one.
-BROWSER_UA = dict(UA, **{"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                                       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 "
-                                       "Safari/537.36"})
+# A host that refuses this script is not asked again as a browser (rule
+# 103): its file stays unweighed, and any copy made before stands, until it
+# answers (rule 8).
 
 _WIKIMEDIA = re.compile(r"(^|\.)(wikimedia|wikipedia)\.org$", re.I)
 # A photograph this site hosts itself, unmodified, because its source offers
@@ -978,6 +975,14 @@ def probe(url, entry=None, headers=UA):
     return read
 
 
+def _own_answer(final):
+    """Whether a 404 is the file's own answer: one from a bot wall's host
+    after a redirect (Minnesota's Radware page, rule 79's reading) says
+    nothing of the file (rule 8); any other host's is the file's."""
+    from . import agent
+    return not agent.wall_host(final)
+
+
 def _probe_once(url, entry, headers, span):
     from .portraits import image_size
 
@@ -1012,7 +1017,7 @@ def _probe_once(url, entry, headers, span):
     except urllib.error.HTTPError as exc:
         if exc.code == 304:
             return {"status": "unchanged"}
-        if exc.code in (404, 410):
+        if exc.code in (404, 410) and _own_answer(exc.geturl() or url):
             return {"status": "gone", "code": exc.code}
         if exc.code == 416:
             return probe_whole(url, headers)
@@ -1141,7 +1146,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
     def out_of_time():
         return weigh_until is not None and time.monotonic() > weigh_until
 
-    def one(url, headers):
+    def one(url):
         entry = originals[url]
         # A conditional read only where a 304 would leave nothing to do: a
         # copy made for a box that covers every kind the original is shown as
@@ -1150,12 +1155,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
             (entry.get("copy") and covers(entry["copy"], box_for(entry.get("kinds") or []))
              and not shown.stale(url, entry))
             or (entry.get("bytes") and not heavy(entry))) else None
-        read = prober(url, known, headers)
-        if read["status"] == "error" and read.get("code") in (401, 403, 406) and headers is UA:
-            time.sleep(PAUSE)
-            read = prober(url, known, BROWSER_UA)
-            headers = BROWSER_UA
-        return read, headers
+        return prober(url, known, UA)
 
     def host_worker(host, urls):
         down = 0
@@ -1169,7 +1169,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
             if wait > 0:
                 time.sleep(wait)
             last = time.monotonic()
-            read, headers = one(url, UA)
+            read = one(url)
             entry = originals[url]
             with lock:
                 report["weighed"] += 1
@@ -1246,7 +1246,7 @@ def _run(root, cache, shown, limit, deadline, force, log, workers, maker, prober
                 time.sleep(PAUSE)
                 last = time.monotonic()
                 try:
-                    data = fetcher(url, headers)
+                    data = fetcher(url, UA)
                 except Exception as exc:  # noqa: BLE001 - concludes nothing (rule 8)
                     with lock:
                         entry["error"] = f"download: {type(exc).__name__}: {str(exc)[:100]}"
