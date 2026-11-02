@@ -210,10 +210,10 @@ def weigh(url, timeout=30, headers=None):
                 rest = response.read(MAX_PORTRAIT_BYTES * 20)
                 total = len(head) + len(rest)
     except urllib.error.HTTPError as exc:
-        # A 404 from another host (a redirect to a bot wall's) says nothing
-        # of the file (rule 8).
-        own = (urllib.parse.urlsplit(exc.geturl() or url).hostname or "").lower() == host
-        return (False if exc.code in (404, 410) and own else None), None
+        # A 404 from a bot wall's host after a redirect says nothing of the
+        # file (rule 8); any other host's is the file's answer.
+        walled = agent.wall_host(exc.geturl() or url)
+        return (False if exc.code in (404, 410) and not walled else None), None
     except Exception:
         return None, None
     size = _image_size(head)

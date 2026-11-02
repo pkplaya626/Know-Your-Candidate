@@ -2923,13 +2923,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     page never says what a yes or a no vote does, and is in the past tense
     from the day after the election, reading no result.
 
-103. **A request says who sends it.** Ten readers and one tool (`courts`,
-    `enrich`, `federal`, `judiciary`, `legphotos`, `officers`,
-    `official_photos`, `photocopies`, `territorial_courts`, `vacancies`,
-    `voting`, `tools/fetch_court_districts.py`) sent a desktop Chrome's
-    User-Agent string, and two sent one again when a server refused the
-    honest one: `legphotos` asked Indiana's IGA as a browser, and
-    `photocopies` asked again as one after a 401, 403 or 406. A script
+103. **A request says who sends it.** Nine readers and one tool (`courts`,
+    `enrich`, `federal`, `judiciary`, `officers`, `official_photos`,
+    `territorial_courts`, `vacancies`, `voting`,
+    `tools/fetch_court_districts.py`) sent a desktop Chrome's User-Agent
+    string, and two more sent one when a server refused the honest one:
+    `legphotos` asked Indiana's IGA as a browser, and `photocopies` asked
+    again as one after a 401, 403 or 406. A script
     dressed as a person's browser to be let in where scripts were not
     wanted is not this project's to send. By the owner's decision of
     2026-11-01 ("now") every one of them sends `kyc/agent.py`'s
@@ -2972,7 +2972,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
       page as a verdict on a campaign's or a government's site; each is
       inconclusive now, after the spam and parking tests (a parking chain's
       "Security Check" is still parking). `official_photos` and
-      `photocopies` read a 404 from another host the same way.
+      `photocopies` read a 404 at a bot wall's host the same way. Only a
+      wall's own host (`agent.WALL_HOSTS`: Radware's perfdrive.com,
+      DataDome's captcha-delivery.com): the first fix excused a 404 from
+      any other host, so a lapsed campaign domain sent to a registrar's
+      "not found" page would have stayed linked as safe (PR #185 review).
+    - A wall's page is known by the document's own first title, never an
+      inline SVG's, and a phrase an ordinary page might open with ("One
+      more step", "Not allowed", "Security Check", "Access Denied") only
+      as the whole title or beside a wall vendor's name: "One more step to
+      register to vote" would have made a state's lookup "could not be
+      confirmed".
     - `legphotos` counted the members of a state whose read failed as
       nobody asked; they are counted as kept, and Indiana's read that
       concludes nothing raises `Unread` and says the last entries stand.
@@ -2981,8 +2991,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     product token in any User-Agent string in `kyc/`, `tools/` or
     `.github/`, on a module constant that would send one, and on a headless
     Chrome told to pose as another (`setUserAgent`, `--user-agent`), as CI
-    greps for `onclick=`. The readers that already said who they were keep
-    their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
+    greps for `onclick=`. The headless Chrome readers (`courts`' browser
+    recipes, `enrich.render_portraits`, `members`) send
+    Chrome's own headless string and pose as nothing else. The readers that
+    already said who they were keep their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
     convention and names no browser.
 
 ## District maps

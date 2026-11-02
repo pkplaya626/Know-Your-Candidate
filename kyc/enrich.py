@@ -515,9 +515,11 @@ def assess(profile, url, final, status, page):
         return None, "unreachable"
     if status in TURNED_AWAY or status >= 500 or 200 < status < 300:
         return None, f"HTTP {status}"
-    if status in (404, 410) and host_of(final) != host_of(url):
+    if status in (404, 410) and agent.wall_host(final):
         # A redirect to a bot wall's host that answers 404 (rule 79's
-        # Radware page) says nothing of the campaign's own site.
+        # Radware page) says nothing of the campaign's own site. Any other
+        # host's 404 is the site's answer: a lapsed domain sent to a
+        # registrar's "not found" page is gone (rule 39).
         return None, f"HTTP {status} from {host_of(final)}"
     if 300 <= status < 400:
         return REFUSED, f"redirects in a loop through {host_of(final)}"

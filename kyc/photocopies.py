@@ -975,12 +975,12 @@ def probe(url, entry=None, headers=UA):
     return read
 
 
-def _same_host(final, url):
-    """Whether a 404 came from the file's own host: a redirect to a bot
-    wall that answers 404 elsewhere (Minnesota's Radware page, rule 79's
-    reading) says nothing of the file (rule 8)."""
-    return (urllib.parse.urlsplit(final).hostname or "").lower() == \
-        (urllib.parse.urlsplit(url).hostname or "").lower()
+def _own_answer(final):
+    """Whether a 404 is the file's own answer: one from a bot wall's host
+    after a redirect (Minnesota's Radware page, rule 79's reading) says
+    nothing of the file (rule 8); any other host's is the file's."""
+    from . import agent
+    return not agent.wall_host(final)
 
 
 def _probe_once(url, entry, headers, span):
@@ -1017,7 +1017,7 @@ def _probe_once(url, entry, headers, span):
     except urllib.error.HTTPError as exc:
         if exc.code == 304:
             return {"status": "unchanged"}
-        if exc.code in (404, 410) and _same_host(exc.geturl() or url, url):
+        if exc.code in (404, 410) and _own_answer(exc.geturl() or url):
             return {"status": "gone", "code": exc.code}
         if exc.code == 416:
             return probe_whole(url, headers)
