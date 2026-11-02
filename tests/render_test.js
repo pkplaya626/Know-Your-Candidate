@@ -14128,10 +14128,19 @@ async function testRaceMoney() {
         // A first-choice lead is never a win; a withheld year says why.
         s.cells.forEach((c, i) => {
           const text = strip.querySelectorAll(".strip-cell")[i].textContent;
+          // A majority of every vote counted is a first-round win.
           if (c.result && c.result.rankedChoice === "first-choices" && c.result.candidates[1] &&
-              (!/led first choices by/.test(text) || / won /.test(text))) {
-            bad.push(r.id + " " + c.year + ": first choices read as a win");
+              (c.result.firstChoiceMajority
+                ? !/won a majority of first choices/.test(text)
+                : !/led first choices by/.test(text) || / won /.test(text))) {
+            bad.push(r.id + " " + c.year + ": first choices read as a win, or a majority as a lead");
           }
+          // An "until" is a day that has come (PR #187 review).
+          (c.holders || []).forEach((h) => {
+            if (h.until && h.until > KYC.localDay(now) && text.indexOf("until " + KYC.dateWords(h.until)) !== -1) {
+              bad.push(r.id + " " + c.year + ": an until still ahead");
+            }
+          });
           if (c.withheld && !/^\d{4}(?: special)?Not shown/.test(text)) bad.push(r.id + " " + c.year);
           if (c.result && !/won|led|unopposed|only candidate/.test(text)) bad.push(r.id + " " + c.year);
         });
@@ -14169,6 +14178,61 @@ async function testRaceMoney() {
     check("Montana's 1st says its 2018 and 2020 results are the whole state's, elected at large",
       !!mt && /elected one member at large then: the results are the whole state’s/.test(
         draw(mt, campaign).textContent));
+
+    /* The review of PR #187, each case made here from a copy of a real
+     * Senate race so the check does not wait on the day's data. */
+    const senate = whole.filter((r) => r.chamber === "Senate" &&
+      r.seatHistory.cells.some((c) => c.result))[0];
+    const made = (holders, extra) => {
+      const r = JSON.parse(JSON.stringify(senate));
+      const c = r.seatHistory.cells.find((x) => x.result);
+      c.holders = holders;
+      Object.assign(c, extra || {});
+      r.seatHistory.cells = [c];
+      return r;
+    };
+    const held = (r, now) => (draw(r, now).querySelector(".strip-cell .strip-held") || {}).textContent || "";
+    // A term ending after the reader's day: no "until" before it comes.
+    const later = made([{ id: "A", name: "Ann Example", party: "Republican" },
+      { id: "B", name: "Bea Example", party: "Democrat", from: "2025-01-21", until: "2026-12-01" }]);
+    check("an until still ahead of the reader's day is not said, and is once it has come",
+      !/until/.test(held(later, campaign)) &&
+        /until Dec\. 1, 2026|until December 1, 2026/.test(held(later, new window.Date(2026, 11, 2))),
+      held(later, campaign) + " / " + held(later, new window.Date(2026, 11, 2)));
+    // An appointee whose term ends on the special's day serves until its
+    // winner is seated, before that day and after it.
+    const moody = made([{ id: "R", name: "Marco Rubio", party: "Republican", until: "2025-01-20" },
+      { id: "M", name: "Ashley Moody", party: "Republican", from: "2025-01-21", how: "appointment",
+        untilSeated: true }]);
+    check("an appointee is serving until the special election's winner takes the seat, never until its day",
+      [campaign, after].every((now) => /Ashley Moody R? ?\(from Jan(?:\.|uary) 21, 2025, appointed until the special election’s winner takes the seat\)/.test(
+        held(moody, now).replace(/\s+/g, " ")) && !/Nov(?:\.|ember) 3/.test(held(moody, now))),
+      held(moody, campaign));
+    // One person appointed, then elected, is one line.
+    const ricketts = made([{ id: "R", name: "Pete Ricketts", party: "Republican", from: "2023-01-23",
+      how: "appointment", elected: "2024-11-05" }]);
+    check("one person appointed and then elected is one line that says both",
+      /Pete Ricketts.*appointed, then elected Nov(?:\.|ember) 5, 2024/.test(held(ricketts, after)) &&
+        (held(ricketts, after).match(/Ricketts/g) || []).length === 1, held(ricketts, after));
+    // An unopposed name with no count is not "the Clerk's count".
+    const lucas = made([], { result: undefined, withheld: "unchecked", withheldUnopposed: true });
+    delete lucas.seatHistory.cells[0].result;
+    const lucasText = draw(lucas, campaign).querySelector(".strip-cell").textContent;
+    check("an unopposed name with no count says so, not that a count is unconfirmed",
+      /unopposed and with no count/.test(lucasText) && !/Clerk’s count/.test(lucasText), lucasText);
+    // A redrawn district's fold stays true beside the strip below it.
+    const redrawn = whole.filter((r) => r.lastElection.redrawn)[0];
+    const redrawnText = redrawn ? draw(redrawn, campaign).textContent : "";
+    check("a redrawn district's fold does not say the result is left out, with the strip giving it",
+      !!redrawn && /so this site does not give it as this district’s own/.test(redrawnText) &&
+        !/does not carry over/.test(redrawnText), redrawnText.slice(0, 300));
+    // Alabama's 2024 lines cite the Census Bureau's list as a list.
+    const al = whole.filter((r) => r.chamber === "House" && r.state === "AL" && r.seatHistory)[0];
+    const alBreak = al ? [...draw(al, campaign).querySelectorAll(".strip-break")]
+      .map((p) => p.textContent).filter((t) => /2024/.test(t))[0] || "" : "";
+    check("Alabama's 2024 lines name the Census Bureau's list as what it is, never as the map",
+      /New lines from 2024, drawn by a federal court\. Source: the Census Bureau’s list of 2024 changes; this site has not read the map’s own record\./.test(alBreak) &&
+        !/Court-drawn map/.test(alBreak), alBreak);
   });
 
   suite("compare the ballot: offices with their place, one renderer", () => {
@@ -15611,6 +15675,41 @@ async function testPeopleSplit() {
         firstDifference(lastFold(full).innerHTML, lastFold(slim).innerHTML));
       check("Georgia's people are whole now, no one else's",
         slim.window.legislatorsData.every((p) => slim.window.KYC.isFull(p) === (p.state === "GA")));
+    });
+
+    // The seat's last election is the index's and is drawn at once; only
+    // the strip waits for the state's file, in a slot of its own whose words
+    // are about the seat's elections, and a file that fails takes nothing
+    // away (PR #187 review). Made to fail here, then asked again.
+    slim.window.location.hash = "#/?state=VT&view=race";
+    full.window.location.hash = "#/?state=VT&view=race";
+    await settle(200);
+    const vtFold = (b) => b.D.querySelector('#results .race-last[data-fold]');
+    const realLoad = slim.window.KYC.loadPeople;
+    slim.window.KYC.loadPeople = () => Promise.resolve(false);
+    openFold(slim.window, vtFold(slim));
+    const vtAtOnce = vtFold(slim).querySelector(".fold-body").textContent;
+    await settle(50);
+    const vtFailed = vtFold(slim).querySelector(".fold-body").textContent;
+    slim.window.KYC.loadPeople = realLoad;
+    vtFold(slim).open = false;
+    vtFold(slim).dispatchEvent(new slim.window.Event("toggle"));
+    openFold(slim.window, vtFold(slim));
+    openFold(full.window, vtFold(full));
+    await until(() => !!vtFold(slim).querySelector(".seat-history"), 5000);
+    suite("index.html — a seat's last election at once, its strip when the state's file is in", () => {
+      check("the last election is drawn at once, and the strip's slot speaks of the seat's elections",
+        /Counts:|not shown|redrew/.test(vtAtOnce) &&
+          /Loading this seat’s elections since 2018/.test(vtAtOnce) && !/campaigns/.test(vtAtOnce),
+        vtAtOnce.slice(0, 300));
+      check("a file that fails keeps the last election and says the strip did not load",
+        /Counts:|not shown|redrew/.test(vtFailed) &&
+          /This seat’s elections since 2018 did not load/.test(vtFailed) && !/campaigns/.test(vtFailed),
+        vtFailed.slice(0, 300));
+      check("opened again, the strip is drawn, as the whole records draw it",
+        vtFold(slim).innerHTML === vtFold(full).innerHTML &&
+          !vtFold(slim).querySelector("[data-strip-race]"),
+        firstDifference(vtFold(full).innerHTML, vtFold(slim).innerHTML));
     });
 
     // A card opens the dialog over a loading line, never over the card's

@@ -1051,7 +1051,23 @@ def read_clerk(year, fetch=_download, chambers=("house", "senate")):
     data = fetch(CLERK_URL.format(year=year))
     if not data.startswith(b"%PDF"):
         raise ClerkFormatError(f"the Clerk's {year} statistics are not a PDF")
-    return parse_statistics(pdf_lines(data, decode=clerk_decoder(data)), year, chambers)
+    lines = [okina(line) for line in pdf_lines(data, decode=clerk_decoder(data))]
+    return parse_statistics(lines, year, chambers)
+
+
+_GRAVE_IN_WORD = re.compile(r"(?<=[^\W\d_])`(?=[^\W\d_])")
+
+
+def okina(line):
+    """The Clerk's spacing grave accent inside a word is the Hawaiian
+    ʻokina (U+02BB): its fonts name byte 0x60 "grave", and the one name it
+    is printed in is "Kaiali`i “Kai” Kahele" (Hawaii's 2nd, 2020), whose
+    name is Kaialiʻi. A grave anywhere else is not read as anything
+    (ClerkFormatError), as a byte no font names is not."""
+    line = _GRAVE_IN_WORD.sub("ʻ", line)
+    if "`" in line:
+        raise ClerkFormatError(f"a grave accent outside a word in the Clerk's text: {line!r}")
+    return line
 
 
 def read_mit(fetch=_download):
@@ -1432,6 +1448,11 @@ def _strip_result(result, chamber):
                          for c in result["candidates"]]
     if chamber == "Senate":
         out["term"] = result.get("term")
+    if result.get("rankedChoice") == "first-choices" and result.get("total") and \
+            2 * result["candidates"][0]["votes"] > result["total"]:
+        # More than half of every vote counted for a candidate: elected in
+        # the first round (Chellie Pingree in each year), not only ahead.
+        out["firstChoiceMajority"] = True
     checked = result.get("checked") or {}
     if checked.get("by") == "mit":
         out["checkedBy"] = "mit"
@@ -1440,16 +1461,53 @@ def _strip_result(result, chamber):
     return out
 
 
+def _general_day(iso):
+    """Whether *iso* is a November general election day: the Tuesday after
+    the first Monday of November in an even year."""
+    day = datetime.date.fromisoformat(iso)
+    return day.year % 2 == 0 and day.month == 11 and day.weekday() == 1 and 2 <= day.day <= 8
+
+
+def _next_day(end, start):
+    """Whether a term beginning *start* follows one ending *end*: the same
+    day (Pete Ricketts's, November 5, 2024) or the next (Cindy
+    Hyde-Smith's, November 27 and 28, 2018)."""
+    gap = (datetime.date.fromisoformat(start) - datetime.date.fromisoformat(end)).days
+    return 0 <= gap <= 1
+
+
+def _scheduled_end(term, following):
+    """Whether an appointee's term end is the date congress-legislators
+    gives until the special election's winner is seated, not a day they
+    left: Ashley Moody's and Jon Husted's appointments "end" on November 3,
+    2026, the specials' day, before it came and after it alike, and an
+    appointee serves until the winner takes the seat (Moody is a candidate
+    in hers). An appointee's term ending on a November election day is the
+    record's word only where the same person's next term begins then (Pete
+    Ricketts, appointed, then elected on November 5, 2024). One ending with
+    the term itself (Alan Armstrong's, January 3, 2027) is the window's end
+    and carries no date either way."""
+    return term.get("how") == "appointment" and not following and _general_day(term["end"])
+
+
 def _holders(terms, start, end):
     """Who served the seat between *start* and *end*, by congress-legislators'
-    terms: ``[{"id", "name", "party", "from"?, "until"?, "how"?}]``, a date
-    only where it is not the window's own (a member seated late, a death)."""
+    terms: ``[{"id", "name", "party", "from"?, "until"?, "how"?,
+    "elected"?, "untilSeated"?}]``, a date only where it is not the
+    window's own (a member seated late, a death). One person's terms one
+    after the other are one line (Pete Ricketts, appointed on January 23,
+    2023 and elected on November 5, 2024: ``elected``); an appointee whose
+    term ends on the special election's date with nothing after it is
+    serving until its winner is seated (``untilSeated``), never "until"
+    that day (:func:`_scheduled_end`). Whether an "until" has come is the
+    page's to say, on the reader's day."""
     late = (datetime.date.fromisoformat(start) +
             datetime.timedelta(days=STRIP_GRACE)).isoformat()
     early = (datetime.date.fromisoformat(end) -
              datetime.timedelta(days=STRIP_GRACE)).isoformat()
+    ordered = sorted(terms or [], key=lambda t: (t["start"], t["end"]))
     out = []
-    for term in terms or []:
+    for i, term in enumerate(ordered):
         if term["end"] <= start or term["start"] >= end:
             continue
         if term["start"] <= start and term["end"] <= late:
@@ -1457,14 +1515,31 @@ def _holders(terms, start, end):
             # until January 20, 2021, under the special Raphael Warnock won
             # on January 5.
             continue
-        holder = {"id": term["id"], "name": term["name"], "party": term["party"]}
-        if term["start"] > late:
-            holder["from"] = term["start"]
-        if term["end"] < early:
+        following = [t for t in ordered[i + 1:]
+                     if t["id"] == term["id"] and _next_day(term["end"], t["start"])]
+        before = out[-1] if out else None
+        if before and before["id"] == term["id"] and _next_day(before["_end"], term["start"]):
+            # The same person again from the day the last term ended.
+            if term.get("how") != before.get("how") and "elected" not in before:
+                before["elected"] = term["start"]
+            before["_end"] = term["end"]
+            before.pop("until", None)
+            before.pop("untilSeated", None)
+            holder = before
+        else:
+            holder = {"id": term["id"], "name": term["name"], "party": term["party"],
+                      "_end": term["end"]}
+            if term["start"] > late:
+                holder["from"] = term["start"]
+            if term.get("how"):
+                holder["how"] = term["how"]
+            out.append(holder)
+        if _scheduled_end(term, following):
+            holder["untilSeated"] = True
+        elif term["end"] < early:
             holder["until"] = term["end"]
-        if term.get("how"):
-            holder["how"] = term["how"]
-        out.append(holder)
+    for holder in out:
+        holder.pop("_end", None)
     return out
 
 
@@ -1481,7 +1556,7 @@ def _mark_winner(cell):
     if not result.get("candidates"):
         return
     winner = result["candidates"][0]["name"]
-    if result.get("rankedChoice") == "first-choices":
+    if result.get("rankedChoice") == "first-choices" and not result.get("firstChoiceMajority"):
         return                       # a lead in first choices is not a win
     for holder in cell.get("holders") or []:
         if "from" not in holder and "until" not in holder and \
@@ -1506,6 +1581,8 @@ def house_breaks(state, seats):
         if record:
             out[year] = {"kind": "enacted", "title": record["title"],
                          "drawnBy": record["drawnBy"], "url": record["url"]}
+            if record.get("lead"):
+                out[year]["lead"] = True
         elif year == 2022 and not at_large:
             out[year] = {"kind": "census"}
     if state in REDRAWN:
@@ -1520,7 +1597,7 @@ def _house_strip(race, cache):
     seats = cache.get("seats") or {}
     terms = (cache.get("terms") or {}).get("house") or {}
     breaks = house_breaks(state, seats)
-    withheld = {(w["seat"], w["year"]): w["why"] for w in cache.get("withheld") or []}
+    withheld = {(w["seat"], w["year"]): w for w in cache.get("withheld") or []}
     # Each year's lines: the eras between the breaks, the last one the
     # 2026 map's unless 2026 broke it.
     eras, current = [], None
@@ -1555,7 +1632,11 @@ def _house_strip(race, cache):
         if result:
             cell["result"] = _strip_result(result, "House")
         elif (key, year) in withheld:
-            cell["withheld"] = withheld[(key, year)]
+            cell["withheld"] = withheld[(key, year)]["why"]
+            if (withheld[(key, year)].get("result") or {}).get("kind") == "unopposed":
+                # The Clerk printed a name and no count (Oklahoma's 3rd in
+                # 2024): there is no count for the cell to call unconfirmed.
+                cell["withheldUnopposed"] = True
         elif key in ((cache.get("noResult") or {}).get(str(year)) or []):
             cell["none"] = "no-result"
         else:
@@ -1565,6 +1646,27 @@ def _house_strip(race, cache):
         cells.append(cell)
     changes = [dict(change, year=year) for year, change in sorted(breaks.items())]
     return {"eras": eras, "cells": cells, "breaks": changes}
+
+
+def _special_start(terms, result, date):
+    """The day a special election's winner took the seat: the first term
+    of the seat's that begins on or after the election, within
+    SEATING_GRACE of it or of the January 3 after it, held by someone of
+    the winner's surname - Markwayne Mullin on January 3, 2023, after
+    November 8, 2022's special, so James Inhofe, who served until then, is
+    not among those who served the term it chose. The election day itself
+    where nothing fits (a result withheld, no term yet)."""
+    if not result or not result.get("candidates"):
+        return date
+    year = int(date[:4])
+    day = datetime.date.fromisoformat(date)
+    if date[5:7] in ("11", "12"):
+        day = datetime.date(year + 1, 1, 3)
+    last = (day + datetime.timedelta(days=SEATING_GRACE)).isoformat()
+    winner = surname(result["candidates"][0]["name"])
+    starts = [t["start"] for t in terms or []
+              if date <= t["start"] <= last and surname(t["name"]) == winner]
+    return min(starts) if starts else date
 
 
 def _senate_strip(race, cache):
@@ -1589,11 +1691,16 @@ def _senate_strip(race, cache):
         cell = {"year": year, "era": 0}
         ends = item.pop("ends")
         cell.update(item)
-        # Who served the term it chose: the winner is seated within days
-        # of a special, on January 3 after a regular election.
-        start = date if (item.get("result") or {}).get("term") == "unexpired" or \
-            item.get("term") == "unexpired" else f"{year + 1}-01-03"
-        cell["holders"] = _holders(terms.get(f"{state}-{senate_class}"), start, ends)
+        # Who served the term it chose: from January 3 after a regular
+        # election; after a special, from the day its winner took the seat
+        # (_special_start), so whoever held it until then is not among them.
+        seat_terms = terms.get(f"{state}-{senate_class}")
+        if (item.get("result") or {}).get("term") == "unexpired" or \
+                item.get("term") == "unexpired":
+            start = _special_start(seat_terms, item.get("result"), date)
+        else:
+            start = f"{year + 1}-01-03"
+        cell["holders"] = _holders(seat_terms, start, ends)
         _mark_winner(cell)
         cells.append(cell)
     return {"eras": [{"from": YEARS[0], "to": YEARS[-1], "same": True}],

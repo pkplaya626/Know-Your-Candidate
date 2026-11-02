@@ -686,15 +686,15 @@ class TestTheStripsClassIsItsOwn(unittest.TestCase):
 
     def test_no_other_module_or_rule_uses_the_strips_classes(self):
         assets = os.path.join(ROOT, "candidate_profiles_site", "assets")
-        css = open(os.path.join(assets, "kyc.css"), encoding="utf-8").read()
+        css = _text(os.path.join(assets, "kyc.css"))
         self.assertEqual(len(re.findall(r"^\.seat-history\s*\{", css, re.M)), 1)
         for name in os.listdir(assets):
             if not name.endswith(".js"):
                 continue
-            text = open(os.path.join(assets, name), encoding="utf-8").read()
+            text = _text(os.path.join(assets, name))
             if name != "kyc-cards.js":
                 self.assertNotRegex(text, r"seat-history|strip-(?:cell|era|break|title)", name)
-        self.assertNotRegex(open(os.path.join(assets, "kyc-cards.js"), encoding="utf-8").read(),
+        self.assertNotRegex(_text(os.path.join(assets, "kyc-cards.js")),
                             r"class=\"seat-strip")
 
 
@@ -806,6 +806,119 @@ class TestTheFirstFullRead(unittest.TestCase):
                  "| popular_vote1 = 178,416\n}}"}
         sections, page = sh.house_page_sections("DE", read=pages.get, year=2022)
         self.assertEqual(page, "2022 United States House of Representatives election in Delaware")
+
+
+def _text(path):
+    with open(path, encoding="utf-8") as handle:
+        return handle.read()
+
+
+def _term(name, start, end, how=None, ident=None, party="Republican"):
+    term = {"id": ident or name, "name": name, "party": party, "start": start, "end": end}
+    if how:
+        term["how"] = how
+    return term
+
+
+class TestTheStripsReview(unittest.TestCase):
+    """What the review of PR #187 found in who served, and in the words."""
+
+    def _senate(self, terms, results, read="2026-11-01"):
+        seats = {str(y): {} for y in sh.YEARS}
+        cache = {"read": read, "years": list(sh.YEARS), "seats": seats, "house": {},
+                 "houseEarlier": {}, "noResult": {}, "withheld": [],
+                 "senate": results, "terms": {"house": {}, "senate": terms}}
+        return cache
+
+    def test_an_appointees_end_on_the_specials_day_is_not_a_day_they_left(self):
+        # congress-legislators "ends" Ashley Moody's appointment on November
+        # 3, 2026, the special's day, which is ahead of the read and, once
+        # past, still not when she leaves: she serves until the winner is
+        # seated (and is a candidate herself).
+        terms = {"FL-3": [_term("Marco Rubio", "2023-01-03", "2025-01-20", ident="R1"),
+                          _term("Ashley Moody", "2025-01-21", "2026-11-03", "appointment", "M1")]}
+        results = {"FL-2022-full": dict(_cell_result("Marco Rubio", "Val Demings", 16.4, 2022),
+                                        term="full", termEnds="2029-01-03")}
+        for read in ("2026-11-01", "2026-11-20"):
+            cell = sh.seat_strip({"chamber": "Senate", "state": "FL", "senateClass": 3},
+                                 self._senate(terms, results, read))["cells"][0]
+            moody = cell["holders"][1]
+            self.assertNotIn("until", moody, read)
+            self.assertTrue(moody["untilSeated"], read)
+            self.assertEqual(cell["holders"][0]["until"], "2025-01-20")
+        # A real end that is not an election day (Laphonza Butler's,
+        # December 8, 2024) is a day the appointee left.
+        terms = {"CA-1": [_term("Laphonza R. Butler", "2023-10-03", "2024-12-08", "appointment")]}
+        self.assertEqual(sh._holders(terms["CA-1"], "2019-01-03", "2025-06-01"),
+                         [{"id": "Laphonza R. Butler", "name": "Laphonza R. Butler",
+                           "party": "Republican", "from": "2023-10-03", "until": "2024-12-08",
+                           "how": "appointment"}])
+
+    def test_one_persons_terms_one_after_the_other_are_one_line(self):
+        # Pete Ricketts, appointed January 23, 2023, elected November 5, 2024.
+        terms = [_term("Ben Sasse", "2021-01-03", "2023-01-08", ident="S1"),
+                 _term("Pete Ricketts", "2023-01-23", "2024-11-05", "appointment", "R1"),
+                 _term("Pete Ricketts", "2024-11-05", "2027-01-03", ident="R1")]
+        holders = sh._holders(terms, "2021-01-03", "2027-01-03")
+        self.assertEqual([h["name"] for h in holders], ["Ben Sasse", "Pete Ricketts"])
+        self.assertEqual({k: v for k, v in holders[1].items() if k not in ("id", "party")},
+                         {"name": "Pete Ricketts", "from": "2023-01-23", "how": "appointment",
+                          "elected": "2024-11-05"})
+
+    def test_a_specials_term_is_served_from_the_day_its_winner_took_the_seat(self):
+        # Oklahoma's 2022 special: James Inhofe served until January 3, 2023
+        # and is not among those who served the term it chose; Markwayne
+        # Mullin, seated that day, is its winner.
+        terms = {"OK-2": [_term("James M. Inhofe", "2021-01-03", "2023-01-03", ident="I1"),
+                          _term("Markwayne Mullin", "2023-01-03", "2027-01-03", ident="M1")]}
+        results = {"OK-2022-unexpired": dict(
+            _cell_result("Markwayne Mullin", "Kendra Horn", 26.0, 2022),
+            term="unexpired", termEnds="2027-01-03")}
+        cell = sh.seat_strip({"chamber": "Senate", "state": "OK", "senateClass": 2},
+                             self._senate(terms, results))["cells"][0]
+        self.assertEqual(cell["holders"], [{"id": "M1", "name": "Markwayne Mullin",
+                                            "party": "Republican", "winner": True}])
+
+    def test_a_majority_of_first_choices_is_a_win_and_less_is_a_lead(self):
+        pingree = dict(_result(("Chellie Pingree", "Democrat", 588), ("Other", "Republican", 325),
+                               ("Third", "Independent", 87), year=2018),
+                       rankedChoice="first-choices", margin=26.3)
+        self.assertTrue(sh._strip_result(pingree, "House")["firstChoiceMajority"])
+        lead = dict(_result(("Mary Peltola", "Democrat", 488), ("Sarah Palin", "Republican", 257),
+                            ("Nick Begich", "Republican", 255), year=2022),
+                    rankedChoice="first-choices", margin=23.1)
+        self.assertNotIn("firstChoiceMajority", sh._strip_result(lead, "House"))
+        cell = {"result": sh._strip_result(lead, "House"),
+                "holders": [{"name": "Mary Peltola", "party": "Democrat"}]}
+        sh._mark_winner(cell)
+        self.assertNotIn("winner", cell["holders"][0])
+        cell["result"] = sh._strip_result(pingree, "House")
+        cell["holders"] = [{"name": "Chellie Pingree", "party": "Democrat"}]
+        sh._mark_winner(cell)
+        self.assertTrue(cell["holders"][0]["winner"])
+
+    def test_an_unopposed_name_with_no_count_is_withheld_as_such(self):
+        seats = {str(y): {"OK": [1, 2, 3, 4, 5]} for y in sh.YEARS}
+        cache = {"read": "2026-11-01", "years": list(sh.YEARS), "seats": seats, "house": {},
+                 "houseEarlier": {}, "noResult": {}, "senate": {}, "terms": {},
+                 "withheld": [{"seat": "OK-3", "year": 2024, "why": "unchecked",
+                               "result": {"kind": "unopposed", "year": 2024, "candidates": [
+                                   {"name": "Frank D. Lucas", "party": "Republican"}]}}]}
+        cell = sh.seat_strip({"chamber": "House", "state": "OK", "district": 3}, cache)["cells"][-1]
+        self.assertEqual((cell["withheld"], cell.get("withheldUnopposed")), ("unchecked", True))
+
+    def test_alabamas_2024_lines_cite_the_census_list_as_a_list(self):
+        seats = {str(y): {"AL": list(range(1, 8))} for y in sh.YEARS}
+        change = sh.house_breaks("AL", seats)[2024]
+        self.assertTrue(change["lead"])
+        self.assertNotIn("map", change["title"].lower())
+        self.assertIn("census.gov", change["url"])
+
+    def test_the_clerks_grave_inside_a_word_is_the_okina(self):
+        self.assertEqual(sh.okina("Kaiali`i “Kai” Kahele, Democrat"),
+                         "Kaialiʻi “Kai” Kahele, Democrat")
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.okina("`quoted' text")
 
 
 if __name__ == "__main__":

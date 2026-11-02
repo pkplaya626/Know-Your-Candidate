@@ -313,8 +313,10 @@ REDRAWN = {
 #          congressional districts between the 116th and 117th Congresses."
 #   119th: "Five states (Alabama, Georgia, Louisiana, New York, and North
 #          Carolina) delineated new boundaries for the 2024 election cycle."
-# Each entry is the state's own enacting record, read on 2026-11-01:
-# {first election on it: {"title", "drawnBy", "url", "quote"}}.
+# Each entry is the state's own enacting record, read on 2026-11-01, but
+# Alabama's (below): {first election on it: {"title", "drawnBy", "url",
+# "quote", "lead"?}}. An entry whose "url" is only the Census Bureau's list
+# carries "lead": True, and its "title" names the list, never the map.
 CENSUS_RDO_PAGE = ("https://www.census.gov/programs-surveys/decennial-census/about/rdo/"
                    "congressional-districts.{congress}th_Congress.html")
 REDRAWN_BEFORE = {
@@ -337,10 +339,14 @@ REDRAWN_BEFORE = {
     # Not read from the court's own record: govinfo's case page answered 500
     # and the Northern District of Alabama's site has no page for the case
     # that this reader found. The Census Bureau's 119th Congress page names
-    # Alabama, and REDRAWN["AL"] above says whose map it was.
+    # Alabama, and REDRAWN["AL"] above says whose map it was. The link is
+    # named as the list it is (a lead, rule 50) until a person reads the
+    # court's remedial-plan order (Milligan, Caster and Singleton, N.D.
+    # Ala., October 5, 2023) and this entry cites it.
     "AL": {
         2024: {
-            "title": "Court-drawn map",
+            "title": "the Census Bureau’s list of 2024 changes",
+            "lead": True,
             "drawnBy": "a federal court",
             "url": CENSUS_RDO_PAGE.format(congress=119),
             "quote": "Five states (Alabama, Georgia, Louisiana, New York, and North Carolina) "

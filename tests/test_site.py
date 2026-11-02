@@ -457,12 +457,14 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     # KYC.peopleFull says the race's state is whole. outsideDetail is the
     # dialog's (kyc-profile.js, which opens a record once its file is in),
     # in the folds' words (rule 12). The seat fold's strip (seatStrip) is
-    # a race's field the index leaves out (emit.RACE_INDEX_LEAVES_OUT): its
-    # fold waits for the state's file unless the race already holds it.
+    # a race's field the index leaves out (emit.RACE_INDEX_LEAVES_OUT): the
+    # fold draws the last election (an index field) at once and a slot
+    # (stripSlot) that draws the strip only once the race holds it or its
+    # state's file is in, else loads the file first (fillStrips).
     FOLD_DRAWN = {"kyc-cards.js": ("moneyBlock", "moneyRow", "outsideLine", "outsideOtherLine",
                                    "outsideLead", "outsideDetail",
                                    "compareTable", "compareCell", "platformFrom",
-                                   "lastTimeBlock", "seatStrip")}
+                                   "lastTimeBlock", "seatStrip", "stripSlot", "fillStrips")}
     FOLD_ENTRIES = {"kyc-cards.js": ("moneyBlock", "compareBlock", "lastTimeBlock")}
     # Reads a history record's own `wikipedia`, not the profile's.
     SAFE_HELPERS = ("officesHeld",)

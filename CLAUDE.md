@@ -2186,7 +2186,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`REDRAWN`). Years on other lines than the race's sit under a line
     saying they are the district that had its number on that map, which is
     not the map the race is fought on, in dashed cells; a redrawn
-    district's own "last election" still shows no 2024 figure. The reader
+    district's own "last election" shows no 2024 figure as its own, in
+    words true beside the strip that gives it as the old map's district of
+    the number ("does not carry over" was false there). The reader
     found more in the earlier files, each now read, never guessed: a
     footnote marker before a count inside a district's run (Louisiana's
     5th, 2020, whose runoff counts sit among the open primary's), a later
@@ -2215,7 +2217,27 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     for Texas's 14th in 2022 (the percentages say 68,606). The strip is the
     state's file's, not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule
     94), and its classes are its own: drawn as `seat-strip`, the
-    legislature's seat squares, it set each word on a line of its own.
+    legislature's seat squares, it set each word on a line of its own. The
+    fold draws the last election, an index field, at once, and loads the
+    strip into a slot of its own whose words are about the seat's
+    elections (`stripSlot`): waiting whole, the 2024 result waited on the
+    state's file, vanished if it failed, and said "Loading California's
+    campaigns". The review of PR #187 found more in who served, each now
+    refused: congress-legislators ends an appointee's term on the special
+    election's day (Ashley Moody's and Jon Husted's, November 3, 2026),
+    which is no day they left - they serve until its winner is seated
+    (`untilSeated`, `_scheduled_end`) - and the page says an "until" only
+    once the reader's day has reached it; a special's term is served from
+    the day its winner took the seat (`_special_start`), so James Inhofe
+    was not among those who served the term Oklahoma's 2022 special chose;
+    one person's terms one after the other are one line (Pete Ricketts,
+    "appointed, then elected"); a majority of every first choice counted
+    is a first-round win (Chellie Pingree), less a lead; an unopposed name
+    with no count is not "the Clerk's count" unconfirmed; the Clerk's grave
+    accent inside a word is the ʻokina (`okina`: "Kaialiʻi", never a
+    grave accent in his name); and Alabama's court-drawn 2024 lines cite the Census
+    Bureau's list named as that list (`lead`), never as the map, until a
+    person reads the court's order.
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own
