@@ -854,6 +854,42 @@ class TestStatePages(unittest.TestCase):
         self.assertIn("40 seats", html)
         self.assertNotIn("$title", html)          # every placeholder filled
 
+    def test_the_plain_page_names_the_governor_and_the_race_for_governor(self):
+        """Rule 96: the governor's card and the race for governor's cards
+        (kyc-stategov.js) are drawn by script; the page written without
+        them names the governor and the election office's list in its words
+        (rule 91), and after Election Day names no winner."""
+        from kyc import pages
+        gov = {"governor": {"name": "Pat Holder", "party": "Republican", "partyKey": "R",
+                            "profile": "https://www.nga.org/governors/texas/"},
+               "ballot2026": {"offices": {"governor": {"up": True, "holderStatus": {
+                   "holder": "Pat Holder", "why": "not-listed", "source": "https://sos.example/list",
+                   "cite": "the list", "text": "Pat Holder is not among the candidates for this office"},
+                   "candidates": {"url": "https://sos.example/list", "source": "the Secretary's list",
+                                  "read": "2026-10-18", "candidates": [
+                       {"name": "Ann Able", "party": "Democratic", "runningMate": "Bo Bell"},
+                       {"name": "Cy Cole", "party": "Republican"},
+                       {"name": "Di Dunn", "writeIn": True}]}}}}}
+        before, race = pages.governor_static("TX", gov, False)
+        self.assertIn("Pat Holder (Republican), Governor of Texas", before)
+        self.assertIn('id="governor-race"', race)
+        self.assertIn("2026 race for governor of Texas", race)
+        self.assertIn("<li>Ann Able (Democratic), with Bo Bell for lieutenant governor</li>", race)
+        self.assertIn("Write-in candidates (names not printed on the ballot)", race)
+        self.assertIn("In surname order, not ballot order.", race)
+        self.assertIn("Open seat: Pat Holder is not among the candidates", race)
+        self.assertNotIn("profile", race)
+        _, past = pages.governor_static("TX", gov, "2026-11-05")
+        self.assertIn("Candidates who were on the Nov 3, 2026 ballot", past)
+        self.assertIn("names no winner", past)
+        self.assertNotIn("Open seat", past)
+        gov["ballot2026"]["offices"]["governor"]["up"] = False
+        self.assertEqual(pages.governor_static("TX", gov, False)[1], "")
+        self.assertEqual(pages.governor_of("VI"), "Governor of the U.S. Virgin Islands")
+        html = pages.render_state("TX", "example.org", {"states": {"TX": {"name": "Texas"}}}, [], [],
+                                  None, {"states": {"TX": gov}})
+        self.assertIn("Pat Holder (Republican), Governor of Texas", html)
+
     def test_a_territory_reads_as_a_delegate(self):
         from kyc import pages
         html = pages.render_state("GU", "example.org",

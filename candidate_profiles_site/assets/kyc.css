@@ -4929,7 +4929,7 @@ button.local-county-link {
   margin: var(--s-2) 0 var(--s-3);
 }
 .gcard-grid.gcard-writeins {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 180px), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
   gap: var(--s-2);
 }
 .gcard-writeins .gcard { padding: var(--s-2) var(--s-3); gap: 0; }

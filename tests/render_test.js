@@ -2694,6 +2694,24 @@ async function testMap() {
 
 /* ============================================================ state pages */
 
+/* A state page's statewide offices and their candidates: State government,
+ * and the race for governor's own section, whose candidates are cards
+ * (kyc-stategov.js governorRace). Copies of both in one box, to read. */
+function statewidePart(D) {
+  const box = D.createElement("div");
+  ["state-government", "governor-race"].forEach((id) => {
+    const el = D.getElementById(id);
+    if (el) box.appendChild(el.cloneNode(true));
+  });
+  return box;
+}
+
+/* Each office's list of candidates on it, in page order: the other
+ * offices' under State government, then the governor's race. */
+function statewideLists(D) {
+  return [...statewidePart(D).querySelectorAll("#state-government .gov-candidates, #governor-race .gov-race")];
+}
+
 async function testStates() {
   const { window, D, KYC } = await testShared("states/tx.html");
 
@@ -2705,9 +2723,12 @@ async function testStates() {
     check("the race list says what else the ballot elects",
       !!note && /Of the state offices this site covers, the same ballot also elects the governor/
         .test(note.textContent) && /local ballot questions, which this site does not list/.test(note.textContent) &&
-        note.textContent.indexOf("This site lists the candidates for Congress here, and those for " +
-          window.KYC.stategov.listsCandidates("TX") + " under State government; not those for the " +
-          "legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")),
+        // The governor's in the race for governor's own section (its cards).
+        note.textContent.indexOf("This site lists the candidates for Congress here, those for governor under " +
+          window.KYC.stategov.raceHeading("TX") + ", and those for " +
+          window.KYC.stategov.listsCandidates("TX", { governor: false }) + " under State government; not those " +
+          "for the legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")) &&
+        !!note.querySelector('a.state-jump[href="#governor-race"]'),
       note && note.textContent);
     check("the governor, each officer and each chamber is marked, linked to its source",
       marks.length >= 6 && marks.every((a) => /^https:\/\//.test(a.getAttribute("href")) &&
@@ -2754,7 +2775,9 @@ async function testStates() {
       !!note && /territorial and local contests/.test(note.textContent) &&
         !/state offices/.test(note.textContent), note && note.textContent);
     check("and says where the governor's candidates are listed",
-      /Territorial government, which lists the candidates for the governor/.test(note.textContent),
+      note.textContent.indexOf("The candidates for governor are under " +
+        gu.window.KYC.stategov.raceHeading("GU")) !== -1 &&
+        !!note.querySelector('a.state-jump[href="#governor-race"]'),
       note && note.textContent);
   });
   const az = await buildPage("map.html", { hash: "#/?state=AZ&mode=lt" });
@@ -2867,21 +2890,24 @@ async function testStates() {
   suite("states/ga.html — an open governor's seat lists who is on the ballot", () => {
     const gov = ga.D.getElementById("state-government");
     const item = ga.window.kycStateGov.states.GA.ballot2026.offices.governor;
-    const block = gov.querySelector(".gov-candidates");
-    const names = block ? [...block.querySelectorAll(".gov-candidate-name")].map((n) => n.textContent) : [];
+    // The governor's list is cards, in the race for governor's own section.
+    const block = ga.D.querySelector("#governor-race .gov-race");
+    const cardsOf = (sel) => block ? [...block.querySelectorAll(sel)] : [];
+    const names = cardsOf(".gcard-candidate .gov-name").map((n) => n.textContent);
     const printed = item.candidates.candidates.filter((c) => !c.writeIn);
     const writeIns = item.candidates.candidates.filter((c) => c.writeIn);
     check("every candidate the list gives, as it prints them, in the pipeline's order",
       names.join("|") === printed.concat(writeIns).map((c) => c.name).join("|") && printed.length >= 2,
       names.join(" | "));
+    const cards = cardsOf(".gcard-candidate:not(.gcard-writein)");
     check("party in words, never the list's code",
-      printed.every((c) => !c.party || block.textContent.indexOf(c.name + " (" + c.party + ")") !== -1) &&
+      printed.every((c, i) => !c.party || cards[i].querySelector(".gov-party").textContent === c.party) &&
         printed.every((c) => !/^[A-Z]{1,4}$/.test(c.party || "")),
       printed.map((c) => c.party).join(" | "));
     check("write-ins apart, under their own heading",
       writeIns.length > 0 && !!block.querySelector(".gov-writein-head") &&
         /Write-in candidates \(names not printed on the ballot\)/.test(block.textContent) &&
-        block.querySelectorAll(".gov-writein-list .gov-candidate").length === writeIns.length);
+        block.querySelectorAll(".gcard-writeins .gcard-writein").length === writeIns.length);
     const source = block.querySelector(".gov-candidates-source");
     check("credited to the list, linked, with the day it was read, and the order said",
       /^In surname order, not ballot order\. (Names are written [^.]*\. )?Source: the Georgia Secretary of State’s list of November candidates \(read /.test(source.textContent) &&
@@ -2890,12 +2916,12 @@ async function testStates() {
     // A photograph only by rule 91's routes, each with whose it is beside it.
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
       !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
-        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-candidate-photo") &&
-          /^Photo( \(\d{4}\))?: ./.test((img.parentNode.querySelector(".gov-photo-credit") || {}).textContent || "")));
+        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
+          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
-      gov.querySelectorAll(".gov-candidates").length === 4);
+      gov.querySelectorAll(".gov-candidates").length === 3 && !!block);
   });
 
   const maGov = await buildPage("states/ma.html");
@@ -2904,14 +2930,18 @@ async function testStates() {
     const sg = maGov.window.kycStateGov.states.MA;
     const ticket = sg.ballot2026.offices.governor.candidates.candidates.find((c) => c.runningMate);
     const rows = [...gov.querySelectorAll(".gov-candidate")].map((li) => li.textContent);
+    // The governor's list is cards in the race for governor's section.
+    const govCards = [...maGov.D.querySelectorAll("#governor-race .gcard-candidate")];
+    const cardOf = (name) => govCards.find((c) => c.querySelector(".gov-name").textContent === name);
     check("the governor's list names each running mate for lieutenant governor",
-      !!ticket && rows.some((t) => t.indexOf(ticket.name) === 0 &&
-        t.indexOf(", with " + ticket.runningMate + " for lieutenant governor") !== -1), rows.join(" | "));
+      !!ticket && !!cardOf(ticket.name) && cardOf(ticket.name).querySelector(".gcard-mate").textContent ===
+        "With " + ticket.runningMate + " for lieutenant governor", govCards.map((c) => c.textContent).join(" | "));
     const mate = sg.ballot2026.offices.lt.candidates.candidates.find((c) => c.runningMate);
     check("the lieutenant governor's list names the governor each runs with",
       !!mate && rows.some((t) => t.indexOf(", running with " + mate.runningMate + " for governor") !== -1));
     check("a ticket the ballot prints by surnames says how it is printed",
-      !ticket.ballotName || rows.some((t) => t.indexOf("printed on the ballot as “" + ticket.ballotName + "”") !== -1));
+      !ticket.ballotName || cardOf(ticket.name).textContent.indexOf("Printed on the ballot as “" +
+        ticket.ballotName + "”") !== -1);
     const status = sg.ballot2026.offices.governor.holderStatus;
     const line = gov.querySelector(".gov-holder-status");
     check("a holder the list names: among its candidates, never an open seat",
@@ -2921,8 +2951,8 @@ async function testStates() {
         !line.classList.contains("gov-open-seat"), line.textContent);
     const lone = sg.ballot2026.offices.governor.candidates.candidates.find((c) => c.surnameOnly);
     check("a name the ballot prints as a surname only says so, and no first name is invented",
-      !lone || rows.some((t) => t.indexOf(lone.name + " (the list gives a surname only)") === 0),
-      rows.join(" | "));
+      !lone || (!!cardOf(lone.name) && /The list gives a surname only\./.test(cardOf(lone.name).textContent)),
+      govCards.map((c) => c.textContent).join(" | "));
   });
 
   /* A list from a county or a commission is named as what it is and is
@@ -2955,9 +2985,9 @@ async function testStates() {
    * county's stands for nothing. */
   const nvGov = await buildPage("states/nv.html");
   suite("states/nv.html — the Secretary of State's certified list; names and parties as it prints them", () => {
-    const gov = nvGov.D.getElementById("state-government");
+    const gov = statewidePart(nvGov.D);
     const offices = nvGov.window.kycStateGov.states.NV.ballot2026.offices;
-    const blocks = [...gov.querySelectorAll(".gov-candidates")];
+    const blocks = statewideLists(nvGov.D);
     const sources = blocks.map((b) => (b.querySelector(".gov-candidates-source") || {}).textContent || "");
     check("every office's list is the Secretary of State's certified list",
       blocks.length === 4 && sources.every((t) =>
@@ -3000,9 +3030,9 @@ async function testStates() {
    * Designated", never the guide's "Independent". */
   const azGov = await buildPage("states/az.html");
   suite("states/az.html — the Secretary of State's candidate listing; codes in the office's words", () => {
-    const gov = azGov.D.getElementById("state-government");
+    const gov = statewidePart(azGov.D);
     const offices = azGov.window.kycStateGov.states.AZ.ballot2026.offices;
-    const blocks = [...gov.querySelectorAll(".gov-candidates")];
+    const blocks = statewideLists(azGov.D);
     const sources = blocks.map((b) => (b.querySelector(".gov-candidates-source") || {}).textContent || "");
     check("every office's list is the Secretary of State's listing, never called certified",
       blocks.length === 4 && sources.every((t) =>
@@ -3020,7 +3050,7 @@ async function testStates() {
         !offices.lt.candidates.candidates.some((c) => c.party === "Independent") &&
         offices.governor.candidates.candidates.some((c) => c.party === "No Labels") &&
         offices.governor.candidates.candidates.some((c) => c.party === "Green"), gov.textContent.slice(0, 400));
-    const writeIns = [...gov.querySelectorAll(".gov-writein-list li")].map((li) => li.textContent);
+    const writeIns = [...gov.querySelectorAll(".gov-writein-list li, .gcard-writeins .gcard")].map((li) => li.textContent);
     check("the two write-in candidates for governor, apart",
       writeIns.length === 2 && writeIns.some((t) => /Gertritrude Gonzalez/.test(t)) &&
         writeIns.some((t) => /Alice Novoa/.test(t)), writeIns.join(" | "));
@@ -3033,7 +3063,7 @@ async function testStates() {
 
   const flList = await buildPage("states/fl.html");
   suite("states/fl.html — the Division of Elections' own listing, not a county's ballot", () => {
-    const gov = flList.D.getElementById("state-government");
+    const gov = statewidePart(flList.D);
     const sources = [...gov.querySelectorAll(".gov-candidates-source a")].map((a) => a.getAttribute("href"));
     check("every list is the Division's", sources.length >= 3 &&
       sources.every((h) => /^https:\/\/dos\.elections\.myflorida\.com\//.test(h)), sources.join(" | "));
@@ -3094,7 +3124,8 @@ async function testStates() {
         .test(none[0].textContent), none.length && none[0].textContent);
     check("and that the holder was not checked, by name",
       !!gov.querySelector(".gov-holder-unchecked"));
-    check("the other offices still list theirs", gov.querySelectorAll(".gov-candidate-list").length >= 3);
+    check("the other offices still list theirs", gov.querySelectorAll(".gov-candidate-list").length >= 2 &&
+      !!unread.D.querySelector("#governor-race .gcard-candidate"));
   });
 
   const vaGov = await buildPage("states/va.html");
@@ -3106,7 +3137,7 @@ async function testStates() {
 
   const gaVoted = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00" });
   suite("states/ga.html after Election Day — the candidates were on the ballot", () => {
-    const gov = gaVoted.D.getElementById("state-government");
+    const gov = statewidePart(gaVoted.D);
     const heads = [...gov.querySelectorAll(".gov-candidates-head:not(.gov-writein-head)")].map((p) => p.textContent);
     check("in the past tense", heads.length === 4 &&
       heads.every((t) => t === "Candidates who were on the Nov 3, 2026 ballot"), heads.join(" | "));
@@ -3901,7 +3932,9 @@ async function testStates() {
     check("an 'On this page' row links every part of the page",
       // The four parts, and the statewide questions where the record has
       // any word on them (rule 95: Texas's is "none").
-      parts.length === 4 + (window.kycMeasures && window.kycMeasures.TX ? 1 : 0) &&
+      // The race for governor too, where the governor is on the ballot.
+      parts.length === 4 + (window.kycMeasures && window.kycMeasures.TX ? 1 : 0) +
+        (window.KYC.stategov.governorUp("TX") ? 1 : 0) &&
       parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
       parts.map((a) => a.getAttribute("href")).join(" "));
     // Left in the address, a fragment sent the reader back to the section
@@ -9232,9 +9265,11 @@ async function testStateGov() {
 
     const img = D.querySelector("#delegation .gov-portrait");
     if (img) {
+      const card = img.closest(".gcard");
       img.dispatchEvent(new window.Event("error"));
+      // The governor's card keeps its empty circle (kyc-stategov.js).
       check("a headshot that fails to load is removed, not left broken",
-        !D.querySelector("#delegation .gov-portrait"));
+        !D.body.contains(img) && (!card || !!card.querySelector(".gov-portrait-none")));
     }
     check("no text inside the map's SVG (rule 46)", !D.querySelector("#usMap text"));
   });
@@ -9490,27 +9525,28 @@ async function testStateGov() {
     court.photos[court.members[0]] = { photo: "https://court.example/j.jpg", page: "https://court.example/bio" };
     const box = window.document.createElement("div");
     box.innerHTML = window.KYC.stategov.render("GA", { links: false });
-    // The governor's list: the card's first (the other offices' lists picture no one here).
-    const block = box.querySelector(".gov-candidates");
-    const rows = [...block.querySelectorAll(".gov-candidate-list:not(.gov-writein-list) .gov-candidate")];
-    const first = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[0].name);
-    check("a candidate's photograph is drawn beside their name",
-      !!first && !!first.querySelector('img.gov-candidate-photo[src="' + printed[0].photo + '"]'));
+    // The governor's race, as cards (kyc-stategov.js candidateCard).
+    const rows = [...box.querySelectorAll(".gov-race .gcard-candidate:not(.gcard-writein)")];
+    const first = rows.find((li) => li.querySelector(".gov-name").textContent === printed[0].name);
+    check("a candidate's photograph is drawn on their card",
+      !!first && !!first.querySelector('img.gov-portrait[src="' + printed[0].photo + '"]'));
     check("with whose it is: author, licence and Commons",
       !!first && /^Photo: Jane Photographer, CC BY-SA 4\.0, via Wikimedia Commons$/.test(
-        first.querySelector(".gov-photo-credit").textContent), first && first.textContent);
+        first.querySelector(".gcard-credit").textContent), first && first.textContent);
     if (printed[1]) {
-      const second = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[1].name);
+      const second = rows.find((li) => li.querySelector(".gov-name").textContent === printed[1].name);
       check("an official guide's photograph names the guide, linked to its page",
-        !!second && !!second.querySelector('.gov-photo-credit a[href^="https://www.azcleanelections.gov/"]'));
+        !!second && !!second.querySelector('.gcard-credit a[href^="https://www.azcleanelections.gov/"]'));
     }
     const bare = rows.filter((li) => !li.querySelector("img"));
     check("a candidate without one keeps the column, an empty circle, and no credit",
-      bare.every((li) => li.querySelector(".gov-photo-none") && !li.querySelector(".gov-photo-credit")),
+      bare.every((li) => li.querySelector(".gov-portrait-none") && !li.querySelector(".gcard-credit")),
       bare.length);
     check("no photograph is ever drawn without its credit",
       [...box.querySelectorAll("img.gov-photo")].every((img) =>
-        img.parentNode.querySelector(".gov-photo-credit")));
+        img.parentNode.querySelector(".gov-photo-credit")) &&
+      [...box.querySelectorAll(".gcard img.gov-portrait")].every((img) =>
+        img.closest(".gcard").querySelector(".gcard-credit")));
     const member = box.querySelector(".gov-court-member");
     check("a justice's photograph is credited to the court, linked to the page it was read on",
       !!member && !!member.querySelector('img.gov-court-photo') &&
@@ -9528,11 +9564,11 @@ async function testStateGov() {
       !!member && member.querySelector(".gov-court-name").textContent.indexOf(court.members[0]) === 0);
     // A photograph that fails to load takes its credit with it.
     window.document.body.appendChild(box);
-    const img = box.querySelector("img.gov-candidate-photo");
+    const img = first.querySelector("img.gov-portrait");
     img.dispatchEvent(new window.Event("error"));
     check("a photograph that fails to load leaves the circle and no credit",
-      !!first && !first.querySelector("img") && !!first.querySelector(".gov-photo-none") &&
-        !first.querySelector(".gov-photo-credit"));
+      !!first && !first.querySelector("img") && !!first.querySelector(".gov-portrait-none") &&
+        !first.querySelector(".gcard-credit"));
     box.remove();
     // Put the record back as it was for the suites after this one.
     const back = JSON.parse(saved);
@@ -16709,13 +16745,13 @@ async function testPhotoCopies() {
       host.innerHTML = KYC.stategov.render(code);
       const justice = [...host.querySelectorAll(".gov-court-photo")].find((img) =>
         img.getAttribute("data-photo-original") === shot.photo);
-      const candidate = [...host.querySelectorAll(".gov-candidate-photo")].find((img) =>
+      const candidate = [...host.querySelectorAll(".gov-candidate-photo, .gcard-candidate img.gov-portrait")].find((img) =>
         img.getAttribute("data-photo-original") === row.photo);
       check("the justice's row loads the copy, and knows its original",
         !!justice && justice.getAttribute("src") === "../" + COPY);
       check("the candidate's row loads the copy, and knows its original",
         !!candidate && candidate.getAttribute("src") === "../" + COPY);
-      const note = (img) => img && img.closest("li").querySelector(".photo-copy-note");
+      const note = (img) => img && img.closest("li, .gcard").querySelector(".photo-copy-note");
       check("the justice's credit stays the court's and says it is a copy made here, with the weight",
         !!note(justice) && justice.closest("li").querySelector(".gov-photo-credit").textContent ===
           "Photo: " + whose + "; a smaller copy made by this site of the original file (2.4 MB)",
@@ -16736,9 +16772,9 @@ async function testPhotoCopies() {
       const rowOf = (cls, url) => {
         const img = [...host.querySelectorAll(cls)].find((i) =>
           i.getAttribute("src") === url || i.getAttribute("data-photo-original") === url);
-        return img && img.closest("li");
+        return img && img.closest("li, .gcard");
       };
-      const own = [rowOf(".gov-court-photo", shot.photo), rowOf(".gov-candidate-photo", row.photo)];
+      const own = [rowOf(".gov-court-photo", shot.photo), rowOf(".gov-candidate-photo, .gcard-candidate img.gov-portrait", row.photo)];
       check("a copy of another address is never drawn for a justice or a candidate",
         own.every((li) => !!li && li.innerHTML.indexOf(COPY) === -1 && !li.querySelector(".photo-copy-note") &&
           !li.querySelector("[data-photo-original]")),
@@ -16862,16 +16898,16 @@ async function testGuidePhotos() {
       delete row.photoCopy;
       const host = D.createElement("div");
       host.innerHTML = KYC.stategov.render("AK");
-      const img = [...host.querySelectorAll(".gov-candidate-photo")].find((el) =>
+      const img = [...host.querySelectorAll(".gov-candidate-photo, .gcard-candidate img.gov-portrait")].find((el) =>
         el.getAttribute("src") === "../" + HOSTED);
       check("the row loads the hosted file from the site's root", !!img);
-      const credit = img && img.closest("li").textContent;
+      const credit = img && img.closest("li, .gcard").textContent;
       check("and credits the pamphlet", !!credit &&
         credit.indexOf("Photo: from the Alaska Division of Elections' Official Election Pamphlet") !== -1 &&
         credit.indexOf("converted") === -1, credit);
       row.photoCopy = { src: COPY, of: HOSTED, ofBytes: 321884 };
       host.innerHTML = KYC.stategov.render("AK");
-      const copied = [...host.querySelectorAll(".gov-candidate-photo")].find((el) =>
+      const copied = [...host.querySelectorAll(".gov-candidate-photo, .gcard-candidate img.gov-portrait")].find((el) =>
         el.getAttribute("src") === "../" + COPY);
       check("a heavy one is the copy, falling back to the hosted file at its real address",
         !!copied && copied.getAttribute("data-photo-original") === "../" + HOSTED);
@@ -16915,6 +16951,224 @@ async function testGuidePhotos() {
   }
 }
 
+/* ===================================================== governors' cards */
+
+/* The owner's request of 2026-11-02, "lets add cards for governors": every
+ * sitting governor and every candidate on the 2026 ballot for governor as
+ * cards, on the state pages, the grid and the map, drawn by one module
+ * (KYC.stategov.governorCard, governorRace; rule 12). Cards, never
+ * profiles (rule 27): no #/profile/ link, no data-id, and no count of
+ * Congress moves. The candidates are the election office's list in its
+ * words (rule 91), and after Election Day the race is in the past tense
+ * beside the state's results, naming no winner. Every check asks the data
+ * for whichever case is true. */
+async function testGovernorCards() {
+  const noProfile = (root) => !root.querySelector("[data-id]") &&
+    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")));
+  const photoProblems = (root) => [...root.querySelectorAll(".gcard")].filter((card) => {
+    const img = card.querySelector("img.gov-portrait");
+    const credit = card.querySelector(".gcard-credit");
+    return !!img !== !!credit || (credit && !/^Photo/.test(credit.textContent.trim()));
+  }).length;
+
+  const ga = await buildPage("states/ga.html");
+  const sg = ga.window.KYC.stategov;
+  const data = ga.window.kycStateGov.states;
+  const codes = Object.keys(data);
+  const listOf = (code) => {
+    const item = data[code].ballot2026 && data[code].ballot2026.offices.governor;
+    return item && item.up && item.candidates ? item.candidates.candidates : null;
+  };
+  const html = (s) => { const d = ga.D.createElement("div"); d.innerHTML = s; return d; };
+
+  suite("governor cards — one implementation, for every governor and every listed candidate (rules 12, 91)", () => {
+    check("no page errors", !ga.errors.length, ga.errors.join(" | "));
+    const missing = codes.filter((c) => {
+      const card = html(sg.governorCard(c)).querySelector(".gcard");
+      return !card || card.querySelector(".gov-name").textContent.trim() !== data[c].governor.name ||
+        card.querySelector(".gov-role").textContent !== sg.governorOf(c);
+    });
+    check("every sitting governor has a card naming them and their office", codes.length > 50 && !missing.length,
+      missing.join(" "));
+    check("a territory's office is in its own words (rule 75)",
+      sg.governorOf("VI") === "Governor of the U.S. Virgin Islands" && sg.governorOf("GA") === "Governor of Georgia");
+    const races = codes.filter((c) => listOf(c));
+    const wrong = races.filter((c) => {
+      const box = html(sg.governorRace(c));
+      const list = listOf(c);
+      const names = [...box.querySelectorAll(".gcard-candidate .gov-name")].map((n) => n.textContent.trim());
+      const writeIns = [...box.querySelectorAll(".gcard-writeins .gcard")];
+      const mates = list.filter((p) => p.runningMate && !p.writeIn);
+      return names.join("|") !== list.filter((p) => !p.writeIn).concat(list.filter((p) => p.writeIn))
+          .map((p) => p.name).join("|") ||
+        writeIns.length !== list.filter((p) => p.writeIn).length ||
+        !writeIns.every((c2) => /Write-in candidate/.test(c2.textContent)) ||
+        mates.some((p) => box.textContent.indexOf("With " + p.runningMate + " for lieutenant governor") === -1) ||
+        !/In surname order, not ballot order\./.test(box.textContent) ||
+        box.textContent.indexOf("Source: " + data[c].ballot2026.offices.governor.candidates.source) === -1;
+    });
+    check("each race on the ballot draws one card per listed candidate, write-ins apart, running mates beside " +
+      "their nominee, the list cited", races.length > 30 && !wrong.length, wrong.join(" "));
+    check("a list is called certified only where its own words say so",
+      races.every((c) => !/certified/i.test(html(sg.governorRace(c)).querySelector(".gov-candidates-source")
+        .textContent.replace(data[c].ballot2026.offices.governor.candidates.source, "")
+        .replace((data[c].ballot2026.offices.governor.candidates.writeIns || {}).source || "", ""))));
+    check("no card links a profile or carries a profile's id (rule 27)",
+      codes.every((c) => noProfile(html(sg.governorCard(c) + sg.governorRace(c)))));
+    check("every photograph on a card says whose it is, and a card without one shows none",
+      codes.every((c) => !photoProblems(html(sg.governorCard(c) + sg.governorRace(c)))));
+    check("a party's colour only for a party (rule 88)", races.every((c) =>
+      [...html(sg.governorRace(c)).querySelectorAll(".gov-party")].every((p) =>
+        !p.classList.contains("party-r") || /Republican/.test(p.textContent)) &&
+      [...html(sg.governorRace(c)).querySelectorAll(".gov-party")].every((p) =>
+        !p.classList.contains("party-d") || /Democrat/.test(p.textContent))));
+  });
+
+  suite("states/ga.html — the governor's card in State government, the race for governor its own section", () => {
+    const D = ga.D;
+    const card = D.querySelector("#state-government #governor.gcard");
+    check("the sitting governor's card is in State government, with its anchor", !!card &&
+      card.textContent.indexOf(data.GA.governor.name) !== -1);
+    check("the ballot mark sits on the office's line, above the holder (rule 79)",
+      !!card && !!card.querySelector(".gov-office .gov-ballot-mark") &&
+      !card.querySelector(".gov-who .gov-ballot-mark"));
+    const race = D.getElementById("governor-race");
+    check("the race for governor is a section after the races for Congress, before the questions",
+      !!race && race.previousElementSibling && race.previousElementSibling.id === "races" &&
+      (!race.nextElementSibling || race.nextElementSibling.id === "measures"));
+    check("its cards are the election office's list", !!race &&
+      race.querySelectorAll(".gcard-candidate").length === listOf("GA").length);
+    check("State government says where the candidates are",
+      !!D.querySelector('#state-government a.state-jump[href="#governor-race"]'));
+    check("a chip jumps to it", !!D.querySelector('.state-parts a[href="#governor-race"]'));
+    check("nothing about the governor links a profile", noProfile(race) && noProfile(card));
+    const status = data.GA.ballot2026.offices.governor.holderStatus;
+    check("the race says whether the holder is on the ballot, in the State government card's words",
+      !status || race.querySelector(".gov-holder-status").textContent === card.querySelector(".gov-holder-status").textContent);
+    const img = card && card.querySelector("img.gov-portrait");
+    if (img) {
+      img.dispatchEvent(new ga.window.Event("error"));
+      check("a photograph that fails leaves the empty circle and takes its credit with it",
+        !card.querySelector("img.gov-portrait") && !!card.querySelector(".gov-portrait-none") &&
+        !card.querySelector(".gcard-credit"));
+    }
+    const plain = fs.readFileSync(path.join(SITE, "states/ga.html"), "utf8");
+    check("the page names the governor and every printed candidate for governor without scripts (rule 96)",
+      plain.indexOf(data.GA.governor.name) !== -1 &&
+      listOf("GA").every((p) => plain.indexOf(p.name.replace(/&/g, "&amp;")) !== -1));
+  });
+
+  const vaPage = await buildPage("states/va.html");
+  suite("states/va.html — a state whose governor is not on this ballot", () => {
+    check("the governor's card, and no race for governor",
+      !!vaPage.D.querySelector("#state-government .gcard") && !vaPage.D.getElementById("governor-race") &&
+      !vaPage.D.querySelector('.state-parts a[href="#governor-race"]'));
+  });
+
+  const after = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00" });
+  suite("states/ga.html after Election Day — the race for governor in the past tense, naming no winner (rule 91)", () => {
+    const race = after.D.getElementById("governor-race");
+    const results = ((after.window.KYC.meta().voting || {}).GA || {}).results;
+    check("the list is of who was on the ballot",
+      !!race && /Candidates who were on the Nov 3, 2026 ballot/.test(race.textContent) &&
+      !/Candidates on the Nov 3, 2026 ballot/.test(race.textContent));
+    check("it says this site names no winner, and links the state's results",
+      /names no winner/.test(race.textContent) &&
+      (!results || !!race.querySelector('a[href="' + results + '"]')));
+    check("no winner, no holder line", !/\b(Elected|Won|Winner)\b/.test(race.textContent) &&
+      !race.querySelector(".gov-holder-status"));
+    check("the office's mark says it was on the ballot",
+      /This office was on the Nov 3, 2026 ballot/.test(after.D.querySelector("#governor.gcard").textContent));
+  });
+
+  const phone = await buildPage("states/ca.html", { setup: (w) => phoneWidth(w, true) });
+  suite("states/ca.html on a phone — the race for governor folds to a row in its own words (rule 99)", () => {
+    const D = phone.D;
+    const fold = D.querySelector("#governor-race section.gov-race-foldable");
+    const row = fold && fold.querySelector(".race-row");
+    const words = phone.window.KYC.stategov.governorRowWords("CA");
+    check("the row is shown, its race hidden until found", !!fold && !fold.querySelector(".race-row-title").hidden &&
+      fold.querySelector(".race-body").getAttribute("hidden") === "until-found" &&
+      row.getAttribute("aria-expanded") === "false");
+    check("the row names every printed candidate under the list's own head",
+      !!row && listOf("CA").filter((p) => !p.writeIn).every((p) => row.textContent.indexOf(p.name) !== -1) &&
+      row.textContent.indexOf(words.ballot[0][0] + ":") !== -1);
+    check("and the holder line the race says", !words.held ||
+      row.querySelector(".race-row-held").textContent === words.held);
+    row.click();
+    check("tapped, it opens", fold.querySelector(".race-body").getAttribute("hidden") === null &&
+      row.getAttribute("aria-expanded") === "true");
+    const open = D.querySelector("[data-race-open-all]");
+    const congress = phone.window.KYC.races().filter((r) => r.state === "CA").length;
+    check("it is no race for Congress: \"Open all\" counts only theirs (rule 73)",
+      !!open && open.textContent.indexOf(" " + congress + " races") !== -1, open && open.textContent);
+    check("the select offers it by its heading", !!D.querySelector('#raceJumpSelect option[value="race-governor"]'));
+  });
+
+  const grid = await buildPage("index.html");
+  suite("index.html — the Governors chip: cards, apart from Congress's counts (rule 27, 73)", () => {});
+  {
+    const { window, D } = grid;
+    const aside = () => D.querySelector("aside").textContent;
+    const before = aside();
+    const label = D.getElementById("resultsLabel").textContent;
+    const chip = D.querySelector('[data-group="chamber"][data-value="governors"]');
+    check("a Governors chip beside the chambers", !!chip);
+    check("the governors' data is not loaded before they are shown (rule 94)", window.kycStateGov === undefined);
+    chip.click();
+    await until(() => D.querySelectorAll("#results .gcard").length > 0, 8000);
+    const n = Object.keys(window.kycStateGov.states).length;
+    check("every sitting governor's card", D.querySelectorAll("#results .gcard").length === n,
+      D.querySelectorAll("#results .gcard").length + " of " + n);
+    check("no card on the grid is a profile", noProfile(D.getElementById("results")) &&
+      !D.querySelector("#results .card"));
+    check("the results line counts governors, not profiles",
+      /^Showing 55 governors|^Showing \d+ governors/.test(D.getElementById("resultsLabel").textContent) &&
+      !/profiles? matching|Showing [\d,]+ profiles/.test(D.getElementById("resultsLabel").textContent));
+    check("the sidebar's figures do not move", aside() === before);
+    check("the address says it", /chamber=governors/.test(window.location.hash));
+    check("each name leads to its state page's governor",
+      [...D.querySelectorAll("#results .gcard .gcard-link")].every((a) => /states\/[a-z]{2}\.html#governor$/.test(a.getAttribute("href"))));
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    const dems = Object.keys(window.kycStateGov.states).filter((c) => window.kycStateGov.states[c].governor.partyKey === "D");
+    check("filtered by party as the rest is", D.querySelectorAll("#results .gcard").length === dems.length);
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    D.getElementById("raceViewToggle").click();
+    const up = Object.keys(window.kycStateGov.states).filter((c) => listOf(c) || (data[c].ballot2026 &&
+      data[c].ballot2026.offices.governor && data[c].ballot2026.offices.governor.up));
+    check("grouped by race: every race for governor on the ballot as a block",
+      D.querySelectorAll("#results .gov-view-race").length === up.length,
+      D.querySelectorAll("#results .gov-view-race").length + " of " + up.length);
+    check("each block's cards are its list", [...D.querySelectorAll("#results .gov-view-race")].every((s) => {
+      const code = s.id.replace("governor-race-", "");
+      return !listOf(code) || s.querySelectorAll(".gcard-candidate").length === listOf(code).length;
+    }));
+    check("still no profile", noProfile(D.getElementById("results")));
+    D.getElementById("raceViewToggle").click();
+    D.querySelector('[data-group="chamber"][data-value="all"]').click();
+    check("back to Congress, the same line and the same figures",
+      D.getElementById("resultsLabel").textContent === label && aside() === before,
+      D.getElementById("resultsLabel").textContent.slice(0, 120));
+  }
+
+  const map = await buildPage("map.html", { hash: "#/?state=GA&mode=governor" });
+  suite("map.html — the state panel shows the governor's card and the race for governor", () => {
+    const panel = map.D.getElementById("delegation");
+    check("the governor's card", !!panel.querySelector(".gcard") &&
+      panel.querySelector(".gcard").textContent.indexOf(data.GA.governor.name) !== -1);
+    check("the race's cards, one per listed candidate",
+      panel.querySelectorAll(".gcard-candidate").length === listOf("GA").length);
+    check("the holder line said once, on the governor's card",
+      panel.querySelectorAll(".gov-holder-status").length ===
+        panel.querySelectorAll(".gov-officer .gov-holder-status").length + 1);
+    check("no profile among them", noProfile(panel.querySelector(".stategov")) || !panel.querySelector(".gcard [data-id]"));
+    map.window.location.hash = "#/?state=GA&mode=governor2026";
+    map.window.dispatchEvent(new map.window.Event("hashchange"));
+    check("and in the 2026 governor's races view", map.D.querySelectorAll("#delegation .gcard-candidate").length ===
+      listOf("GA").length);
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -16952,6 +17206,7 @@ async function testGuidePhotos() {
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "states" || only === "statephone") await testStatePhone();
+  if (!only || only === "states" || only === "governors") await testGovernorCards();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
   if (!only || only === "states") await testLouisianaDecember();
