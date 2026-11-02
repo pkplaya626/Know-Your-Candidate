@@ -12,6 +12,10 @@
    216,
    216
   ],
+  "governor-candidate": [
+   216,
+   216
+  ],
   "justice": [
    96,
    96
@@ -408,12 +412,12 @@
    "bytes": 277994,
    "copy": {
     "box": [
-     96,
-     96
+     216,
+     216
     ],
-    "bytes": 2749,
-    "chrome": "Chrome/156.0.8078.47",
-    "file": "8d94c807ebfd2809f0e6.jpg",
+    "bytes": 7805,
+    "chrome": "Chrome/156.0.8078.76",
+    "file": "592332c29c388cf4c127.jpg",
     "for": [
      "candidate:AK:governor:Dave Bronson"
     ],
@@ -421,11 +425,11 @@
      1095,
      1320
     ],
-    "height": 116,
-    "made": "2026-10-25",
+    "height": 260,
+    "made": "2026-11-02",
     "quality": 0.86,
-    "sha256": "8d94c807ebfd2809f0e6700a3f5cd9935fe625927c498da82ee866cb180a046b",
-    "width": 96
+    "sha256": "592332c29c388cf4c127d311de6782a617a0df994097300f7bfa2ea7d472f7a5",
+    "width": 216
    },
    "for": [
     "candidate:AK:governor:Dave Bronson"

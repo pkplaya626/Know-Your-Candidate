@@ -577,6 +577,12 @@
     var answers = renderAnswers();
     askZip();
 
+    if (governorsOn()) {
+      if (observer) { observer.disconnect(); observer = null; }
+      renderGovernors(grid, empty, label);
+      return;
+    }
+
     if (state.view === "senate" && KYC.senate) {
       if (observer) { observer.disconnect(); observer = null; }
       renderSenate(grid, empty, label, officials, answers);
@@ -666,6 +672,180 @@
         }
       }, { rootMargin: "600px 0px" });
       observer.observe(sentinel);
+    }
+  }
+
+  /* ------------------------------------------------------------ governors */
+
+  /* The Governors chip shows every sitting governor's card and, grouped by
+   * race, every race for governor on the Nov 3, 2026 ballot as the election
+   * office's list - drawn by the state pages' and the map's own code
+   * (KYC.stategov.governorCard, governorRace; rule 12). A governor is a
+   * state official, never a profile (rule 27): no Congress profile is shown
+   * beside them, and nothing here moves a count of Congress - the
+   * sidebar's figures are the build's, and the results line counts
+   * governors and races for governor in their own words. Their data,
+   * data/stategov.js, is loaded the first time they are shown (rule 94's
+   * on-demand pattern), never before the grid's first card. */
+  var GOVERNORS = "governors";
+  var govLoad = "";
+
+  function governorsOn() {
+    return state.chamber === GOVERNORS;
+  }
+
+  /* The filters only Congress's profiles answer: who sits or runs for it,
+   * its 2026 election, its primaries' eliminated. With the governors on,
+   * none is pressed - a pressed "Not seeking re-election" over every
+   * governor read as a claim about each (PR #191 review) - and choosing
+   * one shows Congress's profiles again (initChips). */
+  var CONGRESS_ONLY = { role: true, election: true, eliminated: true };
+
+  function governorsOnly() {
+    if (!governorsOn()) return;
+    state.role = "all";
+    state.election = "all";
+    state.eliminated = "hide";
+    if (state.view === "senate") state.view = "grid";
+  }
+
+  /** True when the governors' data is in; otherwise asks for it once and
+   *  draws again when it comes, or says it failed. A failed load is not
+   *  asked for again until the reader chooses the governors anew
+   *  (governorsRetry): asked on every draw, a refused file was asked for
+   *  without end and the line never said it failed (PR #191 review). */
+  function governorsReady() {
+    if (!KYC.stategov) return false;
+    if (KYC.stategov.loaded()) return true;
+    if (govLoad === "loading" || govLoad === "failed") return false;
+    govLoad = "loading";
+    KYC.loadData("stategov.js", "kycStateGov", function (ok) {
+      govLoad = ok && KYC.stategov.loaded() ? "" : "failed";
+      if (governorsOn() && listDrawn) render();
+    });
+    return KYC.stategov.loaded();
+  }
+
+  /** The reader chose the governors again: a failed load may be tried once
+   *  more. */
+  function governorsRetry() {
+    if (govLoad === "failed") govLoad = "";
+  }
+
+  var GOV_PARTY = {
+    Democrat: function (g) { return g.partyKey === "D"; },
+    Republican: function (g) { return g.partyKey === "R"; },
+    Independent: function (g) { return g.partyKey !== "D" && g.partyKey !== "R"; },
+  };
+
+  /* The query read as the grid reads it (rule 5): a state's whole name or
+   * code, or a place in it, is that state, never text - "Kansas" is not in
+   * Arkansas, "va" not in Nevada; anything else matches where each of its
+   * words starts. A query naming a district in no state names no governor. */
+  function governorQuery() {
+    if (!state.q) return null;
+    var place = KYC.queryPlace(state.q);
+    if (place) return { state: place.any ? "" : place.state || "" };
+    var folded = KYC.searchFold(state.q);
+    return {
+      terms: folded.split(" ").filter(Boolean).map(function (term) {
+        return new RegExp("(?:^|[^a-z0-9])" + term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+      }),
+    };
+  }
+
+  /** Whether a governor's state, office and words, or its race's, answer
+   *  the query. */
+  function governorText(query, code, words) {
+    if (!query) return true;
+    if (query.terms === undefined) return query.state === code;
+    var text = " " + KYC.searchFold([KYC.stateName(code), "governor"].concat(words).join(" · "));
+    return query.terms.every(function (t) { return t.test(text); });
+  }
+
+  /* What narrowed the governors, in words: a place query is the state it
+   * names ("in Kansas"), never a Congress seat's label. */
+  function governorsNarrowed(query) {
+    var text = "";
+    if (query && query.terms !== undefined) text += " matching “" + typed() + "”";
+    else if (query && !query.state) text += " for “" + typed() + "”";
+    else if (query && query.state !== state.state) text += " in " + KYC.stateName(query.state);
+    if (state.state !== "all") text += " in " + KYC.stateName(state.state);
+    return text;
+  }
+
+  function candidateWords(sg, code) {
+    var list = ((sg.ballotOf(code) || {}).offices.governor.candidates || {}).candidates || [];
+    return list.map(function (p) { return [p.name, p.party, p.runningMate].filter(Boolean).join(" "); });
+  }
+
+  function renderGovernors(grid, empty, label) {
+    showLegend(false);
+    empty.hidden = true;
+    var sg = KYC.stategov;
+    if (!governorsReady()) {
+      grid.className = "";
+      grid.innerHTML = "";
+      label.textContent = !sg || govLoad === "failed"
+        ? "The governors’ data did not load, so they are not shown. Reloading the page usually fixes it."
+        : "Loading the governors…";
+      return;
+    }
+    var past = KYC.electionStatus(2026).phase === "post-election";
+    var query = governorQuery();
+    var codes = sg.codes().filter(function (code) {
+      return state.state === "all" || state.state === code;
+    }).sort(function (a, b) { return KYC.stateName(a).localeCompare(KYC.stateName(b)); });
+    var raced = codes.filter(function (code) {
+      return sg.governorUp(code) && governorText(query, code, candidateWords(sg, code));
+    });
+    // Grouped by race: the races for governor.
+    if (state.view === "race") {
+      label.innerHTML = KYC.escapeHtml("Showing " + plural(raced.length, "race", "races") + " for governor " +
+        (past ? (raced.length === 1 ? "that was on" : "that were on") : "on") + " the Nov 3, 2026 ballot" +
+        governorsNarrowed(query) + ": each the " +
+        "election office’s list of candidates, in surname order. Governors and their candidates are " +
+        "state officials and candidates, listed apart from the profiles of Congress and in none of " +
+        "its counts." + (state.party !== "all" ? " Each race lists everyone on its ballot, whatever the " +
+          "party filter." : "") + zipWords());
+      grid.className = "gov-view";
+      grid.innerHTML = raced.map(function (code) {
+        return '<section class="gov-view-race" id="' + KYC.escapeAttr("governor-race-" + code) + '">' +
+          '<h2 class="race-state-heading">' + KYC.escapeHtml(sg.raceHeading(code)) +
+          ' <a class="race-state-link" href="' + KYC.escapeAttr(KYC.stateUrl(code) + "#governor-race") + '">' +
+          KYC.escapeHtml(KYC.stateName(code)) + " &rsaquo;</a></h2>" +
+          sg.governorRace(code, { role: true }) + "</section>";
+      }).join("");
+      if (!raced.length) {
+        label.textContent = "No race for governor on the Nov 3, 2026 ballot" + governorsNarrowed(query) + "." +
+          zipWords();
+      }
+      return;
+    }
+    var shown = codes.filter(function (code) {
+      var g = (sg.state(code) || {}).governor;
+      if (!g) return false;
+      if (state.party !== "all" && GOV_PARTY[state.party] && !GOV_PARTY[state.party](g)) return false;
+      return governorText(query, code, [g.name, g.party]);
+    });
+    label.innerHTML = KYC.escapeHtml("Showing " + plural(shown.length, "governor", "governors") +
+      governorsNarrowed(query) +
+      ": state officials, listed apart from the profiles of Congress and in none of its counts. " +
+      "Each name leads to its state’s page. Group by race for the people on the " +
+      "Nov 3, 2026 ballot for governor." + zipWords());
+    grid.className = "gcard-grid gov-view";
+    grid.innerHTML = shown.map(function (code) {
+      return sg.governorCard(code, { brief: true });
+    }).join("");
+    if (!shown.length) {
+      // A candidate's name finds their race, not a governor (PR #191
+      // review: "Bottoms" read "No governor matches").
+      var races = query && query.terms !== undefined ? raced.length : 0;
+      label.innerHTML = KYC.escapeHtml("No governor" + (governorsNarrowed(query) || " matches these filters") +
+        ".") + (races ? " " + KYC.escapeHtml(plural(races, "race", "races") + " for governor " +
+          (races === 1 ? "lists" : "list") + " a candidate matching it: ") +
+          '<button type="button" class="btn" data-gov-races>Group by race</button>' : "") +
+        KYC.escapeHtml(zipWords());
     }
   }
 
@@ -982,6 +1162,11 @@
       hits = { found: hits.found.filter(whole), gone: hits.gone.filter(whole) };
     }
     var found = hits.found;
+    // The governors' own cards answer for them below: listed here too,
+    // Brian Kemp was named twice, a link above his card (PR #191 review).
+    if (governorsOn() && state.view !== "race") {
+      found = found.filter(function (h) { return h.row.kind !== "governor"; });
+    }
     var gone = hits.gone;
     if (!found.length && !gone.length) { box.hidden = true; box.innerHTML = ""; return false; }
     // The block with the better match first: a former member named in
@@ -1053,7 +1238,8 @@
    * Candidates otherwise (pages.nav_groups). Every redraw passes here, a
    * chip's as much as a link's. */
   function syncNav() {
-    var here = state.role === "member" ? "congress" : "candidates";
+    // The governors are neither Congress nor its candidates.
+    var here = governorsOn() ? "" : state.role === "member" ? "congress" : "candidates";
     Array.prototype.forEach.call(doc.querySelectorAll('.site-nav [data-nav="candidates"], ' +
         '.site-nav [data-nav="congress"]'), function (link) {
       if (link.getAttribute("data-nav") === here) link.setAttribute("aria-current", "page");
@@ -1216,7 +1402,12 @@
       var optional = chip.hasAttribute("data-optional");
 
       var cleared = group === "eliminated" ? "hide" : "all";
+      // A filter only Congress's profiles answer, chosen over the
+      // governors, shows Congress's (governorsOnly).
+      if (governorsOn() && CONGRESS_ONLY[group]) state.chamber = "all";
+      if (group === "chamber" && value === GOVERNORS) governorsRetry();
       state[group] = optional && state[group] === value ? cleared : value;
+      governorsOnly();
       syncChips();
       apply();
     });
@@ -1232,6 +1423,7 @@
     if (senate) {
       senate.addEventListener("click", function () {
         state.view = state.view === "senate" ? "grid" : "senate";
+        if (state.view === "senate" && governorsOn()) state.chamber = "all";
         apply();
       });
     }
@@ -1259,6 +1451,11 @@
   function initLabel() {
     var label = doc.getElementById("resultsLabel");
     label.addEventListener("click", function (event) {
+      if (event.target.closest("[data-gov-races]")) {
+        state.view = "race";
+        apply();
+        return;
+      }
       if (!event.target.closest("[data-out-toggle]")) return;
       state.eliminated = state.eliminated === "show" ? "hide" : "show";
       apply();
@@ -1389,6 +1586,9 @@
   /* The closest-first sorts order the races view too, so there the menu
    * says what they do instead. */
   function sortNote() {
+    if (governorsOn()) {
+      return "Sorting applies to the cards of Congress. Governors and their races are listed by state.";
+    }
     var source = closeSource();
     if (source && state.view === "race") {
       return "The races view lists races closest first by " + KYC.odds.sourceName(source) +
@@ -1507,7 +1707,8 @@
     state.state = params.state || "all";
     state.sort = SORTS[params.sort] ? params.sort : "region";
     state.view = params.view === "race" ? "race" : "grid";
-    if (params.view === "senate" && KYC.senate) state.view = "senate";
+    if (params.view === "senate" && KYC.senate && !governorsOn()) state.view = "senate";
+    governorsOnly();
 
     if (!adopted) input.value = state.q;
     doc.getElementById("stateSelect").value = state.state;

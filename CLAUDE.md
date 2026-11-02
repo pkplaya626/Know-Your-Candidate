@@ -2331,6 +2331,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `overrides.STATEWIDE_NAME_FORMS` entry, or the line says "not
     checked". After Election Day the block is in the past tense and links
     the state's results; this site names no state winner.
+    The governor and the people on the ballot for governor are cards (the
+    owner's request of 2026-11-02, "lets add cards for governors"), drawn by
+    one module (`KYC.stategov.governorCard`, `governorRace`, rule 12): the
+    sitting governor's in a state page's State government section
+    (`#governor`), the map's state panel and the grid's Governors chip
+    (`#/?chamber=governors`, which loads `data/stategov.js` on demand,
+    rule 94); the race's in its own state page section (`#governor-race`,
+    a row of its own where the races fold, rule 99), the map's panel and
+    the grid's Governors chip grouped by race. A governor's card is a card,
+    never a profile (rule 27): no dialog, no `#/profile/` link, no
+    `data-id`, and it is in no count of who sits in or runs for Congress -
+    not the sidebar's, the grid's results line, "Open all N races" or a
+    race's (rule 73). A candidate's card holds the list's words alone, in
+    the order and with the notes the list block gives (`listParts`, one
+    source of them), and its photograph's copy is made for the card's 72px
+    circle (`photocopies.BOXES` "governor-candidate", rule 101). Its
+    review found a count no second source checks: the NGA lists one
+    unbroken span for a re-elected governor, so Bill Lee and Tate Reeves,
+    in their second terms, read "First term" - the card counts no terms.
+    The Governors view reads a query as the grid does (rule 5: "Kansas" is
+    not Arkansas's governor), presses none of Congress's filters (a pressed
+    "Not seeking re-election" over every governor was a claim about each),
+    and asks once for a file that failed; a candidate's party words are
+    ink, since a fusion line is several parties (rule 88).
 
 92. **"Who is on my ballot" is its own question, answered from the views
     that already answer its parts, and an address keeps a ZIP code, never

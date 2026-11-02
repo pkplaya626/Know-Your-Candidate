@@ -567,11 +567,118 @@ def _person_item(person, indent, extra=""):
             f'{_e(person.get("name") or "")}</a>{party}{extra}</li>')
 
 
-def state_static(code, info, profiles, races, summary=None, measures=None):
+def governor_of(code):
+    """"Governor of Georgia", "Governor of the U.S. Virgin Islands": the
+    place in its own words (rule 75), as ``KYC.stategov.governorOf`` says
+    it from the lookup index (``lookup.place_info``)."""
+    from .voting_dates import place
+
+    return f"Governor of {place(code)}"
+
+
+def _holder_line(status):
+    """The words ``KYC.stategov.openSeat`` writes for an office's holder
+    before the election (rule 79), as markup: "" where there is none."""
+    if not status or not status.get("text"):
+        return ""
+    text = _e(status["text"])
+    if status.get("why") == "unchecked":
+        return f"{text}."
+    lead = "" if status.get("why") == "listed" else "Open seat: "
+    then = status.get("then") or {}
+    more = (f" and {_e(then['text'])} ({_out_link(then['source'], then['cite'])})"
+            if then.get("text") and then.get("source") else "")
+    return f"{lead}{text} ({_out_link(status['source'], status['cite'])}){more}."
+
+
+def governor_static(code, gov_state, post, pad="                "):
+    """The sitting governor and the race for governor as plain markup
+    (rule 96): the governor's name, party and office as the cards say them
+    (``KYC.stategov.governorCard``), and the election office's list of
+    candidates for governor in its own words (``governorRace``, rule 91):
+    each name and party, the running mate beside the nominee, write-ins
+    apart and said to be, the list cited with the day it was read, and
+    after the election in the past tense, naming no winner. ``("", "")``
+    where the build lists no governor."""
+    gov = (gov_state or {}).get("governor")
+    if not gov:
+        return "", ""
+    office = (((gov_state.get("ballot2026") or {}).get("offices") or {}).get("governor")) or {}
+    title = governor_of(code)
+    holder = [f'{pad}<section class="state-section" id="governor">',
+              f'{pad}    <h2 class="state-heading">{_e(title)}</h2>',
+              f'{pad}    <p>{_e(gov["name"])} ({_e(gov.get("party") or "")}), {_e(title)}, as the '
+              f'{_out_link(gov.get("profile") or "https://www.nga.org/governors/", "National Governors Association")}'
+              " lists the governor.</p>",
+              f"{pad}</section>"]
+    if not office.get("up"):
+        return "\n".join(holder), ""
+    heading = "2026 race for " + title[0].lower() + title[1:]
+    rows = [f'{pad}<section class="state-section gov-race-section" id="governor-race">',
+            f'{pad}    <h2 class="state-heading">{_e(heading)}</h2>']
+    status = _holder_line(office.get("holderStatus"))
+    if status and not post:
+        rows.append(f"{pad}    <p>{status}</p>")
+    listed = office.get("candidates")
+    if not listed:
+        rows.append(f"{pad}    <p>" + ("Who was on the Nov 3, 2026 ballot for this office is not listed here"
+                                     if post else "The candidates for this office are not listed here")
+                    + ": no election office's list of them has been read.</p>")
+        return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])
+
+    def item(person):
+        # The card's words (KYC.stategov.candidateCard): a surname-only
+        # name said to be one, the party, the running mate, the name the
+        # ballot prints, and the list's own form of the name.
+        surname = " (the list gives a surname only)" if person.get("surnameOnly") else ""
+        party = f" ({_e(person['party'])})" if person.get("party") else ""
+        mate = (f", with {_e(person['runningMate'])} for lieutenant governor"
+                if person.get("runningMate") else "")
+        ballot = (f"; printed on the ballot as “{_e(person['ballotName'])}”"
+                  if person.get("ballotName") else "")
+        printed = (f"; the list prints “{_e(person['printed'])}”"
+                   if person.get("printed") else "")
+        return f"{pad}        <li>{_e(person['name'])}{surname}{party}{mate}{ballot}{printed}</li>"
+
+    people = listed.get("candidates") or []
+    printed = [p for p in people if not p.get("writeIn")]
+    write_ins = [p for p in people if p.get("writeIn")]
+    rows.append(f"{pad}    <p>" + ("Candidates who were on the Nov 3, 2026 ballot" if post
+                                   else "Candidates on the Nov 3, 2026 ballot") + "</p>")
+    if listed.get("notStateList"):
+        # A list that is not the state's own says why (rule 91), as the
+        # cards do (listParts' `uncertified`).
+        rows.append(f"{pad}    <p>Not the state’s own list. {_e(listed['notStateList'])}.</p>")
+    rows += [f'{pad}    <ul class="share-list">'] + [item(p) for p in printed] + [f"{pad}    </ul>"]
+    if write_ins:
+        rows.append(f"{pad}    <p>Write-in candidates (" + ("their names were" if post else "names")
+                    + " not printed on the ballot)</p>")
+        rows += [f'{pad}    <ul class="share-list">'] + [item(p) for p in write_ins] + [f"{pad}    </ul>"]
+    # The write-ins' own document, where they come from another than the
+    # list's (listParts' credit): never the list's credit for names it
+    # does not hold.
+    others = listed.get("writeIns") or {}
+    write_in_credit = (f"; write-in candidates: {_out_link(others['url'], others['source'])}"
+                       f" (read {time_html(others.get('read'))})"
+                       if others.get("url") and others.get("url") != listed.get("url") else "")
+    recased = ("Names are written first name first, in ordinary capitals and without a title the "
+               "ballot prints; the list writes them its own way. "
+               if any(p.get("printed") for p in people) else "")
+    rows.append(f"{pad}    <p>In surname order, not ballot order. {recased}Source: "
+                f"{_out_link(listed['url'], listed['source'])} (read {time_html(listed.get('read'))})"
+                f"{write_in_credit}."
+                + (" This site does not read the state's results and names no winner." if post else "")
+                + "</p>")
+    return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])
+
+
+def state_static(code, info, profiles, races, summary=None, measures=None, stategov=None):
     """A state page's facts as plain markup: its name, who holds its seats
     and every 2026 race for Congress there, with each person's standing in
-    the profile dialog's words (``share.status_words``), and the statewide
-    questions on its ballot from *measures* (``ballot_measures.for_page``)."""
+    the profile dialog's words (``share.status_words``), its governor and
+    the race for governor from *stategov* (``data/stategov.js``'s payload,
+    ``governor_static``), and the statewide questions on its ballot from
+    *measures* (``ballot_measures.for_page``)."""
     from . import share
     from .cycle import CYCLE
     from .record import seated
@@ -612,7 +719,11 @@ def state_static(code, info, profiles, races, summary=None, measures=None):
                  for p in house]
         rows += [f"{pad}        <li>District {_e(v.get('district'))}: vacant</li>" for v in vacancies]
         rows += [f"{pad}    </ul>", f"{pad}</section>"]
-    ordered = ([r for r in races if r.get("chamber") == "Senate"]
+    governor, governor_race = governor_static(
+        code, (((stategov or {}).get("states")) or {}).get(code), post, pad)
+    if governor:
+        rows.append(governor)
+    ordered =([r for r in races if r.get("chamber") == "Senate"]
                + sorted((r for r in races if r.get("chamber") == "House"),
                         key=lambda r: r.get("district") or 0))
     if ordered:
@@ -624,6 +735,8 @@ def state_static(code, info, profiles, races, summary=None, measures=None):
                      "</a></h3>",
                      share.race_list_html(race, by_id, races_by_id, post, indent=pad + "    ")]
         rows.append(f"{pad}</section>")
+    if governor_race:
+        rows.append(governor_race)
     questions = measures_static(code, (measures or {}).get(code), post, summary, pad)
     if questions:
         rows.append(questions)
@@ -930,7 +1043,7 @@ def read_words(span):
 _HOME = ("Know Your Candidate", "")
 
 
-def render_state(code, host, summary=None, profiles=None, races=None, measures=None):
+def render_state(code, host, summary=None, profiles=None, races=None, measures=None, stategov=None):
     """The HTML for one state's page; with the build's *profiles* and
     *races*, its facts written in as plain lists (``state_static``), with
     the statewide questions *measures* holds (``ballot_measures.for_page``)."""
@@ -964,7 +1077,7 @@ def render_state(code, host, summary=None, profiles=None, races=None, measures=N
         nav_current="states",
         nav_how="true",
         search_placeholder=_e(f"Search {name} profiles…"),
-        main=_state_main(state_static(code, info, profiles, races, summary, measures)),
+        main=_state_main(state_static(code, info, profiles, races, summary, measures, stategov)),
         # Puerto Rico's seat has no 2026 race, and no election that day.
         footer=_state_sources(code, not (code in TERRITORIES and info.get("houseTerm"))),
         scripts=_scripts(_state_scripts(code)),

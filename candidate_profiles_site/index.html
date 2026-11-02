@@ -25,7 +25,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
-<link rel="stylesheet" href="assets/kyc.css?v=26c0a2014d">
+<link rel="stylesheet" href="assets/kyc.css?v=ba301f7a6c">
 <script src="assets/kyc.js?v=5ee44fe42e"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
@@ -258,13 +258,19 @@
                 Filters <span class="filters-count" id="filtersCount"></span>
             </button>
             <div class="chip-groups" id="chipGroups">
-                <div class="chip-group" role="group" aria-label="Chamber">
+                <div class="chip-group" role="group" aria-label="Office">
                     <button type="button" class="chip" data-group="chamber" data-value="all"
                             aria-pressed="true">Both chambers</button>
                     <button type="button" class="chip" data-group="chamber" data-value="Senate"
                             aria-pressed="false">Senate</button>
                     <button type="button" class="chip" data-group="chamber" data-value="House"
                             aria-pressed="false">House</button>
+                    <!-- State officials, never profiles (rule 27): every sitting
+                         governor's card and, grouped by race, every race for
+                         governor on the 2026 ballot (kyc-directory.js). -->
+                    <button type="button" class="chip" data-group="chamber" data-value="governors"
+                            aria-pressed="false"
+                            title="Every sitting governor, and the people on the Nov 3, 2026 ballot for governor: state officials and candidates, listed apart from Congress">Governors</button>
                 </div>
 
                 <div class="chip-group" role="group" aria-label="Members or challengers">
@@ -427,7 +433,7 @@
 <template id="onDemandData">
 <script src="data/federal.js?v=ae5c175b5c"></script>
 <script src="data/judiciary/index.js?v=a41b0be763"></script>
-<script src="data/stategov.js?v=6402439301"></script>
+<script src="data/stategov.js?v=5cb6fda32d"></script>
 <script src="data/search.js?v=12ce73e6ac"></script>
 <script src="data/measures.js?v=c89c22ff6f"></script>
 <script src="data/votes/house.js?v=8e6411144a"></script>
@@ -496,9 +502,10 @@
 <script src="assets/kyc-odds.js?v=c1d28927af"></script>
 <script src="assets/kyc-cards.js?v=afd68e4f27"></script>
 <script src="assets/kyc-profile.js?v=a6d1648353"></script>
+<script src="assets/kyc-stategov.js?v=a1977ca287"></script>
 <script src="assets/kyc-findrep.js?v=45fc0e8859"></script>
 <script src="assets/kyc-senate.js?v=073a8c2331"></script>
 <script src="assets/kyc-search.js?v=760ec6174e"></script>
-<script src="assets/kyc-directory.js?v=510a90ffe9"></script>
+<script src="assets/kyc-directory.js?v=158a01c51a"></script>
 </body>
 </html>

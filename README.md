@@ -207,7 +207,7 @@ commits on its own.
 | `assets/kyc-regionmap.js` | A map of any regions inside a state (legislative districts, counties), with labels, close-ups and an optional layer of dots |
 | `assets/kyc-legislature.js` | A state's legislature page: chambers, districts, members |
 | `assets/kyc-local.js` | A state's counties page: every county and every local government in it, and every city and town |
-| `assets/kyc-stategov.js` | Governors, legislatures and trifectas: the map's three state views and every state page's section |
+| `assets/kyc-stategov.js` | Governors, legislatures and trifectas: the map's three state views and every state page's section; the governors' cards and the races for governor as cards, for the state pages, the map's panel and the grid's Governors chip |
 
 ### What the search answers
 
@@ -1838,6 +1838,45 @@ template would write.
 They are linked from everywhere a state is named: the race headers in the
 grid, the profile dialog's "Represents" line, the state filter in the sidebar,
 the map's delegation panel, the footer, and `sitemap.xml`.
+
+### Governors' cards
+
+The sitting governor is a card in the State government section
+(`#governor`), and where the governor is on the Nov 3, 2026 ballot the race
+for governor is a section of its own after the races for Congress
+(`#governor-race`): one card per candidate on the election office's list,
+in its words (rule 91). On a phone, where the races fold, it folds to a row
+of its own, apart from the races for Congress and their count. The map's
+state panel draws the governor's card in every state-government view, and
+the race's cards in the governor and 2026 governor's races views; the
+statewide-officer, legislature and trifecta views, and the 2026 Senate
+races view, give a line to the race on the state page instead
+(`KYC.stategov.racePointer`). The grid's **Governors** chip shows every
+sitting governor's card, or, grouped by race, every race for governor
+(`#/?chamber=governors`, `&view=race`), loading `data/stategov.js` the
+first time it is shown, once (a failed load is said, and asked again only
+when the chip is chosen again). Its search reads a state's name or code as
+that state and other words where a word starts (rule 5); a candidate's name
+offers their race. The member, election and eliminated filters are
+Congress's: none is pressed over the governors, and choosing one shows
+Congress's profiles. One module draws them all (`KYC.stategov`:
+`governorCard`, `governorRace`).
+
+A governor's card is a card, never a profile (rule 27): it has no dialog,
+no `#/profile/` link and no `data-id`, and no count of who sits in or runs
+for Congress includes it. Its name links to the state page's section.
+
+| Card | Shows | From |
+|---|---|---|
+| Sitting governor | Office ("Governor of the U.S. Virgin Islands", rule 75) with its ballot mark (rule 79), the holder line, photograph and its credit, name, party, "In office since" (where Wikidata agrees with the NGA; no count of terms, which the NGA's one unbroken span gets wrong for a re-elected governor), the office's site, the NGA biography, phone and address | `data/stategov.js` (`governor`, `ballot2026.offices.governor`) |
+| Candidate for governor | Name as the list writes it (its own form on hover), party in words (in ink: a fusion line is several parties), the running mate beside the nominee, the name printed on the ballot, a photograph only by rule 91's routes and its credit; write-ins apart and said to be | `ballot2026.offices.governor.candidates` |
+
+A candidate's card holds no money, platform or filing, and is never joined
+to a profile by a name (rule 25). After Election Day the race is in the
+past tense, links the state's results and names no winner. A candidate for
+governor's photograph is drawn in the governor's 72px circle, so its
+smaller copy (rule 101) is made for that box (`photocopies.BOXES`
+`"governor-candidate"`).
 
 ## Know Your Government
 
