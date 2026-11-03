@@ -37,9 +37,10 @@ import time
 import urllib.request
 import zlib
 
+from . import agent
+
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "courts.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/154.0 Safari/537.36")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 # The chief, but not an associate, vice or deputy chief, nor a vice
 # presiding judge: Arizona has a Vice Chief Justice, Utah and Washington an

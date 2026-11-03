@@ -85,6 +85,19 @@
    *  name someone on the ballot this site has no profile (and so no party)
    *  for. */
   function oneParty(race) {
+    if (race && race.listParties) {
+      // A race for governor (kyc-stategov.js raceOdds): the parties the
+      // election office's list prints beside its candidates, write-ins
+      // apart. A fusion line or a minor party is no one party's (rule 88).
+      var words = {};
+      race.listParties.forEach(function (p) {
+        var key = /^Democratic(?:-Farmer-Labor|-NPL)?$/.test(p) ? "Democrat"
+          : p === "Republican" ? "Republican" : "other:" + p;
+        words[key] = true;
+      });
+      var only = Object.keys(words);
+      return race.listParties.length >= 2 && only.length === 1 && PLURAL[only[0]] ? only[0] : "";
+    }
     if (!race || !race.settled || !KYC.byId) return "";
     var res = race.results || {};
     if ((res.otherNominees || []).length) return "";
