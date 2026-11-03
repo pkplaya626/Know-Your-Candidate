@@ -5264,6 +5264,13 @@ function testColourVision(css) {
     if (!m) throw new Error("no fill rule for " + sel);
     return m[1].trim();
   };
+  // A rule's background over several lines.
+  const blockFill = (sel) => {
+    const m = css.match(new RegExp("^" + sel.replace(/\./g, "\\.") + " \\{([^}]*)\\}", "m"));
+    const fill = m && m[1].match(/background(?:-color)?:\s*([^;]+);/);
+    if (!fill) throw new Error("no fill rule for " + sel);
+    return fill[1].trim();
+  };
   LEGENDS["the balance bar"] = ["r", "d", "i"].map((p) => ruleFill(".bb-" + p));
   LEGENDS["the House squares"] = ["r", "d", "i"].map((p) => ruleFill(".ht-" + p));
   suite("kyc.css — no fill is a text colour (rule 88)", () => {
@@ -5326,6 +5333,17 @@ function testColourVision(css) {
       const shared = ["warn", "danger", "warn-text", "danger-text", "money-out", "money-in"]
         .filter((s) => parties.some((p) => plain(resolve(t, `var(--${s})`), p) < 10));
       check(`${name}: no status or money colour is a party's`, shared.length === 0, shared.join(", "));
+      // A race's money bars (rule 90), on race blocks, profiles and the
+      // map's panel: a length read against its track, in neutral ink (no
+      // hue a reader could take for a party), the two apart as every
+      // colour-vision type sees them.
+      const fill = resolve(t, blockFill(".money-fill"));
+      const track = resolve(t, blockFill(".money-track"));
+      const [, fa, fb] = oklab(rgb(fill).map(lin));
+      const barApart = Math.min(...Object.keys(MATRIX).map((k) => apart(fill, track, k)));
+      check(`${name}: a money bar is neutral ink, apart from its track`,
+        Math.hypot(fa, fb) < 0.05 && barApart >= 10,
+        `fill ${fill}, track ${track}, chroma ${Math.hypot(fa, fb).toFixed(3)}, apart ${barApart.toFixed(1)}`);
     }
     const js = fs.readFileSync(path.join(SITE, "assets", "kyc.js"), "utf8");
     check("the fills the tests call hatched are the ones kyc.js hatches",
@@ -14401,6 +14419,215 @@ async function testRaceMoney() {
   });
 }
 
+/* What every money fold says, wherever it is drawn (rule 90): bars in
+ * neutral ink on one scale per race, the party only in the name chip, each
+ * row its own through-date and FEC link, receipts said to include loans. */
+function moneyFoldProblems(blocks) {
+  const rows = blocks.flatMap((b) => [...b.querySelectorAll(".money-row")]);
+  const barred = rows.filter((r) => r.querySelector(".money-bar"));
+  const bad = [];
+  if (!barred.length) bad.push("no row with figures");
+  barred.forEach((r) => {
+    if (r.querySelectorAll(".money-bar").length < 2) bad.push("fewer than two bars");
+    if (![...r.querySelectorAll(".money-value")].every((v) => /^-?\$[\d.]+[KMB]?$/.test(v.textContent))) {
+      bad.push("an unrounded figure");
+    }
+    if (!/^FEC, through [A-Z][a-z]+\.? \d{1,2}, 20\d\d$/.test(r.querySelector(".money-asof").textContent)) {
+      bad.push("no through-date: " + r.querySelector(".money-asof").textContent);
+    }
+    const a = r.querySelector(".money-asof a");
+    if (!a || !/^https:\/\/www\.fec\.gov\/data\/candidate\/[HSP]\w+\/$/.test(a.href)) bad.push("no FEC link");
+  });
+  if (rows.some((r) => r.querySelector(".money-bars [class*='party']"))) bad.push("a party colour on a bar");
+  if (!rows.every((r) => !!r.querySelector(".money-who .party-chip"))) bad.push("a row without its party chip");
+  blocks.forEach((b) => {
+    const widths = [...b.querySelectorAll(".money-fill")].map((f) => parseFloat(f.style.width));
+    if (widths.length && (Math.max(...widths) !== 100 || widths.some((w) => w < 0 || w > 100))) {
+      bad.push("not one scale: " + widths.join(","));
+    }
+    if (!/Raised includes loans and transfers/.test(b.textContent)) bad.push("receipts not said to include loans");
+  });
+  return bad;
+}
+
+/* The map's delegation panel draws each 2026 race's money through the race
+ * block's own fold (rule 12, VISUALS-20): closed, and drawn when opened from
+ * the state's own file, which it says while it loads and if it fails (rule
+ * 94); on the campaign clock and after Election Day, when the money is
+ * still the campaigns' filed totals and who lost stays in view (rule 63). */
+async function testMapMoney() {
+  const slim = await buildPage("map.html", { people: "index", hash: "#/?state=TX&mode=house" });
+  const full = await buildPage("map.html", { hash: "#/?state=TX&mode=house" });
+  await settle(150);
+  const K = slim.window.KYC;
+  const ballotRaces = (KYC, code, chamber) => KYC.races().filter((r) => r.state === code && r.chamber === chamber &&
+    KYC.cards.racePeople(r, r.incumbentIds.concat(r.candidateIds).map(KYC.byId).filter(Boolean)).running.length);
+  const txRaces = ballotRaces(K, "TX", "House");
+  const folds = (b) => [...b.D.querySelectorAll("#delegation .race-money")];
+  const toggle = slim.D.getElementById("showMoney");
+  const box = slim.D.getElementById("moneyRows");
+  const closedAtFirst = folds(slim).every((f) => !f.open && f.hasAttribute("data-fold") &&
+    !f.querySelector(".money-row"));
+  // Read before the click: a regression that drew the folds open would pass
+  // a check made after it.
+  const hiddenAtFirst = !!box && box.hidden === true && !!toggle &&
+    toggle.getAttribute("aria-expanded") === "false";
+  const before = servedPeople(slim).length;
+  if (toggle) toggle.click();
+  const first = folds(slim)[0];
+  openFold(slim.window, first);
+  const loading = first.querySelector(".fold-body").textContent;
+  const loadingHtml = first.querySelector(".fold-body").innerHTML;
+  await until(() => !!first.querySelector(".money-row"), 6000);
+  const fullFirst = folds(full)[0];
+  openFold(full.window, fullFirst);
+  suite("map.html — the House view's money, race by race (VISUALS-20)", () => {
+    check("no page errors", slim.errors.length === 0 && full.errors.length === 0,
+      slim.errors.concat(full.errors).join(" | "));
+    check("a fold for each Texas House race with someone on its ballot, under one count",
+      folds(slim).length === txRaces.length && txRaces.length > 1 && !!toggle &&
+        toggle.getAttribute("aria-controls") === "moneyRows" &&
+        new RegExp("^\\s*Money in each race " + txRaces.length + "$").test(toggle.textContent) &&
+        folds(slim).every((f) => box.contains(f)), folds(slim).length + "/" + txRaces.length);
+    check("folded until the reader asks: the delegation comes first",
+      hiddenAtFirst && closedAtFirst && box.hidden === false && toggle.getAttribute("aria-expanded") === "true",
+      "hidden at first " + hiddenAtFirst + ", folds closed " + closedAtFirst);
+    // The panel is a polite live region (map.html #delegation): a fold that
+    // fills when opened is kept out of it, or a screen reader reads a race's
+    // figures aloud; its loading line, a status of its own, still speaks.
+    check("the folds are kept out of the panel's live region",
+      slim.D.getElementById("delegation").getAttribute("aria-live") === "polite" &&
+        box.getAttribute("aria-live") === "off" && /role="status"/.test(loadingHtml), loadingHtml);
+    check("each fold names its district, in the district's order",
+      folds(slim).map((f) => f.querySelector("summary").textContent).join("|") ===
+        txRaces.slice().sort((a, b) => Number(a.district) - Number(b.district))
+          .map((r) => "Money in TX-" + r.district).join("|"));
+    check("below the statuses' source, not among the people",
+      !slim.D.querySelector("#challengerRows .race-money") && !!slim.D.querySelector("#delegation .race-results") &&
+        !!(slim.D.querySelector("#delegation .race-results").compareDocumentPosition(toggle) & 4));
+    check("it says it is loading, and draws nothing from the cards meanwhile",
+      /Loading Texas/.test(loading) && !/No data/.test(loading), loading);
+    check("it loads Texas's file, and only it",
+      servedPeople(slim).slice(before).join() === "/data/people/tx.js", servedPeople(slim).join(" "));
+    check("then the money is what the whole records show",
+      first.innerHTML === fullFirst.innerHTML, firstDifference(fullFirst.innerHTML, first.innerHTML));
+    const problems = moneyFoldProblems([first]);
+    check("the race block's bars: neutral ink, one scale, dated and linked rows", problems.length === 0,
+      problems.slice(0, 4).join(" | "));
+    const name = first.querySelector(".money-who [data-id]");
+    // The panel's one delegated listener opens whatever carries a data-id.
+    check("a name in it carries that person's id, for the panel's listener to open",
+      !!name && name.tagName === "BUTTON" && !!K.byId(name.getAttribute("data-id")));
+  });
+
+  // The 2026 Senate race: one fold, beside the race's people, before the
+  // markets (a race block's order); the delegation view has no race.
+  slim.window.location.hash = "#/?state=NC&mode=senate2026";
+  await settle(150);
+  const nc = folds(slim);
+  const odds = slim.D.querySelector("#delegation .odds");
+  if (nc[0]) openFold(slim.window, nc[0]);
+  await until(() => nc[0] && !!nc[0].querySelector(".money-row"), 6000);
+  slim.window.location.hash = "#/?state=NC&mode=senate";
+  await settle(150);
+  const delegationFolds = folds(slim).length;
+  // A governor's race has no money fold: this site reads federal filings
+  // only (rule 19), so the governor races' view draws none - no empty or
+  // zero fold, no "Money in each race" count - and its panel keeps its own
+  // order: the candidates' cards, the list's source, then the markets.
+  const governorRaces = [];
+  for (const code of ["GA", "AK"]) {
+    slim.window.location.hash = "#/?state=" + code + "&mode=governor2026";
+    await settle(150);
+    const panel = slim.D.getElementById("delegation");
+    const at = (sel) => panel.querySelector(sel);
+    const before = (a, b) => !!a && !!b && !!(a.compareDocumentPosition(b) & 4);
+    governorRaces.push({ code, folds: folds(slim).length, count: !!slim.D.getElementById("showMoney"),
+      money: /Money in /.test(panel.textContent), drawn: !!at(".gov-race-panel"),
+      order: before(at(".gcard-candidate"), at(".gov-candidates-source")) &&
+        (!at(".odds") || before(at(".gov-candidates-source"), at(".odds"))) });
+  }
+  suite("map.html — the 2026 Senate race's money", () => {
+    check("one fold, named as on the state page, outside any count",
+      nc.length === 1 && nc[0].querySelector("summary").textContent === "Money in the race" &&
+        !slim.D.getElementById("showMoney"), nc.map((f) => f.querySelector("summary").textContent).join("|"));
+    check("kept out of the panel's live region, as the House view's are",
+      !!nc[0] && !!nc[0].closest('[aria-live="off"]') &&
+        nc[0].closest("[aria-live]") !== slim.D.getElementById("delegation"));
+    check("before the markets, as a race block has it",
+      !odds || !!(nc[0].compareDocumentPosition(odds) & 4));
+    const problems = moneyFoldProblems(nc);
+    check("drawn as the race block draws it", problems.length === 0, problems.slice(0, 4).join(" | "));
+    check("the Senate delegation view, which holds no race, has none", delegationFolds === 0);
+    check("the governor races' view draws no money fold and counts none (rule 19: federal filings only)",
+      governorRaces.length === 2 && governorRaces.every((g) => g.drawn && !g.folds && !g.count && !g.money),
+      JSON.stringify(governorRaces));
+    check("and keeps its panel's order: the cards, the list's source, the markets",
+      governorRaces.every((g) => g.order), JSON.stringify(governorRaces));
+  });
+  slim.window.close();
+  full.window.close();
+
+  // A state's file that fails: said, with how to retry, and nothing drawn.
+  {
+    const built = await buildPage("map.html", { people: "index", refuse: /\/data\/people\/tx\.js$/,
+      hash: "#/?state=TX&mode=house" });
+    await settle(150);
+    const fold = built.D.querySelector("#delegation .race-money");
+    openFold(built.window, fold);
+    await until(() => /did not load/.test(fold.textContent), 6000);
+    suite("map.html — a race's money when its state's file fails", () => {
+      check("says the figures did not load, and how to retry",
+        /did not load\. Close this and open it again to retry/.test(fold.textContent), fold.textContent);
+      check("no money rows drawn from the cards", !fold.querySelector(".money-row"));
+    });
+    built.window.close();
+  }
+
+  // After Election Day: who lost stays in the money, which is still each
+  // campaign's filed totals, the same figures as on the campaign clock.
+  {
+    const pick = (w) => {
+      const race = w.kycRaces.find((r) => r.state === "NC" && r.chamber === "Senate");
+      const byId = Object.fromEntries(w.legislatorsData.map((p) => [p.id, p]));
+      return race.incumbentIds.concat(race.candidateIds).map((id) => byId[id])
+        .filter((p) => p && p.raceStatus === "nominee" && p.receipts && /\$/.test(p.receipts));
+    };
+    const campaign = await buildPage("map.html", { hash: "#/?state=NC&mode=senate2026" });
+    const after = await buildPage("map.html", { now: "2026-11-05T09:00:00", hash: "#/?state=NC&mode=senate2026",
+      data: (w) => {
+        rewindToCampaign(w);
+        const [won, lost] = pick(w);
+        if (won && lost) { won.raceStatus = "elected"; lost.raceStatus = "defeated"; }
+        w.__money = { won: won && won.id, lost: lost && lost.id };
+      } });
+    await settle(150);
+    const open = (b) => {
+      const f = b.D.querySelector("#delegation .race-money");
+      if (f) openFold(b.window, f);
+      return f;
+    };
+    const a = open(campaign);
+    const b = open(after);
+    await until(() => a && b && !!a.querySelector(".money-row") && !!b.querySelector(".money-row"), 6000);
+    const { won, lost } = after.window.__money || {};
+    const ids = (f) => [...f.querySelectorAll(".money-who [data-id]")].map((x) => x.getAttribute("data-id"));
+    suite("map.html — the Senate race's money after Election Day", () => {
+      check("no page errors", after.errors.length === 0, after.errors.join(" | "));
+      check("a winner and a loser to read", !!(won && lost));
+      check("the loser's campaign stays in the money, beside the winner's",
+        !!b && ids(b).indexOf(lost) !== -1 && ids(b).indexOf(won) !== -1, b && ids(b).join(","));
+      check("the same filed totals as on the campaign clock, nothing re-read as a result",
+        !!a && !!b && a.querySelector(".money-rows").innerHTML === b.querySelector(".money-rows").innerHTML,
+        a && b && firstDifference(a.innerHTML, b.innerHTML));
+      const problems = b ? moneyFoldProblems([b]) : ["no fold"];
+      check("drawn as on the campaign clock", problems.length === 0, problems.slice(0, 4).join(" | "));
+    });
+    campaign.window.close();
+    after.window.close();
+  }
+}
+
 function K_open(window, id) {
   window.KYC.profile.open(id);
 }
@@ -17824,6 +18051,7 @@ async function testGovernorOverlays() {
   if (!only || only === "split") await testPeopleSplit();
   if (!only || only === "index.html" || only === "votes") await testVotes();
   if (!only || only === "money") await testRaceMoney();
+  if (!only || only === "money" || only === "map") await testMapMoney();
   if (!only || only === "charts") await testCharts();
   if (!only || only === "guide") await testGuide();
   if (!only || only === "guide") await testBillFlow();

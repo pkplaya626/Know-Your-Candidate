@@ -452,6 +452,40 @@
       }).join(" and ") + ".";
   }
 
+  /* Each race's money (rule 90, VISUALS-20): the race block's own fold
+   * (KYC.cards.moneyBlock, rule 12), closed, and drawn when opened from the
+   * state's own file, which it says while it loads and if it fails (rule
+   * 94): the map holds everyone's card only, where every figure would read
+   * "No data". One race is "Money in the race", as on the state page; a
+   * state's House races each name their district, behind one count, so
+   * Texas's 38 do not bury its delegation. */
+  function moneyFolds(stateRaces) {
+    if (!KYC.cards || !KYC.cards.moneyBlock) return "";
+    var many = stateRaces.length > 1;
+    var name = function (r) {
+      if (r.chamber === "Senate") return r.special ? "the special election" : "the regular election";
+      return r.district ? r.state + "-" + r.district : "the at-large race";
+    };
+    var blocks = stateRaces.slice().sort(function (a, b) {
+      return (a.special ? 1 : 0) - (b.special ? 1 : 0) ||
+        (Number(a.district) || 0) - (Number(b.district) || 0);
+    }).map(function (r) {
+      var everyone = (r.incumbentIds || []).concat(r.candidateIds || []).map(KYC.byId).filter(Boolean);
+      return KYC.cards.moneyBlock(r, everyone, { lazy: true, scope: "map",
+        summary: many ? "Money in " + name(r) : "Money in the race" });
+    }).filter(Boolean);
+    if (!blocks.length) return "";
+    // The panel is a polite live region; a fold that fills when opened would
+    // have a screen reader read a whole race's figures aloud. The folds are
+    // kept out of it (aria-live="off"): the reader who opened one reads it,
+    // and its loading and failure lines (role="status") still speak.
+    if (blocks.length < 2) return '<div class="panel-money" aria-live="off">' + blocks[0] + "</div>";
+    return '<button type="button" class="panel-subhead expander" id="showMoney"' +
+      ' aria-expanded="false" aria-controls="moneyRows">' +
+      KYC.icon("chevron") + " Money in each race <span>" + blocks.length + "</span></button>" +
+      '<div id="moneyRows" class="panel-money" aria-live="off" hidden>' + blocks.join("") + "</div>";
+  }
+
   /** The 2026 races view's line to the state's race for governor, on its
    *  state page (KYC.stategov.racePointer): the panel shows the state's
    *  2026 races, and the governor's is one of them. A governor is never a
@@ -617,6 +651,8 @@
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
       // Before the markets and the holder, beside the statuses they back.
       html += unsureBlock + sourceLine;
+      // The campaigns' money, then the markets, as a race block has them.
+      html += moneyFolds(stateRaces);
       if (KYC.odds) {
         html += stateRaces.map(function (r) {
           return KYC.odds.render(r, { compact: true, collapsed: true });
@@ -689,11 +725,15 @@
           KYC.escapeHtml(KYC.stateName(code)) + " page \u203a</a></p>";
       }
       html += sourceLine;
+      // The 2026 races' money, below the statuses and their source: the
+      // House view's races (the Senate delegation view has none).
+      if (mode === "house") html += moneyFolds(stateRaces);
     }
     list.innerHTML = html;
     list.scrollTop = 0;
 
-    [["showChallengers", "challengerRows"], ["showUnsure", "unsureRows"]].forEach(function (pair) {
+    [["showChallengers", "challengerRows"], ["showUnsure", "unsureRows"],
+     ["showMoney", "moneyRows"]].forEach(function (pair) {
       var toggle = doc.getElementById(pair[0]);
       if (!toggle) return;
       toggle.addEventListener("click", function () {
