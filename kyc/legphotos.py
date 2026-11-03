@@ -81,11 +81,14 @@ TIMEOUT = 30
 DOWN_AFTER = 3
 UA = {"User-Agent": "Mozilla/5.0 (compatible; know-your-candidate/2.1; civic data project)",
       "Accept-Encoding": "gzip"}
-# A browser's user agent, for the hosts that answer a script with an empty
-# shell (Indiana's IGA, rule 57's "answers only a browser").
-BROWSER_UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                            "(KHTML, like Gecko) Chrome/128.0 Safari/537.36",
-              "Accept-Encoding": "gzip"}
+# No request is sent as a browser's (rule 103): Indiana's IGA, once read
+# with a desktop Chrome's string, either answers this one or its members
+# keep their last read.
+
+
+class Unread(RuntimeError):
+    """A legislature's source did not answer this read: its members keep
+    their last entries, and the run says so (rule 8)."""
 
 # Hosts that serve a legislature's files without being its pages' host:
 # Oklahoma's House keeps its uploads on a CloudFront distribution its own
@@ -273,7 +276,7 @@ class Http:
         with self._guard:
             return self._locks.setdefault(host, threading.Lock())
 
-    def get(self, url, limit=None, browser=False):
+    def get(self, url, limit=None):
         host = urllib.parse.urlsplit(url).hostname or ""
         with self._lock(host):
             if self._down.get(host, 0) >= DOWN_AFTER:
@@ -286,21 +289,20 @@ class Http:
             if wait > 0:
                 time.sleep(wait)
             try:
-                answer = self._get(url, limit, browser)
+                answer = self._get(url, limit)
                 if answer.status is None:
                     # One dropped connection is not an answer (rule 8): once more.
                     time.sleep(self.pause * 3)
-                    answer = self._get(url, limit, browser)
+                    answer = self._get(url, limit)
                 self._down[host] = self._down.get(host, 0) + 1 if answer.status is None else 0
                 return answer
             finally:
                 self._last[host] = time.monotonic()
                 self.requests += 1
 
-    def _get(self, url, limit, browser):
-        headers = BROWSER_UA if browser else UA
+    def _get(self, url, limit):
         try:
-            req = urllib.request.Request(url, headers=headers)
+            req = urllib.request.Request(url, headers=UA)
             with urllib.request.urlopen(req, timeout=self.timeout) as response:
                 info = {k.lower(): v for k, v in response.headers.items()}
                 gz = info.get("content-encoding") == "gzip"
@@ -703,19 +705,24 @@ def read_indiana(http, code, records, roster=None, year=0):
     lpid in their Open States links) names them; the IGA app shows their
     photograph at ``images/legislators/<assembly>/<year>/<chamber>/<lpid>
     .jpg``, built from its own key - read from the app's code each run,
-    never assumed (the checker of 2026-10-19)."""
-    ans = http.get("https://iga.in.gov/api/getSessionYears", browser=True)
+    never assumed (the checker of 2026-10-19). Asked as a script, never
+    as a browser (rule 103): a refusal, an empty shell or an app that no
+    longer builds the path concludes nothing, and :class:`Unread` keeps
+    every Indiana member's last entry and says so."""
+    ans = http.get("https://iga.in.gov/api/getSessionYears")
     try:
         active = next(y for y in ans.json()["years"] if y.get("active") and not y.get("special"))
     except Exception:
-        return {}
-    shell = http.get("https://iga.in.gov/", browser=True)
+        raise Unread(f"the IGA's session list answered {ans.status or 'nothing'} "
+                     f"with no session in it") from None
+    shell = http.get("https://iga.in.gov/")
     script = re.search(r'src="(/static/js/main\.[0-9a-f]+\.js)"', shell.text() if shell.status == 200 else "")
     if not script:
-        return {}
-    app = http.get("https://iga.in.gov" + script.group(1), browser=True)
+        raise Unread(f"the IGA's app page answered {shell.status or 'nothing'} with no app script")
+    app = http.get("https://iga.in.gov" + script.group(1))
     if app.status != 200 or '"/images/legislators/").concat(' not in app.text():
-        return {}
+        raise Unread(f"the IGA's app script answered {app.status or 'nothing'} "
+                     f"without the photograph path")
     out = {}
     session = active["lpid"]
     for r in records:
@@ -725,7 +732,7 @@ def read_indiana(http, code, records, roster=None, year=0):
             continue
         api = (f"https://iga.in.gov/api/getLegislatorDetails?session_lpid={session}"
                f"&legislator_lpid={lpid}")
-        ans = http.get(api, browser=True)
+        ans = http.get(api)
         if ans.status != 200:
             continue
         try:
@@ -1387,7 +1394,8 @@ def refresh(by_state, previous, codes=None, http=None, today=None, force=False, 
         except Exception as exc:                 # a recipe's surprise concludes nothing
             log(f"  [warn] {code}: the read failed ({exc.__class__.__name__}: {exc}); "
                 f"the last entries stand")
-            return code, {}, {}
+            # Counted as kept (or none), never as nothing asked.
+            return code, {}, records
         settled = {}
         for r in records:
             outcome = outcomes.get(r["id"])

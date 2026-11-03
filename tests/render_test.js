@@ -566,6 +566,16 @@ function buildPage(page, opts) {
         removeListener() {},
       });
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
+      // opts.federal: the federal data as a refresh might write it, changed
+      // as data/federal.js assigns it, before any page module reads it.
+      if (opts.federal) {
+        let held;
+        Object.defineProperty(window, "kycFederal", {
+          configurable: true, enumerable: true,
+          get() { return held; },
+          set(value) { held = value; opts.federal(value); },
+        });
+      }
       // opts.written: the data as a later refresh would write it, before the rewind.
       const rewind = opts.now === undefined ? rewindToCampaign : null;
       const phase = opts.now === null ? null : phaseAt(opts.now || CAMPAIGN_NOW);
@@ -2713,6 +2723,24 @@ async function testMap() {
 
 /* ============================================================ state pages */
 
+/* A state page's statewide offices and their candidates: State government,
+ * and the race for governor's own section, whose candidates are cards
+ * (kyc-stategov.js governorRace). Copies of both in one box, to read. */
+function statewidePart(D) {
+  const box = D.createElement("div");
+  ["state-government", "governor-race"].forEach((id) => {
+    const el = D.getElementById(id);
+    if (el) box.appendChild(el.cloneNode(true));
+  });
+  return box;
+}
+
+/* Each office's list of candidates on it, in page order: the other
+ * offices' under State government, then the governor's race. */
+function statewideLists(D) {
+  return [...statewidePart(D).querySelectorAll("#state-government .gov-candidates, #governor-race .gov-race")];
+}
+
 async function testStates() {
   const { window, D, KYC } = await testShared("states/tx.html");
 
@@ -2724,9 +2752,12 @@ async function testStates() {
     check("the race list says what else the ballot elects",
       !!note && /Of the state offices this site covers, the same ballot also elects the governor/
         .test(note.textContent) && /local ballot questions, which this site does not list/.test(note.textContent) &&
-        note.textContent.indexOf("This site lists the candidates for Congress here, and those for " +
-          window.KYC.stategov.listsCandidates("TX") + " under State government; not those for the " +
-          "legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")),
+        // The governor's in the race for governor's own section (its cards).
+        note.textContent.indexOf("This site lists the candidates for Congress here, those for governor under " +
+          window.KYC.stategov.raceHeading("TX") + ", and those for " +
+          window.KYC.stategov.listsCandidates("TX", { governor: false }) + " under State government; not those " +
+          "for the legislature") !== -1 && /^the governor/.test(window.KYC.stategov.listsCandidates("TX")) &&
+        !!note.querySelector('a.state-jump[href="#governor-race"]'),
       note && note.textContent);
     check("the governor, each officer and each chamber is marked, linked to its source",
       marks.length >= 6 && marks.every((a) => /^https:\/\//.test(a.getAttribute("href")) &&
@@ -2773,7 +2804,9 @@ async function testStates() {
       !!note && /territorial and local contests/.test(note.textContent) &&
         !/state offices/.test(note.textContent), note && note.textContent);
     check("and says where the governor's candidates are listed",
-      /Territorial government, which lists the candidates for the governor/.test(note.textContent),
+      note.textContent.indexOf("The candidates for governor are under " +
+        gu.window.KYC.stategov.raceHeading("GU")) !== -1 &&
+        !!note.querySelector('a.state-jump[href="#governor-race"]'),
       note && note.textContent);
   });
   const az = await buildPage("map.html", { hash: "#/?state=AZ&mode=lt" });
@@ -2886,35 +2919,44 @@ async function testStates() {
   suite("states/ga.html — an open governor's seat lists who is on the ballot", () => {
     const gov = ga.D.getElementById("state-government");
     const item = ga.window.kycStateGov.states.GA.ballot2026.offices.governor;
-    const block = gov.querySelector(".gov-candidates");
-    const names = block ? [...block.querySelectorAll(".gov-candidate-name")].map((n) => n.textContent) : [];
+    // The governor's list is cards, in the race for governor's own section.
+    const block = ga.D.querySelector("#governor-race .gov-race");
+    const cardsOf = (sel) => block ? [...block.querySelectorAll(sel)] : [];
+    const names = cardsOf(".gcard-candidate .gov-name").map((n) => n.textContent);
     const printed = item.candidates.candidates.filter((c) => !c.writeIn);
     const writeIns = item.candidates.candidates.filter((c) => c.writeIn);
     check("every candidate the list gives, as it prints them, in the pipeline's order",
       names.join("|") === printed.concat(writeIns).map((c) => c.name).join("|") && printed.length >= 2,
       names.join(" | "));
+    const cards = cardsOf(".gcard-candidate:not(.gcard-writein)");
     check("party in words, never the list's code",
-      printed.every((c) => !c.party || block.textContent.indexOf(c.name + " (" + c.party + ")") !== -1) &&
+      printed.every((c, i) => !c.party || cards[i].querySelector(".gov-party").textContent === c.party) &&
         printed.every((c) => !/^[A-Z]{1,4}$/.test(c.party || "")),
       printed.map((c) => c.party).join(" | "));
     check("write-ins apart, under their own heading",
       writeIns.length > 0 && !!block.querySelector(".gov-writein-head") &&
         /Write-in candidates \(names not printed on the ballot\)/.test(block.textContent) &&
-        block.querySelectorAll(".gov-writein-list .gov-candidate").length === writeIns.length);
+        block.querySelectorAll(".gcard-writeins .gcard-writein").length === writeIns.length);
     const source = block.querySelector(".gov-candidates-source");
     check("credited to the list, linked, with the day it was read, and the order said",
       /^In surname order, not ballot order\. (Names are written [^.]*\. )?Source: the Georgia Secretary of State’s list of November candidates \(read /.test(source.textContent) &&
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
     // A photograph only by rule 91's routes, each with whose it is beside it.
+    // "Money" is a campaign's: the race's markets block (PR #195) explains a
+    // contract "worth $1", which is no candidate's money, so it is read apart
+    // (the day's odds first carried Georgia's markets on 2026-11-03).
+    const unpriced = block.cloneNode(true);
+    unpriced.querySelectorAll(".odds").forEach((n) => n.remove());
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
-      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
-        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-candidate-photo") &&
-          /^Photo( \(\d{4}\))?: ./.test((img.parentNode.querySelector(".gov-photo-credit") || {}).textContent || "")));
+      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(unpriced.textContent) &&
+        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
+          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")),
+      (unpriced.textContent.match(/.{0,40}\$.{0,40}/) || [""])[0]);
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
-      gov.querySelectorAll(".gov-candidates").length === 4);
+      gov.querySelectorAll(".gov-candidates").length === 3 && !!block);
   });
 
   const maGov = await buildPage("states/ma.html");
@@ -2923,14 +2965,18 @@ async function testStates() {
     const sg = maGov.window.kycStateGov.states.MA;
     const ticket = sg.ballot2026.offices.governor.candidates.candidates.find((c) => c.runningMate);
     const rows = [...gov.querySelectorAll(".gov-candidate")].map((li) => li.textContent);
+    // The governor's list is cards in the race for governor's section.
+    const govCards = [...maGov.D.querySelectorAll("#governor-race .gcard-candidate")];
+    const cardOf = (name) => govCards.find((c) => c.querySelector(".gov-name").textContent === name);
     check("the governor's list names each running mate for lieutenant governor",
-      !!ticket && rows.some((t) => t.indexOf(ticket.name) === 0 &&
-        t.indexOf(", with " + ticket.runningMate + " for lieutenant governor") !== -1), rows.join(" | "));
+      !!ticket && !!cardOf(ticket.name) && cardOf(ticket.name).querySelector(".gcard-mate").textContent ===
+        "With " + ticket.runningMate + " for lieutenant governor", govCards.map((c) => c.textContent).join(" | "));
     const mate = sg.ballot2026.offices.lt.candidates.candidates.find((c) => c.runningMate);
     check("the lieutenant governor's list names the governor each runs with",
       !!mate && rows.some((t) => t.indexOf(", running with " + mate.runningMate + " for governor") !== -1));
     check("a ticket the ballot prints by surnames says how it is printed",
-      !ticket.ballotName || rows.some((t) => t.indexOf("printed on the ballot as “" + ticket.ballotName + "”") !== -1));
+      !ticket.ballotName || cardOf(ticket.name).textContent.indexOf("Printed on the ballot as “" +
+        ticket.ballotName + "”") !== -1);
     const status = sg.ballot2026.offices.governor.holderStatus;
     const line = gov.querySelector(".gov-holder-status");
     check("a holder the list names: among its candidates, never an open seat",
@@ -2940,8 +2986,8 @@ async function testStates() {
         !line.classList.contains("gov-open-seat"), line.textContent);
     const lone = sg.ballot2026.offices.governor.candidates.candidates.find((c) => c.surnameOnly);
     check("a name the ballot prints as a surname only says so, and no first name is invented",
-      !lone || rows.some((t) => t.indexOf(lone.name + " (the list gives a surname only)") === 0),
-      rows.join(" | "));
+      !lone || (!!cardOf(lone.name) && /The list gives a surname only\./.test(cardOf(lone.name).textContent)),
+      govCards.map((c) => c.textContent).join(" | "));
   });
 
   /* A list from a county or a commission is named as what it is and is
@@ -2974,9 +3020,9 @@ async function testStates() {
    * county's stands for nothing. */
   const nvGov = await buildPage("states/nv.html");
   suite("states/nv.html — the Secretary of State's certified list; names and parties as it prints them", () => {
-    const gov = nvGov.D.getElementById("state-government");
+    const gov = statewidePart(nvGov.D);
     const offices = nvGov.window.kycStateGov.states.NV.ballot2026.offices;
-    const blocks = [...gov.querySelectorAll(".gov-candidates")];
+    const blocks = statewideLists(nvGov.D);
     const sources = blocks.map((b) => (b.querySelector(".gov-candidates-source") || {}).textContent || "");
     check("every office's list is the Secretary of State's certified list",
       blocks.length === 4 && sources.every((t) =>
@@ -3019,9 +3065,9 @@ async function testStates() {
    * Designated", never the guide's "Independent". */
   const azGov = await buildPage("states/az.html");
   suite("states/az.html — the Secretary of State's candidate listing; codes in the office's words", () => {
-    const gov = azGov.D.getElementById("state-government");
+    const gov = statewidePart(azGov.D);
     const offices = azGov.window.kycStateGov.states.AZ.ballot2026.offices;
-    const blocks = [...gov.querySelectorAll(".gov-candidates")];
+    const blocks = statewideLists(azGov.D);
     const sources = blocks.map((b) => (b.querySelector(".gov-candidates-source") || {}).textContent || "");
     check("every office's list is the Secretary of State's listing, never called certified",
       blocks.length === 4 && sources.every((t) =>
@@ -3039,7 +3085,7 @@ async function testStates() {
         !offices.lt.candidates.candidates.some((c) => c.party === "Independent") &&
         offices.governor.candidates.candidates.some((c) => c.party === "No Labels") &&
         offices.governor.candidates.candidates.some((c) => c.party === "Green"), gov.textContent.slice(0, 400));
-    const writeIns = [...gov.querySelectorAll(".gov-writein-list li")].map((li) => li.textContent);
+    const writeIns = [...gov.querySelectorAll(".gov-writein-list li, .gcard-writeins .gcard")].map((li) => li.textContent);
     check("the two write-in candidates for governor, apart",
       writeIns.length === 2 && writeIns.some((t) => /Gertritrude Gonzalez/.test(t)) &&
         writeIns.some((t) => /Alice Novoa/.test(t)), writeIns.join(" | "));
@@ -3052,7 +3098,7 @@ async function testStates() {
 
   const flList = await buildPage("states/fl.html");
   suite("states/fl.html — the Division of Elections' own listing, not a county's ballot", () => {
-    const gov = flList.D.getElementById("state-government");
+    const gov = statewidePart(flList.D);
     const sources = [...gov.querySelectorAll(".gov-candidates-source a")].map((a) => a.getAttribute("href"));
     check("every list is the Division's", sources.length >= 3 &&
       sources.every((h) => /^https:\/\/dos\.elections\.myflorida\.com\//.test(h)), sources.join(" | "));
@@ -3113,7 +3159,8 @@ async function testStates() {
         .test(none[0].textContent), none.length && none[0].textContent);
     check("and that the holder was not checked, by name",
       !!gov.querySelector(".gov-holder-unchecked"));
-    check("the other offices still list theirs", gov.querySelectorAll(".gov-candidate-list").length >= 3);
+    check("the other offices still list theirs", gov.querySelectorAll(".gov-candidate-list").length >= 2 &&
+      !!unread.D.querySelector("#governor-race .gcard-candidate"));
   });
 
   const vaGov = await buildPage("states/va.html");
@@ -3125,7 +3172,7 @@ async function testStates() {
 
   const gaVoted = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00" });
   suite("states/ga.html after Election Day — the candidates were on the ballot", () => {
-    const gov = gaVoted.D.getElementById("state-government");
+    const gov = statewidePart(gaVoted.D);
     const heads = [...gov.querySelectorAll(".gov-candidates-head:not(.gov-writein-head)")].map((p) => p.textContent);
     check("in the past tense", heads.length === 4 &&
       heads.every((t) => t === "Candidates who were on the Nov 3, 2026 ballot"), heads.join(" | "));
@@ -3608,13 +3655,14 @@ async function testStates() {
    * reading by hand, so it is the check's to open or leave unconfirmed.
    * Whichever this week's check found (the record, checked above). */
   const missedOn = (page, code) => (page.window.kycBuildMeta.voting._unreached || {})[code] || [];
-  const openedEither = (note, code, page, kind, label) => {
-    const quoted = "“" + label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "”";
-    return !new RegExp(quoted + "[^.]*could not be confirmed").test(note) &&
+  // Each clause is read for the labels it names, so another link's state
+  // that day ("“Find your polling place” could not be confirmed") says
+  // nothing about this one.
+  const openedEither = (note, code, page, kind, label) =>
+    !namedBefore(note, "could not be confirmed").has(label) &&
       (missedOn(page, code).indexOf(kind) === -1
-        ? !new RegExp(quoted + "[^;.]* opened by hand").test(note)
+        ? !namedBefore(note, "opened by hand").has(label)
         : namedBefore(note, "opened by hand ([\\d-]+)").get(label) === "2026-10-26");
-  };
   suite("states/nh.html — vote.gov's registration page and the results, opened", () => {
     const note = nhHand.D.querySelector("#voting .state-note").textContent;
     check("vote.gov's page is said for what it is",
@@ -3629,12 +3677,11 @@ async function testStates() {
       openedEither(gu, "GU", guVote, "info", "2026 general election: early voting and sample ballots"), gu);
     const al = alHand.D.querySelector("#voting .state-note").textContent;
     const alShown = !!alHand.window.kycBuildMeta.voting.AL.results;
+    const alUnconfirmed = namedBefore(al, "could not be confirmed").has("Official results");
     check("Alabama's results page is never said opened by hand, and unconfirmed only where the check missed it",
-      !/opened by hand/.test(al) &&
+      !namedBefore(al, "opened by hand").has("Official results") &&
         (!alShown ? !/Official results/.test(al)
-          : missedOn(alHand, "AL").indexOf("results") !== -1
-          ? /; “Official results” could not be confirmed by this site's automated check that day\./.test(al)
-          : !/could not be confirmed/.test(al)), al);
+          : missedOn(alHand, "AL").indexOf("results") !== -1 ? alUnconfirmed : !alUnconfirmed), al);
   });
 
   const nd = await buildPage("states/nd.html");
@@ -3920,7 +3967,9 @@ async function testStates() {
     check("an 'On this page' row links every part of the page",
       // The four parts, and the statewide questions where the record has
       // any word on them (rule 95: Texas's is "none").
-      parts.length === 4 + (window.kycMeasures && window.kycMeasures.TX ? 1 : 0) &&
+      // The race for governor too, where the governor is on the ballot.
+      parts.length === 4 + (window.kycMeasures && window.kycMeasures.TX ? 1 : 0) +
+        (window.KYC.stategov.governorUp("TX") ? 1 : 0) &&
       parts.every((a) => !!D.getElementById(a.getAttribute("href").slice(1))),
       parts.map((a) => a.getAttribute("href")).join(" "));
     // Left in the address, a fragment sent the reader back to the section
@@ -9251,9 +9300,11 @@ async function testStateGov() {
 
     const img = D.querySelector("#delegation .gov-portrait");
     if (img) {
+      const card = img.closest(".gcard");
       img.dispatchEvent(new window.Event("error"));
+      // The governor's card keeps its empty circle (kyc-stategov.js).
       check("a headshot that fails to load is removed, not left broken",
-        !D.querySelector("#delegation .gov-portrait"));
+        !D.body.contains(img) && (!card || !!card.querySelector(".gov-portrait-none")));
     }
     check("no text inside the map's SVG (rule 46)", !D.querySelector("#usMap text"));
   });
@@ -9367,16 +9418,33 @@ async function testStateGov() {
         sources.indexOf("attorney general, " + ag.photoBy) !== -1, sources);
     }
     // A named holder without a photograph keeps the photograph's column, so
-    // the row lines up with the pictured rows above it.
+    // the row lines up with the pictured rows above it. Made so here from a
+    // confirmed holder, since a refresh changes who has a photograph, and
+    // found by its own office line: a holder running for governor is named
+    // in the governor's row too (Colorado's Phil Weiser, 2026-11-01).
     const bare = stateCodes.find((c) => data.states[c].ag && data.states[c].ag.name &&
-      !data.states[c].ag.photo && !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed);
+      !data.states[c].ag.unconfirmed && !data.states[c].ag.disputed && !data.states[c].ag.unlisted);
+    check("a confirmed attorney general to draw without a photograph", !!bare);
     if (bare) {
-      pick("#/?state=" + bare + "&mode=ag");
-      const row = [...D.querySelectorAll("#delegation .gov-officer")].find((li) =>
-        li.textContent.indexOf(data.states[bare].ag.name) !== -1);
-      check("an unpictured attorney general's row keeps the photograph's column",
-        !!row && !row.classList.contains("gov-officer-text") &&
-        !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"));
+      const ag = data.states[bare].ag;
+      const saved = Object.keys(ag).filter((k) => /^photo/.test(k)).map((k) => [k, ag[k]]);
+      saved.forEach(([k]) => delete ag[k]);
+      try {
+        // Another state first: the same address again draws nothing anew.
+        pick("#/?state=" + stateCodes.find((c) => c !== bare) + "&mode=ag");
+        pick("#/?state=" + bare + "&mode=ag");
+        const row =[...D.querySelectorAll("#delegation .gov-officer")].find((li) => {
+          const role = li.querySelector(".gov-officer-role");
+          const name = li.querySelector(".gov-officer-name");
+          return !!role && /^Attorney general$/i.test(role.textContent.trim()) &&
+            !!name && name.textContent.indexOf(ag.name) !== -1;
+        });
+        check("an unpictured attorney general's row keeps the photograph's column",
+          !!row && !row.classList.contains("gov-officer-text") &&
+          !!row.querySelector(".gov-officer-nophoto[aria-hidden='true']"), bare);
+      } finally {
+        saved.forEach(([k, v]) => { ag[k] = v; });
+      }
     }
   });
 
@@ -9492,27 +9560,28 @@ async function testStateGov() {
     court.photos[court.members[0]] = { photo: "https://court.example/j.jpg", page: "https://court.example/bio" };
     const box = window.document.createElement("div");
     box.innerHTML = window.KYC.stategov.render("GA", { links: false });
-    // The governor's list: the card's first (the other offices' lists picture no one here).
-    const block = box.querySelector(".gov-candidates");
-    const rows = [...block.querySelectorAll(".gov-candidate-list:not(.gov-writein-list) .gov-candidate")];
-    const first = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[0].name);
-    check("a candidate's photograph is drawn beside their name",
-      !!first && !!first.querySelector('img.gov-candidate-photo[src="' + printed[0].photo + '"]'));
+    // The governor's race, as cards (kyc-stategov.js candidateCard).
+    const rows = [...box.querySelectorAll(".gov-race .gcard-candidate:not(.gcard-writein)")];
+    const first = rows.find((li) => li.querySelector(".gov-name").textContent === printed[0].name);
+    check("a candidate's photograph is drawn on their card",
+      !!first && !!first.querySelector('img.gov-portrait[src="' + printed[0].photo + '"]'));
     check("with whose it is: author, licence and Commons",
       !!first && /^Photo: Jane Photographer, CC BY-SA 4\.0, via Wikimedia Commons$/.test(
-        first.querySelector(".gov-photo-credit").textContent), first && first.textContent);
+        first.querySelector(".gcard-credit").textContent), first && first.textContent);
     if (printed[1]) {
-      const second = rows.find((li) => li.querySelector(".gov-candidate-name").textContent === printed[1].name);
+      const second = rows.find((li) => li.querySelector(".gov-name").textContent === printed[1].name);
       check("an official guide's photograph names the guide, linked to its page",
-        !!second && !!second.querySelector('.gov-photo-credit a[href^="https://www.azcleanelections.gov/"]'));
+        !!second && !!second.querySelector('.gcard-credit a[href^="https://www.azcleanelections.gov/"]'));
     }
     const bare = rows.filter((li) => !li.querySelector("img"));
     check("a candidate without one keeps the column, an empty circle, and no credit",
-      bare.every((li) => li.querySelector(".gov-photo-none") && !li.querySelector(".gov-photo-credit")),
+      bare.every((li) => li.querySelector(".gov-portrait-none") && !li.querySelector(".gcard-credit")),
       bare.length);
     check("no photograph is ever drawn without its credit",
       [...box.querySelectorAll("img.gov-photo")].every((img) =>
-        img.parentNode.querySelector(".gov-photo-credit")));
+        img.parentNode.querySelector(".gov-photo-credit")) &&
+      [...box.querySelectorAll(".gcard img.gov-portrait")].every((img) =>
+        img.closest(".gcard").querySelector(".gcard-credit")));
     const member = box.querySelector(".gov-court-member");
     check("a justice's photograph is credited to the court, linked to the page it was read on",
       !!member && !!member.querySelector('img.gov-court-photo') &&
@@ -9530,11 +9599,11 @@ async function testStateGov() {
       !!member && member.querySelector(".gov-court-name").textContent.indexOf(court.members[0]) === 0);
     // A photograph that fails to load takes its credit with it.
     window.document.body.appendChild(box);
-    const img = box.querySelector("img.gov-candidate-photo");
+    const img = first.querySelector("img.gov-portrait");
     img.dispatchEvent(new window.Event("error"));
     check("a photograph that fails to load leaves the circle and no credit",
-      !!first && !first.querySelector("img") && !!first.querySelector(".gov-photo-none") &&
-        !first.querySelector(".gov-photo-credit"));
+      !!first && !first.querySelector("img") && !!first.querySelector(".gov-portrait-none") &&
+        !first.querySelector(".gcard-credit"));
     box.remove();
     // Put the record back as it was for the suites after this one.
     const back = JSON.parse(saved);
@@ -10231,9 +10300,14 @@ async function testElectionNight() {
     rewindToCampaign(w);
     const up = w.legislatorsData.filter((p) => !p.isCandidate && /Senate/.test(p.chamber) &&
       p.seatUp2026 && p.raceStatus === "nominee" && !p.contestLabel);
-    w.__senators = { lost: up[0], won: up[1], waiting: up[2] };
-    if (up[0]) up[0].raceStatus = "defeated";
-    if (up[1]) up[1].raceStatus = "elected";
+    // Georgia's senator, if up, in its general election runoff: the map
+    // reads the status table's words, not a copy of its own.
+    const ga = up.find((p) => p.state === "GA");
+    const rest = up.filter((p) => p !== ga);
+    w.__senators = { lost: rest[0], won: rest[1], waiting: rest[2], runoff: ga };
+    if (rest[0]) rest[0].raceStatus = "defeated";
+    if (rest[1]) rest[1].raceStatus = "elected";
+    if (ga) ga.raceStatus = "runoff";
   } });
   suite("map.html — the 2026 Senate map after the election", () => {
     const { lost, won, waiting } = map.window.__senators || {};
@@ -10247,6 +10321,161 @@ async function testElectionNight() {
     check("a senator who won reads re-elected", /re-elected/.test(label(won)), label(won));
     check("an uncalled race reads awaiting result, not renominated",
       /awaiting result/.test(label(waiting)) && !/renominated/.test(label(waiting)), label(waiting));
+    const { runoff } = map.window.__senators || {};
+    check("Georgia's senator in its December runoff reads the status table's words",
+      !runoff || / in the general election runoff\)/.test(label(runoff)), runoff && label(runoff));
+  });
+}
+
+/* Louisiana's House seats after their November 3 open primary (rules 63,
+ * 64, 75). The December 12 round is the Secretary of State's "Open U.S.
+ * Representative General" election, never a runoff: the two in it read
+ * Georgia's "In the general election runoff" until the status table said
+ * otherwise. One race is decided outright by a majority, one goes to
+ * December, set the way the pipeline sets them (results._settle_open_primary). */
+function louisianaNight(window, meta) {
+  rewindToCampaign(window);
+  meta.election = Object.assign({}, meta.election, { resultsAsOf: "2026-11-05" });
+  const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
+  const people = (r) => [...new Set(r.candidateIds)].map((id) => byId[id])
+    .filter((p) => p && p.raceId === r.id);
+  const races = window.kycRaces.filter((r) => r.state === "LA" && r.chamber === "House" &&
+    r.primaryKind === "open" && r.generalRunoff && people(r).length >= 3);
+  if (races.length < 2) {
+    window.__laNight = {};
+    return;
+  }
+  const [outright, december] = races;
+  const read = (r, statuses) => {
+    people(r).forEach((p, i) => {
+      p.raceStatus = statuses(i);
+      p.raceStatusRace = r.id;
+      delete p.raceStatusSource;
+    });
+    r.settled = true;
+    r.results = Object.assign({}, r.results, { fromQualifiedList: false, otherNominees: [] });
+  };
+  read(outright, (i) => (i === 0 ? "elected" : "defeated"));
+  read(december, (i) => (i < 2 ? "runoff" : "defeated"));
+  window.__laNight = { outright, december, winner: people(outright)[0],
+    inIt: people(december).slice(0, 2) };
+}
+
+async function testLouisianaDecember() {
+  const night = await buildPage("states/la.html", { now: "2026-11-05T09:00:00", data: louisianaNight });
+  const { outright, december, winner, inIt } = night.window.__laNight || {};
+  const section = (D, r) => D.getElementById("race-" + r.id);
+  const head = (D, r) => (section(D, r) || { querySelector: () => null }).querySelector(".race-head");
+  const cardOf = (D, r, p) => section(D, r) && section(D, r).querySelector('.card[data-id="' + p.id + '"]');
+  suite("states/la.html — after the open primary, the December round in Louisiana's words", () => {
+    check("no page errors", night.errors.length === 0, night.errors.join(" | "));
+    check("two Louisiana House races to read", !!(outright && december));
+    if (!(outright && december)) return;
+    const KYC = night.window.KYC;
+    const won = cardOf(night.D, outright, winner);
+    check("a majority winner on November 3 reads Elected",
+      !!won && /Elected|Re-elected/.test(won.textContent) && !/general election/.test(won.textContent),
+      won && won.textContent);
+    check("and the race's head names its winner",
+      /Won by /.test((head(night.D, outright) || {}).textContent || ""));
+    const h = head(night.D, december);
+    check("a race going to December says its general election, never a runoff",
+      !!h && /Going to the Dec 12 general election/.test(h.textContent) && !/runoff/i.test(h.textContent),
+      h && h.textContent);
+    const badge = h && [...h.querySelectorAll(".badge")].find((b) => /Going to/.test(b.textContent));
+    check("its hover names the two and the round",
+      !!badge && /December 12 general election/.test(badge.getAttribute("title")) &&
+        inIt.every((p) => badge.getAttribute("title").indexOf(p.name) !== -1) &&
+        !/runoff/i.test(badge.getAttribute("title")), badge && badge.getAttribute("title"));
+    check("both in it read 'In the Dec 12 general election' on their cards",
+      inIt.every((p) => /In the Dec 12 general election/.test((cardOf(night.D, december, p) || {}).textContent || "") &&
+        !/runoff/i.test((cardOf(night.D, december, p) || {}).textContent || "")),
+      inIt.map((p) => (cardOf(night.D, december, p) || {}).textContent).join(" | "));
+    const long = KYC.standing(inIt[0], "long");
+    check("and the profile says the December 12 general election, credited to the results",
+      long.label === "In the December 12 general election" && !/runoff/i.test(long.title) &&
+        /Wikipedia/.test(long.title), long.label + " / " + long.title);
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("the grid's key holds the new words", key.indexOf("In the Dec 12 general election") !== -1 &&
+      key.indexOf("In the runoff") !== -1, key.join(", "));
+    // Georgia's general election runoff keeps the words it had.
+    check("a runoff anywhere else is still the general election runoff",
+      KYC.raceStatus("runoff", "long").label === "In the general election runoff" &&
+        KYC.raceStatus("runoff", "card").label === "In the runoff" &&
+        KYC.runoffWords({ primaryKind: "top-two", generalRunoff: "2026-12-01" }).race === "Going to a runoff");
+  });
+
+  const after = await buildPage("states/la.html", { now: "2026-12-14T09:00:00", data: louisianaNight });
+  suite("states/la.html — after December 12 with no result read, the past tense", () => {
+    const { december: d2, inIt: two } = after.window.__laNight || {};
+    if (!d2) { check("a race to read", false); return; }
+    const h = head(after.D, d2);
+    check("the race's head is awaiting the December 12 result",
+      !!h && /Awaiting the Dec 12 result/.test(h.textContent) && !/Going to/.test(h.textContent),
+      h && h.textContent);
+    check("its two are awaiting that result, not still 'in' it",
+      two.every((p) => /Awaiting the Dec 12 result/.test((cardOf(after.D, d2, p) || {}).textContent || "")));
+    const long = after.window.KYC.standing(two[0], "long");
+    check("and the profile says they ran in it",
+      long.label === "Ran in the December 12 general election: awaiting result" &&
+        /had not marked a winner/.test(long.title), long.label + " / " + long.title);
+  });
+
+  // On a phone, Louisiana's races fold to rows (rule 99): the December
+  // race's row says its round in the same words (PR #170 review).
+  const phone = await buildPage("states/la.html", { now: "2026-11-05T09:00:00", data: louisianaNight,
+    setup: (w) => phoneWidth(w, true) });
+  suite("states/la.html on a phone — the December race's row in Louisiana's words", () => {
+    const { december: d3 } = phone.window.__laNight || {};
+    check("no page errors", phone.errors.length === 0, phone.errors.join(" | "));
+    const sec = d3 && phone.D.getElementById("race-" + d3.id);
+    const row = sec && sec.querySelector(".race-row") ? readRow(sec) : null;
+    check("its row says the Dec 12 general election, never a runoff",
+      !!row && /Dec 12 general election/.test(row.text) && !/runoff/i.test(row.text),
+      row ? row.text : "no row");
+  });
+
+  // Decided on December 12: the two read that day's result, never "in
+  // November", and November 3's losers keep theirs (PR #170 review).
+  const decided = await buildPage("states/la.html", { now: "2026-12-14T09:00:00",
+    data: (window, meta) => {
+      louisianaNight(window, meta);
+      meta.election = Object.assign({}, meta.election, { resultsAsOf: "2026-12-13" });
+      const { december: r, inIt: two } = window.__laNight;
+      if (!r) return;
+      const round = { date: r.generalRunoff, open: true };
+      two[0].raceStatus = "elected";
+      two[1].raceStatus = "defeated";
+      two.forEach((p) => { p.raceStatusDecided = round; });
+    } });
+  suite("states/la.html — once December 12 is decided, its result in its own words", () => {
+    const { december: d4, inIt: two } = decided.window.__laNight || {};
+    if (!d4) { check("a race to read", false); return; }
+    const KYC = decided.window.KYC;
+    check("no page errors", decided.errors.length === 0, decided.errors.join(" | "));
+    const texts = two.map((p) => (cardOf(decided.D, d4, p) || {}).textContent || "");
+    check("its winner's card reads Elected Dec 12, its loser's Lost on Dec 12",
+      /(Re-e|E)lected Dec 12/.test(texts[0]) && /Lost (on|re-election) Dec 12/.test(texts[1]) &&
+        !texts.some((t) => /November/.test(t)), texts.join(" | "));
+    const longs = two.map((p) => KYC.standing(p, "long"));
+    check("and the profile says December 12, credited to the results",
+      /^(Re-elected|Elected) on December 12$/.test(longs[0].label) &&
+        /^Lost (the December 12 general election|re-election on December 12)$/.test(longs[1].label) &&
+        longs.every((s) => /December 12 general election/.test(s.title) && /Wikipedia/.test(s.title)),
+      longs.map((s) => s.label + " / " + s.title).join(" | "));
+    check("the race's head names its winner",
+      /Won by /.test((head(decided.D, d4) || {}).textContent || ""));
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("the grid's key holds the December round's results",
+      key.indexOf("Elected Dec 12") !== -1 && key.indexOf("Lost on Dec 12") !== -1, key.join(", "));
+    // Georgia's December 1 runoff, decided, in its own words.
+    const ga = { date: "2026-12-01", open: false };
+    check("a general election runoff's result is that runoff's",
+      KYC.raceStatus("elected", "long", { decided: ga }).label === "Won the December 1 runoff" &&
+        KYC.raceStatus("defeated", "card", { decided: ga }).label === "Lost Dec 1 runoff" &&
+        KYC.raceStatus("elected", "long", { decided: ga, own: true }).label ===
+          "Re-elected in the December 1 runoff" &&
+        KYC.raceStatus("elected", "long").label === "Elected in November");
   });
 }
 
@@ -11699,6 +11928,46 @@ async function testFormerIncumbent() {
  * never with a party; a page lists who sits and never counts vacancies. */
 const PARTY_WORDS = /\b(Republican|Democrat(ic)?|Independent)\b/;
 
+/* Rule 103: an office's page that named its head and cannot be read since
+ * (state.gov refused this project on 2026-11-01) keeps its confirmation,
+ * and the page says when it was read - never as though read today. */
+async function testFederalKeptConfirmation() {
+  const DAY = "2026-10-30";
+  let office = null;
+  const hub = await buildPage("federal/index.html", {
+    federal: (d) => {
+      office = (d.offices || []).find((o) => o.holder && o.holder.page &&
+        o.holder.page.status === "confirmed");
+      if (office) office.holder.page = Object.assign({}, office.holder.page, { kept: true, read: DAY });
+    },
+  });
+  await settle(50);
+  const { window, D, errors } = hub;
+  suite("federal/index.html — a confirmation kept while the office's page cannot be read", () => {
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    check("an office's page confirmed its head", !!office);
+    if (!office) return;
+    const day = window.KYC.dateWords(DAY);
+    const card = [...D.querySelectorAll("#cabinet .fed-officer")].find((r) =>
+      r.querySelector(".fed-office").textContent === office.office);
+    check("the card says when the page last named them",
+      !!card && card.textContent.indexOf("Named on the office's site when last read, " + day) !== -1,
+      card && card.textContent);
+    window.KYC.official.open(office.holder.id);
+    const modal = D.getElementById("officialModal");
+    const text = modal ? modal.textContent : "";
+    check("the dialog says the page has not been read since",
+      text.indexOf("when it was last read, on " + day + "; it could not be read since") !== -1, text.slice(0, 300));
+    window.KYC.official.close();
+    const fresh = window.kycFederal.offices.find((o) => o !== office && o.holder && o.holder.page &&
+      o.holder.page.status === "confirmed" && !o.holder.page.kept);
+    const other = fresh && [...D.querySelectorAll("#cabinet .fed-officer")].find((r) =>
+      r.querySelector(".fed-office").textContent === fresh.office);
+    check("a page read this time says nothing of a last read",
+      !fresh || (!!other && other.textContent.indexOf("when last read") === -1));
+  });
+}
+
 async function testFederal() {
   const hub = await buildPage("federal/index.html");
   await settle(50);
@@ -13012,18 +13281,29 @@ async function testSharePages() {
   const AFTER_DAY = new window.Date(2026, 10, 5, 12);
   suite("share pages' status words — every case, asked of the page code (rule 96)", () => {
     const off = [];
+    // "held": the day after an open primary's December round (KYC.runoffWords).
+    const dayAfter = (iso) => {
+      const [y, m, d] = iso.split("-").map(Number);
+      return new window.Date(y, m - 1, d + 1, 12);
+    };
     table.statuses.forEach((row) => {
-      const [status, allParty, source, own, appointed, unconfirmed, minor, post, label, gone] = row;
+      const [status, allParty, source, round, held, decided, own, appointed, unconfirmed, minor,
+        post, label, gone] = row;
       const spec = KYC.raceStatus(status, "long", { own: !!own, appointed: !!appointed,
         unconfirmed: !!unconfirmed, minor: !!minor, allParty: allParty || undefined,
-        source: source || undefined, now: post ? AFTER_DAY : CAMPAIGN_DAY });
+        source: source || undefined, round: round || undefined, decided: decided || undefined,
+        now: held ? dayAfter(round) : post ? AFTER_DAY : CAMPAIGN_DAY });
       if (!spec || spec.label !== label || !!spec.off !== !!gone) {
-        off.push(`${row.slice(0, 8).join("/")}: "${spec && spec.label}" for "${label}"`);
+        off.push(`${JSON.stringify(row.slice(0, 11))}: "${spec && spec.label}" for "${label}"`);
       }
     });
     check("every status, member or not, appointed, unconfirmed, minor-party, all-party, " +
-      "certified or qualified, before and after Election Day", table.statuses.length > 1000 &&
-      off.length === 0, off.slice(0, 4).join(" | ") || `${table.statuses.length} cases`);
+      "certified or qualified, before and after Election Day, an open primary's December " +
+      "round before and after its day, and a result each kind of December round decided",
+      table.statuses.length > 1000 && table.statuses.some((row) => row[5] && row[5].open) &&
+      table.statuses.some((row) => row[5] && !row[5].open) &&
+      table.statuses.some((row) => row[3] && row[4]) && off.length === 0,
+      off.slice(0, 4).join(" | ") || `${table.statuses.length} cases`);
     const credited = table.credits.filter(([status, source, name, credit]) =>
       creditOf(KYC.raceStatus(status, "long", { source: source || undefined,
         sourceName: name || undefined, now: CAMPAIGN_DAY })) !== credit);
@@ -14450,7 +14730,12 @@ async function testCharts() {
       let checked = 0;
       let inOrder = 0;
       raceIds.forEach((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
+        // A race for governor (G-<ST>-2026, PR #195) is none of Congress's
+        // races: kyc-stategov.js raceOdds draws it from its id and label.
+        // Skipped, 17 of them failed this check once the odds job first
+        // read their polls (2026-11-03).
+        const race = (window.kycRaces || []).find((r) => r.id === id) ||
+          (/^G-[A-Z]{2}-\d{4}$/.test(id) ? { id: id, label: id } : null);
         if (!race) return;
         const box = D.createElement("div");
         box.innerHTML = KYC.odds.render(race, {});
@@ -16683,13 +16968,13 @@ async function testPhotoCopies() {
       host.innerHTML = KYC.stategov.render(code);
       const justice = [...host.querySelectorAll(".gov-court-photo")].find((img) =>
         img.getAttribute("data-photo-original") === shot.photo);
-      const candidate = [...host.querySelectorAll(".gov-candidate-photo")].find((img) =>
+      const candidate = [...host.querySelectorAll(".gov-candidate-photo, .gcard-candidate img.gov-portrait")].find((img) =>
         img.getAttribute("data-photo-original") === row.photo);
       check("the justice's row loads the copy, and knows its original",
         !!justice && justice.getAttribute("src") === "../" + COPY);
       check("the candidate's row loads the copy, and knows its original",
         !!candidate && candidate.getAttribute("src") === "../" + COPY);
-      const note = (img) => img && img.closest("li").querySelector(".photo-copy-note");
+      const note = (img) => img && img.closest("li, .gcard").querySelector(".photo-copy-note");
       check("the justice's credit stays the court's and says it is a copy made here, with the weight",
         !!note(justice) && justice.closest("li").querySelector(".gov-photo-credit").textContent ===
           "Photo: " + whose + "; a smaller copy made by this site of the original file (2.4 MB)",
@@ -16710,9 +16995,9 @@ async function testPhotoCopies() {
       const rowOf = (cls, url) => {
         const img = [...host.querySelectorAll(cls)].find((i) =>
           i.getAttribute("src") === url || i.getAttribute("data-photo-original") === url);
-        return img && img.closest("li");
+        return img && img.closest("li, .gcard");
       };
-      const own = [rowOf(".gov-court-photo", shot.photo), rowOf(".gov-candidate-photo", row.photo)];
+      const own = [rowOf(".gov-court-photo", shot.photo), rowOf(".gov-candidate-photo, .gcard-candidate img.gov-portrait", row.photo)];
       check("a copy of another address is never drawn for a justice or a candidate",
         own.every((li) => !!li && li.innerHTML.indexOf(COPY) === -1 && !li.querySelector(".photo-copy-note") &&
           !li.querySelector("[data-photo-original]")),
@@ -16836,16 +17121,16 @@ async function testGuidePhotos() {
       delete row.photoCopy;
       const host = D.createElement("div");
       host.innerHTML = KYC.stategov.render("AK");
-      const img = [...host.querySelectorAll(".gov-candidate-photo")].find((el) =>
+      const img = [...host.querySelectorAll(".gov-candidate-photo, .gcard-candidate img.gov-portrait")].find((el) =>
         el.getAttribute("src") === "../" + HOSTED);
       check("the row loads the hosted file from the site's root", !!img);
-      const credit = img && img.closest("li").textContent;
+      const credit = img && img.closest("li, .gcard").textContent;
       check("and credits the pamphlet", !!credit &&
         credit.indexOf("Photo: from the Alaska Division of Elections' Official Election Pamphlet") !== -1 &&
         credit.indexOf("converted") === -1, credit);
       row.photoCopy = { src: COPY, of: HOSTED, ofBytes: 321884 };
       host.innerHTML = KYC.stategov.render("AK");
-      const copied = [...host.querySelectorAll(".gov-candidate-photo")].find((el) =>
+      const copied = [...host.querySelectorAll(".gov-candidate-photo, .gcard-candidate img.gov-portrait")].find((el) =>
         el.getAttribute("src") === "../" + COPY);
       check("a heavy one is the copy, falling back to the hosted file at its real address",
         !!copied && copied.getAttribute("data-photo-original") === "../" + HOSTED);
@@ -16906,7 +17191,11 @@ async function testLazyStateData() {
     const page = `states/${code}.html`;
     const early = await buildPage(page, { early: true, now });
     const slots = early.D.querySelectorAll("#stateContent .odds-slot").length;
-    const races = early.D.querySelectorAll("#stateContent section.race").length;
+    // Congress's races, and the race for governor (#governor-race, PR #191),
+    // whose markets are drawn in its block through kyc-odds.js too (PR #195).
+    const govRaces = early.D.querySelectorAll("#stateContent #governor-race .gov-race").length;
+    const races = early.D.querySelectorAll("#stateContent section.race").length + govRaces;
+    const govSlots = early.D.querySelectorAll("#stateContent #governor-race .odds-slot").length;
     const plain = early.D.getElementById("measures");
     const plainWords = plain ? plain.textContent : "";
     const loadedFirst = early.window.kycOdds !== undefined || early.window.kycMeasures !== undefined;
@@ -16922,6 +17211,13 @@ async function testLazyStateData() {
         early.errors.concat(first.errors).join(" | "));
       check("neither was loaded before the first draw", !loadedFirst);
       check("each race drawn holds a slot for its prices", races > 0 && slots === races, `${slots} / ${races}`);
+      check("the race for governor among them", govRaces === 1 && govSlots === 1, `${govSlots} / ${govRaces}`);
+      const govBlock = early.D.querySelector("#stateContent #governor-race .gov-race");
+      check("once in, the race for governor's block is what KYC.stategov draws: its markets, or the line that " +
+        "the cache holds none",
+        !!govBlock && !govBlock.querySelector(".odds-slot") &&
+        (!!govBlock.querySelector(".odds") || !!govBlock.querySelector(".gov-odds-none")) &&
+        govBlock.outerHTML === first.D.querySelector("#stateContent #governor-race .gov-race").outerHTML);
       check("the questions stand as the page was written, with no word of a failure",
         !plain || (!plain.querySelector(".measures-failed") && !!plain.querySelector("[data-measure]") ===
           /<li data-measure="/.test(fs.readFileSync(path.join(SITE, page), "utf8"))), plainWords.replace(/\s+/g, " ").trim().slice(0, 80));
@@ -17008,7 +17304,8 @@ async function testLazyStateData() {
   {
     const failed = await buildPage("states/ca.html", { block: ["data/odds.js"] });
     await until(() => !!failed.D.querySelector(".odds-failed"), 8000);
-    const races = failed.D.querySelectorAll("#stateContent section.race").length;
+    const races = failed.D.querySelectorAll("#stateContent section.race").length +
+      failed.D.querySelectorAll("#stateContent #governor-race .gov-race").length;
     suite("states/ca.html — market prices that did not load are said where each race shows them", () => {
       check("no page errors", failed.errors.length === 0, failed.errors.join(" | "));
       check("every race's place for its prices says they did not load",
@@ -17042,6 +17339,1015 @@ async function testLazyStateData() {
   }
 }
 
+/* ===================================================== governors' cards */
+
+/* The owner's request of 2026-11-02, "lets add cards for governors": every
+ * sitting governor and every candidate on the 2026 ballot for governor as
+ * cards, on the state pages, the grid and the map, drawn by one module
+ * (KYC.stategov.governorCard, governorRace; rule 12). Cards, never
+ * profiles (rule 27): no #/profile/ link, no data-id, and no count of
+ * Congress moves. The candidates are the election office's list in its
+ * words (rule 91), and after Election Day the race is in the past tense
+ * beside the state's results, naming no winner. Every check asks the data
+ * for whichever case is true. */
+async function testGovernorCards() {
+  const noProfile = (root) => !root.querySelector("[data-id]") &&
+    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")));
+  const photoProblems = (root) => [...root.querySelectorAll(".gcard")].filter((card) => {
+    const img = card.querySelector("img.gov-portrait");
+    const credit = card.querySelector(".gcard-credit");
+    return !!img !== !!credit || (credit && !/^Photo/.test(credit.textContent.trim()));
+  }).length;
+
+  const ga = await buildPage("states/ga.html");
+  const sg = ga.window.KYC.stategov;
+  // A state's page holds its own state's part of the governments
+  // (data/stategov/<st>.js, PR #172); the checks of every state's card read
+  // the whole file, as the grid's Governors view and the map load it.
+  const part = Object.keys(ga.window.kycStateGov.states);
+  ga.window.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
+  const data = ga.window.kycStateGov.states;
+  const codes = Object.keys(data);
+  const listOf = (code) => {
+    const item = data[code].ballot2026 && data[code].ballot2026.offices.governor;
+    return item && item.up && item.candidates ? item.candidates.candidates : null;
+  };
+  const html = (s) => { const d = ga.D.createElement("div"); d.innerHTML = s; return d; };
+
+  suite("governor cards — one implementation, for every governor and every listed candidate (rules 12, 91)", () => {
+    check("no page errors", !ga.errors.length, ga.errors.join(" | "));
+    check("the state's page loaded its own state's part alone", part.join(" ") === "GA", part.join(" "));
+    const missing = codes.filter((c) => {
+      const card = html(sg.governorCard(c)).querySelector(".gcard");
+      return !card || card.querySelector(".gov-name").textContent.trim() !== data[c].governor.name ||
+        card.querySelector(".gov-role").textContent !== sg.governorOf(c);
+    });
+    check("every sitting governor has a card naming them and their office", codes.length > 50 && !missing.length,
+      missing.join(" "));
+    check("a territory's office is in its own words (rule 75)",
+      sg.governorOf("VI") === "Governor of the U.S. Virgin Islands" && sg.governorOf("GA") === "Governor of Georgia");
+    const races = codes.filter((c) => listOf(c));
+    const wrong = races.filter((c) => {
+      const box = html(sg.governorRace(c));
+      const list = listOf(c);
+      const names = [...box.querySelectorAll(".gcard-candidate .gov-name")].map((n) => n.textContent.trim());
+      const writeIns = [...box.querySelectorAll(".gcard-writeins .gcard")];
+      const mates = list.filter((p) => p.runningMate && !p.writeIn);
+      return names.join("|") !== list.filter((p) => !p.writeIn).concat(list.filter((p) => p.writeIn))
+          .map((p) => p.name).join("|") ||
+        writeIns.length !== list.filter((p) => p.writeIn).length ||
+        !writeIns.every((c2) => /Write-in candidate/.test(c2.textContent)) ||
+        mates.some((p) => box.textContent.indexOf("With " + p.runningMate + " for lieutenant governor") === -1) ||
+        !/In surname order, not ballot order\./.test(box.textContent) ||
+        box.textContent.indexOf("Source: " + data[c].ballot2026.offices.governor.candidates.source) === -1;
+    });
+    check("each race on the ballot draws one card per listed candidate, write-ins apart, running mates beside " +
+      "their nominee, the list cited", races.length > 30 && !wrong.length, wrong.join(" "));
+    check("a list is called certified only where its own words say so",
+      races.every((c) => !/certified/i.test(html(sg.governorRace(c)).querySelector(".gov-candidates-source")
+        .textContent.replace(data[c].ballot2026.offices.governor.candidates.source, "")
+        .replace((data[c].ballot2026.offices.governor.candidates.writeIns || {}).source || "", ""))));
+    check("no card links a profile or carries a profile's id (rule 27)",
+      codes.every((c) => noProfile(html(sg.governorCard(c) + sg.governorRace(c)))));
+    check("every photograph on a card says whose it is, and a card without one shows none",
+      codes.every((c) => !photoProblems(html(sg.governorCard(c) + sg.governorRace(c)))));
+    // A fusion line ("Republican; Conservative") is several parties, and a
+    // bucketing of the list's words beside KYC.partyKey disagreed with it
+    // (PR #191 review): a candidate's party words are ink, as the list rows'.
+    check("a candidate's party words carry no party's colour (rules 12, 88)", races.every((c) =>
+      [...html(sg.governorRace(c)).querySelectorAll(".gcard-candidate .gov-party")].every((p) =>
+        ![...p.classList].some((k) => /^party-/.test(k)))));
+    // The NGA lists one unbroken span for a re-elected governor, so a count
+    // of terms read from it said "First term" of Bill Lee and Tate Reeves in
+    // their second (PR #191 review). Made: a record carrying a count.
+    const saved = data.TN.governor.terms;
+    data.TN.governor.terms = 1;
+    check("no card counts a governor's terms, which no second source checks",
+      codes.every((c) => !/\bterms?\b/i.test(html(sg.governorCard(c)).querySelector(".gov-who").textContent)),
+      html(sg.governorCard("TN")).querySelector(".gov-who").textContent);
+    data.TN.governor.terms = saved;
+  });
+
+  suite("states/ga.html — the governor's card in State government, the race for governor its own section", () => {
+    const D = ga.D;
+    const card = D.querySelector("#state-government #governor.gcard");
+    check("the sitting governor's card is in State government, with its anchor", !!card &&
+      card.textContent.indexOf(data.GA.governor.name) !== -1);
+    check("the ballot mark sits on the office's line, above the holder (rule 79)",
+      !!card && !!card.querySelector(".gov-office .gov-ballot-mark") &&
+      !card.querySelector(".gov-who .gov-ballot-mark"));
+    const race = D.getElementById("governor-race");
+    check("the race for governor is a section after the races for Congress, before the questions",
+      !!race && race.previousElementSibling && race.previousElementSibling.id === "races" &&
+      (!race.nextElementSibling || race.nextElementSibling.id === "measures"));
+    check("its cards are the election office's list", !!race &&
+      race.querySelectorAll(".gcard-candidate").length === listOf("GA").length);
+    check("State government says where the candidates are",
+      !!D.querySelector('#state-government a.state-jump[href="#governor-race"]'));
+    check("a chip jumps to it", !!D.querySelector('.state-parts a[href="#governor-race"]'));
+    check("nothing about the governor links a profile", noProfile(race) && noProfile(card));
+    const status = data.GA.ballot2026.offices.governor.holderStatus;
+    check("the race says whether the holder is on the ballot, in the State government card's words",
+      !status || race.querySelector(".gov-holder-status").textContent === card.querySelector(".gov-holder-status").textContent);
+    const img = card && card.querySelector("img.gov-portrait");
+    if (img) {
+      img.dispatchEvent(new ga.window.Event("error"));
+      check("a photograph that fails leaves the empty circle and takes its credit with it",
+        !card.querySelector("img.gov-portrait") && !!card.querySelector(".gov-portrait-none") &&
+        !card.querySelector(".gcard-credit"));
+    }
+    const plain = fs.readFileSync(path.join(SITE, "states/ga.html"), "utf8");
+    check("the page names the governor and every printed candidate for governor without scripts (rule 96)",
+      plain.indexOf(data.GA.governor.name) !== -1 &&
+      listOf("GA").every((p) => plain.indexOf(p.name.replace(/&/g, "&amp;")) !== -1));
+  });
+
+  const vaPage = await buildPage("states/va.html");
+  suite("states/va.html — a state whose governor is not on this ballot", () => {
+    check("the governor's card, and no race for governor",
+      !!vaPage.D.querySelector("#state-government .gcard") && !vaPage.D.getElementById("governor-race") &&
+      !vaPage.D.querySelector('.state-parts a[href="#governor-race"]'));
+  });
+
+  const after = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00" });
+  suite("states/ga.html after Election Day — the race for governor in the past tense, naming no winner (rule 91)", () => {
+    const race = after.D.getElementById("governor-race");
+    const results = ((after.window.KYC.meta().voting || {}).GA || {}).results;
+    check("the list is of who was on the ballot",
+      !!race && /Candidates who were on the Nov 3, 2026 ballot/.test(race.textContent) &&
+      !/Candidates on the Nov 3, 2026 ballot/.test(race.textContent));
+    check("it says this site names no winner, and links the state's results",
+      /names no winner/.test(race.textContent) &&
+      (!results || !!race.querySelector('a[href="' + results + '"]')));
+    check("no winner, no holder line", !/\b(Elected|Won|Winner)\b/.test(race.textContent) &&
+      !race.querySelector(".gov-holder-status"));
+    check("the office's mark says it was on the ballot",
+      /This office was on the Nov 3, 2026 ballot/.test(after.D.querySelector("#governor.gcard").textContent));
+  });
+
+  const phone = await buildPage("states/ca.html", { setup: (w) => phoneWidth(w, true) });
+  suite("states/ca.html on a phone — the race for governor folds to a row in its own words (rule 99)", () => {
+    const D = phone.D;
+    const fold = D.querySelector("#governor-race section.gov-race-foldable");
+    const row = fold && fold.querySelector(".race-row");
+    const words = phone.window.KYC.stategov.governorRowWords("CA");
+    check("the row is shown, its race hidden until found", !!fold && !fold.querySelector(".race-row-title").hidden &&
+      fold.querySelector(".race-body").getAttribute("hidden") === "until-found" &&
+      row.getAttribute("aria-expanded") === "false");
+    check("the row names every printed candidate under the list's own head",
+      !!row && listOf("CA").filter((p) => !p.writeIn).every((p) => row.textContent.indexOf(p.name) !== -1) &&
+      row.textContent.indexOf(words.ballot[0][0] + ":") !== -1);
+    check("and the holder line the race says", !words.held ||
+      row.querySelector(".race-row-held").textContent === words.held);
+    // Said once: the race's own line under the row is hidden while folded,
+    // as a race for Congress's title is (PR #191 review).
+    check("folded, the race's own holder line is left to the row",
+      /\.races-folded \.race-body \.gov-race > \.gov-holder-status \{ display: none; \}/
+        .test(fs.readFileSync(path.join(SITE, "assets/kyc.css"), "utf8")));
+    row.click();
+    check("tapped, it opens", fold.querySelector(".race-body").getAttribute("hidden") === null &&
+      row.getAttribute("aria-expanded") === "true");
+    const open = D.querySelector("[data-race-open-all]");
+    const congress = phone.window.KYC.races().filter((r) => r.state === "CA").length;
+    check("it is no race for Congress: \"Open all\" counts only theirs (rule 73)",
+      !!open && open.textContent.indexOf(" " + congress + " races") !== -1, open && open.textContent);
+    check("the select offers it by its heading", !!D.querySelector('#raceJumpSelect option[value="race-governor"]'));
+  });
+
+  const grid = await buildPage("index.html");
+  suite("index.html — the Governors chip: cards, apart from Congress's counts (rule 27, 73)", () => {});
+  {
+    const { window, D } = grid;
+    const aside = () => D.querySelector("aside").textContent;
+    const before = aside();
+    const label = D.getElementById("resultsLabel").textContent;
+    const chip = D.querySelector('[data-group="chamber"][data-value="governors"]');
+    check("a Governors chip beside the chambers", !!chip);
+    check("the governors' data is not loaded before they are shown (rule 94)", window.kycStateGov === undefined);
+    chip.click();
+    await until(() => D.querySelectorAll("#results .gcard").length > 0, 8000);
+    const n = Object.keys(window.kycStateGov.states).length;
+    check("every sitting governor's card", D.querySelectorAll("#results .gcard").length === n,
+      D.querySelectorAll("#results .gcard").length + " of " + n);
+    check("no card on the grid is a profile", noProfile(D.getElementById("results")) &&
+      !D.querySelector("#results .card"));
+    check("the results line counts governors, not profiles",
+      /^Showing 55 governors|^Showing \d+ governors/.test(D.getElementById("resultsLabel").textContent) &&
+      !/profiles? matching|Showing [\d,]+ profiles/.test(D.getElementById("resultsLabel").textContent));
+    check("the sidebar's figures do not move", aside() === before);
+    check("the address says it", /chamber=governors/.test(window.location.hash));
+    check("each name leads to its state page's governor",
+      [...D.querySelectorAll("#results .gcard .gcard-link")].every((a) => /states\/[a-z]{2}\.html#governor$/.test(a.getAttribute("href"))));
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    const dems = Object.keys(window.kycStateGov.states).filter((c) => window.kycStateGov.states[c].governor.partyKey === "D");
+    check("filtered by party as the rest is", D.querySelectorAll("#results .gcard").length === dems.length);
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    D.getElementById("raceViewToggle").click();
+    const up = Object.keys(window.kycStateGov.states).filter((c) => listOf(c) || (data[c].ballot2026 &&
+      data[c].ballot2026.offices.governor && data[c].ballot2026.offices.governor.up));
+    check("grouped by race: every race for governor on the ballot as a block",
+      D.querySelectorAll("#results .gov-view-race").length === up.length,
+      D.querySelectorAll("#results .gov-view-race").length + " of " + up.length);
+    check("each block's cards are its list", [...D.querySelectorAll("#results .gov-view-race")].every((s) => {
+      const code = s.id.replace("governor-race-", "");
+      return !listOf(code) || s.querySelectorAll(".gcard-candidate").length === listOf(code).length;
+    }));
+    check("still no profile", noProfile(D.getElementById("results")));
+    D.getElementById("raceViewToggle").click();
+    D.querySelector('[data-group="chamber"][data-value="all"]').click();
+    check("back to Congress, the same line and the same figures",
+      D.getElementById("resultsLabel").textContent === label && aside() === before,
+      D.getElementById("resultsLabel").textContent.slice(0, 120));
+  }
+
+  /* The Governors view read as the grid reads a query (rule 5; PR #191
+   * review): "Kansas" found Arkansas, "va" Nevada and Pennsylvania. */
+  {
+    const { window, D } = grid;
+    const go = async (hash) => {
+      window.location.hash = hash;
+      window.dispatchEvent(new window.Event("hashchange"));
+      await new Promise((r) => setTimeout(r, 30));
+    };
+    const shownStates = () => [...D.querySelectorAll("#results .gcard")].map((c) => c.getAttribute("data-gov-state"));
+    const states = window.kycStateGov.states;
+    suite("index.html — the Governors view reads a state's name or code as that state (rule 5)", () => {});
+    for (const [q, code] of [["kansas", "KS"], ["Kansas", "KS"], ["virginia", "VA"], ["va", "VA"], ["AR", "AR"],
+      ["ga", "GA"]]) {
+      if (!states[code]) continue;
+      await go("#/?chamber=governors&q=" + encodeURIComponent(q));
+      check("“" + q + "” is " + code + "'s governor alone", shownStates().join() === code,
+        shownStates().join() + " | " + D.getElementById("resultsLabel").textContent.slice(0, 90));
+      check("“" + q + "”: the line names the state it read, not a Congress seat",
+        D.getElementById("resultsLabel").textContent.indexOf("Showing 1 governor in " +
+          window.KYC.stateName(code)) === 0, D.getElementById("resultsLabel").textContent.slice(0, 90));
+    }
+    await go("#/?chamber=governors&view=race&q=kansas");
+    check("grouped by race, “kansas” is Kansas's race alone (if it is on the ballot)",
+      [...D.querySelectorAll("#results .gov-view-race")].every((s) => s.id === "governor-race-KS"));
+    // A governor's name: their card, and no second line for them above it.
+    const holder = states.GA.governor.name;
+    await go("#/?chamber=governors&q=" + encodeURIComponent(holder));
+    await until(() => !D.getElementById("officialResults").hidden ||
+      window.kycFederal !== undefined, 4000);
+    await new Promise((r) => setTimeout(r, 50));
+    check("a governor's name: their card", shownStates().join() === "GA", shownStates().join());
+    check("named once: no “Other officials” line for the governor whose card is shown",
+      D.getElementById("officialResults").textContent.indexOf(holder) === -1);
+    // A candidate's name: no governor, and the way to their race.
+    const candidate = (listOf("GA") || []).find((p) => !p.writeIn &&
+      !Object.keys(states).some((c) => states[c].governor && states[c].governor.name === p.name));
+    if (candidate) {
+      await go("#/?chamber=governors&q=" + encodeURIComponent(candidate.name));
+      const line = D.getElementById("resultsLabel");
+      check("a candidate's name: no governor, never “matches matching”, and a way to the race",
+        !shownStates().length && /^No governor matching/.test(line.textContent) &&
+        !/matches matching/.test(line.textContent) && !!line.querySelector("[data-gov-races]"),
+        line.textContent.slice(0, 120));
+      line.querySelector("[data-gov-races]").click();
+      check("which shows the race that lists them",
+        !!D.querySelector("#results #governor-race-GA") &&
+        D.querySelector("#results #governor-race-GA").textContent.indexOf(candidate.name) !== -1);
+    }
+
+    /* No Congress-only filter is pressed over governors (PR #191 review:
+     * "Not seeking re-election" stayed pressed over every governor). */
+    suite("index.html — the Governors view presses no filter it does not apply", () => {});
+    await go("#/?chamber=governors&election=notSeeking&role=member&eliminated=show");
+    const pressed = () => [...D.querySelectorAll("[data-group][aria-pressed=true]")]
+      .map((c) => c.getAttribute("data-group") + ":" + c.getAttribute("data-value"));
+    check("only the Governors chip is pressed", pressed().join() === "chamber:governors", pressed().join());
+    check("the filter count says so", D.getElementById("filtersCount").textContent === "(1 on)",
+      D.getElementById("filtersCount").textContent);
+    check("every governor shown", shownStates().length === Object.keys(states).filter((c) => states[c].governor).length);
+    check("the sidebar marks neither Congress nor its candidates as the page",
+      !D.querySelector('.site-nav [data-nav="congress"][aria-current], .site-nav [data-nav="candidates"][aria-current]'));
+    D.querySelector('[data-group="election"][data-value="notSeeking"]').click();
+    check("choosing a Congress filter shows Congress's profiles, filtered",
+      pressed().join() === "chamber:all,election:notSeeking" && !D.querySelector("#results .gcard") &&
+        !!D.querySelector("#results .card"), pressed().join());
+    await go("#/?chamber=governors&sort=name");
+    check("the sort menu says it orders Congress's cards", /Governors and their races are listed by state/
+      .test(D.getElementById("sortNote").textContent) && !D.getElementById("sortNote").hidden);
+    await go("#/");
+  }
+
+  /* A failed load is said, and not asked for again on every draw (PR #191
+   * review: a refused stategov.js was asked for 21 times and the line read
+   * "Loading" for good). */
+  const refused = await buildPage("index.html", { refuse: /\/data\/stategov\.js$/ });
+  {
+    const { D } = refused;
+    const asked = () => refused.served.filter((s) => /^\/data\/stategov\.js/.test(s)).length;
+    const chip = D.querySelector('[data-group="chamber"][data-value="governors"]');
+    chip.click();
+    await until(() => /did not load/.test(D.getElementById("resultsLabel").textContent), 4000);
+    await new Promise((r) => setTimeout(r, 200));
+    suite("index.html — the governors' data refused", () => {
+      check("the line says it did not load", /did not load/.test(D.getElementById("resultsLabel").textContent),
+        D.getElementById("resultsLabel").textContent);
+      check("asked for once", asked() === 1, asked() + " requests");
+    });
+    D.querySelector('[data-group="party"][data-value="Democrat"]').click();
+    await new Promise((r) => setTimeout(r, 100));
+    check("a redraw does not ask again", asked() === 1, asked() + " requests");
+    chip.click();
+    await until(() => asked() === 2, 2000);
+    await new Promise((r) => setTimeout(r, 100));
+    check("choosing the governors again asks once more", asked() === 2, asked() + " requests");
+  }
+
+  const pastGrid = await buildPage("index.html", { now: "2026-11-05T09:00:00",
+    hash: "#/?chamber=governors&view=race&state=GA" });
+  await until(() => pastGrid.D.querySelectorAll("#results .gov-view-race").length > 0, 8000);
+  suite("index.html after Election Day — one race for governor reads in the singular", () => {
+    const line = pastGrid.D.getElementById("resultsLabel").textContent;
+    check("“Showing 1 race for governor that was on the Nov 3, 2026 ballot”",
+      /^Showing 1 race for governor that was on the Nov 3, 2026 ballot in Georgia/.test(line), line.slice(0, 100));
+  });
+
+  const map = await buildPage("map.html", { hash: "#/?state=GA&mode=governor" });
+  suite("map.html — the state panel shows the governor's card and the race for governor", () => {
+    const panel = map.D.getElementById("delegation");
+    check("the governor's card", !!panel.querySelector(".gcard") &&
+      panel.querySelector(".gcard").textContent.indexOf(data.GA.governor.name) !== -1);
+    check("the race's cards, one per listed candidate",
+      panel.querySelectorAll(".gcard-candidate").length === listOf("GA").length);
+    check("the holder line said once, on the governor's card",
+      panel.querySelectorAll(".gov-holder-status").length ===
+        panel.querySelectorAll(".gov-officer .gov-holder-status").length + 1);
+    check("no profile among them", noProfile(panel.querySelector(".stategov")) || !panel.querySelector(".gcard [data-id]"));
+    map.window.location.hash = "#/?state=GA&mode=governor2026";
+    map.window.dispatchEvent(new map.window.Event("hashchange"));
+    check("and in the 2026 governor's races view", map.D.querySelectorAll("#delegation .gcard-candidate").length ===
+      listOf("GA").length);
+    // Another office's view leads with that office: the governor's card and
+    // a line to the race, not its cards (PR #191 review: the attorney
+    // general moved 550px down).
+    const pointer = '#delegation a[href$="states/ga.html#governor-race"]';
+    for (const mode of ["ag", "sos", "lt", "legislature", "trifecta"]) {
+      map.window.location.hash = "#/?state=GA&mode=" + mode;
+      map.window.dispatchEvent(new map.window.Event("hashchange"));
+      check("the " + mode + " view: the governor's card, and a line to the race on the state page",
+        map.D.querySelectorAll("#delegation .gcard").length === 1 &&
+        !map.D.querySelector("#delegation .gcard-candidate") && !!map.D.querySelector(pointer));
+    }
+    // The 2026 races view shows the state's races: the governor's is one.
+    map.window.location.hash = "#/?state=GA&mode=senate2026";
+    map.window.dispatchEvent(new map.window.Event("hashchange"));
+    check("the 2026 Senate races view points to the race for governor, never as a profile or a count",
+      !!map.D.querySelector(pointer) && !map.D.querySelector("#delegation .gcard") &&
+      noProfile(map.D.querySelector(pointer).parentNode));
+    const noRace = Object.keys(data).find((c) => !(data[c].ballot2026 && data[c].ballot2026.offices.governor &&
+      data[c].ballot2026.offices.governor.up) && data[c].governor);
+    if (noRace) {
+      map.window.location.hash = "#/?state=" + noRace + "&mode=senate2026";
+      map.window.dispatchEvent(new map.window.Event("hashchange"));
+      check("and a state whose governor is not on the ballot has no such line",
+        !map.D.querySelector('#delegation a[href$="#governor-race"]'));
+    }
+  });
+}
+
+/* ==================================================== governor overlays */
+
+/* The owner's request of 2026-11-02, "the governors should have overlay
+ * cards similar to other candidates and polling and odds to match as well
+ * on map and card page": every governor card opens an overlay in the
+ * profile dialog's shape (kyc-governor.js, rule 91), and the race for
+ * governor shows what the prediction markets and polling averages say
+ * (KYC.stategov.raceOdds through KYC.odds, rule 40) on the state page, the
+ * grid, the map's panel and the overlay. A governor is never a profile
+ * (rule 27). Every check makes the state it tests: the odds are
+ * constructed, a market under another race's id, a governor with and
+ * without an agreed date of birth and a linked record. */
+async function testGovernorOverlays() {
+  const noProfile = (root) => !root.querySelector("[data-id]") &&
+    ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")));
+  const key = (window, node, k) => node.dispatchEvent(new window.KeyboardEvent("keydown", { key: k, bubbles: true }));
+  const esc = (window) => window.document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+  const RACE = "G-GA-2026";
+  // Constructed: two markets and one average on Georgia's race, a Senate
+  // market of the same state under its own id (never the governor's), and
+  // no entry for Alabama's race.
+  const fakeOdds = (odds) => {
+    odds.races = odds.races || {};
+    odds.races[RACE] = {
+      markets: [
+        { source: "kalshi", event: "GOVPARTYGA-26", title: "Georgia Governor winner?",
+          url: "https://kalshi.com/markets/govpartyga",
+          outcomes: [
+            { label: "Rick Jackson", party: "r", price: 0.58,
+              question: "Will the Republican party win the governorship in Georgia" },
+            { label: "Keisha Lance Bottoms", party: "d", price: 0.42,
+              question: "Will the Democratic party win the governorship in Georgia" }] },
+        { source: "polymarket", event: "georgia-governor-winner-2026", title: "Georgia Governor Election Winner",
+          url: "https://polymarket.com/event/georgia-governor-winner-2026",
+          outcomes: [
+            { label: "Rick Jackson (R)", party: "r", price: 0.6, question: "Will the Republicans win the Georgia governor race in 2026?" },
+            { label: "Keisha Lance Bottoms (D)", party: "d", price: 0.4, question: "Will the Democrats win the Georgia governor race in 2026?" }] }],
+      polls: { page: "2026 Georgia gubernatorial election",
+        url: "https://en.wikipedia.org/wiki/2026_Georgia_gubernatorial_election#Polling",
+        rows: [{ aggregator: "270toWin", url: "https://www.270towin.com/2026-governor-election-polls/georgia",
+          administered: "Oct 1 - Oct 28, 2026", updated: "October 30, 2026",
+          results: [{ label: "Rick Jackson (R)", party: "r", pct: 49.0, id: null },
+            { label: "Keisha Lance Bottoms (D)", party: "d", pct: 45.5, id: null }],
+          other: 5.5, margin: "Jackson +3.5" }] },
+    };
+    odds.races["S-GA-2026"] = {
+      markets: [{ source: "kalshi", event: "KXSENATEGA-26", title: "Georgia Senate winner?",
+        url: "https://kalshi.com/markets/kxsenatega",
+        outcomes: [{ label: "Jon Ossoff", party: "d", price: 0.55, question: "Will Democrats win the Senate race in Georgia?" },
+          { label: "Buddy Carter", party: "r", price: 0.45, question: "Will Republicans win the Senate race in Georgia?" }] }],
+    };
+    delete odds.races["G-AL-2026"];
+  };
+  const withOdds = (window) => {
+    let held;
+    Object.defineProperty(window, "kycOdds", {
+      configurable: true, enumerable: true,
+      get() { return held; },
+      set(value) { held = value; fakeOdds(value); },
+    });
+  };
+
+  const ga = await buildPage("states/ga.html", { setup: withOdds });
+  await settle(50);
+  {
+    const { window, D } = ga;
+    const data = window.kycStateGov.states.GA;
+    const gov = data.governor;
+    const list = data.ballot2026.offices.governor.candidates.candidates;
+    const printed = list.filter((p) => !p.writeIn);
+    const writeIns = list.filter((p) => p.writeIn);
+    const modal = () => D.getElementById("governorModal");
+    const open = () => !!modal() && !modal().hidden;
+    const text = (sel) => (modal().querySelector(sel) || {}).textContent || "";
+    const fieldValue = (label) => {
+      const f = [...modal().querySelectorAll("#governorModalBody .field")]
+        .find((x) => x.querySelector(".field-label").textContent === label);
+      return f ? f.querySelector(".field-value").textContent : "";
+    };
+    const startHash = window.location.hash;
+
+    suite("states/ga.html — the governor's card opens an overlay in the profile dialog's shape", () => {});
+    const card = D.querySelector("#state-government #governor.gcard");
+    const chevron = card.querySelector(".gcard-open[data-governor]");
+    check("the card and its chevron carry the governor's id, never a profile's data-id",
+      card.getAttribute("data-governor") === "gov-GA" && !!chevron && chevron.getAttribute("data-governor") === "gov-GA" &&
+      !card.hasAttribute("data-id") && card.getAttribute("tabindex") === "0");
+    chevron.focus();
+    chevron.click();
+    check("the chevron opens it", open());
+    check("the address is #/official/gov-GA, never #/profile/", window.location.hash === "#/official/gov-GA");
+    check("the name, the office tag and the office in the state's own words",
+      text("#governorModalName") === gov.name && text("#governorModalKind") === "Governor" &&
+      text("#governorModalMeta").indexOf("Governor of Georgia") !== -1 &&
+      !!modal().querySelector('#governorModalMeta a.state-link[href$="states/ga.html#governor"]'));
+    check("the party under the portrait, in the party's colour",
+      text("#governorModalParty") === gov.party &&
+      modal().querySelector("#governorModalParty").classList.contains("party-" + gov.partyKey.toLowerCase()));
+    check("the ballot mark is the office's, with the holder line in the card's words (rule 79)",
+      !!modal().querySelector("#governorModalStatus .gov-ballot-mark") &&
+      text("#governorModalStatus .gov-holder-status").trim() === card.querySelector(".gov-holder-status").textContent.trim());
+    check("the tab names them", /^Brian Kemp|^.+ — Know Your Candidate$/.test(D.title) && D.title.indexOf(gov.name) === 0);
+    const panel = modal().querySelector("#governorModalRacePanel");
+    const rows = panel ? [...panel.querySelectorAll(".race-mates .race-mate")] : [];
+    check("the race panel lists every printed candidate as a row, with the badge the cards use",
+      !!panel && text("#governorModalRacePanel .panel-head").indexOf("GA — Governor") !== -1 &&
+      rows.filter((r) => !r.closest("details")).length === printed.length &&
+      rows.filter((r) => !r.closest("details")).every((r) => /On the Nov 3, 2026 ballot/.test(r.textContent)),
+      rows.length + " rows for " + printed.length);
+    check("write-ins apart, said to be, in a fold",
+      !writeIns.length || (panel.querySelectorAll("details.race-out .race-mate").length === writeIns.length &&
+        /write-in candidate/.test(panel.querySelector("details.race-out summary").textContent)));
+    check("the row's words are the card's: name and party",
+      printed.every((p) => rows.some((r) => r.querySelector(".race-mate-name").textContent === p.name &&
+        (!p.party || r.textContent.indexOf(p.party) !== -1))));
+    check("the list cited and dated, as under the cards",
+      panel.textContent.indexOf("Source: " + data.ballot2026.offices.governor.candidates.source) !== -1 &&
+      /\(read /.test(panel.textContent));
+    check("money is said not looked at, in rule 19's words, never \"none\"",
+      /Money in this race is not looked at here: this site reads federal campaign filings only/.test(panel.textContent) &&
+      !/No money/.test(panel.textContent));
+    const odds = panel.querySelector(".odds");
+    check("the constructed markets draw in the overlay: each price quoted, the source linked, dated, not a poll",
+      !!odds && /Kalshi/.test(odds.textContent) && /58%/.test(odds.textContent) && /Polymarket/.test(odds.textContent) &&
+      !!odds.querySelector('a[href="https://kalshi.com/markets/govpartyga"]') &&
+      /as of /.test(odds.textContent) && /not a poll, and not this site’s forecast/.test(odds.textContent),
+      odds && odds.textContent.slice(0, 200));
+    check("the polling average, as published and linked",
+      !!odds && /270toWin/.test(odds.textContent) && /Rick Jackson \(R\) 49\.0/.test(odds.textContent) &&
+      !!odds.querySelector('a[href^="https://www.270towin.com/"]'));
+    check("the Senate market of the same state never draws on the governor's race",
+      !!odds && odds.textContent.indexOf("Ossoff") === -1 && odds.textContent.indexOf("Senate") === -1);
+    check("party colour only on a person's or party's own line (rule 88)",
+      [...odds.querySelectorAll(".odds-seg")].every((s) => /odds-seg-[dr]/.test(s.className)));
+    const born = modal().querySelector("#governorModalBody .field-grid .field .field-value");
+    check("born only where the NGA and Wikidata agree, else said not shown",
+      gov.born ? (born.textContent.indexOf(window.KYC.dateWords(gov.born.date)) !== -1 &&
+          /the NGA’s page and Wikidata agree/.test(born.textContent))
+        : /^Not shown: /.test(born.textContent), born && born.textContent);
+    const held = [...modal().querySelectorAll(".panel")].find((p) => /Public offices held/.test(p.querySelector(".panel-head").textContent));
+    check("public offices held through the two sources' agreement, or \"No linked record\"",
+      !!held && (gov.politicalHistory
+        ? held.querySelectorAll(".held-list .held-row").length === gov.politicalHistory.rows.length &&
+          /Wikidata/.test(held.textContent)
+        : /No linked record of public offices/.test(held.textContent)));
+    check("nothing in the overlay is a profile", noProfile(modal()));
+    check("Report, Copy link and Close in the footer",
+      !!modal().querySelector("#governorModalReport[data-profile='gov-GA']") &&
+      !!modal().querySelector("#governorModalCopy") && !!modal().querySelector(".modal-footer [data-close]"));
+    esc(window);
+    await until(() => !open() && window.location.hash === startHash, 3000);
+    check("Escape closes it, back to the same address, with focus on the chevron",
+      !open() && window.location.hash === startHash && D.activeElement === chevron,
+      window.location.hash + " | " + (D.activeElement && D.activeElement.className));
+
+    // Made: a governor without an agreed date of birth and with no record.
+    const savedBorn = gov.born, savedHistory = gov.politicalHistory;
+    gov.born = undefined;
+    gov.politicalHistory = undefined;
+    chevron.click();
+    const born2 = modal().querySelector("#governorModalBody .field-grid .field .field-value");
+    check("without an agreement, born is \"Not shown\" and the record \"No linked record\"",
+      /Not shown: this site shows a date only where the NGA and Wikidata record the same day/.test(born2.textContent) &&
+      /No linked record of public offices/.test(modal().textContent));
+    gov.born = savedBorn;
+    gov.politicalHistory = savedHistory;
+    modal().querySelector(".modal-footer [data-close]").click();
+    await until(() => !open() && window.location.hash === startHash, 3000);
+    check("the Close button closes it to the same address", !open() && window.location.hash === startHash);
+
+    // A state's page holds its own state's part of the governments
+    // (data/stategov/<st>.js, PR #172): a link there to another state's
+    // governor is on that state's page, never "not in this build's data"
+    // (rule 19).
+    {
+      check("the page holds Georgia's part alone", Object.keys(window.kycStateGov.states).join(" ") === "GA");
+      window.KYC.governor.open("gov-TX");
+      const body = modal().querySelector("#governorModalBody").textContent;
+      const link = modal().querySelector('#governorModalBody a[href$="states/tx.html#/official/gov-TX"]');
+      check("another state's governor links to that state's page, never \"Nobody here by this link\"",
+        open() && !!link && /holds Georgia’s state government only/.test(body) &&
+        !/Nobody here by this link|No longer listed/.test(modal().textContent), body.slice(0, 200));
+      window.KYC.governor.close();
+      await until(() => !open(), 2000);
+    }
+    // Every governor's "In office since" and "Born" in rule 19's words: a
+    // disagreement only where the pipeline compared two dates, and "no
+    // Wikidata item" where the roster holds none (PR #195 review). Read on
+    // the map, which holds every state's government (a state's page holds
+    // its own, PR #172), through the same overlay.
+    {
+      const whole = await buildPage("map.html");
+      await settle(50);
+      const wmodal = () => whole.D.getElementById("governorModal");
+      const bad = [];
+      const fieldOf = (label) => {
+        const f = [...wmodal().querySelectorAll("#governorModalBody .field")]
+          .find((x) => x.querySelector(".field-label").textContent === label);
+        return f ? f.querySelector(".field-value").textContent : "";
+      };
+      check("the map holds every state's government", Object.keys(whole.window.kycStateGov.states).length > 50);
+      for (const [code, st] of Object.entries(whole.window.kycStateGov.states)) {
+        const g = st.governor;
+        whole.window.KYC.governor.open(g.id);
+        const since = fieldOf("In office since");
+        const bornWords = fieldOf("Born");
+        const want = {
+          disagree: /^Not shown: the NGA’s date and Wikidata’s do not agree$/,
+          "no-item": /^Not shown: this site has no Wikidata item for this governor to check the NGA’s date against$/,
+          "no-date": /^Not shown: the Wikidata item records no /,
+          "no-nga": /^Not shown: the NGA’s (roster|page) gives no /,
+          "not-read": /^Not shown: this site has not yet read the Wikidata item’s date of birth/,
+        };
+        if (g.since ? since.indexOf(g.since) !== 0 : !(want[g.sinceWhy] || /^$/).test(since)) bad.push(code + " since: " + since);
+        if (g.born ? bornWords.indexOf(window.KYC.dateWords(g.born.date)) !== 0
+          : !(want[g.bornWhy] || /^$/).test(bornWords)) bad.push(code + " born: " + bornWords);
+        if (/do not agree/.test(since) && g.sinceWhy !== "disagree") bad.push(code + ": a disagreement claimed");
+        if (/do not agree/.test(bornWords) && g.bornWhy !== "disagree") bad.push(code + ": a disagreement claimed");
+      }
+      whole.window.KYC.governor.close();
+      await until(() => wmodal().hidden, 2000);
+      check("every governor's dates: shown where the NGA and Wikidata agree, else why, in rule 19's words",
+        !bad.length, bad.slice(0, 5).join(" | "));
+      const states = whole.window.kycStateGov.states;
+      whole.window.close();
+      check("the roster's governors with no Wikidata item read \"no Wikidata item\", never a disagreement",
+        Object.values(states).filter((s) => s.governor.sinceWhy === "no-item").length > 0 &&
+        Object.values(states).every((s) => s.governor.sinceWhy !== "disagree" || !!s.governor.wikidata ||
+          s.governor.bornWhy !== "no-item"));
+    }
+
+    suite("states/ga.html — a candidate's card opens their overlay", () => {});
+    const first = printed[0];
+    const cards = [...D.querySelectorAll("#governor-race .gcard-candidate")];
+    const cardOf = (p) => cards.find((c) => c.querySelector(".gov-name").textContent.indexOf(p.name) !== -1);
+    const c1 = cardOf(first);
+    check("the card carries the candidate's id and an office line", !!c1 &&
+      c1.getAttribute("data-governor") === first.id && /^Governor • GA$/.test(c1.querySelector(".gcard-office").textContent));
+    c1.focus();
+    key(window, c1, "Enter");
+    check("Enter on the card opens it", open() && text("#governorModalName") === first.name &&
+      window.location.hash === "#/official/" + encodeURIComponent(first.id));
+    check("the office tag, the race and the term note from the ballot table",
+      text("#governorModalKind") === "Governor (Candidate)" &&
+      /Running for Governor • GA/.test(text("#governorModalMeta")) &&
+      !!modal().querySelector('#governorModalMeta a.state-link[href$="states/ga.html#governor-race"]') &&
+      /Term 4-year term \(if elected\)/.test(text("#governorModalMeta")) &&
+      text("#governorModalMeta").indexOf(data.ballot2026.offices.governor.note) === -1);
+    check("the status badge in the cards' words", /On the Nov 3, 2026 ballot/.test(text("#governorModalStatus")));
+    check("the party words are the card's", text("#governorModalParty") === (first.party || "") &&
+      (!first.party || c1.querySelector(".gov-party").textContent === first.party));
+    check("the list's own form under the name, as a filing's name sits",
+      !first.printed || text("#governorModalPrinted") === "The list prints: " + first.printed);
+    const others = [...modal().querySelectorAll("#governorModalRacePanel .race-mates .race-mate")]
+      .filter((r) => !r.closest("details"));
+    check("the race panel lists the other printed candidates, not themselves",
+      others.length === printed.length - 1 && !others.some((r) => r.querySelector(".race-mate-name").textContent === first.name));
+    check("no money, no platform, no filing: each said not looked at",
+      /Campaign finance/.test(modal().textContent) && /Not looked at: this site reads federal campaign filings only/.test(modal().textContent) &&
+      /Not looked at: this site reads no platform/.test(modal().textContent) &&
+      !/Raised|Spent|Cash on hand|Funding sources/.test(modal().textContent) && !modal().querySelector(".money-tile"));
+    check("a Wikipedia badge only where the race's article links theirs", first.wikipedia
+      ? !!modal().querySelector('.link-chip[href^="https://en.wikipedia.org/wiki/"]')
+      : /^No article: |^Not recorded here: /.test(fieldValue("Links")) &&
+        !modal().querySelector('.link-chip[href^="https://en.wikipedia.org/wiki/"]'));
+    check("no rule number in a reader's words, and the list named as the source",
+      !/\(rule \d+\)/.test(modal().textContent) &&
+      new RegExp("The name, party and running mate are from " +
+        data.ballot2026.offices.governor.candidates.source.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + ", read ")
+        .test(text(".held-source")), text(".held-source"));
+    check("the footer cites the list",
+      !!modal().querySelector("#governorModalSource a[href='" + data.ballot2026.offices.governor.candidates.url + "']"));
+    check("nothing in it is a profile", noProfile(modal()));
+    if (others.length) {
+      const second = printed.find((p) => p.name === others[0].querySelector(".race-mate-name").textContent);
+      others[0].click();
+      await settle(20);
+      check("a row opens that candidate, in the same dialog",
+        open() && text("#governorModalName") === second.name && window.location.hash === "#/official/" + encodeURIComponent(second.id));
+    }
+    esc(window);
+    await until(() => !open() && !/#\/official\//.test(window.location.hash), 3000);
+    check("Escape closes it and the address holds no overlay", !open() && !/#\/official\//.test(window.location.hash),
+      window.location.hash);
+    if (writeIns.length) {
+      const w = writeIns[0];
+      const wc = cards.find((c) => c.getAttribute("data-governor") === w.id);
+      wc.querySelector(".gcard-open").click();
+      check("a write-in's overlay says so, and shows no photograph", open() && /Write-in candidate/.test(text("#governorModalStatus")) &&
+        modal().querySelector("#governorModalPortrait").classList.contains("gov-portrait-empty"));
+      esc(window);
+      await until(() => !open(), 2000);
+    }
+    // The card's own click (not on a link or button) opens it too.
+    c1.querySelector(".gov-who").click();
+    check("a click on the card opens it", open() && text("#governorModalName") === first.name);
+    esc(window);
+    await until(() => !open(), 2000);
+
+    suite("the overlay's Term line, article line and records, in rule 19's words (PR #195 review)", () => {});
+    {
+      // Every state's ballot note: the Term line is a term's length alone,
+      // "(if elected)" only beside it, nothing where the note opens with none.
+      const bad = [];
+      let shown = 0;
+      for (const [code, st] of Object.entries(window.kycStateGov.states)) {
+        const item = st.ballot2026 && st.ballot2026.offices.governor;
+        const people = item && item.up && item.candidates ? item.candidates.candidates.filter((p) => !p.writeIn) : [];
+        if (!people.length) continue;
+        window.KYC.governor.open(people[0].id);
+        const term = modal().querySelector("#governorModalMeta .gov-term");
+        const lead = /^(\d+-year term)(?=[;,.]|$)/.exec(item.note || "");
+        if (term) shown += 1;
+        if (lead ? !term || term.textContent.trim() !== "Term " + lead[1] + " (if elected)" : !!term) {
+          bad.push(code + ": " + (term ? term.textContent : "(none)") + " | " + item.note);
+        }
+        if (/last elected|Elected with|ticket|term-limited|noncandidacy|certified/i.test(text("#governorModalMeta"))) {
+          bad.push(code + ": the note's basis printed: " + text("#governorModalMeta"));
+        }
+      }
+      window.KYC.governor.close();
+      await until(() => !open(), 2000);
+      check("every state's Term line is the note's term length alone, or nothing", !bad.length && shown > 0,
+        bad.slice(0, 4).join(" || "));
+
+      // The article line, made in each state the pipeline records.
+      const saved = { wikipedia: first.wikipedia, articleNone: first.articleNone, articleRead: first.articleRead,
+        member: first.member, holder: first.holder };
+      const linksOf = () => { window.KYC.governor.open(first.id); return fieldValue("Links"); };
+      Object.assign(first, { wikipedia: undefined, articleNone: "not-linked", articleRead: "2026-11-03",
+        member: undefined, holder: undefined });
+      // A refused name match is not an absence (rules 19, 62): the line is
+      // about this site's reader, never a claim that the article links none.
+      check("a race article whose links the reader could not match says what the reader found, dated",
+        /^No article: this site’s reader found no link in the race’s Wikipedia article \(read Nov\. 3, 2026\) that it could match to the list’s name/.test(linksOf()) &&
+        !/links none|its infobox|candidate lists/.test(fieldValue("Links")),
+        fieldValue("Links"));
+      first.articleNone = "ambiguous";
+      check("a link not confirmed as theirs says so", /could not be confirmed as theirs/.test(linksOf()));
+      first.articleNone = undefined;
+      first.articleRead = undefined;
+      check("nothing read is \"not recorded here\", never \"found no link\"",
+        /^Not recorded here: this site has not read the race’s Wikipedia article/.test(linksOf()) &&
+        !/found no link/.test(fieldValue("Links")));
+      // A member of Congress an evidenced entry ties to the list's name.
+      first.member = "T000278";
+      window.KYC.governor.open(first.id);
+      const memberLinks = [...modal().querySelectorAll('a[href^="#/profile/"]')];
+      check("a member of Congress on the list links their profile, and nothing else does",
+        memberLinks.length === 1 && memberLinks[0].getAttribute("href") === "#/profile/T000278" &&
+        /A member of Congress: see their profile/.test(fieldValue("Record")) &&
+        !modal().querySelector("[data-id]"));
+      first.member = undefined;
+      // The sitting governor on the list links their governor's record.
+      first.holder = true;
+      window.KYC.governor.open(first.id);
+      const own = modal().querySelector('#governorModalBody a[href="#/official/gov-GA"]');
+      check("the sitting governor on the list links their record as governor",
+        !!own && /The sitting governor/.test(own.textContent) && noProfile(modal()));
+      own.click();
+      window.dispatchEvent(new window.Event("hashchange"));
+      await until(() => text("#governorModalName") === gov.name, 2000);
+      check("which opens the governor's overlay", open() && text("#governorModalKind") === "Governor" &&
+        window.location.hash === "#/official/gov-GA");
+      Object.assign(first, saved);
+      window.KYC.governor.close();
+      await until(() => !open(), 2000);
+      // In the data: the candidates the pipeline ties to a member, and the
+      // sitting governors on their lists, carry their link's field.
+      // Every state's, from the whole file (a state's page holds its own).
+      const whole = {};
+      new Function("window", fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"))(whole);
+      const all = Object.values(whole.kycStateGov.states).flatMap((s) =>
+        ((s.ballot2026 && s.ballot2026.offices.governor && s.ballot2026.offices.governor.candidates) || { candidates: [] })
+          .candidates);
+      check("the data ties members by bioguide id and marks the sitting governors on their lists",
+        all.some((p) => /^[A-Z]\d{6}$/.test(p.member || "")) && all.some((p) => p.holder) &&
+        all.every((p) => !p.member || /^[A-Z]\d{6}$/.test(p.member)));
+    }
+
+    suite("states/ga.html — the race's markets and averages under its cards (rule 40)", () => {
+      const block = D.querySelector("#governor-race .gov-race .odds");
+      check("drawn after the list, from the governor's own race id",
+        !!block && /Kalshi/.test(block.textContent) && /Polymarket/.test(block.textContent) &&
+        /Polls/.test(block.textContent) && block.textContent.indexOf("Ossoff") === -1 &&
+        !!block.querySelector('a[href="https://polymarket.com/event/georgia-governor-winner-2026"]'));
+      check("dated and labelled", /as of /.test(block.textContent) && /not a poll, and not this site’s forecast/.test(block.textContent));
+      check("a race with none says so in rule 19's words",
+        /This site’s cache of prediction markets and polling averages holds none for this race\./
+          .test(window.KYC.stategov.raceOdds("AL")));
+      check("the odds race id is the governor's own, never Congress's",
+        window.KYC.stategov.raceId("GA") === RACE && !window.KYC.races().some((r) => r.id === RACE));
+      // Made: a list of two Democrats under a market on the party alone
+      // (rule 79), the note read page-side from the list's parties.
+      const people = window.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates;
+      const parties = people.map((p) => p.party);
+      const markets = window.kycOdds.races[RACE].markets;
+      people.forEach((p) => { if (!p.writeIn) p.party = "Democratic"; });
+      window.kycOdds.races[RACE].markets = [{ source: "kalshi", event: "GOVPARTYGA-26", url: "https://kalshi.com/x",
+        outcomes: [{ label: "Democratic party", party: "d", price: 0.97 }, { label: "Republican party", party: "r", price: 0.03 }] }];
+      check("a party-only market over a one-party list says it cannot tell them apart",
+        /Everyone on this November ballot is a Democrat/.test(window.KYC.stategov.raceOdds("GA")));
+      people.forEach((p, i) => { p.party = parties[i]; });
+      check("and says nothing of the kind over a list of two parties",
+        !/Everyone on this November ballot/.test(window.KYC.stategov.raceOdds("GA")));
+      window.kycOdds.races[RACE].markets = markets;
+    });
+  }
+
+  // A shared link opens the overlay on landing, and Back closes it.
+  const shared = await buildPage("states/ga.html", { hash: "#/official/gov-GA" });
+  await settle(50);
+  suite("states/ga.html#/official/gov-GA — a shared link opens the overlay", () => {
+    const modal = shared.D.getElementById("governorModal");
+    check("open on landing, naming the governor", !!modal && !modal.hidden &&
+      modal.querySelector("#governorModalName").textContent === shared.window.kycStateGov.states.GA.governor.name);
+    check("the profile dialog is not open", !shared.window.KYC.profile.isOpen());
+  });
+  const unknown = await buildPage("states/ga.html", { hash: "#/official/gov-GA-nobody-here" });
+  await settle(50);
+  suite("states/ga.html — a link to a candidate no list holds", () => {
+    const modal = unknown.D.getElementById("governorModal");
+    check("says nobody is here by this link, never a blank", !!modal && !modal.hidden &&
+      /Nobody here by this link/.test(modal.textContent) && /No longer listed/.test(modal.textContent));
+  });
+
+  const past = await buildPage("states/ga.html", { now: "2026-11-05T09:00:00", setup: withOdds });
+  await settle(50);
+  suite("states/ga.html after Election Day — the overlay in the past tense, naming no winner (rules 63, 91)", () => {
+    const { window, D } = past;
+    const list = window.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates.filter((p) => !p.writeIn);
+    const card = D.querySelector('#governor-race .gcard-candidate[data-governor="' + list[0].id + '"]');
+    card.querySelector(".gcard-open").click();
+    const modal = D.getElementById("governorModal");
+    check("the badge: was on the ballot; this site names no winner",
+      /Was on the Nov 3, 2026 ballot/.test(modal.querySelector("#governorModalStatus").textContent) &&
+      /names no winner/.test(modal.textContent) && !/\b(Elected|Won|Winner)\b/.test(modal.textContent));
+    check("ran for, not running for", /Ran for Governor • GA/.test(modal.querySelector("#governorModalMeta").textContent));
+    check("the prices are final, not results", /Final market prices/.test(modal.textContent) &&
+      /These are not results/.test(modal.textContent));
+    esc(window);
+  });
+
+  // The grid's Governors view grouped by race, and the map's panel.
+  const grid = await buildPage("index.html", { hash: "#/?chamber=governors&view=race&state=GA", setup: withOdds });
+  await until(() => grid.D.querySelectorAll("#results .gov-view-race").length > 0, 8000);
+  await settle(50);
+  suite("index.html — the Governors view: the race's odds, and the overlay from a card", () => {});
+  {
+    const { window, D } = grid;
+    const block = D.querySelector("#results #governor-race-GA .odds");
+    check("the race block carries its markets and averages", !!block && /Kalshi/.test(block.textContent) &&
+      /Polls/.test(block.textContent) && block.textContent.indexOf("Ossoff") === -1);
+    const card = D.querySelector("#results .gcard-candidate[data-governor]");
+    card.querySelector(".gcard-open").click();
+    const modal = D.getElementById("governorModal");
+    check("a card opens the overlay over the view, which stays", !!modal && !modal.hidden &&
+      D.querySelectorAll("#results .gov-view-race").length > 0 && /^#\/official\/gov-GA-/.test(window.location.hash));
+    check("the grid's counts of Congress do not move: no profile in the overlay", noProfile(modal));
+    esc(window);
+    await until(() => modal.hidden && /chamber=governors/.test(window.location.hash), 3000);
+    check("closed to the same view", modal.hidden && /chamber=governors/.test(window.location.hash) &&
+      /view=race/.test(window.location.hash) && /state=GA/.test(window.location.hash) &&
+      D.querySelectorAll("#results .gov-view-race").length > 0, window.location.hash);
+  }
+
+  const map = await buildPage("map.html", { hash: "#/?state=GA&mode=governor2026", setup: withOdds });
+  await settle(50);
+  suite("map.html — the 2026 governor's race panel in the Senate panel's shape", () => {});
+  {
+    const { window, D } = map;
+    const data = window.kycStateGov.states.GA;
+    const list = data.ballot2026.offices.governor.candidates.candidates;
+    const printed = list.filter((p) => !p.writeIn);
+    const panel = D.getElementById("delegation");
+    const head = panel.querySelector(".gov-race-panel .race-people");
+    check("the count is the list's printed candidates, write-ins counted apart, never \"out\"",
+      !!head && head.querySelector("span").textContent === String(printed.length) &&
+      (!list.some((p) => p.writeIn) || /write-in/.test(head.textContent)) && !/\bout\b/i.test(head.textContent),
+      head && head.textContent);
+    check("one card per candidate, each with the office line and a chevron into the overlay",
+      panel.querySelectorAll(".gcard-candidate").length === list.length &&
+      [...panel.querySelectorAll(".gcard-candidate")].every((c) =>
+        /Governor • GA/.test(c.querySelector(".gcard-office").textContent) && !!c.querySelector(".gcard-open[data-governor]")));
+    check("one head: the panel's count, no second \"Candidates on\" heading",
+      panel.querySelectorAll(".gov-race-panel .race-people").length === 1 &&
+      !panel.querySelector(".gov-candidates-head"));
+    check("the holder line once, in the race, not again on the governor's card",
+      panel.querySelectorAll(".gov-holder-status").length <= 1 &&
+      !panel.querySelector('.gcard[data-governor="gov-GA"] .gov-holder-status'));
+    const writeInCards = [...panel.querySelectorAll(".gcard-candidate.gcard-writein")];
+    const odds = panel.querySelector(".gov-race-panel .odds");
+    check("write-ins folded, so the markets follow the printed candidates",
+      writeInCards.every((c) => !!c.closest("details.gov-writeins")) &&
+      (!writeInCards.length || /write-in candidate/.test(panel.querySelector("details.gov-writeins summary").textContent)) &&
+      !!odds && [...panel.querySelectorAll(".gcard-candidate:not(.gcard-writein)")].every((c) =>
+        !!(c.compareDocumentPosition(odds) & 4)));
+    check("each card carries the badge the overlay's rows carry",
+      [...panel.querySelectorAll(".gcard-candidate")].every((c) => {
+        const p = list.find((x) => x.id === c.getAttribute("data-governor"));
+        const badge = c.querySelector(".gcard-status .badge");
+        return !!p && !!badge && badge.textContent === (p.writeIn ? "Write-in candidate" : "On the Nov 3, 2026 ballot");
+      }));
+    check("listed by surname, the list cited", /In surname order, not ballot order\./.test(panel.textContent) &&
+      panel.textContent.indexOf("Source: " + data.ballot2026.offices.governor.candidates.source) !== -1);
+    check("the markets block", !!panel.querySelector(".gov-race-panel .odds") && /Kalshi/.test(panel.textContent));
+    check("the sitting governor's card after the race, with its chevron",
+      !!panel.querySelector('.gcard[data-governor="gov-GA"] .gcard-open') &&
+      panel.textContent.indexOf("Seat held by") !== -1);
+    check("no profile in the panel", noProfile(panel));
+    panel.querySelector('.gcard[data-governor="gov-GA"] .gcard-open').click();
+    const modal = D.getElementById("governorModal");
+    check("the chevron opens the governor's overlay over the map, which keeps its mode",
+      !!modal && !modal.hidden && window.location.hash === "#/official/gov-GA" &&
+      D.querySelector('[data-mode="governor2026"]').getAttribute("aria-pressed") === "true");
+    check("with the race's odds inside", !!modal.querySelector("#governorModalRacePanel .odds"));
+    esc(window);
+    await until(() => modal.hidden && /mode=governor2026/.test(window.location.hash), 3000);
+    check("closed to the same address", modal.hidden && /state=GA/.test(window.location.hash) &&
+      /mode=governor2026/.test(window.location.hash), window.location.hash);
+    // A state whose governor is not on the ballot.
+    window.location.hash = "#/?state=VA&mode=governor2026";
+    window.dispatchEvent(new window.Event("hashchange"));
+    check("a state with no governor's race says so, and shows the governor's card",
+      /does not elect its governor in 2026/.test(panel.textContent) && !!panel.querySelector('.gcard[data-governor="gov-VA"]') &&
+      !panel.querySelector(".gcard-candidate"));
+  }
+
+  // What each page loads when (PR #172 merged with #191 and #195): a shared
+  // link to an overlay opens with the race's odds on every page, saying so
+  // while a file it needs loads and where one did not load (rule 94).
+  const racePanelOdds = (page) => {
+    const p = page.D.getElementById("governorModalRacePanel");
+    return p ? p.innerHTML : "";
+  };
+  {
+    const held = await buildPage("states/ga.html", { early: true, hash: "#/official/gov-GA",
+      hold: /\/data\/odds\.js$/, setup: withOdds });
+    await settle(50);
+    const modal = held.D.getElementById("governorModal");
+    const slotBefore = !!held.D.querySelector("#governorModalRacePanel .odds-slot");
+    const servedBefore = held.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
+    held.release();
+    await until(() => held.window.kycOdds !== undefined && !held.D.querySelector(".odds-slot"), 8000);
+    await settle(30);
+    const block = held.D.querySelector("#governorModalRacePanel .odds");
+    const want = held.window.KYC.stategov.raceOdds("GA", { compact: true, collapsed: true });
+    const raceBlock = held.D.querySelector("#governor-race .gov-race .odds");
+    suite("states/ga.html#/official/gov-GA — the overlay opened before the prices are in", () => {
+      check("no page errors", held.errors.length === 0, held.errors.join(" | "));
+      check("open on landing, the prices asked for once", !!modal && !modal.hidden && servedBefore === 1,
+        String(servedBefore));
+      check("the race panel holds the prices' place while they load", slotBefore);
+      check("once in, the overlay's markets are what KYC.stategov draws, every slot filled",
+        !!block && racePanelOdds(held).indexOf(want) !== -1 && /Kalshi/.test(block.textContent) &&
+        !held.D.querySelector(".odds-slot"), block ? block.textContent.slice(0, 80) : "no block");
+      check("and the race block under the cards too", !!raceBlock && /Kalshi/.test(raceBlock.textContent));
+    });
+    held.window.close();
+  }
+  {
+    const refused = await buildPage("states/ga.html", { hash: "#/official/gov-GA", block: ["data/odds.js"] });
+    await until(() => !!refused.D.querySelector("#governorModalRacePanel .odds-failed"), 8000);
+    suite("states/ga.html#/official/gov-GA — prices that did not load are said in the overlay", () => {
+      check("no page errors", refused.errors.length === 0, refused.errors.join(" | "));
+      check("the overlay's race panel says the prices did not load",
+        /did not load/.test(refused.D.querySelector("#governorModalRacePanel .odds-failed").textContent));
+      check("never the line that the cache holds none", !refused.D.querySelector("#governorModalRacePanel .gov-odds-none"));
+    });
+    refused.window.close();
+  }
+  {
+    // The grid names data/stategov.js on demand (PR #191): a shared link
+    // asks for it, says it is loading, and opens with the odds the grid
+    // loaded first.
+    const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+      hold: /\/data\/stategov\.js$/, setup: withOdds });
+    await settle(50);
+    const modal = grid.D.getElementById("governorModal");
+    const loading = !!modal && !modal.hidden && /Loading the governors/.test(modal.textContent) &&
+      !/Nobody here by this link|No longer listed/.test(modal.textContent);
+    grid.release();
+    await until(() => grid.window.kycStateGov !== undefined &&
+      grid.D.getElementById("governorModalName").textContent === grid.window.kycStateGov.states.GA.governor.name, 8000);
+    await settle(30);
+    const block = grid.D.querySelector("#governorModalRacePanel .odds");
+    const words = grid.served.filter((s) => /\/data\/people\/words\.js/.test(s)).length;
+    suite("index.html#/official/gov-GA — the governors' data loads on demand, and the overlay opens with its odds", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("says it is loading, never \"not listed\", while the file is out", loading);
+      check("then names the governor, with the race's markets", !modal.hidden && !!block && /Kalshi/.test(block.textContent) &&
+        racePanelOdds(grid).indexOf(grid.window.KYC.stategov.raceOdds("GA", { compact: true, collapsed: true })) !== -1);
+      check("and asks for no profile words", words === 0, String(words));
+    });
+    grid.window.close();
+  }
+  {
+    const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+      block: ["data/stategov.js"] });
+    await until(() => /did not load/.test((grid.D.getElementById("governorModal") || {}).textContent || ""), 8000);
+    const modal = grid.D.getElementById("governorModal");
+    suite("index.html#/official/gov-GA — the governors' data refused", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("the overlay says the data did not load, never that nobody is here",
+        !!modal && !modal.hidden && /governors’ data did not load/.test(modal.textContent) &&
+        !/Nobody here by this link|No longer listed/.test(modal.textContent), modal ? modal.textContent.slice(0, 120) : "");
+    });
+    grid.window.close();
+  }
+  {
+    const shared = await buildPage("map.html", { hash: "#/official/gov-GA", setup: withOdds });
+    await settle(50);
+    const modal = shared.D.getElementById("governorModal");
+    const block = shared.D.querySelector("#governorModalRacePanel .odds");
+    suite("map.html#/official/gov-GA — a shared link opens the overlay with its odds", () => {
+      check("no page errors", shared.errors.length === 0, shared.errors.join(" | "));
+      check("open on landing, naming the governor", !!modal && !modal.hidden &&
+        shared.D.getElementById("governorModalName").textContent === shared.window.kycStateGov.states.GA.governor.name);
+      check("with the race's markets", !!block && /Kalshi/.test(block.textContent));
+    });
+    shared.window.close();
+  }
+  {
+    // The Governors view searches its own cards: a query there asks for
+    // none of the profiles' words (data/people/words.js, PR #172).
+    const grid = await buildPage("index.html", { hash: "#/?chamber=governors&q=texas", people: "index" });
+    await until(() => grid.D.querySelectorAll("#results .gcard").length > 0, 8000);
+    await settle(50);
+    const words = grid.served.filter((s) => /\/data\/people\/words\.js/.test(s)).length;
+    suite("index.html#/?chamber=governors&q=texas — the governors' search loads no profile words", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("Texas's governor found", grid.D.querySelector('#results .gcard[data-governor="gov-TX"]') !== null);
+      check("the words file not asked for", words === 0, String(words));
+      check("no line about reading the profiles' words", !/profiles’ own words/.test(grid.D.getElementById("resultsLabel").textContent));
+    });
+    grid.window.close();
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -17052,6 +18358,7 @@ async function testLazyStateData() {
   if (!only || only === "guide") await testGuide();
   if (!only || only === "guide") await testBillFlow();
   if (!only || only === "federal") await testFederal();
+  if (!only || only === "federal") await testFederalKeptConfirmation();
   if (!only || only === "legislature") await testLegislatures();
   if (!only || only === "photos" || only === "legislature") await testPhotoCopies();
   if (!only || only === "photos") await testGuidePhotos();
@@ -17079,8 +18386,11 @@ async function testLazyStateData() {
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "states" || only === "statephone") await testStatePhone();
+  if (!only || only === "states" || only === "governors") await testGovernorCards();
+  if (!only || only === "states" || only === "governors") await testGovernorOverlays();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
+  if (!only || only === "states") await testLouisianaDecember();
 if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();

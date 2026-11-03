@@ -3979,6 +3979,12 @@
      "total": 680.77
     },
     {
+     "committee": "ALISO NIGUEL DEMOCRATIC CLUB",
+     "committeeId": "C00675058",
+     "count": 50,
+     "total": 335.71
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 7,
@@ -19761,5 +19767,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-10-31"
+ "read": "2026-11-02"
 }

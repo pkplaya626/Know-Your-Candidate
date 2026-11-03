@@ -751,7 +751,47 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     three entries stale, `photos.keep_refusals`). A curated row takes its campaign's
     portrait as a filer does: Brian Bengs's sat in the cache while his
     profile showed the silhouette. A sitting member never does: their
-    portrait comes by their bioguide id. Issue headings come from one heading level of a page
+    portrait comes by their bioguide id. One narrow route takes a first
+    name instead of the surname (the owner's decision of 2026-11-01 on the
+    photo research's proposal, "with a look at each before it shows"):
+    on the candidate's own campaign site, read as above, an image whose
+    file name or alt text carries their first name - as the profile or
+    their filing writes it, never a middle name or a nickname, a short form
+    only through an evidenced `overrides.PORTRAIT_NAME_FORMS` entry
+    (`first`) - and "headshot", "portrait" or "profile" in that same file
+    name or alt text ("Teresa-headshot-square-new.jpg", "Jerrad-Headshot2.png";
+    `enrich.first_name_portraits`). "Cropped" is not such a word: on the
+    248 sites read that day it named "Cropped+Family.png", "Family Leg
+    Up_cropped.jpg" and five logos. A first name alone ties less than a
+    surname - a campaign pictures the candidate's family under first names
+    ("colby and fam no background.png") - so the route is asked only where
+    no image named by the surname is found, home page and About page and
+    drawn page alike, every other test still applies (the words a logo, a
+    crowd or someone else's presence gives, the shape, `NOT_A_PORTRAIT`,
+    `PORTRAIT_LICENCE_DOUBTS`, the weight rules and credits), the record
+    says `portraitRoute` "first-name" and its evidence 'first name and
+    "headshot" in file name ...', and the portrait is withheld, and named
+    by validate (`portrait-first-name-unseen`), until a person has looked
+    at the file and recorded it in `overrides.SEEN_FIRST_NAME_PORTRAITS`
+    (the day, the candidate alone and the face measured on the card, the
+    page, and the bytes and pixel size of the file the card shows: a look
+    is at a picture, not an address, and another photograph saved over
+    "alexander-headshot.jpg" goes back behind the gate) or refused it in
+    `NOT_A_PORTRAIT`; an entry no cached record offers is
+    `stale-first-name-portrait`. The review of PR #186 found the gate
+    resting on one field of a hand-editable cache: a record that lost
+    `portraitRoute` would have shown unlooked. The route is known by its
+    evidence's words too (`enrich.first_name_route`), and one shown without
+    its look fails the build (`photo-unevidenced`). On the 289 people for Congress
+    without a photograph swept on 2026-11-01 it found images for nine; two
+    are landscape frames the shape test refuses (Jenny Rae le Roux's, Bob
+    Chew's), and of the seven the pipeline's reader took, six show the
+    candidate alone and are recorded, and Bethany Mann's selfie, with two
+    people behind her, is refused. Five November nominees who showed the
+    silhouette gain a photograph (Alexander Cooke, Colby Watson, Brinker
+    Harding, Teresa Benitez-Thompson, Jerrad Christian), and Bernadette
+    Greene-Placentia's campaign headshot stands ahead of the Clean
+    Elections Commission's guide photograph. Issue headings come from one heading level of a page
     that is not a ballot-question page ("Tyler votes NO" under a measure is
     not his platform), and never a line naming anyone else in the race -
     "Rob Wittman has allowed healthcare prices to skyrocket" is an attack
@@ -791,6 +831,46 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     ("sworn in for CA-03") carry. A label naming someone other than this
     site's candidate of that party is a conflict and a warning; one naming a
     nominee too small to have a profile here is counted, not warned about.
+    The races for governor are read the same way under ids of their own,
+    `G-<ST>-2026` (`odds.governor_ids`, from the ballot table), beside
+    Congress's: a Kalshi market whose question names the state's
+    governorship and whose rules inaugurate that state's governor, a
+    Polymarket event whose title and description name the same state's
+    governorship, the race's own article's averages. A question that
+    speaks of a governorship and a seat in Congress, or of "both", and
+    rules that resolve on a senator and a governor both, place nowhere
+    whichever pattern matched first (`odds._combination`: the Senate
+    pattern once placed "...the Senate race in Georgia and the
+    governorship?" on Georgia's Senate race), a series title speaking of
+    a governor is read only as one state's governor series, and "Georgia
+    Lieutenant Governor Election Winner" is another office's (the first
+    read took "Georgia Lieutenant" for the state, 2026-11-03). A
+    Polymarket description's "the nominee of the party" is how each one
+    says whom a party outcome stands for, not a primary: asked of it, all
+    37 events were refused. The labels and poll columns are matched
+    against the election office's list of candidates for the office
+    (`data/statewide_candidates.json`, `odds.governor_races`), never a
+    profile, as rule 62 matches a name (`odds.named_on_list`): the list's
+    own words in any order, a given name and the surname it prints and no
+    word it does not, a bare surname only where it fits one person on the
+    list's nominees (Nevada's two Fords name neither; Ohio's "Turner" is
+    Renea Turner's ticket, her running mate Jalen Turner's surname counting
+    for nothing), a running mate's whole name for the ticket, even where
+    the list prints their party beside it ("Zac Johnson (Nonpartisan)"),
+    but never their surname alone (the Virgin Islands' two Potters, both
+    running mates, name nobody), and a short form only through an evidenced
+    `overrides.STATEWIDE_NAME_FORMS` entry ("Joe Lombardo"). A namesake
+    ("John Jackson" beside the list's Rick Jackson) names nobody and is
+    reported. The party a label without one takes is its person's, keyed
+    as the list means its words (`odds.list_party_key`: Alaska's
+    "Registered Republican" is a Republican, which the profiles' test
+    read as an independent and drew in amber); a label naming nobody
+    shows its own "(R)" before "Other", and one naming someone of a party
+    the list holds (Dunleavy, for Alaska) is a conflict `validate`
+    reports. The page draws them by one module (`KYC.stategov.raceOdds`
+    through `KYC.odds.render`, the list's parties beside the race for the
+    party-only note, rule 79), and a race the cache holds nothing for
+    says so of the cache (rule 19).
 
 41. **A file that publishes on its own may change only itself.**
     `.github/workflows/odds.yml` commits to `main` every twelve hours
@@ -1396,7 +1476,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "since 2013" was frozen at the read, so a senator who left on January
     3 would have stayed current. Whether a seat in Congress is current is
     the membership snapshot's to say, by the person's bioguide id, at
-    build time (`history-behind`).
+    build time (`history-behind`). The sitting governors are read by the
+    Wikidata item the NGA roster's cross-check holds for them
+    (`executives.wikidata`, under `gov-<ST>`), with the item's date of
+    birth kept for the build to compare with the NGA's; the candidates for
+    governor by the article their race's own article links for them
+    (`stategov.governor_candidate_articles`, rule 33's check), under the
+    overlay's id, as `ballotphotos` records that link whatever route
+    pictures them (`statewide_photos.read_articles`, the cache's
+    `articles`; `--articles-only` reads them alone): recorded only with a
+    Wikipedia photograph, 40 of 173 printed candidates had an article and
+    the overlay told the rest the race's article "links none", members of
+    Congress among them; read on its own (2026-11-03), 73 have one, 67 are
+    matched to no link, 2 are not confirmed as theirs, and the rest, in
+    races with no article, read "not recorded here". "Matched to no link"
+    is the reader's finding, never the article's: its review found
+    Bronson's, Taylor's and Kreiss-Tomkins's articles in Alaska's race
+    infobox (`candidateN`), Bextel's under a sub-heading of "Declared", and
+    Lombardo's as "Joe Lombardo", none of which the reader matched, so the
+    overlay says "this site's reader found no link ... it could match to
+    the list's name" (rule 62), and an evidenced
+    `STATEWIDE_NAME_FORMS` entry is a name the link may give
+    (`statewide_photos.name_forms`). `stategov.attach_history` attaches a record only while
+    it is that item's or that article's (`asked`); a moved item or a
+    changed link is reported, never shown.
 
 70. **A disclosure belongs to an office, and the report must name its
     filer.** The Office of Government Ethics files people under their
@@ -2291,6 +2394,70 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     `overrides.STATEWIDE_NAME_FORMS` entry, or the line says "not
     checked". After Election Day the block is in the past tense and links
     the state's results; this site names no state winner.
+    The governor and the people on the ballot for governor are cards (the
+    owner's request of 2026-11-02, "lets add cards for governors"), drawn by
+    one module (`KYC.stategov.governorCard`, `governorRace`, rule 12): the
+    sitting governor's in a state page's State government section
+    (`#governor`), the map's state panel and the grid's Governors chip
+    (`#/?chamber=governors`, which loads `data/stategov.js` on demand,
+    rule 94); the race's in its own state page section (`#governor-race`,
+    a row of its own where the races fold, rule 99), the map's panel and
+    the grid's Governors chip grouped by race. A governor's card is a card,
+    never a profile (rule 27): no dialog, no `#/profile/` link, no
+    `data-id`, and it is in no count of who sits in or runs for Congress -
+    not the sidebar's, the grid's results line, "Open all N races" or a
+    race's (rule 73). A candidate's card holds the list's words alone, in
+    the order and with the notes the list block gives (`listParts`, one
+    source of them), and its photograph's copy is made for the card's 72px
+    circle (`photocopies.BOXES` "governor-candidate", rule 101). Its
+    review found a count no second source checks: the NGA lists one
+    unbroken span for a re-elected governor, so Bill Lee and Tate Reeves,
+    in their second terms, read "First term" - the card counts no terms.
+    The Governors view reads a query as the grid does (rule 5: "Kansas" is
+    not Arkansas's governor), presses none of Congress's filters (a pressed
+    "Not seeking re-election" over every governor was a claim about each),
+    and asks once for a file that failed; a candidate's party words are
+    ink, since a fusion line is several parties (rule 88). Every governor
+    card opens an overlay in the profile dialog's shape (the owner's
+    request of 2026-11-02; `assets/kyc-governor.js`, built like the
+    officials' dialog on `KYC.createModal`, at `#/official/gov-<ST>` and
+    `#/official/gov-<ST>-<name>`, ids the pipeline writes:
+    `statewide.governor_id`, `candidate_id`), by its chevron, a click or
+    Enter, through one delegated listener (rule 13), never a `data-id`
+    (rule 27). Its biography holds only what a source says: a governor's
+    date of birth where the NGA's page and the Wikidata item give the same
+    day (`stategov.agreed_birth`; Delaware's disagree by eight days and
+    show nothing), in office since in the card's words, the office's site
+    and contact, the NGA biography; a candidate's party and running mate
+    from the list, a Wikipedia badge only where the race's article links
+    theirs; the offices held through rule 69's corroboration, else "No
+    linked record". Money and platform are said "not looked at" (rule 19):
+    this site reads federal campaign filings only. A date not shown says
+    why in rule 19's words, as the pipeline records it (`sinceWhy`,
+    `bornWhy`): "do not agree" only where both dates exist and differ
+    (Ivey, Reynolds; Delaware's birth date), "no Wikidata item ... to check
+    the NGA's date against" where the roster holds none (Pritzker, Abbott,
+    Kotek, the territories) - the first overlay told all ten the dates
+    disagreed. A candidate's article line is the pipeline's finding: their
+    article, "links none" only where the race's article was read and links
+    none, else "not recorded here". A candidate an evidenced
+    `OTHER_OFFICE_NOMINEES` entry ties to a member of Congress (the ballot
+    photographs' member route) links that member's profile, the only
+    profile link an overlay holds, and the sitting governor on the list
+    links their governor's record. The header's "Term" is the ballot
+    note's leading term length alone ("4-year term", "if elected" beside
+    it): the rest of a note is why the office is on the ballot, and printed
+    whole it read "Term Elected with the lieutenant governor ... (if
+    elected)" under Guam's candidates. No rule number is printed to a
+    reader. The race panel lists the list's other candidates with the
+    cards' badge (`KYC.stategov.candidateBadge`, one for the rows and the
+    map's cards), write-ins in a fold, the list cited, and the markets and
+    averages (rule 40). The map's 2026 governor's races view is the race's
+    panel in the Senate panel's shape (`KYC.stategov.racePanel`): one head
+    with the list's count, never an "out" (a list says who is on the
+    ballot, not who left it), the holder line once, the cards with their
+    badges, write-ins folded so the markets follow the printed candidates,
+    then the sitting governor's card.
 
 92. **"Who is on my ballot" is its own question, answered from the views
     that already answer its parts, and an address keeps a ZIP code, never
@@ -2922,6 +3089,80 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     here" says where the most populous counties' are. The
     page never says what a yes or a no vote does, and is in the past tense
     from the day after the election, reading no result.
+
+103. **A request says who sends it.** Nine readers and one tool (`courts`,
+    `enrich`, `federal`, `judiciary`, `officers`, `official_photos`,
+    `territorial_courts`, `vacancies`, `voting`,
+    `tools/fetch_court_districts.py`) sent a desktop Chrome's User-Agent
+    string, and two more sent one when a server refused the honest one:
+    `legphotos` asked Indiana's IGA as a browser, and `photocopies` asked
+    again as one after a 401, 403 or 406. A script
+    dressed as a person's browser to be let in where scripts were not
+    wanted is not this project's to send. By the owner's decision of
+    2026-11-01 ("now") every one of them sends `kyc/agent.py`'s
+    `USER_AGENT` - the project's name and its public repository, never a
+    person's name or address, and no browser's product token (rule 12: one
+    constant; `rollcalls` shares it) - and both fallbacks are gone. A
+    refusal concludes nothing (rule 8): the reader keeps its last good read
+    and says so, and a page that refuses every script is read by hand where
+    a reader needs it (rule 57's way). Rehearsed the evening it changed,
+    asked as this project: Indiana's IGA answered all 59 requests (28
+    portraits, as before); 30 campaign sites of 30 read as before; the
+    FJC, the Court and the territorial courts answered every request;
+    state.gov, war.gov, usda.gov, commerce.gov, hhs.gov, transportation.gov
+    and ed.gov refused (six of them had refused the browser's string too),
+    while dol.gov, dhs.gov and odni.gov, unread as a browser, now confirm
+    their heads; senate.gov's roll-call XML refuses this machine whatever
+    the string; and vote.gov refused all 56 of its pages, as it had
+    refused the browser's string the same morning. The rehearsal
+    found where a refusal still read as a finding, each now refused and
+    tested:
+    - `federal` overwrote an office page's confirmation with "could not be
+      read" (state.gov named Marco Rubio that morning): a confirmation now
+      stands, dated (`read`) and marked `kept`, while the page cannot be
+      read and the holder is the same, and ages into
+      `federal-confirmation-kept` after `officers.KEPT_STALE_DAYS`.
+    - `voting` called a 202, an empty body or a bot wall's page "live", and
+      a name this machine's resolver could not find "dead": Montana's
+      three links (every mt.gov name failed here; dns.google answered)
+      would have left its page. A success that says nothing is "unknown"
+      (`agent.walled`), and a name is gone only where dns.google and
+      Cloudflare say so too (`voting.gone_everywhere`, rule 35).
+    - `judiciary` checked the justices' portraits with HEAD, and a
+      challenge's 200 of HTML would have withdrawn all nine: it reads the
+      file's first bytes, and a refusal, a 202 or a wall's page concludes
+      nothing; a portraits page that says nothing keeps the last.
+    - a territorial court's challenge page read as a court naming no
+      judge; it keeps the last roster.
+    - `enrich` and `localsites` took a firewall's 406 or a geographic
+      block's 451, a 404 at a bot wall's host after a redirect, or a wall's
+      page as a verdict on a campaign's or a government's site; each is
+      inconclusive now, after the spam and parking tests (a parking chain's
+      "Security Check" is still parking). `official_photos` and
+      `photocopies` read a 404 at a bot wall's host the same way. Only a
+      wall's own host (`agent.WALL_HOSTS`: Radware's perfdrive.com,
+      DataDome's captcha-delivery.com): the first fix excused a 404 from
+      any other host, so a lapsed campaign domain sent to a registrar's
+      "not found" page would have stayed linked as safe (PR #185 review).
+    - A wall's page is known by the document's own first title, never an
+      inline SVG's, and a phrase an ordinary page might open with ("One
+      more step", "Not allowed", "Security Check", "Access Denied") only
+      as the whole title or beside a wall vendor's name: "One more step to
+      register to vote" would have made a state's lookup "could not be
+      confirmed".
+    - `legphotos` counted the members of a state whose read failed as
+      nobody asked; they are counted as kept, and Indiana's read that
+      concludes nothing raises `Unread` and says the last entries stand.
+    One test says what a wall's page is (`agent.walled`, beside
+    `officers.says_nothing`). `tests/test_agent.py` fails on a browser's
+    product token in any User-Agent string in `kyc/`, `tools/` or
+    `.github/`, on a module constant that would send one, and on a headless
+    Chrome told to pose as another (`setUserAgent`, `--user-agent`), as CI
+    greps for `onclick=`. The headless Chrome readers (`courts`' browser
+    recipes, `enrich.render_portraits`, `members`) send
+    Chrome's own headless string and pose as nothing else. The readers that
+    already said who they were keep their strings; "Mozilla/5.0 (compatible; ...)" is the crawlers'
+    convention and names no browser.
 
 ## District maps
 

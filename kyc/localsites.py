@@ -65,7 +65,7 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-from . import enrich, overrides
+from . import agent, enrich, overrides
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "local_sites.json")
 SOURCE = ("Each address as the Census Bureau's 2022 Government Units listing gives it, opened by "
@@ -717,6 +717,10 @@ def _assess(names, url, seen):
         return PARKED, f"{where}parked domain{quoted}", final, ""
     if _PLACEHOLDER.search(head) or (small and _PLACEHOLDER.search(body)):
         return UNREAD, f"{where}a web server's placeholder page{quoted}", final, ""
+    if agent.turned_away(page.title):
+        # A bot wall's or a challenge's page, here or at the host a redirect
+        # led to, says nothing of the body's site (rule 8): never "elsewhere".
+        return UNREAD, f"{where}a bot wall's page{quoted}", final, ""
     if enrich._SPAM.search(page.hidden) or enrich._GAMBLING.search(page.hidden):
         return OK, f"{where}answers, and hides gambling links in its page{quoted}", final, ""
     if not moved:

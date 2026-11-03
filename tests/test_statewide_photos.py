@@ -111,6 +111,34 @@ class TestTheOfficialGuides(unittest.TestCase):
         self.assertEqual(rec["by"], sp.CA_BY)
         self.assertEqual(official_photos.record_problems(rec, "x"), [])
 
+    def test_a_guide_page_that_says_nothing_concludes_nothing(self):
+        """coag.gov answered a script HTTP 202 with no body (2026-11-01). A
+        guide answering so, with a bot wall, a page drawn by script or a
+        redesign is not a guide that pictures no one: its key is unknown,
+        and fetch keeps the last photographs read (rules 8 and 24)."""
+        lists = {"AZ": {"governor": [{"name": "Katie Hobbs"}]},
+                 "CA": {"ag": [{"name": "Michael E. Gates"}]}}
+        for said in ("", "<html><head><title>Just a moment...</title></head></html>",
+                     "<html><body><div id=app></div><script>render()</script></body></html>",
+                     "<html><body><main>" + "<p>The 2026 guide.</p>" * 40 + "</main></body></html>",
+                     # A redesign that keeps some of the markup: the list's
+                     # pictures for other offices only, statement blocks
+                     # whose names are no longer <h2> headings.
+                     '<li><img class="pic" src="/Custom/Picture/12"><b>Jo Roe</b>'
+                     '<span class="office">State Senator</span></li>'
+                     '<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
+                     'alt="Michael E. Gates"><h3>Michael E. Gates | REPUBLICAN</h3></div>'):
+            records, problems, unknown = sp.read_guides(lists, measure=measure_from({}), pause=0,
+                                                        get=lambda u: said)
+            self.assertEqual(records, {})
+            self.assertEqual(unknown, {"AZ", "CA|ag"}, said)
+            self.assertTrue(all("the last photographs read are kept" in p for p in problems),
+                            problems)
+        # Statements read, none with a photograph: read, not unknown.
+        page = ('<div class="grid-parent clearfix"><img src="/img/no-photo.png" '
+                'alt="No Photo Submitted"><h2>Rob Bonta | DEMOCRATIC</h2></div>')
+        self.assertEqual(sp.parse_california(page, "ag"), [])
+
     def test_a_guide_photograph_a_person_refused_is_not_used(self):
         lists = {"CA": {"ag": [{"name": "Michael E. Gates"}]}}
         page = ('<div class="grid-parent clearfix"><img src="/img/gates.jpg" '
@@ -190,6 +218,58 @@ class TestTheRacesOwnArticle(unittest.TestCase):
         self.assertEqual(why, "")
         self.assertTrue(rec["portraitHeavy"][0]["kept"])
         self.assertEqual(official_photos.record_problems(rec, "x"), [])
+
+    def test_the_candidates_own_article_is_recorded_whatever_route_pictures_them(self):
+        """The race's article's link to a candidate is a finding of its own:
+        recorded where it links their article, said where it links none, and
+        nothing where the article was not read (rule 19; PR #195 review)."""
+        lists = {"KS": {"governor": [{"name": "Ty Masterson"}, {"name": "Nobody Linked"},
+                                     {"name": "Sam Poe", "writeIn": True}]},
+                 "WY": {"governor": [{"name": "Not Read"}]}}
+
+        def wikitext(title):
+            if "Wyoming" in title:
+                raise RuntimeError("timed out")
+            return title, "text"
+
+        with mock.patch.object(sp, "race_links", return_value=self.LINKS):
+            found, unknown = sp.read_articles(lists, wikitext=wikitext,
+                                              resolve=lambda t: dict(self.ARTICLE), log=lambda m: None)
+        k = lambda code, name: sp.key(code, "governor", name)  # noqa: E731
+        self.assertEqual(found[k("KS", "Ty Masterson")]["article"], "Ty Masterson")
+        self.assertEqual(found[k("KS", "Nobody Linked")]["none"], "not-linked")
+        self.assertNotIn(k("KS", "Sam Poe"), found)
+        self.assertNotIn(k("WY", "Not Read"), found)
+        self.assertIn(k("WY", "Not Read"), unknown)
+        # The last read stands for a race this read concluded nothing about.
+        kept = sp.kept_articles(found, {k("WY", "Not Read"): {"article": "Not Read"}}, unknown)
+        self.assertEqual(kept[k("WY", "Not Read")], {"article": "Not Read"})
+        cache = {"articles": kept, "articlesRead": "2026-11-03", "photos": {}}
+        self.assertEqual(sp.article_of(cache, "KS", "governor", "Nobody Linked")["none"], "not-linked")
+        self.assertIsNone(sp.article_of(cache, "KS", "governor", "Someone Else"))
+
+    def test_an_evidenced_short_form_is_a_name_the_races_link_may_give(self):
+        """Nevada's article links [[Joe Lombardo]] for the list's "Lombardo,
+        Joseph": the evidenced STATEWIDE_NAME_FORMS entry is a name the link
+        may give, and only for the state and office it is recorded for
+        (PR #195's second review)."""
+        from kyc import overrides
+        entry = ("ZZ", "governor", "Joe Testperson")
+        overrides.STATEWIDE_NAME_FORMS[entry] = ("Testperson, Joseph", "a test")
+        links = [("Joe Testperson", "Joe Testperson", None, None)]
+        article = dict(self.ARTICLE, title="Joe Testperson")
+        candidate = {"name": "Testperson, Joseph"}
+        try:
+            found, why = sp.linked_article("governor", candidate, links,
+                                           resolve=lambda t: dict(article), code="ZZ")
+            self.assertEqual((found[2]["title"], why), ("Joe Testperson", ""))
+            # Another state's list, or no state, takes no short form.
+            for code in ("YY", None):
+                self.assertEqual(sp.linked_article("governor", candidate, links,
+                                                   resolve=lambda t: dict(article), code=code),
+                                 (None, "not-linked"))
+        finally:
+            del overrides.STATEWIDE_NAME_FORMS[entry]
 
     def test_a_refused_file_is_never_taken(self):
         """One list for every route (rule 38): NOT_A_PORTRAIT, keyed on the

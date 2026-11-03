@@ -2,7 +2,7 @@
  "ag": {
   "AK": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Cori Mills",
    "office": "https://law.alaska.gov/",
@@ -20,7 +20,7 @@
   },
   "AL": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Steve Marshall",
    "office": "https://www.alabamaag.gov/",
@@ -37,7 +37,7 @@
   },
   "AR": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Tim Griffin",
    "office": "https://arkansasag.gov/",
@@ -47,7 +47,7 @@
   },
   "AZ": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Kris Mayes",
    "office": "https://www.azag.gov/",
@@ -71,7 +71,7 @@
   },
   "CA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Rob Bonta",
    "office": "https://www.oag.ca.gov/",
@@ -95,7 +95,8 @@
   },
   "CO": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmationKept": true,
+   "confirmedOn": "2026-11-01",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Phil Weiser",
    "office": "https://coag.gov/",
@@ -112,7 +113,7 @@
   },
   "CT": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "William Tong",
    "office": "https://portal.ct.gov/ag",
@@ -129,7 +130,7 @@
   },
   "DE": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Kathy Jennings",
    "office": "https://attorneygeneral.delaware.gov/",
@@ -139,7 +140,8 @@
   },
   "FL": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmationKept": true,
+   "confirmedOn": "2026-11-01",
    "listedBy": "Republican Attorneys General Association",
    "name": "James Uthmeier",
    "office": "https://www.myfloridalegal.com/",
@@ -163,7 +165,7 @@
   },
   "GA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Chris Carr",
    "office": "https://law.georgia.gov/",
@@ -180,7 +182,7 @@
   },
   "HI": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Anne Lopez",
    "office": "https://ag.hawaii.gov/",
@@ -205,7 +207,7 @@
   },
   "IA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Brenna Bird",
    "office": "https://www.iowaattorneygeneral.gov/",
@@ -215,7 +217,7 @@
   },
   "ID": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Raúl Labrador",
    "office": "https://www.ag.idaho.gov/",
@@ -225,7 +227,7 @@
   },
   "IL": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Kwame Raoul",
    "office": "https://www.illinoisattorneygeneral.gov/",
@@ -235,7 +237,7 @@
   },
   "IN": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Todd Rokita",
    "office": "https://www.in.gov/attorneygeneral/",
@@ -252,7 +254,7 @@
   },
   "KS": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Kris Kobach",
    "office": "https://www.ag.ks.gov/",
@@ -262,7 +264,7 @@
   },
   "KY": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Russell Coleman",
    "office": "https://www.ag.ky.gov/Pages/default.aspx",
@@ -279,7 +281,7 @@
   },
   "LA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Liz Murrill",
    "office": "https://www.ag.state.la.us/",
@@ -295,17 +297,18 @@
    "title": "Attorney General"
   },
   "MA": {
+   "alsoListed": [],
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Andrea Campbell",
    "office": "https://www.mass.gov/orgs/office-of-the-attorney-general",
    "party": "D",
    "partyKey": "D",
-   "unconfirmed": true,
-   "unreadable": true
+   "title": "Attorney General"
   },
   "MD": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Anthony Brown",
    "office": "https://www.marylandattorneygeneral.gov/",
@@ -322,7 +325,8 @@
   },
   "ME": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmationKept": true,
+   "confirmedOn": "2026-11-01",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Aaron Frey",
    "office": "https://www.maine.gov/ag/index.shtml",
@@ -333,6 +337,7 @@
   },
   "MI": {
    "alsoListed": [],
+   "confirmationKept": true,
    "confirmedOn": "2026-10-31",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Dana Nessel",
@@ -350,7 +355,7 @@
   },
   "MN": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Keith Ellison",
    "office": "https://www.ag.state.mn.us/",
@@ -367,7 +372,7 @@
   },
   "MO": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Catherine Hanaway",
    "office": "https://ago.mo.gov/",
@@ -384,7 +389,7 @@
   },
   "MS": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Lynn Fitch",
    "office": "https://ago.ms.gov/",
@@ -394,7 +399,7 @@
   },
   "MT": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Austin Knudsen",
    "office": "https://dojmt.gov/attorney-generals-office/",
@@ -403,7 +408,7 @@
    "photo": "https://dojmt.gov/wp-content/uploads/2024/01/austin-knudsen-about-200x200.png",
    "photoPage": "https://dojmt.gov/attorney-generals-office/",
    "photoWeight": {
-    "bytes": 16549,
+    "bytes": 5758,
     "height": 200,
     "width": 200
    },
@@ -413,7 +418,7 @@
    "alsoListed": [
     "Dan Bishop (R)"
    ],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Jeff Jackson",
    "office": "https://ncdoj.gov/",
@@ -423,7 +428,7 @@
   },
   "ND": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Drew Wrigley",
    "office": "https://attorneygeneral.nd.gov/",
@@ -440,7 +445,7 @@
   },
   "NE": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Mike Hilgers",
    "office": "https://ago.nebraska.gov/",
@@ -469,7 +474,7 @@
   },
   "NJ": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Jennifer Davenport",
    "office": "https://www.njoag.gov/",
@@ -494,7 +499,7 @@
   },
   "NM": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Raúl Torrez",
    "office": "https://nmdoj.gov/",
@@ -511,7 +516,7 @@
   },
   "NV": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Aaron Ford",
    "office": "https://ag.nv.gov/",
@@ -528,7 +533,7 @@
   },
   "NY": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Letitia James",
    "office": "https://ag.ny.gov/",
@@ -538,7 +543,7 @@
   },
   "OH": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Andy Wilson",
    "office": "https://www.ohioattorneygeneral.gov/",
@@ -555,7 +560,7 @@
   },
   "OK": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Gentner Drummond",
    "office": "https://oklahoma.gov/oag.html",
@@ -565,7 +570,7 @@
   },
   "OR": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Dan Rayfield",
    "office": "https://www.doj.state.or.us/",
@@ -582,7 +587,7 @@
   },
   "PA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Dave Sunday",
    "office": "https://www.attorneygeneral.gov/",
@@ -606,7 +611,7 @@
   },
   "RI": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Peter Neronha",
    "office": "https://riag.ri.gov/",
@@ -623,7 +628,7 @@
   },
   "SC": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Alan Wilson",
    "office": "https://www.scag.gov/",
@@ -633,7 +638,7 @@
   },
   "SD": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Marty Jackley",
    "office": "https://atg.sd.gov/",
@@ -676,7 +681,7 @@
   },
   "TX": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Ken Paxton",
    "office": "https://www.texasattorneygeneral.gov/",
@@ -693,7 +698,7 @@
   },
   "UT": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Derek Brown",
    "office": "https://attorneygeneral.utah.gov/",
@@ -703,7 +708,7 @@
   },
   "VA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Jay Jones",
    "office": "https://www.oag.state.va.us/",
@@ -713,7 +718,7 @@
   },
   "VT": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Charity Clark",
    "office": "https://ago.vermont.gov/",
@@ -730,7 +735,7 @@
   },
   "WA": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Nick Brown",
    "office": "https://www.atg.wa.gov/",
@@ -754,7 +759,8 @@
   },
   "WI": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmationKept": true,
+   "confirmedOn": "2026-11-01",
    "listedBy": "Democratic Attorneys General Association",
    "name": "Josh Kaul",
    "office": "https://www.doj.state.wi.us/",
@@ -764,7 +770,7 @@
   },
   "WV": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "J.B. McCuskey",
    "office": "https://ago.wv.gov/",
@@ -788,7 +794,7 @@
   },
   "WY": {
    "alsoListed": [],
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "listedBy": "Republican Attorneys General Association",
    "name": "Keith Kautz",
    "office": "https://ag.wyo.gov/",
@@ -798,7 +804,7 @@
    "title": "Attorney General"
   }
  },
- "fetched": "2026-10-31T14:16:00+00:00",
+ "fetched": "2026-11-02T17:20:42+00:00",
  "lt": {
   "AK": {
    "name": "Nancy Dahlstrom",
@@ -1381,7 +1387,7 @@
   "FL": {
    "address": "R.A. Gray Bldg. 500 S. Bronough, Ste. 100 Tallahassee, FL 32399",
    "bio": "https://dos.fl.gov/about-the-department/about-the-secretary/",
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "electionChief": true,
    "email": "SecretaryofState@dos.fl.gov",
    "member": false,
@@ -1920,7 +1926,7 @@
   "VA": {
    "address": "PO Box 1475 Richmond, VA 23218",
    "bio": "https://www.commonwealth.virginia.gov/about-us/",
-   "confirmedOn": "2026-10-31",
+   "confirmedOn": "2026-11-02",
    "electionChief": false,
    "email": "soc@governor.virginia.gov",
    "member": false,
@@ -1979,7 +1985,8 @@
   "WI": {
    "address": "PO Box 7848 Madison, WI 53707-7848",
    "bio": "https://sos.wi.gov",
-   "confirmedOn": "2026-10-31",
+   "confirmationKept": true,
+   "confirmedOn": "2026-11-01",
    "electionChief": false,
    "email": "statesec@wisconsin.gov",
    "member": false,

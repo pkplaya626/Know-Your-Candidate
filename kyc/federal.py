@@ -34,8 +34,8 @@ import re
 import time
 import urllib.request
 
-from . import federal_offices
-from .officers import _fold, same_person, visible_text
+from . import agent, federal_offices
+from .officers import KEPT_STALE_DAYS, _fold, same_person, says_nothing, visible_text
 
 EXECUTIVE_URL = "https://unitedstates.github.io/congress-legislators/executive.json"
 VOTE_MENU_URL = ("https://www.senate.gov/legislative/LIS/roll_call_lists/"
@@ -43,8 +43,7 @@ VOTE_MENU_URL = ("https://www.senate.gov/legislative/LIS/roll_call_lists/"
 VOTE_URL = ("https://www.senate.gov/legislative/LIS/roll_call_votes/vote{congress}{session}/"
             "vote_{congress}_{session}_{number}.htm")
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "federal_executive.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 
 class FederalError(RuntimeError):
@@ -138,6 +137,14 @@ def photo_set(tag, photo):
         if url.split("?")[0] == photo:
             out.append([url, int(width)])
     return sorted(out, key=lambda pair: pair[1])
+
+
+def same_holder(a, b):
+    """Whether two records of the President or Vice President are one
+    person: by the Wikidata ids both carry (rule 17), by name only where
+    one lacks it."""
+    x, y = ((a.get("ids") or {}).get("wikidata"), (b.get("ids") or {}).get("wikidata"))
+    return x == y if x and y else same_person(a.get("name", ""), b.get("name", ""))
 
 
 def portrait(page):
@@ -257,19 +264,20 @@ def confirm_on_page(office, name, read=None, pause=0.5):
              if key == office["key"] and same_person(holder, name)]
     seen = None
     for url in office["pages"]:
-        text = None
+        page = None
         # A failed request is tried once more before the page counts as
         # unreadable: one timeout must not read as "not named" (rule 8).
         for _attempt in range(2):
             try:
-                text = visible_text(read(url))
+                page = read(url)
                 break
             except FederalError:
                 time.sleep(pause)
-        if text is None:
+        # A bot wall, an empty challenge or a script-drawn shell says
+        # nothing either way, as no answer (officers.says_nothing).
+        if page is None or says_nothing(page):
             continue
-        if len(text) < 300:
-            continue                 # an error page or a script-drawn shell
+        text = visible_text(page)
         seen = url
         if names_holder(name, text, office["pageTitle"], forms):
             found = {"status": "confirmed", "url": url}
@@ -341,6 +349,25 @@ def confirmation(office, name, votes):
         "url": VOTE_URL.format(congress=found["congress"], session=found["session"],
                                number=found["number"]),
     }
+
+
+def kept_page(page, before, name, last_read, today):
+    """*page*, the office's own page's finding this run, dated; or, where
+    the page could not be read (a refusal, a challenge, a page drawn by
+    script: rule 8) and its last read named the same person beside the
+    title, that confirmation, kept with the day it was given (``read``)
+    and marked ``kept``, as an attorney general's is (rule 56). Asked as
+    this project, never as a browser (rule 103), state.gov refused the
+    read that had confirmed Marco Rubio the same morning, and the page
+    would have said it "could not be read" over its own earlier finding.
+    """
+    if page.get("status") == "confirmed":
+        return dict(page, read=today)
+    old = (before or {}).get("page") or {}
+    if (page.get("status") == "unreadable" and old.get("status") == "confirmed"
+            and same_person((before or {}).get("name", ""), name)):
+        return dict(old, kept=True, read=old.get("read") or last_read)
+    return page
 
 
 # ------------------------------------------------------------------ fetch
@@ -484,9 +511,26 @@ def fetch(previous=None, today=None, read=None, log=print, history_read=None):
             continue
         person["page"] = listed[1]
         try:
-            person["photo"], person["photoSet"] = portrait(read(listed[1]))
+            page = read(listed[1])
         except FederalError as exc:
             log(f"  [warn] {exc}")
+            page = None
+        person["photo"], person["photoSet"] = portrait(page) if page else (None, [])
+        if not person["photo"] and (page is None or says_nothing(page) or "<main" not in page):
+            # The page did not answer, or said nothing - a challenge with
+            # no body, a bot wall, a page drawn by script, or one without the
+            # main content this reader reads: the same person's last
+            # portrait stands (rule 8), dated by the day it was last read
+            # whole, which problems() ages. Only a page read whole drops it.
+            kept = (previous or {}).get(key) or {}
+            if kept.get("photo") and same_holder(kept, person):
+                person["photo"], person["photoSet"] = kept["photo"], kept.get("photoSet") or []
+                person["photoKept"] = kept.get("photoKept") or (previous or {}).get("asOf") or today
+                log(f"  [warn] the {title}'s page could not be read; the portrait last read on "
+                    f"{person['photoKept']} is kept")
+            else:
+                log(f"  [warn] the {title}'s page could not be read; there is no earlier "
+                    "portrait of them to keep")
     entries = parse_cabinet(read(federal_offices.CABINET_URL))
     held, unknown = assign(entries)
     if unknown:
@@ -522,7 +566,12 @@ def fetch(previous=None, today=None, read=None, log=print, history_read=None):
             else:
                 holder["senate"] = None
                 holder["senateUnread"] = True
-        holder["page"] = confirm_on_page(office, entry["name"], read)
+        holder["page"] = kept_page(confirm_on_page(office, entry["name"], read),
+                                   (before.get(office["key"]) or {}).get("holder"),
+                                   entry["name"], (previous or {}).get("asOf") or today, today)
+        if holder["page"].get("kept"):
+            log(f"  [warn] the {office['office']}'s own page could not be read; the "
+                f"confirmation it gave on {holder['page']['read']} is kept")
         offices.append({"key": office["key"], "office": office["office"],
                         "body": office["body"],
                         "kind": "department" if department else "cabinet-level",
@@ -619,6 +668,24 @@ def problems(cache, today=None):
             out.append(("error", "federal-term-ended",
                         f"the {title}'s term in the cache does not cover {today}; run 'federal'",
                         [person.get("name", "?")]))
+        # A portrait kept while the page said nothing (rule 8) ages as a
+        # kept confirmation does (officers.KEPT_STALE_DAYS).
+        kept = person.get("photo") and person.get("photoKept")
+        if kept and (datetime.date.fromisoformat(today)
+                     - datetime.date.fromisoformat(kept)).days > KEPT_STALE_DAYS:
+            out.append(("warn", "federal-portrait-kept",
+                        f"the {title}'s portrait was last read on {kept}; their White House "
+                        "page has said nothing a reader can read since. Look at it",
+                        [person.get("name", "?")]))
+    stale = [f"{o['office']}: {o['holder']['name']}, last read {o['holder']['page']['read']}"
+             for o in cache.get("offices") or []
+             if ((o.get("holder") or {}).get("page") or {}).get("kept")
+             and (datetime.date.fromisoformat(today)
+                  - datetime.date.fromisoformat(o["holder"]["page"]["read"])).days > KEPT_STALE_DAYS]
+    if stale:
+        out.append(("warn", "federal-confirmation-kept",
+                    f"{len(stale)} officers' own pages have not been readable since they named "
+                    "them; read each by hand", stale))
     keys = {o["key"] for o in cache.get("offices") or []}
     missing = [o["office"] for o in federal_offices.DEPARTMENTS if o["key"] not in keys]
     if missing:

@@ -61,7 +61,7 @@
    *  The names in it are a heading's, a race's or a table's elsewhere on
    *  the page (rules 48, 75). *seated*: the state's sitting House members,
    *  the delegation's own list. */
-  function findRaceBlock(info, senateRaces, houseRaces, measures, parts, seated) {
+  function findRaceBlock(info, senateRaces, houseRaces, measures, parts, seated, govRace) {
     var opt = function (id, text) {
       return '<option value="' + KYC.escapeAttr(id) + '">' + KYC.escapeHtml(text) + "</option>";
     };
@@ -89,6 +89,10 @@
     // added once it is drawn (foldLayout).
     var listed = {};
     statewide.forEach(function (s) { listed[s[0]] = true; });
+    // The race for governor, by its own heading's words, in the Statewide
+    // group only: the line under the select names the office already.
+    var governor = govRace ? [["race-governor", KYC.stategov.raceHeading(code)]] : [];
+    if (govRace) listed["governor-race"] = true;
     var here = parts.filter(function (p) { return !listed[p[0]]; })
       .map(function (p) { return opt(p[0], p[1]); }).join("");
     var line = statewide.map(function (s) {
@@ -105,8 +109,8 @@
       '<div class="race-jump find-race-jump"><label for="raceJumpSelect">Jump to a race or section</label>' +
       '<select id="raceJumpSelect" class="select" data-race-jump>' +
       '<option value="">Choose…</option>' +
-      (statewide.length ? '<optgroup label="Statewide">' +
-        statewide.map(function (s) { return opt(s[0], s[1]); }).join("") + "</optgroup>" : "") +
+      (statewide.length + governor.length ? '<optgroup label="Statewide">' +
+        statewide.concat(governor).map(function (s) { return opt(s[0], s[1]); }).join("") + "</optgroup>" : "") +
       (house ? '<optgroup label="U.S. House">' + house + "</optgroup>" : "") +
       '<optgroup label="This page" data-this-page>' + here + "</optgroup></select></div>" +
       '<div class="find-race-tiles"></div><div class="find-race-lookup"></div>' +
@@ -160,8 +164,24 @@
     }
   }
 
+  /* Every part of the page that folds to a row: the races for Congress,
+   * and the race for governor, which is no race for Congress and stays out
+   * of their count ("Open all 52 races") and their checks (rule 73). */
+  var FOLDS = "section.race-foldable, section.gov-race-foldable";
+
   function raceSections() {
     return Array.prototype.slice.call(doc.querySelectorAll("#stateContent section.race-foldable"));
+  }
+
+  /* The race for governor's section holds its one folding race: a link to
+   * the section ("#governor-race", from State government) opens it. */
+  function ownFold(node) {
+    return node && node.id === "governor-race" ? node.querySelector("section.gov-race-foldable") : null;
+  }
+
+  function foldSections() {
+    return Array.prototype.slice.call(doc.querySelectorAll("#stateContent section.race-foldable, " +
+      "#stateContent section.gov-race-foldable"));
   }
 
   /** Fold the page for the width it is drawn at, or unfold it: moving the
@@ -187,15 +207,16 @@
         home.parent.insertBefore(home.node, home.next && home.next.parentNode === home.parent ? home.next : null);
       }
     });
-    var races = el("races");
-    if (races) races.classList.toggle("races-folded", phone);
+    ["races", "governor-race"].forEach(function (id) {
+      if (el(id)) el(id).classList.toggle("races-folded", phone);
+    });
     Array.prototype.forEach.call(content.querySelectorAll(".state-parts, .race-jumps"), function (nav) {
       nav.hidden = phone;
     });
     Array.prototype.forEach.call(content.querySelectorAll(".race-fold-bar"), function (bar) {
       bar.hidden = !phone;
     });
-    raceSections().forEach(function (section) {
+    foldSections().forEach(function (section) {
       section.querySelector(".race-row-title").hidden = !phone;
       section.querySelector(".race-close-row").hidden = !phone;
       section.hidden = false;
@@ -240,7 +261,7 @@
   function goTo(id) {
     var target = doc.getElementById(id);
     if (!target) return null;
-    var section = target.closest ? target.closest("section.race-foldable") : null;
+    var section = (target.closest ? target.closest(FOLDS) : null) || ownFold(target);
     if (section && fold && fold.phone) setOpen(section, true, "reader");
     // At once, never animated: a smooth scroll's end is worked out before
     // it starts, and the delegation's cards above the races grow as they
@@ -296,25 +317,25 @@
    * what it opened. */
   function initFoldEvents() {
     doc.addEventListener("beforematch", function (event) {
-      var section = event.target && event.target.closest && event.target.closest("section.race-foldable");
+      var section = event.target && event.target.closest && event.target.closest(FOLDS);
       if (section) setOpen(section, true, "find");
     }, true);
     global.addEventListener("beforeprint", function () {
       if (!fold || !fold.phone) return;
-      raceSections().forEach(function (s) {
+      foldSections().forEach(function (s) {
         if (!fold.opened[s.getAttribute("data-race")]) setOpen(s, true, "print");
       });
     });
     global.addEventListener("afterprint", function () {
       if (!fold) return;
-      raceSections().forEach(function (s) {
+      foldSections().forEach(function (s) {
         if (fold.opened[s.getAttribute("data-race")] === "print") setOpen(s, false);
       });
     });
     // A link to a race on this page, followed after it has loaded (an
     // address typed or pasted, a link from another script).
     global.addEventListener("hashchange", function () {
-      if (/^#race-/.test(global.location.hash)) jumpToSection();
+      if (/^#(race-|governor)/.test(global.location.hash)) jumpToSection();
     });
   }
 
@@ -448,6 +469,10 @@
     // badges every race shares, said once above them there.
     var foldable = senateRaces.length + houseRaces.length > FOLD_OVER;
     var shared = foldable ? cards.sharedBadges(senateRaces.concat(houseRaces)) : {};
+    // The race for governor, where the state's governor is on this ballot:
+    // a section of its own after the races for Congress, as cards
+    // (KYC.stategov.governorRace), folded to a row where they fold.
+    var govRace = !!(KYC.stategov && KYC.stategov.governorUp && KYC.stategov.governorUp(code));
 
     // The statewide questions on the ballot (rule 95), after the races, as
     // a printed ballot puts them; "" where nothing is recorded.
@@ -507,9 +532,10 @@
       house.length ? ["delegation", info.territory ? delegateTitle(info) : "House delegation"] : null,
       KYC.stategov && (KYC.stategov.state(code) || code === "DC") ? ["state-government", govHeading(info)] : null,
       senateRaces.length + houseRaces.length ? ["races", "2026 races"] : null,
+      govRace ? ["governor-race", "Race for governor"] : null,
       measures ? ["measures", KYC.ballot.measuresName(code)] : null,
     ].filter(Boolean);
-    if (foldable) html.push(findRaceBlock(info, senateRaces, houseRaces, measures, parts, house));
+    if (foldable) html.push(findRaceBlock(info, senateRaces, houseRaces, measures, parts, house, govRace));
     if (parts.length > 1) {
       html.push('<nav class="toolbar jump-row state-parts" aria-label="On this page">' +
         parts.map(function (p) {
@@ -569,7 +595,10 @@
         '<h2 class="state-heading">' + govHeading(info) + "</h2>",
         // The three branches at a glance, the details under them (VISUALS-28).
         KYC.stategov.glance ? KYC.stategov.glance(code) : "",
-        '<div class="stategov">' + KYC.stategov.render(code, { links: false }) + "</div>",
+        // The governor's card here, with the anchor links reach it by; the
+        // race for governor in its own section below (governorSection).
+        '<div class="stategov">' + KYC.stategov.render(code, { links: false, here: true, raceApart: govRace }) +
+          "</div>",
         "</section>"
       );
     }
@@ -620,6 +649,7 @@
         "</section>"
       );
     }
+    if (govRace) html.push(governorSection(foldable));
     if (measures) html.push(measures);
 
     target.innerHTML = html.join("");
@@ -669,6 +699,45 @@
     }
   }
 
+  /** The race for governor: the election office's list as cards
+   *  (KYC.stategov.governorRace, the map's and the grid's too, rule 12).
+   *  Where the races for Congress fold to rows on a phone, it folds the
+   *  same way, its row in the race's own words (governorRowWords, rule
+   *  99), apart from their count: it is no race for Congress (rule 73). */
+  function governorSection(foldable) {
+    var heading = KYC.stategov.raceHeading(code);
+    var body = KYC.stategov.governorRace(code);
+    var inner = foldable
+      ? '<section class="gov-race-fold gov-race-foldable" id="race-governor" data-race="governor">' +
+        governorRow(KYC.stategov.governorRowWords(code), heading) +
+        '<div class="race-body" id="race-body-governor">' + body +
+        '<p class="race-close-row" hidden><button type="button" class="btn race-close" data-race-close="governor">' +
+        KYC.icon("chevron", "race-close-icon") + " Close the " + KYC.escapeHtml(heading.replace(/^2026 /, "")) +
+        "</button></p></div></section>"
+      : body;
+    return '<section class="state-section gov-race-section" id="governor-race">' +
+      '<h2 class="state-heading">' + KYC.escapeHtml(heading) + "</h2>" + inner + "</section>";
+  }
+
+  /** The race for governor folded to one row, in the form of a race for
+   *  Congress's (KYC.cards.raceRow): the holder line, then each group of
+   *  names under its own label. Drawn hidden; foldLayout shows it. */
+  function governorRow(words, heading) {
+    var groups = words.ballot.map(function (g) {
+      return '<span class="race-row-ballot"><span class="race-row-label">' + KYC.escapeHtml(g[0]) +
+        ":</span> " + g[1].map(function (name) {
+          return '<span class="race-row-name">' + KYC.escapeHtml(name) + "</span>";
+        }).join(", ") + ".</span> ";
+    }).join("");
+    return '<h3 class="race-row-title" hidden><button type="button" class="race-row" aria-expanded="true" ' +
+      'aria-controls="race-body-governor" data-race-toggle="governor">' +
+      '<span class="race-row-num is-word" aria-hidden="true">Gov.</span>' +
+      '<span class="race-row-main"><span class="sr-only">' + KYC.escapeHtml(heading) + ". </span>" +
+      (words.held ? '<span class="race-row-held">' + KYC.escapeHtml(words.held) + "</span> " : "") +
+      groups + (words.none ? '<span class="race-row-ballot">' + KYC.escapeHtml(words.none) + "</span>" : "") +
+      "</span>" + KYC.icon("chevron", "race-row-chevron") + "</button></h3>";
+  }
+
   /** What else the state's November 3 ballot elects, from the same table the
    *  State government section marks, in a sentence. This site lists the
    *  candidates for Congress only, and says so. The statewide questions,
@@ -691,12 +760,13 @@
     if (territory) {
       // A territory's own record covers its governor only (ballot2026.TERRITORIES):
       // its legislature and local offices are not in it, and are said so.
-      var named = KYC.stategov && KYC.stategov.listsCandidates(code);
+      var named = KYC.stategov && KYC.stategov.listsCandidates(code, { governor: false });
       return (list
         ? "Of the territorial offices this site covers, the same ballot also elects the " +
           KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
           '<a class="state-jump" href="#state-government">Territorial government</a>' +
-          (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). "
+          (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). " +
+          governorWhere(code, "The candidates for governor are under ")
         : list === "" ? KYC.escapeHtml(name) + " does not elect its governor in 2026. " : "") +
         KYC.escapeHtml(KYC.ballot.territoryUnlisted);
     }
@@ -711,14 +781,27 @@
     // The statewide offices' candidates are listed under State government
     // from the election office's own list (rule 91); the legislature's are
     // not, and the sentence says which.
-    var listed = KYC.stategov && KYC.stategov.listsCandidates(code);
+    // The governor's are in the race for governor's own section, below.
+    var listed = KYC.stategov && KYC.stategov.listsCandidates(code, { governor: false });
+    var governor = governorWhere(code, "");
+    var where = [governor ? "those for governor under " + governor : "",
+      listed ? "those for " + KYC.escapeHtml(listed) + " under State government" : ""].filter(Boolean);
     return "Of the state offices this site covers, the same ballot also elects " +
       KYC.escapeHtml(list) + " (see " +
       '<a class="state-jump" href="#state-government">State government</a>). It may also hold ' +
-      rest + ". " + (listed
-        ? "This site lists the candidates for Congress here, and those for " +
-          KYC.escapeHtml(listed) + " under State government; not those for the legislature."
+      rest + ". " + (where.length
+        ? "This site lists the candidates for Congress here, " + (where.length > 1 ? where[0] + ", and " +
+          where[1] : "and " + where[0]) + "; not those for the legislature."
         : "This site lists the candidates for Congress only.");
+  }
+
+  /** A link to the race for governor's section by its heading, after
+   *  *lead*, where the page draws it and the election office's list was
+   *  read; "" otherwise. */
+  function governorWhere(code, lead) {
+    if (!(KYC.stategov && KYC.stategov.governorListed(code))) return "";
+    return lead + '<a class="state-jump" href="#governor-race">' +
+      KYC.escapeHtml(KYC.stategov.raceHeading(code)) + "</a>" + (lead ? ". " : "");
   }
 
   /* A link to a section of this page ("#state-government", from the guide)
@@ -737,7 +820,7 @@
     if (!section) return;
     // A race reached by a link (a shared race's page, the lookup's answer,
     // Your ballot, a district page) opens where the page folds.
-    var race = section.closest && section.closest("section.race-foldable");
+    var race = (section.closest && section.closest(FOLDS)) || ownFold(section);
     if (race && fold && fold.phone) setOpen(race, true, "reader");
     // Found again by its id at each jump: the statewide questions are drawn
     // in full over the plain list once data/measures.js is in
@@ -858,7 +941,7 @@
   function searchRaces(q) {
     if (!fold || !fold.phone) return;
     var folded = KYC.foldText(q || "");
-    raceSections().forEach(function (section) {
+    foldSections().forEach(function (section) {
       var id = section.getAttribute("data-race");
       if (!q) {
         section.hidden = false;
@@ -921,13 +1004,13 @@
       // folds it and puts the reader back on its row.
       var toggle = event.target.closest("[data-race-toggle]");
       if (toggle) {
-        var own = toggle.closest("section.race-foldable");
+        var own = toggle.closest(FOLDS);
         setOpen(own, toggle.getAttribute("aria-expanded") !== "true", "reader");
         return;
       }
       var close = event.target.closest("[data-race-close]");
       if (close) {
-        var closing = close.closest("section.race-foldable");
+        var closing = close.closest(FOLDS);
         setOpen(closing, false);
         // At once, as every jump on this page is (goTo).
         if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: "auto" });

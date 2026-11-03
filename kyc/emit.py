@@ -80,6 +80,12 @@ PAGE_REQUIREMENTS = {
         "assets/kyc-odds.js",
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
+        # The governors' cards (the Governors chip): drawn by the state
+        # pages' and the map's own module, from data/stategov.js loaded on
+        # demand (onDemandData) the first time they are shown.
+        "assets/kyc-stategov.js",
+        # The overlay the governor cards open (rule 91).
+        "assets/kyc-governor.js",
         "assets/kyc-findrep.js",
         "assets/kyc-senate.js",
         # The search's answers about offices, places and bodies (rule 97),
@@ -99,6 +105,7 @@ PAGE_REQUIREMENTS = {
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
         "assets/kyc-stategov.js",
+        "assets/kyc-governor.js",
         "assets/kyc-findrep.js",
         "assets/kyc-usmap.js",
         "assets/kyc-map.js",
@@ -108,9 +115,11 @@ PAGE_REQUIREMENTS = {
 # What a page names inert in its onDemandData template, to load when it is
 # wanted, beyond the votes and people files every page that opens profiles
 # names: the grid's search reads the profiles' words (INDEX_WORDS) from
-# their own file, loaded the first time a query is typed.
+# their own file, loaded the first time a query is typed; the governors and
+# their races (data/stategov.js) when the Governors chip, a governor's
+# overlay or a search's office answer wants them (rule 94).
 PAGE_ON_DEMAND = {
-    "index.html": ("data/people/words.js",),
+    "index.html": ("data/people/words.js", "data/stategov.js"),
 }
 
 # Your ballot (rule 92): the data its lists are drawn from, then the modules
@@ -149,6 +158,7 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-governor.js",
     "../assets/kyc-findrep.js",
     "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",
@@ -642,10 +652,15 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     cache = ballot_measures.load(root)
     measures = (ballot_measures.for_page(cache)
                 if cache and not ballot_measures.problems(cache) else None)
+    # Its governor and race for governor too, from the data/stategov.js the
+    # build has just written (the page's script draws them from the same
+    # file as cards).
+    from .guide_photos import read_stategov
+    stategov = read_stategov(root) if races is not None else None
     for code in state_codes(profiles):
         out[os.path.join(SITE_DIR, *pages.page_path(code).split("/"))] = (
             pages.render_state(code, host, summary, profiles if races is not None else None,
-                               races, measures))
+                               races, measures, stategov))
     if races is not None:
         for relative, text in share.render_all(profiles, races, host, summary).items():
             out[os.path.join(SITE_DIR, *relative.split("/"))] = text

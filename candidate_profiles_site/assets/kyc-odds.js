@@ -85,6 +85,19 @@
    *  name someone on the ballot this site has no profile (and so no party)
    *  for. */
   function oneParty(race) {
+    if (race && race.listParties) {
+      // A race for governor (kyc-stategov.js raceOdds): the parties the
+      // election office's list prints beside its candidates, write-ins
+      // apart. A fusion line or a minor party is no one party's (rule 88).
+      var words = {};
+      race.listParties.forEach(function (p) {
+        var key = /^Democratic(?:-Farmer-Labor|-NPL)?$/.test(p) ? "Democrat"
+          : p === "Republican" ? "Republican" : "other:" + p;
+        words[key] = true;
+      });
+      var only = Object.keys(words);
+      return race.listParties.length >= 2 && only.length === 1 && PLURAL[only[0]] ? only[0] : "";
+    }
     if (!race || !race.settled || !KYC.byId) return "";
     var res = race.results || {};
     if ((res.otherNominees || []).length) return "";
@@ -298,11 +311,20 @@
    * and the file stays the odds job's alone (rule 41). */
   var waiting = null;   // null, "loading" or "failed"
 
+  /* The race each slot was drawn for, by its id: a race for governor
+   * (kyc-stategov.js raceOdds, G-<ST>-2026) is none of KYC.races(), and a
+   * slot filled from that list alone was dropped without a word. A race
+   * may carry *none*, the line its caller draws where the cache holds no
+   * prices for it (the governor's race says so, rule 19), drawn in the
+   * slot's place as the caller would have drawn it. */
+  var slotted = {};
+
   function lazy() {
     return !global.kycOdds && !!KYC.onDemandSrc && !!KYC.onDemandSrc("odds.js");
   }
 
   function slot(race, opts) {
+    slotted[race.id] = race;
     want();
     return '<div class="odds-slot" data-odds-race="' + KYC.escapeAttr(race.id) + '"' +
       (opts.compact ? " data-odds-compact" : "") + (opts.collapsed ? " data-odds-collapsed" : "") +
@@ -329,13 +351,15 @@
     KYC.races().forEach(function (r) { byId[r.id] = r; });
     Array.prototype.forEach.call(doc.querySelectorAll(".odds-slot"), function (el) {
       if (waiting === "failed") { el.innerHTML = FAILED_LINE; return; }
-      var race = byId[el.getAttribute("data-odds-race")];
+      var id = el.getAttribute("data-odds-race");
+      var race = slotted[id] || byId[id];
       var html = race ? render(race, { compact: el.hasAttribute("data-odds-compact"),
-        collapsed: el.hasAttribute("data-odds-collapsed") }) : "";
+        collapsed: el.hasAttribute("data-odds-collapsed") }) || race.none || "" : "";
       if (!html) { el.parentNode.removeChild(el); return; }
       var holder = doc.createElement("div");
       holder.innerHTML = html;
-      el.parentNode.replaceChild(holder.firstChild, el);
+      while (holder.firstChild) el.parentNode.insertBefore(holder.firstChild, el);
+      el.parentNode.removeChild(el);
     });
   }
 
@@ -448,5 +472,8 @@
   }
 
   KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices,
-               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; } };
+               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; },
+               // Whether the page loads data/odds.js later (a state's and a
+               // district's pages): render() then draws a slot.
+               later: lazy };
 })(window);

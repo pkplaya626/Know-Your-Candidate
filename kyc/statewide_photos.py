@@ -152,8 +152,13 @@ def parse_arizona(page):
     Elections Commission's candidate list: each ``<li>`` of the state
     executive's sections pairs ``/Custom/Picture/<n>`` with ``<b>Name</b>``
     and the office. Picture 0 is the commission's silhouette (it answers
-    200), so it is no one's photograph."""
+    200), so it is no one's photograph. A list with no statewide item this
+    reader reads - an empty challenge (coag.gov answered a script HTTP 202
+    with no body, 2026-11-01), a bot wall, a page drawn by script, a
+    redesign - raises: it concludes nothing (rules 8 and 24), never "the
+    guide pictures no one", and the last photographs read are kept."""
     out = []
+    read = 0
     for item in re.findall(r"<li>(.*?)</li>", page or "", re.S):
         pic = re.search(r'<img class="pic" src="(/Custom/Picture/(\d+))"', item)
         name = re.search(r"<b>(.*?)</b>", item, re.S)
@@ -161,7 +166,10 @@ def parse_arizona(page):
         if not (pic and name and office):
             continue
         office_text = " ".join(html.unescape(office.group(1)).split())
-        if office_text not in AZ_OFFICES or pic.group(2) == "0":
+        if office_text not in AZ_OFFICES:
+            continue
+        read += 1
+        if pic.group(2) == "0":
             continue
         raw = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", name.group(1))).split())
         ticket = re.search(r"\(([^)]+)\)\s*$", raw)
@@ -170,6 +178,8 @@ def parse_arizona(page):
                  + (f", '{' '.join(party.group(1).split())}'" if party else ""))
         out.append((AZ_OFFICES[office_text], _plain_name(raw), ticket.group(1) if ticket else None,
                     urllib.parse.urljoin(AZ_LIST, pic.group(1)), words))
+    if not read:
+        raise StatewidePhotoError(f"{AZ_LIST} holds no statewide candidate this reader reads")
     return out
 
 
@@ -177,14 +187,18 @@ def parse_california(page, office):
     """``[(office, name, None, image url, words)]`` from one of the guide's
     statement pages: each candidate's block holds one image and one
     heading, "Name | PARTY"; the image is taken only where its alt text is
-    the heading's name. "No Photo Submitted" is no photograph."""
+    the heading's name. "No Photo Submitted" is no photograph, but a block
+    read. A page with no block this reader reads raises, as Arizona's list
+    does (:func:`parse_arizona`)."""
     out = []
+    read = 0
     blocks = re.split(r'<div class="grid-parent clearfix">', page or "")[1:]
     for block in blocks:
         heads = re.findall(r"<h2>(.*?)</h2>", block, re.S)
         imgs = re.findall(r"<img\b[^>]*>", block, re.I)
         if len(heads) != 1 or len(imgs) != 1:
             continue
+        read += 1
         head = " ".join(html.unescape(re.sub(r"<[^>]+>", " ", heads[0])).split())
         name = head.split("|", 1)[0].strip()
         alt = official_photos._attr(imgs[0], "alt")
@@ -197,6 +211,9 @@ def parse_california(page, office):
         out.append((office, _plain_name(name), None, url,
                     f"the statement's block pairs the image alt-texted '{alt}' with the heading "
                     f"'{head}'"))
+    if not read:
+        raise StatewidePhotoError(f"{CA_GUIDE.format(CA_PAGES[office])} holds no candidate's "
+                                  "statement this reader reads")
     return out
 
 
@@ -541,29 +558,147 @@ def ticket_links(office, candidate, links):
     return [link for link in links if not link[3]]
 
 
-def wiki_photo(code, office, candidate, links, race_title, refused=None, measure=None,
-               passed_over=None):
-    """``(record, why)`` for one candidate through the race's article
-    (*links*, :func:`race_links`). *refused* is ``overrides.NOT_A_PORTRAIT``,
-    keyed on the Commons upload address."""
-    from .portraits import commons_credit, credit_of, thumb_set, title_is_about
+def name_forms(code, office, name):
+    """The short forms an evidenced ``overrides.STATEWIDE_NAME_FORMS`` entry
+    records for this very list name ("Joe Lombardo" for "Lombardo,
+    Joseph"; rule 91), never one guessed."""
+    from . import overrides
+    return [holder for (where, key, holder), (form, _evidence)
+            in sorted(overrides.STATEWIDE_NAME_FORMS.items())
+            if where == code and key == office and form == name]
+
+
+def linked_article(office, candidate, links, resolve=None, code=None):
+    """``((target, infobox image, resolved article), "")`` for the one
+    article the race's article links for *candidate*, checked as rule 33
+    checks a ballot page's link (it resolves, is no section, list or
+    disambiguation, and its title carries their name); else ``(None, why)``:
+    "not-linked" (the race's article links none for them), "ambiguous", or
+    "article-not-theirs"."""
+    from .portraits import title_is_about
     from .statewide import display_name
-    measure = measure or official_photos.weigh
+    resolve = resolve or _resolve
     name = candidate["name"]
+    # The list's name, and a short form an evidenced entry records for it:
+    # Nevada's article links [[Joe Lombardo]] for the list's "Lombardo,
+    # Joseph" (PR #195's second review).
+    names = [name] + (name_forms(code, office, name) if code else [])
     hits = {}
     for target, shown, image, _mate in ticket_links(office, candidate, links):
-        if same_person(name, shown) or same_person(name, target.split(" (")[0]):
+        if any(same_person(n, shown) or same_person(n, target.split(" (")[0]) for n in names):
             hits.setdefault(target, image)
             hits[target] = hits[target] or image
     if len(hits) != 1:
         return None, ("ambiguous" if hits else "not-linked")
     target, infobox_image = next(iter(hits.items()))
-    article = _resolve(target)
+    article = resolve(target)
     resolved = article.get("title") or ""
     if article["missing"] or article["fragment"] or article["disambiguation"] \
             or not title_is_about(resolved, _plain_name(display_name(name))) \
-            or not same_person(name, resolved.split(" (")[0]):
+            or not any(same_person(n, resolved.split(" (")[0]) for n in names):
         return None, "article-not-theirs"
+    return (target, infobox_image, article), ""
+
+
+# The offices whose candidates' own articles the overlay shows (rule 91):
+# the governor's, whatever route pictures them.
+ARTICLE_OFFICES = ("governor",)
+
+
+def read_articles(lists, offices=ARTICLE_OFFICES, wikitext=None, resolve=None, log=print):
+    """``(articles, unknown)``: for every printed candidate for *offices*,
+    what the race's own article links for them, recorded whether or not it
+    gives a photograph: ``{"article": title, "page": race article}`` where
+    it links one that is theirs (:func:`linked_article`), else ``{"none":
+    why, "page": ...}``. A race whose article could not be read, or has
+    none, records nothing: this site did not look (rule 19), and the last
+    read is kept by the caller (rule 8)."""
+    wikitext = wikitext or _wikitext
+    articles, unknown = {}, set()
+    for code in sorted(lists):
+        for office in offices:
+            people = (lists[code] or {}).get(office) or []
+            if not people:
+                continue
+            text = title = None
+            try:
+                for candidate_title in race_titles(code, office):
+                    title, text = wikitext(candidate_title)
+                    if text:
+                        break
+            except Exception as exc:
+                log(f"  {code} {office}: the race's article could not be read ({exc})")
+                unknown.update(key(code, office, p["name"]) for p in people)
+                continue
+            if not text:
+                continue
+            links = race_links(text)
+            for person in people:
+                if person.get("writeIn"):
+                    continue
+                k = key(code, office, person["name"])
+                try:
+                    found, why = linked_article(office, person, links, resolve=resolve,
+                                                code=code)
+                except Exception:
+                    unknown.add(k)
+                    continue
+                articles[k] = ({"article": found[2]["title"], "page": title} if found
+                               else {"none": why, "page": title})
+    return articles, unknown
+
+
+def kept_articles(now, before, unknown):
+    """This read's articles, and the last read's for every candidate it
+    concluded nothing about (rule 8), sorted."""
+    out = dict(now)
+    for k, rec in (before or {}).items():
+        if k not in out and k in unknown:
+            out[k] = rec
+    return {k: out[k] for k in sorted(out)}
+
+
+def with_articles(cache, lists, previous=None, log=print, **readers):
+    """*cache* with the candidates' own articles read again
+    (:func:`read_articles`), the last read's kept where this one concluded
+    nothing. The whole of ``ballotphotos --articles-only``."""
+    now, unknown = read_articles(lists, log=log, **readers)
+    out = dict(cache)
+    out["articles"] = kept_articles(now, (previous or {}).get("articles"), unknown)
+    out["articlesRead"] = (datetime.date.today().isoformat() if now
+                           else (previous or {}).get("articlesRead"))
+    return out
+
+
+def article_of(cache, code, office, name):
+    """What the cache records of the race's article's link to *name*:
+    ``{"article": title, ...}``, ``{"none": why, ...}``, or ``None`` where
+    nothing was read (rule 19). The photograph's own record stands in for
+    a cache read before articles were recorded."""
+    k = key(code, office, name)
+    rec = ((cache or {}).get("articles") or {}).get(k)
+    if rec:
+        return dict(rec, read=(cache or {}).get("articlesRead"))
+    photo = ((cache or {}).get("photos") or {}).get(k) or {}
+    if photo.get("route") == "wikipedia" and photo.get("article"):
+        return {"article": photo["article"], "read": photo.get("read") or (cache or {}).get("read")}
+    return None
+
+
+def wiki_photo(code, office, candidate, links, race_title, refused=None, measure=None,
+               passed_over=None):
+    """``(record, why)`` for one candidate through the race's article
+    (*links*, :func:`race_links`). *refused* is ``overrides.NOT_A_PORTRAIT``,
+    keyed on the Commons upload address."""
+    from .portraits import commons_credit, credit_of, thumb_set
+    from .statewide import display_name
+    measure = measure or official_photos.weigh
+    name = candidate["name"]
+    found, why = linked_article(office, candidate, links, code=code)
+    if not found:
+        return None, why
+    target, infobox_image, article = found
+    resolved = article.get("title") or ""
     file_name = infobox_image or article.get("image")
     if not file_name:
         return None, "no-image"
@@ -783,6 +918,12 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
     cache = {"read": datetime.date.today().isoformat(),
              "photos": {k: records[k] for k in sorted(records)},
              "misses": {k: misses[k] for k in sorted(misses)}}
+    # The candidates' own articles, whatever route pictures them.
+    if wikipedia:
+        cache = with_articles(cache, lists, previous, log=log)
+    elif (previous or {}).get("articles"):
+        cache["articles"] = previous["articles"]
+        cache["articlesRead"] = previous.get("articlesRead")
     whole = wikipedia and not unknown
     for field, now in (("notPortraits", passed_over), ("licenceDoubts", doubts)):
         kept = keep_refusals(now, (previous or {}).get(field), unread, whole)

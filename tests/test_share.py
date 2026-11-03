@@ -107,7 +107,50 @@ class TestStatusWords(unittest.TestCase):
     def test_post_election_is_the_day_the_results_were_read(self):
         self.assertFalse(share.post_election({"election": {"resultsAsOf": "2026-11-03"}}))
         self.assertTrue(share.post_election({"election": {"resultsAsOf": "2026-11-04"}}))
+        self.assertEqual(share.post_election({"election": {"resultsAsOf": "2026-11-04T09:00"}}),
+                         "2026-11-04")
         self.assertFalse(share.post_election({}))
+
+    def test_an_open_primarys_december_round_is_its_general_election(self):
+        # Louisiana's House seats: the Secretary of State's "Open U.S.
+        # Representative General" on December 12, never a runoff (rule 75).
+        la = race(id="H-LA-05-2026", state="LA", district=5, primaryKind="open",
+                  generalRunoff="2026-12-12", primaryDate="2026-11-03")
+        filer = person(id="FEC_LA", isCandidate=True, raceId="H-LA-05-2026", state="LA",
+                       raceStatus="runoff", raceStatusRace="H-LA-05-2026")
+        self.assertEqual(words(filer, races=[la], post="2026-11-05"),
+                         "In the December 12 general election")
+        # The day itself is not passed; the day after, with no result read,
+        # it is in the past tense and awaiting one (rule 63).
+        self.assertEqual(words(filer, races=[la], post="2026-12-12"),
+                         "In the December 12 general election")
+        self.assertEqual(words(filer, races=[la], post="2026-12-13"),
+                         "Ran in the December 12 general election: awaiting result")
+        # Read with no day (a bare True), the round is not said to be over.
+        self.assertEqual(words(filer, races=[la], post=True), "In the December 12 general election")
+        # The source is still the results page's.
+        self.assertEqual(share.status_source(filer, {}), "Wikipedia's election results page")
+
+    def test_georgias_runoff_keeps_its_words(self):
+        ga = race(id="H-GA-13-2026", state="GA", district=13, generalRunoff="2026-12-01")
+        filer = person(id="FEC_GA", isCandidate=True, raceId="H-GA-13-2026", state="GA",
+                       raceStatus="runoff", raceStatusRace="H-GA-13-2026")
+        self.assertEqual(words(filer, races=[ga], post="2026-11-05"),
+                         "In the general election runoff")
+        # A top-two primary's race with a runoff is not an open primary.
+        ca = race(id="H-CA-03-2026", state="CA", primaryKind="top-two", generalRunoff="2026-12-01")
+        other = dict(filer, raceId=ca["id"], raceStatusRace=ca["id"])
+        self.assertEqual(words(other, races=[ca], post="2026-11-05"),
+                         "In the general election runoff")
+
+    def test_no_other_status_reads_the_december_round(self):
+        la = race(id="H-LA-05-2026", primaryKind="open", generalRunoff="2026-12-12")
+        for status in ("elected", "defeated", "nominee", "qualified", "eliminated"):
+            filer = person(id="FEC_LA", isCandidate=True, raceId=la["id"], raceStatus=status,
+                           raceStatusRace=la["id"])
+            plain = dict(filer, raceId="H-TX-03-2026", raceStatusRace="H-TX-03-2026")
+            self.assertEqual(words(filer, races=[la], post="2026-12-13"),
+                             words(plain, races=[race()], post="2026-12-13"), status)
 
 
 class TestStatusTable(unittest.TestCase):
@@ -129,6 +172,13 @@ class TestStatusTable(unittest.TestCase):
         labels = {row[-2] for row in table["statuses"]}
         for words in ("Elected in November", "Re-elected in November", "Lost re-election in November",
                       "In the general election runoff", "On the November ballot: awaiting result",
+                      "In the December 12 general election",
+                      "Ran in the December 12 general election: awaiting result",
+                      "Elected on December 12", "Lost the December 12 general election",
+                      "Re-elected on December 12", "Lost re-election on December 12",
+                      "Won the December 1 runoff", "Lost the December 1 runoff",
+                      "Re-elected in the December 1 runoff",
+                      "Lost re-election in the December 1 runoff",
                       "Advanced to the November ballot", "Not on the November 3 open-primary ballot"):
             self.assertIn(words, labels)
         self.assertEqual({row[0] for row in table["statuses"]}, set(share._RACE_STATUS))
