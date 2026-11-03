@@ -1679,6 +1679,12 @@
       if (!listDrawn) applyParams({}, { quiet: true });
       return;
     }
+    // A governor's overlay (kyc-governor.js) opens over the list as it
+    // stands: redrawing it here reset the Governors view under the dialog.
+    if (route.view === "official") {
+      if (!listDrawn) applyParams({}, { quiet: true });
+      return;
+    }
     if (KYC.profile.isOpen()) KYC.profile.close();
     if (listDrawn && JSON.stringify(route.params || {}) === drawnFor) return;
     applyParams(route.params || {});

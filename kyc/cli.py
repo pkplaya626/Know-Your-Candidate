@@ -823,8 +823,15 @@ def _history(args):
         # The article each challenger's election page links (rule 33).
         results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
                                 field=screen_field(field, profiles, raw.get("record")))
+        # The sitting governors by the NGA roster's Wikidata items, and the
+        # candidates for governor by the article their race's article links
+        # (kyc/stategov.py governor_candidate_articles; rules 69, 91).
+        from . import executives, stategov
+        governors = (executives.load_cache(args.root) or {}).get("governors") or {}
         try:
-            cache = history.fetch(profiles, executive=federal.load_cache(args.root))
+            cache = history.fetch(profiles, executive=federal.load_cache(args.root),
+                                  governors=governors,
+                                  candidates=stategov.governor_candidate_articles(args.root))
         except history.HistoryError as exc:
             print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
             return 2
@@ -1032,8 +1039,15 @@ def _odds(args):
                                 filed=candidates.filed_rows(screened), record=raw.get("record"),
                                 snapshot=legislators.load_snapshot(args.root))
     by_id = {p["id"]: p for p in profiles}
+    # The races for governor (rule 91): their own ids beside Congress's, and
+    # the election office's list of candidates as the people a label or a
+    # poll column may name (kyc/odds.py governor_races).
+    governor_races, governor_people = odds_mod.governor_races(args.root)
+    race_list = race_list + governor_races
 
     def people_of(race):
+        if race["id"] in governor_people:
+            return governor_people[race["id"]]
         # Who a market label or a poll column may name: anyone still in it,
         # and the nominees the results page lists with no FEC filing over
         # $5,000 - in the race, though they have no profile here.
@@ -1056,7 +1070,8 @@ def _odds(args):
     reach = odds_mod.coverage(cache, race_list)
     print(f"  markets for {reach['senate'][0]} of {reach['senate'][1]} Senate and "
           f"{reach['house'][0]} of {reach['house'][1]} House races; polling averages for "
-          f"{reach['polls']}; control of "
+          f"{reach['polls']}; markets for {reach['governor'][0]} of {reach['governor'][1]} "
+          f"governor races and polling averages for {reach['governorPolls']}; control of "
           f"{' and '.join(sorted(cache.get('control') or {})) or 'neither chamber'} "
           f"(fetched {cache.get('fetched')})")
     notes = cache.get("notes") or []

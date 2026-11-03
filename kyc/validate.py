@@ -1627,7 +1627,11 @@ def check_odds(races, odds, today=None):
         issues.append(Issue("warn", "odds-uncovered",
                             f"{len(uncovered)} Senate race(s) with no market from either source",
                             uncovered))
-    unknown = sorted(set(entries) - {r["id"] for r in races})
+    # The races for governor are in the cache under ids of their own
+    # (odds.governor_ids, from the ballot table): known, never Congress's.
+    from .odds import governor_ids
+
+    unknown = sorted(set(entries) - {r["id"] for r in races} - set(governor_ids()))
     if unknown:
         issues.append(Issue("warn", "odds-unknown-race",
                             f"{len(unknown)} race id(s) in the odds cache are not on the ballot "

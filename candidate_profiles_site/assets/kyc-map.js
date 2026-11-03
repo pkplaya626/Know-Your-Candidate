@@ -481,8 +481,13 @@
       // another office's, a line to them on the state page, so the office
       // the reader chose is not pushed a screen down (PR #191 review).
       var governorViews = mode === "governor" || mode === "governor2026";
-      list.innerHTML = '<div class="stategov">' +
-        KYC.stategov.render(code, { links: true, raceLink: !governorViews }) + "</div>";
+      // The 2026 governor's races view: the race's panel in the Senate
+      // panel's shape (KYC.stategov.racePanel) - the candidates on the
+      // election office's list counted and as cards, the markets, then the
+      // sitting governor's card - never the whole state-government block.
+      list.innerHTML = '<div class="stategov">' + (mode === "governor2026"
+        ? KYC.stategov.racePanel(code)
+        : KYC.stategov.render(code, { links: true, raceLink: !governorViews })) + "</div>";
       list.scrollTop = 0;
       return;
     }
@@ -885,6 +890,9 @@
         KYC.profile.open(route.id, { fromRoute: true });
         return;
       }
+      // A governor's overlay (kyc-governor.js) over the map as it stands:
+      // read as a list route, it reset the mode and rewrote the address.
+      if (route.view === "official") return;
       if (KYC.profile.isOpen()) KYC.profile.close();
       var wanted = route.params.mode || "senate";
       var shape = route.params.layout === "tiles" ? "tiles" : "map";

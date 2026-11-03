@@ -220,6 +220,104 @@ def _governor(gov, problems=None):
     return out
 
 
+def agreed_birth(nga, wikidata):
+    """The governor's date of birth where the NGA's page ("May 5, 1961") and
+    the Wikidata item's P569 give the same day (the pattern rule 54 uses
+    for the first day in office): ``{"date": iso, "nga": text}`` or
+    ``None``. A disagreement, or a date one source lacks, shows nothing."""
+    first = _date(nga) if nga else None
+    if first is None or not wikidata or wikidata.get("precision") != "day":
+        return None
+    if first.isoformat() != wikidata.get("date"):
+        return None
+    return {"date": first.isoformat(), "nga": nga.strip()}
+
+
+def candidate_article(photo_cache, code, printed_name):
+    """The candidate's own article as the race's article links it, checked
+    as rule 33 checks a ballot page's link (kyc/statewide_photos.py's
+    wikipedia route), or ``None``: the one route an article reaches a
+    candidate for governor by."""
+    from . import statewide_photos
+
+    rec = ((photo_cache or {}).get("photos") or {}).get(
+        statewide_photos.key(code, "governor", printed_name))
+    if rec and rec.get("route") == "wikipedia" and rec.get("article"):
+        return rec["article"]
+    return None
+
+
+def governor_candidate_articles(root="."):
+    """``{candidate id: (article title, name)}`` for every candidate for
+    governor whose race's article links their own (``candidate_article``):
+    what the ``history`` command reads their offices through."""
+    from . import statewide, statewide_photos
+
+    lists = statewide.load(root) or {"states": {}}
+    photo_cache = statewide_photos.load_cache(root) or {}
+    out = {}
+    for code in sorted(lists.get("states") or {}):
+        listed = statewide.office(lists, code, "governor") or {}
+        for person in listed.get("candidates") or ():
+            article = candidate_article(photo_cache, code, person["name"])
+            if article:
+                name = statewide.display_name(person["name"])
+                out[statewide.candidate_id(code, name)] = (article, name)
+    return out
+
+
+def attach_history(code, entry, raw, cache, photo_cache, problems):
+    """Give the governor's card and the candidates' their offices held and
+    articles from the history cache (kyc/history.py, rule 69), by the
+    overlay's ids: the governor's only while the cache's item is the one
+    the NGA roster's cross-check holds for them (``executives.wikidata``),
+    a candidate's only while the cache was read from the article the
+    race's article links for them now (``asked``, rule 69's
+    ``history-stale``). The governor's date of birth where the NGA and
+    Wikidata agree (``agreed_birth``); a disagreement is reported, never
+    shown."""
+    from . import history, statewide
+
+    people = (cache or {}).get("people") or {}
+    gov = entry["governor"]
+    gov["id"] = statewide.governor_id(code)
+    rec = people.get(history.governor_key(code))
+    if rec and raw.get("wikidata") and rec.get("wikidata") == raw["wikidata"]:
+        gov["politicalHistory"] = history.for_page(rec)
+        gov["wikidata"] = rec["wikidata"]
+        if rec.get("wikipedia"):
+            gov["wikipedia"] = rec["wikipedia"]
+        born = agreed_birth(raw.get("born"), rec.get("born"))
+        if born:
+            gov["born"] = born
+        elif raw.get("born") and rec.get("born") and _date(raw["born"]):
+            problems.append(f"{code}: the NGA says {gov['name']} was born {raw['born']}; "
+                            f"Wikidata records {rec['born']['date']} ({rec['born']['precision']}); "
+                            "neither is shown")
+    elif rec and raw.get("wikidata") and rec.get("wikidata") != raw["wikidata"]:
+        problems.append(f"{code}: the offices-held record for {gov['name']} was read from "
+                        f"{rec.get('wikidata')}; the NGA cross-check now holds {raw['wikidata']}; "
+                        "not shown; run 'history'")
+    item = ((entry.get("ballot2026") or {}).get("offices") or {}).get("governor") or {}
+    listed = item.get("candidates")
+    if not listed:
+        return
+    for row in listed["candidates"]:
+        row["id"] = statewide.candidate_id(code, row["name"])
+        if row.get("writeIn"):
+            continue
+        article = candidate_article(photo_cache, code, row.get("printed") or row["name"])
+        if not article:
+            continue
+        row["wikipedia"] = article
+        rec = people.get(row["id"])
+        if rec and rec.get("asked") == article:
+            row["politicalHistory"] = history.for_page(rec)
+        elif rec:
+            problems.append(f"{code}: {row['name']}'s offices were read from {rec.get('asked')}; the "
+                            f"race's article now links {article}; not shown; run 'history'")
+
+
 def headshot(gov):
     """The NGA headshot the card shows, or ``""``: the file itself when it is
     within the caps every portrait is held to (``photos.too_heavy``), else
@@ -445,9 +543,12 @@ def build(root="."):
         raise StateGovError(f"{statewide_photos.CACHE_PATH}: " + "; ".join(unfit))
     # And the election offices' own guides' photographs, hosted here
     # unmodified, for a candidate no other route pictures (kyc/guide_photos.py).
-    from . import guide_photos, photocopies
+    from . import guide_photos, history, photocopies
     guide_cache = guide_photos.load_cache(root)
     copies_manifest = photocopies.load(root)
+    # The offices held (kyc/history.py): optional; a state whose governor
+    # or candidates it does not hold shows "No linked record" (rule 19).
+    history_cache = history.load_cache(root)
     candidates_heavy = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
@@ -531,6 +632,9 @@ def build(root="."):
                     candidates_heavy += statewide_photos.attach(
                         code, key, item["candidates"]["candidates"], listed, holder, status,
                         photo_cache, guide_cache, copies_manifest)
+        # The offices held, articles and the agreed date of birth for the
+        # governor's overlay and the candidates' (rule 91, rule 69).
+        attach_history(code, entry, governors[code], history_cache, photo_cache, problems)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))

@@ -892,6 +892,7 @@ _STATE_SCRIPTS = (
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-governor.js",
     "../assets/kyc-findrep.js",
     "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",

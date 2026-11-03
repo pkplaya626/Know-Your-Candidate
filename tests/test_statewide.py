@@ -697,10 +697,19 @@ class TestThePage(unittest.TestCase):
                     # drawn as the smaller copy made here (rule 101,
                     # ``photoCopy``): an election office's guide's, hosted
                     # here, can be (kyc/guide_photos.py).
+                    # A candidate for governor also carries the overlay's id,
+                    # the article the race's article links for them (rule 33)
+                    # and the offices two sources agree on (rule 69): never
+                    # money or a platform.
                     self.assertLessEqual(set(person), {"name", "party", "runningMate",
                                                        "ballotName", "writeIn", "holder",
                                                        "printed", "surnameOnly", "record",
-                                                       "photo", "photoCredit", "photoCopy"})
+                                                       "photo", "photoCredit", "photoCopy",
+                                                       "id", "wikipedia", "politicalHistory"})
+                    if key == "governor":
+                        self.assertEqual(person["id"], statewide.candidate_id(code, person["name"]))
+                    else:
+                        self.assertNotIn("id", person)
                     if person.get("photoCopy"):
                         self.assertEqual(person["photoCopy"]["of"], person["photo"], person)
                     self.assertEqual("photo" in person, bool((person.get("photoCredit") or {})
