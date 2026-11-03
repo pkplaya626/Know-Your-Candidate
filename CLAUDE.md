@@ -1481,10 +1481,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (`stategov.governor_candidate_articles`, rule 33's check), under the
     overlay's id, as `ballotphotos` records that link whatever route
     pictures them (`statewide_photos.read_articles`, the cache's
-    `articles`; `--articles-only` reads them alone): first recorded only
-    with a Wikipedia photograph, the link was missing for 133 of 173
-    printed candidates, and the overlay told them all the race's article
-    "links none". `stategov.attach_history` attaches a record only while
+    `articles`; `--articles-only` reads them alone): recorded only with a
+    Wikipedia photograph, 40 of 173 printed candidates had an article and
+    the overlay told the rest the race's article "links none", members of
+    Congress among them; read on its own (2026-11-03), 73 have one, 67 are
+    linked nowhere the reader looks (the infobox, the results, the
+    candidate lists), 2 are not confirmed as theirs, and the rest, in
+    races with no article, read "not recorded here". `stategov.attach_history` attaches a record only while
     it is that item's or that article's (`asked`); a moved item or a
     changed link is reported, never shown.
 

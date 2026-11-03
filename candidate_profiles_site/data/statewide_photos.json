@@ -1,4 +1,575 @@
 {
+ "articles": {
+  "AK|governor|Bronson, Dave": {
+   "none": "not-linked",
+   "page": "2026 Alaska gubernatorial election"
+  },
+  "AK|governor|Kreiss-Tomkins, Jonathan S. “JKT”": {
+   "none": "not-linked",
+   "page": "2026 Alaska gubernatorial election"
+  },
+  "AK|governor|Taylor, Treg": {
+   "none": "not-linked",
+   "page": "2026 Alaska gubernatorial election"
+  },
+  "AK|governor|Wilson, Bernadette M.": {
+   "none": "not-linked",
+   "page": "2026 Alaska gubernatorial election"
+  },
+  "AL|governor|DOUG JONES": {
+   "article": "Doug Jones (politician)",
+   "page": "2026 Alabama gubernatorial election"
+  },
+  "AL|governor|TOMMY TUBERVILLE": {
+   "article": "Tommy Tuberville",
+   "page": "2026 Alabama gubernatorial election"
+  },
+  "AR|governor|Colt Shelby": {
+   "none": "not-linked",
+   "page": "2026 Arkansas gubernatorial election"
+  },
+  "AR|governor|Governor Sarah Huckabee Sanders": {
+   "article": "Sarah Huckabee Sanders",
+   "page": "2026 Arkansas gubernatorial election"
+  },
+  "AR|governor|State Senator Fred Love": {
+   "article": "Fredrick Love",
+   "page": "2026 Arkansas gubernatorial election"
+  },
+  "AZ|governor|BIGGS, ANDY": {
+   "article": "Andy Biggs",
+   "page": "2026 Arizona gubernatorial election"
+  },
+  "AZ|governor|HOURIHAN, TERI ANN": {
+   "none": "not-linked",
+   "page": "2026 Arizona gubernatorial election"
+  },
+  "AZ|governor|LOMBARDO, RISA": {
+   "none": "not-linked",
+   "page": "2026 Arizona gubernatorial election"
+  },
+  "CA|governor|Steve Hilton": {
+   "article": "Steve Hilton",
+   "page": "2026 California gubernatorial election"
+  },
+  "CA|governor|Xavier Becerra": {
+   "article": "Xavier Becerra",
+   "page": "2026 California gubernatorial election"
+  },
+  "CO|governor|Eric Mulder": {
+   "none": "not-linked",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CO|governor|Erik Underwood": {
+   "none": "not-linked",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CO|governor|Greg Lopez": {
+   "article": "Greg Lopez",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CO|governor|Jeff Peckman": {
+   "article": "Jeff Peckman",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CO|governor|Phil Weiser": {
+   "article": "Phil Weiser",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CO|governor|Stephen T. Hamilton": {
+   "none": "not-linked",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CO|governor|Victor Marx": {
+   "article": "Victor Marx",
+   "page": "2026 Colorado gubernatorial election"
+  },
+  "CT|governor|Ned Lamont": {
+   "article": "Ned Lamont",
+   "page": "2026 Connecticut gubernatorial election"
+  },
+  "CT|governor|Ryan Fazio": {
+   "article": "Ryan Fazio",
+   "page": "2026 Connecticut gubernatorial election"
+  },
+  "FL|governor|Byron Donalds": {
+   "article": "Byron Donalds",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|Charles Burkett": {
+   "none": "not-linked",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|David Jolly": {
+   "article": "David Jolly",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|Dean Ocean Abrams": {
+   "none": "not-linked",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|Frank J. Russo": {
+   "none": "not-linked",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|Jeffrey Peter \"Dr. Jeff\" Datto": {
+   "none": "not-linked",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|Moliere \"Moe\" Dimanche": {
+   "article": "Moliere Dimanche",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "FL|governor|Scott Eckhard Jewett": {
+   "none": "not-linked",
+   "page": "2026 Florida gubernatorial election"
+  },
+  "GA|governor|Keisha Lance Bottoms": {
+   "article": "Keisha Lance Bottoms",
+   "page": "2026 Georgia gubernatorial election"
+  },
+  "GA|governor|Rick Jackson": {
+   "article": "Rick Jackson (businessman)",
+   "page": "2026 Georgia gubernatorial election"
+  },
+  "GU|governor|ADA, Vicente A.": {
+   "article": "Vicente Ada",
+   "page": "2026 Guam gubernatorial election"
+  },
+  "GU|governor|TERLAJE, Therese Maria": {
+   "article": "Therese Terlaje",
+   "page": "2026 Guam gubernatorial election"
+  },
+  "HI|governor|Gary Cordery": {
+   "none": "not-linked",
+   "page": "2026 Hawaii gubernatorial election"
+  },
+  "HI|governor|Josh Green": {
+   "article": "Josh Green (politician)",
+   "page": "2026 Hawaii gubernatorial election"
+  },
+  "IA|governor|Rob Sand": {
+   "article": "Rob Sand",
+   "page": "2026 Iowa gubernatorial election"
+  },
+  "IA|governor|Zach Lahn": {
+   "none": "not-linked",
+   "page": "2026 Iowa gubernatorial election"
+  },
+  "ID|governor|Brad Little": {
+   "article": "Brad Little",
+   "page": "2026 Idaho gubernatorial election"
+  },
+  "ID|governor|John R. Stegner": {
+   "article": "John Stegner",
+   "page": "2026 Idaho gubernatorial election"
+  },
+  "ID|governor|Paul Sand": {
+   "none": "not-linked",
+   "page": "2026 Idaho gubernatorial election"
+  },
+  "ID|governor|Pro-Life": {
+   "none": "not-linked",
+   "page": "2026 Idaho gubernatorial election"
+  },
+  "ID|governor|Terri Pickens": {
+   "none": "not-linked",
+   "page": "2026 Idaho gubernatorial election"
+  },
+  "IL|governor|Collin Corbett": {
+   "none": "not-linked",
+   "page": "2026 Illinois gubernatorial election"
+  },
+  "IL|governor|Darren Bailey": {
+   "article": "Darren Bailey",
+   "page": "2026 Illinois gubernatorial election"
+  },
+  "IL|governor|JB Pritzker": {
+   "article": "JB Pritzker",
+   "page": "2026 Illinois gubernatorial election"
+  },
+  "KS|governor|Cindy Holscher": {
+   "article": "Cindy Holscher",
+   "page": "2026 Kansas gubernatorial election"
+  },
+  "KS|governor|Ty Masterson": {
+   "article": "Ty Masterson",
+   "page": "2026 Kansas gubernatorial election"
+  },
+  "MA|governor|James": {
+   "none": "not-linked",
+   "page": "2026 Massachusetts gubernatorial election"
+  },
+  "MA|governor|Maura Healey": {
+   "article": "Maura Healey",
+   "page": "2026 Massachusetts gubernatorial election"
+  },
+  "MA|governor|Michael Roger Minogue": {
+   "none": "article-not-theirs",
+   "page": "2026 Massachusetts gubernatorial election"
+  },
+  "MD|governor|Andy Ellis": {
+   "none": "not-linked",
+   "page": "2026 Maryland gubernatorial election"
+  },
+  "MD|governor|Cathy White": {
+   "none": "not-linked",
+   "page": "2026 Maryland gubernatorial election"
+  },
+  "MD|governor|Dan Cox": {
+   "article": "Dan Cox",
+   "page": "2026 Maryland gubernatorial election"
+  },
+  "MD|governor|Wes Moore": {
+   "article": "Wes Moore",
+   "page": "2026 Maryland gubernatorial election"
+  },
+  "ME|governor|Hannah M. Pingree": {
+   "article": "Hannah Pingree",
+   "page": "2026 Maine gubernatorial election"
+  },
+  "ME|governor|Rick Bennett": {
+   "none": "ambiguous",
+   "page": "2026 Maine gubernatorial election"
+  },
+  "ME|governor|Robert B. Charles": {
+   "article": "Robert B. Charles",
+   "page": "2026 Maine gubernatorial election"
+  },
+  "MI|governor|Anthony Hudson": {
+   "none": "not-linked",
+   "page": "2026 Michigan gubernatorial election"
+  },
+  "MI|governor|Donna Brandenburg": {
+   "none": "not-linked",
+   "page": "2026 Michigan gubernatorial election"
+  },
+  "MI|governor|Douglas Campbell": {
+   "none": "not-linked",
+   "page": "2026 Michigan gubernatorial election"
+  },
+  "MI|governor|Jocelyn Benson": {
+   "article": "Jocelyn Benson",
+   "page": "2026 Michigan gubernatorial election"
+  },
+  "MI|governor|John James": {
+   "article": "John James (Michigan politician)",
+   "page": "2026 Michigan gubernatorial election"
+  },
+  "MN|governor|Amy Klobuchar": {
+   "article": "Amy Klobuchar",
+   "page": "2026 Minnesota gubernatorial election"
+  },
+  "MN|governor|Lisa Demuth": {
+   "article": "Lisa Demuth",
+   "page": "2026 Minnesota gubernatorial election"
+  },
+  "MN|governor|Steven Young": {
+   "none": "not-linked",
+   "page": "2026 Minnesota gubernatorial election"
+  },
+  "MP|governor|ATTAO, Blas Jonathan \"BJ\" Tenorio": {
+   "article": "Blas T. Attao",
+   "page": "2026 Northern Mariana Islands gubernatorial election"
+  },
+  "MP|governor|CAMACHO, Lawrence Fejeran": {
+   "none": "not-linked",
+   "page": "2026 Northern Mariana Islands gubernatorial election"
+  },
+  "MP|governor|TORRES, Ralph Anthony Deleon Guerrero": {
+   "article": "Ralph Torres",
+   "page": "2026 Northern Mariana Islands gubernatorial election"
+  },
+  "NE|governor|Brett Lindstrom": {
+   "article": "Brett Lindstrom",
+   "page": "2026 Nebraska gubernatorial election"
+  },
+  "NE|governor|Jim Pillen": {
+   "article": "Jim Pillen",
+   "page": "2026 Nebraska gubernatorial election"
+  },
+  "NE|governor|Lynne Walz": {
+   "article": "Lynne Walz",
+   "page": "2026 Nebraska gubernatorial election"
+  },
+  "NE|governor|Rick Beard": {
+   "none": "not-linked",
+   "page": "2026 Nebraska gubernatorial election"
+  },
+  "NH|governor|Cinde Warmington": {
+   "article": "Cinde Warmington",
+   "page": "2026 New Hampshire gubernatorial election"
+  },
+  "NH|governor|Kelly Ayotte": {
+   "article": "Kelly Ayotte",
+   "page": "2026 New Hampshire gubernatorial election"
+  },
+  "NH|governor|Stephen Villee": {
+   "none": "not-linked",
+   "page": "2026 New Hampshire gubernatorial election"
+  },
+  "NM|governor|DEB HAALAND": {
+   "article": "Deb Haaland",
+   "page": "2026 New Mexico gubernatorial election"
+  },
+  "NM|governor|GREGGORY D HULL": {
+   "article": "Gregg Hull",
+   "page": "2026 New Mexico gubernatorial election"
+  },
+  "NV|governor|Ford, Aaron D.": {
+   "article": "Aaron Ford (Nevada politician)",
+   "page": "2026 Nevada gubernatorial election"
+  },
+  "NV|governor|Ford, Danielle": {
+   "none": "not-linked",
+   "page": "2026 Nevada gubernatorial election"
+  },
+  "NV|governor|Lombardo, Joseph": {
+   "none": "not-linked",
+   "page": "2026 Nevada gubernatorial election"
+  },
+  "NY|governor|Bruce A. Blakeman": {
+   "article": "Bruce Blakeman",
+   "page": "2026 New York gubernatorial election"
+  },
+  "NY|governor|Kathy C. Hochul": {
+   "article": "Kathy Hochul",
+   "page": "2026 New York gubernatorial election"
+  },
+  "OH|governor|Amy Acton": {
+   "article": "Amy Acton",
+   "page": "2026 Ohio gubernatorial election"
+  },
+  "OH|governor|Don Kissick": {
+   "none": "not-linked",
+   "page": "2026 Ohio gubernatorial election"
+  },
+  "OH|governor|Vivek Ramaswamy": {
+   "article": "Vivek Ramaswamy",
+   "page": "2026 Ohio gubernatorial election"
+  },
+  "OK|governor|CYNDI MUNSON": {
+   "article": "Cyndi Munson",
+   "page": "2026 Oklahoma gubernatorial election"
+  },
+  "OK|governor|JERRY GRIFFIN": {
+   "none": "not-linked",
+   "page": "2026 Oklahoma gubernatorial election"
+  },
+  "OK|governor|MIKE MAZZEI": {
+   "article": "Mike Mazzei",
+   "page": "2026 Oklahoma gubernatorial election"
+  },
+  "OK|governor|ORLANDO LYNN BUSH": {
+   "none": "not-linked",
+   "page": "2026 Oklahoma gubernatorial election"
+  },
+  "OK|governor|ROBERT E BROOKS SR": {
+   "none": "not-linked",
+   "page": "2026 Oklahoma gubernatorial election"
+  },
+  "OR|governor|Brett Smith": {
+   "none": "not-linked",
+   "page": "2026 Oregon gubernatorial election"
+  },
+  "OR|governor|Christine Drazan": {
+   "article": "Christine Drazan",
+   "page": "2026 Oregon gubernatorial election"
+  },
+  "OR|governor|Tina Kotek": {
+   "article": "Tina Kotek",
+   "page": "2026 Oregon gubernatorial election"
+  },
+  "PA|governor|JOSH SHAPIRO": {
+   "article": "Josh Shapiro",
+   "page": "2026 Pennsylvania gubernatorial election"
+  },
+  "PA|governor|KEN KRAWCHUK": {
+   "none": "not-linked",
+   "page": "2026 Pennsylvania gubernatorial election"
+  },
+  "PA|governor|STACY GARRITY": {
+   "article": "Stacy Garrity",
+   "page": "2026 Pennsylvania gubernatorial election"
+  },
+  "RI|governor|AARON CHRISTOPHER GUCKIAN": {
+   "none": "not-linked",
+   "page": "2026 Rhode Island gubernatorial election"
+  },
+  "RI|governor|C D REYNOLDS": {
+   "none": "not-linked",
+   "page": "2026 Rhode Island gubernatorial election"
+  },
+  "RI|governor|HELENA BUONANNO FOULKES": {
+   "article": "Helena Foulkes",
+   "page": "2026 Rhode Island gubernatorial election"
+  },
+  "RI|governor|JASJIT S GOTRA": {
+   "none": "not-linked",
+   "page": "2026 Rhode Island gubernatorial election"
+  },
+  "RI|governor|KENNETH J BLOCK": {
+   "article": "Ken Block (politician)",
+   "page": "2026 Rhode Island gubernatorial election"
+  },
+  "SC|governor|Alan Wilson": {
+   "article": "Alan Wilson (politician)",
+   "page": "2026 South Carolina gubernatorial election"
+  },
+  "SC|governor|Jermaine Johnson": {
+   "article": "Jermaine Johnson (politician)",
+   "page": "2026 South Carolina gubernatorial election"
+  },
+  "SC|governor|Michael Addison": {
+   "none": "not-linked",
+   "page": "2026 South Carolina gubernatorial election"
+  },
+  "SC|governor|Walid Hakim": {
+   "none": "not-linked",
+   "page": "2026 South Carolina gubernatorial election"
+  },
+  "SD|governor|Dan Ahlers": {
+   "article": "Dan Ahlers",
+   "page": "2026 South Dakota gubernatorial election"
+  },
+  "SD|governor|Larry Rhoden": {
+   "article": "Larry Rhoden",
+   "page": "2026 South Dakota gubernatorial election"
+  },
+  "TN|governor|Charles Van Morgan": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Dave Seeman": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|David Hatley": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Dean Brewer": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Eddie Lee Murphy": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Jerri Green": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Karl Knox Smithson": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|L. Webb Taylor": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Lauren Pinkston": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Marsha Blackburn": {
+   "article": "Marsha Blackburn",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Misam Abidi": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Ray Brown": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Robert C. Vick": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Victor L. Scoggin": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TN|governor|Wendell Jackson": {
+   "none": "not-linked",
+   "page": "2026 Tennessee gubernatorial election"
+  },
+  "TX|governor|GINA HINOJOSA": {
+   "article": "Gina Hinojosa",
+   "page": "2026 Texas gubernatorial election"
+  },
+  "TX|governor|GREG ABBOTT": {
+   "article": "Greg Abbott",
+   "page": "2026 Texas gubernatorial election"
+  },
+  "TX|governor|PAT DIXON": {
+   "none": "not-linked",
+   "page": "2026 Texas gubernatorial election"
+  },
+  "VI|governor|Adlah \"Foncie\" Donastorg": {
+   "article": "Adlah Donastorg Jr.",
+   "page": "2026 United States Virgin Islands gubernatorial election"
+  },
+  "VI|governor|Gustav James": {
+   "none": "not-linked",
+   "page": "2026 United States Virgin Islands gubernatorial election"
+  },
+  "VI|governor|Oakland Benta": {
+   "none": "not-linked",
+   "page": "2026 United States Virgin Islands gubernatorial election"
+  },
+  "VI|governor|Stacey E. Plaskett": {
+   "article": "Stacey Plaskett",
+   "page": "2026 United States Virgin Islands gubernatorial election"
+  },
+  "VI|governor|Warren Mosler": {
+   "article": "Warren Mosler",
+   "page": "2026 United States Virgin Islands gubernatorial election"
+  },
+  "VT|governor|AMANDA JANOO": {
+   "none": "not-linked",
+   "page": "2026 Vermont gubernatorial election"
+  },
+  "VT|governor|BRIAN JUDD": {
+   "none": "not-linked",
+   "page": "2026 Vermont gubernatorial election"
+  },
+  "VT|governor|DEAN ROY": {
+   "none": "not-linked",
+   "page": "2026 Vermont gubernatorial election"
+  },
+  "VT|governor|JUNE GOODBAND": {
+   "none": "not-linked",
+   "page": "2026 Vermont gubernatorial election"
+  },
+  "VT|governor|PHIL SCOTT": {
+   "article": "Phil Scott",
+   "page": "2026 Vermont gubernatorial election"
+  },
+  "WI|governor|David Crowley": {
+   "article": "David Crowley (Wisconsin politician)",
+   "page": "2026 Wisconsin gubernatorial election"
+  },
+  "WI|governor|Tom Tiffany": {
+   "article": "Tom Tiffany",
+   "page": "2026 Wisconsin gubernatorial election"
+  },
+  "WY|governor|Eric Barlow": {
+   "article": "Eric Barlow",
+   "page": "2026 Wyoming gubernatorial election"
+  },
+  "WY|governor|Kenneth R. Casner": {
+   "none": "not-linked",
+   "page": "2026 Wyoming gubernatorial election"
+  },
+  "WY|governor|Rebecca Bextel": {
+   "none": "not-linked",
+   "page": "2026 Wyoming gubernatorial election"
+  }
+ },
+ "articlesRead": "2026-11-03",
  "misses": {
   "AK|governor|Bronson, Dave": "not-linked",
   "AK|governor|Kreiss-Tomkins, Jonathan S. “JKT”": "not-linked",

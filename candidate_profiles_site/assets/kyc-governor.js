@@ -252,6 +252,8 @@
     "cross-check holds for the governor; it has none for this one yet.";
   var NO_RECORD_CANDIDATE = "This site reads a candidate’s offices held through their own article, " +
     "as the race’s Wikipedia article links it; it has none for this candidate.";
+  var NOT_READ_CANDIDATE = "This site has not yet read the offices held through this candidate’s " +
+    "article, which the race’s Wikipedia article links.";
 
   /* Why a date the NGA gives is not shown, in rule 19's words, as the
    * pipeline records it (kyc/stategov.py since_why, attach_history's
@@ -321,7 +323,8 @@
     }
     if (person.articleNone === "not-linked") {
       return absent("No article: the race’s own Wikipedia article" + read +
-        " links none for this candidate, and this site never searches by name");
+        " links none for this candidate where it lists the race’s candidates (its infobox, results " +
+        "and candidate lists), and this site never searches by name");
     }
     if (person.articleNone) {
       return absent("No article: the link the race’s own Wikipedia article" + read +
@@ -463,7 +466,8 @@
       '<div class="modal-column">' + racePanel(code, person.id) + "</div>" +
       '<div class="modal-column">' +
       panel("user", "Biography", candidateBiography(code, person, parts)) +
-      panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory, NO_RECORD_CANDIDATE)) +
+      panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory,
+        person.wikipedia ? NOT_READ_CANDIDATE : NO_RECORD_CANDIDATE)) +
       "</div>";
     var list = parts.list;
     el("governorModalSource").innerHTML = "Source: " + outLink(list.url, list.source) + " (read " +

@@ -699,13 +699,16 @@ class TestThePage(unittest.TestCase):
                     # here, can be (kyc/guide_photos.py).
                     # A candidate for governor also carries the overlay's id,
                     # the article the race's article links for them (rule 33)
-                    # and the offices two sources agree on (rule 69): never
-                    # money or a platform.
+                    # and the offices two sources agree on (rule 69), what the
+                    # race's article was found to link (``articleNone``, the
+                    # day read), and the member of Congress an evidenced entry
+                    # ties them to: never money or a platform.
                     self.assertLessEqual(set(person), {"name", "party", "runningMate",
                                                        "ballotName", "writeIn", "holder",
                                                        "printed", "surnameOnly", "record",
                                                        "photo", "photoCredit", "photoCopy",
-                                                       "id", "wikipedia", "politicalHistory"})
+                                                       "id", "wikipedia", "politicalHistory",
+                                                       "articleNone", "articleRead", "member"})
                     if key == "governor":
                         self.assertEqual(person["id"], statewide.candidate_id(code, person["name"]))
                     else:
