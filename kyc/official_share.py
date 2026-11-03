@@ -242,9 +242,11 @@ def weight_words(n):
     return f"{max(1, int(n / 1e3 + 0.5))} KB"
 
 
-def credit_html(credit):
+def credit_html(credit, host=None):
     """``KYC.photoCreditHtml``: one line crediting a photograph, escaped,
-    linked where the credit holds the address; "" for none."""
+    linked where the credit holds the address; "" for none. An original
+    hosted here (an election office's guide's, rule 101) is linked at its
+    address on *host*, the site's one hostname (rule 21)."""
     if not credit or not (credit.get("by") or credit.get("licence") or credit.get("host")):
         return ""
 
@@ -268,13 +270,22 @@ def credit_html(credit):
     line = f"Photo{year}: " + ", ".join(parts) if parts else f"Photo{year}"
     if credit.get("via"):
         line += (", via " if parts else " via ") + anchor(credit.get("page"), credit["via"])
+    if credit.get("listedBy"):
+        line += ", as listed by " + _e(credit["listedBy"])
     if credit.get("dated"):
         line = _e(credit["dated"]) + ". " + line
+    if credit.get("converted"):
+        line += f'<span class="photo-converted-note">; {_e(credit["converted"])}</span>'
     if credit.get("copyOf"):
+        from .photocopies import is_hosted
+
         original = "the original file" + (f" ({weight_words(credit['copyOfBytes'])})"
                                           if credit.get("copyOfBytes") else "")
+        href = credit["copyOf"]
+        if is_hosted(href) and host:
+            href = f"https://{host}/{href}"
         line += (f'<span class="photo-copy-note" data-copy-of="{_e(credit["copyOf"])}">; a smaller '
-                 f"copy made by this site of {anchor(credit['copyOf'], original)}</span>")
+                 f"copy made by this site of {anchor(href, original)}</span>")
     return line
 
 

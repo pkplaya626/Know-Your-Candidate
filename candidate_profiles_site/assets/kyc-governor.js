@@ -342,26 +342,25 @@
    *  governor (the holder line settles them as the holder) or a member of
    *  Congress an evidenced entry ties to the list's name (the photograph's
    *  member route). Never joined by a name alone (rule 25). */
-  function recordLine(code, person) {
+  function recordLine(code, person, words) {
     if (person.holder) {
-      return '<a href="#/official/' + KYC.escapeAttr("gov-" + code) + '">The sitting governor: ' +
-        "see their record ›</a>";
+      return '<a href="#/official/' + KYC.escapeAttr("gov-" + code) + '">' + KYC.escapeHtml(words.record) + "</a>";
     }
     if (person.member) {
-      return '<a href="#/profile/' + KYC.escapeAttr(person.member) + '">A member of Congress: ' +
-        "see their profile ›</a>";
+      return '<a href="#/profile/' + KYC.escapeAttr(person.member) + '">' + KYC.escapeHtml(words.record) + "</a>";
     }
     return "";
   }
 
-  function candidateBiography(code, person, parts) {
+  function candidateBiography(code, person, parts, words) {
     var list = parts.list;
-    var record = recordLine(code, person);
+    var record = recordLine(code, person, words);
+    var mate = words.runningMate.replace(/ for lieutenant governor$/, "");
     var body = '<div class="field-grid">' +
       (record ? field("Record", record, true) : "") +
       field("Party", person.party ? KYC.escapeHtml(person.party) : absent("The list gives none")) +
-      field("Running mate", person.runningMate
-        ? KYC.escapeHtml(person.runningMate) + ' <span class="faint">for lieutenant governor</span>'
+      field("Running mate", words.runningMate
+        ? KYC.escapeHtml(mate) + ' <span class="faint">for lieutenant governor</span>'
         : absent("The list names none")) +
       field("Born", record
         ? absent("Not shown here: see their record")
@@ -375,6 +374,78 @@
       '<p class="held-source">The name, party and running mate are from ' + outLink(list.url, list.source) +
       ", read " + KYC.escapeHtml(KYC.dateWords(list.read)) + ".</p>";
     return body;
+  }
+
+  /* ------------------------------------------------------------ the words */
+
+  function textOf(html) {
+    var d = doc.createElement("div");
+    d.innerHTML = html;
+    return d.textContent.replace(/\s+/g, " ").trim();
+  }
+
+  var PAST = "This site does not read the state’s results and names no winner";
+  var RECORD = { holder: "The sitting governor: see their record ›",
+                 member: "A member of Congress: see their profile ›" };
+
+  /** Every word the overlay's head and footer give *found* ({kind, code,
+   *  person}), each "" where it says none: one table (rule 12) that the
+   *  overlay draws from and the share page (o/<id>.html,
+   *  kyc/governor_share.py share_words) writes without scripts. The render
+   *  suite compares the two for every governor and candidate, and asks
+   *  every case of tests/fixtures/governor_share_words.json of this code on
+   *  both clocks (rule 96). The ballot mark and the holder line are the
+   *  cards' own (officeMark, openSeat, rule 79), read here as text; after
+   *  Election Day the past tense and the state's results, naming no winner
+   *  (rule 91). */
+  function shareWords(found) {
+    var code = found.code;
+    var p = found.person;
+    var past = after();
+    var b = sg().ballotOf(code);
+    var item = b && b.offices.governor;
+    var out = { kind: "", office: "", seeking: "", party: "", since: "", mark: "", holder: "",
+                status: "", printed: "", ballotName: "", surnameOnly: "", runningMate: "", term: "",
+                record: "", past: "", results: "", source: "" };
+    if (past && item && item.up) {
+      var voting = (KYC.meta && KYC.meta().voting) || {};
+      out.past = PAST;
+      out.results = (voting[code] || {}).results || "";
+    }
+    out.party = p.party || "";
+    if (found.kind === "governor") {
+      var nga = ((global.kycStateGov || {}).sources || {}).nga || [];
+      out.kind = "Governor";
+      out.office = sg().governorOf(code);
+      out.since = p.since ? "In office since " + p.since : "";
+      out.mark = textOf(sg().officeMark(code, "governor"));
+      out.holder = textOf(sg().openSeat(code, "governor"));
+      out.source = "Governor: " + (nga[0] || "National Governors Association") +
+        (nga[2] ? ", read " + KYC.dateWords(nga[2]) : "") + ".";
+      return out;
+    }
+    var list = (item && item.candidates) || {};
+    var term = termLength(code);
+    out.kind = "Governor (Candidate)";
+    out.seeking = past ? "Ran for" : "Running for";
+    out.office = "Governor • " + code;
+    out.status = textOf(statusBadge(p));
+    out.printed = p.printed ? "The list prints: " + p.printed : "";
+    out.ballotName = p.ballotName ? "Printed on the ballot as “" + p.ballotName + "”" : "";
+    out.surnameOnly = p.surnameOnly ? "The list gives a surname only." : "";
+    out.runningMate = p.runningMate ? p.runningMate + " for lieutenant governor" : "";
+    out.term = term ? "Term " + term + (past ? "" : " (if elected)") : "";
+    out.record = p.holder ? RECORD.holder : p.member ? RECORD.member : "";
+    out.source = "Source: " + list.source + " (read " + KYC.dateWords(list.read) + ").";
+    return out;
+  }
+
+  /** After Election Day, under an office that was on the ballot: this site
+   *  names no winner, and the state's own results are linked (rule 91). */
+  function pastLine(words) {
+    if (!words.past) return "";
+    return ' <span class="faint gov-past">' + KYC.escapeHtml(words.past) +
+      (words.results ? ": " + outLink(words.results, "the official results") : "") + ".</span>";
   }
 
   /* ---------------------------------------------------------------- render */
@@ -416,18 +487,22 @@
     // The fill the profile dialog's tag takes (kyc-profile.js PARTY_LABEL_BG).
     tag.style.background = "var(--party-" + (key || "i") + ")";
     tag.hidden = !gov.party;
-    el("governorModalKind").textContent = "Governor";
+    // The head's words from the one table the share page writes (rule 96).
+    var words = shareWords({ kind: "governor", code: code, person: gov });
+    el("governorModalKind").textContent = words.kind;
     el("governorModalPrinted").hidden = true;
     el("governorModalMeta").innerHTML =
-      "<span>" + KYC.icon("pin") + " <strong>" + KYC.escapeHtml(sg().governorOf(code)) + "</strong> " +
+      "<span>" + KYC.icon("pin") + " <strong>" + KYC.escapeHtml(words.office) + "</strong> " +
       stateLink(code, "governor") + "</span>" +
-      (gov.since ? "<span>" + KYC.icon("calendar") + " In office since <strong>" +
+      (words.since ? "<span>" + KYC.icon("calendar") + " In office since <strong>" +
         KYC.escapeHtml(gov.since) + "</strong></span>" : "");
     var status = el("governorModalStatus");
     // The ballot mark is the office's and sits on the office's line, the
-    // holder line under it (rule 79), in the card's own words.
+    // holder line under it (rule 79), in the card's own words; after the
+    // election, the state's results, naming no winner (rule 91).
     status.innerHTML = '<span class="gov-office">' + sg().officeMark(code, "governor") + "</span>" +
-      sg().openSeat(code, "governor").replace(/^<p class="/, '<span class="').replace(/<\/p>$/, "</span>");
+      sg().openSeat(code, "governor").replace(/^<p class="/, '<span class="').replace(/<\/p>$/, "</span>") +
+      pastLine(words);
     status.hidden = !status.textContent.trim();
     el("governorModalBody").innerHTML =
       '<div class="modal-column">' + racePanel(code, gov.id) + "</div>" +
@@ -435,9 +510,7 @@
       panel("user", "Biography", governorBiography(code, gov)) +
       panel("landmark", "Public offices held", KYC.officesHeld(gov.politicalHistory, NO_RECORD_GOVERNOR)) +
       panel("link", "Links", governorLinks(gov)) + "</div>";
-    var nga = (global.kycStateGov.sources || {}).nga || [];
-    el("governorModalSource").textContent = "Governor: " + (nga[0] || "National Governors Association") +
-      (nga[2] ? ", read " + KYC.dateWords(nga[2]) : "") + ".";
+    el("governorModalSource").textContent = words.source;
     setPortrait(gov.headshot, gov.photoCopy, gov.headshotBy
       ? { by: gov.headshotBy, page: gov.headshotPage } : null, gov.name);
   }
@@ -449,33 +522,34 @@
     tag.className = "party-tag " + (key ? "party-" + key : "party-tag-ink");
     tag.style.background = key ? "var(--party-" + key + ")" : "";
     tag.hidden = !person.party;
-    el("governorModalKind").textContent = "Governor (Candidate)";
+    // The head's words from the one table the share page writes (rule 96).
+    var words = shareWords({ kind: "candidate", code: code, person: person });
+    el("governorModalKind").textContent = words.kind;
     var printed = el("governorModalPrinted");
-    printed.textContent = person.printed ? "The list prints: " + person.printed : "";
-    printed.hidden = !person.printed;
-    var term = termLength(code);
+    printed.textContent = words.printed;
+    printed.hidden = !words.printed;
+    var term = /^Term (.+?)( \(if elected\))?$/.exec(words.term);
     el("governorModalMeta").innerHTML =
-      "<span>" + KYC.icon("pin") + " " + (parts.past ? "Ran for" : "Running for") +
-      " <strong>Governor • " + KYC.escapeHtml(code) + "</strong> " + stateLink(code, "governor-race") + "</span>" +
-      (term ? '<span class="gov-term">' + KYC.icon("calendar") + " Term <strong>" + KYC.escapeHtml(term) +
-        "</strong>" + (parts.past ? "" : " (if elected)") + "</span>" : "");
+      "<span>" + KYC.icon("pin") + " " + KYC.escapeHtml(words.seeking) +
+      " <strong>" + KYC.escapeHtml(words.office) + "</strong> " + stateLink(code, "governor-race") + "</span>" +
+      (term ? '<span class="gov-term">' + KYC.icon("calendar") + " Term <strong>" + KYC.escapeHtml(term[1]) +
+        "</strong>" + (term[2] || "") + "</span>" : "");
     var status = el("governorModalStatus");
     status.innerHTML = statusBadge(person) +
-      (person.ballotName ? ' <span class="faint">Printed on the ballot as “' +
-        KYC.escapeHtml(person.ballotName) + "”</span>" : "") +
-      (person.surnameOnly ? ' <span class="faint">The list gives a surname only.</span>' : "") +
-      (parts.past ? ' <span class="faint">This site does not read the state’s results and names no winner.</span>' : "");
+      (words.ballotName ? ' <span class="faint">' + KYC.escapeHtml(words.ballotName) + "</span>" : "") +
+      (words.surnameOnly ? ' <span class="faint">' + KYC.escapeHtml(words.surnameOnly) + "</span>" : "") +
+      pastLine(words);
     status.hidden = false;
     el("governorModalBody").innerHTML =
       '<div class="modal-column">' + racePanel(code, person.id) + "</div>" +
       '<div class="modal-column">' +
-      panel("user", "Biography", candidateBiography(code, person, parts)) +
+      panel("user", "Biography", candidateBiography(code, person, parts, words)) +
       panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory,
         person.wikipedia ? NOT_READ_CANDIDATE : NO_RECORD_CANDIDATE)) +
       "</div>";
     var list = parts.list;
-    el("governorModalSource").innerHTML = "Source: " + outLink(list.url, list.source) + " (read " +
-      KYC.escapeHtml(KYC.dateWords(list.read)) + ").";
+    el("governorModalSource").innerHTML = KYC.escapeHtml(words.source)
+      .replace(KYC.escapeHtml(list.source), outLink(list.url, list.source));
     setPortrait(person.writeIn ? "" : person.photo, person.photoCopy, person.photoCredit, person.name);
   }
 
@@ -586,12 +660,17 @@
       el("governorModalPortrait").classList.add("gov-portrait-empty");
       el("governorModalPhotoCredit").hidden = true;
     });
+    // "Copy link" shares the person's share page (o/<id>.html, rule 96),
+    // which unfurls with their name and the overlay's words; an id nobody
+    // here answers to has none, and shares the overlay's own address.
     var copy = el("governorModalCopy");
     copy.addEventListener("click", function () {
       if (!current) return;
-      var url = global.location.origin === "null" ? global.location.href
+      var found = find(current);
+      var url = found ? KYC.shareUrl("official", current)
+        : global.location.origin === "null" ? global.location.href
         : global.location.origin + global.location.pathname + "#/official/" + encodeURIComponent(current);
-      KYC.shareLink(copy, url);
+      KYC.shareLink(copy, url, found ? found.person.name : "");
     });
     return dialog;
   }
@@ -627,5 +706,5 @@
   });
 
   KYC.governor = { open: open, close: close, isOpen: isOpen, ensure: ensure, owns: owns,
-                   find: find, applyRoute: applyRoute };
+                   find: find, applyRoute: applyRoute, shareWords: shareWords };
 })(window);

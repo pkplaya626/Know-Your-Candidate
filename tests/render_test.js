@@ -13073,7 +13073,9 @@ function plainList(html, attr, id) {
  * since the pages land after it - and every case of the fixture asked of
  * the page code. */
 async function testOfficialSharePages() {
-  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /\.html$/.test(f));
+  // The federal officials' and judges' own: the governors' pages share the
+  // folder, and testGovernorSharePages reads them.
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /\.html$/.test(f) && !/^gov-/.test(f));
   const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
   // Each court's file, as its page loads it: the record a court's page opens.
   const courts = {};
@@ -13292,6 +13294,245 @@ async function testOfficialSharePages() {
       `${viaShare} for ${want}`);
     check("a link nobody here answers to stays the view's, with no share page to unfurl",
       typeof nobody === "string" && /#\/official\/x-nobody-of-that-name$/.test(nobody), String(nobody));
+  });
+}
+
+/* Rule 96 for the governor overlays (rule 91): o/gov-<ST>.html and
+ * o/gov-<ST>-<name>.html, written by kyc/governor_share.py in the overlay's
+ * own words (KYC.governor.shareWords). Every page is compared with the
+ * overlay's words on the day the build's results were read, as the
+ * profiles' are; every case of tests/fixtures/governor_share_words.json is
+ * asked of the page code on both clocks; and the overlay draws its head from
+ * the same words, its Copy link sharing the page. */
+async function testGovernorSharePages() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const asOf = String((meta.election || {}).resultsAsOf || CAMPAIGN_NOW).slice(0, 10);
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /^gov-.*\.html$/.test(f));
+  const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+  const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "governor_share_words.json"), "utf8"));
+  const norm = (s) => String(s || "").replace(/\s+/g, " ").trim();
+
+  {
+    const page = await buildPage("states/ga.html", { now: asOf + "T12:00:00" });
+    await settle(50);
+    const W = page.window;
+    const K = W.KYC;
+    const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
+    const text = (doc, sel) => {
+      const el = doc.querySelector(sel);
+      return el ? norm(el.textContent) : "";
+    };
+    const creditText = (credit) => {
+      const div = W.document.createElement("div");
+      div.innerHTML = K.photoCreditHtml(credit);
+      return norm(div.textContent);
+    };
+    suite(`governors' share pages — one each, in the overlay's words (rules 91, 96), as of ${asOf}`, () => {
+      check("the state page loads", page.errors.length === 0, page.errors.join(" | "));
+      // Everyone the overlay answers to: each governor, and each candidate
+      // on a list for an office on this ballot.
+      const want = new Set();
+      Object.keys(W.kycStateGov.states).forEach((code) => {
+        const s = W.kycStateGov.states[code];
+        if (!s.governor || !K.governor.find(s.governor.id)) return;
+        want.add(s.governor.id);
+        const parts = K.stategov.listParts(code, "governor");
+        if (parts && !parts.none) parts.list.candidates.forEach((p) => { if (K.governor.find(p.id)) want.add(p.id); });
+      });
+      const have = new Set(files.map((f) => f.replace(/\.html$/, "")));
+      const missing = [...want].filter((id) => !have.has(id));
+      const extra = [...have].filter((id) => !want.has(id));
+      check("a share page for every governor and candidate the overlay answers to, and none else",
+        missing.length === 0 && extra.length === 0 && have.size > 150,
+        `${have.size} pages; missing ${missing.slice(0, 4)}; extra ${extra.slice(0, 4)}`);
+      check("no governor is a profile (rule 27): every id is the overlay's own",
+        [...have].every((id) => /^gov-[A-Z]{2}(?:-[a-z0-9-]+)?$/.test(id)));
+      const wrong = [];
+      const images = [];
+      let photos = 0;
+      let candidates = 0;
+      files.forEach((f) => {
+        const id = f.replace(/\.html$/, "");
+        const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
+        const doc = parse(html);
+        const found = K.governor.find(id);
+        if (!found) { wrong.push(`${id}: nobody`); return; }
+        if (found.kind === "candidate") candidates += 1;
+        const view = (doc.getElementById("shareView") || { getAttribute: () => "" }).getAttribute("href");
+        if (view !== "../states/" + found.code.toLowerCase() + ".html#/official/" + id) {
+          wrong.push(`${id}: view ${view}`);
+        }
+        const words = K.governor.shareWords(found);
+        const shown = {
+          kind: text(doc, ".share-kind"),
+          office: text(doc, ".share-office strong"),
+          seeking: found.kind === "candidate" ? text(doc, ".share-office").replace(/ Governor • [A-Z]{2}$/, "") : "",
+          party: text(doc, ".share-party"),
+          since: text(doc, ".share-since"),
+          mark: text(doc, ".share-mark"),
+          holder: text(doc, ".share-holder"),
+          status: text(doc, ".share-status"),
+          printed: text(doc, ".share-printed"),
+          ballotName: text(doc, ".share-ballot-name"),
+          surnameOnly: text(doc, ".share-surname-only"),
+          runningMate: text(doc, ".share-mate").replace(/^Running mate: /, ""),
+          term: text(doc, ".share-term"),
+          record: text(doc, ".share-record"),
+          past: text(doc, ".share-past").replace(/(?:: the official results)?\.$/, ""),
+          results: ((doc.querySelector(".share-past a") || { getAttribute: () => "" }).getAttribute("href")) || "",
+          source: text(doc, ".share-source"),
+        };
+        Object.keys(words).forEach((k) => {
+          if (shown[k] !== norm(words[k])) wrong.push(`${id} ${k}: "${shown[k]}" for "${words[k]}"`);
+        });
+        Object.keys(shown).forEach((k) => { if (!(k in words)) wrong.push(`${id}: ${k} is not the overlay's`); });
+        if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
+        ["party", "since", "mark", "status", "past"].forEach((k) => {
+          if (words[k] && desc.indexOf(words[k]) === -1) wrong.push(`${id}: the description lacks ${k}`);
+        });
+        if (desc.indexOf(found.person.name) !== 0) wrong.push(`${id}: the description must lead with the name`);
+        if (/ • /.test(desc)) wrong.push(`${id}: a card's bullet in the description`);
+        // Never a winner, and in the past tense after the election.
+        if (/\b(won|elected governor|winner:)/i.test(desc + doc.body.textContent.replace(/names no winner/g, ""))) {
+          wrong.push(`${id}: a winner named`);
+        }
+        // The picture: the overlay's, by its route, credited as it credits it, or the site's card.
+        const img = (doc.querySelector('meta[property="og:image"]') || { content: "" }).content;
+        const p = found.person;
+        const url = found.kind === "governor" ? p.headshot : (p.writeIn ? "" : p.photo);
+        const credit = found.kind === "governor"
+          ? (p.headshotBy ? { by: p.headshotBy, page: p.headshotPage } : null) : p.photoCredit;
+        const drawn = K.stategov.cardPhoto(url, p.photoCopy, credit);
+        if (/\/assets\/social-card\.png$/.test(img)) {
+          if (drawn.credit) images.push(`${id}: the overlay shows a photograph, the page the card`);
+          if (doc.querySelector(".share-photo-credit")) wrong.push(`${id}: a credit with no photograph`);
+          return;
+        }
+        photos += 1;
+        const copy = K.copyOf(url, p.photoCopy);
+        const expect = copy ? host + copy.src : /^photos\//.test(url) ? host + url : url;
+        if (!drawn.credit || img !== expect || /Special:/.test(img)) {
+          images.push(`${id}: ${img} for ${expect}`);
+        } else if (text(doc, ".share-photo-credit") !== creditText(K.copyCredit(credit, url, p.photoCopy))) {
+          wrong.push(`${id}: credit "${text(doc, ".share-photo-credit")}"`);
+        }
+      });
+      check("every governor's and candidate's share page says what the overlay says, from one table",
+        wrong.length === 0 && candidates > 100, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("a share image is the overlay's photograph by its route, credited as the overlay credits it, " +
+        "or the site's card", images.length === 0 && photos > 50,
+        images.slice(0, 4).join(" | ") || `${photos} photographs`);
+    });
+  }
+
+  for (const [clock, now, post] of [["the campaign's clock", CAMPAIGN_NOW, false],
+                                    ["after Election Day", "2026-11-05T12:00:00", true]]) {
+    const page = await buildPage("states/ga.html", { now });
+    await settle(50);
+    const W = page.window;
+    const K = W.KYC;
+    suite(`the governors' words table asked of the page code, ${clock}`, () => {
+      const data = W.kycStateGov;
+      const savedState = data.states.GA;
+      const savedSources = data.sources;
+      const voting = (W.kycBuildMeta.voting = W.kycBuildMeta.voting || {});
+      const savedVoting = voting.GA;
+      const rows = fixture.cases.filter((row) => row[0] === post);
+      const off = rows.filter(([_post, code, kind, person, state, sources, results, words]) => {
+        data.states[code] = state;
+        data.sources = sources;
+        voting[code] = results ? { results } : {};
+        let got;
+        try {
+          got = K.governor.shareWords({ kind, code, person });
+        } finally {
+          data.states.GA = savedState;
+          data.sources = savedSources;
+          voting.GA = savedVoting;
+        }
+        return JSON.stringify(Object.keys(words).sort().map((k) => [k, words[k]])) !==
+          JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
+      });
+      check("every case of the words table (tests/fixtures/governor_share_words.json)",
+        rows.length >= 60 && off.length === 0,
+        off.slice(0, 2).map((r) => JSON.stringify([r[2], r[3].id, r[7]])).join(" | ") || `${rows.length} cases`);
+      check(post ? "after Election Day every case is in the past tense and names no winner"
+        : "before it, none is in the past tense",
+        rows.every((r) => r[7].kind !== "Governor (Candidate)" || (r[7].seeking === "Ran for") === post) &&
+        rows.every((r) => (post ? !r[7].holder : !r[7].past && !r[7].results)) &&
+        rows.some((r) => post === !!r[7].past) &&
+        rows.every((r) => !/\b(won|winner|elected governor)\b/i.test(JSON.stringify(r[7]).replace(/names no winner/g, ""))));
+
+      // The overlay draws its head from the same words.
+      const drawn = [];
+      const modal = () => page.D.getElementById("governorModal");
+      const t = (sel) => norm((modal().querySelector(sel) || {}).textContent || "");
+      const ids = [data.states.GA.governor.id].concat(
+        data.states.GA.ballot2026.offices.governor.candidates.candidates.map((p) => p.id));
+      const notUp = Object.keys(data.states).find((c) => !K.stategov.governorUp(c) && data.states[c].governor);
+      if (notUp) ids.push(data.states[notUp].governor.id);
+      ids.forEach((id) => {
+        K.governor.open(id);
+        const found = K.governor.find(id);
+        const words = K.governor.shareWords(found);
+        if (t("#governorModalKind") !== words.kind) drawn.push(`${id}: kind`);
+        const metaText = t("#governorModalMeta");
+        if (metaText.indexOf(norm(words.seeking ? words.seeking + " " + words.office : words.office)) === -1) drawn.push(`${id}: office`);
+        if (words.since && metaText.indexOf(words.since) === -1) drawn.push(`${id}: since`);
+        const status = t("#governorModalStatus");
+        ["mark", "holder", "status", "ballotName", "surnameOnly", "past"].forEach((k) => {
+          if (words[k] && status.indexOf(norm(words[k])) === -1) drawn.push(`${id}: ${k}`);
+        });
+        if (words.results && !modal().querySelector('#governorModalStatus a[href="' + words.results + '"]')) {
+          drawn.push(`${id}: the results link`);
+        }
+        if (words.printed && t("#governorModalPrinted") !== words.printed) drawn.push(`${id}: printed`);
+        if (words.term && metaText.indexOf(words.term) === -1) drawn.push(`${id}: term`);
+        if (words.runningMate && t("#governorModalBody").indexOf(words.runningMate) === -1) drawn.push(`${id}: mate`);
+        if (words.record && t("#governorModalBody").indexOf(words.record) === -1) drawn.push(`${id}: record`);
+        if (t("#governorModalSource") !== norm(words.source)) drawn.push(`${id}: source "${t("#governorModalSource")}"`);
+        K.governor.close();
+      });
+      check("the overlay draws its head and footer from the same words", drawn.length === 0 && ids.length > 3,
+        drawn.slice(0, 5).join(" | "));
+    });
+  }
+
+  // Copy link shares the page, and a link nobody answers to stays the view's.
+  const page = await buildPage("states/ga.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  const W = page.window;
+  const K = W.KYC;
+  let copied = null;
+  Object.defineProperty(W.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  const gid = W.kycStateGov.states.GA.governor.id;
+  K.governor.open(gid);
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const governorLink = copied;
+  K.governor.close();
+  const cid = W.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates[0].id;
+  K.governor.open(cid);
+  copied = null;
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const candidateLink = copied;
+  K.governor.close();
+  K.governor.open("gov-GA-nobody-of-that-name");
+  copied = null;
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const nobody = copied;
+  K.governor.close();
+  suite("Copy link in the governor overlay — the share page's address (rule 96)", () => {
+    const want = (id) => new W.URL("../o/" + encodeURIComponent(id) + ".html", W.location.href).href;
+    check("a governor's link is their share page", governorLink === want(gid) && /\/o\/gov-GA\.html$/.test(governorLink),
+      `${governorLink} for ${want(gid)}`);
+    check("a candidate's link is theirs", candidateLink === want(cid), `${candidateLink} for ${want(cid)}`);
+    check("a link nobody here answers to stays the overlay's address, with no share page to unfurl",
+      typeof nobody === "string" && /#\/official\/gov-GA-nobody-of-that-name$/.test(nobody), String(nobody));
   });
 }
 
@@ -18123,6 +18364,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "frame") await testFrame();
   if (!only || only === "share") await testSharePages();
   if (!only || only === "share") await testOfficialSharePages();
+  if (!only || only === "share" || only === "governors") await testGovernorSharePages();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

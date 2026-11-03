@@ -624,7 +624,14 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
         # federal build, whose absence then removes none of them.
         for relative, text in official_share.render_all(fed, fed_courts, host).items():
             out[os.path.join(SITE_DIR, *relative.split("/"))] = text
-        officials = official_share.ids(fed, fed_courts)
+        # Each governor's and each candidate for governor's, beside them
+        # (kyc/governor_share.py, rules 91 and 96), from the data/stategov.js
+        # the state pages are written from: none without it, whose absence
+        # then removes none of them.
+        from . import governor_share
+        for relative, text in governor_share.render_all(stategov, host, summary).items():
+            out[os.path.join(SITE_DIR, *relative.split("/"))] = text
+        officials = official_share.ids(fed, fed_courts) + governor_share.ids(stategov)
     for code in districts.all_codes():
         out[os.path.join(SITE_DIR, *districts.page_path(code).split("/"))] = (
             pages.render_district_page(code, host, summary))
@@ -681,14 +688,27 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     return {path: assets.stamp(text, stamp_from or root) for path, text in out.items()}
 
 
+def _share_family(relative):
+    """``(folder, family)`` of a share page: the governors' pages
+    (``gov-``, kyc/governor_share.py) share ``o/`` with the federal
+    officials' and come from another source, so each is its own family."""
+    from .governor_share import is_governor_id
+
+    name = os.path.basename(relative)
+    return os.path.dirname(relative), ("governor" if is_governor_id(name[:-5]) else "")
+
+
 def _orphans(rendered, root, kept=()):
     """Share pages on disk that *rendered* does not hold: a profile or race
     the data no longer has. Only when the share pages were rendered. A page
     at an id a profile still answers to (*kept*, :func:`_alias_pages`) is
     not one."""
-    # Only a folder whose pages were rendered: without the federal build no
-    # official's page is, and none of theirs is then taken for an orphan.
-    folders = {os.path.dirname(rel) for rel in rendered} & set(SHARE_DIRS)
+    # Only a folder, and in o/ only a family, whose pages were rendered:
+    # without the federal build no official's page is, and without
+    # data/stategov.js no governor's, and none of theirs is then taken for
+    # an orphan.
+    families = {_share_family(rel) for rel in rendered if os.path.dirname(rel) in SHARE_DIRS}
+    folders = {folder for folder, _family in families}
     out = []
     for folder in (f for f in SHARE_DIRS if f in folders):
         directory = os.path.join(root, folder)
@@ -696,7 +716,8 @@ def _orphans(rendered, root, kept=()):
             continue
         for name in sorted(os.listdir(directory)):
             relative = os.path.join(folder, name)
-            if name.endswith(".html") and relative not in rendered and relative not in kept:
+            if (name.endswith(".html") and relative not in rendered and relative not in kept
+                    and _share_family(relative) in families):
                 out.append(relative)
     return out
 
@@ -790,14 +811,18 @@ def sitemap_text(profiles, host, races=None, officials=()):
 
 def official_ids(root="."):
     """Every federal official's and judge's share page id
-    (kyc/official_share.py), or none without the federal build."""
-    from . import federal_build, official_share
+    (kyc/official_share.py), or none without the federal build, and every
+    governor's and candidate for governor's (kyc/governor_share.py), or none
+    without data/stategov.js."""
+    from . import federal_build, governor_share, official_share
+    from .guide_photos import read_stategov
 
+    governors = governor_share.ids(read_stategov(root))
     try:
         fed, fed_courts, _search, _problems = federal_build.build(root)
     except federal_build.FederalBuildError:
-        return []
-    return official_share.ids(fed, fed_courts)
+        return governors
+    return official_share.ids(fed, fed_courts) + governors
 
 
 def write_sitemap(profiles, root=".", races=None):

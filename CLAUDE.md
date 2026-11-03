@@ -95,7 +95,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
-                                             o/*.html           (generated share pages: one per federal official and judge, kyc/official_share.py)
+                                             o/*.html           (generated share pages: one per federal official and judge, kyc/official_share.py,
+                                                                 and per governor and candidate for governor, kyc/governor_share.py)
                                              photos/*.jpg       (smaller copies of heavy portraits, by hash: photocopies)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
@@ -2691,7 +2692,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     licence recorded (rules 82, 87); the Court's own, without one, is the
     card. A folder whose pages were not rendered (no federal build) is
     never swept as orphans. The dialog's "Copy link" shares the page, and
-    an id nobody answers to shares the view.
+    an id nobody answers to shares the view. The governor overlays (rule
+    91) have theirs beside them, `o/gov-<ST>.html` and
+    `o/gov-<ST>-<name>.html` (`kyc/governor_share.py`): the overlay's head
+    from one table (`KYC.governor.shareWords`, compared for every governor
+    and candidate and over `tests/fixtures/governor_share_words.json` on
+    both clocks), the photograph only as the card shows it, the list cited
+    and dated, after Election Day the past tense and the state's results
+    naming no winner, the view the state page's overlay; each family in
+    `o/` is swept only when its own source was read.
 
 97. **The search answers what a reader types about government, from the
     data the page about it shows, and never guesses.** "governor", "Texas
