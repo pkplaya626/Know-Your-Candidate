@@ -558,7 +558,17 @@ def ticket_links(office, candidate, links):
     return [link for link in links if not link[3]]
 
 
-def linked_article(office, candidate, links, resolve=None):
+def name_forms(code, office, name):
+    """The short forms an evidenced ``overrides.STATEWIDE_NAME_FORMS`` entry
+    records for this very list name ("Joe Lombardo" for "Lombardo,
+    Joseph"; rule 91), never one guessed."""
+    from . import overrides
+    return [holder for (where, key, holder), (form, _evidence)
+            in sorted(overrides.STATEWIDE_NAME_FORMS.items())
+            if where == code and key == office and form == name]
+
+
+def linked_article(office, candidate, links, resolve=None, code=None):
     """``((target, infobox image, resolved article), "")`` for the one
     article the race's article links for *candidate*, checked as rule 33
     checks a ballot page's link (it resolves, is no section, list or
@@ -569,9 +579,13 @@ def linked_article(office, candidate, links, resolve=None):
     from .statewide import display_name
     resolve = resolve or _resolve
     name = candidate["name"]
+    # The list's name, and a short form an evidenced entry records for it:
+    # Nevada's article links [[Joe Lombardo]] for the list's "Lombardo,
+    # Joseph" (PR #195's second review).
+    names = [name] + (name_forms(code, office, name) if code else [])
     hits = {}
     for target, shown, image, _mate in ticket_links(office, candidate, links):
-        if same_person(name, shown) or same_person(name, target.split(" (")[0]):
+        if any(same_person(n, shown) or same_person(n, target.split(" (")[0]) for n in names):
             hits.setdefault(target, image)
             hits[target] = hits[target] or image
     if len(hits) != 1:
@@ -581,7 +595,7 @@ def linked_article(office, candidate, links, resolve=None):
     resolved = article.get("title") or ""
     if article["missing"] or article["fragment"] or article["disambiguation"] \
             or not title_is_about(resolved, _plain_name(display_name(name))) \
-            or not same_person(name, resolved.split(" (")[0]):
+            or not any(same_person(n, resolved.split(" (")[0]) for n in names):
         return None, "article-not-theirs"
     return (target, infobox_image, article), ""
 
@@ -624,7 +638,8 @@ def read_articles(lists, offices=ARTICLE_OFFICES, wikitext=None, resolve=None, l
                     continue
                 k = key(code, office, person["name"])
                 try:
-                    found, why = linked_article(office, person, links, resolve=resolve)
+                    found, why = linked_article(office, person, links, resolve=resolve,
+                                                code=code)
                 except Exception:
                     unknown.add(k)
                     continue
@@ -679,7 +694,7 @@ def wiki_photo(code, office, candidate, links, race_title, refused=None, measure
     from .statewide import display_name
     measure = measure or official_photos.weigh
     name = candidate["name"]
-    found, why = linked_article(office, candidate, links)
+    found, why = linked_article(office, candidate, links, code=code)
     if not found:
         return None, why
     target, infobox_image, article = found

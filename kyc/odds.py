@@ -231,12 +231,14 @@ def _race_series(series):
     title, ticker = series.get("title") or "", series.get("ticker") or ""
     if _KALSHI_NOT.search(title):
         return False
-    if re.search(r"governor", title, re.I) and re.search(r"senat|house|congress|\band\b|&|both",
-                                                         title, re.I):
+    # "Gubernatorial" is a governor word as much as "governor" is
+    # ("Georgia Senate & Gubernatorial", PR #195's second review).
+    if re.search(r"governor|gubernatorial", title, re.I) and re.search(
+            r"senat|house|congress|\band\b|&|both", title, re.I):
         return False
     if _KALSHI_GOV_SERIES.match(ticker) or _KALSHI_GOV_TITLE.match(title.strip()):
         return True
-    if re.search(r"governor", title, re.I):
+    if re.search(r"governor|gubernatorial", title, re.I):
         # A series that speaks of a governor and is not one state's
         # governor series is a side market or a combination ("Georgia
         # Senate and Governor"), whatever its ticker says (PR #195 review).
@@ -252,13 +254,16 @@ def _race_series(series):
 # would have matched it first: "Will Democrats win the Senate race in
 # Georgia and the governorship?" matched the Senate pattern and placed on
 # S-GA-2026 (PR #195 review).
-_K_COMBINATION = re.compile(r"\bboth\b|\bcombo\b|\band the (?:governor|senate|house)", re.I)
+_K_COMBINATION = re.compile(r"\bboth\b|\bcombo\b|\band the (?:governor|gubernatorial|senate|house)",
+                            re.I)
 
 
 def _combination(question):
     if _K_COMBINATION.search(question):
         return True
-    return bool(re.search(r"governor", question, re.I)
+    # _K_GOV_Q takes "gubernatorial" as a governor word, so this does too:
+    # "the Senate race in Georgia and the gubernatorial race" is both.
+    return bool(re.search(r"governor|gubernatorial", question, re.I)
                 and re.search(r"senat|\bhouse\b|congress", question, re.I))
 
 
@@ -796,8 +801,9 @@ def named_on_list(words, people):
     name: the list's own words in any order - a given name and the surname
     the list prints, and no word the list does not print for them - never a
     surname alone, save where it fits one person on the list. Nevada's list
-    holds Aaron D. Ford and Danielle Ford, Ohio's two Turners: "Ford" names
-    neither. A running mate's whole name names the ticket (``aliases``); a
+    holds Aaron D. Ford and Danielle Ford: "Ford" names neither. Ohio's
+    "Turner" is Renea Turner's ticket: her running mate Jalen Turner's
+    surname is no nominee's. A running mate's whole name names the ticket (``aliases``); a
     running mate's surname alone never does, and a namesake ("John Jackson"
     beside the list's Rick Jackson) names nobody (PR #195 review)."""
     if len(words) == 1:
@@ -833,9 +839,12 @@ def list_party_key(words):
     in words (``statewide.party_words``): "Republican", "Registered
     Republican" and "Republican Party" are r; "Democratic", "Registered
     Democrat", "Democratic-Farmer-Labor" and "Democratic-NPL" are d; a
-    fusion line is its first party's ("Democratic; Working Families", rule
-    54); anything else is i, and no party at all is ``None``."""
-    text = str(words or "").split(";")[0].strip().lower()
+    fusion line is its first party's, however the list joins it - Oregon's
+    "Democrat, Working Families", Vermont's "Democratic/Progressive", rule
+    54's "Democratic; Working Families" (PR #195's second review: split on
+    ";" alone, Kotek, Drazan and Janoo all keyed i); anything else is i,
+    and no party at all is ``None``."""
+    text = re.split(r"[;,/]", str(words or ""))[0].strip().lower()
     if not text:
         return None
     match = _LIST_PARTY.match(text)
@@ -931,7 +940,7 @@ def governor_races(root="."):
     write-in marked so. A race whose list has not been read has nobody to
     match, so a label naming anyone is shown as its party.
     """
-    from . import ballot2026, overrides, statewide
+    from . import ballot2026, statewide, statewide_photos
     from .results import state_name
 
     lists = statewide.load(root) or {"states": {}}
@@ -947,14 +956,16 @@ def governor_races(root="."):
             row = {"name": statewide.display_name(person["name"]), "party": words,
                    "partyKey": list_party_key(words), "listed": True}
             if person.get("runningMate"):
-                row["aliases"] = [statewide.display_name(person["runningMate"])]
+                # Alaska prints a running mate with their party in brackets
+                # ("Zac Johnson (Nonpartisan)"): the name is the words before
+                # it, or its last word is a party's (PR #195's second review).
+                mate = re.sub(r"\([^)]*\)", " ", str(person["runningMate"]))
+                row["aliases"] = [statewide.display_name(" ".join(mate.split()))]
             # A short form of the name an evidenced entry records for this
             # very list name ("Joe Lombardo" for "Lombardo, Joseph"; rule 91),
             # never one guessed.
-            row["aliases"] = row.get("aliases", []) + [
-                holder for (where, key, holder), (form, _evidence) in
-                sorted(overrides.STATEWIDE_NAME_FORMS.items())
-                if where == code and key == "governor" and form == person["name"]]
+            row["aliases"] = row.get("aliases", []) + statewide_photos.name_forms(
+                code, "governor", person["name"])
             if not row["aliases"]:
                 del row["aliases"]
             if person.get("writeIn"):

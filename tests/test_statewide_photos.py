@@ -248,6 +248,29 @@ class TestTheRacesOwnArticle(unittest.TestCase):
         self.assertEqual(sp.article_of(cache, "KS", "governor", "Nobody Linked")["none"], "not-linked")
         self.assertIsNone(sp.article_of(cache, "KS", "governor", "Someone Else"))
 
+    def test_an_evidenced_short_form_is_a_name_the_races_link_may_give(self):
+        """Nevada's article links [[Joe Lombardo]] for the list's "Lombardo,
+        Joseph": the evidenced STATEWIDE_NAME_FORMS entry is a name the link
+        may give, and only for the state and office it is recorded for
+        (PR #195's second review)."""
+        from kyc import overrides
+        entry = ("ZZ", "governor", "Joe Testperson")
+        overrides.STATEWIDE_NAME_FORMS[entry] = ("Testperson, Joseph", "a test")
+        links = [("Joe Testperson", "Joe Testperson", None, None)]
+        article = dict(self.ARTICLE, title="Joe Testperson")
+        candidate = {"name": "Testperson, Joseph"}
+        try:
+            found, why = sp.linked_article("governor", candidate, links,
+                                           resolve=lambda t: dict(article), code="ZZ")
+            self.assertEqual((found[2]["title"], why), ("Joe Testperson", ""))
+            # Another state's list, or no state, takes no short form.
+            for code in ("YY", None):
+                self.assertEqual(sp.linked_article("governor", candidate, links,
+                                                   resolve=lambda t: dict(article), code=code),
+                                 (None, "not-linked"))
+        finally:
+            del overrides.STATEWIDE_NAME_FORMS[entry]
+
     def test_a_refused_file_is_never_taken(self):
         """One list for every route (rule 38): NOT_A_PORTRAIT, keyed on the
         Commons upload address as for a judge's portrait."""

@@ -322,9 +322,13 @@
         "candidate" + KYC.escapeHtml(read || ",") + " checked to be theirs; never a search by name.</p>";
     }
     if (person.articleNone === "not-linked") {
-      return absent("No article: the race’s own Wikipedia article" + read +
-        " links none for this candidate where it lists the race’s candidates (its infobox, results " +
-        "and candidate lists), and this site never searches by name");
+      // A claim about this site's reader, never about the article: a link
+      // the reader could not match to the list's name is not an absence
+      // (rules 19 and 62; PR #195's second review found Bronson's, Taylor's
+      // and Bextel's articles linked where the reader did not look).
+      return absent("No article: this site’s reader found no link in the race’s Wikipedia " +
+        "article" + (person.articleRead ? " (read " + KYC.dateWords(person.articleRead) + ")" : "") +
+        " that it could match to the list’s name, and it never searches by name");
     }
     if (person.articleNone) {
       return absent("No article: the link the race’s own Wikipedia article" + read +

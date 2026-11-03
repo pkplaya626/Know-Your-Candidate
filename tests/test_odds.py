@@ -562,6 +562,63 @@ class TestGovernorRaces(unittest.TestCase):
         self.assertIn(f"markets for 1/{len(odds.governor_ids())} governor races", line)
         self.assertIn("polling averages for 1 (fetched", line)
 
+    def test_a_fusion_line_keys_as_its_first_party_however_the_list_joins_it(self):
+        # Split on ";" alone, Oregon's "Democrat, Working Families" and
+        # "Republican, Libertarian" and Vermont's "Democratic/Progressive"
+        # all keyed i (PR #195's second review).
+        for words, key in (("Democrat, Working Families", "d"), ("Republican, Libertarian", "r"),
+                           ("Democratic/Progressive", "d"), ("Republican/Democratic", "r"),
+                           ("Progressive/Democratic", "i")):
+            self.assertEqual(odds.list_party_key(words), key, words)
+        oregon = listed({"name": "Tina Kotek", "party": "Democrat, Working Families"},
+                        {"name": "Christine Drazan", "party": "Republican, Libertarian"},
+                        {"name": "Brett Smith", "party": "Pacific Green"})
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Tina Kotek", "party": None, "price": 0.7},
+            {"label": "Christine Drazan", "party": None, "price": 0.3}]}, oregon)
+        self.assertEqual([(o.get("mismatch"), o["party"]) for o in out], [(None, "d"), (None, "r")])
+        # With a Republican on the list, a Republican label naming someone
+        # else is a conflict, not a party label.
+        other = odds.checked_outcomes({"outcomes": [
+            {"label": "Jane Roe", "party": "r", "price": 0.2}]}, oregon)
+        self.assertTrue(other[0]["mismatch"] and other[0]["conflict"])
+
+    def test_a_running_mate_printed_with_a_party_still_names_the_ticket(self):
+        # Alaska prints "Zac Johnson (Nonpartisan)": taken whole, the
+        # alias's last word was a party's, and "Zac Johnson" named nobody.
+        from unittest import mock
+        from kyc import statewide
+        lists = {"states": {"AK": {"offices": {"governor": {"candidates": [
+            {"name": "Jonathan Kreiss-Tomkins", "party": "Registered Democrat",
+             "runningMate": "Zac Johnson (Nonpartisan)"},
+            {"name": "Treg Taylor", "party": "Registered Republican",
+             "runningMate": "Candi English"}]}}}}}
+        with mock.patch.object(statewide, "load", return_value=lists):
+            _races, people = odds.governor_races(ROOT)
+        ak = people["G-AK-2026"]
+        self.assertEqual(ak[0]["aliases"], ["Zac Johnson"])
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Zac Johnson", "party": None, "price": 0.4},
+            {"label": "Johnson", "party": None, "price": 0.1}]}, ak)
+        self.assertEqual(out[0].get("mismatch"), None)
+        self.assertEqual(out[0]["party"], "d")
+        # A running mate's surname alone never names the ticket.
+        self.assertTrue(out[1].get("mismatch"))
+
+    def test_gubernatorial_is_a_governor_word_to_the_combination_guard(self):
+        senate = {"ticker": "KXSENATEGOVGA-26-D",
+                  "title": "Will Democrats win the Senate race in Georgia and the gubernatorial race?",
+                  "rules_primary": "If a Democrat is sworn in as a Senator of Georgia and the "
+                                   "Democratic party wins the governorship of Georgia ..."}
+        self.assertEqual(odds.kalshi_place(senate, GOV_INDEX), (None, None))
+        house = dict(senate, title="Will Democrats win the House race for GA-2 and the "
+                                   "gubernatorial race?")
+        self.assertEqual(odds.kalshi_place(house, GOV_INDEX), (None, None))
+        self.assertFalse(odds._race_series({"ticker": "KXSENATEGOVGA",
+                                            "title": "Georgia Senate & Gubernatorial"}))
+        self.assertFalse(odds._race_series({"ticker": "KXGOVGA",
+                                            "title": "Georgia gubernatorial and Senate"}))
+
     def test_validate_knows_the_governor_ids(self):
         cache = {"fetched": "2026-11-02", "races": {"G-GA-2026": {"markets": []}, "G-ZZ-2026": {}}}
         issues = validate.check_odds(RACES, cache, today=datetime.date(2026, 11, 2))

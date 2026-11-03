@@ -17624,16 +17624,19 @@ async function testGovernorOverlays() {
       const linksOf = () => { window.KYC.governor.open(first.id); return fieldValue("Links"); };
       Object.assign(first, { wikipedia: undefined, articleNone: "not-linked", articleRead: "2026-11-03",
         member: undefined, holder: undefined });
-      check("a race article read that links none says so, dated",
-        /^No article: the race’s own Wikipedia article, read Nov\. 3, 2026, links none for this candidate/.test(linksOf()),
+      // A refused name match is not an absence (rules 19, 62): the line is
+      // about this site's reader, never a claim that the article links none.
+      check("a race article whose links the reader could not match says what the reader found, dated",
+        /^No article: this site’s reader found no link in the race’s Wikipedia article \(read Nov\. 3, 2026\) that it could match to the list’s name/.test(linksOf()) &&
+        !/links none|its infobox|candidate lists/.test(fieldValue("Links")),
         fieldValue("Links"));
       first.articleNone = "ambiguous";
       check("a link not confirmed as theirs says so", /could not be confirmed as theirs/.test(linksOf()));
       first.articleNone = undefined;
       first.articleRead = undefined;
-      check("nothing read is \"not recorded here\", never \"links none\"",
+      check("nothing read is \"not recorded here\", never \"found no link\"",
         /^Not recorded here: this site has not read the race’s Wikipedia article/.test(linksOf()) &&
-        !/links none/.test(fieldValue("Links")));
+        !/found no link/.test(fieldValue("Links")));
       // A member of Congress an evidenced entry ties to the list's name.
       first.member = "T000278";
       window.KYC.governor.open(first.id);

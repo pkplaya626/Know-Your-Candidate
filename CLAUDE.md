@@ -853,9 +853,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     profile, as rule 62 matches a name (`odds.named_on_list`): the list's
     own words in any order, a given name and the surname it prints and no
     word it does not, a bare surname only where it fits one person on the
-    list (Nevada's two Fords, Ohio's two Turners, the Virgin Islands' two
-    Potters), a running mate's whole name for the ticket but never their
-    surname alone, and a short form only through an evidenced
+    list's nominees (Nevada's two Fords name neither; Ohio's "Turner" is
+    Renea Turner's ticket, her running mate Jalen Turner's surname counting
+    for nothing), a running mate's whole name for the ticket, even where
+    the list prints their party beside it ("Zac Johnson (Nonpartisan)"),
+    but never their surname alone (the Virgin Islands' two Potters, both
+    running mates, name nobody), and a short form only through an evidenced
     `overrides.STATEWIDE_NAME_FORMS` entry ("Joe Lombardo"). A namesake
     ("John Jackson" beside the list's Rick Jackson) names nobody and is
     reported. The party a label without one takes is its person's, keyed
@@ -1485,9 +1488,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Wikipedia photograph, 40 of 173 printed candidates had an article and
     the overlay told the rest the race's article "links none", members of
     Congress among them; read on its own (2026-11-03), 73 have one, 67 are
-    linked nowhere the reader looks (the infobox, the results, the
-    candidate lists), 2 are not confirmed as theirs, and the rest, in
-    races with no article, read "not recorded here". `stategov.attach_history` attaches a record only while
+    matched to no link, 2 are not confirmed as theirs, and the rest, in
+    races with no article, read "not recorded here". "Matched to no link"
+    is the reader's finding, never the article's: its review found
+    Bronson's, Taylor's and Kreiss-Tomkins's articles in Alaska's race
+    infobox (`candidateN`), Bextel's under a sub-heading of "Declared", and
+    Lombardo's as "Joe Lombardo", none of which the reader matched, so the
+    overlay says "this site's reader found no link ... it could match to
+    the list's name" (rule 62), and an evidenced
+    `STATEWIDE_NAME_FORMS` entry is a name the link may give
+    (`statewide_photos.name_forms`). `stategov.attach_history` attaches a record only while
     it is that item's or that article's (`asked`); a moved item or a
     changed link is reported, never shown.
 
