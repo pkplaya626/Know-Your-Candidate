@@ -1104,6 +1104,39 @@ Senate race the published polling averages too - in the grid's race view, the
 state pages, the profile dialog's "in this race" panel, the Senate view and
 the map's 2026 Senate panel. The race view opens with the markets on which
 party will control each chamber, and the Senate view with the Senate's.
+The races for governor show both too (the owner's request of 2026-11-02):
+under the race's cards on the state page, in the grid's Governors view
+grouped by race, in the map's 2026 governor's races panel and in the governor
+overlay, drawn by the same module (`KYC.stategov.raceOdds` through
+`KYC.odds.render`), under ids of their own: `G-<ST>-2026` for each state and
+territory whose governor is on the ballot (`odds.governor_ids`, from
+`kyc/ballot2026.py`), beside Congress's `S-<ST>-2026` and `H-<ST>-<NN>-2026`.
+A Kalshi market is the governor's when its question names the state and the
+governorship ("Will the Democratic party win the governorship in Arizona";
+"Who will win the governorship in Alaska?") and its rules resolve on that
+state's governor ("inaugurated as the governor of Arizona", "elected the
+governor of Alaska"); a question that also speaks of the Senate or the House
+(a combination) places nowhere, and a lieutenant governor's event is not the
+governor's. A Polymarket event is the governor's when its title ("Arizona
+Governor Election Winner") and its description ("the 2026 Arizona
+gubernatorial election") name the same state. The polling averages are the
+race's own article's ("2026 Arizona gubernatorial election"). Labels and
+poll columns are matched against the election office's list of candidates
+(`odds.governor_races`, rule 91) as rule 62 matches a name
+(`odds.named_on_list`): the list's own words in any order - a given name and
+the surname it prints, and no word it does not - a bare surname only where
+it fits one person on the list (never Nevada's "Ford"), a running mate's
+whole name for the ticket but never their surname alone, a short form only
+through an evidenced `overrides.STATEWIDE_NAME_FORMS` entry. A write-in is on
+the list. A label naming nobody on it - a namesake included - is shown as the
+party it resolves on (its own "(R)" where it carries one) and reported, and
+one naming someone of a party the list holds is a conflict. A label with no
+party of its own takes its person's, keyed as the list means its words
+(`odds.list_party_key`: Alaska's "Registered Republican" is a Republican). A
+question that speaks of a governorship and a seat in Congress places nowhere,
+whichever pattern matched first. A race the cache holds nothing for says so,
+about the cache, and the roster build's line counts the governor races as the
+odds command does (`odds.build_line`).
 `python build_profile_site.py odds` writes `data/odds.json` and the page file
 `data/odds.js`:
 
@@ -1877,6 +1910,45 @@ past tense, links the state's results and names no winner. A candidate for
 governor's photograph is drawn in the governor's 72px circle, so its
 smaller copy (rule 101) is made for that box (`photocopies.BOXES`
 `"governor-candidate"`).
+
+### The governor overlay
+
+Every governor card opens an overlay in the profile dialog's shape
+(`assets/kyc-governor.js`, `KYC.governor`; the owner's request of
+2026-11-02, "overlay cards similar to other candidates"): by its chevron, by
+a click on the card, or by Enter on the focused card, on the state pages,
+the grid's Governors view and the map. Built like the federal officials'
+dialog on `KYC.createModal`, at `#/official/gov-<ST>` for the sitting
+governor and `#/official/gov-<ST>-<name>` for a candidate on the list
+(`statewide.governor_id`, `statewide.candidate_id`: ids the pipeline writes,
+never a profile's, rule 27); Escape, the Close button and Back close it to
+the same address with focus returned. Its header is the card's: the
+portrait with its credit (a failed one leaves the circle and takes its
+credit with it), the party under it (a candidate's fusion line in ink, rule
+88), an office tag ("Governor", "Governor (Candidate)"), the name with the
+list's own form under it, "Governor of Georgia" or "Running for Governor •
+GA" with the term's length from the ballot table's note ("Term 4-year term
+(if elected)"; nothing where the note opens with no length - the rest of a
+note is why the office is on the ballot), the office's ballot mark and holder line (rule 79)
+or the candidate's badge ("On the Nov 3, 2026 ballot"; a write-in said; from
+the day after Election Day "Was on the Nov 3, 2026 ballot", naming no
+winner).
+
+| Panel | Shows | From |
+|---|---|---|
+| The race ("GA — Governor") | The other candidates as rows (portrait, name, party, badge, running mate), write-ins in a fold, the list cited and dated, the markets and polling averages closed under a heading (below), and that money "is not looked at here: this site reads federal campaign filings only" (rule 19) | `ballot2026.offices.governor.candidates`, `data/odds.js` |
+| Biography (governor) | Born, only where the NGA's page and the Wikidata item's P569 give the same day (`stategov.agreed_birth`, rule 54's pattern); in office since (the card's words); either one not shown says why - the two dates differ, the roster holds no Wikidata item to check against, the item records no date, the item is not read yet, the NGA gives none (`bornWhy`, `sinceWhy`); the office's site, phone and address; the NGA biography | `data/stategov.js` (`governor.born`, read by `history`) |
+| Biography (candidate) | "The sitting governor: see their record" (the holder line settled them) or "A member of Congress: see their profile" (an evidenced `OTHER_OFFICE_NOMINEES` entry, the ballot photographs' member route: `candidate.member`); party and running mate from the list; born, campaign finance and platform each said "Not looked at"; a Wikipedia badge where the race's own article links theirs, "this site's reader found no link ... it could match to the list's name" where that article was read and no link matched (a claim about the reader, never that the article links none: rule 62), else "Not recorded here" (rule 33: `statewide_photos.read_articles`, whatever route pictures them) | the list, `candidate.wikipedia`, `articleNone`, `articleRead` |
+| Public offices held | `KYC.officesHeld`: the offices Wikidata's position-held and the person's own article agree on (rule 69), or "No linked record" | `politicalHistory` |
+| Footer | The list's or the NGA roster's source line, "Report a problem", "Copy link" (`KYC.shareLink`), Close | |
+
+`python build_profile_site.py history` now reads the sitting governors by the
+NGA roster's Wikidata items (`gov-<ST>`) and the candidates by the article
+their race's article links (`stategov.governor_candidate_articles`), and
+`stategov.build` attaches each record only while it is that item's
+(`executives.wikidata`) or that article's (`asked`); a disagreement on the
+day of birth or a moved item is reported and shown as nothing. A share page
+for these ids is draft #180's to add.
 
 ## Know Your Government
 

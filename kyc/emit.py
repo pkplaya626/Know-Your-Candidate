@@ -79,6 +79,8 @@ PAGE_REQUIREMENTS = {
         # pages' and the map's own module, from data/stategov.js loaded on
         # demand (onDemandData) the first time they are shown.
         "assets/kyc-stategov.js",
+        # The overlay the governor cards open (rule 91).
+        "assets/kyc-governor.js",
         "assets/kyc-findrep.js",
         "assets/kyc-senate.js",
         # The search's answers about offices, places and bodies (rule 97),
@@ -98,6 +100,7 @@ PAGE_REQUIREMENTS = {
         "assets/kyc-cards.js",
         "assets/kyc-profile.js",
         "assets/kyc-stategov.js",
+        "assets/kyc-governor.js",
         "assets/kyc-findrep.js",
         "assets/kyc-usmap.js",
         "assets/kyc-map.js",
@@ -142,6 +145,7 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-cards.js",
     "../assets/kyc-profile.js",
     "../assets/kyc-stategov.js",
+    "../assets/kyc-governor.js",
     "../assets/kyc-findrep.js",
     "../assets/kyc-ballot.js",
     "../assets/kyc-state.js",

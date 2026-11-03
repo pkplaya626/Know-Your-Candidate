@@ -452,7 +452,9 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     # The dialog opens a record only once its state's file is in
     # (openWhenLoaded); the state-government panels draw offices, never a
     # profile.
-    EXEMPT = {"kyc-profile.js", "kyc-stategov.js"}
+    # The governor overlay (kyc-governor.js) draws a governor's or a
+    # candidate's record from data/stategov.js, never a profile (rule 27).
+    EXEMPT = {"kyc-profile.js", "kyc-stategov.js", "kyc-governor.js"}
     # The race folds (kyc-cards.js fold()) draw their body only once
     # KYC.peopleFull says the race's state is whole. outsideDetail is the
     # dialog's (kyc-profile.js, which opens a record once its file is in),
@@ -498,9 +500,10 @@ class TestTheIndexDrawsNothingItLeavesOut(unittest.TestCase):
     def test_the_exempt_modules_are_what_they_say(self):
         modules = self.modules()
         self.assertIn("openWhenLoaded", modules["kyc-profile.js"])
-        stategov = modules.get("kyc-stategov.js", "")
-        for api in ("KYC.people(", "KYC.byId(", "legislatorsData", "kycRaces"):
-            self.assertNotIn(api, stategov)
+        for name in ("kyc-stategov.js", "kyc-governor.js"):
+            module = modules.get(name, "")
+            for api in ("KYC.people(", "KYC.byId(", "legislatorsData", "kycRaces"):
+                self.assertNotIn(api, module, name)
 
     def test_the_guard_finds_a_card_reading_money(self):
         modules = self.modules()
