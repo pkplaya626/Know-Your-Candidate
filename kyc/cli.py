@@ -240,12 +240,7 @@ def _build(args):
           f"{counts['last_elections']} races")
     markets = odds_mod.load_cache(args.root)
     if markets:
-        reach = odds_mod.coverage(markets, race_list)
-        print(f"  odds: markets for {reach['senate'][0]}/{reach['senate'][1]} Senate and "
-              f"{reach['house'][0]}/{reach['house'][1]} House races, polling averages for "
-              f"{reach['polls']} (fetched {markets.get('fetched')}); "
-              f"{reach['unprofiled']} outcome labels name a nominee with no profile here "
-              "and show as their party")
+        print("  " + odds_mod.build_line(markets, race_list))
     else:
         print("  [warn] no odds cache; run 'odds' for market prices and polling averages")
     # The results settle who is on the ballot, so count after applying them.
@@ -2177,8 +2172,20 @@ def _ballotphotos(args):
             return 2
         with open(os.path.join(args.root, "congress_snapshot.json"), encoding="utf-8") as handle:
             snapshot = _json.load(handle)
-        cache, problems = statewide_photos.fetch(lists, snapshot, previous,
-                                                 wikipedia=not args.no_wikipedia)
+        if args.articles_only:
+            # Only the candidates' own articles, as the races' articles link
+            # them (rule 33), whatever route pictures them: no photograph is
+            # read, changed or dropped.
+            cache, problems = statewide_photos.with_articles(
+                previous or {}, statewide_photos.lists_of(lists), previous), []
+        else:
+            cache, problems = statewide_photos.fetch(lists, snapshot, previous,
+                                                     wikipedia=not args.no_wikipedia)
+        recorded = (cache.get("articles") or {}).values()
+        print(f"  candidates' own articles: {sum('article' in r for r in recorded)} linked, "
+              f"{sum(r.get('none') == 'not-linked' for r in recorded)} not linked, "
+              f"{sum('none' in r and r['none'] != 'not-linked' for r in recorded)} not confirmed "
+              f"(read {cache.get('articlesRead')})")
     errors = statewide_photos.problems(cache)
     seen = statewide_photos.counts(cache)
     print(f"  {seen['shown']} statewide candidates' photographs cached ("
@@ -2894,6 +2901,9 @@ def build_parser():
     photos_cmd.add_argument("--no-wikipedia", action="store_true",
                             help="read only the official guides and members; keep the "
                                  "Wikipedia photographs last read")
+    photos_cmd.add_argument("--articles-only", action="store_true",
+                            help="read only the article each race's Wikipedia article links for "
+                                 "a candidate for governor; change no photograph")
 
     tribes_cmd = add("tribes", help="every tribal government and its leader (BIA Tribal Leaders "
                                     "Directory)")

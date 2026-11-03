@@ -594,6 +594,79 @@ class TestGovernorOverlayData(unittest.TestCase):
                 self.assertTrue(person["id"].startswith(f"gov-{code}-"))
                 if "politicalHistory" in person:
                     self.assertIn("wikipedia", person)
+            # Why no date is shown is recorded, a disagreement only where the
+            # roster holds an item to compare with (rule 19; PR #195 review).
+            gov = state["governor"]
+            if not gov.get("since"):
+                self.assertIn(gov.get("sinceWhy"), {"no-nga", "no-item", "no-date", "disagree"}, code)
+            if not gov.get("born"):
+                self.assertIn(gov.get("bornWhy"),
+                              {"no-nga", "no-item", "not-read", "no-date", "disagree"}, code)
+            if not gov.get("wikidata") and gov.get("bornWhy") == "disagree":
+                self.fail(f"{code}: a disagreement claimed with no item read")
+
+    def test_why_no_first_day_is_shown_is_said_in_rule_19s_terms(self):
+        terms = ["January 14, 2019 - Current"]
+        base = {"name": "Pat Governor", "party": "Republican", "partyKey": "R", "profile": "p",
+                "terms": terms}
+        # The roster holds no Wikidata item: nothing was compared.
+        self.assertEqual(stategov._governor(dict(base))["sinceWhy"], "no-item")
+        # An item with no start in the office.
+        self.assertEqual(stategov._governor(dict(base, wikidata="Q1"))["sinceWhy"], "no-date")
+        # Both dates, and they differ (Kay Ivey's, Kim Reynolds's).
+        self.assertEqual(stategov._governor(dict(base, wikidata="Q1",
+                                                 wikidataStarts=["2019-01-15"]))["sinceWhy"],
+                         "disagree")
+        agreed = stategov._governor(dict(base, wikidata="Q1", wikidataStarts=["2019-01-14"]))
+        self.assertEqual((agreed["since"], agreed.get("sinceWhy")), ("January 14, 2019", None))
+        self.assertEqual(stategov._governor(dict(base, terms=[]))["sinceWhy"], "no-nga")
+
+    def test_why_no_date_of_birth_is_shown_is_said_in_rule_19s_terms(self):
+        cache = {"people": {"gov-GA": {"wikidata": "Q777", "born": {"date": "1963-11-02",
+                                                                     "precision": "day"},
+                                       "congress": [], "offices": [], "withheld": []}}}
+
+        def why(raw, people=cache):
+            entry = {"governor": {"name": "Pat Governor", "party": "Republican", "partyKey": "R"}}
+            stategov.attach_history("GA", entry, raw, people, {}, [])
+            return entry["governor"].get("bornWhy"), entry["governor"].get("born")
+
+        raw = {"name": "Pat Governor", "wikidata": "Q777", "born": "November 2, 1963"}
+        self.assertEqual(why(raw)[0], None)
+        self.assertEqual(why(dict(raw, born="November 3, 1963")), ("disagree", None))
+        self.assertEqual(why(dict(raw, wikidata=None)), ("no-item", None))
+        self.assertEqual(why(dict(raw, wikidata="Q888")), ("not-read", None))
+        self.assertEqual(why(dict(raw, born=None)), ("no-nga", None))
+        undated = {"people": {"gov-GA": dict(cache["people"]["gov-GA"], born=None)}}
+        self.assertEqual(why(raw, undated), ("no-date", None))
+
+    def test_a_candidates_article_member_and_finding_come_from_the_records(self):
+        from kyc import statewide_photos
+        entry = {"governor": {"name": "Pat Governor", "party": "Republican", "partyKey": "R"},
+                 "ballot2026": {"offices": {"governor": {"up": True, "candidates": {"candidates": [
+                     {"name": "Jane Doe", "party": "Democratic"},
+                     {"name": "Tom Member", "party": "Republican"},
+                     {"name": "Nobody Linked", "party": "Libertarian"},
+                     {"name": "Not Read", "party": "Green"}]}}}}}
+        k = lambda name: statewide_photos.key("GA", "governor", name)  # noqa: E731
+        photos = {"articlesRead": "2026-11-03", "articles": {
+            # Linked, though the photograph came by another route.
+            k("Tom Member"): {"article": "Tom Member", "page": "2026 Georgia gubernatorial election"},
+            k("Nobody Linked"): {"none": "not-linked", "page": "2026 Georgia gubernatorial election"}},
+            "photos": {
+                k("Jane Doe"): {"route": "wikipedia", "article": "Jane Doe (politician)"},
+                k("Tom Member"): {"route": "member", "bioguide": "T000278"}}}
+        stategov.attach_history("GA", entry, {"name": "Pat Governor"}, {"people": {}}, photos, [])
+        rows = {r["name"]: r for r in entry["ballot2026"]["offices"]["governor"]["candidates"]["candidates"]}
+        self.assertEqual(rows["Jane Doe"]["wikipedia"], "Jane Doe (politician)")
+        self.assertEqual(rows["Tom Member"]["wikipedia"], "Tom Member")
+        self.assertEqual(rows["Tom Member"]["member"], "T000278")
+        self.assertEqual(rows["Nobody Linked"]["articleNone"], "not-linked")
+        self.assertEqual(rows["Nobody Linked"]["articleRead"], "2026-11-03")
+        # Nothing read: nothing claimed.
+        self.assertEqual(set(rows["Not Read"]) & {"wikipedia", "articleNone", "articleRead", "member"},
+                         set())
+
 
 if __name__ == "__main__":
     unittest.main()

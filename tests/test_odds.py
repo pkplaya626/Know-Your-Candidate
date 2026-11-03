@@ -8,6 +8,7 @@ people a label names, and which table on a page is the November matchup.
 import datetime
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -267,9 +268,24 @@ GOV_RACES = RACES + [
 GOV_INDEX = odds.race_index(GOV_RACES)
 # The election office's list for Georgia's governor (odds.governor_races):
 # a running mate as an alias of the ticket's nominee, a write-in marked.
-GA_LIST = [{"name": "Rick Jackson", "party": "Republican"},
-           {"name": "Keisha Lance Bottoms", "party": "Democratic", "aliases": ["Pat Mate"]},
-           {"name": "David C. Byrne", "party": None, "writeIn": True}]
+def listed(*rows):
+    """Rows as odds.governor_races writes them: the list's party key, and
+    marked as an election office's list."""
+    return [dict(row, partyKey=odds.list_party_key(row.get("party")), listed=True) for row in rows]
+
+
+GA_LIST = listed({"name": "Rick Jackson", "party": "Republican"},
+                 {"name": "Keisha Lance Bottoms", "party": "Democratic", "aliases": ["Pat Mate"]},
+                 {"name": "David C. Byrne", "party": None, "writeIn": True})
+# Alaska's list writes a party as the voter registered it (rule 91).
+AK_LIST = listed({"name": "Dave Bronson", "party": "Registered Republican"},
+                 {"name": "Bernadette Wilson", "party": "Registered Republican"},
+                 {"name": "Jonathan Kreiss-Tomkins", "party": "Registered Democrat"},
+                 {"name": "Ramadhani “Ram” Greer", "party": "Registered Libertarian"})
+# Nevada's holds two Fords.
+NV_LIST = listed({"name": "Joseph Lombardo", "party": "Republican"},
+                 {"name": "Aaron D. Ford", "party": "Democratic"},
+                 {"name": "Danielle Ford", "party": "Libertarian Party of Nevada"})
 
 
 def kalshi_gov(ticker, question, rule_state, label, price, party="Democratic", rule=None):
@@ -414,7 +430,137 @@ class TestGovernorRaces(unittest.TestCase):
         self.assertTrue(all(r["chamber"] == "Governor" for r in races))
         ga = people["G-GA-2026"]
         self.assertTrue(any(p["name"] == "Keisha Lance Bottoms" and p["party"] == "Democratic" for p in ga))
-        self.assertTrue(all(set(p) <= {"name", "party", "aliases", "writeIn"} for p in ga))
+        self.assertTrue(all(set(p) <= {"name", "party", "partyKey", "listed", "aliases", "writeIn"}
+                            for p in ga))
+        # Every list's party words key as the list means them: Alaska's
+        # "Registered Republican" is a Republican (PR #195 review).
+        # A short form only through its evidenced entry (rule 91).
+        nv = [p for p in people["G-NV-2026"] if "Lombardo" in p["name"]]
+        self.assertEqual(len(nv), 1)
+        self.assertIn("Joe Lombardo", nv[0].get("aliases") or [])
+        self.assertTrue(odds.named("Joe Lombardo (R)", people["G-NV-2026"]))
+        ak = people["G-AK-2026"]
+        self.assertTrue(ak and all(p["listed"] for p in ak))
+        for p in ak + ga:
+            party = p.get("party") or ""
+            if "Republican" in party and ";" not in party:
+                self.assertEqual(p["partyKey"], "r", p)
+            if re.search(r"^(Registered )?Democrat", party):
+                self.assertEqual(p["partyKey"], "d", p)
+
+    def test_a_lists_party_words_key_as_the_list_means_them(self):
+        for words, key in (("Republican", "r"), ("Registered Republican", "r"),
+                           ("Republican Party", "r"), ("Democratic", "d"),
+                           ("Registered Democrat", "d"), ("Democratic Party", "d"),
+                           ("Democratic-Farmer-Labor", "d"), ("Democratic-NPL", "d"),
+                           ("Democratic; Working Families", "d"),
+                           ("Republican; Conservative", "r"),
+                           ("Registered Libertarian", "i"), ("Libertarian Party of Nevada", "i"),
+                           ("Independent", "i"), ("Party Not Designated", "i"),
+                           ("Undeclared", "i"), (None, None), ("", None)):
+            self.assertEqual(odds.list_party_key(words), key, words)
+        self.assertEqual(odds._party_key(AK_LIST[0]), "r")
+
+    def test_a_label_with_no_party_takes_its_persons_real_party(self):
+        # Kalshi's candidate markets carry no party of their own.
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Bernadette Wilson", "party": None, "price": 0.3},
+            {"label": "Jonathan Kreiss-Tomkins", "party": None, "price": 0.4},
+            {"label": "Ram Greer", "party": None, "price": 0.01}]}, AK_LIST)
+        self.assertEqual([(o.get("mismatch"), o["party"]) for o in out],
+                         [(None, "r"), (None, "d"), (None, "i")])
+
+    def test_a_label_naming_someone_of_a_party_on_the_list_is_a_conflict(self):
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Mike Dunleavy", "party": "r", "price": 0.2}]}, AK_LIST)
+        self.assertTrue(out[0]["mismatch"] and out[0]["conflict"])
+        issues = validate.check_odds(GOV_RACES, {"fetched": "2026-11-02", "races": {
+            "G-AK-2026": {"markets": [{"source": "kalshi", "outcomes": out}]}}},
+            today=datetime.date(2026, 11, 2))
+        self.assertTrue(any(i.code == "odds-label-mismatch" and "Mike Dunleavy" in i.detail[0]
+                            for i in issues))
+
+    def test_a_namesake_or_a_bare_surname_names_nobody_on_the_list(self):
+        out = odds.checked_outcomes({"outcomes": [
+            # A namesake: Georgia's list holds Rick Jackson, not John.
+            {"label": "John Jackson", "party": None, "price": 0.02},
+            # A running mate's surname alone never names the ticket.
+            {"label": "Mate", "party": None, "price": 0.01},
+            # A bare surname that fits one person on the list names them.
+            {"label": "Bottoms", "party": None, "price": 0.6}]}, GA_LIST)
+        self.assertEqual([o.get("mismatch") for o in out], [True, True, None])
+        self.assertEqual(out[0]["label"], "Other")
+        self.assertEqual(out[2]["party"], "d")
+        # Two Fords on Nevada's list: "Ford" names neither; the whole name
+        # names one, in any order of the list's words.
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Ford", "party": None, "price": 0.3},
+            {"label": "Aaron Ford", "party": None, "price": 0.4},
+            {"label": "Ford, Danielle", "party": None, "price": 0.01},
+            {"label": "Joe Lombardo", "party": "r", "price": 0.5}]}, NV_LIST)
+        self.assertTrue(out[0]["mismatch"])
+        self.assertEqual((out[1].get("mismatch"), out[1]["party"]), (None, "d"))
+        self.assertEqual((out[2].get("mismatch"), out[2]["party"]), (None, "i"))
+        # A short form the list does not print is not the list's words.
+        self.assertTrue(out[3]["mismatch"])
+        self.assertEqual(odds.named("Aaron Ford", NV_LIST), [NV_LIST[1]])
+        self.assertEqual(odds.named("Ford", NV_LIST), [])
+
+    def test_a_mismatched_labels_own_party_suffix_gives_the_party(self):
+        out = odds.checked_outcomes({"outcomes": [
+            {"label": "Chris Carr (R)", "party": None, "price": 0.02}]}, GA_LIST)
+        self.assertTrue(out[0]["mismatch"])
+        self.assertEqual((out[0]["party"], out[0]["label"]), ("r", "Republican party"))
+        self.assertTrue(out[0]["conflict"])
+
+    def test_a_poll_column_with_a_namesake_or_a_shared_surname_is_not_this_race(self):
+        table = TABLE.replace("Ken<br />Paxton (R)", "Joseph<br />Lombardo (R)").replace(
+            "James<br />Talarico (D)", "Ford (D)")
+        rows, reason = odds.parse_aggregates(table, NV_LIST)
+        self.assertIsNone(rows)
+        self.assertIn("'Ford (D)' names nobody", reason)
+        rows, reason = odds.parse_aggregates(table.replace("Ford (D)", "Aaron<br />Ford (D)"),
+                                             NV_LIST)
+        self.assertIsNone(reason)
+
+    def test_a_combination_places_nowhere_whichever_pattern_matches_first(self):
+        # The Senate pattern matched first and placed this on S-GA-2026.
+        combo = {"ticker": "KXSENATEGOVGA-26", "title": "Will Democrats win the Senate race in "
+                 "Georgia and the governorship?",
+                 "rules_primary": "If a Democrat is sworn in as Senator of Georgia and a "
+                                  "Democrat is inaugurated as the governor of Georgia ..."}
+        self.assertEqual(odds.kalshi_place(combo, GOV_INDEX), (None, None))
+        # Rules that resolve on both, under a question that names one.
+        both = dict(combo, title="Will Democrats win the Senate race in Georgia?")
+        self.assertEqual(odds.kalshi_place(both, GOV_INDEX), (None, None))
+        # A series titled with "governor" that is not one state's governor
+        # series is refused, whatever its ticker.
+        self.assertFalse(odds._race_series({"ticker": "KXSENATEGOVGA",
+                                            "title": "Georgia Senate and Governor"}))
+        # A governor market never reaches the Senate race.
+        gov = kalshi_gov("GOVPARTYGA-26-D", "Will the Democratic party win the governorship in "
+                         "Georgia", "Georgia", "Keisha Lance Bottoms", 0.6)
+        self.assertNotEqual(odds.kalshi_place(gov, GOV_INDEX)[0], "S-GA-2026")
+
+    def test_a_polymarket_description_speaking_of_a_partys_nominee_is_still_the_governors(self):
+        # Every one of Polymarket's descriptions says whom a party outcome
+        # stands for with "the nominee of the party"; asked of the title's
+        # words, all 37 were refused.
+        event = {"slug": "georgia-governor-winner-2026", "title": "Georgia Governor Election Winner",
+                 "description": "This market will resolve according to the winner of the 2026 "
+                                "Georgia gubernatorial election.\n\nA candidate shall be "
+                                "considered to represent a party in the event that he or she is "
+                                "the nominee of the party in question."}
+        self.assertEqual(odds.polymarket_place(event, GOV_INDEX), ("G-GA-2026", None))
+        primary = dict(event, title="Georgia Governor Republican Primary Winner")
+        self.assertEqual(odds.polymarket_place(primary, GOV_INDEX)[0], None)
+
+    def test_the_builds_line_counts_the_governor_races(self):
+        cache = {"fetched": "2026-11-03", "races": {"G-GA-2026": {"markets": [{}],
+                                                                  "polls": {"rows": [1]}}}}
+        line = odds.build_line(cache, RACES)
+        self.assertIn(f"markets for 1/{len(odds.governor_ids())} governor races", line)
+        self.assertIn("polling averages for 1 (fetched", line)
 
     def test_validate_knows_the_governor_ids(self):
         cache = {"fetched": "2026-11-02", "races": {"G-GA-2026": {"markets": []}, "G-ZZ-2026": {}}}

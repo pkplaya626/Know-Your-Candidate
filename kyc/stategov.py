@@ -210,6 +210,29 @@ def _governor(gov, problems=None):
                         f"{since}; Wikidata records {', '.join(gov['wikidataStarts'])}")
     out = {"name": gov["name"], "party": gov["party"], "partyKey": gov["partyKey"],
            "since": since if confirmed else "", "terms": terms, "profile": gov["profile"]}
+    if not confirmed:
+        # Why no first day is shown, in rule 19's terms: the page words
+        # each (a disagreement only where both dates exist and differ).
+        out["sinceWhy"] = since_why(gov, since)
+    return _governor_rest(gov, out)
+
+
+def since_why(gov, since):
+    """Why the governor's first day in office is not shown: "no-nga" (the
+    NGA's roster gives none), "no-item" (the roster's cross-check holds no
+    Wikidata item for them, so nothing was compared), "no-date" (the item
+    records no start in the office) or "disagree" (both dates exist and
+    differ: Kay Ivey's, Kim Reynolds's)."""
+    if not since or _date(since) is None:
+        return "no-nga"
+    if not gov.get("wikidata"):
+        return "no-item"
+    if not gov.get("wikidataStarts"):
+        return "no-date"
+    return "disagree"
+
+
+def _governor_rest(gov, out):
     for key in ("website", "phone", "address"):
         if gov.get(key):
             out[key] = gov[key]
@@ -240,10 +263,23 @@ def candidate_article(photo_cache, code, printed_name):
     candidate for governor by."""
     from . import statewide_photos
 
+    rec = statewide_photos.article_of(photo_cache, code, "governor", printed_name)
+    return (rec or {}).get("article")
+
+
+def candidate_member(photo_cache, code, printed_name):
+    """The bioguide id of the member of Congress an evidenced
+    ``overrides.OTHER_OFFICE_NOMINEES`` entry ties to this candidate, as the
+    ballot photographs' member route matched them (kyc/statewide_photos.py
+    read_members: the entry, and the list's name for the office theirs), or
+    ``None``."""
+    from . import statewide_photos
+    from .overrides import OTHER_OFFICE_NOMINEES
+
     rec = ((photo_cache or {}).get("photos") or {}).get(
-        statewide_photos.key(code, "governor", printed_name))
-    if rec and rec.get("route") == "wikipedia" and rec.get("article"):
-        return rec["article"]
+        statewide_photos.key(code, "governor", printed_name)) or {}
+    if rec.get("route") == "member" and rec.get("bioguide") in OTHER_OFFICE_NOMINEES:
+        return rec["bioguide"]
     return None
 
 
@@ -276,12 +312,19 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
     ``history-stale``). The governor's date of birth where the NGA and
     Wikidata agree (``agreed_birth``); a disagreement is reported, never
     shown."""
-    from . import history, statewide
+    from . import history, statewide, statewide_photos
 
     people = (cache or {}).get("people") or {}
     gov = entry["governor"]
     gov["id"] = statewide.governor_id(code)
     rec = people.get(history.governor_key(code))
+    # Why no date of birth is shown, in rule 19's terms: no item to check
+    # the NGA's against, the item not read, no date on one side, or two
+    # dates that differ (``bornWhy``; the page words each).
+    if not raw.get("wikidata"):
+        gov["bornWhy"] = "no-item"
+    elif not (rec and rec.get("wikidata") == raw["wikidata"]):
+        gov["bornWhy"] = "not-read"
     if rec and raw.get("wikidata") and rec.get("wikidata") == raw["wikidata"]:
         gov["politicalHistory"] = history.for_page(rec)
         gov["wikidata"] = rec["wikidata"]
@@ -290,7 +333,12 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
         born = agreed_birth(raw.get("born"), rec.get("born"))
         if born:
             gov["born"] = born
-        elif raw.get("born") and rec.get("born") and _date(raw["born"]):
+        elif not (raw.get("born") and _date(raw["born"])):
+            gov["bornWhy"] = "no-nga"
+        elif not rec.get("born") or rec["born"].get("precision") != "day":
+            gov["bornWhy"] = "no-date"
+        else:
+            gov["bornWhy"] = "disagree"
             problems.append(f"{code}: the NGA says {gov['name']} was born {raw['born']}; "
                             f"Wikidata records {rec['born']['date']} ({rec['born']['precision']}); "
                             "neither is shown")
@@ -306,8 +354,20 @@ def attach_history(code, entry, raw, cache, photo_cache, problems):
         row["id"] = statewide.candidate_id(code, row["name"])
         if row.get("writeIn"):
             continue
-        article = candidate_article(photo_cache, code, row.get("printed") or row["name"])
+        printed = row.get("printed") or row["name"]
+        member = candidate_member(photo_cache, code, printed)
+        if member:
+            row["member"] = member
+        found = statewide_photos.article_of(photo_cache, code, "governor", printed)
+        if found and found.get("read"):
+            row["articleRead"] = found["read"]
+        article = (found or {}).get("article")
         if not article:
+            # What the race's article said of them, where it was read: it
+            # links none ("not-linked"), or a link that could not be
+            # confirmed as theirs; nothing where it was not read (rule 19).
+            if found and found.get("none"):
+                row["articleNone"] = found["none"]
             continue
         row["wikipedia"] = article
         rec = people.get(row["id"])

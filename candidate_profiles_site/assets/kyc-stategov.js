@@ -453,7 +453,13 @@
    *  does not load data/odds.js. */
   function raceOdds(code, opts) {
     if (!KYC.odds || !global.kycOdds) return "";
-    var html = KYC.odds.render({ id: raceId(code), label: raceHeading(code) }, opts || { compact: true });
+    // The parties the list prints beside its candidates, write-ins apart:
+    // what kyc-odds.js reads to say a party-only market over a ballot of
+    // one party cannot tell its candidates apart (rule 79).
+    var parts = listParts(code, "governor");
+    var parties = parts && parts.printed ? parts.printed.map(function (p) { return p.party || ""; }) : null;
+    var html = KYC.odds.render({ id: raceId(code), label: raceHeading(code), listParties: parties },
+      opts || { compact: true });
     if (html) return html;
     return '<p class="faint gov-odds-none">This site’s cache of prediction markets and polling ' +
       "averages holds none for this race.</p>";
@@ -470,6 +476,9 @@
     var href = governorHref(code, "governor", opts.here);
     var name = href ? '<a class="gcard-link" href="' + KYC.escapeAttr(href) + '">' +
       KYC.escapeHtml(gov.name) + "</a>" : KYC.escapeHtml(gov.name);
+    // *opts.seatLine* false leaves out the holder line where the race above
+    // the card has said it (the map's panel: said once, PR #195 review).
+    var seatLine = opts.seatLine === false ? "" : openSeat(code, "governor");
     // Since when, only where Wikidata agrees with the NGA (stategov, rule
     // 54). No count of terms: the NGA lists one unbroken span for a
     // re-elected governor, so a count read from it said "First term" of
@@ -480,7 +489,7 @@
     return '<article class="gov-card gcard"' + (opts.here ? ' id="governor"' : "") +
       ' data-gov-state="' + KYC.escapeAttr(code) + '" aria-label="' + KYC.escapeAttr(title) + '"' +
       openAttrs(gov.id) + ">" +
-      officeLine("gov-role", title, officeMark(code, "governor")) + openSeat(code, "governor") +
+      officeLine("gov-role", title, officeMark(code, "governor")) + seatLine +
       '<div class="gcard-holder">' + photo.img + '<div class="gov-who">' +
       '<p class="gov-name">' + name + openControl(gov.id, gov.name) + "</p>" +
       '<p class="gov-party party-' + KYC.escapeAttr(String(gov.partyKey || "i").toLowerCase()) + '">' +
@@ -497,7 +506,24 @@
    *  first with the list's own form on hover, the party in words, the
    *  running mate beside the nominee, the name printed on the ballot, and a
    *  write-in said to be one. */
-  function candidateCard(person, code) {
+  /** A candidate's status in the cards' words, as a badge: on the list for
+   *  the November 3 ballot, or a write-in; after Election Day in the past
+   *  tense, and never a winner (rule 91). One implementation for the
+   *  overlay's rows and the map panel's cards (rule 12). */
+  function candidateBadge(person) {
+    var past = after();
+    var text = person.writeIn
+      ? (past ? "Was a write-in candidate" : "Write-in candidate")
+      : (past ? "Was on the Nov 3, 2026 ballot" : "On the Nov 3, 2026 ballot");
+    var title = person.writeIn
+      ? "The election office's list of write-in candidates names them; the name is not printed on the ballot."
+      : "The election office's list of candidates for governor names them.";
+    return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(title) + '">' +
+      KYC.escapeHtml(text) + "</span>";
+  }
+
+  function candidateCard(person, code, opts) {
+    opts = opts || {};
     var photo = person.writeIn ? { img: "", credit: "" }
       : cardPhoto(person.photo, person.photoCopy, person.photoCredit);
     var name = person.record ? link(person.record, person.name) : KYC.escapeHtml(person.name);
@@ -517,7 +543,10 @@
       // #191 review). Only the sitting governor's card carries a colour.
       (person.party ? '<p class="gov-party gcard-party-words">' +
         KYC.escapeHtml(person.party) + "</p>" : "") +
-      (person.writeIn ? '<p class="faint">Write-in candidate</p>' : "") +
+      // The status badge where the caller asks for it (the map's panel, as
+      // a Senate panel's cards carry theirs); it says a write-in is one.
+      (opts.badge ? '<p class="gcard-status">' + candidateBadge(person) + "</p>"
+        : person.writeIn ? '<p class="faint">Write-in candidate</p>' : "") +
       (person.runningMate ? '<p class="gcard-mate">With ' + KYC.escapeHtml(person.runningMate) +
         " for lieutenant governor</p>" : "") +
       (person.ballotName ? '<p class="faint">Printed on the ballot as “' +
@@ -553,14 +582,25 @@
     if (parts.none) {
       return '<div class="gov-race">' + status + '<div class="gov-candidates">' + parts.none + "</div></div>";
     }
-    var card = function (p) { return candidateCard(p, code); };
+    // *opts.panel*: the map's panel, whose own head counts the list - no
+    // second heading, each card with its badge, and the write-ins folded so
+    // the markets follow the printed candidates, as the overlay folds them.
+    var panelled = !!opts.panel;
+    var card = function (p) { return candidateCard(p, code, { badge: panelled }); };
+    var writeIns = "";
+    if (parts.writeIns.length && panelled) {
+      writeIns = '<details class="race-out gov-writeins"><summary>' + parts.writeIns.length +
+        " write-in candidate" + (parts.writeIns.length === 1 ? "" : "s") + " (" +
+        (parts.past ? "their names were" : "names") + " not printed on the ballot)</summary>" +
+        '<div class="gcard-grid gcard-writeins">' + parts.writeIns.map(card).join("") + "</div></details>";
+    } else if (parts.writeIns.length) {
+      writeIns = '<p class="gov-candidates-head gov-writein-head">' + parts.writeInHead + "</p>" +
+        '<div class="gcard-grid gcard-writeins">' + parts.writeIns.map(card).join("") + "</div>";
+    }
     return '<div class="gov-race" data-gov-race="' + KYC.escapeAttr(code) + '">' + status +
-      '<p class="gov-candidates-head">' + parts.head + "</p>" + parts.uncertified +
+      (panelled ? "" : '<p class="gov-candidates-head">' + parts.head + "</p>") + parts.uncertified +
       '<div class="gcard-grid">' + parts.printed.map(card).join("") + "</div>" +
-      (parts.writeIns.length
-        ? '<p class="gov-candidates-head gov-writein-head">' + parts.writeInHead + "</p>" +
-          '<div class="gcard-grid gcard-writeins">' + parts.writeIns.map(card).join("") + "</div>"
-        : "") + parts.source +
+      writeIns + parts.source +
       // The markets and averages after the list, as a Senate race's block
       // follows its cards (rule 40); left out where the caller draws them
       // itself (*opts.odds* false).
@@ -590,8 +630,9 @@
         (parts.writeIns.length ? '<span class="race-out-note">' + parts.writeIns.length +
           " write-in</span>" : "") + "</p>";
     }
-    return '<div class="gov-race-panel">' + head + governorRace(code) + "</div>" +
-      '<p class="panel-subhead">Seat held by</p>' + governorCard(code);
+    // The holder line once, in the race above the card (PR #195 review).
+    return '<div class="gov-race-panel">' + head + governorRace(code, { panel: !parts.none }) + "</div>" +
+      '<p class="panel-subhead">Seat held by</p>' + governorCard(code, { seatLine: false });
   }
 
   function textOf(html) {
@@ -1344,6 +1385,7 @@
     raceId: raceId,
     raceOdds: raceOdds,
     racePanel: racePanel,
+    candidateBadge: candidateBadge,
     cardPhoto: cardPhoto,
     governorUp: governorUp,
     governorListed: governorListed,

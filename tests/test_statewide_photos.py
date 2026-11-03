@@ -219,6 +219,35 @@ class TestTheRacesOwnArticle(unittest.TestCase):
         self.assertTrue(rec["portraitHeavy"][0]["kept"])
         self.assertEqual(official_photos.record_problems(rec, "x"), [])
 
+    def test_the_candidates_own_article_is_recorded_whatever_route_pictures_them(self):
+        """The race's article's link to a candidate is a finding of its own:
+        recorded where it links their article, said where it links none, and
+        nothing where the article was not read (rule 19; PR #195 review)."""
+        lists = {"KS": {"governor": [{"name": "Ty Masterson"}, {"name": "Nobody Linked"},
+                                     {"name": "Sam Poe", "writeIn": True}]},
+                 "WY": {"governor": [{"name": "Not Read"}]}}
+
+        def wikitext(title):
+            if "Wyoming" in title:
+                raise RuntimeError("timed out")
+            return title, "text"
+
+        with mock.patch.object(sp, "race_links", return_value=self.LINKS):
+            found, unknown = sp.read_articles(lists, wikitext=wikitext,
+                                              resolve=lambda t: dict(self.ARTICLE), log=lambda m: None)
+        k = lambda code, name: sp.key(code, "governor", name)  # noqa: E731
+        self.assertEqual(found[k("KS", "Ty Masterson")]["article"], "Ty Masterson")
+        self.assertEqual(found[k("KS", "Nobody Linked")]["none"], "not-linked")
+        self.assertNotIn(k("KS", "Sam Poe"), found)
+        self.assertNotIn(k("WY", "Not Read"), found)
+        self.assertIn(k("WY", "Not Read"), unknown)
+        # The last read stands for a race this read concluded nothing about.
+        kept = sp.kept_articles(found, {k("WY", "Not Read"): {"article": "Not Read"}}, unknown)
+        self.assertEqual(kept[k("WY", "Not Read")], {"article": "Not Read"})
+        cache = {"articles": kept, "articlesRead": "2026-11-03", "photos": {}}
+        self.assertEqual(sp.article_of(cache, "KS", "governor", "Nobody Linked")["none"], "not-linked")
+        self.assertIsNone(sp.article_of(cache, "KS", "governor", "Someone Else"))
+
     def test_a_refused_file_is_never_taken(self):
         """One list for every route (rule 38): NOT_A_PORTRAIT, keyed on the
         Commons upload address as for a judge's portrait."""

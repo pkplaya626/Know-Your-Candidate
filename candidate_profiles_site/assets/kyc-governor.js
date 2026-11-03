@@ -166,12 +166,16 @@
       KYC.escapeHtml(KYC.stateName(code)) + " ›</a>";
   }
 
-  /** The race's term note from the ballot table ("4-year term; term begins
-   *  01/2027"), where the office is on the ballot. */
-  function termNote(code) {
+  /** The term's length, from the ballot table's note where the office is on
+   *  the ballot and the note opens with one ("4-year term; term begins
+   *  01/2027" -> "4-year term"), else "". The rest of a note is why the
+   *  office is on the ballot - "last elected 2022", Guam's statute, "open
+   *  seat (Mills term-limited)" - and is no term (PR #195 review). */
+  function termLength(code) {
     var b = sg().ballotOf(code);
     var item = b && b.offices.governor;
-    return item && item.up && item.note ? item.note : "";
+    var m = item && item.up && /^(\d+-year term)(?=[;,.]|$)/.exec(String(item.note || ""));
+    return m ? m[1] : "";
   }
 
   /** One candidate as a row in the race panel, in the profile dialog's
@@ -199,15 +203,7 @@
    *  or a write-in; after Election Day in the past tense, and never a
    *  winner (rule 91). */
   function statusBadge(person) {
-    var past = after();
-    var text = person.writeIn
-      ? (past ? "Was a write-in candidate" : "Write-in candidate")
-      : (past ? "Was on the Nov 3, 2026 ballot" : "On the Nov 3, 2026 ballot");
-    var title = person.writeIn
-      ? "The election office's list of write-in candidates names them; the name is not printed on the ballot."
-      : "The election office's list of candidates for governor names them.";
-    return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(title) + '">' +
-      KYC.escapeHtml(text) + "</span>";
+    return sg().candidateBadge(person);
   }
 
   /** The race panel: the other candidates as rows, write-ins apart, the
@@ -255,7 +251,26 @@
   var NO_RECORD_GOVERNOR = "This site reads the offices held through the Wikidata item the NGA roster’s " +
     "cross-check holds for the governor; it has none for this one yet.";
   var NO_RECORD_CANDIDATE = "This site reads a candidate’s offices held through their own article, " +
-    "as the race’s Wikipedia article links it (rule 33); it has none for this candidate.";
+    "as the race’s Wikipedia article links it; it has none for this candidate.";
+
+  /* Why a date the NGA gives is not shown, in rule 19's words, as the
+   * pipeline records it (kyc/stategov.py since_why, attach_history's
+   * bornWhy): a disagreement only where both dates exist and differ. */
+  var NOT_CHECKED = "Not shown: this site has no Wikidata item for this governor to check the NGA’s date against";
+  var SINCE_WHY = {
+    disagree: "Not shown: the NGA’s date and Wikidata’s do not agree",
+    "no-item": NOT_CHECKED,
+    "no-date": "Not shown: the Wikidata item records no first day in this office to check the NGA’s date against",
+    "no-nga": "Not shown: the NGA’s roster gives no first day in office",
+  };
+  var BORN_WHY = {
+    disagree: "Not shown: the NGA’s date and Wikidata’s do not agree",
+    "no-item": NOT_CHECKED,
+    "not-read": "Not shown: this site has not yet read the Wikidata item’s date of birth to check the NGA’s against",
+    "no-date": "Not shown: the Wikidata item records no date of birth to the day to check the NGA’s against",
+    "no-nga": "Not shown: the NGA’s page gives no date of birth",
+  };
+  var ONLY_AGREED = "Not shown: this site shows a date only where the NGA and Wikidata record the same day";
 
   /** Where the biography's facts come from, for the governor. */
   function governorBiography(code, gov) {
@@ -264,11 +279,10 @@
     var born = gov.born
       ? KYC.escapeHtml(KYC.dateWords(gov.born.date)) +
         ' <span class="faint">(the NGA’s page and Wikidata agree)</span>'
-      : absent("Not shown: this site shows a date of birth only where the NGA’s page and " +
-        "Wikidata give the same day");
+      : absent(BORN_WHY[gov.bornWhy] || ONLY_AGREED);
     var since = gov.since
       ? KYC.escapeHtml(gov.since) + ' <span class="faint">(the NGA’s roster, confirmed by Wikidata)</span>'
-      : absent("Not shown: the NGA’s date and Wikidata’s do not agree");
+      : absent(SINCE_WHY[gov.sinceWhy] || ONLY_AGREED);
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join("<br>");
     var links = [outLink(gov.profile, "NGA biography")];
     if (gov.website) links.unshift(outLink(gov.website, "The governor’s office"));
@@ -293,28 +307,66 @@
         "cross-check holds for this governor; never a search by name.</p>" : "");
   }
 
+  /** What the race's own Wikipedia article was found to link for the
+   *  candidate, as the pipeline records it (kyc/statewide_photos.py
+   *  read_articles): their article; none, where the article was read and
+   *  links none; a link not confirmed as theirs; or "not recorded here"
+   *  where nothing was read (rule 19). */
+  function articleLine(person) {
+    var read = person.articleRead ? ", read " + KYC.dateWords(person.articleRead) + "," : "";
+    if (person.wikipedia) {
+      return linkChip(wikipediaUrl(person.wikipedia), "Wikipedia") +
+        '<p class="faint">The article the race’s own Wikipedia article links for this ' +
+        "candidate" + KYC.escapeHtml(read || ",") + " checked to be theirs; never a search by name.</p>";
+    }
+    if (person.articleNone === "not-linked") {
+      return absent("No article: the race’s own Wikipedia article" + read +
+        " links none for this candidate, and this site never searches by name");
+    }
+    if (person.articleNone) {
+      return absent("No article: the link the race’s own Wikipedia article" + read +
+        " gives this candidate could not be confirmed as theirs");
+    }
+    return absent("Not recorded here: this site has not read the race’s Wikipedia article for " +
+      "this candidate");
+  }
+
+  /** A candidate who is someone this site has a record of: the sitting
+   *  governor (the holder line settles them as the holder) or a member of
+   *  Congress an evidenced entry ties to the list's name (the photograph's
+   *  member route). Never joined by a name alone (rule 25). */
+  function recordLine(code, person) {
+    if (person.holder) {
+      return '<a href="#/official/' + KYC.escapeAttr("gov-" + code) + '">The sitting governor: ' +
+        "see their record ›</a>";
+    }
+    if (person.member) {
+      return '<a href="#/profile/' + KYC.escapeAttr(person.member) + '">A member of Congress: ' +
+        "see their profile ›</a>";
+    }
+    return "";
+  }
+
   function candidateBiography(code, person, parts) {
     var list = parts.list;
-    var article = person.wikipedia
-      ? linkChip(wikipediaUrl(person.wikipedia), "Wikipedia") +
-        '<p class="faint">The article the race’s own Wikipedia article links for this ' +
-        "candidate, checked to be theirs (rule 33); never a search by name.</p>"
-      : absent("No article linked: this site takes a candidate’s article only from the race’s " +
-        "own Wikipedia article, checked to be theirs, and it links none for this candidate");
+    var record = recordLine(code, person);
     var body = '<div class="field-grid">' +
+      (record ? field("Record", record, true) : "") +
       field("Party", person.party ? KYC.escapeHtml(person.party) : absent("The list gives none")) +
       field("Running mate", person.runningMate
         ? KYC.escapeHtml(person.runningMate) + ' <span class="faint">for lieutenant governor</span>'
         : absent("The list names none")) +
-      field("Born", absent("Not looked at: this site reads no biography for a candidate for governor " +
-        "beyond the election office’s list and the race’s article")) +
+      field("Born", record
+        ? absent("Not shown here: see their record")
+        : absent("Not looked at: this site reads no biography for a candidate for governor " +
+          "beyond the election office’s list and the race’s article")) +
       field("Campaign finance", absent("Not looked at: this site reads federal campaign filings only, " +
         "not the state’s")) +
       field("Platform", absent("Not looked at: this site reads no platform for a candidate for governor"), true) +
-      field("Links", article, true) +
+      field("Links", articleLine(person), true) +
       "</div>" +
-      '<p class="held-source">The name, party and running mate are ' + outLink(list.url, list.source) +
-      "’s, read " + KYC.escapeHtml(KYC.dateWords(list.read)) + ".</p>";
+      '<p class="held-source">The name, party and running mate are from ' + outLink(list.url, list.source) +
+      ", read " + KYC.escapeHtml(KYC.dateWords(list.read)) + ".</p>";
     return body;
   }
 
@@ -394,12 +446,12 @@
     var printed = el("governorModalPrinted");
     printed.textContent = person.printed ? "The list prints: " + person.printed : "";
     printed.hidden = !person.printed;
-    var note = termNote(code);
+    var term = termLength(code);
     el("governorModalMeta").innerHTML =
       "<span>" + KYC.icon("pin") + " " + (parts.past ? "Ran for" : "Running for") +
       " <strong>Governor • " + KYC.escapeHtml(code) + "</strong> " + stateLink(code, "governor-race") + "</span>" +
-      (note ? "<span>" + KYC.icon("calendar") + " Term <strong>" + KYC.escapeHtml(note) + "</strong>" +
-        (parts.past ? "" : " (if elected)") + "</span>" : "");
+      (term ? '<span class="gov-term">' + KYC.icon("calendar") + " Term <strong>" + KYC.escapeHtml(term) +
+        "</strong>" + (parts.past ? "" : " (if elected)") + "</span>" : "");
     var status = el("governorModalStatus");
     status.innerHTML = statusBadge(person) +
       (person.ballotName ? ' <span class="faint">Printed on the ballot as “' +

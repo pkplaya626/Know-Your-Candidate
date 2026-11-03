@@ -1122,12 +1122,21 @@ Governor Election Winner") and its description ("the 2026 Arizona
 gubernatorial election") name the same state. The polling averages are the
 race's own article's ("2026 Arizona gubernatorial election"). Labels and
 poll columns are matched against the election office's list of candidates
-(`odds.governor_races`, rule 91): a running mate's name names the ticket, a
-write-in is on the list, and a label naming nobody on it is shown as the
-party it resolves on. A race the cache holds nothing for says so, about the
-cache. Read locally on 2026-11-03: Kalshi markets on 35 and Polymarket on
-37 of the 39 races, polling averages on 20 (`odds.coverage` counts them
-apart).
+(`odds.governor_races`, rule 91) as rule 62 matches a name
+(`odds.named_on_list`): the list's own words in any order - a given name and
+the surname it prints, and no word it does not - a bare surname only where
+it fits one person on the list (never Nevada's "Ford"), a running mate's
+whole name for the ticket but never their surname alone, a short form only
+through an evidenced `overrides.STATEWIDE_NAME_FORMS` entry. A write-in is on
+the list. A label naming nobody on it - a namesake included - is shown as the
+party it resolves on (its own "(R)" where it carries one) and reported, and
+one naming someone of a party the list holds is a conflict. A label with no
+party of its own takes its person's, keyed as the list means its words
+(`odds.list_party_key`: Alaska's "Registered Republican" is a Republican). A
+question that speaks of a governorship and a seat in Congress places nowhere,
+whichever pattern matched first. A race the cache holds nothing for says so,
+about the cache, and the roster build's line counts the governor races as the
+odds command does (`odds.build_line`).
 `python build_profile_site.py odds` writes `data/odds.json` and the page file
 `data/odds.js`:
 
@@ -1918,8 +1927,9 @@ portrait with its credit (a failed one leaves the circle and takes its
 credit with it), the party under it (a candidate's fusion line in ink, rule
 88), an office tag ("Governor", "Governor (Candidate)"), the name with the
 list's own form under it, "Governor of Georgia" or "Running for Governor •
-GA" with the term note from the ballot table ("4-year term; term begins
-01/2027", "if elected"), the office's ballot mark and holder line (rule 79)
+GA" with the term's length from the ballot table's note ("Term 4-year term
+(if elected)"; nothing where the note opens with no length - the rest of a
+note is why the office is on the ballot), the office's ballot mark and holder line (rule 79)
 or the candidate's badge ("On the Nov 3, 2026 ballot"; a write-in said; from
 the day after Election Day "Was on the Nov 3, 2026 ballot", naming no
 winner).
@@ -1927,8 +1937,8 @@ winner).
 | Panel | Shows | From |
 |---|---|---|
 | The race ("GA — Governor") | The other candidates as rows (portrait, name, party, badge, running mate), write-ins in a fold, the list cited and dated, the markets and polling averages closed under a heading (below), and that money "is not looked at here: this site reads federal campaign filings only" (rule 19) | `ballot2026.offices.governor.candidates`, `data/odds.js` |
-| Biography (governor) | Born, only where the NGA's page and the Wikidata item's P569 give the same day (`stategov.agreed_birth`, rule 54's pattern; else "Not shown"); in office since (the card's words); the office's site, phone and address; the NGA biography | `data/stategov.js` (`governor.born`, read by `history`) |
-| Biography (candidate) | Party and running mate from the list; born, campaign finance and platform each said "Not looked at"; a Wikipedia badge only where the race's own article links theirs (rule 33: `statewide_photos`' wikipedia route) | the list, `candidate.wikipedia` |
+| Biography (governor) | Born, only where the NGA's page and the Wikidata item's P569 give the same day (`stategov.agreed_birth`, rule 54's pattern); in office since (the card's words); either one not shown says why - the two dates differ, the roster holds no Wikidata item to check against, the item records no date, the item is not read yet, the NGA gives none (`bornWhy`, `sinceWhy`); the office's site, phone and address; the NGA biography | `data/stategov.js` (`governor.born`, read by `history`) |
+| Biography (candidate) | "The sitting governor: see their record" (the holder line settled them) or "A member of Congress: see their profile" (an evidenced `OTHER_OFFICE_NOMINEES` entry, the ballot photographs' member route: `candidate.member`); party and running mate from the list; born, campaign finance and platform each said "Not looked at"; a Wikipedia badge where the race's own article links theirs, "links none" only where that article was read and links none, else "Not recorded here" (rule 33: `statewide_photos.read_articles`, whatever route pictures them) | the list, `candidate.wikipedia`, `articleNone`, `articleRead` |
 | Public offices held | `KYC.officesHeld`: the offices Wikidata's position-held and the person's own article agree on (rule 69), or "No linked record" | `politicalHistory` |
 | Footer | The list's or the NGA roster's source line, "Report a problem", "Copy link" (`KYC.shareLink`), Close | |
 

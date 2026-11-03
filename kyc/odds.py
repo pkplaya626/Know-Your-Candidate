@@ -231,12 +231,35 @@ def _race_series(series):
     title, ticker = series.get("title") or "", series.get("ticker") or ""
     if _KALSHI_NOT.search(title):
         return False
+    if re.search(r"governor", title, re.I) and re.search(r"senat|house|congress|\band\b|&|both",
+                                                         title, re.I):
+        return False
+    if _KALSHI_GOV_SERIES.match(ticker) or _KALSHI_GOV_TITLE.match(title.strip()):
+        return True
+    if re.search(r"governor", title, re.I):
+        # A series that speaks of a governor and is not one state's
+        # governor series is a side market or a combination ("Georgia
+        # Senate and Governor"), whatever its ticker says (PR #195 review).
+        return False
     if re.match(r"^(?:KX)?SENATE", ticker) or re.match(r"^(?:KX)?HOUSE(?:RACE|[A-Z]{2}\d{1,2})$",
                                                        ticker):
         return True
-    if _KALSHI_GOV_SERIES.match(ticker) or _KALSHI_GOV_TITLE.match(title.strip()):
-        return True
     return bool(_KALSHI_RACE.search(title))
+
+
+# A question that speaks of a governorship and of a seat in Congress, or of
+# "both", is a combination market and places nowhere, whichever pattern
+# would have matched it first: "Will Democrats win the Senate race in
+# Georgia and the governorship?" matched the Senate pattern and placed on
+# S-GA-2026 (PR #195 review).
+_K_COMBINATION = re.compile(r"\bboth\b|\bcombo\b|\band the (?:governor|senate|house)", re.I)
+
+
+def _combination(question):
+    if _K_COMBINATION.search(question):
+        return True
+    return bool(re.search(r"governor", question, re.I)
+                and re.search(r"senat|\bhouse\b|congress", question, re.I))
 
 
 def kalshi_series():
@@ -273,6 +296,11 @@ def kalshi_place(market, index):
     """``(race id, None)``; ``(None, note)`` when its question and its rules
     disagree; ``(None, None)`` when it is not about who wins a 2026 seat."""
     question, rules = market.get("title") or "", market.get("rules_primary") or ""
+    # A combination places nowhere, whichever pattern would match first; so
+    # do rules that resolve on a senator and a governor both.
+    if _combination(question) or (_K_GOV_R.search(rules) and (_K_SENATE_R.search(rules)
+                                                              or _K_HOUSE_R.search(rules))):
+        return None, None
     asked, ruled = _K_SENATE_Q.search(question), _K_SENATE_R.search(rules)
     governor = None if asked else _K_GOV_Q.search(question)
     if asked:
@@ -459,9 +487,12 @@ def polymarket_place(event, index):
             return None, None
         # The description must name the same state and speak of the
         # governorship, and of no other office: a lieutenant governor's, or
-        # a seat in Congress (a combination).
+        # a seat in Congress (a combination). Its words about a party's
+        # "nominee" are how every one says whom a party outcome stands for,
+        # not a primary: asked of the title's words, they refused all 37 of
+        # Polymarket's races for governor (2026-11-03).
         if (governor_race(description, index) != race or not _PM_GOV_WORDS.search(description)
-                or _PM_NOT_GOV.search(description)
+                or re.search(r"lieutenant|lt\.?\s*gov", description, re.I)
                 or re.search(r"\bsenat|\bhouse\b|congress", description, re.I)):
             return None, f"{event.get('slug')}: title and description do not name one governorship"
         return race, None
@@ -748,22 +779,73 @@ def named(label, people):
     words = [w for w in _words(re.sub(r"\([^)]*\)", " ", label)) if w not in _NOT_A_NAME]
     if not words:
         return []
+    if any(p.get("listed") for p in people):
+        return named_on_list(words, people)
     last = words[-1]
     hits = []
     for person in people:
-        # A running mate's name names the ticket (a governor's list's
-        # ``aliases``): a market on the ticket is a market on its nominee.
+        theirs = [w for w in _words(person.get("name")) if w not in _NOT_A_NAME]
+        if theirs and (last == theirs[-1] or (len(theirs) > 2 and last in theirs[1:])):
+            hits.append(person)
+    return hits
+
+
+def named_on_list(words, people):
+    """Everyone on an election office's list (a race for governor,
+    :func:`governor_races`) the label's *words* name, as rule 62 matches a
+    name: the list's own words in any order - a given name and the surname
+    the list prints, and no word the list does not print for them - never a
+    surname alone, save where it fits one person on the list. Nevada's list
+    holds Aaron D. Ford and Danielle Ford, Ohio's two Turners: "Ford" names
+    neither. A running mate's whole name names the ticket (``aliases``); a
+    running mate's surname alone never does, and a namesake ("John Jackson"
+    beside the list's Rick Jackson) names nobody (PR #195 review)."""
+    if len(words) == 1:
+        hits = [p for p in people
+                if [w for w in _words(p.get("name")) if w not in _NOT_A_NAME][-1:] == words]
+        return hits if len(hits) == 1 else []
+    hits = []
+    for person in people:
         for name in [person.get("name")] + list(person.get("aliases") or ()):
             theirs = [w for w in _words(name) if w not in _NOT_A_NAME]
-            if theirs and (last == theirs[-1] or (len(theirs) > 2 and last in theirs[1:])):
+            if (len(theirs) >= 2 and theirs[-1] in words and set(words) <= set(theirs)
+                    and any(w in words for w in theirs[:-1])):
                 hits.append(person)
                 break
     return hits
 
 
 def _party_key(person):
+    """d, r or i. A governor's list's row carries its own key
+    (``partyKey``, :func:`list_party_key`): Alaska prints "Registered
+    Republican", which the profiles' test below reads as an independent."""
+    if (person or {}).get("partyKey"):
+        return person["partyKey"]
     party = str((person or {}).get("party") or "")
     return "d" if "Democrat" in party else "r" if party == "Republican" else "i"
+
+
+_LIST_PARTY = re.compile(r"^(?:registered\s+)?(.+?)(?:\s+party)?(?:\s+of\s+[a-z .]+)?$")
+
+
+def list_party_key(words):
+    """The colour key of a party as an election office's list writes it,
+    in words (``statewide.party_words``): "Republican", "Registered
+    Republican" and "Republican Party" are r; "Democratic", "Registered
+    Democrat", "Democratic-Farmer-Labor" and "Democratic-NPL" are d; a
+    fusion line is its first party's ("Democratic; Working Families", rule
+    54); anything else is i, and no party at all is ``None``."""
+    text = str(words or "").split(";")[0].strip().lower()
+    if not text:
+        return None
+    match = _LIST_PARTY.match(text)
+    core = match.group(1) if match else text
+    if core in ("republican", "republicans", "gop"):
+        return "r"
+    if core in ("democrat", "democratic", "democrats", "democratic-farmer-labor",
+                "democratic-npl", "democratic farmer labor"):
+        return "d"
+    return "i"
 
 
 def _shared_party(people):
@@ -849,7 +931,7 @@ def governor_races(root="."):
     write-in marked so. A race whose list has not been read has nobody to
     match, so a label naming anyone is shown as its party.
     """
-    from . import ballot2026, statewide
+    from . import ballot2026, overrides, statewide
     from .results import state_name
 
     lists = statewide.load(root) or {"states": {}}
@@ -861,10 +943,20 @@ def governor_races(root="."):
         listed = statewide.office(lists, code, "governor") or {}
         rows = []
         for person in listed.get("candidates") or ():
-            row = {"name": statewide.display_name(person["name"]),
-                   "party": statewide.party_words(code, person.get("party"), person.get("writeIn"))}
+            words = statewide.party_words(code, person.get("party"), person.get("writeIn"))
+            row = {"name": statewide.display_name(person["name"]), "party": words,
+                   "partyKey": list_party_key(words), "listed": True}
             if person.get("runningMate"):
                 row["aliases"] = [statewide.display_name(person["runningMate"])]
+            # A short form of the name an evidenced entry records for this
+            # very list name ("Joe Lombardo" for "Lombardo, Joseph"; rule 91),
+            # never one guessed.
+            row["aliases"] = row.get("aliases", []) + [
+                holder for (where, key, holder), (form, _evidence) in
+                sorted(overrides.STATEWIDE_NAME_FORMS.items())
+                if where == code and key == "governor" and form == person["name"]]
+            if not row["aliases"]:
+                del row["aliases"]
             if person.get("writeIn"):
                 row["writeIn"] = True
             rows.append(row)
@@ -957,6 +1049,21 @@ def payload(cache):
     return json.loads(json.dumps(page, sort_keys=True))
 
 
+def build_line(cache, races):
+    """The roster build's one line about the cache: Congress's coverage
+    and the races for governor's, counted as the odds command counts them
+    (their ids from the ballot table alone). The build only reads the
+    cache (rule 41)."""
+    known = {r["id"] for r in races}
+    reach = coverage(cache, list(races) + [{"id": i} for i in governor_ids() if i not in known])
+    return (f"odds: markets for {reach['senate'][0]}/{reach['senate'][1]} Senate and "
+            f"{reach['house'][0]}/{reach['house'][1]} House races, polling averages for "
+            f"{reach['polls']}; markets for {reach['governor'][0]}/{reach['governor'][1]} "
+            f"governor races, polling averages for {reach['governorPolls']} "
+            f"(fetched {(cache or {}).get('fetched')}); {reach['unprofiled']} outcome labels "
+            "name a nominee with no profile here and show as their party")
+
+
 def coverage(cache, races):
     """``{"senate": (with a market, of), "house": (...), "polls": n}``."""
     entries = (cache or {}).get("races") or {}
@@ -1000,6 +1107,9 @@ def checked_outcomes(market, people):
             if not hits:
                 row["mismatch"] = True
                 row["marketLabel"] = label
+                # The market's own word for the party, where its label
+                # carries one ("Chris Carr (R)"), before "Other".
+                row["party"] = row.get("party") or _label_party(label)
                 row["label"] = {"d": "Democratic party", "r": "Republican party",
                                 "i": "Independent"}.get(row.get("party"), "Other")
                 # A conflict when this site knows someone of that party in the
