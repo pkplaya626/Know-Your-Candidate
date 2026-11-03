@@ -498,29 +498,45 @@
    * (data/stategov/<st>.js): a link to another state's governor or race
    * there is not "not in this build's data" (rule 19), but on that state's
    * page, at the same address. Null, or ``{code, here}``: the state the id
-   * names and the page's own. */
+   * names and the page's own. Only a place the file names as having a
+   * governor (``governed``, kyc/emit.py): the District of Columbia has
+   * none, and its page would say nobody was there (rule 19). */
   function elsewhere(id) {
     var m = ID.exec(String(id || ""));
     var code = m ? m[1] : "";
     var page = doc.querySelector('[data-page="state"][data-state]');
     var here = page ? page.getAttribute("data-state") : "";
-    return code && here && code !== here && !states()[code] && KYC.stateName(code) !== code
+    var governed = (global.kycStateGov || {}).governed;
+    var has = governed ? governed.indexOf(code) !== -1 : KYC.stateName(code) !== code;
+    return code && here && code !== here && !states()[code] && has
       ? { code: code, here: here } : null;
   }
 
+  /* A place in its own words (rule 75): "the District of Columbia", "the
+   * U.S. Virgin Islands", never "District of Columbia" in a sentence, and
+   * no territory or the District called a state. */
+  var WITH_THE = { DC: true, MP: true, VI: true };
+  function placeWords(code) {
+    return (WITH_THE[code] ? "the " : "") + KYC.stateName(code);
+  }
+  function placeOwn(code) {
+    var w = placeWords(code);
+    return w + (/Islands$/.test(w) ? "’" : "’s");
+  }
+
   function renderElsewhere(id, other) {
-    var name = KYC.stateName(other.code);
-    el("governorModalKind").textContent = "Another state";
+    var there = placeWords(other.code);
+    el("governorModalKind").textContent = "On another page";
     el("governorModalParty").hidden = true;
     el("governorModalPrinted").hidden = true;
     el("governorModalMeta").textContent = "";
     el("governorModalStatus").hidden = true;
     el("governorModalBody").innerHTML = '<div class="modal-column">' +
-      panel("info", "Another state’s government", '<p class="note-box">This page holds ' +
-        KYC.escapeHtml(KYC.stateName(other.here)) + "’s state government only. The link names " +
-        KYC.escapeHtml(id) + ", in " + KYC.escapeHtml(name) + ": " + '<a href="' +
+      panel("info", "On " + placeOwn(other.code) + " page", '<p class="note-box">This page holds the records of ' +
+        KYC.escapeHtml(placeWords(other.here)) + " alone. The link names " +
+        KYC.escapeHtml(id) + ", a record of " + KYC.escapeHtml(there) + ": " + '<a href="' +
         KYC.escapeAttr(KYC.stateUrl(other.code) + "#/official/" + encodeURIComponent(id)) + '">open it on ' +
-        KYC.escapeHtml(name) + "’s page</a>.</p>") + "</div>";
+        KYC.escapeHtml(placeOwn(other.code)) + " page</a>.</p>") + "</div>";
     el("governorModalSource").textContent = "";
     setPortrait("", null, null, "");
   }
@@ -528,7 +544,7 @@
   function render(id, found) {
     var other = found ? null : elsewhere(id);
     el("governorModalName").textContent = found ? found.person.name
-      : other ? "On " + KYC.stateName(other.code) + "’s page" : "No longer listed";
+      : other ? "On " + placeOwn(other.code) + " page" : "No longer listed";
     if (other) renderElsewhere(id, other);
     else if (!found) renderMissing(id);
     else if (found.kind === "governor") renderGovernor(found.code, found.person);
@@ -537,7 +553,7 @@
 
   /* ------------------------------------------------------------------ open */
 
-  var pending = null;
+  var pending = false;
 
   /** The overlay while the governors' data is loading, or where it did
    *  not load (rule 94): said, never a blank or "not listed". */
@@ -563,14 +579,17 @@
       // The grid loads the governors' data on demand (rule 94): a shared
       // link to an overlay asks for it once, says so while it loads, and
       // draws the record when it comes - or says it did not load.
+      // One wait for the file, whichever record is asked for meanwhile: it
+      // draws what is open when the file comes, not the first id asked for.
+      // A wait per call left the overlay "Loading…" for ever once the
+      // address changed before the file arrived (PR #172 review).
       show(id, null, opts, false);
-      if (pending === id) return true;
-      pending = id;
+      if (pending) return true;
+      pending = true;
       KYC.loadData("stategov.js", "kycStateGov", function (ok) {
-        var wanted = pending;
-        pending = null;
-        if (wanted !== id || current !== id || !isOpen()) return;
-        if (ok && sg().loaded()) open(id, { fromRoute: true });
+        pending = false;
+        if (!isOpen() || !current) return;
+        if (ok && sg().loaded()) open(current, { fromRoute: true });
         else renderWaiting(true);
       });
       return true;

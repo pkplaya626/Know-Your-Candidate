@@ -1068,9 +1068,16 @@ def stategov_state_payload(payload, code):
     its entry (none where the build holds none) and every source the
     entries cite. A state's page draws its own government and nothing of
     another state's; the map, the directory of states, the legislatures'
-    directory, the search and Your ballot load the whole file."""
+    directory, the search and Your ballot load the whole file.
+
+    ``governed`` names every place whose entry holds a governor, so a link
+    on one state's page to another's governor can say it is on that page,
+    and a place with none (the District of Columbia) is never offered as
+    holding one (rules 19, 75)."""
     states = payload.get("states") or {}
+    governed = sorted(c for c, entry in states.items() if (entry or {}).get("governor"))
     return {"states": {code: states[code]} if code in states else {},
+            "governed": governed,
             "sources": payload.get("sources") or {}}
 
 

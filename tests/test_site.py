@@ -386,10 +386,17 @@ class TestPeopleFiles(unittest.TestCase):
         payload = {"states": {"TX": {"governor": {"name": "A"}}, "CA": {"governor": {"name": "B"}}},
                    "sources": {"ncsl": ["x"]}}
         self.assertEqual(emit.stategov_state_payload(payload, "TX"),
-                         {"states": {"TX": {"governor": {"name": "A"}}}, "sources": {"ncsl": ["x"]}})
-        # A place the build holds no entry for still has its file.
+                         {"states": {"TX": {"governor": {"name": "A"}}}, "governed": ["CA", "TX"],
+                          "sources": {"ncsl": ["x"]}})
+        # A place the build holds no entry for still has its file, and
+        # names the places that have a governor: a link on its page to
+        # another's is on that page (PR #172 review).
         self.assertEqual(emit.stategov_state_payload(payload, "GU"),
-                         {"states": {}, "sources": {"ncsl": ["x"]}})
+                         {"states": {}, "governed": ["CA", "TX"], "sources": {"ncsl": ["x"]}})
+        # An entry with no governor read is not one.
+        payload["states"]["DC"] = {"court": {}}
+        self.assertEqual(emit.stategov_state_payload(payload, "TX")["governed"], ["CA", "TX"])
+        del payload["states"]["DC"]
         with tempfile.TemporaryDirectory() as tmp:
             written = emit.write_stategov_states(payload, tmp)
             self.assertEqual(len(written), len(emit.people_codes()))

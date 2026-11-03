@@ -48,6 +48,14 @@ function readPeopleFile(file) {
   return sandbox.window.kycPeopleFile || sandbox.window.kycBuildMeta;
 }
 
+/* The market prices as data/odds.js assigns them, read from the file: what a
+ * check chooses a priced race by before the page has asked for them. */
+function oddsOnDisk() {
+  const sandbox = { window: {} };
+  require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "odds.js"), "utf8"), sandbox);
+  return sandbox.window.kycOdds || {};
+}
+
 /* Everyone's whole record, from every state's file, keyed by id: what a
  * check compares a page against where the page itself holds less. */
 let everyoneCache = null;
@@ -17318,22 +17326,36 @@ async function testLazyStateData() {
   }
   {
     // A district page draws no race's prices until a profile shows them.
+    // The profile is opened by its address, chosen from the data as a
+    // Texan whose race has prices: the page draws no card by default on
+    // every day (the January rehearsal's districts/tx.html draws none), so
+    // clicking the first card tested the day's data, not the rule.
     const page = await buildPage("districts/tx.html", { early: true });
     await settle(50);
     const before = page.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
-    const card = page.D.querySelector("#districtsApp .card[data-id]");
-    const person = card && page.window.KYC.byId(card.getAttribute("data-id"));
-    if (card) card.click();
+    const priced = oddsOnDisk().races || {};
+    const raceIds = new Set(page.window.KYC.races().map((r) => r.id));
+    const person = (page.window.legislatorsData || []).filter((p) => {
+      const id = p.contestRaceId || p.raceId;
+      return p.state === "TX" && raceIds.has(id) && ((priced[id] || {}).markets || []).length > 0;
+    })[0];
+    if (person) page.window.location.hash = "#/profile/" + encodeURIComponent(person.id);
     await until(() => page.window.kycOdds !== undefined && !page.D.querySelector(".odds-slot"), 8000);
     const box = page.D.getElementById("profileModalRaceOdds");
     const title = (page.D.getElementById("profileModalRaceTitle") || {}).textContent;
-    const want = person && page.window.KYC.races().filter((r) => r.label === title)[0];
+    const want = person && page.window.KYC.races().filter((r) => r.id === (person.contestRaceId || person.raceId))[0];
     suite("districts/tx.html — the prices load when a profile shows them", () => {
       check("no page errors", page.errors.length === 0, page.errors.join(" | "));
-      check("not before", before === 0 && !!person, String(before));
+      check("a Texan whose race has prices, in the page's data", !!person && !!want,
+        person ? person.id : "none of " + (page.window.legislatorsData || []).length + " profiles");
+      check("not before", before === 0, String(before));
       check("then the dialog shows them as the prices are drawn everywhere",
-        !!box && !!want && box.innerHTML === page.window.KYC.odds.render(want, { compact: true, collapsed: true }),
-        box ? box.innerHTML.slice(0, 80) : "no box");
+        !!box && !!want && title === want.label &&
+          box.innerHTML === page.window.KYC.odds.render(want, { compact: true, collapsed: true }),
+        box ? title + ": " + box.innerHTML.slice(0, 80) : "no box");
+      check("and they are prices, not a line saying there are none",
+        !!box && box.querySelector(".odds-market") !== null && !/holds none/.test(box.textContent),
+        box ? box.innerHTML.slice(0, 120) : "no box");
     });
     page.window.close();
   }
@@ -17889,10 +17911,38 @@ async function testGovernorOverlays() {
       const body = modal().querySelector("#governorModalBody").textContent;
       const link = modal().querySelector('#governorModalBody a[href$="states/tx.html#/official/gov-TX"]');
       check("another state's governor links to that state's page, never \"Nobody here by this link\"",
-        open() && !!link && /holds Georgia’s state government only/.test(body) &&
+        open() && !!link && /holds the records of Georgia alone/.test(body) &&
+        /a record of Texas: open it on Texas’s page/.test(body) &&
         !/Nobody here by this link|No longer listed/.test(modal().textContent), body.slice(0, 200));
       window.KYC.governor.close();
       await until(() => !open(), 2000);
+      // A territory and the District in their own words (rule 75), and
+      // never "state" of either; a place with no governor (the District)
+      // is never sent to its page, which would say nobody is there (rules
+      // 19 and the PR #172 review). Asked of the data: whichever places
+      // the file names as having a governor, and whichever not.
+      const governed = window.kycStateGov.governed || [];
+      check("the page's file names the places with a governor",
+        governed.indexOf("GA") !== -1 && governed.indexOf("TX") !== -1, governed.join(" "));
+      const islands = governed.filter((c) => c === "VI" || c === "MP")[0];
+      if (islands) {
+        window.KYC.governor.open("gov-" + islands);
+        const words = modal().textContent;
+        check("an island territory is \"the … Islands’ page\", never another state",
+          open() && /On the .*Islands’ page/.test(words) && !/[Aa]nother state|state government/.test(words),
+          words.slice(0, 200));
+        window.KYC.governor.close();
+        await until(() => !open(), 2000);
+      }
+      if (governed.indexOf("DC") === -1) {
+        window.KYC.governor.open("gov-DC");
+        const words = modal().textContent;
+        check("a place with no governor is not sent to its page, which holds nobody by that link",
+          open() && /No longer listed/.test(words) && !modal().querySelector('#governorModalBody a[href*="states/"]') &&
+          !/District of Columbia’s page/.test(words), words.slice(0, 200));
+        window.KYC.governor.close();
+        await until(() => !open(), 2000);
+      }
     }
     // Every governor's "In office since" and "Born" in rule 19's words: a
     // disagreement only where the pipeline compared two dates, and "no
@@ -18304,6 +18354,49 @@ async function testGovernorOverlays() {
       check("and asks for no profile words", words === 0, String(words));
     });
     grid.window.close();
+  }
+  {
+    // The address changes while the file is out (Back, an edited hash, a
+    // candidate's link): the overlay draws what is open when the file
+    // comes, never "Loading…" for ever (PR #172 review).
+    for (const next of ["#/official/gov-TX", "#/official/gov-GA-x"]) {
+      const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+        hold: /\/data\/stategov\.js$/, setup: withOdds });
+      await settle(50);
+      grid.window.location.hash = next;
+      await settle(30);
+      const asked = grid.served.filter((s) => /\/data\/stategov\.js/.test(s)).length;
+      grid.release();
+      await until(() => grid.window.kycStateGov !== undefined &&
+        !/Loading/.test(grid.D.getElementById("governorModalName").textContent), 3000);
+      await settle(30);
+      const modal = grid.D.getElementById("governorModal");
+      const name = grid.D.getElementById("governorModalName").textContent;
+      const want = next === "#/official/gov-TX" ? grid.window.kycStateGov.states.TX.governor.name : "No longer listed";
+      suite("index.html" + next + " — asked for while the governors' data is still loading", () => {
+        check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+        check("the file asked for once", asked === 1, String(asked));
+        check("the record the address names is drawn once the file is in, never \"Loading…\"",
+          !!modal && !modal.hidden && name === want && !/Loading the governors/.test(modal.textContent), name);
+      });
+      grid.window.close();
+    }
+  }
+  {
+    // A page of a place that is not a state says so in its own words
+    // (rule 75): "the records of the District of Columbia", never "state".
+    const dc = await buildPage("states/dc.html", { hash: "#/official/gov-GA" });
+    await settle(50);
+    const body = (dc.D.getElementById("governorModalBody") || {}).textContent || "";
+    const kind = (dc.D.getElementById("governorModalKind") || {}).textContent || "";
+    suite("states/dc.html#/official/gov-GA — another place's governor, in the District's words", () => {
+      check("no page errors", dc.errors.length === 0, dc.errors.join(" | "));
+      check("the District's own words, a link to Georgia's page, and no \"state\"",
+        /holds the records of the District of Columbia alone/.test(body) &&
+        !!dc.D.querySelector('#governorModalBody a[href$="states/ga.html#/official/gov-GA"]') &&
+        !/state/i.test(body + " " + kind), kind + " | " + body.slice(0, 200));
+    });
+    dc.window.close();
   }
   {
     const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",

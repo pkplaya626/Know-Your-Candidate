@@ -115,7 +115,10 @@ The profiles are written in the files each page needs (CLAUDE.md rule 94):
 | `data/people/<st>.js` | one state's profiles whole, and its races | `states/<st>.html`, `districts/<st>.html`; on `ballot.html`, the states an answer is in, before it is drawn; elsewhere on demand (`KYC.loadPeople`) |
 
 A state's page loads its own state's part of `data/stategov.js`
-(`data/stategov/<st>.js`, signed and checked by `verify`), and names
+(`data/stategov/<st>.js`, signed and checked by `verify`, with `governed`:
+the places that have a governor, so a link there to another place's
+governor points to that place's page, and never to the District of
+Columbia's, which has none), and names
 `data/odds.js` and `data/measures.js` on demand: it draws its races with a
 slot for each race's prices (`kyc-odds.js`, filled once the file is in, or
 said not to have loaded) and its statewide questions as the plain list it
