@@ -34,12 +34,13 @@ import unicodedata
 import urllib.parse
 import urllib.request
 
+from . import agent
+
 NASS_URL = "https://www.nass.org/membership"
 NLGA_URL = "https://nlga.us/our-members/"
 RAGA_URL = "https://www.republicanags.com/attorneys-general"
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "statewide_officers.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/154.0 Safari/537.36")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 # How the rosters abbreviate a jurisdiction's name.
 ABBREVIATED = {
@@ -476,7 +477,6 @@ def acting(name, text):
 # How long to wait after each failed request for an office's page before it
 # is tried again (tests set these to nothing).
 _RETRY_WAITS = (2, 10)
-_BOT_WALL = re.compile(r"<title>\s*(Access Denied|Just a moment|Not allowed)", re.I)
 
 
 def says_nothing(page):
@@ -484,7 +484,7 @@ def says_nothing(page):
     wall's, a challenge with no body (coag.gov's firewall answered the
     refresh's runner HTTP 202 and nothing else, 2026-11-01), or a page that
     draws itself with JavaScript (Nevada's secretary of state)."""
-    return bool(_BOT_WALL.search(page)) or len(visible_text(page)) < 300
+    return agent.walled(page) or len(visible_text(page)) < 300
 
 
 def _get_answered(url):

@@ -264,6 +264,43 @@ class TestWhenThePresidentsPageSaysNothing(unittest.TestCase):
         other["president"]["name"] = "Someone Else"
         self.assertIsNone(self.fetch(other, "")["president"]["photo"])
 
+    def test_a_confirmation_stands_while_the_page_cannot_be_read(self):
+        # Rule 103: state.gov refused this project the read that had named
+        # Marco Rubio that morning; the finding stands, dated, and ages.
+        fresh = federal.kept_page({"status": "confirmed", "url": "https://x.gov/a"}, None,
+                                  "Doug Collins", "2026-10-01", "2026-10-16")
+        self.assertEqual(fresh, {"status": "confirmed", "url": "https://x.gov/a", "read": "2026-10-16"})
+        before = {"name": "Doug Collins", "page": fresh}
+        kept = federal.kept_page({"status": "unreadable"}, before, "Doug Collins",
+                                 "2026-10-20", "2026-10-21")
+        self.assertEqual(kept, dict(fresh, kept=True))
+        # Kept again, it keeps the day it was given.
+        self.assertEqual(federal.kept_page({"status": "unreadable"}, {"name": "Doug Collins",
+                                                                      "page": kept},
+                                           "Doug Collins", "2026-10-25", "2026-10-26")["read"],
+                         "2026-10-16")
+        # An older cache's confirmation has no day of its own: the last run's.
+        undated = {"name": "Doug Collins", "page": {"status": "confirmed", "url": "https://x.gov/a"}}
+        self.assertEqual(federal.kept_page({"status": "unreadable"}, undated, "Doug Collins",
+                                           "2026-10-20", "2026-10-21")["read"], "2026-10-20")
+        # Never for someone else, and never over a page read whole.
+        self.assertEqual(federal.kept_page({"status": "unreadable"}, before, "Someone Else",
+                                           "2026-10-20", "2026-10-21"), {"status": "unreadable"})
+        whole = {"status": "unconfirmed", "url": "https://x.gov/a"}
+        self.assertEqual(federal.kept_page(whole, before, "Doug Collins", "2026-10-20",
+                                           "2026-10-21"), whole)
+        # Through a whole fetch, and aged by problems().
+        previous = copy.deepcopy(self.fetch(None, None))
+        office = next(o for o in previous["offices"] if o.get("holder"))
+        office["holder"]["page"] = {"status": "confirmed", "url": "https://x.gov/a",
+                                    "read": "2026-09-01"}
+        got = next(o for o in self.fetch(previous, None)["offices"] if o["key"] == office["key"])
+        self.assertEqual(got["holder"]["page"], {"status": "confirmed", "url": "https://x.gov/a",
+                                                 "read": "2026-09-01", "kept": True})
+        codes = [code for _l, code, _m, _d in federal.problems(
+            {"offices": [got], "president": {}, "vicePresident": {}}, today="2026-10-16")]
+        self.assertIn("federal-confirmation-kept", codes)
+
     def test_a_kept_portrait_is_dated_and_ages(self):
         previous = copy.deepcopy(self.fetch(None, None))
         previous["president"]["photo"] = self.PHOTO
