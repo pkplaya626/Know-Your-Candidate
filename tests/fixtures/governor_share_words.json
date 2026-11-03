@@ -4007,6 +4007,236 @@
   [
    false,
    "GA",
+   "candidate",
+   {
+    "id": "gov-GA-c-d",
+    "name": "C D",
+    "party": "Democratic"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Democratic",
+    "past": "",
+    "printed": "",
+    "record": "",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4-year term (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-e-f",
+    "name": "E F",
+    "writeIn": true
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "",
+    "past": "",
+    "printed": "",
+    "record": "",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list of certified write-in candidates (read Oct. 28, 2026).",
+    "status": "Write-in candidate",
+    "surnameOnly": "",
+    "term": "Term 4-year term (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
    "governor",
    {
     "id": "gov-GA",
@@ -8061,6 +8291,236 @@
   [
    false,
    "GA",
+   "candidate",
+   {
+    "id": "gov-GA-c-d",
+    "name": "C D",
+    "party": "Democratic"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Democratic",
+    "past": "",
+    "printed": "",
+    "record": "",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "On the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4-year term (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-e-f",
+    "name": "E F",
+    "writeIn": true
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "",
+    "past": "",
+    "printed": "",
+    "record": "",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Running for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list of certified write-in candidates (read Oct. 28, 2026).",
+    "status": "Write-in candidate",
+    "surnameOnly": "",
+    "term": "Term 4-year term (if elected)"
+   }
+  ],
+  [
+   false,
+   "GA",
    "governor",
    {
     "id": "gov-GA",
@@ -12115,6 +12575,236 @@
   [
    true,
    "GA",
+   "candidate",
+   {
+    "id": "gov-GA-c-d",
+    "name": "C D",
+    "party": "Democratic"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Democratic",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "",
+    "results": "https://results.example.gov/",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4-year term"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-e-f",
+    "name": "E F",
+    "writeIn": true
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   "https://results.example.gov/",
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "",
+    "results": "https://results.example.gov/",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list of certified write-in candidates (read Oct. 28, 2026).",
+    "status": "Was a write-in candidate",
+    "surnameOnly": "",
+    "term": "Term 4-year term"
+   }
+  ],
+  [
+   true,
+   "GA",
    "governor",
    {
     "id": "gov-GA",
@@ -16164,6 +16854,236 @@
     "status": "",
     "surnameOnly": "",
     "term": ""
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-c-d",
+    "name": "C D",
+    "party": "Democratic"
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "Democratic",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list (read Oct. 18, 2026).",
+    "status": "Was on the Nov 3, 2026 ballot",
+    "surnameOnly": "",
+    "term": "Term 4-year term"
+   }
+  ],
+  [
+   true,
+   "GA",
+   "candidate",
+   {
+    "id": "gov-GA-e-f",
+    "name": "E F",
+    "writeIn": true
+   },
+   {
+    "ballot2026": {
+     "offices": {
+      "governor": {
+       "candidates": {
+        "candidates": [
+         {
+          "id": "gov-GA-c-d",
+          "name": "C D",
+          "party": "Democratic"
+         },
+         {
+          "id": "gov-GA-e-f",
+          "name": "E F",
+          "writeIn": true
+         },
+         {
+          "id": "gov-GA-g",
+          "name": "G",
+          "party": "Libertarian",
+          "printed": "G",
+          "surnameOnly": true
+         },
+         {
+          "ballotName": "Hank I",
+          "id": "gov-GA-h-i",
+          "name": "H I",
+          "party": "Republican; Conservative",
+          "printed": "I, H",
+          "runningMate": "J K"
+         },
+         {
+          "holder": true,
+          "id": "gov-GA-a-b",
+          "name": "A B",
+          "party": "Republican"
+         },
+         {
+          "id": "gov-GA-l-m",
+          "member": "M000001",
+          "name": "L M",
+          "party": "Democratic"
+         }
+        ],
+        "certified": false,
+        "read": "2026-10-18",
+        "source": "the Secretary of State’s list",
+        "url": "https://sos.example.gov/list.pdf",
+        "writeIns": {
+         "by": "the Secretary of State",
+         "read": "2026-10-28",
+         "source": "the Secretary of State’s list of certified write-in candidates",
+         "url": "https://sos.example.gov/writeins.pdf"
+        }
+       },
+       "holderStatus": {
+        "cite": "the list",
+        "holder": "A B",
+        "source": "https://sos.example.gov/list.pdf",
+        "text": "A B is not among the candidates for this office",
+        "why": "not-listed"
+       },
+       "note": "4-year term; term begins 01/2027",
+       "selection": "elected",
+       "source": "https://sos.example.gov/offices",
+       "up": true
+      }
+     }
+    },
+    "governor": {
+     "id": "gov-GA",
+     "name": "A B",
+     "party": "Republican",
+     "partyKey": "R",
+     "profile": "https://www.nga.org/governors/georgia/",
+     "since": "January 14, 2019"
+    }
+   },
+   {
+    "nga": [
+     "National Governors Association, current governors",
+     "https://www.nga.org/governors/",
+     "2026-11-02"
+    ]
+   },
+   null,
+   {
+    "ballotName": "",
+    "holder": "",
+    "kind": "Governor (Candidate)",
+    "mark": "",
+    "office": "Governor • GA",
+    "party": "",
+    "past": "This site does not read the state’s results and names no winner",
+    "printed": "",
+    "record": "",
+    "results": "",
+    "runningMate": "",
+    "seeking": "Ran for",
+    "since": "",
+    "source": "Source: the Secretary of State’s list of certified write-in candidates (read Oct. 28, 2026).",
+    "status": "Was a write-in candidate",
+    "surnameOnly": "",
+    "term": "Term 4-year term"
    }
   ],
   [

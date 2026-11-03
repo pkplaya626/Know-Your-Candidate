@@ -2918,9 +2918,17 @@ async function testStates() {
       /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
     // Money is a campaign's: the markets' block under the race (PR #195)
     // explains a price as "a contract worth $1", which is no one's money.
-    const moneyless = block.cloneNode(true);
-    moneyless.querySelectorAll(".odds").forEach((el) => el.remove());
-    const dollars = /.{0,40}\$.{0,40}/.exec(moneyless.textContent);
+    // Only those words are passed over, never the block: a dollar figure
+    // anywhere else in it would be one (PR #180 review).
+    const money = (el) => /.{0,40}\$.{0,40}/.exec(el.textContent
+      .replace(/a contract worth \$1(?![\d,.]*\d)|a \$1 contract/g, ""));
+    const dollars = money(block);
+    // The test of the test: a figure planted in the markets' block is seen.
+    const planted = block.cloneNode(true);
+    const markets = planted.querySelector(".odds");
+    if (markets) markets.insertAdjacentHTML("beforeend", "<p>Raised $1,250,000</p>");
+    check("the money check reads the markets' block, all but the price's explanation",
+      !!markets && !!money(planted));
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
       !block.querySelector("a[href*='#/profile/']") && !dollars && uncredited.length === 0,
       (dollars ? dollars[0] : "") + " | " + uncredited.map((img) => img.className + " " + img.getAttribute("src")).join(" | "));
@@ -13311,6 +13319,9 @@ async function testGovernorSharePages() {
   const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
   const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "governor_share_words.json"), "utf8"));
   const norm = (s) => String(s || "").replace(/\s+/g, " ").trim();
+  // The classes kyc.css makes a block inside .modal-meta (a sentence there).
+  const sentenceBlocks = new Set([...fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")
+    .matchAll(/\.modal-meta \.([\w-]+)\s*\{[^}]*display:\s*block/g)].map((m) => m[1]));
 
   {
     const page = await buildPage("states/ga.html", { now: asOf + "T12:00:00" });
@@ -13351,6 +13362,7 @@ async function testGovernorSharePages() {
       const images = [];
       let photos = 0;
       let candidates = 0;
+      let writeInsApart = 0;
       files.forEach((f) => {
         const id = f.replace(/\.html$/, "");
         const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
@@ -13389,8 +13401,25 @@ async function testGovernorSharePages() {
         if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
         const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
         ["party", "since", "mark", "status", "past"].forEach((k) => {
-          if (words[k] && desc.indexOf(words[k]) === -1) wrong.push(`${id}: the description lacks ${k}`);
+          // The mark's two parts are two sentences there (PR #180 review:
+          // "Not elected in 2026 Next elected: November 2029" read as a glitch).
+          const want = k === "mark" ? words.mark.replace(/ Next /, ". Next ") : words[k];
+          if (want && desc.indexOf(want) === -1) wrong.push(`${id}: the description lacks ${k}`);
         });
+        if (/\d{4} Next /.test(desc)) wrong.push(`${id}: the mark's two parts run together in the description`);
+        // A write-in is cited to the document that names them: the office's
+        // list of write-ins where it keeps one apart (rules 19, 91; PR #180
+        // review), never the printed list without their name.
+        const listed = found.kind === "candidate"
+          ? K.stategov.ballotOf(found.code).offices.governor.candidates : null;
+        if (listed) {
+          const named = found.person.writeIn && listed.writeIns ? listed.writeIns : listed;
+          const cited = (doc.querySelector(".share-source a") || { getAttribute: () => "" }).getAttribute("href");
+          if (cited !== named.url || text(doc, ".share-source").indexOf(named.source) === -1) {
+            wrong.push(`${id}: cites ${cited} for ${named.url}`);
+          }
+          if (found.person.writeIn && listed.writeIns) writeInsApart += 1;
+        }
         if (desc.indexOf(found.person.name) !== 0) wrong.push(`${id}: the description must lead with the name`);
         if (/ • /.test(desc)) wrong.push(`${id}: a card's bullet in the description`);
         // Never a winner, and in the past tense after the election.
@@ -13420,6 +13449,8 @@ async function testGovernorSharePages() {
       });
       check("every governor's and candidate's share page says what the overlay says, from one table",
         wrong.length === 0 && candidates > 100, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("the write-ins whose office lists them apart are among them, each cited to that list",
+        writeInsApart > 0, `${writeInsApart} write-ins`);
       check("a share image is the overlay's photograph by its route, credited as the overlay credits it, " +
         "or the site's card", images.length === 0 && photos > 50,
         images.slice(0, 4).join(" | ") || `${photos} photographs`);
@@ -13487,6 +13518,16 @@ async function testGovernorSharePages() {
         if (words.results && !modal().querySelector('#governorModalStatus a[href="' + words.results + '"]')) {
           drawn.push(`${id}: the results link`);
         }
+        // A sentence with a link in it is one block: as .modal-meta's
+        // inline-flex item, the results line's sentence, link and full stop
+        // stood in three narrow columns on a phone (PR #180 review).
+        [...modal().querySelector("#governorModalStatus").children].forEach((child) => {
+          const mixed = [...child.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) &&
+            child.children.length > 0;
+          if (mixed && ![...child.classList].some((c) => sentenceBlocks.has(c))) {
+            drawn.push(`${id}: "${norm(child.textContent).slice(0, 40)}" is not one block`);
+          }
+        });
         if (words.printed && t("#governorModalPrinted") !== words.printed) drawn.push(`${id}: printed`);
         if (words.term && metaText.indexOf(words.term) === -1) drawn.push(`${id}: term`);
         if (words.runningMate && t("#governorModalBody").indexOf(words.runningMate) === -1) drawn.push(`${id}: mate`);
@@ -15148,6 +15189,9 @@ async function testCharts() {
     const { window, D } = await buildPage("index.html");
     await settle(50);
     const KYC = window.KYC;
+    // The governor races' markets are drawn from the election office's
+    // list (data/stategov.js), which the grid loads on demand (rule 94).
+    await new Promise((resolve) => KYC.loadData("stategov.js", "kycStateGov", resolve));
     suite("charts — funding sources as one bar (VISUALS-24)", () => {
       const who = window.legislatorsData.find((p) => p.fundingBreakdown && !p.fundingBase &&
         Object.keys(p.fundingBreakdown).length >= 3);
@@ -15169,14 +15213,24 @@ async function testCharts() {
         odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
       let checked = 0;
       let inOrder = 0;
+      // A race for governor (G-GA-2026, PR #195) is no race of Congress's:
+      // it is drawn by the governor cards' own call (KYC.stategov.raceOdds),
+      // which passes the list's parties for rule 79's note, never a race
+      // object made up here (PR #180 review). null for a race nobody draws.
+      const drawOdds = (id, opts) => {
+        const race = (window.kycRaces || []).find((r) => r.id === id);
+        if (race) return KYC.odds.render(race, opts);
+        const gov = /^G-([A-Z]{2})-\d{4}$/.exec(id);
+        return gov && window.kycStateGov ? KYC.stategov.raceOdds(gov[1], opts) : null;
+      };
+      check("the governor races are drawn through the state government module, with the list's parties",
+        !!window.kycStateGov && typeof KYC.stategov.raceOdds === "function" &&
+          raceIds.some((id) => /^G-/.test(id)));
       raceIds.forEach((id) => {
-        // A race for governor (G-GA-2026, PR #195) is no race of Congress's
-        // and drawn as the governor cards draw it: by its id and its name.
-        const race = (window.kycRaces || []).find((r) => r.id === id) ||
-          (/^G-[A-Z]{2}-\d{4}$/.test(id) ? { id, label: id } : null);
-        if (!race) return;
+        const html = drawOdds(id, {});
+        if (html === null) return;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const rows = box.querySelectorAll(".poll-row");
         if (rows.length !== odds.races[id].polls.rows.length) return;
         checked += 1;
@@ -15201,19 +15255,23 @@ async function testCharts() {
       // A ten-point axis made 49.7 against 47.4 look like a wide gap (PR
       // #111 review); the compact line already prints its two figures.
       const narrow = raceIds.filter((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return false;
+        const html = drawOdds(id, {});
+        if (html === null) return false;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const ticks = [...box.querySelectorAll(".poll-ticks span")].map((s) => parseFloat(s.textContent));
         return ticks.length < 2 || Math.max(...ticks) - Math.min(...ticks) < 30;
       });
       check("every poll axis spans at least thirty points", narrow.length === 0, narrow.join(" "));
-      const compact = raceIds.map((id) => (window.kycRaces || []).find((r) => r.id === id)).filter(Boolean)
-        .filter((race) => { const b = D.createElement("div"); b.innerHTML = KYC.odds.render(race, { compact: true });
-          return !!b.querySelector(".poll-dots"); });
+      const compact = raceIds.filter((id) => {
+        const html = drawOdds(id, { compact: true });
+        if (html === null) return false;
+        const b = D.createElement("div");
+        b.innerHTML = html;
+        return !!b.querySelector(".poll-dots");
+      });
       check("the compact panel prints the line, not a one-row chart of it", compact.length === 0,
-        compact.map((r) => r.id).join(" "));
+        compact.join(" "));
     });
   }
 }

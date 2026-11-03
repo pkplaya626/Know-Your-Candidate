@@ -199,8 +199,19 @@ def share_words(found, post=False, sources=None, results=None):
     out["term"] = term_words(item, post)
     out["record"] = RECORD["holder"] if person.get("holder") else (
         RECORD["member"] if person.get("member") else "")
-    out["source"] = f"Source: {listed.get('source')} (read {date_words(listed.get('read'))})."
+    named = list_for(listed, person)
+    out["source"] = f"Source: {named.get('source')} (read {date_words(named.get('read'))})."
     return out
+
+
+def list_for(listed, person):
+    """``listFor``: the document that names *person*. A write-in's is the
+    office's list of write-ins where it keeps one apart (``writeIns``,
+    statewide.py), never the printed list that does not hold their name
+    (rules 19, 91; PR #180 review); everyone else's is the list."""
+    listed = listed or {}
+    more = listed.get("writeIns") or {}
+    return more if (person or {}).get("writeIn") and more.get("source") else listed
 
 
 # --------------------------------------------------------- who is shared
@@ -284,7 +295,12 @@ def describe(found, words):
         return " ".join(f"{p}" if p.endswith(".") else f"{p}." for p in parts if p)
 
     if found["kind"] == "governor":
-        return name, sentence(f"{name}{party}, {words['office']}", words["since"], words["mark"])
+        # The mark's two parts ("Not elected in 2026", "Next elected:
+        # November 2029") are two sentences here: run together they read as
+        # a glitch in an unfurl (PR #180 review). The overlay keeps its words.
+        mark, _, nxt = words["mark"].partition(" Next ")
+        return name, sentence(f"{name}{party}, {words['office']}", words["since"], mark,
+                              "Next " + nxt if nxt else "")
     office = governor_of(found["code"])
     seat = office[0].lower() + office[1:]
     mate = f", with {found['person']['runningMate']} for lieutenant governor" if words["runningMate"] else ""
@@ -361,7 +377,7 @@ def render_governor(oid, found, host, post=False, sources=None, results=None):
         if len(nga) > 1 and nga[0] and _https(nga[1]):
             source = source.replace(_e(nga[0]), _link(nga[1], nga[0]), 1)
     else:
-        listed = (item or {}).get("candidates") or {}
+        listed = list_for((item or {}).get("candidates"), person)
         source = _e(words["source"])
         if listed.get("source") and _https(listed.get("url")):
             source = source.replace(_e(listed["source"]), _link(listed["url"], listed["source"]), 1)
@@ -458,6 +474,15 @@ def words_table():
                 if item and item.get("up"):
                     for person in people:
                         cases.append((post, "GA", "candidate", person, state, sources, results))
+            # A list that keeps its write-ins in a document of their own
+            # (Georgia's, Maine's): a write-in cites that one (PR #180 review).
+            apart = dict(listed, candidates=people, writeIns={
+                "url": "https://sos.example.gov/writeins.pdf", "by": "the Secretary of State",
+                "read": "2026-10-28", "source": "the Secretary of State’s list of certified write-in candidates"})
+            state = {"governor": governor,
+                     "ballot2026": {"offices": {"governor": dict(items[0], candidates=apart)}}}
+            for person in people[:2]:
+                cases.append((post, "GA", "candidate", person, state, sources, results))
             # A governor without a date of office or a party.
             bare = dict(governor, since=None, party=None)
             cases.append((post, "GA", "governor", bare, {"governor": bare}, sources, results))

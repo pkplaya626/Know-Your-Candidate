@@ -352,8 +352,19 @@
     return "";
   }
 
+  /** The document that names *person*: a write-in's is the list of
+   *  write-ins where the office keeps one apart (Georgia's certified
+   *  write-ins, Maine's declared ones), never the printed list that does
+   *  not hold their name (rules 19, 91); everyone else's is the list. The
+   *  race panel cites both; the head, the footer, the biography's line and
+   *  the share page (kyc/governor_share.py list_for) cite this one. */
+  function listFor(list, person) {
+    return person && person.writeIn && list && list.writeIns && list.writeIns.source
+      ? list.writeIns : (list || {});
+  }
+
   function candidateBiography(code, person, parts, words) {
-    var list = parts.list;
+    var list = listFor(parts.list, person);
     var record = recordLine(code, person, words);
     var mate = words.runningMate.replace(/ for lieutenant governor$/, "");
     var body = '<div class="field-grid">' +
@@ -436,7 +447,8 @@
     out.runningMate = p.runningMate ? p.runningMate + " for lieutenant governor" : "";
     out.term = term ? "Term " + term + (past ? "" : " (if elected)") : "";
     out.record = p.holder ? RECORD.holder : p.member ? RECORD.member : "";
-    out.source = "Source: " + list.source + " (read " + KYC.dateWords(list.read) + ").";
+    var named = listFor(list, p);
+    out.source = "Source: " + named.source + " (read " + KYC.dateWords(named.read) + ").";
     return out;
   }
 
@@ -547,7 +559,7 @@
       panel("landmark", "Public offices held", KYC.officesHeld(person.politicalHistory,
         person.wikipedia ? NOT_READ_CANDIDATE : NO_RECORD_CANDIDATE)) +
       "</div>";
-    var list = parts.list;
+    var list = listFor(parts.list, person);
     el("governorModalSource").innerHTML = KYC.escapeHtml(words.source)
       .replace(KYC.escapeHtml(list.source), outLink(list.url, list.source));
     setPortrait(person.writeIn ? "" : person.photo, person.photoCopy, person.photoCredit, person.name);
@@ -706,5 +718,6 @@
   });
 
   KYC.governor = { open: open, close: close, isOpen: isOpen, ensure: ensure, owns: owns,
-                   find: find, applyRoute: applyRoute, shareWords: shareWords };
+                   find: find, applyRoute: applyRoute, shareWords: shareWords,
+                   listFor: listFor };
 })(window);

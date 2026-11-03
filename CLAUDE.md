@@ -2700,7 +2700,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     both clocks), the photograph only as the card shows it, the list cited
     and dated, after Election Day the past tense and the state's results
     naming no winner, the view the state page's overlay; each family in
-    `o/` is swept only when its own source was read.
+    `o/` is swept only when its own source was read. Its review found
+    every write-in's page cited to the printed list, which does not hold
+    their name: a write-in is cited to the office's list of write-ins
+    where it keeps one apart (`listFor`, `governor_share.list_for`).
 
 97. **The search answers what a reader types about government, from the
     data the page about it shows, and never guesses.** "governor", "Texas

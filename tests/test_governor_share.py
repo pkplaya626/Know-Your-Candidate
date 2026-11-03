@@ -131,6 +131,49 @@ class TestWords(unittest.TestCase):
         self.assertEqual((words["past"], words["results"]), ("", ""))
         self.assertEqual(list(governor_share.governors(data)), ["gov-GA"])
 
+    def test_the_description_writes_the_marks_two_parts_as_two_sentences(self):
+        # PR #180 review: "Not elected in 2026 Next elected: November 2029."
+        # ran the mark's two parts together in the unfurl. The overlay's
+        # words (the mark) stay as they are; the description punctuates them.
+        data = payload(up=False)
+        f = found("gov-GA", data)
+        words = governor_share.share_words(f, False, SOURCES)
+        _, description = governor_share.describe(f, words)
+        self.assertIn("Not elected in 2026. Next elected: November 2029.", description)
+        self.assertNotIn("2026 Next", description)
+        data["states"]["GA"]["ballot2026"]["offices"]["governor"]["next"] = {
+            "year": 2027, "month": "October", "source": "https://law.example.gov/"}
+        f = found("gov-GA", data)
+        _, description = governor_share.describe(f, governor_share.share_words(f, False, SOURCES))
+        self.assertIn("Not elected in 2026. Next election: October 2027.", description)
+        page = governor_share.render_governor("gov-GA", f, HOST, False, SOURCES)
+        self.assertIn("Not elected in 2026. Next election: October 2027.", page)
+
+    def test_a_write_in_cites_the_list_of_write_ins_that_names_them(self):
+        # PR #180 review: Georgia's, Maine's, Texas's and Wisconsin's
+        # write-ins were cited to the printed list, which does not hold
+        # their names; the office keeps their own list apart (rules 19, 91).
+        data = payload()
+        data["states"]["GA"]["ballot2026"]["offices"]["governor"]["candidates"]["writeIns"] = {
+            "url": "https://sos.example.gov/writeins.pdf", "by": "the Secretary of State",
+            "read": "2026-10-28", "source": "the Secretary of State’s list of certified write-in candidates"}
+        byrne = found("gov-GA-david-c-byrne", data)
+        words = governor_share.share_words(byrne, False, SOURCES)
+        self.assertEqual(words["source"], "Source: the Secretary of State’s list of certified write-in "
+                                          "candidates (read Oct. 28, 2026).")
+        page = governor_share.render_governor("gov-GA-david-c-byrne", byrne, HOST, False, SOURCES)
+        self.assertIn('<a href="https://sos.example.gov/writeins.pdf"', page)
+        self.assertNotIn("https://sos.example.gov/list.pdf", page.split('class="share-source')[1])
+        # A printed candidate keeps the printed list; with no list of
+        # write-ins apart, a write-in keeps it too.
+        printed = governor_share.share_words(found("gov-GA-keisha-lance-bottoms", data), False, SOURCES)
+        self.assertEqual(printed["source"], "Source: the Secretary of State’s list (read Oct. 18, 2026).")
+        alone = governor_share.share_words(found("gov-GA-david-c-byrne"), False, SOURCES)
+        self.assertEqual(alone["source"], "Source: the Secretary of State’s list (read Oct. 18, 2026).")
+        # The fixture the render suite asks the page code about holds such a case.
+        self.assertTrue(any(row[3].get("writeIn") and "write-in candidates" in row[7]["source"]
+                            for row in governor_share.words_table()["cases"]))
+
 
 class TestPicture(unittest.TestCase):
 
