@@ -35,10 +35,11 @@ import re
 import time
 import urllib.request
 
-from . import vacancies
+from . import agent, vacancies
 
-# A plain, honest User-Agent: a page that refuses it concludes nothing.
-USER_AGENT = "know-your-candidate/2.1 (open-source civic data project)"
+# Who sends it, never a browser (rule 103): a page that refuses it
+# concludes nothing.
+USER_AGENT = agent.USER_AGENT
 PAUSE = 2.0
 STALE_DAYS = 45
 
@@ -73,9 +74,14 @@ def _get(url, timeout=60):
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
         with urllib.request.urlopen(request, timeout=timeout) as response:
-            return response.read().decode("utf-8", errors="replace")
+            page = response.read().decode("utf-8", errors="replace")
     except OSError as exc:
         raise CourtChiefUnread(f"could not fetch {url}: {exc}") from exc
+    # A bot wall's or challenge's page, or an empty body, says nothing of
+    # the court (rules 8 and 103: one test, agent.walled).
+    if agent.walled(page):
+        raise CourtChiefUnread(f"{url} answered with a bot wall's page or nothing")
+    return page
 
 
 def _text(fragment):

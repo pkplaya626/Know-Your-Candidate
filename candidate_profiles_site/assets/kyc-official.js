@@ -346,7 +346,10 @@
     var page = holder.page || {};
     if (page.status === "confirmed") {
       return "Named beside the title on " + outLink(page.url, "the office’s own page") +
-        (page.acting ? " as acting" : "");
+        (page.acting ? " as acting" : "") +
+        (page.kept && page.read
+          ? " when it was last read, on " + KYC.escapeHtml(KYC.dateWords(page.read)) +
+            "; it could not be read since" : "");
     }
     if (page.status === "unconfirmed") {
       return absent("The office’s own page did not name them beside the title when last read") +

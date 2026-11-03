@@ -849,8 +849,40 @@ def _us_places(items, read=None):
     return out
 
 
-def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
-    """The whole cache; :class:`HistoryError` when a source cannot be read."""
+def governor_key(code):
+    """The sitting governor's key in the cache, the overlay's id: ``gov-GA``."""
+    return f"gov-{code}"
+
+
+def _governor_state(key):
+    """The state a governor's or a candidate for governor's key names
+    (``gov-GA``, ``gov-GA-keisha-lance-bottoms``), or ``None``."""
+    match = re.match(r"^gov-([A-Z]{2})(?:-|$)", key or "")
+    return match.group(1) if match else None
+
+
+def birth(entity):
+    """The item's date of birth (P569), ``{date, precision}`` or ``None``:
+    a governor's, compared with the NGA's at build time (kyc/stategov.py)
+    and shown only where the two agree (rule 54's pattern)."""
+    for claim in _claims(entity, "P569"):
+        when = _time(claim.get("mainsnak"))
+        if when:
+            return {"date": when["date"], "precision": when["precision"]}
+    return None
+
+
+def fetch(profiles, executive=None, read=None, wiki_read=None, today=None, governors=None,
+          candidates=None):
+    """The whole cache; :class:`HistoryError` when a source cannot be read.
+
+    *governors*: ``{state code: {name, wikidata}}``, the NGA's roster with
+    each governor's Wikidata item (kyc/executives.py), read under
+    :func:`governor_key`; *candidates*: ``{id: (article title, name)}``,
+    each candidate for governor whose race's article links their own
+    (kyc/statewide_photos.py's wikipedia route, checked as rule 33 checks a
+    ballot page's link), resolved through the article's sitelink as a
+    challenger's is - never a search (rule 69)."""
     from .federal_build import slug
     from .legislators import HISTORICAL_URL, SOURCE_URL
 
@@ -881,6 +913,11 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
             for row in office.get("holders") or []:
                 if row.get("current") and row.get("wikidata"):
                     qids[slug(row["name"])] = row["wikidata"]
+    for code, gov in sorted((governors or {}).items()):
+        if gov.get("wikidata"):
+            qids[governor_key(code)] = gov["wikidata"]
+    for cid, (title, name) in sorted((candidates or {}).items()):
+        wanted[cid] = (title, name)
     resolved, unresolved = resolve_titles(wanted, read, wiki_read)
     qids.update(resolved)
 
@@ -929,6 +966,8 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
         home = {t["state"] for t in (member or {}).get("terms") or []}
         if by_profile.get(key, {}).get("state"):
             home.add(by_profile[key]["state"])
+        if _governor_state(key):
+            home.add(_governor_state(key))
         shown, withheld = offices_for(entity, info, reach, allowed,
                                       infobox_terms(texts.get(title) or ""), labels, home)
         out[key] = {
@@ -937,6 +976,12 @@ def fetch(profiles, executive=None, read=None, wiki_read=None, today=None):
             "offices": shown, "withheld": withheld,
             "revision": entity.get("lastrevid"),
         }
+        if _governor_state(key) and key == governor_key(_governor_state(key)):
+            # A sitting governor's date of birth, for the build to compare
+            # with the NGA's (shown only where they agree).
+            born = birth(entity)
+            if born:
+                out[key]["born"] = born
         if member:
             # Whose seats these are: a member's candidacy profile (Ashley
             # Hinson's for the Senate) sits in the House all the same.

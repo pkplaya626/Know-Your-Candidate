@@ -48,7 +48,7 @@ import time
 import unicodedata
 import urllib.request
 
-from . import judiciary
+from . import agent, judiciary
 
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "judge_disclosures.json")
 BUCKET = "https://com-courtlistener-storage.s3-us-west-2.amazonaws.com/"
@@ -58,7 +58,7 @@ REPORTS = "financial-disclosures-"
 PERSON_RECORD = "https://www.courtlistener.com/person/{id}/{slug}/"
 PERSON_PAGE = PERSON_RECORD + "#disclosures"
 SITE = "https://www.courtlistener.com/"
-USER_AGENT = "know-your-candidate/2.1 (open-source civic data project)"
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 PAUSE = 1.0
 # CourtListener exports quarterly; a file older than this has missed one.
 EXPORT_STALE_DAYS = 200

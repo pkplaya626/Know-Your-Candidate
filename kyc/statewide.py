@@ -655,6 +655,20 @@ def for_page(code, entry, holder_name=None):
     return page
 
 
+def candidate_id(code, name):
+    """The stable id of one candidate for governor on a state's list, for
+    the overlay's address and the offices-held cache (rule 91):
+    ``gov-GA-keisha-lance-bottoms``, from the name as the page shows it.
+    Never a profile's id (rule 27): the ``gov-`` prefix is the sitting
+    governor's (``gov-GA``) and these candidates' alone."""
+    return f"gov-{code}-" + "-".join(tokens(display_name(name)))
+
+
+def governor_id(code):
+    """The sitting governor's id for the overlay: ``gov-GA``."""
+    return f"gov-{code}"
+
+
 def write_ins_certified(lst):
     """Does a write-in list call its people certified in its own title (the
     part the cache quotes, between straight quotes)? Never the cache's own

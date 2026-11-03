@@ -382,5 +382,56 @@ class TestTheCommittedReads(unittest.TestCase):
         self.assertFalse([p for p in court_chiefs.problems(directory) if p[0] == "error"])
 
 
+
+class TestWhoTheReadersSayTheyAre(unittest.TestCase):
+    """Rule 103 (merged from main with #185): both readers send the project's
+    one User-Agent, and a bot wall's page in a chief's page's place concludes
+    nothing, as a refusal does."""
+
+    def test_the_one_constant(self):
+        from kyc import agent
+        self.assertEqual(court_chiefs.USER_AGENT, agent.USER_AGENT)
+        self.assertEqual(judge_disclosures.USER_AGENT, agent.USER_AGENT)
+
+    def _answer(self, body):
+        from unittest import mock
+
+        class Response:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def read(self):
+                return body.encode("utf-8")
+        sent = []
+
+        def urlopen(request, timeout=None):
+            sent.append(request.get_header("User-agent"))
+            return Response()
+        return mock.patch("urllib.request.urlopen", urlopen), sent
+
+    def test_a_wall_keeps_the_last_read(self):
+        from kyc import agent
+        old = {"chief": "Catherine C. Eagles", "read": "2026-10-01", "judge": "fjc-1"}
+        for wall in ("<html><head><title>Just a moment...</title></head><body></body></html>",
+                     ""):
+            patched, sent = self._answer(wall)
+            with patched:
+                with self.assertRaises(court_chiefs.CourtChiefUnread):
+                    court_chiefs._get(court_chiefs.RECIPES["nc-m"]["url"])
+                reads, trouble = court_chiefs.fetch(judges(), {"nc-m": old}, today=TODAY,
+                                                    read=court_chiefs._get)
+            self.assertEqual(reads["nc-m"], old)
+            self.assertTrue(trouble)
+            self.assertEqual(set(sent), {agent.USER_AGENT})
+
+    def test_the_court_s_own_page_still_reads(self):
+        patched, _ = self._answer(NCMD)
+        with patched:
+            self.assertEqual(court_chiefs._get("https://www.ncmd.uscourts.gov/x"), NCMD)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1693,13 +1693,15 @@ def for_row(cache, code, office, row, manifest=None):
 def copy_heavy(cache, root=".", maker=None, log=print):
     """The smaller copies of the heavy photographs just hosted (rule 101),
     made at once: a profile's drawn as a card ("person"), a statewide
-    candidate's in the election office's list ("candidate")."""
+    candidate's in the election office's list ("candidate"), a candidate for
+    governor's on a card ("governor-candidate", photocopies.stategov_photos)."""
     from . import photocopies
     shown = photocopies.Shown()
     for key, rec in sorted(((cache or {}).get("photos") or {}).items()):
         if rec.get("method") == "linked":
             continue                    # not hosted here: photocopies weighs it
-        kind = "person" if key.startswith("person:") else "candidate"
+        kind = ("person" if key.startswith("person:")
+                else "governor-candidate" if key.split(":")[2:3] == ["governor"] else "candidate")
         shown.add(rec["photo"], kind, key, {}, True)
     return photocopies.copy_hosted(root, shown, maker=maker, log=log)
 

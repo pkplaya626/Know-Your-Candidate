@@ -505,7 +505,12 @@
     var page = (holder && holder.page) || {};
     if (page.status === "confirmed") {
       return '<a href="' + KYC.escapeAttr(page.url) + '" target="_blank" rel="noopener noreferrer">' +
-        "Named on the office's site</a>" + (page.acting ? ", as acting" : "");
+        "Named on the office's site</a>" + (page.acting ? ", as acting" : "") +
+        // Kept from the last read that named them: the page has not been
+        // readable since (rule 8), and the cell says when it was read.
+        (page.kept && page.read
+          ? ' <span class="faint">when last read, ' + KYC.escapeHtml(KYC.dateWords(page.read)) +
+            "</span>" : "");
     }
     if (page.status === "unconfirmed") return '<span class="faint">Not named there when last read</span>';
     if (page.status === "unreadable") return '<span class="faint">Could not be read</span>';

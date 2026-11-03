@@ -559,5 +559,45 @@ class TestTheRead(unittest.TestCase):
         self.assertTrue(any("FEC_H1" in line for line in cache["unresolved"]))
 
 
+class TestGovernors(unittest.TestCase):
+    """Rule 69's corroboration for the sitting governors, by the NGA roster's
+    Wikidata item, and for the candidates for governor by the article the
+    race's article links (rule 91); never a search."""
+
+    def test_a_governor_is_read_by_the_rosters_item_with_a_date_of_birth(self):
+        entities = dict(ENTITIES)
+        entities["Q777"] = {"sitelinks": {"enwiki": {"title": "Pat Governor"}}, "claims": {
+            "P31": [claim("P31", item("Q5"))],
+            "P569": [{"mainsnak": {"datavalue": {"value": {"time": "+1963-11-02T00:00:00Z", "precision": 11}}}}],
+            "P39": [position_held("QGOVVA", "2022-01-15")]}}
+        texts = dict(TEXTS)
+        texts["Pat Governor"] = ("{{Infobox officeholder\n| office = Governor of Virginia\n"
+                                 "| term_start = January 15, 2022\n}}")
+        from unittest import mock
+
+        with mock.patch.dict(ENTITIES, entities), mock.patch.dict(TEXTS, texts):
+            cache = history.fetch([], governors={"VA": {"name": "Pat Governor", "wikidata": "Q777"}},
+                                  candidates={"gov-VA-jane-doe": ("Jane Doe (politician)", "Jane Doe")},
+                                  read=fake_read, today="2026-11-02")
+        people = cache["people"]
+        self.assertEqual(sorted(people), ["gov-VA", "gov-VA-jane-doe"])
+        gov = people["gov-VA"]
+        self.assertEqual(gov["born"], {"date": "1963-11-02", "precision": "day"})
+        self.assertEqual([(o["office"], o["from"], o["open"]) for o in gov["offices"]],
+                         [("Governor of Virginia", "2022", True)])
+        self.assertEqual(gov["congress"], [])
+        # A candidate is read through the article, which the cache records
+        # (asked), and carries no date of birth: only a governor's is compared.
+        doe = people["gov-VA-jane-doe"]
+        self.assertEqual(doe["asked"], "Jane Doe (politician)")
+        self.assertNotIn("born", doe)
+        self.assertEqual(history.governor_key("VA"), "gov-VA")
+
+    def test_a_governor_without_an_item_is_not_read(self):
+        cache = history.fetch([], governors={"VA": {"name": "Pat Governor"}}, read=fake_read,
+                              today="2026-11-02")
+        self.assertEqual(cache["people"], {})
+
+
 if __name__ == "__main__":
     unittest.main()
