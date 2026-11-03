@@ -39,7 +39,7 @@ import urllib.request
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 
-from . import overrides
+from . import agent, overrides
 from .legislators import age_on
 from .normalize import fill_field, looks_like_date
 from .photos import campaign_credit, lighter_rendition, parse_srcset, too_heavy
@@ -51,9 +51,8 @@ from .results import OFF_BALLOT
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "enrichment.json")
 
 _UA_WEB = {
-    "User-Agent": ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-                   "(KHTML, like Gecko) Chrome/129.0 Safari/537.36 "
-                   "know-your-candidate/2.1 (open-source civic data project)"),
+    # Who sends it, never a browser's string (rule 103).
+    "User-Agent": agent.USER_AGENT,
     "Accept": "text/html,application/xhtml+xml",
     "Accept-Language": "en-US,en;q=0.9",
     # Brotli needs a third-party package; ask for what the standard library reads.
@@ -68,6 +67,10 @@ STALE_DAYS = 6
 
 # Site verdicts. ``None`` - could not tell - is the third state (rule 8).
 SAFE, REFUSED = True, False
+# Statuses that turn a script away without saying anything of the site
+# (rule 8): a bot wall's 401 or 403, a firewall's 406 for an unfamiliar
+# user agent (ModSecurity's), a geographic block's 451, a rate limit's 429.
+TURNED_AWAY = frozenset({401, 403, 406, 429, 451})
 HIJACKED = "reads as hijacked"
 PARKED = "reads as parked or expired"
 UNNAMED = "does not name the candidate"
@@ -510,8 +513,14 @@ def assess(profile, url, final, status, page):
     """
     if status is None:
         return None, "unreachable"
-    if status in (401, 403, 429) or status >= 500 or 200 < status < 300:
+    if status in TURNED_AWAY or status >= 500 or 200 < status < 300:
         return None, f"HTTP {status}"
+    if status in (404, 410) and agent.wall_host(final):
+        # A redirect to a bot wall's host that answers 404 (rule 79's
+        # Radware page) says nothing of the campaign's own site. Any other
+        # host's 404 is the site's answer: a lapsed domain sent to a
+        # registrar's "not found" page is gone (rule 39).
+        return None, f"HTTP {status} from {host_of(final)}"
     if 300 <= status < 400:
         return REFUSED, f"redirects in a loop through {host_of(final)}"
     if status >= 400:
@@ -526,6 +535,10 @@ def assess(profile, url, final, status, page):
     if (_PARKED.search(head) or (len(body) < 2000 and _PARKED.search(body))
             or _PARKING_CODE.search(page.small)):
         return REFUSED, PARKED
+    if agent.turned_away(page.title):
+        # A bot wall's page in the site's place, after the spam and parking
+        # tests: a parking chain's "Security Check" is still parking.
+        return None, f"a bot wall's page ({page.title[:40]})"
     text = " ".join([head, body, page.hidden] + [h for _, h in page.headings])
     # On the page, not in the address: a lapsed "janesmith2026.com" still has
     # her name in it.
@@ -913,6 +926,106 @@ def portrait(page, base, profile):
     return [(u, hinted) for _, u, hinted in sorted(scored, key=lambda row: -row[0])]
 
 
+# The narrow first-name route (the owner's decision of 2026-11-01 on the
+# photo research's proposal): a campaign site's own image whose file name or
+# alt text carries the candidate's FIRST name together with one of these
+# words, in that same file name or alt text - "Teresa-headshot-square-new.jpg",
+# "Jerrad-Headshot2.png". A first name alone is a weak tie (a campaign's site
+# pictures the candidate's family under first names: "colby and fam no
+# background.png", "Baby Alani sitting on her father"), so it needs a word
+# saying the image is a likeness, and a person's look before it shows
+# (overrides.SEEN_FIRST_NAME_PORTRAITS). "Cropped" is not one of them: on the
+# 248 sites read on 2026-11-01 it named "Cropped+Family.png", "Family Leg
+# Up_cropped.jpg", "Sitting with dogs_cropped.jpg" and five logos.
+FIRST_NAME_ROUTE = "first-name"
+_LIKENESS_WORDS = ("headshot", "headshots", "portrait", "profile")
+
+
+def _likeness_word(words):
+    """The likeness word *words* carry ("headshot" for "head shot"), or ``None``."""
+    # A number run on is the photographer's or the upload's: "Jerrad-Headshot2".
+    words = [w.rstrip("0123456789") for w in words]
+    for word in _LIKENESS_WORDS:
+        if word in words:
+            return word
+    if "head" in words and "shot" in words:
+        return "headshot"
+    return None
+
+
+def first_names(profile):
+    """The candidate's first name as the profile writes it and as their own
+    filing writes it ("HUTCHINSON, TRIPP CHARLES" gives "tripp"), folded,
+    plus a first name an evidenced ``overrides.PORTRAIT_NAME_FORMS`` entry
+    records for this profile (``first``). No nickname table, never a middle
+    name, and no name under three letters."""
+    from .candidates import display_name
+    from .results import _tokens
+
+    out = set()
+    for name in (profile.get("name"), display_name(profile.get("filedName"))):
+        # Honorifics and suffixes dropped ("Dr.", "Jr."); an initial first
+        # ("J. Thomas Smith") gives no first name, never the middle one.
+        words = _words(" ".join(_tokens(name or "")))
+        if len(words) >= 2 and len(words[0]) >= 3:
+            out.add(words[0])
+    entry = getattr(overrides, "PORTRAIT_NAME_FORMS", {}).get(profile.get("id")) or {}
+    if entry.get("first") and entry.get("evidence"):
+        out.add(fold(entry["first"]))
+    return out
+
+
+def first_name_portraits(page, base, profile):
+    """``[(url, evidence)]``: the images the narrow first-name route offers
+    on *page* (:data:`FIRST_NAME_ROUTE`), best first, each with the words
+    that named them ('first name and "headshot" in file name "..."').
+
+    Only an image :func:`portrait` does not already offer, whose file name
+    or alt text carries one of :func:`first_names` and a likeness word
+    together, and nothing :func:`portrait` refuses an image for (a logo, a
+    crowd, someone else's word: "family", "with", "and"), nor a campaign's
+    branding, nor more than two other words. The caller holds it to the
+    shape test, ``NOT_A_PORTRAIT`` and a person's look."""
+    names = first_names(profile)
+    surname = fold(surname_of(profile["name"]))
+    if not names or len(surname) < 3:
+        return []
+    person = set(_words(profile["name"]))
+    taken = {u for u, _hinted in portrait(page, base, profile)}
+    found = []
+    images = [(page.meta.get("og:image", ""), ""), (page.meta.get("twitter:image", ""), "")]
+    for src, alt in images + page.images:
+        src = (src or "").strip()
+        if not src or src.startswith("data:"):
+            continue
+        url = urllib.parse.urljoin(base, src)
+        if not url.startswith("https://") or url in taken or url in (u for u, _ in found):
+            continue
+        path = urllib.parse.unquote(urllib.parse.urlsplit(url).path)
+        if not re.search(r"\.(?:jpe?g|png|webp)$", path, re.I):
+            continue
+        name_words = _words(os.path.basename(path).rsplit(".", 1)[0])
+        alt_words = _words(alt)
+        words = set(name_words) | set(alt_words)
+        if words & _NOT_A_PORTRAIT or words & _BRANDING:
+            continue
+        for where, said in (("file name", name_words), ("alt text", alt_words)):
+            first = next((w for w in said if w in names), None)
+            word = _likeness_word(said)
+            if not first or not word:
+                continue
+            extra = [w for w in said if w not in person and w not in names
+                     and w.rstrip("0123456789") not in _LIKENESS_WORDS + ("head", "shot")
+                     and not any(c.isdigit() for c in w)]
+            if len(extra) > 2:
+                continue
+            shown = (os.path.basename(path) if where == "file name"
+                     else " ".join(alt.split()))[:120]
+            found.append((url, f'first name and "{word}" in {where} "{shown}"'))
+            break
+    return found
+
+
 def evidence_of(page, base, url, profile=None):
     """What on *page* names the person beside the image at *url*: its alt
     text, else its file name - the words :func:`portrait` took it by, kept
@@ -1054,8 +1167,13 @@ def look_for_portrait(record, profile, page, final, pause=1.0):
     words that named them beside it (``portraitEvidence``) and the day it
     was read (``portraitRead``). A portrait over the caps is taken in a
     rendition its source offers, else at full size, and said in
-    ``portraitHeavy`` (:func:`lighten`)."""
-    refused_all = []
+    ``portraitHeavy`` (:func:`lighten`).
+
+    Only where neither page gives one named by the surname is the narrow
+    first-name route asked (:func:`first_name_portraits`), home page first;
+    what it takes is marked ``portraitRoute`` and is shown only once a
+    person has looked at it (``overrides.SEEN_FIRST_NAME_PORTRAITS``)."""
+    refused_all, later = [], []
     where, base = page, final
     for step in ("home", "about"):
         if step == "about":
@@ -1084,9 +1202,74 @@ def look_for_portrait(record, profile, page, final, pause=1.0):
             record["portraitEvidence"] = evidence_of(where, base, original, profile)
             record["portraitRead"] = datetime.date.today().isoformat()
             break
+        later.append((where, base))
+    if not record.get("portrait"):
+        for where, base in later:
+            if take_first_name_portrait(record, profile, where, base, refused_all):
+                break
     if refused_all:
         record["notPortraits"] = refused_all
     return record.get("portrait")
+
+
+def take_first_name_portrait(record, profile, page, base, refused=None, today=None):
+    """Put in *record* the first image the narrow first-name route offers on
+    *page* that is shaped like a likeness (:func:`take_portrait`; the
+    likeness word lets it be square), marked ``portraitRoute``
+    :data:`FIRST_NAME_ROUTE`, with the words that named it. Returns what was
+    taken, or ``None``."""
+    found = first_name_portraits(page, base, profile)
+    evidence = dict(found)
+    pictures = [(u, True) for u, _ev in found
+                if not not_a_portrait(u, passed_over=refused if refused is not None else [])]
+    taken = take_portrait(record, pictures, offers=page_forms(page, base))
+    if not taken:
+        return None
+    original = (record.get("portraitHeavy") or [{}])[0].get("url") or taken
+    record.update(portraitPage=base, portraitEvidence=evidence[original],
+                  portraitRead=today or datetime.date.today().isoformat(),
+                  portraitRoute=FIRST_NAME_ROUTE)
+    return taken
+
+
+FIRST_NAME_EVIDENCE = "first name and "
+
+
+def first_name_route(record):
+    """``True`` when *record*'s portrait came by the narrow first-name route:
+    by its ``portraitRoute``, or by the words that named it (the PR #186
+    review: the gate must not rest on one field of a hand-editable cache,
+    which a hand edit or a carry-over copying fields one by one could drop,
+    and the portrait would then show unlooked)."""
+    record = record or {}
+    return (record.get("portraitRoute") == FIRST_NAME_ROUTE
+            or str(record.get("portraitEvidence") or "").startswith(FIRST_NAME_EVIDENCE))
+
+
+_LOOK_SIZE = ("bytes", "width", "height")
+
+
+def first_name_seen(record):
+    """``True`` when *record*'s portrait came by the surname, or came by the
+    first-name route and a person has looked at it: its file (the original,
+    where a lighter rendition is shown) is in
+    ``overrides.SEEN_FIRST_NAME_PORTRAITS`` with the bytes and pixel size of
+    the file the card shows as the record now gives them. A look is at a
+    picture, not an address: a campaign that saves another photograph over
+    the same file name (a family photograph over "alexander-headshot.jpg")
+    goes back behind the gate and is named (portrait-first-name-unseen)."""
+    record = record or {}
+    if not first_name_route(record):
+        return True
+    seen = getattr(overrides, "SEEN_FIRST_NAME_PORTRAITS", {})
+    heavy = (record.get("portraitHeavy") or [{}])[0].get("url")
+    weight = record.get("portraitWeight") or {}
+    for url in (record.get("portrait"), heavy):
+        entry = seen.get(url) if url else None
+        size = entry[3] if entry and len(entry) > 3 and isinstance(entry[3], dict) else None
+        if size and all(size.get(k) and size.get(k) == weight.get(k) for k in _LOOK_SIZE):
+            return True
+    return False
 
 
 def _weigh(url):
@@ -1095,7 +1278,7 @@ def _weigh(url):
 
 
 _PORTRAIT_FIELDS = ("portrait", "portraitWeight", "portraitHeavy", "portraitForms",
-                    "portraitPage", "portraitEvidence", "portraitRead")
+                    "portraitPage", "portraitEvidence", "portraitRead", "portraitRoute")
 
 
 def lighten(record, picture, weight, offered=()):
@@ -1171,8 +1354,8 @@ def measure_portraits(cache, log=print, pause=1.0):
             if not weight:
                 continue                       # could not tell: kept (rule 8)
             weighed += 1
-            kept = {k: record[k] for k in ("portraitPage", "portraitEvidence", "portraitRead")
-                    if k in record}
+            kept = {k: record[k] for k in ("portraitPage", "portraitEvidence", "portraitRead",
+                                           "portraitRoute") if k in record}
             offered = [tuple(form) for form in record.get("portraitForms") or ()]
             lighten(record, picture, weight, offered)
             record.update(kept)
@@ -1247,9 +1430,13 @@ def render_wanted(profiles, cache, today=None, limit=RENDER_LIMIT):
         for key in ("site", "listed"):
             record = entry.get(key) or {}
             url = drawn_address(record)
+            # A first-name portrait waiting for a person's look does not stop
+            # the drawn page being asked for one named by the surname; once
+            # a person has looked at it, it stops it as a surname's does.
+            named = ((record.get("portrait") or record.get("portraitHeavy"))
+                     and first_name_seen(record))
             if (not url.startswith("https://") or record.get("safe") is False
-                    or record.get("portrait") or record.get("portraitHeavy")
-                    or overrides.blocked_campaign_host(url)):
+                    or named or overrides.blocked_campaign_host(url)):
                 continue
             drawn = entry.get("drawn") or {}
             if drawn.get("url") == url and drawn.get("read", "") >= cutoff:
@@ -1278,6 +1465,10 @@ def _drawn_read(profile, url, markup, today):
         original = (record.get("portraitHeavy") or [{}])[0].get("url") or record["portrait"]
         record.update(portraitPage=url, portraitEvidence=evidence_of(page, url, original, profile),
                       portraitRead=today)
+    else:
+        take_first_name_portrait(record, profile, page, url, refused, today)
+        if refused:
+            record["notPortraits"] = refused
     return record, page
 
 
@@ -1286,8 +1477,9 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
     """Read the sites :func:`render_wanted` names as a browser draws them -
     the home page, then its About page when the home page has no portrait -
     and keep what each gives as the person's ``drawn`` record. Returns how
-    many portraits were found. No Chrome, or a page the browser could not
-    read, keeps every earlier drawn record (rule 8)."""
+    many portraits were found, those named by the first name alone among
+    them (the caller saves the cache on any). No Chrome, or a page the
+    browser could not read, keeps every earlier drawn record (rule 8)."""
     from .courts import read_with_browser
 
     one_run = reader or (lambda pages: read_with_browser(pages, root=root))
@@ -1312,7 +1504,9 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
     drawn, problems = reader(homes)
     for line in problems[:5]:
         log(f"    [drawn] {line}")
-    found, abouts = 0, {}
+    # A portrait named by the first name alone is counted apart: it shows
+    # only once a person has looked at it (first_name_seen).
+    found, first_named, abouts = 0, 0, {}
     for i, (profile, _key, url) in enumerate(wanted):
         markup = drawn.get(_code(i))
         if markup is None:
@@ -1320,12 +1514,18 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
         record, page = _drawn_read(profile, url, markup, today)
         before = people.setdefault(profile["id"], {}).get("drawn")
         people[profile["id"]]["drawn"] = record
-        if record.get("portrait"):
+        if record.get("portrait") and not first_name_route(record):
             found += 1
         elif record["safe"] is SAFE:
+            # A home page's first-name portrait gives way to the About
+            # page's named by the surname (look_for_portrait's order).
             about = about_link(page, url)
             if about:
                 abouts[_code(i)] = (profile, url, about, before)
+            elif record.get("portrait"):
+                first_named += 1
+        elif record.get("portrait"):
+            first_named += 1
     if abouts:
         from .photos import keep_refused
         more, problems = reader({code: about for code, (_p, _u, about, _b) in abouts.items()})
@@ -1338,17 +1538,28 @@ def render_portraits(profiles, cache, root=".", limit=RENDER_LIMIT, log=print, r
                     keep_refused(people[profile["id"]]["drawn"], before)
                 continue
             record, _page = _drawn_read(profile, about, more[code], today)
+            home = people[profile["id"]]["drawn"]
             # What either page refused stays with the record kept: the
-            # About page's portrait, or else the home page's record.
-            if record.get("portrait"):
+            # About page's portrait, or else the home page's record. A
+            # surname's beats a first name's; between two first names'
+            # the home page's stands.
+            if record.get("portrait") and (not home.get("portrait")
+                                           or not first_name_route(record)):
                 record["url"] = url                      # the site it stands for
-                people[profile["id"]]["drawn"] = keep_refused(record,
-                                                              people[profile["id"]]["drawn"])
-                found += 1
+                people[profile["id"]]["drawn"] = keep_refused(record, home)
+                kept = record
             else:
-                keep_refused(people[profile["id"]]["drawn"], record)
-    log(f"  enrich: {found} portrait(s) found on drawn pages")
-    return found
+                keep_refused(home, record)
+                kept = home
+            if kept.get("portrait"):
+                if first_name_route(kept):
+                    first_named += 1
+                else:
+                    found += 1
+    log(f"  enrich: {found} portrait(s) found on drawn pages"
+        + (f", and {first_named} named by the first name alone, each shown once a person "
+           "has looked at it" if first_named else ""))
+    return found + first_named
 
 
 # --------------------------------------------------------------------- cache
@@ -1644,10 +1855,17 @@ def portrait_record(entry, site):
     read when it found one, else the drawn
     read of that same site (:func:`render_portraits`) when it read as the
     campaign's."""
-    if site.get("portrait") or site.get("portraitHeavy"):
-        return site
     drawn = (entry or {}).get("drawn") or {}
-    if drawn.get("safe") is True and drawn.get("url") in (site.get("url"), drawn_address(site)):
+    drawn_ok = drawn.get("safe") is True and drawn.get("url") in (site.get("url"),
+                                                                   drawn_address(site))
+    if site.get("portrait") or site.get("portraitHeavy"):
+        # A first-name portrait gives way to the drawn page's named by the
+        # surname, as on one read (look_for_portrait).
+        if (first_name_route(site) and drawn_ok
+                and drawn.get("portrait") and not first_name_route(drawn)):
+            return drawn
+        return site
+    if drawn_ok:
         return drawn
     return site
 
@@ -1662,6 +1880,11 @@ def take_campaign_portrait(profile, entry, site, counts):
     record = portrait_record(entry, site)
     picture = campaign_portrait(record)
     if picture is None:
+        return False
+    if not first_name_seen(record):
+        # Named by the first name: shown once a person has looked at it
+        # (validate: portrait-first-name-unseen).
+        counts["portrait_awaiting_look"] += 1
         return False
     if too_heavy(record.get("portraitWeight")):
         # No lighter rendition is offered: shown all the same, lazily, and
@@ -1681,6 +1904,35 @@ def take_campaign_portrait(profile, entry, site, counts):
     profile["photoCredit"] = campaign_credit(page)
     counts["portrait"] += 1
     return True
+
+
+def awaiting_look(profiles, cache):
+    """``[(profile, record)]``: the challengers whose campaign portrait came
+    by the first-name route (:func:`first_name_portraits`) and is withheld
+    until a person looks at it (:func:`first_name_seen`): still running,
+    not a member (rule 24), showing nothing ahead of it - no photograph, or
+    only an election office's guide's, which every campaign portrait comes
+    before."""
+    from .guide_photos import ROUTE as GUIDE_ROUTE
+
+    people = (cache or {}).get("people") or {}
+    out = []
+    for profile in profiles:
+        if (not running(profile) or not profile.get("isCandidate") or profile.get("bioguide")
+                or profile.get("photoSource") not in (None, "", GUIDE_ROUTE)):
+            continue
+        entry = people.get(profile.get("id")) or {}
+        shown = profile.get("campaignSite")
+        for key in ("site", "listed"):
+            site = entry.get(key) or {}
+            if (not shown or shown not in (site.get("url"), site.get("working"))
+                    or site.get("safe") is False):
+                continue
+            record = portrait_record(entry, site)
+            if campaign_portrait(record) and not first_name_seen(record):
+                out.append((profile, record))
+            break
+    return out
 
 
 def campaign_portrait(site):

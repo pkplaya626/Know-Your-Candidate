@@ -176,6 +176,40 @@ class TestTheJusticesPortraits(unittest.TestCase):
     """The Court's own portraits, joined only to the nine justices already
     joined to the directory: the page pictures retired justices too."""
 
+    def test_a_challenge_in_a_portraits_place_concludes_nothing(self):
+        # Rule 103: asked as this project, a firewall may answer 202, a 200
+        # bot wall's page, or a 403; none of them withdraws a portrait.
+        import io
+        import urllib.error
+
+        class Answer(io.BytesIO):
+            def __init__(self, status, kind, body):
+                super().__init__(body)
+                self.status, self.headers = status, {"Content-Type": kind}
+
+        def opener(answer):
+            def opened(request, timeout=None):
+                if isinstance(answer, Exception):
+                    raise answer
+                return answer
+            return opened
+
+        original = judiciary.time.sleep
+        judiciary.time.sleep = lambda s: None
+        try:
+            ok = lambda answer: judiciary._image_ok("https://www.supremecourt.gov/x.jpg",
+                                                    opener=opener(answer))
+            self.assertTrue(ok(Answer(200, "image/jpeg", b"\xff\xd8\xff\xe0")))
+            self.assertTrue(ok(Answer(206, "application/octet-stream", b"\xff\xd8\xff\xe0")))
+            self.assertIsNone(ok(Answer(202, "text/html", b"")))
+            self.assertIsNone(ok(Answer(200, "text/html", b"<title>Access Denied</title>")))
+            self.assertIsNone(ok(Answer(200, "text/html", b"")))
+            self.assertIsNone(ok(urllib.error.HTTPError("u", 403, "Forbidden", {}, None)))
+            self.assertFalse(ok(urllib.error.HTTPError("u", 404, "Not Found", {}, None)))
+            self.assertFalse(ok(Answer(200, "text/html", b"<title>Page not found</title>")))
+        finally:
+            judiciary.time.sleep = original
+
     def build(self, page, image_ok=lambda url: True):
         return judiciary.build(fixture("federal-judicial-service.csv"), fixture("judges.csv"),
                                fixture("members.html"), TODAY, page, image_ok)
