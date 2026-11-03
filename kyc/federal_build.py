@@ -94,10 +94,12 @@ def _change(row):
     return {k: v for k, v in out.items() if v not in (None, False, "")}
 
 
-def _judge(record, links=None):
+def _judge(record, links=None, disclosures=None):
     """A judge as the pages show them: nothing a source did not state.
     *links* is the judge-links cache (kyc/judge_links.py): a Wikipedia
-    article and a portrait joined through the FJC id, never a name."""
+    article and a portrait joined through the FJC id, never a name.
+    *disclosures* is CourtListener's holdings of their financial disclosure
+    reports (kyc/judge_disclosures.py), joined through the FJC's judge id."""
     keep = ("id", "name", "sortName", "status", "seats", "prior", "born", "education",
             "career", "otherNominations", "fjc", "justice", "retiredJustice", "courtService",
             "portrait")
@@ -113,6 +115,14 @@ def _judge(record, links=None):
     # Wikidata item carries their FJC id.
     if joined.get("linkVia") and (out.get("wikipedia") or out.get("wikidata")):
         out["linkVia"] = joined["linkVia"]
+    # Their financial disclosure reports, as CourtListener holds them: a
+    # link where it holds any, the record itself where the one carrying
+    # their FJC id holds none (its words about that record alone), and
+    # nothing where no CourtListener record carries their FJC id.
+    from . import judge_disclosures
+    held = judge_disclosures.for_judge(disclosures, record["id"].replace("fjc-", ""))
+    if held is not None:
+        out["disclosures"] = held
     # A sitting justice's official portrait as Wikimedia Commons holds it,
     # credited to its photographer (overrides.JUSTICE_PORTRAITS, the owner's
     # decision of 2026-10-20). The Court's own stands for a justice the
@@ -161,6 +171,8 @@ def build(root="."):
         raise FederalBuildError(f"no {judiciary.CACHE_PATH}; run 'judiciary'")
     from . import judge_links
     links = judge_links.load_cache(root)
+    from . import court_chiefs, judge_disclosures
+    disclosures = judge_disclosures.load_cache(root)
     problems = [message for level, _code, message, _d in federal.problems(executive)
                 if level == "error"]
     problems += [message for level, _code, message, _d in judiciary.problems(courts)
@@ -257,6 +269,9 @@ def build(root="."):
             "chief": {"id": chief, "name": judiciary.display_name(judges[chief]["name"])}
             if chief else None,
             "chiefUnsettled": bool(held.get("chiefUnsettled")),
+            # Where the directory's record cannot say who is chief, what the
+            # court's own site says, beside it (kyc/court_chiefs.py).
+            **({"chiefByCourt": by_court} if (by_court := court_chiefs.shown(courts, cid)) else {}),
             **({"token": colours[court["circuit"]]}
                if court["kind"] == "appeals" and court.get("states") else {}),
             "vacancies": len(vacant.get(cid, [])),
@@ -270,7 +285,9 @@ def build(root="."):
     scotus = courts["courts"]["scotus"]
     payload = {
         "asOf": {"executive": executive["asOf"], "judiciary": courts["asOf"]},
-        "sources": {"executive": executive["sources"], "judiciary": courts["sources"]},
+        "sources": {"executive": executive["sources"], "judiciary": courts["sources"],
+                    **({"disclosures": judge_disclosures.source(disclosures)}
+                       if disclosures else {})},
         "president": _leader(executive["president"], "President of the United States"),
         "vicePresident": _leader(executive["vicePresident"], "Vice President of the United States"),
         "offices": offices,
@@ -280,8 +297,8 @@ def build(root="."):
         "otherCourts": [dict(c) for c in court_info.OTHER_COURTS],
         "courtSites": {"source": court_info.SOURCE, "reviewed": court_info.REVIEWED},
         "statute": (court_districts.load_cache(root) or {}).get("source"),
-        "supremeCourt": {"members": [_judge(judges[i], links) for i in scotus["judges"]],
-                         "retired": [_judge(judges[i], links) for i in scotus.get("retired") or []]},
+        "supremeCourt": {"members": [_judge(judges[i], links, disclosures) for i in scotus["judges"]],
+                         "retired": [_judge(judges[i], links, disclosures) for i in scotus.get("retired") or []]},
         # Sitting judges: a retired justice is listed apart, never counted.
         "judges": sum(1 for j in judges.values() if not j.get("retiredJustice")),
         "changes": {k: changes[k] for k in ("since", "read", "sources") if changes.get(k)} or None,
@@ -302,7 +319,7 @@ def build(root="."):
         # the directory, so every court page loads the same scripts.
         rows = []
         for i in held["judges"]:
-            row = _judge(judges[i], links)
+            row = _judge(judges[i], links, disclosures)
             listed = disagree.get((cid, i))
             if listed:
                 row["listedSenior"] = {"since": listed["since"]}
@@ -326,7 +343,7 @@ def build(root="."):
         if not held["listed"] and listed_by_court:
             per_court[cid]["courtList"] = listed_by_court
         if held.get("retired"):
-            per_court[cid]["retired"] = [_judge(judges[i], links) for i in held["retired"]]
+            per_court[cid]["retired"] = [_judge(judges[i], links, disclosures) for i in held["retired"]]
     # One row per judge, with every court they sit on: a judge on several
     # courts (a roving judgeship) is one person.
     sitting_on = {}

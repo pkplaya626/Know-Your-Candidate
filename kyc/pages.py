@@ -1949,6 +1949,11 @@ def _federal_static(federal):
         if court["kind"] == "supreme":
             continue
         chief = f" (chief judge: {_e(court['chief']['name'])})" if court.get("chief") else ""
+        if not court.get("chief") and court.get("chiefByCourt"):
+            # The directory's record cannot say; the court's own site's word,
+            # attributed to it (kyc/court_chiefs.py).
+            chief = (f" (chief judge as the court's own site names its chief: "
+                     f"{_e(court['chiefByCourt']['name'])}; the directory's record is not settled)")
         rows.append(f'                        <li><a href="../courts/{_e(court["id"])}.html">'
                     f"{_e(court['name'])}</a>{chief}</li>")
     rows.append("                    </ul>")
@@ -2129,6 +2134,9 @@ def _court_counts(court_id, federal):
     if not found or not found["listed"] or found["kind"] == "supreme":
         return ""
     chief = f" Chief judge: {found['chief']['name']}." if found.get("chief") else ""
+    if not found.get("chief") and found.get("chiefByCourt"):
+        chief = (f" Chief judge, as the court's own site names its chief: "
+                 f"{found['chiefByCourt']['name']}; the directory's record is not settled.")
     return (f"{chief} {found['active']} active and {found['senior']} senior judges as of "
             f"{date_words(federal['asOf']['judiciary'])}.")
 

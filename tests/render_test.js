@@ -552,6 +552,11 @@ function buildPage(page, opts) {
         addListener() {},
         removeListener() {},
       });
+      // opts.loaded: change the data after every script has assigned it and
+      // before any page module draws from it (the modules start on
+      // DOMContentLoaded, and this listener is the first), for pages that
+      // load no people (the federal pages): a check makes the state it tests.
+      if (opts.loaded) window.document.addEventListener("DOMContentLoaded", () => opts.loaded(window));
       if (opts.now !== null) freezeClock(window, opts.now || CAMPAIGN_NOW);
       // opts.federal: the federal data as a refresh might write it, changed
       // as data/federal.js assigns it, before any page module reads it.
@@ -2914,10 +2919,20 @@ async function testStates() {
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
     // A photograph only by rule 91's routes, each with whose it is beside it.
+    // No money: no campaign's figure. The race's markets (PR #195) say what
+    // a contract "worth $1" is, which is a price's meaning, not money raised.
+    const moneyText = () => {
+      const copy = block.cloneNode(true);
+      copy.querySelectorAll(".odds-note").forEach((n) => n.remove());
+      return copy.textContent;
+    };
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
-      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
+      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(moneyText()) &&
         [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
-          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
+          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")),
+      [...block.querySelectorAll("img")].map((img) => img.className + " " +
+        ((img.closest(".gcard") || { querySelector: () => null }).querySelector(".gcard-credit") || {}).textContent)
+        .join(" | ") + (/\$/.test(moneyText()) ? " (money)" : ""));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -12537,11 +12552,183 @@ async function testFederal() {
   });
 
   await testFederalAudit();
+  await testCourtChiefsAndDisclosures();
 }
 
 /* The reader-side audit of 2026-10-17 (FEDERAL-*): who sits, announced
  * vacancies, the hub's vacancies and nominees, the executive's departed
  * officers, the line of succession, the agencies' own websites. */
+/** FEDERAL-17 and FEDERAL-05, on states the test makes (the Conventions):
+ *  a court whose directory record cannot say who is chief, with and
+ *  without the court's own site's word beside it; and a judge whose
+ *  disclosures CourtListener holds, one whose joined record lists none, and one it has
+ *  no record of - on the campaign clock and after Election Day. */
+async function testCourtChiefsAndDisclosures() {
+  const probe = await buildPage("federal/index.html");
+  await settle(50);
+  const court = probe.window.kycFederal.courts.find((c) => c.kind === "district" && c.listed &&
+    c.active > 2 && !c.chiefUnsettled);
+  if (!court) {
+    suite("court chiefs and judges' disclosures", () => check("a district court to test on", false));
+    return;
+  }
+  const id = court.id;
+  const ON_THE_SITE = { name: "Pat Q. Example", title: "Chief District Judge",
+    words: "Pat Q. Example, Chief District Judge", source: "https://www.example.uscourts.gov/judges",
+    read: "2026-10-30" };
+  // The court's index row and its first active judge, made unsettled; the
+  // court's own word added where `named`.
+  const unsettle = (named) => (w) => {
+    const row = w.kycFederal.courts.find((c) => c.id === id);
+    const mine = w.kycCourt[id];
+    const judge = mine.judges.find((j) => j.status !== "senior");
+    row.chief = null;
+    row.chiefUnsettled = true;
+    delete row.chiefByCourt;
+    if (named) row.chiefByCourt = Object.assign({ judge: judge.id }, ON_THE_SITE);
+    judge.seats.forEach((s) => { if (s.court === id) s.chiefUnsettled = true; });
+    w.__unsettled = judge;
+  };
+  const DISCLOSED = { url: "https://www.courtlistener.com/person/1/pat-example/#disclosures",
+    reports: 3, first: "2018", last: "2020" };
+  const NONE_LISTED = { record: "https://www.courtlistener.com/person/2/pat-example/", reports: 0 };
+  for (const now of [CAMPAIGN_NOW, "2026-11-05T09:00:00"]) {
+    const when = now === CAMPAIGN_NOW ? "campaign" : "after Election Day";
+    for (const named of [true, false]) {
+      const hub = await buildPage("federal/index.html", { now, loaded: (w) => {
+        const row = w.kycFederal.courts.find((c) => c.id === id);
+        row.chief = null;
+        row.chiefUnsettled = true;
+        delete row.chiefByCourt;
+        if (named) row.chiefByCourt = Object.assign({ judge: "fjc-1" }, ON_THE_SITE);
+      } });
+      await settle(50);
+      suite(`federal/index.html — an unsettled chief, ${named ? "with" : "without"} the court's ` +
+        `own word (${when})`, () => {
+        const { D, errors } = hub;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const cell = D.querySelector('#courts a[href="../courts/' + id + '.html"]').closest("tr")
+          .querySelector('[data-label="Chief judge"]');
+        const text = cell.textContent;
+        if (named) {
+          check("the court's own word is named, attributed to the court, never the directory's",
+            text === "Pat Q. Example (as the court’s own site names its chief; the directory’s " +
+              "record is not settled: see the court’s page)", text);
+          check("the name opens the judge's record on the court's page",
+            !!cell.querySelector('a[href="../courts/' + id + '.html#/official/fjc-1"]'));
+        } else {
+          check("with nothing read, it reads 'Not settled'", text === "Not settled (see the court’s page)",
+            text);
+        }
+        check("it links to why", !!cell.querySelector('a[href="../courts/' + id + '.html#chiefUnsettled"]'));
+      });
+
+      const page = await buildPage("courts/" + id + ".html", { now, loaded: unsettle(named) });
+      await settle(50);
+      suite(`courts/${id}.html — an unsettled chief, ${named ? "with" : "without"} the court's own ` +
+        `word (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const note = D.getElementById("chiefUnsettled");
+        const text = note ? note.textContent : "";
+        check("the directory's record is said, and why it cannot say who is chief",
+          text.indexOf("The directory lists " + w.__unsettled.name + " as this court’s chief judge " +
+            "and also on senior status") === 0 && /28 U\.S\.C\. 136\(a\)/.test(text), text);
+        if (named) {
+          check("the court's own words stand beside it, quoted, linked and dated",
+            text.indexOf("The court’s own website lists “Pat Q. Example, Chief District Judge” (its " +
+              "page of judges, read by this site on " + w.KYC.dateWords("2026-10-30") + ")") !== -1 &&
+            !!note.querySelector('a[href="https://www.example.uscourts.gov/judges"]'), text);
+          check("neither is taken over the other", /neither is taken over the other/.test(text) &&
+            !/nobody is shown as chief/.test(text), text);
+        } else {
+          check("with nothing read, nobody is shown as chief", /nobody is shown as chief/.test(text) &&
+            !/court’s own website/.test(text), text);
+        }
+      });
+
+      // The judge's own dialog says the same beside the seat (rule 82: the
+      // row, the dialog and the hub; the PR #181 review found it silent).
+      page.window.KYC.official.open(page.window.__unsettled.id);
+      await settle(20);
+      suite(`courts/${id}.html — the unsettled chief's dialog, ${named ? "with" : "without"} the ` +
+        `court's own word (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const line = D.querySelector("#officialModalBody .chief-by-court");
+        const text = line ? line.textContent : "";
+        check("the directory's two words are said", text.indexOf("The directory also lists this " +
+          "judge as the court’s chief judge, which a judge on senior status cannot be (28 U.S.C. " +
+          "136(a))") === 0, text);
+        if (named) {
+          check("the court's own word beside them, quoted, linked and dated", text.indexOf(
+            "the court’s own website lists “Pat Q. Example, Chief District Judge” (its page of " +
+            "judges, read by this site on " + w.KYC.dateWords("2026-10-30") + "). Neither is taken " +
+            "over the other.") !== -1 && !!line.querySelector('a[href="https://www.example.uscourts.gov/judges"]'),
+          text);
+        } else {
+          check("with nothing read, nobody is shown as chief", /Nobody is shown as the court’s chief/.test(
+            text) && !/own website/.test(text), text);
+        }
+      });
+      page.window.KYC.official.close && page.window.KYC.official.close();
+    }
+
+    // The dialog's disclosures: held, none listed, no record.
+    const cases = [["held", DISCLOSED], ["none listed", NONE_LISTED], ["no record", null]];
+    for (const [what, held] of cases) {
+      let judgeId = null;
+      const page = await buildPage("courts/" + id + ".html", { now, loaded: (w) => {
+        const judge = w.kycCourt[id].judges[0];
+        judgeId = judge.id;
+        if (held) judge.disclosures = held; else delete judge.disclosures;
+        w.kycFederal.sources.disclosures = { export: "2026-09-30", read: "2026-11-01",
+          url: "https://www.courtlistener.com/" };
+      } });
+      await settle(50);
+      page.window.KYC.official.open(judgeId);
+      await settle(20);
+      suite(`courts/${id}.html — a judge's financial disclosures: ${what} (${when})`, () => {
+        const { window: w, D, errors } = page;
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        const body = D.getElementById("officialModalBody");
+        const chip = [...body.querySelectorAll("a.link-chip")].find((a) =>
+          a.textContent === "Financial disclosures");
+        const note = D.getElementById("officialDisclosures");
+        const text = note ? note.textContent : "";
+        check("never says a report was not filed", !/not filed|none filed|no reports filed/i.test(
+          body.textContent));
+        if (what === "held") {
+          check("a 'Financial disclosures' link to CourtListener's page for them",
+            !!chip && chip.getAttribute("href") === DISCLOSED.url);
+          check("says what the link is, which years and as of when", text.indexOf(
+            "Financial disclosure reports, as CourtListener holds them: 3 reports, for 2018 to 2020 " +
+            "(its data of " + w.KYC.dateWords("2026-09-30") + ").") === 0, text);
+          check("says how it was found: by the FJC id, never a name", /Federal Judicial Center’s id/.test(text) &&
+            /never a search by name/.test(text), text);
+        } else if (what === "none listed") {
+          // The PR #181 review: Judge Graber's reports are under a duplicate
+          // record carrying no FJC id, so the words speak of the joined
+          // record alone, which is linked for a reader to look.
+          const record = [...body.querySelectorAll("a.link-chip")].find((a) =>
+            a.textContent === "CourtListener record");
+          check("no 'Financial disclosures' link; the record itself is linked", !chip && !!record &&
+            record.getAttribute("href") === NONE_LISTED.record, record && record.getAttribute("href"));
+          check("the words are about the record carrying the FJC id, its data dated", text.indexOf(
+            "Financial disclosure reports: the CourtListener record that carries this judge’s Federal " +
+            "Judicial Center id lists no reports (its data of " + w.KYC.dateWords("2026-09-30") +
+            ").") === 0 && /cannot say whether CourtListener holds reports for them under another/.test(
+            text), text);
+          check("never that CourtListener holds none for the judge",
+            !/lists no reports for this judge/.test(body.textContent), text);
+        } else {
+          check("no link and no word", !chip && !note);
+        }
+      });
+    }
+  }
+}
+
 async function testFederalAudit() {
   const hub = await buildPage("federal/index.html");
   await settle(50);
@@ -12598,8 +12785,14 @@ async function testFederalAudit() {
     const unsettled = d.courts.find((c) => c.chiefUnsettled);
     const cell = unsettled && D.querySelector('#courts a[href="../courts/' + unsettled.id + '.html"]')
       .closest("tr").querySelector('[data-label="Chief judge"]');
-    check("a chief the directory contradicts reads 'Not settled', linked to why", !unsettled ||
-      (/^Not settled \(see the court’s page\)$/.test(cell.textContent) &&
+    // Where the court's own site was read, its word stands beside the note
+    // (kyc/court_chiefs.py); testCourtChiefsAndDisclosures makes both states.
+    check("a chief the directory contradicts reads 'Not settled' or the court's own word, linked " +
+      "to why", !unsettled ||
+      ((unsettled.chiefByCourt
+        ? cell.textContent.indexOf(unsettled.chiefByCourt.name + " (as the court’s own site names " +
+          "its chief; the directory’s record is not settled: see the court’s page)") === 0
+        : /^Not settled \(see the court’s page\)$/.test(cell.textContent)) &&
        !!cell.querySelector('a[href$="#chiefUnsettled"]')), cell && cell.textContent);
     // FEDERAL-24: the Article I courts are named and linked.
     const lede = D.getElementById("courtsLede");
@@ -14670,6 +14863,9 @@ async function testCharts() {
     const { window, D } = await buildPage("index.html");
     await settle(50);
     const KYC = window.KYC;
+    // The governor races' markets are drawn from the election office's
+    // list (data/stategov.js), which the grid loads on demand (rule 94).
+    await new Promise((resolve) => KYC.loadData("stategov.js", "kycStateGov", resolve));
     suite("charts — funding sources as one bar (VISUALS-24)", () => {
       const who = window.legislatorsData.find((p) => p.fundingBreakdown && !p.fundingBase &&
         Object.keys(p.fundingBreakdown).length >= 3);
@@ -14691,11 +14887,24 @@ async function testCharts() {
         odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
       let checked = 0;
       let inOrder = 0;
-      raceIds.forEach((id) => {
+      // A race for governor (G-GA-2026, PR #195) is no race of Congress's:
+      // it is drawn by the governor cards' own call (KYC.stategov.raceOdds),
+      // which passes the list's parties for rule 79's note, never a race
+      // object made up here (PR #180 review). null for a race nobody draws.
+      const drawOdds = (id, opts) => {
         const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return;
+        if (race) return KYC.odds.render(race, opts);
+        const gov = /^G-([A-Z]{2})-\d{4}$/.exec(id);
+        return gov && window.kycStateGov ? KYC.stategov.raceOdds(gov[1], opts) : null;
+      };
+      check("the governor races are drawn through the state government module, with the list's parties",
+        !!window.kycStateGov && typeof KYC.stategov.raceOdds === "function" &&
+          raceIds.some((id) => /^G-/.test(id)));
+      raceIds.forEach((id) => {
+        const html = drawOdds(id, {});
+        if (html === null) return;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const rows = box.querySelectorAll(".poll-row");
         if (rows.length !== odds.races[id].polls.rows.length) return;
         checked += 1;
@@ -14720,19 +14929,23 @@ async function testCharts() {
       // A ten-point axis made 49.7 against 47.4 look like a wide gap (PR
       // #111 review); the compact line already prints its two figures.
       const narrow = raceIds.filter((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return false;
+        const html = drawOdds(id, {});
+        if (html === null) return false;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const ticks = [...box.querySelectorAll(".poll-ticks span")].map((s) => parseFloat(s.textContent));
         return ticks.length < 2 || Math.max(...ticks) - Math.min(...ticks) < 30;
       });
       check("every poll axis spans at least thirty points", narrow.length === 0, narrow.join(" "));
-      const compact = raceIds.map((id) => (window.kycRaces || []).find((r) => r.id === id)).filter(Boolean)
-        .filter((race) => { const b = D.createElement("div"); b.innerHTML = KYC.odds.render(race, { compact: true });
-          return !!b.querySelector(".poll-dots"); });
+      const compact = raceIds.filter((id) => {
+        const html = drawOdds(id, { compact: true });
+        if (html === null) return false;
+        const b = D.createElement("div");
+        b.innerHTML = html;
+        return !!b.querySelector(".poll-dots");
+      });
       check("the compact panel prints the line, not a one-row chart of it", compact.length === 0,
-        compact.map((r) => r.id).join(" "));
+        compact.join(" "));
     });
   }
 }
