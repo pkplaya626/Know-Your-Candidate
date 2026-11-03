@@ -40,6 +40,10 @@
    "article": "Andy Biggs",
    "page": "2026 Arizona gubernatorial election"
   },
+  "AZ|governor|HOBBS, KATIE": {
+   "article": "Katie Hobbs",
+   "page": "2026 Arizona gubernatorial election"
+  },
   "AZ|governor|HOURIHAN, TERI ANN": {
    "none": "not-linked",
    "page": "2026 Arizona gubernatorial election"
@@ -325,7 +329,7 @@
    "page": "2026 Nevada gubernatorial election"
   },
   "NV|governor|Lombardo, Joseph": {
-   "none": "not-linked",
+   "article": "Joe Lombardo",
    "page": "2026 Nevada gubernatorial election"
   },
   "NY|governor|Bruce A. Blakeman": {
