@@ -11289,10 +11289,10 @@
   {
    "candidate_id": "H4MO07156",
    "candidate_status": "C",
-   "cash_on_hand_end_period": "60779.19",
-   "coverage_end_date": "2026-09-30",
+   "cash_on_hand_end_period": "45851.95",
+   "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2025-01-30",
-   "disbursements": 43641.69,
+   "disbursements": 60168.93,
    "district_number": 7,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -11301,7 +11301,7 @@
    "office": "H",
    "party": "DEM",
    "party_full": "DEMOCRATIC PARTY",
-   "receipts": 65739.85,
+   "receipts": 66639.85,
    "state": "MO"
   },
   {
@@ -51521,7 +51521,7 @@
    "candidate_status": "C",
    "cash_on_hand_end_period": "5412.46",
    "coverage_end_date": "2026-10-14",
-   "coverage_start_date": "2026-03-10",
+   "coverage_start_date": "2026-04-01",
    "disbursements": 11616.21,
    "district_number": 1,
    "has_raised_funds": true,
@@ -53230,7 +53230,7 @@
    "candidate_id": "H6PA12097",
    "candidate_status": "C",
    "cash_on_hand_end_period": "0.00",
-   "coverage_end_date": "2026-06-30",
+   "coverage_end_date": "2026-09-30",
    "coverage_start_date": "2025-01-01",
    "disbursements": 18722.32,
    "district_number": 12,
@@ -61166,7 +61166,7 @@
   },
   {
    "candidate_id": "H6UT02259",
-   "candidate_status": "N",
+   "candidate_status": "C",
    "cash_on_hand_end_period": "1079.43",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-03-05",
@@ -61382,7 +61382,7 @@
   },
   {
    "candidate_id": "H6UT02549",
-   "candidate_status": "N",
+   "candidate_status": "C",
    "cash_on_hand_end_period": "1079.43",
    "coverage_end_date": "2026-10-14",
    "coverage_start_date": "2026-03-05",
@@ -69270,7 +69270,7 @@
    "cash_on_hand_end_period": "179.59",
    "coverage_end_date": "2026-06-30",
    "coverage_start_date": "2023-01-01",
-   "disbursements": 14144.09,
+   "disbursements": 14313.67,
    "district_number": 0,
    "has_raised_funds": true,
    "incumbent_challenge": "C",
@@ -69279,7 +69279,7 @@
    "office": "S",
    "party": "REP",
    "party_full": "REPUBLICAN PARTY",
-   "receipts": 10577.14,
+   "receipts": 11005.12,
    "state": "OR"
   },
   {

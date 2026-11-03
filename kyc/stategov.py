@@ -210,6 +210,29 @@ def _governor(gov, problems=None):
                         f"{since}; Wikidata records {', '.join(gov['wikidataStarts'])}")
     out = {"name": gov["name"], "party": gov["party"], "partyKey": gov["partyKey"],
            "since": since if confirmed else "", "terms": terms, "profile": gov["profile"]}
+    if not confirmed:
+        # Why no first day is shown, in rule 19's terms: the page words
+        # each (a disagreement only where both dates exist and differ).
+        out["sinceWhy"] = since_why(gov, since)
+    return _governor_rest(gov, out)
+
+
+def since_why(gov, since):
+    """Why the governor's first day in office is not shown: "no-nga" (the
+    NGA's roster gives none), "no-item" (the roster's cross-check holds no
+    Wikidata item for them, so nothing was compared), "no-date" (the item
+    records no start in the office) or "disagree" (both dates exist and
+    differ: Kay Ivey's, Kim Reynolds's)."""
+    if not since or _date(since) is None:
+        return "no-nga"
+    if not gov.get("wikidata"):
+        return "no-item"
+    if not gov.get("wikidataStarts"):
+        return "no-date"
+    return "disagree"
+
+
+def _governor_rest(gov, out):
     for key in ("website", "phone", "address"):
         if gov.get(key):
             out[key] = gov[key]
@@ -218,6 +241,141 @@ def _governor(gov, problems=None):
         out["headshot"] = shown
         out["headshotBy"] = "National Governors Association"
     return out
+
+
+def agreed_birth(nga, wikidata):
+    """The governor's date of birth where the NGA's page ("May 5, 1961") and
+    the Wikidata item's P569 give the same day (the pattern rule 54 uses
+    for the first day in office): ``{"date": iso, "nga": text}`` or
+    ``None``. A disagreement, or a date one source lacks, shows nothing."""
+    first = _date(nga) if nga else None
+    if first is None or not wikidata or wikidata.get("precision") != "day":
+        return None
+    if first.isoformat() != wikidata.get("date"):
+        return None
+    return {"date": first.isoformat(), "nga": nga.strip()}
+
+
+def candidate_article(photo_cache, code, printed_name):
+    """The candidate's own article as the race's article links it, checked
+    as rule 33 checks a ballot page's link (kyc/statewide_photos.py's
+    wikipedia route), or ``None``: the one route an article reaches a
+    candidate for governor by."""
+    from . import statewide_photos
+
+    rec = statewide_photos.article_of(photo_cache, code, "governor", printed_name)
+    return (rec or {}).get("article")
+
+
+def candidate_member(photo_cache, code, printed_name):
+    """The bioguide id of the member of Congress an evidenced
+    ``overrides.OTHER_OFFICE_NOMINEES`` entry ties to this candidate, as the
+    ballot photographs' member route matched them (kyc/statewide_photos.py
+    read_members: the entry, and the list's name for the office theirs), or
+    ``None``."""
+    from . import statewide_photos
+    from .overrides import OTHER_OFFICE_NOMINEES
+
+    rec = ((photo_cache or {}).get("photos") or {}).get(
+        statewide_photos.key(code, "governor", printed_name)) or {}
+    if rec.get("route") == "member" and rec.get("bioguide") in OTHER_OFFICE_NOMINEES:
+        return rec["bioguide"]
+    return None
+
+
+def governor_candidate_articles(root="."):
+    """``{candidate id: (article title, name)}`` for every candidate for
+    governor whose race's article links their own (``candidate_article``):
+    what the ``history`` command reads their offices through."""
+    from . import statewide, statewide_photos
+
+    lists = statewide.load(root) or {"states": {}}
+    photo_cache = statewide_photos.load_cache(root) or {}
+    out = {}
+    for code in sorted(lists.get("states") or {}):
+        listed = statewide.office(lists, code, "governor") or {}
+        for person in listed.get("candidates") or ():
+            article = candidate_article(photo_cache, code, person["name"])
+            if article:
+                name = statewide.display_name(person["name"])
+                out[statewide.candidate_id(code, name)] = (article, name)
+    return out
+
+
+def attach_history(code, entry, raw, cache, photo_cache, problems):
+    """Give the governor's card and the candidates' their offices held and
+    articles from the history cache (kyc/history.py, rule 69), by the
+    overlay's ids: the governor's only while the cache's item is the one
+    the NGA roster's cross-check holds for them (``executives.wikidata``),
+    a candidate's only while the cache was read from the article the
+    race's article links for them now (``asked``, rule 69's
+    ``history-stale``). The governor's date of birth where the NGA and
+    Wikidata agree (``agreed_birth``); a disagreement is reported, never
+    shown."""
+    from . import history, statewide, statewide_photos
+
+    people = (cache or {}).get("people") or {}
+    gov = entry["governor"]
+    gov["id"] = statewide.governor_id(code)
+    rec = people.get(history.governor_key(code))
+    # Why no date of birth is shown, in rule 19's terms: no item to check
+    # the NGA's against, the item not read, no date on one side, or two
+    # dates that differ (``bornWhy``; the page words each).
+    if not raw.get("wikidata"):
+        gov["bornWhy"] = "no-item"
+    elif not (rec and rec.get("wikidata") == raw["wikidata"]):
+        gov["bornWhy"] = "not-read"
+    if rec and raw.get("wikidata") and rec.get("wikidata") == raw["wikidata"]:
+        gov["politicalHistory"] = history.for_page(rec)
+        gov["wikidata"] = rec["wikidata"]
+        if rec.get("wikipedia"):
+            gov["wikipedia"] = rec["wikipedia"]
+        born = agreed_birth(raw.get("born"), rec.get("born"))
+        if born:
+            gov["born"] = born
+        elif not (raw.get("born") and _date(raw["born"])):
+            gov["bornWhy"] = "no-nga"
+        elif not rec.get("born") or rec["born"].get("precision") != "day":
+            gov["bornWhy"] = "no-date"
+        else:
+            gov["bornWhy"] = "disagree"
+            problems.append(f"{code}: the NGA says {gov['name']} was born {raw['born']}; "
+                            f"Wikidata records {rec['born']['date']} ({rec['born']['precision']}); "
+                            "neither is shown")
+    elif rec and raw.get("wikidata") and rec.get("wikidata") != raw["wikidata"]:
+        problems.append(f"{code}: the offices-held record for {gov['name']} was read from "
+                        f"{rec.get('wikidata')}; the NGA cross-check now holds {raw['wikidata']}; "
+                        "not shown; run 'history'")
+    item = ((entry.get("ballot2026") or {}).get("offices") or {}).get("governor") or {}
+    listed = item.get("candidates")
+    if not listed:
+        return
+    for row in listed["candidates"]:
+        row["id"] = statewide.candidate_id(code, row["name"])
+        if row.get("writeIn"):
+            continue
+        printed = row.get("printed") or row["name"]
+        member = candidate_member(photo_cache, code, printed)
+        if member:
+            row["member"] = member
+        found = statewide_photos.article_of(photo_cache, code, "governor", printed)
+        if found and found.get("read"):
+            row["articleRead"] = found["read"]
+        article = (found or {}).get("article")
+        if not article:
+            # What the race's article said of them, where it was read: it
+            # links none ("not-linked"), or a link that could not be
+            # confirmed as theirs; nothing where it was not read (rule 19).
+            if found and found.get("none"):
+                row["articleNone"] = found["none"]
+            continue
+        row["wikipedia"] = article
+        rec = people.get(row["id"])
+        if rec and rec.get("asked") == article:
+            row["politicalHistory"] = history.for_page(rec)
+        elif rec:
+            problems.append(f"{code}: {row['name']}'s offices were read from {rec.get('asked')}; the "
+                            f"race's article now links {article}; not shown; run 'history'")
 
 
 def headshot(gov):
@@ -445,9 +603,12 @@ def build(root="."):
         raise StateGovError(f"{statewide_photos.CACHE_PATH}: " + "; ".join(unfit))
     # And the election offices' own guides' photographs, hosted here
     # unmodified, for a candidate no other route pictures (kyc/guide_photos.py).
-    from . import guide_photos, photocopies
+    from . import guide_photos, history, photocopies
     guide_cache = guide_photos.load_cache(root)
     copies_manifest = photocopies.load(root)
+    # The offices held (kyc/history.py): optional; a state whose governor
+    # or candidates it does not hold shows "No linked record" (rule 19).
+    history_cache = history.load_cache(root)
     candidates_heavy = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
@@ -531,6 +692,9 @@ def build(root="."):
                     candidates_heavy += statewide_photos.attach(
                         code, key, item["candidates"]["candidates"], listed, holder, status,
                         photo_cache, guide_cache, copies_manifest)
+        # The offices held, articles and the agreed date of birth for the
+        # governor's overlay and the candidates' (rule 91, rule 69).
+        attach_history(code, entry, governors[code], history_cache, photo_cache, problems)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))

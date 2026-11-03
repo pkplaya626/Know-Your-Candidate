@@ -4885,6 +4885,113 @@ button.local-county-link {
 }
 .gov-who { min-width: 0; }
 .gov-who p { margin: 0 0 2px; }
+/* A governor's card and a governor candidate's (kyc-stategov.js
+ * governorCard, candidateCard): a card, never a profile (rule 27), so a
+ * box of its own with no button and no dialog. The office's line and its
+ * ballot mark across the top (rule 79), the photograph's 72px circle - the
+ * box rule 101's copies are made for - beside the name, and whose the
+ * photograph is under it. */
+.gov-card.gcard,
+.gcard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  margin: 0;
+  padding: var(--s-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-1);
+  min-width: 0;
+}
+.stategov > .gov-card.gcard { margin-bottom: var(--s-3); }
+.gcard-holder {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  column-gap: var(--s-3);
+  align-items: start;
+}
+.gcard-writein .gcard-holder { grid-template-columns: minmax(0, 1fr); }
+.gcard .gov-name { font-size: var(--t-md); overflow-wrap: anywhere; }
+.gcard-mate { font-size: var(--t-sm); color: var(--text); }
+.gcard-credit { margin-top: var(--s-1) !important; }
+.gov-portrait-none {
+  display: block;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+  box-sizing: border-box;
+}
+.gcard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+  gap: var(--s-3);
+  margin: var(--s-2) 0 var(--s-3);
+}
+.gcard-grid.gcard-writeins {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: var(--s-2);
+}
+.gcard-writeins .gcard { padding: var(--s-2) var(--s-3); gap: 0; }
+.gcard-writeins .gov-name { font-size: var(--t-sm); }
+.stategov > .gov-card.gcard { max-width: 720px; }
+.gov-race { margin: var(--s-2) 0 var(--s-3); }
+.gov-race > .gov-holder-status { margin-bottom: var(--s-2); }
+.gov-race-pointer { margin: 0 0 var(--s-3); font-size: var(--t-sm); }
+
+/* The governor overlay (kyc-governor.js, rule 91) and the controls that
+ * open it: a chevron after the name, and the card itself by click or
+ * Enter. The candidate card's office line reads as a Congress card's. */
+.gcard[data-governor] { cursor: pointer; }
+.gcard[data-governor]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.gcard-open {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: var(--s-1);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  vertical-align: middle;
+}
+.gcard-open .icon { width: 14px; height: 14px; }
+@media (hover: hover) {
+  .gcard-open:hover { color: var(--accent); border-color: var(--border-strong); }
+}
+.gcard-office { font-size: var(--t-xs); }
+.gov-money-note, .gov-odds-none { font-size: var(--t-sm); }
+.gov-race-panel .gov-race { margin-top: 0; }
+.gov-race-none { margin: 0 0 var(--s-3); }
+/* The overlay's portrait: the dialog's box, the dashed circle where there
+ * is none (as the cards keep theirs), and a party tag in ink for a party
+ * the colours do not bucket (a fusion line, rule 88). */
+#governorModal .modal-portrait img { border-radius: 50%; width: 116px; height: 116px; object-position: center 20%; }
+#governorModal .modal-portrait.gov-portrait-empty img { display: none; }
+#governorModal .modal-portrait.gov-portrait-empty::before {
+  content: "";
+  display: block;
+  width: 116px;
+  height: 116px;
+  border-radius: 50%;
+  border: 1px dashed var(--border);
+  box-sizing: border-box;
+}
+#governorModal .party-tag-ink { background: var(--surface-3); color: var(--text); }
+#governorModal .modal-meta .gov-office { margin: 0; }
+/* The holder line is a sentence: as a flex item it split its link from its
+ * brackets ("( the list )"). */
+#governorModal .modal-meta .gov-holder-status { display: block; margin: 0; font-size: var(--t-sm); }
+.race-mate .gov-portrait.race-mate-thumb { width: 36px; height: 36px; }
+.race-mate .gcard-party-words { color: var(--text); }
+.races-folded .gov-race-foldable.is-open .race-body { padding: var(--s-3) var(--s-1) 0; }
+/* The grid's Governors view (kyc-directory.js): one heading over each list. */
+.gov-view-head { margin: var(--s-4) 0 var(--s-2); font-size: var(--t-lg); }
+.gov-view-state { margin: var(--s-5) 0 var(--s-2); font-size: var(--t-md); }
 .gov-role {
   font-size: var(--t-xs);
   font-weight: 700;
@@ -5736,6 +5843,9 @@ button.local-county-link {
   .races-folded .badge-shared { display: none; }
   /* A badge the race's row above already gives (kyc-cards headBadgeHtml). */
   .races-folded .badge-in-row { display: none; }
+  /* The race for governor's holder line, which its row above already says
+   * (kyc-state.js governorRow; PR #191 review). */
+  .races-folded .race-body .gov-race > .gov-holder-status { display: none; }
 }
 @media print {
   .race-row-title,
