@@ -240,12 +240,7 @@ def _build(args):
           f"{counts['last_elections']} races")
     markets = odds_mod.load_cache(args.root)
     if markets:
-        reach = odds_mod.coverage(markets, race_list)
-        print(f"  odds: markets for {reach['senate'][0]}/{reach['senate'][1]} Senate and "
-              f"{reach['house'][0]}/{reach['house'][1]} House races, polling averages for "
-              f"{reach['polls']} (fetched {markets.get('fetched')}); "
-              f"{reach['unprofiled']} outcome labels name a nominee with no profile here "
-              "and show as their party")
+        print("  " + odds_mod.build_line(markets, race_list))
     else:
         print("  [warn] no odds cache; run 'odds' for market prices and polling averages")
     # The results settle who is on the ballot, so count after applying them.
@@ -823,8 +818,15 @@ def _history(args):
         # The article each challenger's election page links (rule 33).
         results_mod.apply_cache(profiles, results_mod.load_cache(args.root),
                                 field=screen_field(field, profiles, raw.get("record")))
+        # The sitting governors by the NGA roster's Wikidata items, and the
+        # candidates for governor by the article their race's article links
+        # (kyc/stategov.py governor_candidate_articles; rules 69, 91).
+        from . import executives, stategov
+        governors = (executives.load_cache(args.root) or {}).get("governors") or {}
         try:
-            cache = history.fetch(profiles, executive=federal.load_cache(args.root))
+            cache = history.fetch(profiles, executive=federal.load_cache(args.root),
+                                  governors=governors,
+                                  candidates=stategov.governor_candidate_articles(args.root))
         except history.HistoryError as exc:
             print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
             return 2
@@ -1032,8 +1034,15 @@ def _odds(args):
                                 filed=candidates.filed_rows(screened), record=raw.get("record"),
                                 snapshot=legislators.load_snapshot(args.root))
     by_id = {p["id"]: p for p in profiles}
+    # The races for governor (rule 91): their own ids beside Congress's, and
+    # the election office's list of candidates as the people a label or a
+    # poll column may name (kyc/odds.py governor_races).
+    governor_races, governor_people = odds_mod.governor_races(args.root)
+    race_list = race_list + governor_races
 
     def people_of(race):
+        if race["id"] in governor_people:
+            return governor_people[race["id"]]
         # Who a market label or a poll column may name: anyone still in it,
         # and the nominees the results page lists with no FEC filing over
         # $5,000 - in the race, though they have no profile here.
@@ -1056,7 +1065,8 @@ def _odds(args):
     reach = odds_mod.coverage(cache, race_list)
     print(f"  markets for {reach['senate'][0]} of {reach['senate'][1]} Senate and "
           f"{reach['house'][0]} of {reach['house'][1]} House races; polling averages for "
-          f"{reach['polls']}; control of "
+          f"{reach['polls']}; markets for {reach['governor'][0]} of {reach['governor'][1]} "
+          f"governor races and polling averages for {reach['governorPolls']}; control of "
           f"{' and '.join(sorted(cache.get('control') or {})) or 'neither chamber'} "
           f"(fetched {cache.get('fetched')})")
     notes = cache.get("notes") or []
@@ -2162,8 +2172,20 @@ def _ballotphotos(args):
             return 2
         with open(os.path.join(args.root, "congress_snapshot.json"), encoding="utf-8") as handle:
             snapshot = _json.load(handle)
-        cache, problems = statewide_photos.fetch(lists, snapshot, previous,
-                                                 wikipedia=not args.no_wikipedia)
+        if args.articles_only:
+            # Only the candidates' own articles, as the races' articles link
+            # them (rule 33), whatever route pictures them: no photograph is
+            # read, changed or dropped.
+            cache, problems = statewide_photos.with_articles(
+                previous or {}, statewide_photos.lists_of(lists), previous), []
+        else:
+            cache, problems = statewide_photos.fetch(lists, snapshot, previous,
+                                                     wikipedia=not args.no_wikipedia)
+        recorded = (cache.get("articles") or {}).values()
+        print(f"  candidates' own articles: {sum('article' in r for r in recorded)} linked, "
+              f"{sum(r.get('none') == 'not-linked' for r in recorded)} not linked, "
+              f"{sum('none' in r and r['none'] != 'not-linked' for r in recorded)} not confirmed "
+              f"(read {cache.get('articlesRead')})")
     errors = statewide_photos.problems(cache)
     seen = statewide_photos.counts(cache)
     print(f"  {seen['shown']} statewide candidates' photographs cached ("
@@ -2879,6 +2901,9 @@ def build_parser():
     photos_cmd.add_argument("--no-wikipedia", action="store_true",
                             help="read only the official guides and members; keep the "
                                  "Wikipedia photographs last read")
+    photos_cmd.add_argument("--articles-only", action="store_true",
+                            help="read only the article each race's Wikipedia article links for "
+                                 "a candidate for governor; change no photograph")
 
     tribes_cmd = add("tribes", help="every tribal government and its leader (BIA Tribal Leaders "
                                     "Directory)")

@@ -86,6 +86,13 @@ _FIPS = re.compile(r"^\d{5}$")
 _PLACE = re.compile(r"^\d{7}$")
 _NOT_A_TITLE = re.compile(r"https?:|www\.|\blinked\b|\bdescribed as\b|\bedition:|\bquery:", re.I)
 _CUT = re.compile(r"\.\.\.|…")
+# A document's label: a style or page code before it ("EN_20"), the kind of
+# ballot, a page number, and the election it is for ("General 2026").
+_ONLY_A_LABEL = re.compile(r"^\W*(?:[A-Z]{1,3}_?\d+\W*)?(?:composite|facsimile|reference|"
+                           r"sample|official)(?:\W+(?:ballot|page))*(?:\W+\d+)?"
+                           r"(?:\W+(?:(?:gubernatorial|presidential|statewide|consolidated|"
+                           r"general|primary|special|november|municipal|election)\W+)*"
+                           r"\d{4})?\W*$", re.I)
 _OFF_THE_BALLOT = re.compile(r"\bwithdrawn\b|\bremoved from the ballot\b|\bstricken from the "
                              r"ballot\b|\btaken off the ballot\b", re.I)
 
@@ -274,6 +281,13 @@ def basis_problems(where, fips, state, b):
         # Tarrant's "Districts in Election", quoted as showing the list was
         # whole, was only the document's name.
         out.append(f"{where}: its 'complete' words are only its source's title")
+    elif complete is not None and _ONLY_A_LABEL.match(str(complete)):
+        # San Diego's reference ballot is titled "Composite Ballot" and footed
+        # "Composite Page 20", and prints no City of San Diego or Chula Vista
+        # question: a label says what the document is called, not that it
+        # holds every contest.
+        out.append(f"{where}: its 'complete' words are only a label of the document "
+                   f"({complete!r}), not words saying it holds every contest")
     if "every" in b and b["every"] is not True:
         out.append(f"{where}: 'every' is true or absent")
     return out
@@ -347,6 +361,15 @@ def city_problems(fips, state, c, measures, counties):
         out.append(f"{where}: unknown field(s) {', '.join(sorted(extra))} for '{status}'")
     mine = [m for m in measures if m["jurisdiction"].get("kind") == "city"
             and m["jurisdiction"].get("place") == c.get("place")]
+    for m in mine:
+        # A city's questions are the city's own. Los Angeles's Measure SC
+        # amends the City Charter, but the Registrar prints it under the
+        # school district's own heading, apart from the city's seven: listed
+        # with them, it made the city's count eight against the document's
+        # seven, and the district's voters outside the city never saw it.
+        if m["jurisdiction"].get("name") != c.get("name"):
+            out.append(f"{where}: a question of {m['jurisdiction'].get('name')!r} is listed as the "
+                       "city's; a city's questions are its own")
     if status == "listed":
         if not mine:
             out.append(f"{where}: 'listed', and none of its questions is listed")
