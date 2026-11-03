@@ -831,6 +831,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     ("sworn in for CA-03") carry. A label naming someone other than this
     site's candidate of that party is a conflict and a warning; one naming a
     nominee too small to have a profile here is counted, not warned about.
+    The races for governor are read the same way under ids of their own,
+    `G-<ST>-2026` (`odds.governor_ids`, from the ballot table), beside
+    Congress's: a Kalshi market whose question names the state's
+    governorship and whose rules inaugurate that state's governor, a
+    Polymarket event whose title and description name the same state's
+    governorship, the race's own article's averages. A question that also
+    speaks of the Senate or the House (Kalshi's "Senate-Governor Combo")
+    places nowhere, and "Georgia Lieutenant Governor Election Winner" is
+    another office's (the first read took "Georgia Lieutenant" for the
+    state, 2026-11-03). The labels are matched against the election
+    office's list of candidates for the office
+    (`data/statewide_candidates.json`, `odds.governor_races`), never a
+    profile: a running mate's name names the ticket, a write-in is on the
+    list. The page draws them by one module (`KYC.stategov.raceOdds`
+    through `KYC.odds.render`), and a race the cache holds nothing for
+    says so of the cache (rule 19).
 
 41. **A file that publishes on its own may change only itself.**
     `.github/workflows/odds.yml` commits to `main` every twelve hours
@@ -1436,7 +1452,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "since 2013" was frozen at the read, so a senator who left on January
     3 would have stayed current. Whether a seat in Congress is current is
     the membership snapshot's to say, by the person's bioguide id, at
-    build time (`history-behind`).
+    build time (`history-behind`). The sitting governors are read by the
+    Wikidata item the NGA roster's cross-check holds for them
+    (`executives.wikidata`, under `gov-<ST>`), with the item's date of
+    birth kept for the build to compare with the NGA's; the candidates for
+    governor by the article their race's own article links for them
+    (`stategov.governor_candidate_articles`, rule 33's check), under the
+    overlay's id. `stategov.attach_history` attaches a record only while
+    it is that item's or that article's (`asked`); a moved item or a
+    changed link is reported, never shown.
 
 70. **A disclosure belongs to an office, and the report must name its
     filer.** The Office of Government Ethics files people under their
@@ -2354,7 +2378,28 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     not Arkansas's governor), presses none of Congress's filters (a pressed
     "Not seeking re-election" over every governor was a claim about each),
     and asks once for a file that failed; a candidate's party words are
-    ink, since a fusion line is several parties (rule 88).
+    ink, since a fusion line is several parties (rule 88). Every governor
+    card opens an overlay in the profile dialog's shape (the owner's
+    request of 2026-11-02; `assets/kyc-governor.js`, built like the
+    officials' dialog on `KYC.createModal`, at `#/official/gov-<ST>` and
+    `#/official/gov-<ST>-<name>`, ids the pipeline writes:
+    `statewide.governor_id`, `candidate_id`), by its chevron, a click or
+    Enter, through one delegated listener (rule 13), never a `data-id`
+    (rule 27). Its biography holds only what a source says: a governor's
+    date of birth where the NGA's page and the Wikidata item give the same
+    day (`stategov.agreed_birth`; Delaware's disagree by eight days and
+    show nothing), in office since in the card's words, the office's site
+    and contact, the NGA biography; a candidate's party and running mate
+    from the list, a Wikipedia badge only where the race's article links
+    theirs; the offices held through rule 69's corroboration, else "No
+    linked record". Money and platform are said "not looked at" (rule 19):
+    this site reads federal campaign filings only. The race panel lists
+    the list's other candidates with the cards' badge, write-ins apart,
+    the list cited, and the markets and averages (rule 40). The map's 2026
+    governor's races view is the race's panel in the Senate panel's shape
+    (`KYC.stategov.racePanel`): the list's count, never an "out" (a list
+    says who is on the ballot, not who left it), the cards, the markets,
+    then the sitting governor's card.
 
 92. **"Who is on my ballot" is its own question, answered from the views
     that already answer its parts, and an address keeps a ZIP code, never

@@ -4983,7 +4983,9 @@ button.local-county-link {
 }
 #governorModal .party-tag-ink { background: var(--surface-3); color: var(--text); }
 #governorModal .modal-meta .gov-office { margin: 0; }
-#governorModal .modal-meta .gov-holder-status { margin: 0; font-size: var(--t-sm); }
+/* The holder line is a sentence: as a flex item it split its link from its
+ * brackets ("( the list )"). */
+#governorModal .modal-meta .gov-holder-status { display: block; margin: 0; font-size: var(--t-sm); }
 .race-mate .gov-portrait.race-mate-thumb { width: 36px; height: 36px; }
 .race-mate .gcard-party-words { color: var(--text); }
 .races-folded .gov-race-foldable.is-open .race-body { padding: var(--s-3) var(--s-1) 0; }

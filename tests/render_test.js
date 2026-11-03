@@ -17508,7 +17508,8 @@ async function testGovernorOverlays() {
       others.length === printed.length - 1 && !others.some((r) => r.querySelector(".race-mate-name").textContent === first.name));
     check("no money, no platform, no filing: each said not looked at",
       /Campaign finance/.test(modal().textContent) && /Not looked at: this site reads federal campaign filings only/.test(modal().textContent) &&
-      /Not looked at: this site reads no platform/.test(modal().textContent) && !/\$/.test(modal().textContent));
+      /Not looked at: this site reads no platform/.test(modal().textContent) &&
+      !/Raised|Spent|Cash on hand|Funding sources/.test(modal().textContent) && !modal().querySelector(".money-tile"));
     check("a Wikipedia badge only where the race's article links theirs", first.wikipedia
       ? !!modal().querySelector('.link-chip[href^="https://en.wikipedia.org/wiki/"]')
       : /No article linked/.test(modal().textContent) && !modal().querySelector('.link-chip[href^="https://en.wikipedia.org/wiki/"]'));
@@ -17608,7 +17609,8 @@ async function testGovernorOverlays() {
     check("the grid's counts of Congress do not move: no profile in the overlay", noProfile(modal));
     esc(window);
     await until(() => modal.hidden && /chamber=governors/.test(window.location.hash), 3000);
-    check("closed to the same view", modal.hidden && /chamber=governors&view=race/.test(window.location.hash) &&
+    check("closed to the same view", modal.hidden && /chamber=governors/.test(window.location.hash) &&
+      /view=race/.test(window.location.hash) && /state=GA/.test(window.location.hash) &&
       D.querySelectorAll("#results .gov-view-race").length > 0, window.location.hash);
   }
 

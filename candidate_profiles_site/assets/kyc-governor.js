@@ -354,6 +354,8 @@
     var tag = el("governorModalParty");
     tag.textContent = gov.party || "";
     tag.className = "party-tag party-" + (key || "i");
+    // The fill the profile dialog's tag takes (kyc-profile.js PARTY_LABEL_BG).
+    tag.style.background = "var(--party-" + (key || "i") + ")";
     tag.hidden = !gov.party;
     el("governorModalKind").textContent = "Governor";
     el("governorModalPrinted").hidden = true;
@@ -386,6 +388,7 @@
     var tag = el("governorModalParty");
     tag.textContent = person.party || "";
     tag.className = "party-tag " + (key ? "party-" + key : "party-tag-ink");
+    tag.style.background = key ? "var(--party-" + key + ")" : "";
     tag.hidden = !person.party;
     el("governorModalKind").textContent = "Governor (Candidate)";
     var printed = el("governorModalPrinted");
