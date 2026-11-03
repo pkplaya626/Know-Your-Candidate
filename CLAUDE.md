@@ -2409,7 +2409,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     race's (rule 73). A candidate's card holds the list's words alone, in
     the order and with the notes the list block gives (`listParts`, one
     source of them), and its photograph's copy is made for the card's 72px
-    circle (`photocopies.BOXES` "governor-candidate", rule 101). Its
+    circle (`photocopies.BOXES` "governor-candidate", rule 101). A card's
+    photograph, the map panel's and the overlay's header's included, that
+    fails takes its credit with it through the one helper the officers'
+    list of sources uses (`KYC.stategov.dropPhotoCredit`, rule 87): a copy
+    first gives way to its original, which keeps the credit (rule 101),
+    and only the original failing takes it, and every other credit naming
+    that file once nothing on the page still shows it. Its
     review found a count no second source checks: the NGA lists one
     unbroken span for a re-elected governor, so Bill Lee and Tate Reeves,
     in their second terms, read "First term" - the card counts no terms.

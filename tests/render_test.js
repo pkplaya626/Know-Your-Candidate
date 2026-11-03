@@ -2914,10 +2914,20 @@ async function testStates() {
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
     // A photograph only by rule 91's routes, each with whose it is beside it.
+    // No money: no campaign's figure. The race's markets (PR #195) say what
+    // a contract "worth $1" is, which is a price's meaning, not money raised.
+    const moneyText = () => {
+      const copy = block.cloneNode(true);
+      copy.querySelectorAll(".odds-note").forEach((n) => n.remove());
+      return copy.textContent;
+    };
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
-      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
+      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(moneyText()) &&
         [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
-          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
+          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")),
+      [...block.querySelectorAll("img")].map((img) => img.className + " " +
+        ((img.closest(".gcard") || { querySelector: () => null }).querySelector(".gcard-credit") || {}).textContent)
+        .join(" | ") + (/\$/.test(moneyText()) ? " (money)" : ""));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -9413,6 +9423,208 @@ async function testStateGov() {
     }
   });
 
+  suite("state government — a photograph that fails takes its credit with it (rule 87)", () => {
+    // Which photographs a card draws is the week's read, so each case is
+    // made from whichever state carries what it needs, never by its code.
+    const drawn = (o) => !!(o && o.photo && o.photoBy && !(o.disputed || o.unlisted ||
+      o.unconfirmed || o.vacant || o.none || o.notMember));
+    const govShot = (s) => !!(s.governor && s.governor.headshot && s.governor.headshotBy);
+    const shots = (s) => (govShot(s) ? [s.governor.headshot] : [])
+      .concat(["lt", "ag", "sos"].filter((k) => drawn(s[k])).map((k) => s[k].photo));
+    // Every photograph on the card its own file: one failing names no other.
+    const distinct = (s) => new Set(shots(s)).size === shots(s).length;
+    // The copies a week's weighing made are set aside, so the first error
+    // is the photograph's own (the last case makes one).
+    const bare = (s) => [s.governor].concat(["lt", "ag", "sos"].map((k) => s[k])).filter(Boolean)
+      .filter((o) => "photoCopy" in o).map((o) => { const v = o.photoCopy; delete o.photoCopy; return [o, v]; });
+    const draw = (code) => {
+      const host = D.createElement("div");
+      host.innerHTML = KYC.stategov.render(code);
+      D.body.appendChild(host);
+      return host;
+    };
+    const list = (host) => host.querySelector(".gov-sources .gov-photo-sources");
+    const labels = (host) => [...host.querySelectorAll(".gov-sources .gov-photo-source")]
+      .map((c) => c.textContent.split(",")[0].trim());
+    // "; " between the clauses left, a final ".", and nothing else.
+    const wellFormed = (host) => {
+      const l = list(host);
+      if (!l) return true;
+      const parts = [...l.querySelectorAll(".gov-photo-source")].map((c) => c.textContent);
+      return parts.length > 0 && l.textContent === " Photographs: " + parts.join("; ") + ".";
+    };
+    const fail = (img) => img.dispatchEvent(new window.Event("error"));
+    // A credit stays while any <img> on the page still shows its file
+    // (KYC.stategov.dropPhotoCredit): an officer on their office's list of
+    // candidates shows the office's photograph there too (rule 91), and a
+    // file that fails fails in both places. *keeps*: the check that a
+    // clause stays while its file is still shown in the other place.
+    const failFile = (host, img, keeps) => {
+      const address = img.getAttribute("src");
+      fail(img);
+      const twins = [...host.querySelectorAll("img")].filter((i) => i.getAttribute("src") === address);
+      if (twins.length && keeps) keeps(address);
+      twins.forEach(fail);
+    };
+    const officerImg = (host, o) => [...host.querySelectorAll("img.gov-officer-photo")]
+      .find((i) => i.getAttribute("src") === KYC.photoHref(o.photo));
+    // The map's panel may show one of these states' cards: set aside while
+    // the suite draws its own, so no file is shown twice on the page.
+    const panel = D.getElementById("delegation");
+    const heldPanel = panel ? panel.innerHTML : "";
+    if (panel) panel.innerHTML = "";
+
+    const withAg = stateCodes.find((c) => drawn(data.states[c].ag) && distinct(data.states[c]) &&
+      shots(data.states[c]).length > 1);
+    check("a state whose attorney general and another office are pictured", !!withAg);
+    if (withAg) {
+      const s = data.states[withAg];
+      const kept = bare(s);
+      try {
+        const host = draw(withAg);
+        const before = labels(host);
+        check("the list of sources credits the attorney general's photograph",
+          before.indexOf("attorney general") !== -1 && wellFormed(host), before.join(" | "));
+        const img = officerImg(host, s.ag);
+        check("the attorney general's row draws the photograph its clause names", !!img &&
+          [...host.querySelectorAll(".gov-photo-source")].some((c) =>
+            c.getAttribute("data-credits") === img.getAttribute("src")));
+        if (img) {
+          failFile(host, img, (address) => check("its clause stays while the same file is still shown elsewhere",
+            [...host.querySelectorAll(".gov-photo-source")].some((c) => c.getAttribute("data-credits") === address)));
+        }
+        const after = labels(host);
+        check("a failed attorney general's photograph takes its clause, and only its clause",
+          !!img && !img.isConnected && after.indexOf("attorney general") === -1 &&
+          JSON.stringify(after) === JSON.stringify(before.filter((l) => l !== "attorney general")),
+          before.join(" | ") + " -> " + after.join(" | "));
+        check("and the list stays one sentence", wellFormed(host),
+          (list(host) || {}).textContent);
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    const withGov = stateCodes.find((c) => govShot(data.states[c]) && distinct(data.states[c]));
+    check("a state whose governor is pictured", !!withGov);
+    if (withGov) {
+      const s = data.states[withGov];
+      const kept = bare(s);
+      try {
+        // The governor's card says whose its photograph is under it
+        // (governorCard, PR #191), so the list of sources credits the
+        // officers alone.
+        const host = draw(withGov);
+        const before = labels(host);
+        const card = host.querySelector(".gcard:not(.gcard-candidate)");
+        const img = card && card.querySelector("img.gov-portrait");
+        const address = KYC.photoHref(s.governor.headshot);
+        check("the governor's card credits the headshot under it, and the list of sources does not",
+          before.indexOf("governor") === -1 && !!img && img.getAttribute("src") === address &&
+          !!card.querySelector('.gcard-credit[data-credits="' + address + '"]'));
+        // A candidate's card may show the same file (the holder on the list:
+        // the office photograph the card already shows, rule 91); it keeps
+        // its credit while it still shows it.
+        const twins = [...host.querySelectorAll(".gcard-candidate img.gov-portrait")]
+          .filter((i) => i.getAttribute("src") === address);
+        if (img) fail(img);
+        const after = labels(host);
+        check("a failed governor's headshot takes the card's credit and leaves the empty circle",
+          !card.querySelector("img.gov-portrait") && !!card.querySelector(".gov-portrait-none") &&
+          !card.querySelector(".gcard-credit"));
+        check("and touches no officer's clause", JSON.stringify(after) === JSON.stringify(before),
+          before.join(" | ") + " -> " + after.join(" | "));
+        check("a candidate's card still showing that file keeps its credit", twins.every((i) =>
+          i.isConnected && !!i.closest(".gcard").querySelector('.gcard-credit[data-credits="' + address + '"]')));
+        check("and what is left is one sentence", wellFormed(host), (list(host) || {}).textContent);
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    const every = stateCodes.find((c) => govShot(data.states[c]) && shots(data.states[c]).length > 1);
+    check("a state with the governor and an officer pictured", !!every);
+    if (every) {
+      const s = data.states[every];
+      const kept = bare(s);
+      try {
+        const host = draw(every);
+        check("its list of sources credits photographs", !!list(host));
+        // Every photograph on the card: the officers' and governor's, the
+        // race's cards and the officers' lists of candidates.
+        [...host.querySelectorAll("img.gov-portrait, img.gov-officer-photo, img.gov-photo")].forEach(fail);
+        const text = host.querySelector(".gov-sources").textContent;
+        check("when every photograph fails, the sources say no 'Photographs:'",
+          !list(host) && !/Photographs:/.test(text) && !host.querySelector(".gov-photo-source"), text);
+        check("and still end in a full stop", /\.$/.test(text.trim()), text.slice(-120));
+        host.remove();
+      } finally {
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    if (withAg) {
+      // No state today pictures one office alone, so the case is made: the
+      // attorney general's photograph the only one the card credits, its
+      // clause the whole list, and its failure the list's end.
+      const s = data.states[withAg];
+      const kept = bare(s);
+      const others = [[s.governor, "headshot"], [s.lt, "photo"], [s.sos, "photo"]]
+        .filter(([o, k]) => o && k in o).map(([o, k]) => [o, k, o[k]]);
+      others.forEach(([o, k]) => { o[k] = null; });
+      try {
+        const host = draw(withAg);
+        check("a card picturing one office credits it in one clause",
+          JSON.stringify(labels(host)) === JSON.stringify(["attorney general"]) && wellFormed(host),
+          (list(host) || {}).textContent);
+        const img = officerImg(host, s.ag);
+        if (img) failFile(host, img);
+        const text = host.querySelector(".gov-sources").textContent;
+        check("and its one photograph failing leaves no 'Photographs:' and a full stop",
+          !!img && !list(host) && !/Photographs:/.test(text) && /\.$/.test(text.trim()), text.slice(-120));
+        host.remove();
+      } finally {
+        others.forEach(([o, k, v]) => { o[k] = v; });
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+
+    if (withAg) {
+      // A copy that fails gives way to its original (rule 101), which is
+      // shown, so its credit stays; only when the original fails too does
+      // the credit go.
+      const s = data.states[withAg];
+      const kept = bare(s);
+      const COPY = "photos/0a1b2c3d4e5f60718293.jpg?v=0a1b2c3d4e";
+      s.ag.photoCopy = { src: COPY, of: s.ag.photo };
+      try {
+        const host = draw(withAg);
+        const img = [...host.querySelectorAll("img.gov-officer-photo")]
+          .find((i) => i.getAttribute("data-photo-original") === KYC.photoHref(s.ag.photo));
+        check("the attorney general's row loads the copy", !!img && img.getAttribute("src") === KYC.siteRoot() + COPY);
+        if (img) {
+          fail(img);
+          check("a copy that fails falls back to its original", img.isConnected &&
+            img.getAttribute("src") === KYC.photoHref(s.ag.photo));
+          check("and the original keeps its credit, no longer called a copy",
+            labels(host).indexOf("attorney general") !== -1 && wellFormed(host) &&
+            ![...host.querySelectorAll(".photo-copy-note")].some((n) =>
+              n.getAttribute("data-copy-of") === s.ag.photo), (list(host) || {}).textContent);
+          failFile(host, img);
+          check("then the original failing takes the credit", !img.isConnected &&
+            labels(host).indexOf("attorney general") === -1 && wellFormed(host));
+        }
+        host.remove();
+      } finally {
+        delete s.ag.photoCopy;
+        kept.forEach(([o, v]) => { o.photoCopy = v; });
+      }
+    }
+    if (panel) panel.innerHTML = heldPanel;
+  });
+
   suite("state government — the data", () => {
     check("every state has a governor", stateCodes.every((c) => data.states[c] && data.states[c].governor.name));
     const uncredited = stateCodes.filter((c) => {
@@ -14692,7 +14904,10 @@ async function testCharts() {
       let checked = 0;
       let inOrder = 0;
       raceIds.forEach((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
+        // A race for governor (G-GA-2026, PR #195) is no race for Congress:
+        // drawn as the state page draws it, by its id (KYC.stategov.raceOdds).
+        const race = (window.kycRaces || []).find((r) => r.id === id) ||
+          (/^G-[A-Z]{2}-\d{4}$/.test(id) ? { id, label: id } : null);
         if (!race) return;
         const box = D.createElement("div");
         box.innerHTML = KYC.odds.render(race, {});
@@ -17819,6 +18034,204 @@ async function testGovernorOverlays() {
   }
 }
 
+/* A governor's or a candidate's photograph that fails takes its credit with
+ * it, through one helper (KYC.stategov.dropPhotoCredit, rule 87): on the
+ * state page's governor card and race cards, the grid's Governors view, the
+ * map's race panel and the overlay's header. A copy that fails falls back
+ * to its original and keeps the credit, no longer calling it a copy (rule
+ * 101); only the original failing removes the image and every credit
+ * naming it, wherever the page prints it, once no <img> there still shows
+ * it. The state is chosen from the data (the governor pictured and on the
+ * list, so a candidate's card shows the same file, and another candidate
+ * pictured), and copies are planted on the governor's headshot and the
+ * other candidate's photograph, the week's own set aside. */
+async function testGovernorPhotoCredits() {
+  const sg = {};
+  new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sg);
+  const states = sg.kycStateGov.states;
+  const listOf = (s) => ((((s.ballot2026 || {}).offices || {}).governor || {}).candidates || {}).candidates || [];
+  const pictured = (p) => !p.writeIn && !!p.photo && !!p.photoCredit;
+  const pick = (s) => {
+    const g = s.governor || {};
+    if (!(g.headshot && g.headshotBy && g.id)) return null;
+    const twin = listOf(s).find((p) => pictured(p) && p.photo === g.headshot && p.id);
+    const other = listOf(s).find((p) => pictured(p) && p.photo !== g.headshot && p.id &&
+      !listOf(s).some((q) => q !== p && q.photo === p.photo));
+    return twin && other ? { twin: twin.id, other: other.id } : null;
+  };
+  const code = Object.keys(states).sort().find((c) => pick(states[c]));
+  suite("governors — a photograph that fails takes its credit with it (rule 87)", () => {
+    check("a state whose governor is pictured on the card and on the list, beside another pictured candidate",
+      !!code);
+  });
+  if (!code) return;
+  const ids = pick(states[code]);
+  const COPY = "photos/0a1b2c3d4e5f60718293.jpg?v=0a1b2c3d4e";
+  const COPY2 = "photos/1b2c3d4e5f6071829304.jpg?v=1b2c3d4e5f";
+  const plant = (window) => {
+    let value;
+    Object.defineProperty(window, "kycStateGov", { configurable: true, enumerable: true, get() { return value; },
+      set(v) {
+        const s = v.states[code];
+        delete s.governor.photoCopy;
+        listOf(s).forEach((p) => { delete p.photoCopy; });
+        s.governor.photoCopy = { src: COPY, of: s.governor.headshot, ofBytes: 4200000 };
+        const other = listOf(s).find((p) => p.id === ids.other);
+        other.photoCopy = { src: COPY2, of: other.photo, ofBytes: 3100000 };
+        value = v;
+      } });
+  };
+  const fail = (window, img) => img.dispatchEvent(new window.Event("error"));
+  // Every credit on the page names a photograph an <img> there still shows
+  // (as itself, or as the original a copy falls back to), and every
+  // governor's or candidate's photograph shown is credited.
+  const creditProblems = (D) => {
+    const shown = (a) => [...D.querySelectorAll("img")].some((i) =>
+      i.getAttribute("src") === a || i.getAttribute("data-photo-original") === a);
+    const orphans = [...D.querySelectorAll("[data-credits]")]
+      .filter((c) => !shown(c.getAttribute("data-credits")));
+    const bare = [...D.querySelectorAll(".gcard img.gov-portrait")]
+      .filter((i) => !i.closest(".gcard").querySelector(".gcard-credit"));
+    return orphans.map((c) => "credit for a photograph not shown: " + c.textContent.slice(0, 60))
+      .concat(bare.map((i) => "photograph without its credit: " + i.getAttribute("src")));
+  };
+  // The governor card's and the race cards' photographs, failing in turn.
+  const cardsCase = (label, window, root) => {
+    const D = window.document;
+    const KYC = window.KYC;
+    const s = window.kycStateGov.states[code];
+    const original = KYC.photoHref(s.governor.headshot);
+    const other = listOf(s).find((p) => p.id === ids.other);
+    const otherOriginal = KYC.photoHref(other.photo);
+    const govCard = root.querySelector('.gcard[data-governor="gov-' + code + '"]:not(.gcard-candidate)');
+    const twinCard = root.querySelector('.gcard-candidate[data-governor="' + ids.twin + '"]');
+    const otherCard = root.querySelector('.gcard-candidate[data-governor="' + ids.other + '"]');
+    suite(label, () => {
+      check("the governor's card, the holder's card on the list and another candidate's card are drawn",
+        !!govCard && !!twinCard && !!otherCard);
+      if (!govCard || !twinCard || !otherCard) return;
+      check("nothing on the page credits a photograph it does not show, before any fails",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+      const img = govCard.querySelector("img.gov-portrait");
+      const credit = () => govCard.querySelector(".gcard-credit");
+      check("the governor's card loads the copy, and its credit says so and names the original",
+        !!img && img.getAttribute("src") === KYC.siteRoot() + COPY && !!credit() &&
+        credit().getAttribute("data-credits") === original && !!credit().querySelector(".photo-copy-note"));
+      fail(window, img);
+      check("a copy that fails falls back to its original", img.isConnected && img.getAttribute("src") === original);
+      check("and keeps its credit, no longer calling it a copy", !!credit() && /^Photo/.test(credit().textContent) &&
+        !credit().querySelector(".photo-copy-note"), credit() && credit().textContent);
+      fail(window, img);
+      check("the original failing leaves the empty circle and takes the card's credit",
+        !img.isConnected && !!govCard.querySelector(".gov-portrait-none") && !credit());
+      const twinImg = twinCard.querySelector("img.gov-portrait");
+      check("the holder's card on the list, still showing that file, keeps its credit",
+        !!twinImg && twinImg.getAttribute("src") === original &&
+        !!twinCard.querySelector('.gcard-credit[data-credits="' + original + '"]'));
+      fail(window, twinImg);
+      check("its failing too takes its credit, and nothing on the page credits that file any more",
+        !twinCard.querySelector(".gcard-credit") && !!twinCard.querySelector(".gov-portrait-none") &&
+        ![...D.querySelectorAll("img")].some((i) => i.getAttribute("src") === original) &&
+        ![...D.querySelectorAll("[data-credits]")].some((c) => c.getAttribute("data-credits") === original));
+      const otherImg = otherCard.querySelector("img.gov-portrait");
+      const otherCredit = () => otherCard.querySelector(".gcard-credit");
+      check("another candidate's card loads its copy, credited as one",
+        !!otherImg && otherImg.getAttribute("src") === KYC.siteRoot() + COPY2 &&
+        !!otherCredit() && !!otherCredit().querySelector(".photo-copy-note"));
+      fail(window, otherImg);
+      check("its copy failing falls back to the original and keeps the credit",
+        otherImg.isConnected && otherImg.getAttribute("src") === otherOriginal && !!otherCredit() &&
+        !otherCredit().querySelector(".photo-copy-note"));
+      fail(window, otherImg);
+      check("the original failing takes it", !otherImg.isConnected && !otherCredit() &&
+        !!otherCard.querySelector(".gov-portrait-none"));
+      check("every other candidate's card keeps its photograph and its credit",
+        [...root.querySelectorAll(".gcard-candidate")].filter((c) => c !== twinCard && c !== otherCard)
+          .every((c) => !!c.querySelector("img.gov-portrait") === !!c.querySelector(".gcard-credit")));
+      check("nothing left on the page credits a photograph it does not show",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+    });
+  };
+
+  for (const [when, now] of [["on the campaign clock", undefined], ["after Election Day", "2026-11-05T09:00:00"]]) {
+    const page = await buildPage("states/" + code.toLowerCase() + ".html", { setup: plant, now });
+    await settle(50);
+    const root = page.D.getElementById("state-government").parentNode;
+    cardsCase("states/" + code.toLowerCase() + ".html, " + when + " — the governor's card and the race's cards",
+      page.window, page.D.body);
+    suite("states/" + code.toLowerCase() + ".html, " + when + " — no page errors", () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      check("the state government section is on the page", !!root);
+    });
+  }
+
+  const map = await buildPage("map.html", { hash: "#/?state=" + code + "&mode=governor2026", setup: plant });
+  await settle(50);
+  cardsCase("map.html#/?state=" + code + "&mode=governor2026 — the race panel's cards", map.window,
+    map.D.getElementById("delegation"));
+
+  const grid = await buildPage("index.html", { setup: plant });
+  {
+    const D = grid.D;
+    D.querySelector('[data-group="chamber"][data-value="governors"]').click();
+    await until(() => D.querySelectorAll("#results .gcard").length > 0, 8000);
+    const s = grid.window.kycStateGov.states[code];
+    const original = grid.window.KYC.photoHref(s.governor.headshot);
+    const card = D.querySelector('#results .gcard[data-governor="gov-' + code + '"]');
+    suite("index.html#/?chamber=governors — the governor's card on the grid", () => {
+      const img = card && card.querySelector("img.gov-portrait");
+      check("the card loads the copy, credited as one", !!img &&
+        img.getAttribute("src") === grid.window.KYC.siteRoot() + COPY &&
+        !!card.querySelector(".gcard-credit .photo-copy-note"));
+      if (!img) return;
+      fail(grid.window, img);
+      check("a copy that fails falls back to its original and keeps the credit",
+        img.isConnected && img.getAttribute("src") === original && !!card.querySelector(".gcard-credit") &&
+        !card.querySelector(".photo-copy-note"));
+      fail(grid.window, img);
+      check("the original failing takes the credit and leaves the circle",
+        !img.isConnected && !card.querySelector(".gcard-credit") && !!card.querySelector(".gov-portrait-none"));
+      check("nothing on the grid credits a photograph it does not show",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+    });
+  }
+
+  // The overlay's header: the governor's, then a candidate's, each opened
+  // by its own address over the state page.
+  for (const [who, id, copy] of [["the governor", "gov-" + code, COPY], ["a candidate", ids.other, COPY2]]) {
+    const page = await buildPage("states/" + code.toLowerCase() + ".html", { setup: plant, hash: "#/official/" + id });
+    await settle(50);
+    const { window, D } = page;
+    const s = window.kycStateGov.states[code];
+    const record = id === "gov-" + code ? { photo: s.governor.headshot }
+      : listOf(s).find((p) => p.id === id);
+    const original = window.KYC.photoHref(record.photo);
+    const modal = D.getElementById("governorModal");
+    const img = D.getElementById("governorModalPhoto");
+    const line = D.getElementById("governorModalPhotoCredit");
+    suite("states/" + code.toLowerCase() + ".html#/official/" + id + " — " + who + "'s overlay header", () => {
+      check("the overlay is open, its header loading the copy, credited as one", !!modal && !modal.hidden &&
+        img.getAttribute("src") === window.KYC.siteRoot() + copy && !line.hidden &&
+        !!line.querySelector('[data-credits="' + original + '"] .photo-copy-note'));
+      fail(window, img);
+      check("a copy that fails falls back to its original and keeps the credit, no longer a copy's",
+        img.getAttribute("src") === original && !line.hidden && /^Photo/.test(line.textContent) &&
+        !line.querySelector(".photo-copy-note"), line.textContent);
+      // The card on the page under the overlay still shows the file.
+      const card = D.querySelector('.gcard[data-governor="' + id + '"]');
+      fail(window, img);
+      check("the original failing empties the portrait and takes the header's credit",
+        !img.getAttribute("src") && D.getElementById("governorModalPortrait").classList.contains("gov-portrait-empty") &&
+        line.hidden && !line.textContent.trim());
+      check("while the card under it, still showing that file, keeps its own credit", !card ||
+        (!!card.querySelector("img.gov-portrait") && !!card.querySelector(".gcard-credit")));
+      check("nothing on the page credits a photograph it does not show",
+        !creditProblems(D).length, creditProblems(D).join(" | "));
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+    });
+  }
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -17858,6 +18271,7 @@ async function testGovernorOverlays() {
   if (!only || only === "states" || only === "statephone") await testStatePhone();
   if (!only || only === "states" || only === "governors") await testGovernorCards();
   if (!only || only === "states" || only === "governors") await testGovernorOverlays();
+  if (!only || only === "states" || only === "governors" || only === "photos") await testGovernorPhotoCredits();
   if (!only || only === "states") await testElectionNight();
   if (!only || only === "states") await testQualifiedBallot();
   if (!only || only === "states") await testLouisianaDecember();
