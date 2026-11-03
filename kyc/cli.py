@@ -911,8 +911,13 @@ def _seats(args):
         except (seat_history.ClerkFormatError, OSError, portraits.PortraitError) as exc:
             print(f"[error] {exc}; the committed cache is unchanged", file=sys.stderr)
             return 2
+    earlier = cache.get("houseEarlier") or {}
     print(f"  {len(cache['house'])} House results and {len(cache['senate'])} Senate results "
           f"shown, {len(cache['withheld'])} withheld (read {cache['read']})")
+    for year in sorted(earlier):
+        print(f"  {year}: {len(earlier[year])} House results shown, "
+              f"{sum(1 for w in cache['withheld'] if w['year'] == int(year) and '-' in w['seat'] and w['seat'].count('-') == 1)} "
+              f"withheld, {len((cache.get('noResult') or {}).get(year) or [])} with no result listed")
     for item in cache["withheld"]:
         print(f"    withheld {item['seat']} {item['year']}: {item['why']}"
               + (f" ({item['page']})" if item.get("page") else ""))

@@ -304,6 +304,92 @@ REDRAWN = {
     },
 }
 
+# Every House map a state put in place between two of the elections from
+# 2018 to 2024 other than the one drawn after the 2020 census, which every
+# state with more than one district used from 2022 (kyc/seat_history.py
+# breaks a seat's strip at each). The list is the Census Bureau's, from its
+# Redistricting Data Program's page for each Congress (a lead, rule 50):
+#   117th: "North Carolina was the only state that had changes to their
+#          congressional districts between the 116th and 117th Congresses."
+#   119th: "Five states (Alabama, Georgia, Louisiana, New York, and North
+#          Carolina) delineated new boundaries for the 2024 election cycle."
+# Each entry is the state's own enacting record, read on 2026-11-01, but
+# Alabama's (below): {first election on it: {"title", "drawnBy", "url",
+# "quote", "lead"?}}. An entry whose "url" is only the Census Bureau's list
+# carries "lead": True, and its "title" names the list, never the map.
+CENSUS_RDO_PAGE = ("https://www.census.gov/programs-surveys/decennial-census/about/rdo/"
+                   "congressional-districts.{congress}th_Congress.html")
+REDRAWN_BEFORE = {
+    "NC": {
+        2020: {
+            "title": "2019 map (S.L. 2019-249)",
+            "drawnBy": "the General Assembly as Session Law 2019-249 (House Bill 1029), "
+                       "chaptered November 15, 2019",
+            "url": "https://www.ncleg.gov/BillLookUp/2019/H1029",
+            "quote": "House Bill 1029 / SL 2019-249 ... Last Action: Ch. SL 2019-249 on 11/15/2019",
+        },
+        2024: {
+            "title": "2023 map (S.L. 2023-145)",
+            "drawnBy": "the General Assembly as Session Law 2023-145 (Senate Bill 757), "
+                       "chaptered October 25, 2023",
+            "url": "https://www.ncleg.gov/BillLookUp/2023/S757",
+            "quote": "Senate Bill 757 / SL 2023-145 ... Last Action: Ch. SL 2023-145 on 10/25/2023",
+        },
+    },
+    # Not read from the court's own record: govinfo's case page answered 500
+    # and the Northern District of Alabama's site has no page for the case
+    # that this reader found. The Census Bureau's 119th Congress page names
+    # Alabama, and REDRAWN["AL"] above says whose map it was. The link is
+    # named as the list it is (a lead, rule 50) until a person reads the
+    # court's remedial-plan order (Milligan, Caster and Singleton, N.D.
+    # Ala., October 5, 2023) and this entry cites it.
+    "AL": {
+        2024: {
+            "title": "the Census Bureau’s list of 2024 changes",
+            "lead": True,
+            "drawnBy": "a federal court",
+            "url": CENSUS_RDO_PAGE.format(congress=119),
+            "quote": "Five states (Alabama, Georgia, Louisiana, New York, and North Carolina) "
+                     "delineated new boundaries for the 2024 election cycle.",
+        },
+    },
+    # legis.ga.gov draws its pages with JavaScript: read in headless Chrome.
+    "GA": {
+        2024: {
+            "title": "2023 map (Act 2EX)",
+            "drawnBy": "the General Assembly as the Georgia Congressional Redistricting Act of "
+                       "2023 (Senate Bill 3EX, Act 2EX), signed December 8, 2023",
+            "url": "https://www.legis.ga.gov/legislation/65853",
+            "quote": "SB 3EX \"Georgia Congressional Redistricting Act of 2023\"; enact ... "
+                     "12/08/2023 Act 2EX 12/08/2023 Senate Date Signed by Governor",
+        },
+    },
+    "LA": {
+        2024: {
+            "title": "2024 map (Act 2)",
+            "drawnBy": "the Legislature as SB 8 of its 2024 First Extraordinary Session, "
+                       "signed January 22, 2024 as Act 2",
+            "url": "https://legis.la.gov/legis/BillInfo.aspx?s=241ES&b=SB8",
+            "quote": "CONGRESS: Provides for redistricting of Louisiana congressional districts. "
+                     "... 01/22 S Signed by the Governor. Becomes Act No. 2.",
+        },
+    },
+    # The Assembly's page for the bill the Senate's S.8653-A was substituted
+    # for (nysenate.gov answers this reader 403). A.9304, the commission's
+    # plan, "lost" on February 26, 2024.
+    "NY": {
+        2024: {
+            "title": "2024 map (Chapter 92)",
+            "drawnBy": "the Legislature as S.8653-A (A.9310-A), signed February 28, 2024 as "
+                       "Chapter 92 of the Laws of 2024",
+            "url": "https://nyassembly.gov/leg/?default_fld=&leg_video=&bn=A09310&term=2023"
+                   "&Summary=Y&Actions=Y",
+            "quote": "Repeals and enacts new provisions creating congressional districts. ... "
+                     "02/28/2024 DELIVERED TO GOVERNOR 02/28/2024 SIGNED CHAP.92",
+        },
+    },
+}
+
 
 def all_codes():
     """Every state, D.C. and territory with a seat in the House."""
