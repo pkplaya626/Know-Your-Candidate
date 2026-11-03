@@ -2402,7 +2402,9 @@ ELECTIONS = {
                         ("2026-12-01", "Dec 1", "Georgia's runoff", [
                             "Where no one won a majority in a Georgia general election, the top "
                             "two meet again. They read", ("runoff", "In the runoff"),
-                            "until it is decided."]),
+                            "until it is held; from the day after, until a winner is marked "
+                            "in the results, they read",
+                            ("runoff-held", "Awaiting the Dec 1 runoff result"), "."]),
                         ("2026-12-03", "Dec 3", "California's counties certify", [
                             "The deadline for California's counties to certify their results."]),
                         ("2026-12-07", "Dec 7", "Texas's state canvass", [

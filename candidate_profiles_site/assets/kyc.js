@@ -562,14 +562,45 @@
       raceTitle: waiting + " In the " + day + " general election, per the published results: " };
   }
 
+  /* A general election runoff once its day has passed and no result is
+   * read: Georgia's December 1 (overrides.GENERAL_RUNOFFS, the date the
+   * state page's key dates give; O.C.G.A. 21-2-501(a)). Until that day the
+   * two are "In the runoff"; from the day after, "In the runoff" read as
+   * though it were still to be held, so it is in the past tense and
+   * awaiting a result, as Louisiana's December round is (openRound) and a
+   * nominee is after November (rule 63). *date* is the race's own
+   * (generalRunoff), so nothing here knows a state. */
+  function heldRunoff(date) {
+    var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(date || ""));
+    if (!m) return null;
+    var day = ROUND_MONTHS[+m[1] - 1] + " " + (+m[2]);
+    var short = ROUND_MONTHS[+m[1] - 1].slice(0, 3) + " " + (+m[2]);
+    var asOf = (meta().election || {}).resultsAsOf;
+    var waiting = "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +
+      " had not marked a winner.";
+    return { cls: "badge-neutral", rank: 1,
+      card: "Awaiting the " + short + " runoff result",
+      long: "Ran in the " + day + " general election runoff: awaiting result",
+      mate: "Awaiting the " + short + " runoff result", short: "Awaiting runoff result",
+      title: "Ran in the " + day + " general election runoff, between the top two after no " +
+        "candidate won a majority in November. " + waiting,
+      race: "Awaiting the " + short + " runoff result",
+      raceTitle: waiting + " In the " + day + " general election runoff, per the published " +
+        "results: " };
+  }
+
   /** The words of a race's December round for its two: an open primary's
-   *  general election where *race* is one (`primaryKind` "open"), on the
-   *  reader's day (*now*, for tests), else the general election runoff's.
+   *  general election where *race* is one (`primaryKind` "open"), else the
+   *  general election runoff's - each in the past tense from the day after
+   *  its date (`generalRunoff`) on the reader's day (*now*, for tests).
    *  One spec in every form, for the people (raceStatus) and the race's
    *  head (KYC.cards). */
   function runoffWords(race, now) {
-    var date = race && race.primaryKind === "open" ? race.generalRunoff : null;
-    return (date && openRound(date, date < localDay(now || new Date()))) || RACE_STATUS.runoff;
+    var date = race && race.generalRunoff;
+    if (!date) return RACE_STATUS.runoff;
+    var held = date < localDay(now || new Date());
+    if (race.primaryKind === "open") return openRound(date, held) || RACE_STATUS.runoff;
+    return (held && heldRunoff(date)) || RACE_STATUS.runoff;
   }
 
   /* A result the December round decided, in that round's words (rule 75):
@@ -685,7 +716,8 @@
    *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
    *  record's raceStatusUnconfirmed; `appointed` - an appointee, who is
    *  never "not running for re-election"; `round` - an open primary's
-   *  December round's date; `decided` - the December round that decided a
+   *  December round's date; `runoffDay` - a general election runoff's
+   *  date (Georgia's); `decided` - the December round that decided a
    *  result (`raceStatusDecided`); `now` - the clock, for tests. */
   /* Through to November from an all-party primary - California's and
    * Washington's top two, Alaska's top four: nobody won a party's
@@ -710,9 +742,12 @@
     if (!spec) return null;
     opts = opts || {};
     if (status === "nominee" && opts.allParty) spec = allParty(opts.allParty);
-    // An open primary's December round is its general election.
+    // An open primary's December round is its general election; a general
+    // election runoff is in the past tense once its day has passed.
     if (status === "runoff" && opts.round) {
       spec = runoffWords({ primaryKind: "open", generalRunoff: opts.round }, opts.now);
+    } else if (status === "runoff" && opts.runoffDay) {
+      spec = runoffWords({ generalRunoff: opts.runoffDay }, opts.now);
     }
     // A result the December round decided, in its words (decidedRound).
     if (opts.decided) spec = decidedRound(status, opts.decided) || spec;
@@ -782,6 +817,7 @@
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
     return raceStatus(status, form, {
       round: race && race.primaryKind === "open" ? race.generalRunoff : undefined,
+      runoffDay: race && race.primaryKind !== "open" ? race.generalRunoff || undefined : undefined,
       decided: record.raceStatusDecided || undefined,
       own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
         !(item.appointed && status !== "unlisted"),
@@ -923,6 +959,17 @@
       add(openRound(open.generalRunoff, false), "No candidate won a majority in an open " +
         "primary; in the general election between the top two that follows it.");
       add(openRound(open.generalRunoff, true), "After that general election: in it, and the " +
+        "results this site last read had not marked a winner.");
+    }
+    // A general election runoff after its day (heldRunoff), where a race
+    // the page holds has one.
+    var runoff = null;
+    races().some(function (r) {
+      if (r.primaryKind !== "open" && r.generalRunoff) { runoff = r; return true; }
+      return false;
+    });
+    if (runoff) {
+      add(heldRunoff(runoff.generalRunoff), "After a general election runoff: ran in it, and the " +
         "results this site last read had not marked a winner.");
     }
     // A result a December round decided, in its words (decidedRound), for

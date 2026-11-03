@@ -15,7 +15,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import emit, pages, share  # noqa: E402
+from kyc import emit, overrides, pages, share  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -143,6 +143,41 @@ class TestStatusWords(unittest.TestCase):
         self.assertEqual(words(other, races=[ca], post="2026-11-05"),
                          "In the general election runoff")
 
+    def test_georgias_runoff_is_in_the_past_tense_after_its_day(self):
+        # December 1 (overrides.GENERAL_RUNOFFS): on the day itself the two
+        # are still in it; read after it with no result marked, they ran in
+        # it and await the result, as Louisiana's December round does
+        # (rule 63). Nothing here knows Georgia: the date is the race's.
+        day = overrides.GENERAL_RUNOFFS["GA"][0]
+        ga = race(id="H-GA-13-2026", state="GA", district=13, generalRunoff=day)
+        filer = person(id="FEC_GA", isCandidate=True, raceId="H-GA-13-2026", state="GA",
+                       raceStatus="runoff", raceStatusRace="H-GA-13-2026")
+        self.assertEqual(words(filer, races=[ga], post=day), "In the general election runoff")
+        self.assertEqual(words(filer, races=[ga], post="2026-12-02"),
+                         "Ran in the December 1 general election runoff: awaiting result")
+        # Read with no day (a bare True), the runoff is not said to be over.
+        self.assertEqual(words(filer, races=[ga], post=True), "In the general election runoff")
+        # A sitting member in it reads the same words.
+        member = person(raceId="H-GA-13-2026", state="GA", raceStatus="runoff",
+                        raceStatusRace="H-GA-13-2026")
+        self.assertEqual(words(member, races=[ga], post="2026-12-02"),
+                         "Ran in the December 1 general election runoff: awaiting result")
+        self.assertEqual(share.status_source(filer, {}), "Wikipedia's election results page")
+        # Once the result is read, it is the runoff's result, not "awaiting".
+        won = dict(filer, raceStatus="elected", raceStatusDecided={"date": day, "open": False})
+        self.assertEqual(words(won, races=[ga], post="2026-12-02"), "Won the December 1 runoff")
+        lost = dict(won, raceStatus="defeated")
+        self.assertEqual(words(lost, races=[ga], post="2026-12-02"), "Lost the December 1 runoff")
+
+    def test_no_other_status_reads_georgias_runoff(self):
+        ga = race(id="H-GA-13-2026", state="GA", generalRunoff="2026-12-01")
+        for status in ("elected", "defeated", "nominee", "eliminated", "withdrawn", "unlisted"):
+            filer = person(id="FEC_GA", isCandidate=True, raceId=ga["id"], raceStatus=status,
+                           raceStatusRace=ga["id"])
+            plain = dict(filer, raceId="H-TX-03-2026", raceStatusRace="H-TX-03-2026")
+            self.assertEqual(words(filer, races=[ga], post="2026-12-02"),
+                             words(plain, races=[race()], post="2026-12-02"), status)
+
     def test_no_other_status_reads_the_december_round(self):
         la = race(id="H-LA-05-2026", primaryKind="open", generalRunoff="2026-12-12")
         for status in ("elected", "defeated", "nominee", "qualified", "eliminated"):
@@ -174,6 +209,7 @@ class TestStatusTable(unittest.TestCase):
                       "In the general election runoff", "On the November ballot: awaiting result",
                       "In the December 12 general election",
                       "Ran in the December 12 general election: awaiting result",
+                      "Ran in the December 1 general election runoff: awaiting result",
                       "Elected on December 12", "Lost the December 12 general election",
                       "Re-elected on December 12", "Lost re-election on December 12",
                       "Won the December 1 runoff", "Lost the December 1 runoff",
