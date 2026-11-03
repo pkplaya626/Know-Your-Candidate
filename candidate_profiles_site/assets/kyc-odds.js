@@ -303,7 +303,68 @@
   }
 
   /** The race's block. *opts.compact* drops the poll table for one line. */
+  /* A state's and a district's pages draw their races before the prices
+   * arrive: data/odds.js is named on demand there (rule 76's template) and
+   * loaded once a race is drawn, and each race's place for its prices is a
+   * slot, filled where the file is in and said where it did not load. The
+   * prices themselves are drawn by render() alone, as everywhere (rule 12),
+   * and the file stays the odds job's alone (rule 41). */
+  var waiting = null;   // null, "loading" or "failed"
+
+  /* The race each slot was drawn for, by its id: a race for governor
+   * (kyc-stategov.js raceOdds, G-<ST>-2026) is none of KYC.races(), and a
+   * slot filled from that list alone was dropped without a word. A race
+   * may carry *none*, the line its caller draws where the cache holds no
+   * prices for it (the governor's race says so, rule 19), drawn in the
+   * slot's place as the caller would have drawn it. */
+  var slotted = {};
+
+  function lazy() {
+    return !global.kycOdds && !!KYC.onDemandSrc && !!KYC.onDemandSrc("odds.js");
+  }
+
+  function slot(race, opts) {
+    slotted[race.id] = race;
+    want();
+    return '<div class="odds-slot" data-odds-race="' + KYC.escapeAttr(race.id) + '"' +
+      (opts.compact ? " data-odds-compact" : "") + (opts.collapsed ? " data-odds-collapsed" : "") +
+      (waiting === "failed" ? ">" + FAILED_LINE : ">") + "</div>";
+  }
+
+  var FAILED_LINE = '<p class="odds-note odds-failed">The prediction markets and polling ' +
+    "averages this site quotes for its races did not load. Reload the page to try again.</p>";
+
+  function want() {
+    if (waiting === "loading") return;
+    waiting = "loading";
+    KYC.loadData("odds.js", "kycOdds", function (ok) {
+      waiting = ok ? null : "failed";
+      fill();
+    });
+  }
+
+  /** Every slot on the page, filled with its race's prices once they are
+   *  in (or emptied, for a race with none), or told they did not load. */
+  function fill() {
+    var doc = global.document;
+    var byId = {};
+    KYC.races().forEach(function (r) { byId[r.id] = r; });
+    Array.prototype.forEach.call(doc.querySelectorAll(".odds-slot"), function (el) {
+      if (waiting === "failed") { el.innerHTML = FAILED_LINE; return; }
+      var id = el.getAttribute("data-odds-race");
+      var race = slotted[id] || byId[id];
+      var html = race ? render(race, { compact: el.hasAttribute("data-odds-compact"),
+        collapsed: el.hasAttribute("data-odds-collapsed") }) || race.none || "" : "";
+      if (!html) { el.parentNode.removeChild(el); return; }
+      var holder = doc.createElement("div");
+      holder.innerHTML = html;
+      while (holder.firstChild) el.parentNode.insertBefore(holder.firstChild, el);
+      el.parentNode.removeChild(el);
+    });
+  }
+
   function render(race, opts) {
+    if (race && lazy()) return slot(race, opts || {});
     var odds = race && (data().races || {})[race.id];
     if (!odds) return "";
     opts = opts || {};
@@ -411,5 +472,8 @@
   }
 
   KYC.odds = { render: render, control: control, percent: percent, finalPrices: finalPrices,
-               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; } };
+               gap: gap, sourceName: function (s) { return SOURCE_NAMES[s] || s; },
+               // Whether the page loads data/odds.js later (a state's and a
+               // district's pages): render() then draws a slot.
+               later: lazy };
 })(window);

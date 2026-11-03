@@ -477,19 +477,20 @@
     // The statewide questions on the ballot (rule 95), after the races, as
     // a printed ballot puts them; "" where nothing is recorded.
     var measures = KYC.ballot.measuresSection(code);
-    // Where data/measures.js did not load, the plain list the page was
-    // written with stays, under a line saying so (rules 76, 96): drawn
-    // from nothing, it vanished without a word (PR #123 review).
+    // data/measures.js is loaded once the page is drawn (named on demand,
+    // rule 76): until it is in, the plain list the page was written with
+    // stands where the section goes (rule 96), drawn over when it arrives
+    // (measuresArrived). Where it did not load, the plain list stays, under
+    // a line saying so: drawn from nothing, it vanished without a word (PR
+    // #123 review).
     var keptMeasures = false;
+    var measuresLater = false;
     if (!measures && KYC.ballot.measuresMissing()) {
+      measuresLater = KYC.ballot.measuresPending();
       var written = target.querySelector("#measures");
       if (written) {
         var kept = written.cloneNode(true);
-        var heading = kept.querySelector("h2");
-        var holder = doc.createElement("div");
-        holder.innerHTML = KYC.ballot.measuresFailedLine(code, true);
-        if (heading) heading.parentNode.insertBefore(holder.firstChild, heading.nextSibling);
-        else kept.insertBefore(holder.firstChild, kept.firstChild);
+        if (!measuresLater) measuresFailed(kept, code);
         measures = kept.outerHTML;
         keptMeasures = !!kept.querySelector("[data-measure]");
       }
@@ -654,6 +655,48 @@
     target.innerHTML = html.join("");
     if (KYC.findRep) KYC.findRep.mountAll(target);
     if (foldable) initFold();
+    if (measuresLater) {
+      KYC.ballot.loadMeasures(function (ok) { measuresArrived(target, code, ok); });
+    }
+  }
+
+  /** The line saying the questions did not load, under *section*'s heading. */
+  function measuresFailed(section, code) {
+    if (section.querySelector(".measures-failed")) return;
+    var heading = section.querySelector("h2");
+    var holder = doc.createElement("div");
+    holder.innerHTML = KYC.ballot.measuresFailedLine(code, true);
+    if (heading) heading.parentNode.insertBefore(holder.firstChild, heading.nextSibling);
+    else section.insertBefore(holder.firstChild, section.firstChild);
+  }
+
+  /** data/measures.js has loaded (*ok*) or failed: the questions drawn in
+   *  full over the plain list, or the plain list kept and said so. */
+  function measuresArrived(target, code, ok) {
+    var written = target.querySelector("#measures");
+    if (!ok) {
+      if (written) measuresFailed(written, code);
+      return;
+    }
+    var html = KYC.ballot.measuresSection(code);
+    if (!html) return;
+    var holder = doc.createElement("div");
+    holder.innerHTML = html;
+    var section = holder.firstChild;
+    if (written) written.parentNode.replaceChild(section, written);
+    else target.appendChild(section);
+    // A link to the questions, or to one of them (the search's answers,
+    // rule 97), landed on the plain list: it lands again on the question
+    // drawn in full, where the reader has not moved since.
+    if (held && !held.moved && held.id) {
+      var at = doc.getElementById(held.id);
+      if (at && (at === section || section.contains(at))) {
+        var id = held.id;
+        held.jump();
+        held = holdPlace(held.jump);
+        held.id = id;
+      }
+    }
   }
 
   /** The race for governor: the election office's list as cards
@@ -779,11 +822,18 @@
     // Your ballot, a district page) opens where the page folds.
     var race = (section.closest && section.closest(FOLDS)) || ownFold(section);
     if (race && fold && fold.phone) setOpen(race, true, "reader");
+    // Found again by its id at each jump: the statewide questions are drawn
+    // in full over the plain list once data/measures.js is in
+    // (measuresArrived), under the same ids, and a jump to the plain one,
+    // no longer in the page, went nowhere (PR #172 review).
+    var id = m[1];
     var jump = function () {
-      if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
+      var at = doc.getElementById(id) || section;
+      if (at.scrollIntoView) at.scrollIntoView({ block: "start" });
     };
     jump();
-    holdPlace(jump);
+    held = holdPlace(jump);
+    held.id = id;
     if (m[2] && m[1] === "findrep" && KYC.findRep) KYC.findRep.ask(m[2]);
     if (global.history && global.history.replaceState) {
       global.history.replaceState(global.history.state, "", global.location.pathname + global.location.search);
@@ -800,24 +850,41 @@
   var HOLD_MS = 10000;
   var HOLD_STOPS = ["wheel", "touchstart", "pointerdown", "keydown"];
 
+  /* The place a link jumped to (jumpToSection): its jump, its id, and
+   * whether the reader has moved since. A section drawn later over the
+   * plain one the link landed on (measuresArrived) is jumped to again, and
+   * held again, unless the reader has moved - however long the file took,
+   * since a slow phone can wait past HOLD_MS for it. */
+  var held = null;
+
   function holdPlace(jump) {
+    if (held) held.release();
+    var place = { jump: jump, moved: false, release: function () {} };
     var Observer = global.ResizeObserver;
     var content = el("stateContent");
-    if (!Observer || !content) return;
     var done = false;
-    var observer = new Observer(function () { if (!done) jump(); });
+    var observer = Observer && content ? new Observer(function () { if (!done) jump(); }) : null;
     var stop = function () {
       if (done) return;
       done = true;
-      observer.disconnect();
+      if (observer) observer.disconnect();
       clearTimeout(timer);
-      HOLD_STOPS.forEach(function (name) { global.removeEventListener(name, stop, true); });
+    };
+    var moved = function () {
+      place.moved = true;
+      stop();
+      place.release();
+    };
+    place.release = function () {
+      stop();
+      HOLD_STOPS.forEach(function (name) { global.removeEventListener(name, moved, true); });
     };
     var timer = setTimeout(stop, HOLD_MS);
     HOLD_STOPS.forEach(function (name) {
-      global.addEventListener(name, stop, { capture: true, passive: true });
+      global.addEventListener(name, moved, { capture: true, passive: true });
     });
-    observer.observe(content);
+    if (observer) observer.observe(content);
+    return place;
   }
 
   /* ---------------------------------------------------------- all states */

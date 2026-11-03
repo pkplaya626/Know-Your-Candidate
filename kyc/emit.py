@@ -16,6 +16,9 @@ PEOPLE_DIR = os.path.join(DATA_DIR, "people")
 PEOPLE_META_FILE = os.path.join(PEOPLE_DIR, "meta.js")
 # Everyone's card and search fields, and every race: the grid and the map.
 PEOPLE_INDEX_FILE = os.path.join(PEOPLE_DIR, "index.js")
+# What the grid's free-text search reads and no card draws (INDEX_WORDS):
+# loaded on the grid the first time a reader types a query.
+PEOPLE_WORDS_FILE = os.path.join(PEOPLE_DIR, "words.js")
 # The file whose signature is the build's, which ``verify`` compares.
 DATA_FILE = PEOPLE_META_FILE
 # The single file the split replaced: a build removes it, verify refuses it.
@@ -26,6 +29,8 @@ ODDS_FILE = os.path.join(DATA_DIR, "odds.js")
 GOVERNMENT_FILE = os.path.join(DATA_DIR, "government.js")
 # Each state's governor and which party holds each chamber (kyc/stategov.py).
 STATEGOV_FILE = os.path.join(DATA_DIR, "stategov.js")
+# The same, one state's part per file, for that state's own page.
+STATEGOV_DIR = os.path.join(DATA_DIR, "stategov")
 # The statewide questions on each jurisdiction's ballot (kyc/ballot_measures.py),
 # for Your ballot and the state pages.
 MEASURES_FILE = os.path.join(DATA_DIR, "measures.js")
@@ -107,6 +112,16 @@ PAGE_REQUIREMENTS = {
     ),
 }
 
+# What a page names inert in its onDemandData template, to load when it is
+# wanted, beyond the votes and people files every page that opens profiles
+# names: the grid's search reads the profiles' words (INDEX_WORDS) from
+# their own file, loaded the first time a query is typed; the governors and
+# their races (data/stategov.js) when the Governors chip, a governor's
+# overlay or a search's office answer wants them (rule 94).
+PAGE_ON_DEMAND = {
+    "index.html": ("data/people/words.js", "data/stategov.js"),
+}
+
 # Your ballot (rule 92): the data its lists are drawn from, then the modules
 # that draw races, offices and the lookup, then its own. It loads the build's
 # figures and no one's records: an answer is in one state, or two where a
@@ -137,9 +152,7 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/people/meta.js",
     "../data/people/{code}.js",
-    "../data/odds.js",
-    "../data/stategov.js",
-    "../data/measures.js",
+    "../data/stategov/{code}.js",
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
     "../assets/kyc-cards.js",
@@ -151,11 +164,20 @@ STATE_PAGE_REQUIREMENTS = (
     "../assets/kyc-state.js",
 )
 
+# A state's page draws its races, government and plain questions first,
+# and loads the market prices and the questions in full once drawn: named
+# on demand, never loaded before the first race (phone plan 3b).
+STATE_PAGE_ON_DEMAND = ("../data/odds.js", "../data/measures.js")
+
 # The directory of states, in the same folder: every state's counts and
-# races, from the index of everyone.
-STATES_INDEX_REQUIREMENTS = tuple(
-    src.replace("{code}", "index") for src in STATE_PAGE_REQUIREMENTS
-    if src != "../data/measures.js")
+# races, from the index of everyone, and every state's government.
+STATES_INDEX_REQUIREMENTS = (
+    "../assets/kyc.js",
+    "../data/people/meta.js",
+    "../data/people/index.js",
+    "../data/odds.js",
+    "../data/stategov.js",
+) + STATE_PAGE_REQUIREMENTS[4:]
 
 
 def people_on_demand(loaded):
@@ -174,7 +196,6 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../assets/kyc.js",
     "../data/people/meta.js",
     "../data/people/{code}.js",
-    "../data/odds.js",
     "../data/districts/{code}.js",
     "../data/lookup/index.js",
     "../assets/kyc-odds.js",
@@ -183,6 +204,9 @@ DISTRICT_PAGE_REQUIREMENTS = (
     "../assets/kyc-findrep.js",
     "../assets/kyc-districts.js",
 )
+
+# Its races' market prices, loaded once the page is drawn.
+DISTRICT_PAGE_ON_DEMAND = ("../data/odds.js",)
 
 # A state's legislature page: the districts and people, then the map, then
 # the page module that reads both.
@@ -380,6 +404,19 @@ INDEX_LEAVES_OUT = frozenset({
     "termEndYear", "wikipediaVia", "wikipediaWithheld",
 })
 
+# What the grid's free-text search reads (kyc.js SEARCH_FIELDS) and no card,
+# map panel, filter, sort or race list draws: the profile's own words -
+# careers, schools, platforms, committees, funding, voting record, the
+# campaign's quote. They were 45% of the index's gzipped weight, loaded by
+# every reader of the grid and the map before the first card, and read by
+# none who did not type a query. The index leaves them for the words file
+# (data/people/words.js), which the grid loads the first time a query is
+# typed and takes into the index's records (kyc.js takePeople); until it is
+# in, the grid says it is still reading them, never "no profiles" (rule 19).
+# A state's file holds them as it holds every field.
+INDEX_WORDS = ("education", "previous_professions", "committees", "platforms",
+               "funding_sources", "voting_alignment", "campaignQuote")
+
 
 class PeopleSplitError(ValueError):
     """The profiles cannot be split by state without losing someone."""
@@ -450,10 +487,20 @@ INDEX_KEEPS_FOR_THE_CARD = {"districtOffices": _card_calls_a_district_office}
 
 def index_record(profile):
     """A profile as the index holds it: without :data:`INDEX_LEAVES_OUT`,
-    but for a field its card reads (:data:`INDEX_KEEPS_FOR_THE_CARD`)."""
+    but for a field its card reads (:data:`INDEX_KEEPS_FOR_THE_CARD`), and
+    without its words (:data:`INDEX_WORDS`), which the words file holds."""
     return {k: v for k, v in profile.items()
-            if k not in INDEX_LEAVES_OUT
-            or (k in INDEX_KEEPS_FOR_THE_CARD and INDEX_KEEPS_FOR_THE_CARD[k](profile))}
+            if k not in INDEX_WORDS and (
+                k not in INDEX_LEAVES_OUT
+                or (k in INDEX_KEEPS_FOR_THE_CARD and INDEX_KEEPS_FOR_THE_CARD[k](profile)))}
+
+
+def words_record(profile):
+    """A profile as the words file holds it: its id and the
+    :data:`INDEX_WORDS` it has, as its whole record holds them; None where
+    it has none."""
+    words = {k: profile[k] for k in INDEX_WORDS if k in profile}
+    return dict({"id": profile.get("id")}, **words) if words else None
 
 
 def people_payloads(profiles, races=None, summary=None):
@@ -470,7 +517,9 @@ def people_payloads(profiles, races=None, summary=None):
     build = data_signature(profiles, races, summary)
     races = list(races or [])
     out = {"index": {"build": build, "index": True,
-                     "people": [index_record(p) for p in profiles], "races": races}}
+                     "people": [index_record(p) for p in profiles], "races": races},
+           "words": {"build": build, "words": list(INDEX_WORDS),
+                     "people": [w for w in map(words_record, profiles) if w]}}
     for code in people_codes():
         out[code] = {"build": build, "state": code,
                      "people": [p for p in profiles if p.get("state") == code],
@@ -484,7 +533,11 @@ def people_signature(payload):
 
 
 def _people_path(key, root="."):
-    return os.path.join(root, PEOPLE_INDEX_FILE) if key == "index" else people_file(key, root)
+    if key == "index":
+        return os.path.join(root, PEOPLE_INDEX_FILE)
+    if key == "words":
+        return os.path.join(root, PEOPLE_WORDS_FILE)
+    return people_file(key, root)
 
 
 def write_people(profiles, stats, root=".", races=None, summary=None):
@@ -520,11 +573,13 @@ def write_people(profiles, stats, root=".", races=None, summary=None):
         signature = people_signature(payload)
         if read_signature(path=path) == signature:
             continue
-        what = ("everyone's card and search fields, and every race" if key == "index"
-                else f"{key}'s people and races")
+        what = ("everyone's card fields, and every race" if key == "index"
+                else "the profiles' words the grid's search reads (loaded when a query is typed)"
+                if key == "words" else f"{key}'s people and races")
         text = (
             _BANNER.format(source="the roster CSVs at the repository root", built=built)
-            + f"// {what}: {len(payload['people'])} profiles, {len(payload['races'])} races\n"
+            + f"// {what}: {len(payload['people'])} profiles"
+            + (f", {len(payload['races'])} races" if "races" in payload else "") + "\n"
             + f"window.kycPeopleFile = {_json(payload)};\n"
             + 'window.kycPeopleFileMeta = {"signature":"' + signature + '"};\n'
         )
@@ -1008,6 +1063,75 @@ def write_stategov(payload, root="."):
     return path, _atomic_write(path, text)
 
 
+def stategov_state_payload(payload, code):
+    """One state's part of the state-government payload, for its own page:
+    its entry (none where the build holds none) and every source the
+    entries cite. A state's page draws its own government and nothing of
+    another state's; the map, the directory of states, the legislatures'
+    directory, the search and Your ballot load the whole file.
+
+    ``governed`` names every place whose entry holds a governor, so a link
+    on one state's page to another's governor can say it is on that page,
+    and a place with none (the District of Columbia) is never offered as
+    holding one (rules 19, 75)."""
+    states = payload.get("states") or {}
+    governed = sorted(c for c, entry in states.items() if (entry or {}).get("governor"))
+    return {"states": {code: states[code]} if code in states else {},
+            "governed": governed,
+            "sources": payload.get("sources") or {}}
+
+
+def stategov_state_file(code, root="."):
+    """``candidate_profiles_site/data/stategov/tx.js``."""
+    return os.path.join(root, STATEGOV_DIR, f"{code.lower()}.js")
+
+
+def write_stategov_states(payload, root="."):
+    """Emit ``data/stategov/<st>.js`` for every state, D.C. and territory,
+    each only when its signature changed, and remove any other file there.
+    Returns ``[(path, size)]`` for the files written."""
+    os.makedirs(os.path.join(root, STATEGOV_DIR), exist_ok=True)
+    written, expected = [], set()
+    for code in people_codes():
+        part = stategov_state_payload(payload, code)
+        path = stategov_state_file(code, root)
+        expected.add(os.path.basename(path))
+        signature = stategov_signature(part)
+        if read_signature(path=path) == signature:
+            continue
+        text = (
+            _BANNER.format(source="kyc/stategov.py (one state's part of data/stategov.js)",
+                           built=build_timestamp())
+            + f"window.kycStateGov = {_json(part)};\n"
+            + 'window.kycStateGovMeta = {"signature":"' + signature + '"};\n'
+        )
+        written.append((path, _atomic_write(path, text)))
+    for name in os.listdir(os.path.join(root, STATEGOV_DIR)):
+        if name.endswith(".js") and name not in expected:
+            os.remove(os.path.join(root, STATEGOV_DIR, name))
+    return written
+
+
+def check_stategov_states(payload, root="."):
+    """``[(path, problem)]`` for the per-state files missing, stale or not
+    written by this build."""
+    problems, expected = [], set()
+    for code in people_codes():
+        path = stategov_state_file(code, root)
+        expected.add(os.path.basename(path))
+        committed = read_signature(path=path)
+        if committed is None:
+            problems.append((path, "missing or carries no signature"))
+        elif committed != stategov_signature(stategov_state_payload(payload, code)):
+            problems.append((path, "stale"))
+    folder = os.path.join(root, STATEGOV_DIR)
+    if os.path.isdir(folder):
+        for name in sorted(os.listdir(folder)):
+            if name.endswith(".js") and name not in expected:
+                problems.append((os.path.join(folder, name), "not a file this build writes"))
+    return problems
+
+
 def write_measures(payload, root="."):
     """Emit ``candidate_profiles_site/data/measures.js``: each jurisdiction's
     statewide questions in the page's words (kyc/ballot_measures.py, rule
@@ -1421,6 +1545,7 @@ def check_pages(root="."):
     """
     results = []
     checks = dict(PAGE_REQUIREMENTS)
+    on_demand = dict(PAGE_ON_DEMAND)
     for folder, required in ((STATES_DIR, STATE_PAGE_REQUIREMENTS),
                              (DISTRICT_PAGES_DIR, DISTRICT_PAGE_REQUIREMENTS),
                              (LEGISLATURE_PAGES_DIR, LEGISLATURE_PAGE_REQUIREMENTS),
@@ -1434,6 +1559,10 @@ def check_pages(root="."):
                     code = name[:-len(".html")]
                     checks[f"{os.path.basename(folder)}/{name}"] = tuple(
                         src.replace("{code}", code) for src in required)
+                    later = {STATES_DIR: STATE_PAGE_ON_DEMAND,
+                             DISTRICT_PAGES_DIR: DISTRICT_PAGE_ON_DEMAND}.get(folder)
+                    if later and name != "index.html":
+                        on_demand[f"{os.path.basename(folder)}/{name}"] = later
     # The directory of states counts every state's races: it loads the
     # index of everyone, as the grid does, not a state's file (rule 94).
     if "states/index.html" in checks:
@@ -1465,6 +1594,14 @@ def check_pages(root="."):
         loaded = script_sources(text)
 
         problems = inline_script_problems(text)
+        lazy_wanted = [src for src in on_demand.get(page, ()) if src not in on_demand_sources(text)]
+        if lazy_wanted:
+            problems.append("its onDemandData template does not name " + ", ".join(lazy_wanted))
+        # A file a page loads when wanted is not also loaded before it draws.
+        early = [src for src in on_demand.get(page, ()) if src in loaded]
+        if early:
+            problems.append("loads " + ", ".join(early) + " before it draws, which it should "
+                            "load only when wanted")
         # The profile dialog loads a member's votes on demand, from the files
         # the page names in its inert template (KYC.loadData): a page that
         # opens profiles and names none would say the votes failed to load.

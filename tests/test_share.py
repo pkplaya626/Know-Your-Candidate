@@ -519,8 +519,12 @@ class TestPlainStatePages(unittest.TestCase):
         self.assertIn("2 statewide questions are on the Nov 3, 2026 ballot, as the Texas "
                       "Secretary of State lists them", section)
         statewide = re.search(r'data-measures="statewide">(.*?)</ol>', section, re.S).group(1)
-        self.assertEqual(re.findall(r'data-measure="(\d+)">([^(<]*) \(', statewide),
-                         [("0", "Proposition 1: Water"), ("1", "Proposition 2")])
+        self.assertEqual(re.findall(r'data-measure="(\d+)" id="([^"]+)">([^(<]*) \(', statewide),
+                         [("0", "measure-TX-0", "Proposition 1: Water"),
+                          ("1", "measure-TX-1", "Proposition 2")])
+        # The ids the full section gives each question, so a link to one
+        # (the search's answers, rule 97) lands before data/measures.js.
+        self.assertIn('id="measure-TX-2"', section)
         self.assertIn('data-measures="local">', section)
         self.assertIn("One more question is on every ballot, but is not one statewide decision",
                       section)

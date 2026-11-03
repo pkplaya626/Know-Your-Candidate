@@ -26,7 +26,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="assets/kyc.css?v=9b12de39cf">
-<script src="assets/kyc.js?v=5ee44fe42e"></script>
+<script src="assets/kyc.js?v=46a5fd191e"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
@@ -424,12 +424,15 @@
     </main>
 </div>
 
-<!-- Loaded only when wanted (KYC.loadData, KYC.loadPeople): the officials
-     and the search's places and bodies when a search is typed, the ballot
-     questions when one names a question (rule 97), a chamber's roll calls
-     when a member's profile is opened, a state's full records (rule 94) when
-     one of its people is opened or its race's money is. Named here, inert,
-     so the build stamps their versions with the rest (rule 76). -->
+<!-- Loaded only when wanted (KYC.loadData, KYC.loadPeople): the officials,
+     the search's places and bodies, and the profiles' own words the search
+     reads (careers, schools, platforms: KYC.loadWords) when a search is typed,
+     the governors and their races when the Governors chip or a governor's
+     overlay is opened, the ballot questions when one names a question (rule
+     97), a chamber's roll calls when a member's profile is opened, a state's
+     full records (rule 94) when one of its people is opened or its race's
+     money is. Named here, inert, so the build stamps their versions with the
+     rest (rule 76). -->
 <template id="onDemandData">
 <script src="data/federal.js?v=79a09516ad"></script>
 <script src="data/judiciary/index.js?v=a41b0be763"></script>
@@ -438,6 +441,7 @@
 <script src="data/measures.js?v=c89c22ff6f"></script>
 <script src="data/votes/house.js?v=34dc37a347"></script>
 <script src="data/votes/senate.js?v=cf1cd91b55"></script>
+<script src="data/people/words.js?v=1f801a02f2"></script>
 <script src="data/people/ak.js?v=427af9bb77"></script>
 <script src="data/people/al.js?v=3a3e775c71"></script>
 <script src="data/people/ar.js?v=334a3685cf"></script>
@@ -496,17 +500,17 @@
 <script src="data/people/wy.js?v=c985bf9195"></script>
 </template>
 <script src="data/people/meta.js?v=9dc29247a2"></script>
-<script src="data/people/index.js?v=ed9b3c0aa3"></script>
+<script src="data/people/index.js?v=93e9ebe974"></script>
 <script src="data/odds.js"></script>
 <script src="data/lookup/index.js?v=83bd36a7ea"></script>
-<script src="assets/kyc-odds.js?v=c7177f527c"></script>
+<script src="assets/kyc-odds.js?v=483bc4847f"></script>
 <script src="assets/kyc-cards.js?v=afd68e4f27"></script>
 <script src="assets/kyc-profile.js?v=a6d1648353"></script>
-<script src="assets/kyc-stategov.js?v=b9585c7624"></script>
-<script src="assets/kyc-governor.js?v=5c04b1778e"></script>
+<script src="assets/kyc-stategov.js?v=c8cd37dc2e"></script>
+<script src="assets/kyc-governor.js?v=7576bf79b7"></script>
 <script src="assets/kyc-findrep.js?v=45fc0e8859"></script>
 <script src="assets/kyc-senate.js?v=073a8c2331"></script>
 <script src="assets/kyc-search.js?v=760ec6174e"></script>
-<script src="assets/kyc-directory.js?v=7ca0f91dbe"></script>
+<script src="assets/kyc-directory.js?v=492e2c8c8d"></script>
 </body>
 </html>
