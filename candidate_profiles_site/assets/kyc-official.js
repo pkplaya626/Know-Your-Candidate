@@ -22,6 +22,7 @@
   var dialog = null;
   var root = null;
   var current = null;
+  var currentFound = null;
   // The page's own title, put back when the dialog closes.
   var baseTitle = null;
   var routed = false;
@@ -184,6 +185,94 @@
   function courtUrl(id) {
     var prefix = doc.body.getAttribute("data-page") === "court" ? "" : "../courts/";
     return prefix + encodeURIComponent(id) + ".html";
+  }
+
+  /* ----------------------------------------------------------- the words */
+
+  /* What the dialog's head says of an official, and where it comes from:
+   * one table, which an official's share page (o/<id>.html, rule 96)
+   * writes in the same words without scripts (kyc/official_share.py). The
+   * render suite compares the two for every official on every build, and
+   * asks every case in tests/fixtures/official_share_words.json of this
+   * code: a word changed on one side fails the day it changes. */
+  var SOURCES = {
+    leader: "The term’s dates and party are from congress-legislators’ record of executive " +
+      "terms; the portrait is the White House’s.",
+    officer: "Listed by the White House among the President’s Cabinet; checked on the " +
+      "office’s own page and against the Senate’s roll-call votes. A Cabinet officer is " +
+      "shown without a party.",
+    former: "The Cabinet’s changes since the term began: who held each office from Wikidata, " +
+      "checked against the person’s Wikipedia article, and the Senate’s roll-call votes. A " +
+      "Cabinet officer is shown without a party.",
+    judge: "Federal Judicial Center, Biographical Directory of Article III Federal Judges",
+  };
+
+  /** A judge's service, as the dialog says it: senior by the courts' list
+   *  and active by the directory are both said, and neither is picked
+   *  silently (kyc/vacancies.py listed_senior; rule 82). */
+  function judgeStatus(judge) {
+    return judge.retiredJustice ? "Retired justice, not a member of the Court" :
+      judge.status === "senior" ? "Senior status" :
+      judge.listedSenior ? "Senior status from " + KYC.dateWords(judge.listedSenior.since) + " by the courts’ " +
+        "list of vacancies; the FJC directory still lists active service" : "Active service";
+  }
+
+  /** A nomination to another court the announced list records, in the
+   *  future tense (rule 82): ``[before, the court's name, after]``, the
+   *  name between so the dialog can link it. */
+  function nominatedParts(to) {
+    return ["Nominated to the ", String(to.name).replace(/^U\.S\. /, ""),
+      (to.nominated ? " on " + KYC.dateWords(to.nominated) : "") +
+      ", pending in the Senate, as the courts’ list of announced vacancies has it"];
+  }
+
+  /* Leaving the seat, as the courts' list of announced vacancies has it
+   * (kyc/vacancies.py announced_departures): it has not happened, so the
+   * future tense, as the court's own table says it (rule 82). */
+  var LEAVING = { Senior: "Will take senior status", Retired: "Will retire", Resigned: "Will resign" };
+
+  function leavingText(leaving) {
+    var said = LEAVING[(leaving || {}).reason];
+    return said ? said + ", as the courts’ list of announced vacancies has it" : "";
+  }
+
+  /** ``{kind, office, inLaw, status, party, appointedBy, nominated,
+   *  leaving, source}``: every word the dialog's head gives *found* (an
+   *  entry of ``officials()``), each "" where it says none. No party for a
+   *  judge or a Cabinet officer; a judge's appointing President instead. */
+  function shareWords(found) {
+    var p = found.person;
+    var out = { kind: "", office: "", inLaw: "", status: "", party: "", appointedBy: "",
+                nominated: "", leaving: "", source: SOURCES[found.kind] || "" };
+    if (found.kind === "leader") {
+      out.kind = p.office || "";
+      out.party = p.party || "";
+      out.status = "In office since " + KYC.dateWords(p.since || "") + "; term ends " +
+        KYC.dateWords(p.until || "");
+    } else if (found.kind === "officer") {
+      var office = found.office || {};
+      out.kind = office.body || "";
+      out.office = p.title || office.office || "";
+      if (p.title && p.title !== office.office) out.inLaw = "The office in law: " + office.office;
+      if ((p.page || {}).acting) out.status = "Acting";
+    } else if (found.kind === "former") {
+      var held = p.held || [];
+      var last = held[held.length - 1] || {};
+      out.kind = "Former, this term";
+      out.office = (last.acting ? "Acting " : "") + (last.office || "");
+      out.status = leftText(last);
+    } else {
+      var first = (p.seats || [])[0] || {};
+      var c = court(first.court);
+      out.source = SOURCES.judge;
+      out.kind = p.justice ? "Supreme Court" : (c ? c.name : "Federal judge");
+      out.office = p.justice ? p.justice.role : (first.title || "Judge");
+      out.status = judgeStatus(p);
+      out.appointedBy = first.appointedBy || "";
+      if (p.nominatedTo) out.nominated = nominatedParts(p.nominatedTo).join("");
+      out.leaving = leavingText(p.leaving);
+    }
+    return out;
   }
 
   /* ---------------------------------------------------------------- markup */
@@ -413,10 +502,11 @@
   }
 
   function renderLeader(person) {
-    el("officialModalKind").textContent = person.office;
+    var words = shareWords({ kind: "leader", person: person });
+    el("officialModalKind").textContent = words.kind;
     el("officialModalMeta").innerHTML =
-      "<span>" + KYC.icon("flag") + " " + KYC.escapeHtml(person.party || "") + "</span>" +
-      "<span>" + KYC.icon("calendar") + " In office since <strong>" +
+      "<span>" + KYC.icon("flag") + " " + KYC.escapeHtml(words.party) + "</span>" +
+      '<span class="official-status">' + KYC.icon("calendar") + " In office since <strong>" +
       KYC.escapeHtml(KYC.dateWords(person.since || "")) + "</strong>; term ends <strong>" +
       KYC.escapeHtml(KYC.dateWords(person.until || "")) + "</strong></span>";
     var links = REFERENCE.filter(function (r) { return (person.links || {})[r[0]]; })
@@ -429,9 +519,8 @@
       panel("link", "Links", links.length ? '<div class="links-row">' + links.join("") + "</div>"
         : absent("No links recorded")) + "</div>" +
       '<div class="modal-column">' +
-      panel("info", "Where this comes from", '<p class="note-box">The term’s dates and ' +
-        "party are from congress-legislators’ record of executive terms; the portrait is " +
-        "the White House’s.</p>") + "</div>";
+      panel("info", "Where this comes from", '<p class="note-box">' +
+        KYC.escapeHtml(words.source) + "</p>") + "</div>";
     el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
   }
 
@@ -462,11 +551,11 @@
    *  left - as a former member's profile does (rule 67). */
   function renderFormer(person) {
     var held = person.held || [];
-    var last = held[held.length - 1] || {};
-    el("officialModalKind").textContent = "Former, this term";
+    var words = shareWords({ kind: "former", person: person });
+    el("officialModalKind").textContent = words.kind;
     el("officialModalMeta").innerHTML = "<span>" + KYC.icon("landmark") + " <strong>" +
-      KYC.escapeHtml((last.acting ? "Acting " : "") + (last.office || "")) + "</strong></span>" +
-      '<span class="badge badge-warn">' + KYC.escapeHtml(leftText(last)) + "</span>";
+      KYC.escapeHtml(words.office) + "</strong></span>" +
+      '<span class="badge badge-warn official-status">' + KYC.escapeHtml(words.status) + "</span>";
     var since = (federal().changes || {}).since;
     var rows = held.map(function (row) {
       return "<li><strong>" + KYC.escapeHtml((row.acting ? "Acting " : "") + row.office) + "</strong><br>" +
@@ -494,21 +583,20 @@
       '<div class="modal-column">' +
       panel("link", "Links", links.length ? '<div class="links-row">' + links.join("") + "</div>"
         : absent("No links recorded")) +
-      panel("info", "Where this comes from", '<p class="note-box">The Cabinet’s changes since ' +
-        "the term began: who held each office from Wikidata, checked against the person’s " +
-        "Wikipedia article, and the Senate’s roll-call votes. A Cabinet officer is shown " +
-        "without a party.</p>") + "</div>";
+      panel("info", "Where this comes from", '<p class="note-box">' +
+        KYC.escapeHtml(words.source) + "</p>") + "</div>";
     el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
   }
 
   function renderOfficer(holder, office) {
-    el("officialModalKind").textContent = office.body;
-    var titled = holder.title && holder.title !== office.office;
+    var words = shareWords({ kind: "officer", person: holder, office: office });
+    el("officialModalKind").textContent = words.kind;
     el("officialModalMeta").innerHTML =
-      "<span>" + KYC.icon("landmark") + " <strong>" + KYC.escapeHtml(holder.title || office.office) +
+      "<span>" + KYC.icon("landmark") + " <strong>" + KYC.escapeHtml(words.office) +
       "</strong></span>" +
-      (titled ? '<span class="faint">The office in law: ' + KYC.escapeHtml(office.office) + "</span>" : "") +
-      ((holder.page || {}).acting ? '<span class="badge badge-warn">Acting</span>' : "");
+      (words.inLaw ? '<span class="faint official-in-law">' + KYC.escapeHtml(words.inLaw) + "</span>" : "") +
+      (words.status ? '<span class="badge badge-warn official-status">' + KYC.escapeHtml(words.status) +
+        "</span>" : "");
     var rows = field("Senate confirmation", senateText(holder), true) +
       field("The office’s own page", pageText(holder), true);
     var history = (office.history || []);
@@ -534,10 +622,8 @@
         ((office.site || {}).contact ? " and contact page" : "") +
         " as USA.gov’s index of agencies lists " + ((office.site || {}).contact ? "them" : "it") +
         ".</p>") : "") +
-      panel("info", "Where this comes from", '<p class="note-box">Listed by the White House ' +
-        "among the President’s Cabinet; checked on the office’s own page and " +
-        "against the Senate’s roll-call votes. A Cabinet officer is shown without a " +
-        "party.</p>") + "</div>";
+      panel("info", "Where this comes from", '<p class="note-box">' +
+        KYC.escapeHtml(words.source) + "</p>") + "</div>";
     el("officialModalSource").textContent = "As of " + KYC.dateWords((federal().asOf || {}).executive || "");
   }
 
@@ -576,20 +662,17 @@
     var seats = judge.seats || [];
     var first = seats[0] || {};
     var c = court(first.court);
-    el("officialModalKind").textContent = judge.justice ? "Supreme Court" :
-      (c ? c.name : "Federal judge");
+    var words = shareWords({ kind: "judge", person: judge });
+    el("officialModalKind").textContent = words.kind;
     // Senior by the courts' list, active by the directory: both said, and
-    // neither picked silently (kyc/vacancies.py listed_senior).
-    var status = judge.retiredJustice ? "Retired justice, not a member of the Court" :
-      judge.status === "senior" ? "Senior status" :
-      judge.listedSenior ? "Senior status from " + KYC.dateWords(judge.listedSenior.since) + " by the courts’ " +
-        "list of vacancies; the FJC directory still lists active service" : "Active service";
+    // neither picked silently (judgeStatus).
     el("officialModalMeta").innerHTML =
-      "<span>" + KYC.icon("landmark") + " <strong>" +
-      KYC.escapeHtml(judge.justice ? judge.justice.role : (first.title || "Judge")) + "</strong></span>" +
-      "<span>" + KYC.escapeHtml(status) + "</span>" +
-      (first.appointedBy ? "<span>Appointed by <strong>" + KYC.escapeHtml(first.appointedBy) +
-        "</strong></span>" : "");
+      "<span>" + KYC.icon("landmark") + " <strong>" + KYC.escapeHtml(words.office) + "</strong></span>" +
+      '<span class="official-status">' + KYC.escapeHtml(words.status) + "</span>" +
+      (words.leaving ? '<span class="official-leaving">' + KYC.escapeHtml(words.leaving) +
+        "</span>" : "") +
+      (words.appointedBy ? '<span class="official-appointed">Appointed by <strong>' +
+        KYC.escapeHtml(words.appointedBy) + "</strong></span>" : "");
 
     var born = judge.born ? [judge.born.city, judge.born.state].filter(Boolean).join(", ") +
       (judge.born.year ? (judge.born.city || judge.born.state ? ", " : "") + judge.born.year : "") : "";
@@ -621,11 +704,10 @@
     }).join("");
 
     var to = judge.nominatedTo;
-    var pending = to ? '<p class="state-note" id="officialNominated">Nominated to the ' +
-      '<a href="' + KYC.escapeAttr(courtUrl(to.id)) + '">' +
-      KYC.escapeHtml(String(to.name).replace(/^U\.S\. /, "")) + "</a>" +
-      (to.nominated ? " on " + KYC.escapeHtml(KYC.dateWords(to.nominated)) : "") +
-      ", pending in the Senate, as the courts’ list of announced vacancies has it on " +
+    var said = to ? nominatedParts(to) : null;
+    var pending = to ? '<p class="state-note" id="officialNominated">' + KYC.escapeHtml(said[0]) +
+      '<a href="' + KYC.escapeAttr(courtUrl(to.id)) + '">' + KYC.escapeHtml(said[1]) + "</a>" +
+      KYC.escapeHtml(said[2]) + " on " +
       KYC.escapeHtml(KYC.dateWords(to.asOf)) + ". Meanwhile they sit on this court.</p>" : "";
     el("officialModalBody").innerHTML =
       '<div class="modal-column">' + pending +
@@ -654,8 +736,8 @@
         (c && c.site ? linkChip(c.site, "The court’s website") : "") + "</div>" +
         (judge.wikipedia || judge.wikidata ? '<p class="faint">' + linksNote(judge) + "</p>" : "")) +
       "</div>";
-    el("officialModalSource").textContent = "Federal Judicial Center, Biographical Directory of " +
-      "Article III Federal Judges, as of " + KYC.dateWords((federal().asOf || {}).judiciary || "");
+    el("officialModalSource").textContent = words.source + ", as of " +
+      KYC.dateWords((federal().asOf || {}).judiciary || "");
   }
 
   /* --------------------------------------------------------- not listed */
@@ -725,6 +807,7 @@
     }
     ensure();
     current = id;
+    currentFound = found;
     KYC.clearShareField(el("officialModalCopy"));
     render(id, found);
     el("officialModalReport").setAttribute("data-profile", id);
@@ -764,6 +847,7 @@
     dialog = KYC.createModal(root, {
       onClose: function () {
         current = null;
+        currentFound = null;
         if (baseTitle !== null) doc.title = baseTitle;
         if (routed) {
           routed = false;
@@ -786,10 +870,16 @@
     var copy = el("officialModalCopy");
     copy.addEventListener("click", function () {
       if (!current) return;
-      var url = global.location.origin === "null" ? global.location.href
+      // An official this page lists is shared by their share page
+      // (o/<id>.html, rule 96), which unfurls with their own name, office
+      // and portrait: a link to the view behind "#/official/<id>" unfurled
+      // as the home page. An id nobody here answers to has no share page,
+      // and is shared as the view it is.
+      var url = currentFound ? KYC.shareUrl("official", current)
+        : global.location.origin === "null" ? global.location.href
         : global.location.origin + global.location.pathname + "#/official/" + encodeURIComponent(current);
       // The one way a page shares a link, with its fallbacks (KYC.shareLink).
-      KYC.shareLink(copy, url);
+      KYC.shareLink(copy, url, currentFound ? currentFound.person.name : "");
     });
     return dialog;
   }
@@ -807,5 +897,9 @@
     open: open, close: close, isOpen: isOpen, ensure: ensure,
     applyRoute: applyRoute, officials: officials, pictureTag: pictureTag,
     whenText: whenText, tenureText: tenureText, precisionNote: precisionNote,
+    // The words an official's share page writes too (rule 96), and the
+    // picture and credit the dialog shows: the render suite compares them.
+    shareWords: shareWords, judgeStatus: judgeStatus, leftText: leftText,
+    picture: picture, SOURCES: SOURCES,
   };
 })(window);

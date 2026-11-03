@@ -38,6 +38,7 @@ from . import vacancies as vacancies_mod
 from . import ballot_measures as measures_mod
 from . import local_measures as local_measures_mod
 from . import search_index as search_index_mod
+from . import official_share
 
 
 def _load(args):
@@ -615,9 +616,16 @@ def _build(args):
     states = [w for w in written if os.path.normpath(emit.STATES_DIR) in os.path.normpath(w)]
     share_dirs = {os.path.normpath(os.path.join(args.root, d)) for d in emit.SHARE_DIRS}
     shared = [w for w in written if os.path.normpath(os.path.dirname(w)) in share_dirs]
+    officials_dir = os.path.join(args.root, emit.SITE_DIR, official_share.OFFICIAL_DIR)
+    in_o = (sorted(f for f in os.listdir(officials_dir) if f.endswith(".html"))
+            if os.path.isdir(officials_dir) else [])
+    governors = sum(1 for f in in_o if f.startswith("gov-"))
+    officials = len(in_o) - governors
     print(f"[ok] wrote {len(states)} state pages under {emit.STATES_DIR}, "
           f"{len(maps)} district pages under {emit.DISTRICT_PAGES_DIR} and "
-          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)}")
+          f"{len(shared)} changed share page(s) of {len(profiles) + len(race_list)} profiles "
+          f"and races, {officials} federal officials and judges and {governors} governors "
+          "and candidates for governor")
     from . import assets
     restamped = assets.stamp_templates(args.root)
     if restamped:

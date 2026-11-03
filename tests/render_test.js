@@ -2914,10 +2914,24 @@ async function testStates() {
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
     // A photograph only by rule 91's routes, each with whose it is beside it.
+    const uncredited = [...block.querySelectorAll("img")].filter((img) => !(img.classList.contains("gov-portrait") &&
+      /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
+    // Money is a campaign's: the markets' block under the race (PR #195)
+    // explains a price as "a contract worth $1", which is no one's money.
+    // Only those words are passed over, never the block: a dollar figure
+    // anywhere else in it would be one (PR #180 review).
+    const money = (el) => /.{0,40}\$.{0,40}/.exec(el.textContent
+      .replace(/a contract worth \$1(?![\d,.]*\d)|a \$1 contract/g, ""));
+    const dollars = money(block);
+    // The test of the test: a figure planted in the markets' block is seen.
+    const planted = block.cloneNode(true);
+    const markets = planted.querySelector(".odds");
+    if (markets) markets.insertAdjacentHTML("beforeend", "<p>Raised $1,250,000</p>");
+    check("the money check reads the markets' block, all but the price's explanation",
+      !!markets && !!money(planted));
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
-      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
-        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
-          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
+      !block.querySelector("a[href*='#/profile/']") && !dollars && uncredited.length === 0,
+      (dollars ? dollars[0] : "") + " | " + uncredited.map((img) => img.className + " " + img.getAttribute("src")).join(" | "));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -13058,6 +13072,511 @@ function plainList(html, attr, id) {
   return m ? plainItems(m[1]) : [];
 }
 
+/* An official's share page (o/<id>.html, kyc/official_share.py; rule 96,
+ * TECH-09): the President, the Vice President, the Cabinet and every
+ * federal judge, each in the words the officials' dialog gives them
+ * (KYC.official.shareWords, one table), with the picture and credit the
+ * dialog shows, by its route only (rules 24, 82, 87, 101). Compared for
+ * every official on both clocks - the campaign's and after Election Day,
+ * since the pages land after it - and every case of the fixture asked of
+ * the page code. */
+async function testOfficialSharePages() {
+  // The federal officials' and judges' own: the governors' pages share the
+  // folder, and testGovernorSharePages reads them.
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /\.html$/.test(f) && !/^gov-/.test(f));
+  const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+  // Each court's file, as its page loads it: the record a court's page opens.
+  const courts = {};
+  fs.readdirSync(path.join(SITE, "data", "judiciary")).forEach((f) => {
+    if (!/\.js$/.test(f) || f === "index.js") return;
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "judiciary", f), "utf8"), sandbox);
+    Object.assign(courts, sandbox.window.kycCourt || {});
+  });
+  const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "official_share_words.json"), "utf8"));
+  for (const [clock, now] of [["the campaign's clock", CAMPAIGN_NOW], ["after Election Day", "2026-11-05T12:00:00"]]) {
+    const hub = await buildPage("federal/index.html", { now });
+    await settle(50);
+    const W = hub.window;
+    const K = W.KYC;
+    const onHub = K.official.officials();
+    const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
+    const text = (doc, sel) => {
+      const el = doc.querySelector(sel);
+      return el ? el.textContent : "";
+    };
+    const creditText = (credit) => {
+      const div = W.document.createElement("div");
+      div.innerHTML = K.photoCreditHtml(credit);
+      return div.textContent;
+    };
+    suite(`officials' share pages — one each, in the dialog's words (rule 96), ${clock}`, () => {
+      check("the federal page loads", hub.errors.length === 0, hub.errors.join(" | "));
+      // Everyone the dialog answers to: the hub's, and each court's judges.
+      const want = new Set(Object.keys(onHub));
+      Object.keys(courts).forEach((cid) => (courts[cid].judges || []).concat(courts[cid].retired || [])
+        .forEach((j) => want.add(j.id)));
+      const have = new Set(files.map((f) => f.replace(/\.html$/, "")));
+      const missing = [...want].filter((id) => !have.has(id));
+      const extra = [...have].filter((id) => !want.has(id));
+      check("a share page for everyone the dialog answers to, and none for anyone else",
+        missing.length === 0 && extra.length === 0 && have.size > 1000,
+        `${have.size} pages; missing ${missing.slice(0, 4)}; extra ${extra.slice(0, 4)}`);
+      check("no official is a profile (rule 27): none shares an id with one",
+        [...have].every((id) => /^(x-|fjc-)/.test(id)));
+      const wrong = [];
+      const images = [];
+      let photos = 0;
+      files.forEach((f) => {
+        const id = f.replace(/\.html$/, "");
+        const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
+        const doc = parse(html);
+        const view = (doc.getElementById("shareView") || { getAttribute: () => "" }).getAttribute("href");
+        const m = /^\.\.\/(federal\/index|courts\/([a-z0-9-]+))\.html#\/official\/(.+)$/.exec(view || "");
+        if (!m || m[3] !== id) { wrong.push(`${id}: view ${view}`); return; }
+        let found = null;
+        if (m[2]) {
+          const court = courts[m[2]] || {};
+          const rec = (court.judges || []).concat(court.retired || []).filter((j) => j.id === id)[0];
+          if (rec) found = { kind: "judge", person: rec };
+        } else {
+          found = onHub[id] || null;
+        }
+        if (!found) { wrong.push(`${id}: nobody at ${view}`); return; }
+        const words = K.official.shareWords(found);
+        const shown = {
+          kind: text(doc, ".share-kind"),
+          office: text(doc, ".share-office"),
+          inLaw: text(doc, ".share-in-law"),
+          party: text(doc, ".share-party"),
+          status: text(doc, ".share-status"),
+          appointedBy: text(doc, ".share-appointed").replace(/^Appointed by /, ""),
+          nominated: text(doc, ".share-nominated").replace(/\.$/, ""),
+          leaving: text(doc, ".share-leaving").replace(/\.$/, ""),
+          source: text(doc, ".share-source").replace(/^Source: /, ""),
+        };
+        Object.keys(words).forEach((k) => {
+          const expect = k === "source" ? words.source.replace(/\.?$/, ".") : words[k];
+          if (shown[k] !== expect) wrong.push(`${id} ${k}: "${shown[k]}" for "${expect}"`);
+        });
+        if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        // The description is the name and the head's words, every one of
+        // them, and nothing of its own: take each out, and only the joins
+        // are left. A former officer's leads with "Former, this term".
+        const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
+        const said = { leader: ["kind", "party", "status"], officer: ["office", "kind", "status"],
+                       former: ["kind", "office", "status"],
+                       judge: ["kind", "office", "status", "appointedBy", "leaving", "nominated"] }[found.kind];
+        let rest = desc;
+        said.concat().sort((a, b) => words[b].length - words[a].length).forEach((k) => {
+          if (!words[k]) return;
+          const at = rest.indexOf(words[k]);
+          if (at === -1) wrong.push(`${id}: the description lacks ${k} "${words[k]}"`);
+          else rest = rest.slice(0, at) + "|" + rest.slice(at + words[k].length);
+        });
+        rest = rest.replace(found.person.name, "|").replace("; appointed by |", "|");
+        if (!/^[|\s.,:;()—]*$/.test(rest)) wrong.push(`${id}: the description's own words "${rest}"`);
+        if (found.kind === "former" && desc.indexOf(words.kind) > desc.indexOf(words.office)) {
+          wrong.push(`${id}: a former officer's description must lead with "${words.kind}"`);
+        }
+        // A party only where the dialog gives one: never a judge's or a
+        // Cabinet officer's.
+        if (found.kind !== "leader" && (shown.party || (found.person.party && desc.indexOf(found.person.party) !== -1))) {
+          wrong.push(`${id}: a party`);
+        }
+        // The picture: the dialog's, by its route, or the site's card.
+        const img = (doc.querySelector('meta[property="og:image"]') || { content: "" }).content;
+        if (/\/assets\/social-card\.png$/.test(img)) {
+          if (doc.querySelector(".share-photo-credit")) wrong.push(`${id}: a credit with no photograph`);
+          return;
+        }
+        photos += 1;
+        const pic = K.official.picture(found.person, 116);
+        const p = found.person;
+        const copy = p.photo ? K.copyOf(p.photo, p.photoCopy) : null;
+        const ok = !!pic && !/Special:/.test(img) && (p.photo
+          ? (copy ? img === host + copy.src
+            : (p.photoSet || []).some((s) => s[0] === img) || img === p.photo)
+          : !!(p.portrait && p.portrait.licence) && /^https:\/\/upload\.wikimedia\.org\//.test(img) &&
+            ((p.portrait.set || []).some((s) => s[1] === img) || img === p.portrait.url));
+        if (!ok) images.push(`${id}: ${img}`);
+        else if (text(doc, ".share-photo-credit") !== creditText(pic.credit)) {
+          wrong.push(`${id}: credit "${text(doc, ".share-photo-credit")}" for "${creditText(pic.credit)}"`);
+        }
+      });
+      check("every official's share page says what the dialog says, from one table",
+        wrong.length === 0, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("a share image is the dialog's photograph by its route, credited as the dialog credits it, " +
+        "or the site's card", images.length === 0 && photos > 500,
+        images.slice(0, 4).join(" | ") || `${photos} photographs`);
+      const off = fixture.cases.filter(([kind, person, office, words]) => {
+        const got = K.official.shareWords({ kind, person, office: office || undefined });
+        return JSON.stringify(Object.keys(words).sort().map((k) => [k, words[k]])) !==
+          JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
+      });
+      check("every case of the words table, asked of the page code (tests/fixtures/official_share_words.json)",
+        fixture.cases.length >= 30 && off.length === 0,
+        off.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${fixture.cases.length} cases`);
+      check("each case leaving the seat is in the future tense, and only the list's reasons are said",
+        fixture.cases.filter(([kind, person]) => kind === "judge" && person.leaving).length >= 3 &&
+        fixture.cases.every(([kind, person, office, words]) => !words.leaving || /^Will /.test(words.leaving)));
+      // A copy's credit gives its original's weight: rounded alike on both
+      // sides, ties too (Python rounds a tie to even, toFixed up).
+      const weighed = (fixture.weights || []).filter(([n, words]) => K.weightWords(n) !== words);
+      check("an original's weight in a copy's credit, as the page writes it",
+        (fixture.weights || []).length >= 10 && weighed.length === 0,
+        weighed.slice(0, 4).map(([n, w]) => `${n}: ${w} for ${K.weightWords(n)}`).join(" | "));
+    });
+  }
+
+  // The dialog draws those words, and its Copy link shares the page.
+  const hub = await buildPage("federal/index.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  const tne = await buildPage("courts/tn-e.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  // A court with a judge leaving their seat, as the announced list has it,
+  // whichever court that is on the day (Southwick's Fifth Circuit once).
+  const goingCourt = Object.keys(courts).sort().find((cid) => (courts[cid].judges || []).some((j) => j.leaving));
+  const going = goingCourt ? await buildPage(`courts/${goingCourt}.html`, { now: CAMPAIGN_NOW }) : null;
+  if (going) await settle(50);
+  suite("the officials' dialog — the share page's words, and its address to share", () => {
+    const drawn = [];
+    const check1 = (page, id) => {
+      const { window: w, D } = page;
+      const K = w.KYC;
+      K.official.open(id);
+      const found = K.official.officials()[id];
+      const words = K.official.shareWords(found);
+      const kind = D.getElementById("officialModalKind").textContent;
+      const meta = D.getElementById("officialModalMeta");
+      const status = meta.querySelector(".official-status");
+      if (kind !== words.kind) drawn.push(`${id}: kind ${kind}`);
+      if ((status ? status.textContent.trim() : "") !== words.status) drawn.push(`${id}: status`);
+      const leaving = meta.querySelector(".official-leaving");
+      if ((leaving ? leaving.textContent.trim() : "") !== words.leaving) drawn.push(`${id}: leaving`);
+      if (words.office && meta.textContent.indexOf(words.office) === -1) drawn.push(`${id}: office`);
+      if (words.appointedBy && meta.textContent.indexOf("Appointed by " + words.appointedBy) === -1) {
+        drawn.push(`${id}: appointed`);
+      }
+      if (D.getElementById("officialModalBody").textContent.indexOf(words.source.replace(/\.$/, "")) === -1 &&
+          D.getElementById("officialModalSource").textContent.indexOf(words.source) === -1) {
+        drawn.push(`${id}: source`);
+      }
+      K.official.close();
+    };
+    const d = hub.window.kycFederal;
+    const ids = [d.president.id, d.vicePresident.id]
+      .concat(d.offices.filter((o) => o.holder).slice(0, 4).map((o) => o.holder.id))
+      .concat((d.former || []).slice(0, 2).map((p) => p.id))
+      .concat(d.supremeCourt.members.map((j) => j.id))
+      .concat((d.supremeCourt.retired || []).map((j) => j.id));
+    ids.forEach((id) => check1(hub, id));
+    (tne.window.kycCourt["tn-e"].judges || []).forEach((j) => check1(tne, j.id));
+    if (going) (going.window.kycCourt[goingCourt].judges || []).forEach((j) => check1(going, j.id));
+    check("the dialog draws its head from the same words, on the hub and a court's page",
+      drawn.length === 0 && ids.length > 12, drawn.slice(0, 5).join(" | "));
+  });
+
+  const W = hub.window;
+  const K = W.KYC;
+  const someone = W.kycFederal.supremeCourt.members[0];
+  K.official.open(someone.id);
+  const copy = hub.D.getElementById("officialModalCopy");
+  let copied = null;
+  Object.defineProperty(W.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  copy.click();
+  await settle(0);
+  const viaShare = copied;
+  K.official.close();
+  K.official.open("x-nobody-of-that-name");
+  copied = null;
+  hub.D.getElementById("officialModalCopy").click();
+  await settle(0);
+  const nobody = copied;
+  K.official.close();
+  suite("Copy link in the officials' dialog — the share page's address (TECH-09)", () => {
+    // From the site's root: the federal page sits a folder down.
+    const want = new W.URL("../o/" + someone.id + ".html", W.location.href).href;
+    check("an official's link is their share page", viaShare === want && /\/o\/fjc-\d+\.html$/.test(want),
+      `${viaShare} for ${want}`);
+    check("a link nobody here answers to stays the view's, with no share page to unfurl",
+      typeof nobody === "string" && /#\/official\/x-nobody-of-that-name$/.test(nobody), String(nobody));
+  });
+}
+
+/* Rule 96 for the governor overlays (rule 91): o/gov-<ST>.html and
+ * o/gov-<ST>-<name>.html, written by kyc/governor_share.py in the overlay's
+ * own words (KYC.governor.shareWords). Every page is compared with the
+ * overlay's words on the day the build's results were read, as the
+ * profiles' are; every case of tests/fixtures/governor_share_words.json is
+ * asked of the page code on both clocks; and the overlay draws its head from
+ * the same words, its Copy link sharing the page. */
+async function testGovernorSharePages() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const asOf = String((meta.election || {}).resultsAsOf || CAMPAIGN_NOW).slice(0, 10);
+  const files = fs.readdirSync(path.join(SITE, "o")).filter((f) => /^gov-.*\.html$/.test(f));
+  const host = "https://" + fs.readFileSync(path.join(SITE, "CNAME"), "utf8").trim() + "/";
+  const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, "fixtures", "governor_share_words.json"), "utf8"));
+  const norm = (s) => String(s || "").replace(/\s+/g, " ").trim();
+  // The classes kyc.css makes a block inside .modal-meta (a sentence there).
+  const sentenceBlocks = new Set([...fs.readFileSync(path.join(SITE, "assets", "kyc.css"), "utf8")
+    .matchAll(/\.modal-meta \.([\w-]+)\s*\{[^}]*display:\s*block/g)].map((m) => m[1]));
+
+  {
+    const page = await buildPage("states/ga.html", { now: asOf + "T12:00:00" });
+    await settle(50);
+    const W = page.window;
+    const K = W.KYC;
+    const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
+    const text = (doc, sel) => {
+      const el = doc.querySelector(sel);
+      return el ? norm(el.textContent) : "";
+    };
+    const creditText = (credit) => {
+      const div = W.document.createElement("div");
+      div.innerHTML = K.photoCreditHtml(credit);
+      return norm(div.textContent);
+    };
+    suite(`governors' share pages — one each, in the overlay's words (rules 91, 96), as of ${asOf}`, () => {
+      check("the state page loads", page.errors.length === 0, page.errors.join(" | "));
+      // Everyone the overlay answers to: each governor, and each candidate
+      // on a list for an office on this ballot.
+      const want = new Set();
+      Object.keys(W.kycStateGov.states).forEach((code) => {
+        const s = W.kycStateGov.states[code];
+        if (!s.governor || !K.governor.find(s.governor.id)) return;
+        want.add(s.governor.id);
+        const parts = K.stategov.listParts(code, "governor");
+        if (parts && !parts.none) parts.list.candidates.forEach((p) => { if (K.governor.find(p.id)) want.add(p.id); });
+      });
+      const have = new Set(files.map((f) => f.replace(/\.html$/, "")));
+      const missing = [...want].filter((id) => !have.has(id));
+      const extra = [...have].filter((id) => !want.has(id));
+      check("a share page for every governor and candidate the overlay answers to, and none else",
+        missing.length === 0 && extra.length === 0 && have.size > 150,
+        `${have.size} pages; missing ${missing.slice(0, 4)}; extra ${extra.slice(0, 4)}`);
+      check("no governor is a profile (rule 27): every id is the overlay's own",
+        [...have].every((id) => /^gov-[A-Z]{2}(?:-[a-z0-9-]+)?$/.test(id)));
+      const wrong = [];
+      const images = [];
+      let photos = 0;
+      let candidates = 0;
+      let writeInsApart = 0;
+      files.forEach((f) => {
+        const id = f.replace(/\.html$/, "");
+        const html = fs.readFileSync(path.join(SITE, "o", f), "utf8");
+        const doc = parse(html);
+        const found = K.governor.find(id);
+        if (!found) { wrong.push(`${id}: nobody`); return; }
+        if (found.kind === "candidate") candidates += 1;
+        const view = (doc.getElementById("shareView") || { getAttribute: () => "" }).getAttribute("href");
+        if (view !== "../states/" + found.code.toLowerCase() + ".html#/official/" + id) {
+          wrong.push(`${id}: view ${view}`);
+        }
+        const words = K.governor.shareWords(found);
+        const shown = {
+          kind: text(doc, ".share-kind"),
+          office: text(doc, ".share-office strong"),
+          seeking: found.kind === "candidate" ? text(doc, ".share-office").replace(/ Governor • [A-Z]{2}$/, "") : "",
+          party: text(doc, ".share-party"),
+          since: text(doc, ".share-since"),
+          mark: text(doc, ".share-mark"),
+          holder: text(doc, ".share-holder"),
+          status: text(doc, ".share-status"),
+          printed: text(doc, ".share-printed"),
+          ballotName: text(doc, ".share-ballot-name"),
+          surnameOnly: text(doc, ".share-surname-only"),
+          runningMate: text(doc, ".share-mate").replace(/^Running mate: /, ""),
+          term: text(doc, ".share-term"),
+          record: text(doc, ".share-record"),
+          past: text(doc, ".share-past").replace(/(?:: the official results)?\.$/, ""),
+          results: ((doc.querySelector(".share-past a") || { getAttribute: () => "" }).getAttribute("href")) || "",
+          source: text(doc, ".share-source"),
+        };
+        Object.keys(words).forEach((k) => {
+          if (shown[k] !== norm(words[k])) wrong.push(`${id} ${k}: "${shown[k]}" for "${words[k]}"`);
+        });
+        Object.keys(shown).forEach((k) => { if (!(k in words)) wrong.push(`${id}: ${k} is not the overlay's`); });
+        if (doc.querySelector("h1").textContent !== found.person.name) wrong.push(`${id}: name`);
+        const desc = (doc.querySelector('meta[name="description"]') || { content: "" }).content;
+        ["party", "since", "mark", "status", "past"].forEach((k) => {
+          // The mark's two parts are two sentences there (PR #180 review:
+          // "Not elected in 2026 Next elected: November 2029" read as a glitch).
+          const want = k === "mark" ? words.mark.replace(/ Next /, ". Next ") : words[k];
+          if (want && desc.indexOf(want) === -1) wrong.push(`${id}: the description lacks ${k}`);
+        });
+        if (/\d{4} Next /.test(desc)) wrong.push(`${id}: the mark's two parts run together in the description`);
+        // A write-in is cited to the document that names them: the office's
+        // list of write-ins where it keeps one apart (rules 19, 91; PR #180
+        // review), never the printed list without their name.
+        const listed = found.kind === "candidate"
+          ? K.stategov.ballotOf(found.code).offices.governor.candidates : null;
+        if (listed) {
+          const named = found.person.writeIn && listed.writeIns ? listed.writeIns : listed;
+          const cited = (doc.querySelector(".share-source a") || { getAttribute: () => "" }).getAttribute("href");
+          if (cited !== named.url || text(doc, ".share-source").indexOf(named.source) === -1) {
+            wrong.push(`${id}: cites ${cited} for ${named.url}`);
+          }
+          if (found.person.writeIn && listed.writeIns) writeInsApart += 1;
+        }
+        if (desc.indexOf(found.person.name) !== 0) wrong.push(`${id}: the description must lead with the name`);
+        if (/ • /.test(desc)) wrong.push(`${id}: a card's bullet in the description`);
+        // Never a winner, and in the past tense after the election.
+        if (/\b(won|elected governor|winner:)/i.test(desc + doc.body.textContent.replace(/names no winner/g, ""))) {
+          wrong.push(`${id}: a winner named`);
+        }
+        // The picture: the overlay's, by its route, credited as it credits it, or the site's card.
+        const img = (doc.querySelector('meta[property="og:image"]') || { content: "" }).content;
+        const p = found.person;
+        const url = found.kind === "governor" ? p.headshot : (p.writeIn ? "" : p.photo);
+        const credit = found.kind === "governor"
+          ? (p.headshotBy ? { by: p.headshotBy, page: p.headshotPage } : null) : p.photoCredit;
+        const drawn = K.stategov.cardPhoto(url, p.photoCopy, credit);
+        if (/\/assets\/social-card\.png$/.test(img)) {
+          if (drawn.credit) images.push(`${id}: the overlay shows a photograph, the page the card`);
+          if (doc.querySelector(".share-photo-credit")) wrong.push(`${id}: a credit with no photograph`);
+          return;
+        }
+        photos += 1;
+        const copy = K.copyOf(url, p.photoCopy);
+        const expect = copy ? host + copy.src : /^photos\//.test(url) ? host + url : url;
+        if (!drawn.credit || img !== expect || /Special:/.test(img)) {
+          images.push(`${id}: ${img} for ${expect}`);
+        } else if (text(doc, ".share-photo-credit") !== creditText(K.copyCredit(credit, url, p.photoCopy))) {
+          wrong.push(`${id}: credit "${text(doc, ".share-photo-credit")}"`);
+        }
+      });
+      check("every governor's and candidate's share page says what the overlay says, from one table",
+        wrong.length === 0 && candidates > 100, wrong.slice(0, 6).join(" | ") || `${files.length} pages`);
+      check("the write-ins whose office lists them apart are among them, each cited to that list",
+        writeInsApart > 0, `${writeInsApart} write-ins`);
+      check("a share image is the overlay's photograph by its route, credited as the overlay credits it, " +
+        "or the site's card", images.length === 0 && photos > 50,
+        images.slice(0, 4).join(" | ") || `${photos} photographs`);
+    });
+  }
+
+  for (const [clock, now, post] of [["the campaign's clock", CAMPAIGN_NOW, false],
+                                    ["after Election Day", "2026-11-05T12:00:00", true]]) {
+    const page = await buildPage("states/ga.html", { now });
+    await settle(50);
+    const W = page.window;
+    const K = W.KYC;
+    suite(`the governors' words table asked of the page code, ${clock}`, () => {
+      const data = W.kycStateGov;
+      const savedState = data.states.GA;
+      const savedSources = data.sources;
+      const voting = (W.kycBuildMeta.voting = W.kycBuildMeta.voting || {});
+      const savedVoting = voting.GA;
+      const rows = fixture.cases.filter((row) => row[0] === post);
+      const off = rows.filter(([_post, code, kind, person, state, sources, results, words]) => {
+        data.states[code] = state;
+        data.sources = sources;
+        voting[code] = results ? { results } : {};
+        let got;
+        try {
+          got = K.governor.shareWords({ kind, code, person });
+        } finally {
+          data.states.GA = savedState;
+          data.sources = savedSources;
+          voting.GA = savedVoting;
+        }
+        return JSON.stringify(Object.keys(words).sort().map((k) => [k, words[k]])) !==
+          JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
+      });
+      check("every case of the words table (tests/fixtures/governor_share_words.json)",
+        rows.length >= 60 && off.length === 0,
+        off.slice(0, 2).map((r) => JSON.stringify([r[2], r[3].id, r[7]])).join(" | ") || `${rows.length} cases`);
+      check(post ? "after Election Day every case is in the past tense and names no winner"
+        : "before it, none is in the past tense",
+        rows.every((r) => r[7].kind !== "Governor (Candidate)" || (r[7].seeking === "Ran for") === post) &&
+        rows.every((r) => (post ? !r[7].holder : !r[7].past && !r[7].results)) &&
+        rows.some((r) => post === !!r[7].past) &&
+        rows.every((r) => !/\b(won|winner|elected governor)\b/i.test(JSON.stringify(r[7]).replace(/names no winner/g, ""))));
+
+      // The overlay draws its head from the same words.
+      const drawn = [];
+      const modal = () => page.D.getElementById("governorModal");
+      const t = (sel) => norm((modal().querySelector(sel) || {}).textContent || "");
+      const ids = [data.states.GA.governor.id].concat(
+        data.states.GA.ballot2026.offices.governor.candidates.candidates.map((p) => p.id));
+      const notUp = Object.keys(data.states).find((c) => !K.stategov.governorUp(c) && data.states[c].governor);
+      if (notUp) ids.push(data.states[notUp].governor.id);
+      ids.forEach((id) => {
+        K.governor.open(id);
+        const found = K.governor.find(id);
+        const words = K.governor.shareWords(found);
+        if (t("#governorModalKind") !== words.kind) drawn.push(`${id}: kind`);
+        const metaText = t("#governorModalMeta");
+        if (metaText.indexOf(norm(words.seeking ? words.seeking + " " + words.office : words.office)) === -1) drawn.push(`${id}: office`);
+        if (words.since && metaText.indexOf(words.since) === -1) drawn.push(`${id}: since`);
+        const status = t("#governorModalStatus");
+        ["mark", "holder", "status", "ballotName", "surnameOnly", "past"].forEach((k) => {
+          if (words[k] && status.indexOf(norm(words[k])) === -1) drawn.push(`${id}: ${k}`);
+        });
+        if (words.results && !modal().querySelector('#governorModalStatus a[href="' + words.results + '"]')) {
+          drawn.push(`${id}: the results link`);
+        }
+        // A sentence with a link in it is one block: as .modal-meta's
+        // inline-flex item, the results line's sentence, link and full stop
+        // stood in three narrow columns on a phone (PR #180 review).
+        [...modal().querySelector("#governorModalStatus").children].forEach((child) => {
+          const mixed = [...child.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) &&
+            child.children.length > 0;
+          if (mixed && ![...child.classList].some((c) => sentenceBlocks.has(c))) {
+            drawn.push(`${id}: "${norm(child.textContent).slice(0, 40)}" is not one block`);
+          }
+        });
+        if (words.printed && t("#governorModalPrinted") !== words.printed) drawn.push(`${id}: printed`);
+        if (words.term && metaText.indexOf(words.term) === -1) drawn.push(`${id}: term`);
+        if (words.runningMate && t("#governorModalBody").indexOf(words.runningMate) === -1) drawn.push(`${id}: mate`);
+        if (words.record && t("#governorModalBody").indexOf(words.record) === -1) drawn.push(`${id}: record`);
+        if (t("#governorModalSource") !== norm(words.source)) drawn.push(`${id}: source "${t("#governorModalSource")}"`);
+        K.governor.close();
+      });
+      check("the overlay draws its head and footer from the same words", drawn.length === 0 && ids.length > 3,
+        drawn.slice(0, 5).join(" | "));
+    });
+  }
+
+  // Copy link shares the page, and a link nobody answers to stays the view's.
+  const page = await buildPage("states/ga.html", { now: CAMPAIGN_NOW });
+  await settle(50);
+  const W = page.window;
+  const K = W.KYC;
+  let copied = null;
+  Object.defineProperty(W.navigator, "clipboard", { configurable: true,
+    value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+  const gid = W.kycStateGov.states.GA.governor.id;
+  K.governor.open(gid);
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const governorLink = copied;
+  K.governor.close();
+  const cid = W.kycStateGov.states.GA.ballot2026.offices.governor.candidates.candidates[0].id;
+  K.governor.open(cid);
+  copied = null;
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const candidateLink = copied;
+  K.governor.close();
+  K.governor.open("gov-GA-nobody-of-that-name");
+  copied = null;
+  page.D.getElementById("governorModalCopy").click();
+  await settle(0);
+  const nobody = copied;
+  K.governor.close();
+  suite("Copy link in the governor overlay — the share page's address (rule 96)", () => {
+    const want = (id) => new W.URL("../o/" + encodeURIComponent(id) + ".html", W.location.href).href;
+    check("a governor's link is their share page", governorLink === want(gid) && /\/o\/gov-GA\.html$/.test(governorLink),
+      `${governorLink} for ${want(gid)}`);
+    check("a candidate's link is theirs", candidateLink === want(cid), `${candidateLink} for ${want(cid)}`);
+    check("a link nobody here answers to stays the overlay's address, with no share page to unfurl",
+      typeof nobody === "string" && /#\/official\/gov-GA-nobody-of-that-name$/.test(nobody), String(nobody));
+  });
+}
+
 /* Rule 96: a profile's and a race's share page, and a state page's plain
  * lists, are written by the pipeline (kyc/share.py) in the words the page
  * code gives the same people. Every one is compared with KYC.standing as
@@ -14670,6 +15189,9 @@ async function testCharts() {
     const { window, D } = await buildPage("index.html");
     await settle(50);
     const KYC = window.KYC;
+    // The governor races' markets are drawn from the election office's
+    // list (data/stategov.js), which the grid loads on demand (rule 94).
+    await new Promise((resolve) => KYC.loadData("stategov.js", "kycStateGov", resolve));
     suite("charts — funding sources as one bar (VISUALS-24)", () => {
       const who = window.legislatorsData.find((p) => p.fundingBreakdown && !p.fundingBase &&
         Object.keys(p.fundingBreakdown).length >= 3);
@@ -14691,11 +15213,24 @@ async function testCharts() {
         odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
       let checked = 0;
       let inOrder = 0;
-      raceIds.forEach((id) => {
+      // A race for governor (G-GA-2026, PR #195) is no race of Congress's:
+      // it is drawn by the governor cards' own call (KYC.stategov.raceOdds),
+      // which passes the list's parties for rule 79's note, never a race
+      // object made up here (PR #180 review). null for a race nobody draws.
+      const drawOdds = (id, opts) => {
         const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return;
+        if (race) return KYC.odds.render(race, opts);
+        const gov = /^G-([A-Z]{2})-\d{4}$/.exec(id);
+        return gov && window.kycStateGov ? KYC.stategov.raceOdds(gov[1], opts) : null;
+      };
+      check("the governor races are drawn through the state government module, with the list's parties",
+        !!window.kycStateGov && typeof KYC.stategov.raceOdds === "function" &&
+          raceIds.some((id) => /^G-/.test(id)));
+      raceIds.forEach((id) => {
+        const html = drawOdds(id, {});
+        if (html === null) return;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const rows = box.querySelectorAll(".poll-row");
         if (rows.length !== odds.races[id].polls.rows.length) return;
         checked += 1;
@@ -14720,19 +15255,23 @@ async function testCharts() {
       // A ten-point axis made 49.7 against 47.4 look like a wide gap (PR
       // #111 review); the compact line already prints its two figures.
       const narrow = raceIds.filter((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return false;
+        const html = drawOdds(id, {});
+        if (html === null) return false;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const ticks = [...box.querySelectorAll(".poll-ticks span")].map((s) => parseFloat(s.textContent));
         return ticks.length < 2 || Math.max(...ticks) - Math.min(...ticks) < 30;
       });
       check("every poll axis spans at least thirty points", narrow.length === 0, narrow.join(" "));
-      const compact = raceIds.map((id) => (window.kycRaces || []).find((r) => r.id === id)).filter(Boolean)
-        .filter((race) => { const b = D.createElement("div"); b.innerHTML = KYC.odds.render(race, { compact: true });
-          return !!b.querySelector(".poll-dots"); });
+      const compact = raceIds.filter((id) => {
+        const html = drawOdds(id, { compact: true });
+        if (html === null) return false;
+        const b = D.createElement("div");
+        b.innerHTML = html;
+        return !!b.querySelector(".poll-dots");
+      });
       check("the compact panel prints the line, not a one-row chart of it", compact.length === 0,
-        compact.map((r) => r.id).join(" "));
+        compact.join(" "));
     });
   }
 }
@@ -17882,6 +18421,8 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();
   if (!only || only === "share") await testSharePages();
+  if (!only || only === "share") await testOfficialSharePages();
+  if (!only || only === "share" || only === "governors") await testGovernorSharePages();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

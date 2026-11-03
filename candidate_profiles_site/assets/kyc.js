@@ -3020,10 +3020,12 @@
   /** The address of a profile's or a race's share page (rule 96), whole:
    *  "https://host/p/<id>.html". A crawler drops the "#/profile/<id>" a
    *  view lives behind, so a link to the view unfurled as the home page's
-   *  card; the share page carries the person's own. *kind* "race" or
-   *  "profile". */
+   *  card; the share page carries the person's own. *kind* "race",
+   *  "profile", or "official" (o/<id>.html: the President, the Vice
+   *  President, the Cabinet and every federal judge, kyc/official_share.py). */
   function shareUrl(kind, id) {
-    var path = siteRoot() + (kind === "race" ? "r/" : "p/") + encodeURIComponent(id) + ".html";
+    var path = siteRoot() + (kind === "race" ? "r/" : kind === "official" ? "o/" : "p/") +
+      encodeURIComponent(id) + ".html";
     try {
       return new URL(path, global.location.href).href;
     } catch (e) {

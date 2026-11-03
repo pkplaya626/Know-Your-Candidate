@@ -95,6 +95,8 @@ data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              ballot.html        (generated: Your ballot, drawn by kyc-ballot.js)
                                              districts/index.html, courts/index.html (generated directories)
                                              p/*.html, r/*.html (generated share pages: one per profile and race, kyc/share.py)
+                                             o/*.html           (generated share pages: one per federal official and judge, kyc/official_share.py,
+                                                                 and per governor and candidate for governor, kyc/governor_share.py)
                                              photos/*.jpg       (smaller copies of heavy portraits, by hash: photocopies)
                                              site.webmanifest   (generated)
                                              sitemap.xml        (generated)
@@ -2663,6 +2665,45 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     copy it. A shared race opens its state page at the race and holds it
     there while the page above it draws (`kyc-state.js` `holdPlace`, until
     the reader moves): it once landed 3,000px short on a phone.
+    Officials and judges open in `KYC.official` behind `#/official/<id>`
+    and unfurled as the home page too, so each has `o/<id>.html`
+    (`kyc/official_share.py`): everyone the dialog answers to, a judge on
+    the page of the court whose file holds them, the justices, the
+    Cabinet and who left it this term on the federal page's. Its words are
+    the dialog's head, from one table (`shareWords`, `SOURCES`), compared
+    for every official on both clocks and over every case of
+    `tests/fixtures/official_share_words.json`: a judge's service with
+    both sources where they differ (rule 82), the appointing President,
+    never a party but the President's and Vice President's, a nomination
+    in the future tense without the list's as-of day, and a departure the
+    courts' announced list has for the judge ("Will take senior status",
+    `vacancies.announced_departures`, on the dialog too): Leslie
+    Southwick's first page unfurled as "Active service" alone. Its
+    description is the name and those words and nothing of its own - a
+    former officer's leads with "Former, this term", since "Pam Bondi:
+    Attorney General", cut short, read as still in office - and the
+    render suite takes each word out of it and finds only the joins.
+    Where it sends a reader without scripts, it says what that page's
+    plain text holds: the federal page's lists no one who left the
+    Cabinet and no retired justice. Its image is the
+    dialog's by the dialog's route, credited as the dialog credits it: the
+    White House's sizes of its one file or the copy made here on the
+    site's host (rules 42, 101), a judge's Commons portrait with its
+    licence recorded (rules 82, 87); the Court's own, without one, is the
+    card. A folder whose pages were not rendered (no federal build) is
+    never swept as orphans. The dialog's "Copy link" shares the page, and
+    an id nobody answers to shares the view. The governor overlays (rule
+    91) have theirs beside them, `o/gov-<ST>.html` and
+    `o/gov-<ST>-<name>.html` (`kyc/governor_share.py`): the overlay's head
+    from one table (`KYC.governor.shareWords`, compared for every governor
+    and candidate and over `tests/fixtures/governor_share_words.json` on
+    both clocks), the photograph only as the card shows it, the list cited
+    and dated, after Election Day the past tense and the state's results
+    naming no winner, the view the state page's overlay; each family in
+    `o/` is swept only when its own source was read. Its review found
+    every write-in's page cited to the printed list, which does not hold
+    their name: a write-in is cited to the office's list of write-ins
+    where it keeps one apart (`listFor`, `governor_share.list_for`).
 
 97. **The search answers what a reader types about government, from the
     data the page about it shows, and never guesses.** "governor", "Texas

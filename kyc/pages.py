@@ -2984,12 +2984,12 @@ def render_redirect(target, host):
 
 
 def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=(), courts=(),
-            profiles=(), races=()):
+            profiles=(), races=(), officials=()):
     """``sitemap.xml`` listing the two hand-maintained pages and every state.
 
     Individual profiles live behind hash fragments, which crawlers do not
     treat as separate URLs: each is listed by its share page (rule 96),
-    as each race is, last.
+    as each race is, last, and each federal official and judge.
     """
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
@@ -3036,5 +3036,8 @@ def sitemap(host, codes, built=None, district_maps=(), guide=(), legislatures=()
         url(race_path(rid), "0.4")
     for pid in sorted(profiles):
         url(profile_path(pid), "0.3")
+    from .official_share import official_path
+    for oid in sorted(officials):
+        url(official_path(oid), "0.3")
     lines.append("</urlset>")
     return "\n".join(lines) + "\n"

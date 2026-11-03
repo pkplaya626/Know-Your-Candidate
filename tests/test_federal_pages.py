@@ -313,6 +313,41 @@ class TestWhoSits(unittest.TestCase):
         self.assertEqual(vacancies.pending_elevations(self.CACHE, judges),
                          {"fjc-5": {"court": "ca8", "nominated": None}})
 
+    def test_a_judge_the_list_has_leaving_is_found_by_name_and_court(self):
+        # Rule 82: Southwick's record said "Active service" alone while his
+        # court's table said "Will take senior status".
+        cache = {"future": [
+            {"court": "ca5", "reason": "Senior",
+             "vacatedBy": {"listedAs": "Southwick,Leslie H.", "name": "Leslie H. Southwick"}},
+            {"court": "ca10", "reason": "Retired",
+             "vacatedBy": {"listedAs": "Tymkovich,Timothy M.", "name": "Timothy M. Tymkovich"}},
+            # A nomination is said as one, never as a departure.
+            {"court": "ar-e", "reason": "Elevated",
+             "vacatedBy": {"listedAs": "Rudofsky,Lee P.", "name": "Lee P. Rudofsky"}},
+            # A colleague of the surname is never the one leaving (rule 17).
+            {"court": "ca5", "reason": "Senior",
+             "vacatedBy": {"listedAs": "Elrod,Jennifer W.", "name": "Jennifer W. Elrod"}},
+        ]}
+        judges = dict([_judge("fjc-1", "Southwick, Leslie", "ca5"),
+                       _judge("fjc-2", "Tymkovich, Timothy", "ca10"),
+                       _judge("fjc-3", "Rudofsky, Lee", "ar-e"),
+                       _judge("fjc-4", "Elrod, Mary", "ca5")])
+        self.assertEqual(vacancies.announced_departures(cache, judges),
+                         {"fjc-1": {"court": "ca5", "reason": "Senior"},
+                          "fjc-2": {"court": "ca10", "reason": "Retired"}})
+        # Senior by the directory already: the departure has happened.
+        judges.update([_judge("fjc-1", "Southwick, Leslie", "ca5", senior="2026-10-01")])
+        self.assertNotIn("fjc-1", vacancies.announced_departures(cache, judges))
+
+    def test_the_committed_data_carries_each_announced_departure(self):
+        _payload, courts, _, _ = built()
+        cache = vacancies.load_cache(ROOT)
+        judges = judiciary.load_cache(ROOT)["judges"]
+        going = vacancies.announced_departures(cache, judges)
+        shown = {(cid, j["id"]): j["leaving"]["reason"] for cid, court in courts.items()
+                 for j in court["judges"] if j.get("leaving")}
+        self.assertEqual(shown, {(row["court"], jid): row["reason"] for jid, row in going.items()})
+
     def test_the_committed_data_carries_each_pending_elevation(self):
         _payload, courts, _, _ = built()
         for cid, court in courts.items():
