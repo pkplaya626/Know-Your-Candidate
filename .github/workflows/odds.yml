@@ -95,7 +95,31 @@ jobs:
           Opened automatically by .github/workflows/odds.yml. Kalshi and
           Polymarket prices and the polling averages each race's Wikipedia page
           lists, each outcome label checked against its race."
-          git push origin HEAD:main
+          # main can move while the markets are read: a merge at 18:09 UTC
+          # on 2026-11-01 made this push a non-fast-forward, and the prices
+          # waited twelve hours. The commit changes the odds files alone
+          # (checked above) and odds.js is a pure function of odds.json
+          # (rule 41), so it goes on top of the new main and is pushed again.
+          # A rebase that conflicts concludes nothing: the run fails and says so.
+          pushed=""
+          for attempt in 1 2 3; do
+            if git push origin HEAD:main; then pushed=1; break; fi
+            git fetch origin main
+            if ! git rebase origin/main; then
+              git rebase --abort
+              break
+            fi
+            other=$(git diff --name-only origin/main HEAD | grep -Ev "$allowed" || true)
+            if [ -n "$other" ]; then
+              echo "::error::After the rebase the commit would change more than the odds files:"
+              printf '%s\n' "$other"
+              exit 1
+            fi
+          done
+          if [ -z "$pushed" ]; then
+            echo "::error::The new prices could not be pushed onto main."
+            exit 1
+          fi
           gh workflow run deploy.yml --ref main -f reason="odds refresh"
 
       # The same pattern as the roster refresh: a failed scheduled run reaches

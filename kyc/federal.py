@@ -34,7 +34,7 @@ import re
 import time
 import urllib.request
 
-from . import federal_offices
+from . import agent, federal_offices
 from .officers import KEPT_STALE_DAYS, _fold, same_person, says_nothing, visible_text
 
 EXECUTIVE_URL = "https://unitedstates.github.io/congress-legislators/executive.json"
@@ -43,8 +43,7 @@ VOTE_MENU_URL = ("https://www.senate.gov/legislative/LIS/roll_call_lists/"
 VOTE_URL = ("https://www.senate.gov/legislative/LIS/roll_call_votes/vote{congress}{session}/"
             "vote_{congress}_{session}_{number}.htm")
 CACHE_PATH = os.path.join("candidate_profiles_site", "data", "federal_executive.json")
-USER_AGENT = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
-              "(KHTML, like Gecko) Chrome/124.0 Safari/537.36 know-your-candidate/1.0")
+USER_AGENT = agent.USER_AGENT   # rule 103: who sends it, never a browser
 
 
 class FederalError(RuntimeError):
@@ -352,6 +351,25 @@ def confirmation(office, name, votes):
     }
 
 
+def kept_page(page, before, name, last_read, today):
+    """*page*, the office's own page's finding this run, dated; or, where
+    the page could not be read (a refusal, a challenge, a page drawn by
+    script: rule 8) and its last read named the same person beside the
+    title, that confirmation, kept with the day it was given (``read``)
+    and marked ``kept``, as an attorney general's is (rule 56). Asked as
+    this project, never as a browser (rule 103), state.gov refused the
+    read that had confirmed Marco Rubio the same morning, and the page
+    would have said it "could not be read" over its own earlier finding.
+    """
+    if page.get("status") == "confirmed":
+        return dict(page, read=today)
+    old = (before or {}).get("page") or {}
+    if (page.get("status") == "unreadable" and old.get("status") == "confirmed"
+            and same_person((before or {}).get("name", ""), name)):
+        return dict(old, kept=True, read=old.get("read") or last_read)
+    return page
+
+
 # ------------------------------------------------------------------ fetch
 
 def senate_votes(congress, read=None):
@@ -548,7 +566,12 @@ def fetch(previous=None, today=None, read=None, log=print, history_read=None):
             else:
                 holder["senate"] = None
                 holder["senateUnread"] = True
-        holder["page"] = confirm_on_page(office, entry["name"], read)
+        holder["page"] = kept_page(confirm_on_page(office, entry["name"], read),
+                                   (before.get(office["key"]) or {}).get("holder"),
+                                   entry["name"], (previous or {}).get("asOf") or today, today)
+        if holder["page"].get("kept"):
+            log(f"  [warn] the {office['office']}'s own page could not be read; the "
+                f"confirmation it gave on {holder['page']['read']} is kept")
         offices.append({"key": office["key"], "office": office["office"],
                         "body": office["body"],
                         "kind": "department" if department else "cabinet-level",
@@ -654,6 +677,15 @@ def problems(cache, today=None):
                         f"the {title}'s portrait was last read on {kept}; their White House "
                         "page has said nothing a reader can read since. Look at it",
                         [person.get("name", "?")]))
+    stale = [f"{o['office']}: {o['holder']['name']}, last read {o['holder']['page']['read']}"
+             for o in cache.get("offices") or []
+             if ((o.get("holder") or {}).get("page") or {}).get("kept")
+             and (datetime.date.fromisoformat(today)
+                  - datetime.date.fromisoformat(o["holder"]["page"]["read"])).days > KEPT_STALE_DAYS]
+    if stale:
+        out.append(("warn", "federal-confirmation-kept",
+                    f"{len(stale)} officers' own pages have not been readable since they named "
+                    "them; read each by hand", stale))
     keys = {o["key"] for o in cache.get("offices") or []}
     missing = [o["office"] for o in federal_offices.DEPARTMENTS if o["key"] not in keys]
     if missing:
