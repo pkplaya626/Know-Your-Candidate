@@ -2914,8 +2914,12 @@ async function testStates() {
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
     // A photograph only by rule 91's routes, each with whose it is beside it.
+    // The race's markets (#195) explain a price as a contract "worth $1":
+    // that is no one's money, so the money test reads the block without them.
+    const listOnly = block.cloneNode(true);
+    listOnly.querySelectorAll(".odds").forEach((n) => n.remove());
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
-      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
+      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(listOnly.textContent) &&
         [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
           /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
     check("the governor's holder line still says the seat is open",
@@ -10458,6 +10462,34 @@ async function testGeorgiaRunoffPast() {
       words.filter((w) => w.indexOf(PAST) !== -1).length === 2 && !words.some((w) => /In the runoff/.test(w)),
       words.join(" | "));
   });
+
+  // The governor's card, the race for governor and their overlays (#191,
+  // #195) name no state winner and read no status of Congress's: none of
+  // the runoff's words, in either tense, reach them.
+  const RUNOFF_WORDS = /Awaiting the Dec 1 runoff result|Awaiting runoff result|general election runoff|In the runoff|Going to a runoff/;
+  const gov = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04"), hash: "#/official/gov-GA" });
+  await settle(50);
+  suite("states/ga.html after December 1 — the governor's cards and overlays hold no runoff words", () => {
+    const { race } = gov.window.__gaRunoff || {};
+    check("no page errors", gov.errors.length === 0, gov.errors.join(" | "));
+    if (!race) { check("Georgia's Senate race to read", false); return; }
+    const card = gov.D.querySelector("#state-government #governor");
+    const block = gov.D.getElementById("governor-race");
+    check("the governor's card is drawn, without them", !!card && !RUNOFF_WORDS.test(card.textContent),
+      card && card.textContent);
+    check("the race for governor is drawn, without them", !!block && !RUNOFF_WORDS.test(block.textContent),
+      block && block.textContent.slice(0, 300));
+    const modal = gov.D.getElementById("governorModal");
+    check("the governor's overlay opens on its link, without them",
+      !!modal && !modal.hidden && !RUNOFF_WORDS.test(modal.textContent), modal && modal.textContent.slice(0, 300));
+    const close = modal && modal.querySelector("[data-close]");
+    if (close) close.click();
+    const cand = block && block.querySelector(".gcard-candidate[data-governor]");
+    if (cand) cand.click();
+    check("a candidate's overlay opens, without them", !!cand && !modal.hidden &&
+      !RUNOFF_WORDS.test(modal.textContent), modal && modal.textContent.slice(0, 300));
+  });
 }
 
 /* Louisiana's House seats after their November 3 open primary (rules 63,
@@ -14868,7 +14900,10 @@ async function testCharts() {
       let checked = 0;
       let inOrder = 0;
       raceIds.forEach((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
+        // A race for governor (G-GA-2026, #195) is no race of Congress's:
+        // it is drawn as kyc-stategov.js draws it, by its id and heading.
+        const race = (window.kycRaces || []).find((r) => r.id === id) ||
+          (/^G-[A-Z]{2}-\d{4}$/.test(id) ? { id, label: id, listParties: null } : null);
         if (!race) return;
         const box = D.createElement("div");
         box.innerHTML = KYC.odds.render(race, {});
