@@ -2914,10 +2914,24 @@ async function testStates() {
         [...source.querySelectorAll("a")].every((a) => /^https:\/\/sos\.ga\.gov\//.test(a.getAttribute("href"))),
       source.textContent);
     // A photograph only by rule 91's routes, each with whose it is beside it.
+    const uncredited = [...block.querySelectorAll("img")].filter((img) => !(img.classList.contains("gov-portrait") &&
+      /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
+    // Money is a campaign's: the markets' block under the race (PR #195)
+    // explains a price as "a contract worth $1", which is no one's money.
+    // Only those words are passed over, never the block: a dollar figure
+    // anywhere else in it would be one (PR #180 review).
+    const money = (el) => /.{0,40}\$.{0,40}/.exec(el.textContent
+      .replace(/a contract worth \$1(?![\d,.]*\d)|a \$1 contract/g, ""));
+    const dollars = money(block);
+    // The test of the test: a figure planted in the markets' block is seen.
+    const planted = block.cloneNode(true);
+    const markets = planted.querySelector(".odds");
+    if (markets) markets.insertAdjacentHTML("beforeend", "<p>Raised $1,250,000</p>");
+    check("the money check reads the markets' block, all but the price's explanation",
+      !!markets && !!money(planted));
     check("no profile link and no money; a photograph only with its credit (rules 24, 25, 27, 91)",
-      !block.querySelector("a[href*='#/profile/']") && !/\$/.test(block.textContent) &&
-        [...block.querySelectorAll("img")].every((img) => img.classList.contains("gov-portrait") &&
-          /^Photo( \(\d{4}\))?: ./.test((img.closest(".gcard").querySelector(".gcard-credit") || {}).textContent || "")));
+      !block.querySelector("a[href*='#/profile/']") && !dollars && uncredited.length === 0,
+      (dollars ? dollars[0] : "") + " | " + uncredited.map((img) => img.className + " " + img.getAttribute("src")).join(" | "));
     check("the governor's holder line still says the seat is open",
       /^Open seat: /.test((gov.querySelector(".gov-holder-status") || {}).textContent || ""));
     check("every office on the ballot lists its candidates",
@@ -14670,6 +14684,9 @@ async function testCharts() {
     const { window, D } = await buildPage("index.html");
     await settle(50);
     const KYC = window.KYC;
+    // The governor races' markets are drawn from the election office's
+    // list (data/stategov.js), which the grid loads on demand (rule 94).
+    await new Promise((resolve) => KYC.loadData("stategov.js", "kycStateGov", resolve));
     suite("charts — funding sources as one bar (VISUALS-24)", () => {
       const who = window.legislatorsData.find((p) => p.fundingBreakdown && !p.fundingBase &&
         Object.keys(p.fundingBreakdown).length >= 3);
@@ -14691,11 +14708,24 @@ async function testCharts() {
         odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
       let checked = 0;
       let inOrder = 0;
-      raceIds.forEach((id) => {
+      // A race for governor (G-GA-2026, PR #195) is no race of Congress's:
+      // it is drawn by the governor cards' own call (KYC.stategov.raceOdds),
+      // which passes the list's parties for rule 79's note, never a race
+      // object made up here (PR #180 review). null for a race nobody draws.
+      const drawOdds = (id, opts) => {
         const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return;
+        if (race) return KYC.odds.render(race, opts);
+        const gov = /^G-([A-Z]{2})-\d{4}$/.exec(id);
+        return gov && window.kycStateGov ? KYC.stategov.raceOdds(gov[1], opts) : null;
+      };
+      check("the governor races are drawn through the state government module, with the list's parties",
+        !!window.kycStateGov && typeof KYC.stategov.raceOdds === "function" &&
+          raceIds.some((id) => /^G-/.test(id)));
+      raceIds.forEach((id) => {
+        const html = drawOdds(id, {});
+        if (html === null) return;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const rows = box.querySelectorAll(".poll-row");
         if (rows.length !== odds.races[id].polls.rows.length) return;
         checked += 1;
@@ -14720,19 +14750,23 @@ async function testCharts() {
       // A ten-point axis made 49.7 against 47.4 look like a wide gap (PR
       // #111 review); the compact line already prints its two figures.
       const narrow = raceIds.filter((id) => {
-        const race = (window.kycRaces || []).find((r) => r.id === id);
-        if (!race) return false;
+        const html = drawOdds(id, {});
+        if (html === null) return false;
         const box = D.createElement("div");
-        box.innerHTML = KYC.odds.render(race, {});
+        box.innerHTML = html;
         const ticks = [...box.querySelectorAll(".poll-ticks span")].map((s) => parseFloat(s.textContent));
         return ticks.length < 2 || Math.max(...ticks) - Math.min(...ticks) < 30;
       });
       check("every poll axis spans at least thirty points", narrow.length === 0, narrow.join(" "));
-      const compact = raceIds.map((id) => (window.kycRaces || []).find((r) => r.id === id)).filter(Boolean)
-        .filter((race) => { const b = D.createElement("div"); b.innerHTML = KYC.odds.render(race, { compact: true });
-          return !!b.querySelector(".poll-dots"); });
+      const compact = raceIds.filter((id) => {
+        const html = drawOdds(id, { compact: true });
+        if (html === null) return false;
+        const b = D.createElement("div");
+        b.innerHTML = html;
+        return !!b.querySelector(".poll-dots");
+      });
       check("the compact panel prints the line, not a one-row chart of it", compact.length === 0,
-        compact.map((r) => r.id).join(" "));
+        compact.join(" "));
     });
   }
 }
