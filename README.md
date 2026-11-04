@@ -996,7 +996,12 @@ result.
   runoff table that names no party is the general runoff only if everyone in
   it was on the November ballot — a party runoff's loser never was. Its two
   are `runoff`, the rest of the ballot `defeated`, and after the runoff date
-  its marked winner is `elected`.
+  its marked winner is `elected`. Until that winner is marked, from the day
+  after the runoff date, the two read in the past tense: "Awaiting the Dec 1
+  runoff result" on a card, "Ran in the December 1 general election runoff:
+  awaiting result" in the dialog and on a share page (`KYC.raceStatus`'s
+  `heldRunoff`, `share._held_runoff`), never "In the runoff" as though it
+  were still to be held.
 - **Louisiana's House seats** are an open primary whose first round is the
   November election itself: its majority winner is `elected`, its top two
   are in the December 12 `runoff`, and the rest `defeated`.

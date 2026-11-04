@@ -1285,7 +1285,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     that ballot `defeated`, and no mark or two marks change nothing.
     Georgia's general runoff (`overrides.GENERAL_RUNOFFS`) is a runoff table
     naming no party whose people were all on the November ballot - a June
-    party runoff titled "Runoff results" holds a loser who never was.
+    party runoff titled "Runoff results" holds a loser who never was. From
+    the day after December 1 a runoff with no result read is in the past
+    tense, as Louisiana's December round and a November nominee are
+    (the owner's decision of 2026-11-01): "Awaiting the Dec 1 runoff
+    result" on a card, "Ran in the December 1 general election runoff:
+    awaiting result" in the dialog and on the share pages (`heldRunoff` in
+    `KYC.raceStatus`'s words, `share._held_runoff`).
     Rehearsed on 2024's pages as they stood the morning after Election Day
     and once certified (2026-11-01), the reading called no race wrongly, but
     a table titled by its seat alone ("Florida's 1st congressional district,
