@@ -1269,12 +1269,15 @@
     var grouped = groups(list);
     var html = ['<section class="state-section">'];
     if (grouped.length) {
+      // From the day after Election Day the run is over, whatever came of it.
+      var voted = KYC.electionStatus().phase === "post-election";
       html.push(
-        '<h2 class="state-heading">Running in a different district</h2>',
+        '<h2 class="state-heading">', voted ? "Ran in a different district" : "Running in a different district",
+        "</h2>",
         '<p class="state-note">', String(list.length), " member", list.length === 1 ? "" : "s",
         " of the House from ", KYC.escapeHtml(state.name), " hold", list.length === 1 ? "s" : "",
-        " one district and ", list.length === 1 ? "is" : "are",
-        " running in another. Pick a group to see the districts on both maps, or choose any ",
+        " one district and ", voted ? "ran" : list.length === 1 ? "is running" : "are running",
+        " in another. Pick a group to see the districts on both maps, or choose any ",
         "district below.</p>",
         '<div class="mover-groups">'
       );

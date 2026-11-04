@@ -833,7 +833,7 @@
   function holderLine(p, cls) {
     var name = '<button type="button" class="link-button" data-id="' + KYC.escapeAttr(p.id) + '">' +
       KYC.escapeHtml(p.name) + "</button>";
-    return '<p class="race-held' + (cls ? " " + cls : "") + '">' +
+    return '<p class="race-held race-held-off' + (cls ? " " + cls : "") + '">' +
       (KYC.seated(p) ? "Held by " + name : name + " held this seat in the 2026 race") + " " +
       statusBadge(p) + "</p>";
   }

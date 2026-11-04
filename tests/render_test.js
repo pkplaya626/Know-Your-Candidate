@@ -13551,6 +13551,9 @@ async function testSharePages() {
         if (html.indexOf('<p class="race-held">Held by <a href="../p/' + p.id + '.html">') === -1) {
           raceWrong.push(`${race.id}: held by ${p.id}`);
         }
+        if (unescapeHtml(html).indexOf("who " + KYC.contestLine(p).clause + ".") === -1) {
+          raceWrong.push(`${race.id}: ${p.id} is not said to be "${KYC.contestLine(p).clause}"`);
+        }
       });
       const named = KYC.ballotSource(race);
       const others = ((race.results || {}).otherNominees || []).filter((n) => !((race.results.maybeProfiled || {})[n]));
@@ -16440,7 +16443,7 @@ function rowProblems(window, D) {
     }
     // The count is the head's own badge (rule 73), and the names fit it.
     const headCount = [...section.querySelectorAll(".race-head .badge")].map((b) => b.textContent)
-      .filter((t) => /(challenger|candidate)s? on the ballot$|^\d+ (challenger|candidate)s?$|^No challenger|filed|Nobody/.test(t));
+      .filter((t) => /(challenger|candidate)s?(?: was| were)? on the ballot$|^\d+ (challenger|candidate)s?$|^No challenger|filed|Nobody/.test(t));
     if (!row.badges.some((b) => headCount.indexOf(b) !== -1)) say("count " + row.badges.join("|") + " against " + headCount.join("|"));
     const m = /^(\d+) (challenger|candidate)s? on the ballot$/.exec(headCount[0] || "");
     if (m) {
@@ -16450,8 +16453,16 @@ function rowProblems(window, D) {
         say("names " + (got.length + named.length) + " less " + holders.length + " holder(s) against " + m[0]);
       }
     }
+    // A holder off the ballot: their own status, on the row and in the section.
+    section.querySelectorAll(".race-body > .race-held-off").forEach((line) => {
+      const who = KYC.byId(line.querySelector("[data-id]").getAttribute("data-id"));
+      const spec = KYC.standing(who, "card");
+      if (row.held.indexOf(who.name) === -1 || (spec && row.held.indexOf(spec.label) === -1)) {
+        say("holder off the ballot " + JSON.stringify(row.held) + " against " + who.name);
+      }
+    });
     // The holder clause: the section's own "Held by" line, word for word.
-    section.querySelectorAll(".race-body > .race-held").forEach((line) => {
+    section.querySelectorAll(".race-body > .race-held:not(.race-held-off)").forEach((line) => {
       const contact = line.querySelector(".card-contact");
       const words = line.textContent.replace(contact ? contact.textContent : "", "").trim();
       if (row.held.indexOf(words) === -1) say("held " + JSON.stringify(row.held) + " against " + JSON.stringify(words));
@@ -16603,7 +16614,7 @@ async function testStatePhone() {
     const rowsWhere = (test) => [].concat(...all.map((b) => [...b.D.querySelectorAll("section.race-foldable")]
       .filter((s) => test(b.window.KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0], s, b.window))));
     if (oldCongressSits(window)) {
-      const moved = rowsWhere((r, s) => !!s.querySelector(".race-body > .race-held"));
+      const moved = rowsWhere((r, s) => !!s.querySelector(".race-body > .race-held:not(.race-held-off)"));
       check("a holder running elsewhere is named as the section names them, never on this ballot",
         moved.length > 0 && moved.every((s) => {
           const row = readRow(s);
