@@ -4951,6 +4951,36 @@ function otherRunWords(stage, seat, renumbered, after) {
   }[stage];
 }
 
+/* A seat's holder who did not run is nobody who lost a primary (rule 92). */
+async function testHolderOffTheBallot() {
+  const { window, D } = await buildPage("index.html");
+  const KYC = window.KYC;
+  const race = window.kycRaces.find((r) => r.incumbentIds.some((id) => {
+    const p = KYC.byId(id);
+    return p && !p.isCandidate && !p.contestLabel && KYC.offBallot(p.raceStatus);
+  }) && r.candidateIds.some((id) => { const p = KYC.byId(id); return p && KYC.offBallot(p.raceStatus); }));
+  suite("a holder off the ballot is not counted among those who lost", () => {
+    check("the data has such a race", !!race || !oldCongressSits(window));
+    if (!race) return;
+    const people = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(Boolean);
+    const split = KYC.cards.racePeople(race, people);
+    const host = D.createElement("div");
+    host.innerHTML = KYC.cards.raceSection(race, people, {});
+    const summary = host.querySelector(".race-out summary").textContent;
+    const holder = split.holders[0];
+    check("the fold counts only those who were in the race",
+      summary.indexOf(split.out.length + " no longer") === 0 && split.holders.length > 0, summary);
+    check("and the holder is not in it", ![...host.querySelectorAll(".race-out [data-id]")]
+      .some((el) => el.getAttribute("data-id") === holder.id));
+    const held = host.querySelector(`.race-held [data-id="${holder.id}"]`);
+    check("they are named above it, with their own status",
+      !!held && /^Held by /.test(held.closest(".race-held").textContent) &&
+      /Not running|Lost|not seeking/i.test(held.closest(".race-held").textContent),
+      held && held.closest(".race-held").textContent);
+  });
+  window.close();
+}
+
 /* The campaign's words left on a decided race (results night, 2026-11-04). */
 async function testDecidedRaceWords() {
   for (const [clock, opts, after] of [["the campaign clock", {}, false],
@@ -13385,8 +13415,10 @@ async function testSharePages() {
     const moved = list.filter((p) => !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1 &&
       !!p.contestRaceId && p.contestRaceId !== race.id && !!p.contestLabel);
     const rest = list.filter((p) => moved.indexOf(p) === -1);
-    return { ids, moved, running: rest.filter((p) => !KYC.offBallot(p.raceStatus)),
-             out: rest.filter((p) => KYC.offBallot(p.raceStatus)) };
+    const gone = rest.filter((p) => KYC.offBallot(p.raceStatus));
+    const holders = gone.filter((p) => !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1);
+    return { ids, moved, holders, running: rest.filter((p) => !KYC.offBallot(p.raceStatus)),
+             out: gone.filter((p) => holders.indexOf(p) === -1) };
   };
 
   suite("share pages — one per profile and race, in the page code's words (rule 96)", () => {
@@ -13487,7 +13519,7 @@ async function testSharePages() {
       const holders = s.running.filter((p) => race.incumbentIds.indexOf(p.id) !== -1 && KYC.seated(p)).map((p) => p.id);
       if (marked.join() !== holders.join()) raceWrong.push(`${race.id}: holder ${marked} for ${holders}`);
       const credits = [];
-      s.moved.concat(s.running, s.out).forEach((p) => {
+      s.moved.concat(s.holders, s.running, s.out).forEach((p) => {
         const c = creditOf(KYC.standing(p, "long"));
         if (c && credits.indexOf(c) === -1) credits.push(c);
       });
@@ -13495,6 +13527,20 @@ async function testSharePages() {
       const andList = (w) => w.length < 2 ? w.join("") : w.slice(0, -1).join(", ") + " and " + w[w.length - 1];
       if ((sources ? unescapeHtml(sources[1]) : "") !== andList(credits)) raceWrong.push(`${race.id}: sources`);
       if (!same(out, s.out)) raceWrong.push(`${race.id}: out ${out.map((x) => x.id)}`);
+      // The seat's holder off this ballot is named with their own status,
+      // never among those who "lost the primary, withdrew, or were not on
+      // the primary ballot", as the race's own section does (rule 92).
+      const section = KYC.cards.racePeople(race, race.incumbentIds.concat(race.candidateIds)
+        .map(KYC.byId).filter((p, i, all) => p && all.indexOf(p) === i));
+      if (section.holders.map((p) => p.id).join() !== s.holders.map((p) => p.id).join()) {
+        raceWrong.push(`${race.id}: the page's holders ${section.holders.map((p) => p.id)}`);
+      }
+      if (section.out.map((p) => p.id).join() !== s.out.map((p) => p.id).join()) {
+        raceWrong.push(`${race.id}: the page's out ${section.out.map((p) => p.id)}`);
+      }
+      const off = [...html.matchAll(/<p class="race-held share-holder-off" data-id="([^"]+)">.*?<span class="share-standing">(.*?)<\/span>/g)]
+        .map((m) => ({ id: unescapeHtml(m[1]), standing: unescapeHtml(m[2]) }));
+      if (!same(off, s.holders)) raceWrong.push(`${race.id}: holder off the ballot ${off.map((x) => x.id)}`);
       // The head's count, with the same number and tense (rule 73).
       const count = /<p class="share-count">(.*?)\.<\/p>/.exec(html);
       const head = KYC.cards.raceBadgeItems(race).find((b) => b.key === "count");
@@ -18213,6 +18259,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "links") await testRunningElsewhere();
   if (!only || only === "links") await testOtherRunWalk();
   if (!only || only === "links") await testDecidedRaceWords();
+  if (!only || only === "links") await testHolderOffTheBallot();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();

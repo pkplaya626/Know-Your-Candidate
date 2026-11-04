@@ -992,18 +992,12 @@
     // ("Not running for re-election", rule 61), never counted among the
     // people who "lost the primary, withdrew, or were not on the primary
     // ballot".
-    var holders = split.out.filter(function (p) {
-      return !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1;
-    });
-    var gone = split.out.filter(function (p) { return holders.indexOf(p) === -1; });
+    var holders = split.holders;
+    var gone = split.out;
     var body = (lead || "") +
       '<p class="ballot-badges">' + KYC.cards.raceBadges(race) + "</p>" +
       split.moved.map(KYC.cards.heldByLine).join("") +
-      holders.map(function (p) {
-        return '<p class="race-held ballot-holder">Held by <button type="button" class="link-button" ' +
-          'data-id="' + KYC.escapeAttr(p.id) + '">' + esc(p.name) + "</button> " +
-          KYC.cards.statusBadge(p) + "</p>";
-      }).join("") +
+      holders.map(function (p) { return KYC.cards.holderLine(p, "ballot-holder"); }).join("") +
       (running.length ? '<ul class="ballot-people">' + running.map(personRow).join("") + "</ul>" : "") +
       (none ? '<p class="ballot-note">Nobody with a profile here is ' +
         (unsure.length ? "known to be on this ballot" : "in this race") + ".</p>" : "") +

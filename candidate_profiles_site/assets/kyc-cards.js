@@ -808,16 +808,34 @@
 
   /** A race's people as every view that lists the race splits them: the
    *  seat's holder running elsewhere (*moved*, one line above the race),
-   *  the people still in it (*running*) and those no longer in it (*out*),
-   *  each in the pipeline's order; *people* is everyone but the moved. The
-   *  race sections and the Your ballot page split them here, so the two
-   *  list the same people (rules 12 and 73). */
+   *  the seat's holder off its ballot (*holders*, one line above it, in their
+   *  own status: Thom Tillis did not run, and is nobody who "lost the primary,
+   *  withdrew, or were not on the primary ballot", rule 92), the people still
+   *  in it (*running*) and those no longer in it (*out*), each in the
+   *  pipeline's order; *people* is everyone but the moved. The race sections
+   *  and the Your ballot page split them here, so the two list the same
+   *  people (rules 12 and 73). */
   function racePeople(race, people) {
     var moved = people.filter(function (p) { return elsewhere(race, p); });
     people = people.filter(function (p) { return moved.indexOf(p) === -1; });
+    var held = function (p) {
+      return !p.isCandidate && (race.incumbentIds || []).indexOf(p.id) !== -1;
+    };
     return { moved: moved, people: people,
+             holders: people.filter(function (p) { return offBallot(p) && held(p); }),
              running: people.filter(function (p) { return !offBallot(p); }),
-             out: people.filter(offBallot) };
+             out: people.filter(function (p) { return offBallot(p) && !held(p); }) };
+  }
+
+  /* The seat's holder off its ballot, above the race: their name and their
+   * card's status, and a member who has left since held it in the record's
+   * words, never "Held by" (rule 67). */
+  function holderLine(p, cls) {
+    var name = '<button type="button" class="link-button" data-id="' + KYC.escapeAttr(p.id) + '">' +
+      KYC.escapeHtml(p.name) + "</button>";
+    return '<p class="race-held' + (cls ? " " + cls : "") + '">' +
+      (KYC.seated(p) ? "Held by " + name : name + " held this seat in the 2026 race") + " " +
+      statusBadge(p) + "</p>";
   }
 
   function raceSection(race, people, opts) {
@@ -826,6 +844,7 @@
     var moved = split.moved, running = split.running, out = split.out;
     people = split.people;
     var body = moved.map(heldByLine).join("") +
+      split.holders.map(function (p) { return holderLine(p); }).join("") +
       '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
@@ -1538,6 +1557,7 @@
     raceSection: raceSection,
     racePeople: racePeople,
     heldByLine: heldByLine,
+    holderLine: holderLine,
     fillOut: fillOut,
     legend: legend,
   };

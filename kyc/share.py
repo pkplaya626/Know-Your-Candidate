@@ -774,15 +774,20 @@ def _elsewhere(race, person):
 
 
 def split_people(race, by_id):
-    """``(held elsewhere, still in the race, no longer in it)``, as
-    ``KYC.cards.racePeople`` splits a race: the holder running for another
-    seat apart, and anyone a result takes out of it (``offBallot`` of their
-    own status) folded under the rest."""
+    """``(held elsewhere, holder off its ballot, still in the race, no longer
+    in it)``, as ``KYC.cards.racePeople`` splits a race: the holder running
+    for another seat apart, the holder off this ballot apart (Thom Tillis did
+    not run, and is nobody who "lost the primary, withdrew, or were not on the
+    primary ballot", rule 92), and anyone else a result takes out of it
+    (``offBallot`` of their own status) folded under the rest."""
     people = race_people(race, by_id)
     moved = [p for p in people if _elsewhere(race, p)]
     rest = [p for p in people if p not in moved]
-    return (moved, [p for p in rest if p.get("raceStatus") not in OFF_BALLOT],
-            [p for p in rest if p.get("raceStatus") in OFF_BALLOT])
+    gone = [p for p in rest if p.get("raceStatus") in OFF_BALLOT]
+    holders = [p for p in gone if not p.get("isCandidate")
+               and p["id"] in (race.get("incumbentIds") or [])]
+    return (moved, holders, [p for p in rest if p.get("raceStatus") not in OFF_BALLOT],
+            [p for p in gone if p not in holders])
 
 
 def contest_clause(person, by_id, races_by_id=None, post=False):
@@ -858,9 +863,9 @@ def _item(person, by_id, races_by_id, post, root, indent, race=None):
 def race_sources(race, by_id):
     """Who says where the people a race lists stand, each once, in the
     order they are first met: the credit the dialog's badge gives each."""
-    moved, running, out = split_people(race, by_id)
+    moved, holders, running, out = split_people(race, by_id)
     seen = []
-    for person in moved + running + out:
+    for person in moved + holders + running + out:
         source = status_source(person, by_id)
         if source and source not in seen:
             seen.append(source)
@@ -874,15 +879,24 @@ def _and(words):
 def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
     """A race's people as plain lists, each linked to their share page with
     where they stand, split as the race's section on a state page splits
-    them: the holder running elsewhere, the people still in it (the
-    holder marked), those no longer in it, the November names with no
-    profile here, and who says where each stands."""
-    moved, running, out = split_people(race, by_id)
+    them: the holder running elsewhere or off this ballot, the people still
+    in it (the holder marked), those no longer in it, the November names with
+    no profile here, and who says where each stands."""
+    from .record import seated
+
+    moved, holders, running, out = split_people(race, by_id)
     rows = [f'{indent}<p class="share-count">{_e(head_count(race, post))}.</p>']
     for person in moved:
         rows.append(f'{indent}<p class="race-held">Held by <a href="{root}'
                     f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>, who '
                     f"{_e(contest_clause(person, by_id, races_by_id, post))}.</p>")
+    for person in holders:
+        link = (f'<a href="{root}{_e(profile_path(person["id"]))}">'
+                f'{_e(person.get("name") or "")}</a>')
+        words = status_words(person, by_id, races_by_id, post)
+        rows.append(f'{indent}<p class="race-held share-holder-off" data-id="{_e(person["id"])}">'
+                    + (f"Held by {link}" if seated(person) else f"{link} held this seat in the 2026 race")
+                    + (f': <span class="share-standing">{_e(words)}</span>' if words else "") + ".</p>")
     rows.append(f'{indent}<ul class="share-list" data-race="{_e(race["id"])}">')
     rows += [_item(p, by_id, races_by_id, post, root, indent + "    ", race) for p in running]
     rows.append(f"{indent}</ul>")
@@ -946,7 +960,7 @@ def describe_race(race, by_id, races_by_id, post=False):
     """A race's share description: the seat, who holds it, who is still in
     it with where each stands, and who says so."""
     label = race.get("label") or race["id"]
-    moved, running, _out = split_people(race, by_id)
+    moved, holders, running, _out = split_people(race, by_id)
     held = ""
     # The seat's holder only while they sit in it (rule 67): a record
     # incumbent who has left holds nothing.
@@ -957,7 +971,7 @@ def describe_race(race, by_id, races_by_id, post=False):
     if not held and inc.get("seated") and inc.get("name"):
         # Under their profile's name where they have one, as the list
         # below names them: "David G. Valadao" beside "David Valadao".
-        holder = next((p for p in running if holds(race, p)), None)
+        holder = next((p for p in running + holders if holds(race, p)), None)
         name = (holder or {}).get("name") or inc["name"]
         held = f"Held by {name}" + (f" ({inc['party']})." if inc.get("party") else ".")
     people = []
