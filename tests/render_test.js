@@ -15407,6 +15407,14 @@ async function testRaceMoney() {
         if (strip.querySelectorAll(".strip-cell").length !== s.cells.length) {
           bad.push(r.id + ": cells");
         }
+        // History beside "Won by": the strip stops before the race its block
+        // decides, and from the day after Election Day its heading says so,
+        // as the fold's line does (rule 63).
+        const title = strip.querySelector(".strip-title").textContent;
+        if (/^Before 2026: elections /.test(title) !== past || (!past && !/^Elections /.test(title))) {
+          bad.push(r.id + ": the strip's heading on the wrong day: " + title);
+        }
+        if (s.cells.some((c) => c.year >= 2026)) bad.push(r.id + ": a strip reaching the race itself");
         const heads = [...strip.querySelectorAll(".strip-era")].map((p) => p.textContent);
         const others = s.eras.filter((e, i) => !e.same && s.cells.some((c) => c.era === i));
         if (r.chamber === "House") {

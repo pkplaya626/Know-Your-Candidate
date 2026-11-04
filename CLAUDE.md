@@ -2443,7 +2443,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     accent inside a word is the ʻokina (`okina`: "Kaialiʻi", never a
     grave accent in his name); and Alabama's court-drawn 2024 lines cite the Census
     Bureau's list named as that list (`lead`), never as the map, until a
-    person reads the court's order.
+    person reads the court's order. The strip stops at 2024, and from the
+    day after Election Day its heading says it is "Before 2026", as the
+    fold's line does: "Elections to this seat since 2018" under "Won by
+    Kevin Hern" read as though it reached him (rule 63).
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own

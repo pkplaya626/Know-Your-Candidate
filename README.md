@@ -1877,7 +1877,8 @@ record and the Census Bureau's list), and the 2026 maps. Years on other
 lines than the race's are under a line saying so, in dashed cells: they
 are the results of the district that had the number on that map, never
 this district's. A Senate seat's strip is the elections to its class,
-specials included.
+specials included. From the day after Election Day its heading says it is
+"Before 2026", as the fold's own line does.
 
 Each race block, on the state pages, in the grid's races view and in the
 profile dialog, shows under its people the campaigns' money as bars on one

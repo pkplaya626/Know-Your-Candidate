@@ -1731,9 +1731,15 @@
         '" target="_blank" rel="noopener noreferrer">' + y + "</a>";
     }).join(", ");
     // A number, never "this district": on other lines it was another one.
-    var heading = race.chamber === "Senate" ? "Elections to this seat since 2018"
-      : "Elections for " + KYC.escapeHtml(race.state + "-" + (race.district || "AL")) +
+    var heading = race.chamber === "Senate" ? "lections to this seat since 2018"
+      : "lections for " + KYC.escapeHtml(race.state + "-" + (race.district || "AL")) +
         " since 2018";
+    // The strip stops at 2024. From the day after Election Day it is said
+    // to be before the race its block has just decided, as the fold's own
+    // line says: "Elections to this seat since 2018" under "Won by Kevin
+    // Hern" read as though it reached him (rule 63).
+    heading = (KYC.electionStatus(undefined, now).phase === "post-election"
+      ? "Before 2026: e" : "E") + heading;
     return '<section class="seat-history"><h4 class="strip-title">' + heading + "</h4>" +
       parts.join("") +
       '<p class="race-note race-results">Counts: the Clerk of the House&rsquo;s statistics (' +
