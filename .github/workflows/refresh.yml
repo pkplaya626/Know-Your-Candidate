@@ -40,6 +40,10 @@ on:
         description: "Also resolve portraits for anyone new"
         type: boolean
         default: true
+      results_only:
+        description: "Only the field and the results, about 45 minutes to the page (the morning after an election); the daily run reads the rest"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -100,6 +104,12 @@ jobs:
         with:
           node-version: "24"
 
+      # A run with results_only (dispatched by hand) reads the membership, any
+      # new portraits, the field, the results and the articles and sites those
+      # newly link, and skips the rest, whose caches stand (rule 8): the
+      # morning after an election the results reach the page in under an hour
+      # and can be read again through the day. The full run took over two hours
+      # and on 2026-11-04 failed on a voting link, holding the first results.
       - name: Refresh the membership snapshot and apply any drift
         id: reconcile
         run: |
@@ -148,7 +158,7 @@ jobs:
       - name: Refresh campaign finance
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
-        if: env.FEC_API_KEY != ''
+        if: env.FEC_API_KEY != '' && !inputs.results_only
         run: python build_profile_site.py finance --refresh
 
       # Who has filed, and - from the state election pages - who is still in.
@@ -166,7 +176,7 @@ jobs:
       - name: Look up campaign websites for anyone new on a ballot
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
-        if: env.FEC_API_KEY != ''
+        if: env.FEC_API_KEY != '' && !inputs.results_only
         run: python build_profile_site.py campaigns --limit 150 || true
 
       # Outside groups' independent expenditures for and against each
@@ -178,10 +188,11 @@ jobs:
         continue-on-error: true
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
-        if: env.FEC_API_KEY != ''
+        if: env.FEC_API_KEY != '' && !inputs.results_only
         run: python build_profile_site.py outside
 
       - name: Refresh financial disclosure links (House Clerk and Senate eFD)
+        if: ${{ !inputs.results_only }}
         run: python build_profile_site.py disclosures
 
       # Who runs each state: governors (NGA, checked against Wikidata),
@@ -196,14 +207,17 @@ jobs:
       # stopped the whole daily refresh, money and results with it, when
       # these four ran as one step.
       - name: Refresh the governors and party counts
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py executives
 
       - name: Refresh the statewide officers
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py officers
 
       - name: Refresh the state legislators
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py statelegs
 
@@ -212,10 +226,12 @@ jobs:
       # the roster they are matched to. A read that fails keeps the last
       # good photograph and stops nothing else in this run (rule 8).
       - name: Refresh the state legislators' portraits
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py legphotos
 
       - name: Refresh the state high courts
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py courts
 
@@ -225,6 +241,7 @@ jobs:
       # forty minutes - keeping the last read in between. A failed read
       # keeps the last photographs and stops nothing else (rule 8).
       - name: Refresh the statewide candidates' photographs
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 50
         run: |
@@ -242,6 +259,7 @@ jobs:
       # 101's manifest, a heavy one as a smaller copy made at once. A guide
       # that cannot be read keeps its last photographs (rule 8).
       - name: Refresh the election offices' guides' photographs
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 25
         run: python build_profile_site.py guidephotos
@@ -251,6 +269,7 @@ jobs:
       # (kyc/federal.py). A source that cannot be read keeps the committed
       # cache and stops nothing else in this run.
       - name: Refresh the federal executive
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py federal
 
@@ -260,6 +279,7 @@ jobs:
       # (kyc/oge.py). After the executive, whose holders it reads. A read
       # that fails keeps the committed cache.
       - name: Refresh the officers' financial disclosures
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py oge
 
@@ -271,6 +291,7 @@ jobs:
       # Wikipedia and Commons a request a second, and each new photograph's
       # largest size weighed once, a request a second.
       - name: Refresh the federal judiciary
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py judiciary
 
@@ -278,6 +299,7 @@ jobs:
       # uscourts.gov (kyc/vacancies.py). A list that cannot be read, or whose
       # rows do not add up to its own totals, keeps the committed cache.
       - name: Refresh the judicial vacancies
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py vacancies
 
@@ -286,6 +308,7 @@ jobs:
       # are there. A NASS outage or bot wall leaves the committed links as
       # they were and stops nothing else in this run.
       - name: Refresh each state's official voting pages
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py voting
 
@@ -294,6 +317,7 @@ jobs:
       # service counts comes back once; a failed read keeps the committed
       # cache and stops nothing else in this run.
       - name: Refresh the tribal leaders directory
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py tribes
 
@@ -302,6 +326,7 @@ jobs:
       # (kyc/rollcalls.py). A refused or failed request ends the run with
       # what was read saved; the next run goes on from there.
       - name: Read the new roll calls
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 30
         run: python build_profile_site.py votes
@@ -313,6 +338,7 @@ jobs:
       # articles and ids it reads. A read that fails or comes back short
       # keeps the committed cache and stops nothing else in this run.
       - name: Refresh the public offices each person has held
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         run: python build_profile_site.py history
 
@@ -323,6 +349,7 @@ jobs:
       # skipped and a run reads at most 150, one request at a time; a read
       # that concludes nothing keeps the last one.
       - name: Refresh members' biographies, platforms and offices
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 40
         env:
@@ -350,6 +377,7 @@ jobs:
       # once one has gone 60 days. A look that concludes nothing never
       # undoes a withdrawal, and plain gambling stays for a person.
       - name: Look again at local governments' listed websites
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 45
         run: python build_profile_site.py localgov --check-sites --limit 6000 --max-minutes 35
@@ -362,6 +390,7 @@ jobs:
       # again while its original is unchanged; a read that fails keeps what
       # was there, and the run ends cleanly inside its budget (rule 78).
       - name: Weigh the portraits and copy the heavy ones
+        if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 40
         run: python build_profile_site.py photocopies --limit 4000 --max-minutes 30
