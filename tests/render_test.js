@@ -239,10 +239,32 @@ async function testMeasures() {
   /* A state page is written with its statewide questions in plain text
    * (pages.measures_static, rule 96), from the record measures.js is
    * written from; the script draws its section over them. The two must say
-   * the same: the questions, in order, and the lead's words. */
+   * the same: the questions, in order, and the lead's words.
+   *
+   * The plain list is written in the tense of the day the results were
+   * read (share.post_election), the drawn one in the reader's. Compared on
+   * the campaign clock, the first build after Election Day failed this
+   * check whatever its results, and held the refresh (results night,
+   * 2026-11-04): so the drawn section is drawn on the build's own day,
+   * the day its results were read. */
+  const measuresAsOf = ((ca.window.kycBuildMeta.election || {}).resultsAsOf || "").slice(0, 10);
+  const measuresWritten = measuresDrawnOn(measuresAsOf, ca.window.KYC.electionStatus(2026).iso);
+  let measurePages = [["CA", ca], ["AZ", az], ["TX", tx], ["ME", me], ["DC", dc], ["MP", mp], ["GU", gu], ["PR", pr], ["NH", nh]];
+  if (measuresWritten) {
+    const redrawn = [];
+    for (const [code] of measurePages) {
+      redrawn.push([code, await buildPage("states/" + code.toLowerCase() + ".html", { now: measuresWritten })]);
+    }
+    measurePages = redrawn;
+    await settle(50);
+  }
   suite("state pages' plain lists hold the questions the drawn section shows (rules 95, 96)", () => {
     const wrong = [];
-    [["CA", ca], ["AZ", az], ["TX", tx], ["ME", me], ["DC", dc], ["MP", mp], ["GU", gu], ["PR", pr], ["NH", nh]]
+    check("a build whose results were read after Election Day is compared on that day",
+      measuresDrawnOn("2026-11-04", "2026-11-03") === "2026-11-04T12:00:00" &&
+      measuresDrawnOn("2026-11-03", "2026-11-03") === null &&
+      measuresDrawnOn("2026-11-02", "2026-11-03") === null && measuresDrawnOn("", "2026-11-03") === null);
+    measurePages
       .forEach(([code, page]) => {
         const file = fs.readFileSync(path.join(SITE, "states", code.toLowerCase() + ".html"), "utf8");
         const holder = page.D.createElement("div");
@@ -393,6 +415,13 @@ async function testMeasures() {
  * page is built at a campaign-season moment unless a suite says otherwise
  * (opts.now: an ISO local time, or null for the real clock). */
 const CAMPAIGN_NOW = "2026-10-20T12:00:00";
+
+/* The clock a page written from a build is drawn on to say what the build
+ * wrote: the day its results were read, where that was after Election Day
+ * (share.post_election), else null (the campaign clock). */
+function measuresDrawnOn(resultsAsOf, electionDay) {
+  return resultsAsOf && resultsAsOf > electionDay ? resultsAsOf + "T12:00:00" : null;
+}
 
 function freezeClock(window, iso) {
   const Real = window.Date;
@@ -4577,6 +4606,19 @@ async function testPeopleWording() {
     check("a nominee is still 'Running for', with the term", opened(live, () =>
       text("profileModalRegionLabel") === "Running for" &&
       !D.getElementById("profileModalTermWrap").hidden));
+    // Results night (2026-11-04): Guam's new delegate read "Running for
+    // House • GU-AL" and "Term Jan. 3, 2027 (if elected)" over "Elected in
+    // November". The record is made elected here, whatever the day's data.
+    const winner = people.find((p) => p.isCandidate && p.raceStatus === "nominee" &&
+      /\(if elected\)/.test(p.term_start || "") && KYC.contestStatus(p) === "nominee");
+    const was = winner && winner.raceStatus;
+    if (winner) winner.raceStatus = "elected";
+    const wonWords = winner ? opened(winner, () =>
+      text("profileModalRegionLabel") + " | " + text("profileModalTerm")) : "";
+    if (winner) winner.raceStatus = was;
+    check("someone the results elected was 'Elected to' it, with no term 'if elected'",
+      !!winner && /^Elected to \| /.test(wonWords) && !/if elected/.test(wonWords) &&
+      /2027/.test(wonWords), wonWords);
     // An appointee serves until the special election's winner is sworn in
     // (PROFILES-21), and that sentence may wrap: held on one line it ran
     // off a phone's screen.

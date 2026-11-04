@@ -1935,6 +1935,37 @@ GENERAL_RUNOFFS = {
     "GA": ("2026-12-01", "O.C.G.A. 21-2-501(a): a runoff is held on the 28th day after a "
                          "general election in which no candidate receives a majority; "
                          "November 3 + 28 days = December 1, 2026"),
+    # The Delegates from Guam and the Virgin Islands are elected by a
+    # majority too (results night, 2026-11-04: read by plurality, a page
+    # marking a leader short of one would have been "elected" a fortnight
+    # before the runoff). The dates are data/voting_dates.json's.
+    "GU": ("2026-11-17", "48 U.S.C. 1712: \"The Delegate from Guam shall be elected at large "
+                         "and by a majority of the votes cast for the office of Delegate. If "
+                         "no candidate receives such majority, on the fourteenth day following "
+                         "such election a runoff election shall be held\"; November 3 + 14 "
+                         "days = November 17, 2026"),
+    "VI": ("2026-11-17", "48 U.S.C. 1712 elects the Delegate from the Virgin Islands by a "
+                         "majority, with a runoff between the top two on the fourteenth day "
+                         "after the election; the Virgin Islands Elections System's 2026 "
+                         "calendar holds a runoff, only if needed, for Delegate on November "
+                         "17, 2026"),
+}
+
+# Seats whose November election is their only round: no primary, so the
+# results reader's gate (results.primary_settled) has no date to open them
+# on, and on results night (2026-11-04) neither page was read - American
+# Samoa's five certified candidates and the Northern Mariana Islands' two
+# would have read "Awaiting result" for good. The seat's page is read from
+# the day after Election Day, its November table alone deciding.
+# {(state, office): evidence}
+NO_PRIMARY_SEATS = {
+    ("AS", "H"): "American Samoa holds no primary for Delegate: its Election Office's certified "
+                 "list for November 3, 2026 is the ballot, and the Delegate is elected by "
+                 "plurality (48 U.S.C. 1732); the FEC's 2026 calendar lists no primary",
+    ("MP", "H"): "the FEC's 2026 calendar lists no primary for the Northern Mariana Islands' "
+                 "Delegate, and the seat's Wikipedia page holds only the November election's "
+                 "table (read 2026-11-04); a runoff there is for governor and attorney general "
+                 "alone (1 CMC 6509, as data/voting_dates.json records it)",
 }
 
 # Incorporated places the Census Bureau's 2022 Government Units listing files

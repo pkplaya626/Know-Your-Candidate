@@ -235,7 +235,16 @@ def primary_settled(dates, state, office, today, open_seat=False):
     running" for the six weeks between November 3 and the December 12
     runoff. :func:`resolve_race` reads the runoff table only once
     :func:`runoff_held`.
+
+    A seat with no primary at all (``overrides.NO_PRIMARY_SEATS``: American
+    Samoa's, the Northern Mariana Islands') opens from the day after
+    Election Day, when its November table can be read as a result: with no
+    primary date it was never read, and no result could reach it.
     """
+    from .overrides import NO_PRIMARY_SEATS
+
+    if (state, office) in NO_PRIMARY_SEATS:
+        return general_held(today)
     slot = dates.get((state, office))
     if not slot or not slot.get("primary"):
         return False
@@ -1030,6 +1039,69 @@ def _near_spellings(boxes):
     return alias
 
 
+def _one_edit(a, b):
+    """Two different words one letter apart - a letter added, dropped or
+    changed, or two neighbouring letters swapped - whatever their length."""
+    if a == b or abs(len(a) - len(b)) > 1:
+        return False
+    if len(a) == len(b):
+        diff = [i for i in range(len(a)) if a[i] != b[i]]
+        return len(diff) == 1 or (len(diff) == 2 and diff[1] == diff[0] + 1
+                                  and a[diff[0]] == b[diff[1]] and a[diff[1]] == b[diff[0]])
+    if len(a) > len(b):
+        a, b = b, a
+    return any(b[:i] + b[i + 1:] == a for i in range(len(b)))
+
+
+def _infobox_spellings(boxes):
+    """``{infobox spelling: November table's spelling}`` for a nominee the
+    infobox alone misspells.
+
+    On results night (2026-11-04) UT-1's infobox read "nominee1 = Riley
+    Owens" over a page - nominee list, summary and November table - that
+    writes "Riley Owen", and MO-8's "Christopher Riechard" over tables
+    writing "Reichard". :func:`_near_spellings` folds neither (a four-letter
+    surname; two letters swapped), so each infobox spelling was a second
+    nominee of the party, matching no filing: "Also on the November ballot
+    ... Riley Owens (Republican)", a person who does not exist, still on
+    the ballot once the table's winner was marked.
+
+    The infobox names the November table's people. A name only the infobox
+    gives is folded into the one November-table row of the same party whose
+    given names are its own and whose surname is a letter apart; never a
+    row the infobox names as well (two names in one box are two people),
+    never where the party is unknown on either side or two rows fit.
+    """
+    infobox, general, elsewhere = [], [], set()
+    for title, rows in boxes:
+        clean = _clean_title(title)
+        if clean == INFOBOX_TITLE:
+            infobox.extend(rows)
+            continue
+        elsewhere.update(r["name"] for r in rows)
+        if clean not in LIST_TITLES and _stage(clean) == "general":
+            general.extend(r for r in rows if not r["withdrawn"])
+    boxed = {r["name"] for r in infobox}
+    alias = {}
+    for row in infobox:
+        name = row["name"]
+        a = _tokens(name)
+        if name in elsewhere or len(a) < 2 or not row.get("party"):
+            continue
+        fits = set()
+        for other in general:
+            b = _tokens(other["name"])
+            if (other["name"] in boxed or len(b) < 2 or a[:-1] != b[:-1]
+                    or not other.get("party")
+                    or party_key(other["party"]) != party_key(row["party"])
+                    or not _one_edit(a[-1], b[-1])):
+                continue
+            fits.add(other["name"])
+        if len(fits) == 1:
+            alias[name] = fits.pop()
+    return alias
+
+
 def _hyphen_spellings(boxes):
     """``{spelling: spelling kept}`` for one name written with a hyphen in
     one table and a space in another.
@@ -1072,6 +1144,7 @@ def _canonical(boxes):
     """
     near = _near_spellings(boxes)
     near.update({k: v for k, v in _hyphen_spellings(boxes).items() if k not in near})
+    near.update({k: near.get(v, v) for k, v in _infobox_spellings(boxes).items() if k not in near})
     # Two names in one table are two people, however alike: a top-four
     # primary listed both Alaska Sullivans.
     tables = _tables(boxes, near)
