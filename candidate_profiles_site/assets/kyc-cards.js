@@ -1559,6 +1559,7 @@
     raceSection: raceSection,
     racePeople: racePeople,
     heldByLine: heldByLine,
+    outsideLead: outsideLead,
     holderLine: holderLine,
     fillOut: fillOut,
     legend: legend,

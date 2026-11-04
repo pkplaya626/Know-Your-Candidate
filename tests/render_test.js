@@ -5030,6 +5030,25 @@ async function testDecidedRaceWords() {
       check("one on the ballot keeps the candidate's tag and the term's condition",
         running === "House (Candidate)" && /^Term Jan\. 3, 2027 \(if elected\)$/.test(runningTerm),
         running + " / " + runningTerm);
+      // A special election's winner takes the seat on being sworn in, in
+      // December (rule 65), never on January 3: "Term begins Jan. 3, 2027"
+      // sat beside the holder's "until the winner ... is sworn in".
+      const special = races.find((r) => r.special && r.candidateIds.some((id) => (KYC.byId(id) || {}).isCandidate));
+      const sFiler = KYC.byId(special.candidateIds.find((id) => (KYC.byId(id) || {}).isCandidate));
+      const sKept = sFiler.raceStatus;
+      sFiler.raceStatus = "elected";
+      KYC.profile.open(sFiler.id, { fromRoute: true });
+      const sWon = D.getElementById("profileModalTermWrap").textContent.replace(/\s+/g, " ").trim();
+      KYC.profile.close();
+      sFiler.raceStatus = "nominee";
+      KYC.profile.open(sFiler.id, { fromRoute: true });
+      const sRunning = D.getElementById("profileModalTermWrap").textContent.replace(/\s+/g, " ").trim();
+      KYC.profile.close();
+      sFiler.raceStatus = sKept;
+      check("a special election's winner's term begins on being sworn in, never on a date",
+        sWon === "Term begins On being sworn in", sWon);
+      check("and one on its ballot reads the same, with the condition",
+        sRunning === "Term On being sworn in (if elected)", sRunning);
       const member = people.find((p) => !p.isCandidate && KYC.seated(p) && !p.contestLabel && p.seatUp2026 && /House/.test(p.chamber));
       const keptMember = member.raceStatus;
       const line = () => {
@@ -5065,6 +5084,17 @@ async function testDecidedRaceWords() {
       const words = D.querySelector("[data-results-read]").parentElement.textContent;
       check("the sources say the results are primary and November results",
         /primary and November\s+results\s+from\s+each\s+state's\s+Wikipedia\s+election\s+page/.test(words), words.slice(0, 300));
+    });
+    window.location.hash = "#/?view=senate";
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    suite(`the Senate view's headings, on ${clock}`, () => {
+      const roles = [...D.querySelectorAll(".senate-role")].map((n) => n.textContent);
+      const running = roles.filter((t) => /^(Running for this seat|On the November ballot) \(/.test(t));
+      const out = roles.filter((t) => /^(No longer running for this seat|Not on the November ballot) \(/.test(t));
+      check("the people of a race are headed in the tense of the day", running.length > 0 && running.every((t) =>
+        after ? /^On the November ballot/.test(t) : /^Running for this seat/.test(t)), running.slice(0, 2).join(" | "));
+      check("and those who left it", out.length > 0 && out.every((t) =>
+        after ? /^Not on the November ballot/.test(t) : /^No longer running/.test(t)), out.slice(0, 2).join(" | "));
     });
     window.location.hash = "#/?role=candidate";
     await new Promise((resolve) => setTimeout(resolve, 50));

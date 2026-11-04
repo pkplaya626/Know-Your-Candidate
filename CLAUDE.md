@@ -1331,9 +1331,38 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     which the status table alone cannot say: a nominee a November table left
     off reads "withdrawn" to it. An open primary's two marks must be its table's two
     highest counts, and a December round's mark must lead its table. All this
-    is beside the ranked-choice and majority gates and weakens neither. Replayed offline over the
-    pages of the two reads of that night, it made every call they had made
-    (all 10 and all 3) and refused none. Who
+    is beside the ranked-choice and majority gates and weakens neither. Its
+    second reader found more that a vandal or a prepared table could reach, each
+    now refused the same way: a mark on a filer a whole certified list does not
+    print, or whom the page's own primary eliminated, on a row naming no other
+    ballot line (`_eliminated_on_this_line`: a vandal who renames a row to a real
+    filer's name passes the filing test; a list printing them, and another line,
+    let them stand - a qualified list's name counts as a certified list's, rule
+    64, or a true Louisiana call would have been held for ever); a name in
+    Georgia's unpartisan runoff table with no filing, and any such table the
+    November counts do not send the two to (`_runoff_stands`: the two highest,
+    nobody at a majority), or an empty one an editor prepared settled the race.
+    A person's count is their "Total" row where it is filled, else the sum of
+    their lines (`_counted`: on New York's fusion tables a mark on a larger
+    last line stood over more votes in all). "Alone" asks the primaries too:
+    anyone in a table the marked person is not in may be on the ballot. After
+    the count a name only the infobox gives, with no filing and no list, adds
+    nobody (`refusedNames`, `result-name-refused`): the night's vandal, with no
+    mark anywhere, would have stood "Also on the November ballot". The race is
+    not held back for it. Its share reporting is its first number, whatever is
+    around it ("15%<ref>", "under 15%"), and a field with none concludes nothing.
+    Replayed offline over the pages of the two reads of that night, it made
+    every call they had made (all 10 and all 3), with no other status changed,
+    and refused none. A seat's own article ("2026 New York's 13th congressional
+    district election", behind a section's `{{main}}`) is not followed: read on
+    trial it marked the winner hours ahead of the state's page, but printed a
+    filer's name as that page's "Manual "Jomo" Williams" and dropped the
+    winner's Working Families line, so NY-13 waits for the state's page. And a
+    decided race's words are in the render suite's own rewind (`rewindToCampaign`):
+    an ordinary mark in California, Washington, American Samoa or Louisiana
+    failed it, which would have held the refresh that brought the mark, so
+    `allPartyPrimary` stays on a decided status (no word reads it there) and the
+    rewind reads an open primary's people back to the qualified list. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though

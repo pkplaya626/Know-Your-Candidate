@@ -826,7 +826,13 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   the page's infobox leads with them, or nobody else is on the whole ballot) is
   refused: the race reads as before the count, keeps the last read of it, and
   is named in the read's log and by `validate` (the cache's `refusedMarks`,
-  `{race id: [{name, why}]}`; `result-mark-refused`).
+  `{race id: [{name, why}]}`; `result-mark-refused`). So is a mark on a filer a
+  whole certified list does not print, or whom the page's own primary eliminated
+  on the same ballot line, and a Georgia runoff table the November counts do not
+  send its two to. A name only the infobox gives after the count, with no filing
+  and no state's list, adds nobody, the race otherwise read as it stands
+  (`refusedNames`, `result-name-refused`). A special election's filer's
+  `term_start` is "On being sworn in (if elected)", never January 3.
 - **The seat a person is contesting comes from their FEC filing.** Texas,
   Florida, California and Utah redrew their maps for 2026, and thirteen
   sitting members now hold one district number and run in another. A member
