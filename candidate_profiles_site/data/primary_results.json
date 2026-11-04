@@ -3455,7 +3455,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H2AZ02360": "Juan Ciscomani"
+    "H2AZ02360": "Juan Ciscomani",
+    "H6AZ06099": "JoAnna Mendoza"
    },
    "decided": {
     "general": true,
@@ -26461,7 +26462,7 @@
    "article": {
     "S0KS00315": "Roger Marshall",
     "S6KS00288": "Patrick Schmidt (politician)",
-    "S6KS00312": "Adam Hamilton (pastor)"
+    "S6KS00312": "Adam Hamilton (American politician)"
    },
    "decided": {
     "general": true,
@@ -28364,5 +28365,7 @@
    "unsure": []
   }
  },
+ "refusedMarks": {},
+ "refusedNames": {},
  "unparsedPages": []
 }
