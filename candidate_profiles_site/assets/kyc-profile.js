@@ -1438,10 +1438,14 @@
     // running, with a term "if elected" (PROFILES-07).
     var settled = item.isCandidate ? KYC.contestStatus(item) : "";
     var ended = KYC.offBallot(settled) || settled === "defeated";
+    // Nor is someone the results elected still "Running for" it, beside a
+    // term "if elected" (results night, 2026-11-04: Guam's new delegate).
+    var won = settled === "elected";
     el("profileModalRegionLabel").textContent = item.formerMember
       ? "Represented (until " + item.formerMember.left + ")"
       : !item.isCandidate ? "Represents"
       : settled === "unlisted" ? "Filed for"
+      : won ? "Elected to"
       : ended ? "Ran for" : "Running for";
     el("profileModalTermWrap").hidden = ended;
     var stateLink = el("profileModalStateLink");
@@ -1459,7 +1463,9 @@
     // one line it ran off a phone's screen.
     var term = el("profileModalTerm");
     term.textContent = "";
-    String(item.term_start || "N/A").split(" - ").forEach(function (part, i) {
+    var termWords = String(item.term_start || "N/A");
+    if (won && item.isCandidate) termWords = termWords.replace(/\s*\(if elected\)\s*$/i, "");
+    termWords.split(" - ").forEach(function (part, i) {
       if (i) term.appendChild(doc.createTextNode(" - "));
       var span = doc.createElement("span");
       if (part.length <= 24) span.className = "nowrap";

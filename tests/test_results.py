@@ -7,6 +7,7 @@ and the two gates (calendar, exact-match-only) that keep it conservative.
 """
 
 import datetime
+import json
 import os
 import sys
 import unittest
@@ -260,6 +261,98 @@ class TestResolving(unittest.TestCase):
         out = results.resolve_race(results.parse_boxes(text))
         self.assertEqual(out["Caitlyn Gegen"], "nominee")
         self.assertNotIn("Caitlyn Gegan", out)
+
+    def ut1(self, infobox_name, general_name="Riley Owen", mcadams_won=False,
+            infobox_party="Republican Party (United States)"):
+        """A UT-1 page as it stood on results night (2026-11-04): the
+        infobox spells the Republican nominee one way, everything else
+        another."""
+        infobox = "\n".join([
+            "{{Infobox election", "| election_name = 2026 Utah's 1st congressional district election",
+            f"| nominee1 = {infobox_name}", f"| party1 = {infobox_party}",
+            "| nominee2 = Ben McAdams", "| party2 = Democratic Party (United States)", "}}"])
+        primary = box("Republican primary results", (general_name, 900, True),
+                      ("Blake Moore", 800, False))
+        primary = primary.replace("Democratic Party (United States)",
+                                  "Republican Party (United States)")
+        general = box("2026 Utah's 1st congressional district election",
+                      (general_name, 140, False), ("Ben McAdams", 160, mcadams_won))
+        general = general.replace("| party = Democratic Party (United States)\n"
+                                  f"| candidate = {general_name}",
+                                  "| party = Republican Party (United States)\n"
+                                  f"| candidate = {general_name}")
+        return page_statuses("\n".join([infobox, primary, general]), general_held=True)
+
+    def test_an_infobox_misspelling_is_the_november_tables_nominee(self):
+        # UT-1, results night: "nominee1 = Riley Owens" over a page writing
+        # "Riley Owen" everywhere else. Read as two people, the infobox's
+        # spelling was a second Republican on the ballot who matched no
+        # filing, and stayed "nominee" beside the marked winner.
+        out = self.ut1("Riley Owens")
+        self.assertEqual(out, {"Riley Owen": "nominee", "Ben McAdams": "nominee",
+                               "Blake Moore": "eliminated"})
+        out = self.ut1("Riley Owens", mcadams_won=True)
+        self.assertEqual(out, {"Riley Owen": "defeated", "Ben McAdams": "elected",
+                               "Blake Moore": "eliminated"})
+        # MO-8's infobox swaps two letters: "Riechard" over "Reichard".
+        out = self.ut1("Christopher Riechard", "Christopher Reichard", mcadams_won=True)
+        self.assertEqual(out["Christopher Reichard"], "defeated")
+        self.assertNotIn("Christopher Riechard", out)
+
+    def test_with_no_november_table_an_infobox_misspelling_is_the_primary_winner(self):
+        # MO-8 on results night had no November table at all: its infobox's
+        # "Christopher Riechard" stood beside the Democratic primary's
+        # marked winner "Christopher Reichard", and the state page listed
+        # "Riechard (Democratic)" as also on the November ballot.
+        text = "\n".join([
+            "{{Infobox election", "| nominee1 = Jason Smith",
+            "| party1 = Republican Party (United States)",
+            "| nominee2 = Christopher Riechard", "| party2 = Democratic Party (United States)",
+            "}}",
+            box("Democratic primary results", ("Christopher Reichard", 900, True),
+                ("Frank Barnitz", 800, False)),
+            box("Republican primary results", ("Jason Smith", 900, True)).replace(
+                "Democratic Party (United States)", "Republican Party (United States)"),
+        ])
+        out = page_statuses(text, general_held=True)
+        self.assertEqual(out, {"Christopher Reichard": "nominee", "Frank Barnitz": "eliminated",
+                               "Jason Smith": "nominee"})
+        # A primary's loser a letter apart is no nominee to fold into.
+        dem = "Democratic Party (United States)"
+        info = (results.INFOBOX_TITLE, [{"name": "Jo Owens", "party": dem, "won": False,
+                                         "withdrawn": False, "votes": None}])
+        primary = ("Democratic primary results", [
+            {"name": "Jo Owen", "party": dem, "won": False, "withdrawn": False, "votes": 1},
+            {"name": "Al Smith", "party": dem, "won": True, "withdrawn": False, "votes": 2}])
+        self.assertEqual(results._infobox_spellings([primary, info]), {})
+        primary[1][0]["won"] = True
+        self.assertEqual(results._infobox_spellings([primary, info]), {"Jo Owens": "Jo Owen"})
+
+    def test_an_infobox_name_is_folded_only_into_its_own_partys_one_row(self):
+        # Another party's row a letter apart is another person, and so is
+        # one whose party neither side gives.
+        out = self.ut1("Riley Owens", infobox_party="Democratic Party (United States)")
+        self.assertEqual(out["Riley Owens"], "nominee")
+        out = self.ut1("Riley Owens", infobox_party="")
+        self.assertEqual(out["Riley Owens"], "nominee")
+        # Two rows that fit, a different given name, or a row the infobox
+        # names too: nothing is folded.
+        rep = "Republican Party (United States)"
+        info = (results.INFOBOX_TITLE, [{"name": "Jo Owens", "party": rep, "won": False,
+                                         "withdrawn": False, "votes": None}])
+        general = ("2026 Utah's 1st congressional district election", [
+            {"name": "Jo Owen", "party": rep, "won": False, "withdrawn": False, "votes": 1},
+            {"name": "Jo Owes", "party": rep, "won": False, "withdrawn": False, "votes": 1}])
+        self.assertEqual(results._infobox_spellings([general, info]), {})
+        general[1][1]["name"] = "Al Owens"
+        self.assertEqual(results._infobox_spellings([general, info]), {"Jo Owens": "Jo Owen"})
+        info[1].append({"name": "Jo Owen", "party": rep, "won": False, "withdrawn": False,
+                        "votes": None})
+        self.assertEqual(results._infobox_spellings([general, info]), {})
+        self.assertTrue(results._one_edit("riechard", "reichard"))
+        self.assertTrue(results._one_edit("owen", "owens"))
+        self.assertFalse(results._one_edit("owen", "owen"))
+        self.assertFalse(results._one_edit("rice", "rise ") or results._one_edit("abcd", "badc"))
 
     def test_a_surname_with_a_space_and_with_a_hyphen_is_one_person(self):
         # CA-40: the page lists "Esther Kim Varet" among those eliminated and
@@ -1126,6 +1219,90 @@ class TestTerritoryTitles(NoGap):
         self.assertEqual(race["status"]["H6DC00111"], "nominee")
         # Vote-tally lines are not people.
         self.assertNotIn("Overvotes", race["unmatched"])
+
+
+class TestSeatsWithNoPrimary(NoGap):
+    """American Samoa's and the Northern Mariana Islands' seats hold no
+    primary, so the calendar gate had no date to open them on: on results
+    night (2026-11-04) neither page was read, and no result could ever reach
+    either seat."""
+
+    field = {"candidates": [row("H6AS00101", "ALPHA, ANN", "AS", "H", 0, "REP"),
+                            row("H6AS00102", "DELTA, DEE", "AS", "H", 0, "DEM"),
+                            row("H6MP00101", "BETA, BEA", "MP", "H", 0, "IND"),
+                            row("H6MP00102", "GAMMA, GUS", "MP", "H", 0, "REP")]}
+    dates = {("AS", "H"): {"primary": None, "runoff": None},
+             ("MP", "H"): {"primary": None, "runoff": None}}
+    pages = {
+        "AS": box("2026 American Samoa's at-large congressional district election",
+                  ("Ann Alpha", 6000, True), ("Dee Delta", 3000, False)),
+        "MP": box("2026 Northern Mariana Islands's at-large congressional district election",
+                  ("Bea Beta", 3441, False), ("Gus Gamma", 2057, False)),
+    }
+
+    def run_build(self, today):
+        def fetch(title):
+            for state in ("AS", "MP"):
+                if title in results.page_titles(state, "H"):
+                    return self.pages[state]
+            raise results.PageMissing(title)
+        return results.build(self.field, self.dates, today=today, log=lambda *_: None,
+                             fetch=fetch)
+
+    def test_the_seats_are_listed_with_their_evidence(self):
+        from kyc import overrides
+        self.assertEqual(set(overrides.NO_PRIMARY_SEATS), {("AS", "H"), ("MP", "H")})
+        self.assertTrue(all(overrides.NO_PRIMARY_SEATS.values()))
+
+    def test_on_election_day_neither_page_is_read(self):
+        cache = self.run_build(datetime.date(2026, 11, 3))
+        self.assertNotIn("H-AS-00-2026", cache["races"])
+        self.assertNotIn("H-MP-00-2026", cache["races"])
+
+    def test_from_the_day_after_the_november_table_decides(self):
+        cache = self.run_build(datetime.date(2026, 11, 4))
+        self.assertEqual(cache["races"]["H-AS-00-2026"]["status"],
+                         {"H6AS00101": "elected", "H6AS00102": "defeated"})
+        # No mark yet: both are on the ballot, awaiting the count, never
+        # "ballot status not known".
+        self.assertEqual(cache["races"]["H-MP-00-2026"]["status"],
+                         {"H6MP00101": "nominee", "H6MP00102": "nominee"})
+        self.assertNotIn("H-MP-00-2026", cache.get("pending") or [])
+
+    def test_other_seats_still_wait_for_their_primary_date(self):
+        self.assertFalse(results.primary_settled(self.dates | {("GU", "H"): {"primary": None}},
+                                                 "GU", "H", datetime.date(2026, 11, 4)))
+
+
+class TestTerritoryDelegatesNeedAMajority(unittest.TestCase):
+    """48 U.S.C. 1712 elects the Delegates from Guam and the Virgin Islands
+    by a majority, with a runoff on the fourteenth day after. Read by
+    plurality, a leader marked short of a majority would have been
+    "elected" a fortnight before the runoff (results night, 2026-11-04)."""
+
+    def table(self, votes):
+        return box("2026 Guam's at-large congressional district election",
+                   ("Ann Alpha", votes[0], True), ("Dee Delta", votes[1], False),
+                   ("Ed Epsilon", votes[2], False))
+
+    def resolve(self, state, votes):
+        return results.resolve_race(results.parse_boxes(self.table(votes)), general_held=True,
+                                    general_runoff=state in results._general_runoffs())
+
+    def test_a_guam_or_virgin_islands_leader_short_of_a_majority_is_not_elected(self):
+        for state in ("GU", "VI"):
+            self.assertEqual(self.resolve(state, (48, 47, 5))["Ann Alpha"], "nominee", state)
+            self.assertEqual(self.resolve(state, (51, 47, 2))["Ann Alpha"], "elected", state)
+        # Where a plurality elects, the same mark does.
+        self.assertEqual(self.resolve("AS", (48, 47, 5))["Ann Alpha"], "elected")
+
+    def test_the_runoff_dates_are_the_voting_dates_records(self):
+        from kyc import overrides
+        with open(os.path.join(ROOT, "candidate_profiles_site", "data", "voting_dates.json"),
+                  encoding="utf-8") as handle:
+            dates = json.load(handle)["states"]
+        for state in ("GU", "VI"):
+            self.assertEqual(overrides.GENERAL_RUNOFFS[state][0], dates[state]["runoff"]["date"])
 
 
 class TestWithdrawals(unittest.TestCase):
