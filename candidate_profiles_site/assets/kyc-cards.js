@@ -1051,8 +1051,10 @@
     var o = p.outsideSpending;
     if (!o.runningElsewhere) return "";
     var running = KYC.byId(o.runningElsewhere);
+    var line = KYC.contestLine(p);
     return "Filed under their " + (o.candidacy || chamberWord(p)) + " candidacy, not the " +
-      (running ? chamberWord(running) : "other") + " campaign they are running: ";
+      (running ? chamberWord(running) : "other") + " campaign they " +
+      (line && line.past ? "ran" : "are running") + ": ";
   }
 
   function outsideOtherLead(o) {

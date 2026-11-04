@@ -2346,10 +2346,10 @@ DATASETS = (
     ("Who is running, and their money",
      '<a href="https://www.fec.gov/data/">Federal Election Commission</a>',
      "Everyone registered for 2026; receipts, spending and cash on hand", "refresh", None),
-    ("Primary results and who is on the ballot",
+    ("Primary and November results, and who is on the ballot",
      "Each state's results page on Wikipedia; Louisiana's Secretary of State for its "
      "qualified candidates",
-     "Who won, lost or withdrew; who is on the November ballot", "refresh", "results"),
+     "Who won, lost or withdrew; who was on the November ballot and who won it", "refresh", "results"),
     ("Financial disclosures",
      '<a href="https://disclosures-clerk.house.gov/">House Clerk</a> and '
      '<a href="https://efdsearch.senate.gov/">Senate eFD</a>',

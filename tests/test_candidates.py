@@ -499,6 +499,16 @@ class TestDuplicateDetection(unittest.TestCase):
         self.assertEqual(issues[0].level, "warn")
         self.assertIn("Jeremy Todd (B)", issues[0].detail[0])
 
+    def test_a_members_second_registration_is_reported_too(self):
+        # filedName is only a filer's: a sitting member's words are the
+        # register's for their own ids (PR #199 review).
+        profiles = [{"id": "FEC_A", "name": "Andy Barr", "fecCandidateId": "A"}]
+        field = {"candidates": [{"candidate_id": "A", "name": "BARR, GARLAND ANDY"},
+                                {"candidate_id": "B", "name": "BARR, GARLAND ANDY"}]}
+        issues = validate.check_second_registrations(
+            self.race(("B", "Andy Barr II")), profiles, field)
+        self.assertEqual([i.code for i in issues], ["second-registration"])
+
     def test_a_name_on_the_ballot_in_a_profiles_filed_words_is_reported(self):
         profiles = [{"id": "FEC_A", "name": "Jeremy Todd", "filedName": "TODD, JEREMY RYAN"}]
         issues = validate.check_second_registrations(

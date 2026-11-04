@@ -613,7 +613,10 @@
           outNote + "</p>" + racePeople.map(personRow).join("") +
           (stateRaces.length === 1 ? KYC.cards.orderNote(racePeople, stateRaces[0]) : "");
       } else if (out.length) {
-        html += '<p class="panel-subhead race-people">Nobody listed as still in the race' + outNote + "</p>";
+        html += '<p class="panel-subhead race-people">' +
+          (KYC.electionStatus().phase === "post-election"
+            ? "Nobody listed on the November ballot" : "Nobody listed as still in the race") +
+          outNote + "</p>";
       }
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
       // Before the markets and the holder, beside the statuses they back.

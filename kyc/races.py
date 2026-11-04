@@ -138,6 +138,9 @@ def assign(profiles):
     return profiles
 
 
+SPECIAL_TERM = "On being sworn in (if elected)"
+
+
 def ballot_kind(race):
     """How the race's ballot is decided, for a badge the reader can see:
     ``primaryKind`` ("top-two", "top-four" or "open") and
@@ -352,6 +355,14 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         # A special election (Florida's, Ohio's): from the frozen record, so it
         # stays one after the seat's winner is seated for the term to 2029.
         race["special"] = bool((frozen.get(race["id"]) or {}).get("special"))
+        if race["special"]:
+            # A special's winner takes the seat on being sworn in, in December,
+            # for the rest of the term (rule 65), never on January 3: the same
+            # site says of the holder "until the winner ... is sworn in".
+            for pid in race["candidateIds"]:
+                person = by_id.get(pid)
+                if person and person.get("isCandidate") and "(if elected)" in str(person.get("term_start")):
+                    person["term_start"] = SPECIAL_TERM
         if race["chamber"] == "Senate" and (frozen.get(race["id"]) or {}).get("senateClass"):
             # The seat's class, from the record: the view groups a seat by
             # it whoever holds the seat now.

@@ -1631,7 +1631,7 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
     return boxes, refused
 
 
-def _eliminated_on_this_line(boxes, name):
+def _eliminated_on_this_line(boxes, name, general_runoff=False):
     """True where the page's own decided primary eliminated *name* and their
     November row names no other ballot line. A vandal who renames a row to a
     real filer's name passes the filing test; a person who lost a party's primary
@@ -1645,7 +1645,7 @@ def _eliminated_on_this_line(boxes, name):
         stage = _stage(clean)
         if stage == "primary" and not _COUNTY_CONVENTION.search(clean):
             primaries[clean] = rows
-        elif stage == "runoff":
+        elif stage == "runoff" and not (general_runoff and _unpartisan_runoff(clean)):
             runoffs[clean] = rows
         elif stage == "general":
             november.extend(r for r in rows if r["name"] == name)
@@ -2823,11 +2823,14 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     continue
                 if (printed or {}).get("complete"):
                     unvouched[name] = "the state's certified list, the whole ballot, does not print them"
-                elif name not in matched and name not in ambiguous and not _exact_filing(name, rows):
-                    # A name that fits two filings is a filer's, not nobody's:
-                    # one person's two registrations settle at apply (rule 72).
-                    unvouched[name] = "no filing and no state's list in this race names them"
-                elif _eliminated_on_this_line(boxes, name):
+                elif name not in matched and not _exact_filing(name, rows):
+                    # Fitting two filings is no filing to stand on, and nothing
+                    # here tells them apart; but it is not "no filing".
+                    unvouched[name] = ("it fits more than one filing, and nothing here tells them "
+                                       "apart" if name in ambiguous
+                                       else "no filing and no state's list in this race names them")
+                elif not is_open and _eliminated_on_this_line(
+                        boxes, name, general_runoff=kinds["general_runoff"]):
                     unvouched[name] = "the page's own primary eliminated them, and their November " \
                                       "row names no other ballot line"
             if unvouched:

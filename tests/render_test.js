@@ -446,12 +446,25 @@ function freezeClock(window, iso) {
 const NOVEMBER_RESULTS = { elected: true, defeated: true, runoff: true };
 
 function rewindToCampaign(window) {
+  const raceOf = {};
+  window.kycRaces.forEach((r) => { raceOf[r.id] = r; });
   window.legislatorsData.forEach((p) => {
-    if (NOVEMBER_RESULTS[p.raceStatus]) p.raceStatus = "nominee";
+    if (!NOVEMBER_RESULTS[p.raceStatus]) return;
+    // An open primary's people were on the state's qualified list until its
+    // count; anyone else on the ballot, a nominee (allPartyPrimary stays on
+    // the record, for the all-party words).
+    const race = raceOf[p.raceStatusRace || p.contestRaceId || p.raceId];
+    if (race && race.primaryKind === "open") {
+      p.raceStatus = "qualified";
+      p.raceStatusSource = "qualified";
+    } else {
+      p.raceStatus = "nominee";
+    }
   });
   window.kycRaces.forEach((r) => {
     const res = r.results;
     if (!res) return;
+    if (r.primaryKind === "open") res.fromQualifiedList = true;
     res.nominees = (res.nominees || 0) + (res.elected || 0) + (res.defeated || 0) + (res.runoff || 0);
     res.elected = res.defeated = res.runoff = 0;
     res.otherElected = [];
@@ -2118,7 +2131,11 @@ async function testDirectoryAsync() {
     // NY-15: Jose Vega lost the Democratic primary and is on the "Speak The
     // Truth" line; without the line he read as a second Democratic nominee.
     // A real nominee in a race with a member stands in, given a hostile line.
-    const race = window.kycRaces.find((r) => r.incumbentIds.length &&
+    // A race whose holder is in it: a holder who went elsewhere draws no
+    // "In this race" row of the nominee. Any challenger stands in once every
+    // race is decided; the rewind reads them back as nominees.
+    const inRace = (r) => r.incumbentIds.length && !KYC.runsElsewhere(KYC.byId(r.incumbentIds[0]) || {});
+    const race = window.kycRaces.find((r) => inRace(r) &&
       r.candidateIds.some((id) => (KYC.byId(id) || {}).raceStatus === "nominee"));
     check("a race with a challenger nominee exists to test", !!race);
     if (!race) return;
@@ -4874,8 +4891,10 @@ async function testPeopleWordingAfterElection() {
   let lost = null;
   const { window, D, errors } = await buildPage("index.html", { now: "2026-11-10T12:00:00",
     data: (w) => {
+      // Any member with another run: the night's marks decide them in turn,
+      // and this state is made, whichever status the day's data gives.
       const member = w.legislatorsData.find((p) => p.alsoRunningId && !p.isCandidate &&
-        (w.legislatorsData.find((f) => f.id === p.alsoRunningId) || {}).raceStatus === "nominee");
+        w.legislatorsData.some((f) => f.id === p.alsoRunningId));
       if (!member) return;
       w.legislatorsData.find((f) => f.id === member.alsoRunningId).raceStatus = "defeated";
       lost = member.id;
@@ -5117,6 +5136,14 @@ async function testOtherRunWalk() {
               running !== /[Rr]unning/.test(cross)) wrong.push(`${tag}: cross link "${cross}"`);
           if (stage === "won" && !/[Ee]lected/.test(cross) && !/\(elected\)/i.test(cross)) {
             wrong.push(`${tag}: cross link "${cross}"`);
+          }
+          // Said once, and a result keeps its capitals (PR #199 review).
+          if (/november\)|\(elected\)/.test(cross)) wrong.push(`${tag}: cross link "${cross}"`);
+          // Outside groups' lead: the campaign they ran, or are running.
+          const outsideSaid = KYC.cards.outsideLead(Object.assign({}, m, { outsideSpending:
+            { runningElsewhere: m.alsoRunningId || "nobody", candidacy: "House" } }));
+          if (/campaign they are running/.test(outsideSaid) !== running) {
+            wrong.push(`${tag}: outside "${outsideSaid}"`);
           }
         });
         m.raceStatus = kept[0];
@@ -10293,8 +10320,13 @@ async function testCertifiedBallots() {
     // American Samoa holds no primary: its delegate, put on the ballot by
     // the certified list, read "Renominated", credited to "the state's"
     // list (rules 74 and 75).
-    const delegate = as.window.legislatorsData.find((p) => as.window.KYC.seated(p) &&
-      p.state === "AS" && p.raceStatusSource === "certified");
+    // A mark on the race takes the list's credit off the person, and the
+    // rewind cannot know whose it was: the campaign's state is made here.
+    const delegate = as.window.legislatorsData.find((p) => as.window.KYC.seated(p) && p.state === "AS");
+    if (delegate && res.certifiedBy && !delegate.raceStatusSource) {
+      delegate.raceStatusSource = "certified";
+      delegate.raceStatusSourceName = res.certifiedBy;
+    }
     const card = delegate ? as.window.KYC.cards.card(delegate) : "";
     const long = delegate ? as.window.KYC.raceStatusOf(delegate, "long") : null;
     check("the delegate reads 'On the November ballot', never 'Renominated'",

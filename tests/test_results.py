@@ -1390,9 +1390,151 @@ class TestAMarkNeedsAFilingAndACount(unittest.TestCase):
                                              ("Ann Other", 20, False)))
         self.assertEqual(results.refuse_marks(top, open_primary=True)[1], [])
 
+    # ---- the second reader's findings on the first version (PR #199)
 
-if __name__ == "__main__":
-    unittest.main()
+    def lists(self, *names, complete=True):
+        return {"NC": {"source": "NC", "url": "https://x", "fetched": "2026-10-17",
+                       "complete": complete, "races": {self.RACE: [
+                           {"name": n, "party": "Democratic", "kind": "ballot"} for n in names]}}}
+
+    def with_loser(self):
+        self.field["candidates"].append(
+            {"candidate_id": "S6NC4", "name": "LOSER, LARRY", "state": "NC", "office": "S",
+             "party": "DEM"})
+
+    def test_a_whole_lists_ballot_refuses_a_filer_it_does_not_print(self):
+        # A vandal who renames a row to a real filer's name passes the filing
+        # test: the list is the ballot (rule 77).
+        self.with_loser()
+        cache = self.read(self.table(("Larry Loser", 900, True), ("Roy Cooper", 800, False),
+                                     ("Michael Whatley", 700, False)),
+                          certified=self.lists("Roy Cooper", "Michael Whatley"))
+        self.assertNotEqual(self.status(cache).get("S6NC4"), "elected")
+        self.assertEqual(self.refused(cache)[0]["name"], "Larry Loser")
+        self.assertIn("certified list", self.refused(cache)[0]["why"])
+        self.assertNotIn("elected", self.status(cache).values())
+
+    def test_a_primary_loser_on_the_same_line_is_refused_a_mark(self):
+        self.with_loser()
+        self.PRIMARIES = (box("Democratic primary results", ("Roy Cooper", 900, True),
+                              ("Larry Loser", 100, False)) + "\n" +
+                          box("Republican primary results", ("Michael Whatley", 800, True)))
+        cache = self.read(self.table(("Larry Loser", 900, True), ("Roy Cooper", 800, False)))
+        self.assertEqual(self.refused(cache)[0]["name"], "Larry Loser")
+        self.assertIn("eliminated", self.refused(cache)[0]["why"])
+        self.assertNotIn("elected", self.status(cache).values())
+
+    def test_a_primary_loser_on_another_line_may_win(self):
+        # New York's fusion lines, a sore loser's own party: another ballot line.
+        self.with_loser()
+        self.PRIMARIES = (box("Democratic primary results", ("Roy Cooper", 900, True),
+                              ("Larry Loser", 100, False)) + "\n" +
+                          box("Republican primary results", ("Michael Whatley", 800, True)))
+        other = "\n".join([
+            "{{Election box begin no change", f"| title = {self.TITLE}", "}}",
+            "{{Election box winning candidate with party link no change",
+            "| party = Independent politician", "| candidate = Larry Loser", "| votes = 900", "}}",
+            "{{Election box candidate with party link no change",
+            "| party = Democratic Party (United States)", "| candidate = Roy Cooper", "| votes = 800", "}}",
+            "{{Election box end}}"])
+        cache = self.read(other)
+        self.assertEqual(self.refused(cache), [])
+        self.assertEqual(self.status(cache)["S6NC4"], "elected")
+
+    def test_an_infobox_name_with_no_filing_and_no_list_adds_nobody_after_the_count(self):
+        logged = []
+        cache = self.read(self.infobox(("Peter Griffin", "900"), ("Michael Whatley", "800")),
+                          self.table(("Roy Cooper", None, False), ("Michael Whatley", None, False)),
+                          logged=logged)
+        race = cache["races"][self.RACE]
+        self.assertNotIn("Peter Griffin", race["unmatched"])
+        self.assertEqual(self.status(cache), self.AWAITING)
+        self.assertEqual(cache["refusedNames"][self.RACE][0]["name"], "Peter Griffin")
+        self.assertTrue(any("[REFUSED]" in line and "Peter Griffin" in line for line in logged), logged)
+        from kyc import validate
+        issues = [i for i in validate.check_results_pages(cache) if i.code == "result-name-refused"]
+        self.assertEqual([i.level for i in issues], ["warn"])
+        self.assertIn("Peter Griffin", issues[0].detail[0])
+
+    def test_an_infobox_name_a_table_or_a_list_holds_stands(self):
+        cache = self.read(self.infobox(("Sam Nofiling", "900"), ("Michael Whatley", "800")),
+                          self.table(("Sam Nofiling", None, False), ("Michael Whatley", None, False)))
+        self.assertIn("Sam Nofiling", cache["races"][self.RACE]["unmatched"])
+        cache = self.read(self.infobox(("Sam Nofiling", "900"), ("Michael Whatley", "800")),
+                          self.table(("Roy Cooper", None, False), ("Michael Whatley", None, False)),
+                          certified=self.lists("Roy Cooper", "Michael Whatley", "Sam Nofiling"))
+        self.assertFalse(cache.get("refusedNames"))
+
+    def test_before_the_count_an_infobox_name_is_left_as_it_was(self):
+        cache = self.read(self.infobox(("Peter Griffin", "900")), self.table(("Roy Cooper", None, False)),
+                          today=datetime.date(2026, 11, 2))
+        self.assertFalse(cache.get("refusedNames"))
+
+    def test_reporting_is_the_fields_first_number_whatever_is_around_it(self):
+        for said in ("15%<ref>AP</ref>", "15<ref name=x/>", "{{percent|15}}", "~15%", "under 15%", "15 percent"):
+            cache = self.read(self.infobox(("Roy Cooper", "900"), ("Michael Whatley", "800"), reporting=said),
+                              self.table(("Roy Cooper", None, True), ("Michael Whatley", None, False)))
+            self.assertEqual(self.status(cache), self.AWAITING, said)
+            self.assertIn("15 reporting", self.refused(cache)[0]["why"], said)
+        cache = self.read(self.infobox(("Roy Cooper", "900"), ("Michael Whatley", "800"), reporting="most"),
+                          self.table(("Roy Cooper", None, True), ("Michael Whatley", None, False)))
+        self.assertEqual(self.status(cache), self.AWAITING)
+        self.assertIn("cannot be read", self.refused(cache)[0]["why"])
+        self.assertEqual(results._reporting(""), (None, False))
+
+    def test_an_ongoing_count_may_say_so_in_other_words(self):
+        for said in ("y", "true", "Yes"):
+            cache = self.read(self.infobox(("Roy Cooper", "900"), ("Michael Whatley", "800"), ongoing=said),
+                              self.table(("Roy Cooper", None, True), ("Michael Whatley", None, False)))
+            self.assertEqual(self.status(cache), self.AWAITING, said)
+
+    def fusion(self, *rows):
+        out = ["{{Election box begin no change", f"| title = {self.TITLE}", "}}"]
+        for name, party, votes, won in rows:
+            kind = "winning candidate" if won else "candidate"
+            out += [f"{{{{Election box {kind}", f"| party = {party}", f"| candidate = {name}",
+                    f"| votes = {votes}", "}}"]
+        return "\n".join(out + ["{{Election box end}}"])
+
+    def test_a_fusion_table_is_led_by_a_persons_total_or_the_sum_of_their_lines(self):
+        lines = [("Roy Cooper", "Democratic", 100000, True), ("Roy Cooper", "Working Families", 10000, True),
+                 ("Michael Whatley", "Republican", 90000, False), ("Michael Whatley", "Conservative", 12000, False)]
+        self.assertEqual(self.status(self.read(self.fusion(*lines))), self.ELECTED)
+        # A mark on the larger last line, over fewer votes in all, does not stand.
+        wrong = [("Roy Cooper", "Democratic", 100000, False), ("Roy Cooper", "Working Families", 10000, False),
+                 ("Michael Whatley", "Republican", 90000, True), ("Michael Whatley", "Conservative", 12000, True)]
+        cache = self.read(self.fusion(*wrong))
+        self.assertEqual(self.status(cache), self.AWAITING)
+        self.assertIn("do not lead", self.refused(cache)[0]["why"])
+        # A filled Total row is the person's count.
+        total = lines + [("Roy Cooper", "Total", 110000, False), ("Michael Whatley", "Total", 102000, False)]
+        self.assertEqual(self.status(self.read(self.fusion(*total))), self.ELECTED)
+
+    def test_a_lone_row_is_not_alone_beside_another_partys_unmarked_primary(self):
+        self.PRIMARIES = (box("Democratic primary results", ("Roy Cooper", 900, True)) + "\n" +
+                          box("Republican primary results", ("Michael Whatley", 800, False)))
+        cache = self.read(self.table(("Roy Cooper", None, True)))
+        self.assertNotIn("elected", self.status(cache).values())
+        self.assertEqual(self.refused(cache)[0]["name"], "Roy Cooper")
+        # One who withdrew is nobody else on the ballot.
+        self.PRIMARIES = (box("Democratic primary results", ("Roy Cooper", 900, True)) + "\n" +
+                          box("Republican primary results", ("Michael Whatley", 800, False, "withdrawn")))
+        self.assertEqual(self.status(self.read(self.table(("Roy Cooper", None, True))))["S6NC1"], "elected")
+
+    def test_a_name_fitting_two_filings_says_so_and_never_no_filing(self):
+        self.field["candidates"] += [
+            {"candidate_id": "S2NC8", "name": "CLEMMONS, MITCHELL", "state": "NC", "office": "S", "party": "DEM"},
+            {"candidate_id": "S6NC9", "name": "CLEMMONS, MITCHELL LEE", "state": "NC", "office": "S", "party": "DEM"}]
+        cache = self.read(self.table(("Mitch Clemmons", 900, True), ("Roy Cooper", 800, False)))
+        self.assertNotIn("elected", self.status(cache).values())
+        self.assertIn("more than one filing", self.refused(cache)[0]["why"])
+
+    def test_a_bold_or_referenced_count_is_a_count(self):
+        for votes in ("\'\'\'700\'\'\'", "700<ref>x</ref>", "700"):
+            cache = self.read(self.fusion(("Roy Cooper", "Democratic", votes, True),
+                                          ("Michael Whatley", "Republican", 600, False)))
+            self.assertEqual(self.status(cache), self.ELECTED, votes)
+
 
 
 CA_TITLE = "2026 United States House of Representatives elections in California"
@@ -2898,3 +3040,110 @@ class TestNamedMinorParty(unittest.TestCase):
         results.apply_cache([vega], self.cache("speak the truth", "Speak The Truth"))
         self.assertEqual(vega["party"], "Democrat")
         self.assertEqual(vega["ballotLine"], "Speak The Truth")
+
+
+class TestAGeneralRunoffNeedsTheNovemberCount(NoGap):
+    """Georgia's general runoff: rule 63's marks test did not reach it. A name
+    with no filing stood in the runoff with a real nominee defeated, and a table
+    an editor prepared settled a race with no count behind it."""
+
+    TITLE = "2026 United States Senate election in Georgia"
+    RACE = "S-GA-2026"
+    PRIMARIES = (box("Democratic primary results", ("Jon Ossoff", 900, True)) + "\n" +
+                 box("Republican primary results", ("Mike Collins", 800, True)))
+
+    def setUp(self):
+        super().setUp()
+        self.field = {"candidates": [
+            {"candidate_id": "S8GA1", "name": "OSSOFF, JON", "state": "GA", "office": "S", "party": "DEM"},
+            {"candidate_id": "S6GA2", "name": "COLLINS, MIKE", "state": "GA", "office": "S", "party": "REP"},
+            {"candidate_id": "S6GA3", "name": "LIB, LENA", "state": "GA", "office": "S", "party": "LIB"}]}
+        self.dates = {("GA", "S"): {"primary": "2026-05-19", "runoff": "2026-06-16"}}
+
+    def read(self, *tables, logged=None):
+        page = "\n\n".join((self.PRIMARIES,) + tables)
+        return results.build(self.field, self.dates, today=datetime.date(2026, 11, 4),
+                             log=(logged.append if logged is not None else lambda *_: None),
+                             fetch=lambda t: page if t == self.TITLE else
+                             (_ for _ in ()).throw(results.PageMissing(t)))
+
+    def refused(self, cache):
+        return (cache.get("refusedMarks") or {}).get(self.RACE) or []
+
+    def test_a_runoff_the_november_counts_send_them_to_stands(self):
+        cache = self.read(box(self.TITLE, ("Jon Ossoff", 490, False), ("Mike Collins", 480, False),
+                              ("Lena Lib", 30, False)),
+                          box("Runoff results", ("Jon Ossoff", 0, False), ("Mike Collins", 0, False)))
+        self.assertEqual(self.refused(cache), [])
+        status = cache["races"][self.RACE]["status"]
+        self.assertEqual((status["S8GA1"], status["S6GA2"], status["S6GA3"]),
+                         ("runoff", "runoff", "defeated"))
+
+    def test_a_name_with_no_filing_stands_in_no_runoff(self):
+        cache = self.read(box(self.TITLE, ("Jon Ossoff", 490, False), ("Peter Griffin", 480, False),
+                              ("Lena Lib", 30, False)),
+                          box("Runoff results", ("Jon Ossoff", 0, False), ("Peter Griffin", 0, False)))
+        race = cache["races"][self.RACE]
+        self.assertNotIn("Peter Griffin", race["unmatched"])
+        self.assertNotIn(race["status"]["S6GA2"], ("defeated", "runoff"))
+        self.assertIn("Peter Griffin", [m["name"] for m in self.refused(cache)])
+
+    def test_an_empty_runoff_table_settles_nothing(self):
+        logged = []
+        cache = self.read(box(self.TITLE, ("Jon Ossoff", 0, False), ("Mike Collins", 0, False),
+                              ("Lena Lib", 0, False)),
+                          box("Runoff results", ("Jon Ossoff", 0, False), ("Mike Collins", 0, False)),
+                          logged=logged)
+        status = cache["races"][self.RACE]["status"]
+        self.assertNotIn("runoff", status.values())
+        self.assertNotIn("defeated", status.values())
+        self.assertEqual(len(self.refused(cache)), 2)
+        self.assertTrue(any("[REFUSED]" in line for line in logged), logged)
+
+    def test_a_runoff_beside_a_majority_settles_nothing(self):
+        cache = self.read(box(self.TITLE, ("Jon Ossoff", 600, False), ("Mike Collins", 300, False),
+                              ("Lena Lib", 100, False)),
+                          box("Runoff results", ("Jon Ossoff", 0, False), ("Mike Collins", 0, False)))
+        self.assertNotIn("runoff", cache["races"][self.RACE]["status"].values())
+        # Nor the two who are not the highest.
+        cache = self.read(box(self.TITLE, ("Jon Ossoff", 400, False), ("Mike Collins", 300, False),
+                              ("Lena Lib", 350, False)),
+                          box("Runoff results", ("Jon Ossoff", 0, False), ("Mike Collins", 0, False)))
+        self.assertNotIn("runoff", cache["races"][self.RACE]["status"].values())
+
+
+class TestAQualifiedListVouchesForAName(NoGap):
+    """Rule 64's list has a certified list's standing: Louisiana's holds people
+    with no FEC filing, and refusing one who reached the top two would have held
+    a true call for ever, with a false reason."""
+
+    def read(self, *rows):
+        field = {"candidates": [row("H6LA2A", "CARTER, TROY", "LA", "H", 2, "DEM")]}
+        page = "\n==District 2==\n" + box("2026 Louisiana's 2nd congressional district election", *rows)
+        listed = {"H-LA-02-2026": [
+            {"name": "Troy Carter", "party": "Democratic", "filed": "", "withdrew": False},
+            {"name": 'Renada "Honey" Collins', "party": "Republican", "filed": "", "withdrew": False},
+            {"name": "Gone Candidate", "party": "Republican", "filed": "", "withdrew": True}]}
+        return results.build(field, LA_CALENDAR, today=datetime.date(2026, 11, 4), log=lambda *_: None,
+                             fetch=lambda t: page if t == LA_TITLE else
+                             (_ for _ in ()).throw(results.PageMissing(t)),
+                             qualified=(listed, {"source": "LA SoS"}))
+
+    def test_someone_on_the_list_may_reach_the_top_two_with_no_filing(self):
+        cache = self.read(("Troy Carter", 120000, True), ('Renada "Honey" Collins', 60000, True),
+                          ("Third Person", 10000, False))
+        self.assertFalse(cache["refusedMarks"], cache["refusedMarks"])
+        race = cache["races"]["H-LA-02-2026"]
+        self.assertEqual(race["status"]["H6LA2A"], "runoff")
+
+    def test_someone_off_the_list_may_not(self):
+        cache = self.read(("Troy Carter", 120000, True), ("Peter Griffin", 60000, True))
+        self.assertIn("no filing", cache["refusedMarks"]["H-LA-02-2026"][0]["why"])
+
+    def test_someone_the_list_says_withdrew_may_not(self):
+        cache = self.read(("Troy Carter", 120000, True), ("Gone Candidate", 60000, True))
+        self.assertTrue(cache["refusedMarks"]["H-LA-02-2026"])
+
+
+if __name__ == "__main__":
+    unittest.main()

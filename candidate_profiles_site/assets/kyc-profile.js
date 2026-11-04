@@ -1258,14 +1258,18 @@
     var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated" ||
       other.raceStatus === "elected" || (counted && KYC.onNovemberBallot(other.raceStatus) &&
         other.raceStatus !== "runoff"));
-    var how = ended ? KYC.raceStatusOf(other, "mate") : null;
+    // Elected is said once, by the verb; a result keeps the status table's
+    // capitals ("lost in November", never "lost in november").
+    var elected = !!other && other.raceStatus === "elected";
+    var how = ended && !elected ? KYC.raceStatusOf(other, "mate") : null;
     link.innerHTML =
       KYC.icon("branch") + ' <span class="cross-link-text">' +
-      (item.alsoRunningId ? (ended ? "Also ran for" : "Also running for")
+      (item.alsoRunningId ? (elected ? "Elected to" : ended ? "Also ran for" : "Also running for")
         : left ? "Held until " + left : "Currently holds") +
       ' <button type="button" data-goto="' + KYC.escapeAttr(id) + '">' +
       KYC.escapeHtml(seat) + "</button>" +
-      (how ? " (" + KYC.escapeHtml(how.label.toLowerCase()) + ")" : "") + "</span>";
+      (how ? " (" + KYC.escapeHtml(how.label.charAt(0).toLowerCase() + how.label.slice(1)) + ")" : "") +
+      "</span>";
   }
 
   function renderStatus(item) {

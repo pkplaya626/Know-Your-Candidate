@@ -630,17 +630,19 @@ def seat_phrase(label):
     return f"the {parts[0]} in {parts[1]}" if parts else str(label or "")
 
 
-def _role(person):
+def _role(person, post=False):
     from .record import seated
 
     parts = _seat_parts(person.get("officeLabel"))
     if not parts:
         office = person.get("officeLabel") or ""
-        return ("candidate for " if person.get("isCandidate")
+        return (("in the 2026 race for " if post else "candidate for ") if person.get("isCandidate")
                 else "member for " if seated(person) else "former member for ") + office
     body, where = parts
     if person.get("isCandidate"):
-        return f"candidate for the {body} in {where}"
+        # "Candidate for the U.S. Senate ...: Elected in November" was both.
+        return (f"in the 2026 race for the {body} in {where}" if post
+                else f"candidate for the {body} in {where}")
     return ("member" if seated(person) else "former member") + f" of the {body} for {where}"
 
 
@@ -685,7 +687,7 @@ def describe(person, by_id, races_by_id, post=False):
         said.append(other)
     if not said and seat_up(person):
         said.append("seat up in " + str(person["electionYear"]))
-    description = f"{lead}, {_role(person)}" + (": " + "; ".join(said) + "." if said else ".")
+    description = f"{lead}, {_role(person, post)}" + (": " + "; ".join(said) + "." if said else ".")
     return lead, description, status
 
 
