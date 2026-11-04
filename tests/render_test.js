@@ -4974,7 +4974,9 @@ async function testHolderOffTheBallot() {
       .some((el) => el.getAttribute("data-id") === holder.id));
     const held = host.querySelector(`.race-held [data-id="${holder.id}"]`);
     check("they are named above it, with their own status",
-      !!held && /^Held by /.test(held.closest(".race-held").textContent) &&
+      // One who has left since held it, in the record's words (rule 67).
+      !!held && (KYC.seated(holder) ? /^Held by /
+        : / held this seat in the 2026 race /).test(held.closest(".race-held").textContent) &&
       /Not running|Lost|not seeking/i.test(held.closest(".race-held").textContent),
       held && held.closest(".race-held").textContent);
   });
