@@ -4905,6 +4905,163 @@ async function testPeopleWordingAfterElection() {
   window.close();
 }
 
+/* ================================================ a member's other run */
+
+/* Every status a member's run for another seat can have, through every place
+ * that says it, on the campaign clock and after Election Day. Andy Barr was
+ * elected to the Senate and read "who is running for Senate KY" on the race
+ * for the seat he holds; a member who lost in November "is not on its November
+ * ballot". The words are written here once more, on purpose: a word changed in
+ * the page code alone fails (kyc/share.py's are held to the page code by the
+ * fixture, testSharePages). */
+const OTHER_RUN = [
+  // status, the words on the campaign clock, and after Election Day
+  ["nominee", "running", "awaiting"],
+  ["qualified", "running", "awaiting"],
+  ["advanced", "running", "running"],
+  ["runoff", "running", "running"],
+  ["elected", "won", "won"],
+  ["defeated", "lost", "lost"],
+  ["eliminated", "out", "out"],
+  ["withdrawn", "out", "out"],
+  ["unlisted", "out", "out"],
+  ["", "running", "ran"],
+];
+
+function otherRunWords(stage, seat, renumbered, after) {
+  const map = " under the state\u2019s new district map";
+  const absent = (after ? "was" : "is") + " not on its November ballot";
+  if (renumbered) {
+    return {
+      running: { verb: "Running in", clause: `is running in ${seat}${map}` },
+      awaiting: { verb: "Ran in", clause: `ran in ${seat}${map}; the result is awaited` },
+      ran: { verb: "Ran in", clause: `ran in ${seat}${map}` },
+      won: { verb: "Re-elected in", clause: `was re-elected in ${seat}${map} in November` },
+      lost: { verb: "Ran in", clause: `ran in ${seat}${map}, and lost in November` },
+      out: { verb: "Ran in", clause: `ran in ${seat}${map}, and ${absent}` },
+    }[stage];
+  }
+  return {
+    running: { verb: "Running for", clause: `is running for ${seat}` },
+    awaiting: { verb: "Ran for", clause: `ran for ${seat}; the result is awaited` },
+    ran: { verb: "Ran for", clause: `ran for ${seat}` },
+    won: { verb: "Elected to", clause: `was elected to ${seat} in November` },
+    lost: { verb: "Ran for", clause: `ran for ${seat} and lost in November` },
+    out: { verb: "Ran for", clause: `ran for ${seat} and ${absent}` },
+  }[stage];
+}
+
+async function testOtherRunWalk() {
+  for (const [clock, opts] of [["the campaign clock", {}],
+    ["after Election Day", { now: "2026-11-05T12:00:00" }]]) {
+    const after = !!opts.now;
+    const { window, D } = await buildPage("index.html", opts);
+    const mapPage = await buildPage("map.html", Object.assign({ hash: "#/?state=KY&mode=house" }, opts));
+    const KYC = window.KYC;
+    const people = window.legislatorsData;
+    const races = window.kycRaces;
+    const stripped = (html) => html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ");
+    const movers = people.filter((m) => KYC.runsElsewhere(m) && m.contestLabel && KYC.seated(m) &&
+      races.some((r) => r.id === m.raceId && r.incumbentIds.indexOf(m.id) !== -1));
+    const samples = [movers.find((m) => !m.renumbered), movers.find((m) => m.renumbered)].filter(Boolean);
+    suite(`a member's other run — every status, every place, on ${clock}`, () => {
+      check("the data has a member running for another seat, while the old Congress sits",
+        samples.length === 2 || !oldCongressSits(window), samples.map((m) => m.name).join(", "));
+      const wrong = [];
+      samples.forEach((m) => {
+        const filing = m.alsoRunningId ? KYC.byId(m.alsoRunningId) : null;
+        const kept = [m.raceStatus, m.raceStatusRace, filing && filing.raceStatus];
+        const held = races.find((r) => r.id === m.raceId && r.incumbentIds.indexOf(m.id) !== -1);
+        const seat = m.contestLabel.replace(" \u2022 ", " ").replace(/^House /, "");
+        OTHER_RUN.forEach(([status, before, later]) => {
+          const stage = after ? later : before;
+          const want = otherRunWords(stage, seat, !!m.renumbered, after);
+          m.raceStatus = status;
+          m.raceStatusRace = m.contestRaceId;
+          if (filing) filing.raceStatus = status;
+          const tag = `${m.name}/${status || "none"}`;
+          const line = KYC.contestLine(m);
+          if (line.stage !== stage) wrong.push(`${tag}: stage ${line.stage}`);
+          if (line.verb !== want.verb) wrong.push(`${tag}: verb "${line.verb}"`);
+          if (line.clause !== want.clause) wrong.push(`${tag}: clause "${line.clause}"`);
+          // The card's badge, the race's "Held by" line, its folded row and
+          // its head's badge (Your ballot draws the same "Held by" line).
+          const card = stripped(KYC.cards.statusBadge(m));
+          if (card.indexOf(line.label) === -1) wrong.push(`${tag}: card "${card}"`);
+          const heldBy = stripped(KYC.cards.heldByLine(m));
+          if (heldBy.indexOf("who " + want.clause + ".") === -1) wrong.push(`${tag}: held by "${heldBy}"`);
+          const row = KYC.cards.holderWords(held, KYC.cards.racePeople(held, held.incumbentIds.concat(held.candidateIds).map(KYC.byId).filter(Boolean)));
+          if (row.indexOf(want.clause) === -1) wrong.push(`${tag}: row "${row}"`);
+          const badges = KYC.cards.raceBadgeItems(held).filter((b) => b.key === "open" || b.key === "moved");
+          badges.forEach((b) => {
+            const said = b.title || "";
+            if (said && said.indexOf(want.clause) === -1) wrong.push(`${tag}: head "${said}"`);
+            if (b.key === "moved" && b.text.toLowerCase().indexOf(want.verb.toLowerCase()) === -1) {
+              wrong.push(`${tag}: head badge "${b.text}"`);
+            }
+          });
+          // The profile: its status line's words never contradict the cross link.
+          KYC.profile.open(m.id, { fromRoute: true });
+          const cross = D.getElementById("profileModalCrossLink").textContent;
+          KYC.profile.close();
+          const running = stage === "running";
+          if (running === /\b(Ran|ran|Elected|Re-elected)\b/.test(cross) ||
+              running !== /[Rr]unning/.test(cross)) wrong.push(`${tag}: cross link "${cross}"`);
+          if (stage === "won" && !/[Ee]lected/.test(cross) && !/\(elected\)/i.test(cross)) {
+            wrong.push(`${tag}: cross link "${cross}"`);
+          }
+        });
+        m.raceStatus = kept[0];
+        m.raceStatusRace = kept[1];
+        if (filing) filing.raceStatus = kept[2];
+      });
+      check("the badge, the race's lines and the profile each say the one set of words",
+        wrong.length === 0, wrong.slice(0, 6).join(" | ") || `${samples.length} members`);
+    });
+
+    // The map's panel, by the same words.
+    const MK = mapPage.window.KYC;
+    const mapMovers = mapPage.window.legislatorsData.filter((m) => MK.runsElsewhere(m) &&
+      m.contestLabel && MK.seated(m) && !m.renumbered);
+    const barr = mapMovers[0];
+    if (barr) {
+      suite(`a member's other run — the map's panel, on ${clock}`, () => {
+        const select = mapPage.D.getElementById("mapStateSelect");
+        const modes = mapPage.D.getElementById("mapModeSelect");
+        const draw = () => {
+          select.value = barr.state;
+          select.dispatchEvent(new mapPage.window.Event("change", { bubbles: true }));
+          const other = modes.value === "house" ? "senate" : "house";
+          modes.value = other;
+          modes.dispatchEvent(new mapPage.window.Event("change", { bubbles: true }));
+          modes.value = "house";
+          modes.dispatchEvent(new mapPage.window.Event("change", { bubbles: true }));
+        };
+        const kept = [barr.raceStatus, barr.raceStatusRace];
+        const wrong = [];
+        const number = barr.contestLabel.split(" \u2022 ");
+        const label = number[0] === "House" && number[1] ? number[1]
+          : number[1] === barr.state ? number[0] : number.join(" ");
+        OTHER_RUN.forEach(([status, before, later]) => {
+          barr.raceStatus = status;
+          barr.raceStatusRace = barr.contestRaceId;
+          draw();
+          const row = mapPage.D.querySelector(`#delegation .person-row[data-id="${barr.id}"] .contest`);
+          const want = otherRunWords(after ? later : before, label, false, after).verb + " " + label;
+          if (!row || row.textContent !== want) {
+            wrong.push(`${status || "none"}: "${row && row.textContent}" for "${want}"`);
+          }
+        });
+        barr.raceStatus = kept[0];
+        barr.raceStatusRace = kept[1];
+        check("each status's badge on the seat's row", wrong.length === 0, wrong.slice(0, 4).join(" | "));
+      });
+    }
+    window.close();
+    mapPage.window.close();
+  }
+}
+
 /* ====================================================== running elsewhere */
 
 /* A member contesting another seat has a primary result for the seat they
@@ -13333,6 +13490,24 @@ async function testSharePages() {
     });
     check("and each filer the results do not settle", table.filers.length >= 4 && filers.length === 0,
       filers.map((r) => JSON.stringify(r)).join(" | "));
+    // A member's other run, in every status, before and after Election Day:
+    // Andy Barr read "who is running for Senate KY" on share pages and the
+    // state page beside "Elected in November" on his profile.
+    const contest = table.contest.filter(([status, renumbered, post, decided, unconfirmed, clause]) => {
+      const line = KYC.contestLine({ id: "FAKE", isCandidate: false, name: "A Member",
+        party: "Republican", officeLabel: "House \u2022 AL-2", raceId: "H-AL-02-2026",
+        contestLabel: renumbered ? "House \u2022 AL-1" : "Senate \u2022 AL",
+        contestRaceId: renumbered ? "H-AL-01-2026" : "S-AL-2026",
+        raceStatusRace: renumbered ? "H-AL-01-2026" : "S-AL-2026", raceStatus: status,
+        renumbered: !!renumbered, raceStatusDecided: decided || undefined,
+        raceStatusUnconfirmed: !!unconfirmed }, { now: post ? AFTER_DAY : CAMPAIGN_DAY });
+      return !line || line.clause !== clause;
+    });
+    check("and a member's other run, in every status, renumbered or not, before and after " +
+      "Election Day", table.contest.length >= 40 &&
+      ["elected", "defeated", "nominee", "runoff", "eliminated", "withdrawn", "unlisted", ""].every(
+        (status) => table.contest.some((row) => row[0] === status)) && contest.length === 0,
+      contest.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${table.contest.length} cases`);
   });
 
   suite("state pages — written with their names before the script draws (TECH-10)", () => {
@@ -17954,6 +18129,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "links") await testDeepLinks();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();
+  if (!only || only === "links") await testOtherRunWalk();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();

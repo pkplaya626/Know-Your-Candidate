@@ -62,7 +62,11 @@
       title: "A sitting member running for re-election under the state’s new district map, " +
         "for the district the badge names." },
     ran: { cls: "badge-neutral", label: "Ran for …",
-      title: "A sitting member who ran for another seat in 2026 and is not on its November ballot." },
+      title: "A sitting member who ran for another seat in 2026 and lost it or was not on its " +
+        "November ballot, or whose result is awaited." },
+    elected: { cls: "badge-money", label: "Elected to …",
+      title: "A sitting member elected to another seat in 2026, who holds this one until the " +
+        "new term begins." },
   };
 
   function seatBadge(key, label, title) {
@@ -441,14 +445,38 @@
       (other ? " · " + other.text : "") + ".";
   }
 
+  /* A holder running under a new district number, as a clause about the
+   * seat they hold: in the words of KYC.contestLine, whatever has come of
+   * the run. *race.holderMoved* names them and where they went. */
+  function movedWords(race) {
+    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
+      return p && p.contestLabel && p.name === race.holderMoved.name;
+    })[0];
+    var line = holder ? KYC.contestLine(holder) : null;
+    return race.holderMoved.name + ", who holds this seat, " + (line ? line.clause
+      : "is running for " + race.holderMoved.to.replace(/ • /, " ") +
+        " under the state\u2019s new district map");
+  }
+
+  /* The head badge's words for that holder: "Holder running in CA-41",
+   * "Holder re-elected in CA-41", "Holder ran in CA-41". */
+  function movedBadge(race) {
+    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
+      return p && p.contestLabel && p.name === race.holderMoved.name;
+    })[0];
+    var line = holder ? KYC.contestLine(holder) : null;
+    var verb = line ? line.verb.charAt(0).toLowerCase() + line.verb.slice(1) : "running in";
+    return "Holder " + verb + " " + race.holderMoved.to.replace(/^House • /, "");
+  }
+
   function openSeatWhy(race) {
     var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
     // The record names who held the seat even when they have no profile.
     var named = race.incumbent && race.incumbent.name;
     if (race.holderMoved) {
-      return race.holderMoved.name + ", who holds this seat, is running for " +
-        race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map; no " +
-        "sitting member is on this seat's ballot.";
+      return movedWords(race) + "; no sitting member " +
+        (KYC.electionStatus().phase === "post-election" ? "was" : "is") +
+        " on this seat's ballot.";
     }
     // A mid-decade map keeps every district number, so a seat nobody
     // holds is vacant, not new: FL-20 and TX-23 read "newly drawn".
@@ -456,10 +484,8 @@
       // Seated since in the seat they won elsewhere (kyc/record.py).
       holder.raceRole === "winner" && holder.raceId !== race.id
         ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
-      holder.contestLabel && KYC.offBallot(KYC.contestStatus(holder))
-        ? holder.name + " ran for " + holder.contestLabel.replace(/ • /, " ") +
-          " and is not on the November ballot." :
-      holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
+      // Their other run, in the one set of words (KYC.contestLine).
+      holder.contestLabel ? holder.name + " " + heldByWhat(holder) + "." :
       holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
       // Out of this seat's race, in their own card's words: never "not on
       // the November ballot", which Byron Donalds is, for governor, and a
@@ -482,10 +508,8 @@
     } else if (race.holderMoved) {
       // Not open - a member is running here under the new number - but its
       // holder is on another seat's ballot, and the reader should see where.
-      badges.push(headBadge("moved", "badge-neutral",
-        "Holder running in " + race.holderMoved.to.replace(/^House • /, ""),
-        race.holderMoved.name + ", who holds this seat, is running for " +
-        race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map."));
+      badges.push(headBadge("moved", "badge-neutral", movedBadge(race),
+        movedWords(race) + "."));
     }
     // An open primary's date is on its own badge (ballotKindItems).
     if (race.primaryDate && race.primaryKind !== "open") {
@@ -609,13 +633,8 @@
    * clause the race's "Held by" line and its folded row both say. */
   function heldByWhat(p) {
     var line = KYC.contestLine(p);
-    var seat = String(p.contestLabel).replace(/ • /, " ").replace(/^House /, "");
-    return !line ? "is running for " + seat
-      : line.renumbered ? (line.past ? "ran in " + seat + " under the state’s new district map, " +
-          "and is not on its November ballot" : "is running in " + seat + " under the state’s " +
-          "new district map")
-      : line.past ? "ran for " + seat + " and is not on its November ballot"
-      : "is running for " + seat;
+    return line ? line.clause
+      : "is running for " + String(p.contestLabel).replace(/ • /, " ").replace(/^House /, "");
   }
 
   function heldByLine(p) {

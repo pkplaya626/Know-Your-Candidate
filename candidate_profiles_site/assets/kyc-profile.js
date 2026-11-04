@@ -1186,7 +1186,8 @@
     var line = KYC.contestLine(item);
     var seat = filing.officeLabel;
     var words = (missing ? "No " + chamber + " filing this cycle; " : "") +
-      (line && line.past ? "ran for " : missing ? "running for " : "Also running for ") +
+      (line && line.past ? line.verb.toLowerCase() + " " : missing ? "running for "
+        : "Also running for ") +
       seat + ". That campaign";
     words = words.charAt(0).toUpperCase() + words.slice(1);
     var id = filing.fecCandidateId ? " (FEC " + filing.fecCandidateId + ")" : "";
@@ -1227,12 +1228,14 @@
       if (item.contestLabel && !item.isCandidate) {
         var line = KYC.contestLine(item);
         link.hidden = false;
+        var won = line.stage === "won";
         link.innerHTML = KYC.icon("branch") + ' <span class="cross-link-text">' + (line.renumbered
-          ? (line.past ? "Ran" : "Running") + " for re-election in <strong>" +
+          ? (won ? "Re-elected" : (line.past ? "Ran" : "Running") + " for re-election") + " in <strong>" +
             KYC.escapeHtml(item.contestLabel) +
             "</strong> under the new district map"
-          : (line.past ? "Ran in 2026 for <strong>" : "Running in 2026 for <strong>") +
-            KYC.escapeHtml(item.contestLabel) + "</strong> instead of " +
+          : (won ? "Elected in 2026 to <strong>" : line.past ? "Ran in 2026 for <strong>"
+            : "Running in 2026 for <strong>") +
+            KYC.escapeHtml(item.contestLabel) + "</strong>" + (won ? "; holds " : " instead of ") +
             KYC.escapeHtml(item.officeLabel)) + "</span>";
         return;
       }
@@ -1247,10 +1250,14 @@
     var left = member && member.formerMember ? member.formerMember.left : null;
     // "Also running Senate • SC" beside Russell Fry's renomination, after
     // he lost the Senate primary: a run that ended is "Also ran for", a
-    // November loss included, as KYC.contestLine says it on the card.
+    // November result or an awaited one included, as KYC.contestLine says
+    // it on the card.
     var other = item.alsoRunningId ? KYC.byId(item.alsoRunningId) : null;
-    var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated");
-    var how = ended ? KYC.raceStatus(other.raceStatus, "mate") : null;
+    var counted = !!other && KYC.electionStatus().phase === "post-election";
+    var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated" ||
+      other.raceStatus === "elected" || (counted && KYC.onNovemberBallot(other.raceStatus) &&
+        other.raceStatus !== "runoff"));
+    var how = ended ? KYC.raceStatusOf(other, "mate") : null;
     link.innerHTML =
       KYC.icon("branch") + ' <span class="cross-link-text">' +
       (item.alsoRunningId ? (ended ? "Also ran for" : "Also running for")
