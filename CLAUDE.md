@@ -1291,7 +1291,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (the owner's decision of 2026-11-01): "Awaiting the Dec 1 runoff
     result" on a card, "Ran in the December 1 general election runoff:
     awaiting result" in the dialog and on the share pages (`heldRunoff` in
-    `KYC.raceStatus`'s words, `share._held_runoff`).
+    `KYC.raceStatus`'s words, `share._held_runoff`). The words take the
+    race's own date, so the Delegates' runoff in Guam and the Virgin Islands
+    (November 17, 48 U.S.C. 1712) reads the same a fortnight sooner, while
+    Georgia's is still "In the runoff" and Louisiana's "In the Dec 12 general
+    election"; the grid's key lists each day its races hold, and a member's
+    run in a runoff that has been held is "ran for" (`contestLine`'s
+    "awaiting" stage), on the card and the dialog's cross-link alike.
     Rehearsed on 2024's pages as they stood the morning after Election Day
     and once certified (2026-11-01), the reading called no race wrongly, but
     a table titled by its seat alone ("Florida's 1st congressional district,

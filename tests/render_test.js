@@ -8614,20 +8614,28 @@ async function testGuideMaps() {
         chip("awaiting") !== chip("nominee"), chip("awaiting"));
       // Georgia's runoff in both tenses: its step's own day, passed with no
       // result read, in the one table's words (heldRunoff).
-      check("the runoff's step gives its past tense from the table, dated by the step",
-        chip("runoff-held") === K.raceStatus("runoff", "card", { runoffDay: "2026-12-01",
-          now: new window.Date(Date.UTC(2026, 11, 5, 12)) }).label &&
-        chip("runoff-held") === "Awaiting the Dec 1 runoff result" &&
-        chip("runoff") === "In the runoff" &&
-        D.querySelector('.guide-status[data-status="runoff-held"]').closest("li")
-          .getAttribute("data-date") === "2026-12-01", chip("runoff-held"));
+      const heldChips = [...D.querySelectorAll('.guide-status[data-status="runoff-held"]')].map((n) => {
+        const day = n.closest("li").getAttribute("data-date");
+        const [y, m, d] = day.split("-").map(Number);
+        return { day, words: n.textContent,
+          table: K.raceStatus("runoff", "card", { runoffDay: day,
+            now: new window.Date(Date.UTC(y, m - 1, d + 4, 12)) }).label };
+      });
+      check("each runoff's step gives its past tense from the table, dated by the step",
+        heldChips.map((c) => c.day + " " + c.words).join(" | ") ===
+          "2026-11-17 Awaiting the Nov 17 runoff result | 2026-12-01 Awaiting the Dec 1 runoff result" &&
+        heldChips.every((c) => c.words === c.table) &&
+        [...D.querySelectorAll('.guide-status[data-status="runoff"]')].every((n) => n.textContent === "In the runoff"),
+        heldChips.map((c) => c.day + " " + c.words).join(" | "));
       check("on the campaign clock Election Day is next and nothing is past",
         D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-11-03" &&
         !D.querySelector(".guide-timeline-steps li.is-past"));
       K.guide.initTimeline(new window.Date(Date.UTC(2026, 11, 5, 12)));
       check("in December the steps passed are marked done and the next is Texas's canvass",
         D.querySelector(".guide-timeline-steps li.is-next").getAttribute("data-date") === "2026-12-07" &&
-        D.querySelectorAll(".guide-timeline-steps li.is-past").length === 5);
+        [...D.querySelectorAll(".guide-timeline-steps li")].every((li) =>
+          li.classList.contains("is-past") === (li.getAttribute("data-date") < "2026-12-05")) &&
+        D.querySelectorAll(".guide-timeline-steps li.is-past").length >= 5);
       // The highlighted step read as "today": each mark is a word, and the
       // caption says what the words mean.
       const tags = [...D.querySelectorAll(".guide-timeline-steps .guide-timeline-tag")];
@@ -10714,11 +10722,15 @@ async function testElectionNight() {
  * ballot lost then. The race is the one every Georgia ZIP code's ballot
  * and the Senate map hold. */
 function georgiaRunoff(asOf, decided) {
+  return generalRunoffIn("GA", "Senate", asOf, decided);
+}
+
+function generalRunoffIn(state, chamber, asOf, decided) {
   return (window, meta) => {
     rewindToCampaign(window);
     meta.election = Object.assign({}, meta.election, { resultsAsOf: asOf });
     const byId = Object.fromEntries(window.legislatorsData.map((p) => [p.id, p]));
-    const race = window.kycRaces.find((r) => r.state === "GA" && r.chamber === "Senate" &&
+    const race = window.kycRaces.find((r) => r.state === state && r.chamber === chamber &&
       r.generalRunoff && r.primaryKind !== "open");
     const own = (p) => p && !p.contestLabel &&
       (p.isCandidate ? p.raceId : (p.contestRaceId || p.raceId)) === race.id;
@@ -10866,6 +10878,131 @@ async function testGeorgiaRunoffPast() {
     check("its two read the past tense, as their cards do",
       words.filter((w) => w.indexOf(PAST) !== -1).length === 2 && !words.some((w) => /In the runoff/.test(w)),
       words.join(" | "));
+  });
+
+  // A member in the runoff for another seat (Mike Collins, in Georgia's
+  // Senate race): "running" until it is held, then "ran" with the result
+  // awaited, on the card's line and the dialog's cross-link alike.
+  const memberIn = (page) => {
+    const { two } = page.window.__gaRunoff || {};
+    return two && page.window.legislatorsData.find((p) => !p.isCandidate && p.alsoRunningId &&
+      two.some((t) => t.id === p.alsoRunningId));
+  };
+  const crossLink = (page, member) => {
+    page.window.KYC.profile.open(member.id);
+    const link = page.D.getElementById("profileModalCrossLink");
+    const words = link ? link.textContent : "";
+    page.window.KYC.profile.close();
+    return words;
+  };
+  const dayOf = await buildPage("states/ga.html", { now: "2026-12-01T20:00:00",
+    data: georgiaRunoff("2026-11-20") });
+  const dayAfter = await buildPage("states/ga.html", { now: "2026-12-05T09:00:00",
+    data: georgiaRunoff("2026-12-04") });
+  suite("states/ga.html — a member's other run through the runoff (rule 63, KYC.contestLine)", () => {
+    const before = memberIn(dayOf);
+    const past = memberIn(dayAfter);
+    check("a member to read", !!before && !!past);
+    if (!before || !past) return;
+    const running = dayOf.window.KYC.contestLine(before);
+    const ran = dayAfter.window.KYC.contestLine(past);
+    check("on the day itself the run is still on", running.stage === "running" && !running.past &&
+      /^is running for /.test(running.clause), running.clause);
+    check("after it, the run is awaiting the result, in the past tense",
+      ran.stage === "awaiting" && ran.past && /^ran for .*; the result is awaited$/.test(ran.clause), ran.clause);
+    const onDay = crossLink(dayOf, before);
+    const afterDay = crossLink(dayAfter, past);
+    check("the dialog's cross-link says 'Also running for' on the day",
+      /Also running for/.test(onDay) && !/Also ran for/.test(onDay), onDay);
+    check("and 'Also ran for', awaiting the runoff's result, after it, as the card does",
+      /Also ran for/.test(afterDay) && !/Also running for/.test(afterDay) &&
+        /awaiting the Dec 1 runoff result/.test(afterDay), afterDay);
+  });
+
+  // Guam's Delegate (and the Virgin Islands', by the same table) has a
+  // runoff a fortnight after the election (48 U.S.C. 1712), so its past
+  // tense names its own day, and comes while Georgia's is still ahead.
+  const GU_PAST = "Awaiting the Nov 17 runoff result";
+  const guOnDay = await buildPage("states/gu.html", { now: "2026-11-17T20:00:00",
+    data: generalRunoffIn("GU", "House", "2026-11-16") });
+  suite("states/gu.html on November 17 — the runoff is still today's", () => {
+    const { race, two } = guOnDay.window.__gaRunoff || {};
+    check("no page errors", guOnDay.errors.length === 0, guOnDay.errors.join(" | "));
+    if (!race) { check("Guam's race to read", false); return; }
+    const texts = two.map((p) => (cardOf(guOnDay.D, race, p) || {}).textContent || "");
+    check("both read In the runoff, and nothing is awaited",
+      texts.every((t) => /In the runoff/.test(t) && !/Awaiting/.test(t)), texts.join(" | "));
+    check("and the race's head is going to a runoff",
+      /Going to a runoff/.test((head(guOnDay.D, race) || {}).textContent || ""));
+  });
+  const guAfter = await buildPage("states/gu.html", { now: "2026-11-18T09:00:00",
+    data: generalRunoffIn("GU", "House", "2026-11-18") });
+  suite("states/gu.html after November 17, no result read — its own day's words", () => {
+    const { race, two } = guAfter.window.__gaRunoff || {};
+    const KYC = guAfter.window.KYC;
+    check("no page errors", guAfter.errors.length === 0, guAfter.errors.join(" | "));
+    if (!race) { check("Guam's race to read", false); return; }
+    const texts = two.map((p) => (cardOf(guAfter.D, race, p) || {}).textContent || "");
+    check("both cards await the November 17 result",
+      texts.every((t) => t.indexOf(GU_PAST) !== -1 && !/In the runoff/.test(t)), texts.join(" | "));
+    const h = head(guAfter.D, race);
+    check("the race's head says so, and that the runoff was held on its day",
+      !!h && h.textContent.indexOf(GU_PAST) !== -1 && /Runoff held Nov 17/.test(h.textContent), h && h.textContent);
+    check("the dialog's words name its day",
+      KYC.standing(two[0], "long").label === "Ran in the November 17 general election runoff: awaiting result",
+      KYC.standing(two[0], "long").label);
+    check("and say which vote had no majority, never 'in November' of a runoff held in November",
+      /won a majority in the general election\./.test(KYC.standing(two[0], "long").title),
+      KYC.standing(two[0], "long").title);
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("its key names its own day, and no other's",
+      key.indexOf(GU_PAST) !== -1 && !key.some((label) => /Dec 1 runoff/.test(label)), key.join(", "));
+  });
+  const guDecided = await buildPage("states/gu.html", { now: "2026-11-20T09:00:00",
+    data: generalRunoffIn("GU", "House", "2026-11-20", true) });
+  suite("states/gu.html with its result read — the runoff's result, on its day", () => {
+    const { race, two } = guDecided.window.__gaRunoff || {};
+    if (!race) { check("Guam's race to read", false); return; }
+    const texts = two.map((p) => (cardOf(guDecided.D, race, p) || {}).textContent || "");
+    check("its winner and its loser read that day, and nobody is awaiting it",
+      /(Won Nov 17 runoff|Re-elected Nov 17)/.test(texts[0]) &&
+        /(Lost Nov 17 runoff|Lost re-election Nov 17)/.test(texts[1]) &&
+        !texts.some((t) => /Awaiting/.test(t)), texts.join(" | "));
+    const unseated = guDecided.window.KYC.raceStatus("elected", "long",
+      { decided: { date: race.generalRunoff, open: false } }).title;
+    check("no 'in November' for the vote that had no majority",
+      /won a majority in the general election/.test(unseated), unseated);
+  });
+  const allRaces = await buildPage("index.html", { now: "2026-11-18T09:00:00", data: phaseAt("2026-11-18T09:00:00") });
+  suite("every December or November round, each by its own race's day (rules 63, 75)", () => {
+    const KYC = allRaces.window.KYC;
+    const withRound = (allRaces.window.kycRaces || []).filter((r) => r.generalRunoff);
+    const noon = (y, m, d) => new allRaces.window.Date(y, m - 1, d, 12);
+    const wrong = [];
+    [noon(2026, 11, 18), noon(2026, 12, 5), noon(2026, 12, 13)].forEach((now) => {
+      const today = [now.getFullYear(), String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")].join("-");
+      withRound.forEach((race) => {
+        const held = race.generalRunoff < today;
+        const words = KYC.runoffWords(race, now);
+        const open = race.primaryKind === "open";
+        const [, m, d] = race.generalRunoff.split("-").map(Number);
+        const day = ["Nov", "Dec"][m - 11] + " " + d;
+        const want = open ? (held ? "Awaiting the " + day + " result" : "In the " + day + " general election")
+          : held ? "Awaiting the " + day + " runoff result" : "In the runoff";
+        if (words.card !== want) wrong.push(`${race.id} on ${today}: ${words.card}, not ${want}`);
+      });
+    });
+    const states = new Set(withRound.map((r) => r.state));
+    check("the races with a round include Georgia's, Guam's, the Virgin Islands' and Louisiana's",
+      ["GA", "GU", "VI", "LA"].every((st) => states.has(st)), [...states].join(" "));
+    check("each reads its own tense on November 18, December 5 and December 13",
+      wrong.length === 0, wrong.slice(0, 4).join(" | "));
+    const key = KYC.raceStatusLegend().map((row) => row.label);
+    check("the grid's key lists the past tense of each day its races hold",
+      ["Awaiting the Nov 17 runoff result", "Awaiting the Dec 1 runoff result",
+        "In the Dec 12 general election", "Awaiting the Dec 12 result", "In the runoff"]
+        .every((label) => key.indexOf(label) !== -1), key.join(", "));
   });
 
   // The governor's card, the race for governor and their overlays (#191,
@@ -13933,6 +14070,32 @@ async function testSharePages() {
       ["elected", "defeated", "nominee", "runoff", "eliminated", "withdrawn", "unlisted", ""].every(
         (status) => table.contest.some((row) => row[0] === status)) && contest.length === 0,
       contest.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${table.contest.length} cases`);
+    // The same, in a round of its own: the rows above ask with no race, so
+    // they never meet a round's day. The pipeline's race and date are laid
+    // over the page's for each row, and put back.
+    const roundsOff = table.contestRounds.filter(([kind, day, read, renumbered, clause]) => {
+      const race = window.kycRaces.find((r) => r.id === (renumbered ? "H-AL-01-2026" : "S-AL-2026"));
+      if (!race) return true;
+      const saved = { generalRunoff: race.generalRunoff, primaryKind: race.primaryKind };
+      race.generalRunoff = day;
+      race.primaryKind = kind || undefined;
+      const [y, m, d] = read.split("-").map(Number);
+      const line = KYC.contestLine({ id: "FAKE", isCandidate: false, name: "A Member",
+        party: "Republican", officeLabel: "House \u2022 AL-2", raceId: "H-AL-02-2026",
+        contestLabel: renumbered ? "House \u2022 AL-1" : "Senate \u2022 AL",
+        contestRaceId: race.id, raceStatusRace: race.id, raceStatus: "runoff",
+        renumbered: !!renumbered }, { now: new window.Date(y, m - 1, d, 12) });
+      Object.assign(race, saved);
+      return !line || line.clause !== clause;
+    });
+    check("and a member's other run in a round, the day before it, on the day and after it",
+      table.contestRounds.length >= 18 && roundsOff.length === 0 &&
+        table.contestRounds.some((row) => /; the result is awaited$/.test(row[4])) &&
+        table.contestRounds.some((row) => /^is running/.test(row[4])),
+      roundsOff.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${table.contestRounds.length} cases`);
+    check("and each day a general election runoff is held is asked of its words",
+      ["November 17", "December 1"].every((day) => table.statuses.some((row) => row[4] && row[5] &&
+        row[12] === "Ran in the " + day + " general election runoff: awaiting result")));
   });
 
   suite("state pages — written with their names before the script draws (TECH-10)", () => {

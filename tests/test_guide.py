@@ -668,17 +668,19 @@ class TestNewSections(unittest.TestCase):
         self.assertEqual(days[-1], "2027-01-03")
 
     def test_the_runoffs_step_is_dated_by_the_runoff_table(self):
-        # The step that names Georgia's runoff, in both tenses, is the day
-        # the race's own generalRunoff gives (overrides.GENERAL_RUNOFFS):
-        # kyc-guide.js reads the past tense's day from the step.
+        # Each step that names a general election runoff, in both tenses, is
+        # a day the race's own generalRunoff gives (overrides.GENERAL_RUNOFFS),
+        # and every such day has one: kyc-guide.js reads the past tense's day
+        # from the step.
         from kyc import overrides
 
         html = government.render("elections", "example.org")
         steps = re.findall(r'<li data-date="(\d{4}-\d{2}-\d{2})">(.*?)</li>', html, re.S)
         held = [day for day, body in steps if 'data-status="runoff-held"' in body]
-        self.assertEqual(held, [overrides.GENERAL_RUNOFFS["GA"][0]])
-        body = dict(steps)[held[0]]
-        self.assertLess(body.index('data-status="runoff"'), body.index('data-status="runoff-held"'))
+        self.assertEqual(held, sorted({day for day, _why in overrides.GENERAL_RUNOFFS.values()}))
+        for day in held:
+            body = dict(steps)[day]
+            self.assertLess(body.index('data-status="runoff"'), body.index('data-status="runoff-held"'))
 
     def test_a_timeline_out_of_order_is_refused(self):
         spec = {"items": [("2026-12-01", "Dec 1", "b", "b", []),

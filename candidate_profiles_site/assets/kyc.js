@@ -563,8 +563,9 @@
   }
 
   /* A general election runoff once its day has passed and no result is
-   * read: Georgia's December 1 (overrides.GENERAL_RUNOFFS, the date the
-   * state page's key dates give; O.C.G.A. 21-2-501(a)). Until that day the
+   * read: Georgia's December 1, Guam's and the Virgin Islands' November 17
+   * (overrides.GENERAL_RUNOFFS, the date the state page's key dates give;
+   * O.C.G.A. 21-2-501(a), 48 U.S.C. 1712). Until that day the
    * two are "In the runoff"; from the day after, "In the runoff" read as
    * though it were still to be held, so it is in the past tense and
    * awaiting a result, as Louisiana's December round is (openRound) and a
@@ -583,7 +584,7 @@
       long: "Ran in the " + day + " general election runoff: awaiting result",
       mate: "Awaiting the " + short + " runoff result", short: "Awaiting runoff result",
       title: "Ran in the " + day + " general election runoff, between the top two after no " +
-        "candidate won a majority in November. " + waiting,
+        "candidate won a majority in the general election. " + waiting,
       race: "Awaiting the " + short + " runoff result",
       raceTitle: waiting + " In the " + day + " general election runoff, per the published " +
         "results: " };
@@ -628,7 +629,8 @@
         : (won ? "Won " : "Lost ") + "the " + day + " runoff",
       title: (won ? "Won " : "Lost ") + round + (decided.open
         ? ", between the top two of the open primary"
-        : ", after no candidate won a majority in November") + ", per Wikipedia's results page.",
+        : ", after no candidate won a majority in the general election") +
+        ", per Wikipedia's results page.",
       member: { card: memberCard, mate: memberCard, short: base.member.short,
         long: (won ? "Re-elected " : "Lost re-election ") + (decided.open ? "on " + day
           : "in the " + day + " runoff"),
@@ -717,7 +719,7 @@
    *  record's raceStatusUnconfirmed; `appointed` - an appointee, who is
    *  never "not running for re-election"; `round` - an open primary's
    *  December round's date; `runoffDay` - a general election runoff's
-   *  date (Georgia's); `decided` - the December round that decided a
+   *  date (Georgia's, Guam's, the Virgin Islands'); `decided` - the December round that decided a
    *  result (`raceStatusDecided`); `now` - the clock, for tests. */
   /* Through to November from an all-party primary - California's and
    * Washington's top two, Alaska's top four: nobody won a party's
@@ -961,17 +963,17 @@
       add(openRound(open.generalRunoff, true), "After that general election: in it, and the " +
         "results this site last read had not marked a winner.");
     }
-    // A general election runoff after its day (heldRunoff), where a race
-    // the page holds has one.
-    var runoff = null;
-    races().some(function (r) {
-      if (r.primaryKind !== "open" && r.generalRunoff) { runoff = r; return true; }
-      return false;
+    // A general election runoff after its day (heldRunoff), for each day a
+    // race the page holds has one: the grid holds Georgia's December 1 and
+    // the territories' November 17, and each card names its own.
+    var runoffDays = {};
+    races().forEach(function (r) {
+      if (r.primaryKind !== "open" && r.generalRunoff) runoffDays[r.generalRunoff] = true;
     });
-    if (runoff) {
-      add(heldRunoff(runoff.generalRunoff), "After a general election runoff: ran in it, and the " +
+    Object.keys(runoffDays).sort().forEach(function (day) {
+      add(heldRunoff(day), "After a general election runoff: ran in it, and the " +
         "results this site last read had not marked a winner.");
-    }
+    });
     // A result a December round decided, in its words (decidedRound), for
     // each round someone on the page holds one from.
     var rounds = {};

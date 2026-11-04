@@ -169,6 +169,48 @@ class TestStatusWords(unittest.TestCase):
         lost = dict(won, raceStatus="defeated")
         self.assertEqual(words(lost, races=[ga], post="2026-12-02"), "Lost the December 1 runoff")
 
+    def test_every_general_runoff_is_in_the_past_tense_after_its_own_day(self):
+        # Guam's and the Virgin Islands' November 17 (GENERAL_RUNOFFS since
+        # results night), read beside Georgia's: each by its race's own date,
+        # so read on November 18 one has been held and the other has not, and
+        # Louisiana's December round is still ahead.
+        for state, entry in overrides.GENERAL_RUNOFFS.items():
+            day = entry[0]
+            year, month, number = (int(part) for part in day.split("-"))
+            named = f"{share._MONTHS[month - 1]} {number}"
+            ahead = race(id=f"H-{state}-01-2026", state=state, generalRunoff=day)
+            filer = person(id="FEC_RUNOFF", isCandidate=True, raceId=ahead["id"], state=state,
+                           raceStatus="runoff", raceStatusRace=ahead["id"])
+            self.assertEqual(words(filer, races=[ahead], post=day), "In the general election runoff")
+            after = f"{year}-{month:02d}-{number + 1:02d}"
+            self.assertEqual(words(filer, races=[ahead], post=after),
+                             f"Ran in the {named} general election runoff: awaiting result")
+        guam = race(id="H-GU-AL-2026", state="GU", generalRunoff="2026-11-17")
+        ga = race(id="H-GA-13-2026", state="GA", generalRunoff="2026-12-01")
+        la = race(id="H-LA-05-2026", state="LA", primaryKind="open", generalRunoff="2026-12-12")
+        read = {}
+        for each in (guam, ga, la):
+            filer = person(id="FEC_RUNOFF", isCandidate=True, raceId=each["id"],
+                           raceStatus="runoff", raceStatusRace=each["id"])
+            read[each["state"]] = words(filer, races=[each], post="2026-11-18")
+        self.assertEqual(read, {
+            "GU": "Ran in the November 17 general election runoff: awaiting result",
+            "GA": "In the general election runoff",
+            "LA": "In the December 12 general election"})
+
+    def test_a_members_other_run_in_a_runoff_ran_once_it_was_held(self):
+        # KYC.contestLine's "awaiting" stage: Mike Collins, a House member in
+        # Georgia's Senate runoff, "is running" until it is held, then "ran";
+        # asked of the status table too, with no race, it never met the day.
+        for day, kind in ((overrides.GENERAL_RUNOFFS["GA"][0], None),
+                          (overrides.GENERAL_RUNOFFS["GU"][0], None),
+                          ("2026-12-12", "open")):
+            rows = [row for row in share.status_table()["contestRounds"]
+                    if row[1] == day and row[0] == kind and not row[3]]
+            self.assertEqual([row[4] for row in rows],
+                             ["is running for Senate AL", "is running for Senate AL",
+                              "ran for Senate AL; the result is awaited"], day)
+
     def test_no_other_status_reads_georgias_runoff(self):
         ga = race(id="H-GA-13-2026", state="GA", generalRunoff="2026-12-01")
         for status in ("elected", "defeated", "nominee", "eliminated", "withdrawn", "unlisted"):

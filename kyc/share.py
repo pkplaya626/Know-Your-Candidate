@@ -25,6 +25,7 @@ import html
 import itertools
 import json
 import os
+from datetime import date, timedelta
 from urllib.parse import urlparse
 
 from . import overrides
@@ -118,7 +119,8 @@ def _open_round(date, held=False):
 
 def _held_runoff(date):
     """KYC.raceStatus's heldRunoff: the long words of a general election
-    runoff (Georgia's, ``overrides.GENERAL_RUNOFFS``) once results read
+    runoff (``overrides.GENERAL_RUNOFFS``: Georgia's, Guam's and the Virgin
+    Islands') once results read
     after its day still mark no winner - in the past tense and awaiting
     one, as an open primary's December round is (rule 63)."""
     try:
@@ -161,7 +163,8 @@ def december_round(race):
 
 def general_runoff(race):
     """The date of *race*'s general election runoff (Georgia's December 1,
-    ``generalRunoff`` from ``overrides.GENERAL_RUNOFFS``) when it is not an
+    the territories' November 17: ``generalRunoff`` from
+    ``overrides.GENERAL_RUNOFFS``) when it is not an
     open primary's December round, else None."""
     race = race or {}
     return race.get("generalRunoff") if race.get("primaryKind") != "open" else None
@@ -310,6 +313,8 @@ _TABLE_ROUND = "2026-12-12"
 # The general election runoff the table's other rows are asked about:
 # Georgia's, from the one table the results reader and the calendar read.
 _TABLE_RUNOFF = overrides.GENERAL_RUNOFFS["GA"][0]
+# Every day the table holds one: the words name the day, so each is asked.
+_TABLE_RUNOFF_DAYS = sorted({day for day, _why in overrides.GENERAL_RUNOFFS.values()})
 # A result each kind of December round decided (_decided_round): an open
 # primary's general election, and a general election runoff (Georgia's).
 _TABLE_DECIDED = ({"date": _TABLE_ROUND, "open": True}, {"date": _TABLE_RUNOFF, "open": False})
@@ -337,23 +342,55 @@ def _member_elsewhere(status, renumbered, decided, unconfirmed):
     return item
 
 
+def _contest_rounds():
+    """What :func:`contest_clause` says of a member's other run in a December
+    round or a general election runoff, read the day before it, on the day
+    and the day after (``[kind, day, read, renumbered, clause]``): the
+    "contest" rows ask it with no race, so they never meet a round's date,
+    and a run in a runoff that has been held is "ran for", not "is running
+    for" (KYC.contestLine's "awaiting" stage)."""
+    rows = []
+    for kind, day in ((None, day) for day in _TABLE_RUNOFF_DAYS):
+        rows.extend(_contest_round(kind, day))
+    rows.extend(_contest_round("open", _TABLE_ROUND))
+    return rows
+
+
+def _contest_round(kind, day):
+    rows = []
+    race = {"generalRunoff": day}
+    if kind:
+        race["primaryKind"] = kind
+    for offset in (-1, 0, 1):
+        read = (date.fromisoformat(day) + timedelta(days=offset)).isoformat()
+        for renumbered in (0, 1):
+            item = _member_elsewhere("runoff", renumbered, None, 0)
+            clause = contest_clause(item, {}, {item["raceStatusRace"]: race}, read)
+            rows.append([kind, day, read, renumbered, clause])
+    return rows
+
+
 def status_table():
-    """``{"statuses": [...], "contest": [...], "filers": [...]}``: what
-    :func:`_race_status` and :func:`_race_source` say for every combination
-    of status and option, what :func:`contest_clause` says of a member's other
-    run in every status, and what :func:`standing` says for each kind of
-    filer the results do not settle."""
+    """``{"statuses": [...], "contest": [...], "contestRounds": [...],
+    "filers": [...]}``: what :func:`_race_status` and :func:`_race_source` say
+    for every combination of status and option, what :func:`contest_clause`
+    says of a member's other run in every status and every kind of round, and
+    what :func:`standing` says for each kind of filer the results do not
+    settle."""
     words = []
     # A race whose December round is an open primary's general election
     # (_open_round), before that day and after it; the render suite reads
     # "held" as the day after it, so only after Election Day.
     # A general election runoff ("runoff", Georgia's) the same way, before
-    # its day and after it (_held_runoff).
+    # its day and after it (_held_runoff), and the runoff's own words on
+    # every other day one is held (the territories' November 17).
     # And a result each kind of December round decided ("decided"), asked
     # after the open primary's day.
     rounds = ((None, None, 0, None), (_TABLE_ROUND, None, 0, None), (_TABLE_ROUND, None, 1, None),
               (None, _TABLE_RUNOFF, 0, None), (None, _TABLE_RUNOFF, 1, None),
-              (_TABLE_ROUND, None, 1, _TABLE_DECIDED[0]), (None, None, 0, _TABLE_DECIDED[1]))
+              (_TABLE_ROUND, None, 1, _TABLE_DECIDED[0]), (None, None, 0, _TABLE_DECIDED[1]),
+              *((None, day, held, None) for day in _TABLE_RUNOFF_DAYS if day != _TABLE_RUNOFF
+                for held in (0, 1)))
     for status in sorted(_RACE_STATUS):
         # A top-four primary's words are a top-two's in the long form.
         for all_party in (None, "top-two"):
@@ -362,6 +399,8 @@ def status_table():
                     if (round_date or runoff_day or decided) and all_party:
                         continue
                     if decided and status not in ("elected", "defeated"):
+                        continue
+                    if runoff_day not in (None, _TABLE_RUNOFF) and status != "runoff":
                         continue
                     for flags in itertools.product((0, 1), repeat=5):
                         own, appointed, unconfirmed, minor, post = flags
@@ -400,14 +439,15 @@ def status_table():
         filers.append([fake, spec[0] if spec else None, status_source(item, {})])
     return {"words": ["status", "allParty", "source", "round", "runoff", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
-            "statuses": words, "credits": credits, "contest": contest, "filers": filers}
+            "statuses": words, "credits": credits, "contest": contest,
+            "contestRounds": _contest_rounds(), "filers": filers}
 
 
 def status_table_text():
     """The fixture's text: one row a line, so a change reads as a diff."""
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
-    for key in ("statuses", "credits", "contest", "filers"):
+    for key in ("statuses", "credits", "contest", "contestRounds", "filers"):
         rows = table[key]
         lines.append(f'"{key}": [')
         lines += [json.dumps(row, ensure_ascii=False, separators=(",", ":"))
