@@ -795,7 +795,8 @@
         status = '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(
           "Holds this seat. " + line.title + (there ? " " + there.title : "")) + '">' +
           KYC.escapeHtml(line.label) +
-          (there ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
+          // "Elected to Senate KY" says it: never "· Elected" after it.
+          (there && line.stage !== "won" ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
       }
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
         KYC.portraitThumb(p, "36px") +
