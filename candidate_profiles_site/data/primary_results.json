@@ -15445,8 +15445,7 @@
    },
    "ambiguous": [],
    "article": {
-    "H2NC13243": "Pat Harrigan",
-    "H6NC10174": "Ashley Bell (North Carolina politician)"
+    "H2NC13243": "Pat Harrigan"
    },
    "decided": {
     "general": true,
@@ -22601,7 +22600,8 @@
    "ambiguous": [],
    "article": {
     "H4TX23120": "Brandon Herrera",
-    "H4TX28046": "Quico Canseco"
+    "H4TX28046": "Quico Canseco",
+    "H6TX23273": "Katy Padilla Stout"
    },
    "certified": {
     "complete": true,
@@ -25391,7 +25391,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H6WI07207": "Fred Clark (politician)"
+    "H6WI07207": "Fred Clark (politician)",
+    "H6WI07223": "Michael Alfonso (Wisconsin politician)"
    },
    "decided": {
     "general": false,
@@ -26695,11 +26696,11 @@
     "S6LA00573": "withdrawn",
     "S6LA00581": "withdrawn",
     "S6LA00607": "withdrawn",
-    "S6LA00615": "nominee",
+    "S6LA00615": "defeated",
     "S6LA00623": "withdrawn",
     "S6LA00631": "withdrawn",
     "S6LA00649": "withdrawn",
-    "S6LA00664": "nominee",
+    "S6LA00664": "elected",
     "S6LA00672": "withdrawn",
     "S6LA00680": "eliminated",
     "S6LA00698": "eliminated",
@@ -28365,7 +28366,14 @@
    "unsure": []
   }
  },
- "refusedMarks": {},
+ "refusedMarks": {
+  "S-MT-2026": [
+   {
+    "name": "Sawyer Adams",
+    "why": "no filing and no state's list in this race names them"
+   }
+  ]
+ },
  "refusedNames": {},
  "unparsedPages": []
 }
