@@ -483,7 +483,12 @@
       html += out ? KYC.escapeHtml(", " + out.toLocaleString() + " of them out of the race " +
         "(lost a primary, withdrew, or not on the ballot).") + outToggle() : ".";
     } else {
-      html += KYC.escapeHtml(": " + (state.role === "candidate" ? "candidates still running"
+      // From the day after Election Day nobody is "still running": the
+      // list holds who won and who lost (rule 63).
+      var voted = KYC.electionStatus().phase === "post-election";
+      html += KYC.escapeHtml(": " + (state.role === "candidate"
+        ? (voted ? "candidates who were on the November ballot" : "candidates still running")
+        : voted ? "people in office or who were on the November ballot"
         : "people in office or still running") + ".");
       if (hiddenOut) {
         html += " " + KYC.escapeHtml(plural(hiddenOut, "person", "people") +

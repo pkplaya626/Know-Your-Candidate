@@ -201,7 +201,8 @@
     var unlisted = race ? KYC.cards.unprofiledNote(race) : "";
     if (running.length || unlisted) {
       row.push('<div class="senate-side senate-running"><p class="senate-role">' +
-               "Running for this seat (" + (running.length +
+               (KYC.electionStatus().phase === "post-election"
+                 ? "On the November ballot (" : "Running for this seat (") + (running.length +
                  (race ? KYC.cards.unprofiledNames(race).none.length +
                    KYC.cards.unprofiledNames(race).maybe.length : 0)) + ")</p>" +
                cards(running) + unlisted + KYC.cards.orderNote(running, race) + "</div>");
@@ -211,8 +212,10 @@
     // the race: shown, a dozen faded cards had pushed them 1,400px down.
     if (race && KYC.odds) html.push(KYC.odds.render(race, { collapsed: true }));
     if (out.length) {
-      html.push('<div class="race-out senate-out"><p class="senate-role">No longer running ' +
-                "for this seat (" + out.length + ") &mdash; lost the primary, withdrew, or " +
+      html.push('<div class="race-out senate-out"><p class="senate-role">' +
+                (KYC.electionStatus().phase === "post-election"
+                  ? "Not on the November ballot (" : "No longer running for this seat (") +
+                out.length + ") &mdash; lost the primary, withdrew, or " +
                 "were not on the primary ballot</p>", cards(out), "</div>");
     }
     html.push("</section>");

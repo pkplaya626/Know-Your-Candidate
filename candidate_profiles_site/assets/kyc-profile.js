@@ -67,7 +67,7 @@
       '          <span id="profileModalRegionLabel">Represents</span> <strong id="profileModalRegion"></strong>' +
       '          <a id="profileModalStateLink" class="state-link" href="#"></a></span>',
       '        <span id="profileModalTermWrap">' + KYC.icon("calendar") +
-      '          Term <strong id="profileModalTerm"></strong></span>',
+      '          <span id="profileModalTermLabel">Term</span> <strong id="profileModalTerm"></strong></span>',
       '        <span id="profileModalCrossLink" hidden></span>',
       "      </p>",
       '      <p class="modal-meta" id="profileModalStatus" hidden></p>',
@@ -795,7 +795,8 @@
         status = '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(
           "Holds this seat. " + line.title + (there ? " " + there.title : "")) + '">' +
           KYC.escapeHtml(line.label) +
-          (there ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
+          // "Elected to Senate KY" says it: never "· Elected" after it.
+          (there && line.stage !== "won" ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";
       }
       return '<button type="button" class="race-mate" data-goto="' + KYC.escapeAttr(p.id) + '">' +
         KYC.portraitThumb(p, "36px") +
@@ -1186,7 +1187,8 @@
     var line = KYC.contestLine(item);
     var seat = filing.officeLabel;
     var words = (missing ? "No " + chamber + " filing this cycle; " : "") +
-      (line && line.past ? "ran for " : missing ? "running for " : "Also running for ") +
+      (line && line.past ? line.verb.toLowerCase() + " " : missing ? "running for "
+        : "Also running for ") +
       seat + ". That campaign";
     words = words.charAt(0).toUpperCase() + words.slice(1);
     var id = filing.fecCandidateId ? " (FEC " + filing.fecCandidateId + ")" : "";
@@ -1227,12 +1229,14 @@
       if (item.contestLabel && !item.isCandidate) {
         var line = KYC.contestLine(item);
         link.hidden = false;
+        var won = line.stage === "won";
         link.innerHTML = KYC.icon("branch") + ' <span class="cross-link-text">' + (line.renumbered
-          ? (line.past ? "Ran" : "Running") + " for re-election in <strong>" +
+          ? (won ? "Re-elected" : (line.past ? "Ran" : "Running") + " for re-election") + " in <strong>" +
             KYC.escapeHtml(item.contestLabel) +
             "</strong> under the new district map"
-          : (line.past ? "Ran in 2026 for <strong>" : "Running in 2026 for <strong>") +
-            KYC.escapeHtml(item.contestLabel) + "</strong> instead of " +
+          : (won ? "Elected in 2026 to <strong>" : line.past ? "Ran in 2026 for <strong>"
+            : "Running in 2026 for <strong>") +
+            KYC.escapeHtml(item.contestLabel) + "</strong>" + (won ? "; holds " : " instead of ") +
             KYC.escapeHtml(item.officeLabel)) + "</span>";
         return;
       }
@@ -1247,17 +1251,25 @@
     var left = member && member.formerMember ? member.formerMember.left : null;
     // "Also running Senate • SC" beside Russell Fry's renomination, after
     // he lost the Senate primary: a run that ended is "Also ran for", a
-    // November loss included, as KYC.contestLine says it on the card.
+    // November result or an awaited one included, as KYC.contestLine says
+    // it on the card.
     var other = item.alsoRunningId ? KYC.byId(item.alsoRunningId) : null;
-    var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated");
-    var how = ended ? KYC.raceStatus(other.raceStatus, "mate") : null;
+    var counted = !!other && KYC.electionStatus().phase === "post-election";
+    var ended = !!other && (KYC.offBallot(other.raceStatus) || other.raceStatus === "defeated" ||
+      other.raceStatus === "elected" || (counted && KYC.onNovemberBallot(other.raceStatus) &&
+        other.raceStatus !== "runoff"));
+    // Elected is said once, by the verb; a result keeps the status table's
+    // capitals ("lost in November", never "lost in november").
+    var elected = !!other && other.raceStatus === "elected";
+    var how = ended && !elected ? KYC.raceStatusOf(other, "mate") : null;
     link.innerHTML =
       KYC.icon("branch") + ' <span class="cross-link-text">' +
-      (item.alsoRunningId ? (ended ? "Also ran for" : "Also running for")
+      (item.alsoRunningId ? (elected ? "Elected to" : ended ? "Also ran for" : "Also running for")
         : left ? "Held until " + left : "Currently holds") +
       ' <button type="button" data-goto="' + KYC.escapeAttr(id) + '">' +
       KYC.escapeHtml(seat) + "</button>" +
-      (how ? " (" + KYC.escapeHtml(how.label.toLowerCase()) + ")" : "") + "</span>";
+      (how ? " (" + KYC.escapeHtml(how.label.charAt(0).toLowerCase() + how.label.slice(1)) + ")" : "") +
+      "</span>";
   }
 
   function renderStatus(item) {
@@ -1464,7 +1476,12 @@
     var term = el("profileModalTerm");
     term.textContent = "";
     var termWords = String(item.term_start || "N/A");
-    if (won && item.isCandidate) termWords = termWords.replace(/\s*\(if elected\)\s*$/i, "");
+    // Someone newly elected: when the term they won begins, never a lone
+    // date under "Term" (results night, 2026-11-04). A sitting member's line
+    // stays their current term, whether or not they have won the next.
+    var newlyElected = won && item.isCandidate;
+    el("profileModalTermLabel").textContent = newlyElected ? "Term begins" : "Term";
+    if (newlyElected) termWords = termWords.replace(/\s*\(if elected\)\s*$/i, "");
     termWords.split(" - ").forEach(function (part, i) {
       if (i) term.appendChild(doc.createTextNode(" - "));
       var span = doc.createElement("span");
@@ -1474,7 +1491,8 @@
     });
 
     var chamber = el("profileModalChamber");
-    chamber.textContent = item.chamber;
+    // "Senate (Candidate)" beside "Elected in November" read as both.
+    chamber.textContent = newlyElected ? item.chamber.replace("(Candidate)", "(Elected)") : item.chamber;
     chamber.className =
       "badge " + (item.chamber.indexOf("Senate") !== -1 ? "badge-accent" : "badge-neutral");
 

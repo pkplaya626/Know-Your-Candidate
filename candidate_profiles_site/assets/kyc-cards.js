@@ -62,7 +62,11 @@
       title: "A sitting member running for re-election under the state’s new district map, " +
         "for the district the badge names." },
     ran: { cls: "badge-neutral", label: "Ran for …",
-      title: "A sitting member who ran for another seat in 2026 and is not on its November ballot." },
+      title: "A sitting member who ran for another seat in 2026 and lost it or was not on its " +
+        "November ballot, or whose result is awaited." },
+    elected: { cls: "badge-money", label: "Elected to …",
+      title: "A sitting member elected to another seat in 2026, who holds this one until the " +
+        "new term begins." },
   };
 
   function seatBadge(key, label, title) {
@@ -441,14 +445,38 @@
       (other ? " · " + other.text : "") + ".";
   }
 
+  /* A holder running under a new district number, as a clause about the
+   * seat they hold: in the words of KYC.contestLine, whatever has come of
+   * the run. *race.holderMoved* names them and where they went. */
+  function movedWords(race) {
+    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
+      return p && p.contestLabel && p.name === race.holderMoved.name;
+    })[0];
+    var line = holder ? KYC.contestLine(holder) : null;
+    return race.holderMoved.name + ", who holds this seat, " + (line ? line.clause
+      : "is running for " + race.holderMoved.to.replace(/ • /, " ") +
+        " under the state\u2019s new district map");
+  }
+
+  /* The head badge's words for that holder: "Holder running in CA-41",
+   * "Holder re-elected in CA-41", "Holder ran in CA-41". */
+  function movedBadge(race) {
+    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
+      return p && p.contestLabel && p.name === race.holderMoved.name;
+    })[0];
+    var line = holder ? KYC.contestLine(holder) : null;
+    var verb = line ? line.verb.charAt(0).toLowerCase() + line.verb.slice(1) : "running in";
+    return "Holder " + verb + " " + race.holderMoved.to.replace(/^House • /, "");
+  }
+
   function openSeatWhy(race) {
     var holder = race.incumbentIds.map(KYC.byId).filter(Boolean)[0];
     // The record names who held the seat even when they have no profile.
     var named = race.incumbent && race.incumbent.name;
     if (race.holderMoved) {
-      return race.holderMoved.name + ", who holds this seat, is running for " +
-        race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map; no " +
-        "sitting member is on this seat's ballot.";
+      return movedWords(race) + "; no sitting member " +
+        (KYC.electionStatus().phase === "post-election" ? "was" : "is") +
+        " on this seat's ballot.";
     }
     // A mid-decade map keeps every district number, so a seat nobody
     // holds is vacant, not new: FL-20 and TX-23 read "newly drawn".
@@ -456,10 +484,8 @@
       // Seated since in the seat they won elsewhere (kyc/record.py).
       holder.raceRole === "winner" && holder.raceId !== race.id
         ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
-      holder.contestLabel && KYC.offBallot(KYC.contestStatus(holder))
-        ? holder.name + " ran for " + holder.contestLabel.replace(/ • /, " ") +
-          " and is not on the November ballot." :
-      holder.contestLabel ? holder.name + " is running for " + holder.contestLabel + "." :
+      // Their other run, in the one set of words (KYC.contestLine).
+      holder.contestLabel ? holder.name + " " + heldByWhat(holder) + "." :
       holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
       // Out of this seat's race, in their own card's words: never "not on
       // the November ballot", which Byron Donalds is, for governor, and a
@@ -482,10 +508,8 @@
     } else if (race.holderMoved) {
       // Not open - a member is running here under the new number - but its
       // holder is on another seat's ballot, and the reader should see where.
-      badges.push(headBadge("moved", "badge-neutral",
-        "Holder running in " + race.holderMoved.to.replace(/^House • /, ""),
-        race.holderMoved.name + ", who holds this seat, is running for " +
-        race.holderMoved.to.replace(/ • /, " ") + " under the state's new district map."));
+      badges.push(headBadge("moved", "badge-neutral", movedBadge(race),
+        movedWords(race) + "."));
     }
     // An open primary's date is on its own badge (ballotKindItems).
     if (race.primaryDate && race.primaryKind !== "open") {
@@ -503,6 +527,7 @@
     // $5,000, or none. They are on the ballot, so they count (rule 22).
     var unprofiled = res && res.otherNominees ? res.otherNominees.length : 0;
     var noProfile = unprofiledNames(race).none;
+    var voted = KYC.electionStatus().phase === "post-election";
     if (race.contested && !(race.candidateCount + unprofiled) && race.ballotUnknown) {
       // Nobody known to be on the ballot, and someone who may be: never
       // "No challenger on the ballot", never "0 challengers".
@@ -515,12 +540,14 @@
       // With nobody holding the seat on the ballot, nobody is challenging:
       // an open seat, or one nobody held when the race was set (FL-20).
       var word = race.openSeat || !(race.incumbentIds || []).length ? "candidate" : "challenger";
+      // From the day after Election Day, who was on it (rule 63).
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
-        (race.settled ? " on the ballot" : "")));
+        (race.settled ? (voted ? (running === 1 ? " was" : " were") : "") + " on the ballot" : "")));
     } else if (race.settled && res) {
       var gone = res.eliminated + res.withdrawn + res.unlisted;
       badges.push(headBadge("count", "badge-neutral",
-        "No challenger on the ballot" + (gone ? " · " + gone + " out" : ""),
+        (voted ? "No challenger was on the ballot" : "No challenger on the ballot") +
+        (gone ? " · " + gone + " out" : ""),
         "The primary has been held. Of those who filed with the FEC, " +
         res.eliminated + " lost, " + res.withdrawn + " withdrew and " +
         res.unlisted + " were not on the primary ballot."));
@@ -609,13 +636,8 @@
    * clause the race's "Held by" line and its folded row both say. */
   function heldByWhat(p) {
     var line = KYC.contestLine(p);
-    var seat = String(p.contestLabel).replace(/ • /, " ").replace(/^House /, "");
-    return !line ? "is running for " + seat
-      : line.renumbered ? (line.past ? "ran in " + seat + " under the state’s new district map, " +
-          "and is not on its November ballot" : "is running in " + seat + " under the state’s " +
-          "new district map")
-      : line.past ? "ran for " + seat + " and is not on its November ballot"
-      : "is running for " + seat;
+    return line ? line.clause
+      : "is running for " + String(p.contestLabel).replace(/ • /, " ").replace(/^House /, "");
   }
 
   function heldByLine(p) {
@@ -786,16 +808,34 @@
 
   /** A race's people as every view that lists the race splits them: the
    *  seat's holder running elsewhere (*moved*, one line above the race),
-   *  the people still in it (*running*) and those no longer in it (*out*),
-   *  each in the pipeline's order; *people* is everyone but the moved. The
-   *  race sections and the Your ballot page split them here, so the two
-   *  list the same people (rules 12 and 73). */
+   *  the seat's holder off its ballot (*holders*, one line above it, in their
+   *  own status: Thom Tillis did not run, and is nobody who "lost the primary,
+   *  withdrew, or were not on the primary ballot", rule 92), the people still
+   *  in it (*running*) and those no longer in it (*out*), each in the
+   *  pipeline's order; *people* is everyone but the moved. The race sections
+   *  and the Your ballot page split them here, so the two list the same
+   *  people (rules 12 and 73). */
   function racePeople(race, people) {
     var moved = people.filter(function (p) { return elsewhere(race, p); });
     people = people.filter(function (p) { return moved.indexOf(p) === -1; });
+    var held = function (p) {
+      return !p.isCandidate && (race.incumbentIds || []).indexOf(p.id) !== -1;
+    };
     return { moved: moved, people: people,
+             holders: people.filter(function (p) { return offBallot(p) && held(p); }),
              running: people.filter(function (p) { return !offBallot(p); }),
-             out: people.filter(offBallot) };
+             out: people.filter(function (p) { return offBallot(p) && !held(p); }) };
+  }
+
+  /* The seat's holder off its ballot, above the race: their name and their
+   * card's status, and a member who has left since held it in the record's
+   * words, never "Held by" (rule 67). */
+  function holderLine(p, cls) {
+    var name = '<button type="button" class="link-button" data-id="' + KYC.escapeAttr(p.id) + '">' +
+      KYC.escapeHtml(p.name) + "</button>";
+    return '<p class="race-held race-held-off' + (cls ? " " + cls : "") + '">' +
+      (KYC.seated(p) ? "Held by " + name : name + " held this seat in the 2026 race") + " " +
+      statusBadge(p) + "</p>";
   }
 
   function raceSection(race, people, opts) {
@@ -804,6 +844,7 @@
     var moved = split.moved, running = split.running, out = split.out;
     people = split.people;
     var body = moved.map(heldByLine).join("") +
+      split.holders.map(function (p) { return holderLine(p); }).join("") +
       '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
@@ -1010,8 +1051,10 @@
     var o = p.outsideSpending;
     if (!o.runningElsewhere) return "";
     var running = KYC.byId(o.runningElsewhere);
+    var line = KYC.contestLine(p);
     return "Filed under their " + (o.candidacy || chamberWord(p)) + " candidacy, not the " +
-      (running ? chamberWord(running) : "other") + " campaign they are running: ";
+      (running ? chamberWord(running) : "other") + " campaign they " +
+      (line && line.past ? "ran" : "are running") + ": ";
   }
 
   function outsideOtherLead(o) {
@@ -1516,6 +1559,8 @@
     raceSection: raceSection,
     racePeople: racePeople,
     heldByLine: heldByLine,
+    outsideLead: outsideLead,
+    holderLine: holderLine,
     fillOut: fillOut,
     legend: legend,
   };

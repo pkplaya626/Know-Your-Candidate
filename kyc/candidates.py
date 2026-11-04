@@ -453,7 +453,7 @@ def same_committee(a, b):
                                                "coverage_end_date"))
 
 
-def registrations(rows, committees=None):
+def registrations(rows, committees=None, every=()):
     """``{kept id: [other ids]}`` for people registered under several ids.
 
     Within one state and office, filings that report the same committee's
@@ -463,7 +463,11 @@ def registrations(rows, committees=None):
     "Dan Miressi" and "Daniel Miressi", "Bob Chew" and "Robert Chew" each
     filed twice for one committee, and each appeared twice in their race,
     counted twice as on the ballot. Equal money alone is never enough: many
-    filers share $0 and a quarter's end. The registration kept is the one
+    filers share $0 and a quarter's end. *every* is the whole register, for
+    an evidenced pair whose second registration is under the threshold and so
+    not among *rows*: KY-4's $0 filing has no profile to fold, and without its
+    id on the kept profile the results named it as a second person. The
+    registration kept is the one
     with the latest statement of candidacy (last_f2_date) - Ronda Kennedy
     filed for NV-3 in 2025 and NV-4 in 2026, and the lower id had put her in
     the wrong race - then the lowest id, so the choice never flips between
@@ -519,8 +523,9 @@ def registrations(rows, committees=None):
     # Curated same-person pairs, each with its evidence (overrides).
     from . import overrides
     present = {r["candidate_id"] for r in rows}
+    registered = present | {r["candidate_id"] for r in every}
     for other, (target, _why) in overrides.SAME_PERSON_FILINGS.items():
-        if other in present and target in present:
+        if other in registered and target in present:
             moved = kept.pop(other, [])
             # The target may already be folded under another registration
             # of this person: that cluster moves to the target as well.
@@ -594,7 +599,8 @@ def to_profiles(cache, existing, threshold=STATUTORY_THRESHOLD, claimed=None):
                     incumbents[(rid, words[0], words[-1])] = p
 
     rows = eligible(cache, threshold)
-    merged = registrations(rows, (cache or {}).get("committeeOf"))
+    merged = registrations(rows, (cache or {}).get("committeeOf"),
+                           every=(cache or {}).get("candidates") or ())
     folded = {other for others in merged.values() for other in others}
 
     profiles, skipped = [], 0

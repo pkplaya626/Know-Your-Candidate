@@ -224,7 +224,8 @@
           status === "nominee" && defender.seekingReelection2026 ?
             (own ? " renominated" : " on the November ballot") :
           defender.seekingReelection2026 ? " running" :
-          defender.contestLabel ? " running for " + defender.contestLabel :
+          defender.contestLabel ? " " + lowerFirst(KYC.contestLine(defender).verb) + " " +
+            defender.contestLabel :
           defender.alsoRunningSeat ? " running for " + defender.alsoRunningSeat :
           " not running") + ")",
     };
@@ -365,11 +366,11 @@
     var seat = item.contestLabel.split(" • ");
     var label = seat[0] === "House" && seat[1] ? seat[1]
       : seat[1] === item.state ? seat[0] : seat.join(" ");
-    // The shared words (KYC.contestLine): "Ran for" after a loss, and a
-    // renumbered seat is "(redrawn)", re-election rather than leaving.
+    // The shared words (KYC.contestLine): "Elected to" after a win, "Ran
+    // for" after a loss, and a renumbered seat is "(redrawn)", re-election
+    // rather than leaving.
     var line = KYC.contestLine(item);
-    var words = line.renumbered ? (line.past ? "Ran in " : "Running in ") + label + " (redrawn)"
-      : (line.past ? "Ran for " : "Running for ") + label;
+    var words = line.verb + " " + label + (line.renumbered ? " (redrawn)" : "");
     return '<span class="badge ' + line.cls + ' contest" title="' +
       KYC.escapeAttr(line.title) + '">' + KYC.escapeHtml(words) + "</span>";
   }
@@ -612,7 +613,10 @@
           outNote + "</p>" + racePeople.map(personRow).join("") +
           (stateRaces.length === 1 ? KYC.cards.orderNote(racePeople, stateRaces[0]) : "");
       } else if (out.length) {
-        html += '<p class="panel-subhead race-people">Nobody listed as still in the race' + outNote + "</p>";
+        html += '<p class="panel-subhead race-people">' +
+          (KYC.electionStatus().phase === "post-election"
+            ? "Nobody listed on the November ballot" : "Nobody listed as still in the race") +
+          outNote + "</p>";
       }
       html += stateRaces.map(function (r) { return KYC.cards.unprofiledNote(r, "panel-note"); }).join("");
       // Before the markets and the holder, beside the statuses they back.
@@ -655,7 +659,8 @@
           "</button>" +
           '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
       } else if (out.length) {
-        html += '<p class="panel-subhead">No challenger still on the ballot ' +
+        html += '<p class="panel-subhead">' + (KYC.electionStatus().phase === "post-election"
+          ? "No challenger was on the ballot " : "No challenger still on the ballot ") +
           '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
           out.length + " out</span></p>";
       }

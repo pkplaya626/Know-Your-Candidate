@@ -1307,7 +1307,63 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     with another year than the cycle's ("Texas's 28th congressional
     district, 2024" above an unmarked 2026 one) read as this November's -
     it is another election's (`_stage`), and a party's assembly is not
-    read at all. Who
+    read at all. And a mark needs a filing and a count behind it
+    (`results.refuse_marks`, read on the night of 2026-11-04, when this read
+    began to publish without a person): South Carolina's page named "Peter
+    Griffin" for a minute at 03:33 UTC, Iowa's and Colorado's named a winner
+    at 0 reporting and Massachusetts' at 15, and North Carolina's and South
+    Carolina's November tables carried a mark over empty count columns. So a
+    November mark is refused - it concludes nothing, the race reads as before
+    the count and keeps the last read of it (`carry_refused`, rule 8), a line
+    in the read's log says `[REFUSED]` and `validate` names the race
+    (`result-mark-refused`) - where it is on a name no filing fits and no
+    certified list prints, however the page spells it (rule 62's matching and
+    `RESULT_NAMES` apply; the name then stands on no ballot, and the table
+    with it, or a real nominee whose row a vandal took reads "withdrawn"), on
+    someone its table's own counts do not lead, or one of two; where its table
+    holds fewer than two counts above zero, it stands only on the same page's
+    infobox - counts above zero, the marked person leading, not marked ongoing
+    and at least `REPORTING_FLOOR` reporting where it says (North Carolina's
+    2,431,822 to 1,624,770, South Carolina's 984,027 to 916,267 at 95) - or
+    on nobody else being on the ballot, since an unopposed count may never
+    come: the certified list prints them alone (and no write-in) and is the
+    whole ballot (Florida's "unopposed"), or with no list the table and the
+    infobox name nobody else and no primary on the page crowned anyone else,
+    which the status table alone cannot say: a nominee a November table left
+    off reads "withdrawn" to it. An open primary's two marks must be its table's two
+    highest counts, and a December round's mark must lead its table. All this
+    is beside the ranked-choice and majority gates and weakens neither. Its
+    second reader found more that a vandal or a prepared table could reach, each
+    now refused the same way: a mark on a filer a whole certified list does not
+    print, or whom the page's own primary eliminated, on a row naming no other
+    ballot line (`_eliminated_on_this_line`: a vandal who renames a row to a real
+    filer's name passes the filing test; a list printing them, and another line,
+    let them stand - a qualified list's name counts as a certified list's, rule
+    64, or a true Louisiana call would have been held for ever); a name in
+    Georgia's unpartisan runoff table with no filing, and any such table the
+    November counts do not send the two to (`_runoff_stands`: the two highest,
+    nobody at a majority), or an empty one an editor prepared settled the race.
+    A person's count is their "Total" row where it is filled, else the sum of
+    their lines (`_counted`: on New York's fusion tables a mark on a larger
+    last line stood over more votes in all). "Alone" asks the primaries too:
+    anyone in a table the marked person is not in may be on the ballot. After
+    the count a name only the infobox gives, with no filing and no list, adds
+    nobody (`refusedNames`, `result-name-refused`): the night's vandal, with no
+    mark anywhere, would have stood "Also on the November ballot". The race is
+    not held back for it. Its share reporting is its first number, whatever is
+    around it ("15%<ref>", "under 15%"), and a field with none concludes nothing.
+    Replayed offline over the pages of the two reads of that night, it made
+    every call they had made (all 10 and all 3), with no other status changed,
+    and refused none. A seat's own article ("2026 New York's 13th congressional
+    district election", behind a section's `{{main}}`) is not followed: read on
+    trial it marked the winner hours ahead of the state's page, but printed a
+    filer's name as that page's "Manual "Jomo" Williams" and dropped the
+    winner's Working Families line, so NY-13 waits for the state's page. And a
+    decided race's words are in the render suite's own rewind (`rewindToCampaign`):
+    an ordinary mark in California, Washington, American Samoa or Louisiana
+    failed it, which would have held the refresh that brought the mark, so
+    `allPartyPrimary` stays on a decided status (no word reads it there) and the
+    rewind reads an open primary's people back to the qualified list. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
@@ -1560,7 +1616,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "filed in total" counts the person once too (`filing_counts` folds the
     same registrations), or VA-11 read 22 filed with Purves three times. A
     results-page name that was ambiguous only between one person's
-    registrations is theirs (`results._claim_unmatched`).
+    registrations is theirs (`results._claim_unmatched`). A second
+    registration with no money and no committee joins nothing automatically
+    (equal money alone never joins anyone, and it has no committee), so on
+    results night 2026-11-04 KY-4 read "Jeremy Ryan Todd (Libertarian): Lost
+    the November election" beside "Also on the November ballot ... with no FEC
+    filing over $5,000 and so no profile here: Jeremy Todd (Libertarian)": the
+    page's one name fitted both ids, and the $0 one was named from the page.
+    There is no new automatic test: each such pair - the very same filed name,
+    party and seat, one holding a campaign's money - is an evidenced
+    `SAME_PERSON_FILINGS` entry, and `validate` warns on the next
+    (`second-registration`: a name a race lists with no profile whose filing
+    is letter for letter a profile's filed name there).
 
 73. **A count is one formula, wherever it is shown.** The sidebar read
     587 challengers on the ballot, a state's strip 16 over race headers

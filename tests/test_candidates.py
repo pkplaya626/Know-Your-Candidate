@@ -482,6 +482,69 @@ class TestDuplicateDetection(unittest.TestCase):
                 {"id": "B", "name": "Daniel Sullivan", "raceId": None}]
         self.assertEqual(validate.check_duplicate_people(pair), [])
 
+    def race(self, *below, others=()):
+        return [{"id": "H-KY-04-2026", "incumbentIds": [], "candidateIds": ["FEC_A"],
+                 "results": {"belowThreshold": [{"id": cid, "name": name} for cid, name in below],
+                             "otherNominees": [name for _c, name in below] + list(others)}}]
+
+    def test_a_second_registration_under_a_profiles_filed_name_is_reported(self):
+        # KY-4 read as two Libertarians: the profile, "Jeremy Ryan Todd", and
+        # the page's one name for the $0 filing, "Jeremy Todd" (rule 72).
+        profiles = [{"id": "FEC_A", "name": "Jeremy Ryan Todd", "filedName": "TODD, JEREMY RYAN"}]
+        field = {"candidates": [{"candidate_id": "A", "name": "TODD, JEREMY RYAN"},
+                                {"candidate_id": "B", "name": "TODD, JEREMY RYAN"}]}
+        issues = validate.check_second_registrations(
+            self.race(("B", "Jeremy Todd")), profiles, field)
+        self.assertEqual([i.code for i in issues], ["second-registration"])
+        self.assertEqual(issues[0].level, "warn")
+        self.assertIn("Jeremy Todd (B)", issues[0].detail[0])
+
+    def test_a_members_second_registration_is_reported_too(self):
+        # filedName is only a filer's: a sitting member's words are the
+        # register's for their own ids (PR #199 review).
+        profiles = [{"id": "FEC_A", "name": "Andy Barr", "fecCandidateId": "A"}]
+        field = {"candidates": [{"candidate_id": "A", "name": "BARR, GARLAND ANDY"},
+                                {"candidate_id": "B", "name": "BARR, GARLAND ANDY"}]}
+        issues = validate.check_second_registrations(
+            self.race(("B", "Andy Barr II")), profiles, field)
+        self.assertEqual([i.code for i in issues], ["second-registration"])
+
+    def test_a_name_on_the_ballot_in_a_profiles_filed_words_is_reported(self):
+        profiles = [{"id": "FEC_A", "name": "Jeremy Todd", "filedName": "TODD, JEREMY RYAN"}]
+        issues = validate.check_second_registrations(
+            self.race(others=["Jeremy Ryan Todd"]), profiles, {"candidates": []})
+        self.assertEqual([i.code for i in issues], ["second-registration"])
+
+    def test_another_persons_filing_is_not_reported(self):
+        profiles = [{"id": "FEC_A", "name": "Jeremy Ryan Todd", "filedName": "TODD, JEREMY RYAN"}]
+        field = {"candidates": [{"candidate_id": "B", "name": "TODD, JEREMY"}]}
+        self.assertEqual(validate.check_second_registrations(
+            self.race(("B", "Jeremy Todd")), profiles, field), [])
+
+    def test_the_evidenced_folds_join_a_campaign_and_its_empty_registration(self):
+        # The entries of results night: the id kept is the one with the money.
+        rows = [{"candidate_id": "H6KY04205", "name": "TODD, JEREMY RYAN", "state": "KY",
+                 "office": "H", "receipts": 30837.92},
+                {"candidate_id": "H6KY04213", "name": "TODD, JEREMY RYAN", "state": "KY",
+                 "office": "H", "receipts": 0.0}]
+        self.assertEqual(candidates.registrations(rows), {"H6KY04205": ["H6KY04213"]})
+
+    def test_a_fold_reaches_the_profile_when_the_second_filing_is_under_the_threshold(self):
+        # The second registration never becomes a profile, so the kept one
+        # must carry its id, or the results name it as a second person.
+        rows = [{"candidate_id": "H6KY04205", "name": "TODD, JEREMY RYAN", "state": "KY",
+                 "office": "H", "district_number": 4, "party": "LIB", "party_full": "LIBERTARIAN",
+                 "candidate_status": "C", "incumbent_challenge": "C", "receipts": 30837.92,
+                 "disbursements": 100.0, "has_raised_funds": True,
+                 "coverage_end_date": "2026-09-30"},
+                {"candidate_id": "H6KY04213", "name": "TODD, JEREMY RYAN", "state": "KY",
+                 "office": "H", "district_number": 4, "party": "LIB", "party_full": "LIBERTARIAN",
+                 "candidate_status": "N", "incumbent_challenge": "C", "receipts": 0.0}]
+        out = candidates.to_profiles({"cycle": 2026, "candidates": rows}, [])
+        people = out[0] if isinstance(out, tuple) else out
+        self.assertEqual([(p["fecCandidateId"], p.get("otherFecIds")) for p in people],
+                         [("H6KY04205", ["H6KY04213"])])
+
     def test_nothing_is_removed(self):
         pair = [self.person("A", "Dan Sullivan"), self.person("B", "Daniel Sullivan")]
         validate.check_duplicate_people(pair)

@@ -959,46 +959,76 @@
   }
 
   /** A sitting member's run for a seat other than the one they hold, as
-   *  one badge's words for every view: `{cls, label, title, past}`, or
-   *  null. Running again under a new district number is re-election, not
-   *  leaving (rule 74): "Running in CA-40 (redrawn)". A run that ended in
-   *  a loss or a withdrawal is in the past tense: "Ran for Senate IL"
-   *  read "Running for" beside "Lost primary" into October (GRID-15). */
-  function contestLine(item) {
+   *  one set of words for every view (rule 12): `{cls, stage, verb, label,
+   *  title, clause, past, renumbered}`, or null. *stage* is where the run
+   *  stands: "running", "won", "lost", "out" (not on its November ballot),
+   *  "awaiting" (the status table's word, after the vote and before a
+   *  result) or "ran" (after the vote, with no status read). *verb* opens the
+   *  badge ("Elected to", "Ran for", "Running in"), *clause* follows "who" in
+   *  a sentence ("was elected to Senate KY in November").
+   *
+   *  Running again under a new district number is re-election, not leaving
+   *  (rule 74): "Running in CA-40 (redrawn)". A run that ended is in the past
+   *  tense: "Ran for Senate IL" read "Running for" beside "Lost primary" into
+   *  October (GRID-15), and on results night Andy Barr read "who is running
+   *  for Senate KY" on his own seat's race beside "Elected in November" on
+   *  his profile. kyc/share.py's contest_clause says the same words, and
+   *  tests/fixtures/share_status_words.json holds both to them.
+   *  *opts.now* is the day asked about, as KYC.raceStatus takes it. */
+  function contestLine(item, opts) {
     if (!item || item.isCandidate || !item.contestLabel) return null;
+    opts = opts || {};
     var seat = item.contestLabel.replace(/ • /, " ");
+    var number = seat.replace(/^House /, "");
     var status = contestStatus(item);
-    var past = OFF_BALLOT[status] || status === "defeated";
-    // A loss in a December round is that round's (decidedRound).
-    var december = status === "defeated" && decidedRound(status, decidedOf(item));
-    var lost = december ? "l" + december.long.slice(1)
-      : status === "defeated" ? "lost in November" : "is not on its November ballot";
+    var spec = raceStatusOf(item, "long", opts);
+    var counted = electionStatus(2026, opts.now).phase === "post-election";
+    var stage = status === "elected" ? "won" : status === "defeated" ? "lost"
+      : OFF_BALLOT[status] ? "out"
+      : spec && /awaiting result/.test(spec.label) ? "awaiting"
+      : !status && counted ? "ran" : "running";
+    // A result the December round decided is that round's (decidedRound).
+    var december = decidedRound(status, decidedOf(item));
+    var when = !december ? "in November"
+      : december.long.replace(/^Won /, "in ").replace(/^Elected /, "");
+    var lost = december ? "l" + december.long.slice(1) : "lost in November";
+    var absent = (counted ? "was" : "is") + " not on its November ballot";
+    var ending = stage === "lost" ? lost : stage === "out" ? absent : "";
+    var waiting = stage === "awaiting" ? "; the result is awaited" : "";
     var end = String(item.term_start || "").split(" - ")[1] || "";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(end)) end = "";
+    var past = stage !== "running";
+    var won = stage === "won";
+    var cls = won ? RACE_STATUS.elected.cls : past ? "badge-neutral" : "badge-warn";
     if (item.renumbered) {
-      var number = seat.replace(/^House /, "");
-      return past
-        ? { cls: "badge-neutral", past: true, renumbered: true,
-            label: "Ran in " + number + " (redrawn)",
-            title: "Ran for re-election under the state's new district map, in " +
-              item.contestLabel + ", and " +
-              lost +
-              "; holds " + item.officeLabel + (end ? " until " + end : "") + "." }
-        : { cls: "badge-neutral", past: false, renumbered: true,
-            label: "Running in " + number + " (redrawn)",
-            title: "Running for re-election under the state's new district map, in " +
-              item.contestLabel + "; holds " + item.officeLabel + " until the new term begins." };
+      var map = " under the state\u2019s new district map";
+      var inVerb = won ? "Re-elected in" : past ? "Ran in" : "Running in";
+      return { cls: past ? cls : "badge-neutral", past: past, stage: stage, renumbered: true,
+        verb: inVerb, label: inVerb + " " + number + " (redrawn)",
+        clause: won ? "was re-elected in " + number + map + " " + when
+          : past ? "ran in " + number + map + (ending ? ", and " + ending : waiting)
+          : "is running in " + number + map,
+        title: won ? "Re-elected under the state's new district map, in " + item.contestLabel +
+            ", " + when + "; holds " + item.officeLabel + " until the new term begins."
+          : past ? "Ran for re-election under the state's new district map, in " +
+            item.contestLabel + (ending ? ", and " + ending : waiting) + "; holds " +
+            item.officeLabel + (end ? " until " + end : "") + "."
+          : "Running for re-election under the state's new district map, in " +
+            item.contestLabel + "; holds " + item.officeLabel + " until the new term begins." };
     }
-    if (past) {
-      return { cls: "badge-neutral", past: true, label: "Ran for " + seat,
-        title: "Ran for " + item.contestLabel + " in 2026 and " +
-          lost +
-          "; not seeking re-election to " + item.officeLabel +
-          (end ? ", whose term ends " + end : "") + "." };
-    }
-    return { cls: "badge-warn", past: false, label: "Running for " + seat,
-      title: "Running for " + item.contestLabel + " in 2026; not seeking re-election to " +
-        item.officeLabel + "." };
+    var verb = won ? "Elected to" : past ? "Ran for" : "Running for";
+    return { cls: cls, past: past, stage: stage, renumbered: false,
+      verb: verb, label: verb + " " + seat,
+      clause: won ? "was elected to " + number + " " + when
+        : past ? "ran for " + number + (ending ? " and " + ending : waiting)
+        : "is running for " + number,
+      title: won ? "Elected to " + item.contestLabel + " " + when + "; holds " + item.officeLabel +
+          (end ? " until " + end : " until the new term begins") + "."
+        : past ? "Ran for " + item.contestLabel + " in 2026" +
+          (ending ? " and " + ending : waiting) + "; not seeking re-election to " +
+          item.officeLabel + (end ? ", whose term ends " + end : "") + "."
+        : "Running for " + item.contestLabel + " in 2026; not seeking re-election to " +
+          item.officeLabel + "." };
   }
 
   /* Each race lists its people in one order, decided by the pipeline

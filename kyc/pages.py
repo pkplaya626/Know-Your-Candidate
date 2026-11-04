@@ -273,8 +273,8 @@ _CONGRESS_SOURCES = """\
                 <p><strong>Sources:</strong>
                     membership, contact details and committee rosters from the
                     <code>congress-legislators</code> dataset; the candidate field and
-                    campaign finance from the Federal Election Commission; primary results
-                    from each state's Wikipedia election page<span data-results-read hidden>,
+                    campaign finance from the Federal Election Commission; primary and November
+                    results from each state's Wikipedia election page<span data-results-read hidden>,
                     as last read on <time data-results-as-of></time></span>; the November
                     ballot, where this site reads one, from the certified list of candidates
                     its election office publishes, credited on each race it sets; portraits
@@ -2346,10 +2346,10 @@ DATASETS = (
     ("Who is running, and their money",
      '<a href="https://www.fec.gov/data/">Federal Election Commission</a>',
      "Everyone registered for 2026; receipts, spending and cash on hand", "refresh", None),
-    ("Primary results and who is on the ballot",
+    ("Primary and November results, and who is on the ballot",
      "Each state's results page on Wikipedia; Louisiana's Secretary of State for its "
      "qualified candidates",
-     "Who won, lost or withdrew; who is on the November ballot", "refresh", "results"),
+     "Who won, lost or withdrew; who was on the November ballot and who won it", "refresh", "results"),
     ("Financial disclosures",
      '<a href="https://disclosures-clerk.house.gov/">House Clerk</a> and '
      '<a href="https://efdsearch.senate.gov/">Senate eFD</a>',
@@ -2724,7 +2724,7 @@ _BALLOT_SIDEBAR = """
 _BALLOT_SOURCES = """\
                 <p><strong>Sources:</strong> the races for Congress and everyone in them as the
                     rest of this site lists them: the candidate field from the Federal Election
-                    Commission, primary results from each state's Wikipedia election page, and the
+                    Commission, primary and November results from each state's Wikipedia election page, and the
                     November ballot from the certified list of candidates its election office
                     publishes, where this site reads one, each race crediting its own; the
                     statewide offices on the ballot from each state's constitution, statutes and

@@ -51,7 +51,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
-| `… results` | Read each state's primary results from Wikipedia: who is still in |
+| `… results` | Read each state's primary and November results from Wikipedia: who is still in, who won |
 | `… results --check` | Report the results from the committed cache; no network |
 | `… campaigns` | Look up campaign websites from each candidate's FEC committee (needs `FEC_API_KEY`) |
 | `… campaigns --check` | Report campaign-site coverage from the committed cache; no network |
@@ -820,6 +820,19 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   decided *their* contest — their own party's primary, a nonpartisan primary,
   or the November ballot. A Democrat is not struck out because the Republican
   table is complete.
+- **A November mark needs a filing and a count behind it.** The read publishes
+  without a person, so a mark on a name no filing or certified list holds, on
+  someone the table's own counts do not lead, or in a table with no counts (unless
+  the page's infobox leads with them, or nobody else is on the whole ballot) is
+  refused: the race reads as before the count, keeps the last read of it, and
+  is named in the read's log and by `validate` (the cache's `refusedMarks`,
+  `{race id: [{name, why}]}`; `result-mark-refused`). So is a mark on a filer a
+  whole certified list does not print, or whom the page's own primary eliminated
+  on the same ballot line, and a Georgia runoff table the November counts do not
+  send its two to. A name only the infobox gives after the count, with no filing
+  and no state's list, adds nobody, the race otherwise read as it stands
+  (`refusedNames`, `result-name-refused`). A special election's filer's
+  `term_start` is "On being sworn in (if elected)", never January 3.
 - **The seat a person is contesting comes from their FEC filing.** Texas,
   Florida, California and Utah redrew their maps for 2026, and thirteen
   sitting members now hold one district number and run in another. A member
