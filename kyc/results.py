@@ -2156,7 +2156,7 @@ def _one_person(a, b):
     return len(x) >= 2 and x[:-1] == y[:-1] and _near(x[-1], y[-1])
 
 
-def certify_race(race, spec, rows, aliases=None, ranked_choice=False):
+def certify_race(race, spec, rows, aliases=None, ranked_choice=False, no_primary=False):
     """Lay a state's certified list over a race's results (rule 77).
 
     *race* is the results page's entry, or ``None`` for a seat no page
@@ -2260,7 +2260,10 @@ def certify_race(race, spec, rows, aliases=None, ranked_choice=False):
                 new = now if now in (ELIMINATED, WITHDRAWN) else ELIMINATED
             else:
                 continue
-            if new != now:
+            # A seat with no primary (overrides.NO_PRIMARY_SEATS): the
+            # page's "nominee" there is no primary's word, so the list is
+            # what puts everyone it prints on the ballot (rule 77).
+            if new != now or (no_primary and kind == BALLOT and new == NOMINEE):
                 status[cid] = new
                 changed[cid] = new
     # Names the list holds that match no filing: on the race by name, in the
@@ -2557,13 +2560,16 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     # A state's certified list of November candidates, laid over whatever
     # the page decided (rule 77). Louisiana's open-primary seats keep their
     # qualified list (rule 64).
+    from .overrides import NO_PRIMARY_SEATS
     for state, spec in sorted((certified or {}).items()):
         for rid, entries in sorted(spec.get("races", {}).items()):
             if (races.get(rid) or {}).get("source") == "qualified":
                 continue
             races[rid] = certify_race(races.get(rid), dict(spec, entries=entries),
                                       by_race.get(rid, []), (aliases or {}).get(rid),
-                                      ranked_choice=state in RANKED_CHOICE)
+                                      ranked_choice=state in RANKED_CHOICE,
+                                      no_primary=(state, rid.split("-")[0])
+                                      in NO_PRIMARY_SEATS)
             if rid in pending:
                 pending.remove(rid)
             for cid in races[rid].get("certifiedHeld") or []:
@@ -3393,8 +3399,9 @@ def race_summary(cache, race_id):
     """``{"nominees": n, "eliminated": n, "withdrawn": n, ...}`` or ``None``.
 
     ``otherNominees`` names everyone the page puts on the November ballot
-    whom no filing matched, before and after the count; ``otherElected`` and
-    ``otherRunoff`` say which of them won, or are in a runoff."""
+    whom no filing matched, before and after the count; ``otherElected``,
+    ``otherDefeated`` and ``otherRunoff`` say which of them won, lost, or are
+    in a runoff."""
     race = (cache or {}).get("races", {}).get(race_id)
     if not race:
         return None
@@ -3428,4 +3435,5 @@ def race_summary(cache, race_id):
                              if unmatched.get(n) in NOVEMBER and list_party_words(p)},
             "otherNominees": sorted(n for n, st in unmatched.items() if st in NOVEMBER),
             "otherElected": sorted(n for n, st in unmatched.items() if st == ELECTED),
+            "otherDefeated": sorted(n for n, st in unmatched.items() if st == DEFEATED),
             "otherRunoff": sorted(n for n, st in unmatched.items() if st == RUNOFF)}

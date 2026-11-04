@@ -2383,6 +2383,33 @@ class TestValidateElected(unittest.TestCase):
         self.assertEqual(len(found), 1)
         self.assertIn("Cy Unprofiled", " ".join(found[0].detail))
 
+    def test_a_loser_with_no_profile_is_not_awaiting_the_result(self):
+        # Results night 2026-11-04: otherNominees names everyone on the
+        # November ballot with no profile, the defeated included, and the
+        # check called Bray (NC) and Hackett (SC) still waiting.
+        from kyc import validate
+        people = [{"id": "a", "name": "Ann One", "party": "Democrat", "raceStatus": "elected",
+                   "raceId": "H-GA-05-2026", "isCandidate": True}]
+        for key in ("otherDefeated", "otherElected"):
+            race = dict(self.race, results={"otherNominees": ["Cy Unprofiled"],
+                                            key: ["Cy Unprofiled"]})
+            codes = [i.code for i in validate.check_results(people, [race])]
+            self.assertNotIn("nominee-beside-result", codes)
+        race = dict(self.race, results={"otherNominees": ["Cy Unprofiled", "Di Waiting"],
+                                        "otherDefeated": ["Cy Unprofiled"]})
+        found = [i for i in validate.check_results(people, [race])
+                 if i.code == "nominee-beside-result"]
+        self.assertEqual(len(found), 1)
+        self.assertNotIn("Cy Unprofiled", " ".join(found[0].detail))
+        self.assertIn("Di Waiting", " ".join(found[0].detail))
+
+    def test_the_summary_names_unprofiled_losers(self):
+        cache = {"races": {"S-SC-2026": {"status": {}, "unmatched": {
+            "Mark Hackett": "defeated", "Eve Won": "elected", "Fay Wait": "nominee"}}}}
+        summary = results.race_summary(cache, "S-SC-2026")
+        self.assertEqual(summary["otherDefeated"], ["Mark Hackett"])
+        self.assertIn("Mark Hackett", summary["otherNominees"])
+
 
 class TestSenateDateFallback(unittest.TestCase):
     def test_a_senate_race_without_a_primary_date_takes_the_house_date(self):
