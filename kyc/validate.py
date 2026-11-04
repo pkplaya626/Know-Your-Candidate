@@ -1993,7 +1993,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
         district_error=None, voting=None, federal=None, judiciary=None, vacancies=None,
         history=None, voting_dates=None, statewide=None, measures=None, portraits=None,
         photo_routes=(), guides=None, photo_manifest=None, legislators=None, officers=None,
-        local_measures=None):
+        local_measures=None, judge_disclosures=False):
     """Run every check. Returns a list of :class:`Issue`."""
     issues = []
     issues += check_district_maps(races, district_maps, district_error)
@@ -2047,7 +2047,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_ballot2026()
     issues += check_federal(federal)
     issues += check_succession(federal, snapshot)
-    issues += check_judiciary(judiciary)
+    issues += check_judiciary(judiciary, judge_disclosures)
     issues += check_vacancies(vacancies, judiciary)
     issues += check_history(history, profiles)
     if voting is not None:                 # None: the caller did not supply it
@@ -2313,12 +2313,16 @@ def check_succession(cache, snapshot):
                   f"in the line of succession", problems)] if problems else []
 
 
-def check_judiciary(cache):
+def check_judiciary(cache, disclosures=False):
     """The federal judiciary cache (kyc/judiciary.py), when the caller
     supplies one: every court present, nine justices and no retired one
     among them, and no judge with a party; and each court's own website on
-    a host of the judiciary's own (kyc/court_info.py)."""
-    from . import court_info, federal_courts, judiciary
+    a host of the judiciary's own (kyc/court_info.py). With it, each court's
+    own word on its chief where the directory cannot say
+    (kyc/court_chiefs.py), and, when the caller supplies it (``False``: not
+    supplied; ``None``: no cache), the judges' disclosures as CourtListener
+    holds them (kyc/judge_disclosures.py)."""
+    from . import court_chiefs, court_info, federal_courts, judge_disclosures, judiciary
 
     issues = [Issue("error", "federal-courts", f"the court table: {p}")
               for p in federal_courts.check()]
@@ -2327,6 +2331,11 @@ def check_judiciary(cache):
     if cache is not None:
         issues += [Issue(level, code, message, detail)
                    for level, code, message, detail in judiciary.problems(cache)]
+        issues += [Issue(level, code, message, detail)
+                   for level, code, message, detail in court_chiefs.problems(cache)]
+        if disclosures is not False:
+            issues += [Issue(level, code, message, detail) for level, code, message, detail
+                       in judge_disclosures.problems(disclosures, cache.get("judges"))]
     return issues
 
 
