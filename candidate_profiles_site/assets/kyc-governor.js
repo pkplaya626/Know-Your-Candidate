@@ -121,7 +121,8 @@
       // The office's ballot mark and the holder line (rule 79), and a
       // candidate's status badge.
       '      <p class="modal-meta" id="governorModalStatus" hidden></p>',
-      '      <p class="modal-credit" id="governorModalPhotoCredit" hidden></p>',
+      // A slot the credit helper hides once it is empty (rule 87).
+      '      <p class="modal-credit" id="governorModalPhotoCredit" data-credit-slot hidden></p>',
       "    </div>",
       "  </header>",
       '  <div class="modal-body scroll-y" id="governorModalBody"></div>',
@@ -404,7 +405,16 @@
     if (drawn.getAttribute("data-photo-of")) img.setAttribute("data-photo-of", drawn.getAttribute("data-photo-of"));
     img.src = drawn.getAttribute("src");
     img.alt = name;
-    line.innerHTML = photo.credit.replace(/^<p[^>]*>|<\/p>$/g, "");
+    // The card's credit line, as a span naming the photograph it credits
+    // (data-credits), so a photograph that fails for good takes it with it
+    // through the cards' one helper (KYC.stategov.dropPhotoCredit, rule 87).
+    attrs.innerHTML = photo.credit;
+    var said = attrs.firstChild;
+    var credit = doc.createElement("span");
+    credit.setAttribute("data-credits", said.getAttribute("data-credits") || "");
+    while (said.firstChild) credit.appendChild(said.firstChild);
+    line.innerHTML = "";
+    line.appendChild(credit);
     line.hidden = false;
   }
 
@@ -575,16 +585,20 @@
     });
     // A portrait that will not load leaves the circle, and takes its
     // credit with it (rule 87); a copy this site made gives way to its
-    // original first (rule 101).
+    // original first (rule 101), which keeps the credit, no longer calling
+    // it a copy (KYC.retryOriginal removes that note wherever it is). One
+    // helper with the cards (KYC.stategov.dropPhotoCredit, rule 12): only
+    // the original failing takes the credit, here and wherever else the
+    // page prints it once nothing on the page shows that photograph.
     el("governorModalPhoto").addEventListener("error", function (event) {
-      if (KYC.retryOriginal(event.target, event)) {
-        var note = el("governorModalPhotoCredit").querySelector(".photo-copy-note");
-        if (note) note.remove();
-        return;
-      }
+      if (KYC.retryOriginal(event.target, event)) return;
+      var address = event.target.getAttribute("src");
+      if (!address) return;
       event.target.removeAttribute("src");
       el("governorModalPortrait").classList.add("gov-portrait-empty");
-      el("governorModalPhotoCredit").hidden = true;
+      var line = el("governorModalPhotoCredit");
+      sg().dropPhotoCredit(address, line.querySelector("[data-credits]"));
+      line.hidden = true;
     });
     var copy = el("governorModalCopy");
     copy.addEventListener("click", function () {

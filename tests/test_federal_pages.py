@@ -466,5 +466,116 @@ class TestThePages(unittest.TestCase):
             self.assertIn(f"https://example.org/courts/{cid}.html", text)
 
 
+class TestTheFederalPortraitsAskTheRefusalLists(unittest.TestCase):
+    """The President's, the Vice President's and the Cabinet's photographs
+    are asked of the lists a person keeps (rules 24 and 87), as every other
+    route is at build time."""
+
+    @staticmethod
+    def payload():
+        def person(name, slug, **kw):
+            return dict(name=name, photo=f"https://www.whitehouse.gov/{slug}.jpg",
+                        photoSet=[[f"https://www.whitehouse.gov/{slug}.jpg?resize=400,500", 400]], **kw)
+        return {
+            "president": person("A President", "president", office="President of the United States"),
+            "vicePresident": person("A Vice President", "vp", office="Vice President of the United States"),
+            "offices": [{"key": "state", "holder": person("A Secretary", "secretary",
+                                                         title="Secretary of State")},
+                        {"key": "vacant", "holder": None}],
+        }
+
+    def withhold(self, refusals=None, doubts=None):
+        from unittest import mock
+        from kyc import overrides
+        payload = self.payload()
+        with mock.patch.object(overrides, "NOT_A_PORTRAIT", refusals or {}), \
+                mock.patch.object(overrides, "PORTRAIT_LICENCE_DOUBTS", doubts or {}):
+            said = federal_build.withhold_refused(payload)
+        return payload, said
+
+    def test_a_refused_presidents_photo_is_withheld_and_said(self):
+        payload, said = self.withhold(refusals={
+            "https://www.whitehouse.gov/president.jpg": ("2026-11-01", "a scene, not a likeness")})
+        self.assertIsNone(payload["president"]["photo"])
+        self.assertEqual(payload["president"]["photoSet"], [])
+        self.assertEqual(len(said), 1)
+        self.assertIn("A President", said[0])
+        self.assertIn("NOT_A_PORTRAIT", said[0])
+        self.assertIn("a scene, not a likeness", said[0])
+        # Nobody else's is touched.
+        self.assertTrue(payload["vicePresident"]["photo"])
+        self.assertTrue(payload["offices"][0]["holder"]["photo"])
+
+    def test_a_cabinet_holders_doubted_size_withholds_the_photo(self):
+        # Any address of the photograph: a size in its set is the same file.
+        payload, said = self.withhold(doubts={
+            "https://www.whitehouse.gov/secretary.jpg?resize=400,500": ("2026-11-01", "no author")})
+        holder = payload["offices"][0]["holder"]
+        self.assertIsNone(holder["photo"])
+        self.assertEqual(holder["photoSet"], [])
+        self.assertEqual(len(said), 1)
+        self.assertIn("A Secretary (Secretary of State)", said[0])
+        self.assertIn("PORTRAIT_LICENCE_DOUBTS", said[0])
+        self.assertTrue(payload["president"]["photo"])
+
+    def test_an_unrefused_photo_is_unchanged(self):
+        payload, said = self.withhold(refusals={
+            "https://example.org/someone-else.jpg": ("2026-11-01", "another file")})
+        self.assertEqual(said, [])
+        self.assertEqual(payload, self.payload())
+
+    def test_others_in_the_frame_refuse_an_officials_photo(self):
+        # The background-people rule is for officials too; only a judge is
+        # exempt (photos.applies).
+        from kyc import overrides
+        payload, said = self.withhold(refusals={
+            "https://www.whitehouse.gov/vp.jpg": ("2026-11-01", "people behind",
+                                                  overrides.OTHERS_IN_FRAME)})
+        self.assertIsNone(payload["vicePresident"]["photo"])
+        self.assertEqual(len(said), 1)
+
+    def test_the_build_reports_a_refused_photo_and_withholds_it(self):
+        from unittest import mock
+        from kyc import federal, overrides
+        executive = federal.load_cache(ROOT)
+        if not executive or not (executive.get("president") or {}).get("photo"):
+            self.skipTest("the federal cache holds no President's photograph")
+        holder = next((o["holder"] for o in executive["offices"]
+                       if (o.get("holder") or {}).get("photo")), None)
+        refusals = {executive["president"]["photo"]: ("2026-11-01", "test refusal")}
+        if holder:
+            refusals[holder["photo"]] = ("2026-11-01", "test refusal")
+        with mock.patch.object(overrides, "NOT_A_PORTRAIT", refusals):
+            payload, _courts, _search, problems = federal_build.build(ROOT)
+        self.assertIsNone(payload["president"]["photo"])
+        self.assertEqual(payload["president"]["photoSet"], [])
+        self.assertNotIn("photoCopy", payload["president"])
+        self.assertTrue(any(executive["president"]["name"] in p and "withheld" in p for p in problems))
+        if holder:
+            shown = next(o["holder"] for o in payload["offices"]
+                         if (o.get("holder") or {}).get("name") == holder["name"])
+            self.assertIsNone(shown["photo"])
+            self.assertTrue(any(holder["name"] in p and "withheld" in p for p in problems))
+
+    def test_every_federal_photo_is_a_route_the_staleness_check_knows(self):
+        from kyc import federal
+        executive = federal.load_cache(ROOT)
+        if not executive:
+            self.skipTest("no federal cache")
+        addresses = federal_build.photo_addresses(executive)
+        for person in [executive["president"], executive["vicePresident"]] + [
+                o["holder"] for o in executive["offices"] if o.get("holder")]:
+            for url in federal_build.photo_urls(person):
+                self.assertIn(url, addresses)
+        # And validate's staleness check is told of them: a NOT_A_PORTRAIT
+        # entry refusing the President's photograph guards a file this route
+        # offers, never reported stale.
+        from kyc import cli
+        routes = cli._photo_routes(ROOT)
+        if executive["president"].get("photo"):
+            self.assertIn(executive["president"]["photo"], routes)
+        self.assertLessEqual(addresses, routes)
+
+
 if __name__ == "__main__":
     unittest.main()
