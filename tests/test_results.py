@@ -1118,6 +1118,279 @@ class TestAgainstTheRealCache(unittest.TestCase):
                 self.assertLessEqual(len(names), 1, f"{rid}: {party} nominees {sorted(names)}")
 
 
+class TestAMarkNeedsAFilingAndACount(unittest.TestCase):
+    """The read publishes without a person (rules 29, 63). On the night of
+    2026-11-04 South Carolina's page named "Peter Griffin" for a minute, Iowa's
+    and Colorado's named a winner at 0 reporting and Massachusetts' at 15, and
+    North Carolina's and South Carolina's November tables carried a mark over
+    empty count columns, their counts only in the infobox."""
+
+    TITLE = "2026 United States Senate election in North Carolina"
+    RACE = "S-NC-2026"
+    PRIMARIES = (box("Democratic primary results", ("Roy Cooper", 900, True)) + "\n" +
+                 box("Republican primary results", ("Michael Whatley", 800, True)))
+
+    def setUp(self):
+        self.field = {"candidates": [
+            {"candidate_id": "S6NC1", "name": "COOPER, ROY", "state": "NC", "office": "S",
+             "party": "DEM"},
+            {"candidate_id": "S6NC2", "name": "WHATLEY, MICHAEL", "state": "NC", "office": "S",
+             "party": "REP"}]}
+        self.dates = {("NC", "S"): {"primary": "2026-03-03", "runoff": None}}
+
+    def infobox(self, *rows, ongoing=None, reporting=None):
+        out = ["{{Infobox election", "| election_name = x"]
+        if ongoing is not None:
+            out.append(f"| ongoing = {ongoing}")
+        if reporting is not None:
+            out.append(f"| reporting = {reporting}")
+        for i, (name, votes) in enumerate(rows, 1):
+            out += [f"| nominee{i} = '''[[{name}]]'''",
+                    f"| party{i} = Democratic Party (United States)",
+                    f"| popular_vote{i} = '''{votes}'''"]
+        return "\n".join(out + ["}}"])
+
+    def table(self, *rows):
+        """A November table; a row's count may be None, printed empty."""
+        out = ["{{Election box begin no change", f"| title = {self.TITLE}", "}}"]
+        for name, votes, won in rows:
+            kind = "winning candidate" if won else "candidate"
+            out += [f"{{{{Election box {kind} with party link no change",
+                    "| party = Democratic Party (United States)", f"| candidate = {name}",
+                    f"| votes = {'' if votes is None else votes}", "}}"]
+        return "\n".join(out + ["{{Election box end}}"])
+
+    def read(self, *parts, today=datetime.date(2026, 11, 4), certified=None, aliases=None,
+             logged=None):
+        page = "\n\n".join((self.PRIMARIES,) + parts)
+        return results.build(self.field, self.dates, today=today,
+                             log=(logged.append if logged is not None else lambda *_: None),
+                             fetch=lambda t: page if t == self.TITLE else
+                             (_ for _ in ()).throw(results.PageMissing(t)),
+                             certified=certified, aliases=aliases)
+
+    def status(self, cache):
+        return cache["races"][self.RACE]["status"]
+
+    def refused(self, cache):
+        return (cache.get("refusedMarks") or {}).get(self.RACE) or []
+
+    AWAITING = {"S6NC1": "nominee", "S6NC2": "nominee"}
+    ELECTED = {"S6NC1": "elected", "S6NC2": "defeated"}
+
+    # ---- the name
+
+    def test_a_mark_on_a_name_with_no_filing_concludes_nothing(self):
+        logged = []
+        cache = self.read(self.table(("Peter Griffin", 900, True), ("Michael Whatley", 800, False)),
+                          logged=logged)
+        race = cache["races"][self.RACE]
+        # The vandal's name wins nothing and stands on no ballot, and the
+        # nominee whose row it took is not "withdrawn".
+        self.assertEqual(self.status(cache), self.AWAITING)
+        self.assertNotIn("Peter Griffin", race["unmatched"])
+        self.assertEqual(results.race_summary(cache, self.RACE)["otherElected"], [])
+        self.assertEqual([m["name"] for m in self.refused(cache)], ["Peter Griffin"])
+        self.assertIn("no filing", self.refused(cache)[0]["why"])
+        self.assertTrue(any("[REFUSED]" in line and "Peter Griffin" in line and self.RACE in line
+                            for line in logged), logged)
+
+    def test_the_name_may_be_the_filings_in_any_spelling_rule_62_allows(self):
+        cache = self.read(self.table(("Roy A. Cooper", 900, True), ("Michael Whatley", 800, False)))
+        self.assertEqual(self.status(cache), self.ELECTED)
+        self.field["candidates"][0]["name"] = "COOPER, ROY ASBERRY III"
+        cache = self.read(self.table(("Roy Cooper", 900, True), ("Michael Whatley", 800, False)))
+        self.assertEqual(self.status(cache), self.ELECTED)
+
+    def test_an_alias_from_the_roster_is_a_filing(self):
+        self.PRIMARIES = (box("Democratic primary results", ("Buddy Cooper", 900, True)) + "\n" +
+                          box("Republican primary results", ("Michael Whatley", 800, True)))
+        cache = self.read(self.table(("Buddy Cooper", 900, True), ("Michael Whatley", 800, False)),
+                          aliases={self.RACE: [("Buddy Cooper", "S6NC1")]})
+        self.assertEqual(self.status(cache), self.ELECTED)
+
+    def test_a_certified_list_entry_stands_for_a_filing(self):
+        # American Samoa's delegate: the list names them, no filing does.
+        lists = {"NC": {"source": "NC State Board", "url": "https://x", "fetched": "2026-10-17",
+                        "complete": False,
+                        "races": {self.RACE: [
+                            {"name": "Samuel Nofiling", "party": "Green", "kind": "ballot"},
+                            {"name": "Michael Whatley", "party": "Republican", "kind": "ballot"}]}}}
+        cache = self.read(self.table(("Samuel Nofiling", 900, True), ("Michael Whatley", 800, False)),
+                          certified=lists)
+        self.assertEqual(results.race_summary(cache, self.RACE)["otherElected"], ["Samuel Nofiling"])
+        self.assertEqual(self.refused(cache), [])
+
+    def test_a_list_entry_who_withdrew_stands_for_nothing(self):
+        lists = {"NC": {"source": "NC State Board", "url": "https://x", "fetched": "2026-10-17",
+                        "complete": False,
+                        "races": {self.RACE: [
+                            {"name": "Samuel Nofiling", "party": "Green", "kind": "withdrawn"}]}}}
+        cache = self.read(self.table(("Samuel Nofiling", 900, True), ("Michael Whatley", 800, False)),
+                          certified=lists)
+        self.assertEqual(results.race_summary(cache, self.RACE)["otherElected"], [])
+        self.assertEqual([m["name"] for m in self.refused(cache)], ["Samuel Nofiling"])
+
+    def test_a_fitting_name_that_fits_two_people_is_refused(self):
+        self.field["candidates"].append({"candidate_id": "S6NC3", "name": "COOPER, ROY B",
+                                         "state": "NC", "office": "S", "party": "REP"})
+        self.field["candidates"][0]["name"] = "COOPER, ROY A"
+        cache = self.read(self.table(("Roy Cooper", 900, True), ("Michael Whatley", 800, False)))
+        self.assertEqual(results.race_summary(cache, self.RACE)["otherElected"], [])
+        self.assertNotIn("elected", self.status(cache).values())
+        self.assertEqual([m["name"] for m in self.refused(cache)], ["Roy Cooper"])
+
+    # ---- the count
+
+    def test_a_mark_the_tables_counts_lead_with_stands(self):
+        cache = self.read(self.table(("Roy Cooper", 900, True), ("Michael Whatley", 800, False)))
+        self.assertEqual(self.status(cache), self.ELECTED)
+        self.assertEqual(self.refused(cache), [])
+
+    def test_a_mark_on_someone_the_counts_do_not_lead_with_is_refused(self):
+        for votes in ((700, 800), (800, 800)):
+            cache = self.read(self.table(("Roy Cooper", votes[0], True),
+                                         ("Michael Whatley", votes[1], False)))
+            self.assertEqual(self.status(cache), self.AWAITING, votes)
+            self.assertIn("do not lead", self.refused(cache)[0]["why"])
+
+    def test_two_marks_are_refused_and_reported(self):
+        cache = self.read(self.table(("Roy Cooper", 900, True), ("Michael Whatley", 800, True)))
+        self.assertEqual(self.status(cache), self.AWAITING)
+        self.assertEqual(sorted(m["name"] for m in self.refused(cache)),
+                         ["Michael Whatley", "Roy Cooper"])
+
+    NO_COUNTS = (("Roy Cooper", None, True), ("Michael Whatley", None, False))
+    ZERO_COUNTS = (("Roy Cooper", 0, True), ("Michael Whatley", 0, False))
+
+    def test_no_counts_stand_on_the_infobox_when_it_leads_with_them(self):
+        # North Carolina's, 2026-11-04: Cooper 2,431,822 to Whatley 1,624,770.
+        for rows in (self.NO_COUNTS, self.ZERO_COUNTS):
+            cache = self.read(self.table(*rows),
+                              self.infobox(("Roy Cooper", "2,431,822"), ("Michael Whatley", "1,624,770")))
+            self.assertEqual(self.status(cache), self.ELECTED, rows)
+
+    def test_no_counts_and_no_infobox_counts_conclude_nothing(self):
+        for parts in ((self.table(*self.NO_COUNTS),),
+                      (self.table(*self.NO_COUNTS), self.infobox(("Roy Cooper", ""), ("Michael Whatley", ""))),
+                      (self.table(*self.ZERO_COUNTS), self.infobox(("Roy Cooper", "0"), ("Michael Whatley", "0"))),
+                      (self.table(*self.NO_COUNTS), self.infobox(("Roy Cooper", "100"), ("Michael Whatley", "")))):
+            cache = self.read(*parts)
+            self.assertEqual(self.status(cache), self.AWAITING)
+            self.assertIn("no counts", self.refused(cache)[0]["why"])
+
+    def test_an_infobox_leading_with_someone_else_refuses(self):
+        cache = self.read(self.table(*self.NO_COUNTS),
+                          self.infobox(("Roy Cooper", "100"), ("Michael Whatley", "200")))
+        self.assertEqual(self.status(cache), self.AWAITING)
+
+    def test_an_infobox_count_at_little_reporting_or_marked_ongoing_is_no_count(self):
+        counts = (("Roy Cooper", "270,896"), ("Michael Whatley", "105,431"))
+        for kwargs in ({"reporting": "0"}, {"reporting": "15"}, {"ongoing": "yes"}):
+            cache = self.read(self.table(*self.NO_COUNTS), self.infobox(*counts, **kwargs))
+            self.assertEqual(self.status(cache), self.AWAITING, kwargs)
+        cache = self.read(self.table(*self.NO_COUNTS), self.infobox(*counts, reporting="95", ongoing="no"))
+        self.assertEqual(self.status(cache), self.ELECTED)
+
+    def test_a_count_in_a_comment_is_not_shown_and_counts_for_nothing(self):
+        box_text = self.infobox(("Roy Cooper", "100"), ("Michael Whatley", "<!-- 200 -->"))
+        cache = self.read(self.table(*self.NO_COUNTS), box_text)
+        self.assertEqual(self.status(cache), self.AWAITING)
+
+    def test_a_table_with_one_count_and_another_row_blank_is_not_a_count(self):
+        cache = self.read(self.table(("Roy Cooper", 900, True), ("Michael Whatley", None, False)))
+        self.assertEqual(self.status(cache), self.AWAITING)
+
+    # ---- one person on the whole ballot
+
+    def unopposed(self, kind="unopposed", *others):
+        return {"NC": {"source": "NC", "url": "https://x", "fetched": "2026-10-17", "complete": True,
+                       "races": {self.RACE: [{"name": "Roy Cooper", "party": "Democratic", "kind": kind},
+                                             *others]}}}
+
+    def test_a_list_naming_one_person_needs_no_count(self):
+        # Florida prints no unopposed candidate, so no count may ever come.
+        self.PRIMARIES = box("Democratic primary results", ("Roy Cooper", 900, True))
+        self.field["candidates"].pop()
+        cache = self.read(self.table(("Roy Cooper", None, True)), certified=self.unopposed())
+        self.assertEqual(self.status(cache)["S6NC1"], "elected")
+        self.assertEqual(self.refused(cache), [])
+
+    def test_a_list_naming_anyone_else_needs_a_count(self):
+        self.PRIMARIES = box("Democratic primary results", ("Roy Cooper", 900, True))
+        for other in ({"name": "Ann Other", "party": "Green", "kind": "ballot"},
+                      {"name": "Ann Other", "party": "", "kind": "write-in"}):
+            cache = self.read(self.table(("Roy Cooper", None, True)),
+                              certified=self.unopposed("ballot", other))
+            self.assertNotEqual(self.status(cache).get("S6NC1"), "elected", other)
+            self.assertIn("no counts", self.refused(cache)[0]["why"])
+
+    def test_the_page_alone_names_one_person_only_when_nobody_else_is_its_nominee(self):
+        self.PRIMARIES = box("Democratic primary results", ("Roy Cooper", 900, True))
+        cache = self.read(self.table(("Roy Cooper", None, True)), self.infobox(("Roy Cooper", "")))
+        self.assertEqual(self.status(cache)["S6NC1"], "elected")
+        # Another party's nominee the November table left off: not alone.
+        self.PRIMARIES = (box("Democratic primary results", ("Roy Cooper", 900, True)) + "\n" +
+                          box("Republican primary results", ("Michael Whatley", 800, True)))
+        cache = self.read(self.table(("Roy Cooper", None, True)))
+        self.assertNotEqual(self.status(cache).get("S6NC1"), "elected")
+        # Anyone else the infobox names: not alone.
+        self.PRIMARIES = box("Democratic primary results", ("Roy Cooper", 900, True))
+        cache = self.read(self.table(("Roy Cooper", None, True)),
+                          self.infobox(("Roy Cooper", ""), ("Michael Whatley", "")))
+        self.assertNotEqual(self.status(cache).get("S6NC1"), "elected")
+
+    # ---- beside the other gates
+
+    def test_before_the_day_after_a_mark_is_not_read_or_refused(self):
+        cache = self.read(self.table(("Peter Griffin", None, True), ("Michael Whatley", None, False)),
+                          today=datetime.date(2026, 11, 3))
+        self.assertEqual(self.refused(cache), [])
+
+    def test_a_refused_read_keeps_the_last_read_of_that_race(self):
+        cache = self.read(self.table(*self.NO_COUNTS))
+        previous = {"races": {self.RACE: {"status": self.ELECTED}}}
+        self.assertEqual(results.carry_refused(cache, previous), [self.RACE])
+        self.assertEqual(cache["races"][self.RACE]["status"], self.ELECTED)
+        self.assertEqual(results.carry_refused({"refusedMarks": {}}, previous), [])
+
+    def test_validate_names_each_refused_race_to_a_person(self):
+        from kyc import validate
+        cache = self.read(self.table(("Peter Griffin", 900, True), ("Michael Whatley", 800, False)))
+        issues = [i for i in validate.check_results_pages(cache) if i.code == "result-mark-refused"]
+        self.assertEqual([i.level for i in issues], ["warn"])
+        self.assertIn(self.RACE, issues[0].detail[0])
+        self.assertIn("Peter Griffin", issues[0].detail[0])
+        self.assertFalse([i for i in validate.check_results_pages(
+            self.read(self.table(("Roy Cooper", 900, True), ("Michael Whatley", 800, False))))
+            if i.code == "result-mark-refused"])
+
+    def test_the_counts_are_not_the_majority_gates_to_weaken(self):
+        # A ranked-choice seat's lead short of a majority stays unread though
+        # it leads the table: this guard asks first and the gate still asks.
+        boxes = results.parse_boxes(self.table(("Roy Cooper", 45, True), ("Michael Whatley", 30, False),
+                                               ("Ann Other", 25, False)))
+        kept, refused = results.refuse_marks(boxes, open_primary=False)
+        self.assertEqual(refused, [])
+        status = results.resolve_race(kept, general_held=True, ranked_choice=True)
+        self.assertNotIn(results.ELECTED, status.values())
+
+    def test_a_december_mark_needs_a_count_too(self):
+        boxes = results.parse_boxes(box("Runoff results", ("Roy Cooper", 0, True),
+                                        ("Michael Whatley", 0, False)))
+        kept, refused = results.refuse_marks(boxes, general_runoff=True, round_held=True)
+        self.assertEqual([m["name"] for m in refused], ["Roy Cooper"])
+        self.assertFalse(any(r["won"] for _t, rows in kept for r in rows))
+        # An open primary's two marks must be the two highest counts.
+        first = results.parse_boxes(self.table(("Roy Cooper", 40, True), ("Michael Whatley", 20, True),
+                                               ("Ann Other", 30, False)))
+        kept, refused = results.refuse_marks(first, open_primary=True)
+        self.assertEqual(len(refused), 2)
+        top = results.parse_boxes(self.table(("Roy Cooper", 40, True), ("Michael Whatley", 30, True),
+                                             ("Ann Other", 20, False)))
+        self.assertEqual(results.refuse_marks(top, open_primary=True)[1], [])
+
+
 if __name__ == "__main__":
     unittest.main()
 
@@ -1803,7 +2076,9 @@ class TestOpenPrimaryElectionNight(NoGap):
             cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *rows),
                                    log=logged)
             self.assertEqual(cache["races"], {}, rows)
-            self.assertTrue(any("[warn] H-LA-05-2026" in line for line in logged), rows)
+            # Short of a count, the mark is refused before this reads it.
+            self.assertTrue(any("H-LA-05-2026" in line and ("[warn]" in line or "[REFUSED]" in line)
+                                for line in logged), rows)
 
     def test_a_filer_absent_from_the_first_round_is_unlisted(self):
         cache = self.run_build(datetime.date(2026, 11, 4), la5_box(LA5_NOVEMBER, *TOP_TWO))
@@ -2039,8 +2314,8 @@ class TestGeneralElectionNight(NoGap):
 
     def test_after_the_runoff_its_winner_is_elected(self):
         cache = self.run_build(datetime.date(2026, 12, 2), self.general(),
-                               box("Runoff results", ("Ann Alpha", 0, False),
-                                   ("Dee Delta", 1, True)))
+                               box("Runoff results", ("Ann Alpha", 40, False),
+                                   ("Dee Delta", 60, True)))
         self.assertEqual(self.statuses(cache), {
             "alpha": "defeated", "beta": "eliminated", "delta": "elected", "epsilon": "defeated"})
 
@@ -2051,8 +2326,8 @@ class TestGeneralElectionNight(NoGap):
         # (Epsilon) lost in November.
         from kyc import share
         cache = self.run_build(datetime.date(2026, 12, 2), self.general(),
-                               box("Runoff results", ("Ann Alpha", 0, False),
-                                   ("Dee Delta", 1, True)))
+                               box("Runoff results", ("Ann Alpha", 40, False),
+                                   ("Dee Delta", 60, True)))
         race = cache["races"]["H-GA-05-2026"]
         self.assertEqual(race["decidedIn"], {"date": "2026-12-01", "open": False,
                                              "ids": ["H6GA05201", "H6GA05204"]})

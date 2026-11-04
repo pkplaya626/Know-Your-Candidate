@@ -1045,6 +1045,14 @@ def check_results_pages(cache):
     if not cache:
         return []
     issues = []
+    refused = [f"{rid}: {item.get('name')}: {item.get('why')}"
+               for rid, marks in sorted((cache.get("refusedMarks") or {}).items())
+               for item in marks]
+    if refused:
+        issues.append(Issue("warn", "result-mark-refused",
+                            f"{len(refused)} November marks the results read refused (rule 63): "
+                            "each race reads as before the count until its page gives the mark "
+                            "a filing and a count; a person should look at each", refused))
     unparsed = list(cache.get("unparsedPages") or [])
     if unparsed:
         issues.append(Issue("error", "results-page-unparsed",

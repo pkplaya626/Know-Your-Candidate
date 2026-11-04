@@ -1306,7 +1306,34 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     with another year than the cycle's ("Texas's 28th congressional
     district, 2024" above an unmarked 2026 one) read as this November's -
     it is another election's (`_stage`), and a party's assembly is not
-    read at all. Who
+    read at all. And a mark needs a filing and a count behind it
+    (`results.refuse_marks`, read on the night of 2026-11-04, when this read
+    began to publish without a person): South Carolina's page named "Peter
+    Griffin" for a minute at 03:33 UTC, Iowa's and Colorado's named a winner
+    at 0 reporting and Massachusetts' at 15, and North Carolina's and South
+    Carolina's November tables carried a mark over empty count columns. So a
+    November mark is refused - it concludes nothing, the race reads as before
+    the count and keeps the last read of it (`carry_refused`, rule 8), a line
+    in the read's log says `[REFUSED]` and `validate` names the race
+    (`result-mark-refused`) - where it is on a name no filing fits and no
+    certified list prints, however the page spells it (rule 62's matching and
+    `RESULT_NAMES` apply; the name then stands on no ballot, and the table
+    with it, or a real nominee whose row a vandal took reads "withdrawn"), on
+    someone its table's own counts do not lead, or one of two; where its table
+    holds fewer than two counts above zero, it stands only on the same page's
+    infobox - counts above zero, the marked person leading, not marked ongoing
+    and at least `REPORTING_FLOOR` reporting where it says (North Carolina's
+    2,431,822 to 1,624,770, South Carolina's 984,027 to 916,267 at 95) - or
+    on nobody else being on the ballot, since an unopposed count may never
+    come: the certified list prints them alone (and no write-in) and is the
+    whole ballot (Florida's "unopposed"), or with no list the table and the
+    infobox name nobody else and no primary on the page crowned anyone else,
+    which the status table alone cannot say: a nominee a November table left
+    off reads "withdrawn" to it. An open primary's two marks must be its table's two
+    highest counts, and a December round's mark must lead its table. All this
+    is beside the ranked-choice and majority gates and weakens neither. Replayed offline over the
+    pages of the two reads of that night, it made every call they had made
+    (all 10 and all 3) and refused none. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
