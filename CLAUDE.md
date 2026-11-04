@@ -1559,7 +1559,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "filed in total" counts the person once too (`filing_counts` folds the
     same registrations), or VA-11 read 22 filed with Purves three times. A
     results-page name that was ambiguous only between one person's
-    registrations is theirs (`results._claim_unmatched`).
+    registrations is theirs (`results._claim_unmatched`). A second
+    registration with no money and no committee joins nothing automatically
+    (equal money alone never joins anyone, and it has no committee), so on
+    results night 2026-11-04 KY-4 read "Jeremy Ryan Todd (Libertarian): Lost
+    the November election" beside "Also on the November ballot ... with no FEC
+    filing over $5,000 and so no profile here: Jeremy Todd (Libertarian)": the
+    page's one name fitted both ids, and the $0 one was named from the page.
+    There is no new automatic test: each such pair - the very same filed name,
+    party and seat, one holding a campaign's money - is an evidenced
+    `SAME_PERSON_FILINGS` entry, and `validate` warns on the next
+    (`second-registration`: a name a race lists with no profile whose filing
+    is letter for letter a profile's filed name there).
 
 73. **A count is one formula, wherever it is shown.** The sidebar read
     587 challengers on the ballot, a state's strip 16 over race headers

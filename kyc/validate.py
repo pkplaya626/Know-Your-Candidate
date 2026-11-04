@@ -760,6 +760,55 @@ def check_bio_sources(profiles):
     return []
 
 
+def check_second_registrations(races, profiles, field):
+    """A name a race lists with no profile, whose filing is letter for letter
+    a profile's filed name in that race. One page name fits both ids, so KY-4
+    read as two Libertarians: "Jeremy Ryan Todd", who lost, and "Jeremy Todd",
+    with "no FEC filing over $5,000 and so no profile here" (rules 25, 72). A
+    warning, never a merge: a person folds them with evidence in
+    ``overrides.SAME_PERSON_FILINGS`` or confirms they are two people."""
+    def norm(name):
+        return " ".join(str(name or "").upper().split())
+
+    def plain(name):
+        from .candidates import display_name
+        return tuple(sorted(norm(display_name(name)).split()))
+
+    filed = {row.get("candidate_id"): row.get("name")
+             for row in (field or {}).get("candidates") or []}
+    by_id = {p["id"]: p for p in profiles}
+    lines = []
+    for race in races or []:
+        res = race.get("results") or {}
+        people = [by_id[pid] for pid in (race.get("incumbentIds") or []) + (race.get("candidateIds") or [])
+                  if pid in by_id]
+        names = {}
+        for person in people:
+            if person.get("filedName"):
+                names.setdefault(norm(person["filedName"]), person)
+        for below in res.get("belowThreshold") or []:
+            person = names.get(norm(filed.get(below.get("id"))))
+            if person:
+                lines.append(f"{race['id']}: {below.get('name')} ({below.get('id')}) is filed as "
+                             f"{filed[below['id']]}, as {person['name']} ({person['id']}) is")
+        below = {b.get("name") for b in res.get("belowThreshold") or []}
+        words = {plain(name): person for name, person in names.items()}
+        for name in res.get("otherNominees") or []:
+            if name in below:
+                continue
+            spaced = tuple(sorted(norm(name).split()))
+            if spaced in words:
+                person = words[spaced]
+                lines.append(f"{race['id']}: {name} has no filing matched, and is the words "
+                             f"{person['name']} ({person['id']}) files under")
+    if not lines:
+        return []
+    return [Issue("warn", "second-registration",
+                  f"{len(lines)} names on a November ballot with no profile are a profile's filed "
+                  "name in that race: fold them with evidence in overrides.SAME_PERSON_FILINGS "
+                  "(rules 25, 72) or confirm they are two people", lines)]
+
+
 def check_duplicate_people(profiles):
     """Flag pairs in one race that look like the same person filed twice.
 
@@ -1966,6 +2015,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_field_screen(field)
     issues += check_registrations(profiles, field)
     issues += check_duplicate_people(profiles)
+    issues += check_second_registrations(races, profiles, field)
     issues += check_results(profiles, races)
     issues += check_winners(profiles, races)
     issues += check_member_filings(profiles, snapshot)

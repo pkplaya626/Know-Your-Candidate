@@ -366,6 +366,30 @@ SAME_PERSON_FILINGS = {
     # 2026-08-27 - so the race shows his current money, not a stale $5,142.86.
     "H6VA11256": ("H6VA11249", "VA-11: committee C00959106 lists H6VA11249, H6VA11256 and "
                                "H6VA11264, all filed as PURVES, ARTHUR GRAHAME MR."),
+    # A second registration with no money and no committee in the campaigns
+    # cache, under the campaign's very filed name, party and seat: nothing
+    # joins it automatically (rule 72), and a results page's one name matched
+    # both ids, so KY-4 read "Jeremy Ryan Todd (Libertarian): Lost the November
+    # election" and "with no FEC filing over $5,000 and so no profile here:
+    # Jeremy Todd (Libertarian)" (results night, 2026-11-04). Read from
+    # data/fec_field.json that day; validate's second-registration warning
+    # names the next one for a person.
+    "H6KY04213": ("H6KY04205", "KY-4: both filed as TODD, JEREMY RYAN, Libertarian; H6KY04205 "
+                               "has $30,837.92 and committee C00954834 JEREMY TODD FOR KENTUCKY, "
+                               "H6KY04213 $0 and no committee"),
+    "H6NJ06278": ("H6NJ06286", "NJ-6: both filed as HERZIG, HILLARY, Republican; H6NJ06286 has "
+                               "$11,766.00 and committee C00927335 HERZIG FOR CONGRESS, H6NJ06278 "
+                               "$0 and no committee"),
+    "S6TX00503": ("S6TX00495", "Texas Senate: both filed as SIMMONS, JADE, Independent; S6TX00495 "
+                               "has $9,324.49 and committee C00923201 JADE SIMMONS FOR SENATE, "
+                               "S6TX00503 $0 and no committee"),
+    "H6FL12215": ("H6FL12207", "FL-12: all filed as WILLIAMS, SHAY, Republican; H6FL12207 has "
+                               "$23,443.03, as does H6FL12223 (already folded under it, one "
+                               "committee's money), H6FL12215 $0"),
+    "H6GA03170": ("H6GA11231", "GA-11: both filed as EKPETE KAMA, ULOMA, Republican; H6GA11231 "
+                               "has $12,011.00, H6GA03170 $0"),
+    "H8TX29102": ("H2TX18207", "TX-38: both filed as MONTIEL, CARMEN, Republican; H2TX18207 has "
+                               "$147,355.21, H8TX29102 $0"),
 }
 
 # The name a results page uses for a filing the matcher cannot connect to it:
