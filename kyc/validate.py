@@ -784,8 +784,12 @@ def check_second_registrations(races, profiles, field):
                   if pid in by_id]
         names = {}
         for person in people:
-            if person.get("filedName"):
-                names.setdefault(norm(person["filedName"]), person)
+            # A filer's filed name; a sitting member's or a curated row's is
+            # the register's words for their own FEC ids.
+            ids = [person.get("fecCandidateId")] + list(person.get("otherFecIds") or [])
+            for form in [person.get("filedName")] + [filed.get(cid) for cid in ids if cid]:
+                if form:
+                    names.setdefault(norm(form), person)
         for below in res.get("belowThreshold") or []:
             person = names.get(norm(filed.get(below.get("id"))))
             if person:
@@ -1053,6 +1057,14 @@ def check_results_pages(cache):
                             f"{len(refused)} November marks the results read refused (rule 63): "
                             "each race reads as before the count until its page gives the mark "
                             "a filing and a count; a person should look at each", refused))
+    names_left = [f"{rid}: {item.get('name')}: {item.get('why')}"
+                  for rid, items in sorted((cache.get("refusedNames") or {}).items())
+                  for item in items]
+    if names_left:
+        issues.append(Issue("warn", "result-name-refused",
+                            f"{len(names_left)} names only an infobox gave after the count, with "
+                            "no filing and no state's list (rule 63): left off the page; a person "
+                            "should look at each", names_left))
     unparsed = list(cache.get("unparsedPages") or [])
     if unparsed:
         issues.append(Issue("error", "results-page-unparsed",

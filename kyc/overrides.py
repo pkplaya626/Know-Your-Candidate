@@ -383,9 +383,10 @@ SAME_PERSON_FILINGS = {
     "S6TX00503": ("S6TX00495", "Texas Senate: both filed as SIMMONS, JADE, Independent; S6TX00495 "
                                "has $9,324.49 and committee C00923201 JADE SIMMONS FOR SENATE, "
                                "S6TX00503 $0 and no committee"),
-    "H6FL12215": ("H6FL12207", "FL-12: all filed as WILLIAMS, SHAY, Republican; H6FL12207 has "
-                               "$23,443.03, as does H6FL12223 (already folded under it, one "
-                               "committee's money), H6FL12215 $0"),
+    "H6FL12215": ("H6FL12207", "FL-12 and FL-14: all filed as WILLIAMS, SHAY, Republican; "
+                               "H6FL12207 (registered in district 14) has $23,443.03, as does "
+                               "H6FL12223 (district 12, already folded under it, one committee's "
+                               "money), H6FL12215 (district 12) $0"),
     "H6GA03170": ("H6GA11231", "GA-11: both filed as EKPETE KAMA, ULOMA, Republican; H6GA11231 "
                                "has $12,011.00, H6GA03170 $0"),
     "H8TX29102": ("H2TX18207", "TX-38: both filed as MONTIEL, CARMEN, Republican; H2TX18207 has "

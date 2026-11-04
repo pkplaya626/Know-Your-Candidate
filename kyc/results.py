@@ -531,12 +531,12 @@ def parse_boxes(text):
                     lines.append(count)
                 continue
             lines.append(count or 0)
-            votes = fields.get("votes", "").replace(",", "")
             rows.append({
                 "name": name,
                 "won": row.group("kind").lower().startswith("winning"),
                 "withdrawn": _is_withdrawn(raw),
-                "votes": int(votes) if votes.isdigit() else None,
+                # Through _count: a bold or referenced count is a count.
+                "votes": count,
                 # "Democratic Party (United States)", "[[Independent
                 # politician|Independent]]" - the ballot's word on party.
                 "party": clean_name(fields.get("party", "")) or None,
@@ -568,7 +568,7 @@ _BOX_COUNTED = re.compile(
 
 def _count(value):
     """``"197,151"`` -> 197151; anything else (blank, "TBD", a ref) -> None."""
-    digits = re.sub(r"<ref.*", "", value or "", flags=re.S).replace(",", "").strip()
+    digits = re.sub(r"<ref.*", "", value or "", flags=re.S).replace(",", "").replace("'", "").strip()
     return int(digits) if digits.isdigit() else None
 
 
@@ -615,8 +615,8 @@ def infobox_nominees(text):
     # Its counts as the page shows them: an editor keeps the third candidate
     # in a comment until they reach one (Iowa's, 2026-11-04).
     shown = template_fields("|" + _COMMENT.sub("", body).split("|", 1)[-1])
-    ongoing = shown.get("ongoing", "").strip().lower().startswith("yes")
-    reporting = re.match(r"\s*(\d+(?:\.\d+)?)\s*%?\s*$", shown.get("reporting", ""))
+    ongoing = shown.get("ongoing", "").strip().lower() in ("yes", "y", "true", "1", "on")
+    reporting, unread = _reporting(shown.get("reporting", ""))
     rows = []
     for key, value in fields.items():
         if not _NOMINEE_FIELD.match(key):
@@ -633,8 +633,24 @@ def infobox_nominees(text):
                      # on it (rule 63).
                      "popular": _count(shown.get(f"popular_vote{number}", "").replace("'", "")),
                      "ongoing": ongoing,
-                     "reporting": float(reporting.group(1)) if reporting else None})
+                     "reporting": reporting,
+                     "reportingUnread": unread})
     return rows
+
+
+_REF_TAG = re.compile(r"<ref\b[^>]*/>|<ref\b.*?</ref>", re.S | re.I)
+
+
+def _reporting(value):
+    """``(share, unread)`` from an infobox's ``reporting`` field: its first
+    number, whatever is around it ("15%<ref>AP</ref>", "{{percent|15}}", "under
+    15%"). A field that says something and gives no number concludes nothing
+    (*unread*), rather than reading as a field that says nothing."""
+    text = _REF_TAG.sub("", value or "").strip()
+    if not text:
+        return None, False
+    found = re.search(r"\d+(?:\.\d+)?", text)
+    return (float(found.group(0)), False) if found else (None, True)
 
 
 WITHDRAWN_LIST = "Withdrawn list"
@@ -1443,12 +1459,29 @@ REPORTING_FLOOR = 50
 LEADS, BEHIND, UNCOUNTED = "leads", "behind", "uncounted"
 
 
+def _counted(rows, field="votes"):
+    """Each person's count in a table: their "Total" row where one is filled,
+    else the sum of their lines. New York's fusion tables give a person a line
+    a party, and read line by line a mark on the larger second line stood over
+    someone with more votes in all."""
+    lines, totals = {}, {}
+    for row in rows:
+        count = row.get(field)
+        if not count:
+            continue
+        if (row.get("party") or "").strip().lower() == "total":
+            totals[row["name"]] = max(count, totals.get(row["name"], 0))
+        else:
+            lines[row["name"]] = lines.get(row["name"], 0) + count
+    return {**lines, **totals}
+
+
 def _lead(rows, name, field="votes"):
     """Whether *name* leads a table's counts (or an infobox's, *field*
     "popular"): LEADS, BEHIND, or UNCOUNTED where fewer than two rows hold a
     count above zero. Zero is no count: a table waiting for its first returns
     prints one for everybody."""
-    counted = {r["name"]: r[field] for r in rows if r.get(field)}
+    counted = _counted(rows, field)
     if len(counted) < 2:
         return BEHIND if counted and name not in counted else UNCOUNTED
     if name not in counted:
@@ -1463,10 +1496,12 @@ def _no_other_name(name, ballot, infobox, crowned, entries, same):
     settles it (the list's whole, *entries*, kinds off the ballot aside). A
     list naming them alone says so only where it is the whole ballot. Without
     one, the page: the table and the infobox name nobody else, and no primary
-    on it crowned anyone else (*crowned*, its marked winners who are in no
-    Withdrawn list). A Democrat a primary table crowned, whom a November table
-    left off, reads "withdrawn" to the status table, and would have left the
-    Republican alone on the ballot."""
+    on it holds anyone else who may be running (*crowned*: its marked winners,
+    and anyone in a primary table *name* is not in, an unopposed nominee is
+    often left unmarked; both less whoever a Withdrawn list names). A Democrat
+    a primary table crowned, whom a November table left off, reads "withdrawn"
+    to the status table, and would have left the Republican alone on the
+    ballot."""
     from .certified import BALLOT, UNOPPOSED, WRITE_IN
 
     if entries is not None:
@@ -1499,6 +1534,8 @@ def _mark_stands(name, rows, infobox, alone):
         return "the table has no counts, and the infobox gives no leading count"
     if any(r.get("ongoing") for r in infobox):
         return "the table has no counts, and the infobox marks the count ongoing"
+    if any(r.get("reportingUnread") for r in infobox):
+        return "the table has no counts, and the infobox's share reporting cannot be read"
     low = [r["reporting"] for r in infobox if r.get("reporting") is not None]
     if low and min(low) < REPORTING_FLOOR:
         return (f"the table has no counts, and the infobox's stand at {min(low):g} "
@@ -1509,11 +1546,25 @@ def _mark_stands(name, rows, infobox, alone):
 def _top_two(rows, names):
     """Whether *names*, an open primary's two marks, hold the table's two
     highest counts, above zero and above everyone else's."""
-    counted = {r["name"]: r["votes"] for r in rows if r.get("votes")}
+    counted = _counted(rows)
     if not all(n in counted for n in names):
         return False
     floor = min(counted[n] for n in names)
     return all(v < floor for n, v in counted.items() if n not in names)
+
+
+def _runoff_stands(ballot, names):
+    """Whether a general runoff between *names* follows from the November
+    counts (*ballot*): the two highest, and nobody at a majority of every vote
+    the table counts (:func:`_majority`). An editor prepares the table before
+    the count, and read as it stood it settled the race with nothing behind
+    it: both named "in the runoff", the rest of the ballot defeated."""
+    if len(names) != 2 or not _top_two(ballot, names):
+        return False
+    counted = _counted(ballot)
+    boxed = [r["boxVotes"] for r in ballot if r.get("boxVotes")]
+    base = max(boxed + [sum(counted.values())])
+    return all(2 * votes <= base for votes in counted.values())
 
 
 def _unmark(boxes, tables):
@@ -1541,6 +1592,7 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
     """
     same = same or _one_person
     infobox, november, rounds, crowned, left = [], [], [], set(), set()
+    primary_tables = []
     for title, rows in _canonical(boxes):
         clean = _clean_title(title)
         if clean == INFOBOX_TITLE:
@@ -1556,8 +1608,8 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
                 rounds.append((clean, rows))
             elif stage in ("primary", "runoff"):
                 crowned.update(r["name"] for r in rows if r["won"] and not r["withdrawn"])
-    crowned -= left
-    refused, off = [], set()
+                primary_tables.append(rows)
+    refused, off, gone = [], set(), set()
     ballot = [r for _title, rows in november for r in rows]
     marked = sorted({r["name"] for r in ballot if r["won"] and not r["withdrawn"]})
     if open_primary:
@@ -1575,7 +1627,11 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
         off.update(title for title, _rows in november)
     elif marked:
         name = marked[0]
-        alone = _no_other_name(name, ballot, infobox, crowned, entries, same)
+        # Anyone in a primary table the marked person is not in may be on the
+        # ballot too: an unopposed nominee is often left unmarked.
+        rivals = {r["name"] for rows in primary_tables if not any(r["name"] == name for r in rows)
+                  for r in rows if not r["withdrawn"]}
+        alone = _no_other_name(name, ballot, infobox, (crowned | rivals) - left, entries, same)
         for title, rows in november:
             if not any(r["name"] == name and r["won"] for r in rows):
                 continue
@@ -1583,14 +1639,64 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
             if why:
                 refused.append({"name": name, "why": why})
                 off.add(title)
+    if general_runoff and not open_primary:
+        # Georgia's: a table between people on the November ballot (a party
+        # runoff's loser never was, _settle_general) must follow from its count.
+        on_it = {r["name"] for r in ballot if not r["withdrawn"]}
+        for title, rows in rounds:
+            pair = {r["name"] for r in rows if not r["withdrawn"]}
+            if len(pair) >= 2 and pair <= on_it and not _runoff_stands(ballot, pair):
+                why = ("a general runoff the November counts do not send them to: not the two "
+                       "highest, or someone holds a majority")
+                refused += [{"name": name, "why": why} for name in sorted(pair)]
+                gone.add(title)
     if round_held:
         for title, rows in rounds:
             won = sorted({r["name"] for r in rows if r["won"] and not r["withdrawn"]})
-            if len(won) == 1 and _lead(rows, won[0]) != LEADS:
+            if title not in gone and len(won) == 1 and _lead(rows, won[0]) != LEADS:
                 refused.append({"name": won[0], "why": "the December table's own counts do not "
                                                        "lead with them"})
                 off.add(title)
-    return (_unmark(boxes, off) if off else boxes), refused
+    if off:
+        boxes = _unmark(boxes, off)
+    if gone:
+        boxes = [(title, rows) for title, rows in boxes if _clean_title(title) not in gone]
+    return boxes, refused
+
+
+def _eliminated_on_this_line(boxes, name):
+    """True where the page's own decided primary eliminated *name* and their
+    November row names no other ballot line. A vandal who renames a row to a
+    real filer's name passes the filing test; a person who lost a party's primary
+    and stands on another line (New York's fusion lines, a sore loser's own
+    party) does not fall here."""
+    primaries, runoffs, november = {}, {}, []
+    for title, rows in _canonical(boxes):
+        clean = _clean_title(title)
+        if clean == INFOBOX_TITLE or clean in LIST_TITLES:
+            continue
+        stage = _stage(clean)
+        if stage == "primary" and not _COUNTY_CONVENTION.search(clean):
+            primaries[clean] = rows
+        elif stage == "runoff":
+            runoffs[clean] = rows
+        elif stage == "general":
+            november.extend(r for r in rows if r["name"] == name)
+    if name not in _losers(primaries, runoffs):
+        return False
+    lines = {(r.get("party") or "").strip().lower() for r in november} - {"", "total"}
+    if not lines:
+        return True
+    for title, rows in list(primaries.items()) + list(runoffs.items()):
+        for row in rows:
+            if row["name"] != name:
+                continue
+            party = (row.get("party") or "").strip().lower()
+            lost_on = {party} if party else {line for line in lines
+                                             if line.split()[0] in title.lower()}
+            if lines <= lost_on:
+                return True
+    return False
 
 
 def _without_the_november_tables(boxes, names, open_primary=False, general_runoff=False):
@@ -2623,7 +2729,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
 
     races, pending, missing_pages, failed, unparsed = {}, [], [], [], []
     pages = {}
-    refused_marks = {}
+    refused_marks, refused_names = {}, {}
     from .certified import LOST_PRIMARY as _LOST, WITHDRAWN as _LIST_WITHDREW
     _OFF_THE_LIST = (_LOST, _LIST_WITHDREW)
 
@@ -2739,6 +2845,15 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                     set(_certified_ids(page, rows, race_aliases)) &
                     set(_certified_ids(listed_name, rows, race_aliases)))
 
+            def on_a_list(name):
+                """Whether a state's list running this race names them: its
+                certified list, or Louisiana's qualified one (rule 64), which
+                has the same standing and holds people with no FEC filing."""
+                return any(same(name, e["name"]) for e in (printed or {}).get("entries", ())
+                           if e["kind"] not in _OFF_THE_LIST) or any(
+                    same(name, q["name"]) for q in qualified_lists.get(rid, ())
+                    if not q.get("withdrew"))
+
             boxes, struck = refuse_marks(
                 boxes, entries=printed, same=same, open_primary=is_open,
                 general_runoff=kinds["general_runoff"],
@@ -2753,18 +2868,50 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
 
         matched, ambiguous, unsure = read_names()
         if general_held(today):
-            unfiled = sorted(
-                name for name, st in outcome.items()
-                if (st == ELECTED or (is_open and st == RUNOFF)) and name not in matched and
-                not _exact_filing(name, rows) and
-                not any(same(name, e["name"]) for e in (printed or {}).get("entries", ())
-                        if e["kind"] not in _OFF_THE_LIST))
-            if unfiled:
-                struck += [{"name": name, "why": "no filing and no certified list in this race "
-                                                 "names them"} for name in unfiled]
+            unvouched = {}
+            for name, st in outcome.items():
+                if st != ELECTED and not (st == RUNOFF and (is_open or kinds["general_runoff"])):
+                    continue
+                if on_a_list(name):
+                    continue
+                if (printed or {}).get("complete"):
+                    unvouched[name] = "the state's certified list, the whole ballot, does not print them"
+                elif name not in matched and name not in ambiguous and not _exact_filing(name, rows):
+                    # A name that fits two filings is a filer's, not nobody's:
+                    # one person's two registrations settle at apply (rule 72).
+                    unvouched[name] = "no filing and no state's list in this race names them"
+                elif _eliminated_on_this_line(boxes, name):
+                    unvouched[name] = "the page's own primary eliminated them, and their November " \
+                                      "row names no other ballot line"
+            if unvouched:
+                struck += [{"name": name, "why": why} for name, why in sorted(unvouched.items())]
                 boxes = _without_the_november_tables(
-                    boxes, set(unfiled), open_primary=is_open,
+                    boxes, set(unvouched), open_primary=is_open,
                     general_runoff=kinds["general_runoff"])
+                late = set()
+                outcome = resolve_race(boxes, general_held=True, late=late, **kinds)
+                matched, ambiguous, unsure = read_names()
+            # An infobox is one editor's word in the minutes after a poll
+            # closes, and the night's vandal could stand there with no mark
+            # anywhere: after the count a name only it gives, with no filing
+            # and no list, adds nobody. No other name in the race is touched,
+            # so the race is not held back as a refused mark's is.
+            tabled = {r["name"] for title_, rows_ in _canonical(boxes)
+                      if _clean_title(title_) != INFOBOX_TITLE for r in rows_}
+            only_infobox = sorted(
+                name for name, st in outcome.items()
+                if st == NOMINEE and not is_open and name not in tabled and name not in matched
+                and name not in ambiguous and not _exact_filing(name, rows) and not on_a_list(name))
+            if only_infobox:
+                refused_names[rid] = [{"name": name, "why": "only the infobox names them, with no "
+                                                            "filing and no state's list"}
+                                      for name in only_infobox]
+                for name in only_infobox:
+                    log(f"    [REFUSED] {rid}: {name!r} on {title!r}: only the infobox names them, "
+                        "with no filing and no state's list; not shown")
+                boxes = [(title_, [r for r in rows_ if r["name"] not in only_infobox])
+                         if _clean_title(title_) == INFOBOX_TITLE else (title_, rows_)
+                         for title_, rows_ in _canonical(boxes)]
                 late = set()
                 outcome = resolve_race(boxes, general_held=True, late=late, **kinds)
                 matched, ambiguous, unsure = read_names()
@@ -2902,6 +3049,9 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # Each November mark this read refused, and why (rule 63): the race
         # reads as before the count, and validate names it to a person.
         "refusedMarks": dict(sorted(refused_marks.items())),
+        # Each name only an infobox gave, with no filing and no list, that this
+        # read left out after the count (rule 63). The race reads on without it.
+        "refusedNames": dict(sorted(refused_names.items())),
         # Every place the calendar above is not the FEC's, and why.
         "calendarNotes": calendar_notes,
         # The calendar travels with the results so `build` needs no network
@@ -3385,9 +3535,12 @@ def apply_cache(profiles, cache, field=None):
                 # (KYC.decidedRound): {date, open}.
                 profile["raceStatusDecided"] = {"date": late["date"], "open": bool(late.get("open"))}
             kind = ALL_PARTY_PRIMARIES.get(rid.split("-")[1])
-            if kind and status == NOMINEE:
+            if kind and status in NOVEMBER:
                 # Through to November from an all-party primary: the page
-                # says "advanced", never "won" or "renominated".
+                # says "advanced", never "won" or "renominated". Kept on a
+                # decided status too, which no word reads: the race was
+                # all-party whoever won it, and the render suite's rewind to
+                # the campaign reads it back.
                 profile["allPartyPrimary"] = kind[0]
             _source_of(profile, races.get(rid), candidate_id)
             ballot_name, via = _ballot_name(profile, race, candidate_id)
