@@ -299,6 +299,35 @@ class TestResolving(unittest.TestCase):
         self.assertEqual(out["Christopher Reichard"], "defeated")
         self.assertNotIn("Christopher Riechard", out)
 
+    def test_with_no_november_table_an_infobox_misspelling_is_the_primary_winner(self):
+        # MO-8 on results night had no November table at all: its infobox's
+        # "Christopher Riechard" stood beside the Democratic primary's
+        # marked winner "Christopher Reichard", and the state page listed
+        # "Riechard (Democratic)" as also on the November ballot.
+        text = "\n".join([
+            "{{Infobox election", "| nominee1 = Jason Smith",
+            "| party1 = Republican Party (United States)",
+            "| nominee2 = Christopher Riechard", "| party2 = Democratic Party (United States)",
+            "}}",
+            box("Democratic primary results", ("Christopher Reichard", 900, True),
+                ("Frank Barnitz", 800, False)),
+            box("Republican primary results", ("Jason Smith", 900, True)).replace(
+                "Democratic Party (United States)", "Republican Party (United States)"),
+        ])
+        out = page_statuses(text, general_held=True)
+        self.assertEqual(out, {"Christopher Reichard": "nominee", "Frank Barnitz": "eliminated",
+                               "Jason Smith": "nominee"})
+        # A primary's loser a letter apart is no nominee to fold into.
+        dem = "Democratic Party (United States)"
+        info = (results.INFOBOX_TITLE, [{"name": "Jo Owens", "party": dem, "won": False,
+                                         "withdrawn": False, "votes": None}])
+        primary = ("Democratic primary results", [
+            {"name": "Jo Owen", "party": dem, "won": False, "withdrawn": False, "votes": 1},
+            {"name": "Al Smith", "party": dem, "won": True, "withdrawn": False, "votes": 2}])
+        self.assertEqual(results._infobox_spellings([primary, info]), {})
+        primary[1][0]["won"] = True
+        self.assertEqual(results._infobox_spellings([primary, info]), {"Jo Owens": "Jo Owen"})
+
     def test_an_infobox_name_is_folded_only_into_its_own_partys_one_row(self):
         # Another party's row a letter apart is another person, and so is
         # one whose party neither side gives.

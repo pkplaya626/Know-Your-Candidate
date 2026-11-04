@@ -1066,21 +1066,29 @@ def _infobox_spellings(boxes):
     ... Riley Owens (Republican)", a person who does not exist, still on
     the ballot once the table's winner was marked.
 
-    The infobox names the November table's people. A name only the infobox
-    gives is folded into the one November-table row of the same party whose
-    given names are its own and whose surname is a letter apart; never a
-    row the infobox names as well (two names in one box are two people),
-    never where the party is unknown on either side or two rows fit.
+    The infobox names the November ballot: the November table's people, or,
+    where the page has no November table yet (MO-8's), the primaries' marked
+    winners. A name only the infobox gives is folded into the one such row
+    of the same party whose given names are its own and whose surname is a
+    letter apart; never a row the infobox names as well (two names in one
+    box are two people), never where the party is unknown on either side or
+    two rows fit.
     """
-    infobox, general, elsewhere = [], [], set()
+    infobox, general, winners, elsewhere = [], [], [], set()
     for title, rows in boxes:
         clean = _clean_title(title)
         if clean == INFOBOX_TITLE:
             infobox.extend(rows)
             continue
         elsewhere.update(r["name"] for r in rows)
-        if clean not in LIST_TITLES and _stage(clean) == "general":
+        if clean in LIST_TITLES:
+            continue
+        stage = _stage(clean)
+        if stage == "general":
             general.extend(r for r in rows if not r["withdrawn"])
+        elif stage in ("primary", "runoff"):
+            winners.extend(r for r in rows if r["won"] and not r["withdrawn"])
+    general = general or winners
     boxed = {r["name"] for r in infobox}
     alias = {}
     for row in infobox:
