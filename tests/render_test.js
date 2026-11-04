@@ -4635,7 +4635,9 @@ async function testPeopleWording() {
     if (winner) winner.raceStatus = was;
     check("someone the results elected was 'Elected to' it, with no term 'if elected'",
       !!winner && /^Elected to \| /.test(wonWords) && !/if elected/.test(wonWords) &&
-      /2027/.test(wonWords), wonWords);
+      // A special election's winner takes the seat on being sworn in (rule 65).
+      ((window.kycRaces.find((r) => r.id === winner.raceId) || {}).special
+        ? /On being sworn in/ : /2027/).test(wonWords), wonWords);
     // An appointee serves until the special election's winner is sworn in
     // (PROFILES-21), and that sentence may wrap: held on one line it ran
     // off a phone's screen.
@@ -5085,7 +5087,7 @@ async function testDecidedRaceWords() {
       check("the sources say the results are primary and November results",
         /primary and November\s+results\s+from\s+each\s+state's\s+Wikipedia\s+election\s+page/.test(words), words.slice(0, 300));
     });
-    window.location.hash = "#/?view=senate";
+    window.location.hash = "#/?view=senate&eliminated=show";
     await new Promise((resolve) => setTimeout(resolve, 50));
     suite(`the Senate view's headings, on ${clock}`, () => {
       const roles = [...D.querySelectorAll(".senate-role")].map((n) => n.textContent);
@@ -5182,6 +5184,30 @@ async function testOtherRunWalk() {
       });
       check("the badge, the race's lines and the profile each say the one set of words",
         wrong.length === 0, wrong.slice(0, 6).join(" | ") || `${samples.length} members`);
+    });
+
+    // A race the map's panel lists nobody in: the campaign's "still in the
+    // race" is not said once the count has begun (PR #199 review).
+    suite(`the map's panel of a race with nobody on its ballot, on ${clock}`, () => {
+      const MW = mapPage.window;
+      const race = MW.kycRaces.find((r) => r.chamber === "Senate" && !r.special && r.candidateIds.length > 1);
+      const people = race.incumbentIds.concat(race.candidateIds).map(MW.KYC.byId).filter(Boolean);
+      const kept = people.map((p) => p.raceStatus);
+      const keptResults = race.results;
+      people.forEach((p) => { p.raceStatus = "eliminated"; });
+      race.results = Object.assign({}, keptResults, { otherNominees: [], belowThreshold: [], unmatched: {}, otherElected: [], otherDefeated: [], otherRunoff: [] });
+      const select = mapPage.D.getElementById("mapStateSelect");
+      const modes = mapPage.D.getElementById("mapModeSelect");
+      select.value = race.state;
+      select.dispatchEvent(new MW.Event("change", { bubbles: true }));
+      modes.value = "senate2026";
+      modes.dispatchEvent(new MW.Event("change", { bubbles: true }));
+      const said = [...mapPage.D.querySelectorAll(".race-people")].map((n) => n.textContent).join(" | ");
+      people.forEach((p, i) => { p.raceStatus = kept[i]; });
+      race.results = keptResults;
+      check("it says who is listed in the tense of the day",
+        after ? /Nobody listed on the November ballot/.test(said) && !/still in the race/.test(said)
+          : /Nobody listed as still in the race/.test(said), said.slice(0, 200));
     });
 
     // The map's panel, by the same words.
@@ -14701,9 +14727,12 @@ async function testRaceMoney() {
       check(p.name + "'s race row shows the other candidacy's spending apart, never added in",
         !row.querySelector(".money-row") || /Filed separately under their (House|Senate) candidacy, and not added in here: outside groups spent/
           .test(row.textContent), row.textContent.slice(0, 200));
+      // "They ran" once the run has ended, as their card says it.
       check(p.name + "'s member line says whose candidacy it is",
-        !!member && /^Filed under their (House|Senate) candidacy, not the (House|Senate) campaign they are running: /
-          .test(holderOf(KYC.cards.outsideLine(member)).textContent));
+        !!member && new RegExp("^Filed under their (House|Senate) candidacy, not the (House|Senate) campaign they " +
+          ((KYC.contestLine(member) || {}).past ? "ran" : "are running") + ": ")
+          .test(holderOf(KYC.cards.outsideLine(member)).textContent),
+        member && holderOf(KYC.cards.outsideLine(member)).textContent.slice(0, 120));
     });
     function holderOf(html) {
       const box = D.createElement("div");
