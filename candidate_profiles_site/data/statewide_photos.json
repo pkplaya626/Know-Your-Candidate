@@ -574,6 +574,17 @@
   }
  },
  "articlesRead": "2026-11-03",
+ "licenceDoubts": {
+  "CO|ag|Michael J. Allen": [
+   "https://upload.wikimedia.org/wikipedia/commons/8/89/Allen_Headshot_-_Pikes_Peak_background_(cropped).jpg"
+  ],
+  "IA|sos|Paul D. Pate": [
+   "https://upload.wikimedia.org/wikipedia/commons/9/94/Paul_Pate_(cropped).jpeg"
+  ],
+  "NM|ag|RAUL TORREZ": [
+   "https://upload.wikimedia.org/wikipedia/commons/2/27/Ra%C3%BAl_Torrez_(cropped_2).jpg"
+  ]
+ },
  "misses": {
   "AK|governor|Bronson, Dave": "not-linked",
   "AK|governor|Kreiss-Tomkins, Jonathan S. “JKT”": "not-linked",
@@ -595,10 +606,6 @@
   "AR|sos|Kelly Grappe": "not-linked",
   "AR|sos|Michael Pakko": "not-linked",
   "AR|sos|Senator Kim Hammer": "no-image",
-  "AZ|governor|HOURIHAN, TERI ANN": "not-linked",
-  "AZ|governor|LOMBARDO, RISA": "not-linked",
-  "AZ|lt|Castillo, Lisa": "not-linked",
-  "AZ|lt|Harrolle Mohan, Angela": "not-linked",
   "AZ|sos|COLLIER, DUWAYNE": "not-linked",
   "CA|ag|Michael E. Gates": "not-linked",
   "CO|governor|Eric Mulder": "not-linked",
@@ -860,6 +867,12 @@
   ],
   "SD|sos|Heather Baxter": [
    "https://upload.wikimedia.org/wikipedia/commons/7/7d/Heather_Baxter_by_Gage_Skidmore.jpg"
+  ],
+  "TX|ag|MAYES MIDDLETON": [
+   "https://upload.wikimedia.org/wikipedia/commons/2/23/Mayes_Middleton_by_Gage_Skidmore_(cropped).jpg"
+  ],
+  "WI|sos|JoCasta Zamarripa": [
+   "https://upload.wikimedia.org/wikipedia/commons/f/f0/JoCasta_Zamarripa_(51017746066).jpg"
   ]
  },
  "photos": {
@@ -893,7 +906,7 @@
    "height": 250,
    "page": "https://bioguide.congress.gov/search/bio/T000278",
    "photo": "https://www.congress.gov/img/member/t000278_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 200
   },
@@ -968,7 +981,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2292",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 800
   },
@@ -979,7 +992,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2427",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 799
   },
@@ -991,7 +1004,7 @@
    "height": 263,
    "page": "https://bioguide.congress.gov/search/bio/B001302",
    "photo": "https://www.congress.gov/img/member/b001302_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 175
   },
@@ -1002,7 +1015,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2343",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 800
   },
@@ -1013,7 +1026,7 @@
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2366",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 666
   },
@@ -1024,7 +1037,7 @@
    "height": 370,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2460",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 296
   },
@@ -1035,7 +1048,7 @@
    "height": 1000,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2635",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 752
   },
@@ -1046,7 +1059,7 @@
    "height": 894,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2640",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 715
   },
@@ -1057,7 +1070,7 @@
    "height": 870,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2634",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 696
   },
@@ -1068,7 +1081,7 @@
    "height": 955,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2642",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 764
   },
@@ -1079,7 +1092,7 @@
    "height": 832,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2451",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 666
   },
@@ -1090,7 +1103,7 @@
    "height": 291,
    "page": "https://www.azcleanelections.gov/Custom/CandidateList?location=",
    "photo": "https://www.azcleanelections.gov/Custom/Picture/2302",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 233
   },
@@ -1166,7 +1179,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/lt-governor-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/lt-governor/ma.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 207
   },
@@ -1199,7 +1212,7 @@
    "height": 290,
    "page": "https://voterguide.sos.ca.gov/candidates/sos-candidate-statements.htm",
    "photo": "https://voterguide.sos.ca.gov/img/sos/wagner.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "guide",
    "width": 207
   },
@@ -1242,27 +1255,6 @@
    "height": 364,
    "page": "https://en.wikipedia.org/wiki/2026_Colorado_Attorney_General_election",
    "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Jena_Griswold_%28cropped%29.JPG/250px-Jena_Griswold_%28cropped%29.JPG",
-   "read": "2026-11-02",
-   "route": "wikipedia",
-   "width": 250
-  },
-  "CO|ag|Michael J. Allen": {
-   "article": "Michael J. Allen",
-   "by": "Koncurrentkat",
-   "bytes": 22340,
-   "credit": {
-    "by": "Koncurrentkat",
-    "licence": "CC0",
-    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "page": "https://commons.wikimedia.org/wiki/File:Allen_Headshot_-_Pikes_Peak_background_(cropped).jpg",
-    "via": "Wikimedia Commons",
-    "year": 2021,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 Colorado Attorney General election' links [[Michael J. Allen]] for the list's 'Michael J. Allen'; the article 'Michael J. Allen' is the nominee's, and the race's infobox sets File:Allen Headshot - Pikes Peak background (cropped).jpg beside them",
-   "height": 335,
-   "page": "https://en.wikipedia.org/wiki/2026_Colorado_Attorney_General_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Allen_Headshot_-_Pikes_Peak_background_%28cropped%29.jpg/250px-Allen_Headshot_-_Pikes_Peak_background_%28cropped%29.jpg",
    "read": "2026-11-02",
    "route": "wikipedia",
    "width": 250
@@ -1405,7 +1397,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/D000032",
    "photo": "https://www.congress.gov/img/member/d000032_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 175
   },
@@ -1557,27 +1549,6 @@
    "read": "2026-11-02",
    "route": "wikipedia",
    "width": 250
-  },
-  "IA|sos|Paul D. Pate": {
-   "article": "Paul Pate",
-   "by": "Iowa General Assembly",
-   "bytes": 52993,
-   "credit": {
-    "by": "Iowa General Assembly",
-    "licence": "Copyrighted free use",
-    "licenceUrl": null,
-    "page": "https://commons.wikimedia.org/wiki/File:Paul_Pate_(cropped).jpeg",
-    "via": "Wikimedia Commons",
-    "year": 1991,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 Iowa Secretary of State election' links [[Paul Pate]] for the list's 'Paul D. Pate'; the article 'Paul Pate' is the nominee's, and the race's infobox sets File:Paul Pate (cropped).jpeg beside them",
-   "height": 625,
-   "page": "https://en.wikipedia.org/wiki/2026_Iowa_Secretary_of_State_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Paul_Pate_%28cropped%29.jpeg/500px-Paul_Pate_%28cropped%29.jpeg",
-   "read": "2026-11-02",
-   "route": "wikipedia",
-   "width": 500
   },
   "ID|ag|Raul R. Labrador": {
    "article": "Raúl Labrador",
@@ -1948,7 +1919,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/J000307",
    "photo": "https://www.congress.gov/img/member/j000307_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 175
   },
@@ -2003,7 +1974,7 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/K000367",
    "photo": "https://www.congress.gov/img/member/k000367_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 180
   },
@@ -2286,27 +2257,6 @@
    "read": "2026-11-02",
    "route": "wikipedia",
    "width": 330
-  },
-  "NM|ag|RAUL TORREZ": {
-   "article": "Raúl Torrez",
-   "by": "LandofEnchantment Pics",
-   "bytes": 17952,
-   "credit": {
-    "by": "LandofEnchantment Pics",
-    "licence": "CC0",
-    "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
-    "page": "https://commons.wikimedia.org/wiki/File:Ra%C3%BAl_Torrez_(cropped_2).jpg",
-    "via": "Wikimedia Commons",
-    "year": 2026,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 New Mexico Attorney General election' links [[Raúl Torrez]] for the list's 'RAUL TORREZ'; the article 'Raúl Torrez' is the nominee's, and the race's infobox sets File:Raúl Torrez (cropped 2).jpg beside them",
-   "height": 306,
-   "page": "https://en.wikipedia.org/wiki/2026_New_Mexico_Attorney_General_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Ra%C3%BAl_Torrez_%28cropped_2%29.jpg/250px-Ra%C3%BAl_Torrez_%28cropped_2%29.jpg",
-   "read": "2026-11-02",
-   "route": "wikipedia",
-   "width": 250
   },
   "NM|governor|DEB HAALAND": {
    "article": "Deb Haaland",
@@ -2655,30 +2605,9 @@
    "height": 225,
    "page": "https://bioguide.congress.gov/search/bio/B001243",
    "photo": "https://www.congress.gov/img/member/b001243_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 180
-  },
-  "TX|ag|MAYES MIDDLETON": {
-   "article": "Mayes Middleton",
-   "by": "Gage Skidmore",
-   "bytes": 54989,
-   "credit": {
-    "by": "Gage Skidmore",
-    "licence": "CC BY-SA 3.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0",
-    "page": "https://commons.wikimedia.org/wiki/File:Mayes_Middleton_by_Gage_Skidmore_(cropped).jpg",
-    "via": "Wikimedia Commons",
-    "year": 2018,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 Texas Attorney General election' links [[Mayes Middleton]] for the list's 'MAYES MIDDLETON'; the article 'Mayes Middleton' is the nominee's, and the race's infobox sets File:Mayes Middleton by Gage Skidmore (cropped).jpg beside them",
-   "height": 667,
-   "page": "https://en.wikipedia.org/wiki/2026_Texas_Attorney_General_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/23/Mayes_Middleton_by_Gage_Skidmore_%28cropped%29.jpg/500px-Mayes_Middleton_by_Gage_Skidmore_%28cropped%29.jpg",
-   "read": "2026-11-02",
-   "route": "wikipedia",
-   "width": 500
   },
   "TX|governor|GREG ABBOTT": {
    "article": "Greg Abbott",
@@ -2752,7 +2681,7 @@
    "height": 219,
    "page": "https://bioguide.congress.gov/search/bio/P000610",
    "photo": "https://www.congress.gov/img/member/p000610_200.jpg",
-   "read": "2026-11-02",
+   "read": "2026-11-04",
    "route": "member",
    "width": 175
   },
@@ -2883,28 +2812,7 @@
    "read": "2026-11-02",
    "route": "wikipedia",
    "width": 250
-  },
-  "WI|sos|JoCasta Zamarripa": {
-   "article": "JoCasta Zamarripa",
-   "by": "Susan Ruggles from Milwaukee, USA",
-   "bytes": 27634,
-   "credit": {
-    "by": "Susan Ruggles from Milwaukee, USA",
-    "licence": "CC BY 2.0",
-    "licenceUrl": "https://creativecommons.org/licenses/by/2.0",
-    "page": "https://commons.wikimedia.org/wiki/File:JoCasta_Zamarripa_(51017746066).jpg",
-    "via": "Wikimedia Commons",
-    "year": 2018,
-    "yearForm": 4
-   },
-   "evidence": "The race's article '2026 Wisconsin Secretary of State election' links [[JoCasta Zamarripa]] for the list's 'JoCasta Zamarripa'; the article 'JoCasta Zamarripa' is the nominee's, and the race's infobox sets File:JoCasta Zamarripa (51017746066).jpg beside them",
-   "height": 333,
-   "page": "https://en.wikipedia.org/wiki/2026_Wisconsin_Secretary_of_State_election",
-   "photo": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/JoCasta_Zamarripa_%2851017746066%29.jpg/250px-JoCasta_Zamarripa_%2851017746066%29.jpg",
-   "read": "2026-11-02",
-   "route": "wikipedia",
-   "width": 250
   }
  },
- "read": "2026-11-02"
+ "read": "2026-11-04"
 }
