@@ -1333,13 +1333,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     highest counts, and a December round's mark must lead its table. All this
     is beside the ranked-choice and majority gates and weakens neither. Replayed offline over the
     pages of the two reads of that night, it made every call they had made
-    (all 10 and all 3) and refused none. A section that hands its seat to the
-    seat's own article with `{{main}}` is read from that article after the count
-    (`results.seat_article`: NY-13's and CO-1's had marked their winners while
-    the state page's tables never did), only where the article's own title names
-    that seat and this cycle's general, and it reads as that seat's alone
-    (`is_seat_article`: a redirect to the state's page does not), under every
-    guard above. Who
+    (all 10 and all 3) and refused none. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though

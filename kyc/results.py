@@ -929,39 +929,6 @@ def sub_articles(text, title):
     return found
 
 
-def seat_article(section, state, number, cycle=CYCLE):
-    """The article a House section hands its seat to with ``{{main}}``, or None.
-
-    Only the one whose own title names that seat and this cycle's general:
-    "2026 New York's 13th congressional district election". On the night of
-    2026-11-04 that article had marked its winner, with counts, for hours while
-    the state page's table had no mark. Any other link in a section's ``{{main}}``
-    is not followed: "Missouri's 3rd congressional district" is the district's
-    article, a list of every election it has held.
-    """
-    from .cycle import ordinal
-
-    name = state_name(state)
-    if not name or not number:
-        return None
-    want = f"{cycle} {name}'s {ordinal(number)} congressional district election"
-    for match in _MAIN.finditer(section or ""):
-        if any(target.strip() == want for target in template_fields_positional(match.group(1))):
-            return want
-    return None
-
-
-def is_seat_article(text, title):
-    """True when *text* is the article *title* names: a title can redirect, and
-    a redirect to the state's page would read every district's tables as this
-    seat's. It has no "District N" sections, and a table titled for the seat."""
-    if house_sections(text):
-        return False
-    seat = title.split(" ", 1)[-1].rsplit(" election", 1)[0].lower()
-    return any(seat in _clean_title(table).lower() and _stage(_clean_title(table)) == "general"
-               for table, _rows in parse_boxes(text))
-
-
 # ---------------------------------------------------------------- resolving
 
 # A November table titled by its seat alone: "Florida's 1st congressional
@@ -2777,26 +2744,6 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 continue
             for n, body in house_sections(sub_text).items():
                 sections.setdefault(n, (sub_used, body))
-        # After the count, a section that hands its seat to the seat's own
-        # article is read from it (seat_article), under every guard a table
-        # on the state's page is: a table the section keeps may never be marked.
-        if general_held(today):
-            for n, (_page, body) in sorted(sections.items()):
-                article = seat_article(body, state, n)
-                if not article:
-                    continue
-                art_used, art_text, art_trouble = fetch_first([article])
-                if art_text and is_seat_article(art_text, article):
-                    sections[n] = (art_used, art_text)
-                else:
-                    # The section still stands, so no race goes unread. A
-                    # request that failed is reported; an article with no
-                    # November table yet (Colorado's 1st, 2026-11-04) is not
-                    # a missing page.
-                    if art_trouble:
-                        failed.append(f"{state}-{office}: {article}")
-                    log(f"    [warn] {state}-{n}: its section hands off to {article!r}, which "
-                        f"could not be read as that seat's article; read from the section")
         if not sections:
             # Never fall back to reading the page as one at-large race: that
             # silently dropped every California seat.
