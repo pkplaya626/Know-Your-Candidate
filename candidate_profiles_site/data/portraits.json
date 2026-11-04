@@ -7196,39 +7196,40 @@
  },
  "person:adam hamilton|KS|S": {
   "credit": {
-   "attribution": true,
-   "by": "Working Preacher",
-   "file": "https://commons.wikimedia.org/wiki/File:Adam_Hamilton_on_the_Courage_to_Preach_(cropped).png",
+   "attribution": false,
+   "by": "Leoniceno",
+   "file": "https://commons.wikimedia.org/wiki/File:Adam_Hamilton_campaign_rally,_Newton,_Kansas,_30_Oct_2026_(cropped).jpg",
    "form": 4,
-   "licence": "CC BY 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "licence": "CC0",
+   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
    "nonFree": false,
-   "year": 2017
+   "year": 2026
   },
-  "height": 1080,
+  "height": 3337,
+  "linked": "Adam Hamilton (American politician)",
   "name": "Adam Hamilton",
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/120px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/120px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ],
    [
     250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/250px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/250px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ],
    [
     330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/330px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/330px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ],
    [
     500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/500px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/500px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ]
   ],
-  "title": "Adam Hamilton (pastor)",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/960px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png",
+  "title": "Adam Hamilton (American politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/960px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg",
   "via": "wikipedia",
-  "width": 1020
+  "width": 2226
  },
  "person:adam hollier|MI|H": {
   "credit": {
@@ -12834,6 +12835,11 @@
   "via": "wikipedia",
   "width": 458
  },
+ "person:joanna mendoza|AZ|H": {
+  "name": "Joanna Mendoza",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:joe baldacci|ME|H": {
   "name": "Joe Baldacci",
   "url": null,
@@ -12949,7 +12955,7 @@
   "width": 1224
  },
  "person:john andrew williams|KY|H": {
-  "bytes": 10718,
+  "bytes": 10709,
   "credit": {
    "attribution": false,
    "by": "EPalmer221",

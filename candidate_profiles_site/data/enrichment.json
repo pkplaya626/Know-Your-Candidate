@@ -163,12 +163,6 @@
    "living": true,
    "to": "Arthur Ellis (Maryland politician)"
   },
-  "Ashley Bell (North Carolina politician)": {
-   "checked": "2026-11-04",
-   "fragment": null,
-   "living": false,
-   "to": "Ashley Bell (North Carolina politician)"
-  },
   "Ashley Hinson": {
    "checked": "2026-11-04",
    "fragment": null,
@@ -1255,6 +1249,12 @@
    "living": true,
    "to": "Kathleen Riebe"
   },
+  "Katy Padilla Stout": {
+   "checked": "2026-11-04",
+   "fragment": "District 23",
+   "living": false,
+   "to": "2026 United States House of Representatives elections in Texas"
+  },
   "Kelvin Buck": {
    "checked": "2026-11-04",
    "fragment": null,
@@ -1330,7 +1330,7 @@
   "Lakesha Womack": {
    "checked": "2026-11-04",
    "fragment": null,
-   "living": false,
+   "living": true,
    "to": "Lakesha Womack"
   },
   "Larry A. Thompson": {
@@ -1578,6 +1578,10 @@
    "fragment": null,
    "living": true,
    "to": "Micah Lasher"
+  },
+  "Michael Alfonso (Wisconsin politician)": {
+   "checked": "2026-11-04",
+   "missing": true
   },
   "Michael Blake (politician)": {
    "checked": "2026-11-04",
