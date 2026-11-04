@@ -178,6 +178,7 @@ python build_profile_site.py congress         # refresh membership, and who has 
 python build_profile_site.py field --check    # who is running, from the FEC
 python build_profile_site.py disclosures      # House and Senate disclosure links
 python build_profile_site.py results          # who is still in, from Wikipedia (Louisiana's qualified list; the states' certified ballots)
+gh workflow run refresh.yml -f results_only=true  # the field and the results alone, about 45 minutes to the page: read them often after an election
 python build_profile_site.py record           # the frozen 2026 race record (--freeze writes it; refuses to overwrite)
 python build_profile_site.py campaigns        # campaign websites from FEC committees
 python build_profile_site.py enrich           # fill gaps; check every campaign site

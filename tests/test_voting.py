@@ -164,6 +164,15 @@ class TestOverrides(unittest.TestCase):
                          "https://sos.iowa.gov/new-absentee")
         self.assertTrue(any(s.startswith("IA absentee") for s in voting.stale_overrides(cache)))
 
+    def test_an_entry_nass_moved_is_reported_and_stops_nothing(self):
+        # What the refresh of 2026-11-04 found: NASS moved two states' pages.
+        # The new address is shown, and a warning says the override may be
+        # unneeded; neither is a failure.
+        moved = "https://www.in.gov/sos/elections/voter-information/ways-to-vote/absentee-voting"
+        cache = cache_of(IN={"absentee": moved})
+        self.assertEqual(voting.effective(cache)["IN"]["absentee"]["url"], moved)
+        self.assertIn(f"IN absentee: NASS now lists {moved}", voting.stale_overrides(cache))
+
     def test_a_dead_link_is_not_sent_to_a_reader(self):
         cache = cache_of()
         cache["links"] = {"https://vote.oh.gov/polling": voting.DEAD}
@@ -392,7 +401,12 @@ class TestRoundThree(unittest.TestCase):
             self.assertEqual(shown[code]["results"], {"url": new, "from": voting.OFFICE})
             self.assertEqual(page[code]["results"], new)
             self.assertTrue(voting.official(new, code))
-        self.assertEqual(voting.stale_overrides(cache), [])
+        # Only these two: whether another state's entry has moved is the
+        # week's record, not this rule's. NASS moved Iowa's and Indiana's
+        # absentee pages on 2026-11-04, and asserting an empty list failed the
+        # first November results refresh (CLAUDE.md, "Conventions").
+        stale = voting.stale_overrides(cache)
+        self.assertEqual([s for s in stale if s.startswith(("OK results", "NH results"))], [])
 
     def test_ohios_results_address_is_labelled_for_the_portal_it_reaches(self):
         # A person found it leads to the office's data portal, not a results
@@ -417,9 +431,9 @@ class TestRoundThree(unittest.TestCase):
         with mock.patch.dict(voting.RESULTS, {"OK": "https://results.okelections.gov/new/"}):
             self.assertEqual(voting.effective(cache)["OK"]["results"]["url"],
                              "https://results.okelections.gov/new/")
-            self.assertEqual(voting.stale_overrides(cache),
-                             ["OK results: kyc/voting.py now lists "
-                              "https://results.okelections.gov/new/"])
+            self.assertIn("OK results: kyc/voting.py now lists "
+                          "https://results.okelections.gov/new/",
+                          voting.stale_overrides(cache))
 
 
 class TestAsItsSiteLinksIt(unittest.TestCase):
