@@ -917,10 +917,17 @@ def check_results(profiles, races):
         # candidates whom the page's November table left out).
         if won or summary.get("otherRunoff") or any(
                 p.get("raceStatus") == "runoff" for p in people):
-            # A name the results hold with no profile counts as much.
+            # A name the results hold with no profile counts as much, once
+            # it is not one the results say won, lost or is in the runoff:
+            # otherNominees names everyone on the November ballot, and on
+            # results night 2026-11-04 two Senate candidates the cache read
+            # as defeated (Bray, NC; Hackett, SC) were reported as waiting.
+            settled = (set(summary.get("otherElected") or ()) |
+                       set(summary.get("otherDefeated") or ()) |
+                       set(summary.get("otherRunoff") or ()))
             waiting = sorted({p["name"] for p in people
                               if p.get("raceStatus") in ("nominee", "qualified")} |
-                             set(summary.get("otherNominees") or ()))
+                             (set(summary.get("otherNominees") or ()) - settled))
             if waiting:
                 beside.append(f"{race['id']}: " + ", ".join(waiting))
         for pid in race["incumbentIds"]:

@@ -393,6 +393,25 @@ class TestOverlay(unittest.TestCase):
         self.assertEqual(race["party"], {})
         self.assertEqual(race["label"], {})
 
+    def test_a_seat_with_no_primary_credits_the_list_where_its_page_agrees(self):
+        # Results night 2026-11-04: American Samoa's page, read from the day
+        # after Election Day, also had the delegate as its nominee, the list
+        # changed nobody, and her card credited Wikipedia (rule 77).
+        page = {"page": "x", "status": {"H4AS00036": "nominee"}, "unmatched": {},
+                "ambiguous": [], "decided": {"general": True, "parties": []}}
+        rows = [row("H4AS00036", "AMATA, AUMUA", "AS", 0, "REP")]
+        listed = spec([("Aumua Amata", "", "ballot")], source="American Samoa Election Office")
+        race = results.certify_race(dict(page, status=dict(page["status"])), listed, rows,
+                                    no_primary=True)
+        self.assertEqual(race["certifiedIds"], {"H4AS00036": "nominee"})
+        # A seat with a primary: the page's nominee won it, and keeps its credit.
+        race = results.certify_race(dict(page, status=dict(page["status"])), listed, rows)
+        self.assertEqual(race["certifiedIds"], {})
+        # A result the page counted is never the list's.
+        won = dict(page, status={"H4AS00036": "elected"})
+        race = results.certify_race(won, listed, rows, no_primary=True)
+        self.assertEqual(race["certifiedIds"], {})
+
     def test_a_party_named_independent_keeps_its_name(self):
         rows = [row("H6FL20119", "MAXIME, KEDNER", "FL", 20, "IND"),
                 row("H6FL21109", "COOKE, ALEXANDER", "FL", 21, "NNE")]

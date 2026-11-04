@@ -703,6 +703,8 @@ second nominee: TX-12's Democratic nominee raised nothing, and California's
 top-two seats were the worst hit. The results page had already matched each
 one to an FEC id. `races.build` names them from that filing
 (`results.belowThreshold`, `{id, name, status, party}`) and adds them to `otherNominees`.
+After the count, `otherElected`, `otherDefeated` and `otherRunoff` say which of
+those names, profiled nowhere here, won, lost or are in the runoff.
 Each such name is printed with its party (`results.otherParties`, `{name: party}`):
 the ballot's line as the results page or the state's certified list gives it,
 else the filing's party where the FEC names one ("Alan Aversa (Republican)").

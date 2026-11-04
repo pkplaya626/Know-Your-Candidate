@@ -414,7 +414,8 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
                     summary["otherParties"] = dict(sorted(
                         {**(summary.get("otherParties") or {}),
                          **{b["name"]: b["party"] for b in below if b["party"]}}.items()))
-                    for key, wanted in (("otherElected", "elected"), ("otherRunoff", "runoff")):
+                    for key, wanted in (("otherElected", "elected"), ("otherDefeated", "defeated"),
+                                        ("otherRunoff", "runoff")):
                         summary[key] = sorted(set(summary.get(key) or ()) | {
                             b["name"] for b in below if b["status"] == wanted})
                 # One person, counted once: an undecided profile whose name
