@@ -273,8 +273,8 @@ _CONGRESS_SOURCES = """\
                 <p><strong>Sources:</strong>
                     membership, contact details and committee rosters from the
                     <code>congress-legislators</code> dataset; the candidate field and
-                    campaign finance from the Federal Election Commission; primary results
-                    from each state's Wikipedia election page<span data-results-read hidden>,
+                    campaign finance from the Federal Election Commission; primary and November
+                    results from each state's Wikipedia election page<span data-results-read hidden>,
                     as last read on <time data-results-as-of></time></span>; the November
                     ballot, where this site reads one, from the certified list of candidates
                     its election office publishes, credited on each race it sets; portraits
@@ -2724,7 +2724,7 @@ _BALLOT_SIDEBAR = """
 _BALLOT_SOURCES = """\
                 <p><strong>Sources:</strong> the races for Congress and everyone in them as the
                     rest of this site lists them: the candidate field from the Federal Election
-                    Commission, primary results from each state's Wikipedia election page, and the
+                    Commission, primary and November results from each state's Wikipedia election page, and the
                     November ballot from the certified list of candidates its election office
                     publishes, where this site reads one, each race crediting its own; the
                     statewide offices on the ballot from each state's constitution, statutes and

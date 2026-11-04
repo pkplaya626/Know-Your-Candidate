@@ -51,7 +51,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
 | `… disclosures` | Link members to their filed financial disclosures (House Clerk, Senate eFD) |
-| `… results` | Read each state's primary results from Wikipedia: who is still in |
+| `… results` | Read each state's primary and November results from Wikipedia: who is still in, who won |
 | `… results --check` | Report the results from the committed cache; no network |
 | `… campaigns` | Look up campaign websites from each candidate's FEC committee (needs `FEC_API_KEY`) |
 | `… campaigns --check` | Report campaign-site coverage from the committed cache; no network |

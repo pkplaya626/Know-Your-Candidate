@@ -527,6 +527,7 @@
     // $5,000, or none. They are on the ballot, so they count (rule 22).
     var unprofiled = res && res.otherNominees ? res.otherNominees.length : 0;
     var noProfile = unprofiledNames(race).none;
+    var voted = KYC.electionStatus().phase === "post-election";
     if (race.contested && !(race.candidateCount + unprofiled) && race.ballotUnknown) {
       // Nobody known to be on the ballot, and someone who may be: never
       // "No challenger on the ballot", never "0 challengers".
@@ -539,12 +540,14 @@
       // With nobody holding the seat on the ballot, nobody is challenging:
       // an open seat, or one nobody held when the race was set (FL-20).
       var word = race.openSeat || !(race.incumbentIds || []).length ? "candidate" : "challenger";
+      // From the day after Election Day, who was on it (rule 63).
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
-        (race.settled ? " on the ballot" : "")));
+        (race.settled ? (voted ? (running === 1 ? " was" : " were") : "") + " on the ballot" : "")));
     } else if (race.settled && res) {
       var gone = res.eliminated + res.withdrawn + res.unlisted;
       badges.push(headBadge("count", "badge-neutral",
-        "No challenger on the ballot" + (gone ? " · " + gone + " out" : ""),
+        (voted ? "No challenger was on the ballot" : "No challenger on the ballot") +
+        (gone ? " · " + gone + " out" : ""),
         "The primary has been held. Of those who filed with the FEC, " +
         res.eliminated + " lost, " + res.withdrawn + " withdrew and " +
         res.unlisted + " were not on the primary ballot."));

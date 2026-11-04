@@ -878,7 +878,7 @@ def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
     holder marked), those no longer in it, the November names with no
     profile here, and who says where each stands."""
     moved, running, out = split_people(race, by_id)
-    rows = []
+    rows = [f'{indent}<p class="share-count">{_e(head_count(race, post))}.</p>']
     for person in moved:
         rows.append(f'{indent}<p class="race-held">Held by <a href="{root}'
                     f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>, who '
@@ -911,6 +911,30 @@ def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
         rows.append(f'{indent}<p class="share-source faint">Where each stands: per '
                     f"{_e(_and(sources))}.</p>")
     return "\n".join(rows)
+
+
+def head_count(race, post=False):
+    """KYC.cards' count badge: who is on a race's ballot, in the head's own
+    words and number, in the past tense once the results read are November's
+    (*post*). The render suite compares the two for every race."""
+    res = race.get("results") or None
+    unprofiled_names = len((res or {}).get("otherNominees") or [])
+    count = race.get("candidateCount") or 0
+    if race.get("contested") and not (count + unprofiled_names) and race.get("ballotUnknown"):
+        return f"{race['ballotUnknown']} filed, ballot status not known"
+    if race.get("contested"):
+        running = count + unprofiled_names
+        word = "candidate" if race.get("openSeat") or not (race.get("incumbentIds") or []) else "challenger"
+        verb = ("" if not post else " was" if running == 1 else " were")
+        return (f"{running} {word}{'' if running == 1 else 's'}"
+                + (f"{verb} on the ballot" if race.get("settled") else ""))
+    if race.get("settled") and res:
+        gone = (res.get("eliminated") or 0) + (res.get("withdrawn") or 0) + (res.get("unlisted") or 0)
+        return (("No challenger was on the ballot" if post else "No challenger on the ballot")
+                + (f" · {gone} out" if gone else ""))
+    if race.get("filedCount"):
+        return f"{race['filedCount']} filed, none past $5k"
+    return "Nobody has filed"
 
 
 def _what(race):

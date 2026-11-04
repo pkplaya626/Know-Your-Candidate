@@ -656,7 +656,8 @@
           "</button>" +
           '<div id="challengerRows" hidden>' + running.map(personRow).join("") + "</div>";
       } else if (out.length) {
-        html += '<p class="panel-subhead">No challenger still on the ballot ' +
+        html += '<p class="panel-subhead">' + (KYC.electionStatus().phase === "post-election"
+          ? "No challenger was on the ballot " : "No challenger still on the ballot ") +
           '<span title="Lost the primary, withdrew, or were not on the primary ballot">' +
           out.length + " out</span></p>";
       }

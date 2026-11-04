@@ -4951,6 +4951,82 @@ function otherRunWords(stage, seat, renumbered, after) {
   }[stage];
 }
 
+/* The campaign's words left on a decided race (results night, 2026-11-04). */
+async function testDecidedRaceWords() {
+  for (const [clock, opts, after] of [["the campaign clock", {}, false],
+    ["after Election Day", { now: "2026-11-05T12:00:00" }, true]]) {
+    const { window, D } = await buildPage("index.html", opts);
+    const KYC = window.KYC;
+    const people = window.legislatorsData;
+    const races = window.kycRaces;
+    suite(`a decided race's words, on ${clock}`, () => {
+      const filer = people.find((p) => p.isCandidate && /House \(Candidate\)/.test(p.chamber) && p.raceStatus !== undefined);
+      const kept = filer.raceStatus;
+      filer.raceStatus = "elected";
+      KYC.profile.open(filer.id, { fromRoute: true });
+      const tag = D.getElementById("profileModalChamber").textContent;
+      const wrap = D.getElementById("profileModalTermWrap").textContent.replace(/\s+/g, " ").trim();
+      KYC.profile.close();
+      filer.raceStatus = "nominee";
+      KYC.profile.open(filer.id, { fromRoute: true });
+      const running = D.getElementById("profileModalChamber").textContent;
+      const runningTerm = D.getElementById("profileModalTermWrap").textContent.replace(/\s+/g, " ").trim();
+      KYC.profile.close();
+      filer.raceStatus = kept;
+      check("an elected challenger's tag says elected", tag === "House (Elected)", tag);
+      check("and their term says when it begins, with no 'if elected'",
+        /^Term begins Jan\. 3, 2027$/.test(wrap), wrap);
+      check("one on the ballot keeps the candidate's tag and the term's condition",
+        running === "House (Candidate)" && /^Term Jan\. 3, 2027 \(if elected\)$/.test(runningTerm),
+        running + " / " + runningTerm);
+      const member = people.find((p) => !p.isCandidate && KYC.seated(p) && !p.contestLabel && p.seatUp2026 && /House/.test(p.chamber));
+      const keptMember = member.raceStatus;
+      const line = () => {
+        KYC.profile.open(member.id, { fromRoute: true });
+        const said = D.getElementById("profileModalTermWrap").textContent.replace(/\s+/g, " ").trim();
+        const chip = D.getElementById("profileModalChamber").textContent;
+        KYC.profile.close();
+        return [said, chip];
+      };
+      const before = line();
+      member.raceStatus = "elected";
+      const reelected = line();
+      member.raceStatus = keptMember;
+      check("a re-elected member's term line stays their current term",
+        reelected[0] === before[0] && reelected[1] === before[1] && /^Term \S/.test(reelected[0]) &&
+        !/begins/.test(reelected[0]), reelected.join(" / "));
+
+      // The head's count: the tense, on the head and the folded row alike.
+      const race = races.find((r) => r.settled && r.contested && (r.candidateCount || 0) +
+        ((r.results || {}).otherNominees || []).length > 1);
+      const head = KYC.cards.raceBadgeItems(race).find((b) => b.key === "count").text;
+      const n = (race.candidateCount || 0) + race.results.otherNominees.length;
+      check("a race's head counts who is, or who was, on the ballot",
+        new RegExp(`^${n} (challengers|candidates) ${after ? "were " : ""}on the ballot$`).test(head), head);
+      const list = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(Boolean);
+      const row = KYC.cards.raceRow(race, KYC.cards.racePeople(race, list), { label: race.label });
+      check("and the phone's row in the same words and number", row.indexOf(head) !== -1, row.slice(0, 200));
+      if (after) {
+        const one = Object.assign({}, race, { candidateCount: 1, results: Object.assign({}, race.results, { otherNominees: [] }) });
+        check("one person was on it", /^1 (challenger|candidate) was on the ballot$/.test(
+          KYC.cards.raceBadgeItems(one).find((b) => b.key === "count").text));
+      }
+      const words = D.querySelector("[data-results-read]").parentElement.textContent;
+      check("the sources say the results are primary and November results",
+        /primary and November\s+results\s+from\s+each\s+state's\s+Wikipedia\s+election\s+page/.test(words), words.slice(0, 300));
+    });
+    window.location.hash = "#/?role=candidate";
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    suite(`the grid's line, on ${clock}`, () => {
+      const said = D.getElementById("resultsLabel").textContent;
+      check("says who is listed in the tense of the day",
+        after ? /candidates who were on the November ballot/.test(said) && !/still running/.test(said)
+          : /candidates still running/.test(said), said.slice(0, 200));
+    });
+    window.close();
+  }
+}
+
 async function testOtherRunWalk() {
   for (const [clock, opts] of [["the campaign clock", {}],
     ["after Election Day", { now: "2026-11-05T12:00:00" }]]) {
@@ -13419,6 +13495,12 @@ async function testSharePages() {
       const andList = (w) => w.length < 2 ? w.join("") : w.slice(0, -1).join(", ") + " and " + w[w.length - 1];
       if ((sources ? unescapeHtml(sources[1]) : "") !== andList(credits)) raceWrong.push(`${race.id}: sources`);
       if (!same(out, s.out)) raceWrong.push(`${race.id}: out ${out.map((x) => x.id)}`);
+      // The head's count, with the same number and tense (rule 73).
+      const count = /<p class="share-count">(.*?)\.<\/p>/.exec(html);
+      const head = KYC.cards.raceBadgeItems(race).find((b) => b.key === "count");
+      if (!count || !head || unescapeHtml(count[1]) !== head.text) {
+        raceWrong.push(`${race.id}: count "${count && count[1]}" for "${head && head.text}"`);
+      }
       s.moved.forEach((p) => {
         if (html.indexOf('<p class="race-held">Held by <a href="../p/' + p.id + '.html">') === -1) {
           raceWrong.push(`${race.id}: held by ${p.id}`);
@@ -18130,6 +18212,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "links") await testFoldedIds();
   if (!only || only === "links") await testRunningElsewhere();
   if (!only || only === "links") await testOtherRunWalk();
+  if (!only || only === "links") await testDecidedRaceWords();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();

@@ -67,7 +67,7 @@
       '          <span id="profileModalRegionLabel">Represents</span> <strong id="profileModalRegion"></strong>' +
       '          <a id="profileModalStateLink" class="state-link" href="#"></a></span>',
       '        <span id="profileModalTermWrap">' + KYC.icon("calendar") +
-      '          Term <strong id="profileModalTerm"></strong></span>',
+      '          <span id="profileModalTermLabel">Term</span> <strong id="profileModalTerm"></strong></span>',
       '        <span id="profileModalCrossLink" hidden></span>',
       "      </p>",
       '      <p class="modal-meta" id="profileModalStatus" hidden></p>',
@@ -1471,7 +1471,12 @@
     var term = el("profileModalTerm");
     term.textContent = "";
     var termWords = String(item.term_start || "N/A");
-    if (won && item.isCandidate) termWords = termWords.replace(/\s*\(if elected\)\s*$/i, "");
+    // Someone newly elected: when the term they won begins, never a lone
+    // date under "Term" (results night, 2026-11-04). A sitting member's line
+    // stays their current term, whether or not they have won the next.
+    var newlyElected = won && item.isCandidate;
+    el("profileModalTermLabel").textContent = newlyElected ? "Term begins" : "Term";
+    if (newlyElected) termWords = termWords.replace(/\s*\(if elected\)\s*$/i, "");
     termWords.split(" - ").forEach(function (part, i) {
       if (i) term.appendChild(doc.createTextNode(" - "));
       var span = doc.createElement("span");
@@ -1481,7 +1486,8 @@
     });
 
     var chamber = el("profileModalChamber");
-    chamber.textContent = item.chamber;
+    // "Senate (Candidate)" beside "Elected in November" read as both.
+    chamber.textContent = newlyElected ? item.chamber.replace("(Candidate)", "(Elected)") : item.chamber;
     chamber.className =
       "badge " + (item.chamber.indexOf("Senate") !== -1 ? "badge-accent" : "badge-neutral");
 
