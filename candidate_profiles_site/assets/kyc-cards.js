@@ -1388,6 +1388,8 @@
     global.document.addEventListener("toggle", function (event) {
       var t = event.target;
       if (t && t.matches && t.matches("details[data-fold]") && t.open) fillFold(t);
+      // A seat's strip that failed to load is asked for again on opening.
+      if (t && t.open && t.matches && t.matches("details.race-last")) fillStrips(t, true);
     }, true);
     // A race's "Copy link": its share page (rule 96), delegated (rule 13).
     global.document.addEventListener("click", function (event) {
@@ -1454,10 +1456,12 @@
         (race.district || 0)) + '">See where its area came from &rsaquo;</a>' : "";
       // Said of every redrawn district alike: many of Florida's and North
       // Carolina's new districts are nearly the old ones, so "fought by
-      // other voters" was not true of them.
+      // other voters" was not true of them. And true beside the strip,
+      // which gives that result as the old map's district of this number
+      // (PR #187 review): "does not carry over" was false there.
       return '<p class="race-note">' + KYC.escapeHtml(KYC.stateName(race.state)) +
         " redrew its House districts for 2026. The " + last.year + " result was counted on " +
-        "the old lines, which this site does not carry over to the new ones." + link + "</p>";
+        "the old lines, so this site does not give it as this district’s own." + link + "</p>";
     }
     if (last.withheld) {
       return '<p class="race-note">The ' + last.year + " result is not shown: " +
@@ -1484,9 +1488,16 @@
       rows = '<p class="race-note">' + KYC.escapeHtml(last.candidates[0].name + " (" +
         last.candidates[0].party + ") was unopposed. " + (last.note || "")) + "</p>";
     } else {
+      // First choices are a lead (rule 90): the top row is "Won" only beside
+      // more than half of every vote counted, a first-round win. Nick Begich
+      // led Alaska's 2024 first choices with 48.4% and was badged "Won".
+      var outright = last.rankedChoice !== "first-choices" ||
+        2 * last.candidates[0].votes > last.total;
+      var topBadge = ' <span class="badge badge-neutral">' + (outright ? "Won" : "Led first choices") +
+        "</span>";
       rows = '<table class="last-table"><tbody>' + last.candidates.map(function (c, i) {
         return "<tr><th scope=\"row\">" + KYC.escapeHtml(c.name) + ' <span class="faint">' +
-          KYC.escapeHtml(c.party) + "</span>" + (i === 0 ? ' <span class="badge badge-neutral">Won</span>' : "") +
+          KYC.escapeHtml(c.party) + "</span>" + (i === 0 ? topBadge : "") +
           "</th><td>" + pct(c.share) + "</td><td class=\"faint\">" +
           c.votes.toLocaleString("en-US") + " votes</td></tr>";
       }).join("") + (last.others ? '<tr><th scope="row">Everyone else</th><td>' +
@@ -1523,13 +1534,281 @@
       "</a>, compiled from each state’s certified results." + checked + "</p>";
   }
 
+  /* ------------------------------------------------- the seat's strip */
+
+  /* The seat's elections from 2018 to 2024 (VISUALS-33,
+   * kyc/seat_history.py seat_strip), in the seat fold under its last
+   * election: who won each, by what margin, and who served the term it
+   * chose, from the Clerk's statistics checked as the last election is and
+   * congress-legislators' terms by bioguide id. A House district's years
+   * are grouped by the lines they were fought on, and a group on other
+   * lines than this race's says so and gives the number the district had
+   * on that map: a result on other lines is never set beside this
+   * district as its own (rule 90). Bars are neutral ink, the party only a
+   * chip (rule 88); everything is page text and boxes (rule 46). The strip
+   * is the state's file's, not the index's (emit.RACE_INDEX_LEAVES_OUT),
+   * so the fold waits for it (rule 94). *now* is for tests. */
+  function stripChip(party) {
+    var abbr = KYC.partyAbbr({ party: party });
+    return abbr ? ' <span class="party-chip ' + KYC.partyClass({ party: party }) + '">' +
+      KYC.escapeHtml(abbr) + "</span>" : "";
+  }
+
+  function stripWhat(result) {
+    var won = result.candidates[0];
+    var name = KYC.escapeHtml(won.name) + stripChip(won.party);
+    var pts = result.margin != null ? result.margin.toFixed(1) + " points" : "";
+    if (result.kind === "unopposed") return name + ", unopposed";
+    if (!result.candidates[1]) return name + ", the only candidate named";
+    // More than half of every vote counted for a candidate is a first-round
+    // win (Chellie Pingree's each year); anything less is a lead.
+    if (result.rankedChoice === "first-choices") {
+      return result.firstChoiceMajority
+        ? name + " won a majority of first choices, " + pct(won.share)
+        : name + " led first choices by " + pts;
+    }
+    if (result.kind === "runoff") return name + " won the runoff by " + pts;
+    // The Clerk printed two names and the final round's counts without
+    // saying so (Maine's 2nd in 2018): the second compilation is what gives
+    // them as the final round's, and the cell says so (seat_history.
+    // final_round_check).
+    if (result.kind === "rcv-final") {
+      return name + " won the final round by " + pts + (result.roundFrom
+        ? '<span class="strip-held"> The Clerk prints these counts without naming the ' +
+          "round; Wikipedia&rsquo;s page gives them as the final round&rsquo;s.</span>" : "");
+    }
+    return name + " won by " + pts;
+  }
+
+  /* An "until" is said only once it has come, on the reader's day: a date
+   * still ahead is a term's scheduled end, not a day someone left. An
+   * appointee whose term congress-legislators ends on the special
+   * election's day is serving until its winner takes the seat
+   * (untilSeated, seat_history._scheduled_end): Ashley Moody "until Nov.
+   * 3, 2026" read as past on November 1, and false after it (PR #187
+   * review). */
+  function stripHolders(cell, now) {
+    var holders = cell.holders || [];
+    if (!holders.length) {
+      return cell.result ? '<span class="strip-held">congress-legislators lists no one ' +
+        "serving this seat in the term it chose</span>" : "";
+    }
+    if (holders.every(function (h) { return h.winner; })) return "";
+    var today = KYC.localDay(now || new Date());
+    return '<span class="strip-held">Served: ' + holders.map(function (h) {
+      var dates = [];
+      if (h.from) dates.push("from " + KYC.dateWords(h.from));
+      if (h.until && h.until <= today) dates.push("until " + KYC.dateWords(h.until));
+      if (h.how === "appointment") {
+        dates.push(h.elected ? "appointed, then elected " + KYC.dateWords(h.elected)
+          : h.untilSeated ? "appointed until the special election’s winner takes the seat"
+          : "appointed");
+      } else if (h.elected) {
+        dates.push("elected " + KYC.dateWords(h.elected));
+      }
+      return KYC.escapeHtml(h.name) + stripChip(h.party) +
+        (dates.length ? " " + KYC.escapeHtml("(" + dates.join(", ") + ")") : "");
+    }).join("; ") + "</span>";
+  }
+
+  function stripCell(race, cell, scale, now) {
+    var head = '<span class="strip-year">' + cell.year +
+      (race.chamber === "Senate" && cell.result && cell.result.term === "unexpired"
+        ? " special" : "") + "</span>";
+    var body;
+    if (cell.result) {
+      var r = cell.result;
+      var bar = r.margin != null && r.candidates[1]
+        ? '<span class="strip-track" aria-hidden="true"><span class="strip-fill" style="width:' +
+          Math.max(2, Math.min(100, Math.round(100 * r.margin / scale))) + '%"></span></span>'
+        : "";
+      body = '<span class="strip-who">' + stripWhat(r) + "</span>" + bar;
+    } else if (cell.withheld) {
+      // An unopposed name the Clerk printed with no count (Oklahoma's 3rd,
+      // 2024) has no count to be unconfirmed.
+      body = '<span class="strip-none">Not shown: ' + (cell.withheld === "disagree"
+        ? "the Clerk&rsquo;s count and the compilation it is checked against disagree"
+        : cell.withheldUnopposed
+          ? "the Clerk lists one candidate, unopposed and with no count, and no second " +
+            "compilation confirms it"
+          : "no second compilation confirms the Clerk&rsquo;s count") + "</span>";
+    } else if (cell.none === "no-election") {
+      body = '<span class="strip-none">No election to this seat that year: its term is four years</span>';
+    } else if (cell.none === "no-district") {
+      body = '<span class="strip-none">No district numbered ' + (race.district || 0) +
+        " on that map</span>";
+    } else {
+      body = '<span class="strip-none">The Clerk&rsquo;s statistics list no result for this ' +
+        "district</span>";
+    }
+    return '<li class="strip-cell">' + head + body + stripHolders(cell, now) + "</li>";
+  }
+
+  function stripYears(era) {
+    return era.from === era.to ? "the " + era.from + " election"
+      : "the elections of " + era.from + " to " + era.to;
+  }
+
+  function stripChange(race, change) {
+    var plan = (KYC.meta().districtMaps || {})[race.state];
+    var by = change.drawnBy ? ", drawn by " + KYC.escapeHtml(change.drawnBy) : "";
+    if (change.kind === "census") {
+      return "New lines from " + change.year + ": the map drawn after the 2020 census.";
+    }
+    // A compiled list cited until the map's own record is read (Alabama's
+    // court-drawn map for 2024: districts.REDRAWN_BEFORE): the link is
+    // named as the list, never as the map (rule 50).
+    if (change.lead) {
+      return "New lines from " + change.year + by + ". Source: " + (change.url
+        ? '<a href="' + KYC.escapeAttr(change.url) + '" target="_blank" rel="noopener noreferrer">' +
+          KYC.escapeHtml(change.title) + "</a>" : KYC.escapeHtml(change.title)) +
+        "; this site has not read the map’s own record.";
+    }
+    var title = change.url
+      ? '<a href="' + KYC.escapeAttr(change.url) + '" target="_blank" rel="noopener noreferrer">' +
+        KYC.escapeHtml(change.title) + "</a>"
+      : KYC.escapeHtml(change.title);
+    var link = change.kind === "redrawn" && plan ? ' <a href="' + KYC.escapeAttr(KYC.siteRoot() +
+      plan.page + "#/?d=" + (race.district || 0)) + '">See where its area came from &rsaquo;</a>' : "";
+    return (change.kind === "redrawn" ? "New lines for " : "New lines from ") + change.year +
+      ": " + title + by + "." + link;
+  }
+
+  /* *again*: an earlier era on other lines has said what that means, so
+   * this one names its district's number and no more (North Carolina's 1st
+   * repeated the whole sentence four times on a phone). */
+  function stripEraHead(race, strip, era, cells, now, again) {
+    if (race.chamber === "Senate") return "";
+    var past = KYC.electionStatus(undefined, now).phase === "post-election";
+    var numbered = cells.some(function (c) { return c.district != null && !c.atLarge; });
+    var atLarge = cells.some(function (c) { return c.atLarge; });
+    if (era.same) {
+      return '<p class="strip-era">' + KYC.escapeHtml((strip.eras.length > 1 ? "On " : "All on ") +
+        "the lines this district " + (past ? "was" : "is") + " elected on in 2026 (" +
+        stripYears(era) + ")") + "</p>";
+    }
+    if (again && numbered && !atLarge) {
+      return '<p class="strip-era strip-other">' + KYC.escapeHtml("On other lines than this " +
+        "race’s: " + stripYears(era) + ", the district numbered " + (race.district || 0) +
+        " on that map.") + "</p>";
+    }
+    return '<p class="strip-era strip-other">' + KYC.escapeHtml("On other lines than this " +
+      "race’s: " + stripYears(era) + "." + (numbered ? " The results are those of the " +
+      "district numbered " + (race.district || 0) + " on that map, which is not the map this " +
+      "race " + (past ? "was" : "is") + " fought on." : "") + (atLarge ? " " +
+      KYC.stateName(race.state) + " elected one member at large then: the results are the " +
+      "whole state’s." : "")) + "</p>";
+  }
+
+  function seatStrip(race, now) {
+    var strip = race.seatHistory;
+    if (!strip || !strip.cells || !strip.cells.length) return "";
+    var scale = 20;
+    strip.cells.forEach(function (c) {
+      if (c.result && c.result.margin != null && c.result.margin > scale) scale = c.result.margin;
+    });
+    var breaks = {};
+    (strip.breaks || []).forEach(function (b) { breaks[b.year] = b; });
+    var parts = [];
+    var said = false;
+    strip.eras.forEach(function (era, i) {
+      if (i > 0 && breaks[era.from]) {
+        parts.push('<p class="strip-break">' + stripChange(race, breaks[era.from]) + "</p>");
+      }
+      var cells = strip.cells.filter(function (c) { return c.era === i; });
+      if (!cells.length) return;
+      parts.push(stripEraHead(race, strip, era, cells, now, said) + '<ol class="strip-cells">' +
+        cells.map(function (c) { return stripCell(race, c, scale, now); }).join("") + "</ol>");
+      said = said || (!era.same && cells.some(function (c) { return c.district != null && !c.atLarge; }));
+    });
+    if (breaks[2026]) parts.push('<p class="strip-break">' + stripChange(race, breaks[2026]) + "</p>");
+    var sources = KYC.meta().lastElectionSources || {};
+    var years = strip.cells.map(function (c) { return c.year; }).filter(function (y, i, all) {
+      return all.indexOf(y) === i && sources[String(y)];
+    });
+    var counts = years.map(function (y) {
+      return '<a href="' + KYC.escapeAttr(sources[String(y)].url) +
+        '" target="_blank" rel="noopener noreferrer">' + y + "</a>";
+    }).join(", ");
+    // A number, never "this district": on other lines it was another one.
+    var heading = race.chamber === "Senate" ? "Elections to this seat since 2018"
+      : "Elections for " + KYC.escapeHtml(race.state + "-" + (race.district || "AL")) +
+        " since 2018";
+    return '<section class="seat-history"><h4 class="strip-title">' + heading + "</h4>" +
+      parts.join("") +
+      '<p class="race-note race-results">Counts: the Clerk of the House&rsquo;s statistics (' +
+      counts + "), each shown where a second compilation (" +
+      (race.chamber === "Senate" ? "MIT&rsquo;s Senate returns, else " : "") +
+      "Wikipedia&rsquo;s page for that election) names the same winner and runner-up. Margins " +
+      "are of the votes cast for a candidate. Who served: congress-legislators&rsquo; terms, " +
+      "by member.</p></section>";
+  }
+
+  /* The strip is the state's file's (rule 94); the last election is the
+   * index's. So the fold draws the last election at once, as it always
+   * did, and a race the index holds gets a slot that loads the state's
+   * file and draws the strip into it: waiting for the whole fold made the
+   * 2024 result, which the index holds, wait on 84 KB, and vanish if the
+   * file failed (PR #187 review). The slot speaks of the seat's elections,
+   * never of campaigns' figures. */
+  var stripWaiting = {};
+  var stripTimer = null;
+
+  function stripSlot(race, now) {
+    if (race.seatHistory || !race.state || KYC.peopleFull(race.state)) return seatStrip(race, now);
+    stripWaiting[race.id] = { race: race, now: now };
+    if (!stripTimer && global.setTimeout) {
+      // A fold drawn open on arrival is put in the page by its caller,
+      // after this returns.
+      stripTimer = global.setTimeout(function () {
+        stripTimer = null;
+        fillStrips(global.document);
+      }, 0);
+    }
+    return '<div class="seat-history-wait" data-strip-race="' + KYC.escapeAttr(race.id) +
+      '"><p class="race-note" role="status">Loading this seat’s elections since 2018&hellip;</p></div>';
+  }
+
+  /* Each strip slot in *root* not yet asked for: its state's file, then
+   * the strip; a failure is said, and asked again (*again*) when its fold
+   * is next opened. */
+  function fillStrips(root, again) {
+    if (!root || !root.querySelectorAll) return;
+    var which = "[data-strip-race]:not([data-strip-asked])" +
+      (again ? ", [data-strip-race][data-strip-failed]" : "");
+    Array.prototype.forEach.call(root.querySelectorAll(which),
+      function (slot) {
+        var entry = stripWaiting[slot.getAttribute("data-strip-race")];
+        if (!entry) return;
+        slot.setAttribute("data-strip-asked", "");
+        slot.removeAttribute("data-strip-failed");
+        slot.innerHTML = '<p class="race-note" role="status">Loading this seat’s elections ' +
+          "since 2018&hellip;</p>";
+        KYC.loadPeople(entry.race.state).then(function (ok) {
+          if (!slot.parentNode) return;
+          if (ok) {
+            var strip = seatStrip(entry.race, entry.now);
+            var box = slot.ownerDocument.createElement("div");
+            box.innerHTML = strip;
+            if (box.firstChild) slot.parentNode.replaceChild(box.firstChild, slot);
+            else slot.parentNode.removeChild(slot);
+            return;
+          }
+          slot.setAttribute("data-strip-failed", "");
+          slot.innerHTML = '<p class="race-note kyc-absent" role="status">' +
+            KYC.escapeHtml(KYC.peopleProblem() || "This seat’s elections since 2018 did " +
+              "not load. Close this and open it again to retry.") + "</p>";
+        });
+      });
+  }
+
   function lastTimeBlock(race, opts) {
     opts = opts || {};
     var last = race && race.lastElection;
     if (!last) return "";
     return fold("race-last", lastTimeSummary(race, last, opts.now), opts,
       (opts.scope || "race") + ":last:" + race.id, null,
-      function () { return lastTimeBody(race, last); });
+      function () { return lastTimeBody(race, last) + stripSlot(race, opts.now); });
   }
 
   KYC.cards = {

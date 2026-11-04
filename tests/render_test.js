@@ -71,6 +71,19 @@ function allRaces() {
   return readPeopleFile(path.join(SITE, "data", "people", "index.js")).races;
 }
 
+/* Every race whole, from every state's file: with the fields the index
+ * leaves out (emit.RACE_INDEX_LEAVES_OUT, the seat fold's strip). */
+let wholeRacesCache = null;
+function wholeRaces() {
+  if (!wholeRacesCache) {
+    wholeRacesCache = [];
+    peopleStates().forEach((code) => {
+      wholeRacesCache.push(...readPeopleFile(path.join(SITE, "data", "people", code + ".js")).races);
+    });
+  }
+  return wholeRacesCache;
+}
+
 /* Every state's people file (rule 94), by its lower-case code. */
 function peopleStates() {
   return fs.readdirSync(path.join(SITE, "data", "people"))
@@ -15287,8 +15300,9 @@ async function testRaceMoney() {
    * NJ-11, GA-13, GA-14), and every "Last time" becomes 2026's own from the
    * day after Election Day (PR #110 review; rule 63). */
   suite("the seat's last election: specials since, and the day after", () => {
-    // Every state's races: the North Carolina page holds its own (rule 94).
-    const all = allRaces();
+    // Every state's races, whole: the North Carolina page holds its own
+    // (rule 94), and a race the index holds waits for its state's file.
+    const all = wholeRaces();
     const specials = all.filter((r) => r.lastElection && r.lastElection.seatedSince &&
       r.lastElection.seatedSince.how === "special-election");
     const campaign = new window.Date(2026, 9, 20);
@@ -15329,10 +15343,205 @@ async function testRaceMoney() {
     check("a ranked-choice count's first choices are a lead, not a win, in the summary",
       rcv.every((r) => / led first choices by \d+\.\d points$/.test(holder(KYC.cards.lastTimeBlock(r,
         { lazy: false, now: campaign })).querySelector("summary").textContent)), rcv.length);
+    // ... and in the table: "Won" beside a first-choice row only with more
+    // than half of every vote counted (Begich's 48.4% in Alaska, 2024, was
+    // badged "Won"). Made so from a copy of any two-candidate result.
+    const two = shown.find((r) => r.lastElection.candidates[1] && !r.lastElection.redrawn &&
+      !r.lastElection.withheld && r.lastElection.kind !== "unopposed" &&
+      r.lastElection.rankedChoice !== "first-choices");
+    const badges = (r) => [...holder(KYC.cards.lastTimeBlock(r, { lazy: false, now: campaign }))
+      .querySelectorAll(".last-table .badge")].map((b) => b.textContent);
+    const ranked = (share) => {
+      const r = JSON.parse(JSON.stringify(two));
+      r.lastElection.rankedChoice = "first-choices";
+      r.lastElection.candidates[0].votes = Math.round(r.lastElection.total * share);
+      return r;
+    };
+    check("a first-choice leader short of a majority is badged a lead, never 'Won'",
+      !!two && JSON.stringify(badges(ranked(0.484))) === '["Led first choices"]', two && two.id);
+    check("and one with more than half of every vote counted won outright",
+      !!two && JSON.stringify(badges(ranked(0.53))) === '["Won"]' &&
+        JSON.stringify(badges(two)) === '["Won"]', two && two.id);
     const unchecked = all.filter((r) => r.lastElection && r.lastElection.withheld === "unchecked");
     check("a result the second compilation does not confirm says so, not that it was unread",
       unchecked.every((r) => /does not confirm it/.test(holder(KYC.cards.lastTimeBlock(r,
         { lazy: false })).textContent)), unchecked.length);
+  });
+
+  /* The seat's strip, 2018 to 2024 (VISUALS-33): grouped by the lines each
+   * year was fought on, a result on other lines labelled as the district
+   * that had the number on that map, never this district's (rule 90); the
+   * party a chip and the bars neutral ink (rule 88); page text and boxes
+   * (rule 46); in the state's file, not the index's (rule 94). */
+  suite("the seat's strip of elections since 2018", () => {
+    const whole = wholeRaces().filter((r) => r.seatHistory && r.lastElection);
+    const campaign = new window.Date(2026, 9, 20);
+    const after = new window.Date(2026, 10, 4);
+    const draw = (r, now) => {
+      const box = D.createElement("div");
+      box.innerHTML = KYC.cards.lastTimeBlock(r, { lazy: false, now: now });
+      return box;
+    };
+    check("every race's state file carries its strip", whole.length > 400 &&
+      wholeRaces().every((r) => !r.lastElection || r.seatHistory), whole.length);
+    // The fold waiting for the state's file on a page that holds only the
+    // index is testPeopleSplit's (the grid); a state page holds its own
+    // state's file, whose races carry the strip and draw it at once.
+    check("the index leaves the strip out, and the state page's own races draw it at once",
+      allRaces().every((r) => !("seatHistory" in r)) && (() => {
+        const r = window.kycRaces.filter((x) => x.lastElection && x.state === "NC")[0];
+        return !!r && !!r.seatHistory &&
+          /class="seat-history"/.test(KYC.cards.lastTimeBlock(r, { lazy: false }));
+      })());
+    const sample = whole.filter((r, i) => i % 3 === 0 || r.state === "NC" || r.state === "MT" ||
+      r.chamber === "Senate");
+    const bad = [];
+    sample.forEach((r) => {
+      [campaign, after].forEach((now) => {
+        const box = draw(r, now);
+        const strip = box.querySelector(".seat-history");
+        const s = r.seatHistory;
+        const past = now === after;
+        if (!strip) { bad.push(r.id + ": no strip"); return; }
+        if (strip.querySelector("svg, canvas, text")) bad.push(r.id + ": drawn as a picture");
+        if (strip.querySelectorAll(".strip-cell").length !== s.cells.length) {
+          bad.push(r.id + ": cells");
+        }
+        const heads = [...strip.querySelectorAll(".strip-era")].map((p) => p.textContent);
+        const others = s.eras.filter((e, i) => !e.same && s.cells.some((c) => c.era === i));
+        if (r.chamber === "House") {
+          if (heads.filter((h) => /^On other lines than this race’s/.test(h)).length !== others.length) {
+            bad.push(r.id + ": an era on other lines is not labelled so");
+          }
+          if (!heads.every((h) => /^On other lines/.test(h) ||
+              new RegExp("the lines this district " + (past ? "was" : "is") + " elected on in 2026").test(h))) {
+            bad.push(r.id + ": an era head in the wrong tense or words");
+          }
+          if (s.eras.some((e) => e.same) && s.breaks.some((b) => b.year === 2026)) {
+            bad.push(r.id + ": a redrawn district has an era on its 2026 lines");
+          }
+        } else if (heads.length) {
+          bad.push(r.id + ": a Senate seat's lines are labelled");
+        }
+        const breaks = [...strip.querySelectorAll(".strip-break")].map((p) => p.textContent);
+        if (breaks.length !== s.breaks.length ||
+            !s.breaks.every((b) => breaks.some((t) => t.indexOf(String(b.year)) !== -1 &&
+              /^New lines (from|for) /.test(t)))) {
+          bad.push(r.id + ": breaks " + breaks.join(" / "));
+        }
+        // The party is a chip; a bar is neutral ink.
+        const coloured = [...strip.querySelectorAll('[class*="party-"]')];
+        if (!coloured.every((el) => el.classList.contains("party-chip"))) bad.push(r.id + ": party ink");
+        if ([...strip.querySelectorAll(".strip-fill")].some((el) => /color|background/.test(
+          el.getAttribute("style") || ""))) bad.push(r.id + ": a coloured bar");
+        // A first-choice lead is never a win; a withheld year says why.
+        s.cells.forEach((c, i) => {
+          const text = strip.querySelectorAll(".strip-cell")[i].textContent;
+          // A majority of every vote counted is a first-round win.
+          if (c.result && c.result.rankedChoice === "first-choices" && c.result.candidates[1] &&
+              (c.result.firstChoiceMajority
+                ? !/won a majority of first choices/.test(text)
+                : !/led first choices by/.test(text) || / won /.test(text))) {
+            bad.push(r.id + " " + c.year + ": first choices read as a win, or a majority as a lead");
+          }
+          // An "until" is a day that has come (PR #187 review).
+          (c.holders || []).forEach((h) => {
+            if (h.until && h.until > KYC.localDay(now) && text.indexOf("until " + KYC.dateWords(h.until)) !== -1) {
+              bad.push(r.id + " " + c.year + ": an until still ahead");
+            }
+          });
+          if (c.withheld && !/^\d{4}(?: special)?Not shown/.test(text)) bad.push(r.id + " " + c.year);
+          if (c.result && !/won|led|unopposed|only candidate/.test(text)) bad.push(r.id + " " + c.year);
+        });
+      });
+    });
+    check("each year is in its era, labelled by its lines, in the tense of the reader's day",
+      bad.length === 0, bad.slice(0, 6).join(" | ") + " (" + sample.length + " races)");
+    const nc = races.filter((r) => /^race-H-NC/.test(r.id))[0];
+    const fold = nc && nc.querySelector(".race-last");
+    if (fold) openFold(window, fold);
+    const strip = fold && fold.querySelector(".seat-history");
+    check("North Carolina's districts break at all four of its maps since 2018, none of them its 2026 lines",
+      !!strip && strip.querySelectorAll(".strip-break").length === 4 &&
+        /Session Law 2019-249/.test(strip.textContent) && /2020 census/.test(strip.textContent) &&
+        /Session Law 2023-145/.test(strip.textContent) && !/elected on in 2026/.test(strip.textContent) &&
+        // What "other lines" means is said once, not before each of its four maps.
+        (strip.textContent.match(/which is not the map this race/g) || []).length === 1 &&
+        (strip.textContent.match(/, the district numbered 1 on that map\./g) || []).length === 3,
+      strip ? strip.textContent.slice(0, 300) : "no strip");
+    // A final round the Clerk prints without naming it is said to be the
+    // second compilation's reading (Maine's 2nd in 2018), made here from a
+    // copy of a real race so the check does not wait on the day's data.
+    const me = JSON.parse(JSON.stringify(whole.filter((r) => r.chamber === "House" &&
+      r.seatHistory.cells.some((c) => c.result && c.result.candidates[1]))[0]));
+    const cell = me.seatHistory.cells.find((c) => c.result && c.result.candidates[1]);
+    cell.result.kind = "rcv-final";
+    delete cell.result.rankedChoice;
+    cell.result.roundFrom = "second-compilation";
+    const meText = draw(me, campaign).querySelectorAll(".strip-cell")[
+      me.seatHistory.cells.indexOf(cell)].textContent;
+    check("a final round the Clerk does not name says whose reading it is",
+      /won the final round by/.test(meText) && /Wikipedia’s page gives them as the final round’s/.test(meText),
+      meText);
+    const mt = whole.filter((r) => r.state === "MT" && r.district === 1)[0];
+    check("Montana's 1st says its 2018 and 2020 results are the whole state's, elected at large",
+      !!mt && /elected one member at large then: the results are the whole state’s/.test(
+        draw(mt, campaign).textContent));
+
+    /* The review of PR #187, each case made here from a copy of a real
+     * Senate race so the check does not wait on the day's data. */
+    const senate = whole.filter((r) => r.chamber === "Senate" &&
+      r.seatHistory.cells.some((c) => c.result))[0];
+    const made = (holders, extra) => {
+      const r = JSON.parse(JSON.stringify(senate));
+      const c = r.seatHistory.cells.find((x) => x.result);
+      c.holders = holders;
+      Object.assign(c, extra || {});
+      r.seatHistory.cells = [c];
+      return r;
+    };
+    const held = (r, now) => (draw(r, now).querySelector(".strip-cell .strip-held") || {}).textContent || "";
+    // A term ending after the reader's day: no "until" before it comes.
+    const later = made([{ id: "A", name: "Ann Example", party: "Republican" },
+      { id: "B", name: "Bea Example", party: "Democrat", from: "2025-01-21", until: "2026-12-01" }]);
+    check("an until still ahead of the reader's day is not said, and is once it has come",
+      !/until/.test(held(later, campaign)) &&
+        /until Dec\. 1, 2026|until December 1, 2026/.test(held(later, new window.Date(2026, 11, 2))),
+      held(later, campaign) + " / " + held(later, new window.Date(2026, 11, 2)));
+    // An appointee whose term ends on the special's day serves until its
+    // winner is seated, before that day and after it.
+    const moody = made([{ id: "R", name: "Marco Rubio", party: "Republican", until: "2025-01-20" },
+      { id: "M", name: "Ashley Moody", party: "Republican", from: "2025-01-21", how: "appointment",
+        untilSeated: true }]);
+    check("an appointee is serving until the special election's winner takes the seat, never until its day",
+      [campaign, after].every((now) => /Ashley Moody R? ?\(from Jan(?:\.|uary) 21, 2025, appointed until the special election’s winner takes the seat\)/.test(
+        held(moody, now).replace(/\s+/g, " ")) && !/Nov(?:\.|ember) 3/.test(held(moody, now))),
+      held(moody, campaign));
+    // One person appointed, then elected, is one line.
+    const ricketts = made([{ id: "R", name: "Pete Ricketts", party: "Republican", from: "2023-01-23",
+      how: "appointment", elected: "2024-11-05" }]);
+    check("one person appointed and then elected is one line that says both",
+      /Pete Ricketts.*appointed, then elected Nov(?:\.|ember) 5, 2024/.test(held(ricketts, after)) &&
+        (held(ricketts, after).match(/Ricketts/g) || []).length === 1, held(ricketts, after));
+    // An unopposed name with no count is not "the Clerk's count".
+    const lucas = made([], { result: undefined, withheld: "unchecked", withheldUnopposed: true });
+    delete lucas.seatHistory.cells[0].result;
+    const lucasText = draw(lucas, campaign).querySelector(".strip-cell").textContent;
+    check("an unopposed name with no count says so, not that a count is unconfirmed",
+      /unopposed and with no count/.test(lucasText) && !/Clerk’s count/.test(lucasText), lucasText);
+    // A redrawn district's fold stays true beside the strip below it.
+    const redrawn = whole.filter((r) => r.lastElection.redrawn)[0];
+    const redrawnText = redrawn ? draw(redrawn, campaign).textContent : "";
+    check("a redrawn district's fold does not say the result is left out, with the strip giving it",
+      !!redrawn && /so this site does not give it as this district’s own/.test(redrawnText) &&
+        !/does not carry over/.test(redrawnText), redrawnText.slice(0, 300));
+    // Alabama's 2024 lines cite the Census Bureau's list as a list.
+    const al = whole.filter((r) => r.chamber === "House" && r.state === "AL" && r.seatHistory)[0];
+    const alBreak = al ? [...draw(al, campaign).querySelectorAll(".strip-break")]
+      .map((p) => p.textContent).filter((t) => /2024/.test(t))[0] || "" : "";
+    check("Alabama's 2024 lines name the Census Bureau's list as what it is, never as the map",
+      /New lines from 2024, drawn by a federal court\. Source: the Census Bureau’s list of 2024 changes; this site has not read the map’s own record\./.test(alBreak) &&
+        !/Court-drawn map/.test(alBreak), alBreak);
   });
 
   suite("compare the ballot: offices with their place, one renderer", () => {
@@ -15897,6 +16106,11 @@ async function testCharts() {
 
     suite("charts — polling averages as dots (VISUALS-34)", () => {
       const odds = window.kycOdds || { races: {} };
+      // A race for Congress is the build's; a race for governor (G-<ST>-2026,
+      // PR #195) is drawn from the object kyc-stategov.js raceOdds builds, by
+      // the same KYC.odds.render, so its averages are held to the same rule.
+      const raceOf = (id) => (window.kycRaces || []).find((r) => r.id === id) ||
+        (/^G-[A-Z]{2}-\d{4}$/.test(id) ? { id: id, label: "Governor" } : null);
       const raceIds = Object.keys(odds.races).filter((id) => (odds.races[id].polls || {}).rows &&
         odds.races[id].polls.rows.length && (odds.races[id].markets || []).length);
       let checked = 0;
@@ -16775,6 +16989,11 @@ async function testPeopleSplit() {
     openFold(slim.window, compare(slim));
     openFold(full.window, compare(full));
     await until(() => !!compare(slim).querySelector(".compare-table"), 5000);
+    // The seat's strip is a race's field the index leaves out.
+    const lastFold = (b) => b.D.querySelector('#results .race-last[data-fold]');
+    openFold(slim.window, lastFold(slim));
+    openFold(full.window, lastFold(full));
+    await until(() => !!lastFold(slim).querySelector(".seat-history"), 5000);
     suite("index.html — a race's money and comparison load the state's records when opened", () => {
       check("it says it is loading, and draws nothing from the cards meanwhile",
         /Loading Georgia/.test(loading) && !/No data/.test(loading), loading);
@@ -16785,8 +17004,49 @@ async function testPeopleSplit() {
       check("and the ballot side by side too",
         compare(slim).innerHTML === compare(full).innerHTML,
         firstDifference(compare(full).innerHTML, compare(slim).innerHTML));
+      check("and the seat's last election with its strip since 2018, filled into the index's race",
+        !!lastFold(slim).querySelector(".seat-history") &&
+          lastFold(slim).innerHTML === lastFold(full).innerHTML &&
+          slim.window.kycRaces.filter((r) => r.state === "GA").every((r) => !!r.seatHistory) &&
+          slim.window.kycRaces.filter((r) => r.state !== "GA").every((r) => !r.seatHistory),
+        firstDifference(lastFold(full).innerHTML, lastFold(slim).innerHTML));
       check("Georgia's people are whole now, no one else's",
         slim.window.legislatorsData.every((p) => slim.window.KYC.isFull(p) === (p.state === "GA")));
+    });
+
+    // The seat's last election is the index's and is drawn at once; only
+    // the strip waits for the state's file, in a slot of its own whose words
+    // are about the seat's elections, and a file that fails takes nothing
+    // away (PR #187 review). Made to fail here, then asked again.
+    slim.window.location.hash = "#/?state=VT&view=race";
+    full.window.location.hash = "#/?state=VT&view=race";
+    await settle(200);
+    const vtFold = (b) => b.D.querySelector('#results .race-last[data-fold]');
+    const realLoad = slim.window.KYC.loadPeople;
+    slim.window.KYC.loadPeople = () => Promise.resolve(false);
+    openFold(slim.window, vtFold(slim));
+    const vtAtOnce = vtFold(slim).querySelector(".fold-body").textContent;
+    await settle(50);
+    const vtFailed = vtFold(slim).querySelector(".fold-body").textContent;
+    slim.window.KYC.loadPeople = realLoad;
+    vtFold(slim).open = false;
+    vtFold(slim).dispatchEvent(new slim.window.Event("toggle"));
+    openFold(slim.window, vtFold(slim));
+    openFold(full.window, vtFold(full));
+    await until(() => !!vtFold(slim).querySelector(".seat-history"), 5000);
+    suite("index.html — a seat's last election at once, its strip when the state's file is in", () => {
+      check("the last election is drawn at once, and the strip's slot speaks of the seat's elections",
+        /Counts:|not shown|redrew/.test(vtAtOnce) &&
+          /Loading this seat’s elections since 2018/.test(vtAtOnce) && !/campaigns/.test(vtAtOnce),
+        vtAtOnce.slice(0, 300));
+      check("a file that fails keeps the last election and says the strip did not load",
+        /Counts:|not shown|redrew/.test(vtFailed) &&
+          /This seat’s elections since 2018 did not load/.test(vtFailed) && !/campaigns/.test(vtFailed),
+        vtFailed.slice(0, 300));
+      check("opened again, the strip is drawn, as the whole records draw it",
+        vtFold(slim).innerHTML === vtFold(full).innerHTML &&
+          !vtFold(slim).querySelector("[data-strip-race]"),
+        firstDifference(vtFold(full).innerHTML, vtFold(slim).innerHTML));
     });
 
     // A card opens the dialog over a loading line, never over the card's
@@ -18287,6 +18547,12 @@ async function testGovernorCards() {
       !!D.querySelector('#state-government a.state-jump[href="#governor-race"]'));
     check("a chip jumps to it", !!D.querySelector('.state-parts a[href="#governor-race"]'));
     check("nothing about the governor links a profile", noProfile(race) && noProfile(card));
+    // The seat's results strip (PR #187) is a race for Congress's: this
+    // site reads no state results, so the race for governor has no
+    // "Last time" fold, no strip and no slot waiting for one.
+    check("the race for governor carries no seat history (the site reads no state results)",
+      !!race && !race.querySelector("details.race-last, .seat-history, .seat-history-wait, [data-strip-race]") &&
+      !/since 2018/.test(race.textContent));
     const status = data.GA.ballot2026.offices.governor.holderStatus;
     check("the race says whether the holder is on the ballot, in the State government card's words",
       !status || race.querySelector(".gov-holder-status").textContent === card.querySelector(".gov-holder-status").textContent);
@@ -18322,6 +18588,12 @@ async function testGovernorCards() {
       (!results || !!race.querySelector('a[href="' + results + '"]')));
     check("no winner, no holder line", !/\b(Elected|Won|Winner)\b/.test(race.textContent) &&
       !race.querySelector(".gov-holder-status"));
+    // The seat's results strip (PR #187) is a race for Congress's: this
+    // site reads no state results, so the race for governor has no
+    // "Last time" fold, no strip and no slot waiting for one.
+    check("the race for governor carries no seat history (the site reads no state results)",
+      !!race && !race.querySelector("details.race-last, .seat-history, .seat-history-wait, [data-strip-race]") &&
+      !/since 2018/.test(race.textContent));
     check("the office's mark says it was on the ballot",
       /This office was on the Nov 3, 2026 ballot/.test(after.D.querySelector("#governor.gcard").textContent));
   });
@@ -18348,6 +18620,8 @@ async function testGovernorCards() {
     row.click();
     check("tapped, it opens", fold.querySelector(".race-body").getAttribute("hidden") === null &&
       row.getAttribute("aria-expanded") === "true");
+    check("opened, it holds no seat history: the strip is a race for Congress's (PR #187)",
+      !fold.querySelector("details.race-last, .seat-history, .seat-history-wait, [data-strip-race]"));
     const open = D.querySelector("[data-race-open-all]");
     const congress = phone.window.KYC.races().filter((r) => r.state === "CA").length;
     check("it is no race for Congress: \"Open all\" counts only theirs (rule 73)",

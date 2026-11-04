@@ -250,9 +250,22 @@
         delete partial[p.id];
       }
     });
+    // A race the index holds is filled from its state's file, never
+    // replaced: the fields the index leaves out (emit.RACE_INDEX_LEAVES_OUT,
+    // the seat fold's strip) join the record every view already holds.
     var heldRace = {};
-    raceList.forEach(function (r) { heldRace[r.id] = true; });
-    file.races.forEach(function (r) { if (!heldRace[r.id]) raceList.push(r); });
+    raceList.forEach(function (r) { heldRace[r.id] = r; });
+    file.races.forEach(function (r) {
+      var known = heldRace[r.id];
+      if (!known) {
+        raceList.push(r);
+        heldRace[r.id] = r;
+        return;
+      }
+      if (!file.index) {
+        Object.keys(r).forEach(function (key) { if (!(key in known)) known[key] = r[key]; });
+      }
+    });
     if (file.index) indexIn = true;
     else fullStates[what] = true;
     // What was built from the arrays is built again from them.

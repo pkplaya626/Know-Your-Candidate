@@ -46,7 +46,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
-| `… seats` | Each seat's last election, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
+| `… seats` | Each seat's last election and its elections since 2018, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
 | `… photocopies` | Weigh every portrait the build shows outside Wikimedia (a ranged GET, one request a second per host) and make a smaller copy, in headless Chrome, of each over 300 KB or 1,200 px, writing `photos/<hash>.jpg` and `data/photo_copies.json` (`--check` reports the copies and what is left; `--limit N`, oldest first; `--max-minutes M`, a time budget for the whole run: the weighing stops early enough to leave the copy maker its share, is saved before Chrome starts, and Chrome starts no copy past the deadline; `--force` reads again what was read in the last 7 days). See [Smaller copies of heavy portraits](#smaller-copies-of-heavy-portraits) |
 | `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
@@ -1843,6 +1843,7 @@ Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 | `results.sourceUrl` | Where the race's statuses were read: the Wikipedia results page the cache names (by its title), or the Secretary of State's Candidate Inquiry for a ballot read from a qualified list. The race head links it ("Results: Wikipedia, read Oct. 17, 2026"), and every status says whose word it is ("per Wikipedia's results page"), never "the published results", which read as a certified count |
 
 | `lastElection` | The seat's last election, from `seats` (`kyc/seat_history.py`): `{year, date, kind, candidates: [{name, party, votes, share}], others, othersShare, total, margin, checkedBy}` - the winner and runner-up as the Clerk of the House's statistics count them, shares of the votes cast for a candidate (blank and void ballots excluded), the margin of the votes. `kind` is `general`, `runoff` (Georgia's 2021 runoff), `rcv-final` (Maine's final ranked-choice round) or `unopposed` (with the Clerk's `note`); `rankedChoice: "first-choices"` where the counts are first choices (Alaska). `checkedBy` is `"mit"` or the Wikipedia article checked against. `{redrawn: true, year}` for a district redrawn for 2026, which carries no 2024 figure (rule 90); `{withheld, year}` where no second source agrees. `seatedSince: {name, since, how}` where someone took the seat after the counted election without having won it, by `special-election` or `appointment` (from the frozen record and the snapshot): the result is then the last regular election's. The sources' titles and addresses are `kycBuildMeta.lastElectionSources`, by year |
+| `seatHistory` | The seat's elections from 2018 to 2024, from `seats` (`kyc/seat_history.py` `seat_strip`), in the state's people file only (`emit.RACE_INDEX_LEAVES_OUT`; the index's race is filled from it when the fold opens): `{eras: [{from, to, same}], cells: [{year, era, district?, atLarge?, result \| withheld \| none, holders}], breaks: [{year, kind, title?, drawnBy?, url?, lead?}]}`. A House district's years are grouped by the lines they were fought on (`same`: the lines this district is elected on in 2026); each `break` is a change of lines - `census` (the map drawn after the 2020 census, from 2022, wherever a state has more than one seat), `enacted` (`districts.REDRAWN_BEFORE`: each mid-decade map, from the state's own record) or `redrawn` (2026's, `districts.REDRAWN`). A cell's `result` is the Clerk's count checked as `lastElection`'s is (winner and runner-up with their shares, the margin, `kind`, `checkedBy`); `none` is `no-election` (Puerto Rico's four-year seat), `no-district` (no district of that number on that map) or `no-result` (the Clerk lists none: NC-9, 2018); `holders` are who served the term it chose, from congress-legislators' terms by bioguide id (`{id, name, party, from?, until?, how?, elected?, untilSeated?, winner?}`: one person's consecutive terms are one holder, `elected` the day an appointee was then elected; `untilSeated` an appointee whose term the record ends on the special election's day, serving until its winner is seated; the page says `until` only once the reader's day has reached it; a special's holders are counted from the day its winner took the seat). A first-choice count with more than half of every vote counted carries `firstChoiceMajority` (a first-round win); a withheld cell whose Clerk entry is an unopposed name with no count carries `withheldUnopposed`; a `break` cited from the Census Bureau's list alone carries `lead`. A Senate seat's cells are the elections to its class, specials included |
 
 `incumbentIds` comes from the record too: the person who held the seat, sitting or former, never whoever sits in it now. Every race of the record exists, whoever points at it.
 
@@ -1859,8 +1860,24 @@ in that order with counts within 1%: MIT Election Data and Science Lab's
 Senate returns, and for the House each state's 2024 Wikipedia page (MIT's
 House file sits behind a download form asking for a name and an email).
 What no second source confirms is withheld and says so. A district redrawn
-for 2026 shows no 2024 result: it says the old lines' election was other
-voters' and links where its area came from.
+for 2026 shows no 2024 result: it says the result was counted on the old
+lines and links where its area came from.
+
+Under it, the same fold draws the seat's strip: every election from 2018
+to 2024 (the Clerk's statistics for 2018, 2020, 2022 and 2024, each result
+checked the same way against each state's Wikipedia page for that year or
+MIT's Senate returns), who won it and by what margin as a bar in neutral
+ink, and who served the term it chose (congress-legislators' terms, by
+bioguide id). A House district's years are grouped by the lines they were
+fought on, and the strip breaks at each change: the maps drawn after the
+2020 census (from 2022), every mid-decade map (North Carolina's for 2020;
+Alabama's, Georgia's, Louisiana's, New York's and North Carolina's for
+2024, `districts.REDRAWN_BEFORE`, each from the state's own enacting
+record and the Census Bureau's list), and the 2026 maps. Years on other
+lines than the race's are under a line saying so, in dashed cells: they
+are the results of the district that had the number on that map, never
+this district's. A Senate seat's strip is the elections to its class,
+specials included.
 
 Each race block, on the state pages, in the grid's races view and in the
 profile dialog, shows under its people the campaigns' money as bars on one

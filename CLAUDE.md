@@ -61,7 +61,7 @@ data/local_sites.json       ──┤   (each local government's listed website,
 data/members.json           ──┤   (members' platforms, education, careers, offices: members)
 data/roll_calls.json        ──┤   (every roll call of the Congress: House Clerk, Senate LIS; votes)
 data/record_2026.json       ──┤   (the frozen 2026 race set: record --freeze)
-data/seat_history.json      ──┤   (each seat's last election: the Clerk's statistics, checked; seats)
+data/seat_history.json      ──┤   (each seat's elections, 2018-2024: the Clerk's statistics, checked; seats)
 data/outside_spending.json  ──┤   (independent expenditures by candidate: FEC Schedule E; outside)
 data/departed_members.json  ──┤   (who left this Congress: congress, from legislators-historical)
 data/photo_copies.json      ──┤   (each heavy portrait's original and its copy, and each photograph hosted here: rule 101)
@@ -2379,6 +2379,71 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     appointment, on what day. From the day after Election Day the fold is
     "Before 2026", not "Last time" (rule 63), and a ranked-choice count's
     first choices are a lead, never a win.
+    The same fold draws the seat's strip, every election from 2018 to 2024
+    (`seat_history.seat_strip`, VISUALS-33), each year's count read and
+    checked as the last one is, and who served the term it chose from
+    congress-legislators' terms by bioguide id. A House district's years
+    are grouped by the lines they were fought on and break at each change:
+    the census maps from 2022 (not in a state elected at large throughout),
+    each mid-decade map (`districts.REDRAWN_BEFORE`, from the state's own
+    enacting record, checked against the Census Bureau's list for each
+    Congress: North Carolina's for 2020; Alabama's, Georgia's,
+    Louisiana's, New York's and North Carolina's for 2024) and 2026's
+    (`REDRAWN`). Years on other lines than the race's sit under a line
+    saying they are the district that had its number on that map, which is
+    not the map the race is fought on, in dashed cells; a redrawn
+    district's own "last election" shows no 2024 figure as its own, in
+    words true beside the strip that gives it as the old map's district of
+    the number ("does not carry over" was false there). The reader
+    found more in the earlier files, each now read, never guessed: a
+    footnote marker before a count inside a district's run (Louisiana's
+    5th, 2020, whose runoff counts sit among the open primary's), a later
+    ranked-choice round's counts footnoted beside first choices (Maine's
+    2nd, 2022: the final round between the two), one runoff footnote per
+    candidate (Mississippi's 2018 special, refused unless they name one
+    day), and a district listed with no count (North Carolina's 9th,
+    2018, `no-result`, never "withheld"). The first full read put counts
+    beside the wrong names, each now refused: a party printed alone is a
+    fusion line only in New York and Connecticut (`FUSION_STATES`) -
+    anywhere else it is a candidate the Clerk did not name, nobody's
+    (Virginia's 2nd in 2020 gave Scott Taylor David Foster's 9,170 votes) -
+    and New Hampshire's "Scatter", Nevada's "None of These Candidates",
+    Maine's "Exhausted Ballot" and Puerto Rico's "Unadjudicated" had been
+    added to the candidate above them; a line naming no one and no party
+    the file prints after a name is an error. The check read less than it
+    could: a House runoff is checked against the runoff's table, never the
+    open primary's; "Election box  winning" with two spaces, a footnote in
+    a name's field and a box ending "{{end}}" are read; a title leading to
+    the national article is not a state's page. Two names with no footnote
+    in a ranked-choice state (Maine's 2nd, 2018) are the final round only
+    where the second compilation's final round has those counts and its
+    first round does not, and the cell says whose reading that is. What
+    the sources disagree on stays withheld: Wikipedia's 99,655 for Ohio's
+    4th runner-up in 2018 (the Clerk's 89,412 adds up), the Clerk's 63,606
+    for Texas's 14th in 2022 (the percentages say 68,606). The strip is the
+    state's file's, not the index's (`emit.RACE_INDEX_LEAVES_OUT`, rule
+    94), and its classes are its own: drawn as `seat-strip`, the
+    legislature's seat squares, it set each word on a line of its own. The
+    fold draws the last election, an index field, at once, and loads the
+    strip into a slot of its own whose words are about the seat's
+    elections (`stripSlot`): waiting whole, the 2024 result waited on the
+    state's file, vanished if it failed, and said "Loading California's
+    campaigns". The review of PR #187 found more in who served, each now
+    refused: congress-legislators ends an appointee's term on the special
+    election's day (Ashley Moody's and Jon Husted's, November 3, 2026),
+    which is no day they left - they serve until its winner is seated
+    (`untilSeated`, `_scheduled_end`) - and the page says an "until" only
+    once the reader's day has reached it; a special's term is served from
+    the day its winner took the seat (`_special_start`), so James Inhofe
+    was not among those who served the term Oklahoma's 2022 special chose;
+    one person's terms one after the other are one line (Pete Ricketts,
+    "appointed, then elected"); a majority of every first choice counted
+    is a first-round win (Chellie Pingree), less a lead; an unopposed name
+    with no count is not "the Clerk's count" unconfirmed; the Clerk's grave
+    accent inside a word is the ʻokina (`okina`: "Kaialiʻi", never a
+    grave accent in his name); and Alabama's court-drawn 2024 lines cite the Census
+    Bureau's list named as that list (`lead`), never as the map, until a
+    person reads the court's order.
     `kyc/outside.py` reads independent expenditures from the FEC's
     by-candidate totals for the 2025-26 cycle (an election-period read gave
     Jon Ossoff the January 2021 runoff's spending), by the profile's own
