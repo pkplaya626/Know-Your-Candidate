@@ -820,6 +820,13 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   decided *their* contest — their own party's primary, a nonpartisan primary,
   or the November ballot. A Democrat is not struck out because the Republican
   table is complete.
+- **A November mark needs a filing and a count behind it.** The read publishes
+  without a person, so a mark on a name no filing or certified list holds, on
+  someone the table's own counts do not lead, or in a table with no counts (unless
+  the page's infobox leads with them, or nobody else is on the whole ballot) is
+  refused: the race reads as before the count, keeps the last read of it, and
+  is named in the read's log and by `validate` (the cache's `refusedMarks`,
+  `{race id: [{name, why}]}`; `result-mark-refused`).
 - **The seat a person is contesting comes from their FEC filing.** Texas,
   Florida, California and Utah redrew their maps for 2026, and thirteen
   sitting members now hold one district number and run in another. A member
