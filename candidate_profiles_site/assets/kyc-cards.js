@@ -1167,11 +1167,13 @@
     return people.filter(function (p) { return !offBallot(p) && !elsewhere(race, p); });
   }
 
+  /* *opts.summary* names the race where a view lists several: the map's
+   * panel holds a state's House races side by side (VISUALS-20). */
   function moneyBlock(race, people, opts) {
     opts = opts || {};
     var shown = ballotPeople(race, people);
     if (!shown.length) return "";
-    return fold("race-money", "Money in the race", opts, (opts.scope || "race") + ":money:" + race.id,
+    return fold("race-money", opts.summary || "Money in the race", opts, (opts.scope || "race") + ":money:" + race.id,
       race.state, function () {
         var max = 0;
         shown.forEach(function (p) {

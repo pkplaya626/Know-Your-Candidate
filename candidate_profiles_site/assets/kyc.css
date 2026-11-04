@@ -5478,6 +5478,9 @@ button.local-county-link {
 .race-mates > .race-money,
 .race-mates > .race-last,
 .race-mates > .race-compare { display: block; margin-top: var(--s-2); }
+/* The map's panel: each race's money fold under one count (kyc-map.js). */
+.panel-money { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s-2); }
+.panel-money > .race-money { min-width: 0; }
 
 .money-rows { list-style: none; margin: var(--s-2) 0 0; padding: 0; display: grid; gap: var(--s-3); }
 .money-row { display: grid; gap: var(--s-1); min-width: 0; }
