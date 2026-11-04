@@ -52,6 +52,67 @@ class TestTheFictionalMemberships(unittest.TestCase):
         # Fiction is never a real id.
         self.assertTrue(all(b in before or b.startswith("Z9") for b in after))
 
+    def test_january_follows_the_results_once_they_are_read(self):
+        # The first refresh to carry a result (2026-11-04) failed four page
+        # checks: "elected" was not among the statuses that win, so the seat
+        # Andy Barr won went to Kentucky's best-funded filer, who had withdrawn.
+        # The state is made here, on a seat whose holder is running again and
+        # a seat a member is running for, whatever the day's results hold.
+        from unittest import mock
+        from kyc import candidates, fec, results
+        from kyc.profiles import build_profiles
+        raw = sources.load_all(ROOT)
+        snap = legislators.load_snapshot(ROOT)
+        if cycle.phase(snap) == "record":
+            self.skipTest("the new Congress is sitting: the committed data is the case")
+        field = candidates.load_cache(ROOT)
+        profiles, _ = build_profiles(raw, snapshot=snap, field=field, finance=fec.load_cache(ROOT))
+        record = raw["record"]
+        member_ids = {i for p in snap["legislators"] for i in p.get("fecAll") or []}
+        members = {p["id"]: p for p in profiles if not p["isCandidate"]}
+        filers = {}
+        for row in field["candidates"]:
+            rid = candidates.race_id(row)
+            if rid in record["races"] and row["candidate_id"] not in member_ids \
+                    and row.get("incumbent_challenge") != "I":
+                filers.setdefault(rid, []).append(row)
+        people = legislators.by_bioguide(snap)
+        # A holder running again who loses to the least-funded filer in the race
+        # (two filers or more), in a seat whose index does not fall on the
+        # rehearsal's every fifth, unlinked, newcomer.
+        ordered = sorted(record["races"])
+        beaten = next(rid for rid in ordered
+                      if rid.startswith("H-") and ordered.index(rid) % 5 != 0
+                      and len(filers.get(rid) or []) >= 2
+                      and (record["incumbents"].get(rid) or {}).get("bioguide") in members
+                      and members[record["incumbents"][rid]["bioguide"]].get("seekingReelection2026")
+                      and people.get(record["incumbents"][rid]["bioguide"], {}).get("fecAll"))
+        bid = record["incumbents"][beaten]["bioguide"]
+        winner = min(filers[beaten], key=lambda r: (r.get("receipts") or 0, r["candidate_id"]))
+        status = {beaten: {winner["candidate_id"]: "elected",
+                           **{i: "defeated" for i in people[bid]["fecAll"]}}}
+        # A sitting member elected to the seat they are running for instead.
+        mover = next((p for p in members.values()
+                      if p.get("contestRaceId") in record["races"]
+                      and p["contestRaceId"] != p.get("raceId")
+                      and people.get(p["id"], {}).get("fecAll")), None)
+        if mover:
+            status[mover["contestRaceId"]] = {i: "elected" for i in people[mover["id"]]["fecAll"]}
+        with mock.patch.object(results, "load_cache",
+                               return_value={"races": {r: {"status": st} for r, st in status.items()}}):
+            snapshot, _gone, _log = rehearsal.january()
+        after = legislators.by_bioguide(snapshot)
+        self.assertNotIn(bid, after, "a holder the results say lost leaves")
+        seated = [p for p in after.values() if p["bioguide"].startswith("Z9")
+                  and winner["candidate_id"] in (p.get("fecAll") or [])]
+        self.assertEqual(len(seated), 1, "whoever the results elected takes the seat")
+        self.assertEqual(seated[0]["state"], record["races"][beaten]["state"])
+        if mover:
+            race = record["races"][mover["contestRaceId"]]
+            self.assertIn(mover["id"], after)
+            self.assertEqual(after[mover["id"]]["chamber"], race["chamber"])
+            self.assertEqual(after[mover["id"]]["state"], race["state"])
+
     def test_december_replaces_one_appointee(self):
         for label in ("december-loses", "december-wins"):
             made = rehearsal.december(label)
