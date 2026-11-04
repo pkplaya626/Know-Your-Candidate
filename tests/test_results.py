@@ -1118,6 +1118,97 @@ class TestAgainstTheRealCache(unittest.TestCase):
                 self.assertLessEqual(len(names), 1, f"{rid}: {party} nominees {sorted(names)}")
 
 
+class TestASeatsOwnArticle(unittest.TestCase):
+    """NY-13's and CO-1's state page sections hand off to the seat's own
+    article with {{main}}, whose table was marked for hours while the section's
+    never was (2026-11-04)."""
+
+    PAGE = "2026 United States House of Representatives elections in New York"
+    ARTICLE = "2026 New York's 13th congressional district election"
+    NOVEMBER = datetime.date(2026, 11, 4)
+
+    def setUp(self):
+        self.field = {"candidates": [
+            {"candidate_id": "H6NY13A", "name": "CHEVALIER, DARIALIZA AVILA", "state": "NY",
+             "office": "H", "district_number": 13, "party": "DEM"},
+            {"candidate_id": "H6NY13B", "name": "OTHER, ANN", "state": "NY", "office": "H",
+             "district_number": 13, "party": "REP"}]}
+        self.dates = {("NY", "H"): {"primary": "2026-06-23", "runoff": None}}
+
+    def table(self, a_won=False, a_votes="", b_votes="", winner="Darializa Avila Chevalier"):
+        out = ["{{Election box begin no change", f"| title = {self.ARTICLE}", "}}"]
+        kind = "winning candidate" if a_won else "candidate"
+        out += [f"{{{{Election box {kind} with party link no change", "| party = Democratic Party (United States)",
+                f"| candidate = {winner}", f"| votes = {a_votes}", "}}"]
+        out += ["{{Election box candidate with party link no change", "| party = Republican Party (United States)",
+                "| candidate = Ann Other", f"| votes = {b_votes}", "}}", "{{Election box end}}"]
+        return "\n".join(out)
+
+    def read(self, article, main=None, today=None):
+        main = main or self.ARTICLE
+        page = (f"\n==District 13==\n{{{{main|{main}}}}}\n" + self.table() + "\n")
+        asked = []
+
+        def fetch(title):
+            asked.append(title)
+            if title == self.PAGE:
+                return page
+            if title == self.ARTICLE and article:
+                return article
+            raise results.PageMissing(title)
+
+        cache = results.build(self.field, self.dates, today=today or self.NOVEMBER,
+                              log=lambda *_: None, fetch=fetch)
+        return cache, asked
+
+    def status(self, cache):
+        return cache["races"]["H-NY-13-2026"]["status"]
+
+    def test_the_seats_article_is_read_after_the_count(self):
+        cache, asked = self.read(self.table(True, "90,000", "20,000"))
+        self.assertEqual(self.status(cache), {"H6NY13A": "elected", "H6NY13B": "defeated"})
+        self.assertIn(self.ARTICLE, asked)
+        # The page a reader is sent to is the one the result came from.
+        self.assertEqual(cache["races"]["H-NY-13-2026"]["page"], self.ARTICLE)
+
+    def test_every_guard_stands_over_it(self):
+        cache, _ = self.read(self.table(True, "", ""))
+        self.assertEqual(self.status(cache), {"H6NY13A": "nominee", "H6NY13B": "nominee"})
+        self.assertIn("H-NY-13-2026", cache["refusedMarks"])
+        cache, _ = self.read(self.table(True, "90,000", "20,000", winner="Peter Griffin"))
+        self.assertIn("H-NY-13-2026", cache["refusedMarks"])
+        self.assertNotIn("H-NY-13-2026", cache["races"])
+
+    def test_before_the_count_nothing_more_is_read(self):
+        _cache, asked = self.read(self.table(True, "90,000", "20,000"),
+                                  today=datetime.date(2026, 11, 3))
+        self.assertNotIn(self.ARTICLE, asked)
+
+    def test_a_link_to_anything_else_is_never_followed(self):
+        for other in ("New York's 13th congressional district",
+                      "2026 New York's 14th congressional district election",
+                      "2024 New York's 13th congressional district election",
+                      "2026 New York's 13th congressional district special election"):
+            _cache, asked = self.read(self.table(True, "90,000", "20,000"), main=other)
+            self.assertEqual(asked.count(other), 0, other)
+            self.assertNotIn(self.ARTICLE, asked, other)
+
+    def test_a_redirect_to_the_states_page_is_not_that_seats_article(self):
+        whole = ("\n==District 13==\n" + self.table(True, "90,000", "20,000") + "\n==District 14==\n" +
+                 self.table(False, "1", "2"))
+        cache, _ = self.read(whole)
+        self.assertEqual(self.status(cache), {"H6NY13A": "nominee", "H6NY13B": "nominee"})
+
+    def test_an_article_with_no_table_for_the_seat_leaves_the_section(self):
+        cache, _ = self.read("An article with no table yet.")
+        self.assertEqual(self.status(cache), {"H6NY13A": "nominee", "H6NY13B": "nominee"})
+        self.assertEqual(cache["races"]["H-NY-13-2026"]["page"], self.PAGE)
+
+    def test_an_article_that_does_not_exist_leaves_the_section(self):
+        cache, _ = self.read(None)
+        self.assertEqual(self.status(cache), {"H6NY13A": "nominee", "H6NY13B": "nominee"})
+
+
 class TestAMarkNeedsAFilingAndACount(unittest.TestCase):
     """The read publishes without a person (rules 29, 63). On the night of
     2026-11-04 South Carolina's page named "Peter Griffin" for a minute, Iowa's
