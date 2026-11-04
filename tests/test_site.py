@@ -6,6 +6,7 @@ import contextlib
 import io
 import json
 import os
+import re
 import sys
 import tempfile
 import unittest
@@ -1549,6 +1550,31 @@ class TestRefreshWorkflow(unittest.TestCase):
         self.assertNotIn("if: inputs.portraits != false", self.text)
         self.assertIn("github.event_name != 'workflow_dispatch' || inputs.portraits",
                       self.text)
+
+    def test_a_results_only_run_reads_the_results_and_checks_them(self):
+        # Step by step: what such a run skips carries the condition, and what
+        # reads and checks the results, publishes them and reports a failure
+        # never does. On a schedule `inputs` is empty, so the condition is
+        # true and a scheduled run skips nothing.
+        steps = {}
+        for block in re.split(r"(?m)^(?=      - name: )", self.text)[1:]:
+            lines = block.split("\n\n", 1)[0]
+            steps[lines.splitlines()[0].split("- name: ", 1)[1]] = lines
+        for name in ("Refresh the membership snapshot and apply any drift",
+                     "Refresh the candidate field and primary results",
+                     "Fill gaps from candidates' articles and campaign sites",
+                     "Rebuild the site data",
+                     "Confirm the result is valid and self-consistent",
+                     "Open a pull request if anything changed",
+                     "Report the failure",
+                     "Close the failure issue after a good run"):
+            self.assertNotIn("results_only", steps[name], name)
+        skipped = [name for name, lines in steps.items() if "!inputs.results_only" in lines]
+        for name in ("Refresh campaign finance", "Refresh the state high courts",
+                     "Refresh each state's official voting pages",
+                     "Look again at local governments' listed websites"):
+            self.assertIn(name, skipped)
+        self.assertRegex(self.text, r"results_only:\n        description: .*\n        type: boolean\n        default: false")
 
     def test_a_failure_opens_an_issue(self):
         self.assertIn("issues: write", self.text)

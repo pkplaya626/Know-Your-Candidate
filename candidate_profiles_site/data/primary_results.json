@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-02",
+ "asOf": "2026-11-04",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -10,7 +10,7 @@
  "certified": {
   "AK": {
    "complete": true,
-   "fetched": "2026-11-02",
+   "fetched": "2026-11-04",
    "races": {
     "H-AK-00-2026": [
      {
@@ -77,7 +77,7 @@
   },
   "AS": {
    "complete": true,
-   "fetched": "2026-11-02",
+   "fetched": "2026-11-04",
    "races": {
     "H-AS-00-2026": [
      {
@@ -112,7 +112,7 @@
   },
   "CO": {
    "complete": true,
-   "fetched": "2026-11-02",
+   "fetched": "2026-11-04",
    "races": {
     "H-CO-01-2026": [
      {
@@ -373,7 +373,7 @@
   },
   "FL": {
    "complete": true,
-   "fetched": "2026-11-02",
+   "fetched": "2026-11-04",
    "races": {
     "H-FL-01-2026": [
      {
@@ -1595,7 +1595,7 @@
   },
   "TX": {
    "complete": true,
-   "fetched": "2026-11-02",
+   "fetched": "2026-11-04",
    "races": {
     "H-TX-01-2026": [
      {
@@ -2514,12 +2514,10 @@
  },
  "fetchFailed": [],
  "missingPages": [],
- "pending": [
-  "H-MP-00-2026"
- ],
+ "pending": [],
  "qualified": {
   "election": "11/03/2026",
-  "fetched": "2026-11-02",
+  "fetched": "2026-11-04",
   "races": [
    "H-LA-01-2026",
    "H-LA-02-2026",
@@ -2541,7 +2539,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Alaska Division of Elections, 2026 General Election candidate list",
     "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
    },
@@ -3115,10 +3113,13 @@
   "H-AS-00-2026": {
    "about": {},
    "ambiguous": [],
-   "article": {},
+   "article": {
+    "H4AS00036": "Amata Coleman Radewagen",
+    "H6AS01021": "Sandra King-Young"
+   },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "American Samoa Election Office, Candidates for the 2026 Midterm Election",
     "url": "https://www.aselectionoffice.gov/candidates-information/candidates-for-the-2026-midterm-election"
    },
@@ -3156,10 +3157,15 @@
     "H6AS01021": "Sandra King Young",
     "H8AS00052": "Fualaau Rosie Tago Lancaster"
    },
-   "page": null,
-   "party": {},
+   "page": "2026 United States House of Representatives election in American Samoa",
+   "party": {
+    "H4AS00036": "republican",
+    "H4AS00093": "independent",
+    "H6AS00064": "independent",
+    "H6AS01021": "democratic",
+    "H8AS00052": "independent"
+   },
    "site": {},
-   "source": "certified",
    "status": {
     "H4AS00036": "nominee",
     "H4AS00093": "nominee",
@@ -5960,7 +5966,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6042,7 +6048,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6102,7 +6108,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6172,7 +6178,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6241,7 +6247,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6319,7 +6325,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6392,7 +6398,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6464,7 +6470,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6878,7 +6884,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -6943,7 +6949,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7037,7 +7043,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7109,7 +7115,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7181,7 +7187,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7252,7 +7258,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7349,7 +7355,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7427,7 +7433,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7480,7 +7486,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7555,7 +7561,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7604,7 +7610,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7690,7 +7696,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7753,7 +7759,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7830,7 +7836,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7922,7 +7928,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7977,10 +7983,12 @@
     "H6FL16158": "former mayor of Sarasota"
    },
    "ambiguous": [],
-   "article": {},
+   "article": {
+    "H6FL16141": "Sydney Gruters"
+   },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8064,7 +8072,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8124,7 +8132,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8179,7 +8187,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8292,7 +8300,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8388,7 +8396,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8449,7 +8457,7 @@
    "article": {},
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8536,7 +8544,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8611,7 +8619,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8700,7 +8708,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8781,7 +8789,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8837,7 +8845,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8903,7 +8911,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -9668,9 +9676,9 @@
     "H6GU01032": "https://aliciaforcongress.com"
    },
    "status": {
-    "H2GU01031": "nominee",
+    "H2GU01031": "defeated",
     "H6GU00059": "eliminated",
-    "H6GU01032": "nominee"
+    "H6GU01032": "elected"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -11713,8 +11721,8 @@
    },
    "site": {},
    "status": {
-    "H6KY01110": "nominee",
-    "H6KY01169": "nominee",
+    "H6KY01110": "elected",
+    "H6KY01169": "defeated",
     "H6KY01177": "eliminated",
     "H6KY01185": "eliminated"
    },
@@ -11766,13 +11774,13 @@
    "site": {},
    "status": {
     "H2KY02125": "eliminated",
-    "H6KY02068": "nominee",
+    "H6KY02068": "defeated",
     "H6KY02076": "eliminated",
     "H6KY02092": "eliminated",
     "H6KY02100": "eliminated",
-    "H8KY02031": "nominee",
+    "H8KY02031": "elected",
     "H8KY02080": "eliminated",
-    "H8KY02106": "nominee"
+    "H8KY02106": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -11807,9 +11815,9 @@
    },
    "site": {},
    "status": {
-    "H2KY03206": "nominee",
+    "H2KY03206": "elected",
     "H4KY03269": "withdrawn",
-    "H6KY03223": "nominee",
+    "H6KY03223": "defeated",
     "H6KY03231": "eliminated"
    },
    "unmatched": {
@@ -11869,11 +11877,11 @@
     "H6KY04130": "withdrawn",
     "H6KY04148": "eliminated",
     "H6KY04155": "withdrawn",
-    "H6KY04171": "nominee",
-    "H6KY04189": "nominee",
+    "H6KY04171": "elected",
+    "H6KY04189": "defeated",
     "H6KY04197": "withdrawn",
-    "H6KY04205": "nominee",
-    "H6KY04213": "nominee"
+    "H6KY04205": "defeated",
+    "H6KY04213": "defeated"
    },
    "unmatched": {
     "Dennis Jackson": "withdrawn",
@@ -11916,11 +11924,11 @@
    },
    "site": {},
    "status": {
-    "H0KY05015": "nominee",
-    "H2KY05185": "nominee",
-    "H6KY05152": "nominee",
+    "H0KY05015": "elected",
+    "H2KY05185": "defeated",
+    "H6KY05152": "defeated",
     "H6KY05194": "eliminated",
-    "H6KY05202": "nominee"
+    "H6KY05202": "defeated"
    },
    "unmatched": {
     "Benjamin Hurley": "eliminated",
@@ -11945,6 +11953,7 @@
     "H6KY06143": "Ryan Dotson",
     "H6KY06150": "Cherlynn Stevenson",
     "H6KY06176": "Deanna Frazier Gordon",
+    "H6KY06184": "Zach Dembo",
     "H6KY06192": "Ralph Alvarado"
    },
    "decided": {
@@ -11995,18 +12004,18 @@
     "H6KY06150": "eliminated",
     "H6KY06168": "eliminated",
     "H6KY06176": "withdrawn",
-    "H6KY06184": "nominee",
-    "H6KY06192": "nominee",
+    "H6KY06184": "elected",
+    "H6KY06192": "defeated",
     "H6KY06218": "eliminated",
     "H6KY06226": "eliminated",
-    "H6KY06242": "nominee",
+    "H6KY06242": "defeated",
     "H6KY06259": "eliminated",
     "H6KY06267": "eliminated",
     "H6KY06275": "eliminated"
    },
    "unmatched": {
     "Harvey Carroll Jr.": "eliminated",
-    "Jay J. Bowman": "nominee",
+    "Jay J. Bowman": "defeated",
     "Jimmy Clifton Ausbrooks": "eliminated"
    },
    "unmatchedParty": {
@@ -13850,7 +13859,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H2MN01223": "Brad Finstad"
+    "H2MN01223": "Brad Finstad",
+    "H6MN01190": "Jake Johnson (Minnesota politician)"
    },
    "decided": {
     "general": false,
@@ -14681,13 +14691,45 @@
     "H6MO08217": "eliminated"
    },
    "unmatched": {
-    "Christopher Riechard": "nominee",
     "Rebecca Sharpe Lombard": "nominee"
    },
    "unmatchedParty": {
-    "Christopher Riechard": "Democratic",
     "Rebecca Sharpe Lombard": "Libertarian"
    },
+   "unsure": []
+  },
+  "H-MP-00-2026": {
+   "about": {
+    "H4MP01022": "incumbent U.S. delegate (2025–present)",
+    "H6MP01027": "president of Northern Marianas College and nephew of former delegate Gregorio Sablan"
+   },
+   "ambiguous": [],
+   "article": {
+    "H4MP01022": "Kimberlyn King-Hinds"
+   },
+   "decided": {
+    "general": true,
+    "parties": []
+   },
+   "label": {},
+   "names": {
+    "H4MP01022": "Kimberlyn King-Hinds",
+    "H6MP01027": "Galvin Deleon Guerrero"
+   },
+   "page": "2026 United States House of Representatives election in Northern Mariana Islands",
+   "party": {
+    "H4MP01022": "republican",
+    "H6MP01027": "independent"
+   },
+   "site": {
+    "H6MP01027": "https://galvinforcongress.com/"
+   },
+   "status": {
+    "H4MP01022": "nominee",
+    "H6MP01027": "nominee"
+   },
+   "unmatched": {},
+   "unmatchedParty": {},
    "unsure": []
   },
   "H-MS-01-2026": {
@@ -15402,7 +15444,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H2NC13243": "Pat Harrigan"
+    "H2NC13243": "Pat Harrigan",
+    "H6NC10174": "Ashley Bell (North Carolina politician)"
    },
    "decided": {
     "general": true,
@@ -15573,7 +15616,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H4NC13116": "Brad Knott"
+    "H4NC13116": "Brad Knott",
+    "H6NC13228": "Paul Barringer (attorney)"
    },
    "decided": {
     "general": true,
@@ -15615,12 +15659,12 @@
   },
   "H-NC-14-2026": {
    "about": {
-    "H4NC14015": "incumbent U.S. representative",
-    "H6NC14069": "business consultant"
+    "H4NC14015": "incumbent U.S. representative"
    },
    "ambiguous": [],
    "article": {
-    "H4NC14015": "Tim Moore (North Carolina politician)"
+    "H4NC14015": "Tim Moore (North Carolina politician)",
+    "H6NC14069": "Lakesha Womack"
    },
    "decided": {
     "general": true,
@@ -15936,6 +15980,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6NH01321": "Stefany Shaheen",
     "H6NH01370": "Heath Howard",
     "H6NH01388": "Brian Cole (politician)",
     "H8NH01186": "Maura Sullivan"
@@ -16351,6 +16396,7 @@
    "ambiguous": [],
    "article": {
     "H0NJ07261": "Thomas Kean Jr.",
+    "H6NJ07201": "Rebecca Bennett (politician)",
     "H6NJ07300": "Randall Terry"
    },
    "decided": {
@@ -18208,6 +18254,7 @@
    "names": {
     "H6NY25182": "Sherita Traywick",
     "H6NY25208": "Virginia McIntyre",
+    "H6NY25216": "Kloud Walton",
     "H8NY25105": "Joseph Morelle",
     "H8NY25113": "Robin Wilt"
    },
@@ -18222,12 +18269,11 @@
    "status": {
     "H6NY25182": "eliminated",
     "H6NY25208": "nominee",
+    "H6NY25216": "withdrawn",
     "H8NY25105": "nominee",
     "H8NY25113": "eliminated"
    },
-   "unmatched": {
-    "Daelin Walton": "withdrawn"
-   },
+   "unmatched": {},
    "unmatchedParty": {},
    "unsure": []
   },
@@ -18565,7 +18611,8 @@
    "ambiguous": [],
    "article": {
     "H2OH16051": "Max Miller (politician)",
-    "H6OH07143": "Ed FitzGerald"
+    "H6OH07143": "Ed FitzGerald",
+    "H6OH07168": "Brian Poindexter"
    },
    "decided": {
     "general": true,
@@ -19064,9 +19111,9 @@
    "status": {
     "H001082": "withdrawn",
     "H4OK01123": "eliminated",
-    "H6OK01201": "nominee",
+    "H6OK01201": "defeated",
     "H6OK01227": "withdrawn",
-    "H6OK01235": "nominee",
+    "H6OK01235": "elected",
     "H6OK01243": "eliminated",
     "H6OK01250": "eliminated",
     "H6OK01268": "withdrawn",
@@ -19122,9 +19169,9 @@
    },
    "site": {},
    "status": {
-    "H2OK02315": "nominee",
-    "H4OK02196": "nominee",
-    "H4OK02204": "nominee",
+    "H2OK02315": "elected",
+    "H4OK02196": "defeated",
+    "H4OK02204": "defeated",
     "H6OK02266": "eliminated",
     "H6OK02274": "eliminated"
    },
@@ -19258,10 +19305,10 @@
     "H6OK05301": "https://projectduecourse.org/"
    },
    "status": {
-    "H0OK05205": "nominee",
-    "H4OK04176": "nominee",
-    "H6OK05293": "nominee",
-    "H6OK05301": "nominee",
+    "H0OK05205": "elected",
+    "H4OK04176": "defeated",
+    "H6OK05293": "defeated",
+    "H6OK05301": "defeated",
     "H6OK05319": "eliminated"
    },
    "unmatched": {},
@@ -19784,6 +19831,7 @@
    "ambiguous": [],
    "article": {
     "H6PA07162": "Ryan Crosswell",
+    "H6PA07188": "Bob Brooks (Pennsylvania politician)",
     "H8PA15195": "Ryan Mackenzie"
    },
    "decided": {
@@ -20785,7 +20833,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H0TN04195": "Scott DesJarlais"
+    "H0TN04195": "Scott DesJarlais",
+    "H4TN04270": "Victoria Broderick"
    },
    "decided": {
     "general": false,
@@ -21110,7 +21159,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21177,7 +21226,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21241,7 +21290,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21297,7 +21346,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21354,7 +21403,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21413,7 +21462,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21471,7 +21520,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21534,7 +21583,7 @@
    "article": {},
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21605,7 +21654,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21698,7 +21747,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21793,7 +21842,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21847,7 +21896,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21901,7 +21950,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21955,7 +22004,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22019,7 +22068,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22073,7 +22122,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22142,7 +22191,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22203,7 +22252,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22266,7 +22315,7 @@
    "article": {},
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22339,7 +22388,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22396,7 +22445,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22486,7 +22535,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22555,7 +22604,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22634,7 +22683,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22692,7 +22741,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22746,7 +22795,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22810,7 +22859,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22877,7 +22926,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22948,7 +22997,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23007,7 +23056,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23079,7 +23128,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23167,7 +23216,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23252,7 +23301,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23324,7 +23373,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23401,16 +23450,16 @@
   },
   "H-TX-35-2026": {
    "about": {
-    "H6TX35087": "gym owner and brother of U.S. representative Monica De La Cruz",
-    "H6TX35095": "Bexar County sheriff's deputy"
+    "H6TX35087": "gym owner and brother of U.S. representative Monica De La Cruz"
    },
    "ambiguous": [],
    "article": {
-    "H6TX35053": "John Lujan"
+    "H6TX35053": "John Lujan",
+    "H6TX35095": "Johnny C. Garcia"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23500,7 +23549,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23558,7 +23607,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23622,7 +23671,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -25552,7 +25601,6 @@
     "H6WY00225": "Jillian Balow",
     "H6WY00233": "David Giralt",
     "H6WY00241": "Bo Biteman",
-    "H6WY01108": "Daniel Workman",
     "H6WY01116": "Reid Rasner",
     "H6WY01140": "Kevin Christensen",
     "H6WY01157": "Frank Chapman",
@@ -25568,7 +25616,6 @@
     "H6WY00225": "republican",
     "H6WY00233": "republican",
     "H6WY00241": "republican",
-    "H6WY01108": "independent",
     "H6WY01116": "republican",
     "H6WY01140": "republican",
     "H6WY01165": "republican",
@@ -25585,7 +25632,6 @@
     "H6WY00225": "eliminated",
     "H6WY00233": "eliminated",
     "H6WY00241": "eliminated",
-    "H6WY01108": "nominee",
     "H6WY01116": "eliminated",
     "H6WY01140": "eliminated",
     "H6WY01157": "withdrawn",
@@ -25617,7 +25663,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Alaska Division of Elections, 2026 General Election candidate list",
     "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
    },
@@ -25856,7 +25902,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -26022,7 +26068,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -26298,15 +26344,15 @@
     "S8ID00092": "https://senatorrisch.com/"
    },
    "status": {
-    "S0ID00172": "nominee",
+    "S0ID00172": "defeated",
     "S6ID00120": "eliminated",
     "S6ID00138": "withdrawn",
-    "S6ID00146": "nominee",
+    "S6ID00146": "defeated",
     "S6ID00153": "eliminated",
     "S6ID00161": "eliminated",
     "S6ID00179": "eliminated",
-    "S6ID00187": "nominee",
-    "S8ID00092": "nominee"
+    "S6ID00187": "defeated",
+    "S8ID00092": "elected"
    },
    "unmatched": {
     "Brad Moore": "eliminated"
@@ -26551,15 +26597,15 @@
     "S0KY00339": "eliminated",
     "S6KY00211": "eliminated",
     "S6KY00237": "eliminated",
-    "S6KY00286": "nominee",
+    "S6KY00286": "elected",
     "S6KY00294": "eliminated",
     "S6KY00302": "withdrawn",
     "S6KY00310": "eliminated",
     "S6KY00328": "eliminated",
     "S6KY00336": "withdrawn",
     "S6KY00369": "eliminated",
-    "S6KY00377": "nominee",
-    "S6KY00385": "nominee",
+    "S6KY00377": "defeated",
+    "S6KY00385": "defeated",
     "S6KY00393": "eliminated",
     "S6KY00401": "eliminated",
     "S6KY00419": "eliminated"
@@ -26596,7 +26642,7 @@
     "S6LA00318": "John Fleming (Louisiana politician)",
     "S6LA00540": "Blake Miguez",
     "S6LA00581": "Julie Emerson",
-    "S6LA00615": "Jamie Davis (Lousiana)",
+    "S6LA00615": "Jamie Davis (Louisiana)",
     "S6LA00664": "Julia Letlow",
     "S6LA00672": "Eric Skrmetta"
    },
@@ -27095,11 +27141,11 @@
     "S4MT00217": "eliminated",
     "S6MT00238": "eliminated",
     "S6MT00246": "eliminated",
-    "S6MT00253": "nominee",
-    "S6MT00261": "nominee",
+    "S6MT00253": "defeated",
+    "S6MT00261": "defeated",
     "S6MT00279": "withdrawn",
-    "S6MT00287": "nominee",
-    "S6MT00295": "nominee",
+    "S6MT00287": "defeated",
+    "S6MT00295": "elected",
     "S6MT00303": "eliminated",
     "S6MT00311": "eliminated",
     "S6MT00329": "eliminated"
@@ -27176,13 +27222,13 @@
     "S6NC00563": "https://www.dublinforcongress.com/"
    },
    "status": {
-    "S0NC00335": "nominee",
+    "S0NC00335": "defeated",
     "S2NC00745": "eliminated",
     "S6NC00340": "withdrawn",
     "S6NC00365": "withdrawn",
     "S6NC00373": "eliminated",
-    "S6NC00407": "nominee",
-    "S6NC00415": "nominee",
+    "S6NC00407": "elected",
+    "S6NC00415": "defeated",
     "S6NC00423": "eliminated",
     "S6NC00449": "eliminated",
     "S6NC00456": "eliminated",
@@ -27192,7 +27238,7 @@
     "S6NC00522": "eliminated",
     "S6NC00530": "eliminated",
     "S6NC00548": "eliminated",
-    "S6NC00563": "nominee",
+    "S6NC00563": "defeated",
     "S8NC00270": "eliminated",
     "T000476": "withdrawn"
    },
@@ -27620,22 +27666,22 @@
    "status": {
     "S0OK00420": "eliminated",
     "S2OK00186": "withdrawn",
-    "S6OK04163": "nominee",
+    "S6OK04163": "defeated",
     "S6OK04171": "eliminated",
     "S6OK04197": "eliminated",
-    "S6OK04205": "nominee",
+    "S6OK04205": "defeated",
     "S6OK04213": "eliminated",
     "S6OK04221": "withdrawn",
     "S6OK04239": "eliminated",
-    "S6OK04247": "nominee",
+    "S6OK04247": "elected",
     "S6OK04254": "eliminated",
     "S6OK04262": "eliminated",
     "S6OK04270": "eliminated",
     "S6OK04288": "eliminated"
    },
    "unmatched": {
-    "Curtis Stinnett": "nominee",
-    "Sevier White": "nominee",
+    "Curtis Stinnett": "defeated",
+    "Sevier White": "defeated",
     "Tammy Swearengin": "withdrawn"
    },
    "unmatchedParty": {
@@ -27842,8 +27888,8 @@
     "S6SC04189": "withdrawn",
     "S6SC04197": "eliminated",
     "S6SC04213": "eliminated",
-    "S6SC04239": "nominee",
-    "S6SC04247": "nominee",
+    "S6SC04239": "elected",
+    "S6SC04247": "defeated",
     "S6SC04262": "withdrawn",
     "S6SC04270": "eliminated",
     "S6SC04288": "withdrawn",
@@ -27855,13 +27901,13 @@
     "S6SC04387": "eliminated",
     "S6SC04395": "eliminated",
     "S6SC04403": "eliminated",
-    "S6SC04437": "nominee",
+    "S6SC04437": "defeated",
     "S6SC04445": "eliminated",
     "S6SC04460": "eliminated"
    },
    "unmatched": {
     "Danny Ford II": "eliminated",
-    "Mark Hackett": "nominee",
+    "Mark Hackett": "defeated",
     "Mark Sanford": "eliminated",
     "Samuel Shepherd": "eliminated"
    },
@@ -28018,7 +28064,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-02",
+    "fetched": "2026-11-04",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },

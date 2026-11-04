@@ -107,7 +107,7 @@ def december(label, root=REPO):
 
 NEW_TERM = "2027-01-03"
 HOUSE_END, SENATE_END, SPECIAL_END = "2029-01-03", "2033-01-03", "2029-01-03"
-WINS = ("nominee", "advanced", "qualified")
+WINS = ("elected", "nominee", "advanced", "qualified")
 
 
 def january(root=REPO):
@@ -134,19 +134,26 @@ def january(root=REPO):
         if rid and row["candidate_id"] not in member_fec and row.get("incumbent_challenge") != "I":
             filers.setdefault(rid, []).append(row)
     for rid, rows in filers.items():
-        # A nominee first: only someone on the November ballot can have won.
-        rows.sort(key=lambda r: (status_of.get((rid, r["candidate_id"])) not in WINS,
+        # Whoever the results elected, then a nominee: only someone on the
+        # November ballot can have won. Before "elected" was among these, the
+        # first refresh to carry a result (2026-11-04) seated Kentucky's
+        # best-funded filer, who had withdrawn, in the seat Andy Barr won.
+        rows.sort(key=lambda r: (status_of.get((rid, r["candidate_id"])) != "elected",
+                                 status_of.get((rid, r["candidate_id"])) not in WINS,
                                  -(r.get("receipts") or 0), r["candidate_id"]))
 
     held = {rid: (inc or {}).get("bioguide") for rid, inc in record["incumbents"].items()}
     holder, log = {}, []
 
-    def nominee(p, rid):
+    def statuses(p, rid):
         ids = set(people.get(p["id"], {}).get("fecAll") or [])
         other = next((q for q in profiles if q["id"] == p.get("alsoRunningId")), None)
         if other:
             ids |= {other.get("fecCandidateId"), other.get("rosterFecId")}
-        return any(status_of.get((rid, i)) in WINS for i in ids if i)
+        return {status_of.get((rid, i)) for i in ids if i}
+
+    def nominee(p, rid):
+        return bool(statuses(p, rid) & set(WINS))
 
     # 1. A member running for another record seat whose incumbent is not
     #    running for it again, and who is that race's nominee, takes it.
@@ -154,14 +161,17 @@ def january(root=REPO):
                      and p["contestRaceId"] != p.get("raceId")), key=lambda p: p["id"]):
         rid = p["contestRaceId"]
         inc = members.get(held.get(rid) or "")
-        if rid in holder or (inc and inc.get("seekingReelection2026")) or not nominee(p, rid):
+        won = "elected" in statuses(p, rid)
+        if rid in holder or (inc and inc.get("seekingReelection2026") and not won) \
+                or not nominee(p, rid):
             continue
         holder[rid] = ("mover", p["id"])
     # 2. An incumbent running again for their own seat keeps it.
     taken = {v[1] for v in holder.values()}
     for rid, bid in held.items():
         if rid not in holder and bid in members and bid not in taken \
-                and members[bid].get("seekingReelection2026"):
+                and members[bid].get("seekingReelection2026") \
+                and "defeated" not in statuses(members[bid], rid):
             holder[rid] = ("incumbent", bid)
     # The specials: while they are open, Florida's appointee is re-seated and
     # Ohio's replaced. Once their winners are seated (December, in the data

@@ -2677,9 +2677,31 @@ class TestPeopleDataAudit(unittest.TestCase):
                                                  "twitter_id": "1"}, "M001219"))
 
     def test_the_link_corrections_match_the_snapshot(self):
-        from kyc import legislators
-        snapshot = legislators.load_snapshot(ROOT)
-        self.assertEqual(validate.check_member_link_overrides(snapshot), [])
+        from kyc import overrides
+        # The state is made from the tables themselves: whether a member still
+        # holds the value their entry corrects is the day's record, and a
+        # member who has left (James Moylan, in the January rehearsal on
+        # 2026-11-04; about a hundred on January 3) makes an entry stale, a
+        # warning for a person and never a failure of the refresh that read it.
+        made = {}
+
+        def person(bioguide):
+            return made.setdefault(bioguide, {"bioguide": bioguide, "social": {}})
+
+        for bioguide, entry in overrides.MEMBER_CONTACT_FORMS.items():
+            person(bioguide)["contactForm"] = entry[0]
+        for table in (overrides.YOUTUBE_LEGACY_NAMES, overrides.YOUTUBE_HANDLE_CORRECTIONS):
+            for bioguide, entry in table.items():
+                person(bioguide)["social"]["youtube"] = entry[0]
+        for bioguide, entry in overrides.DEAD_X_HANDLES.items():
+            person(bioguide)["social"]["twitter"] = entry[0]
+        issues = validate.check_member_link_overrides({"legislators": list(made.values())})
+        self.assertNotIn("stale-link-override", [i.code for i in issues])
+        left = dict(made)
+        left.pop(next(iter(overrides.DEAD_X_HANDLES)))
+        self.assertIn("stale-link-override",
+                      [i.code for i in validate.check_member_link_overrides(
+                          {"legislators": list(left.values())})])
         moved = {"legislators": [{"bioguide": "M001219", "social": {"twitter": "NewHandle"}}]}
         codes = [i.code for i in validate.check_member_link_overrides(moved)]
         self.assertIn("stale-link-override", codes)
