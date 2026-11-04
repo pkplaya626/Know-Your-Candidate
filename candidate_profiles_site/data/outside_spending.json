@@ -1,5 +1,5 @@
 {
- "asked": 2623,
+ "asked": 2629,
  "candidates": {
   "H0AL01055": {
    "oppose": [],
@@ -87,6 +87,12 @@
      "committeeId": "C00854299",
      "count": 5,
      "total": 610970.5
+    },
+    {
+     "committee": "SAFER ALAMEDA COUNTY PAC",
+     "committeeId": "C00956144",
+     "count": 10,
+     "total": 375201.33
     },
     {
      "committee": "SD 2026",
@@ -231,6 +237,12 @@
      "committeeId": "C00495028",
      "count": 3,
      "total": 93331.9
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 470.81
     }
    ],
    "support": [
@@ -464,6 +476,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 103.36
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 1,
@@ -541,6 +559,12 @@
      "committeeId": "C00745745",
      "count": 1,
      "total": 12945.3
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 299.74
     }
    ],
    "support": [
@@ -633,6 +657,12 @@
      "committeeId": "C00492140",
      "count": 13,
      "total": 326560.3
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 299.6
     }
    ],
    "support": []
@@ -662,6 +692,12 @@
      "committeeId": "C90017492",
      "count": 1,
      "total": 1000.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 242.14
     }
    ],
    "support": []
@@ -679,6 +715,12 @@
   },
   "H0NY02267": {
    "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 275.29
+    },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
@@ -835,6 +877,12 @@
      "committeeId": "C00492140",
      "count": 5,
      "total": 215000.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 235.55
     }
    ],
    "support": []
@@ -1003,6 +1051,12 @@
      "total": 35723.68
     },
     {
+     "committee": "TOMORROW TOGETHER",
+     "committeeId": "C00958603",
+     "count": 1,
+     "total": 10625.0
+    },
+    {
      "committee": "DEMOCRATIC PARTY OF WISCONSIN FEDERAL",
      "committeeId": "C00019331",
      "count": 1,
@@ -1025,6 +1079,12 @@
      "committeeId": "C00909994",
      "count": 1,
      "total": 695.93
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 312.34
     }
    ],
    "support": [
@@ -1061,6 +1121,12 @@
   },
   "H2AK01083": {
    "oppose": [
+    {
+     "committee": "WHEEL DOG PAC",
+     "committeeId": "C00944389",
+     "count": 18,
+     "total": 905683.26
+    },
     {
      "committee": "HMP",
      "committeeId": "C00495028",
@@ -1145,6 +1211,12 @@
      "total": 46000.0
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 416.85
+    },
+    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
      "count": 5,
@@ -1199,6 +1271,12 @@
      "total": 552500.0
     },
     {
+     "committee": "TOMORROW TOGETHER",
+     "committeeId": "C00958603",
+     "count": 1,
+     "total": 10625.0
+    },
+    {
      "committee": "YOUTH SAVE DEMOCRACY PAC",
      "committeeId": "C00832493",
      "count": 1,
@@ -1215,6 +1293,12 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 1412.43
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 302.25
     },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
@@ -1330,6 +1414,12 @@
      "committeeId": "C00640300",
      "count": 2,
      "total": 345.83
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 78.03
     }
    ]
   },
@@ -1387,6 +1477,12 @@
      "committeeId": "C00640300",
      "count": 19,
      "total": 6681.15
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 124.01
     },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
@@ -1684,6 +1780,12 @@
      "total": 151713.45
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 198.16
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -1719,6 +1821,17 @@
    ],
    "support": []
   },
+  "H2FL21132": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 367.91
+    }
+   ],
+   "support": []
+  },
   "H2FL22171": {
    "oppose": [
     {
@@ -1746,6 +1859,12 @@
      "committeeId": "C00580068",
      "count": 1,
      "total": 23075.88
+    },
+    {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 1,
+     "total": 52.55
     }
    ]
   },
@@ -1801,6 +1920,18 @@
      "total": 1252.78
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 7,
+     "total": 992.93
+    },
+    {
+     "committee": "VOTERS OF TOMORROW PAC",
+     "committeeId": "C00833103",
+     "count": 1,
+     "total": 735.75
+    },
+    {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
      "count": 1,
@@ -1811,6 +1942,12 @@
      "committeeId": "C00802389",
      "count": 12,
      "total": 250.61
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 201.76
     }
    ]
   },
@@ -1833,6 +1970,12 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 2393.74
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 372.39
     }
    ],
    "support": [
@@ -2045,6 +2188,12 @@
      "total": 25311.56
     },
     {
+     "committee": "TOMORROW TOGETHER",
+     "committeeId": "C00958603",
+     "count": 1,
+     "total": 10625.0
+    },
+    {
      "committee": "YOUTH SAVE DEMOCRACY PAC",
      "committeeId": "C00832493",
      "count": 1,
@@ -2055,6 +2204,12 @@
      "committeeId": "C00909994",
      "count": 2,
      "total": 1412.32
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 412.59
     }
    ],
    "support": [
@@ -2127,6 +2282,12 @@
      "committeeId": "C00025254",
      "count": 1,
      "total": 806.7
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 381.14
     }
    ],
    "support": [
@@ -2235,6 +2396,12 @@
      "committeeId": "C00495028",
      "count": 2,
      "total": 97850.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 187.19
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -2463,6 +2630,12 @@
      "committeeId": "C00802389",
      "count": 10,
      "total": 363.34
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 153.47
     }
    ]
   },
@@ -2474,6 +2647,12 @@
      "committeeId": "C00285593",
      "count": 1,
      "total": 6062.99
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 226.23
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -2503,6 +2682,12 @@
      "committeeId": "C00909994",
      "count": 5,
      "total": 1352.54
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 156.44
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -2559,8 +2744,8 @@
     {
      "committee": "JDCA PAC",
      "committeeId": "C00684969",
-     "count": 1,
-     "total": 1995.49
+     "count": 2,
+     "total": 9995.49
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -2685,6 +2870,12 @@
      "committeeId": "C00489799",
      "count": 7,
      "total": 341.19
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 284.99
     }
    ],
    "support": [
@@ -2725,12 +2916,35 @@
      "total": 253.45
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 142.51
+    },
+    {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 1,
+     "total": 98.7
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
      "total": 10.0
     }
    ]
+  },
+  "H2OH03067": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 266.45
+    }
+   ],
+   "support": []
   },
   "H2OH03125": {
    "oppose": [],
@@ -2802,10 +3016,22 @@
      "total": 267.89
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 183.03
+    },
+    {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 2,
      "total": 112.5
+    },
+    {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 2,
+     "total": 46.57
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -2834,6 +3060,12 @@
      "committeeId": "C00802389",
      "count": 13,
      "total": 333.75
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 162.93
     }
    ]
   },
@@ -2855,12 +3087,24 @@
      "committeeId": "C00495028",
      "count": 4,
      "total": 173469.89
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 265.6
     }
    ],
    "support": []
   },
   "H2OH16051": {
    "oppose": [
+    {
+     "committee": "READY FOR THE FIGHT",
+     "committeeId": "C00960997",
+     "count": 3,
+     "total": 1467252.07
+    },
     {
      "committee": "AB PAC",
      "committeeId": "C00492140",
@@ -2878,6 +3122,12 @@
      "committeeId": "C00954040",
      "count": 1,
      "total": 1091.8
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 296.85
     }
    ],
    "support": []
@@ -2976,6 +3226,12 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 1144.97
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 432.36
     },
     {
      "committee": "INDIGO PAC",
@@ -3243,6 +3499,12 @@
      "committeeId": "C00909994",
      "count": 2,
      "total": 182.27
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 81.56
     }
    ]
   },
@@ -3318,6 +3580,12 @@
      "total": 1750.0
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 340.34
+    },
+    {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
      "count": 1,
@@ -3388,6 +3656,12 @@
      "committeeId": "C00909994",
      "count": 6,
      "total": 1563.15
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 184.95
     }
    ]
   },
@@ -3524,6 +3798,12 @@
      "total": 1793.8
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 102.13
+    },
+    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 1,
@@ -3590,10 +3870,22 @@
      "total": 967.69
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 223.2
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 4,
      "total": 121.87
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 53.5
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -3667,7 +3959,14 @@
    "support": []
   },
   "H4CA09093": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 147.68
+    }
+   ],
    "support": [
     {
      "committee": "CLF",
@@ -3773,7 +4072,14 @@
      "total": 4551.51
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 84.06
+    }
+   ]
   },
   "H4CA23011": {
    "oppose": [],
@@ -3931,6 +4237,12 @@
      "total": 317.27
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 77.89
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -4070,6 +4382,12 @@
      "committeeId": "C00909465",
      "count": 4,
      "total": 858.04
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 339.68
     },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
@@ -4254,6 +4572,12 @@
      "committeeId": "C00343459",
      "count": 3,
      "total": 89199.7
+    },
+    {
+     "committee": "BLUE FLORIDA MAJORITY",
+     "committeeId": "C00955856",
+     "count": 1,
+     "total": 84648.64
     }
    ]
   },
@@ -4444,6 +4768,12 @@
      "committeeId": "C00802389",
      "count": 8,
      "total": 393.33
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 202.54
     }
    ]
   },
@@ -4540,6 +4870,12 @@
      "committeeId": "C00935767",
      "count": 10,
      "total": 42116.29
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 348.29
     }
    ],
    "support": [
@@ -4649,6 +4985,12 @@
      "committeeId": "C00802389",
      "count": 8,
      "total": 236.01
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 77.99
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -4798,6 +5140,12 @@
      "committeeId": "C00604496",
      "count": 1,
      "total": 4500.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 342.6
     }
    ],
    "support": [
@@ -4824,6 +5172,12 @@
   "H4OR05304": {
    "oppose": [],
    "support": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 177.09
+    },
     {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
@@ -4859,6 +5213,12 @@
      "total": 250000.0
     },
     {
+     "committee": "TOMORROW TOGETHER",
+     "committeeId": "C00958603",
+     "count": 1,
+     "total": 10625.0
+    },
+    {
      "committee": "RURAL FREEDOM NETWORK",
      "committeeId": "C00647966",
      "count": 3,
@@ -4869,6 +5229,12 @@
      "committeeId": "C00640300",
      "count": 3,
      "total": 1539.87
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 246.91
     }
    ],
    "support": []
@@ -4966,6 +5332,12 @@
      "committeeId": "C00802389",
      "count": 10,
      "total": 232.05
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 228.91
     },
     {
      "committee": "API PA VOTES",
@@ -5230,6 +5602,12 @@
      "committeeId": "C00685693",
      "count": 1,
      "total": 287.35
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 158.45
     }
    ]
   },
@@ -5294,6 +5672,12 @@
      "total": 13236.29
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 165.89
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 8,
@@ -5354,8 +5738,8 @@
     {
      "committee": "WHEEL DOG PAC",
      "committeeId": "C00944389",
-     "count": 33,
-     "total": 2186255.64
+     "count": 69,
+     "total": 3648901.34
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -5427,6 +5811,17 @@
    ],
    "support": []
   },
+  "H6AZ04250": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00453704",
+     "count": 1,
+     "total": 815.85
+    }
+   ]
+  },
   "H6AZ05083": {
    "oppose": [],
    "support": [
@@ -5451,6 +5846,12 @@
      "committeeId": "C00495028",
      "count": 2,
      "total": 794162.5
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 223.5
     }
    ],
    "support": [
@@ -5538,6 +5939,12 @@
      "total": 2184.77
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 6,
+     "total": 519.2
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 17,
@@ -5548,6 +5955,12 @@
      "committeeId": "C90017492",
      "count": 1,
      "total": 172.42
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 160.55
     }
    ]
   },
@@ -5934,7 +6347,14 @@
    ]
   },
   "H6CA13199": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 155.69
+    }
+   ],
    "support": [
     {
      "committee": "REFORM LEADERS PAC",
@@ -5985,10 +6405,22 @@
      "total": 373773.02
     },
     {
+     "committee": "ALAMEDA COME TOGETHER PAC",
+     "committeeId": "C00956581",
+     "count": 7,
+     "total": 313596.9
+    },
+    {
      "committee": "PRO-CHOICE MAJORITY ACTION",
      "committeeId": "C00949248",
      "count": 1,
      "total": 200000.0
+    },
+    {
+     "committee": "SAFER ALAMEDA COUNTY PAC",
+     "committeeId": "C00956144",
+     "count": 5,
+     "total": 95687.01
     },
     {
      "committee": "FOR OUR VALUES PAC",
@@ -6173,6 +6605,12 @@
      "total": 16743.5
     },
     {
+     "committee": "MIJENTE PAC",
+     "committeeId": "C00738039",
+     "count": 1,
+     "total": 15471.48
+    },
+    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 3,
@@ -6224,7 +6662,7 @@
      "committee": "GRAYPAC",
      "committeeId": "C00877845",
      "count": 1,
-     "total": 450.0
+     "total": 406.69
     },
     {
      "committee": "FOOD AND WATER ACTION",
@@ -6233,10 +6671,22 @@
      "total": 333.0
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 4,
+     "total": 242.85
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 7,
      "total": 118.06
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 67.46
     }
    ]
   },
@@ -6546,6 +6996,17 @@
     }
    ]
   },
+  "H6CA45191": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 149.69
+    }
+   ],
+   "support": []
+  },
   "H6CA46116": {
    "oppose": [],
    "support": [
@@ -6657,6 +7118,12 @@
      "total": 192.83
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 117.01
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 2,
@@ -6683,6 +7150,12 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 305.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 218.76
     }
    ],
    "support": [
@@ -6866,6 +7339,12 @@
      "committeeId": "C00495028",
      "count": 3,
      "total": 232472.04
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 375.76
     }
    ],
    "support": [
@@ -6887,10 +7366,22 @@
      "total": 725.69
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 199.24
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 3,
      "total": 77.35
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 31.65
     }
    ]
   },
@@ -6981,6 +7472,18 @@
      "committeeId": "C00909994",
      "count": 4,
      "total": 913.89
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 182.55
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 31.65
     }
    ]
   },
@@ -7264,8 +7767,8 @@
     {
      "committee": "ANTI-ZIONIST AMERICA PAC",
      "committeeId": "C00916379",
-     "count": 1,
-     "total": 10050.01
+     "count": 2,
+     "total": 15440.01
     },
     {
      "committee": "TURN LEFT PAC",
@@ -7385,6 +7888,17 @@
     }
    ]
   },
+  "H6FL06399": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 646.0
+    }
+   ]
+  },
   "H6FL06415": {
    "oppose": [
     {
@@ -7394,7 +7908,14 @@
      "total": 286066.0
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "TAB AMERICA FIRST",
+     "committeeId": "C00956623",
+     "count": 2,
+     "total": 18019.84
+    }
+   ]
   },
   "H6FL07215": {
    "oppose": [],
@@ -7410,8 +7931,25 @@
      "committeeId": "C00909994",
      "count": 7,
      "total": 1386.34
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 226.69
     }
    ]
+  },
+  "H6FL07231": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 428.74
+    }
+   ],
+   "support": []
   },
   "H6FL09070": {
    "oppose": [],
@@ -7519,6 +8057,12 @@
   "H6FL13312": {
    "oppose": [
     {
+     "committee": "WIN IT BACK PAC",
+     "committeeId": "C00844613",
+     "count": 7,
+     "total": 526535.79
+    },
+    {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
      "count": 1,
@@ -7543,6 +8087,12 @@
      "committeeId": "C00909994",
      "count": 8,
      "total": 1350.96
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 254.26
     }
    ]
   },
@@ -7599,7 +8149,14 @@
    ]
   },
   "H6FL18097": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "ANTI-ZIONIST AMERICA PAC",
+     "committeeId": "C00916379",
+     "count": 1,
+     "total": 4950.0
+    }
+   ],
    "support": [
     {
      "committee": "PAVC PAC",
@@ -7721,6 +8278,12 @@
      "committeeId": "C00909994",
      "count": 6,
      "total": 2150.11
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 646.0
     }
    ]
   },
@@ -7801,6 +8364,18 @@
   "H6FL23154": {
    "oppose": [],
    "support": [
+    {
+     "committee": "BAN THE TRADE PAC",
+     "committeeId": "C00894394",
+     "count": 2,
+     "total": 35000.0
+    },
+    {
+     "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00453704",
+     "count": 1,
+     "total": 2106.51
+    },
     {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
@@ -7937,6 +8512,17 @@
      "committeeId": "C00902106",
      "count": 60,
      "total": 92052.58
+    }
+   ]
+  },
+  "H6FL27098": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 173.88
     }
    ]
   },
@@ -8172,6 +8758,18 @@
      "total": 1070.34
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 4,
+     "total": 961.28
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 170.86
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 2,
@@ -8198,6 +8796,12 @@
      "committeeId": "C00573261",
      "count": 4,
      "total": 113084.21
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 316.26
     }
    ],
    "support": [
@@ -8244,6 +8848,12 @@
      "total": 13245.32
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 194.71
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 4,
@@ -8254,6 +8864,12 @@
      "committeeId": "C00909994",
      "count": 1,
      "total": 35.51
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 2,
+     "total": 12.13
     }
    ]
   },
@@ -8696,6 +9312,17 @@
      "committeeId": "C00898767",
      "count": 3,
      "total": 1041.4
+    }
+   ],
+   "support": []
+  },
+  "H6IN01231": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 192.99
     }
    ],
    "support": []
@@ -9225,6 +9852,12 @@
      "total": 244.36
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 160.94
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 3,
@@ -9351,6 +9984,12 @@
      "total": 1769.23
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 219.66
+    },
+    {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 2,
@@ -9363,6 +10002,17 @@
      "total": 10.0
     }
    ]
+  },
+  "H6MI08312": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 380.49
+    }
+   ],
+   "support": []
   },
   "H6MI10276": {
    "oppose": [
@@ -9411,10 +10061,22 @@
      "total": 366.6
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 116.58
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 1,
      "total": 25.0
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 3.73
     }
    ]
   },
@@ -9505,6 +10167,12 @@
      "committeeId": "C00745745",
      "count": 4,
      "total": 24781.26
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 223.05
     }
    ],
    "support": [
@@ -9534,7 +10202,14 @@
    ]
   },
   "H6MI11191": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "INTEGRITY PAC",
+     "committeeId": "C00941724",
+     "count": 2,
+     "total": 20000.0
+    }
+   ],
    "support": [
     {
      "committee": "THINK BIG",
@@ -9559,6 +10234,17 @@
      "committeeId": "C00740514",
      "count": 1,
      "total": 104.0
+    }
+   ]
+  },
+  "H6MI11241": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "INTEGRITY PAC",
+     "committeeId": "C00941724",
+     "count": 2,
+     "total": 20000.0
     }
    ]
   },
@@ -9599,8 +10285,8 @@
     {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
      "committeeId": "C00453704",
-     "count": 2,
-     "total": 17727.16
+     "count": 9,
+     "total": 39753.65
     },
     {
      "committee": "SEIU COPE (SERVICE EMPLOYEES INTERNATIONAL UNION COMMITTEE ON POLITICAL EDUCATION)",
@@ -9655,6 +10341,12 @@
      "committeeId": "C00738815",
      "count": 45,
      "total": 20613.64
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 202.84
     }
    ]
   },
@@ -9693,6 +10385,18 @@
      "total": 61394.92
     },
     {
+     "committee": "PLANNED PARENTHOOD OF MINNESOTA POLITICAL ACTION FUND",
+     "committeeId": "C00684530",
+     "count": 2,
+     "total": 693.63
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 237.36
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -9719,7 +10423,14 @@
    ]
   },
   "H6MN02263": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 443.94
+    }
+   ],
    "support": [
     {
      "committee": "MINNESOTA CITIZENS CONCERNED FOR LIFE, INC. FEDERAL PAC",
@@ -9843,6 +10554,12 @@
      "total": 96960.51
     },
     {
+     "committee": "AMERICAN WORKERS FIRST PAC",
+     "committeeId": "C00955591",
+     "count": 3,
+     "total": 29314.51
+    },
+    {
      "committee": "MISSOURI FARM BUREAU FEDERATION FEDERAL PAC",
      "committeeId": "C00613489",
      "count": 3,
@@ -9857,6 +10574,12 @@
      "committeeId": "C00878264",
      "count": 3,
      "total": 138220.42
+    },
+    {
+     "committee": "AMERICAN WORKERS FIRST PAC",
+     "committeeId": "C00955591",
+     "count": 3,
+     "total": 28779.4
     }
    ],
    "support": []
@@ -9892,6 +10615,18 @@
      "committeeId": "C00909994",
      "count": 3,
      "total": 949.89
+    },
+    {
+     "committee": "VOTERS OF TOMORROW PAC",
+     "committeeId": "C00833103",
+     "count": 3,
+     "total": 860.51
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 123.66
     }
    ]
   },
@@ -9919,6 +10654,12 @@
      "committeeId": "C00573261",
      "count": 2,
      "total": 50000.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 233.46
     }
    ],
    "support": [
@@ -9931,8 +10672,8 @@
     {
      "committee": "LEADERSHIP IN ACTION",
      "committeeId": "C00764209",
-     "count": 15,
-     "total": 263669.07
+     "count": 20,
+     "total": 320936.57
     },
     {
      "committee": "MAKE MONTANA GREAT",
@@ -9998,6 +10739,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 157.2
+    },
+    {
      "committee": "RED WINE AND BLUE",
      "committeeId": "C90020058",
      "count": 3,
@@ -10060,6 +10807,12 @@
      "total": 65256.84
     },
     {
+     "committee": "WAY TO LEAD PAC",
+     "committeeId": "C00686832",
+     "count": 2,
+     "total": 57240.0
+    },
+    {
      "committee": "SURJ PAC",
      "committeeId": "C00742205",
      "count": 6,
@@ -10070,6 +10823,12 @@
      "committeeId": "C00909994",
      "count": 7,
      "total": 721.51
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 222.35
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -10104,6 +10863,18 @@
      "committeeId": "C00935015",
      "count": 1,
      "total": 370000.0
+    },
+    {
+     "committee": "WAY TO LEAD PAC",
+     "committeeId": "C00686832",
+     "count": 2,
+     "total": 48760.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 418.85
     }
    ],
    "support": []
@@ -10264,6 +11035,12 @@
      "committeeId": "C00640300",
      "count": 2,
      "total": 333.2
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 135.47
     }
    ]
   },
@@ -10346,6 +11123,12 @@
      "committeeId": "C00909994",
      "count": 1,
      "total": 448.47
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 257.63
     }
    ],
    "support": []
@@ -10510,6 +11293,12 @@
      "total": 959.44
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 129.94
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 2,
@@ -10540,7 +11329,14 @@
    ]
   },
   "H6NJ09264": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 147.11
+    }
+   ],
    "support": [
     {
      "committee": "RNJ 2 SAVE AMERICA T/A RNJ 2 SA",
@@ -10662,7 +11458,7 @@
      "committee": "GRAYPAC",
      "committeeId": "C00877845",
      "count": 1,
-     "total": 999.8
+     "total": 999.31
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -10824,6 +11620,23 @@
      "committeeId": "C00495028",
      "count": 3,
      "total": 204000.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 289.2
+    }
+   ],
+   "support": []
+  },
+  "H6NV01331": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 420.78
     }
    ],
    "support": []
@@ -10864,6 +11677,17 @@
     }
    ]
   },
+  "H6NV03204": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 392.98
+    }
+   ],
+   "support": []
+  },
   "H6NV03220": {
    "oppose": [],
    "support": [
@@ -10874,6 +11698,28 @@
      "total": 59986.96
     }
    ]
+  },
+  "H6NV04020": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 211.18
+    }
+   ]
+  },
+  "H6NV04111": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 428.45
+    }
+   ],
+   "support": []
   },
   "H6NY01159": {
    "oppose": [],
@@ -10901,6 +11747,12 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 1255.64
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 145.51
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -10938,6 +11790,17 @@
      "total": 1311.06
     }
    ]
+  },
+  "H6NY04211": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 296.86
+    }
+   ],
+   "support": []
   },
   "H6NY07164": {
    "oppose": [
@@ -11247,6 +12110,18 @@
      "committeeId": "C00710848",
      "count": 1,
      "total": 381.82
+    },
+    {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 2,
+     "total": 377.4
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 154.89
     }
    ]
   },
@@ -11257,6 +12132,12 @@
      "committeeId": "C00647966",
      "count": 2,
      "total": 2315.53
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 311.36
     }
    ],
    "support": []
@@ -11348,7 +12229,14 @@
    ]
   },
   "H6OH01138": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 265.24
+    }
+   ],
    "support": [
     {
      "committee": "RED BRIDGE LEADERSHIP PAC",
@@ -11433,6 +12321,12 @@
      "total": 1250.0
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 159.33
+    },
+    {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 1,
@@ -11468,6 +12362,28 @@
     }
    ]
   },
+  "H6OH10121": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 140.9
+    }
+   ]
+  },
+  "H6OH13307": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 308.05
+    }
+   ],
+   "support": []
+  },
   "H6OH15112": {
    "oppose": [
     {
@@ -11501,6 +12417,12 @@
      "committeeId": "C00909994",
      "count": 3,
      "total": 1794.51
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 142.15
     }
    ]
   },
@@ -11572,6 +12494,17 @@
     }
    ]
   },
+  "H6OR05242": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 335.51
+    }
+   ],
+   "support": []
+  },
   "H6PA01181": {
    "oppose": [
     {
@@ -11611,6 +12544,12 @@
      "committeeId": "C00909994",
      "count": 8,
      "total": 431.72
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 137.94
     }
    ]
   },
@@ -11963,6 +12902,12 @@
      "total": 187.51
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 139.58
+    },
+    {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 1,
@@ -11973,6 +12918,12 @@
      "committeeId": "C00802389",
      "count": 2,
      "total": 36.54
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 3.73
     }
    ]
   },
@@ -11983,6 +12934,12 @@
      "committeeId": "C00495028",
      "count": 10,
      "total": 422451.21
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 258.46
     },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
@@ -12047,10 +13004,22 @@
      "total": 23381.67
     },
     {
+     "committee": "FF PAC",
+     "committeeId": "C00669259",
+     "count": 2,
+     "total": 2198.02
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 5,
      "total": 1360.09
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 6,
+     "total": 594.95
     },
     {
      "committee": "DMFI PAC",
@@ -12065,10 +13034,10 @@
      "total": 232.03
     },
     {
-     "committee": "MOMSRISING PAC",
-     "committeeId": "C00878025",
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
      "count": 1,
-     "total": 101.25
+     "total": 130.74
     }
    ]
   },
@@ -12348,6 +13317,12 @@
      "committeeId": "C00952093",
      "count": 3,
      "total": 33707.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 168.99
     }
    ]
   },
@@ -12358,6 +13333,12 @@
      "committeeId": "C00552851",
      "count": 3,
      "total": 273013.62
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 315.51
     }
    ],
    "support": []
@@ -13069,6 +14050,17 @@
     }
    ]
   },
+  "H6TX09231": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "MIJENTE PAC",
+     "committeeId": "C00738039",
+     "count": 4,
+     "total": 26762.87
+    }
+   ]
+  },
   "H6TX10221": {
    "oppose": [],
    "support": [
@@ -13161,6 +14153,12 @@
      "committeeId": "C00909465",
      "count": 2,
      "total": 144.75
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 111.26
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -13262,6 +14260,12 @@
      "committeeId": "C00948109",
      "count": 2,
      "total": 349.99
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 125.85
     }
    ]
   },
@@ -13295,8 +14299,8 @@
     {
      "committee": "TEXAS ORGANIZING PROJECT POLITICAL ACTION COMMITTEE",
      "committeeId": "C00756940",
-     "count": 13,
-     "total": 7771.94
+     "count": 20,
+     "total": 48877.38
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -13478,6 +14482,12 @@
      "committeeId": "C00495028",
      "count": 8,
      "total": 471765.87
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 156.21
     }
    ],
    "support": []
@@ -13564,6 +14574,12 @@
      "committeeId": "C00495028",
      "count": 20,
      "total": 2628269.51
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 209.71
     }
    ],
    "support": [
@@ -13655,10 +14671,22 @@
      "total": 39392.0
     },
     {
+     "committee": "WAY TO LEAD PAC",
+     "committeeId": "C00686832",
+     "count": 2,
+     "total": 26392.5
+    },
+    {
      "committee": "PROTECT AND SERVE PAC",
      "committeeId": "C00716704",
      "count": 1,
      "total": 12284.53
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 247.39
     }
    ],
    "support": [
@@ -13721,6 +14749,18 @@
      "committeeId": "C00580068",
      "count": 3,
      "total": 47287.11
+    },
+    {
+     "committee": "WAY TO LEAD PAC",
+     "committeeId": "C00686832",
+     "count": 2,
+     "total": 30982.5
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 133.59
     }
    ]
   },
@@ -13845,6 +14885,12 @@
      "total": 1946.6
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 191.73
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 2,
@@ -13875,16 +14921,45 @@
      "total": 381.82
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 180.11
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 9,
      "total": 133.26
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 31.65
     }
    ]
+  },
+  "H6VA07205": {
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 300.25
+    }
+   ],
+   "support": []
   },
   "H6VA09136": {
    "oppose": [],
    "support": [
+    {
+     "committee": "WASHINGTON COUNTY VIRGINIA DEMOCRATIC COMMITTEE",
+     "committeeId": "C00757302",
+     "count": 1,
+     "total": 5200.0
+    },
     {
      "committee": "RURAL AMERICA RISING",
      "committeeId": "C00893529",
@@ -13993,6 +15068,12 @@
      "committeeId": "C00926675",
      "count": 2,
      "total": 110000.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 348.95
     }
    ],
    "support": [
@@ -14117,6 +15198,12 @@
      "total": 1223.19
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 259.49
+    },
+    {
      "committee": "GRASSROOTS NORTH SHORE",
      "committeeId": "C00626036",
      "count": 1,
@@ -14147,7 +15234,14 @@
    ]
   },
   "H6WI07223": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "AMERICAN FUTURE FUND POLITICAL ACTION",
+     "committeeId": "C00449926",
+     "count": 3,
+     "total": 207335.92
+    }
+   ],
    "support": [
     {
      "committee": "NORTHWOODS FUTURE PAC",
@@ -14622,7 +15716,14 @@
    ]
   },
   "H8FL27185": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 330.63
+    }
+   ],
    "support": [
     {
      "committee": "LATINOS FOR CONSERVATIVE VALUES",
@@ -14687,6 +15788,12 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 2491.45
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 373.34
     },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
@@ -15046,6 +16153,12 @@
      "total": 1723.75
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 876.32
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 5,
@@ -15072,6 +16185,12 @@
      "committeeId": "C00285593",
      "count": 1,
      "total": 5083.74
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 222.7
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -15101,6 +16220,12 @@
   "H8NY15148": {
    "oppose": [],
    "support": [
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 2,
+     "total": 6315.47
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -15163,6 +16288,12 @@
      "committeeId": "C00802389",
      "count": 8,
      "total": 372.01
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 166.16
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -15359,6 +16490,12 @@
      "total": 1096.69
     },
     {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 262.73
+    },
+    {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
      "count": 3,
@@ -15542,8 +16679,8 @@
     {
      "committee": "TEXAS ORGANIZING PROJECT POLITICAL ACTION COMMITTEE",
      "committeeId": "C00756940",
-     "count": 13,
-     "total": 28582.73
+     "count": 15,
+     "total": 32886.09
     },
     {
      "committee": "LATINO VICTORY FUND",
@@ -15618,6 +16755,12 @@
      "committeeId": "C00486845",
      "count": 15,
      "total": 828238.01
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 356.7
     }
    ],
    "support": []
@@ -15625,6 +16768,12 @@
   "H8VA05106": {
    "oppose": [],
    "support": [
+    {
+     "committee": "VOTERS OF TOMORROW PAC",
+     "committeeId": "C00833103",
+     "count": 5,
+     "total": 7323.35
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
@@ -15691,6 +16840,12 @@
      "committeeId": "C00573261",
      "count": 2,
      "total": 50000.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 484.69
     }
    ],
    "support": []
@@ -15830,7 +16985,20 @@
    "support": []
   },
   "S0KS00315": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "PEOPLE OVER POLITICS ACTION FUND",
+     "committeeId": "C00953299",
+     "count": 11,
+     "total": 3446247.0
+    },
+    {
+     "committee": "UNITED FUTURES",
+     "committeeId": "C00899096",
+     "count": 1,
+     "total": 25000.0
+    }
+   ],
    "support": [
     {
      "committee": "SENATE CONSERVATIVES FUND",
@@ -16009,6 +17177,12 @@
      "total": 700000.0
     },
     {
+     "committee": "TEXAS FAMILIES FORWARD",
+     "committeeId": "C00940478",
+     "count": 6,
+     "total": 6034.39
+    },
+    {
      "committee": "CEDAR KEY PROGRESS",
      "committeeId": "C00827030",
      "count": 1,
@@ -16179,6 +17353,12 @@
      "committeeId": "C00678839",
      "count": 1,
      "total": 15475.83
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 131.45
     }
    ],
    "support": [
@@ -16465,6 +17645,18 @@
      "total": 2500.0
     },
     {
+     "committee": "REBELLION PAC",
+     "committeeId": "C00727008",
+     "count": 1,
+     "total": 2500.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 1252.54
+    },
+    {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
      "count": 2,
@@ -16552,6 +17744,12 @@
   },
   "S4NE00207": {
    "oppose": [
+    {
+     "committee": "WIN IT BACK PAC",
+     "committeeId": "C00844613",
+     "count": 7,
+     "total": 2059627.56
+    },
     {
      "committee": "SLF PAC",
      "committeeId": "C00571703",
@@ -16746,6 +17944,12 @@
      "committeeId": "C00802389",
      "count": 11,
      "total": 699.23
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 5,
+     "total": 507.65
     }
    ]
   },
@@ -16949,6 +18153,18 @@
    "oppose": [],
    "support": [
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 3023.0
+    },
+    {
+     "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00453704",
+     "count": 1,
+     "total": 2106.51
+    },
+    {
      "committee": "DREAM DEFENDERS FIGHT PAC",
      "committeeId": "C00728352",
      "count": 3,
@@ -16976,6 +18192,12 @@
      "committeeId": "C00897363",
      "count": 1,
      "total": 500.0
+    },
+    {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 1,
+     "total": 52.55
     }
    ]
   },
@@ -16997,6 +18219,12 @@
      "committeeId": "C00951483",
      "count": 7,
      "total": 853400.86
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 1958.61
     }
    ],
    "support": [
@@ -17046,6 +18274,18 @@
   },
   "S6IA00298": {
    "oppose": [
+    {
+     "committee": "WIN IT BACK PAC",
+     "committeeId": "C00844613",
+     "count": 9,
+     "total": 3789309.35
+    },
+    {
+     "committee": "FIGHT ON IOWA",
+     "committeeId": "C00904482",
+     "count": 23,
+     "total": 3001340.75
+    },
     {
      "committee": "HIGH PLAINS PAC",
      "committeeId": "C00875039",
@@ -17127,6 +18367,12 @@
      "total": 1683.21
     },
     {
+     "committee": "FF PAC",
+     "committeeId": "C00669259",
+     "count": 1,
+     "total": 1300.0
+    },
+    {
      "committee": "DEMOCRATIC FUTURE PAC",
      "committeeId": "C00934273",
      "count": 2,
@@ -17137,6 +18383,12 @@
      "committeeId": "C00802389",
      "count": 5,
      "total": 143.4
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 5,
+     "total": 84.85
     }
    ]
   },
@@ -17159,6 +18411,12 @@
      "committeeId": "C00865444",
      "count": 6,
      "total": 1786416.82
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 131.66
     }
    ],
    "support": [
@@ -17167,6 +18425,12 @@
      "committeeId": "C00687103",
      "count": 28,
      "total": 3449905.25
+    },
+    {
+     "committee": "FIGHT ON IOWA",
+     "committeeId": "C00904482",
+     "count": 19,
+     "total": 2808774.64
     },
     {
      "committee": "SLF PAC",
@@ -17498,6 +18762,12 @@
      "committeeId": "C00934463",
      "count": 1,
      "total": 14015.67
+    },
+    {
+     "committee": "ELBERT GUILLORY'S AMERICA",
+     "committeeId": "C00607374",
+     "count": 4,
+     "total": 4118.75
     }
    ]
   },
@@ -17627,6 +18897,12 @@
      "committeeId": "C00909994",
      "count": 1,
      "total": 1270.79
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 651.56
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -17766,6 +19042,12 @@
      "committeeId": "C00802389",
      "count": 1,
      "total": 50.0
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 31.65
     }
    ]
   },
@@ -17899,6 +19181,12 @@
      "total": 27881.25
     },
     {
+     "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00453704",
+     "count": 7,
+     "total": 17721.44
+    },
+    {
      "committee": "FORWARD BLUE",
      "committeeId": "C00835041",
      "count": 2,
@@ -17945,6 +19233,12 @@
      "committeeId": "C00776419",
      "count": 8,
      "total": 512.0
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 134.4
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -18019,6 +19313,12 @@
      "total": 33403.64
     },
     {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 3,
+     "total": 18957.06
+    },
+    {
      "committee": "BLUE MAJORITY PROJECT",
      "committeeId": "C00897363",
      "count": 2,
@@ -18079,6 +19379,12 @@
    ],
    "support": [
     {
+     "committee": "DLGA",
+     "committeeId": "C00685719",
+     "count": 9,
+     "total": 1087134.64
+    },
+    {
      "committee": "NORTH STAR DAWN PAC",
      "committeeId": "C00935973",
      "count": 1,
@@ -18107,6 +19413,18 @@
      "committeeId": "C90017955",
      "count": 2,
      "total": 6915.54
+    },
+    {
+     "committee": "CHRISTOPHER STREET PROJECT PAC (CSP PAC)",
+     "committeeId": "C00893461",
+     "count": 3,
+     "total": 4000.0
+    },
+    {
+     "committee": "PLANNED PARENTHOOD OF MINNESOTA POLITICAL ACTION FUND",
+     "committeeId": "C00684530",
+     "count": 2,
+     "total": 1940.32
     },
     {
      "committee": "INDIVISIBLE PROJECT INC.",
@@ -18156,8 +19474,8 @@
     {
      "committee": "DLGA",
      "committeeId": "C00685719",
-     "count": 13,
-     "total": 1933344.0
+     "count": 15,
+     "total": 2107544.0
     },
     {
      "committee": "CLEAR VOICE MINNESOTA",
@@ -18248,6 +19566,12 @@
      "committeeId": "C00896548",
      "count": 17,
      "total": 444287.13
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 1362.9
     }
    ],
    "support": [
@@ -18319,7 +19643,14 @@
    ]
   },
   "S6MT00253": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "MORE JOBS, LESS GOVERNMENT",
+     "committeeId": "C00693838",
+     "count": 1,
+     "total": 6816.26
+    }
+   ],
    "support": [
     {
      "committee": "PROGRESSIVE VET PAC",
@@ -18346,8 +19677,8 @@
     {
      "committee": "MORE JOBS, LESS GOVERNMENT",
      "committeeId": "C00693838",
-     "count": 7,
-     "total": 962124.0
+     "count": 10,
+     "total": 1964551.0
     },
     {
      "committee": "LEADERSHIP IN ACTION",
@@ -18378,6 +19709,12 @@
      "committeeId": "C00943910",
      "count": 4,
      "total": 217613.96
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 122.79
     }
    ],
    "support": [
@@ -18392,6 +19729,12 @@
      "committeeId": "C00916692",
      "count": 1,
      "total": 286358.33
+    },
+    {
+     "committee": "MORE JOBS, LESS GOVERNMENT",
+     "committeeId": "C00693838",
+     "count": 1,
+     "total": 40110.34
     }
    ]
   },
@@ -18502,6 +19845,12 @@
      "total": 2401.25
     },
     {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 6,
+     "total": 1602.6
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 20,
@@ -18524,6 +19873,12 @@
      "committeeId": "C90020058",
      "count": 3,
      "total": 160.79
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 1,
+     "total": 60.0
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -18552,6 +19907,12 @@
      "committeeId": "C90022427",
      "count": 2,
      "total": 143240.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 2266.21
     },
     {
      "committee": "SIERRA CLUB POLITICAL COMMITTEE",
@@ -18594,6 +19955,12 @@
      "committeeId": "C00909465",
      "count": 1,
      "total": 431.09
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 290.14
     }
    ],
    "support": [
@@ -18840,6 +20207,12 @@
      "total": 3494.44
     },
     {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 7,
+     "total": 1411.85
+    },
+    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
      "count": 9,
@@ -18870,6 +20243,18 @@
      "total": 900.0
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 543.54
+    },
+    {
+     "committee": "FF PAC",
+     "committeeId": "C00669259",
+     "count": 1,
+     "total": 200.0
+    },
+    {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 1,
@@ -18892,6 +20277,12 @@
      "total": 120000.0
     },
     {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 5,
+     "total": 59000.07
+    },
+    {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
      "count": 1,
@@ -18908,6 +20299,12 @@
      "committeeId": "C00865444",
      "count": 1,
      "total": 5625.0
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 1186.48
     },
     {
      "committee": "WORKING AMERICA",
@@ -19092,6 +20489,12 @@
      "committeeId": "C00802389",
      "count": 1,
      "total": 160.0
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 3,
+     "total": 31.65
     }
    ]
   },
@@ -19217,16 +20620,46 @@
      "total": 1853480.91
     },
     {
+     "committee": "TEXAS ORGANIZING PROJECT POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00756940",
+     "count": 2,
+     "total": 207500.0
+    },
+    {
      "committee": "LONE STAR RISING PAC",
      "committeeId": "C00918268",
      "count": 3,
      "total": 90909.71
     },
     {
+     "committee": "WAY TO LEAD PAC",
+     "committeeId": "C00686832",
+     "count": 2,
+     "total": 26392.5
+    },
+    {
      "committee": "PAF",
      "committeeId": "C00754069",
      "count": 2,
      "total": 26020.8
+    },
+    {
+     "committee": "THE LOWDOWN",
+     "committeeId": "C00956920",
+     "count": 2,
+     "total": 14920.38
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 6216.79
+    },
+    {
+     "committee": "FF PAC",
+     "committeeId": "C00669259",
+     "count": 1,
+     "total": 500.0
     }
    ],
    "support": [
@@ -19339,6 +20772,18 @@
      "total": 3980261.86
     },
     {
+     "committee": "EVANGELICALS FOR A BETTER FUTURE",
+     "committeeId": "C00887968",
+     "count": 1,
+     "total": 400000.0
+    },
+    {
+     "committee": "TEXAS ORGANIZING PROJECT POLITICAL ACTION COMMITTEE",
+     "committeeId": "C00756940",
+     "count": 13,
+     "total": 185080.37
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 38,
@@ -19363,6 +20808,12 @@
      "total": 45559.38
     },
     {
+     "committee": "WAY TO LEAD PAC",
+     "committeeId": "C00686832",
+     "count": 2,
+     "total": 30982.5
+    },
+    {
      "committee": "PAF",
      "committeeId": "C00754069",
      "count": 2,
@@ -19379,6 +20830,12 @@
      "committeeId": "C00640300",
      "count": 8,
      "total": 16330.95
+    },
+    {
+     "committee": "MIJENTE PAC",
+     "committeeId": "C00738039",
+     "count": 4,
+     "total": 15988.27
     },
     {
      "committee": "EVERY STATE",
@@ -19405,16 +20862,34 @@
      "total": 2994.78
     },
     {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 7,
+     "total": 1942.82
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 9,
      "total": 747.87
     },
     {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 2,
+     "total": 699.97
+    },
+    {
      "committee": "BLUE DEMOCRACY NETWORK",
      "committeeId": "C00933796",
      "count": 1,
      "total": 550.0
+    },
+    {
+     "committee": "FF PAC",
+     "committeeId": "C00669259",
+     "count": 2,
+     "total": 500.0
     },
     {
      "committee": "CONCERNED CITIZEN",
@@ -19659,10 +21134,22 @@
      "total": 1773.02
     },
     {
+     "committee": "FF PAC",
+     "committeeId": "C00669259",
+     "count": 1,
+     "total": 1300.0
+    },
+    {
      "committee": "SURJ PAC",
      "committeeId": "C00742205",
      "count": 6,
      "total": 1176.42
+    },
+    {
+     "committee": "JDCA PAC",
+     "committeeId": "C00684969",
+     "count": 5,
+     "total": 908.39
     },
     {
      "committee": "GALEO IMPACT FUND PAC",
@@ -19675,6 +21162,12 @@
      "committeeId": "C00909465",
      "count": 3,
      "total": 423.91
+    },
+    {
+     "committee": "MOMSRISING PAC",
+     "committeeId": "C00878025",
+     "count": 2,
+     "total": 278.1
     },
     {
      "committee": "BLUE MAJORITY MAKERS PAC",
@@ -19767,5 +21260,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-11-02"
+ "read": "2026-11-04"
 }
