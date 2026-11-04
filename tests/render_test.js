@@ -16046,6 +16046,75 @@ async function testMapMoney() {
         a && b && firstDifference(a.innerHTML, b.innerHTML));
       const problems = b ? moneyFoldProblems([b]) : ["no fold"];
       check("drawn as on the campaign clock", problems.length === 0, problems.slice(0, 4).join(" | "));
+      // A decided race's fold keeps the receipts' own words: nothing in it
+      // reads as a result, and it is the campaign clock's to the letter.
+      check("a decided race's fold says what it said before the count, word for word",
+        !!a && !!b && a.querySelector("summary").textContent === b.querySelector("summary").textContent &&
+          a.querySelector(".fold-body").innerHTML === b.querySelector(".fold-body").innerHTML,
+        a && b && firstDifference(a.querySelector(".fold-body").innerHTML, b.querySelector(".fold-body").innerHTML));
+      // The list above it reads as the day it is (rule 63), and the panel
+      // keeps a race block's order on either clock.
+      const inOrder = (b0) => {
+        const panel = b0.D.getElementById("delegation");
+        const seq = [".race-people", ".race-results", ".race-money", ".odds"]
+          .map((sel) => panel.querySelector(sel));
+        return seq.every(Boolean) && seq.slice(1).every((el, i) => !!(seq[i].compareDocumentPosition(el) & 4));
+      };
+      const head = (b0) => b0.D.querySelector("#delegation .race-people").textContent;
+      check("the list above it is 'On the November ballot', and 'Still in the race' only before the count",
+        /^\s*On the November ballot \d+/.test(head(after)) && /^\s*Still in the race \d+/.test(head(campaign)),
+        head(campaign) + " / " + head(after));
+      check("the list, its source, the money, then the markets, on either clock",
+        inOrder(campaign) && inOrder(after));
+    });
+    campaign.window.close();
+    after.window.close();
+  }
+
+  // A decided House race and one gone to a runoff keep their folds, and
+  // their folds their words; the count is the campaign clock's: who was on
+  // the ballot does not change with who won.
+  {
+    const decide = (w) => {
+      rewindToCampaign(w);
+      const byId = Object.fromEntries(w.legislatorsData.map((p) => [p.id, p]));
+      const contested = w.kycRaces.filter((r) => r.state === "NC" && r.chamber === "House").map((race) => ({
+        race,
+        people: race.incumbentIds.concat(race.candidateIds).map((id) => byId[id]).filter((p) =>
+          p && p.raceStatus === "nominee" && (!p.contestRaceId || p.contestRaceId === race.id) &&
+            p.receipts && /\$/.test(p.receipts)),
+      })).filter((x) => x.people.length >= 2);
+      const [one, two] = contested;
+      if (!one || !two) return;
+      one.people[0].raceStatus = "elected";
+      one.people[1].raceStatus = "defeated";
+      two.people[0].raceStatus = two.people[1].raceStatus = "runoff";
+      w.__decided = [one, two].map((x) => ({ district: x.race.district, ids: x.people.slice(0, 2).map((p) => p.id) }));
+    };
+    const campaign = await buildPage("map.html", { hash: "#/?state=NC&mode=house" });
+    const after = await buildPage("map.html", { now: "2026-11-05T09:00:00", hash: "#/?state=NC&mode=house", data: decide });
+    await settle(150);
+    const foldsOf = (b) => [...b.D.querySelectorAll("#delegation .race-money")];
+    const decided = after.window.__decided || [];
+    const named = (b, district) => foldsOf(b).find((f) =>
+      f.querySelector("summary").textContent === "Money in NC-" + district);
+    const pairs = decided.map((d) => ({ d, was: named(campaign, d.district), now: named(after, d.district) }));
+    pairs.forEach((x) => {
+      if (x.was) openFold(campaign.window, x.was);
+      if (x.now) openFold(after.window, x.now);
+    });
+    suite("map.html — a decided House race's money", () => {
+      check("no page errors", after.errors.length === 0, after.errors.join(" | "));
+      check("a decided race and a runoff to read", decided.length === 2, JSON.stringify(decided));
+      check("the same count of folds as before the count",
+        foldsOf(after).length === foldsOf(campaign).length && foldsOf(after).length > 1,
+        foldsOf(campaign).length + " / " + foldsOf(after).length);
+      check("each keeps its fold and both its campaigns",
+        pairs.every((x) => !!x.now && x.d.ids.every((id) =>
+          !!x.now.querySelector('.money-who [data-id="' + id + '"]'))), JSON.stringify(decided));
+      check("word for word what it said before the count",
+        pairs.every((x) => !!x.was && !!x.now &&
+          x.was.querySelector(".fold-body").innerHTML === x.now.querySelector(".fold-body").innerHTML));
     });
     campaign.window.close();
     after.window.close();

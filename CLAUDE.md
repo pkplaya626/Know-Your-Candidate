@@ -2475,7 +2475,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the race block's own fold for each of the picked state's 2026 races,
     closed, from the state's file when opened (rule 94), kept out of the
     panel's live region so a screen reader does not read a race's figures
-    aloud as it fills. Your ballot draws none. Closest races are ordered by one market's prices, the
+    aloud as it fills. A decided race's fold says after the count what it
+    said before it, word for word, its loser's campaign and a runoff's two
+    with the rest: they are receipts, not a result (rule 63). Your ballot
+    draws none. Closest races are ordered by one market's prices, the
     gap between its two highest, never a blend (rule 40). In the grid's
     races view every new fold is drawn when opened (GRID-14's budget).
 
