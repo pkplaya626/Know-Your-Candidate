@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-04",
+ "asOf": "2026-11-05",
  "changes": {
   "offices": {
    "agriculture": {
@@ -1324,7 +1324,7 @@
    "wikipedia": "https://en.wikipedia.org/"
   }
  },
- "fetched": "2026-11-04T16:21:05+00:00",
+ "fetched": "2026-11-05T16:35:09+00:00",
  "offices": [
   {
    "body": "Department of State",
@@ -1376,7 +1376,7 @@
    "holder": {
     "name": "Scott Bessent",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://home.treasury.gov/about/general-information/officials"
     },
@@ -1462,8 +1462,7 @@
    "holder": {
     "name": "Todd Blanche",
     "page": {
-     "kept": true,
-     "read": "2026-11-02",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.justice.gov/ag"
     },
@@ -1515,7 +1514,7 @@
    "holder": {
     "name": "Doug Burgum",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.doi.gov/secretary-doug-burgum"
     },
@@ -1643,7 +1642,7 @@
    "holder": {
     "name": "Keith Sonderling",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.dol.gov/agencies/osec"
     },
@@ -1737,7 +1736,7 @@
    "holder": {
     "name": "Scott Turner",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.hud.gov/aboutus/secretary"
     },
@@ -1819,7 +1818,7 @@
    "holder": {
     "name": "Chris Wright",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.energy.gov/"
     },
@@ -1905,7 +1904,7 @@
    "holder": {
     "name": "Doug Collins",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://department.va.gov/about/"
     },
@@ -1975,7 +1974,7 @@
    "holder": {
     "name": "Lee Zeldin",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.epa.gov/aboutepa/epa-administrator"
     },
@@ -2036,7 +2035,7 @@
    "holder": {
     "name": "Jamieson Greer",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://ustr.gov/about-us/biographies-key-officials"
     },
@@ -2072,7 +2071,7 @@
    "holder": {
     "name": "Jay Clayton",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.odni.gov/index.php/who-we-are/leadership"
     },
@@ -2124,7 +2123,7 @@
    "holder": {
     "name": "John Ratcliffe",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.cia.gov/about/director-of-cia/"
     },
@@ -2168,7 +2167,7 @@
    "holder": {
     "name": "Kelly Loeffler",
     "page": {
-     "read": "2026-11-04",
+     "read": "2026-11-05",
      "status": "confirmed",
      "url": "https://www.sba.gov/person/kelly-loeffler/"
     },

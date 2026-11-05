@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-02T17:07:09+00:00",
+ "fetched": "2026-11-05T16:05:04+00:00",
  "governors": {
   "AK": {
    "address": "Office of the Governor, P.O. Box 110001, Juneau, AK 99811-0001",
@@ -85,11 +85,7 @@
    "terms": [
     "January 10, 2023 - Current"
    ],
-   "website": "https://governor.arkansas.gov/",
-   "wikidata": "Q27986907",
-   "wikidataStarts": [
-    "2023-01-10"
-   ]
+   "website": "https://governor.arkansas.gov/"
   },
   "AS": {
    "address": "Office of the Governor, Pago Pago, AS 96799",
@@ -194,11 +190,7 @@
     "January 8, 2019 - January 10, 2023",
     "January 10, 2023 - Current"
    ],
-   "website": "https://www.colorado.gov/governor/",
-   "wikidata": "Q935734",
-   "wikidataStarts": [
-    "2019-01-08"
-   ]
+   "website": "https://www.colorado.gov/governor/"
   },
   "CT": {
    "address": "Office of the Governor, State Capitol, 210 Capitol Avenue, Hartford, CT 06106",
@@ -395,11 +387,7 @@
     "January 15, 2019 - January 13, 2023",
     "January 13, 2023 - Current"
    ],
-   "website": "https://governor.iowa.gov/",
-   "wikidata": "Q6409269",
-   "wikidataStarts": [
-    "2017-05-24"
-   ]
+   "website": "https://governor.iowa.gov/"
   },
   "ID": {
    "address": "State Capitol, PO Box 83720, Boise, ID 83720",
