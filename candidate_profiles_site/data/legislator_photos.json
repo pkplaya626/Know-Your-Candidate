@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-04T16:10:25+00:00",
+ "fetched": "2026-11-05T16:20:06+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -2065,9 +2065,10 @@
    "image": "https://www.rilegislature.gov/LegislationPictures/alex_finkelman.jpg",
    "key": "member page",
    "lastModified": "2026-02-09",
+   "lastModifiedAt": "2026-02-09T19:24:33",
    "name": "Alex Finkelman",
    "page": "https://www.rilegislature.gov/representatives/finkelman/Pages/biography.aspx",
-   "read": "2026-10-19",
+   "read": "2026-11-05",
    "sha": "e90a6fd369e6ab6e",
    "state": "RI",
    "width": 450
@@ -2756,9 +2757,10 @@
    "image": "https://www.rilegislature.gov/LegislationPictures/tina_spears.jpg",
    "key": "member page",
    "lastModified": "2026-03-16",
+   "lastModifiedAt": "2026-03-16T21:26:48",
    "name": "Tina Spears",
    "page": "https://www.rilegislature.gov/representatives/spears/pages/biography.aspx",
-   "read": "2026-10-19",
+   "read": "2026-11-05",
    "sha": "1fbec41f18b686fd",
    "state": "RI",
    "width": 450
@@ -3426,9 +3428,10 @@
    "image": "https://www.rilegislature.gov/LegislationPictures/cherie_cruz.jpg",
    "key": "member page",
    "lastModified": "2024-03-19",
+   "lastModifiedAt": "2024-03-19T18:07:37",
    "name": "Cherie Cruz",
    "page": "https://www.rilegislature.gov/representatives/cruz/Pages/Biography.aspx",
-   "read": "2026-10-19",
+   "read": "2026-11-05",
    "sha": "1851c0c01b2ae6ef",
    "state": "RI",
    "width": 450
@@ -15038,9 +15041,10 @@
    "image": "https://www.rilegislature.gov/LegislationPictures/brandon_voas.jpg",
    "key": "member page",
    "lastModified": "2026-02-09",
+   "lastModifiedAt": "2026-02-09T19:24:33",
    "name": "Brandon Voas",
    "page": "https://www.rilegislature.gov/representatives/voas/pages/biography.aspx",
-   "read": "2026-10-19",
+   "read": "2026-11-05",
    "sha": "73da2c4ba79ae8c7",
    "state": "RI",
    "width": 450
