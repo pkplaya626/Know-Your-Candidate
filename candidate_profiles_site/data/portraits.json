@@ -7319,7 +7319,7 @@
   "name": "Adrian Boafo",
   "original": "https://mgaleg.maryland.gov/2026RS/images/boafo01.jpg",
   "page": "https://mgaleg.maryland.gov/mgawebsite/Members/Details/boafo01",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg"
   ],
@@ -8994,7 +8994,7 @@
   "name": "Carrie Buck",
   "original": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "state": "NV",
   "url": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
   "via": "state-legislature",
@@ -9429,6 +9429,11 @@
   "via": "wikipedia",
   "width": 2918
  },
+ "person:christina hines|MI|H": {
+  "name": "Christina Hines",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:christopher m. rabb|PA|H": {
   "credit": {
    "attribution": false,
@@ -9500,6 +9505,11 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Chuck_Gray_in_2025_%28cropped%29.jpg/960px-Chuck_Gray_in_2025_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 2250
+ },
+ "person:chuck hubbard|NC|H": {
+  "name": "Chuck Hubbard",
+  "url": null,
+  "via": "unresolved"
  },
  "person:claire valdez|NY|H": {
   "credit": {
@@ -10566,6 +10576,11 @@
   "via": "wikipedia",
   "width": 884
  },
+ "person:don ralph leonard|OH|H": {
+  "name": "Don Ralph Leonard",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:don tracy|IL|S": {
   "name": "Don Tracy",
   "url": null,
@@ -11150,7 +11165,7 @@
   "name": "Fred Wellman",
   "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "set": [
    [
     120,
@@ -11825,7 +11840,7 @@
   "name": "Jacqui V Irwin",
   "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
   "page": "https://www.assembly.ca.gov/assemblymembers/42",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
@@ -11955,7 +11970,7 @@
   "name": "James Talarico",
   "original": "https://house.texas.gov/images/members/3685.jpg?v=1",
   "page": "https://house.texas.gov/members/3685",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg",
    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg"
@@ -12574,7 +12589,7 @@
   "name": "Jeremy Moss",
   "original": "https://senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg",
   "page": "https://senatedems.com/moss",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg"
   ],
@@ -12980,7 +12995,7 @@
   "name": "John Andrew Williams",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "set": [
    [
     120,
@@ -14130,6 +14145,11 @@
   "via": "wikipedia",
   "width": 420
  },
+ "person:kristina knickerbocker|OH|H": {
+  "name": "Kristina Knickerbocker",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:kshama sawant|WA|H": {
   "credit": {
    "attribution": false,
@@ -15105,7 +15125,7 @@
   "name": "Martin R Zamora",
   "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "state": "NM",
   "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "via": "state-legislature",
@@ -15804,6 +15824,43 @@
   "via": "wikipedia",
   "width": 3360
  },
+ "person:michael alfonso|WI|H": {
+  "credit": {
+   "attribution": true,
+   "by": "Gage Skidmore from Surprise, AZ, United States of America",
+   "file": "https://commons.wikimedia.org/wiki/File:Michael_Alfonso_2025.jpg",
+   "form": 4,
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+   "nonFree": false,
+   "year": 2025
+  },
+  "height": 1975,
+  "linked": "Michael Alfonso (politician)",
+  "name": "Michael Alfonso",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/120px-Michael_Alfonso_2025.jpg"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/250px-Michael_Alfonso_2025.jpg"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/330px-Michael_Alfonso_2025.jpg"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/500px-Michael_Alfonso_2025.jpg"
+   ]
+  ],
+  "title": "Michael Alfonso (politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/960px-Michael_Alfonso_2025.jpg",
+  "via": "wikipedia",
+  "width": 1482
+ },
  "person:michael blake|NY|H": {
   "credit": {
    "attribution": true,
@@ -16172,6 +16229,11 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/6-17-25_world_refugee_day_advocacy_event_Mike_Simmons_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 658
+ },
+ "person:mitchell berman|WI|H": {
+  "name": "Mitchell Berman",
+  "url": null,
+  "via": "unresolved"
  },
  "person:morgan cephas|PA|H": {
   "credit": {
@@ -17048,6 +17110,43 @@
   "via": "wikipedia",
   "width": 2652
  },
+ "person:randy villegas|CA|H": {
+  "credit": {
+   "attribution": true,
+   "by": "Maremoto Fund",
+   "file": "https://commons.wikimedia.org/wiki/File:Randy_Villegas_at_Vota_Palooza_in_2024_(cropped).jpg",
+   "form": 4,
+   "licence": "CC BY 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "nonFree": false,
+   "year": 2024
+  },
+  "height": 1084,
+  "linked": "Randy Villegas",
+  "name": "Randy Villegas",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/120px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/250px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/330px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/500px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ]
+  ],
+  "title": "Randy Villegas",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg",
+  "via": "wikipedia",
+  "width": 814
+ },
  "person:raymond edward smith jr.|NC|H": {
   "credit": {
    "attribution": false,
@@ -17105,7 +17204,7 @@
   "name": "Rebecca Bennett",
   "original": "https://upload.wikimedia.org/wikipedia/commons/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg",
   "page": "https://www.wikidata.org/wiki/Q141373045",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "set": [
    [
     120,
@@ -17355,7 +17454,7 @@
   "name": "Rick Brattin",
   "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "state": "MO",
   "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "via": "state-legislature",
@@ -18266,7 +18365,7 @@
   "name": "Sean McCann",
   "original": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "page": "https://senatedems.com/mccann",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "state": "MI",
   "url": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "via": "state-legislature",
@@ -18812,6 +18911,43 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/%2803-12-24%29_Taylor_Darling.jpg",
   "via": "wikipedia",
   "width": 605
+ },
+ "person:taylor wettach|IA|H": {
+  "credit": {
+   "attribution": true,
+   "by": "(Robert Alanson) Renotomast",
+   "file": "https://commons.wikimedia.org/wiki/File:Iowa_Auditor-elect_Taylor_Wettach_(cropped).png",
+   "form": 4,
+   "licence": "CC BY 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "nonFree": false,
+   "year": 2026
+  },
+  "height": 719,
+  "linked": "Taylor Wettach",
+  "name": "Taylor Wettach",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png/120px-Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png/250px-Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png/330px-Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png/500px-Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png"
+   ]
+  ],
+  "title": "Taylor Wettach",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/4/46/Iowa_Auditor-elect_Taylor_Wettach_%28cropped%29.png",
+  "via": "wikipedia",
+  "width": 539
  },
  "person:tbd - runoff winner|OK|S": {
   "name": "TBD - Runoff Winner",
@@ -19522,7 +19658,7 @@
   "name": "Yolanda Rena Prince",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
-  "read": "2026-11-05",
+  "read": "2026-11-06",
   "set": [
    [
     120,

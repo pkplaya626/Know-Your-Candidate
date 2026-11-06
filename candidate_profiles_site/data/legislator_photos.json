@@ -1,5 +1,5 @@
 {
- "fetched": "2026-11-05T16:20:06+00:00",
+ "fetched": "2026-11-06T15:45:36+00:00",
  "people": {
   "ocd-person/006c1bd9-54e9-49be-9d02-12dda1119149": {
    "bytes": 61635,
@@ -9706,9 +9706,10 @@
    "image": "https://azleg.gov/alisImages/MemberPhotos/57leg/House/FINK.jpg",
    "key": "member page",
    "lastModified": "2026-06-23",
+   "lastModifiedAt": "2026-06-23T21:25:51",
    "name": "Lisa Fink",
    "page": "https://www.azleg.gov/house-member/?legislature=57&session=129&legislator=2369",
-   "read": "2026-10-19",
+   "read": "2026-11-06",
    "sha": "a5e362c48651cbdc",
    "state": "AZ",
    "width": 765
