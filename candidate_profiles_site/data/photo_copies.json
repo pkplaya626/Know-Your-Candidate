@@ -44,7 +44,7 @@
    "height": 973,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
    "type": "image/jpeg",
    "width": 807
@@ -59,7 +59,7 @@
    "height": 599,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=24",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "395297bde1fe2d67a664def420d3f6c5f69e7e6f3cf170df14f4744951f77001",
    "type": "image/jpeg",
    "width": 399
@@ -95,7 +95,7 @@
    "height": 1329,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
    "type": "image/jpeg",
    "width": 1113
@@ -110,7 +110,7 @@
    "height": 1080,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
    "type": "image/jpeg",
    "width": 1048
@@ -126,7 +126,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=35",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "66ea811e6896720ac02bc62b9b5c3010c9f84783b2d484f24f5b97eb2d924964",
    "sourceSha256": "d122af6046b6eed47f96087ce2655a2a0cfbb0eade51b1fcfcee3ebe63740193",
    "type": "image/png",
@@ -143,7 +143,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=32",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "84307b6eaed61e0ed24d50dc543a3bd7348fdbb76c929ccf970682e5b0a501ea",
    "sourceSha256": "b2e4071d718473886045f92064729322e5dc73d3167fd4e837026b3efb1459f5",
    "type": "image/png",
@@ -159,7 +159,7 @@
    "height": 857,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
    "type": "image/jpeg",
    "width": 751
@@ -175,7 +175,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=34",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "8c34d6c5670d0ded7391a04d3ff7495b02c8ca2c37a190853f6dddb57305ee91",
    "sourceSha256": "1e241eeb55ad58da4c179ed0503de827562e16f28aa8698fc648e2bf217702cd",
    "type": "image/png",
@@ -212,7 +212,7 @@
    "height": 2705,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
    "type": "image/jpeg",
    "width": 2254
@@ -227,7 +227,7 @@
    "height": 540,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=16",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "9484fc6ce5c2e8fc26297d2accbc392af1602dab9fc866771d8346116e1764b2",
    "type": "image/jpeg",
    "width": 434
@@ -243,7 +243,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book11_web.pdf#page=32",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "96b6ab3f3d932a2970abc41bca9190449abd06cc859298e1c3021e7b87aafdbc",
    "sourceSha256": "f8493c2c95b33d3dee1b6ea3c0d65ff1d045dd418c8e9da01ef7c906d9728cfb",
    "type": "image/png",
@@ -259,7 +259,7 @@
    "height": 433,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
    "type": "image/jpeg",
    "width": 361
@@ -274,7 +274,7 @@
    "height": 944,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=11",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "ac1170898cbf3a54000465fe5c9e3dcefa5a451180e33a9e96c4be775c78aa92",
    "type": "image/jpeg",
    "width": 630
@@ -289,7 +289,7 @@
    "height": 906,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
    "type": "image/jpeg",
    "width": 759
@@ -304,7 +304,7 @@
    "height": 1096,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
    "type": "image/jpeg",
    "width": 906
@@ -340,7 +340,7 @@
    "height": 1392,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=9",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "c05c0d9dc26b407606b77ff43b68a7b59edb5043a961d201dfe978a7c518574b",
    "type": "image/jpeg",
    "width": 928
@@ -355,7 +355,7 @@
    "height": 501,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
    "type": "image/jpeg",
    "width": 418
@@ -370,7 +370,7 @@
    "height": 584,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
    "type": "image/jpeg",
    "width": 486
@@ -385,7 +385,7 @@
    "height": 619,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
    "type": "image/jpeg",
    "width": 517
@@ -401,7 +401,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=36",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "d879b05c460beddb58ed25185a9c132c1933bef5a02b778c9f87a53526bb4a71",
    "sourceSha256": "4268d7b64f5798df27a236fd858a87408dd132d06719a2f87e9669edd2a26d43",
    "type": "image/png",
@@ -438,7 +438,7 @@
    "height": 1320,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
    "type": "image/jpeg",
    "width": 1095
@@ -469,7 +469,7 @@
    "height": 907,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
-   "read": "2026-11-05",
+   "read": "2026-11-07",
    "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
    "type": "image/jpeg",
    "width": 758
@@ -6571,6 +6571,21 @@
     "legislator:AZ:ocd-person/0fb2e73b-b140-4669-a9bd-b75facb342dd"
    ],
    "width": 829
+  },
+  "https://azleg.gov/alisImages/MemberPhotos/57leg/House/FINK.jpg": {
+   "bytes": 54321,
+   "etag": "\"b4aa23de563dd1:0\"",
+   "gone": 0,
+   "height": 956,
+   "kinds": [
+    "legislator"
+   ],
+   "lastModified": "Tue, 23 Jun 2026 21:25:51 GMT",
+   "read": "2026-11-07",
+   "records": [
+    "legislator:AZ:ocd-person/981d0aee-d239-4acc-9da8-1332481e57ee"
+   ],
+   "width": 765
   },
   "https://azleg.gov/alisImages/MemberPhotos/57leg/House/GARCIA.jpg": {
    "bytes": 50658,
@@ -51662,7 +51677,7 @@
     "legislator"
    ],
    "lastModified": "Fri, 27 Mar 2026 12:31:22 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:VT:ocd-person/b2efb3b2-d580-404c-ace4-313fc17a1952"
    ],
@@ -52958,7 +52973,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 18 Aug 2026 17:15:45 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:VT:ocd-person/d799cf20-3603-4035-88b8-20d7bb45f627"
    ],
@@ -53263,7 +53278,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 06 Oct 2026 13:19:49 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:VT:ocd-person/89c4edc3-e069-4f8f-a0b4-f57986aff04f"
    ],
@@ -53299,7 +53314,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 05 Jan 2026 13:08:55 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:VT:ocd-person/337c5ad5-3e6d-483b-949f-fd0e2dbe985c"
    ],
@@ -53523,7 +53538,7 @@
     "legislator"
    ],
    "lastModified": "Thu, 18 Dec 2025 20:14:49 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:VT:ocd-person/3925fa66-5990-42d3-b3d0-5ee83143d931"
    ],
@@ -54283,7 +54298,7 @@
     "legislator"
    ],
    "lastModified": "Thu, 03 Sep 2026 14:51:40 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:VT:ocd-person/70ab2e29-6232-4074-9539-2a514aa21dcf"
    ],
@@ -66091,14 +66106,12 @@
    "gone": 0,
    "height": 153,
    "kinds": [
-    "legislator",
-    "person"
+    "legislator"
    ],
    "lastModified": "Thu, 05 Dec 2024 19:36:30 GMT",
    "read": "2026-11-01",
    "records": [
-    "legislator:SC:ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab",
-    "person:FEC_H6SC05202"
+    "legislator:SC:ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab"
    ],
    "width": 125
   },
@@ -71478,7 +71491,7 @@
     "justice"
    ],
    "lastModified": "Thu, 29 Oct 2026 17:46:47 GMT",
-   "read": "2026-10-30",
+   "read": "2026-11-07",
    "records": [
     "justice:AR:court:Courtney Rae Hudson"
    ],
@@ -74299,21 +74312,6 @@
    ],
    "sha256": "16b93f2736a72d2f1ac2246725dd530274a4ea76f58ea96002b48d4a5ced427b",
    "width": 1920
-  },
-  "https://www.azleg.gov/alisImages/MemberPhotos/57leg/House/FINK.jpg": {
-   "bytes": 54321,
-   "etag": "\"b4aa23de563dd1:0\"",
-   "gone": 0,
-   "height": 956,
-   "kinds": [
-    "legislator"
-   ],
-   "lastModified": "Tue, 23 Jun 2026 21:25:51 GMT",
-   "read": "2026-10-30",
-   "records": [
-    "legislator:AZ:ocd-person/981d0aee-d239-4acc-9da8-1332481e57ee"
-   ],
-   "width": 765
   },
   "https://www.azleg.gov/alisImages/MemberPhotos/57leg/House/TRAVERS.jpg": {
    "bytes": 59206,
@@ -85217,21 +85215,6 @@
    ],
    "width": 640
   },
-  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Rosen-Eric-Justice-Supreme-Court.jpg?ext=.jpg": {
-   "bytes": 85339,
-   "etag": "\"18809b1c3d3ddc1:0\"",
-   "gone": 0,
-   "height": 800,
-   "kinds": [
-    "justice"
-   ],
-   "lastModified": "Tue, 14 Oct 2025 19:02:39 GMT",
-   "read": "2026-11-02",
-   "records": [
-    "justice:KS:court:Eric S. Rosen"
-   ],
-   "width": 640
-  },
   "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/Standridge-Melissa-Taylor-Justice-Supreme-Court.jpg?ext=.jpg": {
    "bytes": 34568,
    "etag": "\"80d341c3d3ddc1:0\"",
@@ -85307,6 +85290,21 @@
    ],
    "width": 640
   },
+  "https://www.kscourts.gov/KSCourts/media/KsCourts/SC%20Justices/rosen-eric-chief-justice-supreme-court.jpg?ext=.jpg": {
+   "bytes": 39154,
+   "etag": "\"d8c4766cb6edd1:0\"",
+   "gone": 0,
+   "height": 800,
+   "kinds": [
+    "justice"
+   ],
+   "lastModified": "Fri, 06 Nov 2026 16:25:23 GMT",
+   "read": "2026-11-07",
+   "records": [
+    "justice:KS:court:Eric S. Rosen"
+   ],
+   "width": 640
+  },
   "https://www.kslegislature.gov/static/li_pics/rep_alcala_john_1.jpg": {
    "bytes": 10624,
    "etag": "\"6adf5401-b223\"",
@@ -85316,7 +85314,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/f29363f0-8ac1-4c25-a8a7-74db5cefd9a4"
    ],
@@ -85346,7 +85344,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/4544fc4e-fff8-4bbe-bc29-4e28c6be3179"
    ],
@@ -85361,7 +85359,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/aa7fa5a0-596b-4f52-9af5-732b76f875e9"
    ],
@@ -85376,7 +85374,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/cb7f246f-5619-4086-8e6a-79614bcbaca6"
    ],
@@ -85391,7 +85389,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/06e5710d-2c6a-4baa-829f-803417539415"
    ],
@@ -85406,7 +85404,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/050b34c6-14a3-4998-a67a-13c02217a666"
    ],
@@ -85421,7 +85419,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/e6316819-6e7e-4560-9acf-a7c28e5cfbe7"
    ],
@@ -85451,7 +85449,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/20c5c197-1683-45a4-a6f6-32b9cab0ba93"
    ],
@@ -85466,7 +85464,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/0c2ba27f-4208-475d-a625-a12c5f0581b5"
    ],
@@ -85481,7 +85479,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/cf31199e-7382-4bbe-9359-92c92b428861"
    ],
@@ -85496,7 +85494,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/434a4028-6a95-4e5c-8f5e-98c8762f6570"
    ],
@@ -85511,7 +85509,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/61d402db-ed53-4310-9c6b-c392755834a6"
    ],
@@ -85526,7 +85524,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/0a2abc46-725c-4637-bf38-dc83cb7f90fd"
    ],
@@ -85541,7 +85539,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/529d7e5b-3acd-467b-b6b2-bf4314fcf633"
    ],
@@ -85556,7 +85554,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/f1e5ad82-52f7-4a6a-b028-40df8a3f929b"
    ],
@@ -85571,7 +85569,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/96643a66-5a00-41ba-9aa6-fc126a92849c"
    ],
@@ -85586,7 +85584,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/97a9a84c-4616-44eb-845c-1e7064c41066"
    ],
@@ -85601,7 +85599,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/6c410bc7-76fd-4488-aca4-5158a5a55d70"
    ],
@@ -85616,7 +85614,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/9d1f2540-8f56-49c1-be08-2ee7b7faed8e"
    ],
@@ -85631,7 +85629,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/afee9b4c-c30b-4cba-b5a2-e20a186c75b1"
    ],
@@ -85646,7 +85644,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/e0cd5e74-7229-4c04-be9e-aa688868e703"
    ],
@@ -85661,7 +85659,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/57e6524f-40c5-4708-89ad-c80570bf31b1"
    ],
@@ -85676,7 +85674,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/75db09fb-b9dd-4c6f-ae73-bfde55d7dd62"
    ],
@@ -85691,7 +85689,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/6daed22d-40c3-492c-948a-d3de94499e53"
    ],
@@ -85706,7 +85704,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d034154f-ba03-4c97-ac96-c4023968f9b3"
    ],
@@ -85721,7 +85719,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:54:17 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/075f264c-efcf-408f-baf8-b3f9306bae36"
    ],
@@ -85736,7 +85734,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/ca3f1bf6-44e0-4d67-b242-3cd29905723c"
    ],
@@ -85751,7 +85749,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/cc0df3af-9c8b-4834-a629-c16e4c8debcb"
    ],
@@ -85766,7 +85764,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/3ebdf5bf-c602-4181-914d-fd63b564ea2b"
    ],
@@ -85781,7 +85779,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/2d7cf122-fd6c-406c-a158-de6c61ff0afa"
    ],
@@ -85796,7 +85794,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/55f1cbff-5420-44f1-8d6e-1970317cd150"
    ],
@@ -85811,7 +85809,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/a81f29c0-88a5-4984-a36e-214eddb912fb"
    ],
@@ -85826,7 +85824,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/26eb8f32-d499-4b8b-82c6-8fef014633a3"
    ],
@@ -85841,7 +85839,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c51517ec-db1e-433d-a1d0-683547ae34a2"
    ],
@@ -85856,7 +85854,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/df19b642-2877-4b6d-ab29-bbdd26deaa26"
    ],
@@ -85871,7 +85869,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/e5b4d1e8-40a3-4f75-af3a-36fc7e84a228"
    ],
@@ -85886,7 +85884,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c333ddca-e5a2-4638-910c-a816bcddd666"
    ],
@@ -85901,7 +85899,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/528160f1-93ab-49f0-89d5-c00cf6e87b81"
    ],
@@ -85916,7 +85914,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/4ab616b7-79d2-4d89-ae25-cd4ea4e8c4c8"
    ],
@@ -85931,7 +85929,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/241d0891-9169-443e-be77-d3d00a57f401"
    ],
@@ -85946,7 +85944,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/ecff64bf-dfd7-4df4-a1c2-681348e68fa8"
    ],
@@ -85961,7 +85959,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/9cef565d-6e73-4090-80bc-a752310efc4c"
    ],
@@ -85976,7 +85974,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/59368846-3703-44a5-a898-d7ab00c32c8b"
    ],
@@ -85991,7 +85989,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/05ca3b77-c9d8-4d8e-92bf-603b2f71eda6"
    ],
@@ -86006,7 +86004,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/ef29753b-3048-4126-bc08-353befde18ab"
    ],
@@ -86021,7 +86019,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:54:17 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/a587476a-1201-4d9f-b8b7-ac6f74b3f6ce"
    ],
@@ -86036,7 +86034,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/7bb01d00-be23-4fb4-ab33-074c2826b69e"
    ],
@@ -86051,7 +86049,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/2abcd1bf-54b0-4abe-a716-065895d88d6b"
    ],
@@ -86066,7 +86064,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:25:59 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c1529b6d-c377-4491-9397-d61c1301243a"
    ],
@@ -86081,7 +86079,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/eaf4ca2d-ba48-4c99-88cc-2845e7237143"
    ],
@@ -86096,7 +86094,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/ca29b8ff-9845-40ba-a196-458cef943041"
    ],
@@ -86111,7 +86109,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/019607dd-e8e2-4c2e-b4cc-e95ccddb54a2"
    ],
@@ -86126,7 +86124,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/7191d22a-a111-4e14-b3d2-87c4084bea1b"
    ],
@@ -86141,7 +86139,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/a1546322-9d4b-467c-a65a-57dddcc9c4cf"
    ],
@@ -86156,7 +86154,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/eafd24b5-d096-4fa0-92c4-3b4ced58c40f"
    ],
@@ -86171,7 +86169,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/16ed9e2b-5a1b-48b1-99c9-651a55061060"
    ],
@@ -86186,7 +86184,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d9b94e4b-d2b0-4139-8135-cba9ff03e8b7"
    ],
@@ -86201,7 +86199,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/65fa3818-4803-4821-8533-51a7802694ec"
    ],
@@ -86216,7 +86214,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/8e21a303-1c30-4c02-a8f8-8eacccb6873c"
    ],
@@ -86231,7 +86229,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/31351496-5fc5-44fc-911f-0e7547a50a72"
    ],
@@ -86246,7 +86244,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/46d9caea-ab2c-4a6e-a08c-ebc927403dc8"
    ],
@@ -86261,7 +86259,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/fcd23935-0e7e-4896-9381-45ca745e8903"
    ],
@@ -86276,7 +86274,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/782cdea1-59a1-4930-8126-ffd1264420f9"
    ],
@@ -86291,7 +86289,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d01abc3e-cce3-450e-8d2c-41491b5bbde6"
    ],
@@ -86306,7 +86304,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/372f4e97-d36e-41c3-aae3-fd69da828ee5"
    ],
@@ -86321,7 +86319,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/41909a90-1eff-473a-8cb7-3c8770f667f4"
    ],
@@ -86336,7 +86334,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/6a7f0eed-6a34-4bd2-842c-2978ca9c6008"
    ],
@@ -86351,7 +86349,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c06bc779-d072-495b-95f8-e5f4e67bdd4c"
    ],
@@ -86366,7 +86364,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/3df522a5-5542-4ad4-b1bf-54736e60c601"
    ],
@@ -86381,7 +86379,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/3618106c-5f38-4df6-bf12-d58576bd7c93"
    ],
@@ -86396,7 +86394,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/e6ca4faa-17ec-4256-9265-fbba8afcbb0e"
    ],
@@ -86411,7 +86409,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/23c34f8e-b06b-4de9-91c3-44892dbb2b7d"
    ],
@@ -86426,7 +86424,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/1748d756-be07-4eaf-be90-82992092e990"
    ],
@@ -86441,7 +86439,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d0ddb22e-8135-4ca0-856a-4c00c29f1d47"
    ],
@@ -86456,7 +86454,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/29dad718-27f5-4cbb-9a2c-56fad33e4569"
    ],
@@ -86471,7 +86469,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/f3a06f5c-fe9a-42c9-ad04-82e1532b6979"
    ],
@@ -86486,7 +86484,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c1802270-0126-4be5-b7e7-1a9a472f5fd7"
    ],
@@ -86501,7 +86499,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/8b617466-af12-4848-8cca-ed088fb196da"
    ],
@@ -86516,7 +86514,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/2b9bf649-25fe-4910-8ee9-fe1de5e978da"
    ],
@@ -86531,7 +86529,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/e0cddd71-639c-4b74-8dea-bc189418034d"
    ],
@@ -86561,7 +86559,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/dc23fc2c-0f64-4fab-96ec-951f0efbe7bb"
    ],
@@ -86576,7 +86574,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/630804aa-ee95-4839-9b15-7522ef06d5dd"
    ],
@@ -86591,7 +86589,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/a65df523-1cb7-4ee3-ac85-1eec82b3fe2c"
    ],
@@ -86606,7 +86604,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d7dd1de1-73e2-438a-bf25-c70e12ede30d"
    ],
@@ -86621,7 +86619,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/71b474cb-1732-41fc-b525-4d53911cbbbe"
    ],
@@ -86636,7 +86634,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/bb92c4f1-d89e-4147-9b09-5fc1f56fca1c"
    ],
@@ -86651,7 +86649,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/4a16a87e-2567-4361-9874-aaee47278840"
    ],
@@ -86666,7 +86664,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/8dc23ca9-1ad8-466d-83d4-453f1bf324b0"
    ],
@@ -86681,7 +86679,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/7aac5ab6-1590-4cfe-8c02-d61f292497c8"
    ],
@@ -86696,7 +86694,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/655437d6-f80f-4e14-b061-c28a8977cf0f"
    ],
@@ -86711,7 +86709,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/acb8f24a-aecd-43a5-887c-be8bbf963e3d"
    ],
@@ -86726,7 +86724,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d9e298ca-0584-41ff-bb18-082072dfe73f"
    ],
@@ -86741,7 +86739,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c4b83a00-d449-498a-915f-7a7943110545"
    ],
@@ -86771,7 +86769,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/0ebc0742-f24c-4ab3-9155-7a4c37e2fa87"
    ],
@@ -86786,7 +86784,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/8d608ede-12f3-4ec4-8206-2c3dde0db6b7"
    ],
@@ -86801,7 +86799,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/39cab563-99a8-4412-8112-7b88b0911714"
    ],
@@ -86816,7 +86814,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c56cf970-39c2-4821-8723-a85dfe09cd6b"
    ],
@@ -86831,7 +86829,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/e5d951f2-88c7-47d4-ac28-08c175ba440d"
    ],
@@ -86846,7 +86844,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c0c78c6c-d725-4f3b-8ae5-11446753d9a7"
    ],
@@ -86861,7 +86859,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/80f9f23c-fa36-43ef-b97e-a9563bd4237b"
    ],
@@ -86876,7 +86874,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/918f677f-eac8-4e2d-acc9-eb2c3e4de80f"
    ],
@@ -86891,7 +86889,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/463dcd61-1bf6-4182-ae6f-a840e43ea7fe"
    ],
@@ -86906,7 +86904,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/76d729c5-1b4d-4966-8c99-5ac8b74d8719"
    ],
@@ -86921,7 +86919,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/3093633a-62dc-4e93-a305-258a20bfd0f2"
    ],
@@ -86936,7 +86934,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/a0787678-986f-459f-bba3-38d46ef55d8b"
    ],
@@ -86951,7 +86949,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/4fca7c3e-1f7c-455e-b555-a293ff578e60"
    ],
@@ -86966,7 +86964,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/35630402-1f6a-4a3e-b6cf-48c1b93bd6ae"
    ],
@@ -86981,7 +86979,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/64c3ae14-1ec8-46ed-b317-bcd9722319f5"
    ],
@@ -87026,7 +87024,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/413cc3ff-a3b9-465b-827d-4aeb4b0b42c1"
    ],
@@ -87041,7 +87039,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/90f4cf61-cce8-4f87-8495-c0dc298c8d27"
    ],
@@ -87056,7 +87054,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/4d244ceb-6d50-4670-93db-22ad153b3961"
    ],
@@ -87071,7 +87069,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/148ed29a-4c96-4e69-9791-29b2bd3f09b6"
    ],
@@ -87086,7 +87084,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/43caafd7-9177-40f4-b515-0681ef5930f3"
    ],
@@ -87101,7 +87099,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/8a08b0a9-eeff-495c-8fc8-7bbfe3e4dc26"
    ],
@@ -87116,7 +87114,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/c091ed05-ad26-42f2-b7e8-a830404cb152"
    ],
@@ -87131,7 +87129,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/d0ae10e6-5c26-4be4-af00-036b23664127"
    ],
@@ -87146,7 +87144,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/2b66826b-7af3-4053-8d3b-90dbcf4f0740"
    ],
@@ -87176,7 +87174,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/2c46aedb-f7a4-4f9a-bade-5ae192acc2a3"
    ],
@@ -87191,7 +87189,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/97943c08-7d1f-400e-b71d-7a20e939b1d9"
    ],
@@ -87206,7 +87204,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/8a353296-bd2d-4fd6-b1b9-d8b3c8b3f771"
    ],
@@ -87221,7 +87219,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/cc84252c-b7c6-484d-a036-dd38a90b1b04"
    ],
@@ -87236,7 +87234,7 @@
     "legislator"
    ],
    "lastModified": "Mon, 26 Oct 2026 13:22:09 GMT",
-   "read": "2026-10-31",
+   "read": "2026-11-07",
    "records": [
     "legislator:KS:ocd-person/85a66c0d-6f9e-4a55-947e-4d3dc28af0d8"
    ],
@@ -92407,7 +92405,7 @@
   },
   "https://www.legis.ga.gov/api/images/default-source/portraits/neal-yasmin-765.jpg": {
    "bytes": 1048576,
-   "error": "copy: InvalidStateError: The source image could not be decoded.",
+   "error": "URLError: <urlopen error timed out>",
    "gone": 0,
    "height": 1690,
    "kinds": [
@@ -93650,6 +93648,7 @@
     "sha256": "2344aa62f8ce2af6ac7d431d5a3f96020181fd36a02ed06808f03756ffa764a9",
     "width": 174
    },
+   "error": "URLError: <urlopen error timed out>",
    "gone": 0,
    "height": 2994,
    "kinds": [
@@ -93734,7 +93733,7 @@
   },
   "https://www.legis.ga.gov/api/images/default-source/portraits/smith-tyler-paul-4990.jpg": {
    "bytes": 1048576,
-   "error": "copy: InvalidStateError: The source image could not be decoded.",
+   "error": "URLError: <urlopen error timed out>",
    "gone": 0,
    "height": 1794,
    "kinds": [
@@ -106008,18 +106007,6 @@
     "officer:IN:sos:Diego Morales"
    ]
   },
-  "https://www.nass.org/sites/default/files/styles/secretary/public/2025-03/MD-Lee-25.png?itok=HDnlCNlh": {
-   "bytes": 7949,
-   "etag": "\"AzXTVGue2VTwCJRx4ou39zHFmLVeKGwcax4iwGN5xsI\"",
-   "gone": 0,
-   "kinds": [
-    "officer"
-   ],
-   "read": "2026-11-02",
-   "records": [
-    "officer:MD:sos:Susan C. Lee"
-   ]
-  },
   "https://www.nass.org/sites/default/files/styles/secretary/public/2025-03/NE-Evnen-25.jpg?itok=uc48bAFg": {
    "bytes": 9077,
    "etag": "\"I44RUIfbcLl0QYLHVJ7K57inMpakce2T/XYWDKoRmww\"",
@@ -106166,6 +106153,18 @@
    "read": "2026-11-02",
    "records": [
     "officer:NJ:sos:Shirley Emehelu"
+   ]
+  },
+  "https://www.nass.org/sites/default/files/styles/secretary/public/2026-11/MD-MLore.jpg?itok=IEQ8kH6C": {
+   "bytes": 13529,
+   "etag": "\"IXqNgzsATe6QgOhgYWKHEGC4J+5WcFaY6B95rpmN7qg\"",
+   "gone": 0,
+   "kinds": [
+    "officer"
+   ],
+   "read": "2026-11-07",
+   "records": [
+    "officer:MD:sos:Michael Lore"
    ]
   },
   "https://www.nassaucountyny.gov/ImageRepository/Document?documentID=9396": {
@@ -125428,7 +125427,7 @@
    "sha256": "87c9272c6ae3e3ef15abe74092564f7bff83c850496e6f253047e840ea785f05",
    "width": 1280
   },
-  "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_copy_18960607.coreimg.jpeg/1789594460036/pohlman-j-hires.jpeg": {
+  "https://www.utcourts.gov/content/experience-fragments/utcourts/us/en/site/judges_bios/appellate_courts/utah-supreme-court/master/_jcr_content/root/container/columncontainer_copy/col-2-2-1/teaser_copy_18960607.coreimg.jpeg/1793992444607/pohlman-j-hires.jpeg": {
    "bytes": 137706,
    "copy": {
     "box": [
@@ -125436,31 +125435,31 @@
      96
     ],
     "bytes": 2963,
-    "chrome": "Chrome/155.0.8059.39",
+    "chrome": "Chrome/156.0.8078.79",
     "file": "fb60a27c4074bbf690d0.jpg",
     "for": [
-     "justice:UT:court:Jill M. Pohlman"
+     "justice:UT:court:Interim Chief Justice Jill M. Pohlman"
     ],
     "from": [
      1280,
      1600
     ],
     "height": 120,
-    "made": "2026-10-26",
+    "made": "2026-11-07",
     "quality": 0.86,
     "sha256": "fb60a27c4074bbf690d0b3720ac7ec3d7331ddc442f0f6f81f29e04958721be8",
     "width": 96
    },
-   "etag": "\"219ea-65ba06e148f00\"",
+   "etag": "\"219ea-65fa06a5ab700\"",
    "gone": 0,
    "height": 1600,
    "kinds": [
     "justice"
    ],
-   "lastModified": "Wed, 16 Sep 2026 21:34:20 GMT",
-   "read": "2026-11-02",
+   "lastModified": "Fri, 06 Nov 2026 19:14:04 GMT",
+   "read": "2026-11-07",
    "records": [
-    "justice:UT:court:Jill M. Pohlman"
+    "justice:UT:court:Interim Chief Justice Jill M. Pohlman"
    ],
    "sha256": "d020ba1f76c54b330b9513ab5fd503cdedf966f8cade7ee5e0188e018b60e79f",
    "width": 1280
