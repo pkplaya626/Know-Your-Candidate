@@ -2206,12 +2206,17 @@ async function testDirectoryAsync() {
     const unprofiled = (window.kycRaces || []).filter((r) => r.settled && r.candidateCount === 0 &&
       ((r.results || {}).belowThreshold || []).length);
     check("there are races whose only challengers are under the threshold", unprofiled.length > 0);
+    // A name the results may give a profile (maybeProfiled: MN-5's Joe Nagel
+    // on 2026-11-06) is counted on the ballot but not as having none: the
+    // check counted every name as profileless and held three refreshes.
     const badly = unprofiled.filter((r) => {
       const html = KYC.cards.raceBadges(r);
       const n = r.results.otherNominees.length;
+      const none = KYC.cards.unprofiledNames(r).none.length;
       return /No challenger on the ballot/.test(html) ||
         (html.indexOf(n + " challenger") === -1 && html.indexOf(n + " candidate") === -1) ||
-        html.indexOf(n + " with no profile here") === -1;
+        (none > 0 && html.indexOf(none + " with no profile here") === -1) ||
+        (none === 0 && / with no profile here/.test(html));
     });
     check("each counts them as challengers and says they have no profile here",
       badly.length === 0, badly.slice(0, 3).map((r) => r.id + ": " + KYC.cards.raceBadges(r)).join(" | "));
