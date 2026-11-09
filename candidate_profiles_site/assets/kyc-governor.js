@@ -590,36 +590,117 @@
     setPortrait("", null, null, "");
   }
 
+  /* A state's page holds its own state's government alone
+   * (data/stategov/<st>.js): a link to another state's governor or race
+   * there is not "not in this build's data" (rule 19), but on that state's
+   * page, at the same address. Null, or ``{code, here}``: the state the id
+   * names and the page's own. Only a place the file names as having a
+   * governor (``governed``, kyc/emit.py): the District of Columbia has
+   * none, and its page would say nobody was there (rule 19). */
+  function elsewhere(id) {
+    var m = ID.exec(String(id || ""));
+    var code = m ? m[1] : "";
+    var page = doc.querySelector('[data-page="state"][data-state]');
+    var here = page ? page.getAttribute("data-state") : "";
+    var governed = (global.kycStateGov || {}).governed;
+    var has = governed ? governed.indexOf(code) !== -1 : KYC.stateName(code) !== code;
+    return code && here && code !== here && !states()[code] && has
+      ? { code: code, here: here } : null;
+  }
+
+  /* A place in its own words (rule 75): "the District of Columbia", "the
+   * U.S. Virgin Islands", never "District of Columbia" in a sentence, and
+   * no territory or the District called a state. */
+  var WITH_THE = { DC: true, MP: true, VI: true };
+  function placeWords(code) {
+    return (WITH_THE[code] ? "the " : "") + KYC.stateName(code);
+  }
+  function placeOwn(code) {
+    var w = placeWords(code);
+    return w + (/Islands$/.test(w) ? "’" : "’s");
+  }
+
+  function renderElsewhere(id, other) {
+    var there = placeWords(other.code);
+    el("governorModalKind").textContent = "On another page";
+    el("governorModalParty").hidden = true;
+    el("governorModalPrinted").hidden = true;
+    el("governorModalMeta").textContent = "";
+    el("governorModalStatus").hidden = true;
+    el("governorModalBody").innerHTML = '<div class="modal-column">' +
+      panel("info", "On " + placeOwn(other.code) + " page", '<p class="note-box">This page holds the records of ' +
+        KYC.escapeHtml(placeWords(other.here)) + " alone. The link names " +
+        KYC.escapeHtml(id) + ", a record of " + KYC.escapeHtml(there) + ": " + '<a href="' +
+        KYC.escapeAttr(KYC.stateUrl(other.code) + "#/official/" + encodeURIComponent(id)) + '">open it on ' +
+        KYC.escapeHtml(placeOwn(other.code)) + " page</a>.</p>") + "</div>";
+    el("governorModalSource").textContent = "";
+    setPortrait("", null, null, "");
+  }
+
   function render(id, found) {
-    el("governorModalName").textContent = found ? found.person.name : "No longer listed";
-    if (!found) renderMissing(id);
+    var other = found ? null : elsewhere(id);
+    el("governorModalName").textContent = found ? found.person.name
+      : other ? "On " + placeOwn(other.code) + " page" : "No longer listed";
+    if (other) renderElsewhere(id, other);
+    else if (!found) renderMissing(id);
     else if (found.kind === "governor") renderGovernor(found.code, found.person);
     else renderCandidate(found.code, found.person, found.parts);
   }
 
   /* ------------------------------------------------------------------ open */
 
-  var pending = null;
+  var pending = false;
+
+  /** The overlay while the governors' data is loading, or where it did
+   *  not load (rule 94): said, never a blank or "not listed". */
+  function renderWaiting(failed) {
+    el("governorModalName").textContent = failed ? "Did not load" : "Loading…";
+    el("governorModalKind").textContent = "Governor";
+    el("governorModalParty").hidden = true;
+    el("governorModalPrinted").hidden = true;
+    el("governorModalMeta").textContent = "";
+    el("governorModalStatus").hidden = true;
+    el("governorModalBody").innerHTML = '<div class="modal-column">' + (failed
+      ? panel("info", "The governors’ data did not load", '<p class="note-box">This record cannot be ' +
+        "shown, because the file of the states’ governors and their races did not load. Reloading the " +
+        "page usually fixes it.</p>")
+      : '<p class="race-note" role="status">Loading the governors and their races…</p>') + "</div>";
+    el("governorModalSource").textContent = "";
+    setPortrait("", null, null, "");
+  }
 
   function open(id, opts) {
     if (!sg()) return false;
     if (!sg().loaded()) {
       // The grid loads the governors' data on demand (rule 94): a shared
-      // link to an overlay asks for it once, and opens when it comes.
-      if (pending === id) return true;
-      pending = id;
+      // link to an overlay asks for it once, says so while it loads, and
+      // draws the record when it comes - or says it did not load.
+      // One wait for the file, whichever record is asked for meanwhile: it
+      // draws what is open when the file comes, not the first id asked for.
+      // A wait per call left the overlay "Loading…" for ever once the
+      // address changed before the file arrived (PR #172 review).
+      show(id, null, opts, false);
+      if (pending) return true;
+      pending = true;
       KYC.loadData("stategov.js", "kycStateGov", function (ok) {
-        var wanted = pending;
-        pending = null;
-        if (ok && wanted === id) open(id, opts);
+        pending = false;
+        if (!isOpen() || !current) return;
+        if (ok && sg().loaded()) open(current, { fromRoute: true });
+        else renderWaiting(true);
       });
       return true;
     }
-    var found = find(id);
+    return show(id, find(id), opts, true);
+  }
+
+  /** The overlay for *id*: its record (*found*), once the data is in
+   *  (*ready*), or the line saying it is loading. */
+  function show(id, found, opts, ready) {
     ensure();
     current = id;
     KYC.clearShareField(el("governorModalCopy"));
-    render(id, found);
+    if (ready) render(id, found);
+    else renderWaiting(false);
     el("governorModalReport").setAttribute("data-profile", id);
     if (baseTitle === null) baseTitle = doc.title;
     var shown = el("governorModalName").textContent;
@@ -688,12 +769,18 @@
     });
     // "Copy link" shares the person's share page (o/<id>.html, rule 96),
     // which unfurls with their name and the overlay's words; an id nobody
-    // here answers to has none, and shares the overlay's own address.
+    // here answers to has none, and shares the overlay's own address. A
+    // record of another state, which a state's page does not hold
+    // (data/stategov/<st>.js, PR #172), shares the address on that state's
+    // page, where it is drawn - never this page's note that it is elsewhere.
     var copy = el("governorModalCopy");
     copy.addEventListener("click", function () {
       if (!current) return;
       var found = find(current);
+      var other = found ? null : elsewhere(current);
       var url = found ? KYC.shareUrl("official", current)
+        : other ? new global.URL(KYC.stateUrl(other.code) + "#/official/" + encodeURIComponent(current),
+          global.location.href).href
         : global.location.origin === "null" ? global.location.href
         : global.location.origin + global.location.pathname + "#/official/" + encodeURIComponent(current);
       KYC.shareLink(copy, url, found ? found.person.name : "");

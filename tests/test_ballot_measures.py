@@ -322,14 +322,24 @@ class TestTheSourcesAreNamed(unittest.TestCase):
 
 class TestThePagesLoadThem(unittest.TestCase):
     def test_state_pages_and_your_ballot_load_the_questions(self):
-        self.assertIn("../data/measures.js", pages._state_scripts("CA"))
-        self.assertNotIn("../data/measures.js", pages._state_scripts(None))
+        # A state's page names them on demand and loads them once drawn,
+        # over the plain list it is written with (phone plan 3b); Your
+        # ballot loads them before it draws.
+        scripts, later = pages._state_scripts("CA")
+        self.assertNotIn("../data/measures.js", scripts)
+        self.assertIn("measures.js", later)
+        self.assertNotIn("../data/measures.js", pages._state_scripts(None)[0])
+        self.assertNotIn("measures.js", pages._state_scripts(None)[1])
+        self.assertIn("../data/measures.js", emit.STATE_PAGE_ON_DEMAND)
         self.assertIn("data/measures.js", emit.BALLOT_PAGE_REQUIREMENTS)
         self.assertNotIn("../data/measures.js", emit.STATES_INDEX_REQUIREMENTS)
         for page in ("states/ca.html", "ballot.html"):
             with open(os.path.join(ROOT, "candidate_profiles_site", page), encoding="utf-8") as fh:
-                self.assertTrue(re.search(r'src="(\.\./)?data/measures\.js\?v=[0-9a-f]{10}"',
-                                          fh.read()), page)
+                html = fh.read()
+            self.assertTrue(re.search(r'src="(\.\./)?data/measures\.js\?v=[0-9a-f]{10}"', html), page)
+            if page.startswith("states/"):
+                self.assertNotIn("../data/measures.js", emit.script_sources(html))
+                self.assertIn("../data/measures.js", emit.on_demand_sources(html))
 
 
 if __name__ == "__main__":

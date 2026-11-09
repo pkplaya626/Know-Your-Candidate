@@ -68,11 +68,13 @@ data/photo_copies.json      ──┤   (each heavy portrait's original and its 
 data/partisan_composition.json ┴─> kyc/ ──> candidate_profiles_site/
                                              data/people/meta.js (the build's figures and signature)
                                              data/people/index.js (everyone's cards and search fields, every race)
+                                             data/people/words.js (the profiles' own words the grid's search reads, on a query; rule 94)
                                              data/people/*.js   (one state's whole records and races; rule 94)
                                              data/geo.js        (SVG path data for the map)
                                              data/odds.js       (market prices, polling averages)
                                              data/government.js (the guide's maps: kyc/government_maps.py)
                                              data/stategov.js   (governors, chamber control, trifectas)
+                                             data/stategov/*.js (one state's part of it, for its own state page; rule 94)
                                              data/measures.js   (the statewide questions: kyc/ballot_measures.py)
                                              data/localmeasures/*.js (the counties covered, and one state's local questions: kyc/local_measures.py)
                                              data/search.js     (the search's places and bodies: kyc/search_index.py)
@@ -2736,6 +2738,39 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     as though it were the Senate. The guide's Congress page names its
     members from the build (`pages.committees_html`, `leaders_html`) and
     loads no profile data.
+    The index still held 45% of its gzipped weight in words no card draws -
+    careers, schools, platforms, committees, funding, the voting record,
+    the campaign's quote - which only the grid's free-text search reads, so
+    every reader of the grid and the map waited for them before the first
+    card or shape. They are `emit.INDEX_WORDS`, left out of the index and
+    written to `data/people/words.js`, which the grid loads the first time a
+    query is typed (`KYC.loadWords`; a link arriving with `?q=` asks for it
+    as `meta.js` arrives) and takes into the index's records as a state's
+    file does, filling and never replacing them. While it loads the results
+    line says the search is still reading the profiles' own words and anyone
+    they match is added in a moment; where it fails, that the search looked
+    at names, places and offices only - never "no profiles" (rule 19). The
+    Governors view searches its own cards and never asks for it. A field a
+    card, a filter, a sort or a race list reads stays in the index;
+    `TestTheIndexDrawsNothingItLeavesOut` holds the words to the same test as
+    `INDEX_LEAVES_OUT`, and `testPeopleSplit` asks real queries for the same
+    people, scores and snippets from the index and its words as from the
+    whole records. A state page holds only its own state's government
+    (`data/stategov/<st>.js`, that state's entry, the sources and `governed`,
+    the places whose entry holds a governor), so a link there to another
+    state's governor says so and links that state's page, its Copy link
+    shares the record's address there, and a place with no governor is not
+    sent to one; the map, the directory, the
+    legislatures' directory, the search and Your ballot keep the whole
+    `stategov.js`. A state page loads `data/odds.js` and `data/measures.js`
+    once it has drawn, and a district page `data/odds.js` when a profile
+    shows prices (`emit.PAGE_ON_DEMAND`, `STATE_PAGE_ON_DEMAND`,
+    `DISTRICT_PAGE_ON_DEMAND`, held by `check_pages`): each race draws a slot
+    `KYC.odds.render` fills when the file is in, or says did not load, and
+    the questions stand as the plain list rule 96 writes until they are
+    drawn over it. Anything new that draws prices or questions on those
+    pages goes through `KYC.odds.render` and `KYC.ballot`; a block that
+    tests `window.kycOdds` itself shows nothing there.
 
 95. **A ballot question is the election office's words, and "none" is a
     document's.** Every state page said the ballot also held "ballot

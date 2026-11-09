@@ -221,10 +221,42 @@
   var indexIn = false;     // whether the index of everyone is in
   var partial = {};        // id -> true for a record the index holds in part
   var refusedPeople = [];  // the files refused, as the index or a state code
+  var wordsIn = false;     // whether the words file is in (data/people/words.js)
+  var earlyWords = null;   // the words file, arrived before the index
   var lastPeopleFile;
+
+  /* data/people/words.js: what the grid's search reads and no card draws
+   * (emit.INDEX_WORDS) - careers, schools, platforms - for everyone the
+   * index holds, loaded the first time a query is typed. Each person's
+   * words fill the index's record, never replacing a field it holds; a
+   * search cached on a record is dropped, to be read again with them. */
+  function takeWords(file) {
+    var build = (global.kycBuildMeta || {}).signature;
+    if (build && file.build !== build) {
+      if (refusedPeople.indexOf("words") === -1) refusedPeople.push("words");
+      return;
+    }
+    if (wordsIn) return;
+    // Asked for beside the index (a link with a query), they can arrive
+    // first: kept until there are records to fill.
+    if (!indexIn) { earlyWords = file; return; }
+    var held = {};
+    people().forEach(function (p) { held[p.id] = p; });
+    file.people.forEach(function (w) {
+      var known = held[w.id];
+      if (!known) return;
+      Object.keys(w).forEach(function (key) { if (!(key in known)) known[key] = w[key]; });
+      delete known.__tiers;
+    });
+    wordsIn = true;
+    if (doc && typeof global.CustomEvent === "function") {
+      doc.dispatchEvent(new global.CustomEvent("kyc:words"));
+    }
+  }
 
   function takePeople(file) {
     lastPeopleFile = file;
+    if (file && file.words && file.people) { takeWords(file); return; }
     if (!file || !file.people || !file.races) return;
     var what = file.index ? "index" : String(file.state || "");
     var build = (global.kycBuildMeta || {}).signature;
@@ -248,6 +280,8 @@
       if (!file.index) {
         Object.keys(p).forEach(function (key) { if (!(key in known)) known[key] = p[key]; });
         delete partial[p.id];
+        // Its words may have come with it: searched again with them.
+        delete known.__tiers;
       }
     });
     // A race the index holds is filled from its state's file, never
@@ -268,6 +302,11 @@
     });
     if (file.index) indexIn = true;
     else fullStates[what] = true;
+    if (file.index && earlyWords) {
+      var words = earlyWords;
+      earlyWords = null;
+      takeWords(words);
+    }
     // What was built from the arrays is built again from them.
     profileIndex = null;
     racePositions = null;
@@ -283,6 +322,25 @@
       set: takePeople,
     });
   } catch (e) { /* a page without the property cannot hold people files */ }
+
+  /* The build's figures (data/people/meta.js) arrive just before the
+   * index. A link that arrives with a query ("#/?q=nurse") will search the
+   * profiles' words, so they are asked for then, to come beside the index
+   * rather than after it (only where the page names them: the grid). */
+  var buildMeta = global.kycBuildMeta;
+  try {
+    Object.defineProperty(global, "kycBuildMeta", {
+      configurable: true,
+      enumerable: true,
+      get: function () { return buildMeta; },
+      set: function (meta) {
+        buildMeta = meta;
+        if (meta && !wordsIn && queryInAddress() && onDemandSrc("people/words.js")) {
+          loadPeopleFile("people/words.js", function () { return wordsIn || !!earlyWords; });
+        }
+      },
+    });
+  } catch (e) { /* the figures are then a plain global, as before */ }
 
   /** Every profile the page holds: the array every view reads. */
   function people() {
@@ -3031,6 +3089,34 @@
     return loadPeopleFile("people/index.js", function () { return indexIn; });
   }
 
+  /** Whether every record the page holds carries its words, the fields the
+   *  search reads (emit.INDEX_WORDS): the words file is in, or no record is
+   *  held in part (a state's page, or every state's file in). */
+  function wordsHeld() {
+    if (wordsIn) return true;
+    for (var id in partial) if (Object.prototype.hasOwnProperty.call(partial, id)) return false;
+    return true;
+  }
+
+  /** Whether the page's address carries a search (?q= in its hash or its
+   *  query string) of the profiles: the grid's Governors view
+   *  (chamber=governors) searches its own cards, never the profiles' words. */
+  function queryInAddress() {
+    var loc = global.location || {};
+    var hash = String(loc.hash || "");
+    if (/[?&]chamber=governors(?:&|$)/.test(hash)) return false;
+    return /[?&]q=[^&]/.test(hash) || /[?&]q=[^&]/.test(String(loc.search || ""));
+  }
+
+  /** A promise of whether every record's words are in: at once where they
+   *  are, else once data/people/words.js has loaded. False where it failed
+   *  to load or was refused, and a failed load can be asked for again. */
+  function loadWords() {
+    if (wordsHeld()) return Promise.resolve(true);
+    if (!onDemandSrc("people/words.js")) return Promise.resolve(false);
+    return loadPeopleFile("people/words.js", wordsHeld);
+  }
+
   /** A promise of the person *id* names (an FEC id they were merged from
    *  among them), held whole; null where no profile has that id. Rejects
    *  when a file it needed did not load. */
@@ -3947,6 +4033,7 @@
     stateNamed: stateNamed,
     stateAbbreviation: stateAbbreviation,
     loadData: loadData,
+    onDemandSrc: onDemandSrc,
     people: people,
     races: races,
     isFull: isFull,
@@ -3955,6 +4042,8 @@
     peopleProblem: peopleProblem,
     loadPeople: loadPeople,
     loadIndex: loadIndex,
+    loadWords: loadWords,
+    wordsHeld: wordsHeld,
     loadPerson: loadPerson,
     indexHeld: function () { return indexIn; },
     canLoadPeople: function (file) { return !!onDemandSrc(file); },

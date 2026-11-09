@@ -458,19 +458,22 @@
    *  rule 40: each price quoted, dated, linked, labelled not a poll and not
    *  this site's forecast), or the line that says this site's cache holds
    *  none (rule 19: about the cache, never the race). "" where the page
-   *  does not load data/odds.js. */
+   *  does not load data/odds.js. A page that loads it once drawn (a
+   *  state's, named on demand) gets kyc-odds.js's slot, filled with the
+   *  same block, or the same "holds none" line (*none*), when it is in. */
+  var ODDS_NONE = '<p class="faint gov-odds-none">This site’s cache of prediction markets and polling ' +
+    "averages holds none for this race.</p>";
+
   function raceOdds(code, opts) {
-    if (!KYC.odds || !global.kycOdds) return "";
+    if (!KYC.odds || !(global.kycOdds || (KYC.odds.later && KYC.odds.later()))) return "";
     // The parties the list prints beside its candidates, write-ins apart:
     // what kyc-odds.js reads to say a party-only market over a ballot of
     // one party cannot tell its candidates apart (rule 79).
     var parts = listParts(code, "governor");
     var parties = parts && parts.printed ? parts.printed.map(function (p) { return p.party || ""; }) : null;
-    var html = KYC.odds.render({ id: raceId(code), label: raceHeading(code), listParties: parties },
-      opts || { compact: true });
-    if (html) return html;
-    return '<p class="faint gov-odds-none">This site’s cache of prediction markets and polling ' +
-      "averages holds none for this race.</p>";
+    var html = KYC.odds.render({ id: raceId(code), label: raceHeading(code), listParties: parties,
+      none: ODDS_NONE }, opts || { compact: true });
+    return html || ODDS_NONE;
   }
 
   function governorCard(code, opts) {

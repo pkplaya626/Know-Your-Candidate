@@ -509,6 +509,10 @@ def _build(args):
     if emit.read_signature(path=gov_file) != emit.stategov_signature(state_gov):
         gov_path, gov_size = emit.write_stategov(state_gov, args.root)
         print(f"[ok] wrote {gov_path} ({gov_size / 1024:.0f} KB)")
+    # Each state's part, for its own page.
+    gov_states = emit.write_stategov_states(state_gov, args.root)
+    if gov_states:
+        print(f"[ok] wrote {len(gov_states)} file(s) under {emit.STATEGOV_DIR}")
     gov_stats = stategov.stats(state_gov)
     print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
         f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
@@ -1787,6 +1791,11 @@ def _verify(args):
     else:
         print(f"  ok  {emit.STATEGOV_FILE} matches the governor, legislator and NCSL caches "
               f"({gov_expected[:16]}...)")
+    if gov_built is not None:
+        gov_parts = emit.check_stategov_states(gov_built, args.root)
+        problems += [f"{path} is {why}" for path, why in gov_parts]
+        if not gov_parts:
+            print(f"  ok  {emit.STATEGOV_DIR} holds each state's part of it")
 
     # The statewide questions (rule 95): the page's file is the cache's.
     measures_cache = measures_mod.load(args.root)

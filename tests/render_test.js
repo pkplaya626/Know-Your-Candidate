@@ -22,14 +22,16 @@ const SITE = path.resolve(__dirname, "..", "candidate_profiles_site");
  * and nothing reaches the network: the pages load nothing from another host
  * (CLAUDE.md), and a stylesheet is nothing a test reads. *served* lists the
  * site's files a page asked for. */
-function siteResources(served, refuse) {
+function siteResources(served, refuse, held) {
   return {
-    interceptors: [requestInterceptor((request) => {
+    interceptors: [requestInterceptor(async (request) => {
       const u = new URL(request.url);
       if (u.hostname !== "kyc.local") return new Response("", { status: 403 });
       if (/\.css$/.test(u.pathname)) return new Response("", { headers: { "Content-Type": "text/css" } });
       const file = path.join(SITE, ...decodeURIComponent(u.pathname).split("/").filter(Boolean));
       served.push(u.pathname + u.search);
+      // opts.hold: a file that arrives only when the suite releases it.
+      if (held && held.match.test(u.pathname)) await held.until;
       if (refuse && refuse.test(u.pathname)) return new Response("", { status: 503 });
       if (!fs.existsSync(file) || !fs.statSync(file).isFile()) return new Response("", { status: 404 });
       return new Response(fs.readFileSync(file), {
@@ -44,6 +46,14 @@ function readPeopleFile(file) {
   const sandbox = { window: {} };
   require("vm").runInNewContext(fs.readFileSync(file, "utf8"), sandbox);
   return sandbox.window.kycPeopleFile || sandbox.window.kycBuildMeta;
+}
+
+/* The market prices as data/odds.js assigns them, read from the file: what a
+ * check chooses a priced race by before the page has asked for them. */
+function oddsOnDisk() {
+  const sandbox = { window: {} };
+  require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "odds.js"), "utf8"), sandbox);
+  return sandbox.window.kycOdds || {};
 }
 
 /* Everyone's whole record, from every state's file, keyed by id: what a
@@ -534,7 +544,10 @@ function buildPage(page, opts) {
   opts = opts || {};
   const errors = [];
   const vc = new VirtualConsole();
-  vc.on("jsdomError", (e) => errors.push("jsdomError: " + e.message));
+  // A file a suite blocks failing to load is what it set up, not an error.
+  const blockedLoad = (message) => /Could not load script/.test(message) &&
+    (opts.block || []).some((b) => message.indexOf(b) !== -1);
+  vc.on("jsdomError", (e) => { if (!blockedLoad(e.message)) errors.push("jsdomError: " + e.message); });
   vc.on("error", (...a) => errors.push("console.error: " + a.join(" ")));
 
   // jsdom does not fetch <script src>, so inline every local script in
@@ -585,9 +598,17 @@ function buildPage(page, opts) {
   html = html.replace(/<!--inert-(\d+)-->/g, (m, i) => inert[Number(i)]);
 
   const served = [];
+  // A blocked file that the page names on demand (a state page's prices and
+  // questions) fails when it is asked for, as a blocked tag fails to load.
+  const blocked = (opts.block || []).map((b) => b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+  const refuse = blocked.length
+    ? new RegExp((opts.refuse ? "(?:" + opts.refuse.source + ")|" : "") + "(?:" + blocked.join("|") + ")$")
+    : opts.refuse;
+  let release = () => {};
+  const held = opts.hold ? { match: opts.hold, until: new Promise((r) => { release = r; }) } : null;
   const dom = new JSDOM(html, {
     runScripts: "dangerously",
-    resources: siteResources(served, opts.refuse),
+    resources: siteResources(served, refuse, held),
     url: "https://kyc.local/" + page + (opts.search || "") + (opts.hash || ""),
     pretendToBeVisual: true,
     virtualConsole: vc,
@@ -633,16 +654,32 @@ function buildPage(page, opts) {
   });
 
   const { window } = dom;
-  const packed = { window, D: window.document, errors, served,
+  const packed = { window, D: window.document, errors, served, release: () => release(),
     sources: sources.map((m) => m[1].split("?v=")[0]) };
 
   // Wait for jsdom's own DOMContentLoaded rather than dispatching one. An
   // earlier version fired the event by hand, jsdom then fired its own, and
   // every page module booted twice - two listeners per control, so a single
   // click toggled the race view on and straight back off.
+  // A state's and a district's pages load the market prices and the
+  // statewide questions once drawn (named on demand): the page is handed
+  // over once each it asked for is in, or refused (opts.block, opts.refuse),
+  // as most suites read the page whole. One that asks how the page reads
+  // before they arrive says so (opts.early).
+  const LAZY = [["data/odds.js", "kycOdds"], ["data/measures.js", "kycMeasures"]];
+  const settled = async () => {
+    if (opts.early) return packed;
+    const asked = () => LAZY.filter(([file]) => [...window.document.head.querySelectorAll("script[src]")]
+      .some((s) => s.getAttribute("src").split("?")[0].endsWith(file)));
+    const refused = (file) => (opts.block || []).some((b) => file.endsWith(b)) ||
+      (opts.refuse && opts.refuse.test("/" + file));
+    await until(() => asked().every(([file, name]) => window[name] !== undefined || refused(file)), 8000);
+    if (asked().length) await new Promise((r) => setTimeout(r, 20));
+    return packed;
+  };
   return new Promise((resolve) => {
-    if (window.document.readyState !== "loading") return resolve(packed);
-    window.document.addEventListener("DOMContentLoaded", () => resolve(packed));
+    if (window.document.readyState !== "loading") return resolve(settled());
+    window.document.addEventListener("DOMContentLoaded", () => resolve(settled()));
   });
 }
 
@@ -10468,6 +10505,9 @@ async function testStateGov() {
   suite("state pages — where the office's site cannot confirm a listing, whole sentences", () => {
     const W = nhGov.window;
     const states = W.kycStateGov.states;
+    // A state's page holds its own government (data/stategov/<st>.js), and
+    // this draws Nevada's office on New Hampshire's: it is given Nevada's.
+    if (!states.NV) states.NV = JSON.parse(JSON.stringify(nvGov.window.kycStateGov.states.NV));
     const ag = Object.assign({}, states.NH.ag, { name: "Jane Q. Roe", party: "R", partyKey: "R",
       listedBy: "Republican Attorneys General Association", office: "https://ag.example.gov/" });
     const sos = Object.assign({}, states.NV.sos, { name: "John Q. Doe", party: "D", partyKey: "D",
@@ -14475,6 +14515,12 @@ async function testGovernorSharePages() {
     await settle(50);
     const W = page.window;
     const K = W.KYC;
+    // A state's page holds its own state's part of the governments
+    // (data/stategov/<st>.js, PR #172), and the share pages are every
+    // state's: the checks of every governor and candidate read the whole
+    // file, as the grid's Governors view and the map load it.
+    const part = Object.keys(W.kycStateGov.states);
+    W.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
     const parse = (html) => new W.DOMParser().parseFromString(html, "text/html");
     const text = (doc, sel) => {
       const el = doc.querySelector(sel);
@@ -14487,6 +14533,8 @@ async function testGovernorSharePages() {
     };
     suite(`governors' share pages — one each, in the overlay's words (rules 91, 96), as of ${asOf}`, () => {
       check("the state page loads", page.errors.length === 0, page.errors.join(" | "));
+      check("the state's page loaded its own state's part alone, before the whole file was read",
+        part.join(" ") === "GA", part.join(" "));
       // Everyone the overlay answers to: each governor, and each candidate
       // on a list for an office on this ballot.
       const want = new Set();
@@ -14610,6 +14658,11 @@ async function testGovernorSharePages() {
     await settle(50);
     const W = page.window;
     const K = W.KYC;
+    // The overlay's head is checked for a governor whose office is not on
+    // this ballot too, and Georgia's is: the whole file is read, since a
+    // state's page holds its own part alone (PR #172). Read from Georgia's
+    // part only, that governor was never found and the check went quiet.
+    W.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
     suite(`the governors' words table asked of the page code, ${clock}`, () => {
       const data = W.kycStateGov;
       const savedState = data.states.GA;
@@ -14684,6 +14737,7 @@ async function testGovernorSharePages() {
       });
       check("the overlay draws its head and footer from the same words", drawn.length === 0 && ids.length > 3,
         drawn.slice(0, 5).join(" | "));
+      check("a governor whose office is not on the ballot is among them", !!notUp, notUp || "none found");
     });
   }
 
@@ -17716,6 +17770,12 @@ async function sameOnBoth(full, slim, routes, ids, wait) {
       const done = (b) => !/Looking up/.test((b.D.getElementById("findrep") || {}).textContent || "");
       await until(() => done(full) && done(slim), 8000);
     }
+    // A query loads the profiles' words (data/people/words.js) on the
+    // grid as it ships, and draws again when they are in.
+    if (/[?&]q=/.test(route) && slim.window.KYC.wordsHeld) {
+      await until(() => slim.window.KYC.wordsHeld(), 8000);
+      await settle(30);
+    }
     const a = shown(full.D, ids);
     const b = shown(slim.D, ids);
     out.push({ route, same: a === b, why: a === b ? "" : firstDifference(a, b), size: a.length });
@@ -17723,8 +17783,15 @@ async function sameOnBoth(full, slim, routes, ids, wait) {
   return out;
 }
 
+/* The people files a page fetched once built: the index and the states'
+ * files, not the words the grid's search reads (servedWords). */
 function servedPeople(built) {
-  return built.served.filter((s) => /\/data\/people\//.test(s)).map((s) => s.split("?")[0]);
+  return built.served.filter((s) => /\/data\/people\//.test(s) && !/\/words\.js/.test(s))
+    .map((s) => s.split("?")[0]);
+}
+
+function servedWords(built) {
+  return built.served.filter((s) => /\/data\/people\/words\.js/.test(s));
 }
 
 async function testPeopleSplit() {
@@ -17768,6 +17835,10 @@ async function testPeopleSplit() {
       check("the globals keep their shape: legislatorsData, kycRaces, kycBuildMeta",
         Array.isArray(slim.window.legislatorsData) && Array.isArray(slim.window.kycRaces) &&
           slim.window.kycRaces.length === index.races.length && !!slim.window.kycBuildMeta.signature);
+      check("nor the profiles' words the search reads, before a query is typed",
+        servedWords(slim).length === 0 && !slim.window.KYC.wordsHeld() &&
+          slim.window.legislatorsData.every((p) => !("platforms" in p) && !("education" in p)),
+        servedWords(slim).join(" "));
     });
     const routes = ["#/", "#/?sort=name", "#/?sort=age-desc", "#/?sort=age-asc", "#/?sort=senate26",
       "#/?sort=close-kalshi", "#/?sort=close-polymarket", "#/?view=race", "#/?view=senate",
@@ -17775,12 +17846,47 @@ async function testPeopleSplit() {
       "#/?role=candidate", "#/?role=member&state=TX", "#/?election=senateUp26", "#/?election=notSeeking",
       "#/?election=unchallenged", "#/?state=CA&view=race", "#/?q=nurse", "#/?q=veteran",
       "#/?q=speaker", "#/?q=pelo", "#/?q=texas", "#/?q=j.d.", "#/?q=warren", "#/?q=vance",
-      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show"];
+      "#/?q=80202", "#/?q=02139", "#/?q=nurse&sort=name&eliminated=show", "#/?q=harvard",
+      "#/?q=abortion&view=race", "#/?q=appropriations&view=senate", "#/?q=TX-3", "#/?q=farmer&role=candidate"];
     const ids = ["results", "resultsLabel", "officialResults", "activeFilters", "findrep", "noResults"];
     const compared = await sameOnBoth(full, slim, routes, ids, 200);
     suite("index.html — every view the same from the index as from everyone's whole records", () => {
       compared.forEach((c) => check(`${c.route} draws the same`, c.same && c.size > 200, c.why || c.size));
       check("still no state's file loaded", servedPeople(slim).length === 0, servedPeople(slim).join(" "));
+      check("the profiles' words loaded once, for the first query",
+        servedWords(slim).length === 1 && slim.window.KYC.wordsHeld(), servedWords(slim).join(" "));
+    });
+
+    // Every query finds exactly whom it finds from everyone's whole
+    // records, in the same order, once the words are in: names, careers,
+    // schools, issues, offices held, committees, states and districts
+    // however written (rule 5).
+    const QUERIES = ["pelosi", "pelo", "Mike Rogers", "j.d. vance", "jd vance", "diaz-balart",
+      "Díaz-Balart", "nurse", "farmer", "attorney", "veteran", "teacher", "small business owner",
+      "harvard", "west point", "university of texas", "stanford law", "abortion", "immigration",
+      "border security", "medicare", "climate", "second amendment", "governor", "state senator",
+      "mayor", "city council", "appropriations", "armed services", "pac", "individual",
+      "dw-nominate", "speaker", "Senator Warren", "Rep. Crockett", "kansas", "Kansas", "texas",
+      "IN", "in", "me", "new york", "TX-3", "tx 3", "TX-03", "TX3", "texas 3rd", "ca-12",
+      "AK-AL", "Ohio delegation", "democratic", "republican nurse", "zzqx nobody"];
+    const finds = (w, q) => w.KYC.people().map((p) => [p.id, w.KYC.queryScore(p, q)])
+      .filter((r) => r[1] >= 0).map((r) => r.join(":")).sort().join(",");
+    const snippets = (w, q) => w.KYC.people().map((p) => {
+      const s = w.KYC.queryScore(p, q) === 3 ? w.KYC.searchSnippet(p, q) : null;
+      return s ? p.id + "=" + s.label + ":" + s.text : "";
+    }).filter(Boolean).sort().join("|");
+    suite("index.html — a query finds the same people from the index and its words (rule 94)", () => {
+      QUERIES.forEach((q) => {
+        const a = finds(full.window, q);
+        const b = finds(slim.window, q);
+        check(`"${q}" finds the same people, scored the same`, a === b,
+          a === b ? (a ? a.split(",").length : 0) + " found" : firstDifference(a, b));
+      });
+      const s = QUERIES.filter((q) => snippets(full.window, q) !== snippets(slim.window, q));
+      check("and says where in their words it found each, the same", s.length === 0, s.join(", "));
+      const careers = finds(full.window, "nurse").split(",").filter((r) => /:3$/.test(r)).length;
+      check("a career word finds people by their words alone (the file is read, not skipped)",
+        careers > 0, String(careers));
     });
 
     // A race's money and its ballot side by side are the state's file's:
@@ -17885,6 +17991,134 @@ async function testPeopleSplit() {
     slim.window.KYC.profile.close();
     full.window.close();
     slim.window.close();
+  }
+
+  // While the words load the grid says so, and where they fail it says the
+  // search looked at names, places and offices only: never "No profiles"
+  // for someone their words would have found (rule 19).
+  {
+    const type = (b, q) => {
+      const input = b.D.getElementById("searchInput");
+      input.value = q;
+      input.dispatchEvent(new b.window.Event("search"));
+    };
+    const label = (b) => b.D.getElementById("resultsLabel").textContent;
+    const slim = await buildPage("index.html", { people: "index" });
+    await settle(100);
+    type(slim, "harvard");
+    const reading = label(slim);
+    const readingEmpty = slim.D.getElementById("noResults").hidden;
+    await until(() => slim.window.KYC.wordsHeld() && !/Still reading/.test(label(slim)), 8000);
+    const read = label(slim);
+    const failed = await buildPage("index.html", { people: "index", refuse: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(failed, "harvard");
+    await until(() => /did not load/.test(label(failed)), 8000);
+    const failedLine = label(failed);
+    const failedEmpty = failed.D.getElementById("noResults").hidden;
+    type(failed, "nurse");
+    await until(() => servedWords(failed).length === 2, 8000);
+    // A shared link with a query asks for the words as the index arrives.
+    const linked = await buildPage("index.html", { people: "index", hash: "#/?q=nurse" });
+    await until(() => linked.window.KYC.wordsHeld() && !/Still reading/.test(label(linked)), 8000);
+    await settle(30);
+    suite("index.html — a query while the profiles' words load, and if they fail", () => {
+      check("while they load it says so, never that no profile matches",
+        /Still reading the profiles’ own words/.test(reading) && !/^\s*No profiles/.test(reading) && readingEmpty,
+        reading);
+      check("then it draws whom they match, and the line says nothing more of it",
+        /^Showing/.test(read.trim()) && !/own words/.test(read) &&
+          slim.D.querySelectorAll("#results .card").length > 0, read);
+      check("where they failed, it says the search looked at names, places and offices only",
+        /did not load, so this search looked at names, places and offices only/.test(failedLine) &&
+          !/^\s*No profiles/.test(failedLine) && failedEmpty, failedLine);
+      check("and a new query asks for them again", servedWords(failed).length === 2,
+        servedWords(failed).join(" "));
+      check("a link that arrives with a query asks for them once, and finds by them",
+        servedWords(linked).length === 1 && linked.D.querySelectorAll("#results .card").length > 0 &&
+          /^Showing/.test(label(linked).trim()) && linked.errors.length === 0,
+        servedWords(linked).length + " / " + label(linked).slice(0, 80));
+      // But the refusal itself, which is the failure this checks.
+      const errors = slim.errors.concat(failed.errors.filter((e) =>
+        !/Could not load script: "https:\/\/kyc\.local\/data\/people\/words\.js/.test(e)));
+      check("no page errors but the refused file", errors.length === 0, errors.join(" | "));
+      check("where they failed, the line reads as a sentence",
+        /^No profile found by name, place or office matching “harvard”\./.test(failedLine.trim()), failedLine);
+    });
+    slim.window.close();
+    failed.window.close();
+  }
+
+  // The words can arrive seconds after the first matches are drawn: a
+  // reader who has since appended cards, opened a race's fold or is on a
+  // card keeps their place when the list is drawn again (PR #172 review;
+  // rule 45's "redrew the grid from its first card").
+  {
+    const type = (b, q) => {
+      const input = b.D.getElementById("searchInput");
+      input.value = q;
+      input.dispatchEvent(new b.window.Event("search"));
+    };
+    const label = (b) => b.D.getElementById("resultsLabel").textContent;
+    const cards = (b) => b.D.querySelectorAll("#results .card[data-id]");
+    // Everyone in Texas, out of the race too: more than one window of cards.
+    const grid = await buildPage("index.html", { people: "index", hash: "#/?eliminated=show",
+      hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(grid, "texas");
+    await until(() => /Still reading/.test(label(grid)), 5000);
+    const first = cards(grid).length;
+    const more = grid.D.getElementById("gridMore");
+    if (more) more.click();
+    const appended = cards(grid).length;
+    const on = cards(grid)[Math.min(appended - 1, first + 5)];
+    const onId = on && on.getAttribute("data-id");
+    if (on) on.focus();
+    grid.release();
+    await until(() => grid.window.KYC.wordsHeld() && !/Still reading/.test(label(grid)), 8000);
+    await settle(30);
+    const after = cards(grid).length;
+    const focused = grid.D.activeElement;
+
+    const races = await buildPage("index.html", { people: "index", hash: "#/?view=race",
+      hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(races, "texas");
+    await until(() => /Still reading/.test(label(races)), 5000);
+    const outs = [...races.D.querySelectorAll("#results details.race-out[data-out-race]")];
+    const out = outs[Math.min(2, outs.length - 1)];
+    const outKey = out && out.getAttribute("data-out-race");
+    if (out) openFold(races.window, out);
+    races.release();
+    await until(() => races.window.KYC.wordsHeld() && !/Still reading/.test(label(races)), 8000);
+    await settle(30);
+    const reopened = outKey && races.D.querySelector('#results details[data-out-race="' + outKey + '"]');
+    const openNow = [...races.D.querySelectorAll("#results details[open]")];
+
+    const still = await buildPage("index.html", { people: "index", hold: /\/data\/people\/words\.js$/ });
+    await settle(100);
+    type(still, "texas");
+    await until(() => /Still reading/.test(label(still)), 5000);
+    still.release();
+    await until(() => still.window.KYC.wordsHeld() && !/Still reading/.test(label(still)), 8000);
+    await settle(30);
+    suite("index.html — the words arriving keep the reader's place", () => {
+      check("no page errors", [grid, races, still].every((b) => b.errors.length === 0),
+        [grid, races, still].flatMap((b) => b.errors).join(" | "));
+      check("the reader had appended cards past the first window", first > 0 && appended > first,
+        first + " then " + appended);
+      check("the list drawn again holds at least as many cards", after >= appended, after + " / " + appended);
+      check("and the card the reader was on keeps the focus",
+        !!onId && !!focused && focused.getAttribute("data-id") === onId &&
+          grid.D.getElementById("results").contains(focused),
+        onId + " / " + (focused && focused.getAttribute && focused.getAttribute("data-id")));
+      check("a race's fold the reader opened stays open, its people drawn",
+        !!reopened && reopened.open && reopened.querySelectorAll(".card").length > 0 &&
+          openNow.length === 1, (outKey || "no fold") + " / " + openNow.length + " open");
+      check("a reader who has not moved sees the list drawn as it is now, from its first window",
+        cards(still).length > 0 && cards(still).length <= 120, String(cards(still).length));
+    });
+    [grid, races, still].forEach((b) => b.window.close());
   }
 
   // The directory of states counts every state's races from the index.
@@ -19843,6 +20077,185 @@ async function testGuidePhotos() {
   }
 }
 
+/* A state's page draws its races and its plain questions first, and loads
+ * the market prices and the questions in full once drawn (phone plan 3b);
+ * a district page loads the prices when a profile shows them. Each, once
+ * in, draws exactly what the page drew when it loaded them first, and a
+ * file that does not load is said where it would have been drawn. */
+async function testLazyStateData() {
+  const preload = (files) => (window) => {
+    files.forEach((file) => window.eval(fs.readFileSync(path.join(SITE, "data", file), "utf8")));
+  };
+  const allSlotsFilled = (b) => !b.D.querySelector(".odds-slot");
+  // On the campaign clock, and the day after Election Day, when the prices
+  // are final and the questions in the past tense (rule 63).
+  for (const [code, now] of [["ca"], ["tx"], ["wy"], ["nh"], ["ca", "2026-11-05T09:00:00"],
+    ["wy", "2026-11-05T09:00:00"]]) {
+    const page = `states/${code}.html`;
+    const early = await buildPage(page, { early: true, now });
+    const slots = early.D.querySelectorAll("#stateContent .odds-slot").length;
+    // Congress's races, and the race for governor (#governor-race, PR #191),
+    // whose markets are drawn in its block through kyc-odds.js too (PR #195).
+    const govRaces = early.D.querySelectorAll("#stateContent #governor-race .gov-race").length;
+    const races = early.D.querySelectorAll("#stateContent section.race").length + govRaces;
+    const govSlots = early.D.querySelectorAll("#stateContent #governor-race .odds-slot").length;
+    const plain = early.D.getElementById("measures");
+    const plainWords = plain ? plain.textContent : "";
+    const loadedFirst = early.window.kycOdds !== undefined || early.window.kycMeasures !== undefined;
+    await until(() => early.window.kycOdds !== undefined && early.window.kycMeasures !== undefined &&
+      allSlotsFilled(early), 8000);
+    await settle(30);
+    const first = await buildPage(page, { setup: preload(["odds.js", "measures.js"]), now });
+    await settle(30);
+    const a = first.D.getElementById("stateContent").innerHTML;
+    const b = early.D.getElementById("stateContent").innerHTML;
+    suite(`${page}${now ? " after Election Day" : ""} — the prices and the questions load once the races are drawn`, () => {
+      check("no page errors", early.errors.length === 0 && first.errors.length === 0,
+        early.errors.concat(first.errors).join(" | "));
+      check("neither was loaded before the first draw", !loadedFirst);
+      check("each race drawn holds a slot for its prices", races > 0 && slots === races, `${slots} / ${races}`);
+      check("the race for governor among them", govRaces === 1 && govSlots === 1, `${govSlots} / ${govRaces}`);
+      const govBlock = early.D.querySelector("#stateContent #governor-race .gov-race");
+      check("once in, the race for governor's block is what KYC.stategov draws: its markets, or the line that " +
+        "the cache holds none",
+        !!govBlock && !govBlock.querySelector(".odds-slot") &&
+        (!!govBlock.querySelector(".odds") || !!govBlock.querySelector(".gov-odds-none")) &&
+        govBlock.outerHTML === first.D.querySelector("#stateContent #governor-race .gov-race").outerHTML);
+      check("the questions stand as the page was written, with no word of a failure",
+        !plain || (!plain.querySelector(".measures-failed") && !!plain.querySelector("[data-measure]") ===
+          /<li data-measure="/.test(fs.readFileSync(path.join(SITE, page), "utf8"))), plainWords.replace(/\s+/g, " ").trim().slice(0, 80));
+      check("once in, the page is what it is when they load first", a === b && a.length > 1000,
+        firstDifference(a, b));
+      check("every slot filled", allSlotsFilled(early));
+    });
+    early.window.close();
+    first.window.close();
+  }
+  {
+    // A link to one question (the search's answers link
+    // states/<st>.html#measure-<ST>-<n>, rule 97) lands on it in the plain
+    // list, and again on it drawn in full once data/measures.js is in, held
+    // there while the page grows; a reader who moved first is left where
+    // they are. Before, it landed nowhere and left the reader at the top
+    // (PR #172 review). jsdom lays nothing out, so the jumps are counted.
+    const file = fs.readFileSync(path.join(SITE, "states", "ca.html"), "utf8");
+    const want = /<li data-measure="1" id="measure-CA-1">/.test(file) ? "measure-CA-1" : null;
+    const open = async (hash) => {
+      const sizes = [];
+      const jumps = [];
+      const page = await buildPage("states/ca.html", { early: true, hash, hold: /\/data\/measures\.js$/,
+        setup: (w) => {
+          w.ResizeObserver = function (cb) {
+            const me = { cb, on: false };
+            sizes.push(me);
+            this.observe = () => { me.on = true; };
+            this.disconnect = () => { me.on = false; };
+          };
+          w.HTMLElement.prototype.scrollIntoView = function () {
+            jumps.push({ id: this.id, inPage: this.isConnected, full: this.classList.contains("measure") ||
+              !!this.querySelector(".measure") });
+          };
+        } });
+      await settle(30);
+      const grow = () => sizes.forEach((o) => { if (o.on) o.cb([]); });
+      return { page, jumps, grow };
+    };
+    const arrived = (page) => until(() => page.window.kycMeasures !== undefined &&
+      !!page.D.querySelector("#measures .measure"), 8000);
+    const one = await open("#" + want);
+    const before = one.jumps.slice();
+    one.page.release();
+    await arrived(one.page);
+    await settle(30);
+    const after = one.jumps.slice(before.length);
+    one.grow();
+    const regrown = one.jumps.slice(before.length + after.length);
+    const section = await open("#measures");
+    section.page.release();
+    await arrived(section.page);
+    await settle(30);
+    section.grow();
+    const moved = await open("#" + want);
+    const movedBefore = moved.jumps.length;
+    moved.page.window.dispatchEvent(new moved.page.window.WheelEvent("wheel", { deltaY: 100 }));
+    moved.page.release();
+    await arrived(moved.page);
+    await settle(30);
+    moved.grow();
+    suite("states/ca.html#measure-CA-1 — a link to a question lands on it while the questions load", () => {
+      check("no page errors", [one, section, moved].every((o) => o.page.errors.length === 0),
+        [one, section, moved].flatMap((o) => o.page.errors).join(" | "));
+      check("the plain list carries the question's id", !!want);
+      check("it jumps to the question in the plain list, before the file is in",
+        before.length === 1 && before[0].id === want && before[0].inPage && !before[0].full,
+        JSON.stringify(before));
+      check("and to the question drawn in full once it is in, never to the plain one gone",
+        after.length >= 1 && after.every((j) => j.id === want && j.inPage && j.full), JSON.stringify(after));
+      check("held there as the page goes on growing", regrown.length === 1 && regrown[0].id === want &&
+        regrown[0].inPage && regrown[0].full, JSON.stringify(regrown));
+      check("the fragment is dropped from the address", one.page.window.location.hash === "",
+        one.page.window.location.hash);
+      const last = section.jumps[section.jumps.length - 1] || {};
+      check("a link to the section is held on the section drawn in full",
+        section.jumps.length >= 3 && last.id === "measures" && last.inPage && last.full,
+        JSON.stringify(section.jumps));
+      check("a reader who moved before the file arrived is left where they are",
+        movedBefore === 1 && moved.jumps.length === 1, JSON.stringify(moved.jumps));
+    });
+    [one, section, moved].forEach((o) => o.page.window.close());
+  }
+  {
+    const failed = await buildPage("states/ca.html", { block: ["data/odds.js"] });
+    await until(() => !!failed.D.querySelector(".odds-failed"), 8000);
+    const races = failed.D.querySelectorAll("#stateContent section.race").length +
+      failed.D.querySelectorAll("#stateContent #governor-race .gov-race").length;
+    suite("states/ca.html — market prices that did not load are said where each race shows them", () => {
+      check("no page errors", failed.errors.length === 0, failed.errors.join(" | "));
+      check("every race's place for its prices says they did not load",
+        races > 0 && failed.D.querySelectorAll("#stateContent .odds-failed").length === races,
+        failed.D.querySelectorAll("#stateContent .odds-failed").length + " / " + races);
+      check("in words, never a blank", /did not load/.test(
+        (failed.D.querySelector("#stateContent .odds-failed") || {}).textContent || ""));
+    });
+    failed.window.close();
+  }
+  {
+    // A district page draws no race's prices until a profile shows them.
+    // The profile is opened by its address, chosen from the data as a
+    // Texan whose race has prices: the page draws no card by default on
+    // every day (the January rehearsal's districts/tx.html draws none), so
+    // clicking the first card tested the day's data, not the rule.
+    const page = await buildPage("districts/tx.html", { early: true });
+    await settle(50);
+    const before = page.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
+    const priced = oddsOnDisk().races || {};
+    const raceIds = new Set(page.window.KYC.races().map((r) => r.id));
+    const person = (page.window.legislatorsData || []).filter((p) => {
+      const id = p.contestRaceId || p.raceId;
+      return p.state === "TX" && raceIds.has(id) && ((priced[id] || {}).markets || []).length > 0;
+    })[0];
+    if (person) page.window.location.hash = "#/profile/" + encodeURIComponent(person.id);
+    await until(() => page.window.kycOdds !== undefined && !page.D.querySelector(".odds-slot"), 8000);
+    const box = page.D.getElementById("profileModalRaceOdds");
+    const title = (page.D.getElementById("profileModalRaceTitle") || {}).textContent;
+    const want = person && page.window.KYC.races().filter((r) => r.id === (person.contestRaceId || person.raceId))[0];
+    suite("districts/tx.html — the prices load when a profile shows them", () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      check("a Texan whose race has prices, in the page's data", !!person && !!want,
+        person ? person.id : "none of " + (page.window.legislatorsData || []).length + " profiles");
+      check("not before", before === 0, String(before));
+      check("then the dialog shows them as the prices are drawn everywhere",
+        !!box && !!want && title === want.label &&
+          box.innerHTML === page.window.KYC.odds.render(want, { compact: true, collapsed: true }),
+        box ? title + ": " + box.innerHTML.slice(0, 80) : "no box");
+      check("and they are prices, not a line saying there are none",
+        !!box && box.querySelector(".odds-market") !== null && !/holds none/.test(box.textContent),
+        box ? box.innerHTML.slice(0, 120) : "no box");
+    });
+    page.window.close();
+  }
+}
+
 /* ===================================================== governors' cards */
 
 /* The owner's request of 2026-11-02, "lets add cards for governors": every
@@ -19865,6 +20278,11 @@ async function testGovernorCards() {
 
   const ga = await buildPage("states/ga.html");
   const sg = ga.window.KYC.stategov;
+  // A state's page holds its own state's part of the governments
+  // (data/stategov/<st>.js, PR #172); the checks of every state's card read
+  // the whole file, as the grid's Governors view and the map load it.
+  const part = Object.keys(ga.window.kycStateGov.states);
+  ga.window.eval(fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"));
   const data = ga.window.kycStateGov.states;
   const codes = Object.keys(data);
   const listOf = (code) => {
@@ -19875,6 +20293,7 @@ async function testGovernorCards() {
 
   suite("governor cards — one implementation, for every governor and every listed candidate (rules 12, 91)", () => {
     check("no page errors", !ga.errors.length, ga.errors.join(" | "));
+    check("the state's page loaded its own state's part alone", part.join(" ") === "GA", part.join(" "));
     const missing = codes.filter((c) => {
       const card = html(sg.governorCard(c)).querySelector(".gcard");
       return !card || card.querySelector(".gov-name").textContent.trim() !== data[c].governor.name ||
@@ -20391,19 +20810,83 @@ async function testGovernorOverlays() {
     await until(() => !open() && window.location.hash === startHash, 3000);
     check("the Close button closes it to the same address", !open() && window.location.hash === startHash);
 
+    // A state's page holds its own state's part of the governments
+    // (data/stategov/<st>.js, PR #172): a link there to another state's
+    // governor is on that state's page, never "not in this build's data"
+    // (rule 19).
+    {
+      check("the page holds Georgia's part alone", Object.keys(window.kycStateGov.states).join(" ") === "GA");
+      window.KYC.governor.open("gov-TX");
+      const body = modal().querySelector("#governorModalBody").textContent;
+      const link = modal().querySelector('#governorModalBody a[href$="states/tx.html#/official/gov-TX"]');
+      check("another state's governor links to that state's page, never \"Nobody here by this link\"",
+        open() && !!link && /holds the records of Georgia alone/.test(body) &&
+        /a record of Texas: open it on Texas’s page/.test(body) &&
+        !/Nobody here by this link|No longer listed/.test(modal().textContent), body.slice(0, 200));
+      // Copy link (PR #180's share pages) shares the record where it is
+      // drawn, that state's page, never this page's note that it is elsewhere.
+      {
+        let copied = null;
+        const savedClipboard = Object.getOwnPropertyDescriptor(window.navigator, "clipboard");
+        Object.defineProperty(window.navigator, "clipboard", { configurable: true,
+          value: { writeText: (t) => { copied = t; return Promise.resolve(); } } });
+        modal().querySelector("#governorModalCopy").click();
+        await settle(0);
+        if (savedClipboard) Object.defineProperty(window.navigator, "clipboard", savedClipboard);
+        else delete window.navigator.clipboard;
+        check("its Copy link is the record's address on that state's page",
+          /\/states\/tx\.html#\/official\/gov-TX$/.test(copied || "") && !/states\/ga\.html/.test(copied || ""),
+          String(copied));
+      }
+      window.KYC.governor.close();
+      await until(() => !open(), 2000);
+      // A territory and the District in their own words (rule 75), and
+      // never "state" of either; a place with no governor (the District)
+      // is never sent to its page, which would say nobody is there (rules
+      // 19 and the PR #172 review). Asked of the data: whichever places
+      // the file names as having a governor, and whichever not.
+      const governed = window.kycStateGov.governed || [];
+      check("the page's file names the places with a governor",
+        governed.indexOf("GA") !== -1 && governed.indexOf("TX") !== -1, governed.join(" "));
+      const islands = governed.filter((c) => c === "VI" || c === "MP")[0];
+      if (islands) {
+        window.KYC.governor.open("gov-" + islands);
+        const words = modal().textContent;
+        check("an island territory is \"the … Islands’ page\", never another state",
+          open() && /On the .*Islands’ page/.test(words) && !/[Aa]nother state|state government/.test(words),
+          words.slice(0, 200));
+        window.KYC.governor.close();
+        await until(() => !open(), 2000);
+      }
+      if (governed.indexOf("DC") === -1) {
+        window.KYC.governor.open("gov-DC");
+        const words = modal().textContent;
+        check("a place with no governor is not sent to its page, which holds nobody by that link",
+          open() && /No longer listed/.test(words) && !modal().querySelector('#governorModalBody a[href*="states/"]') &&
+          !/District of Columbia’s page/.test(words), words.slice(0, 200));
+        window.KYC.governor.close();
+        await until(() => !open(), 2000);
+      }
+    }
     // Every governor's "In office since" and "Born" in rule 19's words: a
     // disagreement only where the pipeline compared two dates, and "no
-    // Wikidata item" where the roster holds none (PR #195 review).
+    // Wikidata item" where the roster holds none (PR #195 review). Read on
+    // the map, which holds every state's government (a state's page holds
+    // its own, PR #172), through the same overlay.
     {
+      const whole = await buildPage("map.html");
+      await settle(50);
+      const wmodal = () => whole.D.getElementById("governorModal");
       const bad = [];
       const fieldOf = (label) => {
-        const f = [...modal().querySelectorAll("#governorModalBody .field")]
+        const f = [...wmodal().querySelectorAll("#governorModalBody .field")]
           .find((x) => x.querySelector(".field-label").textContent === label);
         return f ? f.querySelector(".field-value").textContent : "";
       };
-      for (const [code, st] of Object.entries(window.kycStateGov.states)) {
+      check("the map holds every state's government", Object.keys(whole.window.kycStateGov.states).length > 50);
+      for (const [code, st] of Object.entries(whole.window.kycStateGov.states)) {
         const g = st.governor;
-        window.KYC.governor.open(g.id);
+        whole.window.KYC.governor.open(g.id);
         const since = fieldOf("In office since");
         const bornWords = fieldOf("Born");
         const want = {
@@ -20419,11 +20902,12 @@ async function testGovernorOverlays() {
         if (/do not agree/.test(since) && g.sinceWhy !== "disagree") bad.push(code + ": a disagreement claimed");
         if (/do not agree/.test(bornWords) && g.bornWhy !== "disagree") bad.push(code + ": a disagreement claimed");
       }
-      window.KYC.governor.close();
-      await until(() => !open(), 2000);
+      whole.window.KYC.governor.close();
+      await until(() => wmodal().hidden, 2000);
       check("every governor's dates: shown where the NGA and Wikidata agree, else why, in rule 19's words",
         !bad.length, bad.slice(0, 5).join(" | "));
-      const states = window.kycStateGov.states;
+      const states = whole.window.kycStateGov.states;
+      whole.window.close();
       check("the roster's governors with no Wikidata item read \"no Wikidata item\", never a disagreement",
         Object.values(states).filter((s) => s.governor.sinceWhy === "no-item").length > 0 &&
         Object.values(states).every((s) => s.governor.sinceWhy !== "disagree" || !!s.governor.wikidata ||
@@ -20568,7 +21052,10 @@ async function testGovernorOverlays() {
       await until(() => !open(), 2000);
       // In the data: the candidates the pipeline ties to a member, and the
       // sitting governors on their lists, carry their link's field.
-      const all = Object.values(window.kycStateGov.states).flatMap((s) =>
+      // Every state's, from the whole file (a state's page holds its own).
+      const whole = {};
+      new Function("window", fs.readFileSync(path.join(SITE, "data", "stategov.js"), "utf8"))(whole);
+      const all = Object.values(whole.kycStateGov.states).flatMap((s) =>
         ((s.ballot2026 && s.ballot2026.offices.governor && s.ballot2026.offices.governor.candidates) || { candidates: [] })
           .candidates);
       check("the data ties members by bioguide id and marks the sitting governors on their lists",
@@ -20722,6 +21209,159 @@ async function testGovernorOverlays() {
     check("a state with no governor's race says so, and shows the governor's card",
       /does not elect its governor in 2026/.test(panel.textContent) && !!panel.querySelector('.gcard[data-governor="gov-VA"]') &&
       !panel.querySelector(".gcard-candidate"));
+  }
+
+  // What each page loads when (PR #172 merged with #191 and #195): a shared
+  // link to an overlay opens with the race's odds on every page, saying so
+  // while a file it needs loads and where one did not load (rule 94).
+  const racePanelOdds = (page) => {
+    const p = page.D.getElementById("governorModalRacePanel");
+    return p ? p.innerHTML : "";
+  };
+  {
+    const held = await buildPage("states/ga.html", { early: true, hash: "#/official/gov-GA",
+      hold: /\/data\/odds\.js$/, setup: withOdds });
+    await settle(50);
+    const modal = held.D.getElementById("governorModal");
+    const slotBefore = !!held.D.querySelector("#governorModalRacePanel .odds-slot");
+    const servedBefore = held.served.filter((s) => /\/data\/odds\.js/.test(s)).length;
+    held.release();
+    await until(() => held.window.kycOdds !== undefined && !held.D.querySelector(".odds-slot"), 8000);
+    await settle(30);
+    const block = held.D.querySelector("#governorModalRacePanel .odds");
+    const want = held.window.KYC.stategov.raceOdds("GA", { compact: true, collapsed: true });
+    const raceBlock = held.D.querySelector("#governor-race .gov-race .odds");
+    suite("states/ga.html#/official/gov-GA — the overlay opened before the prices are in", () => {
+      check("no page errors", held.errors.length === 0, held.errors.join(" | "));
+      check("open on landing, the prices asked for once", !!modal && !modal.hidden && servedBefore === 1,
+        String(servedBefore));
+      check("the race panel holds the prices' place while they load", slotBefore);
+      check("once in, the overlay's markets are what KYC.stategov draws, every slot filled",
+        !!block && racePanelOdds(held).indexOf(want) !== -1 && /Kalshi/.test(block.textContent) &&
+        !held.D.querySelector(".odds-slot"), block ? block.textContent.slice(0, 80) : "no block");
+      check("and the race block under the cards too", !!raceBlock && /Kalshi/.test(raceBlock.textContent));
+    });
+    held.window.close();
+  }
+  {
+    const refused = await buildPage("states/ga.html", { hash: "#/official/gov-GA", block: ["data/odds.js"] });
+    await until(() => !!refused.D.querySelector("#governorModalRacePanel .odds-failed"), 8000);
+    suite("states/ga.html#/official/gov-GA — prices that did not load are said in the overlay", () => {
+      check("no page errors", refused.errors.length === 0, refused.errors.join(" | "));
+      check("the overlay's race panel says the prices did not load",
+        /did not load/.test(refused.D.querySelector("#governorModalRacePanel .odds-failed").textContent));
+      check("never the line that the cache holds none", !refused.D.querySelector("#governorModalRacePanel .gov-odds-none"));
+    });
+    refused.window.close();
+  }
+  {
+    // The grid names data/stategov.js on demand (PR #191): a shared link
+    // asks for it, says it is loading, and opens with the odds the grid
+    // loaded first.
+    const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+      hold: /\/data\/stategov\.js$/, setup: withOdds });
+    await settle(50);
+    const modal = grid.D.getElementById("governorModal");
+    const loading = !!modal && !modal.hidden && /Loading the governors/.test(modal.textContent) &&
+      !/Nobody here by this link|No longer listed/.test(modal.textContent);
+    grid.release();
+    await until(() => grid.window.kycStateGov !== undefined &&
+      grid.D.getElementById("governorModalName").textContent === grid.window.kycStateGov.states.GA.governor.name, 8000);
+    await settle(30);
+    const block = grid.D.querySelector("#governorModalRacePanel .odds");
+    const words = grid.served.filter((s) => /\/data\/people\/words\.js/.test(s)).length;
+    suite("index.html#/official/gov-GA — the governors' data loads on demand, and the overlay opens with its odds", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("says it is loading, never \"not listed\", while the file is out", loading);
+      check("then names the governor, with the race's markets", !modal.hidden && !!block && /Kalshi/.test(block.textContent) &&
+        racePanelOdds(grid).indexOf(grid.window.KYC.stategov.raceOdds("GA", { compact: true, collapsed: true })) !== -1);
+      check("and asks for no profile words", words === 0, String(words));
+    });
+    grid.window.close();
+  }
+  {
+    // The address changes while the file is out (Back, an edited hash, a
+    // candidate's link): the overlay draws what is open when the file
+    // comes, never "Loading…" for ever (PR #172 review).
+    for (const next of ["#/official/gov-TX", "#/official/gov-GA-x"]) {
+      const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+        hold: /\/data\/stategov\.js$/, setup: withOdds });
+      await settle(50);
+      grid.window.location.hash = next;
+      await settle(30);
+      const asked = grid.served.filter((s) => /\/data\/stategov\.js/.test(s)).length;
+      grid.release();
+      await until(() => grid.window.kycStateGov !== undefined &&
+        !/Loading/.test(grid.D.getElementById("governorModalName").textContent), 3000);
+      await settle(30);
+      const modal = grid.D.getElementById("governorModal");
+      const name = grid.D.getElementById("governorModalName").textContent;
+      const want = next === "#/official/gov-TX" ? grid.window.kycStateGov.states.TX.governor.name : "No longer listed";
+      suite("index.html" + next + " — asked for while the governors' data is still loading", () => {
+        check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+        check("the file asked for once", asked === 1, String(asked));
+        check("the record the address names is drawn once the file is in, never \"Loading…\"",
+          !!modal && !modal.hidden && name === want && !/Loading the governors/.test(modal.textContent), name);
+      });
+      grid.window.close();
+    }
+  }
+  {
+    // A page of a place that is not a state says so in its own words
+    // (rule 75): "the records of the District of Columbia", never "state".
+    const dc = await buildPage("states/dc.html", { hash: "#/official/gov-GA" });
+    await settle(50);
+    const body = (dc.D.getElementById("governorModalBody") || {}).textContent || "";
+    const kind = (dc.D.getElementById("governorModalKind") || {}).textContent || "";
+    suite("states/dc.html#/official/gov-GA — another place's governor, in the District's words", () => {
+      check("no page errors", dc.errors.length === 0, dc.errors.join(" | "));
+      check("the District's own words, a link to Georgia's page, and no \"state\"",
+        /holds the records of the District of Columbia alone/.test(body) &&
+        !!dc.D.querySelector('#governorModalBody a[href$="states/ga.html#/official/gov-GA"]') &&
+        !/state/i.test(body + " " + kind), kind + " | " + body.slice(0, 200));
+    });
+    dc.window.close();
+  }
+  {
+    const grid = await buildPage("index.html", { hash: "#/official/gov-GA", people: "index",
+      block: ["data/stategov.js"] });
+    await until(() => /did not load/.test((grid.D.getElementById("governorModal") || {}).textContent || ""), 8000);
+    const modal = grid.D.getElementById("governorModal");
+    suite("index.html#/official/gov-GA — the governors' data refused", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("the overlay says the data did not load, never that nobody is here",
+        !!modal && !modal.hidden && /governors’ data did not load/.test(modal.textContent) &&
+        !/Nobody here by this link|No longer listed/.test(modal.textContent), modal ? modal.textContent.slice(0, 120) : "");
+    });
+    grid.window.close();
+  }
+  {
+    const shared = await buildPage("map.html", { hash: "#/official/gov-GA", setup: withOdds });
+    await settle(50);
+    const modal = shared.D.getElementById("governorModal");
+    const block = shared.D.querySelector("#governorModalRacePanel .odds");
+    suite("map.html#/official/gov-GA — a shared link opens the overlay with its odds", () => {
+      check("no page errors", shared.errors.length === 0, shared.errors.join(" | "));
+      check("open on landing, naming the governor", !!modal && !modal.hidden &&
+        shared.D.getElementById("governorModalName").textContent === shared.window.kycStateGov.states.GA.governor.name);
+      check("with the race's markets", !!block && /Kalshi/.test(block.textContent));
+    });
+    shared.window.close();
+  }
+  {
+    // The Governors view searches its own cards: a query there asks for
+    // none of the profiles' words (data/people/words.js, PR #172).
+    const grid = await buildPage("index.html", { hash: "#/?chamber=governors&q=texas", people: "index" });
+    await until(() => grid.D.querySelectorAll("#results .gcard").length > 0, 8000);
+    await settle(50);
+    const words = grid.served.filter((s) => /\/data\/people\/words\.js/.test(s)).length;
+    suite("index.html#/?chamber=governors&q=texas — the governors' search loads no profile words", () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("Texas's governor found", grid.D.querySelector('#results .gcard[data-governor="gov-TX"]') !== null);
+      check("the words file not asked for", words === 0, String(words));
+      check("no line about reading the profiles' words", !/profiles’ own words/.test(grid.D.getElementById("resultsLabel").textContent));
+    });
+    grid.window.close();
   }
 }
 
@@ -20926,6 +21566,7 @@ async function testGovernorPhotoCredits() {
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
+  if (!only || only === "split") await testLazyStateData();
   if (!only || only === "index.html" || only === "votes") await testVotes();
   if (!only || only === "money") await testRaceMoney();
   if (!only || only === "money" || only === "map") await testMapMoney();
