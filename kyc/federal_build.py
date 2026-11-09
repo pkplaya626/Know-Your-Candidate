@@ -250,6 +250,15 @@ def build(root="."):
     # says which source says what (vacancies.listed_senior).
     disagree = vacancies.listed_senior(openings, judges)
     elevations = vacancies.pending_elevations(openings, judges)
+    # Leaving the seat, as the announced list has it (senior status,
+    # retirement): said on the judge's own record, in the future tense.
+    departures = vacancies.announced_departures(openings, judges)
+
+    def leaving(row, jid, cid):
+        going = departures.get(jid)
+        if going and going["court"] == cid:
+            row["leaving"] = {"reason": going["reason"]}
+        return row
     # Confirmed and not yet commissioned: listed apart on their court's
     # page, never among its judges or in its counts.
     pending = {}
@@ -342,7 +351,8 @@ def build(root="."):
         "otherCourts": [dict(c) for c in court_info.OTHER_COURTS],
         "courtSites": {"source": court_info.SOURCE, "reviewed": court_info.REVIEWED},
         "statute": (court_districts.load_cache(root) or {}).get("source"),
-        "supremeCourt": {"members": [_judge(judges[i], links, disclosures) for i in scotus["judges"]],
+        "supremeCourt": {"members": [leaving(_judge(judges[i], links, disclosures), i, "scotus")
+                                     for i in scotus["judges"]],
                          "retired": [_judge(judges[i], links, disclosures) for i in scotus.get("retired") or []]},
         # Sitting judges: a retired justice is listed apart, never counted.
         "judges": sum(1 for j in judges.values() if not j.get("retiredJustice")),
@@ -374,7 +384,7 @@ def build(root="."):
                 to = elevations[i]
                 row["nominatedTo"] = {"id": to["court"], "name": federal_courts.COURTS[to["court"]]["name"],
                                       "nominated": to.get("nominated"), "asOf": openings["asOf"]}
-            rows.append(row)
+            rows.append(leaving(row, i, cid))
         per_court[cid] = {"id": cid, "listed": held["listed"], "judges": rows,
                           "vacancies": vacant.get(cid, []), "future": coming.get(cid, [])}
         if divisions.get(cid):
