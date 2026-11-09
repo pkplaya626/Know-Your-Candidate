@@ -2991,6 +2991,56 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     other office they are running for. And a smooth scroll past the
     delegation's cards (content-visibility) stopped every jump 500-950px
     short of its race, so every jump on the page now scrolls at once.
+    The second phase (after Election Day) adds three things, each tested on
+    the campaign clock and after Election Day. Once "Find your race" has
+    scrolled away a bar under the header holds the same select (a copy of
+    the block's, one list) and a way back; it is fixed, so showing it moves
+    nothing, it grows the page's scroll-padding by its height so a jump
+    lands below it, and it is not shown on a screen under 500px tall. The
+    padding is set before a jump scrolls, by where the jump will leave the
+    block (`barForJump`), never only once the observer sees the block go:
+    its review found every jump made from the block or by a link (the
+    select, a square, the lookup's answer, a `#race-` address) landing at
+    the header's padding, and the bar shown a moment later over the top of
+    the race; a jump back to the block takes the padding off first.
+    Chips over the rows pick out open seats and races with no challenger
+    on the ballot, in the race heads' own words on both clocks
+    (`KYC.cards.raceFilterWords`: "Uncontested" over heads saying "No
+    challenger on the ballot" was two names for one thing), and in their
+    tense: from the day after Election Day the heads read "No challenger was
+    on the ballot" (rule 63), and so does the chip - merged with the
+    results-day heads, a chip in the present tense named a filter no head
+    used over decided races. They are counted by the
+    heads' own tests (`KYC.cards.raceFilters`, which the grid's chip uses
+    too), with a live "Showing N of M races for Congress" line, and the button below it
+    opens and counts the races shown ("Open these 4 races", never "Open all
+    52" under "Showing 4 of 52"); the
+    filter is in the address (`#/?races=open`), a jump to a race it leaves
+    out shows every race again, and a search never brings one back. The
+    race for governor (rule 91) is no race for Congress: the bar's select
+    offers it where the block's does, its row opens it as a race's row
+    does, and no chip counts or hides it (rules 27, 73; `filterPasses`
+    leaves it alone). Merged with the governor cards, a chip hid it, and a
+    jump to it under a chip put every race back. And a
+    redrawn state's district page shows one plan at a time below 1000px,
+    the 2026 plan first, drawing the other only when it is first switched
+    to and keeping its markup while nothing it shows has changed (still
+    one remeasure at most): Texas's 2026 map began 5,459px down and now
+    begins about 550px down, with Find my district and the picker above
+    it, the key and the zoom chips under it, and the moves folded below
+    under a summary that is their heading's words in its tense ("Ran in a
+    different district" from the day after Election Day).
+    `testDistrictsPhonePlans` numbers every district of each plan, shown in
+    turn, at 280px, on every redrawn state the district files hold (rule
+    43). On a folded page the House delegation's cards
+    fold behind its heading's balance and a "Show all" button, hidden until
+    found, the senators open and every race row leading with its holder; a
+    search naming a member, find-in-page and printing open them; the
+    governor's card stays open under State government, never folded in
+    with Congress's delegation. Whether
+    rule 27 allows this was put to the owner, who approved it; it was the
+    branch's last code commit, so a revert of it alone, and a rebuild,
+    removes it.
 100. **A legislator's portrait is the legislature's, named beside them,
     and a seat's file is dated before it is believed.** 1,022 of 7,323
     state legislators had no portrait (audit 2026-10-17, STATEGOV-13;

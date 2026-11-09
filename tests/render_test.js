@@ -18399,6 +18399,594 @@ function rowProblems(window, D) {
   return out;
 }
 
+/* ===================================== a redrawn state's districts, phone */
+
+/* Below 1000px a redrawn state's district page shows one plan at a time
+ * behind a switch, the 2026 plan first, and draws only that one: Texas's
+ * 2026 map began 5,459px down on a phone (VISUALS-02). */
+async function testDistrictsPhonePlans() {
+  // A browser that can share a location, so Find my district is drawn.
+  const both = (width) => (w) => {
+    phoneWidth(w, true);
+    drawnAt(width)(w);
+    Object.defineProperty(w.navigator, "geolocation", { value: { getCurrentPosition() {} }, configurable: true });
+  };
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("districts/tx.html", { now, setup: both(302) });
+    await settle(30);
+    const { window, D, errors } = page;
+    const state = window.kycDistricts.TX;
+    const grid = D.getElementById("planGrid");
+    const cards = () => [...grid.children];
+    const shownCard = () => cards().filter((c) => !c.hidden);
+    const numbered = (card, plan) => {
+      const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+      return Object.keys(plan.districts).filter((n) => !written.has(n));
+    };
+    const before = (a, b) => !!a && !!b && !!(a.compareDocumentPosition(b) & window.Node.DOCUMENT_POSITION_FOLLOWING);
+    suite(`districts/tx.html on a phone ${when} — one plan at a time, the 2026 plan first`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const buttons = [...D.querySelectorAll(".plan-switch [data-plan-show]")];
+      check("a switch of two buttons is shown, the 2026 plan's first and pressed",
+        !D.querySelector(".plan-switch").hidden && buttons.length === 2 &&
+          buttons[0].getAttribute("data-plan-show") === "1" && buttons[0].getAttribute("aria-pressed") === "true" &&
+          buttons[1].getAttribute("aria-pressed") === "false",
+        buttons.map((b) => b.textContent + "=" + b.getAttribute("aria-pressed")).join(" | "));
+      check("each button names its plan by the plan's own label and title (rule 75)",
+        buttons.every((b) => {
+          const plan = state.plans[Number(b.getAttribute("data-plan-show"))];
+          return b.textContent === plan.label + " " + plan.title;
+        }), buttons.map((b) => b.textContent).join(" | "));
+      check("only the 2026 plan is drawn: the other card is an empty placeholder, hidden",
+        cards().length === 2 && shownCard().length === 1 && shownCard()[0] === cards()[1] &&
+          cards()[0].hidden && !cards()[0].querySelector("svg"),
+        cards().map((c) => (c.hidden ? "hidden " : "shown ") + c.querySelectorAll("svg").length).join(" | "));
+      check("every district on the 2026 plan is numbered somewhere, at 302px (rule 43)",
+        numbered(cards()[1], state.plans[1]).length === 0, numbered(cards()[1], state.plans[1]).join(","));
+      check("Find my district and the picker sit on one row above the map",
+        before(D.getElementById("districtPick"), grid) && !!D.getElementById("locateMe") &&
+          D.querySelector(".districts-locate.has-pick").contains(D.getElementById("districtPick")) &&
+          D.querySelector(".districts-tools").hidden);
+      const fold = D.querySelector(".districts-after .movers-fold");
+      // The summary is the heading's words in the clock's tense (rule 63):
+      // "Ran in a different district" from the day after Election Day.
+      const moved = now ? /^Ran in a different district \d+ members?$/ : /^Running in a different district \d+ members?$/;
+      check("the moves are folded, closed, below the map, the summary counting the members in the heading's tense",
+        !!fold && !fold.open && before(grid, fold) && !!fold.querySelector(".mover-group") &&
+          moved.test(fold.querySelector("summary").textContent) &&
+          fold.querySelector(".state-heading").textContent === fold.querySelector("summary").firstChild.textContent.trim(),
+        fold && fold.querySelector("summary").textContent);
+      check("the hero's lede and links follow the map",
+        !!D.querySelector(".districts-after .districts-lede") && !!D.querySelector(".districts-after .state-links") &&
+          !D.querySelector(".state-hero .districts-lede"));
+      const legend = D.querySelector(".party-legend");
+      check("the key, the toggles and the how-to sit under the shown map, inside its card",
+        !!legend && shownCard()[0].contains(legend) && before(shownCard()[0].querySelector(".district-statewide"), legend) &&
+          shownCard()[0].contains(D.getElementById("compareToggle")) && shownCard()[0].contains(D.querySelector(".districts-howto")));
+      const chips = [...shownCard()[0].querySelectorAll(".inset-zoom [data-zoom]")];
+      check("a Zoom chip for each inset, by its title, under the statewide map",
+        chips.map((c) => c.textContent).join("|") === state.insets.map((i) => i.title).join("|") &&
+          before(shownCard()[0].querySelector(".district-statewide"), chips[0]),
+        chips.map((c) => c.textContent).join("|"));
+      const jumps = [];
+      const real = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () { jumps.push(this); };
+      chips[chips.length - 1].click();
+      window.Element.prototype.scrollIntoView = real;
+      check("a chip jumps to its inset, on the shown plan",
+        jumps.length === 1 && jumps[0].getAttribute("data-inset") === chips[chips.length - 1].textContent &&
+          shownCard()[0].contains(jumps[0]), jumps.map((j) => j.getAttribute("data-inset")).join(","));
+    });
+    suite(`districts/tx.html on a phone ${when} — the other plan, drawn on its first switch and kept`, () => {
+      const kept = cards()[1];
+      D.querySelector('[data-plan-show="0"]').click();
+      check("the 2024 plan is drawn and shown, the 2026 one hidden",
+        shownCard().length === 1 && shownCard()[0] === cards()[0] && !!cards()[0].querySelector(".district-statewide") &&
+          cards()[1] === kept && kept.hidden);
+      check("every district on the 2024 plan is numbered somewhere, at 302px (rule 43)",
+        numbered(cards()[0], state.plans[0]).length === 0, numbered(cards()[0], state.plans[0]).join(","));
+      check("the switch says which is shown, and so does its live region",
+        D.querySelector('[data-plan-show="0"]').getAttribute("aria-pressed") === "true" &&
+          D.getElementById("planShown").textContent === "Showing the " + state.plans[0].title + ", used for " +
+          state.plans[0].used + ".", D.getElementById("planShown").textContent);
+      const old = cards()[0];
+      D.querySelector('[data-plan-show="1"]').click();
+      check("switching back shows the 2026 card as drawn, not drawn again",
+        cards()[1] === kept && !kept.hidden && cards()[0] === old && old.hidden);
+      check("and the key goes with the shown card", kept.contains(D.querySelector(".party-legend")));
+      // A pick changes both plans: the hidden one is drawn again only when shown.
+      D.getElementById("districtPick").value = "9";
+      D.getElementById("districtPick").dispatchEvent(new window.Event("change", { bubbles: true }));
+      check("a pick redraws the shown plan with it", cards()[1] !== kept &&
+        [...cards()[1].querySelectorAll(".district-num.is-focus")].some((n) => n.textContent === "9"));
+      check("and leaves the hidden plan as it was until it is shown", cards()[0] === old);
+      D.querySelector('[data-plan-show="0"]').click();
+      check("shown, the 2024 plan is drawn again with the pick",
+        cards()[0] !== old && [...cards()[0].querySelectorAll(".district-num.is-focus")].some((n) => n.textContent === "9"));
+    });
+    suite(`districts/tx.html ${when} — a tablet turned past 1000px is the desktop page, and back`, () => {
+      turn(window, false);
+      check("both plans drawn side by side, no switch",
+        cards().length === 2 && cards().every((c) => !c.hidden && c.querySelector(".district-statewide")) &&
+          D.querySelector(".plan-switch").hidden && !grid.classList.contains("single"));
+      check("the moves, lede and links are back where the desktop page has them",
+        before(D.querySelector(".districts-movers"), D.getElementById("districtPick")) &&
+          !!D.querySelector(".state-hero .districts-lede") && !!D.querySelector(".state-hero .state-links") &&
+          D.querySelector(".districts-after").hidden);
+      check("no Zoom chips on a desktop", !D.querySelector(".inset-zoom"));
+      check("the key and toggles are back above the maps, in the desktop order",
+        before(D.querySelector(".party-legend"), grid) && D.querySelector(".districts-controls").contains(D.querySelector(".party-legend")) &&
+          D.querySelector(".districts-tools").contains(D.getElementById("compareToggle")) &&
+          D.querySelector(".districts-tools").contains(D.getElementById("districtPick")) &&
+          !D.querySelector(".districts-tools").hidden && !D.querySelector(".districts-locate.has-pick") &&
+          before(D.getElementById("districtPick"), D.getElementById("compareToggle")) &&
+          before(D.querySelector(".districts-howto"), D.querySelector(".party-legend")));
+      turn(window, true);
+      check("turned back, one plan again, the one the reader had picked",
+        shownCard().length === 1 && shownCard()[0] === cards()[0] &&
+          D.querySelector('[data-plan-show="0"]').getAttribute("aria-pressed") === "true");
+      check("still no page errors", errors.length === 0, errors.join(" | "));
+    });
+  }
+  // A state that was not redrawn has one plan: no switch on a phone, its
+  // lede after the map all the same.
+  const ny = await buildPage("districts/ny.html", { setup: both(286) });
+  suite("districts/ny.html on a phone — one plan, no switch", () => {
+    check("no page errors", ny.errors.length === 0, ny.errors.join(" | "));
+    check("no switch", !ny.D.querySelector(".plan-switch"));
+    const card = ny.D.querySelector(".plan-card");
+    const plan = ny.window.kycDistricts.NY.plans[0];
+    const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+    check("every district numbered at 286px", Object.keys(plan.districts).every((n) => written.has(n)));
+    check("zoom chips for its insets", card.querySelectorAll(".inset-zoom [data-zoom]").length ===
+      ny.window.kycDistricts.NY.insets.length);
+  });
+  // The rule 43 check at the phone's own narrowest width: each plan in turn,
+  // on every redrawn state - every district file holding two plans - not a
+  // sample of them (PR #176 review: AL, LA, OH, TN and UT were left out).
+  const redrawn = fs.readdirSync(path.join(SITE, "data", "districts")).filter((f) => /^[a-z]{2}\.js$/.test(f)).map((f) => {
+    const sandbox = { window: {} };
+    require("vm").runInNewContext(fs.readFileSync(path.join(SITE, "data", "districts", f), "utf8"), sandbox);
+    return sandbox.window.kycDistricts || {};
+  }).flatMap((maps) => Object.keys(maps).filter((code) => (maps[code].plans || []).length === 2));
+  suite("the redrawn states, read from the district files", () => {
+    check("several, Texas and California among them", redrawn.length >= 4 && redrawn.includes("TX") && redrawn.includes("CA"),
+      redrawn.join(","));
+  });
+  for (const code of redrawn) {
+    const page = await buildPage("districts/" + code.toLowerCase() + ".html", { setup: both(280) });
+    const state = page.window.kycDistricts[code];
+    suite(`districts/${code.toLowerCase()}.html on a phone at 280px — every district numbered on each plan`, () => {
+      check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+      [1, 0].forEach((i) => {
+        page.D.querySelector(`[data-plan-show="${i}"]`).click();
+        const card = page.D.getElementById("planGrid").children[i];
+        const written = new Set([...card.querySelectorAll(".district-num")].map((t) => t.textContent));
+        const missing = Object.keys(state.plans[i].districts).filter((n) => !written.has(n));
+        check(`the ${state.plans[i].title}, shown`, !card.hidden && missing.length === 0, missing.join(","));
+      });
+    });
+  }
+}
+
+/* ============================== a folded state page's jump bar and filters */
+
+/* A phone of *height* px: the fold's width query, the bar's height query,
+ * and an IntersectionObserver whose callback the suite calls itself. */
+function phoneOfHeight(height) {
+  return (w) => {
+    phoneWidth(w, true);
+    const width = w.matchMedia;
+    w.matchMedia = (query) => /max-height: 499/.test(query)
+      ? { media: query, matches: height < 500, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} }
+      : width(query);
+    w.__observed = [];
+    w.IntersectionObserver = class {
+      constructor(fn, opts) { this.fn = fn; this.opts = opts; }
+      observe(node) { w.__observed.push({ node, fire: (entry) => this.fn([Object.assign({ target: node }, entry)]) }); }
+      disconnect() {}
+    };
+  };
+}
+
+async function testJumpBar() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("states/ca.html", { now, setup: phoneOfHeight(844) });
+    const { window, D, errors } = page;
+    const bar = D.querySelector(".jumpbar");
+    const root = D.documentElement;
+    const watch = window.__observed.filter((o) => o.node.id === "find-race")[0];
+    suite(`states/ca.html on a phone ${when} — the jump bar (rule 44)`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("a bar named Jump to, hidden while Find your race is on screen",
+        !!bar && bar.tagName === "NAV" && bar.getAttribute("aria-label") === "Jump to" && bar.hidden &&
+          !root.classList.contains("has-jumpbar"));
+      check("it watches the Find your race block, below the header", !!watch);
+      const block = [...D.querySelectorAll("#raceJumpSelect option")].map((o) => o.value);
+      const copy = [...D.querySelectorAll("#raceJumpBar option")].map((o) => o.value);
+      check("its select offers exactly the block's places, in the same order",
+        copy.length > 50 && copy.join("|") === block.join("|"), copy.length + " against " + block.length);
+      check("and is named for what it does", D.getElementById("raceJumpBar").getAttribute("aria-label") === "Jump to a race or section");
+      // A jump from the block itself, the bar still hidden: the padding the
+      // bar needs is on before the scroll, or the bar the observer shows a
+      // moment later covers the race the jump landed on (PR #176 review).
+      const landed = [];
+      const own = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () {
+        landed.push({ id: this.id, padded: root.classList.contains("has-jumpbar"), bar: !bar.hidden });
+      };
+      const blockSelect = D.getElementById("raceJumpSelect");
+      const pick = [...blockSelect.options].filter((o) => /^race-H-CA-32/.test(o.value))[0].value;
+      blockSelect.value = pick;
+      blockSelect.dispatchEvent(new window.Event("change", { bubbles: true }));
+      window.Element.prototype.scrollIntoView = own;
+      const first = landed.filter((j) => j.id === pick)[0];
+      check("a pick from the block, the bar hidden, turns the bar and its padding on before it scrolls",
+        !!first && first.padded && first.bar, JSON.stringify(landed));
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      check("once the block has scrolled away under the header, the bar shows and the page's scroll padding grows",
+        !bar.hidden && root.classList.contains("has-jumpbar"));
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: 2000, bottom: 2600 } });
+      check("never for a block below the screen", bar.hidden);
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      // A pick from the bar opens its race and goes there, as the block's does.
+      const select = D.getElementById("raceJumpBar");
+      const value = [...select.options].filter((o) => /^race-H-CA-40/.test(o.value))[0].value;
+      const jumps = [];
+      const real = window.Element.prototype.scrollIntoView;
+      window.Element.prototype.scrollIntoView = function () { jumps.push(this.id || this.className); };
+      select.value = value;
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      const section = D.getElementById(value).closest("section.race-foldable");
+      check("a pick from the bar opens its race and jumps to it",
+        jumps.indexOf(value) !== -1 && section.querySelector(".race-row").getAttribute("aria-expanded") === "true",
+        jumps.join(","));
+      check("and the bar's select goes back to its first option", select.value === "");
+      jumps.length = 0;
+      let backPadded = null;
+      window.Element.prototype.scrollIntoView = function () {
+        jumps.push(this.id || this.className);
+        if (this.id === "find-race") backPadded = root.classList.contains("has-jumpbar") || !bar.hidden;
+      };
+      D.querySelector("[data-jump-find]").click();
+      window.Element.prototype.scrollIntoView = real;
+      check("its button goes back to Find your race and puts the reader on its select",
+        jumps.indexOf("find-race") !== -1 && D.activeElement === D.getElementById("raceJumpSelect"), jumps.join(","));
+      check("with the bar and its padding gone before it scrolls, so the block lands under the header alone",
+        backPadded === false);
+      watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+      turn(window, false);
+      check("a desktop never shows it, past the block or not", bar.hidden && !root.classList.contains("has-jumpbar"));
+      turn(window, true);
+      check("turned back to a phone past the block, it shows again", !bar.hidden);
+      watch.fire({ isIntersecting: true, boundingClientRect: { top: 200, bottom: 800 } });
+      check("and hides, its padding with it, when the block comes back", bar.hidden && !root.classList.contains("has-jumpbar"));
+    });
+  }
+  // A race reached by its address (a shared race's page, Your ballot, a
+  // district page) lands below the bar the observer will show.
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const landed = [];
+    const phone = phoneOfHeight(844);
+    const linked = await buildPage("states/ca.html", { now, hash: "#race-H-CA-32-2026", setup: (w) => {
+      phone(w);
+      w.Element.prototype.scrollIntoView = function () {
+        landed.push({ id: this.id, padded: w.document.documentElement.classList.contains("has-jumpbar") });
+      };
+    } });
+    suite(`states/ca.html#race-H-CA-32-2026 on a phone ${when} — a linked race lands below the bar`, () => {
+      check("no page errors", linked.errors.length === 0, linked.errors.join(" | "));
+      const jumps = landed.filter((j) => j.id === "race-H-CA-32-2026");
+      check("every jump to it is made with the bar's padding on", jumps.length > 0 && jumps.every((j) => j.padded),
+        JSON.stringify(landed.slice(0, 6)));
+      check("and the bar shows", !linked.D.querySelector(".jumpbar").hidden);
+    });
+  }
+  const short = await buildPage("states/ca.html", { setup: phoneOfHeight(420) });
+  suite("states/ca.html on a phone on its side (420px tall) — no jump bar", () => {
+    const watch = short.window.__observed.filter((o) => o.node.id === "find-race")[0];
+    watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+    check("past the block, still hidden: the header and the bar would take a third of the screen",
+      short.D.querySelector(".jumpbar").hidden && !short.D.documentElement.classList.contains("has-jumpbar"));
+  });
+  // A state that does not fold has no bar at all.
+  const wy = await buildPage("states/wy.html", { setup: phoneOfHeight(844) });
+  suite("states/wy.html on a phone — no fold, no bar", () => {
+    check("no bar", !wy.D.querySelector(".jumpbar"));
+  });
+}
+
+/* The chips over a folded page's race rows: counted by the race heads' own
+ * tests, so a chip, its count and the badges never disagree (rule 73). */
+async function testRaceFilters() {
+  const PAGES = ["ca", "tx", "fl", "ny", "ga", "il"];
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const built = {};
+    for (const st of PAGES) built[st] = await buildPage("states/" + st + ".html", { now, setup: (w) => phoneWidth(w, true) });
+    // The heads' words for a race nobody challenges, in the clock's tense
+    // (rule 63): the chip names what it filters in the same words.
+    const noneWords = now ? "No challenger was on the ballot" : "No challenger on the ballot";
+    suite(`state pages on a phone ${when} — the race filters' counts are the race heads' (rules 12, 73)`, () => {
+      const problems = [];
+      PAGES.forEach((st) => {
+        const { window, D, errors } = built[st];
+        if (errors.length) problems.push(st + ": " + errors.join(" | "));
+        const sections = [...D.querySelectorAll("section.race-foldable")];
+        // What each race's own head says, read from the page.
+        const heads = (word) => sections.filter((s) => [...s.querySelectorAll(".race-body .race-head .badge, .race-body .badge")]
+          .some((b) => b.textContent.trim().indexOf(word) === 0)).length;
+        const said = { open: heads("Open seat"), unchallenged: heads(noneWords) };
+        const chips = {};
+        [...D.querySelectorAll(".race-filters [data-race-filter]")].forEach((c) => {
+          chips[c.getAttribute("data-race-filter")] = Number(c.querySelector(".race-filter-count").textContent);
+        });
+        if (chips.all !== sections.length) problems.push(st + ": All says " + chips.all + " over " + sections.length);
+        ["open", "unchallenged"].forEach((k) => {
+          const got = chips[k] || 0;
+          if (got !== said[k]) problems.push(`${st}: ${k} chip ${got}, heads ${said[k]}`);
+        });
+        const info = window.KYC.meta().states[st.toUpperCase()];
+        if ((chips.open || 0) !== (info.open || 0)) problems.push(`${st}: open chip ${chips.open} against the summary's ${info.open}`);
+      });
+      check("each chip counts the races whose head says so, and Open seats is the summary's count", problems.length === 0,
+        problems.slice(0, 6).join(" || "));
+      const past = when === "after Election Day";
+      const words = [].concat(...PAGES.map((st) => [...built[st].D.querySelectorAll(".race-filters [data-race-filter]")]
+        .map((c) => c.firstChild.textContent.trim())));
+      // One name for one thing, on both clocks: the chip is the heads' words
+      // (KYC.cards.raceFilterWords), never "Uncontested" over heads saying
+      // "No challenger on the ballot" (rule 12; PR #176 review), and after
+      // the count the heads' past tense, never the present over a decided
+      // race (rule 63).
+      const other = past ? "No challenger on the ballot" : "No challenger was on the ballot";
+      check(`the no-challenger chip is the head badge's words${past ? ", in the past tense after Election Day" : ""}`,
+        words.indexOf(noneWords) !== -1 && words.indexOf(other) === -1 && words.indexOf("Uncontested") === -1,
+        [...new Set(words)].join(" | "));
+    });
+
+    const { window, D } = built.ca;
+    const KYC = window.KYC;
+    const sections = [...D.querySelectorAll("section.race-foldable")];
+    const shown = () => sections.filter((s) => !s.hidden);
+    const status = D.getElementById("raceFilterStatus");
+    suite(`states/ca.html on a phone ${when} — picking out the open seats`, () => {
+      check("a group of chips over the rows, All pressed", D.querySelector(".race-filters").getAttribute("role") === "group" &&
+        D.querySelector('[data-race-filter="all"]').getAttribute("aria-pressed") === "true" && status.textContent === "");
+      D.querySelector('.race-filters [data-race-filter="open"]').click();
+      const want = sections.filter((s) => KYC.cards.raceFilters.open(KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0]));
+      check("only the open seats' rows are shown", shown().length === want.length && shown().every((s) => want.indexOf(s) !== -1),
+        shown().map((s) => s.getAttribute("data-race")).join(","));
+      check("the live line says how many, of how many", status.textContent === `Showing ${want.length} of ${sections.length} races for Congress` &&
+        status.getAttribute("aria-live") === "polite", status.textContent);
+      check("with Show all beside it", !D.querySelector(".race-filter-all").hidden);
+      check("the filter is in the address", /#\/\?races=open$/.test(window.location.href), window.location.href);
+      // The button below the line counts what the line counts, and opens
+      // only those (rule 73; PR #176 review: "Open all 52 races").
+      const openAll = D.querySelector("[data-race-open-all]");
+      const these = want.length === 1 ? "Open this race" : `Open these ${want.length} races`;
+      check("Open all counts the races shown", openAll.textContent === these, openAll.textContent);
+      openAll.click();
+      check("and opens those alone", want.every((s) => s.classList.contains("is-open")) &&
+        sections.filter((s) => want.indexOf(s) === -1).every((s) => !s.classList.contains("is-open")));
+      check("then offers to fold them", openAll.textContent === these.replace(/^Open/, "Fold"), openAll.textContent);
+      openAll.click();
+      // A search inside the filter keeps the filter.
+      const outsider = sections.filter((s) => want.indexOf(s) === -1)[0];
+      const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;
+      const input = D.getElementById("stateSearch");
+      if (input) {
+        input.value = name;
+        input.dispatchEvent(new window.Event("input"));
+      }
+    });
+  }
+  // The search runs after its debounce: read it, then the jumps.
+  await settle(200);
+  for (const [now, when] of [[undefined, "on the campaign clock"]]) {
+    const page = await buildPage("states/ca.html", { now, hash: "#/?races=open", setup: (w) => phoneWidth(w, true) });
+    const { window, D } = page;
+    const KYC = window.KYC;
+    const sections = [...D.querySelectorAll("section.race-foldable")];
+    const shown = () => sections.filter((s) => !s.hidden);
+    const isOpen = (s) => KYC.cards.raceFilters.open(KYC.races().filter((r) => r.id === s.getAttribute("data-race"))[0]);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a shared filter, and jumps out of it`, () => {
+      check("the address's filter is applied as the page loads",
+        D.querySelector('[data-race-filter="open"]').getAttribute("aria-pressed") === "true" && shown().every(isOpen) &&
+          shown().length === sections.filter(isOpen).length);
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      const input = D.getElementById("stateSearch");
+      const name = KYC.byId(outsider.querySelector(".race-body .card").getAttribute("data-id")).name;
+      check("a race the filter leaves out is not brought back by a search alone", (() => {
+        input.value = name;
+        input.dispatchEvent(new window.Event("input"));
+        return true;
+      })());
+    });
+    await settle(200);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a search inside the filter`, () => {
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      check("the matching race outside the filter stays hidden", outsider.hidden && shown().every(isOpen));
+      const input = D.getElementById("stateSearch");
+      input.value = "";
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html#/?races=open on a phone ${when} — a jump to a race the filter leaves out`, () => {
+      const outsider = sections.filter((s) => !isOpen(s))[0];
+      const select = D.getElementById("raceJumpSelect");
+      select.value = "race-" + outsider.getAttribute("data-race");
+      select.dispatchEvent(new window.Event("change", { bubbles: true }));
+      check("shows every race again and opens the one asked for",
+        !outsider.hidden && outsider.classList.contains("is-open") && shown().length === sections.length &&
+          D.querySelector('[data-race-filter="all"]').getAttribute("aria-pressed") === "true");
+      check("and the address no longer names a filter", !/races=/.test(window.location.href), window.location.href);
+      D.querySelector('.race-filters [data-race-filter="open"]').click();
+      D.querySelector(".race-filter-all").click();
+      check("Show all shows every row and returns to the All chip",
+        shown().length === sections.length && D.activeElement === D.querySelector('.race-filters [data-race-filter="all"]'));
+    });
+  }
+  const desk = await buildPage("states/ca.html", { hash: "#/?races=open" });
+  suite("states/ca.html#/?races=open at 1000px and wider — no filter, every race shown", () => {
+    const sections = [...desk.D.querySelectorAll("section.race-foldable")];
+    check("every race shown, the fold bar with its chips hidden",
+      sections.every((s) => !s.hidden) && desk.D.querySelector(".race-fold-bar").hidden);
+    check("no page errors", desk.errors.length === 0, desk.errors.join(" | "));
+  });
+}
+
+/* On a phone a folded state's House delegation folds behind its heading's
+ * balance and a button; the senators stay open, and every race row leads
+ * with who holds its seat (rule 27; the owner's question, PR body). */
+async function testDelegationFold() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const page = await buildPage("states/ca.html", { now, setup: (w) => phoneWidth(w, true) });
+    const { window, D, errors } = page;
+    const KYC = window.KYC;
+    const grid = D.getElementById("delegationCards");
+    const button = D.querySelector("[data-delegation-toggle]");
+    const house = KYC.people().filter((p) => KYC.seated(p) && p.state === "CA" && /House/.test(p.chamber));
+    suite(`states/ca.html on a phone ${when} — the House delegation folded to its balance`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      check("the heading keeps its balance by party", !!D.querySelector("#delegation h2 .balance") &&
+        /\d+ D/.test(D.querySelector("#delegation h2 .balance").textContent));
+      check("its cards are in the page, hidden until found, behind one button that names how many",
+        grid.getAttribute("hidden") === "until-found" && grid.querySelectorAll(".card").length === house.length &&
+          !button.parentNode.hidden && button.getAttribute("aria-expanded") === "false" &&
+          button.textContent === "Show all " + house.length + " representatives" &&
+          button.getAttribute("aria-controls") === "delegationCards", button.textContent);
+      check("the senators stay open", !D.querySelector("#senators .card-grid").hidden &&
+        D.querySelectorAll("#senators .card").length === 2);
+      check("the delegation still comes before the races (rule 27)",
+        !!(D.getElementById("delegation").compareDocumentPosition(D.getElementById("races")) & window.Node.DOCUMENT_POSITION_FOLLOWING));
+      const held = [...D.querySelectorAll("section.race-foldable")].filter((s) => /^H-/.test(s.getAttribute("data-race")));
+      check("every House race's row leads with whether and by whom its seat is held",
+        held.every((s) => s.querySelector(".race-row-held") && s.querySelector(".race-row-held").textContent.trim()),
+        held.filter((s) => !s.querySelector(".race-row-held")).map((s) => s.getAttribute("data-race")).join(","));
+      button.click();
+      check("the button shows every card, and says it folds them", !grid.hasAttribute("hidden") &&
+        button.getAttribute("aria-expanded") === "true" && button.textContent === "Fold the " + house.length + " representatives");
+      button.click();
+      check("and folds them again", grid.getAttribute("hidden") === "until-found");
+      // The browser's find in a folded card opens the delegation.
+      grid.dispatchEvent(new window.Event("beforematch", { bubbles: true }));
+      check("find-in-page opens it", !grid.hasAttribute("hidden") && button.getAttribute("aria-expanded") === "true");
+      button.click();
+      window.dispatchEvent(new window.Event("beforeprint"));
+      check("printing opens it", !grid.hasAttribute("hidden"));
+      window.dispatchEvent(new window.Event("afterprint"));
+      check("and folds back what printing opened", grid.getAttribute("hidden") === "until-found");
+      turn(window, false);
+      check("1000px and wider: every card shown, no button", !grid.hasAttribute("hidden") && button.parentNode.hidden);
+      turn(window, true);
+      check("turned back, folded again", grid.getAttribute("hidden") === "until-found");
+      const input = D.getElementById("stateSearch");
+      input.value = house[0].name;
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html on a phone ${when} — the page's search reaches a folded member`, () => {
+      check("a search naming a member opens the delegation", !grid.hasAttribute("hidden"));
+      const input = D.getElementById("stateSearch");
+      input.value = "";
+      input.dispatchEvent(new window.Event("input"));
+    });
+    await settle(200);
+    suite(`states/ca.html on a phone ${when} — and cleared, folds back what it opened`, () => {
+      check("folded again", grid.getAttribute("hidden") === "until-found");
+    });
+  }
+  const wy = await buildPage("states/wy.html", { setup: (w) => phoneWidth(w, true) });
+  suite("states/wy.html on a phone — a state that does not fold keeps its delegation open", () => {
+    check("no button, cards shown", !wy.D.querySelector("[data-delegation-toggle]") &&
+      !wy.D.querySelector("#delegation .card-grid").hidden);
+  });
+}
+
+/* The phone layout's second phase meets the race for governor (PRs #176,
+ * #191): the jump bar reaches it as "Find your race" does, a race filter
+ * never counts or hides it as a race for Congress (rules 27, 73), its row
+ * opens its section as a race's does, and the folded delegation never
+ * takes the governor's card in with Congress's. */
+async function testPhoneGovernorRace() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    for (const st of ["ga", "ca"]) {
+      const page = await buildPage("states/" + st + ".html", { now, setup: phoneOfHeight(844) });
+      const { window, D, errors } = page;
+      const root = D.documentElement;
+      const gov = D.getElementById("race-governor");
+      const congress = [...D.querySelectorAll("section.race-foldable")];
+      suite(`states/${st}.html on a phone ${when} — the race for governor beside the jump bar, the filters and the folded delegation`, () => {
+        check("no page errors", errors.length === 0, errors.join(" | "));
+        check("the race for governor folds to a row of its own, apart from the races for Congress",
+          !!gov && gov.classList.contains("gov-race-foldable") && !gov.classList.contains("race-foldable") &&
+            congress.indexOf(gov) === -1);
+        const block = [...D.querySelectorAll("#raceJumpSelect option")].map((o) => o.value);
+        const copy = [...D.querySelectorAll("#raceJumpBar option")].map((o) => o.value);
+        check("the bar's select offers the race for governor where the block's does, in the same order",
+          copy.indexOf("race-governor") !== -1 && copy.indexOf("race-governor") === block.indexOf("race-governor") &&
+            copy.join("|") === block.join("|"), copy.indexOf("race-governor") + " / " + block.indexOf("race-governor"));
+        // In page order: after State government, before the statewide
+        // questions, which the page draws after the race for governor.
+        const at = (v) => copy.indexOf(v);
+        check("in page order: after State government, before the statewide questions",
+          (at("state-government") === -1 || at("state-government") < at("race-governor")) &&
+            (at("measures") === -1 || at("race-governor") < at("measures")) &&
+            (!D.getElementById("measures") ||
+              !!(D.getElementById("governor-race").compareDocumentPosition(D.getElementById("measures")) & 4)),
+          copy.slice(0, 6).join(","));
+        const chips = [...D.querySelectorAll(".race-filters [data-race-filter]")];
+        const all = chips.filter((c) => c.getAttribute("data-race-filter") === "all")[0];
+        check("the chips say what they filter", !!D.querySelector('.race-filters[aria-label="Show races for Congress"]'));
+        check("All counts the races for Congress alone (rule 73)",
+          !!all && Number(all.querySelector(".race-filter-count").textContent) === congress.length,
+          all && all.textContent);
+        const pick = chips.filter((c) => c.getAttribute("data-race-filter") !== "all")[0];
+        if (!pick) return;
+        pick.click();
+        const status = D.getElementById("raceFilterStatus").textContent;
+        const shown = congress.filter((s) => !s.hidden).length;
+        check("a filter leaves the race for governor shown, and out of its count",
+          !gov.hidden && status === `Showing ${shown} of ${congress.length} races for Congress`, status);
+        // A jump to the race for governor from the bar, under a filter: it
+        // opens, the filter stays, and the bar's padding is on before it
+        // scrolls (barForJump).
+        const watch = window.__observed.filter((o) => o.node.id === "find-race")[0];
+        watch.fire({ isIntersecting: false, boundingClientRect: { top: -900, bottom: -300 } });
+        const landed = [];
+        const own = window.Element.prototype.scrollIntoView;
+        window.Element.prototype.scrollIntoView = function () {
+          landed.push({ id: this.id, padded: root.classList.contains("has-jumpbar") });
+        };
+        const select = D.getElementById("raceJumpBar");
+        select.value = "race-governor";
+        select.dispatchEvent(new window.Event("change", { bubbles: true }));
+        window.Element.prototype.scrollIntoView = own;
+        const jump = landed.filter((j) => j.id === "race-governor")[0];
+        check("a pick from the bar opens the race for governor and lands below the bar",
+          !!jump && jump.padded && gov.querySelector(".race-row").getAttribute("aria-expanded") === "true" &&
+            gov.querySelector(".race-body").getAttribute("hidden") === null, JSON.stringify(landed));
+        check("and leaves the races for Congress picked out as they were",
+          pick.getAttribute("aria-pressed") === "true" && congress.filter((s) => !s.hidden).length === shown);
+        // Its row folds and opens it, as a race's row does.
+        const row = gov.querySelector(".race-row");
+        row.click();
+        check("its row folds it", row.getAttribute("aria-expanded") === "false" &&
+          gov.querySelector(".race-body").getAttribute("hidden") === "until-found");
+        row.click();
+        check("and opens it again", row.getAttribute("aria-expanded") === "true");
+        all.click();
+        // The folded delegation is Congress's: the governor's card is not in it.
+        const grid = D.getElementById("delegationCards");
+        const card = D.querySelector("#governor.gcard");
+        check("the delegation folds, the governor's card stays shown under State government",
+          !!grid && grid.getAttribute("hidden") === "until-found" && !!card && !grid.contains(card) &&
+            !card.closest("[hidden]") && !!card.closest("#state-government"));
+      });
+    }
+  }
+}
+
 async function testStatePhone() {
   const PAGES = ["ca", "tx", "fl", "ny", "la", "ok", "wa", "il", "ga", "al"];
   const built = {};
@@ -20373,6 +20961,10 @@ async function testGovernorPhotoCredits() {
   if (!only || only === "index.html") await testAndroidBack();
   if (!only || only === "states") await testStates();
   if (!only || only === "states" || only === "statephone") await testStatePhone();
+  if (!only || only === "states" || only === "statephone" || only === "jumpbar") await testJumpBar();
+  if (!only || only === "states" || only === "statephone" || only === "racefilters") await testRaceFilters();
+  if (!only || only === "states" || only === "statephone" || only === "delegation") await testDelegationFold();
+  if (!only || only === "states" || only === "statephone" || only === "governors") await testPhoneGovernorRace();
   if (!only || only === "states" || only === "governors") await testGovernorCards();
   if (!only || only === "states" || only === "governors") await testGovernorOverlays();
   if (!only || only === "states" || only === "governors" || only === "photos") await testGovernorPhotoCredits();
@@ -20392,6 +20984,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testContactActions();
   if (!only || only === "index.html") await testPayLine();
   if (!only || only === "redistricting") await testDistrictsOnAPhone();
+  if (!only || only === "redistricting" || only === "districtphone") await testDistrictsPhonePlans();
   if (!only || only === "links") await testInterlinks();
   if (!only || only === "links") await testNavigation();
   if (!only || only === "links") await testDeepLinks();

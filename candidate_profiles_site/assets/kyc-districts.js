@@ -769,6 +769,18 @@
    * Drawn narrower than it needs - New York City on a phone - an inset is
    * followed by the closer insets the build planned for that case, and the
    * districts too small for it are numbered there. */
+  /** On a phone, a row of the insets by their titles under the statewide
+   *  map, each jumping to its inset below: Houston's was some 700px under
+   *  the state's map. Every inset is still drawn (rule 43). */
+  function zoomChips() {
+    if (!phone || !state.insets.length) return "";
+    return '<nav class="toolbar jump-row inset-zoom" aria-label="Zoom to a closer map">' +
+      '<span class="inset-zoom-label">Zoom:</span>' + state.insets.map(function (inset) {
+        return '<button type="button" class="chip chip-link" data-zoom="' + KYC.escapeAttr(inset.title) + '">' +
+          KYC.escapeHtml(inset.title) + "</button>";
+      }).join("") + "</nav>";
+  }
+
   function insets(plan) {
     return '<div class="inset-row">' + insetFigures(plan, state.insets) + "</div>";
   }
@@ -812,7 +824,8 @@
       placed.push(box);
       return text("district-num" + focusClass(plan, n), at[0], at[1], size, numLabel(n));
     }));
-    return '<figure class="inset" style="width:' + Math.round(width) + 'px">' +
+    return '<figure class="inset" data-inset="' + KYC.escapeAttr(inset.title) +
+      '" style="width:' + Math.round(width) + 'px">' +
       svg(plan, frame, "district-inset", inset.title + " on the " + plan.title,
         '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
         '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan),
@@ -1130,7 +1143,7 @@
     // An at-large seat is the whole state: the statewide map is its close-up.
     var whole = state.atLarge;
     var body = '<h3 class="plan-panel-title">' + (whole ? "The district" : "Statewide") +
-      "</h3>" + statewide(plan) +
+      "</h3>" + statewide(plan) + zoomChips() +
       (state.insets.length
         ? '<h3 class="plan-panel-title">Where districts are small</h3>' + insets(plan) : "");
     var mine = focusOf(plan);
@@ -1148,10 +1161,80 @@
       plan.title) + '">' + head + body + "</section>";
   }
 
+  /* ------------------------------------------------- one plan on a phone */
+
+  /* On a phone the two plans stacked: Texas's 2026 map began 5,459px down,
+   * six and a half screens, behind the old plan's statewide map, insets and
+   * close-up (VISUALS-02). Below 1000px a redrawn state shows one plan at a
+   * time behind a switch, the 2026 plan first, and draws only that one: the
+   * other is drawn the first time it is switched to, and its markup kept
+   * while nothing it shows has changed. 1000px and wider both are drawn side
+   * by side, as they always were. The dashed outline of the picked districts
+   * on the other map still carries the comparison. */
+  var PHONE_QUERY = "(max-width: 999.98px)";
+  var phone = false;
+  /* The plan shown on a phone, by index: the 2026 plan's. */
+  var shown = -1;
+  /* What each plan card was drawn for; a card drawn for anything else is
+   * stale and is drawn again before it is shown. */
+  var drawnFor = [];
+
+  function phoneQuery() {
+    try {
+      return global.matchMedia ? global.matchMedia(PHONE_QUERY) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function onePlan() {
+    return phone && redrawn();
+  }
+
+  /* Everything a plan card's markup depends on that can change. */
+  function drawKey() {
+    return JSON.stringify([focusBy, drawnAt, pin, phone]);
+  }
+
+  /* The phone's key and toggles (layout() fills it), held here: the card
+   * it sits in is drawn again on every pick. */
+  var keysNode = null;
+
+  function placeKeys(card) {
+    var under = card.querySelector(".inset-zoom") || card.querySelector(".map-frame");
+    if (keysNode && under) under.parentNode.insertBefore(keysNode, under.nextSibling);
+  }
+
+  function cardFrom(html) {
+    var holder = doc.createElement("div");
+    holder.innerHTML = html;
+    return holder.firstChild;
+  }
+
   function render() {
     var expected = expectedWidth();
     if (expected) drawnAt = expected;
-    el("planGrid").innerHTML = state.plans.map(planCard).join("");
+    var grid = el("planGrid");
+    if (!onePlan()) {
+      grid.innerHTML = state.plans.map(planCard).join("");
+      drawnFor = state.plans.map(drawKey);
+    } else {
+      if (grid.children.length !== state.plans.length) {
+        grid.innerHTML = state.plans.map(function () {
+          return '<section class="plan-card" hidden></section>';
+        }).join("");
+        drawnFor = [];
+      }
+      var card = cardFrom(planCard(state.plans[shown], shown));
+      grid.replaceChild(card, grid.children[shown]);
+      // The key and the toggles, under the shown map and its zoom chips,
+      // not under the whole card's insets and close-up.
+      placeKeys(card);
+      drawnFor[shown] = drawKey();
+      Array.prototype.forEach.call(grid.children, function (child, i) {
+        child.hidden = i !== shown;
+      });
+    }
     var picked = focusOf(newPlan());
     var same = !redrawn() || focusOf(state.plans[0]).join(",") === picked.join(",");
     Array.prototype.forEach.call(doc.querySelectorAll(".mover-group"), function (button) {
@@ -1174,7 +1257,8 @@
   /** How wide the statewide map is actually drawn, in CSS pixels; 0 when
    *  there is no layout to measure (a test, a hidden page). */
   function mapWidth() {
-    var map = doc.querySelector(".plan-card .district-statewide");
+    // The shown plan's: on a phone the other may be drawn, and hidden.
+    var map = doc.querySelector(".plan-card:not([hidden]) .district-statewide");
     var width = map ? map.getBoundingClientRect().width : 0;
     return width > 40 ? Math.round(width) : 0;
   }
@@ -1192,7 +1276,7 @@
     // The grid's own rule: columns of at least 420px, as many as there are
     // maps; a single map is at most 860px.
     var columns = single ? 1
-      : Math.max(1, Math.min(state.plans.length, Math.floor((width + gap) / (420 + gap))));
+      : Math.max(1, Math.min(onePlan() ? 1 : state.plans.length, Math.floor((width + gap) / (420 + gap))));
     var card = (width - gap * (columns - 1)) / columns;
     if (single) card = Math.min(card, 860);
     var probe = doc.createElement("div");
@@ -1219,6 +1303,110 @@
     }).observe(el("planGrid"));
   }
 
+  /* Where each part the phone's order moves lives on a desktop: the hero's
+   * lede and links, and the moves, which go after the map on a phone - the
+   * moves folded under their own summary. Moved, never redrawn, so a
+   * turned tablet keeps what the reader picked. */
+  var homes = null;
+
+  function layout() {
+    var query = phoneQuery();
+    var now = !!(query && query.matches);
+    if (homes && phone === now) return false;
+    phone = now;
+    if (shown < 0) shown = state.plans.length - 1;
+    var app = el("districtsApp");
+    var after = app.querySelector(".districts-after");
+    var fold = app.querySelector(".movers-fold");
+    var keys = keysNode || (keysNode = app.querySelector(".districts-keys"));
+    var locate = app.querySelector(".districts-locate");
+    var tools = app.querySelector(".districts-tools");
+    if (!homes) {
+      // In document order: they go home in reverse, each before what
+      // followed it, which is home by then.
+      homes = [
+        doc.querySelector("#districtsContent .state-hero .districts-lede"),
+        doc.querySelector("#districtsContent .state-hero .state-links"),
+        app.querySelector(".districts-movers"),
+        locate ? app.querySelector(".districts-pick") : null,
+        app.querySelector("#compareToggle") && app.querySelector("#compareToggle").parentNode,
+        app.querySelector("#ghostToggle") && app.querySelector("#ghostToggle").parentNode,
+        app.querySelector(".districts-howto"),
+        app.querySelector(".districts-controls > .party-legend"),
+      ].filter(Boolean).map(function (node) {
+        return { node: node, parent: node.parentNode, next: node.nextSibling };
+      });
+      homes.toolsHidden = tools.hidden;
+    }
+    if (!phone) {
+      homes.slice().reverse().forEach(function (home) {
+        home.parent.insertBefore(home.node, home.next && home.next.parentNode === home.parent ? home.next : null);
+      });
+    } else {
+      // Find my district and the picker on one row above the map; the
+      // toggles, the how-to and the key just under it; the hero's words and
+      // the moves after them.
+      homes.forEach(function (home) {
+        var node = home.node;
+        if (node.classList.contains("districts-movers")) fold.appendChild(node);
+        else if (node.classList.contains("districts-pick")) locate.insertBefore(node, el("locateNote"));
+        else if (node.classList.contains("party-legend")) keys.insertBefore(node, keys.firstChild);
+        else if (node.parentNode === tools || node.classList.contains("districts-howto")) keys.appendChild(node);
+        else after.insertBefore(node, fold);
+      });
+    }
+    if (locate) locate.classList.toggle("has-pick", phone);
+    tools.hidden = phone && !!locate ? true : homes.toolsHidden;
+    after.hidden = !phone;
+    var grid = el("planGrid");
+    grid.classList.toggle("single", !redrawn() || onePlan());
+    // The switch names the plan shown: its card does not say it again.
+    grid.classList.toggle("one-plan", onePlan());
+    var toggle = app.querySelector(".plan-switch");
+    if (toggle) toggle.hidden = !onePlan();
+    updateSwitch(false);
+    return true;
+  }
+
+  function updateSwitch(announce) {
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-plan-show]"), function (button) {
+      button.setAttribute("aria-pressed", String(onePlan() && Number(button.getAttribute("data-plan-show")) === shown));
+    });
+    var live = el("planShown");
+    if (live && announce) {
+      var plan = state.plans[shown];
+      live.textContent = "Showing the " + plan.title + ", used for " + plan.used + ".";
+    }
+  }
+
+  /** Show plan *i* on a phone: drawn now only if what it shows has changed
+   *  since it was last drawn. */
+  function showPlan(i) {
+    if (!onePlan() || i === shown) return;
+    shown = i;
+    if (drawnFor[i] !== drawKey()) {
+      render();
+    } else {
+      Array.prototype.forEach.call(el("planGrid").children, function (child, n) {
+        child.hidden = n !== shown;
+      });
+      placeKeys(el("planGrid").children[shown]);
+    }
+    updateSwitch(true);
+  }
+
+  function zoomTo(title) {
+    var card = doc.querySelector(".plan-card:not([hidden])");
+    var figure = card && Array.prototype.filter.call(card.querySelectorAll("figure.inset"), function (f) {
+      return f.getAttribute("data-inset") === title;
+    })[0];
+    if (!figure) return;
+    // At once, as every jump on the state pages is.
+    if (figure.scrollIntoView) figure.scrollIntoView({ block: "start", behavior: "auto" });
+    figure.setAttribute("tabindex", "-1");
+    if (figure.focus) figure.focus({ preventScroll: true });
+  }
+
   /* On a phone the facts follow the maps down the page. A tap changed only
    * an outline, with the district's facts two screens below it (NC-4 at
    * y=1346 on an 844px screen), so the page looked as if nothing happened.
@@ -1229,8 +1417,9 @@
     // The facts of the map that was tapped: each plan has its own, and the
     // first on the page is the 2024 map's even when the 2025 map was tapped.
     // Without a card (the list), the newest plan's - the 2026 lines.
+    // Where one plan is shown at a time, the shown one's.
     var cards = doc.querySelectorAll(".plan-card");
-    var scope = cards[card === undefined ? cards.length - 1 : card] || doc;
+    var scope = cards[onePlan() ? shown : card === undefined ? cards.length - 1 : card] || doc;
     var fact = scope.querySelector(".district-fact.is-focus");
     if (fact && fact.getBoundingClientRect().top > global.innerHeight - 80) {
       fact.scrollIntoView({ behavior: KYC.scrollBehavior(), block: "start" });
@@ -1267,11 +1456,26 @@
    * only updates which is pressed. */
   function controls(list) {
     var grouped = groups(list);
-    var html = ['<section class="state-section">'];
+    var html = ['<section class="state-section districts-controls">'];
+    if (redrawn()) {
+      // A phone's switch between the plans (layout() shows it), the 2026
+      // plan first. Each plan by its own label and title (rule 75).
+      var order = state.plans.map(function (plan, i) { return i; }).reverse();
+      html.push('<div class="plan-switch" role="group" aria-label="Which map to show" hidden>');
+      order.forEach(function (i) {
+        var plan = state.plans[i];
+        html.push('<button type="button" class="plan-switch-btn" data-plan-show="', String(i),
+          '" aria-pressed="false"><span class="plan-switch-label">', KYC.escapeHtml(plan.label),
+          '</span> <span class="plan-switch-title">', KYC.escapeHtml(plan.title), "</span></button>");
+      });
+      html.push('</div><p class="plan-shown sr-only" id="planShown" role="status" ' +
+        'aria-live="polite"></p>');
+    }
     if (grouped.length) {
       // From the day after Election Day the run is over, whatever came of it.
       var voted = KYC.electionStatus().phase === "post-election";
       html.push(
+        '<div class="districts-movers">',
         '<h2 class="state-heading">', voted ? "Ran in a different district" : "Running in a different district",
         "</h2>",
         '<p class="state-note">', String(list.length), " member", list.length === 1 ? "" : "s",
@@ -1293,7 +1497,7 @@
         });
         html.push("</button>");
       });
-      html.push("</div>");
+      html.push("</div></div>");
     }
     var many = numbers(newPlan()).length > 1;
     // Only where the browser can share a location and the map can place it.
@@ -1333,7 +1537,7 @@
     }
     html.push("</div>");
     if (many) {
-      html.push('<p class="state-note">', redrawn() ? "Or click" : "Or click",
+      html.push('<p class="state-note districts-howto">', "Or click",
         " a district on ", redrawn() ? "either map" : "the map",
         "; turn on Compare, or Shift-click, to compare up to ", String(MAX_FOCUS), ".",
         redrawn() ? " Shares of area describe land, not people." : "", "</p>");
@@ -1342,6 +1546,16 @@
       legend(),
       "</section>",
       '<div class="plan-grid', redrawn() ? "" : " single", '" id="planGrid"></div>',
+      // On a phone (layout()): what the page says before its maps, after them.
+      '<div class="districts-after" hidden><div class="districts-keys"></div>',
+      grouped.length
+        // The fold's summary is the heading's words, in its tense (rule 63).
+        ? '<details class="movers-fold"><summary>' +
+          (KYC.electionStatus().phase === "post-election" ? "Ran" : "Running") +
+          ' in a different district <span class="movers-count">' +
+          KYC.escapeHtml(list.length + " member" + (list.length === 1 ? "" : "s")) + "</span></summary></details>"
+        : "",
+      "</div>",
       '<div class="districts-sources">', (state.sources || []).map(sourceLine).join(""), "</div>"
     );
     return html.join("");
@@ -1420,9 +1634,22 @@
         KYC.profile.open(card.getAttribute("data-id"));
         return;
       }
+      var planButton = event.target.closest("[data-plan-show]");
+      if (planButton) {
+        showPlan(Number(planButton.getAttribute("data-plan-show")));
+        return;
+      }
+      var zoom = event.target.closest("[data-zoom]");
+      if (zoom) {
+        zoomTo(zoom.getAttribute("data-zoom"));
+        return;
+      }
       var button = event.target.closest("[data-focus]");
       if (button) {
         setFocus(parseFocus(button.getAttribute("data-focus")));
+        // On a phone the moves are below the map: show what the pick did.
+        var picked = phone && doc.querySelector(".plan-card:not([hidden])");
+        if (picked && picked.scrollIntoView) picked.scrollIntoView({ block: "start", behavior: "auto" });
         return;
       }
       var shape = event.target.closest("[data-district]");
@@ -1501,6 +1728,13 @@
 
     drawDefs();
     app.innerHTML = controls(list);
+    layout();
+    var query = phoneQuery();
+    if (query) {
+      var turned = function () { if (layout()) render(); };
+      if (query.addEventListener) query.addEventListener("change", turned);
+      else if (query.addListener) query.addListener(turned);
+    }
     bind(app, defaults);
     watchWidth();
 

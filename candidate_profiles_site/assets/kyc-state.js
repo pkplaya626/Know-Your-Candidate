@@ -93,6 +93,11 @@
     // group only: the line under the select names the office already.
     var governor = govRace ? [["race-governor", KYC.stategov.raceHeading(code)]] : [];
     if (govRace) listed["governor-race"] = true;
+    // In page order, as the jump bar's copy offers them too: the race for
+    // governor follows the races for Congress and comes before the
+    // statewide questions, so it goes before them in the group.
+    var options = statewide.filter(function (s) { return s[0] !== "measures"; }).concat(governor)
+      .concat(statewide.filter(function (s) { return s[0] === "measures"; }));
     var here = parts.filter(function (p) { return !listed[p[0]]; })
       .map(function (p) { return opt(p[0], p[1]); }).join("");
     var line = statewide.map(function (s) {
@@ -109,8 +114,8 @@
       '<div class="race-jump find-race-jump"><label for="raceJumpSelect">Jump to a race or section</label>' +
       '<select id="raceJumpSelect" class="select" data-race-jump>' +
       '<option value="">Choose…</option>' +
-      (statewide.length + governor.length ? '<optgroup label="Statewide">' +
-        statewide.concat(governor).map(function (s) { return opt(s[0], s[1]); }).join("") + "</optgroup>" : "") +
+      (options.length ? '<optgroup label="Statewide">' +
+        options.map(function (s) { return opt(s[0], s[1]); }).join("") + "</optgroup>" : "") +
       (house ? '<optgroup label="U.S. House">' + house + "</optgroup>" : "") +
       '<optgroup label="This page" data-this-page>' + here + "</optgroup></select></div>" +
       '<div class="find-race-tiles"></div><div class="find-race-lookup"></div>' +
@@ -142,6 +147,8 @@
     fold = {
       phone: null,
       opened: {},
+      // Who opened the folded House delegation, or null while it is folded.
+      delegation: null,
       // Each borrowed part goes back before what followed it.
       homes: [findrep, tiles, links].filter(Boolean).map(function (node) {
         return { node: node, parent: node.parentNode, next: node.nextSibling };
@@ -156,12 +163,98 @@
       option.textContent = voting.textContent.trim();
       group.insertBefore(option, group.firstChild);
     }
+    initJumpBar();
     foldLayout();
     var query = foldQuery();
     if (query) {
       if (query.addEventListener) query.addEventListener("change", foldLayout);
       else if (query.addListener) query.addListener(foldLayout);
     }
+  }
+
+  /* -------------------------------------------- the jump bar on a phone */
+
+  /* Once "Find your race" has scrolled away, getting to a second race meant
+   * scrolling back up as much as fifteen screens. A bar under the header
+   * then holds the same select and a way back to the block. It is fixed,
+   * so showing it moves nothing on the page, and while it shows the page's
+   * scroll-padding grows by its height, so every jump lands below it (rule
+   * 44). Not on a screen shorter than 500px (a phone on its side), where
+   * the header and the bar would take a third of it. Nothing is stored. */
+  var SHORT_QUERY = "(max-height: 499.98px)";
+  var jumpBar = null;
+
+  function initJumpBar() {
+    var block = el("find-race");
+    var select = el("raceJumpSelect");
+    if (!block || !select) return;
+    var bar = doc.createElement("nav");
+    bar.className = "jumpbar";
+    bar.setAttribute("aria-label", "Jump to");
+    bar.hidden = true;
+    // The block's own select, copied once it holds every option (the
+    // voting block's is added in initFold): one list, two places.
+    var copy = select.cloneNode(true);
+    copy.id = "raceJumpBar";
+    copy.setAttribute("aria-label", "Jump to a race or section");
+    copy.options[0].textContent = "Jump to…";
+    bar.appendChild(copy);
+    var back = doc.createElement("button");
+    back.type = "button";
+    back.className = "btn jumpbar-back";
+    back.setAttribute("data-jump-find", "");
+    back.innerHTML = '<span aria-hidden="true">↑</span> Find your race';
+    bar.appendChild(back);
+    el("stateContent").appendChild(bar);
+    jumpBar = { bar: bar, past: false, short: null };
+    try {
+      jumpBar.short = global.matchMedia ? global.matchMedia(SHORT_QUERY) : null;
+    } catch (e) {
+      jumpBar.short = null;
+    }
+    if (jumpBar.short) {
+      if (jumpBar.short.addEventListener) jumpBar.short.addEventListener("change", showJumpBar);
+      else if (jumpBar.short.addListener) jumpBar.short.addListener(showJumpBar);
+    }
+    if (!global.IntersectionObserver) return;
+    // Past the block once its bottom is under the header.
+    var header = doc.querySelector(".app-header");
+    var top = header ? Math.round(header.getBoundingClientRect().height) : 0;
+    new global.IntersectionObserver(function (entries) {
+      var entry = entries[entries.length - 1];
+      jumpBar.past = !entry.isIntersecting && entry.boundingClientRect.top < top;
+      showJumpBar();
+    }, { rootMargin: "-" + top + "px 0px 0px 0px" }).observe(block);
+  }
+
+  function showJumpBar() {
+    if (!jumpBar) return;
+    var show = !!(fold && fold.phone && jumpBar.past && !(jumpBar.short && jumpBar.short.matches));
+    if (jumpBar.bar.hidden === !show) return;
+    jumpBar.bar.hidden = !show;
+    var root = doc.documentElement;
+    root.classList.toggle("has-jumpbar", show);
+    if (show) {
+      var height = Math.round(jumpBar.bar.getBoundingClientRect().height);
+      if (height) root.style.setProperty("--jump-h", height + "px");
+    }
+  }
+
+  /** Before a jump to *target*: show the bar, and its padding, if the
+   *  jump will leave "Find your race" above the screen, and hide it if
+   *  not. Set only once the observer saw the block go, the padding came a
+   *  moment after every jump made from the block or by a link - its
+   *  select, a square, the lookup's answer, a #race- address - and the bar
+   *  then covered the top of the race the jump had landed on (PR #176
+   *  review). The observer still has the last word as the page moves. */
+  function barForJump(target) {
+    if (!jumpBar || !target) return;
+    var block = el("find-race");
+    if (!block || block.hidden) return;
+    // 4: DOCUMENT_POSITION_FOLLOWING - the target comes after the block.
+    jumpBar.past = target !== block && !block.contains(target) &&
+      !!(block.compareDocumentPosition(target) & 4);
+    showJumpBar();
   }
 
   /* Every part of the page that folds to a row: the races for Congress,
@@ -222,10 +315,36 @@
       section.hidden = false;
       showBody(section, !phone || !!fold.opened[section.getAttribute("data-race")]);
     });
+    showDelegation(!phone || !!fold.delegation);
     // A search in the box holds on a turned tablet: the two layouts must
     // not disagree about what it shows.
     searchRaces(searchQuery());
     openAllWords();
+    showJumpBar();
+  }
+
+  /* On a phone the House delegation's cards fold behind their heading,
+   * which keeps its balance ("43 D / 9 R"), and a button that shows them:
+   * California's 52 cards were some 8,000px between the reader and the
+   * races. The senators stay open, every race's row leads with who holds
+   * its seat, and "Find who represents you" answers above (rule 27). The
+   * cards stay in the page, hidden until found, as a race's body does. */
+  function showDelegation(open) {
+    var grid = el("delegationCards");
+    var button = doc.querySelector("[data-delegation-toggle]");
+    if (!grid || !button) return;
+    if (open) grid.removeAttribute("hidden");
+    else grid.setAttribute("hidden", "until-found");
+    button.parentNode.hidden = !fold.phone;
+    button.setAttribute("aria-expanded", String(open));
+    var count = button.getAttribute("data-count");
+    button.textContent = (open ? "Fold the " : "Show all ") + count;
+  }
+
+  function setDelegation(open, why) {
+    if (!fold || !el("delegationCards")) return;
+    fold.delegation = open ? (fold.delegation || why || "reader") : null;
+    if (fold.phone) showDelegation(open);
   }
 
   function showBody(section, open) {
@@ -247,13 +366,23 @@
     openAllWords();
   }
 
+  /** The races the button opens and folds: those shown. Under a filter or
+   *  a search it said "Open all 52 races" below "Showing 4 of 52 races",
+   *  and opened the 48 hidden ones too (rule 73; PR #176 review). */
+  function shownSections() {
+    return raceSections().filter(function (s) { return !s.hidden; });
+  }
+
   function openAllWords() {
     var button = doc.querySelector("[data-race-open-all]");
     if (!button || !fold) return;
-    var sections = raceSections();
+    var sections = shownSections();
+    var every = sections.length === raceSections().length;
     var all = sections.length && sections.every(function (s) { return !!fold.opened[s.getAttribute("data-race")]; });
-    button.textContent = all ? "Fold all " + sections.length + " races" : "Open all " + sections.length + " races";
+    var what = sections.length === 1 ? "this race" : (every ? "all " : "these ") + plural(sections.length, "race");
+    button.textContent = (all ? "Fold " : "Open ") + what;
     button.setAttribute("aria-pressed", String(!!all));
+    button.hidden = !sections.length;
   }
 
   /** Bring *id* into view - a race opened first where the page folds -
@@ -262,12 +391,16 @@
     var target = doc.getElementById(id);
     if (!target) return null;
     var section = (target.closest ? target.closest(FOLDS) : null) || ownFold(target);
+    // A race the filter left out is shown with all the others: a jump to
+    // a race must never land on nothing.
+    if (section && fold && fold.phone && !filterPasses(section)) setRaceFilter("all");
     if (section && fold && fold.phone) setOpen(section, true, "reader");
     // At once, never animated: a smooth scroll's end is worked out before
     // it starts, and the delegation's cards above the races grow as they
     // render on the way past (content-visibility), so a phone's jump to
     // CA-40 stopped 850px short, below the screen (PR #126 review). The
     // address's own #race- link was always instant and always landed.
+    barForJump(target);
     if (target.scrollIntoView) target.scrollIntoView({ block: "start", behavior: "auto" });
     var focus = section && fold && fold.phone ? section.querySelector(".race-row") : target;
     if (focus.focus) {
@@ -282,8 +415,11 @@
    * Enter, never on each arrow. The select goes back to "Choose…", so the
    * same race can be picked again. */
   function initJumpSelect() {
-    var select = doc.querySelector("[data-race-jump]");
-    if (!select) return;
+    // The block's, and the jump bar's copy of it.
+    Array.prototype.forEach.call(doc.querySelectorAll("[data-race-jump]"), bindJumpSelect);
+  }
+
+  function bindJumpSelect(select) {
     var keyed = false;
     var go = function () {
       var id = select.value;
@@ -319,15 +455,18 @@
     doc.addEventListener("beforematch", function (event) {
       var section = event.target && event.target.closest && event.target.closest(FOLDS);
       if (section) setOpen(section, true, "find");
+      if (event.target && event.target.id === "delegationCards") setDelegation(true, "find");
     }, true);
     global.addEventListener("beforeprint", function () {
       if (!fold || !fold.phone) return;
+      if (!fold.delegation) setDelegation(true, "print");
       foldSections().forEach(function (s) {
         if (!fold.opened[s.getAttribute("data-race")]) setOpen(s, true, "print");
       });
     });
     global.addEventListener("afterprint", function () {
       if (!fold) return;
+      if (fold.delegation === "print") setDelegation(false);
       foldSections().forEach(function (s) {
         if (fold.opened[s.getAttribute("data-race")] === "print") setOpen(s, false);
       });
@@ -337,6 +476,75 @@
     global.addEventListener("hashchange", function () {
       if (/^#(race-|governor)/.test(global.location.hash)) jumpToSection();
     });
+  }
+
+  /* ------------------------------------------- filters over the race rows */
+
+  /* On a phone, chips over the rows pick out the open seats and the races
+   * with no challenger on the ballot, counted by the race heads' own tests
+   * (KYC.cards.raceFilters, rule 73), with a live line saying how many are
+   * shown and a way back to all of them. The filter is in the address
+   * (#/?races=open), so a shared link shows the same rows. */
+  var raceFilter = "all";
+
+  /** A chip's words: the head badge's own words for the races it keeps
+   *  (KYC.cards.raceFilterWords, one helper, rule 12). */
+  function filterWords(key) {
+    return cards.raceFilterWords(key);
+  }
+
+  function raceFilterBar(list) {
+    var counts = cards.raceFilterCounts(list);
+    var keys = ["all"].concat(Object.keys(cards.raceFilters).filter(function (k) { return counts[k]; }));
+    if (keys.length < 2) return "";
+    return '<div class="race-filters" role="group" aria-label="Show races for Congress">' + keys.map(function (k) {
+      return '<button type="button" class="chip race-filter" data-race-filter="' + k + '" aria-pressed="' +
+        String(k === "all") + '">' + KYC.escapeHtml(filterWords(k)) +
+        ' <span class="race-filter-count">' + counts[k] + "</span></button>";
+    }).join("") + "</div>" +
+      '<p class="race-filter-status"><span id="raceFilterStatus" role="status" aria-live="polite"></span> ' +
+      '<button type="button" class="link-button race-filter-all" data-race-filter="all" hidden>Show all</button></p>';
+  }
+
+  function raceById(id) {
+    return races.filter(function (r) { return r.id === id; })[0] || null;
+  }
+
+  /* The chips pick out races for Congress, by the race heads' tests: the
+   * race for governor (section.gov-race-foldable) is none of them, so no
+   * chip counts it or hides it (rules 27, 73). */
+  function filterPasses(section) {
+    if (raceFilter === "all" || !cards.raceFilters[raceFilter]) return true;
+    if (!section.classList.contains("race-foldable")) return true;
+    var race = raceById(section.getAttribute("data-race"));
+    return !!race && cards.raceFilters[raceFilter](race);
+  }
+
+  /** Pick out *key*'s races ("all" for every one). *quiet*: from the
+   *  address, which already says so. */
+  function setRaceFilter(key, quiet) {
+    var chip = doc.querySelector('.race-filters [data-race-filter="' + key + '"]');
+    if (!chip || !cards.raceFilters[key]) key = "all";
+    raceFilter = key;
+    Array.prototype.forEach.call(doc.querySelectorAll(".race-filters [data-race-filter]"), function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-race-filter") === key));
+    });
+    searchRaces(searchQuery());
+    filterStatus();
+    if (!quiet && KYC.router) KYC.router.writeFilters({ races: key });
+  }
+
+  function filterStatus() {
+    var status = el("raceFilterStatus");
+    if (!status) return;
+    var sections = raceSections();
+    var shown = sections.filter(function (s) { return !s.hidden; }).length;
+    var on = raceFilter !== "all" && !!(fold && fold.phone);
+    var words = on ? "Showing " + shown + " of " + plural(sections.length, "race") + " for Congress" : "";
+    if (status.textContent !== words) status.textContent = words;
+    var all = doc.querySelector(".race-filter-all");
+    if (all) all.hidden = !on;
+    openAllWords();
   }
 
   /* A non-voting member's title, as summary.py gives it: Puerto Rico's
@@ -581,7 +789,15 @@
           return '<p class="state-note">District ' + v.district + ": " +
             KYC.escapeHtml(KYC.vacancyNote(v)) + "</p>";
         }).join(""),
-        '<div class="card-grid">' + house.map(cards.card).join("") + "</div>",
+        // On a phone (foldLayout), the cards fold behind a button.
+        foldable
+          ? '<p class="delegation-fold" hidden><button type="button" class="btn delegation-toggle" ' +
+            'data-delegation-toggle aria-controls="delegationCards" aria-expanded="true" data-count="' +
+            KYC.escapeAttr(plural(house.length, "representative")) + '">Fold the ' +
+            KYC.escapeHtml(plural(house.length, "representative")) + "</button></p>"
+          : "",
+        '<div class="card-grid"' + (foldable ? ' id="delegationCards"' : "") + ">" +
+          house.map(cards.card).join("") + "</div>",
         "</section>"
       );
     }
@@ -641,6 +857,7 @@
         foldable
           ? '<div class="race-fold-bar" hidden>' + (sharedLine
             ? '<p class="race-shared">All ' + all + " races: " + sharedLine + "</p>" : "") +
+            raceFilterBar(senateRaces.concat(houseRaces)) +
             '<button type="button" class="btn race-open-all" data-race-open-all>Open all ' + all +
             " races</button></div>"
           : "",
@@ -778,8 +995,10 @@
     // A race reached by a link (a shared race's page, the lookup's answer,
     // Your ballot, a district page) opens where the page folds.
     var race = (section.closest && section.closest(FOLDS)) || ownFold(section);
+    if (race && fold && fold.phone && !filterPasses(race)) setRaceFilter("all", true);
     if (race && fold && fold.phone) setOpen(race, true, "reader");
     var jump = function () {
+      barForJump(section);
       if (section.scrollIntoView) section.scrollIntoView({ block: "start" });
     };
     jump();
@@ -787,6 +1006,8 @@
     if (m[2] && m[1] === "findrep" && KYC.findRep) KYC.findRep.ask(m[2]);
     if (global.history && global.history.replaceState) {
       global.history.replaceState(global.history.state, "", global.location.pathname + global.location.search);
+      // The races still picked out, as the address said before the jump.
+      if (raceFilter !== "all") KYC.router.writeFilters({ races: raceFilter });
     }
   }
 
@@ -876,8 +1097,10 @@
     var folded = KYC.foldText(q || "");
     foldSections().forEach(function (section) {
       var id = section.getAttribute("data-race");
+      // A race the filter leaves out stays out, whatever the search finds.
+      var kept = filterPasses(section);
       if (!q) {
-        section.hidden = false;
+        section.hidden = !kept;
         if (fold.opened[id] === "search") setOpen(section, false);
         return;
       }
@@ -887,10 +1110,19 @@
       });
       var row = section.querySelector(".race-row");
       var named = !hit && !!row && KYC.foldText(row.textContent).indexOf(folded) !== -1;
-      section.hidden = !hit && !named;
-      if (hit && !fold.opened[id]) setOpen(section, true, "search");
-      if (!hit && fold.opened[id] === "search") setOpen(section, false);
+      section.hidden = (!hit && !named) || !kept;
+      if (hit && kept && !fold.opened[id]) setOpen(section, true, "search");
+      if ((!hit || !kept) && fold.opened[id] === "search") setOpen(section, false);
     });
+    filterStatus();
+  }
+
+  function searchDelegation(q) {
+    var grid = el("delegationCards");
+    if (!fold || !fold.phone || !grid) return;
+    var hit = !!q && Array.prototype.some.call(grid.children, function (cell) { return !cell.hidden; });
+    if (hit && !fold.delegation) setDelegation(true, "search");
+    if (!hit && fold.delegation === "search") setDelegation(false);
   }
 
   function searchQuery() {
@@ -920,6 +1152,7 @@
           c.parentNode.classList.contains("card-cell")) ? c.parentNode : c;
         cell.hidden = !!q && !(item && KYC.matchesQuery(item, q));
       });
+      searchDelegation(q);
       searchRaces(q);
     }, 120);
     input.addEventListener("input", run);
@@ -946,12 +1179,35 @@
         var closing = close.closest(FOLDS);
         setOpen(closing, false);
         // At once, as every jump on this page is (goTo).
+        barForJump(closing);
         if (closing.scrollIntoView) closing.scrollIntoView({ block: "start", behavior: "auto" });
         closing.querySelector(".race-row").focus({ preventScroll: true });
         return;
       }
+      var members = event.target.closest("[data-delegation-toggle]");
+      if (members) {
+        setDelegation(members.getAttribute("aria-expanded") !== "true", "reader");
+        return;
+      }
+      if (event.target.closest("[data-jump-find]")) {
+        // Back to the block, ready to pick again from its select.
+        goTo("find-race");
+        var picker = el("raceJumpSelect");
+        if (picker && picker.focus) picker.focus({ preventScroll: true });
+        return;
+      }
+      var filter = event.target.closest("[data-race-filter]");
+      if (filter) {
+        setRaceFilter(filter.getAttribute("data-race-filter"));
+        // "Show all" goes back to the chips it undid.
+        if (filter.classList.contains("race-filter-all")) {
+          var chip = doc.querySelector('.race-filters [data-race-filter="all"]');
+          if (chip) chip.focus();
+        }
+        return;
+      }
       if (event.target.closest("[data-race-open-all]")) {
-        var sections = raceSections();
+        var sections = shownSections();
         var all = sections.every(function (s) { return !!fold.opened[s.getAttribute("data-race")]; });
         sections.forEach(function (s) { setOpen(s, !all, "reader"); });
         return;
@@ -977,6 +1233,8 @@
   function applyRoute(route) {
     if (route.view === "profile" && KYC.profile.open(route.id, { fromRoute: true })) return;
     if (KYC.profile.isOpen()) KYC.profile.close();
+    // The races the address picks out (#/?races=open), where the page folds.
+    if (fold && route.view === "list") setRaceFilter(route.params.races || "all", true);
   }
 
   KYC.ready(function () {

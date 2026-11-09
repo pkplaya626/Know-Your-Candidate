@@ -497,13 +497,53 @@
       holder.name + " is not seeking re-election.";
   }
 
+  /* Which races a reader can pick out, by the tests the race's own head
+   * badges use, so a filter's count and the badges never disagree (rules
+   * 12, 73): an open seat is the head's "Open seat", and a race with no
+   * challenger is the head's "No challenger on the ballot" - its primary
+   * settled, and nobody but the holder on its November ballot, profile or
+   * not. The grid's chip and the state page's filter count with these. */
+  var RACE_FILTERS = {
+    open: function (race) { return !!race.openSeat; },
+    unchallenged: function (race) { return !!(race.settled && !race.contested && race.results); },
+  };
+
+  /* The head badge's words for a race nobody challenges: "No challenger
+   * on the ballot" before the count, "No challenger was on the ballot"
+   * from the day after Election Day (rule 63), the heads' and the chip's
+   * alike. The state page's chip read "Uncontested" from that day over
+   * heads that said otherwise, two names for one thing (rule 12; PR #176
+   * review), and after the count a chip in the present tense would name a
+   * filter the heads no longer use. */
+  function noChallenger() {
+    return KYC.electionStatus().phase === "post-election" ?
+      "No challenger was on the ballot" : "No challenger on the ballot";
+  }
+
+  /** A filter's words on a chip: the head badges' own, for the races it
+   *  keeps. */
+  function raceFilterWords(key) {
+    if (key === "open") return "Open seats" + (KYC.recordPhase() ? " in 2026" : "");
+    if (key === "unchallenged") return noChallenger();
+    return "All";
+  }
+
+  /** How many of *list* each filter keeps, and "all". */
+  function raceFilterCounts(list) {
+    var out = { all: list.length };
+    Object.keys(RACE_FILTERS).forEach(function (key) {
+      out[key] = list.filter(RACE_FILTERS[key]).length;
+    });
+    return out;
+  }
+
   /** The badges that summarise a race, as data (headBadge), in the order
    *  its head shows them. */
   function raceBadgeItems(race) {
     var badges = [];
     var outcome = outcomeBadge(race);
     if (outcome) badges.push({ key: "outcome", html: outcome, text: outcome.replace(/<[^>]*>/g, "") });
-    if (race.openSeat) {
+    if (RACE_FILTERS.open(race)) {
       badges.push(headBadge("open", "badge-warn", "Open seat", openSeatWhy(race)));
     } else if (race.holderMoved) {
       // Not open - a member is running here under the new number - but its
@@ -543,11 +583,10 @@
       // From the day after Election Day, who was on it (rule 63).
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
         (race.settled ? (voted ? (running === 1 ? " was" : " were") : "") + " on the ballot" : "")));
-    } else if (race.settled && res) {
+    } else if (RACE_FILTERS.unchallenged(race)) {
       var gone = res.eliminated + res.withdrawn + res.unlisted;
       badges.push(headBadge("count", "badge-neutral",
-        (voted ? "No challenger was on the ballot" : "No challenger on the ballot") +
-        (gone ? " · " + gone + " out" : ""),
+        noChallenger() + (gone ? " · " + gone + " out" : ""),
         "The primary has been held. Of those who filed with the FEC, " +
         res.eliminated + " lost, " + res.withdrawn + " withdrew and " +
         res.unlisted + " were not on the primary ballot."));
@@ -1837,6 +1876,9 @@
     card: card,
     contactOf: contactOf,
     raceBadges: raceBadges,
+    raceFilters: RACE_FILTERS,
+    raceFilterWords: raceFilterWords,
+    raceFilterCounts: raceFilterCounts,
     raceBadgeItems: raceBadgeItems,
     headBadgeHtml: headBadgeHtml,
     sharedBadges: sharedBadges,

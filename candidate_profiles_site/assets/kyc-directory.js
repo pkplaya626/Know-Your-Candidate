@@ -78,8 +78,8 @@
     },
     // The races whose head reads "No challenger on the ballot": the
     // primary is settled and nobody but the holder is on its November
-    // ballot, profile or not - the same test as the head (kyc-cards.js
-    // raceBadges), so the chip and the races never disagree (rule 73).
+    // ballot, profile or not - the head's own test (KYC.cards.raceFilters),
+    // so the chip and the races never disagree (rule 73).
     unchallenged: function (item) {
       var rid = item.isCandidate ? item.raceId : (item.heldRaceId || item.raceId);
       return !!rid && unchallengedRaces.has(rid);
@@ -90,7 +90,7 @@
     races.filter(function (r) { return r.contested; }).map(function (r) { return r.id; })
   );
   var unchallengedRaces = new Set(
-    races.filter(function (r) { return r.settled && !r.contested && r.results; })
+    races.filter(KYC.cards.raceFilters.unchallenged)
       .map(function (r) { return r.id; })
   );
 
