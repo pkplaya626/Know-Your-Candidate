@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-05",
+ "asOf": "2026-11-09",
  "calendarNotes": [
   {
    "kind": "open-primary",
@@ -10,7 +10,7 @@
  "certified": {
   "AK": {
    "complete": true,
-   "fetched": "2026-11-05",
+   "fetched": "2026-11-09",
    "races": {
     "H-AK-00-2026": [
      {
@@ -77,7 +77,7 @@
   },
   "AS": {
    "complete": true,
-   "fetched": "2026-11-05",
+   "fetched": "2026-11-09",
    "races": {
     "H-AS-00-2026": [
      {
@@ -112,7 +112,7 @@
   },
   "CO": {
    "complete": true,
-   "fetched": "2026-11-05",
+   "fetched": "2026-11-09",
    "races": {
     "H-CO-01-2026": [
      {
@@ -373,7 +373,7 @@
   },
   "FL": {
    "complete": true,
-   "fetched": "2026-11-05",
+   "fetched": "2026-11-09",
    "races": {
     "H-FL-01-2026": [
      {
@@ -1595,7 +1595,7 @@
   },
   "TX": {
    "complete": true,
-   "fetched": "2026-11-05",
+   "fetched": "2026-11-09",
    "races": {
     "H-TX-01-2026": [
      {
@@ -2517,7 +2517,7 @@
  "pending": [],
  "qualified": {
   "election": "11/03/2026",
-  "fetched": "2026-11-05",
+  "fetched": "2026-11-09",
   "races": [
    "H-LA-01-2026",
    "H-LA-02-2026",
@@ -2539,7 +2539,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Alaska Division of Elections, 2026 General Election candidate list",
     "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
    },
@@ -2585,7 +2585,7 @@
     "H6AK01118": "Melanie A. Salazar",
     "H6AK01134": "David Ambrose II"
    },
-   "page": "2026 United States House of Representatives election in Alaska",
+   "page": "2026 United States House of Representatives elections in Alaska",
    "party": {
     "H2AK00143": "libertarian",
     "H2AK00556": "all",
@@ -2595,7 +2595,7 @@
     "H6AK01068": "democratic",
     "H6AK01084": "democratic",
     "H6AK01092": "independent",
-    "H6AK01100": "all",
+    "H6AK01100": "undeclared",
     "H6AK01118": "all",
     "H6AK01134": "all"
    },
@@ -3119,7 +3119,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "American Samoa Election Office, Candidates for the 2026 Midterm Election",
     "url": "https://www.aselectionoffice.gov/candidates-information/candidates-for-the-2026-midterm-election"
    },
@@ -5968,7 +5968,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6050,7 +6050,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6110,7 +6110,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6180,7 +6180,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6245,11 +6245,12 @@
    },
    "ambiguous": [],
    "article": {
-    "H6CO05142": "Jeff Crank"
+    "H6CO05142": "Jeff Crank",
+    "H6CO05324": "Jessica Killin"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6327,7 +6328,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6400,7 +6401,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6472,7 +6473,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
@@ -6853,7 +6854,7 @@
     "H6DE01121": "Joseph Arminio",
     "H8DE01044": "Lee Murphy"
    },
-   "page": "2026 United States House of Representatives election in Delaware",
+   "page": "2026 United States House of Representatives elections in Delaware",
    "party": {
     "H4DE00045": "democratic",
     "H4DE00078": "republican",
@@ -6886,7 +6887,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -6947,11 +6948,12 @@
    },
    "ambiguous": [],
    "article": {
-    "H6FL02315": "Evan Power"
+    "H6FL02315": "Evan Power",
+    "H6FL02331": "Austin Rogers (politician)"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7045,7 +7047,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7117,7 +7119,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7189,7 +7191,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7260,7 +7262,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7357,7 +7359,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7435,7 +7437,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7483,12 +7485,11 @@
    },
    "ambiguous": [],
    "article": {
-    "H6FL09179": "Darren Soto",
-    "H6FL09294": "Dan Green (politician)"
+    "H6FL09179": "Darren Soto"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7563,7 +7564,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7608,11 +7609,12 @@
    "article": {
     "H0FL08208": "Daniel Webster (Florida politician)",
     "H2FL11117": "Anthony Sabatini",
+    "H6FL11332": "Joe Strada",
     "H6FL11340": "Carey Baker"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7698,7 +7700,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7761,7 +7763,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7838,7 +7840,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7930,7 +7932,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -7990,7 +7992,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8074,7 +8076,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8134,7 +8136,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8184,12 +8186,13 @@
    "ambiguous": [],
    "article": {
     "H6FL19129": "Jim Oberweis",
+    "H6FL19137": "Jim Schwartzel",
     "H6FL19178": "Madison Cawthorn",
     "H6FL19228": "Chris Collins (New York politician)"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8302,7 +8305,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8398,7 +8401,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8456,10 +8459,12 @@
     "H6FL22248": "businessman and candidate for the 19th district in 2020"
    },
    "ambiguous": [],
-   "article": {},
+   "article": {
+    "H6FL21059": "Pia Dandiya"
+   },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8546,7 +8551,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8621,7 +8626,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8710,7 +8715,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8791,7 +8796,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8847,7 +8852,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -8913,7 +8918,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -10005,6 +10010,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6IA04167": "Chris McGowan",
     "H6IA04175": "Matt Windschitl",
     "H6IA04217": "David Dawson (politician)"
    },
@@ -11270,11 +11276,11 @@
    "site": {},
    "status": {
     "H0IN04238": "eliminated",
-    "H0IN05326": "nominee",
+    "H0IN05326": "defeated",
     "H4IN03182": "eliminated",
     "H4IN05286": "eliminated",
     "H6IN05273": "eliminated",
-    "H6IN05307": "nominee",
+    "H6IN05307": "elected",
     "H6IN05315": "eliminated"
    },
    "unmatched": {
@@ -13202,19 +13208,19 @@
    },
    "site": {},
    "status": {
-    "H2MI01167": "nominee",
+    "H2MI01167": "defeated",
     "H2MI11232": "eliminated",
-    "H4MI01155": "nominee",
-    "H6MI01226": "nominee",
+    "H4MI01155": "defeated",
+    "H6MI01226": "elected",
     "H6MI01242": "eliminated",
     "H6MI01259": "eliminated",
     "H6MI01267": "eliminated",
-    "H6MI01275": "nominee",
-    "H6MI01283": "nominee",
-    "H6MI01309": "nominee"
+    "H6MI01275": "defeated",
+    "H6MI01283": "defeated",
+    "H6MI01309": "defeated"
    },
    "unmatched": {
-    "Doc Kovaly": "nominee"
+    "Doc Kovaly": "defeated"
    },
    "unmatchedParty": {
     "Doc Kovaly": "U.S. Taxpayers"
@@ -13247,6 +13253,7 @@
     "H6MI02216": "Benjamin Ambrose",
     "H6MI02232": "Richard Carrizales",
     "H6MI02240": "Clyde Welford",
+    "H6MI02265": "Charlotte Magoon",
     "H6MI02273": "Richard Sills"
    },
    "page": "2026 United States House of Representatives elections in Michigan",
@@ -13255,24 +13262,22 @@
     "H6MI02208": "democratic",
     "H6MI02216": "democratic",
     "H6MI02240": "democratic",
+    "H6MI02265": "green",
     "H6MI02273": "natural law party"
    },
    "site": {},
    "status": {
     "H4MI02138": "withdrawn",
-    "H4MI04126": "nominee",
+    "H4MI04126": "elected",
     "H6MI02208": "eliminated",
-    "H6MI02216": "nominee",
+    "H6MI02216": "defeated",
     "H6MI02232": "withdrawn",
     "H6MI02240": "eliminated",
-    "H6MI02273": "nominee"
+    "H6MI02265": "defeated",
+    "H6MI02273": "defeated"
    },
-   "unmatched": {
-    "Charlotta Magoon": "nominee"
-   },
-   "unmatchedParty": {
-    "Charlotta Magoon": "Green"
-   },
+   "unmatched": {},
+   "unmatchedParty": {},
    "unsure": []
   },
   "H-MI-03-2026": {
@@ -13308,11 +13313,11 @@
    },
    "site": {},
    "status": {
-    "H0MI03316": "nominee",
+    "H0MI03316": "elected",
     "H4MI03243": "withdrawn",
-    "H6MI03198": "nominee",
+    "H6MI03198": "defeated",
     "H6MI03206": "eliminated",
-    "H6MI03214": "nominee"
+    "H6MI03214": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -13331,7 +13336,8 @@
    "decided": {
     "general": true,
     "parties": [
-     "democratic"
+     "democratic",
+     "republican"
     ]
    },
    "label": {},
@@ -13340,7 +13346,7 @@
     "H4MI04159": "Jessica Swartz",
     "H6MI04196": "Diop Harris",
     "H6MI04204": "Sean McCann",
-    "H6MI04220": "Shafina Barnett"
+    "H6MI04220": "Shafina Che Barnett"
    },
    "page": "2026 United States House of Representatives elections in Michigan",
    "party": {
@@ -13360,7 +13366,9 @@
    "unmatched": {
     "Phil Tanis": "eliminated"
    },
-   "unmatchedParty": {},
+   "unmatchedParty": {
+    "Phil Tanis": "Republican"
+   },
    "unsure": []
   },
   "H-MI-05-2026": {
@@ -13381,26 +13389,32 @@
    },
    "label": {},
    "names": {
+    "H4MI05172": "Jim Bronke",
     "H4MI07103": "Tim Walberg",
     "H6MI05227": "Christian Vukasovich",
     "H6MI05235": "Ronald Muszynski"
    },
    "page": "2026 United States House of Representatives elections in Michigan",
    "party": {
+    "H4MI05172": "green",
     "H4MI07103": "republican",
     "H6MI05227": "democratic",
-    "H6MI05235": "independent"
+    "H6MI05235": "libertarian"
    },
    "site": {},
    "status": {
-    "H4MI07103": "nominee",
-    "H6MI05227": "nominee",
-    "H6MI05235": "nominee"
+    "H4MI05172": "defeated",
+    "H4MI07103": "elected",
+    "H6MI05227": "defeated",
+    "H6MI05235": "defeated"
    },
    "unmatched": {
-    "Jacob Vravis": "withdrawn"
+    "Jacob Vravis": "withdrawn",
+    "Sharon Reiner": "defeated"
    },
-   "unmatchedParty": {},
+   "unmatchedParty": {
+    "Sharon Reiner": "U.S. Taxpayers"
+   },
    "unsure": []
   },
   "H-MI-06-2026": {
@@ -13442,12 +13456,12 @@
    },
    "site": {},
    "status": {
-    "H4MI06154": "nominee",
-    "H4MI12079": "nominee",
-    "H6MI06241": "nominee",
-    "H6MI06258": "nominee",
-    "H6MI06266": "nominee",
-    "H8MI14084": "nominee"
+    "H4MI06154": "defeated",
+    "H4MI12079": "elected",
+    "H6MI06241": "defeated",
+    "H6MI06258": "defeated",
+    "H6MI06266": "defeated",
+    "H8MI14084": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -13462,7 +13476,7 @@
    "article": {
     "H2MI07123": "Tom Barrett (Michigan politician)",
     "H6MI07256": "Bridget Brink",
-    "H6MI07298": "William Lawrence (activist)"
+    "H6MI07298": "William Lawrence (Michigan politician)"
    },
    "decided": {
     "general": true,
@@ -13491,13 +13505,13 @@
    },
    "site": {},
    "status": {
-    "H2MI07123": "nominee",
+    "H2MI07123": "defeated",
     "H6MI07231": "withdrawn",
     "H6MI07256": "eliminated",
     "H6MI07272": "eliminated",
     "H6MI07280": "withdrawn",
-    "H6MI07298": "nominee",
-    "H6MI07306": "nominee"
+    "H6MI07298": "elected",
+    "H6MI07306": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -13543,12 +13557,12 @@
    "site": {},
    "status": {
     "H0MI13463": "eliminated",
-    "H4MI08176": "nominee",
-    "H4MI08218": "nominee",
+    "H4MI08176": "defeated",
+    "H4MI08218": "elected",
     "H6MI08296": "eliminated",
-    "H6MI08312": "nominee",
-    "H6MI08320": "nominee",
-    "H8MI05124": "nominee"
+    "H6MI08312": "defeated",
+    "H6MI08320": "defeated",
+    "H8MI05124": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -13594,13 +13608,13 @@
    },
    "site": {},
    "status": {
-    "H0MI10287": "nominee",
-    "H2MI09178": "nominee",
-    "H4MI09133": "nominee",
+    "H0MI10287": "elected",
+    "H2MI09178": "defeated",
+    "H4MI09133": "defeated",
     "H6MI09237": "withdrawn",
-    "H6MI09245": "nominee",
-    "H6MI09260": "nominee",
-    "H6MI09278": "nominee"
+    "H6MI09245": "defeated",
+    "H6MI09260": "defeated",
+    "H6MI09278": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -13608,7 +13622,8 @@
   },
   "H-MI-10-2026": {
    "about": {
-    "H6MI10276": "prosecutor"
+    "H6MI10276": "prosecutor",
+    "H6MI10359": "Army National Guard captain and son of Oakland County Sheriff Mike Bouchard"
    },
    "ambiguous": [],
    "article": {
@@ -13633,7 +13648,7 @@
     "H6MI10292": "Eric Chung",
     "H6MI10326": "Robert Lulgjuraj",
     "H6MI10334": "Justin Kirk",
-    "H6MI10359": "Michael Bouchard",
+    "H6MI10359": "Michael Bouchard Jr.",
     "H6MI10367": "Steffan Demetropoulos",
     "H6MI10383": "Mike Saliba",
     "H8MI09142": "Andrea Kirby"
@@ -13653,20 +13668,20 @@
    },
    "site": {},
    "status": {
-    "H0MI09206": "nominee",
+    "H0MI09206": "defeated",
     "H6MI10268": "withdrawn",
-    "H6MI10276": "nominee",
+    "H6MI10276": "elected",
     "H6MI10284": "eliminated",
     "H6MI10292": "eliminated",
     "H6MI10326": "eliminated",
     "H6MI10334": "eliminated",
-    "H6MI10359": "nominee",
+    "H6MI10359": "defeated",
     "H6MI10367": "eliminated",
-    "H6MI10383": "nominee",
-    "H8MI09142": "nominee"
+    "H6MI10383": "defeated",
+    "H8MI09142": "defeated"
    },
    "unmatched": {
-    "Kwabena Nkromo": "nominee",
+    "Kwabena Nkromo": "defeated",
     "Tripp Adams": "withdrawn"
    },
    "unmatchedParty": {
@@ -13716,15 +13731,15 @@
    },
    "site": {},
    "status": {
-    "H4MI10131": "nominee",
-    "H6MI11191": "nominee",
+    "H4MI10131": "defeated",
+    "H6MI11191": "elected",
     "H6MI11209": "withdrawn",
     "H6MI11225": "eliminated",
     "H6MI11241": "eliminated",
     "H6MI11274": "eliminated",
-    "H6MI11290": "nominee",
-    "H6MI11308": "nominee",
-    "H6MI11316": "nominee"
+    "H6MI11290": "defeated",
+    "H6MI11308": "defeated",
+    "H6MI11316": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -13755,7 +13770,7 @@
     "H0MI14214": "Marc Sosnowski",
     "H2MI12198": "James D. Hooper",
     "H2MI13154": "Shanelle Jackson",
-    "H4MI12145": "Brenda Sanders",
+    "H4MI12145": "Brenda K. Sanders",
     "H6MI12306": "Byron Nolen",
     "H8MI07039": "Gary Walkowicz",
     "H8MI13250": "Rashida Tlaib"
@@ -13772,13 +13787,13 @@
    },
    "site": {},
    "status": {
-    "H0MI14214": "nominee",
-    "H2MI12198": "nominee",
+    "H0MI14214": "defeated",
+    "H2MI12198": "defeated",
     "H2MI13154": "eliminated",
-    "H4MI12145": "nominee",
+    "H4MI12145": "defeated",
     "H6MI12306": "eliminated",
-    "H8MI07039": "nominee",
-    "H8MI13250": "nominee"
+    "H8MI07039": "defeated",
+    "H8MI13250": "elected"
    },
    "unmatched": {
     "Steven Elliott": "withdrawn"
@@ -13831,14 +13846,14 @@
    "status": {
     "H2MI13204": "eliminated",
     "H2MI13246": "withdrawn",
-    "H2MI13337": "nominee",
-    "H6MI13254": "nominee",
+    "H2MI13337": "defeated",
+    "H6MI13254": "elected",
     "H6MI13296": "withdrawn",
-    "H6MI13312": "nominee",
-    "H6MI13320": "nominee"
+    "H6MI13312": "defeated",
+    "H6MI13320": "defeated"
    },
    "unmatched": {
-    "Simone Coleman": "nominee"
+    "Simone Coleman": "defeated"
    },
    "unmatchedParty": {
     "Simone Coleman": "Working Class Party"
@@ -13856,7 +13871,7 @@
     "H6MN01190": "Jake Johnson (Minnesota politician)"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -13878,8 +13893,8 @@
    },
    "site": {},
    "status": {
-    "H2MN01223": "nominee",
-    "H6MN01190": "nominee",
+    "H2MN01223": "defeated",
+    "H6MN01190": "elected",
     "H6MN01216": "eliminated",
     "H6MN01232": "eliminated"
    },
@@ -13904,7 +13919,7 @@
     "H6MN02271": "Kaela Berg"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -13932,10 +13947,10 @@
    },
    "site": {},
    "status": {
-    "H6MN02230": "nominee",
+    "H6MN02230": "elected",
     "H6MN02248": "eliminated",
     "H6MN02255": "withdrawn",
-    "H6MN02263": "nominee",
+    "H6MN02263": "defeated",
     "H6MN02271": "eliminated",
     "H6MN02289": "eliminated",
     "H6MN02297": "eliminated",
@@ -13959,7 +13974,7 @@
     "H4MN03118": "Kelly Morrison"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -13979,8 +13994,8 @@
    },
    "site": {},
    "status": {
-    "H4MN03118": "nominee",
-    "H6MN03170": "nominee",
+    "H4MN03118": "elected",
+    "H6MN03170": "defeated",
     "H6MN03188": "eliminated"
    },
    "unmatched": {
@@ -13999,7 +14014,7 @@
     "H0MN04049": "Betty McCollum"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -14021,9 +14036,9 @@
    },
    "site": {},
    "status": {
-    "H0MN04049": "nominee",
+    "H0MN04049": "elected",
     "H6MN04285": "eliminated",
-    "H6MN04293": "nominee",
+    "H6MN04293": "defeated",
     "H6MN04301": "eliminated"
    },
    "unmatched": {
@@ -14044,7 +14059,7 @@
     "H8MN05239": "Ilhan Omar"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -14055,6 +14070,7 @@
     "H0MN05251": "Dalia Al-Aqidi",
     "H6MN05357": "John Nagel",
     "H6MN05365": "Latonya Reeves",
+    "H6MN05373": "DeVelle L. Jackson",
     "H6MN05381": "Angie Windhauser",
     "H6MN05399": "Julie Le",
     "H8MN05239": "Ilhan Omar"
@@ -14064,6 +14080,7 @@
     "H0MN05251": "republican",
     "H6MN05357": "republican",
     "H6MN05365": "democratic",
+    "H6MN05373": "independent",
     "H6MN05381": "republican",
     "H6MN05399": "democratic",
     "H8MN05239": "democratic"
@@ -14071,20 +14088,23 @@
    "site": {},
    "status": {
     "H0MN05251": "eliminated",
-    "H6MN05357": "nominee",
+    "H6MN05357": "withdrawn",
     "H6MN05365": "eliminated",
+    "H6MN05373": "defeated",
     "H6MN05381": "eliminated",
     "H6MN05399": "eliminated",
-    "H8MN05239": "nominee"
+    "H8MN05239": "elected"
    },
    "unmatched": {
     "Abbey Zieska": "eliminated",
     "Abena McKenzie": "eliminated",
+    "Joe Nagel": "defeated",
     "Nate Schluter": "eliminated"
    },
    "unmatchedParty": {
     "Abbey Zieska": "Republican",
     "Abena McKenzie": "Democratic",
+    "Joe Nagel": "Republican",
     "Nate Schluter": "Democratic"
    },
    "unsure": []
@@ -14100,7 +14120,7 @@
     "H6MN06256": "Forward-Independence Party"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -14122,9 +14142,9 @@
    },
    "site": {},
    "status": {
-    "H4MN06087": "nominee",
+    "H4MN06087": "elected",
     "H4MN06145": "withdrawn",
-    "H6MN06215": "nominee",
+    "H6MN06215": "defeated",
     "H6MN06223": "eliminated",
     "H6MN06256": "withdrawn"
    },
@@ -14147,7 +14167,7 @@
     "H6MN07338": "Heather Keeler"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -14166,8 +14186,8 @@
    },
    "site": {},
    "status": {
-    "H0MN07091": "nominee",
-    "H6MN07312": "nominee",
+    "H0MN07091": "elected",
+    "H6MN07312": "defeated",
     "H6MN07338": "withdrawn"
    },
    "unmatched": {
@@ -14188,7 +14208,7 @@
     "H8MN08043": "Pete Stauber"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "republican"
@@ -14217,15 +14237,17 @@
    "status": {
     "H6MN08138": "withdrawn",
     "H6MN08161": "withdrawn",
-    "H6MN08179": "nominee",
+    "H6MN08179": "withdrawn",
     "H6MN08195": "eliminated",
     "H6MN08203": "eliminated",
-    "H8MN08043": "nominee"
+    "H8MN08043": "elected"
    },
    "unmatched": {
+    "Jeanne Hendricks": "defeated",
     "John Munter": "eliminated"
    },
    "unmatchedParty": {
+    "Jeanne Hendricks": "Democratic",
     "John Munter": "Democratic"
    },
    "unsure": []
@@ -14243,7 +14265,7 @@
     "H8MO01143": "Cori Bush"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14276,13 +14298,13 @@
    },
    "site": {},
    "status": {
-    "H0MO08285": "nominee",
+    "H0MO08285": "defeated",
     "H2MO01146": "eliminated",
     "H2MO01179": "eliminated",
-    "H2MO02219": "nominee",
-    "H4MO01134": "nominee",
+    "H2MO02219": "defeated",
+    "H4MO01134": "elected",
     "H4MO01142": "eliminated",
-    "H6MO01261": "nominee",
+    "H6MO01261": "defeated",
     "H6MO01311": "eliminated",
     "H8MO01143": "eliminated"
    },
@@ -14301,10 +14323,11 @@
    },
    "ambiguous": [],
    "article": {
-    "H2MO02102": "Ann Wagner"
+    "H2MO02102": "Ann Wagner",
+    "H6MO02343": "Fred Wellman"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14335,17 +14358,17 @@
    "site": {},
    "status": {
     "H0MO03237": "eliminated",
-    "H2MO02102": "nominee",
+    "H2MO02102": "defeated",
     "H4MO02108": "eliminated",
     "H6MO02327": "eliminated",
     "H6MO02335": "eliminated",
-    "H6MO02343": "nominee",
+    "H6MO02343": "elected",
     "H6MO02368": "eliminated",
     "H6MO02376": "eliminated"
    },
    "unmatched": {
     "Bill Eigel": "withdrawn",
-    "Brandon Coulter Daugherty": "nominee",
+    "Brandon Coulter Daugherty": "defeated",
     "Elizabeth Sparks-Holmes": "eliminated"
    },
    "unmatchedParty": {
@@ -14365,7 +14388,7 @@
     "H8MO09146": "Bob Onder"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14394,14 +14417,14 @@
    },
    "site": {},
    "status": {
-    "H2MO02078": "nominee",
-    "H2MO03167": "nominee",
+    "H2MO02078": "defeated",
+    "H2MO03167": "defeated",
     "H6MO03366": "withdrawn",
     "H6MO03374": "withdrawn",
     "H6MO03382": "eliminated",
     "H6MO03390": "eliminated",
     "H6MO03416": "eliminated",
-    "H8MO09146": "nominee"
+    "H8MO09146": "elected"
    },
    "unmatched": {
     "Mike Conner": "withdrawn"
@@ -14420,7 +14443,7 @@
     "H2MO04207": "Mark Alford"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14451,15 +14474,15 @@
    },
    "site": {},
    "status": {
-    "H2MO04108": "nominee",
-    "H2MO04207": "nominee",
+    "H2MO04108": "defeated",
+    "H2MO04207": "elected",
     "H4MO04187": "eliminated",
     "H6MO04240": "withdrawn",
     "H6MO04257": "withdrawn",
     "H6MO04265": "eliminated",
     "H6MO04273": "eliminated",
     "H6MO05247": "eliminated",
-    "H6MO05254": "nominee"
+    "H6MO05254": "defeated"
    },
    "unmatched": {
     "G Rick": "eliminated",
@@ -14487,7 +14510,7 @@
     "H4MO05234": "Emanuel Cleaver"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14519,11 +14542,11 @@
    },
    "site": {},
    "status": {
-    "H2MO04199": "nominee",
-    "H4MO05234": "nominee",
+    "H2MO04199": "defeated",
+    "H4MO05234": "elected",
     "H4MO05333": "eliminated",
     "H4MO05366": "withdrawn",
-    "H6MO05197": "nominee",
+    "H6MO05197": "defeated",
     "H6MO05270": "eliminated",
     "H6MO05304": "eliminated",
     "H6MO05312": "eliminated",
@@ -14547,7 +14570,7 @@
     "H6MO06310": "Chris Stigall"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14582,13 +14605,13 @@
    "site": {},
    "status": {
     "G000546": "withdrawn",
-    "H2MO06269": "nominee",
+    "H2MO06269": "defeated",
     "H6MO06252": "eliminated",
-    "H6MO06260": "nominee",
+    "H6MO06260": "defeated",
     "H6MO06278": "eliminated",
     "H6MO06294": "eliminated",
     "H6MO06302": "eliminated",
-    "H6MO06310": "nominee",
+    "H6MO06310": "elected",
     "H6MO06328": "eliminated",
     "H6MO06344": "eliminated"
    },
@@ -14607,7 +14630,7 @@
     "H2MO07143": "Eric Burlison"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14632,9 +14655,9 @@
    },
    "site": {},
    "status": {
-    "H2MO07143": "nominee",
-    "H4MO07107": "nominee",
-    "H4MO07156": "nominee",
+    "H2MO07143": "elected",
+    "H4MO07107": "defeated",
+    "H4MO07156": "defeated",
     "H6MO07318": "eliminated",
     "H6MO07326": "eliminated"
    },
@@ -14653,7 +14676,7 @@
     "H6MO08191": "Frank Barnitz"
    },
    "decided": {
-    "general": false,
+    "general": true,
     "parties": [
      "democratic",
      "libertarian",
@@ -14678,13 +14701,13 @@
     "H4MO08162": "https://electjasonsmith.com/"
    },
    "status": {
-    "H4MO08162": "nominee",
-    "H6MO08183": "nominee",
+    "H4MO08162": "elected",
+    "H6MO08183": "defeated",
     "H6MO08191": "eliminated",
     "H6MO08217": "eliminated"
    },
    "unmatched": {
-    "Rebecca Sharpe Lombard": "nominee"
+    "Rebecca Sharpe Lombard": "defeated"
    },
    "unmatchedParty": {
     "Rebecca Sharpe Lombard": "Libertarian"
@@ -15057,13 +15080,13 @@
    "site": {},
    "status": {
     "H2NC02253": "withdrawn",
-    "H2NC02287": "nominee",
-    "H4NC01137": "nominee",
+    "H2NC02287": "elected",
+    "H4NC01137": "defeated",
     "H6NC01132": "eliminated",
     "H6NC01140": "eliminated",
     "H6NC01157": "eliminated",
     "H6NC01165": "eliminated",
-    "H8NC13075": "nominee"
+    "H8NC13075": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -15100,13 +15123,13 @@
    },
    "site": {},
    "status": {
-    "H0NC02125": "nominee",
-    "H4NC02135": "nominee",
+    "H0NC02125": "elected",
+    "H4NC02135": "defeated",
     "H6NC02197": "withdrawn",
-    "H6NC02213": "nominee"
+    "H6NC02213": "defeated"
    },
    "unmatched": {
-    "Matthew Laszacs": "nominee"
+    "Matthew Laszacs": "defeated"
    },
    "unmatchedParty": {
     "Matthew Laszacs": "Libertarian"
@@ -15188,12 +15211,12 @@
    "site": {},
    "status": {
     "H2NC06098": "eliminated",
-    "H2NC06114": "nominee",
-    "H4NC04149": "nominee",
+    "H2NC06114": "elected",
+    "H4NC04149": "defeated",
     "H6NC04185": "eliminated"
    },
    "unmatched": {
-    "Max Ganorkar": "nominee"
+    "Max Ganorkar": "defeated"
    },
    "unmatchedParty": {
     "Max Ganorkar": "Republican"
@@ -15261,7 +15284,8 @@
    },
    "ambiguous": [],
    "article": {
-    "H4NC06177": "Addison McDowell"
+    "H4NC06177": "Addison McDowell",
+    "H6NC06164": "Cyril Jefferson"
    },
    "decided": {
     "general": true,
@@ -15287,10 +15311,10 @@
    },
    "site": {},
    "status": {
-    "H4NC06177": "nominee",
+    "H4NC06177": "defeated",
     "H4NC08082": "eliminated",
     "H6NC06156": "eliminated",
-    "H6NC06164": "nominee",
+    "H6NC06164": "elected",
     "H6NC06180": "eliminated"
    },
    "unmatched": {},
@@ -15372,11 +15396,11 @@
    "status": {
     "H6NC08186": "eliminated",
     "H6NC08194": "eliminated",
-    "H6NC08202": "nominee",
-    "H6NC09200": "nominee"
+    "H6NC08202": "defeated",
+    "H6NC09200": "elected"
    },
    "unmatched": {
-    "Bo Whitehead": "nominee",
+    "Bo Whitehead": "defeated",
     "Justin Dues": "withdrawn"
    },
    "unmatchedParty": {
@@ -15418,9 +15442,9 @@
    },
    "site": {},
    "status": {
-    "H2NC08185": "nominee",
+    "H2NC08185": "defeated",
     "H4NC09171": "eliminated",
-    "H6NC09218": "nominee",
+    "H6NC09218": "elected",
     "H6NC09226": "eliminated",
     "H6NC09242": "eliminated"
    },
@@ -15537,14 +15561,14 @@
     "H6NC11206": "withdrawn",
     "H6NC11214": "eliminated",
     "H6NC11230": "withdrawn",
-    "H6NC11248": "nominee",
+    "H6NC11248": "elected",
     "H6NC11255": "eliminated",
     "H6NC11263": "eliminated",
     "H6NC11271": "eliminated",
     "H6NC11289": "eliminated",
     "H6NC11305": "withdrawn",
-    "H6NC11313": "nominee",
-    "H6NC11321": "nominee"
+    "H6NC11313": "defeated",
+    "H6NC11321": "defeated"
    },
    "unmatched": {
     "Chad Nesbitt": "eliminated",
@@ -15587,9 +15611,9 @@
    },
    "site": {},
    "status": {
-    "H4NC12100": "nominee",
+    "H4NC12100": "elected",
     "H6NC12105": "eliminated",
-    "H6NC12113": "nominee"
+    "H6NC12113": "defeated"
    },
    "unmatched": {
     "Monaca Johnson-Williamson": "eliminated"
@@ -15638,11 +15662,11 @@
    "site": {},
    "status": {
     "H4NC13108": "eliminated",
-    "H4NC13116": "nominee",
+    "H4NC13116": "defeated",
     "H4NC13157": "eliminated",
-    "H6NC13228": "nominee",
+    "H6NC13228": "elected",
     "H6NC13236": "eliminated",
-    "H6NC13251": "nominee"
+    "H6NC13251": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -15650,7 +15674,8 @@
   },
   "H-NC-14-2026": {
    "about": {
-    "H4NC14015": "incumbent U.S. representative"
+    "H4NC14015": "incumbent U.S. representative",
+    "H6NC14069": "business consultant"
    },
    "ambiguous": [],
    "article": {
@@ -15670,7 +15695,7 @@
     "H6NC14036": "Brent Caldwell",
     "H6NC14044": "Kate Barr",
     "H6NC14051": "Ahmid Kargbo",
-    "H6NC14069": "LaKesha Womack"
+    "H6NC14069": "Lakesha Womack"
    },
    "page": "2026 United States House of Representatives elections in North Carolina",
    "party": {
@@ -15681,15 +15706,14 @@
     "H6NC14069": "democratic"
    },
    "site": {
-    "H4NC14015": "https://www.timmoorenc.com/",
-    "H6NC14069": "https://www.womack4nc14.com/"
+    "H4NC14015": "https://www.timmoorenc.com/"
    },
    "status": {
-    "H4NC14015": "nominee",
+    "H4NC14015": "defeated",
     "H6NC14036": "eliminated",
     "H6NC14044": "eliminated",
     "H6NC14051": "eliminated",
-    "H6NC14069": "nominee"
+    "H6NC14069": "elected"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -15698,7 +15722,9 @@
   "H-ND-00-2026": {
    "about": {
     "H4ND00061": "incumbent U.S. representative",
-    "H6ND01049": "teacher and nominee for this district in 2024"
+    "H6ND01049": "teacher and nominee for this district in 2024",
+    "H6ND01056": "nurse",
+    "H8ND00138": "Republican activist and perennial candidate"
    },
    "ambiguous": [],
    "article": {
@@ -15716,23 +15742,30 @@
     "H4ND00061": "Julie Fedorchak",
     "H4ND00079": "Alex Balazs",
     "H6ND01049": "Trygve Hammer",
-    "H6ND46010": "Vern Thompson"
+    "H6ND01056": "Helene Neville",
+    "H6ND46010": "Vern Thompson",
+    "H8ND00138": "Charles Tuttle"
    },
-   "page": "2026 United States House of Representatives election in North Dakota",
+   "page": "2026 United States House of Representatives elections in North Dakota",
    "party": {
     "H4ND00061": "republican",
     "H4ND00079": "republican",
-    "H6ND01049": "democratic"
+    "H6ND01049": "democratic",
+    "H6ND01056": "independent",
+    "H8ND00138": "independent"
    },
    "site": {
     "H4ND00061": "https://fedorchaknd.com/",
-    "H6ND01049": "https://www.hammerfornd.com/"
+    "H6ND01049": "https://www.hammerfornd.com/",
+    "H6ND01056": "https://heleneforcongress.com/"
    },
    "status": {
-    "H4ND00061": "nominee",
+    "H4ND00061": "elected",
     "H4ND00079": "eliminated",
-    "H6ND01049": "nominee",
-    "H6ND46010": "withdrawn"
+    "H6ND01049": "defeated",
+    "H6ND01056": "defeated",
+    "H6ND46010": "withdrawn",
+    "H8ND00138": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -15808,6 +15841,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6NE02174": "Denise Powell",
     "H6NE02190": "John Cavanaugh (politician)",
     "H6NE02216": "Brett Lindstrom",
     "H6NE02257": "Crystal Rhoades"
@@ -16140,6 +16174,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6NJ02251": "Zack Mullock",
     "H8NJ02166": "Jeff Van Drew"
    },
    "decided": {
@@ -18045,6 +18080,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6NY21157": "Anthony Constantino (politician)",
     "H6NY21173": "Richard Grayson (writer)",
     "H6NY21215": "Robert Smullen"
    },
@@ -18747,7 +18783,7 @@
     "H6OH09172": "eliminated"
    },
    "unmatched": {
-    "Matthew Althaus": "nominee"
+    "Matthew Althaus": "withdrawn"
    },
    "unmatchedParty": {
     "Matthew Althaus": "Libertarian"
@@ -19588,6 +19624,7 @@
    },
    "ambiguous": [],
    "article": {
+    "H6PA01181": "Bob Harvie (politician)",
     "H6PA08277": "Brian Fitzpatrick (American politician)"
    },
    "decided": {
@@ -20410,8 +20447,8 @@
   "H-SC-02-2026": {
    "about": {
     "H2SC02059": "incumbent U.S. representative",
-    "H6SC02159": "attorney and air force veteran",
-    "H6SC02167": "attorney and air force veteran"
+    "H6SC02159": "attorney and Air Force veteran",
+    "H6SC02167": "attorney and Air Force veteran"
    },
    "ambiguous": [],
    "article": {
@@ -20678,26 +20715,23 @@
     "H6SD01117": "Casey Crabtree",
     "H6SD01133": "Billy Mawhiney",
     "H6SD01141": "Nicole Gronli",
-    "H6SD01158": "James Bialota Jr.",
-    "H6SD01166": "Jack Pittman"
+    "H6SD01158": "James Bialota Jr."
    },
-   "page": "2026 United States House of Representatives election in South Dakota",
+   "page": "2026 United States House of Representatives elections in South Dakota",
    "party": {
     "H6SD01109": "republican",
     "H6SD01141": "democratic",
-    "H6SD01158": "republican",
-    "H6SD01166": "independent"
+    "H6SD01158": "republican"
    },
    "site": {
     "H6SD01109": "https://martyjackley.com/"
    },
    "status": {
-    "H6SD01109": "nominee",
+    "H6SD01109": "elected",
     "H6SD01117": "withdrawn",
     "H6SD01133": "withdrawn",
-    "H6SD01141": "nominee",
-    "H6SD01158": "eliminated",
-    "H6SD01166": "nominee"
+    "H6SD01141": "defeated",
+    "H6SD01158": "eliminated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -21150,7 +21184,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21217,7 +21251,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21281,7 +21315,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21337,7 +21371,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21394,7 +21428,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21453,7 +21487,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21511,7 +21545,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21571,10 +21605,12 @@
     "H6TX08209": "attorney"
    },
    "ambiguous": [],
-   "article": {},
+   "article": {
+    "H6TX08209": "Jessica Steinmann"
+   },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21641,11 +21677,12 @@
    "article": {
     "H0TX09077": "Steve Stockman",
     "H6TX09124": "Briscoe Cain",
-    "H6TX09207": "Terry Virts"
+    "H6TX09207": "Terry Virts",
+    "H6TX09231": "Leticia Gutierrez"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21733,12 +21770,13 @@
    },
    "ambiguous": [],
    "article": {
+    "H6TX10221": "Chris Gober",
     "H6TX10254": "Sarah Eckhardt",
     "H6TX10262": "Sarah Eckhardt"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21833,7 +21871,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21887,7 +21925,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21941,7 +21979,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -21995,7 +22033,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22059,7 +22097,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22113,7 +22151,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22182,7 +22220,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22243,7 +22281,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22306,7 +22344,7 @@
    "article": {},
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22379,7 +22417,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22436,7 +22474,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22522,11 +22560,12 @@
    },
    "ambiguous": [],
    "article": {
-    "H6TX22275": "Jacey Jetton"
+    "H6TX22275": "Jacey Jetton",
+    "H6TX22283": "Trever Nehls"
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22596,7 +22635,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22675,7 +22714,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22733,7 +22772,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22787,7 +22826,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22851,7 +22890,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22918,7 +22957,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -22989,7 +23028,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23048,7 +23087,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23120,7 +23159,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23208,7 +23247,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23293,7 +23332,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23365,7 +23404,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23451,7 +23490,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23541,7 +23580,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23599,7 +23638,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23663,7 +23702,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -23779,6 +23818,7 @@
     "H6UT01228": "Liban Mohamed",
     "H6UT01236": "Michael Farrell",
     "H6UT01244": "Riley Owen",
+    "H6UT01251": "Jesse West",
     "H8UT04053": "Ben McAdams"
    },
    "page": "2026 United States House of Representatives elections in Utah",
@@ -23787,6 +23827,7 @@
     "H6UT01228": "democratic",
     "H6UT01236": "democratic",
     "H6UT01244": "republican",
+    "H6UT01251": "libertarian",
     "H8UT04053": "democratic"
    },
    "site": {},
@@ -23800,15 +23841,19 @@
     "H6UT01210": "eliminated",
     "H6UT01228": "eliminated",
     "H6UT01236": "eliminated",
-    "H6UT01244": "nominee",
-    "H8UT04053": "nominee"
+    "H6UT01244": "defeated",
+    "H6UT01251": "defeated",
+    "H8UT04053": "elected"
    },
    "unmatched": {
     "Adam Clayton": "withdrawn",
     "Blake Moore": "withdrawn",
-    "Dave Robinson": "eliminated"
+    "Dave Robinson": "eliminated",
+    "Elias H. Montgomery": "defeated"
    },
-   "unmatchedParty": {},
+   "unmatchedParty": {
+    "Elias H. Montgomery": "Independent"
+   },
    "unsure": []
   },
   "H-UT-02-2026": {
@@ -23830,28 +23875,40 @@
    "label": {},
    "names": {
     "H0UT01205": "Blake Moore",
+    "H4UT01165": "Daniel Cottam",
     "H6UT01160": "Peter Crosby",
+    "H6UT02259": "Carlton Bowen",
     "H6UT02432": "Tyler Farnsworth",
     "H6UT02440": "Jarom Gillins",
     "H6UT02457": "Jarom Gillins",
     "H6UT02515": "Ian Parrish",
-    "H6UT02523": "Karianne Lisonbee"
+    "H6UT02523": "Karianne Lisonbee",
+    "H6UT02531": "Robert Moesinger",
+    "H6UT02549": "Carlton Bowen"
    },
    "page": "2026 United States House of Representatives elections in Utah",
    "party": {
     "H0UT01205": "republican",
+    "H4UT01165": "libertarian",
     "H6UT01160": "democratic",
-    "H6UT02523": "republican"
+    "H6UT02259": "independent",
+    "H6UT02523": "republican",
+    "H6UT02531": "independent",
+    "H6UT02549": "independent"
    },
    "site": {},
    "status": {
-    "H0UT01205": "nominee",
-    "H6UT01160": "nominee",
+    "H0UT01205": "elected",
+    "H4UT01165": "defeated",
+    "H6UT01160": "defeated",
+    "H6UT02259": "defeated",
     "H6UT02432": "eliminated",
     "H6UT02440": "eliminated",
     "H6UT02457": "eliminated",
     "H6UT02515": "eliminated",
-    "H6UT02523": "eliminated"
+    "H6UT02523": "eliminated",
+    "H6UT02531": "defeated",
+    "H6UT02549": "defeated"
    },
    "unmatched": {
     "Colton Hatch": "eliminated"
@@ -23864,7 +23921,9 @@
     "H4UT02296": "incumbent U.S. representative from the 2nd district",
     "H6UT03182": "engineer and cousin of former U.S. Interior Secretary Stewart Udall"
    },
-   "ambiguous": [],
+   "ambiguous": [
+    "Michael Stoddard"
+   ],
    "article": {
     "H4UT02296": "Celeste Maloy",
     "H6UT03208": "Phil Lyman"
@@ -23875,8 +23934,11 @@
      "republican"
     ]
    },
-   "label": {},
+   "label": {
+    "H2UT02506": "Constitution Party"
+   },
    "names": {
+    "H2UT02506": "Cassie Easley",
     "H4UT02296": "Celeste Maloy",
     "H6UT02465": "Steve Merrill",
     "H6UT03182": "Kent Udell",
@@ -23885,23 +23947,31 @@
    },
    "page": "2026 United States House of Representatives elections in Utah",
    "party": {
+    "H2UT02506": "constitution party",
     "H4UT02296": "republican",
     "H6UT03182": "democratic",
     "H6UT03208": "republican"
    },
    "site": {},
    "status": {
-    "H4UT02296": "nominee",
+    "H2UT02506": "defeated",
+    "H4UT02296": "elected",
     "H6UT02465": "eliminated",
-    "H6UT03182": "nominee",
+    "H6UT03182": "defeated",
     "H6UT03190": "eliminated",
     "H6UT03208": "eliminated"
    },
    "unmatched": {
+    "Michael Stoddard": "defeated",
     "Tyler Murset": "eliminated"
    },
-   "unmatchedParty": {},
-   "unsure": []
+   "unmatchedParty": {
+    "Michael Stoddard": "Libertarian"
+   },
+   "unsure": [
+    "H2UT03355",
+    "H6UT03224"
+   ]
   },
   "H-UT-04-2026": {
    "about": {
@@ -24618,6 +24688,7 @@
   },
   "H-VT-00-2026": {
    "about": {
+    "H2VT00177": "window installation contractor and candidate for U.S. House in 2022 and 2024",
     "H2VT01076": "incumbent U.S. representative (2023–present)",
     "H6VT01085": "retired military officer, and nominee for U.S. Senate in 2022 and 2024"
    },
@@ -24634,27 +24705,41 @@
    },
    "label": {},
    "names": {
+    "H2VT00177": "Adam Ortiz",
     "H2VT01076": "Becca Balint",
     "H4VT01056": "Mark Coester",
-    "H6VT01085": "Gerald Malloy"
+    "H6VT00269": "Suzanne Seymour",
+    "H6VT01085": "Gerald Malloy",
+    "H6VT01093": "Ryan P. Walton"
    },
-   "page": "2026 United States House of Representatives election in Vermont",
+   "page": "2026 United States House of Representatives elections in Vermont",
    "party": {
+    "H2VT00177": "independent",
     "H2VT01076": "democratic",
     "H4VT01056": "republican",
-    "H6VT01085": "republican"
+    "H6VT00269": "independent",
+    "H6VT01085": "republican",
+    "H6VT01093": "independent"
    },
    "site": {
     "H2VT01076": "https://beccabalint.com/",
+    "H6VT00269": "https://ruokvt.com/",
     "H6VT01085": "https://www.deploymalloy.com/"
    },
    "status": {
-    "H2VT01076": "nominee",
+    "H2VT00177": "defeated",
+    "H2VT01076": "elected",
     "H4VT01056": "eliminated",
-    "H6VT01085": "nominee"
+    "H6VT00269": "defeated",
+    "H6VT01085": "defeated",
+    "H6VT01093": "defeated"
    },
-   "unmatched": {},
-   "unmatchedParty": {},
+   "unmatched": {
+    "Phoenix K. Altair": "defeated"
+   },
+   "unmatchedParty": {
+    "Phoenix K. Altair": "Independent"
+   },
    "unsure": []
   },
   "H-WA-01-2026": {
@@ -25513,11 +25598,11 @@
    },
    "site": {},
    "status": {
-    "H0WV03193": "nominee",
+    "H0WV03193": "defeated",
     "H6WV01111": "eliminated",
     "H6WV01137": "eliminated",
-    "H6WV01160": "nominee",
-    "H8WV03097": "nominee"
+    "H6WV01160": "defeated",
+    "H8WV03097": "elected"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -25554,12 +25639,12 @@
     "H4WV02205": "https://www.mooreforwv.com/"
    },
    "status": {
-    "H4WV02205": "nominee",
+    "H4WV02205": "elected",
     "H4WV02247": "eliminated",
     "H6WV02184": "eliminated"
    },
    "unmatched": {
-    "Ace Parsi": "nominee"
+    "Ace Parsi": "defeated"
    },
    "unmatchedParty": {
     "Ace Parsi": "Democratic"
@@ -25603,7 +25688,7 @@
     "H6WY01181": "Richard Dodson",
     "H6WY01207": "Keith Goodenough"
    },
-   "page": "2026 United States House of Representatives election in Wyoming",
+   "page": "2026 United States House of Representatives elections in Wyoming",
    "party": {
     "H0WY01051": "constitution party",
     "H6WY00217": "republican",
@@ -25621,8 +25706,8 @@
     "H6WY00217": "https://chuckforwyoming.com/"
    },
    "status": {
-    "H0WY01051": "nominee",
-    "H6WY00217": "nominee",
+    "H0WY01051": "defeated",
+    "H6WY00217": "elected",
     "H6WY00225": "eliminated",
     "H6WY00233": "eliminated",
     "H6WY00241": "eliminated",
@@ -25630,14 +25715,14 @@
     "H6WY01140": "eliminated",
     "H6WY01157": "withdrawn",
     "H6WY01165": "eliminated",
-    "H6WY01173": "nominee",
+    "H6WY01173": "defeated",
     "H6WY01181": "eliminated",
     "H6WY01207": "eliminated"
    },
    "unmatched": {
     "Elena del Real": "eliminated",
     "John Romero-Martinez": "eliminated",
-    "Shawn Johnson": "nominee"
+    "Shawn Johnson": "defeated"
    },
    "unmatchedParty": {
     "Elena del Real": "Democratic",
@@ -25648,7 +25733,7 @@
   "S-AK-2026": {
    "about": {},
    "ambiguous": [
-    "Daniel J. Sullivan Jr."
+    "Dan J. Sullivan"
    ],
    "article": {
     "S4AK00214": "Dan Sullivan (U.S. senator)",
@@ -25657,7 +25742,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Alaska Division of Elections, 2026 General Election candidate list",
     "url": "https://www.elections.alaska.gov/candidates/?election=26genr"
    },
@@ -25813,10 +25898,10 @@
     "S6AL00443": "eliminated",
     "S6AL00450": "eliminated",
     "S6AL00468": "eliminated",
-    "S6AL00476": "nominee",
+    "S6AL00476": "elected",
     "S6AL00484": "eliminated",
     "S6AL00500": "eliminated",
-    "S6AL00518": "nominee",
+    "S6AL00518": "defeated",
     "T000278": "withdrawn"
    },
    "unmatched": {
@@ -25868,13 +25953,13 @@
     "S6AR00223": "https://www.jeffwadlin.com/"
    },
    "status": {
-    "S4AR00103": "nominee",
+    "S4AR00103": "elected",
     "S6AR00173": "eliminated",
     "S6AR00181": "withdrawn",
-    "S6AR00199": "nominee",
+    "S6AR00199": "defeated",
     "S6AR00207": "eliminated",
     "S6AR00215": "eliminated",
-    "S6AR00223": "nominee"
+    "S6AR00223": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -25896,13 +25981,13 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Colorado Secretary of State, 2026 General Election Official Candidate List",
     "url": "https://www.coloradosos.gov/pubs/elections/vote/generalCandidates.html"
    },
    "certifiedHeld": [],
    "certifiedIds": {
-    "S6CO00556": "nominee"
+    "S6CO00556": "defeated"
    },
    "certifiedUnprinted": {
     "S4CO00429": "write-in"
@@ -25959,7 +26044,7 @@
     "S6CO00507": "https://markbaisley.com/"
    },
    "status": {
-    "S0CO00575": "nominee",
+    "S0CO00575": "elected",
     "S4CO00452": "withdrawn",
     "S6CO00408": "eliminated",
     "S6CO00416": "withdrawn",
@@ -25967,17 +26052,17 @@
     "S6CO00440": "eliminated",
     "S6CO00473": "withdrawn",
     "S6CO00499": "eliminated",
-    "S6CO00507": "nominee",
+    "S6CO00507": "defeated",
     "S6CO00515": "eliminated",
     "S6CO00523": "eliminated",
     "S6CO00531": "eliminated",
-    "S6CO00556": "nominee",
-    "S6CO00564": "nominee"
+    "S6CO00556": "defeated",
+    "S6CO00564": "defeated"
    },
    "unmatched": {
     "A.J. Zimpfer": "withdrawn",
-    "Blake Huber": "nominee",
-    "Christopher Baum": "nominee",
+    "Blake Huber": "defeated",
+    "Christopher Baum": "defeated",
     "Joshua William Kuebler": "withdrawn"
    },
    "unmatchedParty": {
@@ -26029,10 +26114,10 @@
     "S0DE00092": "https://www.chriscoons.com/"
    },
    "status": {
-    "S0DE00092": "nominee",
+    "S0DE00092": "elected",
     "S6DE00156": "withdrawn",
     "S6DE00198": "eliminated",
-    "S6DE00206": "nominee",
+    "S6DE00206": "defeated",
     "S6DE00230": "eliminated",
     "S6DE00263": "eliminated"
    },
@@ -26062,7 +26147,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Florida Division of Elections, candidate listing for the 2026 General Election",
     "url": "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN&OfficeGroup=FED"
    },
@@ -26195,9 +26280,9 @@
     "S2GA00282": "eliminated",
     "S4GA11202": "eliminated",
     "S6GA00382": "withdrawn",
-    "S6GA00390": "nominee",
+    "S6GA00390": "defeated",
     "S6GA00408": "eliminated",
-    "S8GA00180": "nominee"
+    "S8GA00180": "elected"
    },
    "unmatched": {
     "Buddy Carter": "eliminated",
@@ -26272,14 +26357,14 @@
     "S6IA00314": "https://ashleyhinson.com/"
    },
    "status": {
-    "S6IA00181": "nominee",
+    "S6IA00181": "defeated",
     "S6IA00207": "withdrawn",
     "S6IA00249": "eliminated",
     "S6IA00256": "withdrawn",
     "S6IA00272": "eliminated",
     "S6IA00280": "withdrawn",
-    "S6IA00298": "nominee",
-    "S6IA00314": "nominee"
+    "S6IA00298": "elected",
+    "S6IA00314": "defeated"
    },
    "unmatched": {
     "J. D. Scholten": "withdrawn"
@@ -26500,9 +26585,9 @@
     "S6KS00312": "https://hamiltonforkansas.com/"
    },
    "status": {
-    "S0KS00315": "nominee",
+    "S0KS00315": "defeated",
     "S2KS00097": "eliminated",
-    "S2KS00154": "nominee",
+    "S2KS00154": "defeated",
     "S6KS00239": "eliminated",
     "S6KS00247": "eliminated",
     "S6KS00262": "eliminated",
@@ -26510,7 +26595,7 @@
     "S6KS00288": "eliminated",
     "S6KS00296": "eliminated",
     "S6KS00304": "eliminated",
-    "S6KS00312": "nominee",
+    "S6KS00312": "elected",
     "S6KS00320": "eliminated"
    },
    "unmatched": {
@@ -26712,7 +26797,6 @@
    "ambiguous": [],
    "article": {
     "S4MA00028": "Ed Markey",
-    "S6MA00288": "Joe Tache",
     "S6MA00296": "Seth Moulton",
     "S6MA00304": "John Deaton",
     "S8MA00268": "Shiva Ayyadurai"
@@ -26752,14 +26836,14 @@
     "S8MA00268": "https://shiva4senate.com/"
    },
    "status": {
-    "S4MA00028": "nominee",
+    "S4MA00028": "elected",
     "S6MA00254": "withdrawn",
     "S6MA00270": "withdrawn",
-    "S6MA00288": "nominee",
+    "S6MA00288": "defeated",
     "S6MA00296": "eliminated",
-    "S6MA00304": "nominee",
+    "S6MA00304": "defeated",
     "S6MA00312": "eliminated",
-    "S8MA00268": "nominee"
+    "S8MA00268": "defeated"
    },
    "unmatched": {
     "Christopher Thrasher": "eliminated"
@@ -26981,16 +27065,16 @@
    "status": {
     "S4MN00502": "eliminated",
     "S4MN00551": "withdrawn",
-    "S6MN00440": "nominee",
+    "S6MN00440": "elected",
     "S6MN00457": "eliminated",
     "S6MN00465": "withdrawn",
     "S6MN00473": "eliminated",
-    "S6MN00481": "nominee",
+    "S6MN00481": "defeated",
     "S6MN00499": "eliminated",
     "S6MN00515": "eliminated",
     "S6MN00531": "withdrawn",
-    "S6MN00556": "nominee",
-    "S6MN00572": "nominee"
+    "S6MN00556": "defeated",
+    "S6MN00572": "defeated"
    },
    "unmatched": {
     "Ahmad R. Hassan": "eliminated",
@@ -27393,14 +27477,14 @@
     "S6NH00208": "https://www.sununusenator.com/"
    },
    "status": {
-    "S2NH00223": "nominee",
+    "S2NH00223": "defeated",
     "S4NH00096": "eliminated",
-    "S6NH00141": "nominee",
+    "S6NH00141": "elected",
     "S6NH00166": "eliminated",
     "S6NH00174": "withdrawn",
     "S6NH00182": "eliminated",
     "S6NH00190": "withdrawn",
-    "S6NH00208": "nominee",
+    "S6NH00208": "defeated",
     "S6NH00224": "eliminated",
     "S6NH00232": "eliminated"
    },
@@ -27531,9 +27615,9 @@
     "S6NM01186": "https://larrymarker.com/"
    },
    "status": {
-    "S0NM00058": "nominee",
+    "S0NM00058": "elected",
     "S6NM01145": "eliminated",
-    "S6NM01186": "nominee"
+    "S6NM01186": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -27586,16 +27670,16 @@
     "S6OH00429": "https://billredpath.com/"
    },
    "status": {
-    "S6OH00163": "nominee",
-    "S6OH00304": "nominee",
+    "S6OH00163": "elected",
+    "S6OH00304": "defeated",
     "S6OH00338": "withdrawn",
     "S6OH00346": "withdrawn",
     "S6OH00353": "withdrawn",
     "S6OH00361": "eliminated",
     "S6OH00387": "withdrawn",
-    "S6OH00395": "nominee",
+    "S6OH00395": "defeated",
     "S6OH00403": "withdrawn",
-    "S6OH00429": "nominee"
+    "S6OH00429": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -27945,8 +28029,8 @@
     "S6SD01117": "https://bengsforsouthdakota.com"
    },
    "status": {
-    "S4SD00049": "nominee",
-    "S6SD01117": "nominee",
+    "S4SD00049": "elected",
+    "S6SD01117": "defeated",
     "S6SD01125": "withdrawn",
     "S6SD01133": "eliminated"
    },
@@ -28015,24 +28099,24 @@
     "S6TN00414": "https://senatorbarcy.org/"
    },
    "status": {
-    "S0TN00169": "nominee",
+    "S0TN00169": "elected",
     "S0TN00193": "eliminated",
     "S4TN00534": "eliminated",
-    "S4TN00542": "nominee",
-    "S4TN00583": "nominee",
-    "S6TN00323": "nominee",
-    "S6TN00331": "nominee",
-    "S6TN00364": "nominee",
-    "S6TN00372": "nominee",
+    "S4TN00542": "defeated",
+    "S4TN00583": "defeated",
+    "S6TN00323": "defeated",
+    "S6TN00331": "defeated",
+    "S6TN00364": "defeated",
+    "S6TN00372": "defeated",
     "S6TN00380": "eliminated",
-    "S6TN00398": "nominee",
+    "S6TN00398": "defeated",
     "S6TN00406": "eliminated",
-    "S6TN00414": "nominee"
+    "S6TN00414": "defeated"
    },
    "unmatched": {
-    "Andrew Gerena": "nominee",
-    "James Macon III": "nominee",
-    "Jeremy Hearn": "nominee"
+    "Andrew Gerena": "defeated",
+    "James Macon III": "defeated",
+    "Jeremy Hearn": "defeated"
    },
    "unmatchedParty": {
     "Andrew Gerena": "Independent",
@@ -28058,7 +28142,7 @@
    },
    "certified": {
     "complete": true,
-    "fetched": "2026-11-05",
+    "fetched": "2026-11-09",
     "source": "Texas Secretary of State, qualified candidates for the 2026 November General Election (federal offices)",
     "url": "https://goelect.txelections.civixapps.com/ivis-cbp-ui/candidate-information"
    },
@@ -28280,16 +28364,16 @@
     "S6WV00204": "https://wilsonwv.com/"
    },
    "status": {
-    "S4WV00159": "nominee",
+    "S4WV00159": "elected",
     "S4WV00357": "eliminated",
     "S4WV00365": "eliminated",
     "S4WV00407": "eliminated",
     "S6WV00154": "eliminated",
     "S6WV00162": "eliminated",
     "S6WV00170": "eliminated",
-    "S6WV00188": "nominee",
+    "S6WV00188": "defeated",
     "S6WV00196": "eliminated",
-    "S6WV00204": "nominee"
+    "S6WV00204": "defeated"
    },
    "unmatched": {
     "David Purkey": "eliminated",
@@ -28366,6 +28450,13 @@
    }
   ]
  },
- "refusedNames": {},
+ "refusedNames": {
+  "H-MO-08-2026": [
+   {
+    "name": "Christopher Riechard",
+    "why": "only the infobox names them, with no filing and no state's list"
+   }
+  ]
+ },
  "unparsedPages": []
 }
