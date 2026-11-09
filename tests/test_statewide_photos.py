@@ -428,5 +428,254 @@ class TestThePage(unittest.TestCase):
         self.assertEqual(sp.problems(cache), [])
 
 
+class TestWhatTheMondayReadFound(unittest.TestCase):
+    """The faults the read of 2026-11-09 showed, record by record."""
+
+    ARTICLE = dict(TestTheRacesOwnArticle.ARTICLE, image="Pat Doe official portrait.jpg",
+                   title="Pat Doe")
+    LINKS = [("Pat Doe", "Pat Doe", "Pat Doe greets supporters at a rally.jpg", None)]
+
+    def commons(self, file_name, width=614, height=864):
+        name = file_name.replace(" ", "_")
+        page = f"https://commons.wikimedia.org/wiki/File:{name}"
+        upload = official_photos.commons_upload({"credit": {"page": page}})
+        return {"info": {"width": width, "height": height,
+                         # The API's own forms: the upload percent-encoded, the
+                         # file page as it reads.
+                         "url": upload.replace("(", "%28").replace(")", "%29"),
+                         "descriptionurl": page,
+                         "extmetadata": {"Artist": {"value": "Jane Photographer"},
+                                         "LicenseShortName": {"value": "CC BY-SA 4.0"}}},
+                "categories": []}
+
+    def photo(self, links=None, article=None, commons=None, measure=None, **kw):
+        with mock.patch.object(sp, "_resolve", return_value=dict(article or self.ARTICLE)), \
+                mock.patch.object(sp, "_commons", side_effect=commons or self.commons):
+            return sp.wiki_photo("XX", "governor", {"name": "Pat Doe"}, links or self.LINKS,
+                                 "2026 race", measure=measure or (lambda u: (True, SMALL)), **kw)
+
+    def test_a_scene_beside_the_nominee_gives_way_to_their_articles_portrait(self):
+        """Ned Lamont: the race's infobox set a bridge visit beside him, over
+        his own article's official portrait."""
+        rec, why = self.photo()
+        self.assertEqual(why, "")
+        self.assertIn("Pat_Doe_official_portrait", rec["photo"])
+        self.assertIn("leads with File:Pat Doe official portrait.jpg", rec["evidence"])
+        # The infobox's own portrait still comes first.
+        links = [("Pat Doe", "Pat Doe", "Pat Doe 2026.jpg", None)]
+        rec, _ = self.photo(links=links)
+        self.assertIn("Pat_Doe_2026", rec["photo"])
+        # A scene in both (Tad Jude's) gives none, and says why.
+        article = dict(self.ARTICLE, image="Pat Doe greets supporters at a rally.jpg")
+        self.assertEqual(self.photo(article=article), (None, "file-name"))
+
+    def test_a_persons_refusal_promotes_nothing(self):
+        """Mayes Middleton's refused crop would have given way to the
+        uncropped photograph it was cut from (rule 38)."""
+        from kyc import overrides
+        links = [("Pat Doe", "Pat Doe", "Pat Doe (cropped).jpg", None)]
+        article = dict(self.ARTICLE, image="Pat Doe.jpg")
+        crop = "https://upload.wikimedia.org/wikipedia/commons/8/87/Pat_Doe_(cropped).jpg"
+        for table, why in ((overrides.NOT_A_PORTRAIT, "not-a-portrait"),
+                           (overrides.PORTRAIT_LICENCE_DOUBTS, sp.LISTED_DOUBT)):
+            with self.subTest(why=why), mock.patch.dict(table, {crop: ("2026-10-25", "a test")}):
+                self.assertEqual(self.photo(links=links, article=article), (None, why))
+
+    def test_a_file_that_concludes_nothing_gives_way_to_nothing(self):
+        links = [("Pat Doe", "Pat Doe", "Pat Doe 2026.jpg", None)]
+
+        def commons(file_name):
+            return {"info": None, "categories": []} if "2026" in file_name else self.commons(file_name)
+        self.assertEqual(self.photo(links=links, commons=commons),
+                         (None, official_photos.UNKNOWN))
+
+    def test_a_size_wikimedia_did_not_answer_for_is_not_passed_over(self):
+        """Eleven photographs moved to another width of the same file on
+        2026-11-09, Lisa Demuth's to 120px, on transient refusals."""
+        def measure(url):
+            return (None, None) if "/250px-" in url else (True, SMALL)
+        self.assertEqual(self.photo(measure=measure), (None, official_photos.UNKNOWN))
+        sizes = [(250, "a"), (330, "b"), (120, "c")]
+        self.assertEqual(official_photos.choose(sizes, measure_from({"a": None, "b": SMALL}))[0],
+                         "b")
+        self.assertEqual(official_photos.choose(sizes, measure_from({"a": None, "b": SMALL}),
+                                                strict=True)[2], official_photos.UNKNOWN)
+        self.assertEqual(official_photos.choose(sizes, measure_from({"a": SMALL}), strict=True)[0],
+                         "a")
+
+    def test_a_persons_lists_are_asked_in_the_form_they_are_keyed(self):
+        """The API writes "%28cropped%29", the lists "(cropped)": Mayes
+        Middleton's refused file and three doubted licences were taken on
+        every Monday and dropped on Tuesday."""
+        from kyc import overrides
+        links = [("Pat Doe", "Pat Doe", "Pat Doe (cropped).jpg", None)]
+        article = dict(self.ARTICLE, image=None)
+        keyed = "https://upload.wikimedia.org/wikipedia/commons/8/87/Pat_Doe_(cropped).jpg"
+        for table, why in ((overrides.NOT_A_PORTRAIT, "not-a-portrait"),
+                           (overrides.PORTRAIT_LICENCE_DOUBTS, sp.LISTED_DOUBT)):
+            with self.subTest(why=why), mock.patch.dict(table, {keyed: ("2026-10-25", "a test")}):
+                refusals, doubts = [], []
+                self.assertEqual(self.photo(links=links, article=article, passed_over=refusals,
+                                            doubted=doubts), (None, why))
+                self.assertEqual(refusals + doubts, [keyed])
+        # Through the whole read: never cached, and the refusal kept for
+        # validate's staleness check.
+        lists = {"states": {"XX": {"offices": {"governor": {"candidates": [{"name": "Pat Doe"}]}}}}}
+        with mock.patch.dict(overrides.PORTRAIT_LICENCE_DOUBTS, {keyed: ("2026-10-25", "a test")}), \
+                mock.patch.object(sp, "read_members", return_value=({}, [], set())), \
+                mock.patch.object(sp, "read_guides", return_value=({}, [], set())), \
+                mock.patch.object(sp, "_wikitext", lambda t: (t, "text")), \
+                mock.patch.object(sp, "race_links", return_value=links), \
+                mock.patch.object(sp, "_resolve", return_value=dict(article)), \
+                mock.patch.object(sp, "_commons", side_effect=self.commons), \
+                mock.patch.object(official_photos, "weigh", lambda u: (True, SMALL)):
+            cache, _ = sp.fetch(lists, {}, None, log=lambda line: None)
+        self.assertEqual(cache["photos"], {})
+        self.assertEqual(cache["licenceDoubts"], {"XX|governor|Pat Doe": [keyed]})
+
+
+class TestTheMondayReadEndsInsideItsStep(unittest.TestCase):
+    """The refresh of 2026-11-09: the races' articles' read ran past its
+    step's fifty minutes, printing nothing (Python buffers a pipe). It now
+    has a budget (``--max-minutes``, rule 78), and keeps every race it did
+    not reach as last read (rule 8), the oldest first next time."""
+
+    TODAY = sp.datetime.date.today().isoformat()
+    KS = "KS|governor|Ty Masterson"
+    WY = "WY|governor|Pat Doe"
+    WY_SOS = "WY|sos|Lee Roe"
+    REFUSED = "https://upload.wikimedia.org/wikipedia/commons/1/1a/Lee_Roe_rally.jpg"
+
+    def lists(self):
+        return {"states": {
+            "KS": {"offices": {"governor": {"candidates": [{"name": "Ty Masterson"}]}}},
+            "WY": {"offices": {"governor": {"candidates": [{"name": "Pat Doe"}]},
+                               "sos": {"candidates": [{"name": "Lee Roe"}]}}}}}
+
+    def kept(self, name):
+        return {"route": "wikipedia", "read": "2026-11-02", "bytes": 38_037,
+                "photo": f"https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/{name}.jpg/"
+                         f"250px-{name}.jpg",
+                "page": "https://en.wikipedia.org/wiki/2026_race", "evidence": "the race links",
+                "width": 250, "height": 314, "by": "A Legislature",
+                "credit": {"by": "A Legislature", "licence": "CC BY 4.0", "year": 1981,
+                           "yearForm": 4, "via": "Wikimedia Commons",
+                           "page": f"https://commons.wikimedia.org/wiki/File:{name}.jpg"}}
+
+    def previous(self):
+        return {"read": "2026-11-02",
+                "photos": {self.WY: self.kept("Pat_Doe")},
+                "misses": {self.WY_SOS: "not-a-portrait"},
+                "notPortraits": {self.WY_SOS: [self.REFUSED]},
+                "articles": {self.WY: {"article": "Pat Doe", "page": "2026 Wyoming race"}},
+                "articlesRead": "2026-11-02",
+                # Kansas was read longest ago, so it is read first.
+                "racesRead": {"KS|governor": "2026-10-26", "WY|governor": "2026-11-02",
+                              "WY|sos": "2026-11-02"}}
+
+    def run_fetch(self, budget, asked):
+        """``fetch`` over Kansas and Wyoming with every network read made
+        here; *asked* lists the race articles read, in order."""
+        def wikitext(title):
+            asked.append(title)
+            return title, "text"
+
+        def wiki_photo(code, office, candidate, links, title, *args, **kwargs):
+            rec = self.kept(candidate["name"].replace(" ", "_"))
+            rec["read"] = self.TODAY
+            return rec, ""
+
+        with mock.patch.object(sp, "read_members", return_value=({}, [], set())), \
+                mock.patch.object(sp, "read_guides", return_value=({}, [], set())), \
+                mock.patch.object(sp, "_wikitext", wikitext), \
+                mock.patch.object(sp, "_resolve", return_value=dict(TestTheRacesOwnArticle.ARTICLE)), \
+                mock.patch.object(sp, "race_links", return_value=TestTheRacesOwnArticle.LINKS), \
+                mock.patch.object(sp, "wiki_photo", wiki_photo), \
+                mock.patch.object(sp, "date_credits", return_value=0):
+            return sp.fetch(self.lists(), {}, self.previous(), log=None, budget=budget)
+
+    def test_a_race_not_reached_keeps_its_last_read(self):
+        clock = iter([0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]).__next__
+        budget = sp.Budget(60, clock=clock)
+        asked = []
+        cache, problems = self.run_fetch(budget, asked)
+        # Kansas, read longest ago, was read; neither Wyoming race was begun.
+        self.assertEqual(asked, ["2026 Kansas gubernatorial election"])
+        self.assertEqual(cache["photos"][self.KS]["read"], self.TODAY)
+        self.assertEqual(cache["photos"][self.WY], self.kept("Pat_Doe"))
+        self.assertEqual(cache["misses"], {self.WY_SOS: "not-a-portrait"})
+        self.assertEqual(cache["notPortraits"], {self.WY_SOS: [self.REFUSED]})
+        # Wyoming's article record is kept with the day it was read.
+        self.assertEqual(cache["articles"][self.WY]["read"], "2026-11-02")
+        self.assertEqual(sp.article_of(cache, "WY", "governor", "Pat Doe")["read"], "2026-11-02")
+        self.assertIsNone(cache["articles"][self.KS].get("read"))
+        self.assertEqual(sp.article_of(cache, "KS", "governor", "Ty Masterson")["read"], self.TODAY)
+        # The race read is dated, the others keep their day; and it is said.
+        self.assertEqual(cache["racesRead"], {"KS|governor": self.TODAY,
+                                              "WY|governor": "2026-11-02", "WY|sos": "2026-11-02"})
+        said = [p for p in problems if "not reached within the time budget" in p]
+        self.assertEqual(len(said), 2, problems)
+        self.assertIn("WY|governor, WY|sos", said[0])
+
+    def test_a_read_with_time_to_spare_reads_every_race_once(self):
+        asked = []
+        cache, problems = self.run_fetch(sp.Budget(None), asked)
+        # The candidates' articles' read asks for no article the photographs'
+        # read already read.
+        self.assertEqual(sorted(asked), ["2026 Kansas gubernatorial election",
+                                         "2026 Wyoming Secretary of State election",
+                                         "2026 Wyoming gubernatorial election"])
+        self.assertEqual(set(cache["racesRead"].values()), {self.TODAY})
+        self.assertEqual(cache["photos"][self.WY]["read"], self.TODAY)
+        self.assertNotIn("notPortraits", cache)
+        self.assertFalse([p for p in problems if "time budget" in p])
+
+    def test_the_race_read_longest_ago_comes_first(self):
+        lists = {"AK": {"governor": [1]}, "KS": {"governor": [1], "sos": [1]}, "WY": {"lt": [1]}}
+        order = sp.race_order(lists, {"AK|governor": "2026-11-02", "KS|governor": "2026-10-26",
+                                      "WY|lt": "2026-11-02"})
+        self.assertEqual(order, [("KS", "sos"), ("KS", "governor"), ("AK", "governor"),
+                                 ("WY", "lt")])
+
+    def test_an_answer_or_a_failure_is_asked_once(self):
+        calls = []
+
+        def reader(title):
+            calls.append(title)
+            if title == "bad":
+                raise RuntimeError("timed out")
+            return title.upper()
+
+        read = sp.once(reader)
+        self.assertEqual((read("a"), read("a")), ("A", "A"))
+        for _ in range(2):
+            with self.assertRaises(RuntimeError):
+                read("bad")
+        self.assertEqual(calls, ["a", "bad"])
+
+    def test_the_command_takes_a_budget_and_the_refresh_gives_one_inside_its_step(self):
+        import os
+        import re
+        from kyc import cli
+        args = cli.build_parser().parse_args(["ballotphotos", "--max-minutes", "38"])
+        self.assertEqual(args.max_minutes, 38)
+        root = os.path.join(os.path.dirname(__file__), "..")
+        with open(os.path.join(root, ".github", "workflows", "refresh.yml"), encoding="utf-8") as fh:
+            text = fh.read()
+        step = text[text.index("- name: Refresh the statewide candidates' photographs"):]
+        step = step[:step.index("\n\n")]
+        budget = float(re.search(r"ballotphotos --max-minutes (\d+(?:\.\d+)?)", step).group(1))
+        limit = float(re.search(r"timeout-minutes: (\d+)", step).group(1))
+        # Room for a race begun as the budget ran out, its 429s and the save.
+        self.assertLessEqual(budget, limit - 10)
+        # Python is the step's own process, so an ended step ends the read.
+        for line in step.splitlines():
+            if "build_profile_site.py ballotphotos" in line:
+                self.assertTrue(line.strip().startswith("exec python "), line)
+        # And a step ended at its limit keeps what it printed.
+        job = text[text.index("\n  refresh:"):text.index("    steps:", text.index("\n  refresh:"))]
+        self.assertRegex(job, r'PYTHONUNBUFFERED: "1"')
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -192,6 +192,7 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
 python build_profile_site.py ballotphotos     # the statewide candidates' photographs (official guides, members, the race's Wikipedia article)
+                                              # --max-minutes N: no race begun after N minutes; the rest keep their last read
 python build_profile_site.py guidephotos      # the election offices' guides' photographs (WA voters' guide, AK and OR pamphlets), hosted here
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)

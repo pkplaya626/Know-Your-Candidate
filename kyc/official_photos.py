@@ -246,7 +246,7 @@ def _weight_of(measure):
     return weight_of
 
 
-def choose(sizes, measure=weigh, widest=1.0, lighter=None):
+def choose(sizes, measure=weigh, widest=1.0, lighter=None, strict=False):
     """``(url, weight, why, heavy)``: of the sizes a page offers
     (``[(width, url)]``), the narrowest at least ``PREFERRED_WIDTH`` wide
     that is within the caps, else the widest narrower one that is. Where
@@ -257,7 +257,10 @@ def choose(sizes, measure=weigh, widest=1.0, lighter=None):
     size}]`` (``portraitHeavy``), and ``None`` otherwise. Why there is none
     - ``UNKNOWN`` when a size could not be read, ``"shape"`` when the file
     is not portrait-shaped, ``NONE`` when none is an image. Each size is
-    read, never assumed from its label."""
+    read, never assumed from its label. *strict*: a size before the one
+    that would be taken that could not be read concludes nothing
+    (``UNKNOWN``), so a transient refusal never moves a photograph to
+    another size of the same file (rule 8)."""
     if lighter is None:
         from .photos import lighter_form as lighter
     order = [s for s in sizes if s[0] >= PREFERRED_WIDTH] + \
@@ -276,7 +279,11 @@ def choose(sizes, measure=weigh, widest=1.0, lighter=None):
         if too_heavy(weight):
             heavy.append((url, weight))
             continue
+        if strict and unknown:
+            return None, None, UNKNOWN, None
         return url, weight, "", None
+    if strict and unknown:
+        return None, None, UNKNOWN, None
     if heavy:
         # Never left out for its weight (the owner's decision of
         # 2026-10-25): the lightest size offered, smaller where the same

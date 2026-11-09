@@ -90,6 +90,56 @@ class StatewidePhotoError(RuntimeError):
     pass
 
 
+class Budget:
+    """A read's time budget (``ballotphotos --max-minutes``, rule 78): once
+    it is spent no new race is begun, and every race not reached keeps its
+    last read (rule 8). ``Budget(None)`` never runs out."""
+
+    def __init__(self, seconds=None, clock=time.monotonic):
+        self.clock = clock
+        self.seconds = seconds
+        self.end = None if seconds is None else clock() + seconds
+
+    def spent(self):
+        return self.end is not None and self.clock() >= self.end
+
+
+def race_key(code, office):
+    """``"MN|sos"``: a race, as the head of each of its candidates' keys."""
+    return f"{code}|{office}"
+
+
+def race_order(lists, races_read=None, offices=OFFICES):
+    """``[(code, office)]``: every race with a list, the one read longest
+    ago first and a race never read before them all (``racesRead``), so a
+    read its budget stops reaches next time what it did not reach this
+    time, never the same alphabet's tail left unread week after week."""
+    races = [(code, office) for code in sorted(lists) for office in offices
+             if (lists[code] or {}).get(office)]
+    return sorted(races, key=lambda r: ((races_read or {}).get(race_key(*r)) or "", r))
+
+
+def once(reader):
+    """*reader* asked once per argument for the whole run, its answer or its
+    failure remembered: the photographs' read and the candidates' articles'
+    read ask for the same race articles and the same linked articles, and
+    the second asking cost the Monday read a quarter of its time."""
+    answers = {}
+
+    def read(arg):
+        if arg not in answers:
+            try:
+                answers[arg] = (True, reader(arg))
+            except Exception as exc:           # remembered, and raised again
+                answers[arg] = (False, exc)
+        ok, value = answers[arg]
+        if not ok:
+            raise value
+        return value
+    read.answered = answers
+    return read
+
+
 def key(code, office, name):
     return f"{code}|{office}|{name}"
 
@@ -605,56 +655,66 @@ def linked_article(office, candidate, links, resolve=None, code=None):
 ARTICLE_OFFICES = ("governor",)
 
 
-def read_articles(lists, offices=ARTICLE_OFFICES, wikitext=None, resolve=None, log=print):
+def read_articles(lists, offices=ARTICLE_OFFICES, wikitext=None, resolve=None, log=print,
+                  budget=None, unreached=None):
     """``(articles, unknown)``: for every printed candidate for *offices*,
     what the race's own article links for them, recorded whether or not it
     gives a photograph: ``{"article": title, "page": race article}`` where
     it links one that is theirs (:func:`linked_article`), else ``{"none":
     why, "page": ...}``. A race whose article could not be read, or has
     none, records nothing: this site did not look (rule 19), and the last
-    read is kept by the caller (rule 8)."""
+    read is kept by the caller (rule 8). Once *budget* is spent no race is
+    begun: its candidates are *unknown* too, and the race is added to
+    *unreached*."""
     wikitext = wikitext or _wikitext
+    log = log or (lambda line: None)
     articles, unknown = {}, set()
-    for code in sorted(lists):
-        for office in offices:
-            people = (lists[code] or {}).get(office) or []
-            if not people:
+    asked = getattr(wikitext, "answered", {})
+    for code, office in race_order(lists, offices=offices):
+        people = (lists[code] or {}).get(office) or []
+        # A race whose article this run has already read costs nothing more.
+        if budget is not None and budget.spent() and race_titles(code, office)[0] not in asked:
+            unknown.update(key(code, office, p["name"]) for p in people)
+            if unreached is not None and race_key(code, office) not in unreached:
+                unreached.append(race_key(code, office))
+            continue
+        text = title = None
+        try:
+            for candidate_title in race_titles(code, office):
+                title, text = wikitext(candidate_title)
+                if text:
+                    break
+        except Exception as exc:
+            log(f"  {code} {office}: the race's article could not be read ({exc})")
+            unknown.update(key(code, office, p["name"]) for p in people)
+            continue
+        if not text:
+            continue
+        links = race_links(text)
+        for person in people:
+            if person.get("writeIn"):
                 continue
-            text = title = None
+            k = key(code, office, person["name"])
             try:
-                for candidate_title in race_titles(code, office):
-                    title, text = wikitext(candidate_title)
-                    if text:
-                        break
-            except Exception as exc:
-                log(f"  {code} {office}: the race's article could not be read ({exc})")
-                unknown.update(key(code, office, p["name"]) for p in people)
+                found, why = linked_article(office, person, links, resolve=resolve,
+                                            code=code)
+            except Exception:
+                unknown.add(k)
                 continue
-            if not text:
-                continue
-            links = race_links(text)
-            for person in people:
-                if person.get("writeIn"):
-                    continue
-                k = key(code, office, person["name"])
-                try:
-                    found, why = linked_article(office, person, links, resolve=resolve,
-                                                code=code)
-                except Exception:
-                    unknown.add(k)
-                    continue
-                articles[k] = ({"article": found[2]["title"], "page": title} if found
-                               else {"none": why, "page": title})
+            articles[k] = ({"article": found[2]["title"], "page": title} if found
+                           else {"none": why, "page": title})
     return articles, unknown
 
 
-def kept_articles(now, before, unknown):
+def kept_articles(now, before, unknown, before_read=None):
     """This read's articles, and the last read's for every candidate it
-    concluded nothing about (rule 8), sorted."""
+    concluded nothing about (rule 8), sorted. A kept one carries the day it
+    was read (*before_read*, the last read's ``articlesRead``), so a read
+    that reached only some races dates none it did not reach as today's."""
     out = dict(now)
     for k, rec in (before or {}).items():
         if k not in out and k in unknown:
-            out[k] = rec
+            out[k] = dict(rec, read=rec.get("read") or before_read) if before_read else rec
     return {k: out[k] for k in sorted(out)}
 
 
@@ -664,7 +724,8 @@ def with_articles(cache, lists, previous=None, log=print, **readers):
     nothing. The whole of ``ballotphotos --articles-only``."""
     now, unknown = read_articles(lists, log=log, **readers)
     out = dict(cache)
-    out["articles"] = kept_articles(now, (previous or {}).get("articles"), unknown)
+    out["articles"] = kept_articles(now, (previous or {}).get("articles"), unknown,
+                                    (previous or {}).get("articlesRead") if now else None)
     out["articlesRead"] = (datetime.date.today().isoformat() if now
                            else (previous or {}).get("articlesRead"))
     return out
@@ -678,41 +739,100 @@ def article_of(cache, code, office, name):
     k = key(code, office, name)
     rec = ((cache or {}).get("articles") or {}).get(k)
     if rec:
-        return dict(rec, read=(cache or {}).get("articlesRead"))
+        return dict(rec, read=rec.get("read") or (cache or {}).get("articlesRead"))
     photo = ((cache or {}).get("photos") or {}).get(k) or {}
     if photo.get("route") == "wikipedia" and photo.get("article"):
         return {"article": photo["article"], "read": photo.get("read") or (cache or {}).get("read")}
     return None
 
 
+# Why a file a person's list withholds was not taken: no other file of the
+# race's article is asked in its place.
+LISTED_DOUBT = "licence-doubt-listed"
+PERSONS_REFUSALS = ("not-a-portrait", LISTED_DOUBT)
+
+
 def wiki_photo(code, office, candidate, links, race_title, refused=None, measure=None,
-               passed_over=None):
+               passed_over=None, resolve=None, doubted=None):
     """``(record, why)`` for one candidate through the race's article
     (*links*, :func:`race_links`). *refused* is ``overrides.NOT_A_PORTRAIT``,
-    keyed on the Commons upload address."""
-    from .portraits import commons_credit, credit_of, thumb_set
+    keyed on the Commons upload address; a file a person's lists withhold
+    is appended to *passed_over* (``NOT_A_PORTRAIT``) or *doubted*
+    (``PORTRAIT_LICENCE_DOUBTS``).
+
+    The race's infobox image beside the nominee comes before the article's
+    lead (rule 91); a file refused for what it is - its name says a scene
+    or lacks the surname, its licence, its shape - gives way to the other.
+    Ned Lamont's race article set a bridge visit with a Cabinet secretary
+    beside him on 2026-11-09, over his own article's official portrait. A file a person's list withholds gives way
+    to nothing (rule 38), and nor does one that concludes nothing (Commons
+    did not answer, a size could not be weighed): the last photograph read
+    is kept (rule 8)."""
     from .statewide import display_name
-    measure = measure or official_photos.weigh
     name = candidate["name"]
-    found, why = linked_article(office, candidate, links, code=code)
+    found, why = linked_article(office, candidate, links, resolve=resolve, code=code)
     if not found:
         return None, why
     target, infobox_image, article = found
     resolved = article.get("title") or ""
-    file_name = infobox_image or article.get("image")
-    if not file_name:
+    files, first_why = [], ""
+    for raw, from_infobox in ((infobox_image, True), (article.get("image"), False)):
+        if raw:
+            file_name = urllib.parse.unquote(raw).replace("_", " ")
+            if file_name not in [f for f, _ in files]:
+                files.append((file_name, from_infobox))
+    if not files:
         return None, "no-image"
-    file_name = urllib.parse.unquote(file_name).replace("_", " ")
-    if not file_ok(file_name, display_name(name)):
-        return None, "file-name"
+    for file_name, from_infobox in files:
+        if not file_ok(file_name, display_name(name)):
+            first_why = first_why or "file-name"
+            continue
+        rec, why = _commons_photo(file_name, refused, measure, passed_over, doubted)
+        if why == official_photos.UNKNOWN or why in PERSONS_REFUSALS:
+            # A person's refusal promotes nothing unseen (rule 38: refusing
+            # James Talarico's crop brought forward its uncropped file):
+            # Mayes Middleton's refused crop would have given way to the
+            # uncropped Gage Skidmore photograph it was cut from.
+            return None, why
+        if not rec:
+            first_why = first_why or why
+            continue
+        page = "https://en.wikipedia.org/wiki/" + urllib.parse.quote(race_title.replace(" ", "_"))
+        words = (f"The race's article '{race_title}' links [[{target}]] for the list's '{name}'; "
+                 f"the article '{resolved}' "
+                 + ("is the nominee's, and the race's infobox sets File:" + file_name
+                    + " beside them" if from_infobox else "leads with File:" + file_name))
+        chosen, weight, credit, heavy = rec
+        return official_photos.record(
+            chosen, page, words, weight, by=credit.get("by"), route="wikipedia",
+            credit=credit, article=resolved, portraitHeavy=heavy), ""
+    return None, first_why
+
+
+def _commons_photo(file_name, refused=None, measure=None, passed_over=None, doubted=None):
+    """``((url, weight, credit, heavy), "")`` for one Commons file named
+    by a race's article, else ``(None, why)``."""
+    from .photos import not_a_portrait, withheld_files
+    from .portraits import commons_credit, credit_of, thumb_set
+    measure = measure or official_photos.weigh
     meta = _commons(file_name)
     info = meta["info"]
     if not info or not info.get("width"):
         return None, official_photos.UNKNOWN
     upload = (info.get("url") or "").split("?", 1)[0]
-    from .photos import not_a_portrait
-    if not_a_portrait(upload, passed_over=passed_over, table=refused):
+    # The API writes the upload address percent-encoded ("%28cropped%29");
+    # a person's lists, and the build's test of a record (``held_back``),
+    # key it as its file page reads ("(cropped)"). Asked by the API's form
+    # alone, Mayes Middleton's and JoCasta Zamarripa's refused files, and
+    # three files whose licence a person doubts, were taken on every
+    # Monday's read and dropped again on Tuesday's (2026-11-09).
+    canonical = official_photos.commons_upload(
+        {"credit": {"page": info.get("descriptionurl") or ""}})
+    forms = [u for u in (upload, canonical) if u]
+    if not_a_portrait(*forms, passed_over=passed_over, table=refused):
         return None, "not-a-portrait"
+    if withheld_files(forms, passed_over, doubted):
+        return None, LISTED_DOUBT
     credit = credit_of(info)
     if credit.get("nonFree") or not credit.get("licence"):
         return None, "licence"
@@ -726,19 +846,15 @@ def wiki_photo(code, office, candidate, links, race_title, refused=None, measure
     if not official_photos.portrait_shaped({"width": info["width"], "height": info["height"]}):
         return None, "shape"
     sizes = [(w, u) for w, u in thumb_set(upload, info["width"])]
-    chosen, weight, why, heavy = official_photos.choose(sizes, measure)
+    # A size Wikimedia did not answer for (a 429) is not passed over for
+    # the next: the read of 2026-11-09 moved eleven photographs to another
+    # width of the same file, Lisa Demuth's to 120px, on transient refusals.
+    chosen, weight, why, heavy = official_photos.choose(sizes, measure, strict=True)
     if not chosen:
         return None, why
-    page = "https://en.wikipedia.org/wiki/" + urllib.parse.quote(race_title.replace(" ", "_"))
-    words = (f"The race's article '{race_title}' links [[{target}]] for the list's '{name}'; "
-             f"the article '{resolved}' "
-             + ("is the nominee's, and the race's infobox sets File:" + file_name + " beside them"
-                if infobox_image else "leads with File:" + file_name))
-    return official_photos.record(
-        chosen, page, words, weight, by=credit.get("by"), route="wikipedia",
-        credit=dated_credit(dict(commons_credit(credit), basis=basis) if basis
-                            else commons_credit(credit), credit),
-        article=resolved, portraitHeavy=heavy), ""
+    shown = dated_credit(dict(commons_credit(credit), basis=basis) if basis
+                         else commons_credit(credit), credit)
+    return (chosen, weight, shown, heavy), ""
 
 
 def dated_credit(shown, credit):
@@ -782,45 +898,62 @@ def date_credits(cache, info_of=None, log=print):
     return done
 
 
-def read_wikipedia(lists, refused=None, measure=None, log=print, passed_over=None):
+def read_wikipedia(lists, refused=None, measure=None, log=print, passed_over=None,
+                   budget=None, races_read=None, progress=None, wikitext=None, resolve=None,
+                   doubted=None):
     """``(records, problems, unknown, misses)`` through each race's own
-    article, for every printed candidate of every office listed."""
+    article, for every printed candidate of every office listed, the race
+    read longest ago first (:func:`race_order`). Once *budget* is spent no
+    race is begun; *progress*, a dict, is given ``"read"`` (``{race key:
+    day}`` for each race this read concluded about) and ``"unreached"``
+    (the race keys it did not begin)."""
+    wikitext = wikitext or _wikitext
+    log = log or (lambda line: None)
     records, problems, unknown, misses = {}, [], set(), {}
-    for code in sorted(lists):
-        for office in OFFICES:
-            people = (lists[code] or {}).get(office) or []
-            if not people:
+    progress = {} if progress is None else progress
+    done, unreached = progress.setdefault("read", {}), progress.setdefault("unreached", [])
+    today = datetime.date.today().isoformat()
+    for code, office in race_order(lists, races_read):
+        people = (lists[code] or {}).get(office) or []
+        if budget is not None and budget.spent():
+            unreached.append(race_key(code, office))
+            continue
+        text = title = None
+        try:
+            for candidate_title in race_titles(code, office):
+                title, text = wikitext(candidate_title)
+                if text:
+                    break
+        except Exception as exc:
+            problems.append(f"{code} {office}: the race's article could not be read ({exc})")
+            unknown.update(key(code, office, p["name"]) for p in people)
+            continue
+        if not text:
+            done[race_key(code, office)] = today
+            continue
+        links = race_links(text)
+        whole = True
+        for person in people:
+            if person.get("writeIn"):
                 continue
-            text = title = None
+            k = key(code, office, person["name"])
             try:
-                for candidate_title in race_titles(code, office):
-                    title, text = _wikitext(candidate_title)
-                    if text:
-                        break
+                found, why = wiki_photo(code, office, person, links, title, refused, measure,
+                                        passed_over=_bucket(passed_over, k), resolve=resolve,
+                                        doubted=_bucket(doubted, k))
             except Exception as exc:
-                problems.append(f"{code} {office}: the race's article could not be read ({exc})")
-                unknown.update(key(code, office, p["name"]) for p in people)
-                continue
-            if not text:
-                continue
-            links = race_links(text)
-            for person in people:
-                if person.get("writeIn"):
-                    continue
-                k = key(code, office, person["name"])
-                try:
-                    found, why = wiki_photo(code, office, person, links, title, refused, measure,
-                                            passed_over=_bucket(passed_over, k))
-                except Exception as exc:
-                    found, why = None, official_photos.UNKNOWN
-                    problems.append(f"{k}: {exc}")
-                if found:
-                    records[k] = found
-                elif why == official_photos.UNKNOWN:
-                    unknown.add(k)
-                else:
-                    misses[k] = why
-            log(f"  {code} {office}: {title}")
+                found, why = None, official_photos.UNKNOWN
+                problems.append(f"{k}: {exc}")
+            if found:
+                records[k] = found
+            elif why == official_photos.UNKNOWN:
+                unknown.add(k)
+                whole = False
+            else:
+                misses[k] = why
+        if whole:
+            done[race_key(code, office)] = today
+        log(f"  {code} {office}: {title}")
     return records, problems, unknown, misses
 
 
@@ -835,12 +968,20 @@ def lists_of(statewide_cache):
     return out
 
 
-def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
+def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print, budget=None):
     """``(cache, problems)``: every route read again. A photograph a read
     concluded nothing about keeps the last one read for the same
-    candidate (rule 8)."""
+    candidate (rule 8), and so does every race the races' articles' read
+    did not reach before *budget* (:class:`Budget`) was spent: the
+    Monday read once ran past its step's limit and its output, buffered,
+    was lost with it (2026-11-09)."""
     lists = lists_of(statewide_cache)
     problems = []
+    # One asking per article for the whole run: the candidates' articles'
+    # read asks for the governors' race articles the photographs' read has
+    # just read.
+    wikitext, resolve = once(_wikitext), once(_resolve)
+    progress = {}
     records, more, unknown = read_members(lists, snapshot)
     problems += more
     # What a person refused (photos.not_a_portrait), kept in the cache by
@@ -854,20 +995,32 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
         records.setdefault(k, rec)
     misses = {}
     if wikipedia:
-        wiki, more, unknown_w, misses = read_wikipedia(lists, log=log, passed_over=passed_over)
+        wiki, more, unknown_w, misses = read_wikipedia(
+            lists, log=log, passed_over=passed_over, doubted=doubts, budget=budget,
+            races_read=(previous or {}).get("racesRead"), progress=progress,
+            wikitext=wikitext, resolve=resolve)
         problems += more
         unknown |= unknown_w
         for k, rec in wiki.items():
             records.setdefault(k, rec)
+    unreached = set(progress.get("unreached") or ())
+    if unreached:
+        problems.append(f"the races' articles: {len(unreached)} race(s) not reached within the "
+                        f"time budget, their last read kept: {', '.join(sorted(unreached))}")
     before = (previous or {}).get("photos") or {}
 
     def concluded_nothing(k):
         return k in unknown or k.rsplit("|", 1)[0] in unknown or k.split("|", 1)[0] in unknown
 
+    def skipped(k):
+        # The races' articles were not read for this candidate: not read
+        # at all (--no-wikipedia), or not reached before the budget ran out.
+        return not wikipedia or k.rsplit("|", 1)[0] in unreached
+
     for k, rec in before.items():
         held = concluded_nothing(k)
         kept = k not in records and "photo" in rec and (
-            held or (not wikipedia and rec.get("route") == "wikipedia"))
+            held or (skipped(k) and rec.get("route") == "wikipedia"))
         if not kept:
             continue
         # Kept from the last read (rule 8), but asked again of the lists a
@@ -910,7 +1063,7 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
     # good read refused and why it found none (rule 8): Heather Baxter's
     # refused Commons file left the cache on a day the articles went unread.
     def unread(k):
-        return concluded_nothing(k) or not wikipedia
+        return concluded_nothing(k) or skipped(k)
 
     for k, why in ((previous or {}).get("misses") or {}).items():
         if unread(k) and k not in records and k not in misses:
@@ -918,13 +1071,24 @@ def fetch(statewide_cache, snapshot, previous=None, wikipedia=True, log=print):
     cache = {"read": datetime.date.today().isoformat(),
              "photos": {k: records[k] for k in sorted(records)},
              "misses": {k: misses[k] for k in sorted(misses)}}
+    # When each race's article was last read whole, so the next read whose
+    # budget runs out begins with the races this one did not reach.
+    races_read = dict((previous or {}).get("racesRead") or {})
+    races_read.update(progress.get("read") or {})
+    if races_read:
+        cache["racesRead"] = {k: races_read[k] for k in sorted(races_read)}
     # The candidates' own articles, whatever route pictures them.
     if wikipedia:
-        cache = with_articles(cache, lists, previous, log=log)
+        late = []
+        cache = with_articles(cache, lists, previous, log=log, wikitext=wikitext,
+                              resolve=resolve, budget=budget, unreached=late)
+        if late:
+            problems.append(f"the candidates' own articles: {len(late)} race(s) not reached "
+                            f"within the time budget, their last read kept: {', '.join(late)}")
     elif (previous or {}).get("articles"):
         cache["articles"] = previous["articles"]
         cache["articlesRead"] = previous.get("articlesRead")
-    whole = wikipedia and not unknown
+    whole = wikipedia and not unknown and not unreached
     for field, now in (("notPortraits", passed_over), ("licenceDoubts", doubts)):
         kept = keep_refusals(now, (previous or {}).get(field), unread, whole)
         if kept:
