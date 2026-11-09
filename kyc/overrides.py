@@ -391,6 +391,23 @@ SAME_PERSON_FILINGS = {
                                "has $12,011.00, H6GA03170 $0"),
     "H8TX29102": ("H2TX18207", "TX-38: both filed as MONTIEL, CARMEN, Republican; H2TX18207 has "
                                "$147,355.21, H8TX29102 $0"),
+    # UT-3: two registrations under two forms of one name, so the name folds
+    # nothing (rule 72), the race's "filed in total" counted him twice, and the
+    # results read of 2026-11-09 found the page's one "Michael Stoddard" fitting
+    # both. The evidence is the filings (data/fec_field.json) beside Utah's
+    # results page, both read 2026-11-09. The id kept is the 2026 registration,
+    # the one with a report (to 2026-10-14). The other pairs that check found
+    # "defeated" under two ids need no entry: Mike Saliba (MI-10), Paul Berry
+    # (MO-1) and Andrew Woodruff Mixon (Tennessee's Senate seat; one filed name
+    # to the letter, as an independent and as Federalist, and the page lists
+    # one "Andrew Woodruff Mixon ... (Federalist Party)" on the independent
+    # line) are each one filed name with the same nothing reported, which
+    # already counts them once; Bob Chew's two for Colorado's Senate seat are
+    # one committee, C00944298, and the same money to the cent.
+    "H2UT03355": ("H6UT03224", "UT-3: filed as STODDARD, MICHAEL and STODDARD, MICHAEL RAY, both "
+                               "Libertarian, for district 3; the page's November table has one "
+                               "Libertarian line, Michael Stoddard, and lists one campaign site "
+                               "for him; $0 on either"),
 }
 
 # The name a results page uses for a filing the matcher cannot connect to it:
