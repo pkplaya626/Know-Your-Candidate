@@ -831,8 +831,25 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   on the same ballot line, and a Georgia runoff table the November counts do not
   send its two to. A name only the infobox gives after the count, with no filing
   and no state's list, adds nobody, the race otherwise read as it stands
-  (`refusedNames`, `result-name-refused`). A special election's filer's
+  (`refusedNames`, `result-name-refused`). A mark whose lead is under half a
+  point of the table's count (`results.CLOSE_MARGIN`) stands only while the
+  page's infobox declares that person (`after_election`, not marked ongoing);
+  otherwise it is refused the same way. A special election's filer's
   `term_start` is "On being sworn in (if elected)", never January 3.
+- **A renamed November row never makes the nominee "withdrawn".** Where a
+  party's primary winner, or the infobox's nominee, is missing from the
+  November table and it holds a row of that party under a name nothing else on
+  the page gives, the row is the nominee's if the infobox credits them with
+  its very count or it shares their surname and no other filer in the race
+  carries it (the cache's `renamedRows`, `{race id: [{name, as, why}]}`;
+  `result-row-renamed`): they take its result under their own name. Any other such row whose name no
+  filing and no state's list holds is refused (`refusedRows`, `{race id:
+  [{name, for, ids, why}]}`; `result-row-refused`): the name is not shown and
+  the nominee reads as before the count. A nominee a Withdrawn list or the
+  page's own sentence says left or was replaced reads as the page says.
+- **A write-in the November table lists is not read as on the ballot or as
+  left off it**, unless the table marks them the winner: the row gives its
+  person no status, and its count stays in the table.
 - **The seat a person is contesting comes from their FEC filing.** Texas,
   Florida, California and Utah redrew their maps for 2026, and thirteen
   sitting members now hold one district number and run in another. A member

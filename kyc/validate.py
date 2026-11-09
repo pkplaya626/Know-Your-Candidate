@@ -1065,6 +1065,26 @@ def check_results_pages(cache):
                             f"{len(names_left)} names only an infobox gave after the count, with "
                             "no filing and no state's list (rule 63): left off the page; a person "
                             "should look at each", names_left))
+    rows_left = [f"{rid}: {item.get('name')}, in the place of {', '.join(item.get('for') or [])}: "
+                 f"{item.get('why')}"
+                 for rid, items in sorted((cache.get("refusedRows") or {}).items())
+                 for item in items]
+    if rows_left:
+        issues.append(Issue("warn", "result-row-refused",
+                            f"{len(rows_left)} November rows under a name no filing and no "
+                            "state's list holds, standing where a party's nominee should "
+                            "(rule 63): the name is left off the page and the nominee reads as "
+                            "before the count, never \"withdrawn\"; a person should look at each",
+                            rows_left))
+    rows_read = [f"{rid}: {item.get('name')} read as {item.get('as')}: {item.get('why')}"
+                 for rid, items in sorted((cache.get("renamedRows") or {}).items())
+                 for item in items]
+    if rows_read:
+        issues.append(Issue("warn", "result-row-renamed",
+                            f"{len(rows_read)} November rows under another name read as their "
+                            "party's nominee's own (rule 63): the nominee takes the row's result "
+                            "and the page's spelling is not shown; a person should look at each",
+                            rows_read))
     unparsed = list(cache.get("unparsedPages") or [])
     if unparsed:
         issues.append(Issue("error", "results-page-unparsed",

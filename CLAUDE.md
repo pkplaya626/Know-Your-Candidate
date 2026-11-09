@@ -212,8 +212,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2561 tests, no dependencies
-npm install && npm test                       # 3485 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2778 tests, no dependencies
+npm install && npm test                       # 3750 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1363,7 +1363,50 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     an ordinary mark in California, Washington, American Samoa or Louisiana
     failed it, which would have held the refresh that brought the mark, so
     `allPartyPrimary` stays on a decided status (no word reads it there) and the
-    rewind reads an open primary's people back to the qualified list. Who
+    rewind reads an open primary's people back to the qualified list. The
+    check of the 63 calls the refresh of 2026-11-09 brought found two more
+    ways to a wrong word, each now read right or refused. A November row
+    renamed over its party's nominee made the nominee "withdrawn" (won the
+    primary, and not on the ballot) and a person nobody filed as "defeated":
+    Minnesota's 8th's DFL row read "Jeanne Hendricks", a name the page gives
+    nowhere else, over the primary's winner and the infobox's nominee, Trina
+    Swanson, on her very 168,350; its 5th's wrote "Joe Nagel" for the
+    primary's and the infobox's John Nagel; Ohio's 11th's "Mike Krichner" for
+    Mike Kirchner, two letters swapped, which no fold caught. A party's
+    primary winner, or the infobox's nominee, missing from the November table
+    is never "withdrawn" on that alone when the table holds a row of that
+    party under a name nothing else on the page gives (`results._displaced`).
+    The row is theirs where the infobox credits them with that row's very
+    count (`_same_count_rows`, folded with the page's other spellings, and
+    only for a nominee the page names outside its infobox too: a name only
+    the infobox gives takes nobody's row), or where it shares their surname
+    and no other filer in the race carries it (`november_row_names`): they
+    take its result, the page's spelling is not shown, nobody is listed
+    twice, and the read's log, the cache's `renamedRows` and `validate`
+    (`result-row-renamed`) say which and why, for a person to look at. Any other such row whose name no filing and no state's list holds is
+    refused as a mark on such a name is (`refusedRows`, `[REFUSED]`,
+    `result-row-refused`): the name stands on no ballot, its count stays in
+    the table for the winner's own mark to lead, and the nominee it stands in
+    the place of reads as before the count ("Awaiting result"), keeping a
+    loss the last read took while this read still names the winner
+    (`carry_refused`). A row a filing or a list holds is a person, and a
+    nominee a Withdrawn list names, or the section's own sentence says
+    withdrew, died or was replaced (`_left_in_prose`), reads as the page
+    says: a real replacement is not undone. And a mark inside recount range
+    is an editor's call, not a count's: Minnesota's 1st was marked for Jake
+    Johnson on 163,055 to 162,733 (322 votes, 0.10 points) with the infobox
+    declaring him on November 6, and by November 8 its `after_election` and
+    `ongoing = no` were blanked while the table kept its mark. A mark whose
+    lead is under `results.CLOSE_MARGIN` - half a point of every vote the
+    table counts, the margin at which Florida and Arizona recount without
+    being asked - stands only while the same page's infobox declares that
+    person (`after_election` naming them, not marked ongoing); otherwise it
+    concludes nothing, as any refused mark (`result-mark-refused`), and the
+    race keeps the last read of it. Replayed offline over the 92 pages of
+    that evening, the fixed reader changed six races and nothing else:
+    Swanson and Nagel lost, Kirchner is a nominee again, none of the three
+    other names is shown, MN-1 awaits its result, and two write-ins (rule 77)
+    are no longer read as on the ballot. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
@@ -1732,7 +1775,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     And a primary winner missing from the November table beside a name a
     letter from theirs ("Gegen", "Gegan") is undecided, never "withdrawn";
     a seat whose primary was not its state's (Alabama's four August
-    districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`.
+    districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`. Nor is
+    a primary winner "withdrawn" beside any other name on their party's
+    November line: the row is theirs, or its name is refused (rule 63,
+    `results.november_row_names`). And a write-in a page's November table
+    lists is read as a certified one is: North Carolina's 2nd listed
+    "Brian McGinnis (Write-in)" with no count, and he read "Lost the November
+    election"; Florida's 6th's stood "Also on the November ballot". A row
+    the table calls a write-in, in the candidate's cell or as its line, gives
+    its person no status unless the table marks them the winner
+    (`results._names_nobody`); its count stays in the table.
 
 78. **A public body's website is checked before it is linked, and a
     move is kept only where the new page names the body.** The county

@@ -1520,8 +1520,8 @@ def _results(args):
                   f"{cache['qualified'].get('fetched')} for {len(kept)} seats")
         carried = results_mod.carry_refused(cache, previous)
         if carried:
-            print(f"  [warn] kept the last read of {len(carried)} races whose November mark "
-                  f"was refused: {', '.join(carried)}")
+            print(f"  [warn] kept the last read of {len(carried)} races whose November mark, "
+                  f"or a November row's name, was refused: {', '.join(carried)}")
         print(f"  wrote {results_mod.save_cache(cache, args.root)}")
 
     import collections
