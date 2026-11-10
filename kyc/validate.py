@@ -1112,7 +1112,6 @@ def check_results_pages(cache):
     # nobody and settles nothing: invisible, and quietly wrong once the page
     # is renamed again. The read records them, only for a page it read (rule
     # 8), and only an entry still in the table is reported.
-    from . import overrides
     stale = [f"{rid}: {item.get('id')} {item.get('name')!r}"
              for rid, items in sorted((cache.get("staleAliases") or {}).items())
              for item in items
