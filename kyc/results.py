@@ -3583,7 +3583,12 @@ def certify_race(race, spec, rows, aliases=None, ranked_choice=False, no_primary
         loose_printed = [i["name"] for i in loose if i["kind"] == BALLOT] + unprinted
         held = []
         for cid, now in list(status.items()):
-            if cid in named or now not in (NOMINEE, ADVANCED, QUALIFIED):
+            # A loss in November is no more than a place on its ballot: one
+            # the whole list does not print was never on it, whatever the
+            # page's November table holds (FL-6's Michael Gist, in the table
+            # with no count, read "Lost the November election" once the
+            # infobox route called the race, 2026-11-10).
+            if cid in named or now not in (NOMINEE, ADVANCED, QUALIFIED, DEFEATED):
                 continue
             row = next((r for r in rows if r["candidate_id"] == cid), None)
             mine = _row_name(row)

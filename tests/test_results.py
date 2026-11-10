@@ -4277,6 +4277,28 @@ class TestTheInfoboxDeclaresTheWinner(NoGap):
         self.assertEqual(status[self.SWAN], "defeated")
         self.assertEqual(status[self.STONE], "elected")
 
+    def test_a_row_the_whole_list_does_not_print_did_not_lose_on_the_ballot(self):
+        # FL-6 on 2026-11-10: an independent in the page's November table,
+        # not on Florida's whole certified list, read "Lost the November
+        # election" once the race was called; before, "not on the ballot".
+        self.field["candidates"].append(
+            row("H6ZZ05007", "VALE, ROSA", self.STATE, "H", self.DISTRICT, "IND"))
+        table = bold_box(self.general(), ("Pat Stone", REP, None, True),
+                         ("Trina Swan", DEM, None, False), ("Rosa Vale", "Independent politician",
+                                                            None, False))
+        listed = {self.STATE: {"complete": True, "source": "the Test Division of Elections",
+                               "races": {self.race_id(): [
+                                   {"kind": "ballot", "name": "Pat Stone", "party": "Republican"},
+                                   {"kind": "ballot", "name": "Trina Swan", "party": "Democratic"},
+                                   {"kind": "lost-primary", "name": "Tony Hamil",
+                                    "party": "Republican"},
+                                   {"kind": "lost-primary", "name": "Luke Gull",
+                                    "party": "Democratic"}]}}}
+        status = self.status(self.read(self.infobox(), table, certified=listed))
+        self.assertEqual(status[self.STONE], "elected")
+        self.assertEqual(status[self.SWAN], "defeated")
+        self.assertEqual(status["H6ZZ05007"], "unlisted")
+
     def test_a_refusal_keeps_the_last_read(self):
         cache = self.read(self.infobox(), self.table(stone=168900))
         before = {"races": {self.race_id(): {"status": self.called(), "page": "kept"}}}
