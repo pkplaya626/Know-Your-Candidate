@@ -1877,7 +1877,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     time budget that ends the run cleanly well before its step's limit
     (`--max-minutes`): killed at the limit, its threads saved the cache
     after the next step had read it, and verify failed the refresh of
-    2026-10-19. The build warns about any address not looked at in 60 days. As of 2026-10-18, 7,366
+    2026-10-19. Every time-limited step of the refresh runs Python as the
+    step's own process (`exec`), so ending the step ends the read: the
+    statewide photographs' read did the same thing on 2026-11-09 (rule
+    91). The build warns about any address not looked at in 60 days. As of 2026-10-18, 7,366
     of 39,447 governments' links are withdrawn: 5,090 dead, 1,179 gone,
     351 for sale, 255 gambling, 254 parked, 208 elsewhere, 20 expired and
     9 a business's; 5,269 could not be confirmed and stay linked, marked
@@ -2519,7 +2522,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     link matched on given name and surname within that race (Danielle
     Ford is not Aaron Ford, whose article the same page links) and never
     on a one-word name, then checked as rule 33's are, the race's infobox
-    image beside the nominee before the article's lead. The guides whose
+    image beside the nominee before the article's lead. Where the reader
+    refuses the infobox's image for what it is (its name, its licence, its
+    shape), the article's lead is tried in its place - Ned Lamont's record
+    was dropped on 2026-11-09 when the race's infobox took up a bridge
+    visit with someone else, his official portrait leading his own article
+    all the while - but nobody has seen a lead that comes forward so, and
+    the refresh publishes without a person: it says what it stands in
+    place of (`inPlaceOf`) and waits off the page, named by the build,
+    until a look at that very file is recorded in
+    `overrides.SEEN_ARTICLE_LEADS` (the candidate alone, the face
+    measured, the file's pixel size) or it is refused in `NOT_A_PORTRAIT`
+    (the PR #213 review: Wes Moore's and Bruce Blakeman's would have been
+    shown unlooked). A file a person's list withholds gives way to
+    nothing, and the lists are asked before the file's name, in both
+    forms of its address: checked against the API's percent-encoded form
+    alone, five listed files were cached every Monday and dropped every
+    Tuesday. A size Wikimedia does not answer for keeps the last record
+    of the same file, never another width of it (eleven records moved
+    between 250px and 330px on a morning of 429s). The read is the
+    longest of the refresh (about 58 minutes against a 50-minute step:
+    ended there, Python went on under the step's shell and saved the
+    cache while later steps ran), so it runs inside a budget
+    (`--max-minutes`, rule 78's way), oldest race first, and what it does
+    not reach keeps its last read (rule 8). The guides whose
     photographs have no address of their own - Alaska's statements (PDFs,
     none of them encrypted, whatever this rule once said) and Oregon's
     pamphlet (JPEG 2000 inside PDFs) - picture a candidate none of those
