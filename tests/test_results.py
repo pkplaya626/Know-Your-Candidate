@@ -3546,7 +3546,8 @@ class TestARenamedNovemberRow(NoGap):
         # row; "death" was read only as "death of".
         for sentence in ("After Swan's death in September, her husband Jo Swan was nominated "
                          "in her place.",
-                         "Swan stepped aside in August, and the committee named her husband.",
+                         "Swan stepped aside as the nominee in August, and the committee named "
+                         "her husband.",
                          "Her husband Jo Swan succeeded Trina Swan as the nominee.",
                          "The committee met on August 20 and Jo Swan was nominated to replace "
                          "Trina Swan.",
@@ -3631,6 +3632,298 @@ class TestARenamedNovemberRow(NoGap):
         cache = self.read(table)
         self.assertEqual(self.race(cache)["status"], self.CALLED)
         self.assertEqual(self.race(cache)["unmatched"], {"Ida Lone": "defeated"})
+
+    # ---- the second reader's findings on PR #214 as merged
+
+    def codes(self, cache):
+        from kyc import validate
+        return sorted({i.code for i in validate.check_results_pages(cache)
+                       if i.code.startswith(("result-", "stale-"))})
+
+    # Of the 1,106 people standing on the saved pages' November tables the
+    # first prose test said nine had left, seven of them the primary's winner:
+    # each of these shapes was one of them, or the second reader's.
+    FORUM = "Prior to the date of the forum, Swan withdrew, citing personal health issues."
+    NOT_ABOUT_THE_RACE = (
+        FORUM,
+        # A namesake: the given name directly before the surname is another's
+        # (Chuy García for Patty García, Troy Nehls for Trever Nehls) ...
+        "Incumbent Chuy Swan initially filed to run for another term but withdrew his "
+        "nomination after the deadline to file passed.",
+        "Donald Trump switched his endorsement to Trina Swan after Troy Swan withdrew from "
+        "the race.",
+        # ... and where the section names one, a bare surname is nobody's.
+        "Troy Swan led the early polls. Swan withdrew from the race in March.",
+        "The seat was held by [[Lindsey Swan|Lindsey]]. Swan died on July 11.",
+        # A relative's death; a predecessor's.
+        "Swan's brother, the four-term incumbent, won the nomination in June but died on "
+        "July 11.",
+        "Swan said the stress came from the death of Swan's husband.",
+        "The district has two incumbents, Democrat Al Green and Trina Swan, who succeeded "
+        "Sylvester Turner, who died unexpectedly in March.",
+        # Someone else's leaving, another office, another party's line, a question.
+        "In the primary, Swan defeated Gull, who had withdrawn from an earlier race for "
+        "county auditor.",
+        "*Luke Gull, businessman (endorsed Swan, then withdrew from the race)",
+        "Swan said Stone was ineligible to hold office.",
+        "Swan criticized Stone, who dropped out of the October debate.",
+        "Swan, who was replaced as county party chair in 2024, won the nomination.",
+        "Swan withdrew from the race for governor to run for this seat.",
+        "Swan declined the nomination of the Working Families Party.",
+        "Swan withdrew from the primary debate in April.",
+        "It is not known whether Swan withdrew from the race.",
+    )
+
+    def test_a_sentence_about_something_else_leaves_a_strangers_row_refused(self):
+        # The major: any sentence with her surname and then a "left" word
+        # switched the protection off, and nothing said so.
+        for sentence in self.NOT_ABOUT_THE_RACE:
+            cache = self.read(sentence, self.infobox(swan=168349), self.november())
+            race = self.race(cache)
+            self.assertEqual(race["status"], self.HELD, sentence)
+            self.assertEqual(race["unmatched"], {}, sentence)
+            self.assertEqual(cache["refusedRows"][self.RACE][0]["for"], ["Trina Swan"], sentence)
+            self.assertFalse(cache["unsettledRows"], sentence)
+            self.assertEqual(self.codes(cache), ["result-row-refused"], sentence)
+
+    def test_a_sentence_about_something_else_leaves_the_folds_as_they_were(self):
+        for sentence in self.NOT_ABOUT_THE_RACE:
+            # Minnesota's 8th's shape: the infobox's very count.
+            cache = self.read(sentence, self.infobox(), self.november())
+            self.assertEqual(self.race(cache)["status"], self.CALLED, sentence)
+            self.assertEqual(self.race(cache)["unmatched"], {}, sentence)
+            self.assertIn("very count", cache["renamedRows"][self.RACE][0]["why"], sentence)
+            self.assertEqual(self.codes(cache), ["result-row-renamed"], sentence)
+        # Its 5th's: the surname. (A section naming a Troy Swan beside the
+        # row's Jo Swan is another race.)
+        cache = self.read(self.FORUM, self.infobox(swan=168349), self.november("Jo Swan"))
+        self.assertEqual(self.race(cache)["status"], self.CALLED)
+        self.assertIn("surname", cache["renamedRows"][self.RACE][0]["why"])
+        self.assertEqual(self.codes(cache), ["result-row-renamed"])
+
+    ABOUT_THE_RACE = (
+        # The race itself, directly after the words.
+        "Swan withdrew from the race on August 20.",
+        "Swan dropped out of the race in August.",
+        "Swan later declined the nomination.",
+        "Swan was removed from the ballot by the Secretary of State.",
+        "Swan withdrew from the general election in September.",
+        "Swan left the ticket in August.",
+        "Swan stepped down as the Democratic nominee.",
+        "Swan ended her campaign on August 20.",
+        "Swan's withdrawal from the race was announced on August 20.",
+        # A death.
+        "Trina Swan died on August 20.",
+        "Swan passed away on September 2.",
+        "After Swan's death in September, the district committee met.",
+        "Following the death of Trina Swan, the district committee met.",
+        # The November row's own name.
+        "Swan withdrew and was replaced by Jeanne Hendry.",
+        "Swan dropped out in favour of Hendry.",
+        "The district committee chose Hendry to replace Swan.",
+    )
+
+    def test_a_sentence_about_the_race_is_honoured_and_never_silently(self):
+        # Even over the infobox's very count; and the race says which sentence
+        # is why the row stands, in the cache, the log and the build's warning.
+        from kyc import validate
+        for sentence in self.ABOUT_THE_RACE:
+            logged = []
+            cache = self.read(sentence, self.infobox(), self.november(), logged=logged)
+            race = self.race(cache)
+            self.assertEqual(race["status"]["H6OH05003"], "withdrawn", sentence)
+            self.assertEqual(race["unmatched"], {"Jeanne Hendry": "defeated"}, sentence)
+            self.assertFalse(cache["renamedRows"], sentence)
+            self.assertFalse(cache["refusedRows"], sentence)
+            said = cache["unsettledRows"][self.RACE]
+            self.assertEqual([(r["name"], r["for"], r["sentence"]) for r in said],
+                             [("Jeanne Hendry", ["Trina Swan"], sentence.rstrip("."))], sentence)
+            self.assertIn(sentence.rstrip("."), said[0]["why"])
+            issues = [i for i in validate.check_results_pages(cache)
+                      if i.code == "result-row-unsettled"]
+            self.assertEqual([i.level for i in issues], ["warn"], sentence)
+            self.assertIn(sentence.rstrip("."), issues[0].detail[0])
+            self.assertTrue(any("[note]" in line and self.RACE in line and "Jeanne Hendry" in line
+                                and sentence.rstrip(".") in line for line in logged), sentence)
+
+    def test_the_words_the_first_list_lacked_keep_a_relatives_row_from_her(self):
+        # Minor 1: with these the surname fold gave a nominee who had left
+        # the row of the relative named in her place.
+        for sentence in ("Trina Swan was killed in a car accident on September 2; the party "
+                         "chose her husband Jo Swan.",
+                         "Swan passed away on September 2, and Jo Swan was chosen as the nominee.",
+                         "Swan left the race in August and the party named Jo Swan.",
+                         "Swan quit the race in August; Jo Swan was named the nominee.",
+                         "Swan exited the race on August 3 and Jo Swan took the nomination.",
+                         "The party substituted Jo Swan for Trina Swan on the ballot.",
+                         "Swan ended her bid in August; Jo Swan was nominated."):
+            cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+            race = self.race(cache)
+            self.assertEqual(race["status"]["H6OH05003"], "withdrawn", sentence)
+            self.assertEqual(race["unmatched"], {"Jo Swan": "defeated"}, sentence)
+            self.assertTrue(cache["unsettledRows"][self.RACE][0]["sentence"], sentence)
+        # Words that are not plainly about the race are not honoured, and the
+        # row is still hers by the surname, with its warning.
+        cache = self.read("Swan stepped aside in August, and the committee named her husband.",
+                          self.infobox(swan=168349), self.november("Jo Swan"))
+        self.assertEqual(self.race(cache)["status"], self.CALLED)
+        self.assertEqual(self.codes(cache), ["result-row-renamed"])
+
+    def test_a_marked_row_is_never_hers_by_the_surname_alone(self):
+        # Minor 1: a relative named in her place, with no filing, who won. By
+        # the surname the nominee who had left read "elected". The mark's own
+        # refusal takes the table, as a marked stranger's does.
+        table = party_box(self.GENERAL, ("Pat Stone", REP, 150000, False),
+                          ("Jo Swan", DEM, 168350, True))
+
+        def infobox(swan):
+            return party_infobox(("Pat Stone", REP, 150000), ("Trina Swan", DEM, swan),
+                                 declared="[[Trina Swan]]")
+
+        cache = self.read(infobox(168349), table)
+        self.assertFalse(cache["renamedRows"])
+        self.assertIn("no filing", cache["refusedMarks"][self.RACE][0]["why"])
+        self.assertEqual(self.race(cache)["status"], dict(self.HELD, H6OH05001="nominee"))
+        self.assertEqual(self.race(cache)["unmatched"], {})
+        # The infobox's very count still folds a marked row: Minnesota's 8th's
+        # shape on a winner.
+        cache = self.read(infobox(168350), table)
+        self.assertIn("very count", cache["renamedRows"][self.RACE][0]["why"])
+        self.assertEqual(self.race(cache)["status"],
+                         dict(self.CALLED, H6OH05001="defeated", H6OH05003="elected"))
+        # And a sentence saying she died leaves the widower's mark to its own
+        # refusal, and is said.
+        cache = self.read("Swan passed away on September 2, and her husband Jo Swan was chosen "
+                          "as the nominee.", infobox(168350), table)
+        self.assertFalse(cache["renamedRows"])
+        self.assertNotIn("elected", self.race(cache)["status"].values())
+        self.assertEqual(self.codes(cache), ["result-mark-refused", "result-row-unsettled"])
+
+    def test_a_nominee_the_states_whole_list_leaves_out_has_left(self):
+        # Minor 2 (rule 77: the list is the ballot). The list prints her
+        # replacement; the row was then renamed again, to a name the list does
+        # not hold either, and the very count gave it to the nominee the
+        # state's whole ballot leaves out.
+        def lists(complete):
+            return {"OH": {"source": "Ohio Secretary of State (made up)", "url": "https://x",
+                           "fetched": "2026-10-17", "complete": complete, "races": {self.RACE: [
+                               {"name": "Pat Stone", "party": "Republican", "kind": "ballot"},
+                               {"name": "Jeanne Hendry", "party": "Democratic", "kind": "ballot"}]}}}
+
+        cache = self.read(self.infobox(), self.november("Jane Hendrix"), certified=lists(True))
+        race = self.race(cache)
+        self.assertEqual(race["status"]["H6OH05003"], "withdrawn")
+        self.assertFalse(cache["renamedRows"])
+        self.assertFalse(cache["refusedRows"])
+        said = cache["unsettledRows"][self.RACE][0]
+        self.assertEqual((said["name"], said["for"]), ("Jane Hendrix", ["Trina Swan"]))
+        self.assertIn("whole list", said["why"])
+        self.assertEqual(self.codes(cache), ["result-row-unsettled"])
+        # A list that is not the whole ballot says nothing of whom it leaves out.
+        cache = self.read(self.infobox(), self.november("Jane Hendrix"), certified=lists(False))
+        self.assertEqual(cache["renamedRows"][self.RACE][0]["as"], "Trina Swan")
+
+    CALIFORNIA = "2026 United States House of Representatives elections in California"
+
+    def california(self, second, second_party, finisher=("Cal Crane", REP), extra=()):
+        field = {"candidates": [row("H6CA07001", "ALDER, ANN", "CA", "H", 7, "DEM"),
+                                row("H6CA07002", "BIRCH, BEN", "CA", "H", 7, "DEM"),
+                                row("H6CA07003", "CRANE, CAL", "CA", "H", 7, "REP"),
+                                row("H6CA07004", "DOVE, DEE", "CA", "H", 7, "REP")] + list(extra)}
+        primary = party_box("Primary results", ("Ann Alder", DEM, 60000, True),
+                            finisher + (40000, True), ("Ben Birch", DEM, 30000, False),
+                            ("Dee Dove", REP, 20000, False))
+        table = party_box("2026 California's 7th congressional district election",
+                          ("Ann Alder", DEM, 150000, True), (second, second_party, 90000, False))
+        page = "\n==District 7==\n" + table + "\n\n" + primary + "\n"
+        return results.build(field, {("CA", "H"): {"primary": "2026-06-02", "runoff": None}},
+                             today=datetime.date(2026, 11, 9), log=lambda *_: None,
+                             fetch=lambda t: page if t == self.CALIFORNIA else
+                             (_ for _ in ()).throw(results.PageMissing(t)))
+
+    def test_a_rename_that_changes_the_rows_party_too_is_held(self):
+        # Minor 3: the Republican finisher's row renamed and made a second
+        # "Democrat". Paired by party, nothing stood in his place: he read
+        # "withdrawn" beside a person nobody filed as, with no warning.
+        rid = "H-CA-07-2026"
+        cache = self.california("Zed Zane", DEM)
+        race = cache["races"][rid]
+        self.assertEqual(race["status"], {"H6CA07001": "elected", "H6CA07002": "eliminated",
+                                          "H6CA07003": "nominee", "H6CA07004": "eliminated"})
+        self.assertEqual(race["unmatched"], {})
+        self.assertEqual([(r["name"], r["for"]) for r in cache["refusedRows"][rid]],
+                         [("Zed Zane", ["Cal Crane"])])
+        self.assertEqual(self.codes(cache), ["result-row-refused"])
+        # The folds apply as on his own line.
+        cache = self.california("Carl Crane", DEM)
+        self.assertEqual(cache["races"][rid]["status"]["H6CA07003"], "defeated")
+        self.assertEqual(cache["renamedRows"][rid][0]["as"], "Cal Crane")
+        # A person a filing holds reads as the page has it.
+        cache = self.california("Zed Zane", DEM,
+                                extra=[row("H6CA07009", "ZANE, ZED", "CA", "H", 7, "DEM")])
+        self.assertEqual(cache["races"][rid]["status"]["H6CA07003"], "withdrawn")
+        self.assertFalse(cache["refusedRows"])
+        self.assertEqual(self.california("Cal Crane", REP)["races"][rid]["status"]["H6CA07003"],
+                         "defeated")
+
+    def test_a_top_two_finisher_with_no_party_preference_is_not_silently_withdrawn(self):
+        # Minor 3: no party nominates on that line, but a top-two primary
+        # sends its finisher on. Not a major party's: read as the page has
+        # it, and said.
+        rid = "H-CA-07-2026"
+        cache = self.california("Zed Zane", "No party preference",
+                                finisher=("Ivy Indy", "No party preference"),
+                                extra=[row("H6CA07005", "INDY, IVY", "CA", "H", 7, "NPA")])
+        self.assertEqual(cache["races"][rid]["status"]["H6CA07005"], "withdrawn")
+        self.assertEqual([(r["name"], r["for"]) for r in cache["unsettledRows"][rid]],
+                         [("Zed Zane", ["Ivy Indy"])])
+        self.assertEqual(self.codes(cache), ["result-row-unsettled"])
+
+    def test_a_minor_partys_only_row_is_nobodys_displaced_row(self):
+        # The limit of minor 3: a line with no nominee of its own in the table
+        # is a person who may simply have no filing. Her party has no row, so
+        # she left, as the page has it.
+        table = party_box(self.GENERAL, ("Pat Stone", REP, 190744, True),
+                          ("Sam Sub", self.LIB, 4100, False))
+        cache = self.read(table)
+        race = self.race(cache)
+        self.assertEqual(race["status"]["H6OH05003"], "withdrawn")
+        self.assertEqual(race["unmatched"], {"Sam Sub": "defeated"})
+        self.assertFalse(cache["refusedRows"])
+        self.assertFalse(cache["unsettledRows"])
+
+    def test_an_alias_its_races_page_no_longer_gives_is_reported(self):
+        # Minor 4: the refusal's warning tells a person to record an alias,
+        # and nothing said when the page stopped using one.
+        from unittest import mock
+        from kyc import overrides, validate
+        clean = self.november("Trina Swan")
+        stale = {"H6OH05003": ("Somebody Else", "committee C00000000 (made up)")}
+        with mock.patch.dict(overrides.RESULT_NAMES, stale):
+            cache = self.read(clean)
+            self.assertEqual(cache["staleAliases"],
+                             {self.RACE: [{"id": "H6OH05003", "name": "Somebody Else"}]})
+            issues = [i for i in validate.check_results_pages(cache)
+                      if i.code == "stale-result-name"]
+            self.assertEqual([i.level for i in issues], ["warn"])
+            self.assertIn("H6OH05003 'Somebody Else'", issues[0].detail[0])
+            # A page that could not be read says nothing of its aliases
+            # (rule 8), nor a seat whose primary is still to come.
+            unread = results.build(self.field, self.DATES, today=datetime.date(2026, 11, 9),
+                                   log=lambda *_: None,
+                                   fetch=lambda t: (_ for _ in ()).throw(results.PageMissing(t)))
+            self.assertEqual(unread["staleAliases"], {})
+            self.assertNotIn("stale-result-name", self.codes(unread))
+            early = self.read(clean, today=datetime.date(2026, 4, 1))
+            self.assertEqual(early["staleAliases"], {})
+        # Once the entry is corrected or removed, a cache read before says nothing.
+        self.assertNotIn("stale-result-name", self.codes(cache))
+        # An alias the page gives is no finding, wherever it gives it.
+        live = {"H6OH05003": ("Jeanne Hendry", "committee C00000000 (made up)")}
+        with mock.patch.dict(overrides.RESULT_NAMES, live):
+            cache = self.read(self.infobox(swan=168349), self.november())
+            self.assertEqual(cache["staleAliases"], {})
+            self.assertEqual(self.race(cache)["status"], self.CALLED)
 
 
 class TestAWriteInRowIsNotABallotLine(NoGap):

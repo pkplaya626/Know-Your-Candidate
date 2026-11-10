@@ -1090,10 +1090,12 @@ def check_results_pages(cache):
                    for item in items]
     if rows_looked:
         issues.append(Issue("warn", "result-row-unsettled",
-                            f"{len(rows_looked)} November rows of a minor party under a name no "
-                            "filing and no state's list holds, where its nominee should stand "
-                            "(rule 63): read as the page has it, the nominee \"withdrawn\", since "
-                            "a minor party substitutes its candidates; a person should look at "
+                            f"{len(rows_looked)} November rows under a name no filing and no "
+                            "state's list holds, where a party's nominee should stand, read as "
+                            "the page has it, the nominee \"withdrawn\" (rule 63): a minor "
+                            "party's, since a minor party substitutes its candidates; or one "
+                            "whose nominee the page's own sentence, quoted, says left the race, "
+                            "or the state's whole list does not print. A person should look at "
                             "each, and record an evidenced overrides.RESULT_NAMES entry where "
                             "the row is the nominee under another name", rows_looked))
     rows_read = [f"{rid}: {item.get('name')} read as {item.get('as')}: {item.get('why')}"
@@ -1105,6 +1107,21 @@ def check_results_pages(cache):
                             "party's nominee's own (rule 63): the nominee takes the row's result "
                             "and the page's spelling is not shown; a person should look at each",
                             rows_read))
+    # An alias is the name exactly as its race's results page writes it. One
+    # the page, as last read, and the state's list no longer give matches
+    # nobody and settles nothing: invisible, and quietly wrong once the page
+    # is renamed again. The read records them, only for a page it read (rule
+    # 8), and only an entry still in the table is reported.
+    stale = [f"{rid}: {item.get('id')} {item.get('name')!r}"
+             for rid, items in sorted((cache.get("staleAliases") or {}).items())
+             for item in items
+             if (overrides.RESULT_NAMES.get(item.get("id")) or (None,))[0] == item.get("name")]
+    if stale:
+        issues.append(Issue("warn", "stale-result-name",
+                            f"{len(stale)} overrides.RESULT_NAMES aliases are a name neither "
+                            "their race's results page, as last read, nor the state's list for "
+                            "it gives any more: the alias matches nobody. Read the page and the "
+                            "campaign's committee again, and correct or remove each", stale))
     unparsed = list(cache.get("unparsedPages") or [])
     if unparsed:
         issues.append(Issue("error", "results-page-unparsed",
