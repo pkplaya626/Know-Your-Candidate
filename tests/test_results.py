@@ -1457,8 +1457,12 @@ class TestAMarkNeedsAFilingAndACount(unittest.TestCase):
         self.assertIn("Peter Griffin", issues[0].detail[0])
 
     def test_an_infobox_name_a_table_or_a_list_holds_stands(self):
+        # Beside the primaries' winners, not in the place of one: a name the
+        # table gives where a party's nominee should stand is refused
+        # (TestARenamedNovemberRow, the second reader's V1).
         cache = self.read(self.infobox(("Sam Nofiling", "900"), ("Michael Whatley", "800")),
-                          self.table(("Sam Nofiling", None, False), ("Michael Whatley", None, False)))
+                          self.table(("Roy Cooper", None, False), ("Sam Nofiling", None, False),
+                                     ("Michael Whatley", None, False)))
         self.assertIn("Sam Nofiling", cache["races"][self.RACE]["unmatched"])
         cache = self.read(self.infobox(("Sam Nofiling", "900"), ("Michael Whatley", "800")),
                           self.table(("Roy Cooper", None, False), ("Michael Whatley", None, False)),
@@ -3201,12 +3205,13 @@ class TestARenamedNovemberRow(NoGap):
                                      row("H6OH05003", "SWAN, TRINA", "OH", "H", 5, "DEM"),
                                      row("H6OH05004", "GULL, LUKE", "OH", "H", 5, "DEM")]}
 
-    def read(self, *parts, today=datetime.date(2026, 11, 9), logged=None, primaries=None):
+    def read(self, *parts, today=datetime.date(2026, 11, 9), logged=None, primaries=None,
+             certified=None):
         page = "\n==District 5==\n" + "\n\n".join(parts + (primaries or self.PRIMARIES,)) + "\n"
         return results.build(self.field, self.DATES, today=today,
                              log=(logged.append if logged is not None else lambda *_: None),
                              fetch=lambda t: page if t == self.TITLE else
-                             (_ for _ in ()).throw(results.PageMissing(t)))
+                             (_ for _ in ()).throw(results.PageMissing(t)), certified=certified)
 
     def november(self, name="Jeanne Hendry", votes=168350, stone=190744, marked=True):
         return party_box(self.GENERAL, ("Pat Stone", REP, stone, marked), (name, DEM, votes, False))
@@ -3241,12 +3246,12 @@ class TestARenamedNovemberRow(NoGap):
         self.assertIn("Jeanne Hendry read as Trina Swan", issues[0].detail[0])
         self.assertTrue(any("Jeanne Hendry" in line and "Trina Swan" in line for line in logged))
 
-    def test_the_tables_alone_fold_it_wherever_the_page_is_read(self):
+    def test_it_is_decided_where_the_filings_are_known(self):
+        # Never by the tables alone: without the filings nothing can say the
+        # row's name is not a person's (the second reader's first finding).
         text = "\n".join([self.PRIMARIES, self.infobox(), self.november()])
         out = page_statuses(text, general_held=True)
-        self.assertEqual(out["Trina Swan"], "defeated")
-        self.assertNotIn("Jeanne Hendry", out)
-        self.assertEqual(out["Pat Stone"], "elected")
+        self.assertEqual((out["Trina Swan"], out["Jeanne Hendry"]), ("withdrawn", "defeated"))
 
     def test_a_row_sharing_their_surname_is_theirs(self):
         # Minnesota's 5th: "Joe Nagel" in the table, John Nagel everywhere else.
@@ -3366,6 +3371,260 @@ class TestARenamedNovemberRow(NoGap):
         self.assertEqual(race["names"]["H6OH05003"], "Trina Swan")
         self.assertNotIn("Griffin", json.dumps(race))
 
+    # ---- the second reader's findings on the first version (PR #214)
+
+    HENDRY = ("H6OH05008", "HENDRY, JEANNE", "OH", "H", 5, "DEM")
+    LEFT = "Swan withdrew from the race on August 20 and the party named Jeanne Hendry."
+
+    def test_a_filed_replacement_keeps_her_row_from_a_stale_infobox(self):
+        # Cases 1 and 1b: the infobox still names the primary's winner, with
+        # the very count the replacement's row carries. Her filing says the
+        # row is a person's, whatever the infobox credits anyone with.
+        self.field["candidates"].append(row(*self.HENDRY))
+        for prose in ((), (self.LEFT,)):
+            cache = self.read(*prose, self.infobox(), self.november())
+            race = self.race(cache)
+            self.assertEqual((race["status"]["H6OH05003"], race["status"]["H6OH05008"]),
+                             ("withdrawn", "defeated"), prose)
+            self.assertEqual(race["names"]["H6OH05008"], "Jeanne Hendry")
+            self.assertFalse(cache["renamedRows"])
+            self.assertFalse(cache["refusedRows"])
+
+    def test_a_filed_replacement_who_won_is_the_one_elected(self):
+        # Case 1d: read by the count alone, the winner who had withdrawn was
+        # "elected" and the woman who won had no status.
+        self.field["candidates"].append(row(*self.HENDRY))
+        table = party_box(self.GENERAL, ("Pat Stone", REP, 150000, False),
+                          ("Jeanne Hendry", DEM, 168350, True))
+        infobox = party_infobox(("Pat Stone", REP, 150000), ("Trina Swan", DEM, 168350),
+                                declared="[[Jeanne Hendry]]")
+        for prose in ((), (self.LEFT,)):
+            status = self.race(self.read(*prose, infobox, table))["status"]
+            self.assertEqual((status["H6OH05008"], status["H6OH05001"], status["H6OH05003"]),
+                             ("elected", "defeated", "withdrawn"), prose)
+
+    def test_the_very_count_is_not_asked_of_a_nominee_the_page_says_left(self):
+        # Case 1c: no filing for the replacement, and the page's own sentence.
+        cache = self.read("Trina Swan died on August 20; she was replaced by Jeanne Hendry.",
+                          self.infobox(), self.november())
+        self.assertEqual(self.race(cache)["status"]["H6OH05003"], "withdrawn")
+        self.assertEqual(self.race(cache)["unmatched"], {"Jeanne Hendry": "defeated"})
+        self.assertFalse(cache["renamedRows"])
+
+    def test_a_row_read_as_the_nominees_carries_none_of_its_own_link(self):
+        # A1 and A2 (rules 24 and 33): the article a stranger's name links
+        # became the nominee's ballot article, ahead of her own link, and its
+        # surname check passes by construction.
+        for link in ("[[Jo Swan]]", "[[Joseph Swan (physicist)|Jo Swan]]"):
+            race = self.race(self.read(self.infobox(swan=168349), self.november(link)))
+            self.assertEqual(race["status"], self.CALLED, link)
+            self.assertEqual(race["article"].get("H6OH05003"), "Trina Swan", link)
+            # Linked nowhere else, she has no article: never the row's.
+            unlinked = self.infobox(swan=168349).replace("[[Trina Swan]]", "Trina Swan")
+            race = self.race(self.read(unlinked, self.november(link)))
+            self.assertEqual(race["status"], self.CALLED, link)
+            self.assertNotIn("H6OH05003", race["article"], link)
+        # The very-count fold too.
+        unlinked = self.infobox().replace("[[Trina Swan]]", "Trina Swan")
+        race = self.race(self.read(unlinked, self.november("[[Jeanne Hendry (singer)|Jeanne Hendry]]")))
+        self.assertEqual(race["status"], self.CALLED)
+        self.assertNotIn("H6OH05003", race["article"])
+        self.assertNotIn("Hendry", json.dumps(race))
+
+    def test_a_name_the_infobox_gives_too_is_refused_all_the_same(self):
+        # V1 and V1b: the row and the infobox's nominee renamed to one name no
+        # filing and no list holds. An infobox is one editor's word, and the
+        # same word in two places is no second source: the primary's winner is
+        # not "withdrawn", and the name is on no ballot, before the count or
+        # after it.
+        from kyc import validate
+        infobox = self.infobox(name="Jeanne Hendry")
+        cache = self.read(infobox, self.november())
+        race = self.race(cache)
+        self.assertEqual(race["status"], self.HELD)
+        self.assertEqual(race["unmatched"], {})
+        self.assertNotIn("Hendry", json.dumps(race))
+        self.assertEqual([(r["name"], r["for"]) for r in cache["refusedRows"][self.RACE]],
+                         [("Jeanne Hendry", ["Trina Swan"])])
+        self.assertFalse(cache["refusedNames"])
+        # The warning says what a person may record, and where.
+        issue = [i for i in validate.check_results_pages(cache) if i.code == "result-row-refused"][0]
+        self.assertIn("overrides.RESULT_NAMES", issue.message)
+        self.assertIn("overrides.CERTIFIED_BALLOTS", issue.message)
+        cache = self.read(infobox, self.november(marked=False), today=datetime.date(2026, 10, 20))
+        self.assertEqual(self.race(cache)["status"], dict(self.HELD, H6OH05001="nominee"))
+        self.assertEqual(self.race(cache)["unmatched"], {})
+
+    def test_a_result_names_entry_settles_that_the_row_is_the_nominees(self):
+        # What a person records where the row is the nominee under a name
+        # their campaign uses: the row is read as theirs.
+        from unittest import mock
+        from kyc import overrides
+        entry = {"H6OH05003": ("Jeanne Hendry", "committee C00000000 JEANNE FOR OHIO (made up)")}
+        for infobox in (self.infobox(swan=168349), self.infobox(name="Jeanne Hendry")):
+            with mock.patch.dict(overrides.RESULT_NAMES, entry):
+                cache = self.read(infobox, self.november())
+            race = self.race(cache)
+            self.assertEqual(race["status"], self.CALLED)
+            self.assertEqual(race["unmatched"], {})
+            self.assertNotIn("Hendry", json.dumps(race))
+            self.assertFalse(cache["refusedRows"])
+            self.assertIn("RESULT_NAMES", cache["renamedRows"][self.RACE][0]["why"])
+
+    def test_a_replacement_the_states_list_prints_stands_as_the_page_has_it(self):
+        # What a person records for a real replacement with no filing: the
+        # state's certified list for the race (overrides.CERTIFIED_BALLOTS).
+        lists = {"OH": {"source": "Ohio Secretary of State (made up)", "url": "https://x",
+                        "fetched": "2026-10-17", "complete": True, "races": {self.RACE: [
+                            {"name": "Pat Stone", "party": "Republican", "kind": "ballot"},
+                            {"name": "Jeanne Hendry", "party": "Democratic", "kind": "ballot"}]}}}
+        for infobox in ((), (self.infobox(name="Jeanne Hendry"),)):
+            cache = self.read(*infobox, self.november(), certified=lists)
+            race = self.race(cache)
+            self.assertFalse(cache["refusedRows"])
+            self.assertFalse(cache["renamedRows"])
+            self.assertEqual(race["status"]["H6OH05001"], "elected")
+            self.assertEqual(race["status"]["H6OH05003"], "withdrawn")
+            self.assertEqual(race["unmatched"], {"Jeanne Hendry": "defeated"})
+
+    def test_a_filed_nominee_only_the_infobox_names_takes_the_very_count(self):
+        # V3: a page with no primary tables. The nominee is the infobox's
+        # name, which a filing holds, and the row carries her very count.
+        cache = self.read(self.infobox(), self.november(), primaries=" ")
+        race = self.race(cache)
+        self.assertEqual(race["status"], {"H6OH05001": "elected", "H6OH05003": "defeated"})
+        self.assertEqual(race["unmatched"], {})
+        self.assertEqual(cache["renamedRows"][self.RACE][0]["as"], "Trina Swan")
+
+    def test_a_primary_loser_the_infobox_names_takes_nobodys_row(self):
+        # Case 4: an infobox naming the primary's loser with the row's count
+        # gave him the November row, and its winner read "withdrawn".
+        infobox = party_infobox(("Pat Stone", REP, 190744), ("Luke Gull", DEM, 168350),
+                                declared="[[Pat Stone]]")
+        cache = self.read(infobox, self.november())
+        self.assertEqual(self.race(cache)["status"], self.HELD)
+        self.assertEqual(self.race(cache)["unmatched"], {})
+        self.assertFalse(cache["renamedRows"])
+        self.assertEqual(cache["refusedRows"][self.RACE][0]["for"], ["Trina Swan"])
+
+    LIB = "Libertarian Party (United States)"
+
+    def minor(self, name):
+        self.field["candidates"].append(row("H6OH05011", "FREE, LEE", "OH", "H", 5, "LIB"))
+        primaries = self.PRIMARIES + "\n" + party_box(
+            "Libertarian convention results", ("Lee Free", self.LIB, 40, True),
+            ("Max Tax", self.LIB, 12, False))
+        table = party_box(self.GENERAL, ("Pat Stone", REP, 190744, True),
+                          ("Trina Swan", DEM, 168350, False), (name, self.LIB, 4100, False))
+        return self.read(table, primaries=primaries)
+
+    def test_a_minor_partys_row_reads_as_the_page_has_it_and_is_looked_at(self):
+        # Case 2: a minor party substitutes its candidates, and theirs often
+        # have no filing. Refused, the convention's winner read "nominee" for
+        # ever and the person on the ballot line was not shown.
+        from kyc import validate
+        cache = self.minor("Sam Sub")
+        race = self.race(cache)
+        self.assertEqual(race["status"]["H6OH05011"], "withdrawn")
+        self.assertEqual(race["unmatched"]["Sam Sub"], "defeated")
+        self.assertEqual(race["status"]["H6OH05003"], "defeated")
+        self.assertFalse(cache["refusedRows"])
+        self.assertEqual([(r["name"], r["for"]) for r in cache["unsettledRows"][self.RACE]],
+                         [("Sam Sub", ["Lee Free"])])
+        issues = [i for i in validate.check_results_pages(cache) if i.code == "result-row-unsettled"]
+        self.assertEqual([i.level for i in issues], ["warn"])
+        self.assertIn("Sam Sub", issues[0].detail[0])
+
+    def test_the_folds_still_apply_on_a_minor_partys_line(self):
+        cache = self.minor("Leo Free")
+        self.assertEqual(self.race(cache)["status"]["H6OH05011"], "defeated")
+        self.assertNotIn("Leo Free", self.race(cache)["unmatched"])
+        self.assertFalse(cache["unsettledRows"])
+
+    def test_a_relative_named_in_her_place_is_not_her(self):
+        # Case 5: the surname fold gave a nominee who had died her husband's
+        # row; "death" was read only as "death of".
+        for sentence in ("After Swan's death in September, her husband Jo Swan was nominated "
+                         "in her place.",
+                         "Swan stepped aside in August, and the committee named her husband.",
+                         "Her husband Jo Swan succeeded Trina Swan as the nominee.",
+                         "The committee met on August 20 and Jo Swan was nominated to replace "
+                         "Trina Swan.",
+                         "Trina Swan left the ticket in August. The committee nominated Jo "
+                         "Swan in her place."):
+            cache = self.read(sentence, self.infobox(swan=168349), self.november("Jo Swan"))
+            race = self.race(cache)
+            self.assertEqual(race["status"]["H6OH05003"], "withdrawn", sentence)
+            self.assertEqual(race["unmatched"], {"Jo Swan": "defeated"}, sentence)
+        # "Succeeded" of something else is not a succession.
+        cache = self.read("Stone succeeded in holding off Swan.", self.infobox(swan=168349),
+                          self.november("Jo Swan"))
+        self.assertEqual(self.race(cache)["status"], self.CALLED)
+
+    def test_a_top_two_seat_with_no_infobox_is_held_too(self):
+        # T4: whoever a top-two primary sends on is their own party's in
+        # November; with no infobox the renamed row made him "withdrawn".
+        field = {"candidates": [row("H6WA07001", "ALDER, ANN", "WA", "H", 7, "DEM"),
+                                row("H6WA07002", "BIRCH, BEN", "WA", "H", 7, "DEM"),
+                                row("H6WA07003", "CEDAR, CY", "WA", "H", 7, "REP")]}
+        title = "2026 United States House of Representatives elections in Washington"
+
+        def read(second, primary_title="Blanket primary results"):
+            primary = party_box(primary_title, ("Ann Alder", DEM, 90000, True),
+                                ("Ben Birch", DEM, 50000, True), ("Cy Cedar", REP, 30000, False))
+            table = party_box("2026 Washington's 7th congressional district election",
+                              ("Ann Alder", DEM, 200000, True), (second, DEM, 120000, False))
+            page = "\n==District 7==\n" + table + "\n\n" + primary + "\n"
+            return results.build(field, {("WA", "H"): {"primary": "2026-08-04", "runoff": None}},
+                                 today=datetime.date(2026, 11, 9), log=lambda *_: None,
+                                 fetch=lambda t: page if t == title else
+                                 (_ for _ in ()).throw(results.PageMissing(t)))
+
+        # Washington's title, Alaska's, and California's, which names nothing.
+        for primary_title in ("Blanket primary results", "Nonpartisan blanket primary results",
+                              "Top-four primary results", "Primary results"):
+            cache = read("Zed Zane", primary_title)
+            race = cache["races"]["H-WA-07-2026"]
+            self.assertEqual(race["status"], {"H6WA07001": "elected", "H6WA07002": "nominee",
+                                              "H6WA07003": "eliminated"}, primary_title)
+            self.assertEqual(race["unmatched"], {}, primary_title)
+            self.assertEqual(cache["refusedRows"]["H-WA-07-2026"][0]["for"], ["Ben Birch"])
+        clean = read("Ben Birch")
+        self.assertEqual(clean["races"]["H-WA-07-2026"]["status"]["H6WA07002"], "defeated")
+        self.assertFalse(clean["refusedRows"])
+
+    def test_where_a_majority_elects_a_refused_row_holds_the_winners_call(self):
+        # Maine, Alaska, Georgia: the November tables must name every nominee
+        # (rule 63), and a refused row names nobody, with an infobox or without.
+        field = {"candidates": [row("H6ME02001", "PINE, PAT", "ME", "H", 2, "REP"),
+                                row("H6ME02002", "OAK, OLA", "ME", "H", 2, "DEM")]}
+        primaries = "\n".join([party_box("Republican primary results", ("Pat Pine", REP, 30000, True)),
+                               party_box("Democratic primary results", ("Ola Oak", DEM, 28000, True))])
+        title = "2026 United States House of Representatives elections in Maine"
+
+        def read(second, *infobox):
+            table = party_box("2026 Maine's 2nd congressional district election",
+                              ("Pat Pine", REP, 190000, True), (second, DEM, 170000, False),
+                              total=360000)
+            page = "\n==District 2==\n" + "\n\n".join(infobox + (table, primaries)) + "\n"
+            return results.build(field, {("ME", "H"): {"primary": "2026-06-09", "runoff": None}},
+                                 today=datetime.date(2026, 11, 9), log=lambda *_: None,
+                                 fetch=lambda t: page if t == title else
+                                 (_ for _ in ()).throw(results.PageMissing(t)))
+
+        both = party_infobox(("Pat Pine", REP, 190000), ("Olga Elm", DEM, 170000),
+                             declared="[[Pat Pine]]")
+        stale = party_infobox(("Pat Pine", REP, 190000), ("Ola Oak", DEM, 170001),
+                              declared="[[Pat Pine]]")
+        for infobox in ((), (both,), (stale,)):
+            cache = read("Olga Elm", *infobox)
+            race = cache["races"]["H-ME-02-2026"]
+            self.assertEqual(race["status"], {"H6ME02001": "nominee", "H6ME02002": "nominee"})
+            self.assertEqual(race["unmatched"], {})
+            self.assertTrue(cache["refusedRows"]["H-ME-02-2026"])
+        clean = read("Ola Oak", stale)["races"]["H-ME-02-2026"]
+        self.assertEqual(clean["status"], {"H6ME02001": "elected", "H6ME02002": "defeated"})
+
     def test_an_independent_row_displaces_nobody(self):
         table = party_box(self.GENERAL, ("Pat Stone", REP, 190744, True),
                           ("Trina Swan", DEM, 168350, False), ("Ida Lone", "Independent", 900, False))
@@ -3465,7 +3724,11 @@ class TestARecountRangeMarkNeedsTheInfobox(NoGap):
         self.assertTrue(any("[REFUSED]" in line and "Trina Swan" in line for line in logged))
 
     def test_it_stands_while_the_infobox_declares_them(self):
-        for declared in ("[[Trina Swan]]", "[[Trina Swan (politician)|Trina Swan]]"):
+        # The party is often written under the name; run together, the two
+        # named nobody and a declared race was held.
+        for declared in ("[[Trina Swan]]", "[[Trina Swan (politician)|Trina Swan]]",
+                         "[[Trina Swan]]<br />[[Democratic Party (United States)|Democratic]]",
+                         "'''[[Trina Swan]]'''<br>Democratic"):
             cache = self.read(self.infobox(declared=declared), self.table())
             self.assertEqual(self.status(cache), self.CALLED)
             self.assertFalse(cache["refusedMarks"])
@@ -3483,6 +3746,34 @@ class TestARecountRangeMarkNeedsTheInfobox(NoGap):
         self.assertEqual(self.status(cache), self.CALLED)
         cache = self.read(self.table(swan=163894, stone=161894, total=420000))
         self.assertEqual(self.status(cache), self.AWAITING)
+
+    def test_a_fusion_tables_total_rows_are_not_more_votes(self):
+        # New York: a row a line and a "Total" row besides. Summed line by
+        # line every vote was there twice, so the threshold was a point and
+        # the share printed to a person half the true one.
+        from kyc import validate
+
+        def fusion(swan, stone):
+            return party_box(
+                TestARenamedNovemberRow.GENERAL,
+                ("Trina Swan", DEM, swan - 12000, True),
+                ("Trina Swan", "Working Families Party", 12000, True),
+                ("Trina Swan", "Total", swan, True),
+                ("Pat Stone", REP, stone - 6500, False),
+                ("Pat Stone", "Conservative Party of New York State", 6500, False),
+                ("Pat Stone", "Total", stone, False), total=swan + stone)
+
+        cache = self.read(fusion(162000, 161500))
+        self.assertEqual(self.status(cache), self.AWAITING)
+        self.assertIn("500 votes (0.15 points)", cache["refusedMarks"][self.RACE][0]["why"])
+        # What the summary says is true of this refusal too: it has a filing
+        # and a count.
+        issue = [i for i in validate.check_results_pages(cache) if i.code == "result-mark-refused"][0]
+        self.assertNotIn("a filing and a count", issue.message)
+        # 2,300 of 323,700 is 0.71 points, and stands.
+        cache = self.read(fusion(163000, 160700))
+        self.assertEqual(self.status(cache), self.CALLED)
+        self.assertFalse(cache["refusedMarks"])
 
     def test_a_refused_close_mark_keeps_the_last_read(self):
         cache = self.read(self.table())

@@ -514,6 +514,9 @@ def parse_boxes(text):
     larger of the table's own total and the sum of its lines, placeholders
     and write-ins included - or ``None`` while a line it holds has no count
     (a "TBD" slot). A majority is of that, never of the named rows alone.
+    ``boxOnce`` is the same with each person counted once (their "Total" row
+    where a fusion table gives one, :func:`_counted`): what a margin is a
+    share of.
     """
     boxes = []
     for match in _BOX.finditer(text or ""):
@@ -555,9 +558,15 @@ def parse_boxes(text):
                 uncounted = True
             else:
                 lines.append(count)
+        named = sum(r["votes"] or 0 for r in rows)
+        once = max(total, sum(lines) - named + sum(_counted(rows).values()))
         total = max(total, sum(lines))
         for row in rows:
             row["boxVotes"] = None if uncounted else total
+            # The same with each person counted once: New York's fusion
+            # tables give a person a row a line and a "Total" row besides,
+            # and summed line by line every vote is there twice.
+            row["boxOnce"] = None if uncounted else once
         if rows:
             boxes.append((title, rows))
     return boxes
@@ -586,6 +595,7 @@ _PARTY_FIELD = re.compile(r"^party(\d+)$")
 
 INFOBOX_TITLE = "Infobox nominees"
 _COMMENT = re.compile(r"<!--.*?-->", re.S)
+_BREAK = re.compile(r"<br\s*/?>|\n", re.I)
 
 
 def template_body(text, start):
@@ -628,7 +638,10 @@ def infobox_nominees(text):
     # Whom the infobox declares the seat's holder after the election: the
     # field an editor fills once the race is called and blanks when the call
     # is taken back (Minnesota's 1st, 2026-11-06 to -08).
-    declared = clean_name(shown.get("after_election", ""))
+    # Its first line: the party is often written under the name
+    # ("[[Name]]<br />[[Democratic Party (United States)|Democratic]]"), and
+    # run together the two named nobody.
+    declared = clean_name(_BREAK.split(shown.get("after_election", "").strip(), 1)[0])
     rows = []
     for key, value in fields.items():
         if not _NOMINEE_FIELD.match(key):
@@ -1183,29 +1196,21 @@ def _hyphen_spellings(boxes):
     return alias
 
 
-def _canonical(boxes):
-    """Rewrite every row's name to the first spelling seen for that person
-    (:func:`_first_spellings`), and a November row under a name nothing else
-    on the page gives to the party's nominee the infobox credits with that
-    row's very count (:func:`_same_count_rows`)."""
-    out = _first_spellings(boxes)
-    renamed = _same_count_rows(out)
-    if renamed:
-        out = [(title, [dict(r, name=renamed.get(r["name"], r["name"])) for r in rows])
-               for title, rows in out]
-    return out
-
-
 # Lines of a ballot no party nominates one person for.
 _NO_NOMINEE_LINES = ("", "all", "independent", "none", "write-in", "total")
+# A primary's title that says whose it is. One that names no party is every
+# party's: Washington's "Blanket primary results", Alaska's "Top-four primary
+# results", and California's, titled "Primary results" alone.
+_A_PARTYS = re.compile(r"convention|caucus|party|democrat|republican|libertarian|green|\bdfl\b",
+                       re.I)
 
 
-def _displaced(boxes):
+def _displaced(boxes, filed=None):
     """Where a party's nominee is missing from the November tables and they
-    hold a row of that party under a name nothing else on the page gives:
-    ``[{"party", "nominees": [names], "rows": [rows], "popular": {name: the
-    infobox's count}, "known": {names a table or a list gives, the infobox
-    aside}}]``, from *boxes* already in their first spellings.
+    hold a row of that party under a name the page gives nowhere else but,
+    at most, its infobox: ``[{"party", "nominees": [names], "rows": [rows],
+    "popular": {name: the infobox's count}}]``, from *boxes* already in their
+    first spellings. *filed(name)* is whether a filing holds a name.
 
     On 2026-11-05 the November table of Minnesota's 8th had its DFL row
     renamed "Jeanne Hendricks", a name the page gives nowhere else, over the
@@ -1215,36 +1220,41 @@ def _displaced(boxes):
     (won the primary, and not on the ballot) and a person nobody filed as had
     lost in their place.
 
-    The nominee is a party primary's or runoff's one marked winner, or whom
-    the infobox names for the party; never someone a Withdrawn list or a
-    ''(withdrawn)'' names, who left as the page says. A line no party
-    nominates one person for (an independent's, a write-in's, an all-party
-    primary's) displaces nobody.
+    The nominee is a party primary's or runoff's one marked winner; each
+    person a primary whose title names no party (California's and
+    Washington's top two) marks as advancing, for their own party; or whom
+    the infobox names for
+    the party where a filing holds that name. Never someone the page's own
+    primary eliminated, whom a stale infobox may still name with a count;
+    never someone a Withdrawn list or a ''(withdrawn)'' names, who left as
+    the page says. An infobox is one editor's word: the name it gives a
+    row is no second source for it, so a row whose name only the November
+    table and the infobox give is one of these rows too. A line no party
+    nominates one person for (an independent's, a write-in's) displaces
+    nobody.
     """
-    infobox, general, contests, left, elsewhere, later = [], [], [], set(), set(), set()
-    known = set()
+    infobox, general, left, elsewhere = [], [], set(), set()
+    primaries, runoffs, out_by_list = {}, {}, set()
     for raw_title, rows in boxes:
         title = _clean_title(raw_title)
-        if title != INFOBOX_TITLE and (title in LIST_TITLES or _stage(title) != "general"):
-            known.update(r["name"] for r in rows)
         if title == INFOBOX_TITLE:
             infobox.extend(rows)
-        elif title in LIST_TITLES:
-            if title != ELIMINATED_LIST:
-                left.update(r["name"] for r in rows)
+            continue
+        if title in LIST_TITLES:
+            (out_by_list if title == ELIMINATED_LIST else left).update(r["name"] for r in rows)
         else:
             stage = _stage(title)
             if stage == "general":
                 general.extend(rows)
                 continue
             if stage in ("primary", "runoff") and not _COUNTY_CONVENTION.search(title):
-                contests.append((title, stage, rows))
+                (runoffs if stage == "runoff" else primaries).setdefault(title, []).extend(rows)
                 left.update(r["name"] for r in rows if r["withdrawn"])
-                if stage == "runoff":
-                    later.update(r["name"] for r in rows)
         elsewhere.update(r["name"] for r in rows)
     there = {r["name"] for r in general}
     left.update(r["name"] for r in general if r["withdrawn"])
+    lost = _losers(primaries, runoffs) | out_by_list
+    later = {r["name"] for rows in runoffs.values() for r in rows}
     nominees, popular = {}, {}
 
     def add(key, name):
@@ -1252,49 +1262,37 @@ def _displaced(boxes):
             if name not in nominees.setdefault(key, []):
                 nominees[key].append(name)
 
-    for row in infobox:
-        if row.get("party"):
-            key = party_key(row["party"])
-            add(key, row["name"])
-            if row.get("popular"):
-                popular[(key, row["name"])] = row["popular"]
-    for title, stage, rows in contests:
+    for title, rows in list(primaries.items()) + list(runoffs.items()):
         winners = [r for r in rows if r["won"] and not r["withdrawn"]]
-        if len(winners) != 1 or (stage == "primary" and winners[0]["name"] in later):
+        if title in primaries and not _A_PARTYS.search(title):
+            # A top-two or top-four primary: whoever it sends on stands in
+            # November for the party their own row gives.
+            for row in winners:
+                if row.get("party") and row["name"] not in later:
+                    add(party_key(row["party"]), row["name"])
+            continue
+        if len(winners) != 1 or (title in primaries and winners[0]["name"] in later):
             continue                # two advance, or a runoff decides it
         add(party_key(winners[0].get("party") or _party_of(title)), winners[0]["name"])
+    for row in infobox:
+        if not row.get("party"):
+            continue
+        key, name = party_key(row["party"]), row["name"]
+        if row.get("popular"):
+            popular[(key, name)] = row["popular"]
+        if name not in lost and filed and filed(name):
+            add(key, name)
     found = {}
     for row in general:
-        if (row["withdrawn"] or row.get("writeIn") or row.get("refused") or not row.get("party")
+        if (row["withdrawn"] or row.get("writeIn") or not row.get("party")
                 or row["name"] in elsewhere):
             continue
         key = party_key(row["party"])
         if nominees.get(key):
             found.setdefault(key, []).append(row)
-    return [{"party": key, "nominees": nominees[key], "rows": rows, "known": known,
+    return [{"party": key, "nominees": nominees[key], "rows": rows,
              "popular": {name: count for (k, name), count in popular.items() if k == key}}
             for key, rows in found.items()]
-
-
-def _same_count_rows(boxes):
-    """``{November row's name: the nominee's}`` where the infobox names the
-    party's missing nominee with the very count that row carries
-    (:func:`_displaced`): Minnesota's 8th's "Jeanne Hendricks" on 168,350 is
-    the infobox's Trina Swanson on 168,350. One nominee and one row only, and
-    a count above zero; a count a vote apart is another count. The nominee is
-    one the page names outside its infobox too (a primary's winner): an
-    infobox is one editor's word, and a name only it gives takes nobody's row
-    (rule 63's "Peter Griffin")."""
-    alias = {}
-    for item in _displaced(boxes):
-        for row in item["rows"]:
-            votes = row.get("votes")
-            fits = [name for name in item["nominees"]
-                    if votes and item["popular"].get(name) == votes and name in item["known"]]
-            twins = [r for r in item["rows"] if r is not row and r.get("votes") == votes]
-            if len(fits) == 1 and not twins:
-                alias[row["name"]] = fits[0]
-    return alias
 
 
 # How a page's own sentence says a nominee left the race: said of the
@@ -1304,16 +1302,22 @@ _LEFT_WORDS = (r"withdrew|withdrawn|withdraws|dropped out|drops out|died|dies|wa
                r"been replaced|replaced by|disqualified|ineligible|"
                r"removed from the (?:general election |november )?ballot|"
                r"(?:declined|resigned|relinquished|vacated) the nomination|"
-               r"(?:ended|suspended) (?:his|her|their) campaign")
+               r"(?:ended|suspended) (?:his|her|their) campaign|"
+               r"stepped (?:aside|down)|stood down|(?:was|been) succeeded|"
+               r"in (?:his|her|their) (?:place|stead)")
 _LEFT_OF = r"(?:replac(?:e|ed|es|ing)|replacement for|withdrawal of|death of|disqualification of)"
+# "After Swan's death in September, her husband was nominated in her place."
+_LEFT_OWN = r"(?:death|passing|withdrawal|disqualification|resignation|replacement)"
 
 
 def _left_in_prose(name, section):
     """Whether a sentence of the race's own section says *name* left it or
     was replaced: their surname, then the words, with no "after" or "when"
     between (a sentence saying they won after someone else withdrew is not
-    one); or "replaced", "the withdrawal of" and the like before it. Tables
-    and templates are not sentences."""
+    one); "replaced", "succeeded", "the withdrawal of" and the like before
+    it; "succeeded" directly before their name (never "succeeded in holding
+    off Swan"); or the surname's own "death" or "withdrawal" ("Swan's
+    death"). Tables and templates are not sentences."""
     tokens = _tokens(name)
     if len(tokens) < 2:
         return False
@@ -1321,96 +1325,147 @@ def _left_in_prose(name, section):
     after = re.compile(rf"\b{surname}\b(?:(?!\b(?:after|when|once|because|following|while)\b)[^.;])*?"
                        rf"\b(?:{_LEFT_WORDS})\b")
     before = re.compile(rf"\b{_LEFT_OF}\b[^.;]{{0,60}}?\b{surname}\b")
+    own = re.compile(rf"\b{surname}['’]s? {_LEFT_OWN}\b")
+    given = "|".join(re.escape(word) for word in tokens[:-1])
+    succeeded = re.compile(rf"\bsucceed(?:s|ed|ing)? (?:(?:{given}) )*{surname}\b")
     for line in (section or "").splitlines():
         if line.lstrip().startswith(("|", "{", "}", "!", "=")):
             continue
         text = _fold(plain_text(line))
-        if after.search(text) or before.search(text):
+        if (after.search(text) or before.search(text) or own.search(text)
+                or succeeded.search(text)):
             return True
     return False
 
 
 def november_row_names(boxes, rows, aliases=None, on_a_list=None, section=""):
-    """``(boxes, renamed, refused)``: whose a November row is, where it
-    stands under another name in the place of a party's nominee (rule 63).
+    """``(boxes, renamed, refused, looked)``: whose a November row is, where
+    it stands under another name in the place of a party's nominee (rule 63).
 
-    A party's primary winner, or the infobox's nominee, missing from the
-    November table is never "withdrawn" on that alone when the table holds a
-    row of their party under a name nothing else on the page gives
-    (:func:`_displaced`). *renamed* lists the rows that are the nominee's,
-    ``{"name", "as", "why"}``: the infobox credits them with the row's very
-    count (:func:`_same_count_rows`, folded wherever the page is read), or
-    the row's name shares their surname, no other filer in the race carries
-    it, and a filing or another table of the page names the nominee. Such a row is renamed in *boxes*: the nominee takes its
-    result, the page's spelling is not shown, and nobody is listed twice.
+    A party's primary winner, or the infobox's nominee a filing holds, missing
+    from the November table is never "withdrawn" on that alone when the table
+    holds a row of their party under a name the page gives nowhere else but,
+    at most, its infobox (:func:`_displaced`). Each such row is decided here,
+    where the filings are known, in this order:
 
-    Any other such row whose name no filing and no state's list holds is
-    *refused*, ``{"name", "for": [nominees], "why"}``, as a mark on such a
-    name is: it is flagged ``refused`` in *boxes*, gives its name no status,
-    and the table decides nothing for the nominees it stands in for, who read
-    as before the count (:func:`resolve_race`); its count still stands in the
-    table, so the winner's own mark is held to the same gates. A row a filing
-    or a list holds is a person, and the race reads as the page says; so does
-    a nominee the section's own sentences say left or was replaced
-    (:func:`_left_in_prose`), or a Withdrawn list names. A marked row is left
-    to the mark's own refusal (:func:`refuse_marks`, and the filing a mark
-    needs).
+    - a row whose name is the nominee's own filing - by the matcher, or by an
+      evidenced ``overrides.RESULT_NAMES`` entry keyed on their FEC id - is
+      theirs;
+    - a row a filing or a state's list holds is a person, and the race reads
+      as the page says: a replacement who filed loses nothing to the primary's
+      winner, whatever count a stale infobox still credits that winner with.
+      So does a nominee the section's own sentences say left or was replaced
+      (:func:`_left_in_prose`), or a Withdrawn list names;
+    - a row carrying the very count the infobox credits the party's one
+      missing nominee with is theirs (Minnesota's 8th's "Jeanne Hendricks" on
+      168,350 is the infobox's Trina Swanson on 168,350): one nominee and one
+      row only, a count above zero, and a count a vote apart is another count;
+    - a row sharing the one nominee's surname, where no other filer in the
+      race carries it, is theirs (its 5th's "Joe Nagel").
+
+    *renamed* lists the rows that are the nominee's, ``{"name", "as", "why"}``.
+    Such a row is renamed in *boxes*, in the infobox too where it repeats the
+    name: the nominee takes its result, the page's spelling is not shown,
+    nobody is listed twice, and the row carries none of its own link - the
+    article a stranger's name links is not the nominee's (rules 24 and 33).
+
+    Any other such row on a Democratic or Republican line is *refused*,
+    ``{"name", "for": [nominees], "why"}``, as a mark on such a name is: it is
+    flagged ``refused`` in *boxes*, gives its name no status wherever the page
+    writes it, and the table decides nothing for the nominees it stands in for,
+    who read as before the count (:func:`resolve_race`); its count still
+    stands in the table, so the winner's own mark is held to the same gates.
+    On any other line it reads as the page has it and is *looked* at,
+    ``{"name", "for", "why"}``: a minor party substitutes its candidates, and
+    theirs often have no filing. A marked row is left to the mark's own
+    refusal (:func:`refuse_marks`, and the filing a mark needs).
     """
     from .candidates import display_name
 
-    first = _first_spellings(boxes)
-    renamed = [{"name": name, "as": nominee,
-                "why": "the infobox names them for that party with the very count that row carries"}
-               for name, nominee in sorted(_same_count_rows(first).items())]
+    canon = _canonical(boxes)
+    spelled = {}
+    for (_title, raw), (_same, fixed) in zip(boxes, canon):
+        for before, after in zip(raw, fixed):
+            spelled.setdefault(after["name"], set()).add(before["name"])
+
+    def ids(name):
+        """Every filing a page's name is, by any spelling the page gives it."""
+        out = set()
+        for form in sorted(spelled.get(name, set()) | {name}):
+            out.update(_certified_ids(form, rows, aliases))
+        return out
+
     pool = [(row["candidate_id"], _tokens(display_name(row.get("name")))) for row in rows]
     pool += [(cid, _tokens(name)) for name, cid in (aliases or []) if name and cid]
-    fold, refused = {}, {}
-    for item in _displaced(_canonical(boxes)):
-        nominees = [n for n in item["nominees"] if not _left_in_prose(n, section)]
-        if not nominees:
-            continue
+    fold, renamed, refused, looked = {}, [], {}, []
+
+    def theirs(name, nominee, why):
+        fold[name] = nominee
+        renamed.append({"name": name, "as": nominee, "why": why})
+
+    for item in _displaced(canon, filed=ids):
         for row in item["rows"]:
             name = row["name"]
             found, unclear = match_names([name], rows, aliases)
-            if (found.get(name) or unclear or _exact_filing(name, rows)
-                    or (on_a_list and on_a_list(name))):
+            filings = set(found.get(name) or ()) | set(_exact_filing(name, rows))
+            holders = [n for n in item["nominees"] if filings & ids(n)]
+            if len(holders) == 1:
+                theirs(name, holders[0], "a filing of theirs, or an evidenced overrides.RESULT_NAMES "
+                                         "entry, gives that row's name")
+                continue
+            if filings or unclear or (on_a_list and on_a_list(name)):
                 continue                    # a person a filing or a list holds
-            tokens, theirs = _tokens(name), _tokens(nominees[0])
+            nominees = [n for n in item["nominees"] if not _left_in_prose(n, section)]
+            if not nominees:
+                continue                    # the page's own sentence says they left
+            votes = row.get("votes")
+            twins = [r for r in item["rows"] if r is not row and r.get("votes") == votes]
+            fits = [n for n in nominees if votes and item["popular"].get(n) == votes]
+            if len(fits) == 1 and not twins:
+                theirs(name, fits[0], "the infobox names them for that party with the very count "
+                                      "that row carries")
+                continue
+            tokens, own_words = _tokens(name), _tokens(nominees[0])
             if (len(nominees) == 1 and len(item["rows"]) == 1 and len(tokens) >= 2
-                    and len(theirs) >= 2 and tokens[-1] == theirs[-1]):
-                own = set(_certified_ids(nominees[0], rows, aliases))
-                if ((own or nominees[0] in item["known"])
-                        and not {cid for cid, words in pool if tokens[-1] in words} - own):
-                    fold[name] = nominees[0]
-                    renamed.append({"name": name, "as": nominees[0],
-                                    "why": "the row is their party's, shares their surname, and "
-                                           "no other filer in the race carries it"})
-                    continue
+                    and len(own_words) >= 2 and tokens[-1] == own_words[-1]
+                    and not {cid for cid, words in pool if tokens[-1] in words} - ids(nominees[0])):
+                theirs(name, nominees[0], "the row is their party's, shares their surname, and "
+                                          "no other filer in the race carries it")
+                continue
             if row["won"]:
                 continue                    # the mark's own refusal takes the table
-            refused[name] = {"name": name, "for": list(nominees),
-                             "why": "a November row of their party under a name no filing and no "
-                                    "state's list holds, standing where the nominee should"}
+            if item["party"] in _MAJOR:
+                refused[name] = {"name": name, "for": list(nominees),
+                                 "why": "a November row of their party under a name no filing and "
+                                        "no state's list holds, standing where the nominee should"}
+            else:
+                looked.append({"name": name, "for": list(nominees),
+                               "why": "a minor party's November row under a name no filing and no "
+                                      "state's list holds, where its nominee should stand; read "
+                                      "as the page has it"})
     if fold or refused:
         out = []
-        for (title, raw), (_same, fixed) in zip(boxes, _canonical(boxes)):
+        for (title, raw), (_same, fixed) in zip(boxes, canon):
+            clean = _clean_title(title)
+            november = clean == INFOBOX_TITLE or (clean not in LIST_TITLES
+                                                  and _stage(clean) == "general")
             changed = []
             for before, after in zip(raw, fixed):
-                if _stage(_clean_title(title)) != "general":
-                    changed.append(before)
-                elif after["name"] in fold:
-                    changed.append(dict(before, name=fold[after["name"]]))
-                elif after["name"] in refused:
+                if november and after["name"] in fold:
+                    # Read as someone else's, it carries none of its own link.
+                    changed.append(dict(before, name=fold[after["name"]], article=None))
+                elif november and clean != INFOBOX_TITLE and after["name"] in refused:
                     changed.append(dict(before, refused=True,
                                         standsFor=refused[after["name"]]["for"]))
                 else:
                     changed.append(before)
             out.append((title, changed))
         boxes = out
-    return boxes, renamed, [refused[name] for name in sorted(refused)]
+    return (boxes, renamed, [refused[name] for name in sorted(refused)],
+            sorted(looked, key=lambda item: item["name"]))
 
 
-def _first_spellings(boxes):
+def _canonical(boxes):
     """Rewrite every row's name to the first spelling seen for that person.
 
     Pages routinely write a candidate one way in the primary table and
@@ -1532,7 +1587,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             # all, so nothing is inferred from anyone's absence either.
             return {}
     primaries, runoffs, generals, infobox, lists = {}, {}, [], [], {}
-    general_runoff_rows, general_tables, held = [], [], set()
+    general_runoff_rows, general_tables, held, nobody = [], [], set(), set()
     for raw_title, rows in _canonical(boxes):
         title = _clean_title(raw_title)
         if title == INFOBOX_TITLE:
@@ -1558,6 +1613,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
             generals.extend(r for r in rows if not _names_nobody(r))
             general_tables.append(rows)
             held.update(name for r in rows if r.get("refused") for name in r.get("standsFor", ()))
+            nobody.update(r["name"] for r in rows if r.get("refused"))
 
     status = _resolve_tables(primaries, runoffs, generals, has_runoff or open_primary)
     for name in held:
@@ -1604,7 +1660,9 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
     # the primary table has crowned. An open primary has no nominees to name.
     if not open_primary:
         for row in infobox:
-            if status.get(row["name"]) in (None, ADVANCED):
+            # A name the November table's refused row gives is nobody's in
+            # the infobox either: one editor's word in two places.
+            if row["name"] not in nobody and status.get(row["name"]) in (None, ADVANCED):
                 status[row["name"]] = NOMINEE
     if general_held and open_primary:
         _settle_open_primary(status, boxes, late)
@@ -1614,7 +1672,7 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
         # leader short of it.
         needs_majority = ranked_choice or general_runoff
         _settle_general(status, generals, general_runoff_rows, general_runoff_held,
-                        majority_of=(general_tables, {r["name"] for r in infobox})
+                        majority_of=(general_tables, ({r["name"] for r in infobox} - nobody) | held)
                         if needs_majority else None, late=late)
     return status
 
@@ -1724,13 +1782,16 @@ def _lead(rows, name, field="votes"):
 
 def _close(rows, name, field="votes"):
     """*name*'s lead over the runner-up where it is under CLOSE_MARGIN of every
-    vote the table counts (its total and write-in lines, ``boxVotes``, or the
-    sum of its people's counts), as ``(votes, share)``; else None."""
+    vote the table counts, as ``(votes, share)``; else None. Every vote once
+    (``boxOnce``): the table's own total line, or its people's counts with its
+    write-in and unnamed lines, whichever is larger - never ``boxVotes``, which
+    a fusion table's "Total" rows double, so that New York's threshold was one
+    point and the share printed to a person half the true one."""
     counted = _counted(rows, field)
     if name not in counted or len(counted) < 2:
         return None
     lead = counted[name] - max(v for n, v in counted.items() if n != name)
-    boxed = [r["boxVotes"] for r in rows if r.get("boxVotes")] if field == "votes" else []
+    boxed = [r["boxOnce"] for r in rows if r.get("boxOnce")] if field == "votes" else []
     base = max(boxed + [sum(counted.values())])
     return (lead, lead / base) if lead < CLOSE_MARGIN * base else None
 
@@ -2994,7 +3055,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
 
     races, pending, missing_pages, failed, unparsed = {}, [], [], [], []
     pages = {}
-    refused_marks, refused_names, refused_rows, renamed_rows = {}, {}, {}, {}
+    refused_marks, refused_names, refused_rows, renamed_rows, looked_rows = {}, {}, {}, {}, {}
     from .certified import LOST_PRIMARY as _LOST, WITHDRAWN as _LIST_WITHDREW
     _OFF_THE_LIST = (_LOST, _LIST_WITHDREW)
 
@@ -3096,10 +3157,11 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 if not q.get("withdrew"))
 
         # A November row under another name in the place of a party's nominee
-        # is theirs, or is refused; it never makes them "withdrawn" (rule 63).
+        # is theirs, or on a major party's line is refused; it never makes
+        # them "withdrawn" there (rule 63).
         row_names = []
         if not is_open:
-            boxes, row_names, row_refused = november_row_names(
+            boxes, row_names, row_refused, row_looked = november_row_names(
                 boxes, rows, race_aliases, on_a_list, section)
             for item in row_names:
                 log(f"    [note] {rid}: the November row {item['name']!r} on {title!r} is read "
@@ -3107,8 +3169,13 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             for item in row_refused:
                 log(f"    [REFUSED] {rid}: the November row {item['name']!r} on {title!r}: "
                     f"{item['why']} ({', '.join(item['for'])}), who reads as before the count")
+            for item in row_looked:
+                log(f"    [warn] {rid}: the November row {item['name']!r} on {title!r}: "
+                    f"{item['why']} ({', '.join(item['for'])})")
             if row_refused:
                 refused_rows[rid] = row_refused
+            if row_looked:
+                looked_rows[rid] = row_looked
         if general_held(today):
             # A mark needs a count behind it, and a filing or a list's name
             # under it (rule 63). Both refusals conclude nothing: the race
@@ -3320,12 +3387,15 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # Each name only an infobox gave, with no filing and no list, that this
         # read left out after the count (rule 63). The race reads on without it.
         "refusedNames": dict(sorted(refused_names.items())),
-        # Each November row under a name no filing and no list holds, standing
-        # where a party's nominee should, that this read refused (rule 63): the
-        # nominee reads as before the count; and each such row read as the
-        # nominee's own, with why.
+        # Each November row of a major party under a name no filing and no list
+        # holds, standing where the party's nominee should, that this read
+        # refused (rule 63): the nominee reads as before the count; and each
+        # such row, on any line, read as the nominee's own, with why.
         "refusedRows": dict(sorted(refused_rows.items())),
         "renamedRows": dict(sorted(renamed_rows.items())),
+        # Each such row on a minor party's line that nothing settled: read as
+        # the page has it, for a person to look at.
+        "unsettledRows": dict(sorted(looked_rows.items())),
         # Every place the calendar above is not the FEC's, and why.
         "calendarNotes": calendar_notes,
         # The calendar travels with the results so `build` needs no network
