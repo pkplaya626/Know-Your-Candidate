@@ -1670,16 +1670,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     party and seat, one holding a campaign's money - is an evidenced
     `SAME_PERSON_FILINGS` entry, and `validate` warns on the next
     (`second-registration`: a name a race lists with no profile whose filing
-    is letter for letter a profile's filed name there). Where neither
-    registration holds money and the two are under two forms of the name
-    (UT-3's "STODDARD, MICHAEL" and "STODDARD, MICHAEL RAY", both
-    Libertarian), the entry's evidence is the filings beside the one person
-    the state's results page names on that party's line (read 2026-11-09);
-    it moves the race's count of who filed, and nothing shown of the person.
-    Two registrations under one filed name with the same nothing reported
-    already count once, and need none: Mike Saliba (MI-10), Paul Berry
-    (MO-1), Andrew Woodruff Mixon (Tennessee's Senate seat, as an independent
-    and as Federalist).
+    is letter for letter a profile's filed name there).
 
 73. **A count is one formula, wherever it is shown.** The sidebar read
     587 challengers on the ballot, a state's strip 16 over race headers
