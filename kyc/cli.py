@@ -2163,6 +2163,9 @@ def _ballotphotos(args):
     kyc/statewide_photos.py (rules 24, 33, 87 and 91)."""
     import json as _json
     from . import statewide, statewide_photos
+    # The budget runs from the command's start (rule 78): the Monday read
+    # of 2026-11-09 ran past its step's fifty minutes.
+    budget = statewide_photos.Budget(args.max_minutes * 60 if args.max_minutes else None)
     previous = statewide_photos.load_cache(args.root)
     if args.check:
         if not previous:
@@ -2180,11 +2183,17 @@ def _ballotphotos(args):
             # Only the candidates' own articles, as the races' articles link
             # them (rule 33), whatever route pictures them: no photograph is
             # read, changed or dropped.
-            cache, problems = statewide_photos.with_articles(
-                previous or {}, statewide_photos.lists_of(lists), previous), []
+            late = []
+            cache = statewide_photos.with_articles(
+                previous or {}, statewide_photos.lists_of(lists), previous,
+                budget=budget, unreached=late)
+            problems = ([f"the candidates' own articles: {len(late)} race(s) not reached within "
+                         f"the time budget, their last read kept: {', '.join(late)}"]
+                        if late else [])
         else:
             cache, problems = statewide_photos.fetch(lists, snapshot, previous,
-                                                     wikipedia=not args.no_wikipedia)
+                                                     wikipedia=not args.no_wikipedia,
+                                                     budget=budget)
         recorded = (cache.get("articles") or {}).values()
         print(f"  candidates' own articles: {sum('article' in r for r in recorded)} linked, "
               f"{sum(r.get('none') == 'not-linked' for r in recorded)} not linked, "
@@ -2195,7 +2204,8 @@ def _ballotphotos(args):
     print(f"  {seen['shown']} statewide candidates' photographs cached ("
           + ", ".join(f"{n} {route}" for route, n in sorted(seen["routes"].items()))
           + f"); {seen['heavy']} of them at full size, offered only above the caps; "
-          f"{seen['withheld']} withheld by a person's list or the licence test")
+          f"{seen['withheld']} withheld by a person's list or the licence test; "
+          f"{seen['waiting']} waiting for a person's look")
     for line in problems:
         print(f"  [warn] {line}")
     for line in errors:
@@ -2908,6 +2918,11 @@ def build_parser():
     photos_cmd.add_argument("--articles-only", action="store_true",
                             help="read only the article each race's Wikipedia article links for "
                                  "a candidate for governor; change no photograph")
+    photos_cmd.add_argument("--max-minutes", type=float, default=None,
+                            help="begin no race's article after this many minutes, then save "
+                                 "and stop, keeping the last read of every race not reached "
+                                 "(the oldest are read first next time); keep it well inside "
+                                 "a CI step's time limit")
 
     tribes_cmd = add("tribes", help="every tribal government and its leader (BIA Tribal Leaders "
                                     "Directory)")

@@ -72,7 +72,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_lookup_maps.py` | Rebuild `lookup_maps/`: every ZIP code area's share of each district and county, and the finer boundaries a location is placed on, for "Find who represents you" (network) |
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
-| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
+| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
 | `npm install && npm test` | Render every page in jsdom and drive the UI (3434 checks) |
@@ -2486,7 +2486,18 @@ the day, its bytes and size):
    of a new one. On 2026-10-25 five were withheld (David Jolly's names no
    author, Kris Kobach's "official portrait" is a user's CC0, and three are
    recorded doubts) and Aaron Ford's event crop was refused. A running mate
-   is matched only beside their own ticket's nominee.
+   is matched only beside their own ticket's nominee. Where the reader
+   refuses the infobox's image for what it is (its name, its licence, its
+   shape), the article's lead image is tried in its place, and a lead taken
+   that way says so (`inPlaceOf`) and waits off the page, named by the
+   build, until a person has looked at it and recorded the look in
+   `overrides.SEEN_ARTICLE_LEADS` (the candidate alone, the face measured,
+   the file's pixel size) or refused it in `NOT_A_PORTRAIT`: the refresh
+   publishes without a person. A file a person's list withholds gives way
+   to nothing, and the lists are asked before the file's name is. A size
+   Wikimedia does not answer for keeps the last record of the same file
+   (never another width of it); a file new to the candidate is taken at
+   whichever width answers.
 
 A photograph its source offers only above 300 KB or 1,200px is shown all the
 same (rule 87): smaller from its host's resizer or Photon where the same

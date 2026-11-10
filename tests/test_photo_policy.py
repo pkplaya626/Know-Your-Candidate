@@ -788,19 +788,76 @@ class TestAYearIsOnlyOneCommonsStatesPlainly(unittest.TestCase):
                 self.assertEqual(rec["credit"].get("yearForm"), portraits.CREDIT_FORM)
 
     def test_the_committed_credits_are_dated(self):
-        cache = statewide_photos.load_cache(ROOT)
-        for key, rec in cache["photos"].items():
+        """The rule, on a state this test makes (CLAUDE.md: a check tests the
+        rule, not the day's data). It once asked the committed cache for Tad
+        Jude's record, and failed the refresh of 2026-11-09 when the race's
+        article set a campaign-stop photograph beside him instead, which
+        the reader refuses by its name: a change in the day's data, not in
+        the rule."""
+        upload = "https://upload.wikimedia.org/wikipedia/commons/1/1d/Portrait_of_Pat_Jude.jpg"
+        kept = {"route": "wikipedia", "read": "2026-10-20", "bytes": 38_037,
+                "photo": upload.replace("/commons/", "/commons/thumb/") + "/250px-Portrait_of_Pat_Jude.jpg",
+                "page": "https://en.wikipedia.org/wiki/2026_race", "evidence": "the race links",
+                "width": 250, "height": 314, "by": "The Legislature",
+                # Read before credits carried a year: no year, no reading.
+                "credit": {"by": "The Legislature", "licence": "Public domain",
+                           "basis": "PD-US", "via": "Wikimedia Commons",
+                           "page": "https://commons.wikimedia.org/wiki/File:Portrait_of_Pat_Jude.jpg"}}
+        lists = {"states": {"XX": {"offices": {"sos": {"candidates": [{"name": "Pat Jude"}]}}}}}
+        page = {"width": 400, "height": 500, "timestamp": "2024-02-01T10:00:00Z",
+                "extmetadata": {"DateTimeOriginal": {"value": "1981"},
+                                "Artist": {"value": "The Legislature"},
+                                "LicenseShortName": {"value": "Public domain"}}}
+        with unittest.mock.patch.object(statewide_photos, "read_members",
+                                        return_value=({}, [], set())), \
+                unittest.mock.patch.object(statewide_photos, "read_guides",
+                                           return_value=({}, [], set())), \
+                unittest.mock.patch.object(portraits, "file_info",
+                                           side_effect=lambda urls, **kw: {u: page for u in urls}):
+            # A day the races' articles are not read keeps the record, and
+            # dates its credit by the year the file's own page plainly gives.
+            cache, _ = statewide_photos.fetch(lists, {}, {"photos": {"XX|sos|Pat Jude": kept}},
+                                              wikipedia=False, log=None)
+        credit = cache["photos"]["XX|sos|Pat Jude"]["credit"]
+        self.assertEqual(credit["year"], 1981)
+        self.assertEqual(credit["yearForm"], portraits.CREDIT_FORM)
+        # A page whose date is no plain year says so, and is not guessed.
+        page["extmetadata"]["DateTimeOriginal"]["value"] = "circa 1981"
+        later = statewide_photos.dated_credit(credit, portraits.credit_of(page))
+        self.assertNotIn("year", later)
+        self.assertTrue(later["yearUnstated"])
+        # Every committed Commons record carries a reading of its year.
+        for key, rec in statewide_photos.load_cache(ROOT)["photos"].items():
             if rec.get("route") == "wikipedia":
                 self.assertTrue({"year", "yearUnstated"} & set(rec["credit"]), key)
-        jude = [r for k, r in cache["photos"].items() if "TAD JUDE" in k.upper()]
-        self.assertEqual([r["credit"]["year"] for r in jude], [1981])
-        # A file Commons no longer describes (Todd Achilles's was deleted)
-        # keeps its last credit until a read answers (rule 8): a few, never
-        # the many read before credits carried a year.
-        commons = [r for r in portraits.load_cache(ROOT).values()
-                   if r.get("url") and portraits.wikimedia_file(r["url"]) and r.get("credit")]
-        stale = [r.get("name") for r in commons if r["credit"].get("form") != portraits.CREDIT_FORM]
-        self.assertLess(len(stale), len(commons) / 50, stale)
+                self.assertEqual(rec["credit"].get("yearForm"), portraits.CREDIT_FORM, key)
+
+    def test_a_profile_credit_commons_does_not_answer_for_is_kept_until_it_does(self):
+        """A file Commons no longer describes (Todd Achilles's was deleted)
+        keeps its last credit until a read answers (rule 8); every file it
+        describes is read by the current form."""
+        def record(name, form):
+            return {"url": f"https://upload.wikimedia.org/wikipedia/commons/a/ab/{name}.jpg",
+                    "credit": {"by": "X", "licence": "CC BY 4.0", "form": form}}
+        cache = {"a": record("Pat_Doe", 3), "b": record("Lee_Roe", 3),
+                 "c": record("Gone_Away", 3), "d": record("Sam_Poe", portraits.CREDIT_FORM)}
+        before = dict(cache["c"]["credit"])
+        asked = []
+
+        def info_of(urls, log=None):
+            asked.extend(urls)
+            return {u: {"width": 400, "height": 500,
+                        "extmetadata": {"DateTimeOriginal": {"value": "1981"},
+                                        "LicenseShortName": {"value": "CC BY 4.0"}}}
+                    for u in urls if "Gone_Away" not in u}
+        with unittest.mock.patch.object(portraits, "file_info", info_of):
+            self.assertEqual(portraits.credit_all(cache, log=lambda line: None), 2)
+        # The one already read by this form is not asked again.
+        self.assertEqual(sorted(asked), sorted(cache[k]["url"] for k in "abc"))
+        for k in "ab":
+            self.assertEqual(cache[k]["credit"]["form"], portraits.CREDIT_FORM)
+            self.assertEqual(cache[k]["credit"]["year"], 1981)
+        self.assertEqual(cache["c"]["credit"], before)
 
 
 class TestARefusalPromotesNothingUnseen(unittest.TestCase):
