@@ -15968,12 +15968,12 @@
     "H6NE03206": "https://budkeforcongress.com/"
    },
    "status": {
-    "H0NE03217": "nominee",
-    "H6NE03115": "nominee",
+    "H0NE03217": "defeated",
+    "H6NE03115": "elected",
     "H6NE03172": "eliminated",
-    "H6NE03180": "nominee",
-    "H6NE03198": "nominee",
-    "H6NE03206": "nominee"
+    "H6NE03180": "defeated",
+    "H6NE03198": "defeated",
+    "H6NE03206": "defeated"
    },
    "unmatched": {},
    "unmatchedParty": {},
@@ -27877,7 +27877,7 @@
    "about": {
     "S6SC04239": "pediatrician and nominee for in 2022",
     "S6SC04247": "former chair of the South Carolina Libertarian Party State Committee",
-    "S6SC04437": "incumbent senator (2026–present)"
+    "S6SC04437": "incumbent senator (2026–2027)"
    },
    "ambiguous": [],
    "article": {
@@ -28101,8 +28101,8 @@
   },
   "S-TX-2026": {
    "about": {
-    "S6TX00388": "attorney general of Texas (2015–present)",
-    "S6TX00479": "state representative from the 50th district (2018–present)"
+    "S6TX00388": "attorney general of Texas (2015–2027)",
+    "S6TX00479": "state representative from the 50th district (2018–2027)"
    },
    "ambiguous": [],
    "article": {
@@ -28469,6 +28469,7 @@
    }
   ]
  },
+ "staleAliases": {},
  "unparsedPages": [],
  "unsettledRows": {}
 }
