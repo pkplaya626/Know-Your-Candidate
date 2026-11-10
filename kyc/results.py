@@ -1740,8 +1740,13 @@ _COUNTY_CONVENTION = re.compile(r"\bcounty\b.*\bconvention\b", re.I)
 
 def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
                  general_held=False, general_runoff=False, general_runoff_held=False,
-                 ranked_choice=False, late=None):
+                 ranked_choice=False, late=None, called=None):
     """Who is still standing, from a race's results tables.
+
+    *called* names a November winner a route other than a table's mark gives
+    (the national route, :func:`national_call`); a call the infobox route put
+    on the page's own rows (:func:`infobox_call`) is read from them. Either is
+    settled by :func:`_settle_general`, as a mark is.
 
     Returns ``{name: status}`` for everyone named in a primary-stage table,
     on the general ballot, in the infobox, or in a Withdrawn / Eliminated
@@ -1877,9 +1882,14 @@ def resolve_race(boxes, has_runoff=False, open_primary=False, runoff_held=True,
         # December runoff below one (Georgia) - is not decided by a mark on a
         # leader short of it.
         needs_majority = ranked_choice or general_runoff
+        if not general_tables:
+            # The infobox route's call with no November table (infobox_call),
+            # once refuse_marks has let it stand.
+            on_box = {r["name"] for r in infobox if r.get("called") == CALLED_INFOBOX}
+            called = called or (on_box.pop() if len(on_box) == 1 else None)
         _settle_general(status, generals, general_runoff_rows, general_runoff_held,
                         majority_of=(general_tables, ({r["name"] for r in infobox} - nobody) | held)
-                        if needs_majority else None, late=late)
+                        if needs_majority else None, late=late, called=called)
     return status
 
 
@@ -1898,13 +1908,17 @@ def _unpartisan_runoff(title):
     return _stage(title) == "runoff" and not _PARTY_WORDS.search(title)
 
 
-def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None, late=None):
+def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None, late=None,
+                    called=None):
     """Who won in November, from the general table's marked winner.
 
     Someone already WITHDRAWN - listed as having withdrawn after the ballots
     were printed, their row left in the table - stays withdrawn unless the
     table marks them the winner. The two a decided general runoff settles
-    go in *late* (:func:`resolve_race`)."""
+    go in *late* (:func:`resolve_race`). *called* is a winner a route other
+    than a table's mark names where no row is marked (rule 63): settled by
+    the same lines, the majority gate with them - which no call with no
+    table behind it can meet."""
     ballot = [r for r in generals if not r["withdrawn"]]
     names = {r["name"] for r in ballot
              if status.get(r["name"]) != WITHDRAWN or r["won"]}
@@ -1923,6 +1937,17 @@ def _settle_general(status, generals, runoff_rows, runoff_held, majority_of=None
                 late.add(row["name"])
         return
     winners = {r["name"] for r in ballot if r["won"]}
+    if called and not winners:
+        # A call with no mark in a table (the infobox route with no November
+        # table, the national route): settled as a mark on them is, over the
+        # November table where there is one, else over the page's nominees.
+        if not generals:
+            if status.get(called) != NOMINEE:
+                return
+            names = {n for n, s in status.items() if s == NOMINEE}
+        elif called not in names:
+            return
+        winners = {called}
     if len(winners) != 1:
         return                      # count continuing, or a page mid-edit
     if majority_of is not None:
@@ -2045,13 +2070,58 @@ def _no_other_name(name, ballot, infobox, crowned, entries, same):
                  {r["name"] for r in infobox} | crowned) - {name})
 
 
+def _call_stands(name, rows, infobox, alone):
+    """Why the infobox's declaration of *name* (:func:`infobox_call`) is no
+    November call, or None: the infobox route's own gates, beside every gate
+    a table's mark meets (rule 63, the lead's decision of 2026-11-10).
+
+    The declaration is no exemption from anything here, as it is for a mark
+    on a close lead (:func:`_too_close`): it is the whole of the call. The
+    infobox declares them and does not mark the count ongoing; the November
+    table's counts, where it gives any (*rows*), lead with them; the infobox
+    gives two counts above zero and theirs leads; its share reporting, where
+    it gives one, is at least REPORTING_FLOOR and can be read; and the lead is
+    at least CLOSE_MARGIN of the count (the table's every vote where it has
+    counts, else the infobox's). A declaration with no counts anywhere stands
+    only where nobody else is on the ballot (*alone*), as an unopposed mark
+    does."""
+    if any(r.get("ongoing") for r in infobox):
+        return "the infobox marks the count ongoing"
+    if not _declared(name, infobox):
+        return "the infobox does not declare them"
+    lead = _lead(rows, name)
+    if lead == BEHIND:
+        return "the November table's own counts do not lead with them"
+    shown = _lead(infobox, name, "popular")
+    if shown == BEHIND:
+        return "the infobox's own counts do not lead with them"
+    if shown == UNCOUNTED:
+        if alone and lead == UNCOUNTED:
+            return None
+        return "the infobox declares them and gives no two counts above zero"
+    if any(r.get("reportingUnread") for r in infobox):
+        return "the infobox's share reporting cannot be read"
+    low = [r["reporting"] for r in infobox if r.get("reporting") is not None]
+    if low and min(low) < REPORTING_FLOOR:
+        return f"the infobox's counts stand at {min(low):g} reporting"
+    close = _close(rows, name) if lead == LEADS else _close(infobox, name, "popular")
+    if close:
+        votes, share = close
+        return (f"their lead of {votes:,} votes ({100 * share:.2f} points) is under "
+                f"{100 * CLOSE_MARGIN:g} points of the count, and a declaration with no "
+                "mark does not call so close a race")
+    return None
+
+
 def _mark_stands(name, rows, infobox, alone):
     """Why the mark on *name* in the November table *rows* does not stand, or
     None. A table's counts must lead with them. A table with no counts stands
     only on the same page's infobox, counts above zero and them leading it, not
     marked ongoing, and at least REPORTING_FLOOR reporting where it says; or on
     nobody else being on the ballot (*alone*). A lead under CLOSE_MARGIN of the
-    count stands only while the infobox declares them (:func:`_too_close`)."""
+    count stands only while the infobox declares them (:func:`_too_close`).
+    A mark the infobox's declaration put there (:func:`infobox_call`) is held
+    to :func:`_call_stands` instead, which grants no such exemption."""
     lead = _lead(rows, name)
     if lead == LEADS:
         return _too_close(rows, name, infobox)
@@ -2100,9 +2170,96 @@ def _runoff_stands(ballot, names):
 
 
 def _unmark(boxes, tables):
-    """*boxes* with the marks gone from the tables titled in *tables*."""
-    return [(title, [dict(r, won=False) for r in rows] if _clean_title(title) in tables else rows)
+    """*boxes* with the marks gone from the tables titled in *tables*, and any
+    call :func:`infobox_call` put there."""
+    return [(title, [dict(r, won=False, called=None) for r in rows]
+             if _clean_title(title) in tables else rows)
             for title, rows in boxes]
+
+
+CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL = "table", "infobox", "national"
+
+
+def _no_november_result(boxes):
+    """True where a race's section holds no November result at all: no
+    November table with a count above zero or a mark, and no infobox with a
+    count above zero or a declared winner. Only such a race may be called
+    from the national summary (:func:`national_call`)."""
+    for title, rows in boxes:
+        clean = _clean_title(title)
+        if clean == INFOBOX_TITLE:
+            if any(r.get("popular") or (r.get("declared") and not _PLACEHOLDER.match(r["declared"]))
+                   for r in rows):
+                return False
+        elif clean not in LIST_TITLES and _stage(clean) == "general":
+            if any(r["won"] for r in rows) or _counted(rows):
+                return False
+    return True
+
+
+def _november_indexes(boxes):
+    """Where *boxes* holds a November table."""
+    return [i for i, (title, _rows) in enumerate(boxes)
+            if _clean_title(title) not in LIST_TITLES + (INFOBOX_TITLE,)
+            and _stage(_clean_title(title)) == "general"]
+
+
+def infobox_call(boxes, vouched=None):
+    """``(boxes, refused)``: the infobox route to a November winner (rule 63,
+    the lead's decision of 2026-11-10, for the owner's "it seems we are
+    missing some confirmed election results across the site").
+
+    A week after the count 241 races read "Awaiting result" over a page whose
+    infobox declared the winner (``after_election``, not ongoing) and whose
+    counts led with them, because no November table marked anyone with the
+    "winning candidate" template: Alabama's editors bold the winner's row,
+    Texas's tables stand blank and only the infobox is filled. Where no
+    November table marks anyone, the person the infobox declares is marked as
+    the November table's winner - their row, the larger if they have several
+    (a fusion table's "Total") - or, with no November table, on the infobox's
+    own row; ``called`` says the mark is this route's. Nothing else decides
+    it: :func:`refuse_marks` holds it to every gate a table's mark meets and
+    to :func:`_call_stands`, and :func:`resolve_race` settles it as a mark
+    (rule 12), the ranked-choice and majority gates with it.
+
+    Declared, it must be one person on the November ballot as the page has
+    it - one of the November table's rows, or with none one of the infobox's
+    nominees - whom a filing, a state's list or an evidenced
+    ``overrides.RESULT_NAMES`` entry names (*vouched*): a name only the
+    infobox gives is refused, as :func:`refuse_marks` refuses one, and said.
+    """
+    infobox = [r for title, rows in boxes if _clean_title(title) == INFOBOX_TITLE for r in rows]
+    declared = {r["declared"] for r in infobox
+                if r.get("declared") and not _PLACEHOLDER.match(r["declared"])}
+    if len(declared) != 1 or any(r.get("ongoing") for r in infobox):
+        return boxes, []
+    declared = declared.pop()
+    november = _november_indexes(boxes)
+    if any(r["won"] and not r["withdrawn"] for i in november for r in boxes[i][1]):
+        return boxes, []                    # the table's own mark decides
+    pool = ([r for i in november for r in boxes[i][1]
+             if not r["withdrawn"] and not _names_nobody(r)] if november else infobox)
+    fits = sorted({r["name"] for r in pool if _one_person(r["name"], declared)})
+    if len(fits) != 1:
+        return boxes, [{"name": declared,
+                        "why": "the infobox declares a name that is not one person on the page's "
+                               "November ballot"}]
+    name = fits[0]
+    if vouched is not None and not (vouched(name) or vouched(declared)):
+        return boxes, [{"name": name, "why": "the infobox declares them, and no filing and no "
+                                             "state's list in this race names them"}]
+    out = [(title, list(rows)) for title, rows in boxes]
+    if november:
+        theirs = [(i, j) for i in november for j, r in enumerate(out[i][1])
+                  if r["name"] == name and not r["withdrawn"]]
+        i, j = max(theirs, key=lambda at: out[at[0]][1][at[1]].get("votes") or 0)
+        out[i][1][j] = dict(out[i][1][j], won=True, called=CALLED_INFOBOX)
+    else:
+        for title, rows in out:
+            if _clean_title(title) == INFOBOX_TITLE:
+                rows[:] = [dict(r, called=CALLED_INFOBOX) if r["name"] == name else r
+                           for r in rows]
+    return out, []
 
 
 def refuse_marks(boxes, entries=None, same=None, open_primary=False,
@@ -2144,6 +2301,30 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
     refused, off, gone = [], set(), set()
     ballot = [r for _title, rows in november for r in rows]
     marked = sorted({r["name"] for r in ballot if r["won"] and not r["withdrawn"]})
+    # Marks the infobox's declaration put there (infobox_call): held to its
+    # gates in every November table, whichever holds the mark.
+    called = {r["name"] for r in ballot if r["won"] and r.get("called") == CALLED_INFOBOX}
+    if not november:
+        called = {r["name"] for r in infobox if r.get("called") == CALLED_INFOBOX}
+        marked = sorted(called)
+
+    def alone_on_ballot(name):
+        # Anyone in a primary table the marked person is not in may be on the
+        # ballot too: an unopposed nominee is often left unmarked.
+        rivals = {r["name"] for rows in primary_tables if not any(r["name"] == name for r in rows)
+                  for r in rows if not r["withdrawn"]}
+        return _no_other_name(name, ballot, infobox, (crowned | rivals) - left, entries, same)
+
+    def check_call(name):
+        alone = alone_on_ballot(name)
+        whys = [_call_stands(name, rows, infobox, alone) for _title, rows in november] or [
+            _call_stands(name, [], infobox, alone)]
+        why = next((w for w in whys if w), None)
+        if why:
+            refused.append({"name": name, "why": why, "calledBy": CALLED_INFOBOX})
+            off.update(title for title, _rows in november)
+            off.add(INFOBOX_TITLE)
+
     if open_primary:
         # The November table is an open primary's first round: the top two, or
         # one with a majority (_first_round_decided asks the second).
@@ -2151,19 +2332,19 @@ def refuse_marks(boxes, entries=None, same=None, open_primary=False,
             why = "two marks that are not the table's two highest counts"
             refused += [{"name": name, "why": why} for name in marked]
             off.update(title for title, _rows in november)
+        elif len(marked) == 1 and marked[0] in called:
+            check_call(marked[0])
         elif len(marked) == 1 and _lead(ballot, marked[0]) != LEADS:
             refused.append({"name": marked[0], "why": "the table's own counts do not lead with them"})
             off.update(title for title, _rows in november)
     elif len(marked) > 1:
         refused += [{"name": name, "why": "two marks in the November tables"} for name in marked]
         off.update(title for title, _rows in november)
+    elif marked and marked[0] in called:
+        check_call(marked[0])
     elif marked:
         name = marked[0]
-        # Anyone in a primary table the marked person is not in may be on the
-        # ballot too: an unopposed nominee is often left unmarked.
-        rivals = {r["name"] for rows in primary_tables if not any(r["name"] == name for r in rows)
-                  for r in rows if not r["withdrawn"]}
-        alone = _no_other_name(name, ballot, infobox, (crowned | rivals) - left, entries, same)
+        alone = alone_on_ballot(name)
         for title, rows in november:
             if not any(r["name"] == name and r["won"] for r in rows):
                 continue
@@ -3262,7 +3443,7 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     races, pending, missing_pages, failed, unparsed = {}, [], [], [], []
     pages = {}
     refused_marks, refused_names, refused_rows, renamed_rows, looked_rows = {}, {}, {}, {}, {}
-    stale_aliases = {}
+    stale_aliases, calls = {}, {}
     from .overrides import RESULT_NAMES as _RESULT_NAMES
     from .certified import LOST_PRIMARY as _LOST, WITHDRAWN as _LIST_WITHDREW
     _OFF_THE_LIST = (_LOST, _LIST_WITHDREW)
@@ -3389,14 +3570,31 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 refused_rows[rid] = row_refused
             if row_looked:
                 looked_rows[rid] = row_looked
+        silent = _no_november_result(boxes)
+        how = None
+
+        def vouched(name):
+            """A filing (rule 62's matching, or an evidenced RESULT_NAMES
+            entry) or a state's list running this race names them."""
+            found, unclear = match_names([name], rows, race_aliases)
+            return bool((found.get(name) and name not in unclear)
+                        or _exact_filing(name, rows) or on_a_list(name))
+
         if general_held(today):
+            # The infobox's declared winner, where no November table marks
+            # anyone, as the table's mark (infobox_call): held to everything
+            # below as a mark is, and to its own gates.
+            boxes, struck = infobox_call(boxes, vouched=vouched)
+            for item in struck:
+                item["calledBy"] = CALLED_INFOBOX
             # A mark needs a count behind it, and a filing or a list's name
             # under it (rule 63). Both refusals conclude nothing: the race
             # reads as before the count.
-            boxes, struck = refuse_marks(
+            boxes, more = refuse_marks(
                 boxes, entries=printed, same=same, open_primary=is_open,
                 general_runoff=kinds["general_runoff"],
                 round_held=held if is_open else kinds["general_runoff_held"])
+            struck = struck + more
         outcome = resolve_race(boxes, general_held=general_held(today), late=late, **kinds)
 
         def read_names():
@@ -3536,6 +3734,12 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             "ambiguous": ambiguous,
             "decided": coverage(boxes, open_primary=is_open, runoff_held=held),
         }
+        # How the winner, if any, was called (rule 63): a table's mark, the
+        # infobox's declaration (infobox_call), or the national summary
+        # (national_call). Kept below only where someone stands elected.
+        calls[rid] = how or (CALLED_INFOBOX if any(r.get("called") == CALLED_INFOBOX
+                                                   for _t, rs in boxes for r in rs)
+                             else CALLED_TABLE)
         # Whose result the December round decided, and which round: an
         # open primary's general election on the seat's own date, or the
         # state's general election runoff (overrides.GENERAL_RUNOFFS). The
@@ -3586,6 +3790,18 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 log(f"    [warn] {rid}: {cid} is on the page's November ballot and not "
                     f"matched on {state}'s certified list; left as the page has them")
 
+    routes = {}
+    for rid, race in races.items():
+        elected = ELECTED in (race.get("status") or {}).values() or \
+            ELECTED in (race.get("unmatched") or {}).values()
+        race.pop("calledBy", None)
+        if elected and rid in calls:
+            race["calledBy"] = calls[rid]
+            routes[calls[rid]] = routes.get(calls[rid], 0) + 1
+        elif calls.get(rid) == CALLED_NATIONAL:
+            race.pop("national", None)        # a list laid over it unsettled the call
+    log("    races called, by route: " + ", ".join(
+        f"{route} {routes.get(route, 0)}" for route in (CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL)))
     log(f"    settled races with results: {len(races)}   "
         f"pending primaries: {len(pending)}   pages missing: {len(missing_pages)}   "
         f"fetches failed: {len(failed)}   unparsed: {len(unparsed)}")

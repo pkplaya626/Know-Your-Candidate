@@ -4083,5 +4083,300 @@ class TestARecountRangeMarkNeedsTheInfobox(NoGap):
         self.assertEqual(self.status(cache), self.CALLED)
 
 
+def call_infobox(*rows, declared=None, ongoing=None, reporting=None):
+    """An infobox naming ``(name, party, count)`` nominees, a count of None
+    left out; *declared* is its after_election field, *reporting* its share."""
+    out = ["{{Infobox election", "| election_name = x"]
+    if ongoing is not None:
+        out.append(f"| ongoing = {ongoing}")
+    if reporting is not None:
+        out.append(f"| reporting = {reporting}")
+    for i, (name, party, votes) in enumerate(rows, 1):
+        out += [f"| nominee{i} = [[{name}]]", f"| party{i} = {party}"]
+        if votes is not None:
+            out.append(f"| popular_vote{i} = {votes:,}")
+    if declared is not None:
+        out.append(f"| after_election = {declared}")
+    return "\n".join(out + ["}}"])
+
+
+def bold_box(title, *rows):
+    """Alabama's shape: the winner's row bolded, nobody marked with the
+    "winning candidate" template. Each row is ``(name, party, votes, bold)``."""
+    out = ["{{Election box begin no change", f"| title = {title}", "}}"]
+    for name, party, votes, bold in rows:
+        shown = f"'''[[{name}]]'''" if bold else f"[[{name}]]"
+        out += ["{{Election box candidate with party link no change", f"| party = {party}",
+                f"| candidate = {shown}",
+                f"| votes = {'' if votes is None else format(votes, ',')}", "}}"]
+    return "\n".join(out + ["{{Election box end}}"])
+
+
+class TestTheInfoboxDeclaresTheWinner(NoGap):
+    """Rule 63's infobox route (the lead's decision of 2026-11-10, for the
+    owner's "it seems we are missing some confirmed election results across
+    the site"): a week after the count 241 races read "Awaiting result" over
+    a page whose infobox declared the winner and whose counts led with them,
+    because no November table marked anyone with the "winning candidate"
+    template - Alabama's editors bold the winner's row, Texas's tables are
+    blank and only the infobox is filled. The declaration is read as the
+    table's mark, held to every gate a mark meets and to its own."""
+
+    STATE, DISTRICT = "OH", 5
+    CALENDAR = {"primary": "2026-05-05", "runoff": None}
+    STONE, SWAN, HENDRY = "H6ZZ05001", "H6ZZ05003", "H6ZZ05009"
+
+    def setUp(self):
+        super().setUp()
+        self.field = {"candidates": [
+            row(self.STONE, "STONE, PAT", self.STATE, "H", self.DISTRICT, "REP"),
+            row("H6ZZ05002", "HAMIL, TONY", self.STATE, "H", self.DISTRICT, "REP"),
+            row(self.SWAN, "SWAN, TRINA", self.STATE, "H", self.DISTRICT, "DEM"),
+            row("H6ZZ05004", "GULL, LUKE", self.STATE, "H", self.DISTRICT, "DEM")]}
+
+    def general(self):
+        return (f"2026 {results.state_name(self.STATE)}'s {self.DISTRICT}th congressional "
+                "district election")
+
+    def read(self, *parts, logged=None, certified=None, primaries=True, calendar=None):
+        primary = [party_box("Republican primary results", ("Pat Stone", REP, 58139, True),
+                             ("Tony Hamil", REP, 9121, False)),
+                   party_box("Democratic primary results", ("Trina Swan", DEM, 54413, True),
+                             ("Luke Gull", DEM, 11888, False))] if primaries else []
+        page = f"\n==District {self.DISTRICT}==\n" + "\n\n".join(list(parts) + primary) + "\n"
+        titles = results.page_titles(self.STATE, "H")
+        return results.build(self.field, {(self.STATE, "H"): calendar or self.CALENDAR},
+                             today=datetime.date(2026, 11, 10),
+                             log=(logged.append if logged is not None else lambda *_: None),
+                             fetch=lambda t: page if t in titles else
+                             (_ for _ in ()).throw(results.PageMissing(t)), certified=certified)
+
+    def race(self, cache):
+        return cache["races"][f"H-{self.STATE}-{self.DISTRICT:02d}-2026"]
+
+    def status(self, cache):
+        return self.race(cache)["status"]
+
+    def infobox(self, stone=190744, swan=168350, declared="[[Pat Stone]]", **kw):
+        return call_infobox(("Pat Stone", REP, stone), ("Trina Swan", DEM, swan),
+                            declared=declared, **kw)
+
+    def table(self, stone=190744, swan=168350, bold=True):
+        return bold_box(self.general(), ("Pat Stone", REP, stone, bold),
+                        ("Trina Swan", DEM, swan, False))
+
+    def called(self):
+        return {self.STONE: "elected", "H6ZZ05002": "eliminated", self.SWAN: "defeated",
+                "H6ZZ05004": "eliminated"}
+
+    def awaiting(self):
+        return dict(self.called(), **{self.STONE: "nominee", self.SWAN: "nominee"})
+
+    def assertCalled(self, cache):
+        self.assertEqual(self.status(cache), self.called())
+        self.assertEqual(self.race(cache).get("calledBy"), "infobox")
+        self.assertFalse(cache["refusedMarks"])
+
+    def assertRefused(self, cache, words):
+        self.assertEqual(self.status(cache), self.awaiting())
+        self.assertNotIn("calledBy", self.race(cache))
+        rid = f"H-{self.STATE}-{self.DISTRICT:02d}-2026"
+        whys = [item["why"] for item in cache["refusedMarks"].get(rid, ())]
+        self.assertTrue(any(words in why for why in whys), whys)
+
+    # ---- it stands
+
+    def test_alabamas_bold_row_stands_on_the_infobox_and_the_counts(self):
+        logged = []
+        cache = self.read(self.infobox(), self.table(), logged=logged)
+        self.assertCalled(cache)
+        self.assertTrue(any("races called, by route" in line and "infobox 1" in line
+                            for line in logged), logged[-3:])
+
+    def test_texas_blank_table_stands_on_the_infobox_counts(self):
+        self.assertCalled(self.read(self.infobox(), self.table(stone=None, swan=None, bold=False)))
+
+    def test_no_november_table_stands_on_the_infobox(self):
+        self.assertCalled(self.read(self.infobox()))
+
+    def test_a_declaration_with_no_counts_stands_where_nobody_else_is_on_the_ballot(self):
+        lone = call_infobox(("Pat Stone", REP, None), declared="[[Pat Stone]]")
+        alone = bold_box(self.general(), ("Pat Stone", REP, None, True))
+        primary = party_box("Republican primary results", ("Pat Stone", REP, 58139, True),
+                            ("Tony Hamil", REP, 9121, False))
+        cache = self.read(lone, alone, primary, primaries=False)
+        self.assertEqual(self.status(cache)[self.STONE], "elected")
+        self.assertEqual(self.race(cache)["calledBy"], "infobox")
+
+    def test_a_table_mark_is_still_the_tables(self):
+        marked = party_box(self.general(), ("Pat Stone", REP, 190744, True),
+                           ("Trina Swan", DEM, 168350, False))
+        cache = self.read(self.infobox(), marked)
+        self.assertEqual(self.status(cache), self.called())
+        self.assertEqual(self.race(cache)["calledBy"], "table")
+
+    # ---- it is refused
+
+    def test_not_while_the_count_is_ongoing(self):
+        cache = self.read(self.infobox(ongoing="yes"), self.table())
+        self.assertEqual(self.status(cache), self.awaiting())
+        self.assertNotIn("calledBy", self.race(cache))
+
+    def test_no_counts_and_not_alone(self):
+        box = call_infobox(("Pat Stone", REP, None), ("Trina Swan", DEM, None),
+                           declared="[[Pat Stone]]")
+        self.assertRefused(self.read(box, self.table(stone=None, swan=None)),
+                           "gives no two counts above zero")
+        self.assertRefused(self.read(box), "gives no two counts above zero")
+
+    def test_the_infobox_counts_must_lead_with_them(self):
+        self.assertRefused(self.read(self.infobox(stone=150000), self.table(stone=None, swan=None)),
+                           "the infobox's own counts do not lead with them")
+
+    def test_a_table_leading_with_someone_else_refuses_it(self):
+        self.assertRefused(self.read(self.infobox(), self.table(stone=150000)),
+                           "the November table's own counts do not lead with them")
+
+    def test_under_half_a_point(self):
+        # The declaration grants no exemption here, as it does a mark.
+        self.assertRefused(self.read(self.infobox(), self.table(stone=168900)),
+                           "under 0.5 points")
+        self.assertRefused(self.read(self.infobox(stone=168900)), "under 0.5 points")
+
+    def test_reporting_under_the_floor_or_unread(self):
+        self.assertRefused(self.read(self.infobox(reporting="35%"), self.table()),
+                           "stand at 35 reporting")
+        self.assertRefused(self.read(self.infobox(reporting="most"), self.table()),
+                           "cannot be read")
+        self.assertCalled(self.read(self.infobox(reporting="98%"), self.table()))
+
+    def test_a_declared_name_no_filing_or_list_holds(self):
+        logged = []
+        box = call_infobox(("Jeanne Hendry", DEM, 210000), ("Trina Swan", DEM, 168350),
+                           declared="[[Jeanne Hendry]]")
+        table = bold_box(self.general(), ("Jeanne Hendry", DEM, 210000, True),
+                         ("Pat Stone", REP, 190744, False), ("Trina Swan", DEM, 168350, False))
+        cache = self.read(box, table, logged=logged)
+        self.assertNotIn("calledBy", self.race(cache))
+        self.assertNotIn("elected", self.status(cache).values())
+        whys = [item["why"] for item in cache["refusedMarks"][self.race_id()]]
+        self.assertIn("no filing and no state's list", whys[0])
+        self.assertTrue(any("[REFUSED]" in line for line in logged))
+
+    def race_id(self):
+        return f"H-{self.STATE}-{self.DISTRICT:02d}-2026"
+
+    def test_the_losers_are_defeated_as_under_a_mark(self):
+        third = row("H6ZZ05007", "VALE, ROSA", self.STATE, "H", self.DISTRICT, "LIB")
+        self.field["candidates"].append(third)
+        table = bold_box(self.general(), ("Pat Stone", REP, 190744, True),
+                         ("Trina Swan", DEM, 168350, False),
+                         ("Rosa Vale", "Libertarian Party (United States)", 9000, False))
+        status = self.status(self.read(self.infobox(), table))
+        self.assertEqual(status["H6ZZ05007"], "defeated")
+        self.assertEqual(status[self.SWAN], "defeated")
+        self.assertEqual(status[self.STONE], "elected")
+
+    def test_a_refusal_keeps_the_last_read(self):
+        cache = self.read(self.infobox(), self.table(stone=168900))
+        before = {"races": {self.race_id(): {"status": self.called(), "page": "kept"}}}
+        self.assertEqual(results.carry_refused(cache, before), [self.race_id()])
+
+
+class TestTheInfoboxRouteKeepsTheMajorityGates(TestTheInfoboxDeclaresTheWinner):
+    """Maine's ranked choice and Georgia's majority: a declared leader short
+    of a majority is not elected, by the very gate a table's mark meets."""
+
+    def short(self, state):
+        self.STATE = state
+        for filing in self.field["candidates"]:
+            filing["state"] = state
+        third = row("H6ZZ05007", "VALE, ROSA", state, "H", self.DISTRICT, "LIB")
+        self.field["candidates"].append(third)
+
+        def table(stone, swan, vale):
+            return bold_box(self.general(), ("Pat Stone", REP, stone, True),
+                            ("Trina Swan", DEM, swan, False),
+                            ("Rosa Vale", "Libertarian Party (United States)", vale, False))
+
+        def box(stone, swan, vale):
+            return call_infobox(("Pat Stone", REP, stone), ("Trina Swan", DEM, swan),
+                                ("Rosa Vale", "Libertarian Party (United States)", vale),
+                                declared="[[Pat Stone]]")
+
+        held = self.read(box(48000, 45000, 7000), table(48000, 45000, 7000))
+        won = self.read(box(52000, 45000, 3000), table(52000, 45000, 3000))
+        return self.status(held), self.status(won), self.race(won)
+
+    def test_maine_and_georgia_need_a_majority(self):
+        for state in ("ME", "GA"):
+            self.setUp()
+            held, won, race = self.short(state)
+            self.assertEqual(held[self.STONE], "nominee", state)
+            self.assertNotIn("elected", held.values(), state)
+            self.assertEqual(won[self.STONE], "elected", state)
+            self.assertEqual(race["calledBy"], "infobox", state)
+
+    def test_no_november_table_is_no_majority(self):
+        for state in ("ME", "GA"):
+            self.setUp()
+            self.STATE = state
+            for filing in self.field["candidates"]:
+                filing["state"] = state
+            status = self.status(self.read(self.infobox(stone=520000, swan=480000)))
+            self.assertNotIn("elected", status.values(), state)
+
+
+class TestTheInfoboxRouteInAnOpenPrimaryOrATerritory(NoGap):
+    """Louisiana's open round and a territory's runoff: a declared leader
+    without a majority goes to December, never elected."""
+
+    def test_louisianas_open_round(self):
+        field = {"candidates": [row(LA5_PEOPLE[k][3], LA5_PEOPLE[k][2], "LA", "H", 5,
+                                    "REP" if LA5_PEOPLE[k][1] == "Republican" else "DEM")
+                                for k in LA5_PEOPLE]}
+
+        def read(votes):
+            table = la5_box(LA5_NOVEMBER, *[(k, v, False) for k, v in zip(LA5_PEOPLE, votes)])
+            box = call_infobox(("Michael Echols", "Republican", votes[0]),
+                               ("Patricia Moore", "Democratic", votes[1]),
+                               declared="[[Michael Echols]]")
+            page = "\n==District 5==\n" + box + "\n\n" + table + "\n"
+            return results.build(field, LA_CALENDAR, today=datetime.date(2026, 11, 10),
+                                 log=lambda *_: None,
+                                 fetch=lambda t: page if t == LA_TITLE else
+                                 (_ for _ in ()).throw(results.PageMissing(t)))
+
+        # The leader short of a majority: the round decides nothing yet.
+        held = read((40000, 30000, 15000, 10000, 5000))["races"].get("H-LA-05-2026") or {}
+        self.assertNotIn("elected", (held.get("status") or {}).values())
+        won = read((60000, 30000, 5000, 3000, 2000))["races"]["H-LA-05-2026"]
+        self.assertEqual(won["status"]["H6LA05101"], "elected")
+        self.assertEqual(won["calledBy"], "infobox")
+
+    def test_a_territorys_runoff(self):
+        field = {"candidates": [row("H6GU00001", "ALPHA, ANN", "GU", "H", 0, "REP"),
+                                row("H6GU00002", "DELTA, DEE", "GU", "H", 0, "DEM"),
+                                row("H6GU00003", "EPSILON, ED", "GU", "H", 0, "IND")]}
+
+        def read(votes):
+            table = bold_box("2026 Guam's at-large congressional district election",
+                             ("Ann Alpha", REP, votes[0], True), ("Dee Delta", DEM, votes[1], False),
+                             ("Ed Epsilon", "Independent", votes[2], False))
+            box = call_infobox(("Ann Alpha", REP, votes[0]), ("Dee Delta", DEM, votes[1]),
+                               declared="[[Ann Alpha]]")
+            page = box + "\n\n" + table + "\n"
+            titles = results.page_titles("GU", "H")
+            return results.build(field, {("GU", "H"): {"primary": "2026-08-29", "runoff": None}},
+                                 today=datetime.date(2026, 11, 10), log=lambda *_: None,
+                                 fetch=lambda t: page if t in titles else
+                                 (_ for _ in ()).throw(results.PageMissing(t)))
+
+        held = read((4800, 4700, 500))["races"]["H-GU-00-2026"]
+        self.assertNotIn("elected", held["status"].values())
+        won = read((5100, 4700, 200))["races"]["H-GU-00-2026"]
+        self.assertEqual(won["status"]["H6GU00001"], "elected")
+
+
 if __name__ == "__main__":
     unittest.main()
