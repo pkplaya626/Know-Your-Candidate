@@ -492,9 +492,20 @@ class TestWhatTheMondayReadFound(unittest.TestCase):
     def test_a_size_wikimedia_did_not_answer_for_is_not_passed_over(self):
         """Eleven photographs moved to another width of the same file on
         2026-11-09, Lisa Demuth's to 120px, on transient refusals."""
+        asked = []
+
         def measure(url):
+            asked.append(url)
             return (None, None) if "/250px-" in url else (True, SMALL)
-        self.assertEqual(self.photo(measure=measure), (None, official_photos.UNKNOWN))
+        # The candidate's last record is of this very file: its width stays.
+        links = [("Pat Doe", "Pat Doe", None, None)]
+        last, _ = self.photo(links=links)
+        self.assertIn("/250px-", last["photo"])
+        self.assertEqual(self.photo(links=links, measure=measure, last=last),
+                         (None, official_photos.UNKNOWN))
+        # ...and a host that is throttling is asked for no other size of it
+        # (the PR #213 review: four sizes were asked for one candidate).
+        self.assertEqual(len(asked), 1, asked)
         sizes = [(250, "a"), (330, "b"), (120, "c")]
         self.assertEqual(official_photos.choose(sizes, measure_from({"a": None, "b": SMALL}))[0],
                          "b")
@@ -502,6 +513,22 @@ class TestWhatTheMondayReadFound(unittest.TestCase):
                                                 strict=True)[2], official_photos.UNKNOWN)
         self.assertEqual(official_photos.choose(sizes, measure_from({"a": SMALL}), strict=True)[0],
                          "a")
+
+    def test_a_file_new_to_the_candidate_is_taken_at_whichever_width_answers(self):
+        """The PR #213 review: Brett Lindstrom's article led with a new file,
+        its first size answered 429, and the kept record was the crop the
+        article no longer shows. A width guards no fact about a person."""
+        def measure(url):
+            return (None, None) if "/250px-" in url else (True, SMALL)
+        links = [("Pat Doe", "Pat Doe", None, None)]
+        # No record yet, or a record of another file.
+        rec, why = self.photo(links=links, measure=measure)
+        self.assertEqual(why, "")
+        self.assertIn("/330px-Pat_Doe_official_portrait", rec["photo"])
+        other, _ = self.photo(links=[("Pat Doe", "Pat Doe", "Pat Doe 2026.jpg", None)])
+        self.assertIn("Pat_Doe_2026", other["photo"])
+        rec, why = self.photo(links=links, measure=measure, last=other)
+        self.assertIn("/330px-Pat_Doe_official_portrait", rec["photo"])
 
     def test_a_persons_lists_are_asked_in_the_form_they_are_keyed(self):
         """The API writes "%28cropped%29", the lists "(cropped)": Mayes
@@ -573,6 +600,14 @@ class TestTheMondayReadEndsInsideItsStep(unittest.TestCase):
                 "racesRead": {"KS|governor": "2026-10-26", "WY|governor": "2026-11-02",
                               "WY|sos": "2026-11-02"}}
 
+    @staticmethod
+    def clock(calls):
+        """A clock that reads 0 for its first *calls* readings and 100 from
+        then on."""
+        import itertools
+        ticks = itertools.count()
+        return lambda: 0 if next(ticks) < calls else 100
+
     def run_fetch(self, budget, asked):
         """``fetch`` over Kansas and Wyoming with every network read made
         here; *asked* lists the race articles read, in order."""
@@ -581,6 +616,8 @@ class TestTheMondayReadEndsInsideItsStep(unittest.TestCase):
             return title, "text"
 
         def wiki_photo(code, office, candidate, links, title, *args, **kwargs):
+            # As the real one does, it asks for the candidate's article.
+            kwargs["resolve"](links[0][0])
             rec = self.kept(candidate["name"].replace(" ", "_"))
             rec["read"] = self.TODAY
             return rec, ""
@@ -595,8 +632,9 @@ class TestTheMondayReadEndsInsideItsStep(unittest.TestCase):
             return sp.fetch(self.lists(), {}, self.previous(), log=None, budget=budget)
 
     def test_a_race_not_reached_keeps_its_last_read(self):
-        clock = iter([0, 0, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100]).__next__
-        budget = sp.Budget(60, clock=clock)
+        # The budget's start, Kansas's race and its one candidate at 0; the
+        # budget is spent from then on.
+        budget = sp.Budget(60, clock=self.clock(3))
         asked = []
         cache, problems = self.run_fetch(budget, asked)
         # Kansas, read longest ago, was read; neither Wyoming race was begun.
@@ -675,6 +713,309 @@ class TestTheMondayReadEndsInsideItsStep(unittest.TestCase):
         # And a step ended at its limit keeps what it printed.
         job = text[text.index("\n  refresh:"):text.index("    steps:", text.index("\n  refresh:"))]
         self.assertRegex(job, r'PYTHONUNBUFFERED: "1"')
+
+    def test_every_time_limited_step_of_the_refresh_is_its_own_process(self):
+        """The PR #213 review: Python left running under an ended step's
+        shell was fixed for one step, and five more with a time limit still
+        ran it as the shell's child (rule 78: the local sites' check saved
+        its cache after the next step had read it)."""
+        import os
+        import re
+        root = os.path.join(os.path.dirname(__file__), "..")
+        with open(os.path.join(root, ".github", "workflows", "refresh.yml"), encoding="utf-8") as fh:
+            text = fh.read()
+        commands = []
+        for step in re.split(r"\n      - name: ", text)[1:]:
+            if not re.search(r"^        timeout-minutes:", step, re.M):
+                continue
+            lines = [line.strip() for line in step.splitlines()
+                     if "python build_profile_site.py" in line
+                     and not line.strip().startswith("#")]
+            for line in lines:
+                command = line.removeprefix("run: ")
+                self.assertTrue(command.startswith("exec python "), line)
+                commands.append(command.split("build_profile_site.py ", 1)[1].split()[0])
+        # The parse found the steps it is about.
+        for name in ("ballotphotos", "guidephotos", "votes", "members", "localgov",
+                     "photocopies"):
+            self.assertIn(name, commands)
+
+
+class TestWhatThePullRequestsReviewFound(unittest.TestCase):
+    """The review of PR #213, finding by finding."""
+
+    ARTICLE = TestWhatTheMondayReadFound.ARTICLE
+    LINKS = TestWhatTheMondayReadFound.LINKS
+    commons = TestWhatTheMondayReadFound.commons
+    photo = TestWhatTheMondayReadFound.photo
+    K = "XX|governor|Pat Doe"
+    SCENE = "Pat Doe greets supporters at a rally.jpg"
+    LISTS = {"states": {"XX": {"offices": {"governor": {"candidates": [{"name": "Pat Doe"}]}}}}}
+
+    def setUp(self):
+        self.lead = sp.upload_of("Pat Doe official portrait.jpg")
+        self.look = ("2026-11-10", self.K, "Pat Doe alone, nobody else in the frame",
+                     {"width": 614, "height": 864})
+
+    def shown(self, cache, name="Pat Doe"):
+        rows = [{"name": name}]
+        sp.attach("XX", "governor", rows, {"candidates": [{"name": name}]}, None, None, cache)
+        return rows[0].get("photo")
+
+    def fetch(self, previous=None, links=None, article=None, commons=None, **kw):
+        with mock.patch.object(sp, "read_members", return_value=({}, [], set())), \
+                mock.patch.object(sp, "read_guides", return_value=({}, [], set())), \
+                mock.patch.object(sp, "_wikitext", lambda t: (t, "text")), \
+                mock.patch.object(sp, "race_links", return_value=links or self.LINKS), \
+                mock.patch.object(sp, "_resolve", return_value=dict(article or self.ARTICLE)), \
+                mock.patch.object(sp, "_commons", side_effect=commons or self.commons), \
+                mock.patch.object(sp, "date_credits", return_value=0), \
+                mock.patch.object(official_photos, "weigh", lambda u: (True, SMALL)):
+            return sp.fetch(self.LISTS, {}, previous, log=None, **kw)
+
+    # ------------------------------------------- a lead nobody has seen
+
+    def test_a_lead_taken_in_a_refused_files_place_waits_for_a_look(self):
+        """Wes Moore's and Bruce Blakeman's article leads came forward when
+        the reader refused their races' infobox images by name; nobody had
+        seen either, and the refresh publishes without a person."""
+        from kyc import overrides
+        rec, why = self.photo()
+        self.assertEqual(why, "")
+        self.assertEqual(rec["inPlaceOf"], {"file": self.SCENE, "why": "file-name",
+                                            "width": 614, "height": 864})
+        self.assertIn("in place of File:" + self.SCENE, rec["evidence"])
+        cache = {"photos": {self.K: rec}}
+        # The record is whole, and waits: off the page, said by the build.
+        self.assertEqual(sp.problems(cache), [])
+        waits = sp.awaiting_look(self.K, rec)
+        self.assertIn("SEEN_ARTICLE_LEADS", waits)
+        self.assertIn(self.lead, waits)
+        self.assertEqual(sp.withheld_why(self.K, rec), waits)
+        self.assertEqual(sp.withheld_why(self.K, rec, looks=False), "")
+        self.assertIsNone(self.shown(cache))
+        seen = sp.counts(cache)
+        self.assertEqual((seen["shown"], seen["waiting"], seen["withheld"]), (0, 1, 0))
+        self.assertTrue(any("waits for a person's look" in line for line in sp.withheld(cache)))
+        # A person's look, at this file for this candidate, shows it.
+        with mock.patch.dict(overrides.SEEN_ARTICLE_LEADS, {self.lead: self.look}):
+            self.assertEqual(sp.awaiting_look(self.K, rec), "")
+            self.assertEqual(self.shown(cache), rec["photo"])
+            self.assertEqual(sp.counts(cache)["shown"], 1)
+        # A look at another picture under the name, or for another
+        # candidate, is not a look at this one.
+        resized = self.look[:3] + ({"width": 800, "height": 1000},)
+        another = (self.look[0], "XX|governor|Pat Roe") + self.look[2:]
+        for look in (resized, another):
+            with self.subTest(look=look), \
+                    mock.patch.dict(overrides.SEEN_ARTICLE_LEADS, {self.lead: look}):
+                self.assertTrue(sp.awaiting_look(self.K, rec))
+                self.assertIsNone(self.shown(cache))
+        # A person who refuses it instead withholds it as any file.
+        with mock.patch.dict(overrides.NOT_A_PORTRAIT, {self.lead: ("2026-11-10", "a test")}):
+            self.assertIn("NOT_A_PORTRAIT", sp.withheld_why(self.K, rec, looks=False))
+
+    def test_the_routes_as_they_were_wait_for_nothing(self):
+        """Only a lead that stands in a refused file's place waits: the
+        infobox's own image, and the lead where the infobox sets none, are
+        the route rule 91 always had."""
+        for links in ([("Pat Doe", "Pat Doe", None, None)],
+                      [("Pat Doe", "Pat Doe", "Pat Doe 2026.jpg", None)]):
+            with self.subTest(links=links):
+                rec, why = self.photo(links=links)
+                self.assertEqual(why, "")
+                self.assertNotIn("inPlaceOf", rec)
+                self.assertEqual(sp.withheld_why(self.K, rec), "")
+                self.assertEqual(self.shown({"photos": {self.K: rec}}), rec["photo"])
+
+    def test_the_read_says_a_lead_waits_and_keeps_it_while_it_does(self):
+        cache, problems = self.fetch()
+        rec = cache["photos"][self.K]
+        self.assertTrue(rec["inPlaceOf"])
+        said = [p for p in problems if p.startswith(self.K + ": photograph added")]
+        self.assertEqual(len(said), 1, problems)
+        self.assertIn("look at it. Not shown yet:", said[0])
+        self.assertIn("SEEN_ARTICLE_LEADS", said[0])
+        # A day the articles go unread keeps it: waiting is no refusal.
+        again, problems = self.fetch(previous=cache, wikipedia=False)
+        self.assertEqual(again["photos"][self.K], rec)
+        self.assertFalse([p for p in problems if "withheld" in p], problems)
+
+    def test_a_look_is_stale_once_the_race_read_again_brings_another_file(self):
+        import datetime
+        import urllib.parse
+        from kyc import overrides
+        rec, _ = self.photo()
+        plain, _ = self.photo(links=[("Pat Doe", "Pat Doe", "Pat Doe 2026.jpg", None)])
+        with mock.patch.dict(overrides.SEEN_ARTICLE_LEADS, {self.lead: self.look}, clear=True):
+            # An entry made before the read that brings the file: the race
+            # has not been read since the look.
+            self.assertEqual(sp.stale_looks({"photos": {}}), [])
+            self.assertEqual(sp.stale_looks({"photos": {self.K: plain},
+                                             "racesRead": {"XX|governor": "2026-11-09"}}), [])
+            # Read since, the file still in another's place.
+            later = {"XX|governor": "2026-11-16"}
+            self.assertEqual(sp.stale_looks({"photos": {self.K: rec}, "racesRead": later}), [])
+            # Read since, and the race's article gives another file, or none.
+            for photos in ({self.K: plain}, {}):
+                stale = sp.stale_looks({"photos": photos, "racesRead": later})
+                self.assertEqual(len(stale), 1, stale)
+                self.assertIn(self.lead, stale[0])
+        # The looks recorded: dated, for one candidate, keyed as a person's
+        # lists key a Commons file, with what was seen and the file's size.
+        for upload, (day, k, seen, size) in overrides.SEEN_ARTICLE_LEADS.items():
+            with self.subTest(upload=upload):
+                datetime.date.fromisoformat(day)
+                self.assertEqual(k.count("|"), 2)
+                self.assertEqual(upload, sp.upload_of(urllib.parse.unquote(
+                    upload.rsplit("/", 1)[1])))
+                self.assertIn("nobody else in the frame", seen)
+                self.assertEqual(sorted(size), ["height", "width"])
+
+    # --------------------------------------------- a person's refusal
+
+    def test_a_persons_refusal_of_a_file_whose_name_says_a_scene_promotes_nothing(self):
+        """The lists were asked after the file's name: a refused file whose
+        name also said a scene gave way to the article's lead, unrecorded."""
+        from kyc import overrides
+        scene = sp.upload_of(self.SCENE)
+        asked = []
+
+        def commons(file_name):
+            asked.append(file_name)
+            return self.commons(file_name)
+
+        for table, why in ((overrides.NOT_A_PORTRAIT, "not-a-portrait"),
+                           (overrides.PORTRAIT_LICENCE_DOUBTS, sp.LISTED_DOUBT)):
+            with self.subTest(why=why), mock.patch.dict(table, {scene: ("2026-10-25", "a test")}):
+                refusals, doubts = [], []
+                self.assertEqual(self.photo(commons=commons, passed_over=refusals,
+                                            doubted=doubts), (None, why))
+                # Recorded, so validate does not call the entry stale.
+                self.assertEqual(refusals + doubts, [scene])
+        # The file's name gives its address: nothing was asked of Commons.
+        self.assertEqual(asked, [])
+        # Unlisted, the scene gives way to the lead as before.
+        rec, _ = self.photo(commons=commons)
+        self.assertIn("Pat_Doe_official_portrait", rec["photo"])
+
+    # ------------------------------------------------ nothing concluded
+
+    def test_everyone_a_read_concluded_nothing_about_is_named(self):
+        """A candidate with no earlier photograph who read unknown was named
+        nowhere in the read's output."""
+        cache, problems = self.fetch(commons=lambda name: {"info": None, "categories": []},
+                                     links=[("Pat Doe", "Pat Doe", None, None)])
+        self.assertEqual(cache["photos"], {})
+        self.assertTrue(any(p.startswith(self.K + ": could not be read, and no photograph is kept")
+                            for p in problems), problems)
+        # The race was not read whole: it is not dated, and comes first next time.
+        self.assertNotIn("racesRead", cache)
+
+    def test_a_reply_with_no_page_in_it_is_a_failed_read(self):
+        """An error body sent with HTTP 200 read as "no such article": the
+        race's photographs and article records were dropped and the race
+        dated as read whole."""
+        replies = ({}, {"error": {"code": "internal_api_error_DBQueryError"}}, {"query": {}},
+                   {"query": {"pages": []}}, {"batchcomplete": True, "query": {"pages": [{}]}})
+        for reply in replies:
+            with self.subTest(reply=reply), mock.patch.object(sp, "_wiki", return_value=reply):
+                with self.assertRaises(sp.StatewidePhotoError):
+                    sp._wikitext("2026 Wyoming gubernatorial election")
+                with self.assertRaises(sp.StatewidePhotoError):
+                    sp._resolve("Pat Doe")
+        # A page the API says is missing is a finding.
+        missing = {"query": {"pages": [{"title": "Pat Doe", "missing": True}]}}
+        with mock.patch.object(sp, "_wiki", return_value=missing):
+            self.assertEqual(sp._wikitext("Pat Doe"), (None, None))
+            self.assertTrue(sp._resolve("Pat Doe")["missing"])
+        # Through the read: the last photograph and article are kept, and
+        # the race is not dated as read.
+        rec = TestTheMondayReadEndsInsideItsStep.kept(self, "Pat_Doe")
+        previous = {"read": "2026-11-02", "photos": {self.K: rec},
+                    "articles": {self.K: {"article": "Pat Doe", "page": "2026 race"}},
+                    "articlesRead": "2026-11-02", "racesRead": {"XX|governor": "2026-11-02"}}
+        with mock.patch.object(sp, "read_members", return_value=({}, [], set())), \
+                mock.patch.object(sp, "read_guides", return_value=({}, [], set())), \
+                mock.patch.object(sp, "date_credits", return_value=0), \
+                mock.patch.object(sp, "_wiki", return_value={}):
+            cache, problems = sp.fetch(self.LISTS, {}, previous, log=None)
+        self.assertEqual(cache["photos"][self.K], rec)
+        self.assertEqual(cache["articles"][self.K]["article"], "Pat Doe")
+        self.assertEqual(cache["racesRead"], {"XX|governor": "2026-11-02"})
+        self.assertTrue(any("could not be read" in p for p in problems), problems)
+
+    # ------------------------------------------------------- the budget
+
+    def test_the_budget_is_asked_before_each_candidate_of_a_race(self):
+        """A race begun inside the budget ran to its end whatever it cost:
+        Tennessee's prints fifteen candidates."""
+        names = ("Pat Doe", "Lee Roe", "Sam Poe")
+        lists = {"states": {"XX": {"offices": {"governor": {
+            "candidates": [{"name": n} for n in names]}}}}}
+        links = [(n, n, None, None) for n in names]
+        resolved = []
+
+        def resolve(target):
+            resolved.append(target)
+            return dict(self.ARTICLE, title=target)
+
+        def wiki_photo(code, office, candidate, links, title, *args, **kwargs):
+            kwargs["resolve"](candidate["name"])
+            return None, "no-image"
+
+        kept = TestTheMondayReadEndsInsideItsStep.kept(self, "Lee_Roe")
+        previous = {"read": "2026-11-02", "photos": {"XX|governor|Lee Roe": kept},
+                    "articles": {"XX|governor|Sam Poe": {"article": "Sam Poe", "page": "p"}},
+                    "articlesRead": "2026-11-02", "racesRead": {"XX|governor": "2026-11-02"}}
+        # The budget's start, the race and its first candidate inside it.
+        budget = sp.Budget(60, clock=TestTheMondayReadEndsInsideItsStep.clock(3))
+        with mock.patch.object(sp, "read_members", return_value=({}, [], set())), \
+                mock.patch.object(sp, "read_guides", return_value=({}, [], set())), \
+                mock.patch.object(sp, "_wikitext", lambda t: (t, "text")), \
+                mock.patch.object(sp, "race_links", return_value=links), \
+                mock.patch.object(sp, "_resolve", resolve), \
+                mock.patch.object(sp, "wiki_photo", wiki_photo), \
+                mock.patch.object(sp, "date_credits", return_value=0):
+            cache, problems = sp.fetch(lists, {}, previous, log=None, budget=budget)
+        # Nothing was asked for the two the budget did not reach, by the
+        # photographs' read or by the articles' read after it.
+        self.assertEqual(resolved, ["Pat Doe"])
+        self.assertEqual(cache["photos"], {"XX|governor|Lee Roe": kept})
+        self.assertEqual(cache["misses"], {"XX|governor|Pat Doe": "no-image"})
+        self.assertEqual(cache["articles"]["XX|governor|Pat Doe"]["article"], "Pat Doe")
+        self.assertNotIn("XX|governor|Lee Roe", cache["articles"])
+        self.assertEqual(cache["articles"]["XX|governor|Sam Poe"]["read"], "2026-11-02")
+        # The race is not dated as read whole, so it comes first next time.
+        self.assertEqual(cache["racesRead"], {"XX|governor": "2026-11-02"})
+        said = [p for p in problems if "ran out inside 1 race(s); 2 candidate(s)" in p]
+        self.assertEqual(len(said), 1, problems)
+        self.assertIn("XX|governor|Lee Roe, XX|governor|Sam Poe", said[0])
+        self.assertFalse([p for p in problems if "Lee Roe: could not be read" in p], problems)
+
+    def test_the_articles_read_alone_begins_with_the_race_read_longest_ago(self):
+        """``--articles-only --max-minutes`` read the races in the alphabet's
+        order every time, so a budget that ran out left the same tail."""
+        lists = {"AK": {"governor": [{"name": "Ann Bee"}]},
+                 "KS": {"governor": [{"name": "Cy Dee"}]},
+                 "WY": {"governor": [{"name": "Ed Eff"}]}}
+        previous = {"articlesRead": "2026-11-09", "articles": {
+            # Read on the 9th; kept from the 2nd by a read that did not
+            # reach it; and Wyoming's, never read.
+            "AK|governor|Ann Bee": {"article": "Ann Bee", "page": "p"},
+            "KS|governor|Cy Dee": {"none": "not-linked", "page": "p", "read": "2026-11-02"}}}
+        self.assertEqual(sp.article_days(previous, lists),
+                         {"AK|governor": "2026-11-09", "KS|governor": "2026-11-02"})
+        asked = []
+
+        def wikitext(title):
+            asked.append(title)
+            return None, None
+
+        sp.with_articles({}, lists, previous, log=None, wikitext=wikitext)
+        self.assertEqual(asked, ["2026 Wyoming gubernatorial election",
+                                 "2026 Kansas gubernatorial election",
+                                 "2026 Alaska gubernatorial election"])
 
 
 if __name__ == "__main__":

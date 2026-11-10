@@ -1636,6 +1636,52 @@ NOT_A_PORTRAIT = {
 SEEN_AFTER_A_REFUSAL = {
 }
 
+# A statewide candidate's own article's lead image that came forward when
+# the reader refused the image the race's infobox sets beside the nominee -
+# for its name (a scene, no surname), its licence or its shape
+# (statewide_photos.wiki_photo; the record says what it stands in place of,
+# ``inPlaceOf``). Nobody has seen such a file when the Monday read takes it,
+# and the refresh publishes without a person (the PR #213 review: Wes
+# Moore's and Bruce Blakeman's would have been shown unlooked), so it waits
+# off the page, named by the build, until a person has looked at it and
+# recorded it here, keyed on the Commons upload address as its file page
+# reads: (the day, the cache's key for the candidate, what was seen - the
+# candidate alone, nobody else in the frame, and the face, brow to chin, as
+# a share of the 4:5 card that crops it from the top, as rule 38 measures it
+# - and the file's own pixel size as Commons gives it, which ties the look
+# to the picture: another photograph saved over the name goes back behind
+# the gate). One that fails the look goes in NOT_A_PORTRAIT instead. The
+# build reports an entry whose race has been read again since and no longer
+# brings the file forward (statewide_photos.stale_looks).
+SEEN_ARTICLE_LEADS = {
+    "https://upload.wikimedia.org/wikipedia/commons/b/b8/"
+    "Governor_Ned_Lamont_of_Connecticut,_official_portrait.jpg":
+        ("2026-11-10", "CT|governor|Ned Lamont",
+         "The lead image of the article 'Ned Lamont': one man alone, head and shoulders, in a "
+         "grey suit, a light blue shirt and a patterned tie, before a wall with a plaque and a "
+         "piece of ironwork; nobody else in the frame; his face about a fifth of the card's "
+         "height (about 130 of the 500x685 rendition's 685px, the card its top 625px). In "
+         "place of the race's infobox's 'Gold Star Bridge Visit with ... Pete Buttigieg "
+         "(cropped).jpg', refused by its name.", {"width": 1453, "height": 1990}),
+    "https://upload.wikimedia.org/wikipedia/commons/c/c3/Wes_Moore_Official_Governor_Portrait.jpg":
+        ("2026-11-10", "MD|governor|Wes Moore",
+         "The lead image of the article 'Wes Moore': one man alone, head and shoulders, in a "
+         "dark suit, a white shirt and a red tie, before a blue backdrop and Maryland's flag; "
+         "nobody else in the frame; his face about a fifth of the card's height (about 130 of "
+         "the 500x625 rendition's 625px). In place of the race's infobox's 'Governor Kuroiwa "
+         "and Japanese Delegation (cropped2).jpg', refused by its name.",
+         {"width": 1638, "height": 2048}),
+    "https://upload.wikimedia.org/wikipedia/commons/f/fe/Blakeman_Profile_Picture.jpg":
+        ("2026-11-10", "NY|governor|Bruce A. Blakeman",
+         "The lead image of the article 'Bruce Blakeman': one man alone, head and shoulders, "
+         "in a blue suit and a striped tie, the top of a microphone at the bottom edge, a "
+         "blurred building behind; nobody else in the frame; his face about a quarter of the "
+         "card's height (about 160 of the 500x578 rendition's 578px, all of which the card "
+         "shows). In place of the race's infobox's 'Donald J. Trump delivers remarks on the "
+         "economy at Rockland Community College ... (cropped).jpg', refused by its name.",
+         {"width": 675, "height": 780}),
+}
+
 # Campaign-site photographs taken by the narrow first-name route (the
 # owner's decision of 2026-11-01, rule 38): the candidate's own campaign site,
 # an image whose file name or alt text carries their first name and a

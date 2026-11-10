@@ -2204,7 +2204,8 @@ def _ballotphotos(args):
     print(f"  {seen['shown']} statewide candidates' photographs cached ("
           + ", ".join(f"{n} {route}" for route, n in sorted(seen["routes"].items()))
           + f"); {seen['heavy']} of them at full size, offered only above the caps; "
-          f"{seen['withheld']} withheld by a person's list or the licence test")
+          f"{seen['withheld']} withheld by a person's list or the licence test; "
+          f"{seen['waiting']} waiting for a person's look")
     for line in problems:
         print(f"  [warn] {line}")
     for line in errors:
