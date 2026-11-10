@@ -1528,7 +1528,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     person's party, the one named, is the holder's, "gain" only where it is
     not; a row with none of those words gives nothing. Texas's 30th and 35th
     ("Democratic gain" over a Democratic holder, on the national article's
-    new lines) and 37th (two members in one row) give nothing so. A read
+    new lines) give nothing so. A district two members held spans two rows
+    of the table, and both rows' words are the row's: the 18th ("Incumbent
+    re-elected" for its holder, "lost renomination" for Al Green) and the
+    37th ("re-elected" for a member who held the 35th) give nothing. A read
     that fails keeps the last read's national calls (`kept`, rule 8); a state
     page that later gives a result takes over, and one that puts someone
     else first withdraws the call, which `validate` warns of
@@ -1542,7 +1545,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     vote count; the state's page had none when read" (`share.NATIONAL_SOURCE`,
     `raceStatusSource` "national"); an infobox call is the state's page's.
     Replayed over every state's page as it stood at 19:50 UTC on 2026-11-10,
-    the reader called 228 races from the infobox and 111 from the national
+    the reader called 228 races from the infobox and 110 from the national
     summary beside the 92 tables' marks, and changed nothing else once one
     thing the calls exposed was fixed: a filer in a November table whom a
     state's whole list does not print read "Lost the November election"

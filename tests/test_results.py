@@ -4614,6 +4614,18 @@ class TestTheNationalSummarysMark(TestTheInfoboxDeclaresTheWinner):
         self.assertEqual((row_["ayes"], row_["name"], row_["party"]),
                          (1, "Donna Miller", "Democratic"))
         self.assertEqual(row_["words"], [["hold", "Democratic"]])
+        # A district two members held spans two rows: the second's words
+        # must agree too (TX-18 on 2026-11-10: "Incumbent re-elected." for
+        # one, "Incumbent lost renomination." for the other).
+        two = national_article("OH", 5, "Incumbent re-elected.", *self.STONE_WINS).replace(
+            "|{{shading PVI|R|5}}", "|rowspan=2 {{shading PVI|R|5}}").replace(
+            "{{endplainlist}}\n|-\n|}",
+            "{{endplainlist}}\n|-\n|{{sortname|Al|Grey}}\n|Republican\n|2004\n"
+            "|Incumbent lost renomination.\n|-\n|}")
+        row_ = results.national_row(results.national_rows(two)[("OH", 5)])
+        self.assertEqual(row_["words"], [["re-elected"], ["lost renomination"]])
+        self.assertEqual(row_["name"], "Pat Stone")
+        self.assertIn("marks the incumbent", results.national_words_agree(row_, True, "Republican"))
         # A row other tables of the article key the same way, without the
         # district's PVI, is not the district's row.
         self.assertEqual(results.national_rows("\n!{{ushr|OH|5|X}}\n|{{sortname|A|B}}\n|-"), {})

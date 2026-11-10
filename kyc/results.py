@@ -2238,10 +2238,17 @@ def national_rows(text):
     every district, the row's text after its header cell; a district two
     such rows key is None (which of them would be guessing)."""
     out = {}
-    for match in _NATIONAL_ROW.finditer(text or ""):
+    text = text or ""
+    for match in _NATIONAL_ROW.finditer(text):
         body = match.group(3)
         if "shading pvi" not in body.lower():
             continue
+        if "rowspan" in body.lower():
+            # A district two members held (Texas's 18th and 33rd after the
+            # redraw) spans two rows, the second with no header cell: its
+            # words are the row's too, and must agree as well.
+            more = re.search(r"\n\|-\s*\n!|\n\|\}", text[match.end():])
+            body += text[match.end():match.end() + more.start()] if more else ""
         key = (match.group(1).upper(), 0 if match.group(2).upper() == "AL" else int(match.group(2)))
         out[key] = None if key in out else body
     return out
@@ -2256,9 +2263,9 @@ def national_row(body):
     status cell's phrases: ``["re-elected"]``, ``["lost re-election"]``,
     ``["lost renomination"]``, ``["new member"]``, ``["hold", "Democratic"]``
     or ``["gain", "Republican"]``."""
-    lowered = body.lower()
-    cut = lowered.find("{{plainlist")
-    status, people = (body[:cut], body[cut:]) if cut >= 0 else (body, body)
+    block = re.search(r"\{\{\s*plainlist\s*\}\}.*?(?:\{\{\s*endplainlist\s*\}\}|$)", body, re.S | re.I)
+    status, people = ((body[:block.start()] + body[block.end():], block.group(0)) if block
+                      else (body, body))
     found = _AYE_NAME.search(people)
     plain = _REF_TAG.sub(" ", status)
     plain = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", r"\1", plain)
