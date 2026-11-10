@@ -5900,7 +5900,11 @@ async function testRenumbered() {
     // running there under the new number.
     const wrong = moved.filter((r) => {
       const badge = KYC.cards.raceBadges(r);
-      const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered && p.contestRaceId === r.id);
+      // The race the move named (kyc/races.py): once the new Congress sits,
+      // a member seated for the seat they won has no contestRaceId left, and
+      // raceStatusRace is that race.
+      const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered &&
+        (p.contestRaceId || p.raceStatusRace) === r.id);
       return r.openSeat === mover || (r.openSeat ? !/new district map/.test(badge)
         : !/Holder running in/.test(badge) || />Open seat</.test(badge));
     });
@@ -12188,6 +12192,37 @@ async function testRecordPhase() {
     check("its 2026 figures say they are 2026's", strip.length > 3 &&
       strip.filter((b) => /seat|challenger|primaries/.test(b)).every((b) => /2026/.test(b)),
       strip.join(" | "));
+  });
+
+  // Utah's members ran again under the new map's numbers; once seated for
+  // the seats they won, their profiles hold no other run, and the record
+  // keeps the move (kyc/races.py). Made from today's data: each mover is
+  // seated as their new race's winner.
+  const utah = await buildPage("states/ut.html", { data: (w, meta) => {
+    recordPhase(w, meta);
+    const byId = {};
+    w.legislatorsData.forEach((p) => { byId[p.id] = p; });
+    w.kycRaces.filter((r) => r.state === "UT" && r.holderMoved).forEach((r) => {
+      const p = r.incumbentIds.map((id) => byId[id]).find((x) => x && x.name === r.holderMoved.name);
+      if (!p || !p.contestRaceId) return;
+      Object.assign(p, { raceId: p.contestRaceId, raceStatusRace: p.contestRaceId,
+        raceStatus: "elected", raceRole: "winner", officeLabel: p.contestLabel });
+      delete p.contestRaceId;
+      delete p.contestLabel;
+    });
+  } });
+  await settle(50);
+  suite("states/ut.html — members re-elected under the new map, once the new Congress sits", () => {
+    const { window, errors } = utah;
+    check("no page errors", errors.length === 0, errors.join(" | "));
+    const moved = window.kycRaces.filter((r) => r.state === "UT" && r.holderMoved);
+    const html = moved.map((r) => window.KYC.cards.raceBadges(r)).join(" ");
+    check("the data has a seat whose holder ran under a new number", moved.length > 0);
+    check("its holder was re-elected there, in the past tense",
+      /Holder re-elected in UT-\d/.test(html) && !/Holder running in/.test(html), html);
+    check("and held the seat, never holds it",
+      /who held this seat, was re-elected in UT-\d under the state/.test(html) &&
+        !/who holds this seat/.test(html), html);
   });
 
   const tx = await buildPage("districts/tx.html", { data: recordPhase });

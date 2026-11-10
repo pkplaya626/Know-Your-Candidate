@@ -267,14 +267,18 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         if profile["party"] not in race["parties"]:
             race["parties"].append(profile["party"])
 
-    def holds(race, profile):
+    # The races a member ran in under the state's new district number, by
+    # race id: a sitting member is on that seat's ballot, so it is not open.
+    moved_into = set()
+
+    def holds(race, profile, contest=None):
         join(race, profile, "incumbentIds")
         race["openSeat"] = not profile.get("seekingReelection2026", False)
         # A member contesting a different seat - a redrawn district, the
         # other chamber - is a candidate in *that* race as well as the
         # incumbent of this one. Without this, TX-37 had no Greg Casar
         # and TX-35 reported two Democratic nominees.
-        contest = profile.get("contestRaceId")
+        contest = contest or profile.get("contestRaceId")
         if contest and contest != race["id"] and profile.get("alsoRunningId") is None:
             join(race_for(contest), profile, "candidateIds")
         from .districts import REDRAWN
@@ -293,6 +297,7 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
             # the "Not seeking re-election" filter listed eleven nominees.
             profile["renumbered"] = True
             race["holderMoved"] = {"name": profile["name"], "to": seat_label(contest)}
+            moved_into.add(contest)
 
     frozen = (record or {}).get("races") or {}
     held = (record or {}).get("incumbents") or {}
@@ -321,7 +326,13 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         # record incumbent who has left (``formerMember``) would vanish.
         mine = held_by.get(profile["id"])
         if mine:
-            holds(race_for(mine), profile)
+            # Their 2026 run is the race the results credit them with: once
+            # they are seated for the seat they won, their profile has no
+            # other contest (contestRaceId), and on the January rehearsal
+            # Utah read "4 open seats in 2026" over three members re-elected
+            # under the new map (2026-11-10).
+            holds(race_for(mine), profile, contest=profile.get("contestRaceId")
+                  or profile.get("raceStatusRace"))
         if profile.get("raceRole") == "winner":
             race = race_for(rid)
             join(race, profile, "candidateIds")
@@ -378,8 +389,7 @@ def build(profiles, filed_counts=None, results=None, dates=None, filed=None, rec
         # running here under the state's new district number is: UT-4 read
         # "Open seat" with Mike Kennedy its nominee, while UT-1, which no
         # member is running for, did not count as open.
-        if any(by_id[pid].get("renumbered") and by_id[pid].get("contestRaceId") == race["id"]
-               for pid in race["candidateIds"]):
+        if race["id"] in moved_into:
             race["openSeat"] = False
         if record:
             # Who held the seat on the ballot, from the record: named even
