@@ -2292,7 +2292,14 @@ def national_barred(state, rid, open_seat=False, listed=()):
     by ranked choice (RANKED_CHOICE), a seat won only by a majority (the
     states and territories in overrides.GENERAL_RUNOFFS, Georgia's among
     them), or an open primary's first round or a seat on a qualified list
-    (Louisiana's): those wait for their page's counts."""
+    (Louisiana's): those wait for their page's counts. Nor D.C. or a
+    territory: the call's credit speaks of "the state's page", which rule 75
+    forbids of them (PR #220 review); none was called this way when it was
+    written, and their pages wait for a count or a declaration."""
+    from .normalize import TERRITORIES
+
+    if state in TERRITORIES:
+        return "not a state: the national call's credit speaks of the state's page"
     if state in RANKED_CHOICE:
         return "a ranked-choice count"
     if state in _general_runoffs():
@@ -2390,6 +2397,40 @@ def _page_leaders(boxes, outcome):
             top = max(counted.values())
             leaders.update(n for n, v in counted.items() if v == top)
     return leaders
+
+
+def _national_held(boxes, name):
+    """Why the counts a state's page has gained since the national summary
+    called *name* do not let that call stand, or None: the gates a call from
+    the page itself meets (:func:`_call_stands`), which a national call made
+    before the page had counts meets too once it has them (PR #220 review).
+    The infobox's share reporting, where it gives one, can be read and is at
+    least REPORTING_FLOOR; and *name*'s lead is at least CLOSE_MARGIN of the
+    count - every vote of each November table that counts two people, else
+    the infobox's. Whoever the counts put first is :func:`_page_leaders`'s."""
+    canon = _canonical(boxes)
+    infobox = [r for title, rows in canon if _clean_title(title) == INFOBOX_TITLE for r in rows]
+    if any(r.get("reportingUnread") for r in infobox):
+        return "the state's page's share reporting cannot be read"
+    low = [r["reporting"] for r in infobox if r.get("reporting") is not None]
+    if low and min(low) < REPORTING_FLOOR:
+        return f"the state's page's counts stand at {min(low):g} reporting"
+    tables = [(rows, "votes") for title, rows in canon
+              if _clean_title(title) not in LIST_TITLES + (INFOBOX_TITLE,)
+              and _stage(_clean_title(title)) == "general" and len(_counted(rows)) >= 2]
+    for rows, field in tables or [(infobox, "popular")]:
+        counted = _counted(rows, field)
+        if len(counted) < 2:
+            continue
+        theirs = [n for n in counted if _one_person(n, name)]
+        if len(theirs) != 1:
+            return "the state's page's counts do not name them as one person"
+        close = _close(rows, theirs[0], field)
+        if close:
+            votes, share = close
+            return (f"their lead on the state's page is {votes:,} votes ({100 * share:.2f} "
+                    f"points), under {100 * CLOSE_MARGIN:g} points of the count")
+    return None
 
 
 def _no_november_result(boxes):
@@ -3899,13 +3940,18 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 # The state's page has a result now, and its verdict stands;
                 # where it puts someone else first, the national call is
                 # withdrawn, and a person is told (validate).
+                # Where its counts lead with them, they are held to the gates
+                # a call from the page meets (_national_held): too close or
+                # too early a count withdraws it too, never calls it again.
                 others = sorted(n for n in _page_leaders(boxes, outcome)
                                 if not _one_person(n, before.get("name") or ""))
-                if others:
+                pulled = (f"the state's page now puts {', '.join(others)} first" if others
+                          else _national_held(boxes, before.get("name") or ""))
+                if pulled:
                     withdrawn_calls[rid] = {"name": before.get("name"), "leaders": others,
-                                            "revid": before.get("revid")}
+                                            "why": pulled, "revid": before.get("revid")}
                     log(f"    [warn] {rid}: the national summary's call of {before.get('name')!r} "
-                        f"is withdrawn: the state's page now puts {', '.join(others)} first")
+                        f"is withdrawn: {pulled}")
                     before = None
             if national_index is None:
                 record = dict(before, kept=True) if before else None
@@ -4083,6 +4129,23 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
             routes[calls[rid]] = routes.get(calls[rid], 0) + 1
         elif calls.get(rid) == CALLED_NATIONAL:
             race.pop("national", None)        # a list laid over it unsettled the call
+    # A national call the last read made that this one, reading the race's
+    # page, no longer makes - its row lost its mark, became two, or went - with
+    # no state's page result in its place and no withdrawal said: a person is
+    # told (validate), never left to a line of the log (PR #220 review). A
+    # refused mark's race keeps its last read (carry_refused), so is not one.
+    dropped_calls = {}
+    for rid, prev in sorted(((previous or {}).get("races") or {}).items()):
+        if (prev.get("calledBy") != CALLED_NATIONAL or rid not in races
+                or races[rid].get("calledBy") or rid in withdrawn_calls or rid in refused_marks):
+            continue
+        dropped_calls[rid] = {
+            "name": (prev.get("national") or {}).get("name"),
+            "revid": (prev.get("national") or {}).get("revid"),
+            "why": (national_refused.get(rid) or {}).get("why")
+            or "the national summary's row no longer gives a call"}
+        log(f"    [warn] {rid}: the last read's national call of "
+            f"{dropped_calls[rid]['name']!r} is not made again: {dropped_calls[rid]['why']}")
     log("    races called, by route: " + ", ".join(
         f"{route} {routes.get(route, 0)}" for route in (CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL)))
     log(f"    settled races with results: {len(races)}   "
@@ -4133,6 +4196,9 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # call for a race whose page held no result, and why.
         "nationalWithdrawn": dict(sorted(withdrawn_calls.items())),
         "nationalRefused": dict(sorted(national_refused.items())),
+        # A national call the last read made that this one does not, with no
+        # state's page result in its place and no withdrawal (validate warns).
+        "nationalDropped": dropped_calls,
         # Every place the calendar above is not the FEC's, and why.
         "calendarNotes": calendar_notes,
         # The calendar travels with the results so `build` needs no network
@@ -4195,10 +4261,18 @@ def carry_refused(cache, previous):
 
     A refused mark concludes nothing (rule 8): a result an earlier read took,
     or a table the mid-edit page has since lost, is not undone by a page that
-    cannot be vouched for tonight. ``refusedMarks`` still names the race."""
+    cannot be vouched for tonight. ``refusedMarks`` still names the race.
+
+    Except a national call this read withdrew (``nationalWithdrawn``): the
+    state's page's own counts no longer stand behind it - too close, too early
+    or led by someone else - and keeping it would read "Elected" over the very
+    refusal of the page's own declaration for that reason (PR #220 review)."""
     kept = []
+    withdrawn = (cache or {}).get("nationalWithdrawn") or {}
     for rid in sorted((cache or {}).get("refusedMarks") or {}):
         race = ((previous or {}).get("races") or {}).get(rid)
+        if race and rid in withdrawn and race.get("calledBy") == CALLED_NATIONAL:
+            continue
         if race:
             cache["races"][rid] = race
             kept.append(rid)
@@ -4901,17 +4975,21 @@ def _source_of(profile, race, cid=None, absent=False):
     if race.get("source") == "qualified":
         profile["raceStatusSource"] = "qualified"
         return
+    # A winner, or a loser, the national summary called (rule 63's national
+    # route): its source is that summary, which gives no count, never the
+    # state's page, which had none (rule 19). Asked before the certified list:
+    # a minor-party nominee the list prints and the page's table left off reads
+    # "defeated" only because of the call, and was credited to "Wikipedia's
+    # election results page" (six Texans, PR #220 review). The list stays the
+    # source of whom it leaves off or holds as on the ballot.
+    if (cid and not absent and race.get("calledBy") == CALLED_NATIONAL
+            and (race.get("status") or {}).get(cid) in (ELECTED, DEFEATED)):
+        profile["raceStatusSource"] = "national"
+        return
     certified = race.get("certified") or {}
     if certified and (absent or cid in (race.get("certifiedIds") or {})):
         profile["raceStatusSource"] = "certified"
         profile["raceStatusSourceName"] = certified.get("source", "")
-        return
-    # A winner, or a loser, the national summary called (rule 63's national
-    # route): its source is that summary, which gives no count, never the
-    # state's page, which had none (rule 19).
-    if (cid and race.get("calledBy") == CALLED_NATIONAL
-            and (race.get("status") or {}).get(cid) in (ELECTED, DEFEATED)):
-        profile["raceStatusSource"] = "national"
 
 
 def _all_out(race, names):

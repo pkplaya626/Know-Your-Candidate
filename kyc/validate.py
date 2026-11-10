@@ -6,6 +6,7 @@ prints anything suspicious; nothing here blocks a build.
 """
 
 import collections
+import datetime
 import re
 import urllib.parse
 
@@ -1126,14 +1127,47 @@ def check_results_pages(cache):
                             f"table's mark, {routes.get('infobox', 0)} from the infobox's "
                             f"declaration, {routes.get('national', 0)} from the national summary "
                             "where the state's page held no result", national))
-    withdrawn = [f"{rid}: {item.get('name')}, now behind {', '.join(item.get('leaders') or [])} "
+    withdrawn = [f"{rid}: {item.get('name')}: "
+                 f"{item.get('why') or 'now behind ' + ', '.join(item.get('leaders') or [])} "
                  f"(national revision {item.get('revid')})"
                  for rid, item in sorted((cache.get("nationalWithdrawn") or {}).items())]
     if withdrawn:
         issues.append(Issue("warn", "result-national-withdrawn",
                             f"{len(withdrawn)} national summary calls withdrawn (rule 63): the "
-                            "state's page now gives a result that puts someone else first, and "
-                            "its verdict stands; a person should look at each", withdrawn))
+                            "state's page now gives counts that put someone else first, or that "
+                            "are too close or too early to stand behind the call, and its "
+                            "verdict stands; a person should look at each", withdrawn))
+    dropped = [f"{rid}: {item.get('name')}: {item.get('why')} "
+               f"(last called at national revision {item.get('revid')})"
+               for rid, item in sorted((cache.get("nationalDropped") or {}).items())]
+    if dropped:
+        issues.append(Issue("warn", "result-national-dropped",
+                            f"{len(dropped)} races the last read called from the national "
+                            "summary are not called now (rule 63): the row lost its mark, holds "
+                            "two, or is gone, and the state's page gives no result; each reads "
+                            "\"Awaiting result\" until a person looks", dropped))
+    from .officers import KEPT_STALE_DAYS
+    try:
+        as_of = datetime.date.fromisoformat(cache.get("asOf") or "")
+    except ValueError:
+        as_of = None
+    aged = []
+    for rid, race in sorted((cache.get("races") or {}).items()):
+        call = race.get("national") or {}
+        if race.get("calledBy") != "national" or not call.get("kept") or not as_of:
+            continue
+        try:
+            read = datetime.date.fromisoformat(call.get("read") or "")
+        except ValueError:
+            read = None
+        if read is None or (as_of - read).days > KEPT_STALE_DAYS:
+            aged.append(f"{rid}: {call.get('name')}, read {call.get('read') or 'on no recorded day'}")
+    if aged:
+        issues.append(Issue("warn", "result-national-kept-stale",
+                            f"{len(aged)} national summary calls kept more than "
+                            f"{KEPT_STALE_DAYS} days while the article could not be read (rules "
+                            "8 and 63): a person should read the article, or its row, by hand",
+                            aged))
     # An alias is the name exactly as its race's results page writes it. One
     # the page, as last read, and the state's list no longer give matches
     # nobody and settles nothing: invisible, and quietly wrong once the page
@@ -1181,7 +1215,6 @@ def check_results_pages(cache):
     # person's look: Alaska's ranked-choice count is published as a table,
     # not an Election box, and would read "Awaiting result" for weeks.
     from .results import general_day, NOMINEE, NOVEMBER, QUALIFIED
-    import datetime
     as_of = cache.get("asOf") or ""
     if as_of and as_of > (general_day() + datetime.timedelta(days=3)).isoformat():
         settled = set(NOVEMBER[1:]) - {QUALIFIED}

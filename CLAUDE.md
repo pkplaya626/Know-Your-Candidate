@@ -1516,7 +1516,9 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     elections" once a run (`fetch_national`, under the reader's agent), only
     for a House race whose section holds no November count, mark or
     declaration, and never in a ranked-choice or majority state or on an
-    open primary's or a qualified list's seat (`national_barred`). The
+    open primary's or a qualified list's seat, nor for D.C. or a territory,
+    since the call's credit speaks of "the state's page" (rule 75;
+    `national_barred`). The
     district's row - the one the table of every district keys by
     `{{ushr|ST|N}}` beside its PVI, a key two such rows share giving none -
     must mark one person, who is one November nominee of the race by filing
@@ -1535,7 +1537,22 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     that fails keeps the last read's national calls (`kept`, rule 8); a state
     page that later gives a result takes over, and one that puts someone
     else first withdraws the call, which `validate` warns of
-    (`nationalWithdrawn`, `result-national-withdrawn`). Each race records how
+    (`nationalWithdrawn`, `result-national-withdrawn`). Its review found a
+    page that gains counts leading with the called person was let call
+    again past the gates a call from the page meets: a lead of 0.07 points,
+    or 3 reporting, read "Elected" on every read, and a declaration refused
+    as too close brought the national call back through `carry_refused`. Such
+    counts now withdraw it too (`_national_held`: the share reporting
+    readable and at least `REPORTING_FLOOR`, the lead at least
+    `CLOSE_MARGIN`), and a withdrawn national call is never kept over a
+    refusal. A call the last read made that this one does not make, with no
+    result from the state's page and no withdrawal (the row lost its mark,
+    holds two, or went), is `result-national-dropped`, and a call kept past
+    `officers.KEPT_STALE_DAYS` while the article cannot be read is
+    `result-national-kept-stale`. A minor-party nominee a certified list
+    prints, whom a national call settles as defeated, credits the national
+    summary, never "Wikipedia's election results page" (`_source_of`: six
+    Texans did). Each race records how
     it was called (`calledBy`: table, infobox or national; a national call
     its row, address and revision), the read's log and `validate`'s summary
     count each route (`result-calls`, an "info" line), and a national call is

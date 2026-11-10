@@ -820,9 +820,14 @@ page and writes `data/primary_results.json`. Three things keep it honest:
     frozen record's incumbent ("Incumbent re-elected" only for them, "lost
     re-election", "lost renomination" or "New member elected" only for
     someone else, a party's "hold" or "gain" against the holder's party). Never
-    in a ranked-choice, majority or open-primary state. A state page that
-    later gives a result takes over, and one that puts someone else first
-    withdraws the call (`nationalWithdrawn`, `result-national-withdrawn`).
+    in a ranked-choice, majority or open-primary state, D.C. or a territory.
+    A state page that later gives a result takes over, and one that puts
+    someone else first, or whose counts are too close (under `CLOSE_MARGIN`)
+    or too early (under `REPORTING_FLOOR`, or unreadable) to stand behind
+    it, withdraws the call (`nationalWithdrawn`, `{race id: {name, leaders,
+    why, revid}}`, `result-national-withdrawn`); a call the last read made
+    and this one does not is `nationalDropped` (`result-national-dropped`),
+    and one kept unread past two weeks `result-national-kept-stale`.
     The page credits such a call to "Wikipedia's national summary of the
     House elections, which gives no vote count; the state's page had none
     when read" wherever a status's source is shown.
