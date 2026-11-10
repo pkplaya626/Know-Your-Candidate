@@ -213,7 +213,7 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2816 tests, no dependencies
+python -m unittest discover tests             # 2826 tests, no dependencies
 npm install && npm test                       # 3752 real-DOM checks (needs jsdom)
 ```
 
@@ -1385,12 +1385,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     infobox and November table, the filing is "WIRTH, CYNTHIA (CINDE)", and
     with both names fitting it neither was matched - "withdrawn" under one,
     listed with no profile under the other. A row a filing or a state's list
-    holds is a person, and a nominee a Withdrawn list names, or the
-    section's own sentence says withdrew, died or was replaced
+    holds is a person, and a nominee a Withdrawn list names, the state's
+    whole list for the race does not print (rule 77: the list is the
+    ballot), or the section's own sentence says left the race
     (`_left_in_prose`), reads as the page says: a real replacement is not
     undone. Then the row is the nominee's where the infobox credits them
-    with that row's very count, or where it shares their surname and no
-    other filer in the race carries it: they take its result, the page's
+    with that row's very count, or where, unmarked, it shares their surname
+    and no other filer in the race carries it: they take its result, the page's
     spelling is not shown, nobody is listed twice, the row carries none of
     its own link (rules 24 and 33), and the read's log, the cache's
     `renamedRows` and `validate` (`result-row-renamed`) say which and why,
@@ -1425,8 +1426,47 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     page" - an infobox is one editor's word, and the same word in two
     places is no second source. A top-two primary's two (California,
     Washington) are their own parties' nominees for this, with an infobox
-    or without, and "After Swan's death ... nominated in her place",
-    "stepped aside" and "succeeded" are read as leaving. And a mark inside
+    or without, and "After Swan's death ... nominated in her place" and
+    "succeeded Trina Swan as the nominee" are read as leaving. The reader of
+    the merged version found the sentence test switching the whole
+    protection off, without a word, on any sentence holding the nominee's
+    surname and then a "left" word: of the 1,106 people standing on the
+    November tables of the pages saved on 2026-11-09 it said nine had left,
+    seven of them their primary's winner - Doug Ollivant ("Prior to the date
+    of the forum, Ollivant withdrew"), Trever Nehls ("after Troy Nehls
+    withdrew"), Patty García (Chuy García "withdrew his nomination"),
+    Darline Graham (her brother "died") - and a renamed row would have made
+    each "withdrawn" with nothing logged. A sentence counts only where it is
+    plainly theirs - their surname bare or after their own given name, never
+    after another's, never bare where the section names a namesake, never
+    "Graham's" something else - and plainly about the race: a death; the
+    race itself directly after the words ("from the race", "the
+    nomination", "the ballot", "the general election", "the ticket", "her
+    campaign", "as the nominee"); or the November row's own name ("replaced
+    by Jeanne Hendry", "in favour of Hendry"). A forum, a debate, another
+    office, another party's nomination, a relative's death and another
+    candidate's bullet are not; "stepped aside in August" with no more said
+    is not either. A sentence not honoured changes nothing: the row goes on
+    to the folds and the refusal, which a person sees. One honoured is never
+    silent: the race records the row with the sentence quoted
+    (`unsettledRows`, a `[note]` in the log, `result-row-unsettled`), and so
+    it does for a nominee the state's whole list leaves out. A marked row is
+    never the nominee's by the surname alone - a relative named in the place
+    of a nominee who died, with no filing, who won, made the dead nominee
+    "elected" - and is left to the mark's own refusal; the infobox's very
+    count still folds one. A rename that changes the row's party too is
+    held: where one nominee alone is missing, the table holds no row of
+    their party, and one row alone is under such a name on a line whose own
+    nominee is already in the table, it is that row (California's
+    Republican finisher beside a second "Democrat" nobody filed as), and a
+    top-two finisher with no party preference is that line's; a minor
+    party's only row is never taken, since its person may simply have no
+    filing. And a `RESULT_NAMES` alias that neither its race's page, as
+    read, nor the state's list gives any more is recorded by the read
+    (`staleAliases`) and warned (`stale-result-name`), only of a page that
+    was read (rule 8). Replayed over that evening's pages, this reader
+    changed no status, name or unmatched entry and wrote no note, and no
+    alias was stale. And a mark inside
     recount range is an editor's call, not a count's: Minnesota's 1st was
     marked for Jake
     Johnson on 163,055 to 162,733 (322 votes, 0.10 points) with the infobox
