@@ -230,6 +230,10 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
 _WIKIPEDIA = "Wikipedia's election results page"
 _INQUIRY = "the Secretary of State's Candidate Inquiry"
 _CERTIFIED_LIST = "the certified list of candidates"
+# A November winner, or loser, called from the national summary where the
+# state's page held no result (rule 63's national route), in the owner's words.
+NATIONAL_SOURCE = ("Wikipedia's national summary of the House elections, which gives no "
+                   "vote count; the state's page had none when read")
 
 
 def _race_source(status, source=None, source_name=None):
@@ -241,6 +245,8 @@ def _race_source(status, source=None, source_name=None):
         return _INQUIRY
     if source == "certified" and status in _CERTIFIED:
         return source_name or _CERTIFIED_LIST
+    if source == "national" and status in ("elected", "defeated"):
+        return NATIONAL_SOURCE
     return _WIKIPEDIA
 
 
@@ -346,7 +352,7 @@ def status_table():
                for status in sorted(_RACE_STATUS)
                for source, name in ((None, None), ("certified", None),
                                     ("certified", "the Test Division of Elections"),
-                                    ("qualified", None))]
+                                    ("qualified", None), ("national", None))]
     contest = []
     for status in ("", *sorted(_RACE_STATUS)):
         for renumbered in (0, 1):

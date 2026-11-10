@@ -416,6 +416,11 @@
    * ballot, and stays in view beside the person who beat them. */
   // Never "the state's": a territory's, or D.C.'s, is not (rule 75).
   var SOURCE = " Source: Wikipedia's election results page.";
+  // A November winner called from the national summary (rule 63's national
+  // route): share.NATIONAL_SOURCE writes the same words.
+  var NATIONAL_NAME = "Wikipedia's national summary of the House elections";
+  var NATIONAL_NOTE = "which gives no vote count; the state's page had none when read";
+  var NATIONAL_WORDS = NATIONAL_NAME + ", " + NATIONAL_NOTE;
   /* A sitting member leaving the seat they hold, in the same words whether
    * the results list them as withdrawn or do not list them: only the title,
    * which cites its source, differs. */
@@ -738,7 +743,9 @@
     var title = own.title || spec.title;
     var source = spec.source || (listed ? LISTED_SOURCE : certified
       ? " Source: " + (opts.sourceName || "the certified list of candidates") + "."
-      : SOURCE);
+      : opts.source === "national" && (status === "elected" || status === "defeated")
+        ? " Source: " + NATIONAL_WORDS + "."
+        : SOURCE);
     // An independent or a minor party's nominee reaches the ballot by
     // petition or by their party's nomination, mostly without a primary:
     // "Won the primary" was false for Dan Osborn and 57 others (PROFILES-17).
@@ -1129,9 +1136,18 @@
         "won, lost or withdrew.";
     // The caveat is page text: a title is a hover a phone never shows.
     var note = listed ? "" : '<span class="race-source-note"> (not the state\u2019s certified count)</span>';
+    // A winner called from the national summary, where the state's page held
+    // no result (rule 63's national route): its own source, said beside the
+    // page's (rule 19).
+    var national = r.calledBy === "national" && /^https:\/\//.test(r.nationalUrl || "")
+      ? '<span class="race-source"><a href="' + escapeAttr(r.nationalUrl) +
+        '" target="_blank" rel="noopener noreferrer" title="' + escapeAttr(NATIONAL_WORDS) +
+        '">Winner: ' + escapeHtml(NATIONAL_NAME) + "</a>" +
+        '<span class="race-source-note"> (' + escapeHtml(NATIONAL_NOTE) + ")</span></span>"
+      : "";
     return '<span class="race-source"><a href="' + escapeAttr(r.sourceUrl) +
       '" target="_blank" rel="noopener noreferrer" title="' + escapeAttr(title) + '">' +
-      escapeHtml(label) + "</a>" + note + "</span>";
+      escapeHtml(label) + "</a>" + note + "</span>" + national;
   }
 
   /** True when the primary settled *status* out of the race. */

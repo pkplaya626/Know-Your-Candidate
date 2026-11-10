@@ -4893,6 +4893,13 @@ def _source_of(profile, race, cid=None, absent=False):
     if certified and (absent or cid in (race.get("certifiedIds") or {})):
         profile["raceStatusSource"] = "certified"
         profile["raceStatusSourceName"] = certified.get("source", "")
+        return
+    # A winner, or a loser, the national summary called (rule 63's national
+    # route): its source is that summary, which gives no count, never the
+    # state's page, which had none (rule 19).
+    if (cid and race.get("calledBy") == CALLED_NATIONAL
+            and (race.get("status") or {}).get(cid) in (ELECTED, DEFEATED)):
+        profile["raceStatusSource"] = "national"
 
 
 def _all_out(race, names):
@@ -4981,6 +4988,11 @@ def race_summary(cache, race_id):
             # statuses were read from, by the title the cache holds (rule 32),
             # or the Secretary of State's list a qualified ballot came from.
             "sourceUrl": results_source_url(race),
+            # How its winner was called (rule 63), and where the national
+            # summary is, at the revision read, for a winner called from it.
+            "calledBy": race.get("calledBy") or None,
+            "nationalUrl": ((race.get("national") or {}).get("url") or None)
+            if race.get("calledBy") == CALLED_NATIONAL else None,
             # Who certified the November ballot, where a state's list was
             # read (rule 77), and the party of each name with no profile.
             "certifiedBy": (race.get("certified") or {}).get("source") or None,

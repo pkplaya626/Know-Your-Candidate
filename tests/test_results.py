@@ -4559,6 +4559,31 @@ class TestTheNationalSummarysMark(TestTheInfoboxDeclaresTheWinner):
         # With nothing read before, an unread page calls nothing.
         self.assertNoCall(self.nread("", national=False))
 
+    def test_the_call_credits_the_national_summary(self):
+        from kyc import share
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS)
+        race = self.race(cache)
+        for cid in (self.STONE, self.SWAN):
+            profile = {}
+            results._source_of(profile, race, cid)
+            self.assertEqual(profile.get("raceStatusSource"), "national", cid)
+        profile = {}
+        results._source_of(profile, race, "H6ZZ05002")      # lost the primary: the page's
+        self.assertNotIn("raceStatusSource", profile)
+        summary = results.race_summary(cache, self.race_id())
+        self.assertEqual(summary["calledBy"], "national")
+        self.assertIn("oldid=1234", summary["nationalUrl"])
+        self.assertEqual(share.status_source({"raceStatus": "elected", "raceStatusSource": "national",
+                                              "isCandidate": True, "id": "x"}, {}),
+                         share.NATIONAL_SOURCE)
+        self.assertIn("which gives no vote count", share.NATIONAL_SOURCE)
+        # An infobox call is the state's page's, credited as today.
+        cache = self.read(self.infobox(), self.table())
+        profile = {}
+        results._source_of(profile, self.race(cache), self.STONE)
+        self.assertNotIn("raceStatusSource", profile)
+        self.assertIsNone(results.race_summary(cache, self.race_id())["nationalUrl"])
+
     def test_the_row_is_read_as_the_article_writes_it(self):
         body = results.national_rows(national_article(
             "OH", 5, "Incumbent retired to run for Senate.<ref name=x/><br>Democratic hold.",
