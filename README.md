@@ -798,6 +798,47 @@ page and writes `data/primary_results.json`. Three things keep it honest:
 - **Winners come from the markup, never from the count.** A row is a winner
   only when it uses the `Election box winning candidate` template. A table
   with nobody marked decides nothing — it is a candidate list, not a result.
+  After Election Day two more routes name a November winner, each held to
+  every gate a mark is (below) and to its own:
+  - **The infobox's declared winner** (`after_election`, not ongoing), where
+    no November table marks anyone — Alabama's editors bold the winner's row,
+    Texas's tables stand blank. It is read as the table's mark on that person
+    (`results.infobox_call`), so one implementation settles both: the
+    table's counts and the infobox's must lead with them, the lead must be
+    half a point of the count (the declaration grants no exemption here),
+    the infobox's share reporting at least 50, the person a filing, a state's
+    list or an evidenced `RESULT_NAMES` entry names, and the ranked-choice and
+    majority gates stand (a Georgia, Maine, Louisiana or territory seat whose
+    table has no counts is not called). A declaration with no counts anywhere
+    stands only where nobody else is on the ballot.
+  - **The national summary's mark**, for a House race whose state's page
+    holds no November result at all (no count, mark or declaration): the
+    district's row of "2026 United States House of Representatives
+    elections" (read once a run; a failed read keeps the last read's calls)
+    must mark one person with `{{aye}}`, that person one November nominee by
+    filing or a state's list, and the row's own words must agree with the
+    frozen record's incumbent ("Incumbent re-elected" only for them, "lost
+    re-election", "lost renomination" or "New member elected" only for
+    someone else, a party's "hold" or "gain" against the holder's party). Never
+    in a ranked-choice, majority or open-primary state, D.C. or a territory.
+    A state page that later gives a result takes over, and one that puts
+    someone else first, or whose counts are too close (under `CLOSE_MARGIN`)
+    or too early (under `REPORTING_FLOOR`, or unreadable) to stand behind
+    it, withdraws the call (`nationalWithdrawn`, `{race id: {name, leaders,
+    why, revid}}`, `result-national-withdrawn`); a call the last read made
+    and this one does not is `nationalDropped` (`result-national-dropped`),
+    and one kept unread past two weeks `result-national-kept-stale`.
+    The page credits such a call to "Wikipedia's national summary of the
+    House elections, which gives no vote count; the state's page had none
+    when read" wherever a status's source is shown.
+
+  Each race records how its winner was called (`calledBy`: `table`,
+  `infobox` or `national`; a national call's `national`: `{name, party,
+  ayes, words, url, revid, read, kept?}`), the cache records the summary it
+  read (`national`: `{title, revid, url}`, or null) and each silent race's
+  row that gave no call (`nationalRefused`, `{race id: {name, why}}`), and
+  the read's log and `validate` count each route (`result-calls`, an info
+  line).
 - **The general-election table is the authority** when the page has one; a
   party's runoff table decides for the people in it; otherwise a primary's
   marked winner is the nominee. In a runoff state a primary with two marked

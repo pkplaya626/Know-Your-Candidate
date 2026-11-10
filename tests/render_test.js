@@ -14127,6 +14127,28 @@ async function testFrame() {
     check("and the words say whose results they are", race.results.certifiedComplete
       ? KYC.ballotSource(race) === "per the " + race.results.certifiedBy
       : /^per Wikipedia's results page/.test(KYC.ballotSource(race)), KYC.ballotSource(race));
+    // Rule 63's national route: a winner called from the national summary,
+    // where the state's page held no result, names that summary as its own
+    // source beside the page, in page text, and its long title says so too.
+    const national = Object.assign({}, race, { results: Object.assign({}, race.results, {
+      calledBy: "national",
+      nationalUrl: "https://en.wikipedia.org/w/index.php?title=2026_United_States_House_of_Representatives_elections&oldid=1" }) });
+    const box = window.document.createElement("div");
+    box.innerHTML = KYC.resultsSourceHtml(national);
+    const links = box.querySelectorAll(".race-source a");
+    check("a national call links the national summary at its revision, and says it gives no count",
+      links.length === 2 && /oldid=1$/.test(links[1].getAttribute("href")) &&
+        /^Winner: Wikipedia's national summary of the House elections$/.test(links[1].textContent) &&
+        /which gives no vote count; the state's page had none when read/.test(box.textContent),
+      box.innerHTML);
+    const plain = window.document.createElement("div");
+    plain.innerHTML = KYC.resultsSourceHtml(race);
+    check("and a race called any other way links the page alone",
+      plain.querySelectorAll(".race-source a").length === 1, plain.innerHTML);
+    const title = KYC.raceStatus("elected", "long", { source: "national" }).title;
+    check("the status's long title credits the national summary",
+      / Source: Wikipedia's national summary of the House elections, which gives no vote count; the state's page had none when read\.$/
+        .test(title), title);
   });
 
   // map.html: the national views name their sources (TECH-11).
