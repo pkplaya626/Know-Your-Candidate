@@ -5900,7 +5900,11 @@ async function testRenumbered() {
     // running there under the new number.
     const wrong = moved.filter((r) => {
       const badge = KYC.cards.raceBadges(r);
-      const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered && p.contestRaceId === r.id);
+      // The race the move named (kyc/races.py): once the new Congress sits,
+      // a member seated for the seat they won has no contestRaceId left, and
+      // raceStatusRace is that race.
+      const mover = r.candidateIds.map(KYC.byId).some((p) => p && p.renumbered &&
+        (p.contestRaceId || p.raceStatusRace) === r.id);
       return r.openSeat === mover || (r.openSeat ? !/new district map/.test(badge)
         : !/Holder running in/.test(badge) || />Open seat</.test(badge));
     });
