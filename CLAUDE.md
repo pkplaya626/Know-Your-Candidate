@@ -1486,7 +1486,68 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     reader changed seven races and nothing else: Swanson and Nagel lost,
     Kirchner and Wirth are nominees again under one name each, none of the
     four other names is shown, MN-1 awaits its result, and two write-ins
-    (rule 77) are no longer read as on the ballot. Who
+    (rule 77) are no longer read as on the ballot. A week after the count
+    the owner wrote "it seems we are missing some confirmed election
+    results across the site": 91 of 475 races were called, because a
+    winner came only from the "winning candidate" template. 241 pages
+    declared the winner in the infobox with counts leading them and marked
+    no row (Alabama's editors bold the winner's row; Texas's tables stand
+    blank), and 117 sections held no result at all while the national
+    article's row of every district marked the winner with `{{aye}}`. Two
+    routes now name a winner, by the lead's decision and the owner's ("Yes,
+    with checks", 2026-11-10), and neither relaxes a refusal. The infobox's
+    declaration, where no November table marks anyone, is read as the
+    table's mark on that person, or with no table on the infobox's own row
+    (`results.infobox_call`, `called`), so `refuse_marks` and `resolve_race`
+    decide it as they decide a mark (rule 12) and hold it to its own gates
+    besides (`_call_stands`): declared and not ongoing; the person on the
+    page's November ballot and named by a filing, a state's list or an
+    evidenced `RESULT_NAMES` entry (a name only the infobox gives is refused,
+    and said); the table's counts, where it gives any, and the infobox's two
+    or more counts leading with them; the infobox's share reporting at least
+    `REPORTING_FLOOR` and readable; and a lead of at least `CLOSE_MARGIN`,
+    which a declaration does not excuse here as it does a mark (Tennessee's
+    4th, 280 votes, is refused). A declaration with no counts anywhere stands
+    only where nobody else is on the ballot, as an unopposed mark does. The
+    majority gates stand: with no counted table there is no majority, so
+    Georgia's twelve blank-table seats, Louisiana's open rounds, Maine's 1st
+    and the Virgin Islands wait for their counts. The national route
+    (`national_call`) reads "2026 United States House of Representatives
+    elections" once a run (`fetch_national`, under the reader's agent), only
+    for a House race whose section holds no November count, mark or
+    declaration, and never in a ranked-choice or majority state or on an
+    open primary's or a qualified list's seat (`national_barred`). The
+    district's row - the one the table of every district keys by
+    `{{ushr|ST|N}}` beside its PVI, a key two such rows share giving none -
+    must mark one person, who is one November nominee of the race by filing
+    or a state's list, with no look-alike beside them (rule 25) and the row's
+    party their filing's major party; and the row's own words must agree with
+    the frozen record's incumbent and none disagree: "Incumbent re-elected"
+    only for them; "lost re-election", "lost renomination" or "New member
+    elected" only for someone else; a party's "hold" only where the marked
+    person's party, the one named, is the holder's, "gain" only where it is
+    not; a row with none of those words gives nothing. Texas's 30th and 35th
+    ("Democratic gain" over a Democratic holder, on the national article's
+    new lines) and 37th (two members in one row) give nothing so. A read
+    that fails keeps the last read's national calls (`kept`, rule 8); a state
+    page that later gives a result takes over, and one that puts someone
+    else first withdraws the call, which `validate` warns of
+    (`nationalWithdrawn`, `result-national-withdrawn`). Each race records how
+    it was called (`calledBy`: table, infobox or national; a national call
+    its row, address and revision), the read's log and `validate`'s summary
+    count each route (`result-calls`, an "info" line), and a national call is
+    credited wherever a status's source is shown - the dialog's long title,
+    the race head's source line, share pages and the status table's fixture
+    - to "Wikipedia's national summary of the House elections, which gives no
+    vote count; the state's page had none when read" (`share.NATIONAL_SOURCE`,
+    `raceStatusSource` "national"); an infobox call is the state's page's.
+    Replayed over every state's page as it stood at 19:50 UTC on 2026-11-10,
+    the reader called 228 races from the infobox and 111 from the national
+    summary beside the 92 tables' marks, and changed nothing else once one
+    thing the calls exposed was fixed: a filer in a November table whom a
+    state's whole list does not print read "Lost the November election"
+    (FL-6's Michael Gist), and a loss is now no more than a place on the
+    ballot (`certify_race`), so they read "not on the ballot". Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
