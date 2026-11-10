@@ -213,8 +213,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2897 tests, no dependencies
-npm install && npm test                       # 3758 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2898 tests, no dependencies
+npm install && npm test                       # 3762 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1856,6 +1856,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "On the ballot" in CA-3, which he holds and is not running for. A filer
     the results do not name after the primary is `ballotUnknown`, never
     "the primary has not been held yet", and is not counted as on it.
+    The move is the record's once the new Congress sits: a member seated
+    for the seat they won under the new number has no other run on their
+    profile (no `contestRaceId`), so it is the race the results credit them
+    with (`raceStatusRace`), and a seat a member ran in under the new
+    number is not open by that move, not by a field the new term clears.
+    The January rehearsal over the refresh of 2026-11-10, the first with
+    Utah's races called, read "4 open seats in 2026" over three members
+    re-elected under the new map; the page now says it in the past tense
+    ("Holder re-elected in UT-2", "who held this seat").
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it
