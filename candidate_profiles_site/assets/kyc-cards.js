@@ -453,9 +453,30 @@
       return p && p.contestLabel && p.name === race.holderMoved.name;
     })[0];
     var line = holder ? KYC.contestLine(holder) : null;
+    var done = line ? null : movedRecord(race);
+    if (done) {
+      return race.holderMoved.name + ", who held this seat, " + done.clause +
+        " under the state’s new district map";
+    }
     return race.holderMoved.name + ", who holds this seat, " + (line ? line.clause
       : "is running for " + race.holderMoved.to.replace(/ • /, " ") +
         " under the state\u2019s new district map");
+  }
+
+  /* Once the new Congress sits (KYC.recordPhase) a member seated for the seat
+   * they won under the new map has no other run on their profile, so
+   * KYC.contestLine has nothing to say: the run is the record's, in the past
+   * tense. On the January rehearsal of 2026-11-10 Utah's three such members
+   * would have read "who holds this seat, is running for House UT-2". */
+  function movedRecord(race) {
+    if (!KYC.recordPhase()) return null;
+    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
+      return p && p.name === race.holderMoved.name;
+    })[0];
+    var to = race.holderMoved.to.replace(/^House • /, "");
+    var won = !!holder && holder.raceRole === "winner" && holder.raceId !== race.id;
+    return { verb: won ? "re-elected in" : "ran in",
+      clause: (won ? "was re-elected in " : "ran in ") + to };
   }
 
   /* The head badge's words for that holder: "Holder running in CA-41",
@@ -465,7 +486,9 @@
       return p && p.contestLabel && p.name === race.holderMoved.name;
     })[0];
     var line = holder ? KYC.contestLine(holder) : null;
-    var verb = line ? line.verb.charAt(0).toLowerCase() + line.verb.slice(1) : "running in";
+    var done = line ? null : movedRecord(race);
+    var verb = line ? line.verb.charAt(0).toLowerCase() + line.verb.slice(1)
+      : done ? done.verb : "running in";
     return "Holder " + verb + " " + race.holderMoved.to.replace(/^House • /, "");
   }
 
