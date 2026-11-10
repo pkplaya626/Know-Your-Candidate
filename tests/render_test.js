@@ -2261,12 +2261,17 @@ async function testDirectoryAsync() {
     const unprofiled = (window.kycRaces || []).filter((r) => r.settled && r.candidateCount === 0 &&
       ((r.results || {}).belowThreshold || []).length);
     check("there are races whose only challengers are under the threshold", unprofiled.length > 0);
+    // A name the results may give a profile (maybeProfiled: MN-5's Joe Nagel
+    // on 2026-11-06) is counted on the ballot but not as having none: the
+    // check counted every name as profileless and held three refreshes.
     const badly = unprofiled.filter((r) => {
       const html = KYC.cards.raceBadges(r);
       const n = r.results.otherNominees.length;
+      const none = KYC.cards.unprofiledNames(r).none.length;
       return /No challenger on the ballot/.test(html) ||
         (html.indexOf(n + " challenger") === -1 && html.indexOf(n + " candidate") === -1) ||
-        html.indexOf(n + " with no profile here") === -1;
+        (none > 0 && html.indexOf(none + " with no profile here") === -1) ||
+        (none === 0 && / with no profile here/.test(html));
     });
     check("each counts them as challengers and says they have no profile here",
       badly.length === 0, badly.slice(0, 3).map((r) => r.id + ": " + KYC.cards.raceBadges(r)).join(" | "));
@@ -19788,11 +19793,54 @@ async function testPhotoCopies() {
      * gives (the owner's brief of 2026-10-25): Tad Jude's 1981 Minnesota
      * Legislature portrait, a statewide candidate's, read as current. */
     const { window, D, errors } = await buildPage("states/mn.html");
+    const KYC = window.KYC;
     suite("states/mn.html — a Commons photograph's credit says its year", () => {
       check("no page errors", errors.length === 0, errors.join(" | "));
-      const jude = [...D.querySelectorAll("*")].filter((el) => el.children.length === 0 &&
-        /Photo \(1981\): The Minnesota Legislature/.test(el.parentNode.textContent));
-      check("Tad Jude's portrait is dated 1981 in its credit", jude.length > 0);
+      // The check makes the state it tests: it once asked the day's data
+      // for Tad Jude's record, which the read of 2026-11-09 rightly dropped
+      // when his articles changed their image, and every refresh after it
+      // would have failed here (the PR #213 review). A statewide candidate
+      // of whichever state lists one is given a Commons record dated 1981.
+      const pick = (code) => {
+        const offices = ((window.kycStateGov.states[code] || {}).ballot2026 || {}).offices || {};
+        const key = ["sos", "ag", "lt"].find((k) => offices[k] &&
+          ((offices[k].candidates || {}).candidates || []).some((p) => !p.writeIn));
+        return key ? { code, row: offices[key].candidates.candidates.find((p) => !p.writeIn) } : null;
+      };
+      const picked = pick("MN") || Object.keys(window.kycStateGov.states).sort().map(pick).find(Boolean);
+      check("a state lists a statewide candidate to picture", !!picked);
+      if (!picked) return;
+      const { code, row } = picked;
+      const keep = [row.photo, row.photoCredit, row.photoCopy];
+      const credit = { by: "The Minnesota Legislature", licence: "Public domain", licenceUrl: null,
+        page: "https://commons.wikimedia.org/wiki/File:Portrait_of_A_Candidate_(cropped).jpg",
+        via: "Wikimedia Commons", basis: "PD-US", year: 1981, yearForm: 4 };
+      row.photo = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/" +
+        "Portrait_of_A_Candidate_%28cropped%29.jpg/250px-Portrait_of_A_Candidate_%28cropped%29.jpg";
+      delete row.photoCopy;
+      const creditOf = () => {
+        const host = D.createElement("div");
+        host.innerHTML = KYC.stategov.render(code);
+        const img = [...host.querySelectorAll("img")].find((i) => i.getAttribute("src") === row.photo);
+        const item = img && img.closest("li, .gcard, .gov-candidate");
+        return item ? item.textContent.replace(/\s+/g, " ") : "";
+      };
+      row.photoCredit = credit;
+      const dated = creditOf();
+      check("a candidate's Commons portrait is dated in its credit",
+        dated.indexOf("Photo (1981): The Minnesota Legislature, Public domain, via Wikimedia Commons") !== -1, dated);
+      // No year where the file's page gives none plainly: never a guess.
+      row.photoCredit = Object.assign({}, credit, { yearUnstated: true });
+      delete row.photoCredit.year;
+      const undated = creditOf();
+      check("and says no year where the file's page gives none",
+        undated.indexOf("Photo: The Minnesota Legislature, Public domain, via Wikimedia Commons") !== -1 &&
+        !/Photo \(/.test(undated), undated);
+      row.photo = keep[0];
+      row.photoCredit = keep[1];
+      if (keep[2]) row.photoCopy = keep[2];
+      if (keep[0] === undefined) delete row.photo;
+      if (keep[1] === undefined) delete row.photoCredit;
     });
     window.close();
   }

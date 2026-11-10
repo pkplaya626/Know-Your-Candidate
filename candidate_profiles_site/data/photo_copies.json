@@ -44,7 +44,7 @@
    "height": 973,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Church,%20Josh%20J_Lt.%20Governor_Eng_v2.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "1271aa8fadf719586f7c3fe2cb3bdff40729b5adb0ca5f61c74784b3d902e52e",
    "type": "image/jpeg",
    "width": 807
@@ -59,7 +59,7 @@
    "height": 599,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=24",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "395297bde1fe2d67a664def420d3f6c5f69e7e6f3cf170df14f4744951f77001",
    "type": "image/jpeg",
    "width": 399
@@ -95,7 +95,7 @@
    "height": 1329,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/CANDI,%20ENGLISH_%20Lt%20Governor_%20Eng_v2.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "3f11f3a06ce1188320a5139cedf9b72362be9bf88f049ac348affc4074bd6105",
    "type": "image/jpeg",
    "width": 1113
@@ -110,7 +110,7 @@
    "height": 1080,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/JOHNSON,%20ZAC_Lt%20Gov_Eng_v2.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "51d58cb46701d600374bb6c1e0187c52e664c2069d746dce452385d078af79e2",
    "type": "image/jpeg",
    "width": 1048
@@ -126,7 +126,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=35",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "66ea811e6896720ac02bc62b9b5c3010c9f84783b2d484f24f5b97eb2d924964",
    "sourceSha256": "d122af6046b6eed47f96087ce2655a2a0cfbb0eade51b1fcfcee3ebe63740193",
    "type": "image/png",
@@ -143,7 +143,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=32",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "84307b6eaed61e0ed24d50dc543a3bd7348fdbb76c929ccf970682e5b0a501ea",
    "sourceSha256": "b2e4071d718473886045f92064729322e5dc73d3167fd4e837026b3efb1459f5",
    "type": "image/png",
@@ -159,7 +159,7 @@
    "height": 857,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SULLIVAN,%20DANIEL%20J.%20JR%20_US%20Sen_Eng_v1.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "8990ce16abd8652da11d2e9aed7e5a33c559f9f2bd6c42bad3e146f19a3a0da7",
    "type": "image/jpeg",
    "width": 751
@@ -175,7 +175,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book19_web.pdf#page=34",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "8c34d6c5670d0ded7391a04d3ff7495b02c8ca2c37a190853f6dddb57305ee91",
    "sourceSha256": "1e241eeb55ad58da4c179ed0503de827562e16f28aa8698fc648e2bf217702cd",
    "type": "image/png",
@@ -212,7 +212,7 @@
    "height": 2705,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186950/1601895",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "8e7bfe692d6d6b8a2e3e844168e28de4171fc6fb91ef0ba57351c780e66169aa",
    "type": "image/jpeg",
    "width": 2254
@@ -227,7 +227,7 @@
    "height": 540,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=16",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "9484fc6ce5c2e8fc26297d2accbc392af1602dab9fc866771d8346116e1764b2",
    "type": "image/jpeg",
    "width": 434
@@ -243,7 +243,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book11_web.pdf#page=32",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "96b6ab3f3d932a2970abc41bca9190449abd06cc859298e1c3021e7b87aafdbc",
    "sourceSha256": "f8493c2c95b33d3dee1b6ea3c0d65ff1d045dd418c8e9da01ef7c906d9728cfb",
    "type": "image/png",
@@ -259,7 +259,7 @@
    "height": 433,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186955/1601905",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "9e5a0b550a37e2db2b2d53ee883a203138ae0f1368999ca294f5d7af23f499b7",
    "type": "image/jpeg",
    "width": 361
@@ -274,7 +274,7 @@
    "height": 944,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=11",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "ac1170898cbf3a54000465fe5c9e3dcefa5a451180e33a9e96c4be775c78aa92",
    "type": "image/jpeg",
    "width": 630
@@ -289,7 +289,7 @@
    "height": 906,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/WILSON,%20BERNADETTE_Gov_Eng_v2.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "b3b2f41ae57ccc6ccb0d2d034d600dde83abea1c5bf81267d3d8f990b02e81ec",
    "type": "image/jpeg",
    "width": 759
@@ -304,7 +304,7 @@
    "height": 1096,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/SHOWER%20,%20MICHAEL%20K_%20Lt%20Governor_%20Eng_v1.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "b4d4590de7a799cc12bbcec150d5918546fb49bf1a2a820f15a237afb14d7aa6",
    "type": "image/jpeg",
    "width": 906
@@ -340,7 +340,7 @@
    "height": 1392,
    "method": "unmodified",
    "page": "https://vote.utah.gov/wp-content/uploads/2026/09/2026-Voter-Information-Pamphlet.pdf#page=9",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "c05c0d9dc26b407606b77ff43b68a7b59edb5043a961d201dfe978a7c518574b",
    "type": "image/jpeg",
    "width": 928
@@ -355,7 +355,7 @@
    "height": 501,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186953/1601901",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "c8108e6fb86765427c8fc8d620ae31968c629bed6cd57bb797e327f70b409c30",
    "type": "image/jpeg",
    "width": 418
@@ -370,7 +370,7 @@
    "height": 584,
    "method": "unmodified",
    "page": "https://voter.votewa.gov/genericvoterguide.aspx?e=899&c=99#/candidates/186952/1601899",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "ce93240400345f51e5750d61c39b3f3e1939c9f17f8940ff110dbfbee77e9e86",
    "type": "image/jpeg",
    "width": 486
@@ -385,7 +385,7 @@
    "height": 619,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/TAYLOR,%20TREG_Gov_Eng_v1.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "d57500fe4e8b2efaf26f7122a78a0bdf686a7cc67b57aa49ea8d9ad863276c41",
    "type": "image/jpeg",
    "width": 517
@@ -401,7 +401,7 @@
    "height": 350,
    "method": "decoded",
    "page": "https://sos.oregon.gov/elections/Voters-Pamphlet/Documents/VP_G26-Book14_web.pdf#page=36",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "d879b05c460beddb58ed25185a9c132c1933bef5a02b778c9f87a53526bb4a71",
    "sourceSha256": "4268d7b64f5798df27a236fd858a87408dd132d06719a2f87e9669edd2a26d43",
    "type": "image/png",
@@ -438,7 +438,7 @@
    "height": 1320,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/Bronson,%20Dave_Governor_Eng_v3.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "d8f4574d09d969ecac7d69cdf1e2f053d3f08036ee95b4ba1c82d63722cd05e3",
    "type": "image/jpeg",
    "width": 1095
@@ -469,7 +469,7 @@
    "height": 907,
    "method": "unmodified",
    "page": "https://elections.alaska.gov/doc/oep/2026/KREISS-TOMKINS,%20JONATHAN%20S.%20JKT_Gov_Eng_v4.pdf",
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "sha256": "fd2a5042d813f41e237929037c4208150115606eec8e5e39f449961f84887ea9",
    "type": "image/jpeg",
    "width": 758
@@ -26179,15 +26179,14 @@
   },
   "https://docs.legis.wisconsin.gov/2025/legislators/assembly/2899.jpg": {
    "bytes": 33144,
-   "error": "URLError: <urlopen error timed out>",
    "etag": "\"IeR7nvmBEulIooNsUxX2oQ==\"",
    "gone": 0,
    "height": 200,
    "kinds": [
     "legislator"
    ],
-   "lastModified": "Mon, 26 Oct 2026 22:11:28 GMT",
-   "read": "2026-10-26",
+   "lastModified": "Wed, 04 Nov 2026 17:15:06 GMT",
+   "read": "2026-11-04",
    "records": [
     "legislator:WI:ocd-person/3089bcca-553d-4637-9b50-2d9698944d5a"
    ],
@@ -39876,7 +39875,7 @@
     "person"
    ],
    "lastModified": "Thu, 09 Jan 2025 18:44:23 GMT",
-   "read": "2026-10-28",
+   "read": "2026-11-04",
    "records": [
     "legislator:NV:ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
     "person:FEC_H6NV01331"
@@ -69648,7 +69647,7 @@
     "person"
    ],
    "lastModified": "Thu, 12 Jan 2023 19:29:01 GMT",
-   "read": "2026-10-28",
+   "read": "2026-11-04",
    "records": [
     "legislator:MI:ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44",
     "person:FEC_H6MI11191"
@@ -71375,7 +71374,7 @@
    "kinds": [
     "officer"
    ],
-   "read": "2026-10-29",
+   "read": "2026-11-05",
    "records": [
     "officer:AL:ag:Steve Marshall"
    ]
@@ -75746,7 +75745,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/elefante.jpg": {
    "bytes": 41053,
-   "error": "HTTP 429",
    "etag": "\"4029c226c448d91:0\"",
    "gone": 0,
    "height": 359,
@@ -75754,7 +75752,7 @@
     "legislator"
    ],
    "lastModified": "Sat, 25 Feb 2023 02:52:08 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/22139704-8a26-4f4a-8a03-989990c21f37"
    ],
@@ -75762,7 +75760,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/fevella.jpg": {
    "bytes": 62512,
-   "error": "HTTP 429",
    "etag": "\"de8be1cb37cdb1:0\"",
    "gone": 0,
    "height": 380,
@@ -75770,7 +75767,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 18:31:06 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/e6bafd21-a2de-41b8-8139-fcbf5ea94cf4"
    ],
@@ -75778,7 +75775,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/fukunaga.jpg": {
    "bytes": 58076,
-   "error": "HTTP 429",
    "etag": "\"22d40c9e179db1:0\"",
    "gone": 0,
    "height": 380,
@@ -75786,7 +75782,7 @@
     "legislator"
    ],
    "lastModified": "Sat, 08 Feb 2025 04:27:38 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/ca85a087-4a1f-450b-9386-11c13eb8c280"
    ],
@@ -75794,7 +75790,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/gabbard.jpg": {
    "bytes": 60034,
-   "error": "HTTP 429",
    "etag": "\"684b5158af7cdb1:0\"",
    "gone": 0,
    "height": 380,
@@ -75802,7 +75797,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 18:04:08 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/9f87e7d6-a307-45ab-b384-96a8599dab56"
    ],
@@ -75810,7 +75805,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/ihara.jpg": {
    "bytes": 57019,
-   "error": "HTTP 429",
    "etag": "\"deef7cd9af7cdb1:0\"",
    "gone": 0,
    "height": 380,
@@ -75818,7 +75812,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 18:07:44 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/94e42ecd-2e4d-4502-8b50-c1c6324617f1"
    ],
@@ -75841,7 +75835,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/kanuha.jpg": {
    "bytes": 62200,
-   "error": "HTTP 429",
    "etag": "\"ee9d178b07cdb1:0\"",
    "gone": 0,
    "height": 380,
@@ -75849,7 +75842,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 18:09:02 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/e75469cc-851a-4e63-9908-9e63b5215448"
    ],
@@ -75872,7 +75865,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/kim.jpg": {
    "bytes": 112235,
-   "error": "HTTP 429",
    "etag": "\"b14b8f2c084db1:0\"",
    "gone": 0,
    "height": 380,
@@ -75880,7 +75872,7 @@
     "legislator"
    ],
    "lastModified": "Sat, 22 Feb 2025 00:30:16 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/f196e943-c8d6-4a35-96c2-252171c6529a"
    ],
@@ -75888,7 +75880,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/kouchi.jpg": {
    "bytes": 63582,
-   "error": "HTTP 429",
    "etag": "\"3658f586c084db1:0\"",
    "gone": 0,
    "height": 380,
@@ -75896,7 +75887,7 @@
     "legislator"
    ],
    "lastModified": "Sat, 22 Feb 2025 00:27:17 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/3ca1b2e5-0c68-4be1-ba5b-b0d935b85e6f"
    ],
@@ -75919,7 +75910,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/moriwaki.jpg": {
    "bytes": 59677,
-   "error": "HTTP 429",
    "etag": "\"61c7ee67b17cdb1:0\"",
    "gone": 0,
    "height": 380,
@@ -75927,7 +75917,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 18:18:53 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/7e04af29-c684-402f-a7b0-bdde0591197c"
    ],
@@ -75935,7 +75925,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/rhoads.jpg": {
    "bytes": 69104,
-   "error": "HTTP 429",
    "etag": "\"f0828c90b17cdb1:0\"",
    "gone": 0,
    "height": 380,
@@ -75943,7 +75932,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 18:20:01 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/099756de-3b84-4531-b5da-6d1c5d4c89ee"
    ],
@@ -75981,7 +75970,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/RepSenPhotos/schang.jpg": {
    "bytes": 63644,
-   "error": "HTTP 429",
    "etag": "\"e616acad307cdb1:0\"",
    "gone": 0,
    "height": 370,
@@ -75989,7 +75977,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 11 Feb 2025 02:57:25 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/d6359473-e0b5-4040-8d7f-9d95a0518650"
    ],
@@ -76012,7 +76000,6 @@
   },
   "https://www.capitol.hawaii.gov/MemberFiles/Senate/bass/Images/Bass_CR_2026-09.JPG": {
    "bytes": 185480,
-   "error": "HTTP 429",
    "etag": "\"f2e44e34e655dd1:0\"",
    "gone": 0,
    "height": 647,
@@ -76020,7 +76007,7 @@
     "legislator"
    ],
    "lastModified": "Tue, 06 Oct 2026 22:58:29 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/f0a277d4-dbc5-4dfe-952b-bdee42260d39"
    ],
@@ -76043,7 +76030,6 @@
   },
   "https://www.capitol.hawaii.gov/memberfiles/repsenphotos/Miyake.jpg": {
    "bytes": 55880,
-   "error": "HTTP 429",
    "etag": "\"4fa281bf4e68db1:0\"",
    "gone": 0,
    "height": 384,
@@ -76051,7 +76037,7 @@
     "legislator"
    ],
    "lastModified": "Thu, 16 Jan 2025 19:42:16 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/6fb71afb-6ce8-4f21-ad16-a7255ca2bfec"
    ],
@@ -76074,7 +76060,6 @@
   },
   "https://www.capitol.hawaii.gov/memberfiles/repsenphotos/iwamoto.jpg": {
    "bytes": 55776,
-   "error": "HTTP 429",
    "etag": "\"85925dbb4e68db1:0\"",
    "gone": 0,
    "height": 384,
@@ -76082,7 +76067,7 @@
     "legislator"
    ],
    "lastModified": "Thu, 16 Jan 2025 19:42:09 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/824eca2b-d968-4807-a48b-7b3df400a904"
    ],
@@ -76090,7 +76075,6 @@
   },
   "https://www.capitol.hawaii.gov/memberfiles/repsenphotos/repshimizu.jpg": {
    "bytes": 57050,
-   "error": "HTTP 429",
    "etag": "\"989381c24e68db1:0\"",
    "gone": 0,
    "height": 384,
@@ -76098,7 +76082,7 @@
     "legislator"
    ],
    "lastModified": "Thu, 16 Jan 2025 19:42:21 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:HI:ocd-person/9019d5ea-bfe8-4cca-9254-7960319a15bc"
    ],
@@ -92429,7 +92413,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "records": [
     "legislator:GA:ocd-person/6f986b42-14f6-4147-9466-c49294331db9"
    ],
@@ -93756,7 +93740,7 @@
    "kinds": [
     "legislator"
    ],
-   "read": "2026-11-02",
+   "read": "2026-11-05",
    "records": [
     "legislator:GA:ocd-person/4b162447-89a7-4ffc-acbf-617e1ad87e2a"
    ],
@@ -105360,7 +105344,6 @@
   },
   "https://www.naag.org/wp-content/uploads/2020/09/ag-MS-Fitch-2024-225x300.jpg": {
    "bytes": 17333,
-   "error": "HTTP 403",
    "etag": "\"68592c93-43b5\"",
    "gone": 0,
    "height": 300,
@@ -105368,7 +105351,7 @@
     "officer"
    ],
    "lastModified": "Mon, 23 Jun 2025 10:29:39 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "officer:MS:ag:Lynn Fitch"
    ],
@@ -112757,7 +112740,6 @@
   },
   "https://www.nmlegis.gov/Images/Legislators/House/HTHOE.jpg": {
    "bytes": 46586,
-   "error": "TimeoutError: The read operation timed out",
    "etag": "\"11b5d930a80db1:0\"",
    "gone": 0,
    "height": 375,
@@ -112765,7 +112747,7 @@
     "legislator"
    ],
    "lastModified": "Sun, 16 Feb 2025 00:31:59 GMT",
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "legislator:NM:ocd-person/13ad8eb1-a64f-4a08-8c68-a1488466128f"
    ],
@@ -124781,7 +124763,6 @@
   },
   "https://www.tn.gov/attorneygeneral/about-the-office/general-skrmetti/_jcr_content/contentFullWidth/tn_textandimage/image.img.jpg/1740766397785.jpg": {
    "bytes": 82283,
-   "error": "URLError: <urlopen error [Errno 104] Connection reset by peer>",
    "etag": "\"1416b-604cc9f9d7580\"",
    "gone": 0,
    "height": 400,
@@ -124789,7 +124770,7 @@
     "officer"
    ],
    "lastModified": "Thu, 07 Sep 2023 22:45:58 GMT",
-   "read": "2026-10-26",
+   "read": "2026-11-04",
    "records": [
     "officer:TN:ag:Jonathan Skrmetti"
    ],
@@ -126250,13 +126231,12 @@
   },
   "https://www.wicourts.gov/courts/supreme/justices/images/crawfordlg.jpg": {
    "bytes": 214244,
-   "error": "URLError: <urlopen error timed out>",
    "gone": 0,
    "height": 550,
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Susan M. Crawford"
    ],
@@ -126264,13 +126244,12 @@
   },
   "https://www.wicourts.gov/courts/supreme/justices/images/dalletlg.jpg": {
    "bytes": 104906,
-   "error": "URLError: <urlopen error timed out>",
    "gone": 0,
    "height": 550,
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Rebecca Frank Dallet"
    ],
@@ -126278,13 +126257,12 @@
   },
   "https://www.wicourts.gov/courts/supreme/justices/images/hagedornlg.jpg": {
    "bytes": 209198,
-   "error": "URLError: <urlopen error timed out>",
    "gone": 0,
    "height": 550,
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Brian Hagedorn"
    ],
@@ -126297,7 +126275,7 @@
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Jill J. Karofsky"
    ],
@@ -126310,7 +126288,7 @@
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Janet C. Protasiewicz"
    ],
@@ -126323,7 +126301,7 @@
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Chris Taylor"
    ],
@@ -126336,7 +126314,7 @@
    "kinds": [
     "justice"
    ],
-   "read": "2026-10-25",
+   "read": "2026-11-04",
    "records": [
     "justice:WI:court:Annette Kingsland Ziegler"
    ],

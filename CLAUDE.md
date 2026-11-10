@@ -197,6 +197,7 @@ python build_profile_site.py executives       # every governor (NGA), and NCSL's
 python build_profile_site.py officers         # lieutenant governors (NLGA), secretaries of state (NASS), attorneys general
 python build_profile_site.py courts           # each state's highest court, from the court's own roster, and its justices' photographs
 python build_profile_site.py ballotphotos     # the statewide candidates' photographs (official guides, members, the race's Wikipedia article)
+                                              # --max-minutes N: no race begun after N minutes; the rest keep their last read
 python build_profile_site.py guidephotos      # the election offices' guides' photographs (WA voters' guide, AK and OR pamphlets), hosted here
 python build_profile_site.py voting           # each state's official voting pages (NASS Can I Vote)
 python build_profile_site.py federal          # the President, VP and Cabinet (White House, office pages, Senate roll calls)
@@ -219,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2561 tests, no dependencies
-npm install && npm test                       # 3485 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2816 tests, no dependencies
+npm install && npm test                       # 3752 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1382,7 +1383,89 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     an ordinary mark in California, Washington, American Samoa or Louisiana
     failed it, which would have held the refresh that brought the mark, so
     `allPartyPrimary` stays on a decided status (no word reads it there) and the
-    rewind reads an open primary's people back to the qualified list. Who
+    rewind reads an open primary's people back to the qualified list. The
+    check of the 63 calls the refresh of 2026-11-09 brought found two more
+    ways to a wrong word, each now read right or refused. A November row
+    renamed over its party's nominee made the nominee "withdrawn" (won the
+    primary, and not on the ballot) and a person nobody filed as "defeated":
+    Minnesota's 8th's DFL row read "Jeanne Hendricks", a name the page gives
+    nowhere else, over the primary's winner and the infobox's nominee, Trina
+    Swanson, on her very 168,350; its 5th's wrote "Joe Nagel" for the
+    primary's and the infobox's John Nagel; Ohio's 11th's "Mike Krichner" for
+    Mike Kirchner, two letters swapped, which no fold caught. A party's
+    primary winner, or the infobox's nominee a filing holds, missing from the
+    November table is never "withdrawn" on that alone when the table holds a
+    row of that party under a name the page gives nowhere else but, at most,
+    its infobox (`results._displaced`). Whose the row is is decided where the
+    filings are known (`november_row_names`), in this order. A row whose
+    name is the nominee's own filing, by the matcher or by an evidenced
+    `overrides.RESULT_NAMES` entry on their FEC id, is theirs: Indiana's 6th
+    has "Cinde Wirth" win the primary and writes "Cynthia Wirth" in its
+    infobox and November table, the filing is "WIRTH, CYNTHIA (CINDE)", and
+    with both names fitting it neither was matched - "withdrawn" under one,
+    listed with no profile under the other. A row a filing or a state's list
+    holds is a person, and a nominee a Withdrawn list names, or the
+    section's own sentence says withdrew, died or was replaced
+    (`_left_in_prose`), reads as the page says: a real replacement is not
+    undone. Then the row is the nominee's where the infobox credits them
+    with that row's very count, or where it shares their surname and no
+    other filer in the race carries it: they take its result, the page's
+    spelling is not shown, nobody is listed twice, the row carries none of
+    its own link (rules 24 and 33), and the read's log, the cache's
+    `renamedRows` and `validate` (`result-row-renamed`) say which and why,
+    for a person to look at. Any other such row on a Democratic or
+    Republican line is refused as a mark on such a name is (`refusedRows`,
+    `[REFUSED]`, `result-row-refused`): the name stands on no ballot, in the
+    infobox either, its count stays in the table for the winner's own mark
+    to lead, and the nominee it stands in the place of reads as before the
+    count ("Awaiting result"), keeping a loss the last read took while this
+    read still names the winner (`carry_refused`). Where a majority elects
+    (Maine, Alaska, Georgia) a refused row holds the winner's call too, by
+    the gate that the November tables name every nominee, until a person
+    settles it. A person settles a refusal with what the warning names: an
+    evidenced `RESULT_NAMES` entry where the row is the nominee under a name
+    their campaign uses; the state's certified list for the race in
+    `overrides.CERTIFIED_BALLOTS` where it is a replacement the state
+    certified, and the row then stands as the page has it; nothing where
+    the name is a mistake, and the refusal stands until the page is
+    corrected. On any other party's line the two folds still apply, and a
+    row neither settles reads as the page has it, with a warning
+    (`unsettledRows`, `result-row-unsettled`): a minor party substitutes its
+    candidates, and theirs often have no filing. Its second reader found the
+    first version taking the very count among the tables alone, before any
+    filing was asked: a replacement who had filed lost her row, and an
+    "elected", to the primary's winner who had withdrawn, wherever a stale
+    infobox still credited that winner with the count; a primary's loser
+    the infobox named with the count took the row; the renamed row's own
+    link became the nominee's ballot article, ahead of her own, a
+    stranger's article whose surname check passes by construction; and
+    renaming the infobox's nominee with the row made the primary's winner
+    "withdrawn" again, a name the infobox gave being "elsewhere on the
+    page" - an infobox is one editor's word, and the same word in two
+    places is no second source. A top-two primary's two (California,
+    Washington) are their own parties' nominees for this, with an infobox
+    or without, and "After Swan's death ... nominated in her place",
+    "stepped aside" and "succeeded" are read as leaving. And a mark inside
+    recount range is an editor's call, not a count's: Minnesota's 1st was
+    marked for Jake
+    Johnson on 163,055 to 162,733 (322 votes, 0.10 points) with the infobox
+    declaring him on November 6, and by November 8 its `after_election` and
+    `ongoing = no` were blanked while the table kept its mark. A mark whose
+    lead is under `results.CLOSE_MARGIN` - half a point of every vote the
+    table counts, the margin at which Florida and Arizona recount without
+    being asked - stands only while the same page's infobox declares that
+    person (`after_election` naming them, not marked ongoing); otherwise it
+    concludes nothing, as any refused mark (`result-mark-refused`), and the
+    race keeps the last read of it. The infobox declares by the first line of
+    `after_election` (the party is often written under the name, and run
+    together the two named nobody), and the share is of every vote once
+    (`boxOnce`): a New York fusion table's "Total" rows doubled the count, so
+    its threshold was a point and the share printed to a person half the
+    true one. Replayed offline over the 92 pages of that evening, the fixed
+    reader changed seven races and nothing else: Swanson and Nagel lost,
+    Kirchner and Wirth are nominees again under one name each, none of the
+    four other names is shown, MN-1 awaits its result, and two write-ins
+    (rule 77) are no longer read as on the ballot. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
@@ -1751,7 +1834,18 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     And a primary winner missing from the November table beside a name a
     letter from theirs ("Gegen", "Gegan") is undecided, never "withdrawn";
     a seat whose primary was not its state's (Alabama's four August
-    districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`.
+    districts) carries its own date in `overrides.SEAT_PRIMARY_DATES`. Nor is
+    a primary winner "withdrawn" beside a name on their party's November line
+    that no filing and no state's list holds and no Withdrawn list or
+    sentence of the page explains: the row is theirs, or on a major party's
+    line its name is refused, and on a minor party's it is a warning (rule
+    63, `results.november_row_names`). And a write-in a page's November table
+    lists is read as a certified one is: North Carolina's 2nd listed
+    "Brian McGinnis (Write-in)" with no count, and he read "Lost the November
+    election"; Florida's 6th's stood "Also on the November ballot". A row
+    the table calls a write-in, in the candidate's cell or as its line, gives
+    its person no status unless the table marks them the winner
+    (`results._names_nobody`); its count stays in the table.
 
 78. **A public body's website is checked before it is linked, and a
     move is kept only where the new page names the body.** The county
@@ -1802,7 +1896,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     time budget that ends the run cleanly well before its step's limit
     (`--max-minutes`): killed at the limit, its threads saved the cache
     after the next step had read it, and verify failed the refresh of
-    2026-10-19. The build warns about any address not looked at in 60 days. As of 2026-10-18, 7,366
+    2026-10-19. Every time-limited step of the refresh runs Python as the
+    step's own process (`exec`), so ending the step ends the read: the
+    statewide photographs' read did the same thing on 2026-11-09 (rule
+    91). The build warns about any address not looked at in 60 days. As of 2026-10-18, 7,366
     of 39,447 governments' links are withdrawn: 5,090 dead, 1,179 gone,
     351 for sale, 255 gambling, 254 parked, 208 elsewhere, 20 expired and
     9 a business's; 5,269 could not be confirmed and stay linked, marked
@@ -2540,7 +2637,30 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     link matched on given name and surname within that race (Danielle
     Ford is not Aaron Ford, whose article the same page links) and never
     on a one-word name, then checked as rule 33's are, the race's infobox
-    image beside the nominee before the article's lead. The guides whose
+    image beside the nominee before the article's lead. Where the reader
+    refuses the infobox's image for what it is (its name, its licence, its
+    shape), the article's lead is tried in its place - Ned Lamont's record
+    was dropped on 2026-11-09 when the race's infobox took up a bridge
+    visit with someone else, his official portrait leading his own article
+    all the while - but nobody has seen a lead that comes forward so, and
+    the refresh publishes without a person: it says what it stands in
+    place of (`inPlaceOf`) and waits off the page, named by the build,
+    until a look at that very file is recorded in
+    `overrides.SEEN_ARTICLE_LEADS` (the candidate alone, the face
+    measured, the file's pixel size) or it is refused in `NOT_A_PORTRAIT`
+    (the PR #213 review: Wes Moore's and Bruce Blakeman's would have been
+    shown unlooked). A file a person's list withholds gives way to
+    nothing, and the lists are asked before the file's name, in both
+    forms of its address: checked against the API's percent-encoded form
+    alone, five listed files were cached every Monday and dropped every
+    Tuesday. A size Wikimedia does not answer for keeps the last record
+    of the same file, never another width of it (eleven records moved
+    between 250px and 330px on a morning of 429s). The read is the
+    longest of the refresh (about 58 minutes against a 50-minute step:
+    ended there, Python went on under the step's shell and saved the
+    cache while later steps ran), so it runs inside a budget
+    (`--max-minutes`, rule 78's way), oldest race first, and what it does
+    not reach keeps its last read (rule 8). The guides whose
     photographs have no address of their own - Alaska's statements (PDFs,
     none of them encrypted, whatever this rule once said) and Oregon's
     pamphlet (JPEG 2000 inside PDFs) - picture a candidate none of those

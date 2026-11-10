@@ -2152,6 +2152,13 @@ class TestEnrichmentAgainstTheRealCache(unittest.TestCase):
         Special:FilePath/<Name>.jpg, and Rep. Al Green's chain ended in the
         singer's photograph."""
         by_id = {p["id"]: p for p in self.profiles}
+        # A nominee who won is seated under their bioguide id in the January
+        # rehearsal, their curated row's id kept among the profile's own
+        # (rule 68): the check of 2026-11-08 looked up "CAND_18" by its row's
+        # id once Adam Hamilton had won Kansas's seat, and failed the refresh.
+        for p in self.profiles:
+            for other in (p.get("otherIds") or []) + (p.get("otherFecIds") or []):
+                by_id.setdefault(other, p)
         self.assertEqual(validate.check_guessed_photos(self.profiles), [])
         # New Jersey's nominee shows no guess: only a portrait his own
         # campaign's page draws (rule 38), or the silhouette.

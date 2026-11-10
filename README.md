@@ -72,7 +72,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `python tools/fetch_lookup_maps.py` | Rebuild `lookup_maps/`: every ZIP code area's share of each district and county, and the finer boundaries a location is placed on, for "Find who represents you" (network) |
 | `python tools/fetch_court_districts.py` | Rebuild `data/court_districts.json`: which federal district court and division covers each county, from 28 U.S.C. 81-131 (network; `--check` reads without writing) |
 | `python tools/rehearse_changeover.py --out DIR` | Rehearse the turn of the Congress on a copy in `DIR`, which must be outside the repository: December's specials either way, and the 120th Congress on January 4, each through `congress --apply`, the build, the strict check and `verify`. The memberships are fiction about real people and never leave `DIR`. CI runs it on every push, with the unit tests and the page checks on each copy; a scenario the data is already past is skipped |
-| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--check` reports the committed cache (network) |
+| `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
 | `npm install && npm test` | Render every page in jsdom and drive the UI (3434 checks) |
@@ -845,8 +845,35 @@ fed in as aliases so the match does not depend on how the FEC spells them.
   on the same ballot line, and a Georgia runoff table the November counts do not
   send its two to. A name only the infobox gives after the count, with no filing
   and no state's list, adds nobody, the race otherwise read as it stands
-  (`refusedNames`, `result-name-refused`). A special election's filer's
+  (`refusedNames`, `result-name-refused`). A mark whose lead is under half a
+  point of the table's count (`results.CLOSE_MARGIN`) stands only while the
+  page's infobox declares that person (`after_election`, not marked ongoing);
+  otherwise it is refused the same way. A special election's filer's
   `term_start` is "On being sworn in (if elected)", never January 3.
+- **A renamed November row never makes a major party's nominee
+  "withdrawn".** Where a party's primary winner, or the infobox's nominee a
+  filing holds, is missing from the November table and it holds a row of that
+  party under a name the page gives nowhere else but, at most, its infobox,
+  the row is decided where the filings are known
+  (`results.november_row_names`). A row whose name is the nominee's own
+  filing, by the matcher or an evidenced `overrides.RESULT_NAMES` entry, is
+  theirs. A row a filing or a state's list holds is a person, and a nominee a
+  Withdrawn list or the page's own sentence says left or was replaced reads
+  as the page says. Otherwise the row is the nominee's if the infobox credits
+  them with its very count, or it shares their surname and no other filer in
+  the race carries it (the cache's `renamedRows`, `{race id: [{name, as,
+  why}]}`; `result-row-renamed`): they take its result under their own name,
+  and the row's own link is not theirs. Any other such row on a Democratic or
+  Republican line is refused (`refusedRows`, `{race id: [{name, for, ids,
+  why}]}`; `result-row-refused`): the name is not shown and the nominee reads
+  as before the count, until the page is corrected or a person records what
+  the warning names (a `RESULT_NAMES` entry, or the state's certified list in
+  `overrides.CERTIFIED_BALLOTS`). On any other line it reads as the page has
+  it, with a warning (`unsettledRows`, `{race id: [{name, for, why}]}`;
+  `result-row-unsettled`).
+- **A write-in the November table lists is not read as on the ballot or as
+  left off it**, unless the table marks them the winner: the row gives its
+  person no status, and its count stays in the table.
 - **The seat a person is contesting comes from their FEC filing.** Texas,
   Florida, California and Utah redrew their maps for 2026, and thirteen
   sitting members now hold one district number and run in another. A member
@@ -2488,7 +2515,18 @@ the day, its bytes and size):
    of a new one. On 2026-10-25 five were withheld (David Jolly's names no
    author, Kris Kobach's "official portrait" is a user's CC0, and three are
    recorded doubts) and Aaron Ford's event crop was refused. A running mate
-   is matched only beside their own ticket's nominee.
+   is matched only beside their own ticket's nominee. Where the reader
+   refuses the infobox's image for what it is (its name, its licence, its
+   shape), the article's lead image is tried in its place, and a lead taken
+   that way says so (`inPlaceOf`) and waits off the page, named by the
+   build, until a person has looked at it and recorded the look in
+   `overrides.SEEN_ARTICLE_LEADS` (the candidate alone, the face measured,
+   the file's pixel size) or refused it in `NOT_A_PORTRAIT`: the refresh
+   publishes without a person. A file a person's list withholds gives way
+   to nothing, and the lists are asked before the file's name is. A size
+   Wikimedia does not answer for keeps the last record of the same file
+   (never another width of it); a file new to the candidate is taken at
+   whichever width answers.
 
 A photograph its source offers only above 300 KB or 1,200px is shown all the
 same (rule 87): smaller from its host's resizer or Photon where the same

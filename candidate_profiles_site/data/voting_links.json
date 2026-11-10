@@ -1,12 +1,12 @@
 {
- "fetched": "2026-11-02T18:42:07+00:00",
+ "fetched": "2026-11-05T16:52:39+00:00",
  "links": {
   "http://pollfinder.sos.state.mn.us/": "live",
   "http://registration.elections.myflorida.com/": "live",
   "http://sos.mt.gov/elections/absentee": "unknown",
   "http://soswy.state.wy.us/Elections/AbsenteeVoting.aspx": "live",
   "http://soswy.state.wy.us/Elections/PollPlace/Default.aspx": "live",
-  "http://www.dir.ct.gov/sots/LookUp.aspx": "live",
+  "http://www.dir.ct.gov/sots/LookUp.aspx": "unknown",
   "http://www.elections.alaska.gov/Core/AKVoteEarly.php": "unknown",
   "http://www.elections.ny.gov/VotingAbsentee.html": "unknown",
   "http://www.elections.virginia.gov/casting-a-ballot/absentee-voting/": "live",
@@ -108,7 +108,7 @@
   "https://sdsos.gov/elections-voting/voting/absentee-voting.aspx": "live",
   "https://sdsos.gov/elections-voting/voting/register-to-vote/default.aspx": "live",
   "https://secure.utah.gov/voterreg/index.html": "live",
-  "https://silverstateelection.nv.gov/": "unknown",
+  "https://silverstateelection.nv.gov/": "live",
   "https://sos.iowa.gov/elections/voterreg/pollingplace/search.aspx": "unknown",
   "https://sos.iowa.gov/elections/voterreg/regtovote/search.aspx": "unknown",
   "https://sos.iowa.gov/voters/absentee-voting": "unknown",
@@ -255,6 +255,7 @@
   "https://www.elections.virginia.gov/casting-a-ballot/polling-place-lookup/": "live",
   "https://www.elections.virginia.gov/registration/how-to-register/": "live",
   "https://www.elections.virginia.gov/resultsreports/election-results/": "live",
+  "https://www.in.gov/sos/elections/voter-information/register-to-vote/": "live",
   "https://www.in.gov/sos/elections/voter-information/ways-to-vote/absentee-voting": "live",
   "https://www.kdor.ks.gov/Apps/VoterReg/Default.aspx": "live",
   "https://www.maine.gov/sos/cec/elec/voter-info/votreg.html": "unknown",
@@ -295,7 +296,7 @@
   "https://www.sos.mn.gov/elections-voting/register-to-vote/": "unknown",
   "https://www.sos.mn.gov/elections-voting/whats-on-my-ballot": "unknown",
   "https://www.sos.mo.gov/elections/goVoteMissouri/register": "live",
-  "https://www.sos.mo.gov/elections/govotemissouri/howtovote#Absentee": "unknown",
+  "https://www.sos.mo.gov/elections/govotemissouri/howtovote#Absentee": "live",
   "https://www.sos.mo.gov/elections/results": "live",
   "https://www.sos.ms.gov/content/documents/Elections/2026/Sample%20Ballot%209-9-26.pdf": "unknown",
   "https://www.sos.ms.gov/elections-voting/election-results": "live",
@@ -333,7 +334,7 @@
   "https://www1.maine.gov/portal/government/edemocracy/voter_lookup.php": "live",
   "https://www2.alabamavotes.gov/electionnight/statewideresultsbycontest.aspx": "live"
  },
- "linksChecked": "2026-11-02",
+ "linksChecked": "2026-11-05",
  "pages": {
   "absentee": "https://www.nass.org/can-i-vote/absentee-early-voting",
   "polling": "https://www.nass.org/can-i-vote/find-your-polling-place",
@@ -415,7 +416,7 @@
    "status": "https://olvr.hawaii.gov/Default.aspx"
   },
   "IA": {
-   "absentee": "https://sos.iowa.gov/elections/electioninfo/absenteeinfo.html",
+   "absentee": "https://sos.iowa.gov/voters/absentee-voting",
    "polling": "https://sos.iowa.gov/elections/voterreg/pollingplace/search.aspx",
    "register": "https://sos.iowa.gov/voters/voter-registration",
    "status": "https://sos.iowa.gov/elections/voterreg/regtovote/search.aspx"
@@ -433,9 +434,9 @@
    "status": "https://ova.elections.il.gov/RegistrationLookup.aspx"
   },
   "IN": {
-   "absentee": "http://www.in.gov/sos/elections/2402.htm",
+   "absentee": "https://www.in.gov/sos/elections/voter-information/ways-to-vote/absentee-voting",
    "polling": "https://indianavoters.in.gov/PublicSite/PublicMain.aspx",
-   "register": "https://indianavoters.in.gov/PublicSite/PublicMain.aspx",
+   "register": "https://www.in.gov/sos/elections/voter-information/register-to-vote/",
    "status": "https://indianavoters.in.gov/"
   },
   "KS": {

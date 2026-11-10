@@ -89,6 +89,11 @@ jobs:
     needs: gate
     if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
+    # Python buffers its output when it is piped: a step ended at its time
+    # limit lost everything it had printed (the statewide photographs'
+    # read of 2026-11-09 left an empty log).
+    env:
+      PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v7
 
@@ -237,18 +242,26 @@ jobs:
 
       # The statewide candidates' photographs (kyc/statewide_photos.py; rule
       # 91): the official guides and members every day, the races' own
-      # Wikipedia articles on Mondays only - one request a second, about
-      # forty minutes - keeping the last read in between. A failed read
-      # keeps the last photographs and stops nothing else (rule 8).
+      # Wikipedia articles on Mondays only - one request a second - keeping
+      # the last read in between. A failed read keeps the last photographs
+      # and stops nothing else (rule 8). The Monday read of 2026-11-09 took
+      # longer than the step's fifty minutes: the step was ended, but Python
+      # under the shell read on, and wrote the cache while later steps ran.
+      # So the read has a budget (rule 78) that ends it well inside the
+      # step, keeping every race it did not reach for the next Monday,
+      # oldest first, and `exec` makes Python the step's own process, so a
+      # step that is ended ends it too - as in every step below with a time
+      # limit of its own (rule 78: the local sites' check, ended at its
+      # limit, saved its cache after the next step had read it).
       - name: Refresh the statewide candidates' photographs
         if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 50
         run: |
           if [ "$(date -u +%u)" = "1" ]; then
-            python build_profile_site.py ballotphotos
+            exec python build_profile_site.py ballotphotos --max-minutes 38
           else
-            python build_profile_site.py ballotphotos --no-wikipedia
+            exec python build_profile_site.py ballotphotos --no-wikipedia
           fi
 
       # The election offices' own guides' photographs (kyc/guide_photos.py):
@@ -262,7 +275,7 @@ jobs:
         if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 25
-        run: python build_profile_site.py guidephotos
+        run: exec python build_profile_site.py guidephotos
 
       # The President, the Vice President and the Cabinet: the White House's
       # pages, each office's own page and the Senate's roll calls
@@ -333,7 +346,7 @@ jobs:
         if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 30
-        run: python build_profile_site.py votes
+        run: exec python build_profile_site.py votes
 
       # The public offices each person has held: Congress from
       # congress-legislators, every other office from Wikidata where the
@@ -358,7 +371,7 @@ jobs:
         timeout-minutes: 40
         env:
           FEC_API_KEY: ${{ secrets.FEC_API_KEY }}
-        run: python build_profile_site.py members --limit 150
+        run: exec python build_profile_site.py members --limit 150
 
       # What a filed candidate's own sources say - the birth date, education
       # and occupation in the article their ballot page links; their
@@ -384,7 +397,7 @@ jobs:
         if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 45
-        run: python build_profile_site.py localgov --check-sites --limit 6000 --max-minutes 35
+        run: exec python build_profile_site.py localgov --check-sites --limit 6000 --max-minutes 35
 
       # Smaller copies of the heavy portraits the site shows (rule 101): each
       # address weighed again, oldest first, and a copy made in the runner's
@@ -397,7 +410,7 @@ jobs:
         if: ${{ !inputs.results_only }}
         continue-on-error: true
         timeout-minutes: 40
-        run: python build_profile_site.py photocopies --limit 4000 --max-minutes 30
+        run: exec python build_profile_site.py photocopies --limit 4000 --max-minutes 30
 
       # Market prices are not refreshed here: .github/workflows/odds.yml
       # does that every twelve hours and publishes on its own. The build

@@ -679,11 +679,35 @@ class TestChamberScores(unittest.TestCase):
         })
 
     def test_the_build_figures_carry_them(self):
+        # The figures are everyone's, counted again here from the state
+        # files' whole records - not a floor on how many senators are
+        # scored: a senator seated in January has no score yet, and the
+        # January rehearsal of 2026-11-10 seated enough of November's
+        # winners to leave exactly the 90 this once asked for more than,
+        # which held that day's results refresh.
+        from kyc import voteview
+        from kyc.record import seated
         meta = read_people(os.path.join(ROOT, emit.PEOPLE_META_FILE))
         scores = meta["chamberScores"]
-        senate = sum(len(v) for v in scores.get("Senate", {}).values())
-        self.assertGreater(senate, 90)
-        self.assertLessEqual(senate, 100)
+        whole = [p for code in emit.people_codes()
+                 for p in read_people(emit.people_file(code, ROOT))["people"]]
+        self.assertEqual(scores, voteview.chamber_scores(whole))
+        for word in ("Senate", "House"):
+            sitting = sum(1 for p in whole
+                          if seated(p) and word in str(p.get("chamber") or ""))
+            scored = sum(len(v) for v in scores.get(word, {}).values())
+            self.assertGreater(scored, 0, word)
+            self.assertLessEqual(scored, sitting, word)
+
+    def test_a_member_with_no_score_is_in_no_figure(self):
+        # A newly seated senator: no score, so no tick, and never a guess.
+        from kyc import voteview
+        people = [member(id="S%d" % n, voting_alignment=voteview.describe(n / 100.0, 119))
+                  for n in range(3)]
+        people += [member(id="N%d" % n) for n in range(40)]
+        people.append(member(id="X1", voting_alignment="Not scored"))
+        self.assertEqual(voteview.chamber_scores(people),
+                         {"Senate": {"119th Congress": [0.0, 0.01, 0.02]}})
 
 
 class TestAssetVersions(unittest.TestCase):

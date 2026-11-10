@@ -712,6 +712,7 @@ def build(root="."):
         problems.append(f"{candidates_heavy} statewide candidates' photographs shown at full "
                         "size: their source offers them only above the caps")
     problems.extend(statewide_photos.withheld(photo_cache))
+    problems.extend(statewide_photos.stale_looks(photo_cache))
     problems.extend(court_photo_problems(court_cache))
     problems.extend(stale_name_forms(states))
     payload = {

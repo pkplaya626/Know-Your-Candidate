@@ -7196,39 +7196,40 @@
  },
  "person:adam hamilton|KS|S": {
   "credit": {
-   "attribution": true,
-   "by": "Working Preacher",
-   "file": "https://commons.wikimedia.org/wiki/File:Adam_Hamilton_on_the_Courage_to_Preach_(cropped).png",
+   "attribution": false,
+   "by": "Leoniceno",
+   "file": "https://commons.wikimedia.org/wiki/File:Adam_Hamilton_campaign_rally,_Newton,_Kansas,_30_Oct_2026_(cropped).jpg",
    "form": 4,
-   "licence": "CC BY 4.0",
-   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "licence": "CC0",
+   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
    "nonFree": false,
-   "year": 2017
+   "year": 2026
   },
-  "height": 1080,
+  "height": 3337,
+  "linked": "Adam Hamilton (American politician)",
   "name": "Adam Hamilton",
   "set": [
    [
     120,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/120px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/120px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ],
    [
     250,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/250px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/250px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ],
    [
     330,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/330px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/330px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ],
    [
     500,
-    "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/500px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png"
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/500px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg"
    ]
   ],
-  "title": "Adam Hamilton (pastor)",
-  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png/960px-Adam_Hamilton_on_the_Courage_to_Preach_%28cropped%29.png",
+  "title": "Adam Hamilton (American politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b1/Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg/960px-Adam_Hamilton_campaign_rally%2C_Newton%2C_Kansas%2C_30_Oct_2026_%28cropped%29.jpg",
   "via": "wikipedia",
-  "width": 1020
+  "width": 2226
  },
  "person:adam hollier|MI|H": {
   "credit": {
@@ -7318,7 +7319,7 @@
   "name": "Adrian Boafo",
   "original": "https://mgaleg.maryland.gov/2026RS/images/boafo01.jpg",
   "page": "https://mgaleg.maryland.gov/mgawebsite/Members/Details/boafo01",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/0/09/Adrian_Boafo_Feb2023.jpg"
   ],
@@ -8089,6 +8090,11 @@
   "via": "wikipedia",
   "width": 1239
  },
+ "person:ashley bell|NC|H": {
+  "name": "Ashley Bell",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:ashley hinson|IA|S": {
   "credit": {
    "attribution": false,
@@ -8325,6 +8331,11 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Bo_Biteman_by_Gage_Skidmore.jpg/960px-Bo_Biteman_by_Gage_Skidmore.jpg",
   "via": "wikipedia",
   "width": 2352
+ },
+ "person:bob brooks|PA|H": {
+  "name": "Bob Brooks",
+  "url": null,
+  "via": "unresolved"
  },
  "person:bobby hanig|NC|H": {
   "credit": {
@@ -8633,6 +8644,11 @@
  },
  "person:brian mcginnis|NC|S": {
   "name": "Brian McGinnis",
+  "url": null,
+  "via": "unresolved"
+ },
+ "person:brian poindexter|OH|H": {
+  "name": "Brian Poindexter",
   "url": null,
   "via": "unresolved"
  },
@@ -8963,7 +8979,7 @@
   "width": 422
  },
  "person:carrie buck|NV|H": {
-  "bytes": 3918638,
+  "bytes": 33014,
   "chamber": "upper",
   "credit": {
    "by": "Nevada Legislature",
@@ -8971,18 +8987,23 @@
   },
   "district": "5",
   "evidence": "the file Open States lists for Carrie Buck (ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1), served by the Nevada Legislature",
-  "heavy": "3918 KB, over 300 KB",
-  "height": 2964,
+  "heavy": "3918 KB, over 300 KB; shown smaller from the same file",
+  "height": 500,
   "legislator": "ocd-person/189d270a-96e5-45af-a2b8-bbcc2ad225c1",
   "legislatorName": "Carrie Buck",
   "name": "Carrie Buck",
   "original": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
+  "originalWeight": {
+   "bytes": 3918638,
+   "height": 2964,
+   "width": 2964
+  },
   "page": "https://www.leg.state.nv.us/App/Legislator/A/Senate/Current/5",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "state": "NV",
-  "url": "https://leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg",
+  "url": "https://i0.wp.com/leg.state.nv.us/Session/83rd2025/legislators/Senators/Images/Buck.Carrie.387.jpg?w=500&ssl=1",
   "via": "state-legislature",
-  "width": 2964
+  "width": 500
  },
  "person:casey crabtree|SD|H": {
   "name": "Casey Crabtree",
@@ -9413,6 +9434,11 @@
   "via": "wikipedia",
   "width": 2918
  },
+ "person:christina hines|MI|H": {
+  "name": "Christina Hines",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:christopher m. rabb|PA|H": {
   "credit": {
    "attribution": false,
@@ -9484,6 +9510,11 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9c/Chuck_Gray_in_2025_%28cropped%29.jpg/960px-Chuck_Gray_in_2025_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 2250
+ },
+ "person:chuck hubbard|NC|H": {
+  "name": "Chuck Hubbard",
+  "url": null,
+  "via": "unresolved"
  },
  "person:claire valdez|NY|H": {
   "credit": {
@@ -10550,6 +10581,11 @@
   "via": "wikipedia",
   "width": 884
  },
+ "person:don ralph leonard|OH|H": {
+  "name": "Don Ralph Leonard",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:don tracy|IL|S": {
   "name": "Don Tracy",
   "url": null,
@@ -11134,7 +11170,7 @@
   "name": "Fred Wellman",
   "original": "https://upload.wikimedia.org/wikipedia/commons/4/40/Fred_Wellman%2C_August_2025.png",
   "page": "https://www.wikidata.org/wiki/Q131344046",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "set": [
    [
     120,
@@ -11809,7 +11845,7 @@
   "name": "Jacqui V Irwin",
   "original": "https://webapi.assembly.ca.gov/district-media/assets/members/assembly_member_42.jpg",
   "page": "https://www.assembly.ca.gov/assemblymembers/42",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/6/62/Jacqui_Irwin_(cropped)_150302-Z-WQ610-_(16698067641).jpg"
   ],
@@ -11939,7 +11975,7 @@
   "name": "James Talarico",
   "original": "https://house.texas.gov/images/members/3685.jpg?v=1",
   "page": "https://house.texas.gov/members/3685",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/7/70/James_Talarico_Press_Conference_(cropped).jpg",
    "https://upload.wikimedia.org/wikipedia/commons/8/8b/James_Talarico_Press_Conference.jpg"
@@ -12542,7 +12578,7 @@
   "width": 1500
  },
  "person:jeremy moss|MI|H": {
-  "bytes": 656824,
+  "bytes": 70655,
   "chamber": "upper",
   "credit": {
    "by": "Michigan Senate Democrats",
@@ -12551,21 +12587,26 @@
   },
   "district": "7",
   "evidence": "the file Open States lists for Jeremy Moss (ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44), served by the Michigan Senate Democrats, their own party's caucus in that chamber",
-  "heavy": "656 KB, over 300 KB",
-  "height": 2100,
+  "heavy": "656 KB, over 300 KB; shown smaller from the same file",
+  "height": 700,
   "legislator": "ocd-person/d1c4631b-145d-4418-8a29-24683b83ae44",
   "legislatorName": "Jeremy Moss",
   "name": "Jeremy Moss",
   "original": "https://senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg",
+  "originalWeight": {
+   "bytes": 656824,
+   "height": 2100,
+   "width": 1500
+  },
   "page": "https://senatedems.com/moss",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "replaces": [
    "https://upload.wikimedia.org/wikipedia/commons/2/22/Michigan_Senator_Jeremy_Moss_2019.jpg"
   ],
   "state": "MI",
-  "url": "https://senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg",
+  "url": "https://i0.wp.com/senatedems.com/moss/wp-content/uploads/sites/13/2023/01/MDS_Moss_W3A6000.jpg?w=500&ssl=1",
   "via": "state-legislature",
-  "width": 1500
+  "width": 500
  },
  "person:jerry lee carl jr.|AL|H": {
   "credit": {
@@ -12753,6 +12794,11 @@
   "via": "wikipedia",
   "width": 600
  },
+ "person:jim kingston|GA|H": {
+  "name": "Jim Kingston",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:jim oberweis|FL|H": {
   "credit": {
    "attribution": true,
@@ -12818,6 +12864,11 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/5/5d/Jo_Rae_Perkins_for_U.S._Senate.png",
   "via": "wikipedia",
   "width": 458
+ },
+ "person:joanna mendoza|AZ|H": {
+  "name": "Joanna Mendoza",
+  "url": null,
+  "via": "unresolved"
  },
  "person:joe baldacci|ME|H": {
   "name": "Joe Baldacci",
@@ -12934,7 +12985,7 @@
   "width": 1224
  },
  "person:john andrew williams|KY|H": {
-  "bytes": 10709,
+  "bytes": 10718,
   "credit": {
    "attribution": false,
    "by": "EPalmer221",
@@ -12954,7 +13005,7 @@
   "name": "John Andrew Williams",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/66/John_Drew_Williams_Headshot.jpg",
   "page": "https://www.wikidata.org/wiki/Q136086044",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "set": [
    [
     120,
@@ -13246,6 +13297,11 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/78/John_Lujan_visits_560th_Flying_Training_Wing_%28cropped%29.jpg/960px-John_Lujan_visits_560th_Flying_Training_Wing_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 1200
+ },
+ "person:johnny garcia|TX|H": {
+  "name": "Johnny Garcia",
+  "url": null,
+  "via": "unresolved"
  },
  "person:johnny garrett|TN|H": {
   "name": "Johnny Garrett",
@@ -13824,6 +13880,43 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:katy padilla stout|TX|H": {
+  "credit": {
+   "attribution": false,
+   "by": "DivaaNut",
+   "file": "https://commons.wikimedia.org/wiki/File:Katy_Padilla_Stout_Cropped.jpg",
+   "form": 4,
+   "licence": "CC0",
+   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "nonFree": false,
+   "year": 2026
+  },
+  "height": 925,
+  "linked": "Katy Padilla Stout",
+  "name": "Katy Padilla Stout",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Katy_Padilla_Stout_Cropped.jpg/120px-Katy_Padilla_Stout_Cropped.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Katy_Padilla_Stout_Cropped.jpg/250px-Katy_Padilla_Stout_Cropped.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Katy_Padilla_Stout_Cropped.jpg/330px-Katy_Padilla_Stout_Cropped.jpg"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Katy_Padilla_Stout_Cropped.jpg/500px-Katy_Padilla_Stout_Cropped.jpg"
+   ]
+  ],
+  "title": "Katy Padilla Stout",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/6/68/Katy_Padilla_Stout_Cropped.jpg",
+  "via": "wikipedia",
+  "width": 664
+ },
  "person:kelvin oneal buck|MS|H": {
   "name": "Kelvin Oneal Buck",
   "url": null,
@@ -14062,6 +14155,11 @@
   "via": "wikipedia",
   "width": 420
  },
+ "person:kristina knickerbocker|OH|H": {
+  "name": "Kristina Knickerbocker",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:kshama sawant|WA|H": {
   "credit": {
    "attribution": false,
@@ -14164,6 +14262,11 @@
   "url": "https://cdn.ilga.gov/assets/img/members/{BCC3C8D6-5728-4A69-8A3B-F203314DD563}.jpg",
   "via": "state-legislature",
   "width": 500
+ },
+ "person:lakesha womack|NC|H": {
+  "name": "Lakesha Womack",
+  "url": null,
+  "via": "unresolved"
  },
  "person:larry david rubin|TX|H": {
   "credit": {
@@ -15032,7 +15135,7 @@
   "name": "Martin R Zamora",
   "original": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "page": "https://www.nmlegis.gov/Members/Legislator?SponCode=HZAMO",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "state": "NM",
   "url": "https://www.nmlegis.gov/Images/Legislators/House/HZAMO.jpg",
   "via": "state-legislature",
@@ -15731,6 +15834,43 @@
   "via": "wikipedia",
   "width": 3360
  },
+ "person:michael alfonso|WI|H": {
+  "credit": {
+   "attribution": true,
+   "by": "Gage Skidmore from Surprise, AZ, United States of America",
+   "file": "https://commons.wikimedia.org/wiki/File:Michael_Alfonso_2025.jpg",
+   "form": 4,
+   "licence": "CC BY-SA 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+   "nonFree": false,
+   "year": 2025
+  },
+  "height": 1975,
+  "linked": "Michael Alfonso (politician)",
+  "name": "Michael Alfonso",
+  "set": [
+   [
+    120,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/120px-Michael_Alfonso_2025.jpg"
+   ],
+   [
+    250,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/250px-Michael_Alfonso_2025.jpg"
+   ],
+   [
+    330,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/330px-Michael_Alfonso_2025.jpg"
+   ],
+   [
+    500,
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/500px-Michael_Alfonso_2025.jpg"
+   ]
+  ],
+  "title": "Michael Alfonso (politician)",
+  "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/80/Michael_Alfonso_2025.jpg/960px-Michael_Alfonso_2025.jpg",
+  "via": "wikipedia",
+  "width": 1482
+ },
  "person:michael blake|NY|H": {
   "credit": {
    "attribution": true,
@@ -16099,6 +16239,11 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/4/48/6-17-25_world_refugee_day_advocacy_event_Mike_Simmons_%28cropped%29.jpg",
   "via": "wikipedia",
   "width": 658
+ },
+ "person:mitchell berman|WI|H": {
+  "name": "Mitchell Berman",
+  "url": null,
+  "via": "unresolved"
  },
  "person:morgan cephas|PA|H": {
   "credit": {
@@ -16566,6 +16711,11 @@
   "url": null,
   "via": "unresolved"
  },
+ "person:paul barringer|NC|H": {
+  "name": "Paul Barringer",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:paul dans|SC|S": {
   "name": "Paul Dans",
   "url": null,
@@ -16970,6 +17120,43 @@
   "via": "wikipedia",
   "width": 2652
  },
+ "person:randy villegas|CA|H": {
+  "credit": {
+   "attribution": true,
+   "by": "Maremoto Fund",
+   "file": "https://commons.wikimedia.org/wiki/File:Randy_Villegas_at_Vota_Palooza_in_2024_(cropped).jpg",
+   "form": 4,
+   "licence": "CC BY 4.0",
+   "licenceUrl": "https://creativecommons.org/licenses/by/4.0",
+   "nonFree": false,
+   "year": 2024
+  },
+  "height": 1084,
+  "linked": "Randy Villegas",
+  "name": "Randy Villegas",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/120px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/250px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/330px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg/500px-Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg"
+   ]
+  ],
+  "title": "Randy Villegas",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Randy_Villegas_at_Vota_Palooza_in_2024_%28cropped%29.jpg",
+  "via": "wikipedia",
+  "width": 814
+ },
  "person:raymond edward smith jr.|NC|H": {
   "credit": {
    "attribution": false,
@@ -17027,7 +17214,7 @@
   "name": "Rebecca Bennett",
   "original": "https://upload.wikimedia.org/wikipedia/commons/a/af/Littoral_combat_ship_USS_Independence_%28LCS_2%29%2C_RIMPAC_2014_%28Image_3_of_3%29_%28cropped%29.jpg",
   "page": "https://www.wikidata.org/wiki/Q141373045",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "set": [
    [
     120,
@@ -17277,7 +17464,7 @@
   "name": "Rick Brattin",
   "original": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "page": "https://www.senate.mo.gov/Senators/Member?id=5",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "state": "MO",
   "url": "https://www.senate.mo.gov/WebPhotos/SenatorPortraits/Brattin31.jpg",
   "via": "state-legislature",
@@ -18188,7 +18375,7 @@
   "name": "Sean McCann",
   "original": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "page": "https://senatedems.com/mccann",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "state": "MI",
   "url": "https://senatedems.com/mccann/wp-content/uploads/sites/20/2022/12/MDS_McCann_DSC5430.jpg",
   "via": "state-legislature",
@@ -18657,6 +18844,11 @@
   "via": "wikipedia",
   "width": 325
  },
+ "person:sydney gruters|FL|H": {
+  "name": "Sydney Gruters",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:tara anne durant|VA|H": {
   "credit": {
    "attribution": true,
@@ -18729,6 +18921,43 @@
   "url": "https://upload.wikimedia.org/wikipedia/commons/0/00/%2803-12-24%29_Taylor_Darling.jpg",
   "via": "wikipedia",
   "width": 605
+ },
+ "person:taylor wettach|IA|H": {
+  "credit": {
+   "attribution": false,
+   "by": "Doug McCormick",
+   "file": "https://commons.wikimedia.org/wiki/File:Taylor_Wettach.jpg",
+   "form": 4,
+   "licence": "CC0",
+   "licenceUrl": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+   "nonFree": false,
+   "year": 2025
+  },
+  "height": 1118,
+  "linked": "Taylor Wettach",
+  "name": "Taylor Wettach",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Taylor_Wettach.jpg/120px-Taylor_Wettach.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Taylor_Wettach.jpg/250px-Taylor_Wettach.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Taylor_Wettach.jpg/330px-Taylor_Wettach.jpg"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Taylor_Wettach.jpg/500px-Taylor_Wettach.jpg"
+   ]
+  ],
+  "title": "Taylor Wettach",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Taylor_Wettach.jpg",
+  "via": "wikipedia",
+  "width": 830
  },
  "person:tbd - runoff winner|OK|S": {
   "name": "TBD - Runoff Winner",
@@ -19177,6 +19406,11 @@
   "via": "wikipedia",
   "width": 1908
  },
+ "person:victoria broderick|TN|H": {
+  "name": "Victoria Broderick",
+  "url": null,
+  "via": "unresolved"
+ },
  "person:vincent dixie|TN|H": {
   "credit": {
    "attribution": true,
@@ -19224,25 +19458,9 @@
   "via": "unresolved"
  },
  "person:wes climer|SC|H": {
-  "bytes": 29430,
-  "chamber": "upper",
-  "credit": {
-   "by": "South Carolina General Assembly",
-   "page": "https://scstatehouse.gov/member.php?code=0356818139"
-  },
-  "district": "15",
-  "evidence": "the file Open States lists for Wes Climer (ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab), served by the South Carolina General Assembly",
-  "height": 153,
-  "legislator": "ocd-person/cccdb27c-0ed3-4d26-b2e1-5dd7c94e79ab",
-  "legislatorName": "Wes Climer",
   "name": "Wes Climer",
-  "original": "https://scstatehouse.gov/images/members/0356818139.jpg",
-  "page": "https://scstatehouse.gov/member.php?code=0356818139",
-  "read": "2026-11-04",
-  "state": "SC",
-  "url": "https://scstatehouse.gov/images/members/0356818139.jpg",
-  "via": "state-legislature",
-  "width": 125
+  "url": null,
+  "via": "unresolved"
  },
  "person:wesley hunt|TX|S": {
   "credit": {
@@ -19450,7 +19668,7 @@
   "name": "Yolanda Rena Prince",
   "original": "https://upload.wikimedia.org/wikipedia/commons/6/65/Yolanda_Prince.jpg",
   "page": "https://www.wikidata.org/wiki/Q139698851",
-  "read": "2026-11-04",
+  "read": "2026-11-10",
   "set": [
    [
     120,
@@ -19475,6 +19693,43 @@
   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/Yolanda_Prince.jpg/330px-Yolanda_Prince.jpg",
   "via": "wikidata-fec",
   "width": 4267
+ },
+ "person:zach dembo|KY|H": {
+  "credit": {
+   "attribution": false,
+   "by": "U.S. Navy",
+   "file": "https://commons.wikimedia.org/wiki/File:Zach_Dembo.jpg",
+   "form": 4,
+   "licence": "Public domain",
+   "licenceUrl": null,
+   "nonFree": false,
+   "year": null
+  },
+  "height": 780,
+  "linked": "Zach Dembo",
+  "name": "Zach Dembo",
+  "set": [
+   [
+    120,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Zach_Dembo.jpg/120px-Zach_Dembo.jpg"
+   ],
+   [
+    250,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Zach_Dembo.jpg/250px-Zach_Dembo.jpg"
+   ],
+   [
+    330,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Zach_Dembo.jpg/330px-Zach_Dembo.jpg"
+   ],
+   [
+    500,
+    "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6d/Zach_Dembo.jpg/500px-Zach_Dembo.jpg"
+   ]
+  ],
+  "title": "Zach Dembo",
+  "url": "https://upload.wikimedia.org/wikipedia/commons/6/6d/Zach_Dembo.jpg",
+  "via": "wikipedia",
+  "width": 625
  },
  "person:zuhdi jasser|AZ|H": {
   "credit": {
