@@ -1055,8 +1055,9 @@ def check_results_pages(cache):
     if refused:
         issues.append(Issue("warn", "result-mark-refused",
                             f"{len(refused)} November marks the results read refused (rule 63): "
-                            "each race reads as before the count until its page gives the mark "
-                            "a filing and a count; a person should look at each", refused))
+                            "each race reads as before the count, or as the last read had it, "
+                            "until its page's mark stands; each line says what the mark lacks, "
+                            "and a person should look at each", refused))
     names_left = [f"{rid}: {item.get('name')}: {item.get('why')}"
                   for rid, items in sorted((cache.get("refusedNames") or {}).items())
                   for item in items]
@@ -1065,6 +1066,45 @@ def check_results_pages(cache):
                             f"{len(names_left)} names only an infobox gave after the count, with "
                             "no filing and no state's list (rule 63): left off the page; a person "
                             "should look at each", names_left))
+    rows_left = [f"{rid}: {item.get('name')}, in the place of {', '.join(item.get('for') or [])}: "
+                 f"{item.get('why')}"
+                 for rid, items in sorted((cache.get("refusedRows") or {}).items())
+                 for item in items]
+    if rows_left:
+        issues.append(Issue("warn", "result-row-refused",
+                            f"{len(rows_left)} November rows of a major party under a name no "
+                            "filing and no state's list holds, standing where the party's "
+                            "nominee should (rule 63): the name is left off the page and the "
+                            "nominee reads as before the count, never \"withdrawn\". A person "
+                            "should look at each and record which it is: where the row is the "
+                            "nominee under a name their campaign uses, an evidenced "
+                            "overrides.RESULT_NAMES entry on their FEC id, and the row is read as "
+                            "theirs; where it is a replacement the state certified, the state's "
+                            "list for the race in overrides.CERTIFIED_BALLOTS, and the row "
+                            "stands as the page has it; where the name is a mistake, nothing: "
+                            "the refusal stands until the page is corrected",
+                            rows_left))
+    rows_looked = [f"{rid}: {item.get('name')}, in the place of "
+                   f"{', '.join(item.get('for') or [])}: {item.get('why')}"
+                   for rid, items in sorted((cache.get("unsettledRows") or {}).items())
+                   for item in items]
+    if rows_looked:
+        issues.append(Issue("warn", "result-row-unsettled",
+                            f"{len(rows_looked)} November rows of a minor party under a name no "
+                            "filing and no state's list holds, where its nominee should stand "
+                            "(rule 63): read as the page has it, the nominee \"withdrawn\", since "
+                            "a minor party substitutes its candidates; a person should look at "
+                            "each, and record an evidenced overrides.RESULT_NAMES entry where "
+                            "the row is the nominee under another name", rows_looked))
+    rows_read = [f"{rid}: {item.get('name')} read as {item.get('as')}: {item.get('why')}"
+                 for rid, items in sorted((cache.get("renamedRows") or {}).items())
+                 for item in items]
+    if rows_read:
+        issues.append(Issue("warn", "result-row-renamed",
+                            f"{len(rows_read)} November rows under another name read as their "
+                            "party's nominee's own (rule 63): the nominee takes the row's result "
+                            "and the page's spelling is not shown; a person should look at each",
+                            rows_read))
     unparsed = list(cache.get("unparsedPages") or [])
     if unparsed:
         issues.append(Issue("error", "results-page-unparsed",
