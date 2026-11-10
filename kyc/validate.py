@@ -26,7 +26,8 @@ _MARKUP = re.compile(r"</?[a-zA-Z][^>]*>|&[a-zA-Z]{2,10};|&#\d+;")
 
 
 class Issue:
-    """One finding: ``level`` is ``"error"`` or ``"warn"``."""
+    """One finding: ``level`` is ``"error"``, ``"warn"`` or ``"info"`` (what
+    was done, said in the summary and counted as neither)."""
 
     __slots__ = ("level", "code", "message", "detail")
 
@@ -1107,6 +1108,32 @@ def check_results_pages(cache):
                             "party's nominee's own (rule 63): the nominee takes the row's result "
                             "and the page's spelling is not shown; a person should look at each",
                             rows_read))
+    # How each called race was called (rule 63): a table's mark, the
+    # infobox's declaration, or the national summary's mark where the state's
+    # page held nothing. Said, not warned about.
+    routes = {}
+    for race in (cache.get("races") or {}).values():
+        if race.get("calledBy"):
+            routes[race["calledBy"]] = routes.get(race["calledBy"], 0) + 1
+    if routes.get("infobox") or routes.get("national"):
+        national = [f"{rid}: {race['national'].get('name')} "
+                    f"(revision {race['national'].get('revid')}"
+                    f"{', kept from the last read' if race['national'].get('kept') else ''})"
+                    for rid, race in sorted((cache.get("races") or {}).items())
+                    if race.get("calledBy") == "national" and race.get("national")]
+        issues.append(Issue("info", "result-calls",
+                            f"November winners by route (rule 63): {routes.get('table', 0)} from a "
+                            f"table's mark, {routes.get('infobox', 0)} from the infobox's "
+                            f"declaration, {routes.get('national', 0)} from the national summary "
+                            "where the state's page held no result", national))
+    withdrawn = [f"{rid}: {item.get('name')}, now behind {', '.join(item.get('leaders') or [])} "
+                 f"(national revision {item.get('revid')})"
+                 for rid, item in sorted((cache.get("nationalWithdrawn") or {}).items())]
+    if withdrawn:
+        issues.append(Issue("warn", "result-national-withdrawn",
+                            f"{len(withdrawn)} national summary calls withdrawn (rule 63): the "
+                            "state's page now gives a result that puts someone else first, and "
+                            "its verdict stands; a person should look at each", withdrawn))
     # An alias is the name exactly as its race's results page writes it. One
     # the page, as last read, and the state's list no longer give matches
     # nobody and settles nothing: invisible, and quietly wrong once the page
@@ -2509,10 +2536,13 @@ def format_report(issues, verbose=False):
 
     errors = [i for i in issues if i.level == "error"]
     warns = [i for i in issues if i.level == "warn"]
+    # An "info" line says what was done, for a person reading the summary;
+    # it is neither an error nor a warning, and counts as neither.
+    infos = [i for i in issues if i.level == "info"]
 
     lines = [f"Data quality: {len(errors)} error(s), {len(warns)} warning(s)", ""]
-    for issue in errors + warns:
-        marker = "ERROR" if issue.level == "error" else "warn "
+    for issue in errors + warns + infos:
+        marker = {"error": "ERROR", "warn": "warn "}.get(issue.level, "info ")
         lines.append(f"  [{marker}] {issue.code}: {issue.message}")
         shown = issue.detail if verbose else issue.detail[:5]
         for item in shown:

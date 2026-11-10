@@ -2180,6 +2180,211 @@ def _unmark(boxes, tables):
 CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL = "table", "infobox", "national"
 
 
+# ------------------------------------------- the national summary's mark
+
+# The national article's table of every district marks each winner with
+# {{aye}} (rule 63's national route, the owner's decision of 2026-11-10: "Yes,
+# with checks"). It is read only for a House race whose state's page holds no
+# November result at all.
+NATIONAL_HOUSE = "2026 United States House of Representatives elections"
+
+# A row of the table of every district: its header cell keys the district
+# ({{ushr|ST|N|X}}, at-large "AL"); other tables of the article (retirements,
+# special elections) key rows the same way, and only this one gives each
+# district's PVI ({{shading PVI}}).
+_NATIONAL_ROW = re.compile(
+    r"\n!\s*(?:[^|\n{]*\|\s*)?\{\{\s*ushr\s*\|\s*([A-Za-z]{2})\s*\|\s*(\d+|AL)\b[^{}]*\}\}"
+    r"(.*?)(?=\n\|-|\n\|\}|\Z)", re.S | re.I)
+_AYE = re.compile(r"\{\{\s*aye\s*\}\}", re.I)
+_AYE_NAME = re.compile(
+    r"\{\{\s*aye\s*\}\}\s*'*\s*(\[\[[^\]]+\]\]|[^(*\n\[]+?)\s*'*\s*\(([^()]*)\)", re.I)
+_NATIONAL_WORDS = re.compile(
+    r"\b(?:incumbent (?P<re>re-?elected)|incumbent lost (?P<lost>re-?election|renomination)"
+    r"|(?P<new>new member elected)|(?P<party>[A-Z][\w'’]*(?:[ –-][A-Z][\w'’]*)*) "
+    r"(?P<shift>hold|gain))\b", re.I)
+
+
+def fetch_national(title=NATIONAL_HOUSE):
+    """``{"title", "revid", "timestamp", "text"}``: the national article as
+    read now, through the same request every results page goes through.
+    Raises as :func:`fetch_wikitext` does; a failure concludes nothing."""
+    from .portraits import _get
+
+    params = {
+        "action": "query", "prop": "revisions", "rvprop": "content|ids|timestamp",
+        "rvslots": "main", "titles": title, "redirects": "1",
+        "format": "json", "formatversion": "2",
+    }
+    url = f"{WIKI_API}?{urllib.parse.urlencode(params)}"
+    payload = json.loads(_get(url, timeout=_TIMEOUT).decode("utf-8"))
+    page = (payload.get("query", {}).get("pages") or [{}])[0]
+    if page.get("missing") or "revisions" not in page:
+        raise PageMissing(title)
+    revision = page["revisions"][0]
+    return {"title": page.get("title") or title, "revid": revision.get("revid"),
+            "timestamp": revision.get("timestamp"),
+            "text": revision["slots"]["main"]["content"]}
+
+
+def national_url(title, revid=None):
+    """The address of the national article, at the revision read."""
+    base = "https://en.wikipedia.org/w/index.php?title=" + urllib.parse.quote(
+        str(title).replace(" ", "_"))
+    return base + (f"&oldid={revid}" if revid else "")
+
+
+def national_rows(text):
+    """``{(state, district): row}`` from the national article's table of
+    every district, the row's text after its header cell; a district two
+    such rows key is None (which of them would be guessing)."""
+    out = {}
+    for match in _NATIONAL_ROW.finditer(text or ""):
+        body = match.group(3)
+        if "shading pvi" not in body.lower():
+            continue
+        key = (match.group(1).upper(), 0 if match.group(2).upper() == "AL" else int(match.group(2)))
+        out[key] = None if key in out else body
+    return out
+
+
+def national_row(body):
+    """What one district's row says: ``{"ayes", "name", "party", "words"}``.
+
+    ``ayes`` counts the {{aye}} marks; ``name`` and ``party`` are the marked
+    person's as the row writes them ("'''[[Jonathan Jackson (Illinois
+    politician)|Jonathan Jackson]]''' (Democratic)"); ``words`` are the
+    status cell's phrases: ``["re-elected"]``, ``["lost re-election"]``,
+    ``["lost renomination"]``, ``["new member"]``, ``["hold", "Democratic"]``
+    or ``["gain", "Republican"]``."""
+    lowered = body.lower()
+    cut = lowered.find("{{plainlist")
+    status, people = (body[:cut], body[cut:]) if cut >= 0 else (body, body)
+    found = _AYE_NAME.search(people)
+    plain = _REF_TAG.sub(" ", status)
+    plain = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", r"\1", plain)
+    plain = re.sub(r"\{\{[^{}]*\}\}", " ", plain)
+    words = []
+    for match in _NATIONAL_WORDS.finditer(plain):
+        if match.group("re"):
+            words.append(["re-elected"])
+        elif match.group("lost"):
+            words.append(["lost re-election" if "elect" in match.group("lost").lower()
+                          else "lost renomination"])
+        elif match.group("new"):
+            words.append(["new member"])
+        else:
+            words.append([match.group("shift").lower(), match.group("party")])
+    return {"ayes": len(_AYE.findall(people)),
+            "name": clean_name(found.group(1)) if found else None,
+            "party": found.group(2).strip() if found else None,
+            "words": words}
+
+
+def national_barred(state, rid, open_seat=False, listed=()):
+    """Why no national call may be made in *rid*'s state, or None: a count
+    by ranked choice (RANKED_CHOICE), a seat won only by a majority (the
+    states and territories in overrides.GENERAL_RUNOFFS, Georgia's among
+    them), or an open primary's first round or a seat on a qualified list
+    (Louisiana's): those wait for their page's counts."""
+    if state in RANKED_CHOICE:
+        return "a ranked-choice count"
+    if state in _general_runoffs():
+        return "a seat won only by a majority"
+    if open_seat or rid in listed:
+        return "an open primary's round, or a seat on a qualified list"
+    return None
+
+
+def national_words_agree(record, is_incumbent, holder_party):
+    """Why the row's own words do not agree with its mark, or None. At least
+    one phrase is needed, and every one must agree: "Incumbent re-elected"
+    only for the race's record incumbent; "Incumbent lost re-election",
+    "lost renomination" and "New member elected" only for someone else; "<Party>
+    hold" only where the marked person's party is the holder's, "<Party> gain"
+    only where it is not - in both the party named the marked person's own.
+    A word that cannot be checked (no holder on the record) agrees with
+    nothing."""
+    words = record.get("words") or []
+    if not words:
+        return "the row's own words say nothing of the result"
+    theirs = party_key(record.get("party") or "")
+    holder = party_key(holder_party or "") if holder_party else None
+    for word in words:
+        kind = word[0]
+        if kind == "re-elected" and not is_incumbent:
+            return "the row says the incumbent was re-elected, and marks someone else"
+        if kind in ("lost re-election", "lost renomination", "new member") and is_incumbent:
+            return f"the row says {kind}, and marks the incumbent"
+        if kind in ("hold", "gain"):
+            named = party_key(word[1])
+            if not record.get("party") or named != theirs:
+                return f"the row's \"{word[1]} {kind}\" is not the marked person's party"
+            if holder is None:
+                return f"the row's \"{word[1]} {kind}\" cannot be checked: no holder on the record"
+            if (kind == "hold") != (named == holder):
+                return f"the row's \"{word[1]} {kind}\" disagrees with the seat's holder's party"
+    return None
+
+
+def national_call(record, outcome, matched, ambiguous, rows, aliases, on_a_list, same,
+                  incumbent):
+    """``(page name, None)`` for the November nominee the national row
+    (:func:`national_row`) marks, or ``(None, why)``.
+
+    The row marks exactly one person; that person is exactly one of the
+    race's November nominees as this read has them (*outcome*), by a filing
+    (rule 62's matching, or an evidenced ``overrides.RESULT_NAMES`` entry)
+    or a state's list - never a name only the national row gives - with no
+    look-alike beside them (rule 25); the row's party, where a filing gives a
+    major party, is theirs; and the row's own words agree
+    (:func:`national_words_agree`) with *incumbent*, the race's record
+    incumbent (``{"bioguide", "fec", "party"}``)."""
+    ayes = record.get("ayes") or 0
+    if ayes != 1 or not record.get("name"):
+        return None, ("the row marks nobody" if not ayes else
+                      "the row marks more than one person")
+    who = record["name"]
+    found, unclear = match_names([who], rows, aliases)
+    ids = [] if who in unclear else list(found.get(who) or [])
+    ids = ids or _exact_filing(who, rows)
+    nominees = [n for n, status in outcome.items() if status == NOMINEE]
+    if ids:
+        fits = [n for n in nominees if set(matched.get(n) or ()) & set(ids)]
+    elif on_a_list(who):
+        fits = [n for n in nominees if n not in matched and same(n, who)]
+    else:
+        return None, f"no filing and no state's list in this race names {who!r}"
+    look_alike = [n for n in nominees if n not in fits and _one_person(n, who)]
+    if len(fits) != 1 or look_alike:
+        return None, f"{who!r} is not one November nominee of the race, alone"
+    fit = fits[0]
+    theirs = set(matched.get(fit) or ids)
+    filed = {party_key(r.get("party")) for r in rows if r["candidate_id"] in theirs}
+    major = filed & {"democratic", "republican"}
+    if major and record.get("party") and party_key(record["party"]) not in major:
+        return None, f"the row's party for {who!r} is not their filing's"
+    incumbent = incumbent or {}
+    held_by = ({incumbent.get("bioguide")} | set(incumbent.get("fec") or ())) - {None}
+    why = national_words_agree(record, bool(theirs & held_by), incumbent.get("party"))
+    return (None, why) if why else (fit, None)
+
+
+def _page_leaders(boxes, outcome):
+    """Whom a race's own page puts first: each November table's and the
+    infobox's leading count, and anyone it elects."""
+    leaders = {name for name, status in outcome.items() if status == ELECTED}
+    for title, rows in boxes:
+        clean = _clean_title(title)
+        field = "popular" if clean == INFOBOX_TITLE else "votes"
+        if clean != INFOBOX_TITLE and (clean in LIST_TITLES or _stage(clean) != "general"):
+            continue
+        counted = _counted(rows, field)
+        if len(counted) >= 2:
+            top = max(counted.values())
+            leaders.update(n for n, v in counted.items() if v == top)
+    return leaders
+
+
 def _no_november_result(boxes):
     """True where a race's section holds no November result at all: no
     November table with a count above zero or a mark, and no infobox with a
@@ -3409,7 +3614,7 @@ def _row_name(row):
 
 
 def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=None,
-          qualified=None, certified=None):
+          qualified=None, certified=None, national=None, previous=None, incumbents=None):
     """Resolve every settled race. Returns the cache structure.
 
     ``{"asOf": date, "races": {race_id: {"status": {candidate_id: status},
@@ -3419,6 +3624,12 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     ballot of an open-primary seat before its count, used for a seat whose
     page has decided nothing - before November 3, or after it until the
     page marks a result.
+
+    *national* is :func:`fetch_national`'s read of the national article, or
+    None where it could not be read; *previous* the last cache, whose
+    national calls stand while it cannot be (rule 8); *incumbents* the frozen
+    record's incumbent of each race (``{race_id: {"bioguide", "fec",
+    "party"}}``), which the national row's words are checked against.
     """
     # Named apart from the loop's own ``listed`` (a race's ballot parties),
     # which once overwrote it, so every Louisiana seat stayed pending.
@@ -3444,6 +3655,16 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     pages = {}
     refused_marks, refused_names, refused_rows, renamed_rows, looked_rows = {}, {}, {}, {}, {}
     stale_aliases, calls = {}, {}
+    # The national summary (rule 63's national route): its rows, or None
+    # where it was not read this time - then the last read's calls stand
+    # (rule 8).
+    withdrawn_calls, national_refused = {}, {}
+    national_index, national_meta = None, {}
+    if national and national.get("text"):
+        national_index = national_rows(national["text"])
+        national_meta = {"revid": national.get("revid"),
+                         "url": national_url(national.get("title") or NATIONAL_HOUSE,
+                                             national.get("revid"))}
     from .overrides import RESULT_NAMES as _RESULT_NAMES
     from .certified import LOST_PRIMARY as _LOST, WITHDRAWN as _LIST_WITHDREW
     _OFF_THE_LIST = (_LOST, _LIST_WITHDREW)
@@ -3655,6 +3876,50 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 late = set()
                 outcome = resolve_race(boxes, general_held=True, late=late, **kinds)
                 matched, ambiguous, unsure = read_names()
+        national_record = None
+        if general_held(today) and office == "H" and not national_barred(
+                state, rid, is_open, qualified_lists):
+            # The national summary's mark, where the state's page holds no
+            # November result at all (national_call, rule 63).
+            prev = (((previous or {}).get("races") or {}).get(rid) or {})
+            before = prev.get("national") if prev.get("calledBy") == CALLED_NATIONAL else None
+            if before and not silent:
+                # The state's page has a result now, and its verdict stands;
+                # where it puts someone else first, the national call is
+                # withdrawn, and a person is told (validate).
+                others = sorted(n for n in _page_leaders(boxes, outcome)
+                                if not _one_person(n, before.get("name") or ""))
+                if others:
+                    withdrawn_calls[rid] = {"name": before.get("name"), "leaders": others,
+                                            "revid": before.get("revid")}
+                    log(f"    [warn] {rid}: the national summary's call of {before.get('name')!r} "
+                        f"is withdrawn: the state's page now puts {', '.join(others)} first")
+                    before = None
+            if national_index is None:
+                record = dict(before, kept=True) if before else None
+            else:
+                body = national_index.get((state, key))
+                record = dict(national_row(body), **national_meta, read=today.isoformat()) \
+                    if body else None
+            decided = any(st in (ELECTED, RUNOFF) for st in outcome.values())
+            if record and not struck and rid not in refused_rows and not decided and (
+                    silent or (before and _one_person(record.get("name") or "", before["name"]))):
+                fit, why = national_call(record, outcome, matched, ambiguous, rows,
+                                         race_aliases, on_a_list, same,
+                                         (incumbents or {}).get(rid))
+                if fit:
+                    called = resolve_race(boxes, general_held=True, late=set(), called=fit, **kinds)
+                    if called.get(fit) == ELECTED:
+                        outcome, how, national_record = called, CALLED_NATIONAL, record
+                        matched, ambiguous, unsure = read_names()
+                        log(f"    [note] {rid}: called from the national summary for {fit!r} "
+                            f"(revision {record.get('revid')}"
+                            f"{', kept from the last read' if record.get('kept') else ''})")
+                    else:
+                        why = "the call settles nobody on the page's November ballot"
+                if why:
+                    national_refused[rid] = {"name": record.get("name"), "why": why}
+                    log(f"    [note] {rid}: the national summary's row gives no call: {why}")
         if struck:
             refused_marks[rid] = struck
             for item in struck:
@@ -3740,6 +4005,12 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         calls[rid] = how or (CALLED_INFOBOX if any(r.get("called") == CALLED_INFOBOX
                                                    for _t, rs in boxes for r in rs)
                              else CALLED_TABLE)
+        if national_record:
+            # The national article's address and revision are this call's
+            # source; the state's page stays the source of everything else.
+            races[rid]["national"] = {k: national_record.get(k) for k in (
+                "name", "party", "ayes", "words", "url", "revid", "read", "kept")
+                if k in national_record}
         # Whose result the December round decided, and which round: an
         # open primary's general election on the seat's own date, or the
         # state's general election runoff (overrides.GENERAL_RUNOFFS). The
@@ -3841,6 +4112,15 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         # Each overrides.RESULT_NAMES alias that no name on its race's page,
         # as read here, and no name on the state's list for it matches.
         "staleAliases": dict(sorted(stale_aliases.items())),
+        # The national summary this read used (rule 63's national route), or
+        # that it could not be read and the last read's calls were kept.
+        "national": (dict(national_meta, title=(national or {}).get("title") or NATIONAL_HOUSE)
+                     if national_index is not None else None),
+        # A national call the state's page has since put someone else ahead
+        # of, withdrawn (validate warns); and each national row that gave no
+        # call for a race whose page held no result, and why.
+        "nationalWithdrawn": dict(sorted(withdrawn_calls.items())),
+        "nationalRefused": dict(sorted(national_refused.items())),
         # Every place the calendar above is not the FEC's, and why.
         "calendarNotes": calendar_notes,
         # The calendar travels with the results so `build` needs no network
