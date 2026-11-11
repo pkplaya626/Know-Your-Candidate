@@ -5,6 +5,7 @@ campaign's, December 15, January 10 - never the day's data."""
 
 import datetime
 import os
+import re
 import sys
 import unittest
 
@@ -179,6 +180,88 @@ class TheTable(unittest.TestCase):
         self.assertTrue(terms_begin.for_page("NV", "sos")["source"].endswith("NRS-225.html"))
         self.assertTrue(terms_begin.for_page("NV", "ag")["source"].endswith("NRS-228.html"))
 
+    def test_the_gap_count_is_what_the_table_holds(self):
+        # Counted from the data, never typed: every office on the ballot the
+        # records do not date is a gap, and the build log lists each once.
+        up = set(terms_begin.up_offices())
+        dated = {(c, k) for c, records in terms_begin.TERMS.items()
+                 for r in records for k in r["offices"]}
+        logged = terms_begin.gaps()
+        self.assertEqual(len(logged), len(up) - len(dated))
+        self.assertEqual({(c, k) for c, k, _why in logged}, up - dated)
+        self.assertEqual(len(logged), len(terms_begin.GAPS))
+
+    def test_a_gap_nothing_was_read_for_names_where_a_person_reads_it(self):
+        # A refusal concludes nothing (rule 8): where no page was read the
+        # why says what the server answered and the address to read by hand,
+        # on the jurisdiction's own host, never a compiled table's (rule 50).
+        urls = re.compile(r"https://[^\s;,)]+")
+        for (code, key), (why, source) in terms_begin.GAPS.items():
+            found = urls.findall(why)
+            if source is None:
+                self.assertTrue(found, (code, key, why))
+                self.assertIn("A person should read", why, (code, key))
+                self.assertRegex(why, r"HTTP \d{3}|reset|403|commercial host", (code, key))
+            for url in found:
+                self.assertEqual(terms_begin._source_problems(code, (key,), url), [], url)
+        # A Cloudflare challenge is said to be one, never "the law has no day".
+        why, _src = terms_begin.GAPS[("GA", "governor")]
+        self.assertIn("Cloudflare challenge", why)
+        self.assertNotIn("fixes no day", why)
+
+    def test_the_second_reads_days_are_counted_on_the_calendar(self):
+        # Alabama's "first Monday after the second Tuesday": January 18,
+        # never the Monday before that Tuesday (the 11th).
+        al = terms_begin.record_for("AL", "governor")
+        self.assertEqual(terms_begin.count(al["rule"]), datetime.date(2027, 1, 18))
+        # Connecticut's "Wednesday following the first Monday": the 6th.
+        self.assertEqual(terms_begin.record_for("CT", "ag")["day"], "2027-01-06")
+        # Maryland's third Wednesday, Delaware's first Tuesday, the Northern
+        # Mariana Islands' second Monday, Wisconsin's and Wyoming's first.
+        expected = {("MD", "lt"): "2027-01-20", ("DE", "ag"): "2027-01-05",
+                    ("MP", "governor"): "2027-01-11", ("WI", "sos"): "2027-01-04",
+                    ("WY", "sos"): "2027-01-04"}
+        for (code, key), day in expected.items():
+            self.assertEqual(terms_begin.for_page(code, key)["day"], day, (code, key))
+        # A named day is not said to be counted.
+        for code, key in (("NM", "governor"), ("NY", "ag"), ("TX", "ag")):
+            self.assertFalse(terms_begin.for_page(code, key)["counted"], (code, key))
+
+    def test_an_office_that_cites_the_law_without_quoting_it_is_no_source(self):
+        # The second reader of PR #233: Indiana's Election Division's calendar
+        # cites IC 4-5-1-1 and does not quote it, and this table quotes the
+        # law's own words. Its January 1 is a lead, and the gap names the
+        # statute's address for a person to read.
+        self.assertIsNone(terms_begin.record_for("IN", "sos"))
+        why, address = terms_begin.GAPS[("IN", "sos")]
+        self.assertIn("https://iga.in.gov/laws/2025/ic/titles/4", why)
+        self.assertEqual(address, terms_begin.IN_CALENDAR)
+        # Tennessee's leads give two days a reader must tell apart.
+        tn = terms_begin.GAPS[("TN", "governor")][0]
+        self.assertIn("January 15", tn)
+        self.assertIn("General Assembly designates", tn)
+
+    def test_one_jurisdictions_offices_can_split_between_a_day_and_a_gap(self):
+        # Texas's attorney general starts on Gov't Code 601.003's January 1,
+        # which its subsection (c) says is not the governor's or the
+        # lieutenant governor's: they are installed on no fixed day.
+        ag = terms_begin.record_for("TX", "ag")
+        self.assertEqual(ag["day"], "2027-01-01")
+        self.assertIn("does not apply to the office of governor",
+                      " ".join(q for _s, qs in ag["sources"] for q in qs))
+        # The session's "12 noon" (Gov't Code 301.001) is no source of it.
+        self.assertNotIn("at", ag)
+        for key in ("governor", "lt"):
+            self.assertIsNone(terms_begin.record_for("TX", key))
+            self.assertIn(("TX", key), terms_begin.GAPS)
+        # Maryland's attorney general's term runs "from the time of his
+        # election and qualification", the governor's from a named Wednesday.
+        self.assertIsNone(terms_begin.record_for("MD", "ag"))
+        self.assertIn("election and qualification", terms_begin.GAPS[("MD", "ag")][0])
+        self.assertEqual(terms_begin.record_for("MD", "governor")["day"], "2027-01-20")
+        # New York's day is Public Officers Law s.4(1)'s, linked first.
+        self.assertTrue(terms_begin.for_page("NY", "governor")["source"].endswith("/PBO4/"))
+
     def test_every_record_quotes_its_source_on_an_official_host(self):
         for code, records in terms_begin.TERMS.items():
             for record in records:
@@ -331,6 +414,9 @@ class OnEachClock(unittest.TestCase):
         why, source = terms_begin.GAPS[("OR", "governor")]
         self.assertIn("except the Governor", why)
         self.assertTrue(source.startswith("https://www.oregonlegislature.gov/"))
+        # ORS 176.010 starts the term at the Speaker's publication of the
+        # returns, on no fixed day (the second read, 2026-11-11).
+        self.assertIn("publication of the returns", why)
 
 
 class TheBallotTable(unittest.TestCase):
