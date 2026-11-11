@@ -1257,7 +1257,14 @@
         : opts && opts.raceLink ? racePointer(code, false)
         : governorRace(code, { status: false }));
     var place = s.territory ? "The territory" : "The state";
-    if (s.lt || s.ag || s.sos) {
+    // An office on the ballot that no roster read here names a holder for
+    // still lists who is running for it (officerRow): the Northern Mariana
+    // Islands' attorney general, elected under its own constitution.
+    var listedOnly = ["lt", "ag", "sos"].filter(function (k) {
+      var item = ballotItem(code, k);
+      return !s[k] && !!(item && item.up && item.candidates);
+    });
+    if (s.lt || s.ag || s.sos || listedOnly.length) {
       html += '<p class="panel-subhead">' + (s.territory ? "Territorial" : "Statewide") +
         ' officers</p><ul class="gov-officers">' +
         ["lt", "ag", "sos"].map(function (k) {
@@ -1267,10 +1274,21 @@
     }
     if (s.territory) {
       // Said, not left out without a word: a territory's legislature, its
-      // attorney general and its courts are in none of the sources read here.
-      html += '<p class="gov-note">' + KYC.escapeHtml(KYC.possessive(KYC.stateName(code))) + " legislature, " +
-        "attorney general and courts are not covered here: this site lists the governor and the " +
-        "officers the national associations of lieutenant governors and secretaries of state list.</p>";
+      // attorney general and its courts are in none of the sources read here
+      // - save an attorney general its own law elects (the Northern Mariana
+      // Islands'), whose candidates the election office's list gives and
+      // whose holder no roster read here names (kyc/ballot2026.py). The
+      // place in its own words (rule 75): "The Northern Mariana Islands'".
+      var whose = KYC.possessive(KYC.placeWords(code));
+      whose = whose.charAt(0).toUpperCase() + whose.slice(1);
+      html += '<p class="gov-note">' + KYC.escapeHtml(whose) + (listedOnly.indexOf("ag") !== -1
+        ? " legislature and courts, and the holder of its office of attorney general, are not covered " +
+          "here: this site lists the governor, the officers the national associations of lieutenant " +
+          "governors and secretaries of state list, and, for the attorney general, the candidates on " +
+          "the election office's list.</p>"
+        : " legislature, attorney general and courts are not covered here: this site lists the " +
+          "governor and the officers the national associations of lieutenant governors and " +
+          "secretaries of state list.</p>");
     }
     if (s.upper) {
       html += '<p class="panel-subhead">Legislature</p><ul class="gov-chambers">' +

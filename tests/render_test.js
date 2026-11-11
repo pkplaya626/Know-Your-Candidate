@@ -10289,6 +10289,37 @@ async function testStateGov() {
       /Puerto Rico's legislature, attorney general and courts are not covered here/.test(text) &&
       !/Seats: not covered/.test(text));
   });
+
+  // The Northern Mariana Islands elect their attorney general (N.M.I. Const.
+  // art. III, s.11): its three candidates were on the November 3 specimen
+  // ballots while the page said the office was "not covered here" (rule 19).
+  // No roster read here names its holder.
+  const mp = await buildPage("states/mp.html");
+  suite("states/mp.html — the attorney general its voters elect", () => {
+    const { KYC } = mp.window;
+    const section = mp.D.getElementById("state-government");
+    const item = ((KYC.stategov.ballotOf("MP") || {}).offices || {}).ag;
+    check("the ballot table puts the office on the ballot, with the election office's list",
+      !!item && item.up && !!item.candidates && item.candidates.candidates.length > 0);
+    if (!item || !item.candidates) return;
+    const row = [...section.querySelectorAll(".gov-officers .gov-officer")]
+      .find((li) => (li.querySelector(".gov-officer-role") || {}).textContent === "Attorney general");
+    check("the office has its own row, its ballot mark on the label line (rule 79)",
+      !!row && !!row.querySelector(".gov-office .gov-ballot-mark.up"), section.textContent.slice(0, 400));
+    if (!row) return;
+    check("which names no holder", !row.querySelector(".gov-officer-name") &&
+      !row.querySelector(".gov-holder-status"), row.textContent);
+    check("and lists every candidate the list prints, by the name the page shows",
+      item.candidates.candidates.every((c) => row.querySelector(".gov-candidates").textContent.indexOf(c.name) !== -1),
+      row.textContent);
+    const note = section.querySelector(".gov-note").textContent;
+    check("the territory's note says only the holder is not covered, in the place's own words (rule 75)",
+      /^The Northern Mariana Islands' legislature and courts, and the holder of its office of attorney general, are not covered here/.test(note) &&
+      /for the attorney general, the candidates on the election office's list/.test(note) &&
+      !/legislature, attorney general and courts/.test(note), note);
+    const offices = KYC.stategov.ballotOffices("MP");
+    check("the ballot line counts it with the governor's ticket", /attorney general/.test(offices || ""), offices);
+  });
   suite("states/pr.html — the Resident Commissioner, and why no seat is on the 2026 ballot", () => {
     const hero = pr.D.querySelector(".state-summary").textContent;
     check("the hero names the office and its next election, not zeros",
@@ -12608,7 +12639,38 @@ async function testSearchAnswers() {
     check("said in the District's own words", /The District of Columbia has an elected mayor/.test(text()), text());
     check("and no row is titled as its governor", !/Governor, District of Columbia/.test(text()));
   });
-  const missing = Object.keys(gov).filter((c) => !gov[c].ag)[0];
+  const agUp = (c) => !!((((gov[c].ballot2026 || {}).offices || {}).ag || {}).up);
+  const missing = Object.keys(gov).filter((c) => !gov[c].ag && !agUp(c))[0];
+  // An office no roster names a holder for, on the ballot all the same (the
+  // Northern Mariana Islands' attorney general, N.M.I. Const. art. III,
+  // s.11): its page lists the candidates, so the answer is never "lists no
+  // attorney general".
+  for (const code of Object.keys(gov).filter((c) => !gov[c].ag && agUp(c))) {
+    await ask(KYC.stateName(code) + " attorney general");
+    suite(`search answers — '${KYC.stateName(code)} attorney general': on the ballot, no holder named`, () => {
+      const item = gov[code].ballot2026.offices.ag;
+      const printed = ((item.candidates || {}).candidates || []).filter((c) => !c.writeIn);
+      check("titled as the office its page lists, linked to it",
+        /^Attorney General, /.test(box().querySelector(".answer-row").textContent) &&
+        hrefs().indexOf("states/" + code.toLowerCase() + ".html#state-government") !== -1, text());
+      check("names no holder, and says so", /who holds it is not named here/.test(text()) &&
+        !/lists no attorney general/.test(text()), text());
+      check("with the candidates its list names", printed.length > 0 &&
+        printed.every((c) => text().indexOf(c.name) !== -1), text());
+    });
+  }
+  // The every-state list names a territory among its rows, so its heading
+  // does not call them all states (rule 75; the second reader of PR #234).
+  const territoryRow = Object.keys(gov).some((c) => (gov[c].ag || agUp(c)) &&
+    ((KYC.meta().states || {})[c] || {}).territory);
+  await ask("attorney general");
+  suite("search answers — 'attorney general': the every-state list's heading", () => {
+    check(territoryRow ? "a territory's row stands under 'Each state’s and territory’s'"
+      : "no territory's row, so 'Each state’s'",
+    territoryRow ? /Each state’s and territory’s attorney general/.test(text()) &&
+        !/Each state’s attorney general/.test(text())
+      : /Each state’s attorney general/.test(text()), text().slice(0, 300));
+  });
   if (missing) {
     await ask(KYC.stateName(missing) + " attorney general");
     suite(`search answers — '${KYC.stateName(missing)} attorney general': an office this site does not list`, () => {

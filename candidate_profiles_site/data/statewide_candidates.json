@@ -3702,8 +3702,55 @@
    "verified": "MN verified 2026-10-18 with corrections: Secretary of State sample ballot (Ramsey, St. Paul W-2 P-01, State General Election November 3, 2026) and portal ballot data re-read: Klobuchar/Schierer (DFL), Demuth/Wilson (R), Young/Kirby (Green); AG Ellison (DFL), Schutz (R); SoS Kuhl-Stennes (Green), Jude (R), Tangen (L), Simon (DFL). Walz's incumbency re-sourced to the MN House press archive (April 2026); Lt. Gov. incumbent set to null (mn.gov and lrl.mn.gov unreadable, no official page re-opened names Flanagan as Lt. Gov.); AG incumbent quote replaced with text actually on ag.state.mn.us."
   },
   "MP": {
-   "notes": "Source: the Commonwealth Election Commission (votecnmi.gov.mp): its 2026 general election specimen ballots, and its '2026 Certified Candidates Listing' page. Incumbents from the Office of the Governor and Lt. Governor (governor.cnmi.gov), whose Lt. Governor page says Mendiola took office 'following the passing of Governor Arnold I. Palacios'. The attorney general (elected in the CNMI, three candidates on the same ballot) is outside this batch. Read 2026-10-18.",
+   "notes": "Source: the Commonwealth Election Commission (votecnmi.gov.mp): its 2026 general election specimen ballots, and its '2026 Certified Candidates Listing' page. Incumbents from the Office of the Governor and Lt. Governor (governor.cnmi.gov), whose Lt. Governor page says Mendiola took office 'following the passing of Governor Arnold I. Palacios'. Read 2026-10-18. The attorney general, elected in the CNMI since the 2012 amendment of N.M.I. Const. art. III, s.11, was added on 2026-11-11 from the same specimen ballots, its holder from the Office of the Attorney General's own site (cnmioag.org).",
    "offices": {
+    "ag": {
+     "candidates": [
+      {
+       "holder": false,
+       "name": "EVANGELISTA, Michael Norita",
+       "party": null,
+       "runningMate": null,
+       "surname": "EVANGELISTA",
+       "writeIn": false
+      },
+      {
+       "holder": false,
+       "name": "TORRES, Joaquin Deleon Guerrero",
+       "party": null,
+       "runningMate": null,
+       "surname": "TORRES",
+       "writeIn": false
+      },
+      {
+       "holder": false,
+       "name": "GLASS, Jonathan Robert",
+       "party": null,
+       "runningMate": null,
+       "surname": "GLASS",
+       "writeIn": false
+      }
+     ],
+     "certified": false,
+     "holderNote": "Not on the Commission's specimen ballots or its candidates listing. Neither source says why, and no reason is recorded here. This site reads attorneys general for the fifty states only (kyc/officers.py), so the page names no holder for the office.",
+     "holderOnList": false,
+     "holderResearched": "Edward E. Manibusan",
+     "holderSource": {
+      "quote": "Attorney General Edward E. Manibusan is the Commonwealth of the Northern Mariana Island’s first elected Attorney General and was officially sworn into office on January 12, 2015.",
+      "url": "https://www.cnmioag.org/about-us/"
+     },
+     "list": {
+      "by": "Commonwealth Election Commission",
+      "dated": "HTTP Last-Modified: Thu, 17 Sep 2026 13:07:46 GMT (the PDF shows no date of its own)",
+      "kind": "specimen ballot",
+      "quote": "ATTORNEY GENERAL Vote for no more than one (1) 1 EVANGELISTA, Michael Norita 2 TORRES, Joaquin Deleon Guerrero 3 GLASS, Jonathan Robert",
+      "read": "2026-11-11",
+      "title": "Commonwealth Election Commission, 'November 3, 2026 General Election' specimen ballots (2026_GE_BALLOT_SPECIMEN.pdf), cross-checked against the Commission's '2026 Certified Candidates Listing' page (https://www.votecnmi.gov.mp/candidate/2026-certified-candidates-listing)",
+      "url": "https://www.votecnmi.gov.mp/downloads/2026/2026_GE_BALLOT_SPECIMEN.pdf"
+     },
+     "notes": "Names as the specimen ballots print them (surname first, in capitals), under 'ATTORNEY GENERAL - Vote for no more than one (1)', in the same order (1-3) on all 13 precinct ballots in the file, with no party beside any of them: N.M.I. Const. art. III, s.11(d) reads 'Elections for attorney general shall be nonpartisan, and candidates shall not declare any party affiliation' (https://cnmilaw.gov/constitution). The Commission's candidates listing page gives the same three under 'Attorney General' ('3 candidates') in given-name order - 'Joaquin Deleon Guerrero Torres', 'Jonathan Robert Glass', 'Michael Norita Evangelista' - each marked 'N/P', which its own key spells 'Non-Partisan'. No write-in candidates are listed. Read 2026-11-11, both documents asked as this project (kyc/agent.py).",
+     "title": "Attorney General"
+    },
     "governor": {
      "candidates": [
       {
@@ -3802,7 +3849,7 @@
      "title": "Lieutenant Governor"
     }
    },
-   "verified": "MP verified 2026-10-18 with one note trimmed: the CEC specimen ballot (Last-Modified 2026-09-17, same order on all 13 precinct ballots) and certified listing page both give the three Governor/Lt. Governor tickets (Attao/Villagomez IND, Torres/Jones REP, Camacho/Deleon Guerrero IND); Apatang and Mendiola confirmed as holders on governor.cnmi.gov; an unsourced 'no primary' remark removed."
+   "verified": "MP verified 2026-10-18 with one note trimmed: the CEC specimen ballot (Last-Modified 2026-09-17, same order on all 13 precinct ballots) and certified listing page both give the three Governor/Lt. Governor tickets (Attao/Villagomez IND, Torres/Jones REP, Camacho/Deleon Guerrero IND); Apatang and Mendiola confirmed as holders on governor.cnmi.gov; an unsourced 'no primary' remark removed. The attorney general's list, added 2026-11-11, was read from the specimen ballots (all 13 precinct ballots, the same three names in the same order) and checked against the listing page by the reader who added it; a second reader has not yet re-opened it."
   },
   "ND": {
    "notes": "Both offices from the North Dakota Secretary of State's 2026 General Election Contest/Candidate List (vip.sos.nd.gov, eid=348), Jurisdiction 'Statewide', read 2026-10-18. Party labels as the list prints them ('Democratic-NPL', 'Republican'). No write-in candidates are shown on the list.",

@@ -325,11 +325,20 @@
         : "This site does not list " + placeWords(code) + "’s officers."));
     }
     var off = info[key];
+    var title = officeTitle(code, key) + ", " + KYC.stateName(code);
+    if (!off && onBallot(code, key)) {
+      // No roster read here names its holder, but the office was on the
+      // ballot and its page lists the candidates (the Northern Mariana
+      // Islands' attorney general, elected under its own constitution):
+      // "lists no attorney general" read as though the page held nothing
+      // of it.
+      return row(link(href, title) + ":", "who holds it is not named here" +
+        (full === false ? "" : ". " + ballotLine(code, key, full)));
+    }
     if (!off) {
       return row(link(href, PlaceWords(code) + "’s page"), esc("This site lists no " + word + " for " +
         placeWords(code) + "; its page lists the officers it does."));
     }
-    var title = officeTitle(code, key) + ", " + KYC.stateName(code);
     if (off.none) {
       var successor = off.successor && off.successor.name
         ? " First in line to succeed the governor" + (onBallot(code, key) ? " until then" : "") + ": " +
@@ -371,13 +380,20 @@
     });
     var up = 0;
     var rows = [];
+    var apart = false;
     codes.forEach(function (code) {
       var off = states[code][key];
       var ballot = onBallot(code, key);
-      if (!off || (off.none && !ballot)) return;
+      // An office on the ballot that no roster names a holder for is still
+      // one of these offices (the Northern Mariana Islands' attorney
+      // general): left out, "N of these offices" disagreed with the races'
+      // count by onBallot (rule 73).
+      if ((!off && !ballot) || (off && off.none && !ballot)) return;
       if (ballot) up += 1;
       var detail;
-      if (off.none && KYC.stategov.termBegun(code, key)) {
+      if (!off) {
+        detail = "not named here";
+      } else if (off.none && KYC.stategov.termBegun(code, key)) {
         // Its first term has begun on the reader's day (newOfficeWords).
         detail = esc("first elected on Nov 3, 2026; its term " +
           KYC.stategov.beganWords(KYC.stategov.termBegun(code, key)) + "; the roster lists no one yet");
@@ -394,8 +410,9 @@
         detail = "not named here";
       }
       rows.push(row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":", detail));
+      if (((KYC.meta().states || {})[code] || {}).territory) apart = true;
     });
-    return { rows: rows, up: up };
+    return { rows: rows, up: up, apart: apart };
   }
 
   function stateOffice(ctx) {
@@ -434,7 +451,12 @@
           searchLink("Ohio " + name.toLowerCase()) + esc(") to see its candidates.") }));
       return out;
     }
-    out.push(block("offices", (key === "ag" || key === "sos" ? "Each state’s " + name.toLowerCase() : name + "s"),
+    // A territory among the rows is not a state (rule 75): the Northern
+    // Mariana Islands' attorney general stood under "Each state's attorney
+    // general" (the second reader of PR #234).
+    out.push(block("offices", (key === "ag" || key === "sos"
+      ? (all.apart ? "Each state’s and territory’s " : "Each state’s ") + name.toLowerCase()
+      : name + "s"),
       all.rows, { compact: true,
         note: esc("Each state’s and territory’s " + name.toLowerCase() + ", as its page lists them, " +
           "with the title it gives an acting officer. " + plural(all.up, "of these offices", "of these offices") +
