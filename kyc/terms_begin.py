@@ -525,3 +525,98 @@ def for_page(code, key, terms=None):
 def gaps():
     """``[(code, key, why)]`` for the build log: offices with no day."""
     return [(code, key, why) for (code, key), (why, _source) in sorted(GAPS.items())]
+
+
+# ------------------------------------------------ the holder past the term
+
+# Who the rosters name for each office, in a sentence's opening words; an
+# attorney general's is the association that lists them.
+ROSTERS = {"governor": "The National Governors Association’s roster",
+           "lt": "The National Lieutenant Governors Association’s roster",
+           "sos": "The National Association of Secretaries of State’s roster"}
+AG_ROSTERS = "The attorneys general associations’ rosters"
+LEAVING = ("not-listed", "term-limit")
+WHY_WORDS = {"not-listed": "who was not among the candidates for this office",
+             "term-limit": "who was term-limited"}
+
+
+def roster_words(key, holder):
+    """The opening words naming the roster a holder of *key* comes from."""
+    if key == "ag":
+        return f"The {holder['listedBy']}’s roster" if holder.get("listedBy") else AG_ROSTERS
+    return ROSTERS[key]
+
+
+def outgoing(key, holder, status, read):
+    """``{holder, why, roster, read}`` for a holder who will not hold the
+    office past the term the 2026 election chooses - the election office's
+    list did not print them, or a term limit stopped them (the holder line,
+    ``stategov.holder_line``) - else None. *read*: the roster's day read."""
+    if not status or status.get("why") not in LEAVING or not (holder or {}).get("name"):
+        return None
+    return {"holder": holder["name"], "why": status["why"], "roster": roster_words(key, holder),
+            "read": read}
+
+
+def begun(term, day):
+    """Whether the term in *term* (``for_page``'s record) has begun by *day*
+    (an ISO day or a date), as the page decides it on the reader's day."""
+    if not term or not day:
+        return False
+    return str(day)[:10] >= term["from"]
+
+
+def began_words(term):
+    """ "began on Jan. 4, 2027, counted from “...”", the page's words
+    (``KYC.stategov``'s ``beganWords``)."""
+    from .official_share import date_words
+    return (("began no later than " if term["kind"] == "by" else "began on ")
+            + date_words(term["day"])
+            + (f", counted from “{term['words']}”" if term.get("counted") else ""))
+
+
+def past_term_text(key, item, day):
+    """The sentence the page puts in place of the holder's "In office since"
+    once the term the 2026 election chose has begun on *day* and the roster
+    still names a holder who was not on the ballot for it (rule 19: what
+    the roster says, when it was read, and the law's day); "" otherwise.
+    ``KYC.stategov.pastTermText``, word for word."""
+    from .official_share import date_words
+    term = (item or {}).get("termBegins")
+    gone = (item or {}).get("outgoing")
+    if not gone or not begun(term, day):
+        return ""
+    office = ballot2026.TITLES[key].lower()
+    still = "still lists" if gone["read"] >= term["day"] else "lists"
+    return (f"The term of the {office} elected on Nov. 3, 2026 {began_words(term)} "
+            f"({term['cite']}). {gone['roster']}, read {date_words(gone['read'])}, {still} "
+            f"{gone['holder']}, {WHY_WORDS[gone['why']]}.")
+
+
+def lagging(payload, today):
+    """Every office whose new term has begun by *today* (the build's day)
+    while its roster still names the holder who was not on the ballot for
+    it, or, for an office no one held before (Arizona's lieutenant
+    governor), still lists no one: what the build warns of
+    (``holder-past-inauguration``), never an error, so a lagging roster
+    never stops the refresh's other data (rule 8)."""
+    out = []
+    sources = (payload or {}).get("sources") or {}
+    for code, entry in sorted(((payload or {}).get("states") or {}).items()):
+        offices = (entry.get("ballot2026") or {}).get("offices") or {}
+        for key, item in sorted(offices.items()):
+            term = item.get("termBegins")
+            if not item.get("up") or not begun(term, today):
+                continue
+            title = ballot2026.TITLES[key].lower()
+            when = (f"the term the 2026 election chose {began_words(term)} ({term['cite']})")
+            gone = item.get("outgoing")
+            if gone:
+                out.append(f"{code} {title}: {gone['roster'][0].lower()}{gone['roster'][1:]}, "
+                           f"read {gone['read']}, still names {gone['holder']} "
+                           f"({gone['why']}); {when}")
+            elif key == "lt" and (entry.get("lt") or {}).get("none"):
+                read = (sources.get("nlga") or ["", "", ""])[2]
+                out.append(f"{code} {title}: the National Lieutenant Governors Association’s "
+                           f"roster, read {read}, lists none; {when}")
+    return out

@@ -592,7 +592,10 @@ def holder_line(code, key, holder, terms, listed):
 def build(root="."):
     """``(payload, problems)``: what ``data/stategov.js`` holds, and every
     disagreement between the sources."""
-    from . import ballot2026, courts, executives, officers, statelegs, statewide
+    from . import ballot2026, courts, executives, officers, statelegs, statewide, terms_begin
+    unfit = terms_begin.problems()
+    if unfit:
+        raise StateGovError("kyc/terms_begin.py: " + "; ".join(unfit))
     exec_cache, leg_cache, ncsl, officer_cache = (
         executives.load_cache(root), statelegs.load_cache(root), load_ncsl(root),
         officers.load_cache(root))
@@ -699,6 +702,19 @@ def build(root="."):
                     problems.append(problem)
                 if status:
                     item["holderStatus"] = status
+                # The day the term this election chooses begins, from the
+                # state's own law (kyc/terms_begin.py), and the holder who
+                # will not hold it past then: once it has begun, on the
+                # reader's day, the page says so in place of "In office
+                # since" (the January sweep, state-exec-past-inauguration).
+                term = terms_begin.for_page(code, key)
+                if term:
+                    item["termBegins"] = term
+                leaving = terms_begin.outgoing(
+                    key, holder, status, (exec_cache if key == "governor"
+                                          else officer_cache).get("fetched", "")[:10])
+                if leaving:
+                    item["outgoing"] = leaving
                 if listed:
                     item["candidates"] = statewide.for_page(
                         code, listed, status.get("name") if status and status["why"] == "listed"

@@ -285,7 +285,12 @@
       ? KYC.escapeHtml(KYC.dateWords(gov.born.date)) +
         ' <span class="faint">(the NGA’s page and Wikidata agree)</span>'
       : absent(BORN_WHY[gov.bornWhy] || ONLY_AGREED);
-    var since = gov.since
+    // Once the term the 2026 election chose has begun and the roster still
+    // names a governor who was not on the ballot for it, the law's day and
+    // the roster's word in place of the date (KYC.stategov.pastTermNote).
+    var past = sg().pastTermNote(code, "governor");
+    var since = past ? past
+      : gov.since
       ? KYC.escapeHtml(gov.since) + ' <span class="faint">(the NGA’s roster, confirmed by Wikidata)</span>'
       : absent(SINCE_WHY[gov.sinceWhy] || ONLY_AGREED);
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join("<br>");
@@ -420,7 +425,7 @@
     var past = after();
     var b = sg().ballotOf(code);
     var item = b && b.offices.governor;
-    var out = { kind: "", office: "", seeking: "", party: "", since: "", mark: "", holder: "",
+    var out = { kind: "", office: "", seeking: "", party: "", since: "", pastTerm: "", mark: "", holder: "",
                 status: "", printed: "", ballotName: "", surnameOnly: "", runningMate: "", term: "",
                 record: "", past: "", results: "", source: "" };
     if (past && item && item.up) {
@@ -433,7 +438,11 @@
       var nga = ((global.kycStateGov || {}).sources || {}).nga || [];
       out.kind = "Governor";
       out.office = sg().governorOf(code);
-      out.since = p.since ? "In office since " + p.since : "";
+      // kyc/governor_share.py share_words, word for word: the law's day and
+      // the roster's word in place of "In office since" once the term the
+      // 2026 election chose has begun on the reader's day (the January sweep).
+      out.pastTerm = sg().pastTermText(code, "governor");
+      out.since = p.since && !out.pastTerm ? "In office since " + p.since : "";
       out.mark = textOf(sg().officeMark(code, "governor"));
       out.holder = textOf(sg().openSeat(code, "governor"));
       out.source = "Governor: " + (nga[0] || "National Governors Association") +

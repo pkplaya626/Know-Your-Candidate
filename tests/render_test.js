@@ -14768,6 +14768,7 @@ async function testGovernorSharePages() {
           seeking: found.kind === "candidate" ? text(doc, ".share-office").replace(/ Governor • [A-Z]{2}$/, "") : "",
           party: text(doc, ".share-party"),
           since: text(doc, ".share-since"),
+          pastTerm: text(doc, ".share-past-term"),
           mark: text(doc, ".share-mark"),
           holder: text(doc, ".share-holder"),
           status: text(doc, ".share-status"),
@@ -14844,8 +14845,12 @@ async function testGovernorSharePages() {
     });
   }
 
+  // A third clock, in January, after the term the 2026 election chose has
+  // begun (kyc/terms_begin.py): the table's rows for it carry that day.
   for (const [clock, now, post] of [["the campaign's clock", CAMPAIGN_NOW, false],
-                                    ["after Election Day", "2026-11-05T12:00:00", true]]) {
+                                    ["after Election Day", "2026-11-05T12:00:00", true],
+                                    ["in January, the new terms begun", "2027-01-10T12:00:00",
+                                     "2027-01-10"]]) {
     const page = await buildPage("states/ga.html", { now });
     await settle(50);
     const W = page.window;
@@ -14878,14 +14883,30 @@ async function testGovernorSharePages() {
           JSON.stringify(Object.keys(got).sort().map((k) => [k, got[k]]));
       });
       check("every case of the words table (tests/fixtures/governor_share_words.json)",
-        rows.length >= 60 && off.length === 0,
+        rows.length >= (post === "2027-01-10" ? 10 : 60) && off.length === 0,
         off.slice(0, 2).map((r) => JSON.stringify([r[2], r[3].id, r[7]])).join(" | ") || `${rows.length} cases`);
       check(post ? "after Election Day every case is in the past tense and names no winner"
         : "before it, none is in the past tense",
-        rows.every((r) => r[7].kind !== "Governor (Candidate)" || (r[7].seeking === "Ran for") === post) &&
+        rows.every((r) => r[7].kind !== "Governor (Candidate)" || (r[7].seeking === "Ran for") === !!post) &&
         rows.every((r) => (post ? !r[7].holder : !r[7].past && !r[7].results)) &&
-        rows.some((r) => post === !!r[7].past) &&
+        rows.some((r) => !!post === !!r[7].past) &&
         rows.every((r) => !/\b(won|winner|elected governor)\b/i.test(JSON.stringify(r[7]).replace(/names no winner/g, ""))));
+
+      // The law's day stands in place of "In office since" only once the
+      // term has begun (the January sweep): on the January clock, for every
+      // governor case whose term began by then with a holder who was not
+      // on the ballot; on the other clocks, for none.
+      const termCases = rows.filter((r) => r[2] === "governor" &&
+        ((r[4].ballot2026 || {}).offices || {}).governor && r[4].ballot2026.offices.governor.termBegins);
+      check(post === "2027-01-10"
+        ? "in January, a term begun with a holder off the ballot reads the law's day, never \"In office since\""
+        : "before the new terms begin, no case reads the law's day",
+        termCases.length >= 5 && termCases.every((r) => {
+          const item = r[4].ballot2026.offices.governor;
+          const begun = post === "2027-01-10" && item.outgoing && item.termBegins.from <= "2027-01-10";
+          return begun ? !!r[7].pastTerm && !r[7].since && r[7].pastTerm.indexOf(item.outgoing.holder) !== -1
+            : !r[7].pastTerm && !!r[7].since;
+        }), `${termCases.length} cases`);
 
       // The overlay draws its head from the same words.
       const drawn = [];
@@ -20721,6 +20742,94 @@ async function testLazyStateData() {
  * words (rule 91), and after Election Day the race is in the past tense
  * beside the state's results, naming no winner. Every check asks the data
  * for whichever case is true. */
+async function testTermsBegun() {
+  /* The day the term the 2026 election chose begins (kyc/terms_begin.py,
+   * from each state's own law), and a roster that has not caught up with
+   * it (the January sweep, state-exec-past-inauguration). Made states, on
+   * each clock - the campaign's, December 15, January 10 - never the day's
+   * data: a governor and an attorney general the roster still names who
+   * were not on the ballot, and a new office no one held before. */
+  const term = (day, extra) => Object.assign({ day, from: day, kind: "on", counted: true,
+    words: "the first Monday in January", cite: "Made Const. art. V, s.1",
+    source: "https://law.example.gov/terms", read: "2026-11-11" }, extra || {});
+  const leaving = (holder, why) => ({ holder, why, read: "2026-11-10",
+    roster: "The National Governors Association’s roster" });
+  for (const [clock, now, begunJan, begunDec] of [
+    ["the campaign's clock", CAMPAIGN_NOW, false, false],
+    ["December 15", "2026-12-15T12:00:00", false, true],
+    ["January 10", "2027-01-10T12:00:00", true, true]]) {
+    const p = await buildPage("states/mi.html", { now });
+    await settle(30);
+    const W = p.window;
+    const K = W.KYC;
+    const s = W.kycStateGov.states.MI;
+    s.governor = Object.assign({}, s.governor, { name: "Pat Example", since: "January 1, 2019" });
+    const offices = s.ballot2026.offices;
+    offices.governor = Object.assign({}, offices.governor, { up: true,
+      termBegins: term("2027-01-01", { counted: false, words: "noon on the first day of January" }),
+      outgoing: leaving("Pat Example", "term-limit") });
+    s.ag = Object.assign({}, s.ag || {}, { name: "Lee Sample", party: "D", partyKey: "D",
+      title: "Attorney General" });
+    for (const f of ["none", "vacant", "disputed", "unlisted", "unconfirmed", "notMember"]) delete s.ag[f];
+    offices.ag = Object.assign({}, offices.ag, { up: true, termBegins: term("2026-12-07"),
+      outgoing: Object.assign(leaving("Lee Sample", "not-listed"),
+        { roster: "The Democratic Attorneys General Association’s roster" }) });
+    const box = (html) => { const d = p.D.createElement("div"); d.innerHTML = html; return d; };
+    suite(`the new terms begun, ${clock}`, () => {
+      const card = box(K.stategov.governorCard("MI"));
+      const note = card.querySelector(".gov-past-term");
+      check(begunJan ? "the governor's card says the law's day and the roster's word, never \"In office since\""
+        : "before the term begins, the card says \"In office since\" and nothing of the new term",
+        begunJan ? !!note && !/In office since/.test(card.textContent) &&
+          note.textContent.indexOf("began on Jan. 1, 2027 (Made Const. art. V, s.1)") !== -1 &&
+          /read Nov\. 10, 2026, lists Pat Example, who was term-limited\.$/.test(note.textContent) &&
+          note.querySelector('a[href="https://law.example.gov/terms"]') !== null
+          : !note && /In office since January 1, 2019/.test(card.textContent), card.textContent);
+      // The officers' row: the attorney general's term began on Dec. 7.
+      const row = [...box(K.stategov.render("MI")).querySelectorAll(".gov-officer")]
+        .find((li) => /Attorney general/i.test(li.querySelector(".gov-officer-role").textContent));
+      const rowNote = row && row.querySelector(".gov-past-term");
+      check(begunDec ? "the attorney general's row says the term counted from its rule has begun"
+        : "before it, the attorney general's row says nothing of it",
+        !!row && (begunDec ? !!rowNote && /began on Dec\. 7, 2026, counted from “the first Monday in January”/.test(rowNote.textContent) &&
+          /Democratic Attorneys General Association’s roster, read Nov\. 10, 2026, lists Lee Sample, who was not among the candidates/.test(rowNote.textContent)
+          : !rowNote), row && row.textContent);
+      // One sentence, the share page's and the overlay's.
+      check("the overlay's words are the card's", K.stategov.pastTermText("MI", "governor") ===
+        (begunJan ? note.textContent : ""), K.stategov.pastTermText("MI", "governor"));
+      const words = K.governor.shareWords({ kind: "governor", code: "MI", person: s.governor });
+      check("the share words carry it, and no \"In office since\" beside it",
+        begunJan ? words.pastTerm === note.textContent && words.since === ""
+          : words.pastTerm === "" && words.since === "In office since January 1, 2019", JSON.stringify(words));
+      // A holder who was on the ballot keeps "In office since" whatever the day.
+      delete offices.governor.outgoing;
+      check("a holder on the ballot keeps \"In office since\" on every clock",
+        /In office since January 1, 2019/.test(box(K.stategov.governorCard("MI")).textContent) &&
+          !K.stategov.pastTermText("MI", "governor"), clock);
+      // A gap (no day read) says nothing of a new term on any clock.
+      offices.governor.outgoing = leaving("Pat Example", "term-limit");
+      delete offices.governor.termBegins;
+      check("an office with no day read says nothing of a new term", !K.stategov.pastTermText("MI", "governor") &&
+        /In office since/.test(box(K.stategov.governorCard("MI")).textContent), clock);
+      // A new office no one held before (Arizona's lieutenant governor).
+      s.lt = { none: true, successor: { name: "Sam Second", party: "D", partyKey: "D", title: "Secretary of State" } };
+      offices.lt = Object.assign({}, offices.lt, { up: true, note: "New office: first elected 2026",
+        termBegins: term("2027-01-04") });
+      const lt = [...box(K.stategov.render("MI")).querySelectorAll(".gov-officer")]
+        .find((li) => /Lieutenant governor/i.test(li.querySelector(".gov-officer-role").textContent));
+      const fresh = K.stategov.newOfficeWords("MI", "lt", offices.lt, s.lt);
+      check(begunJan ? "a new office's first term begun: the roster lists no one yet, never \"No one holds this office\""
+        : "before its first term, no one holds it, and who succeeds until then",
+        !!lt && (begunJan
+          ? /The term of Michigan’s first lieutenant governor, elected on Nov\. 3, 2026, began on Jan\. 4, 2027/.test(lt.textContent) &&
+            /does not list one yet\./.test(lt.textContent) && !/No one holds|until then|Sam Second/.test(lt.textContent)
+          : /No one holds this office yet: New office: first elected 2026\./.test(lt.textContent) &&
+            /First in line to succeed the governor until then: Secretary of State Sam Second/.test(lt.textContent)) &&
+          fresh.begun === begunJan, lt && lt.textContent);
+    });
+  }
+}
+
 async function testGovernorCards() {
   const noProfile = (root) => !root.querySelector("[data-id]") &&
     ![...root.querySelectorAll("a[href]")].some((a) => /#\/profile\//.test(a.getAttribute("href")));
@@ -22714,6 +22823,7 @@ function KYC_ESC(text) {
   if (!only || only === "states" || only === "statephone" || only === "delegation") await testDelegationFold();
   if (!only || only === "states" || only === "statephone" || only === "governors") await testPhoneGovernorRace();
   if (!only || only === "states" || only === "governors") await testGovernorCards();
+  if (!only || only === "states" || only === "governors" || only === "terms") await testTermsBegun();
   if (!only || only === "states" || only === "governors") await testGovernorOverlays();
   if (!only || only === "states" || only === "governors" || only === "photos") await testGovernorPhotoCredits();
   if (!only || only === "states") await testElectionNight();

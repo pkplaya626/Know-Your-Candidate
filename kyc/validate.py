@@ -2291,6 +2291,36 @@ def check_statewide_candidates(data, snapshot=None):
     return []
 
 
+def check_terms_begun(root=".", today=None, payload=None):
+    """An office on the 2026 ballot whose new term has begun by the build's
+    day (*today*, a date; the real one by default), from the state's own
+    law (kyc/terms_begin.py), while the roster this site reads its holder
+    from still names the holder who was not on the ballot for it - or, for
+    an office no one held before (Arizona's lieutenant governor), still
+    lists no one (the January sweep, state-exec-past-inauguration; rule 16
+    for state executives). A warning, never an error: a roster that lags an
+    inauguration must not stop the refresh's other data (rule 8), and the
+    page already says, on the reader's day, that the term has begun. A
+    table that breaks its own rules is the build's error (stategov.build).
+    *payload*: data/stategov.js's, for tests; built from *root* otherwise."""
+    import datetime
+    from . import stategov, terms_begin
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    if payload is None:
+        try:
+            payload = stategov.build(root)[0]
+        except stategov.StateGovError as exc:
+            return [Issue("error", "terms-begin-unchecked",
+                          f"the state government could not be built to check its terms: {exc}")]
+    found = terms_begin.lagging(payload, today)
+    if found:
+        return [Issue("warning", "holder-past-inauguration",
+                      f"{len(found)} office(s) whose new term has begun, by the state's own law, "
+                      f"while the roster still names the holder who was not on the ballot for it "
+                      f"(or no one): read the roster again, or the office's own page", found)]
+    return []
+
+
 def check_voting_dates(data):
     """Each jurisdiction's key dates (kyc/voting_dates.py): every value the
     page shows sourced to the jurisdiction's own official page, never to a

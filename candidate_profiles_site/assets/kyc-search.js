@@ -335,11 +335,14 @@
         ? " First in line to succeed the governor" + (onBallot(code, key) ? " until then" : "") + ": " +
           off.successor.title + " " + off.successor.name + "." : "";
       // A new office, first elected on Nov 3 (Arizona's lieutenant
-      // governor): no one holds it yet, and its race is shown.
+      // governor): no one holds it yet, and its race is shown - until its
+      // first term begins on the reader's day, when the state page's words
+      // say so instead (KYC.stategov.newOfficeWords, one implementation).
       if (onBallot(code, key)) {
         var item = ballotItem(code, key);
-        return row(link(href, title) + ":", esc("No one holds this office yet" +
-          (item.note ? ": " + item.note : "") + "." + successor) +
+        var fresh = KYC.stategov.newOfficeWords(code, key, item, off);
+        return row(link(href, title) + ":", esc(fresh.text +
+          (fresh.successor ? " " + fresh.successor + "." : "")) +
           (full === false ? "" : " " + ballotLine(code, key, full)));
       }
       return row(link(href, PlaceWords(code) + "’s page"), esc(PlaceWords(code) + " has no " + word +
@@ -349,7 +352,12 @@
     var holder = namedHolder(off)
       ? '<span class="answer-holder">' + esc(off.name) + "</span>"
       : "who holds it is not named here; its page says what each source lists";
-    return row(link(href, title) + ":", holder + (full === false ? "" : ". " + ballotLine(code, key, full)));
+    // The term the 2026 election chose has begun and the roster still names
+    // a holder who was not on the ballot for it: said as the state page says
+    // it (KYC.stategov.pastTermText).
+    var past = KYC.stategov.pastTermText(code, key);
+    return row(link(href, title) + ":", holder + (past ? ". " + esc(past).replace(/\.$/, "") : "") +
+      (full === false ? "" : ". " + ballotLine(code, key, full)));
   }
 
   /** Every state's holder of *key*, compactly: an acting officer, or an
@@ -369,7 +377,11 @@
       if (!off || (off.none && !ballot)) return;
       if (ballot) up += 1;
       var detail;
-      if (off.none) {
+      if (off.none && KYC.stategov.termBegun(code, key)) {
+        // Its first term has begun on the reader's day (newOfficeWords).
+        detail = esc("first elected on Nov 3, 2026; its term " +
+          KYC.stategov.beganWords(KYC.stategov.termBegun(code, key)) + "; the roster lists no one yet");
+      } else if (off.none) {
         detail = esc("no one holds this office yet; first elected on Nov 3, 2026");
       } else if (namedHolder(off)) {
         detail = esc(off.name) + (off.title && off.title !== STATE_OFFICES[key]

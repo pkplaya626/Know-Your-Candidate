@@ -328,6 +328,7 @@ def _build(args):
         issues.append(validate.Issue(level, code, message, detail))
     for level, code, message, detail in members_mod.problems(profiles, member_sources):
         issues.append(validate.Issue(level, code, message, detail))
+    issues.extend(validate.check_terms_begun(args.root))
     departed_rows, departed_problems = _departed(args.root, snapshot, profiles)
     for level, code, message, detail in departed_problems + money_problems:
         issues.append(validate.Issue(level, code, message, detail))
@@ -523,6 +524,14 @@ def _build(args):
     gov_stats = stategov.stats(state_gov)
     print(f"[ok] state government: {gov_stats['governors']} governors; " + ", ".join(
         f"{n} {k}" for k, n in sorted(gov_stats["trifectas"].items())))
+    # The first day of each office's new term (kyc/terms_begin.py): the
+    # offices no provision was read for are listed by name, a gap for a
+    # person to read (never a guess).
+    from . import terms_begin as terms_mod
+    term_gaps = terms_mod.gaps()
+    print(f"[ok] terms begin: {len(terms_mod.up_offices()) - len(term_gaps)} offices on the 2026 "
+          f"ballot dated from their state's own law; {len(term_gaps)} with no day: " +
+          ", ".join(f"{c} {k}" for c, k, _why in term_gaps))
     listed = statewide_mod.stats(statewide_mod.load(args.root))
     print(f"[ok] statewide candidates: {listed['candidates']} on the ballot and "
           f"{listed['writeIns']} write-ins for {listed['offices']} offices; "
