@@ -2289,9 +2289,31 @@ def national_rows(text):
             # words are the row's too, and must agree as well.
             more = re.search(r"\n\|-\s*\n!|\n\|\}", text[match.end():])
             body += text[match.end():match.end() + more.start()] if more else ""
-        key = (match.group(1).upper(), 0 if match.group(2).upper() == "AL" else int(match.group(2)))
+        key = _national_key(match)
         out[key] = None if key in out else body
     return out
+
+
+def _national_key(match):
+    """``(state, district)`` of a national row (:data:`_NATIONAL_ROW`)."""
+    return (match.group(1).upper(), 0 if match.group(2).upper() == "AL" else int(match.group(2)))
+
+
+def national_unkeyed(text, keyed):
+    """The districts a row of the national article names, with its PVI, in
+    any of its tables, that :func:`national_rows` (*keyed*) did not find in
+    their state's own section; every one of them where it keyed none.
+
+    Rule 36: count what came back. The route reads each district in the
+    section named for its state, so an article restructured - its states under
+    a "Results" heading at level 3, a heading carrying a template - would key
+    fewer districts or none, and every call the last read made would drop to
+    "Awaiting result" on a refresh that merges itself (PR #224 review). Any
+    district named and not keyed makes the article unread (rule 8)."""
+    named = {_national_key(match) for match in _NATIONAL_ROW.finditer(text or "")
+             if "shading pvi" in match.group(3).lower()}
+    missing = [f"{s}-{d}" for s, d in sorted(named - set(keyed or ()))]
+    return missing if keyed else missing or ["no district at all"]
 
 
 def national_row(body):
@@ -2380,6 +2402,28 @@ def national_words_agree(record, is_incumbent, holder_party):
     return None
 
 
+def national_person(who, names, matched, rows, aliases, on_a_list, same):
+    """``(ids, fits)``: the filings the national row's *who* is (rule 62's
+    matching, or an evidenced ``overrides.RESULT_NAMES`` entry), and which of
+    the page's *names* are that person - by those filings, else, where a
+    state's list running the race names *who*, by the list's spelling.
+    ``fits`` is None where neither a filing nor a list names them.
+
+    One reading for the call (:func:`national_call`) and for the withdrawal of
+    the last read's call, so the two ask the page about the same person: read
+    by the row's spelling, a withdrawal said "the counts put Pat Stone first"
+    of a row marking "James Stone", Pat Stone's filing "STONE, PAT JAMES", and
+    the call was made again for him in the same read (PR #224 review)."""
+    found, unclear = match_names([who], rows, aliases)
+    ids = [] if who in unclear else list(found.get(who) or [])
+    ids = ids or _exact_filing(who, rows)
+    if ids:
+        return ids, [n for n in names if set(matched.get(n) or ()) & set(ids)]
+    if on_a_list(who):
+        return ids, [n for n in names if n not in matched and same(n, who)]
+    return ids, None
+
+
 def national_call(record, outcome, matched, ambiguous, rows, aliases, on_a_list, same,
                   incumbent):
     """``(page name, None)`` for the November nominee the national row
@@ -2398,15 +2442,9 @@ def national_call(record, outcome, matched, ambiguous, rows, aliases, on_a_list,
         return None, ("the row marks nobody" if not ayes else
                       "the row marks more than one person")
     who = record["name"]
-    found, unclear = match_names([who], rows, aliases)
-    ids = [] if who in unclear else list(found.get(who) or [])
-    ids = ids or _exact_filing(who, rows)
     nominees = [n for n, status in outcome.items() if status == NOMINEE]
-    if ids:
-        fits = [n for n in nominees if set(matched.get(n) or ()) & set(ids)]
-    elif on_a_list(who):
-        fits = [n for n in nominees if n not in matched and same(n, who)]
-    else:
+    ids, fits = national_person(who, nominees, matched, rows, aliases, on_a_list, same)
+    if fits is None:
         return None, f"no filing and no state's list in this race names {who!r}"
     look_alike = [n for n in nominees if n not in fits and _one_person(n, who)]
     if len(fits) != 1 or look_alike:
@@ -2514,6 +2552,14 @@ def national_counts(boxes, name):
         theirs = [n for n in counted if _one_person(n, name)]
         if len(theirs) != 1:
             return None, "the state's page's counts do not name them as one person"
+        # A table's lines that name nobody ("Write-ins", scattering) are no
+        # leader of their own, so a line that could out-count them is held
+        # against the call: all such votes together, at least theirs, say
+        # nothing of who is first (PR #224 review).
+        unnamed = max([r.get("boxOnce") or 0 for r in rows] + [0]) - sum(counted.values())
+        if field == "votes" and unnamed >= counted[theirs[0]]:
+            return None, (f"the state's page counts {unnamed:,} votes on lines that name nobody, "
+                          f"no fewer than their {counted[theirs[0]]:,}")
         close = _close(rows, theirs[0], field)
         if close:
             votes, share = close
@@ -3787,11 +3833,20 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     stale_aliases, calls = {}, {}
     # The national summary (rule 63's national route): its rows, or None
     # where it was not read this time - then the last read's calls stand
-    # (rule 8).
+    # (rule 8) - and where it keys fewer districts than its rows name
+    # (national_unkeyed, rule 36), it is read as unread too.
     withdrawn_calls, national_refused = {}, {}
     national_index, national_meta = None, {}
-    if national and national.get("text"):
-        national_index = national_rows(national["text"])
+    keyed = national_rows(national["text"]) if national and national.get("text") else None
+    unkeyed = national_unkeyed(national["text"], keyed) if keyed is not None else []
+    if unkeyed:
+        log(f"    [warn] the national summary (revision {national.get('revid')}) keys "
+            f"{len(keyed)} districts in their states' own sections and not "
+            f"{len(unkeyed)} its rows name ({', '.join(unkeyed[:8])}"
+            f"{', ...' if len(unkeyed) > 8 else ''}): taken as unread, and the last read's "
+            "national calls stand")
+    elif keyed is not None:
+        national_index = keyed
         national_meta = {"revid": national.get("revid"),
                          "url": national_url(national.get("title") or NATIONAL_HOUSE,
                                              national.get("revid"))}
@@ -4022,14 +4077,25 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 # counts put someone else first or are too close or too early
                 # to stand behind the call (national_counts), the last read's
                 # national call is withdrawn, and a person is told (validate);
-                # it is never made again past them.
-                elsewhere = sorted(n for n, st in outcome.items() if st == ELECTED
-                                   and not _one_person(n, before.get("name") or ""))
-                _case, pulled = national_counts(page_boxes, before.get("name") or "")
-                others = elsewhere or sorted(n for n in _count_leaders(page_boxes)
-                                             if not _one_person(n, before.get("name") or ""))
-                if elsewhere:
-                    pulled = f"the state's page now elects {', '.join(elsewhere)}"
+                # it is never made again past them. The page is asked about
+                # the person the call names, found as the call finds them
+                # (national_person: by filing, never by the row's spelling),
+                # and a page whose own route elects them withdraws nothing
+                # (PR #224 review): the same page reads alike whatever the
+                # last read concluded.
+                who = before.get("name") or ""
+                _ids, theirs = national_person(who, list(outcome), matched, rows, race_aliases,
+                                               on_a_list, same)
+                theirs = theirs or [n for n in outcome if _one_person(n, who)]
+                pulled, others = None, []
+                if not any(outcome.get(n) == ELECTED for n in theirs):
+                    name = theirs[0] if len(theirs) == 1 else who
+                    elsewhere = sorted(n for n, st in outcome.items() if st == ELECTED)
+                    _case, pulled = national_counts(page_boxes, name)
+                    others = elsewhere or sorted(n for n in _count_leaders(page_boxes)
+                                                 if n not in theirs and not _one_person(n, name))
+                    if elsewhere:
+                        pulled = f"the state's page now elects {', '.join(elsewhere)}"
                 if pulled:
                     withdrawn_calls[rid] = {"name": before.get("name"), "leaders": others,
                                             "why": pulled, "revid": before.get("revid")}
