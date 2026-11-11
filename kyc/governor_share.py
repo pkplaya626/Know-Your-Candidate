@@ -187,8 +187,16 @@ def share_words(found, post=False, sources=None, results=None):
         # the roster still names a governor who was not on the ballot for it,
         # the law's day and the roster's word stand in place of "In office
         # since" (kyc/terms_begin.py past_term_text; the January sweep).
+        # The page is written for the day the results were read; a roster
+        # read later than that is a later day the data itself holds (never
+        # the build's clock, rule 96), so a lagging roster read after the
+        # term began says so even while the results are not read again.
         from .terms_begin import past_term_text
-        out["pastTerm"] = past_term_text("governor", item, post if isinstance(post, str) else None)
+        day = post if isinstance(post, str) else None
+        gone = (item or {}).get("outgoing") or {}
+        if day and (gone.get("read") or "") > day:
+            day = gone["read"]
+        out["pastTerm"] = past_term_text("governor", item, day)
         out["since"] = (f"In office since {person['since']}"
                         if person.get("since") and not out["pastTerm"] else "")
         out["mark"] = mark_words(item, post)

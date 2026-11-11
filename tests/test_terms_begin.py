@@ -184,6 +184,12 @@ class OnEachClock(unittest.TestCase):
             words = governor_share.share_words(found, post)
             self.assertEqual(bool(words["pastTerm"]), past, post)
             self.assertEqual(words["since"], "" if past else "In office since January 1, 2019")
+        # The results last read in November, the roster read again on
+        # January 8 and still naming them: the page written then says so.
+        item["outgoing"] = leaving("Lee Sample", "not-listed", read="2027-01-08")
+        words = governor_share.share_words(found, "2026-11-10")
+        self.assertIn("read Jan. 8, 2027, still lists Lee Sample", words["pastTerm"])
+        self.assertEqual(words["since"], "")
 
 
 class TheBallotTable(unittest.TestCase):
