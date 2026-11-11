@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-10",
+ "asOf": "2026-11-11",
  "current": [
   {
    "code": "01 - MA",
@@ -387,32 +387,22 @@
   }
  ],
  "emergenciesUnmatched": [],
- "fetched": "2026-11-10T17:01:36+00:00",
+ "fetched": "2026-11-11T16:19:32+00:00",
  "future": [
   {
    "announced": "2026-07-15",
    "code": "04 - NC-E",
    "court": "nc-e",
-   "nominated": null,
-   "nominee": null,
+   "nominated": "2026-11-09",
+   "nominee": {
+    "listedAs": "Meyers,Brian S.",
+    "name": "Brian S. Meyers"
+   },
    "reason": "Senior",
    "vacancyDate": null,
    "vacatedBy": {
     "listedAs": "Boyle,Terrence William",
     "name": "Terrence William Boyle"
-   }
-  },
-  {
-   "announced": "2026-03-13",
-   "code": "04 - NC-M",
-   "court": "nc-m",
-   "nominated": null,
-   "nominee": null,
-   "reason": "Senior",
-   "vacancyDate": "2027-01-02",
-   "vacatedBy": {
-    "listedAs": "Osteen Jr.,William L.",
-    "name": "William L. Osteen Jr."
    }
   },
   {
@@ -429,11 +419,30 @@
    }
   },
   {
+   "announced": "2026-03-13",
+   "code": "04 - NC-M",
+   "court": "nc-m",
+   "nominated": "2026-11-09",
+   "nominee": {
+    "listedAs": "Aubart,Philip Lawrence",
+    "name": "Philip Lawrence Aubart"
+   },
+   "reason": "Senior",
+   "vacancyDate": "2027-01-02",
+   "vacatedBy": {
+    "listedAs": "Osteen Jr.,William L.",
+    "name": "William L. Osteen Jr."
+   }
+  },
+  {
    "announced": "2026-09-28",
    "code": "05 - CCA",
    "court": "ca5",
-   "nominated": null,
-   "nominee": null,
+   "nominated": "2026-11-09",
+   "nominee": {
+    "listedAs": "Butler,Gregory Todd",
+    "name": "Gregory Todd Butler"
+   },
    "reason": "Senior",
    "vacancyDate": null,
    "vacatedBy": {
@@ -477,8 +486,11 @@
    "announced": "2026-09-22",
    "code": "07 - IN-N",
    "court": "in-n",
-   "nominated": null,
-   "nominee": null,
+   "nominated": "2026-11-09",
+   "nominee": {
+    "listedAs": "Falvey,Joseph Patrick",
+    "name": "Joseph Patrick Falvey"
+   },
    "reason": "Retired",
    "vacancyDate": "2027-07-08",
    "vacatedBy": {
@@ -548,8 +560,11 @@
    "announced": "2026-09-18",
    "code": "08 - NE",
    "court": "ne",
-   "nominated": null,
-   "nominee": null,
+   "nominated": "2026-11-09",
+   "nominee": {
+    "listedAs": "Hamilton,Eric James",
+    "name": "Eric James Hamilton"
+   },
    "reason": "Senior",
    "vacancyDate": null,
    "vacatedBy": {
@@ -600,7 +615,7 @@
    }
   }
  ],
- "read": "2026-11-10",
+ "read": "2026-11-11",
  "sources": {
   "current": "https://www.uscourts.gov/data-news/judicial-vacancies/current-judicial-vacancies",
   "emergencies": "https://www.uscourts.gov/data-news/judicial-vacancies/judicial-emergencies",
