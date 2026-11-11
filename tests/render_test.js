@@ -12624,6 +12624,28 @@ async function testSearchAnswers() {
     check("was on the ballot", !ohio.ballot2026.offices.governor.up ||
       /was on the Nov 3, 2026 ballot/.test(t) && /Candidates who were on it/.test(t), t.slice(0, 300));
   });
+  // The holder line is said only until the election, as on the state page
+  // (KYC.stategov.openSeat): "Kay Ivey is not among the candidates for this
+  // office" spoke of a ballot already voted on. Every state whose governor
+  // or other office carries one is asked.
+  const heldLines = [];
+  let heldAsked = 0;
+  for (const [code, st] of Object.entries((voted.window.kycStateGov || { states: {} }).states)) {
+    const offices = (st.ballot2026 || {}).offices || {};
+    if (!Object.values(offices).some((o) => o && o.up && o.holderStatus && o.holderStatus.text)) continue;
+    typeInto(voted.window, voted.D, KYC.stateName(code) + " governor");
+    await settle(250);
+    heldAsked += 1;
+    const t = voted.D.getElementById("searchAnswers").textContent;
+    if (!new RegExp("Governor, " + KYC.stateName(code)).test(t)) heldLines.push(code + ": not answered: " + t.slice(0, 80));
+    else if (/ is (not )?among the candidates| is running for this office|is not checked here| is term-limited/.test(t)) {
+      heldLines.push(code + ": " + t.slice(0, 160));
+    }
+  }
+  suite("search answers after Election Day — no holder line about the ballot", () => {
+    check("none says who is or is not among the candidates, or running", heldAsked > 0 && heldLines.length === 0,
+      heldLines.slice(0, 3).join(" | ") || `${heldAsked} states asked`);
+  });
   // Every note that counts the ballot is in the past tense too (rules 63, 84).
   for (const [q, past, now] of [["governor", /offices were on the Nov 3, 2026 ballot/, /offices are on/],
       ["governor races", /elected this office on Nov 3, 2026/, /elect this office/],
