@@ -22729,7 +22729,7 @@ async function testWordsSinceElectionDay() {
       `${label("senateSeatsUp")} | ${label("houseSeatsUp")}`);
       // Two counts of one set of seats each say their basis once they can
       // differ (rule 73), from one place (KYC.senateBases).
-      const bases = w.KYC.senateBases();
+      const bases = w.KYC.senateBases ? w.KYC.senateBases() : { defending: "" };
       check("the seats each party defends and the bar's dotted seats each say whose party they count",
         after
           ? label("senateDefending") === bases.defending &&
@@ -22885,8 +22885,8 @@ async function testTheJanuaryWords() {
     check("a re-elected holder and a newcomer on the new term both say when their seat is next up, " +
       "in the dialog's helper and on their share pages",
       !!reelected && !!newcomer && [reelected, newcomer].every((p) =>
-        K.seatUpYear(p) === String(p.electionYear) && shareLine(p) === `Seat up in ${p.electionYear}`),
-      [reelected, newcomer].filter(Boolean).map((p) => `${p.name}: ${K.seatUpYear(p)} / ${shareLine(p)}`).join(" | "));
+        !!K.seatUpYear && K.seatUpYear(p) === String(p.electionYear) && shareLine(p) === `Seat up in ${p.electionYear}`),
+      [reelected, newcomer].filter(Boolean).map((p) => `${p.name}: ${K.seatUpYear ? K.seatUpYear(p) : "(no seatUpYear)"} / ${shareLine(p)}`).join(" | "));
     check("a seated winner with no money read says it was not read for the new term, never 'No data'",
       unread.every((p) => ["not_read_new_term", "no_filing"].indexOf((p.quality || {}).receipts) !== -1 &&
         !/No data/.test(K.renderField(p, "receipts"))),
