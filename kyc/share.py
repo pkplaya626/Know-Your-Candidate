@@ -259,6 +259,15 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
 _WIKIPEDIA = "Wikipedia's election results page"
 _INQUIRY = "the Secretary of State's Candidate Inquiry"
 _CERTIFIED_LIST = "the certified list of candidates"
+# A November winner, or loser, called from the national summary where the
+# state's page held no result (rule 63's national route), in the owner's words.
+NATIONAL_SOURCE = ("Wikipedia's national summary of the House elections, which gives no "
+                   "vote count; the state's page had none when read")
+# The same, where the state's page, read with the summary, gave counts that put
+# the same person first and named no winner (raceStatusSource "national-counts").
+NATIONAL_COUNTS_SOURCE = ("Wikipedia's national summary of the House elections, which marks "
+                          "the winner and gives no vote count; the state's page, read the same "
+                          "day, counts that winner ahead and names no winner")
 
 
 def _race_source(status, source=None, source_name=None):
@@ -270,6 +279,10 @@ def _race_source(status, source=None, source_name=None):
         return _INQUIRY
     if source == "certified" and status in _CERTIFIED:
         return source_name or _CERTIFIED_LIST
+    if source == "national" and status in ("elected", "defeated"):
+        return NATIONAL_SOURCE
+    if source == "national-counts" and status in ("elected", "defeated"):
+        return NATIONAL_COUNTS_SOURCE
     return _WIKIPEDIA
 
 
@@ -370,13 +383,42 @@ def _contest_round(kind, day):
     return rows
 
 
+def _moved_holder(won, renumbered, labelled, sits):
+    """A race's record holder whose run went elsewhere, and the race, in the
+    shape both sides read: the render suite builds the same from a "moved"
+    row. *won*: seated since for the seat they won (``raceRole``); *labelled*:
+    their profile still holds the run (``contestLabel``); *sits*: they sit in
+    this race's seat (else they have left it, or sit for the one they won)."""
+    other = "H-AL-01-2026" if renumbered else "S-AL-2026"
+    from .races import seat_label
+
+    item = {"id": "FAKE", "isCandidate": False, "name": "A Member", "party": "Republican",
+            "officeLabel": seat_label(other) if won else "House • AL-2",
+            "raceId": other if won else "H-AL-02-2026", "raceStatusRace": other,
+            "raceStatus": "elected" if won else "defeated"}
+    if won:
+        item["raceRole"] = "winner"
+    if labelled:
+        item["contestLabel"] = seat_label(other)
+        item["contestRaceId"] = other
+    if renumbered:
+        item["renumbered"] = True
+    if not sits and not won:
+        item["formerMember"] = {"left": "2027-01-03"}
+    race = {"id": "H-AL-02-2026", "incumbentIds": ["FAKE"],
+            "incumbent": {"profileId": "FAKE", "seated": bool(sits)}}
+    return race, item
+
+
 def status_table():
     """``{"statuses": [...], "contest": [...], "contestRounds": [...],
-    "filers": [...]}``: what :func:`_race_status` and :func:`_race_source` say
-    for every combination of status and option, what :func:`contest_clause`
-    says of a member's other run in every status and every kind of round, and
-    what :func:`standing` says for each kind of filer the results do not
-    settle."""
+    "moved": [...], "filers": [...]}``: what :func:`_race_status` and
+    :func:`_race_source` say for every combination of status and option,
+    what :func:`contest_clause` says of a member's other run in every status
+    and every kind of round, what :func:`moved_sentence` says of a seat's
+    holder whose run went elsewhere (seated in it or not, a member seated
+    since for the seat they won or not), and what :func:`standing` says for
+    each kind of filer the results do not settle."""
     words = []
     # A race whose December round is an open primary's general election
     # (_open_round), before that day and after it; the render suite reads
@@ -418,7 +460,8 @@ def status_table():
                for status in sorted(_RACE_STATUS)
                for source, name in ((None, None), ("certified", None),
                                     ("certified", "the Test Division of Elections"),
-                                    ("qualified", None))]
+                                    ("qualified", None), ("national", None),
+                                    ("national-counts", None))]
     contest = []
     for status in ("", *sorted(_RACE_STATUS)):
         for renumbered in (0, 1):
@@ -432,6 +475,19 @@ def status_table():
                         item = _member_elsewhere(status, renumbered, decided, unconfirmed)
                         contest.append([status, renumbered, post, decided, unconfirmed,
                                         contest_clause(item, {}, {}, _TABLE_AFTER if post else False)])
+    moved = []
+    for won in (0, 1):
+        for renumbered in (0, 1):
+            for labelled in (0, 1):
+                for post in (0, 1):
+                    for sits in (0, 1):
+                        # Seated since for the seat they won: their profile
+                        # holds no other run, and they sit for that seat.
+                        if won and (labelled or sits):
+                            continue
+                        race, item = _moved_holder(won, renumbered, labelled, sits)
+                        moved.append([won, renumbered, labelled, post, sits, moved_sentence(
+                            race, item, {}, {}, _TABLE_AFTER if post else False)])
     filers = []
     for fake in _FILERS:
         item = dict(fake, isCandidate=True, id="FAKE")
@@ -439,7 +495,7 @@ def status_table():
         filers.append([fake, spec[0] if spec else None, status_source(item, {})])
     return {"words": ["status", "allParty", "source", "round", "runoff", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
-            "statuses": words, "credits": credits, "contest": contest,
+            "statuses": words, "credits": credits, "contest": contest, "moved": moved,
             "contestRounds": _contest_rounds(), "filers": filers}
 
 
@@ -447,7 +503,7 @@ def status_table_text():
     """The fixture's text: one row a line, so a change reads as a diff."""
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
-    for key in ("statuses", "credits", "contest", "contestRounds", "filers"):
+    for key in ("statuses", "credits", "contest", "contestRounds", "moved", "filers"):
         rows = table[key]
         lines.append(f'"{key}": [')
         lines += [json.dumps(row, ensure_ascii=False, separators=(",", ":"))
@@ -845,11 +901,70 @@ def race_people(race, by_id):
     return out
 
 
-def _elsewhere(race, person):
-    """KYC.cards' elsewhere(): the seat's holder, running for another."""
-    return (not person.get("isCandidate") and person["id"] in (race.get("incumbentIds") or [])
-            and bool(person.get("contestRaceId")) and person.get("contestRaceId") != race["id"]
-            and bool(person.get("contestLabel")))
+def moved_from(race, person):
+    """``KYC.movedFrom``: *race*'s record holder whose 2026 run was another
+    race - the race they won and sit for now (``raceRole`` "winner"), or the
+    race they ran in (``contestRaceId``, else ``raceStatusRace``). Once the
+    new Congress sits a member seated for the seat they won has no other run
+    on their profile, and the test of ``contestRaceId`` alone kept Andy Barr
+    on KY-6's share page, "holds the seat: Elected in November", while he
+    sat in the Senate (the January rehearsal of 2026-11-10)."""
+    if person.get("isCandidate") or person["id"] not in (race.get("incumbentIds") or []):
+        return False
+    if person.get("raceRole") == "winner" and person.get("raceId") and person["raceId"] != race["id"]:
+        return True
+    run = person.get("contestRaceId") or person.get("raceStatusRace")
+    return bool(run) and run != race["id"]
+
+
+def sits_in(race, person):
+    """``KYC.sitsIn``: *person* sits in *race*'s seat now - the race's record
+    of its holder (``incumbent.seated``, races._sits_in), else a member whose
+    seat is this race's; never sitting anywhere (rule 67)."""
+    from .record import seated
+
+    if not seated(person):
+        return False
+    inc = race.get("incumbent") or {}
+    if inc.get("profileId") == person["id"]:
+        return bool(inc.get("seated"))
+    return person.get("raceId") == race["id"]
+
+
+def seat_words(rid):
+    """``KYC``'s seatWords: "Senate KY", "CA-40", "WY-AL"."""
+    from .races import seat_label
+
+    seat = seat_label(rid).replace(" • ", " ", 1)
+    return seat[len("House "):] if seat.startswith("House ") else seat
+
+
+def moved_clause(race, person, by_id, races_by_id=None, post=False):
+    """``KYC.movedLine``'s clause for a holder :func:`moved_from` names: their
+    own :func:`contest_clause` where their profile still holds the run, else
+    the record's words - "was re-elected in CA-40 under the state's new
+    district map", "won the race for Senate KY" - or "ran for" the race their
+    result is for."""
+    if person.get("contestLabel") and not person.get("isCandidate"):
+        return contest_clause(person, by_id, races_by_id, post)
+    won = (person.get("raceRole") == "winner" and bool(person.get("raceId"))
+           and person["raceId"] != race["id"])
+    seat = seat_words(person["raceId"] if won else
+                      (person.get("contestRaceId") or person.get("raceStatusRace")))
+    where = f"{seat} under the state’s new district map"
+    moved = bool(person.get("renumbered"))
+    if won:
+        return f"was re-elected in {where}" if moved else f"won the race for {seat}"
+    return ("ran " if post else "is running ") + (f"in {where}" if moved else f"for {seat}")
+
+
+def moved_sentence(race, person, by_id, races_by_id=None, post=False):
+    """``KYC.movedSentence``: "Held by X, who ..." while they sit in the seat,
+    "X, who held this seat, ..." once they do not."""
+    clause = moved_clause(race, person, by_id, races_by_id, post)
+    name = person.get("name") or ""
+    return (f"Held by {name}, who {clause}." if sits_in(race, person)
+            else f"{name}, who held this seat, {clause}.")
 
 
 def split_people(race, by_id):
@@ -860,7 +975,7 @@ def split_people(race, by_id):
     primary ballot", rule 92), and anyone else a result takes out of it
     (``offBallot`` of their own status) folded under the rest."""
     people = race_people(race, by_id)
-    moved = [p for p in people if _elsewhere(race, p)]
+    moved = [p for p in people if moved_from(race, p)]
     rest = [p for p in people if p not in moved]
     gone = [p for p in rest if p.get("raceStatus") in OFF_BALLOT]
     holders = [p for p in gone if not p.get("isCandidate")
@@ -924,10 +1039,10 @@ HOLDER_MARK = "holds the seat"
 
 def holds(race, person):
     """*person* holds the seat *race* is for, and sits in it now (rule 67:
-    a record incumbent who has left holds nothing)."""
-    from .record import seated
-
-    return person["id"] in (race.get("incumbentIds") or []) and seated(person)
+    a record incumbent who has left holds nothing, and one sitting for the
+    seat they won elsewhere - Blake Moore, re-elected in UT-2 under the new
+    map - does not hold UT-1: :func:`sits_in`)."""
+    return person["id"] in (race.get("incumbentIds") or []) and sits_in(race, person)
 
 
 def _item(person, by_id, races_by_id, post, root, indent, race=None):
@@ -961,20 +1076,22 @@ def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
     them: the holder running elsewhere or off this ballot, the people still
     in it (the holder marked), those no longer in it, the November names with
     no profile here, and who says where each stands."""
-    from .record import seated
-
     moved, holders, running, out = split_people(race, by_id)
     rows = [f'{indent}<p class="share-count">{_e(head_count(race, post))}.</p>']
     for person in moved:
-        rows.append(f'{indent}<p class="race-held">Held by <a href="{root}'
-                    f'{_e(profile_path(person["id"]))}">{_e(person.get("name") or "")}</a>, who '
-                    f"{_e(contest_clause(person, by_id, races_by_id, post))}.</p>")
+        link = (f'<a href="{root}{_e(profile_path(person["id"]))}">'
+                f'{_e(person.get("name") or "")}</a>')
+        clause = _e(moved_clause(race, person, by_id, races_by_id, post))
+        rows.append(f'{indent}<p class="race-held">'
+                    + (f"Held by {link}, who {clause}." if sits_in(race, person)
+                       else f"{link}, who held this seat, {clause}.") + "</p>")
     for person in holders:
         link = (f'<a href="{root}{_e(profile_path(person["id"]))}">'
                 f'{_e(person.get("name") or "")}</a>')
         words = status_words(person, by_id, races_by_id, post)
         rows.append(f'{indent}<p class="race-held share-holder-off" data-id="{_e(person["id"])}">'
-                    + (f"Held by {link}" if seated(person) else f"{link} held this seat in the 2026 race")
+                    + (f"Held by {link}" if sits_in(race, person)
+                       else f"{link} held this seat in the 2026 race")
                     + (f': <span class="share-standing">{_e(words)}</span>' if words else "") + ".</p>")
     rows.append(f'{indent}<ul class="share-list" data-race="{_e(race["id"])}">')
     rows += [_item(p, by_id, races_by_id, post, root, indent + "    ", race) for p in running]
@@ -1044,8 +1161,7 @@ def describe_race(race, by_id, races_by_id, post=False):
     # The seat's holder only while they sit in it (rule 67): a record
     # incumbent who has left holds nothing.
     for person in moved:
-        held = (f"Held by {person.get('name')}, who "
-                f"{contest_clause(person, by_id, races_by_id, post)}.")
+        held = moved_sentence(race, person, by_id, races_by_id, post)
     inc = race.get("incumbent") or {}
     if not held and inc.get("seated") and inc.get("name"):
         # Under their profile's name where they have one, as the list

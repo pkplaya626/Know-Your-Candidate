@@ -762,9 +762,12 @@
      * other race. Read as this race's, Kevin Kiley was "On the ballot" in
      * CA-3, which he holds and is not running for, and Al Green was
      * "Lost primary" in TX-9, though he lost TX-18's. Said as where they
-     * went, and never folded under "no longer in this race". */
+     * went, and never folded under "no longer in this race". Once the new
+     * Congress sits, one seated for the seat they won is read the same way
+     * (KYC.movedFrom): Ami Bera was "Member, Elected" in CA-6's panel, over
+     * CA-3's result. */
     var elsewhere = function (p) {
-      return !p.isCandidate && !!p.contestRaceId && p.contestRaceId !== race.id;
+      return KYC.movedFrom(race, p);
     };
     var out = others.filter(function (p) {
       return !elsewhere(p) && KYC.cards && KYC.cards.offBallot(p);
@@ -791,9 +794,10 @@
         : "";
       if (elsewhere(p)) {
         var there = KYC.raceStatusOf(p, "mate");
-        var line = KYC.contestLine(p);
+        var line = KYC.movedLine(race, p);
         status = '<span class="badge ' + line.cls + '" title="' + KYC.escapeAttr(
-          "Holds this seat. " + line.title + (there ? " " + there.title : "")) + '">' +
+          (KYC.sitsIn(race, p) ? "Holds this seat. " : "Held this seat. ") + line.title +
+          (there ? " " + there.title : "")) + '">' +
           KYC.escapeHtml(line.label) +
           // "Elected to Senate KY" says it: never "· Elected" after it.
           (there && line.stage !== "won" ? " &middot; " + KYC.escapeHtml(there.label) : "") + "</span>";

@@ -244,6 +244,36 @@ class TestRacesWithContests(unittest.TestCase):
         self.assertNotIn("holderMoved", race_list["H-IA-01-2026"])
         self.assertTrue(race_list["H-IA-02-2026"]["openSeat"])
 
+    def test_a_member_re_elected_under_a_new_number_keeps_the_move_once_seated(self):
+        # January: Utah's members sit for the seats they won under the new
+        # map, their profiles hold no other run (no contestRaceId), and the
+        # record names the seat each held. Read from contestRaceId alone, all
+        # four seats were "open" on the rehearsal of 2026-11-10. UT-1, which
+        # none of them ran for, is open; UT-2 and UT-3, where a member ran
+        # under the new number, are not; each says where its holder went.
+        def seated(pid, name, district):
+            m = member(pid, name, "UT", district, party="Republican")
+            rid = f"H-UT-0{district}-2026"
+            m.update(raceId=rid, raceRole="winner", raceStatus="elected",
+                     raceStatusRace=rid, seekingReelection2026=False)
+            return m
+        moore = seated("M001213", "Blake Moore", 2)
+        maloy = seated("M001228", "Celeste Maloy", 3)
+        mcadams = seated("Z900054", "Ben McAdams", 1)
+        record = {"races": {f"H-UT-0{n}-2026": {"chamber": "House"} for n in (1, 2, 3)},
+                  "incumbents": {
+                      "H-UT-01-2026": {"bioguide": "M001213", "name": "Blake Moore", "party": "R"},
+                      "H-UT-02-2026": {"bioguide": "M001228", "name": "Celeste Maloy", "party": "R"},
+                      "H-UT-03-2026": {"bioguide": "K000403", "name": "Mike Kennedy", "party": "R"}}}
+        built = {r["id"]: r for r in races.build([moore, maloy, mcadams], record=record)}
+        self.assertTrue(built["H-UT-01-2026"]["openSeat"])
+        self.assertEqual(built["H-UT-01-2026"]["holderMoved"]["to"], "House • UT-2")
+        self.assertFalse(built["H-UT-02-2026"]["openSeat"])
+        self.assertEqual(built["H-UT-02-2026"]["holderMoved"]["to"], "House • UT-3")
+        self.assertFalse(built["H-UT-03-2026"]["openSeat"])
+        self.assertTrue(moore["renumbered"] and maloy["renumbered"])
+        self.assertNotIn("renumbered", mcadams)
+
     def test_a_member_with_a_separate_candidacy_is_not_added_twice(self):
         stevens = member("S001215", "Haley Stevens", "MI", 11)
         senate = candidate("FEC_S6MI00426", "Haley Stevens", "MI", chamber="Senate")

@@ -1529,9 +1529,22 @@ def _results(args):
         for state in certified_mod.carry(ballots, unread, previous):
             print(f"  [warn] kept {state}'s certified list read on "
                   f"{ballots[state].get('fetched')}")
+        # The national summary of the House elections, read once (rule 63's
+        # national route): a failed read concludes nothing, and the last
+        # read's national calls stand (rule 8).
+        national = None
+        if results_mod.general_held(datetime.date.today()):
+            try:
+                national = results_mod.fetch_national()
+                print(f"  read {national['title']!r} at revision {national.get('revid')}")
+            except Exception as exc:       # inconclusive: say so, conclude nothing
+                print(f"  [warn] the national summary could not be read ({exc}); "
+                      "the last read's national calls are kept")
         print("Reading primary results from Wikipedia ...")
         cache = results_mod.build(field, dates, today=datetime.date.today(), log=print,
-                                  aliases=aliases, qualified=listed, certified=ballots)
+                                  aliases=aliases, qualified=listed, certified=ballots,
+                                  national=national, previous=previous,
+                                  incumbents=(raw.get("record") or {}).get("incumbents") or {})
         kept = results_mod.carry_qualified(cache, previous)
         if kept:
             print(f"  [warn] kept the qualified list read on "

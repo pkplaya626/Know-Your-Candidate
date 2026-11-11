@@ -1,5 +1,5 @@
 {
- "asOf": "2026-11-05",
+ "asOf": "2026-11-10",
  "changes": {
   "offices": {
    "agriculture": {
@@ -53,7 +53,20 @@
       "actingStart": null,
       "confirmed": null,
       "current": false,
-      "end": null,
+      "end": {
+       "shown": {
+        "date": "2026-11-06",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2026-11-06",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-11-06",
+        "precision": "day"
+       }
+      },
       "infobox": true,
       "name": "Susie Wiles",
       "nameFrom": "wikipedia",
@@ -73,6 +86,33 @@
       },
       "wikidata": "Q113560461",
       "wikipedia": "Susie Wiles"
+     },
+     {
+      "acting": null,
+      "actingNote": null,
+      "actingStart": null,
+      "confirmed": null,
+      "current": false,
+      "end": null,
+      "infobox": true,
+      "name": "Stephen Miller",
+      "nameFrom": "wikipedia",
+      "start": {
+       "shown": {
+        "date": "2026-11-09",
+        "precision": "day"
+       },
+       "wikidata": {
+        "date": "2026-11-09",
+        "precision": "day"
+       },
+       "wikipedia": {
+        "date": "2026-11-09",
+        "precision": "day"
+       }
+      },
+      "wikidata": "Q27996060",
+      "wikipedia": "Stephen Miller"
      }
     ],
     "office": "White House Chief of Staff",
@@ -438,15 +478,15 @@
       "nameFrom": "white-house",
       "start": {
        "shown": {
-        "date": "2025-02-03",
-        "precision": "day"
+        "date": "2025-02",
+        "precision": "month"
        },
        "wikidata": {
         "date": "2025-02-03",
         "precision": "day"
        },
        "wikipedia": {
-        "date": "2025-02-03",
+        "date": "2025-02-04",
         "precision": "day"
        }
       },
@@ -1316,7 +1356,7 @@
     "wikidata": "Q1658460"
    }
   },
-  "read": "2026-10-22",
+  "read": "2026-11-10",
   "since": "2025-01-20",
   "sources": {
    "senate": "https://www.senate.gov/legislative/votes_new.htm",
@@ -1324,7 +1364,7 @@
    "wikipedia": "https://en.wikipedia.org/"
   }
  },
- "fetched": "2026-11-05T16:35:09+00:00",
+ "fetched": "2026-11-10T16:51:29+00:00",
  "offices": [
   {
    "body": "Department of State",
@@ -1376,7 +1416,7 @@
    "holder": {
     "name": "Scott Bessent",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://home.treasury.gov/about/general-information/officials"
     },
@@ -1462,7 +1502,7 @@
    "holder": {
     "name": "Todd Blanche",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.justice.gov/ag"
     },
@@ -1514,7 +1554,7 @@
    "holder": {
     "name": "Doug Burgum",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.doi.gov/secretary-doug-burgum"
     },
@@ -1642,7 +1682,7 @@
    "holder": {
     "name": "Keith Sonderling",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.dol.gov/agencies/osec"
     },
@@ -1736,7 +1776,7 @@
    "holder": {
     "name": "Scott Turner",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.hud.gov/aboutus/secretary"
     },
@@ -1818,7 +1858,7 @@
    "holder": {
     "name": "Chris Wright",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.energy.gov/"
     },
@@ -1904,7 +1944,7 @@
    "holder": {
     "name": "Doug Collins",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://department.va.gov/about/"
     },
@@ -1940,7 +1980,9 @@
    "holder": {
     "name": "Markwayne Mullin",
     "page": {
-     "status": "unreadable"
+     "read": "2026-11-10",
+     "status": "confirmed",
+     "url": "https://www.dhs.gov/leadership"
     },
     "photo": "https://www.whitehouse.gov/wp-content/uploads/2026/03/Markwayne-Mullin.jpg",
     "photoSet": [
@@ -1974,7 +2016,7 @@
    "holder": {
     "name": "Lee Zeldin",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.epa.gov/aboutepa/epa-administrator"
     },
@@ -2035,7 +2077,7 @@
    "holder": {
     "name": "Jamieson Greer",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://ustr.gov/about-us/biographies-key-officials"
     },
@@ -2071,7 +2113,7 @@
    "holder": {
     "name": "Jay Clayton",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.odni.gov/index.php/who-we-are/leadership"
     },
@@ -2123,7 +2165,7 @@
    "holder": {
     "name": "John Ratcliffe",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.cia.gov/about/director-of-cia/"
     },
@@ -2167,7 +2209,7 @@
    "holder": {
     "name": "Kelly Loeffler",
     "page": {
-     "read": "2026-11-05",
+     "read": "2026-11-10",
      "status": "confirmed",
      "url": "https://www.sba.gov/person/kelly-loeffler/"
     },

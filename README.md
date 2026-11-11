@@ -812,6 +812,56 @@ page and writes `data/primary_results.json`. Three things keep it honest:
 - **Winners come from the markup, never from the count.** A row is a winner
   only when it uses the `Election box winning candidate` template. A table
   with nobody marked decides nothing — it is a candidate list, not a result.
+  After Election Day two more routes name a November winner, each held to
+  every gate a mark is (below) and to its own:
+  - **The infobox's declared winner** (`after_election`, not ongoing), where
+    no November table marks anyone — Alabama's editors bold the winner's row,
+    Texas's tables stand blank. It is read as the table's mark on that person
+    (`results.infobox_call`), so one implementation settles both: the
+    table's counts and the infobox's must lead with them, the lead must be
+    half a point of the count (the declaration grants no exemption here),
+    the infobox's share reporting at least 50, the person a filing, a state's
+    list or an evidenced `RESULT_NAMES` entry names, and the ranked-choice and
+    majority gates stand (a Georgia, Maine, Louisiana or territory seat whose
+    table has no counts is not called). A declaration with no counts anywhere
+    stands only where nobody else is on the ballot.
+  - **The national summary's mark**, for a House race whose state's page
+    marks and declares nobody, and gives no count or counts that put the
+    same person first (every November table that counts two people and the
+    infobox where it counts two; share reporting at least 50 and readable;
+    a lead of at least half a point: `results.national_counts`, one test on
+    every read, whatever the last one concluded): the district's row of
+    "2026 United States House of Representatives elections", in the
+    article's section for its state (read once a run; a failed read keeps
+    the last read's calls), must mark one person with `{{aye}}`, that person one November nominee by
+    filing or a state's list, and the row's own words must agree with the
+    frozen record's incumbent ("Incumbent re-elected" only for them, "lost
+    re-election", "lost renomination" or "New member elected" only for
+    someone else, a party's "hold" or "gain" against the holder's party). Never
+    in a ranked-choice, majority or open-primary state, D.C. or a territory.
+    A state page that later gives a result takes over, and one that puts
+    someone else first, or whose counts are too close (under `CLOSE_MARGIN`)
+    or too early (under `REPORTING_FLOOR`, or unreadable) to stand behind
+    it, withdraws the call (`nationalWithdrawn`, `{race id: {name, leaders,
+    why, revid}}`, `result-national-withdrawn`); a call the last read made
+    and this one does not is `nationalDropped` (`result-national-dropped`),
+    and one kept unread past two weeks `result-national-kept-stale`.
+    The page credits such a call to "Wikipedia's national summary of the
+    House elections, which gives no vote count; the state's page had none
+    when read" wherever a status's source is shown, or, where the state's
+    page gave counts at that read, "... which marks the winner and gives no
+    vote count; the state's page, read the same day, counts that winner
+    ahead and names no winner" (`raceStatusSource: "national-counts"`, the race
+    summary's `nationalCounts: true`).
+
+  Each race records how its winner was called (`calledBy`: `table`,
+  `infobox` or `national`; a national call's `national`: `{name, party,
+  ayes, words, url, revid, read, kept?, pageCounts, pageLeader?, pageLead?,
+  pageMargin?, pageReporting?}`), the cache records the summary it
+  read (`national`: `{title, revid, url}`, or null) and each race's national
+  row that gave no call (`nationalRefused`, `{race id: {name, why}}`), and
+  the read's log and `validate` count each route (`result-calls`, an info
+  line).
 - **The general-election table is the authority** when the page has one; a
   party's runoff table decides for the people in it; otherwise a primary's
   marked winner is the nominee. In a runoff state a primary with two marked
@@ -1872,7 +1922,7 @@ Derived in `kyc/profiles.py` and `kyc/races.py`, shipped in the data.
 | `contestRaceId` / `contestLabel` | A member contesting a *different* seat: a redrawn district, the other chamber. Never set for a winner seated since in the seat they won (`raceRole`); their held seat is `heldRaceId` |
 | `alsoRunningId` / `incumbentId` | Cross-link between a member and a separate profile for their own candidacy, matched first by any FEC id Congress's record lists for the member, then by name and state. The member's profile links that campaign's totals, labelled with its office and FEC id; they are never folded into the member's own (rule 68) |
 | `otherOffice` | Sitting members only: `{text, source, checked}` when they are another office's November nominee ("Republican nominee for Governor of Florida"), from `overrides.OTHER_OFFICE_NOMINEES`, each the winner the election's results page marks, read on `checked`. From the day after Election Day the page says it in the past tense ("Was the ..."), since this site does not read that race's result. Dropped once the member starts a new term |
-| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; a state's certified list of November candidates, where one was read, decides `nominee` and `unlisted` over the results page (`raceStatusSource: "certified"`, rule 77); after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff); and the race it refers to |
+| `raceStatus` / `raceStatusRace` | `nominee`, `advanced`, `eliminated`, `withdrawn` or `unlisted`; `qualified` for Louisiana's open-primary House ballot before its count; a state's certified list of November candidates, where one was read, decides `nominee` and `unlisted` over the results page (`raceStatusSource: "certified"`, rule 77); after Election Day also `elected`, `defeated` or `runoff` (a general-election runoff), with `raceStatusSource: "national"` or `"national-counts"` where the national summary called the race (rule 63); and the race it refers to |
 | `raceStatusDecided` | With `raceStatus` `elected` or `defeated` only: `{date, open}` when the December round decided the result - an open primary's general election (`open: true`, Louisiana's House seats on December 12) or a general election runoff (Georgia's December 1) - so the badge says it in that round's words ("Elected on December 12", "Lost the December 1 runoff"), never "in November" |
 | `ballotParty` / `fecParty` | The party the ballot lists, when it differs from the roster or FEC record |
 | `ballotLine` | For a nominee only: the November ballot line as the results page spells it ("Speak The Truth", "Party for Socialism and Liberation"), when it is not the line of the party shown. Never set for "none", a write-in or a line named after the candidate themselves (an independent petition reads as "Independent"); `party` is never overwritten by it |

@@ -4083,5 +4083,868 @@ class TestARecountRangeMarkNeedsTheInfobox(NoGap):
         self.assertEqual(self.status(cache), self.CALLED)
 
 
+def call_infobox(*rows, declared=None, ongoing=None, reporting=None):
+    """An infobox naming ``(name, party, count)`` nominees, a count of None
+    left out; *declared* is its after_election field, *reporting* its share."""
+    out = ["{{Infobox election", "| election_name = x"]
+    if ongoing is not None:
+        out.append(f"| ongoing = {ongoing}")
+    if reporting is not None:
+        out.append(f"| reporting = {reporting}")
+    for i, (name, party, votes) in enumerate(rows, 1):
+        out += [f"| nominee{i} = [[{name}]]", f"| party{i} = {party}"]
+        if votes is not None:
+            out.append(f"| popular_vote{i} = {votes:,}")
+    if declared is not None:
+        out.append(f"| after_election = {declared}")
+    return "\n".join(out + ["}}"])
+
+
+def bold_box(title, *rows):
+    """Alabama's shape: the winner's row bolded, nobody marked with the
+    "winning candidate" template. Each row is ``(name, party, votes, bold)``."""
+    out = ["{{Election box begin no change", f"| title = {title}", "}}"]
+    for name, party, votes, bold in rows:
+        shown = f"'''[[{name}]]'''" if bold else f"[[{name}]]"
+        out += ["{{Election box candidate with party link no change", f"| party = {party}",
+                f"| candidate = {shown}",
+                f"| votes = {'' if votes is None else format(votes, ',')}", "}}"]
+    return "\n".join(out + ["{{Election box end}}"])
+
+
+class TestTheInfoboxDeclaresTheWinner(NoGap):
+    """Rule 63's infobox route (the lead's decision of 2026-11-10, for the
+    owner's "it seems we are missing some confirmed election results across
+    the site"): a week after the count 241 races read "Awaiting result" over
+    a page whose infobox declared the winner and whose counts led with them,
+    because no November table marked anyone with the "winning candidate"
+    template - Alabama's editors bold the winner's row, Texas's tables are
+    blank and only the infobox is filled. The declaration is read as the
+    table's mark, held to every gate a mark meets and to its own."""
+
+    STATE, DISTRICT = "OH", 5
+    CALENDAR = {"primary": "2026-05-05", "runoff": None}
+    STONE, SWAN, HENDRY = "H6ZZ05001", "H6ZZ05003", "H6ZZ05009"
+
+    def setUp(self):
+        super().setUp()
+        self.field = {"candidates": [
+            row(self.STONE, "STONE, PAT", self.STATE, "H", self.DISTRICT, "REP"),
+            row("H6ZZ05002", "HAMIL, TONY", self.STATE, "H", self.DISTRICT, "REP"),
+            row(self.SWAN, "SWAN, TRINA", self.STATE, "H", self.DISTRICT, "DEM"),
+            row("H6ZZ05004", "GULL, LUKE", self.STATE, "H", self.DISTRICT, "DEM")]}
+
+    def general(self):
+        return (f"2026 {results.state_name(self.STATE)}'s {self.DISTRICT}th congressional "
+                "district election")
+
+    def read(self, *parts, logged=None, certified=None, primaries=True, calendar=None):
+        primary = [party_box("Republican primary results", ("Pat Stone", REP, 58139, True),
+                             ("Tony Hamil", REP, 9121, False)),
+                   party_box("Democratic primary results", ("Trina Swan", DEM, 54413, True),
+                             ("Luke Gull", DEM, 11888, False))] if primaries else []
+        page = f"\n==District {self.DISTRICT}==\n" + "\n\n".join(list(parts) + primary) + "\n"
+        titles = results.page_titles(self.STATE, "H")
+        return results.build(self.field, {(self.STATE, "H"): calendar or self.CALENDAR},
+                             today=datetime.date(2026, 11, 10),
+                             log=(logged.append if logged is not None else lambda *_: None),
+                             fetch=lambda t: page if t in titles else
+                             (_ for _ in ()).throw(results.PageMissing(t)), certified=certified)
+
+    def race(self, cache):
+        return cache["races"][f"H-{self.STATE}-{self.DISTRICT:02d}-2026"]
+
+    def status(self, cache):
+        return self.race(cache)["status"]
+
+    def infobox(self, stone=190744, swan=168350, declared="[[Pat Stone]]", **kw):
+        return call_infobox(("Pat Stone", REP, stone), ("Trina Swan", DEM, swan),
+                            declared=declared, **kw)
+
+    def table(self, stone=190744, swan=168350, bold=True):
+        return bold_box(self.general(), ("Pat Stone", REP, stone, bold),
+                        ("Trina Swan", DEM, swan, False))
+
+    def called(self):
+        return {self.STONE: "elected", "H6ZZ05002": "eliminated", self.SWAN: "defeated",
+                "H6ZZ05004": "eliminated"}
+
+    def awaiting(self):
+        return dict(self.called(), **{self.STONE: "nominee", self.SWAN: "nominee"})
+
+    def assertCalled(self, cache):
+        self.assertEqual(self.status(cache), self.called())
+        self.assertEqual(self.race(cache).get("calledBy"), "infobox")
+        self.assertFalse(cache["refusedMarks"])
+
+    def assertRefused(self, cache, words):
+        self.assertEqual(self.status(cache), self.awaiting())
+        self.assertNotIn("calledBy", self.race(cache))
+        rid = f"H-{self.STATE}-{self.DISTRICT:02d}-2026"
+        whys = [item["why"] for item in cache["refusedMarks"].get(rid, ())]
+        self.assertTrue(any(words in why for why in whys), whys)
+
+    # ---- it stands
+
+    def test_alabamas_bold_row_stands_on_the_infobox_and_the_counts(self):
+        logged = []
+        cache = self.read(self.infobox(), self.table(), logged=logged)
+        self.assertCalled(cache)
+        self.assertTrue(any("races called, by route" in line and "infobox 1" in line
+                            for line in logged), logged[-3:])
+
+    def test_texas_blank_table_stands_on_the_infobox_counts(self):
+        self.assertCalled(self.read(self.infobox(), self.table(stone=None, swan=None, bold=False)))
+
+    def test_no_november_table_stands_on_the_infobox(self):
+        self.assertCalled(self.read(self.infobox()))
+
+    def test_a_declaration_with_no_counts_stands_where_nobody_else_is_on_the_ballot(self):
+        lone = call_infobox(("Pat Stone", REP, None), declared="[[Pat Stone]]")
+        alone = bold_box(self.general(), ("Pat Stone", REP, None, True))
+        primary = party_box("Republican primary results", ("Pat Stone", REP, 58139, True),
+                            ("Tony Hamil", REP, 9121, False))
+        cache = self.read(lone, alone, primary, primaries=False)
+        self.assertEqual(self.status(cache)[self.STONE], "elected")
+        self.assertEqual(self.race(cache)["calledBy"], "infobox")
+
+    def test_a_table_mark_is_still_the_tables(self):
+        marked = party_box(self.general(), ("Pat Stone", REP, 190744, True),
+                           ("Trina Swan", DEM, 168350, False))
+        cache = self.read(self.infobox(), marked)
+        self.assertEqual(self.status(cache), self.called())
+        self.assertEqual(self.race(cache)["calledBy"], "table")
+
+    # ---- it is refused
+
+    def test_not_while_the_count_is_ongoing(self):
+        cache = self.read(self.infobox(ongoing="yes"), self.table())
+        self.assertEqual(self.status(cache), self.awaiting())
+        self.assertNotIn("calledBy", self.race(cache))
+
+    def test_no_counts_and_not_alone(self):
+        box = call_infobox(("Pat Stone", REP, None), ("Trina Swan", DEM, None),
+                           declared="[[Pat Stone]]")
+        self.assertRefused(self.read(box, self.table(stone=None, swan=None)),
+                           "gives no two counts above zero")
+        self.assertRefused(self.read(box), "gives no two counts above zero")
+
+    def test_the_infobox_counts_must_lead_with_them(self):
+        self.assertRefused(self.read(self.infobox(stone=150000), self.table(stone=None, swan=None)),
+                           "the infobox's own counts do not lead with them")
+
+    def test_a_table_leading_with_someone_else_refuses_it(self):
+        self.assertRefused(self.read(self.infobox(), self.table(stone=150000)),
+                           "the November table's own counts do not lead with them")
+
+    def test_under_half_a_point(self):
+        # The declaration grants no exemption here, as it does a mark.
+        self.assertRefused(self.read(self.infobox(), self.table(stone=168900)),
+                           "under 0.5 points")
+        self.assertRefused(self.read(self.infobox(stone=168900)), "under 0.5 points")
+
+    def test_reporting_under_the_floor_or_unread(self):
+        self.assertRefused(self.read(self.infobox(reporting="35%"), self.table()),
+                           "stand at 35 reporting")
+        self.assertRefused(self.read(self.infobox(reporting="most"), self.table()),
+                           "cannot be read")
+        self.assertCalled(self.read(self.infobox(reporting="98%"), self.table()))
+
+    def test_a_declared_name_no_filing_or_list_holds(self):
+        logged = []
+        box = call_infobox(("Jeanne Hendry", DEM, 210000), ("Trina Swan", DEM, 168350),
+                           declared="[[Jeanne Hendry]]")
+        table = bold_box(self.general(), ("Jeanne Hendry", DEM, 210000, True),
+                         ("Pat Stone", REP, 190744, False), ("Trina Swan", DEM, 168350, False))
+        cache = self.read(box, table, logged=logged)
+        self.assertNotIn("calledBy", self.race(cache))
+        self.assertNotIn("elected", self.status(cache).values())
+        whys = [item["why"] for item in cache["refusedMarks"][self.race_id()]]
+        self.assertIn("no filing and no state's list", whys[0])
+        self.assertTrue(any("[REFUSED]" in line for line in logged))
+
+    def race_id(self):
+        return f"H-{self.STATE}-{self.DISTRICT:02d}-2026"
+
+    def test_the_losers_are_defeated_as_under_a_mark(self):
+        third = row("H6ZZ05007", "VALE, ROSA", self.STATE, "H", self.DISTRICT, "LIB")
+        self.field["candidates"].append(third)
+        table = bold_box(self.general(), ("Pat Stone", REP, 190744, True),
+                         ("Trina Swan", DEM, 168350, False),
+                         ("Rosa Vale", "Libertarian Party (United States)", 9000, False))
+        status = self.status(self.read(self.infobox(), table))
+        self.assertEqual(status["H6ZZ05007"], "defeated")
+        self.assertEqual(status[self.SWAN], "defeated")
+        self.assertEqual(status[self.STONE], "elected")
+
+    def test_a_row_the_whole_list_does_not_print_did_not_lose_on_the_ballot(self):
+        # FL-6 on 2026-11-10: an independent in the page's November table,
+        # not on Florida's whole certified list, read "Lost the November
+        # election" once the race was called; before, "not on the ballot".
+        self.field["candidates"].append(
+            row("H6ZZ05007", "VALE, ROSA", self.STATE, "H", self.DISTRICT, "IND"))
+        table = bold_box(self.general(), ("Pat Stone", REP, None, True),
+                         ("Trina Swan", DEM, None, False), ("Rosa Vale", "Independent politician",
+                                                            None, False))
+        listed = {self.STATE: {"complete": True, "source": "the Test Division of Elections",
+                               "races": {self.race_id(): [
+                                   {"kind": "ballot", "name": "Pat Stone", "party": "Republican"},
+                                   {"kind": "ballot", "name": "Trina Swan", "party": "Democratic"},
+                                   {"kind": "lost-primary", "name": "Tony Hamil",
+                                    "party": "Republican"},
+                                   {"kind": "lost-primary", "name": "Luke Gull",
+                                    "party": "Democratic"}]}}}
+        status = self.status(self.read(self.infobox(), table, certified=listed))
+        self.assertEqual(status[self.STONE], "elected")
+        self.assertEqual(status[self.SWAN], "defeated")
+        self.assertEqual(status["H6ZZ05007"], "unlisted")
+
+    def test_a_refusal_keeps_the_last_read(self):
+        cache = self.read(self.infobox(), self.table(stone=168900))
+        before = {"races": {self.race_id(): {"status": self.called(), "page": "kept"}}}
+        self.assertEqual(results.carry_refused(cache, before), [self.race_id()])
+
+
+class TestTheInfoboxRouteKeepsTheMajorityGates(TestTheInfoboxDeclaresTheWinner):
+    """Maine's ranked choice and Georgia's majority: a declared leader short
+    of a majority is not elected, by the very gate a table's mark meets."""
+
+    def short(self, state):
+        self.STATE = state
+        for filing in self.field["candidates"]:
+            filing["state"] = state
+        third = row("H6ZZ05007", "VALE, ROSA", state, "H", self.DISTRICT, "LIB")
+        self.field["candidates"].append(third)
+
+        def table(stone, swan, vale):
+            return bold_box(self.general(), ("Pat Stone", REP, stone, True),
+                            ("Trina Swan", DEM, swan, False),
+                            ("Rosa Vale", "Libertarian Party (United States)", vale, False))
+
+        def box(stone, swan, vale):
+            return call_infobox(("Pat Stone", REP, stone), ("Trina Swan", DEM, swan),
+                                ("Rosa Vale", "Libertarian Party (United States)", vale),
+                                declared="[[Pat Stone]]")
+
+        held = self.read(box(48000, 45000, 7000), table(48000, 45000, 7000))
+        won = self.read(box(52000, 45000, 3000), table(52000, 45000, 3000))
+        return self.status(held), self.status(won), self.race(won)
+
+    def test_maine_and_georgia_need_a_majority(self):
+        for state in ("ME", "GA"):
+            self.setUp()
+            held, won, race = self.short(state)
+            self.assertEqual(held[self.STONE], "nominee", state)
+            self.assertNotIn("elected", held.values(), state)
+            self.assertEqual(won[self.STONE], "elected", state)
+            self.assertEqual(race["calledBy"], "infobox", state)
+
+    def test_no_november_table_is_no_majority(self):
+        for state in ("ME", "GA"):
+            self.setUp()
+            self.STATE = state
+            for filing in self.field["candidates"]:
+                filing["state"] = state
+            status = self.status(self.read(self.infobox(stone=520000, swan=480000)))
+            self.assertNotIn("elected", status.values(), state)
+
+
+class TestTheInfoboxRouteInAnOpenPrimaryOrATerritory(NoGap):
+    """Louisiana's open round and a territory's runoff: a declared leader
+    without a majority goes to December, never elected."""
+
+    def test_louisianas_open_round(self):
+        field = {"candidates": [row(LA5_PEOPLE[k][3], LA5_PEOPLE[k][2], "LA", "H", 5,
+                                    "REP" if LA5_PEOPLE[k][1] == "Republican" else "DEM")
+                                for k in LA5_PEOPLE]}
+
+        def read(votes):
+            table = la5_box(LA5_NOVEMBER, *[(k, v, False) for k, v in zip(LA5_PEOPLE, votes)])
+            box = call_infobox(("Michael Echols", "Republican", votes[0]),
+                               ("Patricia Moore", "Democratic", votes[1]),
+                               declared="[[Michael Echols]]")
+            page = "\n==District 5==\n" + box + "\n\n" + table + "\n"
+            return results.build(field, LA_CALENDAR, today=datetime.date(2026, 11, 10),
+                                 log=lambda *_: None,
+                                 fetch=lambda t: page if t == LA_TITLE else
+                                 (_ for _ in ()).throw(results.PageMissing(t)))
+
+        # The leader short of a majority: the round decides nothing yet.
+        held = read((40000, 30000, 15000, 10000, 5000))["races"].get("H-LA-05-2026") or {}
+        self.assertNotIn("elected", (held.get("status") or {}).values())
+        won = read((60000, 30000, 5000, 3000, 2000))["races"]["H-LA-05-2026"]
+        self.assertEqual(won["status"]["H6LA05101"], "elected")
+        self.assertEqual(won["calledBy"], "infobox")
+
+    def test_a_territorys_runoff(self):
+        field = {"candidates": [row("H6GU00001", "ALPHA, ANN", "GU", "H", 0, "REP"),
+                                row("H6GU00002", "DELTA, DEE", "GU", "H", 0, "DEM"),
+                                row("H6GU00003", "EPSILON, ED", "GU", "H", 0, "IND")]}
+
+        def read(votes):
+            table = bold_box("2026 Guam's at-large congressional district election",
+                             ("Ann Alpha", REP, votes[0], True), ("Dee Delta", DEM, votes[1], False),
+                             ("Ed Epsilon", "Independent", votes[2], False))
+            box = call_infobox(("Ann Alpha", REP, votes[0]), ("Dee Delta", DEM, votes[1]),
+                               declared="[[Ann Alpha]]")
+            page = box + "\n\n" + table + "\n"
+            titles = results.page_titles("GU", "H")
+            return results.build(field, {("GU", "H"): {"primary": "2026-08-29", "runoff": None}},
+                                 today=datetime.date(2026, 11, 10), log=lambda *_: None,
+                                 fetch=lambda t: page if t in titles else
+                                 (_ for _ in ()).throw(results.PageMissing(t)))
+
+        held = read((4800, 4700, 500))["races"]["H-GU-00-2026"]
+        self.assertNotIn("elected", held["status"].values())
+        won = read((5100, 4700, 200))["races"]["H-GU-00-2026"]
+        self.assertEqual(won["status"]["H6GU00001"], "elected")
+
+
+def national_article(state, district, words, *people, member="{{sortname|Pat|Stone}}"):
+    """The national article's table of every district, in its state's own
+    section, with one row: *people* are ``(name, party, aye)``."""
+    lines = [f"=={results.state_name(state)}==", "{| class=wikitable", "|-",
+             f"!{{{{ushr|{state}|{district}|X}}}}",
+             "|{{shading PVI|R|5}}", f"|{member}", "|Republican", "|2022",
+             f"|{{{{Party shading/Republican/Hold}}}} |{words}",
+             '|style="white-space: nowrap" |{{plainlist}}']
+    for name, party, aye in people:
+        lines.append(f"*{{{{Party stripe|{party} Party (US)}}}}{'{{aye}} ' if aye else ''}"
+                     f"'''[[{name}]]''' ({party})" if aye else
+                     f"*{{{{Party stripe|{party} Party (US)}}}}{name} ({party})")
+    return "\n".join(lines + ["{{endplainlist}}", "|-", "|}"])
+
+
+class TestTheNationalSummarysMark(TestTheInfoboxDeclaresTheWinner):
+    """Rule 63's national route (the owner's decision of 2026-11-10, "Yes,
+    with checks"): 117 races' state pages held no result at all a week after
+    the count, while the national article's row of every district marked the
+    winner with {{aye}}. A race whose page holds nothing may be called from
+    it, where the row marks one November nominee and its own words agree."""
+
+    INCUMBENT = {"bioguide": "S000105", "fec": ["H6ZZ05001"], "party": "Republican"}
+
+    def silent(self):
+        """The page as Illinois's stood: nominees, no count, no declaration."""
+        return call_infobox(("Pat Stone", REP, None), ("Trina Swan", DEM, None))
+
+    def nread(self, words, *people, parts=None, national=True, previous=None, incumbent=None,
+              logged=None, state=None, certified=None, reshape=None):
+        state = state or self.STATE
+        text = national_article(state, self.DISTRICT, words, *people)
+        text = reshape(text) if reshape else text
+        rid = self.race_id()
+        primary = [party_box("Republican primary results", ("Pat Stone", REP, 58139, True),
+                             ("Tony Hamil", REP, 9121, False)),
+                   party_box("Democratic primary results", ("Trina Swan", DEM, 54413, True),
+                             ("Luke Gull", DEM, 11888, False))]
+        page = f"\n==District {self.DISTRICT}==\n" + "\n\n".join(
+            list(parts if parts is not None else (self.silent(),)) + primary) + "\n"
+        titles = results.page_titles(self.STATE, "H")
+        return results.build(
+            self.field, {(self.STATE, "H"): self.CALENDAR}, today=datetime.date(2026, 11, 10),
+            log=(logged.append if logged is not None else lambda *_: None),
+            fetch=lambda t: page if t in titles else (_ for _ in ()).throw(results.PageMissing(t)),
+            national=({"title": results.NATIONAL_HOUSE, "revid": 1234, "text": text}
+                      if national else None),
+            previous=previous, incumbents={rid: incumbent or self.INCUMBENT}, certified=certified)
+
+    STONE_WINS = (("Pat Stone", "Republican", True), ("Trina Swan", "Democratic", False))
+    SWAN_WINS = (("Pat Stone", "Republican", False), ("Trina Swan", "Democratic", True))
+
+    def assertNational(self, cache, winner):
+        status = self.status(cache)
+        self.assertEqual(status[winner], "elected")
+        loser = self.SWAN if winner == self.STONE else self.STONE
+        self.assertEqual(status[loser], "defeated")
+        race = self.race(cache)
+        self.assertEqual(race["calledBy"], "national")
+        self.assertEqual(race["national"]["revid"], 1234)
+        self.assertIn("oldid=1234", race["national"]["url"])
+        self.assertFalse(cache["refusedMarks"])
+
+    def assertNoCall(self, cache, words=None):
+        self.assertEqual(self.status(cache), self.awaiting())
+        self.assertNotIn("calledBy", self.race(cache))
+        if words:
+            self.assertIn(words, cache["nationalRefused"][self.race_id()]["why"])
+
+    # ---- it stands, on each phrase that agrees
+
+    def test_incumbent_re_elected(self):
+        logged = []
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, logged=logged)
+        self.assertNational(cache, self.STONE)
+        self.assertTrue(any("national 1" in line for line in logged if "by route" in line))
+
+    def test_a_hold_and_a_new_member(self):
+        other = {"bioguide": "O000001", "fec": ["H0ZZ05999"], "party": "Republican"}
+        for words in ("Incumbent retired.<br>Republican hold.", "New member elected.",
+                      "Incumbent retired.<br />New member elected.<br>'''Republican hold.'''"):
+            self.assertNational(self.nread(words, *self.STONE_WINS, incumbent=other), self.STONE)
+
+    def test_a_gain_and_an_incumbent_who_lost(self):
+        for words in ("Incumbent lost re-election.<br>Democratic gain.",
+                      "Incumbent lost re-election.", "Democratic gain."):
+            self.assertNational(self.nread(words, *self.SWAN_WINS), self.SWAN)
+
+    # ---- it is refused
+
+    def test_two_ayes(self):
+        cache = self.nread("Incumbent re-elected.", ("Pat Stone", "Republican", True),
+                           ("Trina Swan", "Democratic", True))
+        self.assertNoCall(cache, "more than one")
+
+    def test_a_name_no_filing_holds(self):
+        cache = self.nread("New member elected.", ("Jeanne Hendry", "Democratic", True),
+                           ("Pat Stone", "Republican", False))
+        self.assertNoCall(cache, "no filing and no state's list")
+
+    def test_incumbent_re_elected_on_the_challenger(self):
+        self.assertNoCall(self.nread("Incumbent re-elected.", *self.SWAN_WINS),
+                          "marks someone else")
+
+    def test_a_republican_hold_on_a_democrat(self):
+        self.assertNoCall(self.nread("Republican hold.", *self.SWAN_WINS),
+                          "not the marked person's party")
+        # And the hold of the holder's party on its own nominee who is not it.
+        self.assertNoCall(self.nread("Democratic hold.", *self.SWAN_WINS),
+                          "disagrees with the seat's holder's party")
+
+    def test_no_status_words(self):
+        self.assertNoCall(self.nread("Incumbent retired.", *self.STONE_WINS), "say nothing")
+
+    def test_not_in_a_ranked_choice_majority_or_open_primary_state(self):
+        self.assertEqual(results.national_barred("ME", "H-ME-02-2026"), "a ranked-choice count")
+        self.assertEqual(results.national_barred("GA", "H-GA-05-2026"),
+                         "a seat won only by a majority")
+        self.assertTrue(results.national_barred("GU", "H-GU-00-2026"))
+        self.assertTrue(results.national_barred("LA", "H-LA-05-2026", open_seat=True))
+        self.assertTrue(results.national_barred("OH", "H-OH-05-2026", listed={"H-OH-05-2026"}))
+        self.assertIsNone(results.national_barred("OH", "H-OH-05-2026"))
+        for state in ("ME", "GA"):
+            self.setUp()
+            self.STATE = state
+            for filing in self.field["candidates"]:
+                filing["state"] = state
+            self.assertNoCall(self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                                         incumbent=dict(self.INCUMBENT)))
+
+    def test_a_state_page_that_gives_another_result(self):
+        declared = call_infobox(("Pat Stone", REP, None), ("Trina Swan", DEM, None),
+                                declared="[[Trina Swan]]")
+        counts = bold_box(self.general(), ("Pat Stone", REP, 100, False),
+                          ("Trina Swan", DEM, 120, False))
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(self.silent(), counts))
+        self.assertNotEqual(self.race(cache).get("calledBy"), "national")
+        self.assertNotIn("elected", self.status(cache).values())
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(declared,))
+        self.assertNotEqual(self.race(cache).get("calledBy"), "national")
+
+    # ---- counts on the state's page (2026-11-11): New Jersey's 2nd was
+    # called from the pages saved at 19:50 UTC on 2026-11-10, and left
+    # "Awaiting result" by the refresh two hours later, whose first read of
+    # the race met a page counting Mullock ahead and marking nobody.
+
+    def counted(self, stone=137999, swan=130631, reporting=None):
+        """The page as New Jersey's 2nd stood: counts, no mark, the count
+        marked ongoing."""
+        return (call_infobox(("Pat Stone", REP, stone), ("Trina Swan", DEM, swan),
+                             ongoing="yes", reporting=reporting),
+                bold_box(self.general(), ("Pat Stone", REP, stone, False),
+                         ("Trina Swan", DEM, swan, False)))
+
+    def assertCredit(self, cache, source):
+        from kyc import share
+        race = self.race(cache)
+        for cid in (self.STONE, self.SWAN):
+            profile = {}
+            results._source_of(profile, race, cid)
+            self.assertEqual(profile.get("raceStatusSource"), source, cid)
+        summary = results.race_summary(cache, self.race_id())
+        self.assertEqual(summary["nationalCounts"], source == "national-counts")
+        credit = share.status_source({"raceStatus": "elected", "raceStatusSource": source,
+                                      "isCandidate": True, "id": "x"}, {})
+        self.assertEqual(credit, share.NATIONAL_COUNTS_SOURCE if source == "national-counts"
+                         else share.NATIONAL_SOURCE)
+
+    def test_a_first_read_over_counts_that_lead_with_them_is_called(self):
+        for parts in (self.counted(), self.counted()[:1], self.counted()[1:]):
+            cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=parts)
+            self.assertNational(cache, self.STONE)
+            call = self.race(cache)["national"]
+            self.assertTrue(call["pageCounts"])
+            self.assertEqual((call["pageLeader"], call["pageLead"]), ("Pat Stone", 7368))
+            self.assertAlmostEqual(call["pageMargin"], round(7368 / 268630, 4))
+            self.assertCredit(cache, "national-counts")
+        # A page with no count at all is credited as before.
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS)
+        self.assertNational(cache, self.STONE)
+        self.assertFalse(self.race(cache)["national"]["pageCounts"])
+        self.assertCredit(cache, "national")
+
+    def test_the_same_page_reads_alike_whatever_the_last_read_concluded(self):
+        first = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=self.counted())
+        silent = self.nread("Incumbent re-elected.", *self.STONE_WINS)
+        for previous in (None, silent, first):
+            cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=self.counted(),
+                               previous=previous)
+            self.assertEqual(self.status(cache), self.status(first))
+            self.assertEqual(self.race(cache)["national"], self.race(first)["national"])
+            self.assertCredit(cache, "national-counts")
+            self.assertFalse(cache["nationalWithdrawn"])
+        # And a page that gives no call gives none whatever came before.
+        behind = self.counted(stone=120, swan=150)
+        for previous in (None, silent, first):
+            cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=behind,
+                               previous=previous)
+            self.assertNotIn("elected", self.status(cache).values())
+            self.assertEqual(bool(cache["nationalWithdrawn"]), previous is not None)
+
+    def test_counts_that_do_not_stand_behind_the_mark_give_no_call(self):
+        tied = bold_box(self.general(), ("Pat Stone", REP, 150, False),
+                        ("Trina Swan", DEM, 150, False))
+        alone = bold_box(self.general(), ("Pat Stone", REP, 150, False),
+                         ("Trina Swan", DEM, None, False))
+        stale = (call_infobox(("Pat Stone", REP, 90), ("Trina Swan", DEM, 100)),
+                 bold_box(self.general(), ("Pat Stone", REP, 120, False),
+                          ("Trina Swan", DEM, 100, False)))
+        for parts, words in (
+                (self.counted(stone=120, swan=150), "put Trina Swan first"),
+                ((self.silent(), tied), "put Trina Swan first"),
+                (stale, "put Trina Swan first"),
+                (self.counted(stone=150100, swan=149900), "under 0.5 points"),
+                (self.counted(reporting="30"), "at 30 reporting"),
+                (self.counted(reporting="most"), "cannot be read"),
+                ((self.silent(), alone), "one person alone")):
+            cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=parts)
+            self.assertNoCall(cache, words)
+
+    def test_a_mark_or_a_declaration_is_the_pages_own_route(self):
+        # Declared and ongoing: the infobox route reads nothing, and the
+        # national route does not stand in for it.
+        ongoing = call_infobox(("Pat Stone", REP, 190000), ("Trina Swan", DEM, 120000),
+                               declared="[[Pat Stone]]", ongoing="yes")
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(ongoing,))
+        self.assertNoCall(cache, "marks or declares Pat Stone")
+        # A mark the table's route refuses (too close, and not declared) is
+        # not called either.
+        marked = party_box(self.general(), ("Pat Stone", REP, 150100, True),
+                           ("Trina Swan", DEM, 149900, False))
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(self.silent(), marked))
+        self.assertIn(self.race_id(), cache["refusedMarks"])
+        self.assertNotEqual(self.race(cache).get("calledBy"), "national")
+        self.assertNotIn("elected", self.status(cache).values())
+
+    def test_a_kept_record_keeps_the_case_it_was_made_in(self):
+        counted = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=self.counted())
+        cache = self.nread("", national=False, parts=self.counted(), previous=counted)
+        call = self.race(cache)["national"]
+        self.assertTrue(call["kept"] and call["pageCounts"])
+        self.assertCredit(cache, "national-counts")
+        silent = self.nread("Incumbent re-elected.", *self.STONE_WINS)
+        cache = self.nread("", national=False, parts=self.counted(), previous=silent)
+        call = self.race(cache)["national"]
+        self.assertTrue(call["kept"])
+        self.assertFalse(call["pageCounts"])
+        self.assertCredit(cache, "national")
+        # Kept, it is still held to today's page.
+        cache = self.nread("", national=False, parts=self.counted(stone=120, swan=150),
+                           previous=counted)
+        self.assertIn(self.race_id(), cache["nationalWithdrawn"])
+        self.assertNotIn("elected", self.status(cache).values())
+
+    def test_a_district_another_table_lists_is_not_blanked(self):
+        row_ = national_article("OH", 5, "Incumbent re-elected.", *self.STONE_WINS)
+        crossover = ("==Crossover seats==\n{| class=wikitable\n|-\n!{{ushr|OH|5|X}}\n"
+                     "|{{sortname|Pat|Stone}}\n|{{shading PVI|R|5}}\n|Stone\n|}\n")
+        for text in (crossover + row_, row_ + "\n" + crossover):
+            rows = results.national_rows(text)
+            self.assertEqual(results.national_row(rows[("OH", 5)])["name"], "Pat Stone")
+        # A row only another section holds is no row; two in its own, none.
+        self.assertEqual(results.national_rows(crossover), {})
+        self.assertIsNone(results.national_rows(row_ + "\n" + row_.split("\n", 1)[1])[("OH", 5)])
+        # Another state's section is not the district's either.
+        self.assertEqual(results.national_rows(row_.replace("==Ohio==", "==Oregon==")), {})
+
+    # ---- a state page takes over; an unread national page concludes nothing
+
+    def previous(self):
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS)
+        self.assertNational(cache, self.STONE)
+        return cache
+
+    def test_withdrawn_when_the_state_page_counts_lead_with_someone_else(self):
+        from kyc import validate
+        previous = self.previous()
+        counts = bold_box(self.general(), ("Pat Stone", REP, 100, False),
+                          ("Trina Swan", DEM, 120, False))
+        logged = []
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                           parts=(self.silent(), counts), previous=previous, logged=logged)
+        self.assertNotIn("elected", self.status(cache).values())
+        self.assertIn(self.race_id(), cache["nationalWithdrawn"])
+        self.assertTrue(any("withdrawn" in line for line in logged))
+        codes = [i.code for i in validate.check_results_pages(cache)]
+        self.assertIn("result-national-withdrawn", codes)
+
+    def test_kept_while_the_counts_lead_with_them(self):
+        previous = self.previous()
+        counts = bold_box(self.general(), ("Pat Stone", REP, 120, False),
+                          ("Trina Swan", DEM, 100, False))
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                           parts=(self.silent(), counts), previous=previous)
+        self.assertEqual(self.race(cache).get("calledBy"), "national")
+        self.assertFalse(cache["nationalWithdrawn"])
+
+    # PR #220 review: a page that gains counts is held to the gates a call
+    # from the page meets, never called again past them.
+
+    def assertWithdrawn(self, cache, words):
+        from kyc import validate
+        self.assertNotIn("elected", self.status(cache).values())
+        self.assertNotEqual(self.race(cache).get("calledBy"), "national")
+        self.assertIn(words, cache["nationalWithdrawn"][self.race_id()]["why"])
+        issues = [i for i in validate.check_results_pages(cache)
+                  if i.code == "result-national-withdrawn"]
+        self.assertTrue(issues and words in " ".join(issues[0].detail or ()), issues)
+
+    def test_withdrawn_when_the_state_page_counts_are_too_close(self):
+        previous = self.previous()
+        counts = bold_box(self.general(), ("Pat Stone", REP, 150100, False),
+                          ("Trina Swan", DEM, 149900, False))
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                           parts=(self.silent(), counts), previous=previous)
+        self.assertWithdrawn(cache, "under 0.5 points")
+        # The infobox's counts alone, as close, the same.
+        close = call_infobox(("Pat Stone", REP, 150100), ("Trina Swan", DEM, 149900))
+        self.assertWithdrawn(self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(close,),
+                                        previous=previous), "under 0.5 points")
+
+    def test_withdrawn_when_the_state_page_reports_too_little(self):
+        previous = self.previous()
+        for reporting, words in (("3", "at 3 reporting"), ("most", "cannot be read")):
+            early = call_infobox(("Pat Stone", REP, 5000), ("Trina Swan", DEM, 3000),
+                                 reporting=reporting)
+            self.assertWithdrawn(self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                                            parts=(early,), previous=previous), words)
+
+    def test_a_refused_declaration_does_not_keep_the_withdrawn_call(self):
+        # The page declares the same person, too close to call: the infobox
+        # route refuses it, and carry_refused must not bring the national
+        # call back over that refusal.
+        previous = self.previous()
+        close = call_infobox(("Pat Stone", REP, 150100), ("Trina Swan", DEM, 149900),
+                             declared="[[Pat Stone]]")
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(close,),
+                           previous=previous)
+        self.assertIn(self.race_id(), cache["refusedMarks"])
+        self.assertEqual(results.carry_refused(cache, previous), [])
+        self.assertWithdrawn(cache, "under 0.5 points")
+        # A refusal for another reason, over counts that stand behind the
+        # call, keeps the last read as before (rule 8).
+        vandal = call_infobox(("Pat Stone", REP, 190000), ("Trina Swan", DEM, 120000),
+                              declared="[[Peter Griffin]]")
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(vandal,),
+                           previous=previous)
+        self.assertIn(self.race_id(), cache["refusedMarks"])
+        self.assertFalse(cache["nationalWithdrawn"])
+        self.assertEqual(results.carry_refused(cache, previous), [self.race_id()])
+        self.assertEqual(self.status(cache)[self.STONE], "elected")
+
+    # PR #224 review: the withdrawal asks the page about the person the call
+    # would name - by their filing, never by the row's spelling - and a page
+    # that elects them itself withdraws nothing.
+
+    def test_a_row_spelling_the_winner_otherwise_is_neither_withdrawn_nor_made_again(self):
+        self.field["candidates"][0] = row(self.STONE, "STONE, PAT JAMES", self.STATE, "H",
+                                          self.DISTRICT, "REP")
+        people = (("James Stone", "Republican", True), ("Trina Swan", "Democratic", False))
+        self.assertFalse(results._one_person("Pat Stone", "James Stone"))
+        first = self.nread("Incumbent re-elected.", *people)
+        self.assertNational(first, self.STONE)
+        fresh = self.nread("Incumbent re-elected.", *people, parts=self.counted())
+        again = self.nread("Incumbent re-elected.", *people, parts=self.counted(), previous=first)
+        for cache in (fresh, again):
+            self.assertNational(cache, self.STONE)
+            self.assertFalse(cache["nationalWithdrawn"])
+            self.assertTrue(self.race(cache)["national"]["pageCounts"])
+        self.assertEqual(self.race(again)["national"], self.race(fresh)["national"])
+        # Withdrawn, it is for what the page says of them, not of a stranger
+        # the row's spelling does not fit: too close, never "Pat Stone first".
+        close = self.nread("Incumbent re-elected.", *people,
+                           parts=self.counted(stone=150100, swan=149900), previous=first)
+        self.assertWithdrawn(close, "under 0.5 points")
+        self.assertEqual(close["nationalWithdrawn"][self.race_id()]["leaders"], [])
+        behind = self.nread("Incumbent re-elected.", *people,
+                            parts=self.counted(stone=120, swan=150), previous=first)
+        self.assertWithdrawn(behind, "put Trina Swan first")
+        self.assertEqual(behind["nationalWithdrawn"][self.race_id()]["leaders"], ["Trina Swan"])
+
+    def test_not_withdrawn_where_the_page_itself_elects_them(self):
+        # MN-1's shape: the page declares and marks the same person, not
+        # ongoing, on a lead under 0.5 points - the table's route elects them.
+        previous = self.previous()
+        declared = call_infobox(("Pat Stone", REP, 163055), ("Trina Swan", DEM, 162733),
+                                declared="[[Pat Stone]]", ongoing="no")
+        marked = party_box(self.general(), ("Pat Stone", REP, 163055, True),
+                           ("Trina Swan", DEM, 162733, False))
+        for before in (None, previous):
+            cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, parts=(declared, marked),
+                               previous=before)
+            self.assertEqual(self.status(cache)[self.STONE], "elected")
+            self.assertNotEqual(self.race(cache).get("calledBy"), "national")
+            self.assertFalse(cache["nationalWithdrawn"])
+            self.assertFalse(cache["nationalDropped"])
+
+    def test_a_write_in_line_out_counting_them_gives_no_call(self):
+        lines = party_box(self.general(), ("Pat Stone", REP, 100000, False),
+                          ("Trina Swan", DEM, 90000, False),
+                          ("Write-ins", "Independent", 200000, False))
+        self.assertNoCall(self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                                     parts=(self.silent(), lines)), "lines that name nobody")
+        # A write-in line as small as a real one's leaves the call standing.
+        small = party_box(self.general(), ("Pat Stone", REP, 100000, False),
+                          ("Trina Swan", DEM, 90000, False),
+                          ("Write-ins", "Independent", 500, False))
+        self.assertNational(self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                                       parts=(self.silent(), small)), self.STONE)
+
+    def test_an_article_whose_shape_changed_concludes_nothing(self):
+        # Rule 36: count what came back. States demoted to level-3 headings,
+        # or no district's row at all, key nobody: the article is unread, the
+        # last read's calls stand (rule 8), and none is made.
+        state = results.state_name(self.STATE)
+        for reshape in (lambda t: t.replace(f"=={state}==", f"===={state}===="),
+                        lambda t: "==Results==\n" + t.replace(f"=={state}==", f"==={state}==="),
+                        lambda t: t.split("{|")[0]):
+            previous = self.previous()
+            logged = []
+            cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, previous=previous,
+                               reshape=reshape, logged=logged)
+            self.assertIsNone(cache["national"])
+            self.assertEqual(self.status(cache)[self.STONE], "elected")
+            self.assertTrue(self.race(cache)["national"]["kept"])
+            self.assertFalse(cache["nationalDropped"])
+            self.assertTrue(any("national summary" in line and "unread" in line
+                                for line in logged), logged)
+            self.assertNoCall(self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                                         reshape=reshape))
+
+    def test_a_call_no_longer_made_is_said(self):
+        from kyc import validate
+        previous = self.previous()
+        cache = self.nread("Incumbent re-elected.", ("Pat Stone", "Republican", False),
+                           ("Trina Swan", "Democratic", False), previous=previous)
+        self.assertNotIn("calledBy", self.race(cache))
+        self.assertIn(self.race_id(), cache["nationalDropped"])
+        codes = [i.code for i in validate.check_results_pages(cache)]
+        self.assertIn("result-national-dropped", codes)
+        # Made again, or kept unread, it is not dropped.
+        self.assertFalse(self.nread("Incumbent re-elected.", *self.STONE_WINS,
+                                    previous=previous)["nationalDropped"])
+        self.assertFalse(self.nread("", national=False, previous=previous)["nationalDropped"])
+
+    def test_a_kept_call_ages_into_a_warning(self):
+        from kyc import validate
+        previous = self.previous()
+        cache = self.nread("", national=False, previous=previous)
+        codes = [i.code for i in validate.check_results_pages(cache)]
+        self.assertNotIn("result-national-kept-stale", codes)
+        self.race(cache)["national"]["read"] = "2026-10-20"
+        codes = [i.code for i in validate.check_results_pages(cache)]
+        self.assertIn("result-national-kept-stale", codes)
+
+    def test_not_for_dc_or_a_territory(self):
+        for state in ("DC", "PR", "MP", "AS"):
+            self.assertIn("not a state", results.national_barred(state, f"H-{state}-00-2026"))
+
+    def test_a_minor_party_loss_the_call_settles_credits_the_summary(self):
+        # Texas's certified list prints a minor-party nominee the page's
+        # table left off; once the race is called nationally they read
+        # "defeated" because of the call, and the summary is its source.
+        self.field["candidates"].append(
+            row("H6ZZ05007", "VALE, ROSA", self.STATE, "H", self.DISTRICT, "GRE"))
+        listed = {self.STATE: {"complete": True, "source": "the Test Secretary of State",
+                               "races": {self.race_id(): [
+                                   {"kind": "ballot", "name": "Pat Stone", "party": "Republican"},
+                                   {"kind": "ballot", "name": "Trina Swan", "party": "Democratic"},
+                                   {"kind": "ballot", "name": "Rosa Vale", "party": "Green"},
+                                   {"kind": "lost-primary", "name": "Tony Hamil",
+                                    "party": "Republican"},
+                                   {"kind": "lost-primary", "name": "Luke Gull",
+                                    "party": "Democratic"}]}}}
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS, certified=listed)
+        race = self.race(cache)
+        self.assertEqual(race["calledBy"], "national")
+        self.assertEqual(race["status"]["H6ZZ05007"], "defeated")
+        for cid in (self.STONE, self.SWAN, "H6ZZ05007"):
+            profile = {}
+            results._source_of(profile, race, cid)
+            self.assertEqual(profile.get("raceStatusSource"), "national", cid)
+        # Whom the list leaves off stays the list's.
+        profile = {}
+        results._source_of(profile, race, "H6ZZ05009", absent=True)
+        self.assertEqual(profile.get("raceStatusSource"), "certified")
+
+    def test_kept_when_the_national_page_cannot_be_read(self):
+        previous = self.previous()
+        cache = self.nread("", national=False, previous=previous)
+        self.assertEqual(self.status(cache)[self.STONE], "elected")
+        self.assertTrue(self.race(cache)["national"]["kept"])
+        self.assertIsNone(cache["national"])
+        # With nothing read before, an unread page calls nothing.
+        self.assertNoCall(self.nread("", national=False))
+
+    def test_the_call_credits_the_national_summary(self):
+        from kyc import share
+        cache = self.nread("Incumbent re-elected.", *self.STONE_WINS)
+        race = self.race(cache)
+        for cid in (self.STONE, self.SWAN):
+            profile = {}
+            results._source_of(profile, race, cid)
+            self.assertEqual(profile.get("raceStatusSource"), "national", cid)
+        profile = {}
+        results._source_of(profile, race, "H6ZZ05002")      # lost the primary: the page's
+        self.assertNotIn("raceStatusSource", profile)
+        summary = results.race_summary(cache, self.race_id())
+        self.assertEqual(summary["calledBy"], "national")
+        self.assertIn("oldid=1234", summary["nationalUrl"])
+        self.assertEqual(share.status_source({"raceStatus": "elected", "raceStatusSource": "national",
+                                              "isCandidate": True, "id": "x"}, {}),
+                         share.NATIONAL_SOURCE)
+        self.assertIn("which gives no vote count", share.NATIONAL_SOURCE)
+        # An infobox call is the state's page's, credited as today.
+        cache = self.read(self.infobox(), self.table())
+        profile = {}
+        results._source_of(profile, self.race(cache), self.STONE)
+        self.assertNotIn("raceStatusSource", profile)
+        self.assertIsNone(results.race_summary(cache, self.race_id())["nationalUrl"])
+
+    def test_the_row_is_read_as_the_article_writes_it(self):
+        body = results.national_rows(national_article(
+            "OH", 5, "Incumbent retired to run for Senate.<ref name=x/><br>Democratic hold.",
+            ("Donna Miller", "Democratic", True), ("Michael Noack", "Republican", False)))
+        row_ = results.national_row(body[("OH", 5)])
+        self.assertEqual((row_["ayes"], row_["name"], row_["party"]),
+                         (1, "Donna Miller", "Democratic"))
+        self.assertEqual(row_["words"], [["hold", "Democratic"]])
+        # A district two members held spans two rows: the second's words
+        # must agree too (TX-18 on 2026-11-10: "Incumbent re-elected." for
+        # one, "Incumbent lost renomination." for the other).
+        two = national_article("OH", 5, "Incumbent re-elected.", *self.STONE_WINS).replace(
+            "|{{shading PVI|R|5}}", "|rowspan=2 {{shading PVI|R|5}}").replace(
+            "{{endplainlist}}\n|-\n|}",
+            "{{endplainlist}}\n|-\n|{{sortname|Al|Grey}}\n|Republican\n|2004\n"
+            "|Incumbent lost renomination.\n|-\n|}")
+        row_ = results.national_row(results.national_rows(two)[("OH", 5)])
+        self.assertEqual(row_["words"], [["re-elected"], ["lost renomination"]])
+        self.assertEqual(row_["name"], "Pat Stone")
+        self.assertIn("marks the incumbent", results.national_words_agree(row_, True, "Republican"))
+        # A row other tables of the article key the same way, without the
+        # district's PVI, is not the district's row.
+        self.assertEqual(results.national_rows("\n!{{ushr|OH|5|X}}\n|{{sortname|A|B}}\n|-"), {})
+
+
 if __name__ == "__main__":
     unittest.main()

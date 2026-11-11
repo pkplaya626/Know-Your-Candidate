@@ -18,8 +18,8 @@
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
-     "count": 44,
-     "total": 817.36
+     "count": 45,
+     "total": 1067.61
     }
    ]
   },
@@ -27,10 +27,28 @@
    "oppose": [],
    "support": [
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 7,
+     "total": 9689.26
+    },
+    {
+     "committee": "PROTECT OUR WINTERS ACTION FUND",
+     "committeeId": "C90017898",
+     "count": 100,
+     "total": 5828.75
+    },
+    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
      "count": 1,
      "total": 771.08
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     }
    ]
   },
@@ -129,8 +147,8 @@
     {
      "committee": "HEALTH CARE SAVES LIVES",
      "committeeId": "C00888081",
-     "count": 13,
-     "total": 6357.1
+     "count": 14,
+     "total": 6535.85
     },
     {
      "committee": "UNITY & JUSTICE FUND",
@@ -255,8 +273,8 @@
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 13,
-     "total": 20115.24
+     "count": 17,
+     "total": 24206.55
     },
     {
      "committee": "SENATE CONSERVATIVES FUND",
@@ -421,7 +439,20 @@
    ]
   },
   "H0IA01174": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "IOWANS FOR DECENCY",
+     "committeeId": "C00932996",
+     "count": 1,
+     "total": 5698.65
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 1264.98
+    }
+   ],
    "support": [
     {
      "committee": "HIGH PLAINS PAC",
@@ -500,6 +531,17 @@
     }
    ]
   },
+  "H0IN05326": {
+   "oppose": [
+    {
+     "committee": "PLANNED PARENTHOOD ALLIANCE PAC , SERVING WA, AK, ID, HI, IN, KY",
+     "committeeId": "C00742080",
+     "count": 3,
+     "total": 1680.23
+    }
+   ],
+   "support": []
+  },
   "H0KY06104": {
    "oppose": [],
    "support": [
@@ -543,6 +585,12 @@
      "total": 990134.1
     },
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 9,
+     "total": 807585.96
+    },
+    {
      "committee": "GIFFORDS PAC",
      "committeeId": "C00540443",
      "count": 2,
@@ -555,10 +603,34 @@
      "total": 117570.0
     },
     {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 2,
+     "total": 81100.0
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
      "total": 12945.3
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 28,
+     "total": 10652.67
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 33,
+     "total": 6653.44
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 6,
+     "total": 1808.33
     },
     {
      "committee": "FIGHT FOR WORKING PEOPLE",
@@ -581,6 +653,12 @@
      "total": 511996.46
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 23327.52
+    },
+    {
      "committee": "RIGHT TO LIFE OF MICHIGAN VICTORY FUND",
      "committeeId": "C00574178",
      "count": 10,
@@ -589,8 +667,21 @@
    ]
   },
   "H0MI03316": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "WEST MICHIGAN FOR COMMON SENSE",
+     "committeeId": "C00943332",
+     "count": 3,
+     "total": 537136.23
+    }
+   ],
    "support": [
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 3,
+     "total": 17942.5
+    },
     {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
@@ -719,7 +810,14 @@
      "total": 123.9
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 72582.68
+    }
+   ]
   },
   "H0NM03102": {
    "oppose": [],
@@ -904,7 +1002,14 @@
      "total": 235.55
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 29637.93
+    }
+   ]
   },
   "H0TX22302": {
    "oppose": [],
@@ -971,6 +1076,12 @@
      "committeeId": "C00934851",
      "count": 16,
      "total": 1160619.62
+    },
+    {
+     "committee": "RP PAC",
+     "committeeId": "C00919944",
+     "count": 2,
+     "total": 50591.02
     }
    ],
    "support": []
@@ -990,6 +1101,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 424.03
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -1005,6 +1122,12 @@
      "committeeId": "C00848440",
      "count": 2,
      "total": 113120.0
+    },
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 424.03
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -1028,6 +1151,12 @@
      "committeeId": "C00848440",
      "count": 2,
      "total": 103020.0
+    },
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 367.49
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -1105,10 +1234,22 @@
      "total": 2700.0
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 5,
+     "total": 810.67
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 1,
      "total": 695.93
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 3,
+     "total": 671.63
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -1125,10 +1266,22 @@
      "total": 153880.0
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 84941.4
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
      "count": 1,
      "total": 20000.0
+    },
+    {
+     "committee": "DRIVING FORCE ACTION",
+     "committeeId": "C00879965",
+     "count": 2,
+     "total": 9338.0
     },
     {
      "committee": "AMERICAN MAJORITY ACTION PAC",
@@ -1162,6 +1315,12 @@
      "committeeId": "C00944389",
      "count": 18,
      "total": 905683.26
+    },
+    {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 3,
+     "total": 786283.72
     },
     {
      "committee": "HMP",
@@ -1204,8 +1363,8 @@
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 16,
-     "total": 23935.88
+     "count": 21,
+     "total": 29767.91
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -1224,6 +1383,12 @@
   "H2AK01158": {
    "oppose": [],
    "support": [
+    {
+     "committee": "ALASKA MARCH ON",
+     "committeeId": "C00826966",
+     "count": 8,
+     "total": 1819.54
+    },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
@@ -1253,6 +1418,12 @@
      "total": 46000.0
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 7,
+     "total": 9913.36
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -1275,8 +1446,8 @@
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 16,
-     "total": 23935.88
+     "count": 20,
+     "total": 28027.19
     },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
@@ -1311,6 +1482,18 @@
      "committeeId": "C00418897",
      "count": 1,
      "total": 552500.0
+    },
+    {
+     "committee": "UNITE HERE PAC",
+     "committeeId": "C00627372",
+     "count": 1,
+     "total": 130850.0
+    },
+    {
+     "committee": "VICTORY PAC",
+     "committeeId": "C00869321",
+     "count": 1,
+     "total": 46000.0
     },
     {
      "committee": "TOMORROW TOGETHER",
@@ -1351,6 +1534,12 @@
    ],
    "support": [
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 249516.27
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
      "count": 1,
@@ -1373,10 +1562,22 @@
      "total": 925452.0
     },
     {
+     "committee": "HEALTH CARE SAVES LIVES",
+     "committeeId": "C00888081",
+     "count": 6,
+     "total": 338110.01
+    },
+    {
      "committee": "AFSCME WORKING FAMILIES FUND",
      "committeeId": "C90011172",
      "count": 1,
      "total": 36395.56
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 11,
+     "total": 13011.33
     },
     {
      "committee": "THE SIX PAC",
@@ -1458,16 +1659,22 @@
      "total": 2321.09
     },
     {
-     "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
-     "committeeId": "C90018904",
+     "committee": "FORWARD BLUE",
+     "committeeId": "C00835041",
      "count": 1,
-     "total": 1026.31
+     "total": 2227.59
     },
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 3,
-     "total": 958.73
+     "count": 10,
+     "total": 1763.63
+    },
+    {
+     "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
+     "committeeId": "C90018904",
+     "count": 1,
+     "total": 1026.31
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -1480,6 +1687,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 78.03
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     }
    ]
   },
@@ -1491,6 +1704,12 @@
      "committeeId": "C00705277",
      "count": 3,
      "total": 490.33
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -1521,6 +1740,12 @@
      "total": 436700.0
     },
     {
+     "committee": "HEALTH CARE SAVES LIVES",
+     "committeeId": "C00888081",
+     "count": 2,
+     "total": 193610.83
+    },
+    {
      "committee": "END CITIZENS UNITED",
      "committeeId": "C00573261",
      "count": 4,
@@ -1535,8 +1760,8 @@
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 19,
-     "total": 6681.15
+     "count": 21,
+     "total": 6762.13
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -1549,15 +1774,15 @@
      "committeeId": "C00489799",
      "count": 1,
      "total": 15.03
-    },
-    {
-     "committee": "HEALTH CARE SAVES LIVES",
-     "committeeId": "C00888081",
-     "count": 1,
-     "total": 10.83
     }
    ],
    "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 7,
+     "total": 164442.7
+    },
     {
      "committee": "CLF",
      "committeeId": "C00504530",
@@ -1569,6 +1794,12 @@
      "committeeId": "C00608943",
      "count": 1,
      "total": 25515.0
+    },
+    {
+     "committee": "STRATEGIC MAJORITY PAC",
+     "committeeId": "C00890335",
+     "count": 3,
+     "total": 13260.36
     },
     {
      "committee": "NATIONAL ASSOCIATION OF REALTORS POLITICAL ACTION COMMITTEE",
@@ -1629,8 +1860,8 @@
     {
      "committee": "CFF",
      "committeeId": "C00927426",
-     "count": 11,
-     "total": 573870.93
+     "count": 13,
+     "total": 642447.01
     },
     {
      "committee": "YOUTH SAVE DEMOCRACY PAC",
@@ -1649,8 +1880,8 @@
     {
      "committee": "AMERICANS 4 SECURITY PAC",
      "committeeId": "C00733352",
-     "count": 2,
-     "total": 51504.18
+     "count": 6,
+     "total": 411903.78
     },
     {
      "committee": "CALIFORNIA CONSERVATIVES PAC",
@@ -1892,8 +2123,8 @@
     {
      "committee": "DEFENDING OUR VALUES PAC",
      "committeeId": "C00928390",
-     "count": 5,
-     "total": 697130.51
+     "count": 10,
+     "total": 740264.91
     }
    ],
    "support": []
@@ -1911,6 +2142,12 @@
   },
   "H2FL22171": {
    "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 11,
+     "total": 119391.7
+    },
     {
      "committee": "HYPOCRITES AGAINST POLITICAL TEXTING",
      "committeeId": "C00957209",
@@ -1969,9 +2206,21 @@
      "committeeId": "C00504530",
      "count": 14,
      "total": 4233692.65
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 140346.4
     }
    ],
    "support": [
+    {
+     "committee": "ONE FOR ALL COMMITTEE",
+     "committeeId": "C00752691",
+     "count": 5,
+     "total": 362401.97
+    },
     {
      "committee": "AMERICAN ASSOCIATION OF NURSE ANESTHETISTS SEPARATE SEGREGATED FUND (CRNA-PAC)",
      "committeeId": "C00173153",
@@ -1997,6 +2246,12 @@
      "total": 12687.5
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 5,
+     "total": 6397.23
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 5,
@@ -2005,8 +2260,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 3,
-     "total": 1252.78
+     "count": 5,
+     "total": 1303.22
     },
     {
      "committee": "MOMSRISING PAC",
@@ -2019,6 +2274,18 @@
      "committeeId": "C00833103",
      "count": 1,
      "total": 735.75
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 707.49
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 420.0
     },
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -2061,6 +2328,18 @@
      "total": 2393.74
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 15,
+     "total": 993.33
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 657.49
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -2073,6 +2352,12 @@
      "committeeId": "C00540203",
      "count": 1,
      "total": 23814.76
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 1,
+     "total": 16676.07
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -2109,6 +2394,12 @@
      "committeeId": "C00685552",
      "count": 2,
      "total": 25000.0
+    },
+    {
+     "committee": "MUSLIM CIVIC COALITION-ACTIVATE",
+     "committeeId": "C90023359",
+     "count": 12,
+     "total": 3143.88
     },
     {
      "committee": "UNITY & JUSTICE FUND",
@@ -2172,6 +2463,17 @@
      "committeeId": "C00483693",
      "count": 1,
      "total": 10.0
+    }
+   ]
+  },
+  "H2KY03206": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PLANNED PARENTHOOD ALLIANCE PAC , SERVING WA, AK, ID, HI, IN, KY",
+     "committeeId": "C00742080",
+     "count": 3,
+     "total": 764.73
     }
    ]
   },
@@ -2278,6 +2580,12 @@
      "total": 2046411.92
     },
     {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 2,
+     "total": 71200.0
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
@@ -2290,6 +2598,12 @@
      "total": 10625.0
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 2,
+     "total": 6400.0
+    },
+    {
      "committee": "YOUTH SAVE DEMOCRACY PAC",
      "committeeId": "C00832493",
      "count": 1,
@@ -2300,6 +2614,12 @@
      "committeeId": "C00909994",
      "count": 2,
      "total": 1412.32
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 6,
+     "total": 889.34
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -2322,16 +2642,28 @@
      "total": 50987.5
     },
     {
-     "committee": "RIGHT TO LIFE OF MICHIGAN VICTORY FUND",
-     "committeeId": "C00574178",
-     "count": 8,
-     "total": 7651.86
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 30285.44
+    },
+    {
+     "committee": "DRIVING FORCE ACTION",
+     "committeeId": "C00879965",
+     "count": 2,
+     "total": 13538.0
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 2,
-     "total": 4595.18
+     "count": 7,
+     "total": 10427.21
+    },
+    {
+     "committee": "RIGHT TO LIFE OF MICHIGAN VICTORY FUND",
+     "committeeId": "C00574178",
+     "count": 8,
+     "total": 7651.86
     }
    ]
   },
@@ -2368,6 +2700,12 @@
   "H2MN01223": {
    "oppose": [
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 1,
+     "total": 954095.63
+    },
+    {
      "committee": "TAKEACTION MN FEDERAL FUND",
      "committeeId": "C00738815",
      "count": 44,
@@ -2384,9 +2722,21 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 381.14
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 1,
+     "total": 20.0
     }
    ],
    "support": [
+    {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 1,
+     "total": 500000.0
+    },
     {
      "committee": "SAVE AMERICAN FREEDOM",
      "committeeId": "C00819508",
@@ -2472,9 +2822,21 @@
      "committeeId": "C00504530",
      "count": 8,
      "total": 3905713.82
+    },
+    {
+     "committee": "NCGOP FIRST CONGRESSIONAL DISTRICT",
+     "committeeId": "C00882175",
+     "count": 2,
+     "total": 4900.0
     }
    ],
    "support": [
+    {
+     "committee": "WITH HONOR FUND III, INC.",
+     "committeeId": "C00898890",
+     "count": 2,
+     "total": 750000.0
+    },
     {
      "committee": "ROLLING SEA ACTION FUND",
      "committeeId": "C00844530",
@@ -2500,10 +2862,22 @@
      "total": 97850.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 14824.0
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
      "total": 10150.0
+    },
+    {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 3,
+     "total": 703.33
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -2516,12 +2890,6 @@
      "committeeId": "C90020058",
      "count": 1,
      "total": 69.09
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 1,
-     "total": 45.44
     }
    ]
   },
@@ -2585,8 +2953,8 @@
     {
      "committee": "NEO PHILANTHROPY ACTION FUND INC.",
      "committeeId": "C90023367",
-     "count": 6,
-     "total": 1416.55
+     "count": 7,
+     "total": 1501.55
     },
     {
      "committee": "TURN LEFT PAC",
@@ -2677,6 +3045,17 @@
    ],
    "support": []
   },
+  "H2NH02260": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 1,
+     "total": 8016.23
+    }
+   ]
+  },
   "H2NJ08232": {
    "oppose": [],
    "support": [
@@ -2730,14 +3109,26 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 3268.92
+     "count": 8,
+     "total": 5605.9
+    },
+    {
+     "committee": "THOMAS PAINE SOCIETY L.L.C.",
+     "committeeId": "C90020231",
+     "count": 5,
+     "total": 4825.0
     },
     {
      "committee": "BLUE CD2 NEW MEXICO USA",
      "committeeId": "C00797340",
      "count": 1,
      "total": 3251.71
+    },
+    {
+     "committee": "FORWARD BLUE",
+     "committeeId": "C00835041",
+     "count": 1,
+     "total": 2034.76
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -2763,6 +3154,12 @@
      "total": 150000.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 10205.65
+    },
+    {
      "committee": "WESTERN STATES REGIONAL COUNCIL OF CARPENTERS LEGISLATIVE IMPROVEMENT CMTE UNITED BROTHERHOOD OF CARPENTERS & JOINERS OF AMERICA",
      "committeeId": "C00285593",
      "count": 1,
@@ -2779,6 +3176,12 @@
      "committeeId": "C00802389",
      "count": 5,
      "total": 159.33
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 15.99
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -2812,8 +3215,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 5,
-     "total": 1352.54
+     "count": 7,
+     "total": 1379.51
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -2989,8 +3392,8 @@
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 5,
-     "total": 2800.98
+     "count": 7,
+     "total": 3137.81
     },
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -3017,6 +3420,12 @@
      "committeeId": "C00173153",
      "count": 4,
      "total": 134013.14
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 70683.2
     }
    ]
   },
@@ -3027,6 +3436,18 @@
      "committeeId": "C00504530",
      "count": 5,
      "total": 1566117.12
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 72345.01
+    },
+    {
+     "committee": "RED BRIDGE LEADERSHIP PAC",
+     "committeeId": "C00912337",
+     "count": 1,
+     "total": 3499.11
     }
    ],
    "support": [
@@ -3077,10 +3498,22 @@
   "H2OH03067": {
    "oppose": [
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 9,
+     "total": 1158995.0
+    },
+    {
      "committee": "INNOVATION OHIO PAC",
      "committeeId": "C00958074",
      "count": 1,
      "total": 235000.02
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 6,
+     "total": 436.66
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -3115,6 +3548,12 @@
      "committeeId": "C00487470",
      "count": 7,
      "total": 706276.7
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 13555.78
     }
    ],
    "support": [
@@ -3141,6 +3580,12 @@
      "committeeId": "C00580068",
      "count": 4,
      "total": 53596.93
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 18225.5
     },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
@@ -3210,7 +3655,14 @@
    ]
   },
   "H2OH13264": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 13408.03
+    }
+   ],
    "support": [
     {
      "committee": "ROLLING SEA ACTION FUND",
@@ -3262,12 +3714,24 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 265.6
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 263.33
     }
    ],
    "support": []
   },
   "H2OH16051": {
    "oppose": [
+    {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 6,
+     "total": 1979105.0
+    },
     {
      "committee": "READY FOR THE FIGHT",
      "committeeId": "C00960997",
@@ -3305,7 +3769,14 @@
      "total": 296.85
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 1,
+     "total": 12546.3
+    }
+   ]
   },
   "H2OK02315": {
    "oppose": [],
@@ -3375,8 +3846,8 @@
     {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
-     "count": 42,
-     "total": 33430.07
+     "count": 50,
+     "total": 36013.88
     },
     {
      "committee": "BACK THE BOLD",
@@ -3389,6 +3860,12 @@
      "committeeId": "C00786830",
      "count": 5,
      "total": 21300.0
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 7,
+     "total": 5650.29
     },
     {
      "committee": "RURAL FREEDOM NETWORK",
@@ -3429,10 +3906,16 @@
      "total": 229500.0
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 79564.78
+    },
+    {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 18,
-     "total": 35826.79
+     "count": 22,
+     "total": 39918.1
     },
     {
      "committee": "HOUSE FREEDOM ACTION",
@@ -3580,8 +4063,25 @@
     }
    ]
   },
+  "H2SC07280": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PALMETTO LEADERSHIP FUND",
+     "committeeId": "C00956425",
+     "count": 4,
+     "total": 705105.82
+    }
+   ]
+  },
   "H2TN05446": {
    "oppose": [
+    {
+     "committee": "INVEST IN TOMORROW COALITION PAC",
+     "committeeId": "C00936997",
+     "count": 3,
+     "total": 655825.72
+    },
     {
      "committee": "ALLIANCE FOR ACCOUNTABILITY",
      "committeeId": "C00857540",
@@ -3666,6 +4166,12 @@
      "committeeId": "C00504530",
      "count": 16,
      "total": 2903034.25
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 79211.27
     }
    ],
    "support": [
@@ -3799,6 +4305,12 @@
      "total": 90978.24
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 69437.56
+    },
+    {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
      "count": 14,
@@ -3841,6 +4353,12 @@
      "committeeId": "C00504530",
      "count": 11,
      "total": 2602385.29
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 2,
+     "total": 47469.15
     }
    ],
    "support": [
@@ -3853,8 +4371,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 1563.15
+     "count": 9,
+     "total": 1681.41
+    },
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 452.3
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -3871,6 +4395,12 @@
      "committeeId": "C00835967",
      "count": 3,
      "total": 143722.86
+    },
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 1,
+     "total": 20891.77
     }
    ],
    "support": [
@@ -3964,10 +4494,22 @@
      "total": 695053.16
     },
     {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 2,
+     "total": 363000.0
+    },
+    {
      "committee": "CRUSH MAGA PAC",
      "committeeId": "C00879221",
      "count": 4,
      "total": 275197.18
+    },
+    {
+     "committee": "FIGHT TO WIN",
+     "committeeId": "C00949636",
+     "count": 3,
+     "total": 134351.0
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -4016,8 +4558,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 1793.8
+     "count": 9,
+     "total": 1924.56
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 396.0
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -4049,6 +4597,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "FIGHT TO WIN",
+     "committeeId": "C00949636",
+     "count": 1,
+     "total": 13931.4
+    },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
@@ -4086,6 +4640,12 @@
      "total": 47325.39
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 29,
+     "total": 7574.79
+    },
+    {
      "committee": "WESTERN STATES REGIONAL COUNCIL OF CARPENTERS LEGISLATIVE IMPROVEMENT CMTE UNITED BROTHERHOOD OF CARPENTERS & JOINERS OF AMERICA",
      "committeeId": "C00285593",
      "count": 1,
@@ -4094,8 +4654,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 967.69
+     "count": 8,
+     "total": 982.19
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 396.0
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -4140,6 +4706,17 @@
     }
    ]
   },
+  "H4AZ04115": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "AZ4 DESERVES MORE",
+     "committeeId": "C00917286",
+     "count": 1,
+     "total": 18000.0
+    }
+   ]
+  },
   "H4AZ06045": {
    "oppose": [
     {
@@ -4170,8 +4747,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 8,
-     "total": 2249.19
+     "count": 11,
+     "total": 2346.25
     }
    ]
   },
@@ -4223,14 +4800,20 @@
     {
      "committee": "SOUTH BAY AFL-CIO LABOR COUNCIL",
      "committeeId": "C90012444",
-     "count": 4,
-     "total": 258.02
+     "count": 6,
+     "total": 345.43
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 1,
      "total": 150.0
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -4248,6 +4831,12 @@
      "committeeId": "C00848440",
      "count": 2,
      "total": 111598.74
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -4269,8 +4858,14 @@
     {
      "committee": "SOUTH BAY AFL-CIO LABOR COUNCIL",
      "committeeId": "C90012444",
-     "count": 4,
-     "total": 258.02
+     "count": 6,
+     "total": 345.43
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -4283,6 +4878,12 @@
   "H4CA16197": {
    "oppose": [],
    "support": [
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -4306,6 +4907,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 84.06
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     }
    ]
   },
@@ -4447,6 +5054,12 @@
    ],
    "support": [
     {
+     "committee": "RISING TIDE COLLECTIVE",
+     "committeeId": "C90023474",
+     "count": 1,
+     "total": 100000.0
+    },
+    {
      "committee": "ORANGE COUNTY PAC",
      "committeeId": "C00754192",
      "count": 1,
@@ -4505,6 +5118,12 @@
      "committeeId": "C00495028",
      "count": 1,
      "total": 15178.33
+    },
+    {
+     "committee": "FORWARD BLUE",
+     "committeeId": "C00835041",
+     "count": 1,
+     "total": 3068.16
     },
     {
      "committee": "HEALTH CARE SAVES LIVES",
@@ -4584,8 +5203,14 @@
     {
      "committee": "TRUST BRIGADE",
      "committeeId": "C00914689",
-     "count": 243,
-     "total": 121646.7
+     "count": 272,
+     "total": 140853.71
+    },
+    {
+     "committee": "UNITE HERE PAC",
+     "committeeId": "C00627372",
+     "count": 2,
+     "total": 100207.03
     },
     {
      "committee": "314 ACTION FUND",
@@ -4598,6 +5223,12 @@
      "committeeId": "C00722884",
      "count": 26,
      "total": 18649.16
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 20,
+     "total": 6281.61
     },
     {
      "committee": "YOUTH SAVE DEMOCRACY PAC",
@@ -4636,6 +5267,12 @@
      "committeeId": "C00716704",
      "count": 5,
      "total": 232500.0
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 153258.62
     },
     {
      "committee": "CLEARPATH ACTION FUND, INC.",
@@ -4775,6 +5412,18 @@
      "committeeId": "C00575456",
      "count": 3,
      "total": 97411.08
+    },
+    {
+     "committee": "HOMETOWN FREEDOM ACTION NETWORK",
+     "committeeId": "C00528901",
+     "count": 2,
+     "total": 94000.0
+    },
+    {
+     "committee": "WINNING RIGHT PAC",
+     "committeeId": "C00930495",
+     "count": 1,
+     "total": 5000.0
     }
    ],
    "support": []
@@ -4825,6 +5474,17 @@
      "total": 84648.64
     }
    ]
+  },
+  "H4GA10071": {
+   "oppose": [
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 9238.63
+    }
+   ],
+   "support": []
   },
   "H4GA11087": {
    "oppose": [],
@@ -4924,8 +5584,8 @@
     {
      "committee": "NEA ADVOCACY FUND",
      "committeeId": "C00489815",
-     "count": 1,
-     "total": 1646.71
+     "count": 2,
+     "total": 2579.39
     }
    ]
   },
@@ -5010,6 +5670,12 @@
      "committeeId": "C00504530",
      "count": 11,
      "total": 1602759.09
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 37740.51
     }
    ],
    "support": [
@@ -5172,6 +5838,12 @@
      "total": 191000.0
     },
     {
+     "committee": "EASTERN CAROLINA CONSERVATIVES FUND",
+     "committeeId": "C90023342",
+     "count": 1,
+     "total": 91000.0
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
      "count": 3,
@@ -5225,7 +5897,14 @@
    ]
   },
   "H4NH02399": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 1,
+     "total": 1810.76
+    }
+   ],
    "support": [
     {
      "committee": "FELLOWSHIP PAC",
@@ -5260,6 +5939,12 @@
   "H4NJ09194": {
    "oppose": [],
    "support": [
+    {
+     "committee": "THE TURNOUT PROJECT",
+     "committeeId": "C00760801",
+     "count": 2,
+     "total": 30000.0
+    },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
@@ -5354,6 +6039,12 @@
      "committeeId": "C00814152",
      "count": 2,
      "total": 13336.98
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 2,
+     "total": 1753.42
     }
    ]
   },
@@ -5439,6 +6130,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 342.6
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 263.33
     }
    ],
    "support": [
@@ -5455,16 +6152,22 @@
      "total": 25000.0
     },
     {
-     "committee": "LAW ENFORCEMENT FOR A SAFER AMERICA PAC",
-     "committeeId": "C00681825",
-     "count": 1,
-     "total": 12000.0
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 21681.74
     },
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 4,
-     "total": 7352.29
+     "count": 9,
+     "total": 13184.32
+    },
+    {
+     "committee": "LAW ENFORCEMENT FOR A SAFER AMERICA PAC",
+     "committeeId": "C00681825",
+     "count": 1,
+     "total": 12000.0
     }
    ]
   },
@@ -5544,6 +6247,12 @@
    ],
    "support": [
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 83851.55
+    },
+    {
      "committee": "EARLY VOTE ACTION PAC",
      "committeeId": "C00829721",
      "count": 2,
@@ -5570,6 +6279,12 @@
      "committeeId": "C00552851",
      "count": 1,
      "total": 115960.31
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 72024.39
     },
     {
      "committee": "HOUSE FREEDOM ACTION",
@@ -5634,22 +6349,52 @@
      "total": 13751.84
     },
     {
+     "committee": "CASA IN ACTION PAC",
+     "committeeId": "C00685693",
+     "count": 1,
+     "total": 13731.26
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 5,
      "total": 12748.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 10589.0
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 24,
+     "total": 3818.02
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 5,
-     "total": 840.3
+     "count": 9,
+     "total": 1463.4
+    },
+    {
+     "committee": "ACTIVATE AMERICA",
+     "committeeId": "C00640300",
+     "count": 3,
+     "total": 775.91
     },
     {
      "committee": "MOMSRISING PAC",
      "committeeId": "C00878025",
      "count": 1,
      "total": 593.02
+    },
+    {
+     "committee": "FREEDOM PA",
+     "committeeId": "C00902189",
+     "count": 1,
+     "total": 450.0
     },
     {
      "committee": "DMFI PAC",
@@ -5796,6 +6541,12 @@
      "committeeId": "C00552851",
      "count": 35,
      "total": 631579.59
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 43580.66
     },
     {
      "committee": "GOA VICTORY FUND",
@@ -5965,13 +6716,24 @@
     }
    ]
   },
+  "H4WA05168": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 480.57
+    }
+   ]
+  },
   "H4WA05234": {
    "oppose": [
     {
      "committee": "TOGETHER FOR WORKING PEOPLE",
      "committeeId": "C00926675",
-     "count": 4,
-     "total": 146900.0
+     "count": 15,
+     "total": 271609.42
     },
     {
      "committee": "FIRE HOUSE PAC",
@@ -5985,6 +6747,12 @@
   "H4WA06117": {
    "oppose": [],
    "support": [
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 395.76
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -6000,7 +6768,14 @@
    ]
   },
   "H4WI03169": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 7,
+     "total": 125314.06
+    }
+   ],
    "support": [
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
@@ -6015,16 +6790,40 @@
      "total": 20300.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 15604.95
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 30,
+     "total": 15426.95
+    },
+    {
      "committee": "WELCOMEPAC",
      "committeeId": "C00786830",
      "count": 3,
      "total": 13236.29
     },
     {
+     "committee": "ONE FOR ALL COMMITTEE",
+     "committeeId": "C00752691",
+     "count": 1,
+     "total": 11000.0
+    },
+    {
      "committee": "EQUAL EXCHANGE",
      "committeeId": "C90023748",
      "count": 14,
      "total": 1810.45
+    },
+    {
+     "committee": "350 WISCONSIN ACTION",
+     "committeeId": "C90021692",
+     "count": 15,
+     "total": 1661.06
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -6070,7 +6869,14 @@
    ]
   },
   "H4WV02205": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 9,
+     "total": 3330.0
+    }
+   ],
    "support": [
     {
      "committee": "WEST VIRGINIANS FOR LIFE INC POLITICAL ACTION COMMITTEE",
@@ -6115,6 +6921,12 @@
      "total": 50000.0
     },
     {
+     "committee": "ALASKA MARCH ON",
+     "committeeId": "C00826966",
+     "count": 8,
+     "total": 1819.54
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 3,
@@ -6134,8 +6946,8 @@
     {
      "committee": "DEFENDING OUR VALUES PAC",
      "committeeId": "C00928390",
-     "count": 7,
-     "total": 813211.79
+     "count": 12,
+     "total": 959908.28
     },
     {
      "committee": "CONSERVATIVES FOR AMERICAN EXCELLENCE INC.",
@@ -6146,8 +6958,14 @@
     {
      "committee": "DEFENDING AMERICA'S FUTURE",
      "committeeId": "C00829432",
-     "count": 9,
-     "total": 208259.2
+     "count": 10,
+     "total": 215446.12
+    },
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 2,
+     "total": 112000.0
     }
    ]
   },
@@ -6187,6 +7005,12 @@
   "H6AZ04250": {
    "oppose": [],
    "support": [
+    {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 1,
+     "total": 22170.61
+    },
     {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
      "committeeId": "C00453704",
@@ -6233,6 +7057,12 @@
      "committeeId": "C00916692",
      "count": 3,
      "total": 616449.44
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 7,
+     "total": 281564.83
     },
     {
      "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
@@ -6318,6 +7148,12 @@
      "total": 99403.87
     },
     {
+     "committee": "VICTORY PAC",
+     "committeeId": "C00869321",
+     "count": 1,
+     "total": 54000.0
+    },
+    {
      "committee": "SERVICE EMPLOYEES INTERNATIONAL UNION POLITICAL EDUCATION AND ACTION FUND",
      "committeeId": "C90017955",
      "count": 2,
@@ -6338,14 +7174,20 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 2184.77
+     "count": 9,
+     "total": 2268.02
     },
     {
      "committee": "MOMSRISING PAC",
      "committeeId": "C00878025",
      "count": 9,
      "total": 1478.98
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 396.0
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -6515,8 +7357,8 @@
     {
      "committee": "HEALTH CARE SAVES LIVES",
      "committeeId": "C00888081",
-     "count": 11,
-     "total": 194144.44
+     "count": 13,
+     "total": 233709.35
     },
     {
      "committee": "SEIU COPE (SERVICE EMPLOYEES INTERNATIONAL UNION COMMITTEE ON POLITICAL EDUCATION)",
@@ -6529,11 +7371,24 @@
      "committeeId": "C00011114",
      "count": 1,
      "total": 42305.42
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 6,
+     "total": 9307.3
     }
    ]
   },
   "H6CA03174": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 9,
+     "total": 6101.19
+    }
+   ],
    "support": [
     {
      "committee": "REFORM LEADERS PAC",
@@ -6577,6 +7432,18 @@
     }
    ],
    "support": [
+    {
+     "committee": "RISING TIDE COLLECTIVE",
+     "committeeId": "C90023474",
+     "count": 2,
+     "total": 400000.0
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -6640,6 +7507,12 @@
      "committeeId": "C00863472",
      "count": 9,
      "total": 63297.51
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     }
    ]
   },
@@ -6661,6 +7534,12 @@
      "committeeId": "C00959841",
      "count": 2,
      "total": 400000.0
+    },
+    {
+     "committee": "CATHOLICVOTE.ORG",
+     "committeeId": "C90011800",
+     "count": 1,
+     "total": 12160.98
     }
    ],
    "support": [
@@ -6705,6 +7584,12 @@
      "total": 398243.65
     },
     {
+     "committee": "GROWUSA",
+     "committeeId": "C00958744",
+     "count": 9,
+     "total": 291294.16
+    },
+    {
      "committee": "A FIGHT WORTH HAVING",
      "committeeId": "C00933085",
      "count": 2,
@@ -6721,14 +7606,20 @@
     {
      "committee": "SF SOLIDARITY PAC",
      "committeeId": "C00897314",
-     "count": 2,
-     "total": 178310.35
+     "count": 5,
+     "total": 452579.33
     },
     {
      "committee": "SF FOR ALL",
      "committeeId": "C00945303",
-     "count": 5,
-     "total": 104575.0
+     "count": 27,
+     "total": 319123.67
+    },
+    {
+     "committee": "RISING TIDE COLLECTIVE",
+     "committeeId": "C90023474",
+     "count": 4,
+     "total": 185001.02
     },
     {
      "committee": "PEACE, ACCOUNTABILITY, AND LEADERSHIP PAC",
@@ -6891,8 +7782,14 @@
     {
      "committee": "SOUTH BAY AFL-CIO LABOR COUNCIL",
      "committeeId": "C90012444",
-     "count": 4,
-     "total": 258.01
+     "count": 6,
+     "total": 345.42
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -6950,6 +7847,12 @@
      "committeeId": "C00737411",
      "count": 11,
      "total": 301406.32
+    },
+    {
+     "committee": "STRATEGIC MAJORITY PAC",
+     "committeeId": "C00890335",
+     "count": 6,
+     "total": 67650.08
     },
     {
      "committee": "314 ACTION FUND",
@@ -7014,10 +7917,28 @@
      "total": 78979.95
     },
     {
+     "committee": "UNITED FOR WATER JUSTICE, SPONSORED BY CWC ACTIONFUND",
+     "committeeId": "C00957357",
+     "count": 8,
+     "total": 68306.03
+    },
+    {
+     "committee": "HEALTH CARE SAVES LIVES",
+     "committeeId": "C00888081",
+     "count": 6,
+     "total": 66709.67
+    },
+    {
      "committee": "COMMUNITY WATER CENTER ACTION FUND",
      "committeeId": "C90018334",
      "count": 4,
      "total": 46205.0
+    },
+    {
+     "committee": "LUCETE LEADERSHIP FUND",
+     "committeeId": "C00890723",
+     "count": 9,
+     "total": 32638.58
     },
     {
      "committee": "INDIVISIBLE ACTION",
@@ -7030,12 +7951,6 @@
      "committeeId": "C00800995",
      "count": 2,
      "total": 20300.0
-    },
-    {
-     "committee": "LUCETE LEADERSHIP FUND",
-     "committeeId": "C00890723",
-     "count": 6,
-     "total": 16743.5
     },
     {
      "committee": "MIJENTE PAC",
@@ -7058,8 +7973,14 @@
     {
      "committee": "CENTRAL VALLEY FOR WORKING FAMILIES",
      "committeeId": "C00936831",
-     "count": 1,
-     "total": 1409.2
+     "count": 2,
+     "total": 2382.37
+    },
+    {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 10,
+     "total": 1720.35
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -7078,12 +7999,6 @@
      "committeeId": "C90023318",
      "count": 5,
      "total": 1131.63
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 3,
-     "total": 953.64
     },
     {
      "committee": "INDIVISIBLE PROJECT INC.",
@@ -7301,6 +8216,12 @@
      "committeeId": "C00848440",
      "count": 3,
      "total": 366028.16
+    },
+    {
+     "committee": "DEMOCRATIC CLUB OF THE CONEJO VALLEY - FEDERAL",
+     "committeeId": "C00891390",
+     "count": 1,
+     "total": 2827.76
     }
    ]
   },
@@ -7369,6 +8290,12 @@
      "committeeId": "C00951665",
      "count": 3,
      "total": 350000.0
+    },
+    {
+     "committee": "RISING TIDE COLLECTIVE",
+     "committeeId": "C90023474",
+     "count": 2,
+     "total": 29999.19
     }
    ]
   },
@@ -7511,8 +8438,8 @@
     {
      "committee": "HEALTH CARE SAVES LIVES",
      "committeeId": "C00888081",
-     "count": 17,
-     "total": 194323.23
+     "count": 18,
+     "total": 203311.5
     },
     {
      "committee": "COMMITTEE FOR WORKING FAMILIES, SPONSORED BY LABOR ORGANIZATIONS",
@@ -7545,16 +8472,16 @@
      "total": 1290.18
     },
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 10,
+     "total": 940.15
+    },
+    {
      "committee": "DMFI PAC",
      "committeeId": "C00710848",
      "count": 2,
      "total": 333.34
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 3,
-     "total": 192.83
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -7694,6 +8621,12 @@
      "total": 150000.0
     },
     {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 2,
+     "total": 24627.59
+    },
+    {
      "committee": "YOUNG PEOPLE FOR A NEW ERA",
      "committeeId": "C00949065",
      "count": 3,
@@ -7706,10 +8639,10 @@
      "total": 4115.39
     },
     {
-     "committee": "SF SOLIDARITY PAC",
-     "committeeId": "C00897314",
-     "count": 1,
-     "total": 495.31
+     "committee": "NEO PHILANTHROPY ACTION FUND INC.",
+     "committeeId": "C90023367",
+     "count": 4,
+     "total": 176.95
     },
     {
      "committee": "ORGANIZE FOR PEACE",
@@ -7734,10 +8667,22 @@
    "oppose": [],
    "support": [
     {
+     "committee": "PROTECT OUR WINTERS ACTION FUND",
+     "committeeId": "C90017898",
+     "count": 27,
+     "total": 2064.24
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 3,
-     "total": 693.44
+     "count": 4,
+     "total": 697.85
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 325.33
     }
    ]
   },
@@ -7754,8 +8699,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 2,
-     "total": 558.14
+     "count": 3,
+     "total": 592.83
     }
    ]
   },
@@ -7803,6 +8748,12 @@
      "committeeId": "C00909994",
      "count": 3,
      "total": 725.69
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 325.33
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -7901,6 +8852,12 @@
      "total": 10150.0
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 43,
+     "total": 9837.14
+    },
+    {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
      "count": 9,
@@ -7915,8 +8872,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
+     "count": 7,
+     "total": 933.8
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
      "count": 4,
-     "total": 913.89
+     "total": 325.33
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -8392,8 +9355,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 7,
-     "total": 1386.34
+     "count": 9,
+     "total": 2282.46
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -8456,7 +9419,14 @@
    ]
   },
   "H6FL09294": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "WINNING RIGHT PAC",
+     "committeeId": "C00930495",
+     "count": 2,
+     "total": 37424.0
+    }
+   ],
    "support": [
     {
      "committee": "PATRIOTIC FUND, INC.",
@@ -8579,8 +9549,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 8,
-     "total": 1350.96
+     "count": 10,
+     "total": 2226.07
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -8617,6 +9587,12 @@
      "committeeId": "C00810051",
      "count": 1,
      "total": 10833.0
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 3,
+     "total": 3494.14
     }
    ]
   },
@@ -8773,6 +9749,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 1,
+     "total": 20517.11
+    },
+    {
      "committee": "DISRUPT",
      "committeeId": "C00895011",
      "count": 1,
@@ -8816,8 +9798,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 2150.11
+     "count": 8,
+     "total": 4177.38
     },
     {
      "committee": "MOMSRISING PAC",
@@ -8916,16 +9898,34 @@
    "oppose": [],
    "support": [
     {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 2,
+     "total": 38362.31
+    },
+    {
      "committee": "BAN THE TRADE PAC",
      "committeeId": "C00894394",
      "count": 2,
      "total": 35000.0
     },
     {
+     "committee": "FLIC VOTES INC.",
+     "committeeId": "C90020447",
+     "count": 1,
+     "total": 3228.66
+    },
+    {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
      "committeeId": "C00453704",
      "count": 1,
      "total": 2106.51
+    },
+    {
+     "committee": "NEO PHILANTHROPY ACTION FUND INC.",
+     "committeeId": "C90023367",
+     "count": 4,
+     "total": 117.76
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -8954,30 +9954,36 @@
     {
      "committee": "DEFENDING OUR VALUES PAC",
      "committeeId": "C00928390",
-     "count": 7,
-     "total": 746308.91
+     "count": 16,
+     "total": 857425.53
     },
     {
      "committee": "CONSERVATIVE LEADERSHIP FOR FLORIDA",
      "committeeId": "C00916924",
      "count": 2,
      "total": 158500.0
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 8,
+     "total": 69462.46
     }
    ]
   },
   "H6FL24087": {
    "oppose": [
     {
+     "committee": "AMERICAN MADE POLITICAL ACTION COMMITTEE (AMERICAN MADE PAC)",
+     "committeeId": "C00953257",
+     "count": 12,
+     "total": 321642.23
+    },
+    {
      "committee": "GOOD GROWTH",
      "committeeId": "C00914259",
      "count": 1,
      "total": 83333.33
-    },
-    {
-     "committee": "AMERICAN MADE POLITICAL ACTION COMMITTEE (AMERICAN MADE PAC)",
-     "committeeId": "C00953257",
-     "count": 2,
-     "total": 28264.29
     }
    ],
    "support": [
@@ -9038,8 +10044,8 @@
     {
      "committee": "AMERICAN MADE POLITICAL ACTION COMMITTEE (AMERICAN MADE PAC)",
      "committeeId": "C00953257",
-     "count": 27,
-     "total": 663614.33
+     "count": 37,
+     "total": 916156.49
     }
    ]
   },
@@ -9305,7 +10311,14 @@
    ]
   },
   "H6IA02211": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 72493.04
+    }
+   ],
    "support": [
     {
      "committee": "HMP",
@@ -9340,8 +10353,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 2,
-     "total": 1070.34
+     "count": 5,
+     "total": 1147.89
     },
     {
      "committee": "MOMSRISING PAC",
@@ -9350,10 +10363,22 @@
      "total": 961.28
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 420.0
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
      "total": 170.86
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 1,
+     "total": 125.0
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -9365,6 +10390,12 @@
   },
   "H6IA02237": {
    "oppose": [
+    {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 10,
+     "total": 1740059.56
+    },
     {
      "committee": "HMP",
      "committeeId": "C00495028",
@@ -9388,9 +10419,27 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 316.26
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 140.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 1,
+     "total": 75.0
     }
    ],
    "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 1,
+     "total": 14792.7
+    },
     {
      "committee": "SENATE CONSERVATIVES ACTION",
      "committeeId": "C00524181",
@@ -9412,6 +10461,12 @@
      "committeeId": "C00504530",
      "count": 16,
      "total": 2252300.67
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 76514.1
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -9440,6 +10495,18 @@
      "total": 7612.5
     },
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 7,
+     "total": 1202.34
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 707.49
+    },
+    {
      "committee": "MOMSRISING PAC",
      "committeeId": "C00878025",
      "count": 5,
@@ -9458,10 +10525,10 @@
      "total": 155.34
     },
     {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 1,
-     "total": 35.51
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 140.0
     }
    ]
   },
@@ -9857,6 +10924,12 @@
      "total": 104555.0
     },
     {
+     "committee": "MUSLIM CIVIC COALITION-ACTIVATE",
+     "committeeId": "C90023359",
+     "count": 14,
+     "total": 9495.19
+    },
+    {
      "committee": "FUTURE THAT WORKS 4 EVERYONE PAC",
      "committeeId": "C00920298",
      "count": 1,
@@ -9929,6 +11002,17 @@
     }
    ],
    "support": []
+  },
+  "H6IN05307": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "PLANNED PARENTHOOD ALLIANCE PAC , SERVING WA, AK, ID, HI, IN, KY",
+     "committeeId": "C00742080",
+     "count": 2,
+     "total": 1671.15
+    }
+   ]
   },
   "H6IN05315": {
    "oppose": [],
@@ -10065,6 +11149,12 @@
      "committeeId": "C00418897",
      "count": 2,
      "total": 240000.0
+    },
+    {
+     "committee": "PLANNED PARENTHOOD ALLIANCE PAC , SERVING WA, AK, ID, HI, IN, KY",
+     "committeeId": "C00742080",
+     "count": 8,
+     "total": 2213.48
     }
    ],
    "support": [
@@ -10100,7 +11190,14 @@
    ]
   },
   "H6LA04138": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "A REAL BOTTOM LINE PAC",
+     "committeeId": "C00958124",
+     "count": 17,
+     "total": 135760.19
+    }
+   ],
    "support": [
     {
      "committee": "FREEDOM CAUCUS FUND",
@@ -10142,6 +11239,12 @@
   "H6LA05234": {
    "oppose": [
     {
+     "committee": "LOUISIANA FIRST VICTORY FUND",
+     "committeeId": "C00938910",
+     "count": 2,
+     "total": 112857.01
+    },
+    {
      "committee": "END PREDATOR ABUSE PAC",
      "committeeId": "C00947317",
      "count": 3,
@@ -10180,6 +11283,17 @@
     }
    ]
   },
+  "H6MA01120": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 1,
+     "total": 20745.27
+    }
+   ]
+  },
   "H6MA06160": {
    "oppose": [],
    "support": [
@@ -10188,6 +11302,12 @@
      "committeeId": "C00949248",
      "count": 5,
      "total": 500000.0
+    },
+    {
+     "committee": "SAVE AMERICA FUND",
+     "committeeId": "C00732172",
+     "count": 4,
+     "total": 178889.82
     }
    ]
   },
@@ -10205,6 +11325,12 @@
      "committeeId": "C00678839",
      "count": 5,
      "total": 23194.55
+    },
+    {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 1,
+     "total": 4363.48
     }
    ]
   },
@@ -10262,6 +11388,12 @@
      "committeeId": "C00871368",
      "count": 2,
      "total": 250000.0
+    },
+    {
+     "committee": "NEA ADVOCACY FUND",
+     "committeeId": "C00489815",
+     "count": 1,
+     "total": 742.64
     },
     {
      "committee": "DMFI PAC",
@@ -10327,8 +11459,8 @@
     {
      "committee": "NEA ADVOCACY FUND",
      "committeeId": "C00489815",
-     "count": 2,
-     "total": 3971.03
+     "count": 3,
+     "total": 4587.8
     },
     {
      "committee": "UNITY & JUSTICE FUND",
@@ -10355,6 +11487,12 @@
    ],
    "support": [
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 68238.41
+    },
+    {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
      "count": 11,
@@ -10369,6 +11507,12 @@
      "committeeId": "C00504530",
      "count": 7,
      "total": 2240689.46
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 101289.4
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -10391,6 +11535,12 @@
      "total": 50200.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 30156.0
+    },
+    {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
      "count": 1,
@@ -10399,8 +11549,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 2,
-     "total": 86.43
+     "count": 5,
+     "total": 1161.87
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 6,
+     "total": 77.33
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -10458,9 +11614,51 @@
     }
    ]
   },
-  "H6MI04204": {
+  "H6MI03198": {
    "oppose": [],
    "support": [
+    {
+     "committee": "WEST MICHIGAN FOR COMMON SENSE",
+     "committeeId": "C00943332",
+     "count": 4,
+     "total": 251362.01
+    }
+   ]
+  },
+  "H6MI04204": {
+   "oppose": [
+    {
+     "committee": "MICHIGAN CONSERVATIVE ACTION",
+     "committeeId": "C00806760",
+     "count": 2,
+     "total": 509871.36
+    },
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 2,
+     "total": 363000.0
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 8,
+     "total": 114041.71
+    }
+   ],
+   "support": [
+    {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 1,
+     "total": 113900.0
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 15382.0
+    },
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
@@ -10474,22 +11672,34 @@
      "total": 10150.0
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 25,
+     "total": 7065.65
+    },
+    {
      "committee": "MI DEMOCRATIC 4TH CONGRESSIONAL PAC",
      "committeeId": "C00914671",
      "count": 4,
      "total": 4930.0
     },
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 6,
+     "total": 1958.93
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 6,
+     "total": 1858.33
+    },
+    {
      "committee": "FIGHT FOR WORKING PEOPLE",
      "committeeId": "C00960245",
      "count": 1,
      "total": 1000.0
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 2,
-     "total": 244.36
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -10604,6 +11814,12 @@
      "total": 605152.17
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 7,
+     "total": 62126.51
+    },
+    {
      "committee": "NEW DEMOCRAT MAJORITY",
      "committeeId": "C00859660",
      "count": 2,
@@ -10636,6 +11852,24 @@
      "total": 29616.36
     },
     {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 1,
+     "total": 23800.0
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 45,
+     "total": 21082.59
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 14741.0
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
@@ -10656,8 +11890,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
+     "count": 9,
+     "total": 1845.51
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
      "count": 6,
-     "total": 1769.23
+     "total": 939.34
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -10700,7 +11940,14 @@
      "total": 380.49
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 31172.03
+    }
+   ]
   },
   "H6MI10276": {
    "oppose": [
@@ -10709,6 +11956,12 @@
      "committeeId": "C00504530",
      "count": 5,
      "total": 2659832.86
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 7,
+     "total": 45068.44
     }
    ],
    "support": [
@@ -10731,6 +11984,12 @@
      "total": 153003.5
     },
     {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 2,
+     "total": 95000.0
+    },
+    {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
      "committeeId": "C00580068",
      "count": 2,
@@ -10743,6 +12002,12 @@
      "total": 24781.29
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 16724.0
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
@@ -10751,8 +12016,20 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 3,
-     "total": 366.6
+     "count": 7,
+     "total": 2472.56
+    },
+    {
+     "committee": "FOR OUR FUTURE",
+     "committeeId": "C00620971",
+     "count": 2,
+     "total": 1653.26
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 1159.55
     },
     {
      "committee": "MOMSRISING PAC",
@@ -10881,6 +12158,12 @@
      "committeeId": "C00913269",
      "count": 9,
      "total": 156686.82
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 19872.65
     },
     {
      "committee": "RIGHT TO LIFE OF MICHIGAN VICTORY FUND",
@@ -11013,6 +12296,12 @@
      "total": 10406.25
     },
     {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 1,
+     "total": 8593.92
+    },
+    {
      "committee": "UNITED WE CAN",
      "committeeId": "C00523621",
      "count": 2,
@@ -11059,6 +12348,12 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 202.84
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 1,
+     "total": 20.0
     }
    ]
   },
@@ -11204,14 +12499,25 @@
     }
    ]
   },
+  "H6MN08195": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "SAVE AMERICA FUND",
+     "committeeId": "C00732172",
+     "count": 2,
+     "total": 46875.0
+    }
+   ]
+  },
   "H6MO02343": {
    "oppose": [],
    "support": [
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 7,
-     "total": 2539.78
+     "count": 9,
+     "total": 4243.01
     }
    ]
   },
@@ -11323,6 +12629,12 @@
      "total": 342184.73
     },
     {
+     "committee": "MONTANA VOTERS PAC",
+     "committeeId": "C00887125",
+     "count": 2,
+     "total": 252835.5
+    },
+    {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
      "count": 1,
@@ -11339,6 +12651,12 @@
      "committeeId": "C00868604",
      "count": 3,
      "total": 25101.04
+    },
+    {
+     "committee": "PROTECT OUR WINTERS ACTION FUND",
+     "committeeId": "C90017898",
+     "count": 109,
+     "total": 8048.51
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -11373,6 +12691,12 @@
   },
   "H6MT01152": {
    "oppose": [
+    {
+     "committee": "MONTANA VOTERS PAC",
+     "committeeId": "C00887125",
+     "count": 2,
+     "total": 252835.5
+    },
     {
      "committee": "VOTEVETS",
      "committeeId": "C00418897",
@@ -11416,6 +12740,12 @@
      "committeeId": "C00722025",
      "count": 2,
      "total": 100000.0
+    },
+    {
+     "committee": "MONTANA REPUBLICAN STATE CENTRAL COMMITTEE",
+     "committeeId": "C00008086",
+     "count": 5,
+     "total": 77764.38
     },
     {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
@@ -11590,10 +12920,22 @@
      "total": 57240.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 14894.43
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
      "total": 10150.0
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 27,
+     "total": 8632.3
     },
     {
      "committee": "SURJ PAC",
@@ -11604,8 +12946,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 7,
-     "total": 721.51
+     "count": 9,
+     "total": 737.36
     },
     {
      "committee": "RED WINE AND BLUE",
@@ -11648,6 +12990,12 @@
      "total": 1399255.24
     },
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 3,
+     "total": 1002550.0
+    },
+    {
      "committee": "SD 2026",
      "committeeId": "C00935015",
      "count": 1,
@@ -11658,6 +13006,12 @@
      "committeeId": "C00686832",
      "count": 2,
      "total": 48760.0
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 5,
+     "total": 1488.02
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -11795,6 +13149,12 @@
      "total": 36361.24
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 15806.0
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
@@ -11825,6 +13185,12 @@
      "total": 2375.0
     },
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 6,
+     "total": 1942.04
+    },
+    {
      "committee": "BLUE DEMOCRACY NETWORK",
      "committeeId": "C00933796",
      "count": 2,
@@ -11837,16 +13203,16 @@
      "total": 1075.0
     },
     {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 5,
-     "total": 1016.6
-    },
-    {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 2,
-     "total": 333.2
+     "count": 3,
+     "total": 516.68
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 3,
+     "total": 176.67
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -11927,8 +13293,8 @@
     {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
-     "count": 20,
-     "total": 16119.51
+     "count": 37,
+     "total": 56756.12
     },
     {
      "committee": "FIELD TEAM 6, INC.",
@@ -11941,9 +13307,28 @@
      "committeeId": "C00955138",
      "count": 1,
      "total": 257.63
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 2,
+     "total": 220.78
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 3,
+     "total": 176.67
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "NEBRASKA CONSERVATIVE LEADERSHIP FUND",
+     "committeeId": "C00959064",
+     "count": 3,
+     "total": 9109.33
+    }
+   ]
   },
   "H6NE03115": {
    "oppose": [],
@@ -11969,6 +13354,12 @@
      "committeeId": "C00418897",
      "count": 5,
      "total": 320433.69
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 92977.5
     }
    ],
    "support": [
@@ -11989,6 +13380,12 @@
      "committeeId": "C00898379",
      "count": 7,
      "total": 594108.93
+    },
+    {
+     "committee": "PROTECT OUR WINTERS ACTION FUND",
+     "committeeId": "C90017898",
+     "count": 23,
+     "total": 1629.65
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -12024,6 +13421,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 75964.18
+    },
+    {
      "committee": "TURNING POINT PAC INC.",
      "committeeId": "C00814152",
      "count": 1,
@@ -12046,16 +13449,16 @@
    "oppose": [],
    "support": [
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 12,
+     "total": 2026.27
+    },
+    {
      "committee": "DCOC PAC",
      "committeeId": "C00870923",
      "count": 1,
      "total": 1750.0
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 5,
-     "total": 1142.93
     }
    ]
   },
@@ -12088,6 +13491,18 @@
      "committeeId": "C00950345",
      "count": 9,
      "total": 660675.85
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 48688.96
+    },
+    {
+     "committee": "CATHOLICVOTE.ORG",
+     "committeeId": "C90011800",
+     "count": 1,
+     "total": 12160.98
     }
    ],
    "support": [
@@ -12102,6 +13517,12 @@
      "committeeId": "C00931774",
      "count": 8,
      "total": 253656.16
+    },
+    {
+     "committee": "THE TURNOUT PROJECT",
+     "committeeId": "C00760801",
+     "count": 1,
+     "total": 240000.0
     },
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
@@ -12124,8 +13545,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 5,
-     "total": 959.44
+     "count": 13,
+     "total": 1739.93
     },
     {
      "committee": "MOMSRISING PAC",
@@ -12506,6 +13927,12 @@
    ],
    "support": [
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 9494.35
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -12557,16 +13984,34 @@
    "oppose": [],
    "support": [
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 12365.0
+    },
+    {
      "committee": "ONE APIA PAC",
      "committeeId": "C00761072",
      "count": 2,
      "total": 4945.89
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 5,
+     "total": 1064.0
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
      "total": 211.18
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 15.99
     }
    ]
   },
@@ -12594,8 +14039,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 5,
-     "total": 1181.2
+     "count": 9,
+     "total": 1227.49
     }
    ]
   },
@@ -12702,6 +14147,12 @@
      "committeeId": "C00945436",
      "count": 2,
      "total": 181222.49
+    },
+    {
+     "committee": "32BJ UNITED AMERICAN DREAM FUND",
+     "committeeId": "C90016023",
+     "count": 3,
+     "total": 66920.01
     }
    ]
   },
@@ -12875,6 +14326,12 @@
      "total": 1524101.65
     },
     {
+     "committee": "CATHOLICVOTE.ORG",
+     "committeeId": "C90011800",
+     "count": 1,
+     "total": 12160.98
+    },
+    {
      "committee": "LATINO VICTORY FUND",
      "committeeId": "C00562777",
      "count": 3,
@@ -12919,6 +14376,12 @@
      "total": 4673.27
     },
     {
+     "committee": "NEO PHILANTHROPY ACTION FUND INC.",
+     "committeeId": "C90023367",
+     "count": 4,
+     "total": 788.95
+    },
+    {
      "committee": "UAW - V - CAP (UAW VOLUNTARY COMMUNITY ACTION PROGRAM) 'INT'L UNION UNITED AUTOMOBILE AEROSPACE & AGRICULTURAL IMPLEMENT WORKERS OF AMERICA UAW",
      "committeeId": "C00002840",
      "count": 1,
@@ -12939,6 +14402,12 @@
      "committeeId": "C00950352",
      "count": 1,
      "total": 1500000.0
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 48874.04
     },
     {
      "committee": "THE GOVERNING MAJORITY FUND",
@@ -12993,8 +14462,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 5,
-     "total": 1336.01
+     "count": 9,
+     "total": 1381.04
     },
     {
      "committee": "DMFI PAC",
@@ -13140,6 +14609,12 @@
      "committeeId": "C00912337",
      "count": 23,
      "total": 286609.83
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 23825.1
     }
    ]
   },
@@ -13160,6 +14635,17 @@
     }
    ]
   },
+  "H6OH05154": {
+   "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 14811.15
+    }
+   ],
+   "support": []
+  },
   "H6OH07143": {
    "oppose": [
     {
@@ -13178,6 +14664,18 @@
      "committeeId": "C00504530",
      "count": 3,
      "total": 1126780.54
+    },
+    {
+     "committee": "JOBS & PROSPERITY PAC",
+     "committeeId": "C00820357",
+     "count": 4,
+     "total": 208993.2
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 4,
+     "total": 14394.55
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -13230,6 +14728,12 @@
      "total": 1250.0
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 3,
+     "total": 270.67
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -13275,6 +14779,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 3,
+     "total": 270.67
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -13291,7 +14801,14 @@
      "total": 308.05
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 21436.72
+    }
+   ]
   },
   "H6OH15112": {
    "oppose": [
@@ -13303,6 +14820,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 4,
+     "total": 659857.69
+    },
     {
      "committee": "OHIO CITIZEN ACTION",
      "committeeId": "C90021726",
@@ -13400,6 +14923,12 @@
      "committeeId": "C00913178",
      "count": 7,
      "total": 394067.46
+    },
+    {
+     "committee": "VOTERISE",
+     "committeeId": "C00890400",
+     "count": 8,
+     "total": 5938.51
     }
    ]
   },
@@ -13419,8 +14948,14 @@
     {
      "committee": "DEFENDING AMERICA PAC, INC.",
      "committeeId": "C00848739",
-     "count": 3,
-     "total": 10609.34
+     "count": 5,
+     "total": 708609.34
+    },
+    {
+     "committee": "STRATEGIC MAJORITY PAC",
+     "committeeId": "C00890335",
+     "count": 9,
+     "total": 122291.25
     },
     {
      "committee": "PENNSYLVANIA PRO-LIFE FEDERATION PAC",
@@ -13439,8 +14974,8 @@
     {
      "committee": "SENIORS EMPOWERING AN EFFECTIVE DEMOCRACY (SEED-PAC)",
      "committeeId": "C00934059",
-     "count": 3,
-     "total": 17373.96
+     "count": 4,
+     "total": 18254.89
     },
     {
      "committee": "RESTORING AMERICAN INTEGRITY",
@@ -13449,16 +14984,34 @@
      "total": 12031.0
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 27,
+     "total": 11861.01
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
      "total": 10150.0
     },
     {
+     "committee": "FREEDOM PA",
+     "committeeId": "C00902189",
+     "count": 3,
+     "total": 2507.25
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 8,
-     "total": 431.72
+     "count": 17,
+     "total": 1143.15
+    },
+    {
+     "committee": "ACTIVATE AMERICA",
+     "committeeId": "C00640300",
+     "count": 1,
+     "total": 647.43
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -13498,8 +15051,8 @@
     {
      "committee": "PHILLY FIRST SUPER PAC",
      "committeeId": "C00947028",
-     "count": 19,
-     "total": 637075.45
+     "count": 20,
+     "total": 669066.85
     },
     {
      "committee": "INTERNATIONAL BROTHERHOOD OF ELECTRICAL WORKERS LOCAL 98 COMMITTEE ON POLITICAL EDUCATION",
@@ -13552,8 +15105,8 @@
     {
      "committee": "FREEDOM PA",
      "committeeId": "C00902189",
-     "count": 25,
-     "total": 102164.0
+     "count": 33,
+     "total": 125844.07
     },
     {
      "committee": "MEDICARE FOR ALL",
@@ -13562,16 +15115,16 @@
      "total": 100137.5
     },
     {
+     "committee": "API PA VOTES",
+     "committeeId": "C00761064",
+     "count": 35,
+     "total": 40014.5
+    },
+    {
      "committee": "MAKE THE ROAD ACTION POLITICAL COMMITTEE",
      "committeeId": "C00689745",
      "count": 10,
      "total": 32648.04
-    },
-    {
-     "committee": "API PA VOTES",
-     "committeeId": "C00761064",
-     "count": 20,
-     "total": 27762.0
     },
     {
      "committee": "GET OUT THE VOTE PAC",
@@ -13665,6 +15218,12 @@
      "total": 312371.76
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 69931.97
+    },
+    {
      "committee": "KITCHEN TABLE VALUES PAC",
      "committeeId": "C00924159",
      "count": 5,
@@ -13745,10 +15304,22 @@
      "total": 23285.26
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 44,
+     "total": 17294.56
+    },
+    {
      "committee": "BLUE MAJORITY PROJECT",
      "committeeId": "C00897363",
      "count": 3,
      "total": 16643.34
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 15865.0
     },
     {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
@@ -13807,8 +15378,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 1299.08
+     "count": 14,
+     "total": 2441.08
     },
     {
      "committee": "BLUE DEMOCRACY NETWORK",
@@ -13823,10 +15394,22 @@
      "total": 766.66
     },
     {
+     "committee": "ACTIVATE AMERICA",
+     "committeeId": "C00640300",
+     "count": 1,
+     "total": 756.48
+    },
+    {
      "committee": "PEOPLE'S ACTION POWER",
      "committeeId": "C00738237",
      "count": 1,
      "total": 530.05
+    },
+    {
+     "committee": "FREEDOM PA",
+     "committeeId": "C00902189",
+     "count": 1,
+     "total": 450.0
     },
     {
      "committee": "MOMSRISING PAC",
@@ -13869,10 +15452,28 @@
   "H6PA08277": {
    "oppose": [
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 1,
+     "total": 499325.0
+    },
+    {
      "committee": "HMP",
      "committeeId": "C00495028",
      "count": 10,
      "total": 422451.21
+    },
+    {
+     "committee": "LOSERS AND SUCKERS VOTE",
+     "committeeId": "C00760835",
+     "count": 4,
+     "total": 75680.91
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 10,
+     "total": 6302.52
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -13888,6 +15489,12 @@
     }
    ],
    "support": [
+    {
+     "committee": "STRATEGIC MAJORITY PAC",
+     "committeeId": "C00890335",
+     "count": 5,
+     "total": 114440.25
+    },
     {
      "committee": "EARLY VOTE ACTION PAC",
      "committeeId": "C00829721",
@@ -13909,6 +15516,12 @@
      "committeeId": "C00504530",
      "count": 12,
      "total": 2364142.19
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 76140.5
     },
     {
      "committee": "THE GOVERNING MAJORITY FUND",
@@ -13949,10 +15562,22 @@
      "total": 23381.67
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 22249.0
+    },
+    {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 2,
      "total": 20300.0
+    },
+    {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 12,
+     "total": 2394.69
     },
     {
      "committee": "FF PAC",
@@ -13961,16 +15586,22 @@
      "total": 2198.02
     },
     {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 5,
-     "total": 1360.09
-    },
-    {
      "committee": "MOMSRISING PAC",
      "committeeId": "C00878025",
      "count": 7,
      "total": 1187.97
+    },
+    {
+     "committee": "ACTIVATE AMERICA",
+     "committeeId": "C00640300",
+     "count": 2,
+     "total": 703.64
+    },
+    {
+     "committee": "FREEDOM PA",
+     "committeeId": "C00902189",
+     "count": 1,
+     "total": 450.0
     },
     {
      "committee": "DMFI PAC",
@@ -14015,8 +15646,8 @@
     {
      "committee": "API PA VOTES",
      "committeeId": "C00761064",
-     "count": 11,
-     "total": 17692.87
+     "count": 22,
+     "total": 21892.87
     },
     {
      "committee": "FREEDOM PA",
@@ -14218,7 +15849,14 @@
    ]
   },
   "H6SC01359": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 2,
+     "total": 363000.0
+    }
+   ],
    "support": [
     {
      "committee": "VOTEVETS",
@@ -14251,8 +15889,8 @@
     {
      "committee": "SOUTH DAKOTA VALUES PAC",
      "committeeId": "C00913020",
-     "count": 4,
-     "total": 84050.58
+     "count": 6,
+     "total": 120390.58
     },
     {
      "committee": "CONSERVATIVES FOR AMERICAN EXCELLENCE INC.",
@@ -14311,10 +15949,24 @@
      "total": 315.51
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "INVEST IN TOMORROW COALITION PAC",
+     "committeeId": "C00936997",
+     "count": 5,
+     "total": 1344174.28
+    }
+   ]
   },
   "H6TN06205": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 5,
+     "total": 148090.44
+    }
+   ],
    "support": [
     {
      "committee": "CONSERVATIVE FUTURE FUND",
@@ -14615,8 +16267,8 @@
     {
      "committee": "TENNESSEE IMMIGRANT AND REFUGEE RIGHTS COALITION VOTES ACTION PAC",
      "committeeId": "C00816173",
-     "count": 1,
-     "total": 17628.0
+     "count": 6,
+     "total": 38296.79
     },
     {
      "committee": "INDIVISIBLE ACTION",
@@ -15103,6 +16755,12 @@
      "total": 3142538.1
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 53631.81
+    },
+    {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
      "count": 7,
@@ -15117,6 +16775,12 @@
    ],
    "support": [
     {
+     "committee": "AMERICA'S CREDIT UNIONS PAC",
+     "committeeId": "C00007880",
+     "count": 2,
+     "total": 699931.92
+    },
+    {
      "committee": "HMP",
      "committeeId": "C00495028",
      "count": 4,
@@ -15127,6 +16791,12 @@
      "committeeId": "C90020231",
      "count": 5,
      "total": 1670.0
+    },
+    {
+     "committee": "LONE STAR RISING PAC",
+     "committeeId": "C00918268",
+     "count": 1,
+     "total": 1382.36
     },
     {
      "committee": "TEXAS DEMOCRATIC ALLIANCE POLITICAL ACTION COMMITTEE",
@@ -15162,6 +16832,12 @@
   },
   "H6TX15246": {
    "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 111997.51
+    },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
@@ -15201,6 +16877,12 @@
      "total": 53099.88
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 17015.83
+    },
+    {
      "committee": "BLUE BATTLEGROUND PROJECT",
      "committeeId": "C00704593",
      "count": 1,
@@ -15237,16 +16919,16 @@
      "total": 2708.33
     },
     {
+     "committee": "LONE STAR RISING PAC",
+     "committeeId": "C00918268",
+     "count": 2,
+     "total": 2064.3
+    },
+    {
      "committee": "BLUE DEMOCRACY NETWORK",
      "committeeId": "C00933796",
      "count": 2,
      "total": 1200.0
-    },
-    {
-     "committee": "LONE STAR RISING PAC",
-     "committeeId": "C00918268",
-     "count": 1,
-     "total": 664.02
     },
     {
      "committee": "BLUE MAJORITY PROJECT",
@@ -15470,6 +17152,12 @@
      "committeeId": "C00552851",
      "count": 2,
      "total": 173252.23
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 73450.74
     }
    ],
    "support": [
@@ -15496,7 +17184,14 @@
      "total": 156.21
     }
    ],
-   "support": []
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 39967.57
+    }
+   ]
   },
   "H6TX30245": {
    "oppose": [],
@@ -15614,6 +17309,12 @@
      "total": 135000.0
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 27195.44
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
      "count": 1,
@@ -15713,11 +17414,23 @@
      "committeeId": "C00937094",
      "count": 8,
      "total": 243077.84
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 5,
+     "total": 39239.57
     }
    ]
   },
   "H6TX35095": {
    "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 167717.01
+    },
     {
      "committee": "LEAD LEFT PAC",
      "committeeId": "C00948208",
@@ -15887,8 +17600,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 5,
-     "total": 1946.6
+     "count": 9,
+     "total": 2148.35
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -15906,6 +17619,12 @@
   },
   "H6VA02198": {
    "oppose": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 9,
+     "total": 218966.57
+    },
     {
      "committee": "THE GOVERNING MAJORITY FUND",
      "committeeId": "C00737411",
@@ -16114,10 +17833,27 @@
    ],
    "support": [
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 8,
+     "total": 269872.1
+    },
+    {
      "committee": "SPECIAL OPERATIONS FOR AMERICA",
      "committeeId": "C00523241",
      "count": 1,
      "total": 20000.0
+    }
+   ]
+  },
+  "H6WA04190": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 480.57
     }
    ]
   },
@@ -16153,6 +17889,12 @@
      "committeeId": "C00698936",
      "count": 2,
      "total": 40500.0
+    },
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 1,
+     "total": 20891.77
     }
    ]
   },
@@ -16175,12 +17917,24 @@
      "committeeId": "C00948059",
      "count": 32,
      "total": 227305.77
+    },
+    {
+     "committee": "TOGETHER FOR WORKING PEOPLE",
+     "committeeId": "C00926675",
+     "count": 3,
+     "total": 40578.48
     }
    ]
   },
   "H6WA07458": {
    "oppose": [],
    "support": [
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 339.22
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -16192,6 +17946,12 @@
   "H6WA09025": {
    "oppose": [],
    "support": [
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 367.49
+    },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
@@ -16228,10 +17988,22 @@
      "total": 211711.96
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 15592.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 6,
+     "total": 3589.42
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 2,
-     "total": 1223.19
+     "count": 9,
+     "total": 2526.55
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -16284,6 +18056,18 @@
      "committeeId": "C00922955",
      "count": 19,
      "total": 2239749.88
+    },
+    {
+     "committee": "AMERICANS 4 SECURITY PAC",
+     "committeeId": "C00733352",
+     "count": 4,
+     "total": 73011.0
+    },
+    {
+     "committee": "THANK YOU FOR YOUR ATTENTION TO THIS MATTER PAC",
+     "committeeId": "C00923516",
+     "count": 4,
+     "total": 29767.76
     },
     {
      "committee": "TURNING POINT PAC INC.",
@@ -16373,8 +18157,8 @@
     {
      "committee": "HOMETOWN FREEDOM ACTION NETWORK",
      "committeeId": "C00528901",
-     "count": 2,
-     "total": 29750.0
+     "count": 10,
+     "total": 1137750.0
     }
    ],
    "support": [
@@ -16416,7 +18200,14 @@
    ]
   },
   "H8AZ09040": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "AZ4 DESERVES MORE",
+     "committeeId": "C00917286",
+     "count": 1,
+     "total": 72000.0
+    }
+   ],
    "support": [
     {
      "committee": "THINK BIG",
@@ -16449,8 +18240,8 @@
     {
      "committee": "NEW LEADERSHIP NOW",
      "committeeId": "C00900993",
-     "count": 33,
-     "total": 1457062.68
+     "count": 48,
+     "total": 2834146.4
     }
    ],
    "support": [
@@ -16477,6 +18268,12 @@
      "committeeId": "C00900993",
      "count": 4,
      "total": 19888.72
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -16509,6 +18306,12 @@
      "total": 293.34
     },
     {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 13.12
+    },
+    {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
      "committeeId": "C00483693",
      "count": 1,
@@ -16518,6 +18321,12 @@
   },
   "H8CA11116": {
    "oppose": [
+    {
+     "committee": "RISING TIDE COLLECTIVE",
+     "committeeId": "C90023474",
+     "count": 1,
+     "total": 100000.0
+    },
     {
      "committee": "PEACE, ACCOUNTABILITY, AND LEADERSHIP PAC",
      "committeeId": "C00937888",
@@ -16549,6 +18358,12 @@
      "committeeId": "C00550970",
      "count": 2,
      "total": 1065000.0
+    },
+    {
+     "committee": "GROWUSA",
+     "committeeId": "C00958744",
+     "count": 8,
+     "total": 301449.32
     },
     {
      "committee": "EQUALITY CALIFORNIA VOTES",
@@ -16627,8 +18442,8 @@
     {
      "committee": "AMERICANS 4 SECURITY PAC",
      "committeeId": "C00733352",
-     "count": 24,
-     "total": 3191631.57
+     "count": 36,
+     "total": 4874822.54
     },
     {
      "committee": "CALIFORNIA CONSERVATIVES PAC",
@@ -16653,14 +18468,20 @@
     {
      "committee": "AMERICA'S CREDIT UNIONS PAC",
      "committeeId": "C00007880",
-     "count": 2,
-     "total": 500000.0
+     "count": 4,
+     "total": 997973.0
     },
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
      "count": 28,
      "total": 290053.55
+    },
+    {
+     "committee": "CFF",
+     "committeeId": "C00927426",
+     "count": 1,
+     "total": 65780.82
     },
     {
      "committee": "NATIONAL ASSOCIATION OF REALTORS POLITICAL ACTION COMMITTEE",
@@ -16826,10 +18647,22 @@
      "total": 96656.73
     },
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 2,
+     "total": 58398.9
+    },
+    {
      "committee": "IN UNION USA",
      "committeeId": "C00745745",
      "count": 1,
      "total": 24287.71
+    },
+    {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 11,
+     "total": 10497.13
     },
     {
      "committee": "FREE AND FAIR DEMOCRACY PAC",
@@ -16854,6 +18687,18 @@
      "committeeId": "C00640300",
      "count": 1,
      "total": 2491.45
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 25,
+     "total": 1868.66
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 657.49
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -16894,10 +18739,22 @@
      "total": 49300.0
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 1,
+     "total": 15923.05
+    },
+    {
      "committee": "AMERICAN CONSERVATION COALITION PAC (ACC PAC)",
      "committeeId": "C00877233",
      "count": 1,
      "total": 3379.98
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 1,
+     "total": 40.0
     }
    ]
   },
@@ -17161,10 +19018,22 @@
      "total": 30511.33
     },
     {
+     "committee": "SF SOLIDARITY PAC",
+     "committeeId": "C00897314",
+     "count": 1,
+     "total": 17577.99
+    },
+    {
      "committee": "UNITY & JUSTICE FUND",
      "committeeId": "C00881011",
      "count": 5,
      "total": 11683.84
+    },
+    {
+     "committee": "NEO PHILANTHROPY ACTION FUND INC.",
+     "committeeId": "C90023367",
+     "count": 3,
+     "total": 318.0
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -17254,6 +19123,12 @@
    "oppose": [],
    "support": [
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 11284.78
+    },
+    {
      "committee": "WESTERN STATES REGIONAL COUNCIL OF CARPENTERS LEGISLATIVE IMPROVEMENT CMTE UNITED BROTHERHOOD OF CARPENTERS & JOINERS OF AMERICA",
      "committeeId": "C00285593",
      "count": 1,
@@ -17270,6 +19145,12 @@
      "committeeId": "C00802389",
      "count": 2,
      "total": 106.67
+    },
+    {
+     "committee": "WE VOTE - NOSOTROS VOTAMOS - PPAMM COMMITTEE",
+     "committeeId": "C00527226",
+     "count": 1,
+     "total": 15.99
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -17384,6 +19265,17 @@
      "committeeId": "C00923417",
      "count": 7,
      "total": 571931.25
+    }
+   ]
+  },
+  "H8OH05036": {
+   "oppose": [],
+   "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 22911.76
     }
    ]
   },
@@ -17539,6 +19431,12 @@
      "total": 6044.0
     },
     {
+     "committee": "CAMPAIGN FOR WORKING CLASS COMMUNITIES",
+     "committeeId": "C90023599",
+     "count": 11,
+     "total": 5779.12
+    },
+    {
      "committee": "INDIGO PAC",
      "committeeId": "C00909465",
      "count": 10,
@@ -17576,6 +19474,18 @@
     }
    ],
    "support": [
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 3,
+     "total": 53477.55
+    },
+    {
+     "committee": "DRIVING FORCE ACTION",
+     "committeeId": "C00879965",
+     "count": 2,
+     "total": 10645.0
+    },
     {
      "committee": "EARLY VOTE ACTION PAC",
      "committeeId": "C00829721",
@@ -17824,6 +19734,12 @@
   "H8VA01147": {
    "oppose": [
     {
+     "committee": "YOUR COMMUNITY PAC",
+     "committeeId": "C00886614",
+     "count": 5,
+     "total": 1760325.5
+    },
+    {
      "committee": "HMP",
      "committeeId": "C00495028",
      "count": 16,
@@ -17856,8 +19772,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 2266.08
+     "count": 8,
+     "total": 2434.72
     }
    ]
   },
@@ -17880,6 +19796,12 @@
      "committeeId": "C00848440",
      "count": 2,
      "total": 105040.0
+    },
+    {
+     "committee": "FUSE WASHINGTON",
+     "committeeId": "C90019514",
+     "count": 1,
+     "total": 537.1
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -17919,6 +19841,18 @@
      "committeeId": "C00573261",
      "count": 2,
      "total": 50000.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 6,
+     "total": 3589.42
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 5,
+     "total": 810.67
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -18085,6 +20019,12 @@
      "total": 3446247.0
     },
     {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 6,
+     "total": 696128.75
+    },
+    {
      "committee": "UNITED FUTURES",
      "committeeId": "C00899096",
      "count": 1,
@@ -18143,6 +20083,12 @@
   "S0NM00058": {
    "oppose": [],
    "support": [
+    {
+     "committee": "PROGRESSNOW NEW MEXICO",
+     "committeeId": "C90019829",
+     "count": 1,
+     "total": 1062.23
+    },
     {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
@@ -18253,6 +20199,17 @@
      "total": 45945.1
     }
    ]
+  },
+  "S2NE00094": {
+   "oppose": [
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 46.0
+    }
+   ],
+   "support": []
   },
   "S2TX00106": {
    "oppose": [
@@ -18411,6 +20368,18 @@
   "S4AK00214": {
    "oppose": [
     {
+     "committee": "NORTH STAR",
+     "committeeId": "C00957522",
+     "count": 25,
+     "total": 7310546.09
+    },
+    {
+     "committee": "WOMEN VOTE",
+     "committeeId": "C00473918",
+     "count": 5,
+     "total": 2779734.01
+    },
+    {
      "committee": "RIGHT FOR ALASKA",
      "committeeId": "C00944611",
      "count": 18,
@@ -18479,10 +20448,22 @@
      "total": 265000.0
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 12,
+     "total": 186525.08
+    },
+    {
      "committee": "WE STAND WITH DAN SUPER PAC",
      "committeeId": "C00944272",
      "count": 6,
      "total": 137542.5
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 5,
+     "total": 5247.56
     }
    ]
   },
@@ -18731,16 +20712,40 @@
      "total": 1000000.0
     },
     {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 6,
+     "total": 805883.48
+    },
+    {
      "committee": "PAF",
      "committeeId": "C00754069",
      "count": 2,
      "total": 313520.8
     },
     {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 2,
+     "total": 164000.0
+    },
+    {
      "committee": "END CITIZENS UNITED",
      "committeeId": "C00573261",
      "count": 1,
      "total": 100000.0
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 42,
+     "total": 34294.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 16,
+     "total": 5537.2
     },
     {
      "committee": "MICHIGAN DEMOCRATIC STATE CENTRAL COMMITTEE",
@@ -18769,22 +20774,28 @@
    ],
    "support": [
     {
+     "committee": "GLCF, INC.",
+     "committeeId": "C00853861",
+     "count": 15,
+     "total": 10685348.55
+    },
+    {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
      "count": 41,
      "total": 6838539.33
     },
     {
-     "committee": "GLCF, INC.",
-     "committeeId": "C00853861",
-     "count": 5,
-     "total": 3329147.28
-    },
-    {
      "committee": "THE SENTINEL ACTION FUND",
      "committeeId": "C00811166",
-     "count": 13,
-     "total": 1859480.35
+     "count": 23,
+     "total": 2796557.75
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 25,
+     "total": 1479742.13
     },
     {
      "committee": "FIRST PRINCIPLES DIGITAL",
@@ -18805,6 +20816,18 @@
      "total": 257500.0
     },
     {
+     "committee": "DRIVING FORCE ACTION",
+     "committeeId": "C00879965",
+     "count": 2,
+     "total": 33621.0
+    },
+    {
+     "committee": "TFM",
+     "committeeId": "C00960138",
+     "count": 1,
+     "total": 12500.0
+    },
+    {
      "committee": "RIGHT TO LIFE OF MICHIGAN VICTORY FUND",
      "committeeId": "C00574178",
      "count": 3,
@@ -18815,6 +20838,12 @@
      "committeeId": "C90018904",
      "count": 5,
      "total": 4136.3
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 4,
+     "total": 3506.84
     }
    ]
   },
@@ -18854,6 +20883,12 @@
   },
   "S4NE00207": {
    "oppose": [
+    {
+     "committee": "CORNHUSKER MAJORITY",
+     "committeeId": "C00961227",
+     "count": 15,
+     "total": 4745568.28
+    },
     {
      "committee": "WIN IT BACK PAC",
      "committeeId": "C00844613",
@@ -18905,6 +20940,12 @@
      "total": 10150.0
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 4,
+     "total": 4084.96
+    },
+    {
      "committee": "LGBTQ CONNECTION PAC",
      "committeeId": "C00722884",
      "count": 15,
@@ -18913,14 +20954,20 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 2,
-     "total": 316.11
+     "count": 11,
+     "total": 782.08
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
      "committeeId": "C00776419",
      "count": 2,
      "total": 112.5
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 106.67
     },
     {
      "committee": "SIERRA CLUB INDEPENDENT ACTION",
@@ -19012,10 +21059,22 @@
   "S6AK00276": {
    "oppose": [
     {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 46,
+     "total": 9788383.52
+    },
+    {
      "committee": "LAST FRONTIER PAC",
      "committeeId": "C00875278",
      "count": 16,
      "total": 2778528.68
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 14,
+     "total": 389801.02
     },
     {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
@@ -19024,10 +21083,16 @@
      "total": 174668.22
     },
     {
-     "committee": "SLF PAC",
-     "committeeId": "C00571703",
-     "count": 1,
-     "total": 82032.5
+     "committee": "59 PAC",
+     "committeeId": "C00961698",
+     "count": 4,
+     "total": 105999.0
+    },
+    {
+     "committee": "NATIONAL RIGHT TO LIFE VICTORY FUND",
+     "committeeId": "C00509893",
+     "count": 2,
+     "total": 9500.0
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -19037,6 +21102,18 @@
     }
    ],
    "support": [
+    {
+     "committee": "MIDNIGHT SUN PAC",
+     "committeeId": "C00956284",
+     "count": 6,
+     "total": 1341961.58
+    },
+    {
+     "committee": "ONE FOR ALL COMMITTEE",
+     "committeeId": "C00752691",
+     "count": 8,
+     "total": 469867.84
+    },
     {
      "committee": "EDW ACTION FUND",
      "committeeId": "C00863472",
@@ -19048,12 +21125,6 @@
      "committeeId": "C00927301",
      "count": 1,
      "total": 123182.0
-    },
-    {
-     "committee": "MIDNIGHT SUN PAC",
-     "committeeId": "C00956284",
-     "count": 2,
-     "total": 57707.6
     },
     {
      "committee": "DEMOCRATS FIGHT BACK PAC",
@@ -19090,6 +21161,12 @@
      "committeeId": "C00802389",
      "count": 17,
      "total": 836.1
+    },
+    {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 2,
+     "total": 0.25
     }
    ]
   },
@@ -19258,10 +21335,16 @@
    ],
    "support": [
     {
+     "committee": "STRONGER SAFER NATION",
+     "committeeId": "C00898924",
+     "count": 1,
+     "total": 878594.25
+    },
+    {
      "committee": "SLF PAC",
      "committeeId": "C00571703",
-     "count": 3,
-     "total": 250000.0
+     "count": 4,
+     "total": 280000.0
     },
     {
      "committee": "SENATE CONSERVATIVES FUND",
@@ -19292,6 +21375,12 @@
   "S6FL00830": {
    "oppose": [
     {
+     "committee": "STRONGER SAFER NATION",
+     "committeeId": "C00898924",
+     "count": 6,
+     "total": 6338664.75
+    },
+    {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
      "count": 16,
@@ -19299,6 +21388,18 @@
     }
    ],
    "support": [
+    {
+     "committee": "FLORIDA FREEDOM PAC",
+     "committeeId": "C00521013",
+     "count": 6,
+     "total": 33070.67
+    },
+    {
+     "committee": "FLIC VOTES INC.",
+     "committeeId": "C90020447",
+     "count": 1,
+     "total": 4796.48
+    },
     {
      "committee": "OUR BLUE DEMOCRACY",
      "committeeId": "C00758508",
@@ -19322,6 +21423,12 @@
      "committeeId": "C00728352",
      "count": 3,
      "total": 636.1
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 4,
+     "total": 384.0
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -19374,6 +21481,18 @@
   "S6GA00390": {
    "oppose": [
     {
+     "committee": "THE GEORGIA WAY",
+     "committeeId": "C00953398",
+     "count": 6,
+     "total": 6050124.88
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 5,
+     "total": 1505161.58
+    },
+    {
      "committee": "GEORGIA VALUES",
      "committeeId": "C00951483",
      "count": 7,
@@ -19414,8 +21533,14 @@
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 6,
-     "total": 14264.01
+     "count": 10,
+     "total": 17770.85
+    },
+    {
+     "committee": "NATIONAL RIGHT TO LIFE VICTORY FUND",
+     "committeeId": "C00509893",
+     "count": 1,
+     "total": 2065.56
     },
     {
      "committee": "TURNING POINT PAC INC.",
@@ -19434,6 +21559,12 @@
   "S6IA00298": {
    "oppose": [
     {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 41,
+     "total": 23249833.39
+    },
+    {
      "committee": "WIN IT BACK PAC",
      "committeeId": "C00844613",
      "count": 9,
@@ -19444,6 +21575,18 @@
      "committeeId": "C00904482",
      "count": 23,
      "total": 3001340.75
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 16,
+     "total": 1377266.4
+    },
+    {
+     "committee": "DIGITAL FREEDOM FUND",
+     "committeeId": "C00911610",
+     "count": 1,
+     "total": 348625.15
     },
     {
      "committee": "HIGH PLAINS PAC",
@@ -19462,12 +21605,6 @@
      "committeeId": "C90018904",
      "count": 21,
      "total": 13474.76
-    },
-    {
-     "committee": "SLF PAC",
-     "committeeId": "C00571703",
-     "count": 1,
-     "total": 11166.0
     }
    ],
    "support": [
@@ -19476,6 +21613,18 @@
      "committeeId": "C00418897",
      "count": 40,
      "total": 9756436.14
+    },
+    {
+     "committee": "ONE FOR ALL COMMITTEE",
+     "committeeId": "C00752691",
+     "count": 12,
+     "total": 1269834.09
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 4,
+     "total": 620974.64
     },
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
@@ -19504,8 +21653,14 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 6,
-     "total": 5832.75
+     "count": 13,
+     "total": 6013.76
+    },
+    {
+     "committee": "IOWANS FOR DECENCY",
+     "committeeId": "C00932996",
+     "count": 1,
+     "total": 4763.08
     },
     {
      "committee": "BLUE SHIFT PAC",
@@ -19538,6 +21693,12 @@
      "total": 1683.21
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 1514.98
+    },
+    {
      "committee": "FF PAC",
      "committeeId": "C00669259",
      "count": 1,
@@ -19554,6 +21715,12 @@
      "committeeId": "C00802389",
      "count": 10,
      "total": 334.81
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 2,
+     "total": 140.0
     },
     {
      "committee": "MOMSRISING PAC",
@@ -19582,6 +21749,18 @@
      "committeeId": "C00865444",
      "count": 6,
      "total": 1786416.82
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 6,
+     "total": 745164.92
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 13,
+     "total": 921.33
     },
     {
      "committee": "BUILDING TOGETHER",
@@ -19616,10 +21795,28 @@
      "total": 215921.03
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 6,
+     "total": 100969.36
+    },
+    {
+     "committee": "DIGITAL FREEDOM FUND",
+     "committeeId": "C00911610",
+     "count": 1,
+     "total": 69725.03
+    },
+    {
      "committee": "MISSION IOWA",
      "committeeId": "C00874370",
      "count": 1,
      "total": 10676.74
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 4,
+     "total": 5227.12
     }
    ]
   },
@@ -19754,13 +21951,26 @@
    ]
   },
   "S6KS00312": {
-   "oppose": [],
+   "oppose": [
+    {
+     "committee": "MAIN STREET FUND",
+     "committeeId": "C00957928",
+     "count": 9,
+     "total": 2001724.0
+    }
+   ],
    "support": [
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 3,
-     "total": 3240.89
+     "count": 9,
+     "total": 6003.57
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 1,
+     "total": 3034.9
     }
    ]
   },
@@ -20007,14 +22217,20 @@
     {
      "committee": "COMMONWEALTH TOGETHER PAC",
      "committeeId": "C00933564",
-     "count": 10,
-     "total": 1660880.75
+     "count": 13,
+     "total": 2222370.33
     }
    ],
    "support": []
   },
   "S6ME00159": {
    "oppose": [
+    {
+     "committee": "END CITIZENS UNITED ACTION FUND",
+     "committeeId": "C90023607",
+     "count": 2,
+     "total": 1012808.72
+    },
     {
      "committee": "PLANNED PARENTHOOD VOTES",
      "committeeId": "C00489799",
@@ -20070,6 +22286,12 @@
      "total": 3026.1
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 31,
+     "total": 2094.99
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
      "count": 1,
@@ -20096,16 +22318,16 @@
    ],
    "support": [
     {
+     "committee": "LEAD MAINE COMMITTEE, INC.",
+     "committeeId": "C00946921",
+     "count": 19,
+     "total": 1008590.99
+    },
+    {
      "committee": "AMERICA'S CREDIT UNIONS",
      "committeeId": "C90023565",
      "count": 4,
      "total": 803333.34
-    },
-    {
-     "committee": "LEAD MAINE COMMITTEE, INC.",
-     "committeeId": "C00946921",
-     "count": 9,
-     "total": 638223.71
     },
     {
      "committee": "SLF PAC",
@@ -20126,6 +22348,12 @@
      "total": 539036.17
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 12,
+     "total": 349406.46
+    },
+    {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
      "committeeId": "C90018904",
      "count": 20,
@@ -20140,8 +22368,8 @@
     {
      "committee": "THE SENTINEL ACTION FUND",
      "committeeId": "C00811166",
-     "count": 1,
-     "total": 1000.0
+     "count": 2,
+     "total": 7818.19
     }
    ]
   },
@@ -20171,6 +22399,36 @@
   "S6ME00464": {
    "oppose": [
     {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 49,
+     "total": 19950617.04
+    },
+    {
+     "committee": "PINE TREE RESULTS PAC",
+     "committeeId": "C00894709",
+     "count": 7,
+     "total": 11238068.0
+    },
+    {
+     "committee": "THE MAINE STANDARD",
+     "committeeId": "C00961342",
+     "count": 5,
+     "total": 3748586.91
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 16,
+     "total": 586336.0
+    },
+    {
+     "committee": "LEAD MAINE COMMITTEE, INC.",
+     "committeeId": "C00946921",
+     "count": 11,
+     "total": 507678.28
+    },
+    {
      "committee": "AMERICAN POLITICAL ACTION COMMITTEE",
      "committeeId": "C99002396",
      "count": 3,
@@ -20191,6 +22449,12 @@
      "total": 1647244.71
     },
     {
+     "committee": "ONE FOR ALL COMMITTEE",
+     "committeeId": "C00752691",
+     "count": 5,
+     "total": 393447.78
+    },
+    {
      "committee": "AFSCME WORKING FAMILIES FUND",
      "committeeId": "C90011172",
      "count": 1,
@@ -20203,16 +22467,28 @@
      "total": 14535.38
     },
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 13,
+     "total": 3374.91
+    },
+    {
+     "committee": "REGISTRATION NATION ACTION FUND",
+     "committeeId": "C90023573",
+     "count": 2,
+     "total": 2915.0
+    },
+    {
+     "committee": "ACTIVATE AMERICA",
+     "committeeId": "C00640300",
+     "count": 5,
+     "total": 2806.51
+    },
+    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 2,
      "total": 2567.6
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 4,
-     "total": 1014.72
     },
     {
      "committee": "DEMOCRATS FIGHT BACK PAC",
@@ -20221,16 +22497,16 @@
      "total": 269.5
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 13,
+     "total": 259.33
+    },
+    {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
      "count": 10,
      "total": 201.3
-    },
-    {
-     "committee": "ACTIVATE AMERICA",
-     "committeeId": "C00640300",
-     "count": 2,
-     "total": 148.64
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -20266,10 +22542,34 @@
   "S6MI00418": {
    "oppose": [
     {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 40,
+     "total": 27088595.5
+    },
+    {
      "committee": "UNITED DEMOCRACY PROJECT ('UDP')",
      "committeeId": "C00799031",
      "count": 25,
      "total": 20140908.74
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 28,
+     "total": 2486172.12
+    },
+    {
+     "committee": "THE SENTINEL ACTION FUND",
+     "committeeId": "C00811166",
+     "count": 12,
+     "total": 1609883.7
+    },
+    {
+     "committee": "GLCF, INC.",
+     "committeeId": "C00853861",
+     "count": 9,
+     "total": 1390228.18
     },
     {
      "committee": "AMERICAN PRINCIPLES PROJECT PAC",
@@ -20314,18 +22614,30 @@
      "total": 14443.58
     },
     {
+     "committee": "TFM",
+     "committeeId": "C00960138",
+     "count": 1,
+     "total": 12500.0
+    },
+    {
      "committee": "RIGHT TO LIFE OF MICHIGAN VICTORY FUND",
      "committeeId": "C00574178",
      "count": 3,
      "total": 8671.12
+    },
+    {
+     "committee": "BUILDING MICHIGAN PAC",
+     "committeeId": "C00958983",
+     "count": 1,
+     "total": 8500.0
     }
    ],
    "support": [
     {
      "committee": "FIGHTING FOR MICHIGAN PAC",
      "committeeId": "C00919373",
-     "count": 10,
-     "total": 1134115.61
+     "count": 22,
+     "total": 2289245.76
     },
     {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
@@ -20346,6 +22658,12 @@
      "total": 289664.76
     },
     {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 3,
+     "total": 242543.71
+    },
+    {
      "committee": "WORKING FAMILIES PARTY PAC",
      "committeeId": "C00606962",
      "count": 10,
@@ -20364,6 +22682,12 @@
      "total": 100000.0
     },
     {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 4,
+     "total": 78742.0
+    },
+    {
      "committee": "PAF",
      "committeeId": "C00754069",
      "count": 2,
@@ -20374,6 +22698,12 @@
      "committeeId": "C00879080",
      "count": 3,
      "total": 57721.63
+    },
+    {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 28,
+     "total": 55008.4
     },
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
@@ -20388,16 +22718,16 @@
      "total": 40600.0
     },
     {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 9,
-     "total": 36624.31
-    },
-    {
      "committee": "UNITY & JUSTICE FUND",
      "committeeId": "C00881011",
      "count": 28,
      "total": 27881.25
+    },
+    {
+     "committee": "MILLIONS OF MICHIGANIANS",
+     "committeeId": "C00718353",
+     "count": 1,
+     "total": 25000.0
     },
     {
      "committee": "EMGAGE FEDERAL POLITICAL ACTION COMMITTEE",
@@ -20408,14 +22738,20 @@
     {
      "committee": "FORWARD BLUE",
      "committeeId": "C00835041",
-     "count": 2,
-     "total": 14243.57
+     "count": 3,
+     "total": 17455.93
     },
     {
      "committee": "UNITED WE CAN",
      "committeeId": "C00523621",
      "count": 1,
      "total": 10821.07
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 25,
+     "total": 9903.33
     },
     {
      "committee": "INDIVISIBLE ACTION",
@@ -20430,6 +22766,12 @@
      "total": 7249.11
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 16,
+     "total": 5787.2
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 1,
@@ -20440,6 +22782,12 @@
      "committeeId": "C90023821",
      "count": 27,
      "total": 2063.21
+    },
+    {
+     "committee": "FOR OUR FUTURE",
+     "committeeId": "C00620971",
+     "count": 2,
+     "total": 1653.26
     },
     {
      "committee": "DISRUPT",
@@ -20458,6 +22806,12 @@
      "committeeId": "C00740514",
      "count": 1,
      "total": 689.74
+    },
+    {
+     "committee": "NEO PHILANTHROPY ACTION FUND INC.",
+     "committeeId": "C90023367",
+     "count": 3,
+     "total": 596.68
     },
     {
      "committee": "THE PEOPLE UNITED PAC",
@@ -20524,6 +22878,18 @@
      "committeeId": "C00799031",
      "count": 26,
      "total": 10517821.3
+    },
+    {
+     "committee": "UNITE TO WIN",
+     "committeeId": "C00739771",
+     "count": 6,
+     "total": 3987047.0
+    },
+    {
+     "committee": "FIGHT FOR MICHIGAN PAC",
+     "committeeId": "C00956904",
+     "count": 2,
+     "total": 1038514.0
     },
     {
      "committee": "CENTER FORWARD COMMITTEE",
@@ -20664,6 +23030,12 @@
      "total": 1940.32
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 7,
+     "total": 1882.25
+    },
+    {
      "committee": "INDIVISIBLE PROJECT INC.",
      "committeeId": "C90017492",
      "count": 1,
@@ -20741,16 +23113,16 @@
      "total": 7556334.41
     },
     {
+     "committee": "MINNESOTANS FOR PROGRESS PAC",
+     "committeeId": "C00955948",
+     "count": 5,
+     "total": 1436435.93
+    },
+    {
      "committee": "CENTER FORWARD COMMITTEE",
      "committeeId": "C00568444",
      "count": 4,
      "total": 1229749.89
-    },
-    {
-     "committee": "MINNESOTANS FOR PROGRESS PAC",
-     "committeeId": "C00955948",
-     "count": 1,
-     "total": 356250.0
     },
     {
      "committee": "BLUE MAJORITY PROJECT",
@@ -20811,6 +23183,12 @@
      "total": 444287.13
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 7,
+     "total": 1632.25
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -20856,8 +23234,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 11,
-     "total": 16103.43
+     "count": 14,
+     "total": 16333.46
     }
    ]
   },
@@ -20920,10 +23298,16 @@
      "total": 901179.26
     },
     {
+     "committee": "VOTERISE",
+     "committeeId": "C00890400",
+     "count": 6,
+     "total": 6316.01
+    },
+    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 3,
-     "total": 1264.32
+     "count": 6,
+     "total": 1298.33
     }
    ]
   },
@@ -21002,22 +23386,28 @@
      "committeeId": "C00693838",
      "count": 1,
      "total": 40110.34
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 4,
+     "total": 3506.84
     }
    ]
   },
   "S6NC00407": {
    "oppose": [
     {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 50,
+     "total": 30232037.15
+    },
+    {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
      "count": 20,
      "total": 1766544.97
-    },
-    {
-     "committee": "SLF PAC",
-     "committeeId": "C00571703",
-     "count": 8,
-     "total": 559551.98
     },
     {
      "committee": "THE CONSERVATIVE CAUCUS DBA AMERICANS FOR CONSTITUTIONAL LIBERTY",
@@ -21046,6 +23436,18 @@
    ],
    "support": [
     {
+     "committee": "PROGRESS NORTH CAROLINA ACTION",
+     "committeeId": "C90022427",
+     "count": 6,
+     "total": 823193.3
+    },
+    {
+     "committee": "PLANNED PARENTHOOD VOTES NORTH CAROLINA",
+     "committeeId": "C00887182",
+     "count": 2,
+     "total": 623847.89
+    },
+    {
      "committee": "WORKERS VOTE",
      "committeeId": "C00754051",
      "count": 5,
@@ -21070,28 +23472,28 @@
      "total": 38316.0
     },
     {
-     "committee": "PLANNED PARENTHOOD VOTES NORTH CAROLINA",
-     "committeeId": "C00887182",
-     "count": 1,
-     "total": 29847.89
-    },
-    {
      "committee": "FORWARD BLUE",
      "committeeId": "C00835041",
+     "count": 4,
+     "total": 34086.6
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
      "count": 3,
-     "total": 26772.09
+     "total": 29718.44
+    },
+    {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 62,
+     "total": 26225.97
     },
     {
      "committee": "DEMOCRATIC MESSAGING PROJECT",
      "committeeId": "C00800995",
      "count": 3,
      "total": 20300.0
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 53,
-     "total": 17614.62
     },
     {
      "committee": "MODSQUAD ACTION",
@@ -21102,8 +23504,8 @@
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 14,
-     "total": 9439.48
+     "count": 20,
+     "total": 10162.21
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -21138,8 +23540,8 @@
     {
      "committee": "GIVEGREEN UNITED ACTION",
      "committeeId": "C00802389",
-     "count": 30,
-     "total": 1734.99
+     "count": 31,
+     "total": 1814.99
     },
     {
      "committee": "JDCA PAC",
@@ -21200,6 +23602,12 @@
      "total": 143240.0
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 19,
+     "total": 10646.0
+    },
+    {
      "committee": "BUILDING TOGETHER",
      "committeeId": "C00955138",
      "count": 1,
@@ -21254,6 +23662,18 @@
      "total": 1504587.74
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 4,
+     "total": 3834.96
+    },
+    {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 6,
+     "total": 440.67
+    },
+    {
      "committee": "INDIGO PAC",
      "committeeId": "C00909465",
      "count": 1,
@@ -21288,8 +23708,8 @@
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 8,
-     "total": 14623.55
+     "count": 12,
+     "total": 18130.39
     }
    ]
   },
@@ -21324,10 +23744,28 @@
   "S6NH00141": {
    "oppose": [
     {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 16,
+     "total": 6070538.03
+    },
+    {
      "committee": "AMERICANS FOR PROSPERITY ACTION, INC. (AFP ACTION) DBA CVA ACTION AND DBA LIBRE ACTION",
      "committeeId": "C00687103",
      "count": 17,
      "total": 1228089.79
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 18,
+     "total": 557388.67
+    },
+    {
+     "committee": "THE SENTINEL ACTION FUND",
+     "committeeId": "C00811166",
+     "count": 8,
+     "total": 548727.83
     },
     {
      "committee": "AMERICAN POLITICAL ACTION COMMITTEE",
@@ -21340,12 +23778,6 @@
      "committeeId": "C90018904",
      "count": 37,
      "total": 32260.72
-    },
-    {
-     "committee": "SLF PAC",
-     "committeeId": "C00571703",
-     "count": 1,
-     "total": 11166.0
     },
     {
      "committee": "CITIZENS AGAINST AIPAC CORRUPTION",
@@ -21408,6 +23840,12 @@
      "committeeId": "C00879080",
      "count": 1,
      "total": 2832.5
+    },
+    {
+     "committee": "ORGANIZE FOR PEACE",
+     "committeeId": "C90023318",
+     "count": 2,
+     "total": 581.76
     }
    ]
   },
@@ -21430,6 +23868,12 @@
      "committeeId": "C00178038",
      "count": 1,
      "total": 2000.0
+    },
+    {
+     "committee": "FORWARD BLUE",
+     "committeeId": "C00835041",
+     "count": 1,
+     "total": 442.93
     }
    ],
    "support": [
@@ -21446,10 +23890,22 @@
      "total": 229500.0
     },
     {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 10,
+     "total": 217293.59
+    },
+    {
      "committee": "TURNING POINT PAC INC.",
      "committeeId": "C00814152",
      "count": 7,
      "total": 88869.2
+    },
+    {
+     "committee": "THE SENTINEL ACTION FUND",
+     "committeeId": "C00811166",
+     "count": 4,
+     "total": 75968.94
     }
    ]
   },
@@ -21466,6 +23922,18 @@
   },
   "S6OH00163": {
    "oppose": [
+    {
+     "committee": "SLF PAC",
+     "committeeId": "C00571703",
+     "count": 31,
+     "total": 41942272.0
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 35,
+     "total": 2585079.71
+    },
     {
      "committee": "BUCKEYES PAC",
      "committeeId": "C00961060",
@@ -21485,10 +23953,16 @@
      "total": 1706777.13
     },
     {
-     "committee": "SLF PAC",
-     "committeeId": "C00571703",
-     "count": 3,
-     "total": 416239.01
+     "committee": "DIGITAL FREEDOM FUND",
+     "committeeId": "C00911610",
+     "count": 1,
+     "total": 1485099.34
+    },
+    {
+     "committee": "THE SENTINEL ACTION FUND",
+     "committeeId": "C00811166",
+     "count": 4,
+     "total": 681432.29
     },
     {
      "committee": "AMERICAN POLITICAL ACTION COMMITTEE",
@@ -21529,16 +24003,16 @@
      "total": 144386.79
     },
     {
+     "committee": "FIELD TEAM 6, INC.",
+     "committeeId": "C00909994",
+     "count": 44,
+     "total": 35351.17
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 18,
      "total": 34074.1
-    },
-    {
-     "committee": "FIELD TEAM 6, INC.",
-     "committeeId": "C00909994",
-     "count": 20,
-     "total": 32775.33
     },
     {
      "committee": "OHIO CITIZEN ACTION",
@@ -21551,6 +24025,12 @@
      "committeeId": "C00835041",
      "count": 2,
      "total": 19131.1
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 18225.5
     },
     {
      "committee": "NATIONAL NURSES UNITED FOR PATIENT PROTECTION",
@@ -21571,6 +24051,18 @@
      "total": 6550.0
     },
     {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 7,
+     "total": 5313.81
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 1,
+     "total": 4403.63
+    },
+    {
      "committee": "MOVEON.ORG POLITICAL ACTION",
      "committeeId": "C00341396",
      "count": 1,
@@ -21583,16 +24075,16 @@
      "total": 3026.37
     },
     {
+     "committee": "ACTIVATE AMERICA",
+     "committeeId": "C00640300",
+     "count": 13,
+     "total": 1624.58
+    },
+    {
      "committee": "JDCA PAC",
      "committeeId": "C00684969",
      "count": 7,
      "total": 1411.85
-    },
-    {
-     "committee": "ACTIVATE AMERICA",
-     "committeeId": "C00640300",
-     "count": 9,
-     "total": 1221.22
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -21604,12 +24096,6 @@
      "committee": "MAJORITY BLUE PAC",
      "committeeId": "C00948000",
      "count": 1,
-     "total": 1000.0
-    },
-    {
-     "committee": "WORKING AMERICA",
-     "committeeId": "C90011156",
-     "count": 2,
      "total": 1000.0
     },
     {
@@ -21635,6 +24121,12 @@
   "S6OH00304": {
    "oppose": [
     {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 8,
+     "total": 1464666.5
+    },
+    {
      "committee": "AFSCME WORKING FAMILIES FUND",
      "committeeId": "C90011172",
      "count": 1,
@@ -21653,6 +24145,12 @@
      "total": 59000.07
     },
     {
+     "committee": "NEIGHBOR VOICES PAC",
+     "committeeId": "C00930321",
+     "count": 34,
+     "total": 19877.0
+    },
+    {
      "committee": "INDIVISIBLE ACTION",
      "committeeId": "C00678839",
      "count": 1,
@@ -21661,8 +24159,8 @@
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 8,
-     "total": 6558.9
+     "count": 11,
+     "total": 6842.26
     },
     {
      "committee": "WINSENATE",
@@ -21671,16 +24169,22 @@
      "total": 5625.0
     },
     {
-     "committee": "BUILDING TOGETHER",
-     "committeeId": "C00955138",
+     "committee": "FORWARD BLUE",
+     "committeeId": "C00835041",
      "count": 1,
-     "total": 1186.48
+     "total": 5470.99
     },
     {
      "committee": "WORKING AMERICA",
      "committeeId": "C90011156",
-     "count": 2,
-     "total": 1000.0
+     "count": 7,
+     "total": 5063.81
+    },
+    {
+     "committee": "BUILDING TOGETHER",
+     "committeeId": "C00955138",
+     "count": 1,
+     "total": 1186.48
     },
     {
      "committee": "INDIVISIBLE PROJECT INC.",
@@ -21695,6 +24199,24 @@
      "committeeId": "C00687103",
      "count": 38,
      "total": 3632209.7
+    },
+    {
+     "committee": "DIGITAL FREEDOM FUND",
+     "committeeId": "C00911610",
+     "count": 1,
+     "total": 1485099.33
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 26,
+     "total": 1373718.21
+    },
+    {
+     "committee": "THE SENTINEL ACTION FUND",
+     "committeeId": "C00811166",
+     "count": 12,
+     "total": 1273184.35
     },
     {
      "committee": "SLF PAC",
@@ -21719,6 +24241,12 @@
      "committeeId": "C00608943",
      "count": 4,
      "total": 92660.0
+    },
+    {
+     "committee": "CLUB FOR GROWTH PAC",
+     "committeeId": "C00432260",
+     "count": 4,
+     "total": 5227.12
     },
     {
      "committee": "ACTIVATE AMERICA",
@@ -21843,7 +24371,7 @@
     {
      "committee": "SECURITY IS STRENGTH PAC",
      "committeeId": "C00573733",
-     "count": 5,
+     "count": 8,
      "total": 140755.64
     }
    ],
@@ -21851,8 +24379,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 10,
-     "total": 19347.78
+     "count": 12,
+     "total": 19347.88
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -21888,10 +24416,22 @@
   "S6SC04437": {
    "oppose": [
     {
+     "committee": "PALMETTO FIRST PAC",
+     "committeeId": "C00956490",
+     "count": 8,
+     "total": 304864.37
+    },
+    {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
      "count": 2,
      "total": 45576.3
+    },
+    {
+     "committee": "HOLD THE LINE PAC",
+     "committeeId": "C00736140",
+     "count": 2,
+     "total": 37500.0
     },
     {
      "committee": "COURAGEOUS CONSERVATIVES PAC",
@@ -21904,8 +24444,8 @@
     {
      "committee": "SECURITY IS STRENGTH PAC",
      "committeeId": "C00573733",
-     "count": 5,
-     "total": 1020591.32
+     "count": 24,
+     "total": 3355223.07
     },
     {
      "committee": "MAGA INC.",
@@ -21924,30 +24464,54 @@
      "committeeId": "C00698936",
      "count": 1,
      "total": 100000.0
+    },
+    {
+     "committee": "NATIONAL RIGHT TO LIFE VICTORY FUND",
+     "committeeId": "C00509893",
+     "count": 2,
+     "total": 5000.0
     }
    ]
   },
   "S6SC04445": {
    "oppose": [
     {
+     "committee": "SECURITY IS STRENGTH PAC",
+     "committeeId": "C00573733",
+     "count": 10,
+     "total": 1667372.16
+    },
+    {
      "committee": "INVEST IN TOMORROW COALITION PAC",
      "committeeId": "C00936997",
      "count": 1,
      "total": 1000000.0
+    },
+    {
+     "committee": "PALMETTO LEADERSHIP FUND",
+     "committeeId": "C00956425",
+     "count": 4,
+     "total": 39447.12
+    },
+    {
+     "committee": "HOLD THE LINE PAC",
+     "committeeId": "C00736140",
+     "count": 2,
+     "total": 37500.0
     }
    ],
    "support": [
+    {
+     "committee": "PALMETTO FIRST PAC",
+     "committeeId": "C00956490",
+     "count": 15,
+     "total": 400250.03
+    },
     {
      "committee": "FREEDOM CAUCUS FUND",
      "committeeId": "C00552851",
      "count": 5,
      "total": 73383.39
-    },
-    {
-     "committee": "PALMETTO FIRST PAC",
-     "committeeId": "C00956490",
-     "count": 1,
-     "total": 14255.39
     },
     {
      "committee": "TEA PARTY PATRIOTS CITIZENS FUND",
@@ -21995,10 +24559,34 @@
      "total": 24960684.38
     },
     {
+     "committee": "LONE STAR RISING PAC",
+     "committeeId": "C00918268",
+     "count": 19,
+     "total": 12641838.83
+    },
+    {
+     "committee": "TEXAS FOREVER",
+     "committeeId": "C00962308",
+     "count": 2,
+     "total": 2113210.0
+    },
+    {
      "committee": "TEXANS DEMANDING ACCOUNTABILITY",
      "committeeId": "C00948695",
      "count": 3,
      "total": 1853480.91
+    },
+    {
+     "committee": "MOMENT OF TRUTH PAC INC.",
+     "committeeId": "C00947762",
+     "count": 1,
+     "total": 1632000.0
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 4,
+     "total": 1271754.29
     },
     {
      "committee": "TEXAS ORGANIZING PROJECT POLITICAL ACTION COMMITTEE",
@@ -22011,12 +24599,6 @@
      "committeeId": "C00544387",
      "count": 1,
      "total": 100000.0
-    },
-    {
-     "committee": "LONE STAR RISING PAC",
-     "committeeId": "C00918268",
-     "count": 3,
-     "total": 90909.71
     },
     {
      "committee": "WAY TO LEAD PAC",
@@ -22055,6 +24637,12 @@
      "total": 6216.79
     },
     {
+     "committee": "PATRIOTS FOR AMERICAN PRINCIPLES INC.",
+     "committeeId": "C00924126",
+     "count": 2,
+     "total": 3601.61
+    },
+    {
      "committee": "TEXAS DEMOCRATIC PARTY",
      "committeeId": "C00099267",
      "count": 1,
@@ -22065,14 +24653,32 @@
      "committeeId": "C00669259",
      "count": 1,
      "total": 500.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 1,
+     "total": 250.0
     }
    ],
    "support": [
+    {
+     "committee": "TEXAS PAC",
+     "committeeId": "C00960211",
+     "count": 16,
+     "total": 68820323.8
+    },
     {
      "committee": "LONE STAR LIBERTY PAC",
      "committeeId": "C00901223",
      "count": 7,
      "total": 2521290.83
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 10,
+     "total": 1093717.7
     },
     {
      "committee": "FELLOWSHIP PAC",
@@ -22095,8 +24701,8 @@
     {
      "committee": "CLUB FOR GROWTH PAC",
      "committeeId": "C00432260",
-     "count": 6,
-     "total": 15545.78
+     "count": 11,
+     "total": 20793.34
     },
     {
      "committee": "AMERICAN PRINCIPLES PROJECT PAC",
@@ -22151,10 +24757,28 @@
   "S6TX00479": {
    "oppose": [
     {
+     "committee": "TEXAS PAC",
+     "committeeId": "C00960211",
+     "count": 19,
+     "total": 62709328.3
+    },
+    {
      "committee": "LONE STAR LIBERTY PAC",
      "committeeId": "C00901223",
      "count": 3,
      "total": 7720655.0
+    },
+    {
+     "committee": "AMERICA PAC",
+     "committeeId": "C00879510",
+     "count": 18,
+     "total": 6403096.6
+    },
+    {
+     "committee": "DEFEND US PAC",
+     "committeeId": "C00634261",
+     "count": 3,
+     "total": 5615930.88
     },
     {
      "committee": "PROTECTING AMERICA'S FUTURE",
@@ -22191,8 +24815,14 @@
     {
      "committee": "LONE STAR RISING PAC",
      "committeeId": "C00918268",
-     "count": 16,
-     "total": 3980261.86
+     "count": 20,
+     "total": 5214826.61
+    },
+    {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 4,
+     "total": 1241445.64
     },
     {
      "committee": "EVANGELICALS FOR A BETTER FUTURE",
@@ -22215,8 +24845,8 @@
     {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 38,
-     "total": 102470.35
+     "count": 41,
+     "total": 102804.79
     },
     {
      "committee": "PROGRESSIVE TURNOUT PROJECT",
@@ -22257,8 +24887,14 @@
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 8,
-     "total": 16330.95
+     "count": 15,
+     "total": 18826.4
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 1,
+     "total": 17015.83
     },
     {
      "committee": "MIJENTE PAC",
@@ -22277,6 +24913,12 @@
      "committeeId": "C00895011",
      "count": 1,
      "total": 9375.0
+    },
+    {
+     "committee": "NAKASEC ACTION FUND",
+     "committeeId": "C90020363",
+     "count": 36,
+     "total": 8685.85
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -22324,6 +24966,12 @@
      "committee": "FF PAC",
      "committeeId": "C00669259",
      "count": 2,
+     "total": 500.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 1,
      "total": 500.0
     },
     {
@@ -22497,8 +25145,14 @@
     {
      "committee": "SLF PAC",
      "committeeId": "C00571703",
-     "count": 5,
-     "total": 313599.98
+     "count": 13,
+     "total": 9850692.26
+    },
+    {
+     "committee": "NATIONAL RIGHT TO LIFE VICTORY FUND",
+     "committeeId": "C00509893",
+     "count": 3,
+     "total": 137565.57
     },
     {
      "committee": "AMERICA ONE",
@@ -22545,34 +25199,58 @@
    ],
    "support": [
     {
+     "committee": "LOWER COSTS NOW",
+     "committeeId": "C00961276",
+     "count": 3,
+     "total": 369650.61
+    },
+    {
+     "committee": "FORWARD BLUE",
+     "committeeId": "C00835041",
+     "count": 4,
+     "total": 38865.09
+    },
+    {
      "committee": "THOMAS PAINE SOCIETY L.L.C.",
      "committeeId": "C90020231",
      "count": 25,
      "total": 31840.65
     },
     {
-     "committee": "FORWARD BLUE",
-     "committeeId": "C00835041",
-     "count": 3,
-     "total": 26553.98
-    },
-    {
      "committee": "FIELD TEAM 6, INC.",
      "committeeId": "C00909994",
-     "count": 10,
-     "total": 21555.52
+     "count": 12,
+     "total": 21936.81
     },
     {
      "committee": "ACTIVATE AMERICA",
      "committeeId": "C00640300",
-     "count": 42,
-     "total": 16879.07
+     "count": 47,
+     "total": 17556.41
     },
     {
      "committee": "ASIAN AMERICAN ADVOCACY FUND PAC",
      "committeeId": "C00739557",
      "count": 47,
      "total": 14146.62
+    },
+    {
+     "committee": "COMMUNITY CHANGE VOTERS",
+     "committeeId": "C00612820",
+     "count": 2,
+     "total": 12719.0
+    },
+    {
+     "committee": "WORKING AMERICA",
+     "committeeId": "C90011156",
+     "count": 5,
+     "total": 9563.63
+    },
+    {
+     "committee": "THE GEORGIA WAY",
+     "committeeId": "C00953398",
+     "count": 1,
+     "total": 8532.25
     },
     {
      "committee": "MOVEON.ORG POLITICAL ACTION",
@@ -22585,6 +25263,12 @@
      "committeeId": "C00878025",
      "count": 3,
      "total": 2914.67
+    },
+    {
+     "committee": "CASA IN ACTION PAC",
+     "committeeId": "C00685693",
+     "count": 1,
+     "total": 2269.36
     },
     {
      "committee": "GIVEGREEN UNITED ACTION",
@@ -22713,5 +25397,5 @@
   }
  },
  "cycle": 2026,
- "read": "2026-11-05"
+ "read": "2026-11-10"
 }
