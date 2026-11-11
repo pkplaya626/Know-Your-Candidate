@@ -322,11 +322,13 @@ def _build_member(row, index, seats_up=None, term_ends=None, person=None, assign
     # (``rosterName``). The same person's curated Senate-run row already
     # read "Andy Barr" beside "Garland Barr".
     # A former member's record is gone from the snapshot; their archived row
-    # keeps its name block (*name_record*, legislators.former_name_record),
-    # which names them and nothing else: no contact, term or Senate cycle
-    # comes with it.
-    named = person or {"nameParts": dict(name_record or {})}
-    display = legislators.display_name(name, person or (named if name_record else None)) or name
+    # keeps its name block and article title (*name_record*,
+    # legislators.former_record), which name them and nothing else: no
+    # contact, term or Senate cycle comes with them.
+    named = person or {k: v for k, v in (name_record or {}).items()
+                       if k in ("nameParts", "wikipedia")}
+    display = legislators.display_name(
+        name, person or (named if named.get("nameParts") else None)) or name
 
     chamber = clean_str(row.get("Chamber"), "")
     kind = _chamber_kind(chamber)
@@ -509,10 +511,12 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
     status line and committee seats - about the term that ended - are not
     shown, and no office or phone is attached. They are shown by the name
     their record says they go by, from the name block the row keeps
-    (``Record Name``, legislators.former_name_record), as a sitting member
-    is: without it, "Earl Carter" for Buddy Carter and "James (Jim) Moylan"
-    on January 3. A row without one keeps the roster's spelling, and
-    validate says so (former-name-unrecorded).
+    (``Record Name``), as a sitting member is: without it, "Earl Carter" for
+    Buddy Carter and "James (Jim) Moylan" on January 3. Their search aliases
+    are a sitting member's too, the record's article title among them
+    (``Record Wikipedia``: "Dick Durbin"); both come through
+    legislators.former_record. A row without a name block keeps the
+    roster's spelling, and validate says so (former-name-unrecorded).
 
     A record incumbent still on the roster is built from the roster (an
     interrupted archive leaves a row in both files). One with no archived
@@ -549,7 +553,7 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
         row = dict(row, **seat)
         left = clean_str(row.get("Left Office"), "")
         profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of,
-                                name_record=legislators.former_name_record(row))
+                                name_record=legislators.former_record(row))
         profile.update(
             formerMember={"left": left, "via": clean_str(row.get("Left Via"), ""),
                           "congress": int(clean_str(row.get("Last Congress"), "0") or 0) or None},
@@ -580,7 +584,7 @@ def _former_members(rows, record, profiles, seats_up, as_of=None):
         held = incumbents[rid]
         left = clean_str(row.get("Left Office"), "")
         profile = _build_member(row, 0, seats_up, None, person=None, as_of=as_of,
-                                name_record=legislators.former_name_record(row))
+                                name_record=legislators.former_record(row))
         profile["formerMember"] = {
             "left": left,
             "via": clean_str(row.get("Left Via"), ""),

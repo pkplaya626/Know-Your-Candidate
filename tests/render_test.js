@@ -18796,7 +18796,7 @@ async function testTheJanuaryPage() {
     return roster;
   };
   const formers = GK.people().filter((p) => p.formerMember && !p.isCandidate);
-  const names = { unrecorded: [], wrong: [], unfound: [], renamed: 0 };
+  const names = { unrecorded: [], wrong: [], unfound: [], renamed: 0, titled: 0 };
   formers.forEach((p) => {
     const row = rowOf[p.id];
     let parts = {};
@@ -18805,7 +18805,15 @@ async function testTheJanuaryPage() {
     const want = recordName(row.Name, parts);
     if (p.name !== want) names.wrong.push(`${p.id}: "${p.name}", the record's "${want}"`);
     if (fold(row.Name) !== fold(p.name)) names.renamed += 1;
-    const lost = [row.Name, p.name].filter((q) => !GK.matchesQuery(p, q.toLowerCase()));
+    // And every form the record gives that a sitting member's aliases read
+    // (legislators.aliases): its official name without a quoted nickname,
+    // and its article title (Record Wikipedia) without a disambiguator -
+    // "Dick Durbin" and "Mike Lawler" found nobody on the first fix.
+    const title = String(row["Record Wikipedia"] || "").replace(/\s*\([^)]*\)\s*$/, "").trim();
+    if (title) names.titled += 1;
+    const forms = [row.Name, p.name, title,
+      String(parts.official_full || "").replace(/\s*"[^"]+"/g, "").trim()].filter(Boolean);
+    const lost = forms.filter((q) => !GK.matchesQuery(p, q.toLowerCase()));
     if (lost.length) names.unfound.push(`${p.name}: not found by "${lost.join('", "')}"`);
   });
   // No former member's own words are in the present tense (rule 67): a
@@ -18855,8 +18863,9 @@ async function testTheJanuaryPage() {
       names.unrecorded.slice(0, 5).join(", ") || `${formers.length} former members`);
     check("each is named as their record says they go by", names.wrong.length === 0 && names.renamed > 0,
       names.wrong.slice(0, 5).join(" | ") || `${names.renamed} named otherwise than the roster`);
-    check("the search finds each by the roster's spelling and by the name shown",
-      names.unfound.length === 0, names.unfound.slice(0, 5).join(" | "));
+    check("the search finds each by the roster's spelling, the name shown and the record's " +
+      "official name and article title", names.unfound.length === 0 && names.titled > 0,
+      names.unfound.slice(0, 5).join(" | ") || `${names.titled} with an article title`);
     check("no former member's status reads in the present tense, in any form or their dialog",
       leftSeat.length > 0 && opened > 0 && present.length === 0,
       present.slice(0, 5).join(" | ") || `${leftSeat.length} who did not run, ${opened} dialogs`);

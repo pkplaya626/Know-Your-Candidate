@@ -847,7 +847,9 @@ def departures(bioguides, snapshot, historical=None):
     member is shown by the roster's legal name - "Earl Carter" for Buddy
     Carter, "James (Jim) Moylan" - where a sitting member is shown by the
     name they go by (:func:`display_name`). Left out where the record has
-    none.
+    none. And the article title the record's ids give (``wikipedia``), which
+    :func:`aliases` reads as it does for a sitting member: without it "Dick
+    Durbin" and "Mike Lawler" found nobody from January 3.
     """
     read = str((snapshot or {}).get("fetched") or "")[:10]
     if not read:
@@ -862,6 +864,9 @@ def departures(bioguides, snapshot, historical=None):
             parts = name_parts(entry.get("name"))
             if parts:
                 out[bioguide]["nameParts"] = parts
+            title = (entry.get("id") or {}).get("wikipedia")
+            if isinstance(title, str) and title.strip():
+                out[bioguide]["wikipedia"] = " ".join(title.split())
     return out
 
 
@@ -1059,9 +1064,12 @@ FORMER_ROSTER = "Former_Members.csv"
 # by, as it shows a sitting member, with no network (former_name_record).
 # Empty where the record holds none, or for a row archived before it was
 # kept: that row keeps the roster spelling, and validate says so
-# (former-name-unrecorded).
+# (former-name-unrecorded). Beside it the article title the record's ids
+# give (``Record Wikipedia``, its ``id.wikipedia``), which the search reads
+# as it does a sitting member's: "Dick Durbin" is Richard Durbin's title,
+# and nothing else he is recorded under says "Dick" (former_record).
 FORMER_COLUMNS = ("Left Office", "Left Via", "Last Congress", "Race Role", "Race ID", "FEC IDs",
-                  "Record Name")
+                  "Record Name", "Record Wikipedia")
 
 
 def former_name_record(row):
@@ -1078,6 +1086,23 @@ def former_name_record(row):
     except ValueError:
         return {}
     return name_parts(block)
+
+
+def former_record(row):
+    """The name fields of the record an archived row keeps, shaped as the
+    snapshot's person record holds them for :func:`display_name` and
+    :func:`aliases`: ``nameParts`` (``Record Name``) and ``wikipedia``
+    (``Record Wikipedia``), each only where kept. Nothing else - no
+    contact, term or Senate cycle - since this is a name, not a person
+    record (profiles._former_members)."""
+    out = {}
+    parts = former_name_record(row)
+    if parts:
+        out["nameParts"] = parts
+    title = " ".join(str((row or {}).get("Record Wikipedia") or "").split())
+    if title:
+        out["wikipedia"] = title
+    return out
 
 
 def _read_rows(path):
@@ -1220,7 +1245,8 @@ def apply(drift, root=".", today=None):
                                                "Race Role": gone.get("raceRole", ""),
                                                "Race ID": gone.get("raceId", ""),
                                                "FEC IDs": ";".join(gone.get("fec") or []),
-                                               "Record Name": _name_cell(gone)}))
+                                               "Record Name": _name_cell(gone),
+                                               "Record Wikipedia": gone.get("wikipedia") or ""}))
                     kept.add((_row_id(row), gone["left"]))
                     report["archived"].append(gone["name"])
                 held["rows"].remove(row)

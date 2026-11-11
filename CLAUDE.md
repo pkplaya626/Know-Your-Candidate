@@ -1700,7 +1700,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     Carter, Burgess Owens, Greg Casar, Jim Moylan and Zach Nunn read "Earl
     Carter", "Clarence Owens", "Gregorio Casar", "James (Jim) Moylan" and
     "Zachary (Zach) Nunn" on their profiles, races, share pages and state
-    pages, and the search found none of them by the name they go by. A row
+    pages, and the search found none of them by the name they go by. The
+    row keeps the entry's article title too (`Record Wikipedia`, its
+    `id.wikipedia`; `legislators.former_record` gives both): a sitting
+    member's aliases read it, and the first fix, keeping the name block
+    alone, lost "Dick Durbin", "Mike Lawler", "Rob Wittman" and five more
+    from the search on January 3. A row
     with no block keeps the roster spelling and is a warning
     (`former-name-unrecorded`), never a guess. Once the new Congress sits a
     member who did not run is in the past tense, "Did not run for

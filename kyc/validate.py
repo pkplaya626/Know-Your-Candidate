@@ -136,7 +136,7 @@ def check_former_names(profiles, raw):
                   f"{len(bare)} former members' archived rows keep no record name block, so "
                   f"they are shown by the roster's spelling: add the name block of their "
                   f"legislators-historical entry as JSON in Former_Members.csv's "
-                  f"\"Record Name\"", bare)]
+                  f"\"Record Name\" (and its id.wikipedia in \"Record Wikipedia\")", bare)]
 
 
 def check_seats(profiles):

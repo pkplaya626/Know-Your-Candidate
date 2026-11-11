@@ -609,7 +609,10 @@ atomically:
   the build names a former member as their record says they go by, as it
   names a sitting member, with no network: the new snapshot no longer holds
   them, and without it Buddy Carter read "Earl Carter" and Jim Moylan
-  "James (Jim) Moylan" on the January rehearsal. A row with none keeps the
+  "James (Jim) Moylan" on the January rehearsal. Beside it the entry's
+  Wikipedia title (`Record Wikipedia`, its `id.wikipedia`), which the search
+  reads as a sitting member's aliases do: "Dick Durbin" is in Richard
+  Durbin's record nowhere else. A row with no name block keeps the
   roster's spelling, and `validate` warns (`former-name-unrecorded`). Who
   has left is decided by bioguide id, never by name: `legislators-historical`
   lists them with a term ended by the day the snapshot was read, and the day
