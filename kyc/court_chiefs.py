@@ -21,7 +21,9 @@ judge's heading, none titled chief), keeps the last read (rule 8), each
 read carries its own day, and a read older than
 ``STALE_DAYS`` is a build warning. A recipe for a court whose directory
 record is settled is read all the same but not shown, and the build says
-the recipe can go.
+the recipe can go - unless the court's last read named another chief than
+the directory's, which is two sources disagreeing and is said as such, with
+who each names (``court-chief-sources-disagree``).
 
 The result is the judiciary cache's ``courtChiefs``:
 ``{court id: {"chief", "title", "words", "source", "read"}}``, or
@@ -225,7 +227,29 @@ def problems(cache, today=None):
                     f"{len(no_recipe)} court(s) whose directory record cannot say who is chief "
                     f"have no recipe to read the court's own site (kyc/court_chiefs.py)",
                     no_recipe))
-    unused = sorted(cid for cid in RECIPES if cid not in unsettled)
+    # A settled court whose own page, at its last read, named another chief
+    # is two sources disagreeing (rule 82), never a recipe that "can go": the
+    # first warning on the Middle District of North Carolina would have led a
+    # person to delete the recipe without seeing that the FJC now names David
+    # Alan Bragdon while the court's page named Catherine C. Eagles.
+    judges = cache.get("judges") or {}
+    disagree, unused = [], []
+    for cid in sorted(cid for cid in RECIPES if cid not in unsettled):
+        entry = reads.get(cid) or {}
+        settled = (courts.get(cid) or {}).get("chief")
+        if entry.get("chief") and settled and entry.get("judge") != settled:
+            name = (judges.get(settled) or {}).get("name") or settled
+            disagree.append(f"{cid}: the FJC directory names {name}; the court's page, read "
+                            f"{entry.get('read')}, named {entry['chief']} "
+                            f"(\"{entry.get('words')}\", {entry.get('source')})")
+        else:
+            unused.append(cid)
+    if disagree:
+        out.append(("warn", "court-chief-sources-disagree",
+                    f"{len(disagree)} court(s) whose directory record names a chief were last "
+                    f"read by the court's own page naming someone else; the directory's is shown. "
+                    f"Read the court's page again ('judiciary --chiefs-only') before removing its "
+                    f"recipe", disagree))
     if unused:
         out.append(("warn", "court-chief-recipe-unused",
                     f"{len(unused)} court chief recipe(s) are for courts whose directory record "

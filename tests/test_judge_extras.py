@@ -144,6 +144,27 @@ class TestTheCourtsWordOnItsChief(unittest.TestCase):
         codes = [p[1] for p in court_chiefs.problems(cache(entry, unsettled=False), TODAY)]
         self.assertIn("court-chief-recipe-unused", codes)
 
+    def test_a_settled_court_whose_page_named_another_chief_is_a_disagreement(self):
+        # The PR #218 review: the FJC came to name a new chief of the Middle
+        # District of North Carolina while the court's page, at its last
+        # read, still named Catherine C. Eagles, and the build only said the
+        # recipe "can go".
+        reads, _ = court_chiefs.fetch(judges(), None, read=lambda url: NCMD, today=TODAY)
+        settled = cache(reads["nc-m"], unsettled=False)
+        settled["courts"]["nc-m"]["chief"] = "fjc-2"
+        found = {p[1]: p for p in court_chiefs.problems(settled, TODAY)}
+        self.assertIn("court-chief-sources-disagree", found)
+        self.assertNotIn("court-chief-recipe-unused", found)
+        detail = " ".join(found["court-chief-sources-disagree"][3])
+        self.assertIn("William Lindsay Osteen, Jr.", detail)
+        self.assertIn("Catherine C. Eagles", detail)
+        self.assertIsNone(court_chiefs.shown(settled, "nc-m"))
+        # The directory agreeing with the page: the recipe can go.
+        settled["courts"]["nc-m"]["chief"] = "fjc-1"
+        codes = [p[1] for p in court_chiefs.problems(settled, TODAY)]
+        self.assertIn("court-chief-recipe-unused", codes)
+        self.assertNotIn("court-chief-sources-disagree", codes)
+
     def test_a_chief_who_has_left_the_court_is_not_shown(self):
         entry = dict(court_chiefs.read_court("nc-m", NCMD, judges()), source="x", read=TODAY)
         left = cache(entry)
