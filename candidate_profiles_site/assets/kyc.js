@@ -1018,10 +1018,16 @@
    *  (newTerm) whatever `seatUp2026` says - the campaign's flag, which stays
    *  true of a record incumbent re-seated for the new term, so in January a
    *  newcomer read "Seat up in 2028" and a re-elected holder on the same
-   *  term read nothing. kyc/share.py's seat_up says the same. */
+   *  term read nothing. A term begun after Election Day that ends with the
+   *  cycle's Congress (a winner seated in December for the rest of the
+   *  old term) is up in the election just held, so it says nothing, as
+   *  before: "Seat up in 2026" would have stood past that day (the review
+   *  of PR #229). kyc/share.py's seat_up says the same. */
   function seatUpYear(item) {
     if (!item || !seated(item) || !item.electionYear) return "";
-    return !item.seatUp2026 || newTerm(item) ? String(item.electionYear) : "";
+    var cycle = (meta().election || {}).year || 2026;
+    var next = !!newTerm(item) && Number(item.electionYear) > Number(cycle);
+    return !item.seatUp2026 || next ? String(item.electionYear) : "";
   }
 
   /** Who Congress's record seats in *race*'s seat for the term it decided
@@ -3710,6 +3716,7 @@
       senateSeatsUp: "Senate seats on the 2026 ballot",
       senateDefending: senateBases().defending,
       houseSeatsUp: "House seats on the 2026 ballot",
+      challengers: "Challengers on the 2026 ballot",
     };
   }
 

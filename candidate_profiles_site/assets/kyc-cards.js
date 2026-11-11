@@ -76,8 +76,10 @@
    * it; "Running in … (redrawn)" is "Ran in" or "Re-elected in", as
    * KYC.contestLine words it. */
   var SEAT_BADGES_AFTER = {
-    leaving: { title: "The member’s status line says they retired or did not run for this seat " +
-      "again in 2026." },
+    // Never "retired": from the day after Election Day to January 3 they
+    // still hold the seat (the review of PR #229).
+    leaving: { title: "The member’s status line says they did not run for this seat again in " +
+      "2026." },
     challenger: { title: "Filed with the FEC for 2026; no result this site read says where they " +
       "stood." },
     up: { title: "This Senate seat’s term ends in January 2027, so the seat was on the 2026 " +

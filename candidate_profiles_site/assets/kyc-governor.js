@@ -218,8 +218,8 @@
     if (!parts) {
       var b = sg().ballotOf(code);
       var item = b && b.offices.governor;
-      return panel("flag", title, '<p class="race-note">' + KYC.escapeHtml(KYC.stateName(code)) +
-        " does not elect its governor in 2026." + (item ? " " + sg().officeMark(code, "governor") : "") +
+      return panel("flag", title, '<p class="race-note">' + KYC.escapeHtml(sg().noGovernorRace(code)) +
+        (item ? " " + sg().officeMark(code, "governor") : "") +
         "</p>");
     }
     if (parts.none) {
@@ -246,8 +246,9 @@
     // (TRUST-14); each price quoted and dated, labelled not a poll and not
     // this site's forecast (rule 40).
     html += sg().raceOdds(code, { compact: true, collapsed: true });
+    // Never "not the state’s": a territory's overlay is no state's (rule 75).
     html += '<p class="race-note gov-money-note">Money in this race is not looked at here: this site ' +
-      "reads federal campaign filings only, not the state’s.</p>";
+      "reads federal campaign filings only.</p>";
     return panel("flag", title, html, "governorModalRacePanel");
   }
 
@@ -380,8 +381,7 @@
         ? absent("Not shown here: see their record")
         : absent("Not looked at: this site reads no biography for a candidate for governor " +
           "beyond the election office’s list and the race’s article")) +
-      field("Campaign finance", absent("Not looked at: this site reads federal campaign filings only, " +
-        "not the state’s")) +
+      field("Campaign finance", absent("Not looked at: this site reads federal campaign filings only")) +
       field("Platform", absent("Not looked at: this site reads no platform for a candidate for governor"), true) +
       field("Links", articleLine(person), true) +
       "</div>" +
@@ -398,8 +398,10 @@
     return d.textContent.replace(/\s+/g, " ").trim();
   }
 
-  // "These", never "the state’s": a territory is never a state (rule 75).
-  var PAST = "This site does not read these results and names no winner";
+  // Never "the state’s": a territory is never a state (rule 75); and never
+  // "these", which named no results before it in an unfurl or on Guam's
+  // page (the review of PR #229).
+  var PAST = "This site does not read the election’s results and names no winner";
   var RECORD = { holder: "The sitting governor: see their record ›",
                  member: "A member of Congress: see their profile ›",
                  // stategov's memberFormer: the membership snapshot no longer seats them.

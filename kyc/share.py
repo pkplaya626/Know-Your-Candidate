@@ -932,6 +932,22 @@ def _state_page(code):
     return f"../states/{str(code).lower()}.html"
 
 
+# The places a sentence names with "the" (voting_dates.PLACES' codes).
+_WITH_THE = ("DC", "MP", "VI")
+
+
+def page_place(code):
+    """A state page named in a link's words as the page names itself (rule
+    75: one name in the navigation, the title and the links to it), with
+    "the" where a sentence needs it: "the Virgin Islands", whose page is
+    titled "Virgin Islands" - "the U.S. Virgin Islands’ page" named it
+    otherwise (the review of PR #229)."""
+    from .pages import state_name
+
+    name = state_name(code)
+    return f"the {name}" if code in _WITH_THE else name
+
+
 def _seat_parts(label):
     """``"House • AL-4"`` -> ``("U.S. House", "AL-4")``; ``"Senate • AL"`` ->
     ``("U.S. Senate", "Alabama")``; an at-large seat -> ``"Alaska (at
@@ -993,11 +1009,21 @@ def seat_up(person):
     whatever ``seatUp2026`` says. That is the campaign's flag and stays true
     of a record incumbent re-seated for the new term, so in January a
     newcomer read "Seat up in 2028" and a re-elected holder on the same
-    term read nothing. KYC.seatUpYear says the same."""
+    term read nothing. A term begun after Election Day that ends with the
+    cycle's Congress (a winner seated in December for the rest of the old
+    term) is up in the election just held and says nothing, as before: "Seat
+    up in 2026" would have stood past that day (the review of PR #229).
+    KYC.seatUpYear says the same."""
+    from . import cycle
     from .record import seated
 
-    if (seated(person) and person.get("electionYear") and
-            (not person.get("seatUp2026") or new_term(person))):
+    if not (seated(person) and person.get("electionYear")):
+        return None
+    try:
+        later = int(person["electionYear"]) > cycle.CYCLE
+    except (TypeError, ValueError):
+        later = False
+    if not person.get("seatUp2026") or (new_term(person) and later):
         return f"Seat up in {person['electionYear']}"
     return None
 
@@ -1049,7 +1075,6 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
     for an id the person's profile once had (rule 25's merged filings, a
     filer since seated), its canonical address their own page's."""
     from .pages import _possessive
-    from .voting_dates import place
 
     pid = person["id"]
     lead, description, status = describe(person, by_id, races_by_id, post)
@@ -1087,7 +1112,7 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
         view=_e(f"../index.html#/profile/{pid}"),
         view_words=_e(f"Open {person.get('name')}'s full profile"),
         fallback=(f'<a href="{_e(_state_page(person.get("state")))}">'
-                  f'{_e(_possessive(place(person.get("state"))))} page</a> '
+                  f'{_e(_possessive(page_place(person.get("state"))))} page</a> '
                   "lists its members and races in plain text."),
     )
 
@@ -1406,14 +1431,13 @@ def describe_race(race, by_id, races_by_id, post=False):
 def render_race(race, host, by_id, races_by_id, post=False):
     """``r/<raceId>.html``."""
     from .pages import _possessive
-    from .voting_dates import place
 
     label = race.get("label") or race["id"]
     year = race.get("year") or ""
     state = race.get("state") or ""
-    # In a sentence, a place's own words (rule 75): "the District of
-    # Columbia's page".
-    whose = _possessive(place(state))
+    # In a sentence, the page's own name (rule 75): "the District of
+    # Columbia's page", "the Virgin Islands' page".
+    whose = _possessive(page_place(state))
     what = _what(race)
     return _page(
         host, race_path(race["id"]),

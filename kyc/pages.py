@@ -667,7 +667,7 @@ def governor_static(code, gov_state, post, pad="                "):
     rows.append(f"{pad}    <p>In surname order, not ballot order. {recased}Source: "
                 f"{_out_link(listed['url'], listed['source'])} (read {time_html(listed.get('read'))})"
                 f"{write_in_credit}."
-                + (" This site does not read these results and names no winner." if post else "")
+                + (" This site does not read the election’s results and names no winner." if post else "")
                 + "</p>")
     return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])
 

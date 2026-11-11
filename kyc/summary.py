@@ -86,6 +86,22 @@ def seated_up(senators, races):
     return _split([p for p in senators if (p.get("state"), p.get("senateClass")) in seats])
 
 
+# The posts each Congress fills whose holders the search names first, as
+# legislators.held_posts titles them: the presiding officers and the floor
+# leaders. "Leaders in Congress" says which of them the record does not hold
+# yet for the sitting Congress.
+PRINCIPAL_POSTS = ("Speaker of the House", "House Majority Leader", "House Minority Leader",
+                   "President Pro Tempore of the Senate", "Senate Majority Leader",
+                   "Senate Minority Leader")
+
+
+def _either(titles):
+    """``["A"]`` -> "A"; ``["A", "B"]`` -> "A or B"; three or more -> "A, B, or C"."""
+    if len(titles) < 3:
+        return " or ".join(titles)
+    return ", ".join(titles[:-1]) + ", or " + titles[-1]
+
+
 def build(profiles, races=None, committees=None, results=None, snapshot=None, root=None):
     """Chamber balance and 2026 election headline figures. *results*, the
     results cache, dates what the page says about who won. Given *root*,
@@ -160,15 +176,20 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         },
     }
 
-    # Who leads each chamber, where no sitting member holds any post
-    # recorded in the sitting Congress (legislators.held_posts, rule 68):
-    # on the January rehearsal "Speaker" answered with former state
+    # Who leads each chamber, where no sitting member holds a principal
+    # post recorded in the sitting Congress (legislators.held_posts, rule
+    # 68): on the January rehearsal "Speaker" answered with former state
     # speakers' careers and no word that the new Congress's leaders were not
-    # recorded yet, which the federal page says of its Speaker. The search's
-    # answer reads these words (kyc-search.js leaders).
-    if summary["congress"] and members and not any(p.get("leadership") for p in members):
+    # recorded yet, which the federal page says of its Speaker. Asked post
+    # by post, as the federal page asks, since the file may record one
+    # chamber's leaders before the other's (the review of PR #229). The
+    # search's answer reads these words (kyc-search.js leaders).
+    held = {title for p in members for title in (p.get("leadership") or [])}
+    missing = [title for title in PRINCIPAL_POSTS if title not in held]
+    if summary["congress"] and members and missing:
         from .federal_build import not_yet_recorded
-        summary["leadersUnrecorded"] = (not_yet_recorded(summary["congress"], "leaders") +
+        what = "leaders" if len(missing) == len(PRINCIPAL_POSTS) else _either(missing)
+        summary["leadersUnrecorded"] = (not_yet_recorded(summary["congress"], what) +
                                         "; this site names them once it does.")
 
     # What the job pays: the year and sources of each profile's figure

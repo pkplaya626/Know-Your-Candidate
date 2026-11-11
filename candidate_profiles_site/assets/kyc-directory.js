@@ -126,6 +126,11 @@
         results: "members who were not on " + ballot + " for the seat they held, " +
           "all of whom have since left Congress",
       },
+      unchallenged: {
+        label: KYC.cards.raceFilterWords("unchallenged"),
+        title: "Races in which nobody was on " + ballot + " but the member who held the seat, " +
+          "as each race's heading says",
+      },
     };
   }
 
@@ -139,12 +144,16 @@
       senateUp26: {
         title: "The Senate seats on the 2026 ballot: the senator who holds each, and everyone who ran for it",
       },
+      // Never "they retired": they hold the seat until January 3 (the
+      // review of PR #229). The chip's label is the race heads' own, in
+      // their tense (rule 99: KYC.cards.raceFilterWords).
       notSeeking: {
-        title: "Members who were not on the November 2026 ballot for their seat: they retired, ran " +
-          "for another office, withdrew or lost a primary. A member who ran for the House again " +
-          "under a new district number is not among them.",
+        title: "Members who were not on the November 2026 ballot for their seat: they are " +
+          "retiring at the end of the term, ran for another office, withdrew or lost a primary. " +
+          "A member who ran for the House again under a new district number is not among them.",
       },
       unchallenged: {
+        label: KYC.cards.raceFilterWords("unchallenged"),
         title: "Races with nobody on the November ballot but the seat's holder, as each race's " +
           "heading says",
       },

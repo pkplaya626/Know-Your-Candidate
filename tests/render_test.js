@@ -3297,7 +3297,7 @@ async function testStates() {
     const results = ((gaVoted.window.kycBuildMeta.voting || {}).GA || {}).results;
     const source = gov.querySelector(".gov-candidates-source");
     check("the state's own results are linked; this site names no winner",
-      /This site does not read these results and names no winner/.test(source.textContent) &&
+      /This site does not read the election’s results and names no winner/.test(source.textContent) &&
         (!results || [...source.querySelectorAll("a")].some((a) => a.getAttribute("href") === results)) &&
         !/\b(won|winner:|elected governor)\b/i.test(gov.textContent.replace(/names no winner/g, "")),
       source.textContent);
@@ -22746,6 +22746,32 @@ async function testWordsSinceElectionDay() {
       check("the Challengers chip's hover", chip("role", "candidate") === (after
         ? "Only 2026 candidates who did not hold the seat"
         : "Only 2026 candidates who do not currently hold the seat"), chip("role", "candidate"));
+      // The review of PR #229: from November 4 to January 2 a member off the
+      // ballot still holds the seat, so neither the key nor the chip says
+      // they "retired"; the grid's chip and sidebar row say what the state
+      // page's chip and the race heads say, in their tense.
+      const chipLabel = T(D.querySelector('[data-group="election"][data-value="unchallenged"]'));
+      check("the unchallenged chip is named as the race heads name it (KYC.cards.raceFilterWords)",
+        chipLabel === w.KYC.cards.raceFilterWords("unchallenged") &&
+          chipLabel === (after ? "No challenger was on the ballot" : "No challenger on the ballot"), chipLabel);
+      check("the sidebar's challengers row is in the clock's tense", label("challengers") === (after
+        ? "Challengers on the 2026 ballot" : "Challengers on the ballot"), label("challengers"));
+      check("no one still holding their seat is said to have retired, in the key or the chip's hover",
+        !after || (!/they retired|says they retired/.test(key) && !/: they retired/.test(chip("election", "notSeeking")) &&
+          /retiring at the end of the term/.test(chip("election", "notSeeking"))),
+        chip("election", "notSeeking"));
+      // Its "Show them" works this switch for members who have left Congress
+      // as for people out of the race (hiddenWords): its hover names both.
+      check("the switch that shows who is hidden names both groups it hides",
+        /primary removed/.test(chip("eliminated", "show")) && /left Congress/.test(chip("eliminated", "show")),
+        chip("eliminated", "show"));
+      const december = { id: "Z0", name: "Pat December", isCandidate: false, chamber: "Senate", state: "OH",
+        electionYear: 2026, seatUp2026: true, term_start: "2026-12-08 - 2027-01-03" };
+      check("a winner seated after Election Day for the rest of the old term has no 'Seat up' line; " +
+        "one seated for the new term has", !!w.KYC.seatUpYear && w.KYC.seatUpYear(december) === "" &&
+        w.KYC.seatUpYear(Object.assign({}, december, { electionYear: 2028,
+          term_start: "2027-01-03 - 2029-01-03" })) === "2028",
+      w.KYC.seatUpYear ? JSON.stringify(w.KYC.seatUpYear(december)) : "(no seatUpYear)");
       check("the election chips' hovers say nobody is running", !after ||
         (!/running for it|not running again|whose primary is settled/.test(
           chip("election", "senateUp26") + chip("election", "notSeeking") + chip("election", "unchallenged")) &&
@@ -22792,6 +22818,22 @@ async function testWordsSinceElectionDay() {
     }
     const az = await ballotFor("#/?zip=85004", { now });
     const senate = contestsOf(az.out).find((c) => c.office === "U.S. Senate");
+    // A territory's governor overlays (rule 75): the sitting governor's and
+    // a candidate's, whose money notes said "not the state’s" (the review of
+    // PR #229), and the results line that said "these results" of nothing.
+    const gu = await buildPage("states/gu.html", { now });
+    await settle(80);
+    const guData = (gu.window.kycStateGov || {}).states || {};
+    const guRace = ((((guData.GU || {}).ballot2026 || {}).offices || {}).governor || {}).candidates || {};
+    const guIds = [((guData.GU || {}).governor || {}).id].concat((guRace.candidates || []).map((p) => p.id))
+      .filter(Boolean);
+    const guText = guIds.map((id) => {
+      gu.window.KYC.governor.open(id);
+      const m = gu.D.getElementById("governorModal");
+      const text = T(m);
+      gu.window.KYC.governor.close && gu.window.KYC.governor.close();
+      return text;
+    });
     suite(`a state's races and Your ballot — the election's tense (${clock})`, () => {
       const all = Object.values(leads).join(" ");
       if (after) {
@@ -22805,6 +22847,15 @@ async function testWordsSinceElectionDay() {
         check("the campaign's lead", Object.values(leads).every((t) => /^Each seat with the sitting member/.test(t)) &&
           /the same ballot also elects /.test(leads.il), JSON.stringify(leads).slice(0, 600));
       }
+      check("Guam's governor overlays never call it a state, and name the results they mean (rule 75)",
+        guIds.length > 1 && guText.every((t) => t.length > 100 && !/\bthe state\b|\bthe state['’]s\b|these results/i.test(t)),
+        guText.map((t) => (/.{0,60}(the state|these results).{0,40}/i.exec(t) || [""])[0]).filter(Boolean).join(" | ") ||
+          `${guIds.length} overlays`);
+      check("a place with no governor's race says so in the clock's tense, on every view (rule 63)",
+        ["DC", "PR"].every((c) => !gu.window.KYC.stategov.noGovernorRace ||
+          (after ? / did not elect its governor in 2026\.$/ : / does not elect its governor in 2026\.$/)
+            .test(gu.window.KYC.stategov.noGovernorRace(c))) && !!gu.window.KYC.stategov.noGovernorRace,
+        String(gu.window.KYC.stategov.noGovernorRace && gu.window.KYC.stategov.noGovernorRace("DC")));
       check("Your ballot's Senate card for a state with no Senate race", !!senate &&
         (after ? /Neither of Arizona['’]s U.S. Senate seats was up in 2026\./.test(T(senate.li))
           : /Neither of Arizona['’]s U.S. Senate seats is up in 2026\./.test(T(senate.li))),

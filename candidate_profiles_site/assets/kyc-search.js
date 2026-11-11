@@ -568,9 +568,14 @@
       var rank = function (t) { return PRINCIPAL.test(t) ? 0 : 1; };
       return rank(a.title) - rank(b.title) || a.title.localeCompare(b.title);
     });
+    // Where the record holds some of the sitting Congress's principal posts
+    // and not others, the ones it does not are said under those it does
+    // (the review of PR #229): a query for one of them falls back to no
+    // career text without a word.
     return [block("offices", "Leaders in Congress", held.slice(0, LIMIT * 2).map(function (h) {
       return row(esc(h.title) + ":", memberLink(h.p.id, h.p.name));
-    }), { note: esc("As congress-legislators records the posts held in this Congress.") })];
+    }), { note: esc("As congress-legislators records the posts held in this Congress." +
+      (unrecorded ? " " + unrecorded : "")) })];
   }
 
   /* ------------------------------------------------ seats in Congress */

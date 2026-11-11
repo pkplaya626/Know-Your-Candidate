@@ -50,10 +50,22 @@ class TestAPlaceInASentence(unittest.TestCase):
         self.assertIn("the District of Columbia&#x27;s page</a>", html)
         self.assertNotIn("for District of Columbia", html)
 
+    def test_a_link_to_a_state_page_names_it_as_the_page_names_itself(self):
+        # Rule 75: one name in the navigation, the title and the links. The
+        # page is titled "Virgin Islands"; "the U.S. Virgin Islands’ page"
+        # named it otherwise (the review of PR #229).
+        person = {"id": "P000610", "name": "Pat Example", "party": "Democrat", "state": "VI",
+                  "chamber": "House", "officeLabel": "House • VI-AL"}
+        html = share.render_profile(person, "example.org", {"P000610": person}, {})
+        self.assertIn("the Virgin Islands&#x27; page</a>", html)
+        self.assertNotIn("U.S. Virgin Islands&#x27; page", html)
+        self.assertEqual(share.page_place("VI"), "the Virgin Islands")
+        self.assertEqual(share.page_place("TX"), "Texas")
+
     def test_the_governor_overlays_never_call_a_territory_a_state(self):
         self.assertNotIn("state", governor_share.PAST)
         self.assertEqual(governor_share.PAST,
-                         "This site does not read these results and names no winner")
+                         "This site does not read the election’s results and names no winner")
 
 
 class TestSeatUpInOneReading(unittest.TestCase):
@@ -74,6 +86,12 @@ class TestSeatUpInOneReading(unittest.TestCase):
 
     def test_a_former_member_has_no_seat_up(self):
         self.assertIsNone(share.seat_up(self.member(formerMember={"left": "2027-01-03"})))
+
+    def test_a_winner_seated_in_december_for_the_old_term_says_nothing(self):
+        # The review of PR #229: a term begun after Election Day that ends
+        # with the cycle's Congress read "Seat up in 2026", a day gone by.
+        self.assertIsNone(share.seat_up(self.member(
+            seatUp2026=True, electionYear=2026, term_start="2026-12-08 - 2027-01-03")))
 
 
 class TestThePagesWrittenOnce(unittest.TestCase):
@@ -201,8 +219,21 @@ class TestLeadersNotYetRecorded(unittest.TestCase):
         self.assertEqual(built["leadersUnrecorded"],
                          "congress-legislators has not yet recorded the 120th Congress's leaders; "
                          "this site names them once it does.")
-        led = summary.build([dict(member, leadership=["Speaker of the House"])], snapshot=RECORD)
+        led = summary.build([dict(member, leadership=list(summary.PRINCIPAL_POSTS))], snapshot=RECORD)
         self.assertNotIn("leadersUnrecorded", led)
+
+    def test_asked_post_by_post(self):
+        # The review of PR #229: a record holding the Speaker and not the
+        # Senate's leaders said nothing, and "Senate majority leader" fell
+        # back to career text without a word.
+        member = {"id": "Z900001", "name": "Pat Example", "isCandidate": False, "chamber": "House",
+                  "state": "OH", "party": "Republican", "officeLabel": "House • OH-1"}
+        some = summary.build([dict(member, leadership=["Speaker of the House", "House Majority Leader",
+                                                       "House Minority Leader"])], snapshot=RECORD)
+        self.assertEqual(some["leadersUnrecorded"],
+                         "congress-legislators has not yet recorded the 120th Congress's President "
+                         "Pro Tempore of the Senate, Senate Majority Leader, or Senate Minority Leader; "
+                         "this site names them once it does.")
 
 
 class TestASeatedWinnersMoneyNotReadYet(unittest.TestCase):
