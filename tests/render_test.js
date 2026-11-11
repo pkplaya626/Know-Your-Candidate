@@ -18455,6 +18455,160 @@ async function testGovernorOverlays() {
   }
 }
 
+/* ================================================== the January page */
+
+/* The real January page (the PR #223 review): every other suite builds the
+ * January rehearsal's pages with the phase rewound to the campaign's, so
+ * Utah's strip read "3 members running under a new district number" over
+ * three members sitting in the seats they won, CA-41's row "Held by Ken
+ * Calvert. Elected: Ken Calvert (R), Linda Sánchez (D)", KY-6's share page
+ * "Andy Barr (Republican), holds the seat" of a senator, and CA-3 "Kevin
+ * Kiley, who holds this seat" of a member who had left - and nothing failed.
+ * This suite builds the pages on a clock after noon, Eastern, on January 3
+ * (NEW_CONGRESS), in the phase the data says, from the data as it is. It
+ * runs only where the data is in the record phase: the January rehearsal
+ * (tools/rehearse_changeover.py) runs it, and main's CI says it skipped.
+ * The words it expects are built here from the record's fields, not asked
+ * of the code that writes them. */
+const JANUARY_NOW = "2027-01-10T12:00:00";
+const JANUARY_STATES = ["ut", "ca", "fl", "ky", "tx"];
+
+async function testTheJanuaryPage() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  const phase = (meta.election || {}).phase;
+  if (phase !== "record") {
+    suite("the January page, as the data says it (rule 74)", () => {
+      check(`skipped: the data is in the "${phase}" phase; the January rehearsal ` +
+        "(tools/rehearse_changeover.py) builds it in the record phase and runs this suite", true);
+    });
+    return;
+  }
+  const MAP = " under the state’s new district map";
+  // A race id's seat as a clause names it: "Senate KY", "CA-40", "WY-AL".
+  const seatOf = (rid) => {
+    const m = /^([SH])-([A-Z]{2})(?:-(\d+))?-\d{4}$/.exec(rid || "");
+    return !m ? "" : m[1] === "S" ? "Senate " + m[2] : m[2] + "-" + (Number(m[3]) || "AL");
+  };
+  const bad = { errors: [], strip: [], section: [], row: [], share: [], plain: [] };
+  let movers = 0;
+  const named = {};
+  for (const code of JANUARY_STATES) {
+    const built = await buildPage("states/" + code + ".html", { now: JANUARY_NOW });
+    await settle(80);
+    const { window, D, errors } = built;
+    const KYC = window.KYC;
+    if (errors.length) bad.errors.push(`${code}: ${errors[0]}`);
+    if (!KYC.recordPhase()) bad.errors.push(`${code}: the page is not in the record phase`);
+    const st = code.toUpperCase();
+    const info = (KYC.meta().states || {})[st] || {};
+    const strip = [...D.querySelectorAll(".state-summary .badge")].map((b) => b.textContent.replace(/\s+/g, " ").trim());
+    if (strip.some((t) => /running under a new district number/.test(t))) bad.strip.push(`${st}: ${strip.join(" | ")}`);
+    if (info.renumbered) {
+      const want = info.renumbered + (info.renumbered === 1 ? " member" : " members") +
+        " who ran under a new district number in 2026";
+      if (strip.indexOf(want) === -1) bad.strip.push(`${st}: no "${want}"`);
+      named[st + " strip"] = want;
+    }
+    const plain = fs.readFileSync(path.join(SITE, "states", code + ".html"), "utf8");
+    window.kycRaces.filter((r) => r.state === st).forEach((race) => {
+      const section = D.getElementById("race-" + race.id);
+      const row = D.querySelector('[data-race-toggle="' + race.id + '"]');
+      const share = fs.readFileSync(path.join(SITE, "r", race.id + ".html"), "utf8");
+      const shareText = unescapeHtml(share.replace(/<[^>]+>/g, ""));
+      const text = (el) => el ? el.textContent.replace(/\s+/g, " ").trim() : "";
+      // Whoever is marked as holding the seat on the share page sits in it.
+      const marked = [...share.matchAll(/<li data-id="([^"]+)">[^\n]*?<span class="share-holder">/g)].map((m) => unescapeHtml(m[1]));
+      marked.forEach((id) => {
+        const p = KYC.byId(id);
+        const inc = race.incumbent || {};
+        if (!p || (inc.profileId === id ? !inc.seated : p.raceId !== race.id)) {
+          bad.share.push(`${race.id}: ${p ? p.name : id} "holds the seat"`);
+        }
+      });
+      race.incumbentIds.map(KYC.byId).filter(Boolean).forEach((p) => {
+        const inc = race.incumbent || {};
+        const sits = inc.profileId === p.id ? !!inc.seated : KYC.seated(p) && p.raceId === race.id;
+        const won = p.raceRole === "winner" && p.raceId && p.raceId !== race.id;
+        const ran = p.contestRaceId || p.raceStatusRace;
+        if (!won && !(ran && ran !== race.id)) {
+          // A holder who stayed: "Held by" only while they sit in this seat.
+          if (!sits && new RegExp("Held by " + p.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?! until)").test(text(row))) {
+            bad.row.push(`${race.id}: "Held by ${p.name}" of a member not in this seat`);
+          }
+          return;
+        }
+        movers += 1;
+        const line = KYC.contestLine(p);
+        const clause = line ? line.clause : won
+          ? (p.renumbered ? "was re-elected in " + seatOf(p.raceId) + MAP : "won the race for " + seatOf(p.raceId))
+          : null;
+        const sentence = clause && (sits ? "Held by " + p.name + ", who " + clause + "."
+          : p.name + ", who held this seat, " + clause + ".");
+        if (sentence) named[race.id] = sentence;
+        // The line above the race, its folded row and its share page say it.
+        const held = [...(section ? section.querySelectorAll(".race-held") : [])].map(text);
+        if (sentence && held.indexOf(sentence) === -1) bad.section.push(`${race.id}: ${held.join(" / ") || "(no line)"}`);
+        if (row && sentence && text(row).indexOf(sentence) === -1) bad.row.push(`${race.id}: ${text(row)}`);
+        if (sentence && shareText.indexOf(sentence) === -1) bad.share.push(`${race.id}: "${sentence}" not on its share page`);
+        // Never among the seat's people: no card, no "Elected:" in its row,
+        // no item in its share page's list.
+        if (section && section.querySelector('.card-grid > .card[data-id="' + p.id + '"]')) {
+          bad.section.push(`${race.id}: ${p.name}'s card among the people`);
+        }
+        const groups = row ? [...row.querySelectorAll(".race-row-ballot")].map(text) : [];
+        if (groups.some((g) => g.indexOf(p.name + " (") !== -1)) bad.row.push(`${race.id}: ${p.name} listed in ${groups.join(" ")}`);
+        if (new RegExp('<ul class="share-list" data-race="' + race.id + '">[\\s\\S]*?<li data-id="' + p.id + '">').test(share.split("</ul>")[0] + "</ul>")) {
+          bad.share.push(`${race.id}: ${p.name} in its list`);
+        }
+        if (!sits && /who holds this seat|Held by/.test([...(section ? section.querySelectorAll(".race-head .badge") : [])]
+          .map((b) => (b.getAttribute("title") || "")).filter((t) => t.indexOf(p.name) !== -1).join(" "))) {
+          bad.section.push(`${race.id}: a badge says ${p.name} holds this seat`);
+        }
+        if (!sits && plain.indexOf('<li data-id="' + p.id + '"><a href="../p/' + p.id + '.html">' + KYC.escapeHtml(p.name) +
+          "</a> (" + KYC.escapeHtml(p.party) + '), <span class="share-holder">') !== -1) {
+          bad.plain.push(`${race.id}: ${p.name} marked on states/${code}.html`);
+        }
+      });
+    });
+  }
+  const grid = await buildPage("index.html", { now: JANUARY_NOW });
+  await settle(80);
+  const election = grid.window.KYC.meta().election || {};
+  const title = (grid.D.getElementById("challengerCount") || {}).title || "";
+  const directory = await buildPage("index.html", { now: JANUARY_NOW, hash: "#/?role=candidate" });
+  await settle(120);
+  const note = ((directory.D.querySelector(".results-note") || {}).textContent || "").replace(/\s+/g, " ");
+
+  suite("the January page, as the data says it: who held a seat and where they went (rule 74)", () => {
+    check("no page errors, in the record phase", bad.errors.length === 0, bad.errors.join(" | "));
+    check("the data has seats whose holder's run went elsewhere", movers > 0, `${movers} holders`);
+    check("each state's strip says who ran under a new district number in the past tense",
+      bad.strip.length === 0, bad.strip.join(" | ") || JSON.stringify(Object.keys(named).filter((k) => / strip$/.test(k)).map((k) => named[k])));
+    check("the sidebar and the directory's note too",
+      !election.renumbered || (title.indexOf("(" + election.renumbered + " of them members who ran under a new district number in 2026)") !== -1 &&
+        note.indexOf(" who ran under a new district number in 2026, who are under Sitting members here") !== -1) &&
+      !/running under a new district number/.test(title + note), title.slice(0, 160) + " | " + note.slice(0, 200));
+    check("the line above a race: \"Held by\" only of one sitting in that seat, else who held it and where they went",
+      bad.section.length === 0, bad.section.slice(0, 5).join(" | ") || `${movers} holders`);
+    check("a folded race's row says the same, and never lists them among the seat's people",
+      bad.row.length === 0, bad.row.slice(0, 4).join(" | "));
+    check("a race's share page says the same, and marks \"holds the seat\" only of whoever sits in it",
+      bad.share.length === 0, bad.share.slice(0, 5).join(" | "));
+    check("the state pages' plain lists mark nobody who sits elsewhere", bad.plain.length === 0, bad.plain.join(" | "));
+    // Where the rehearsal's data holds them, the words the review found.
+    const want = {
+      "H-KY-06-2026": /^Andy Barr, who held this seat, won the race for Senate KY\.$/,
+      "H-CA-41-2026": /^Ken Calvert, who held this seat, was re-elected in CA-40 under the state’s new district map\.$/,
+      "H-CA-03-2026": /^Kevin Kiley, who held this seat, ran in CA-6 under the state’s new district map, and lost in November\.$/,
+      "H-UT-01-2026": /^Blake Moore, who held this seat, was re-elected in UT-2 under the state’s new district map\.$/,
+    };
+    const off = Object.keys(want).filter((rid) => named[rid] && !want[rid].test(named[rid]));
+    check("as the review read them: KY-6, CA-41, CA-3 and UT-1", off.length === 0,
+      off.map((rid) => `${rid}: ${named[rid]}`).join(" | ") ||
+        Object.keys(want).filter((rid) => named[rid]).map((rid) => named[rid]).join(" | "));
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -18521,6 +18675,7 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
   if (!only || only === "frame") await testFrame();
   if (!only || only === "share") await testSharePages();
+  if (!only || only === "share" || only === "january") await testTheJanuaryPage();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

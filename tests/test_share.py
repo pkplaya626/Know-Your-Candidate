@@ -368,6 +368,68 @@ class TestSharePages(unittest.TestCase):
                  incumbentIds=[])
         self.assertNotIn("Held by", share.describe_race(r, {}, {}))
 
+    # Once the new Congress sits (the January rehearsal of 2026-11-10): a
+    # member seated for the seat they won has no other run on their profile,
+    # and the share pages marked Andy Barr, a senator, "holds the seat" on
+    # KY-6, Ken Calvert on CA-41 and Blake Moore on UT-1.
+    def _seat_left(self, mover, sits=False):
+        dembo = person(id="FEC_D", name="Zach Dembo", isCandidate=True, party="Democrat",
+                       raceId="H-KY-06-2026", raceStatus="elected")
+        r = race(id="H-KY-06-2026", state="KY", district=6, label="KY-6 — U.S. House",
+                 incumbentIds=[mover["id"]], candidateIds=["FEC_D"],
+                 incumbent={"name": mover["name"], "party": "Republican",
+                            "profileId": mover["id"], "seated": sits})
+        by_id = {p["id"]: p for p in (mover, dembo)}
+        return r, by_id, share.render_race(r, "example.org", by_id, {r["id"]: r},
+                                           post=True), share.describe_race(r, by_id, {r["id"]: r}, post=True)
+
+    def test_a_member_seated_for_the_senate_seat_they_won_holds_nothing_they_left(self):
+        barr = person(id="B001282", name="Andy Barr", state="KY", raceId="S-KY-2026",
+                      raceRole="winner", heldRaceId="H-KY-06-2026", officeLabel="Senate • KY",
+                      chamber="Senate", raceStatus="elected", raceStatusRace="S-KY-2026")
+        r, by_id, page, description = self._seat_left(barr)
+        self.assertTrue(share.moved_from(r, barr))
+        self.assertFalse(share.sits_in(r, barr))
+        self.assertFalse(share.holds(r, barr))
+        self.assertIn('<a href="../p/B001282.html">Andy Barr</a>, who held this seat, won the race '
+                      "for Senate KY.", page)
+        self.assertNotIn("holds the seat", page)
+        self.assertNotIn("Held by", page + description)
+        self.assertIn("Andy Barr, who held this seat, won the race for Senate KY.", description)
+        # Apart from the race's people: never "Elected" on the seat he left.
+        self.assertNotIn('data-id="B001282"', page)
+        self.assertNotIn("Andy Barr (Republican): Elected", description)
+
+    def test_a_member_reelected_under_a_new_number_is_said_so_on_the_seat_they_left(self):
+        calvert = person(id="C000059", name="Ken Calvert", state="CA", raceId="H-CA-40-2026",
+                         raceRole="winner", renumbered=True, officeLabel="House • CA-40",
+                         raceStatus="elected", raceStatusRace="H-CA-40-2026")
+        r, by_id, page, _description = self._seat_left(calvert)
+        self.assertIn("Ken Calvert</a>, who held this seat, was re-elected in CA-40 under the "
+                      "state’s new district map.", page)
+        self.assertNotIn("holds the seat", page)
+
+    def test_a_holder_who_left_after_running_elsewhere_is_never_held_by(self):
+        kiley = person(id="K000401", name="Kevin Kiley", state="CA", raceId="H-CA-03-2026",
+                       formerMember={"left": "2027-01-03"}, renumbered=True,
+                       contestRaceId="H-CA-06-2026", contestLabel="House • CA-6",
+                       raceStatus="defeated", raceStatusRace="H-CA-06-2026")
+        r, by_id, page, description = self._seat_left(kiley)
+        self.assertIn("Kevin Kiley</a>, who held this seat, ran in CA-6 under the state’s new "
+                      "district map, and lost in November.", page)
+        self.assertNotIn("Held by", page + description)
+        # While they sat in it, the campaign's words are unchanged.
+        sitting = dict(kiley)
+        sitting.pop("formerMember")
+        r, by_id, page, description = self._seat_left(sitting, sits=True)
+        self.assertIn("Held by <a", page)
+        self.assertTrue(description.split(" — U.S. House. ")[1].startswith(
+            "Held by Kevin Kiley, who ran in CA-6"), description)
+
+    def test_the_seat_words_of_a_race_id(self):
+        self.assertEqual([share.seat_words(r) for r in ("S-KY-2026", "H-CA-40-2026", "H-WY-00-2026")],
+                         ["Senate KY", "CA-40", "WY-AL"])
+
     def test_the_pages_do_not_carry_the_builds_time(self):
         profiles = [person(), person(id="FEC_A", isCandidate=True)]
         races = [race(candidateIds=["FEC_A"])]
