@@ -1590,6 +1590,26 @@ async function testDirectoryAsync() {
         (tmp.querySelector(".card-held") || {}).textContent === "U.S. Representative",
         (tmp.querySelector(".card-held") || {}).textContent);
     }
+    // A seated winner's record read while they ran (the review of PR #227):
+    // an office open then is neither the card's current office nor
+    // "since" anything in the dialog; the dialog says when it was read.
+    {
+      const seatedHost = window.legislatorsData.find((p) => !p.isCandidate && p.politicalHistory);
+      const keptHistory = seatedHost.politicalHistory;
+      seatedHost.politicalHistory = { rows: [{ office: "Member of the State Senate of California",
+        where: "California", from: "2014", openWhenRead: "2026-11-10" }] };
+      const tmp = D.createElement("div");
+      tmp.innerHTML = KYC.cards.card(seatedHost);
+      const cardHeld = (tmp.querySelector(".card-held") || {}).textContent || "";
+      KYC.profile.open(seatedHost.id);
+      const dialogHeld = (D.getElementById("profileModalHeld") || {}).textContent || "";
+      KYC.profile.close();
+      seatedHost.politicalHistory = keptHistory;
+      check("an office open when a seated winner's record was read as a candidate is never called current",
+        !/State Senate/.test(cardHeld) && !/since 2014/.test(dialogHeld) &&
+          /from 2014, held when this site read their record as a candidate \(Nov\. 10, 2026\)/.test(dialogHeld),
+        cardHeld + " | " + dialogHeld.slice(0, 200));
+    }
     const burlington = { office: "Mayor of Burlington", where: "Burlington, Vermont", from: "1981", to: "1989" };
     check("a place the office already names is not said twice",
       KYC.heldText(burlington) === "Mayor of Burlington, Vermont, 1981–1989", KYC.heldText(burlington));
@@ -1775,7 +1795,11 @@ async function testDirectoryAsync() {
     const members = window.legislatorsData.filter((p) => !p.isCandidate);
     const bare = [];
     members.forEach((p) => ["education", "previous_professions", "platforms"].forEach((f) => {
-      if (KYC.hasValue(p, f) && p[f] && !SOURCED[(p.fieldSources || {})[f]]) bare.push(p.id + " " + f);
+      // A winner seated since Election Day keeps the ballot-linked
+      // article's facts read while they ran (enrich.apply_to_winners).
+      const source = (p.fieldSources || {})[f];
+      const kept = p.raceRole === "winner" && source === "wikipedia" && f !== "platforms";
+      if (KYC.hasValue(p, f) && p[f] && !SOURCED[source] && !kept) bare.push(p.id + " " + f);
     }));
     check("no member's education, careers or platform is shown without its source",
       bare.length === 0, bare.slice(0, 5).join(", "));
@@ -2913,6 +2937,15 @@ async function testStates() {
       !gov.querySelector(".gov-name ~ p .gov-ballot-mark, .gov-officer-name ~ p .gov-ballot-mark"));
     check("nothing on the page says a person is on the ballot",
       !/\bOn the Nov 3, 2026 ballot/.test(gov.textContent), gov.textContent.slice(0, 200));
+    // Its hover is the term, never the researchers' note ("last elected
+    // 2022", "on 2026 sample ballot"), which from November 4 contradicted it.
+    const titles = marks.map((a) => a.getAttribute("title") || "");
+    // After the election it says the office was on that ballot, never that
+    // it was "elected" then: this site reads no state's result, and a runoff
+    // decides some (the review of PR #227).
+    check("each mark's hover is the term's length alone",
+      titles.length >= 4 && titles.every((t) => /^(?:On the Nov 3, 2026 ballot; )?(?:\d+-year term)?$/.test(t)) &&
+        !titles.some((t) => /elected|sample ballot/i.test(t)), titles.join(" | "));
     // Kemp, Jones, Carr and Raffensperger are on none of the November 3
     // ballot's lists (PERSONA-02): each office says so, citing the list.
     const sg = ga.window.kycStateGov.states.GA;
@@ -3800,6 +3833,24 @@ async function testStates() {
       info.openCandidates > 0 && new RegExp(info.openCandidates + " candidates? for open seats").test(strip.textContent) &&
         !/\d+ challengers? on the ballot/.test(strip.textContent), strip.textContent.slice(0, 400));
   });
+  // The strip's split is its race heads' sum, both words (rule 73): FL-20,
+  // vacant at the election with a member running there under a new number,
+  // read "3 candidates" in its head and counted as challengers in the strip.
+  const flSplit = await buildPage("states/fl.html");
+  await settle(60);
+  suite("states/fl.html — the strip's challengers and open-seat candidates are its race heads' sums", () => {
+    const info = flSplit.window.kycBuildMeta.states.FL;
+    const sums = { challenger: 0, candidate: 0 };
+    flSplit.window.kycRaces.filter((r) => r.state === "FL").forEach((r) => {
+      [...flSplit.D.querySelectorAll("#race-" + r.id + " .race-head .badge")].forEach((b) => {
+        const m = /^(\d+) (challenger|candidate)s? (?:were )?on the ballot$/.exec(b.textContent.trim());
+        if (m) sums[m[2]] += Number(m[1]);
+      });
+    });
+    check("as the sidebar and the strip count them", flSplit.errors.length === 0 && sums.candidate > 0 &&
+      sums.candidate === info.openCandidates && sums.challenger === info.challengersOnBallot - info.openCandidates,
+      `heads ${sums.challenger}/${sums.candidate}, strip ${info.challengersOnBallot - info.openCandidates}/${info.openCandidates}`);
+  });
   const guam = await buildPage("states/gu.html");
   suite("states/gu.html — a territory's own election office (RACES-07)", () => {
     const box = guam.D.getElementById("voting");
@@ -4637,6 +4688,12 @@ async function testPeopleWording() {
   });
 
   suite("index.html — a member running elsewhere has that campaign's money (PERSONA-07)", () => {
+    // "No filing this cycle" names the cycle it checked: "the current cycle"
+    // reads as 2027-28 once the new Congress sits (the review of #227).
+    const noFiling = KYC.renderField({ quality: { receipts: "no_filing" } }, "receipts");
+    check("the FEC absence names its cycle, never \"the current cycle\"",
+      new RegExp("no filing for the " + KYC.cycleYears() + " cycle").test(noFiling) &&
+        !/current cycle|\{cycle\}/.test(noFiling), noFiling);
     const running = people.filter((p) => KYC.otherCampaign(p));
     const missing = running.filter((p) => (p.quality || {}).receipts === "no_filing");
     check("the data has members with no filing for their seat and one for another",
@@ -4726,6 +4783,13 @@ async function testPeopleWording() {
   });
 
   suite("index.html — a member who withdrew is not running for re-election (TRUST-18)", () => {
+    // The campaign's case: once the new Congress sits, every member the
+    // results list as withdrawn or unlisted has left (testTheJanuaryPage
+    // reads their past tense).
+    if (!campaign) {
+      check("skipped: the Congress the cycle elects sits, and these members have left", true);
+      return;
+    }
     const withdrew = people.filter((p) => KYC.seated(p) && !p.contestLabel &&
       p.raceStatus === "withdrawn" && !p.appointed);
     check("the data has sitting members the results list as withdrawn", withdrew.length > 0);
@@ -4966,7 +5030,10 @@ async function testPeopleWordingAfterElection() {
     data: (w) => {
       // Any member with another run: the night's marks decide them in turn,
       // and this state is made, whichever status the day's data gives.
-      const member = w.legislatorsData.find((p) => p.alsoRunningId && !p.isCandidate &&
+      // One whose profile still holds the run (contestLabel): in January
+      // Russell Fry, seated for the House seat the results elected him to,
+      // keeps the id of his eliminated Senate filing and no other run.
+      const member = w.legislatorsData.find((p) => p.alsoRunningId && !p.isCandidate && p.contestLabel &&
         w.legislatorsData.some((f) => f.id === p.alsoRunningId));
       if (!member) return;
       w.legislatorsData.find((f) => f.id === member.alsoRunningId).raceStatus = "defeated";
@@ -6797,8 +6864,8 @@ function at(lat, lon, fail, accuracy) {
   };
 }
 
-async function located(page, lat, lon, accuracy) {
-  const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy) });
+async function located(page, lat, lon, accuracy, now) {
+  const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy), now });
   built.D.getElementById("locateMe").click();
   const out = built.D.getElementById("locateResult");
   // The finer lines load first (kyc-findrep.js), so the answer comes after.
@@ -7351,6 +7418,17 @@ async function testFindMyDistrict() {
   // Brooklyn, with a fix good to 1.5 km: more districts in reach than the
   // page can show, which is not an approximate location (RACES-02).
   const brooklyn = await located("districts/ny.html", 40.6710, -73.9814, 1500);
+  // A map's title in a sentence: Connecticut's map is "The map for 2026",
+  // and its hovers, labels and card headings read "on the The map for 2026".
+  const ct = await buildPage("districts/ct.html");
+  await settle(40);
+  const ctWords = [...ct.D.querySelectorAll("[title], [aria-label], h4")].map((e) =>
+    (e.getAttribute("title") || "") + " " + (e.getAttribute("aria-label") || "") + " " + e.textContent);
+  suite("districts — a map's title in a sentence takes one article", () => {
+    check("no \"the The map\" on an unchanged state's page", ct.errors.length === 0 &&
+      ctWords.some((t) => /on the map for 2026/.test(t)) && !ctWords.some((t) => /the The map/.test(t)),
+      ctWords.filter((t) => /the The map/.test(t)).slice(0, 2).join(" | ") || ct.errors.join(" | "));
+  });
   suite("districts — each map's own district, and where several meet", () => {
     check("no page errors", athens.errors.length === 0, athens.errors.join(" | "));
     check("Athens is in OH-12 on the old map and OH-2 on the new",
@@ -10984,6 +11062,16 @@ async function testElectionNight() {
     check("no race head still says 'Runoff Dec 1 if no majority'",
       heads.length > 0 && !/if no majority/.test(heads) && /Runoff (held Dec 1|Dec 1, if one was needed)/.test(heads),
       heads.slice(0, 300));
+    // An office's ballot mark says, after the election, that the office was
+    // on that ballot, never that it was "elected" then: Georgia's own
+    // governor runoff is December 1, and this site reads no state's result
+    // (rule 91; "Last elected Nov 3, 2026", the review of PR #227).
+    // An office's mark (on its label line), not a chamber's seats line.
+    const govMarks = [...december.D.querySelectorAll(".gov-ballot-mark.up")]
+      .filter((a) => a.parentElement.classList.contains("gov-office")).map((a) => a.getAttribute("title") || "");
+    check("an office's ballot mark is never 'elected' after the election",
+      govMarks.length >= 4 && govMarks.every((t) => /^On the Nov 3, 2026 ballot(?:; \d+-year term)?$/.test(t)),
+      govMarks.join(" | "));
   });
 
   const before = await buildPage("states/ga.html", { now: CAMPAIGN_NOW, data: electionNight });
@@ -12602,6 +12690,28 @@ async function testSearchAnswers() {
     const t = voted.D.getElementById("searchAnswers").textContent;
     check("was on the ballot", !ohio.ballot2026.offices.governor.up ||
       /was on the Nov 3, 2026 ballot/.test(t) && /Candidates who were on it/.test(t), t.slice(0, 300));
+  });
+  // The holder line is said only until the election, as on the state page
+  // (KYC.stategov.openSeat): "Kay Ivey is not among the candidates for this
+  // office" spoke of a ballot already voted on. Every state whose governor
+  // or other office carries one is asked.
+  const heldLines = [];
+  let heldAsked = 0;
+  for (const [code, st] of Object.entries((voted.window.kycStateGov || { states: {} }).states)) {
+    const offices = (st.ballot2026 || {}).offices || {};
+    if (!Object.values(offices).some((o) => o && o.up && o.holderStatus && o.holderStatus.text)) continue;
+    typeInto(voted.window, voted.D, KYC.stateName(code) + " governor");
+    await settle(250);
+    heldAsked += 1;
+    const t = voted.D.getElementById("searchAnswers").textContent;
+    if (!new RegExp("Governor, " + KYC.stateName(code)).test(t)) heldLines.push(code + ": not answered: " + t.slice(0, 80));
+    else if (/ is (not )?among the candidates| is running for this office|is not checked here| is term-limited/.test(t)) {
+      heldLines.push(code + ": " + t.slice(0, 160));
+    }
+  }
+  suite("search answers after Election Day — no holder line about the ballot", () => {
+    check("none says who is or is not among the candidates, or running", heldAsked > 0 && heldLines.length === 0,
+      heldLines.slice(0, 3).join(" | ") || `${heldAsked} states asked`);
   });
   // Every note that counts the ballot is in the past tense too (rules 63, 84).
   for (const [q, past, now] of [["governor", /offices were on the Nov 3, 2026 ballot/, /offices are on/],
@@ -15110,6 +15220,30 @@ async function testSharePages() {
         now: AFTER_DAY, record: true });
       return !spec || spec.label !== label || !!spec.off !== !!gone;
     });
+    // Once the new Congress sits, a nominee its record seats for the term
+    // the race decided, where the results read marked no winner: the
+    // record's words and source (share.seated_term, KYC's seatedWords).
+    const seatedOff = (table.seated || []).filter(([status, source, own, term, label, gone, credit]) => {
+      const spec = KYC.raceStatus(status, "long", { own: !!own, source: source || undefined,
+        now: AFTER_DAY, record: true, seatedTerm: term || undefined });
+      return !spec || spec.label !== label || !!spec.off !== !!gone || creditOf(spec) !== credit;
+    });
+    check("and a nominee Congress's record seats for the new term, in its words and the record's source",
+      (table.seated || []).length >= 24 && seatedOff.length === 0 &&
+        table.seated.some((r) => r[3] && /^Seated for the \d{4}–\d{4} term$/.test(r[4])),
+      seatedOff.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${(table.seated || []).length} cases`);
+    // The others on that ballot (share.seated_other, KYC's seatedOtherWords):
+    // "Awaiting result" beside "Seated: Mike Johnson" (the review of #227).
+    const othersOff = (table.seatedOthers || []).filter(([status, source, minor, name, term, label, gone, credit]) => {
+      const spec = KYC.raceStatus(status, "long", { source: source || undefined, minor: !!minor,
+        now: AFTER_DAY, record: true, seatedOther: name ? { name, term } : undefined });
+      return !spec || spec.label !== label || !!spec.off !== !!gone || creditOf(spec) !== credit;
+    });
+    check("and the others on a ballot whose seat the record fills, on it and never said to have lost",
+      (table.seatedOthers || []).length >= 24 && othersOff.length === 0 &&
+        table.seatedOthers.some((r) => r[3] && r[5] === "Was on the November ballot") &&
+        !table.seatedOthers.some((r) => r[3] && /awaiting|lost|defeated/i.test(r[5])),
+      othersOff.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${(table.seatedOthers || []).length} cases`);
     check("and every status in the record phase, a member who did not run in the past tense",
       (table.record || []).length > 100 && recordOff.length === 0 &&
         table.record.some((row) => row[6] === "Did not run for re-election in 2026") &&
@@ -15140,10 +15274,12 @@ async function testSharePages() {
     // A former member is in the past tense from the day after Election Day,
     // whatever the phase (KYC.pastTense, share.past_tense): one who left in
     // December read "Leaving seat" until January 3 (PR #226 review). The
-    // same person as share._former_member builds.
+    // same person as share._former_member builds, in a race no data holds:
+    // the table is written with no races, and in the January data AL-2's
+    // seat is filled, so its others "Was on the November ballot".
     const former = (table.former || []).filter(([status, appointed, post, inRecord, label, gone]) => {
       const item = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican",
-        raceId: "H-AL-02-2026", raceStatus: status,
+        raceId: "H-ZZ-01-2026", raceStatus: status,
         formerMember: { left: "2026-12-15", via: "legislators-historical", congress: 119 } };
       if (appointed) item.appointed = true;
       const spec = KYC.standing(item, "long", { now: post ? AFTER_DAY : CAMPAIGN_DAY,
@@ -16071,6 +16207,14 @@ async function testRaceMoney() {
       [...outside].every((o) => /^(?:Filed (?:under their|separately under their) (?:House|Senate) candidacy[^:]*: o|O)utside groups spent \$[\d.]+[KMB]? (supporting|opposing)/.test(o.textContent) &&
         /processed when read on/.test(o.textContent) && /fec\.gov/.test(o.querySelector("a").href) &&
         !/\bnet\b/i.test(o.textContent)), outside.length + " lines");
+    // A side below zero is said to be as filed (Jimmy Gomez's "-$28K
+    // supporting" read as money spent): built from a record of that shape.
+    const negative = window.KYC.cards.outsideLine({ id: "FAKE", outsideSpending: { support: -28159.84,
+      supportCommittees: 3, oppose: 0, cycle: 2026, asOf: "2026-11-10", url: "https://www.fec.gov/" } })
+      .replace(/<[^>]+>/g, "");
+    check("a side whose total is below zero says it is as filed, a refund or correction",
+      /supporting \(3 groups; as filed: a refund or correction the FEC counts against earlier spending\)/.test(negative),
+      negative.slice(0, 200));
   });
 
   suite("states/nc.html — the seat's last election", () => {
@@ -18805,6 +18949,13 @@ function rowProblems(window, D) {
     row.ballot.filter((g) => /^Also /.test(g.label)).forEach((g) => {
       if (g.label.indexOf(KYC.ballotSource(race)) === -1) say("uncredited: " + g.label);
     });
+    // Nobody is said twice: "Seated: Greg Casar" beside "Seated for the new
+    // term: Greg Casar (D)" on TX-37's January row (the review of #227).
+    row.badges.filter((b) => /^Seated: /.test(b)).forEach((b) => {
+      const name = b.slice("Seated: ".length);
+      if (row.ballot.some((g) => /^Seated for /.test(g.label) &&
+          g.names.some((n) => n === name || n.indexOf(name + " ") === 0))) say("said twice: " + b);
+    });
     // Nobody held the seat, so nobody challenges (FL-20).
     if (!(race.incumbentIds || []).length && row.badges.some((b) => /challenger/.test(b))) {
       say("challengers to nobody: " + row.badges.join("|"));
@@ -21232,7 +21383,7 @@ async function testGovernorOverlays() {
       text("#governorModalKind") === "Governor (Candidate)" &&
       /Running for Governor • GA/.test(text("#governorModalMeta")) &&
       !!modal().querySelector('#governorModalMeta a.state-link[href$="states/ga.html#governor-race"]') &&
-      /Term 4-year term \(if elected\)/.test(text("#governorModalMeta")) &&
+      /Term 4 years \(if elected\)/.test(text("#governorModalMeta")) &&
       text("#governorModalMeta").indexOf(data.ballot2026.offices.governor.note) === -1);
     check("the status badge in the cards' words", /On the Nov 3, 2026 ballot/.test(text("#governorModalStatus")));
     check("the party words are the card's", text("#governorModalParty") === (first.party || "") &&
@@ -21297,9 +21448,10 @@ async function testGovernorOverlays() {
         if (!people.length) continue;
         window.KYC.governor.open(people[0].id);
         const term = modal().querySelector("#governorModalMeta .gov-term");
-        const lead = /^(\d+-year term)(?=[;,.]|$)/.exec(item.note || "");
+        const lead = /^(\d+)-year term(?=[;,.]|$)/.exec(item.note || "");
         if (term) shown += 1;
-        if (lead ? !term || term.textContent.trim() !== "Term " + lead[1] + " (if elected)" : !!term) {
+        if (lead ? !term || term.textContent.trim() !== "Term " + lead[1] + (lead[1] === "1" ? " year" : " years") +
+            " (if elected)" : !!term) {
           bad.push(code + ": " + (term ? term.textContent : "(none)") + " | " + item.note);
         }
         if (/last elected|Elected with|ticket|term-limited|noncandidacy|certified/i.test(text("#governorModalMeta"))) {
@@ -21883,10 +22035,35 @@ async function testGovernorPhotoCredits() {
  * of the code that writes them. */
 const JANUARY_NOW = "2027-01-10T12:00:00";
 
+/* The Challengers chip's count and its note's terms, summed as the sidebar's
+ * "with a profile here" counts them (rule 73). */
+function challengerNoteSum(directory) {
+  const dirText = ((directory.D.getElementById("resultsLabel") || {}).textContent || "").replace(/\s+/g, " ");
+  const num = (re) => { const m = re.exec(dirText); return m ? Number(m[1].replace(/,/g, "")) : 0; };
+  return { dirText, summed: num(/Showing ([\d,]+) profiles?/) - num(/([\d,]+) of them ha(?:s|ve) a ballot status/) +
+    num(/also counts ([\d,]+) members? who ran under/) + num(/also counts ([\d,]+) (?:person|people) who won in 2026/) };
+}
+
 async function testTheJanuaryPage() {
   const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
   const phase = (meta.election || {}).phase;
   if (phase !== "record") {
+    // December (the review of PR #227): a special election's winner seated
+    // before January is under Sitting members, as the January winners are,
+    // and the Challengers chip's note counted them nowhere: 602 against the
+    // sidebar's 603 on the december-loses rehearsal.
+    const election = meta.election || {};
+    if (election.winnersSeated) {
+      const december = await buildPage("index.html", { now: "2026-12-20T12:00:00", hash: "#/?role=candidate" });
+      await settle(120);
+      const { dirText, summed } = challengerNoteSum(december);
+      suite("the December page: a winner seated before January is counted where the sidebar counts them", () => {
+        check("the Challengers chip's count and its note's terms add up to the sidebar's \"with a profile here\"",
+          december.errors.length === 0 && summed === election.challengersWithProfile &&
+            /who won in 2026 and now sit in Congress,/.test(dirText),
+          `${summed} against ${election.challengersWithProfile}: ${dirText.slice(0, 400)}`);
+      });
+    }
     suite("the January page, as the data says it (rule 74)", () => {
       check(`skipped: the data is in the "${phase}" phase; the January rehearsal ` +
         "(tools/rehearse_changeover.py) builds it in the record phase and runs this suite", true);
@@ -21974,6 +22151,17 @@ async function testTheJanuaryPage() {
           bad.share.push(`${race.id}: ${p ? p.name : id} "holds the seat"`);
         }
       });
+      // "Seated: X" is said once on the row: TX-37's read "Seated for the
+      // new term: Greg Casar (D)" and then "Seated: Greg Casar" (#227 review).
+      if (row) {
+        const groupsSaid = [...row.querySelectorAll(".race-row-ballot")].map(text);
+        [...row.querySelectorAll(".race-row-badges .badge")].map(text).filter((b) => /^Seated: /.test(b))
+          .forEach((b) => {
+            if (groupsSaid.some((g) => /^Seated for /.test(g) && g.indexOf(b.slice(8)) !== -1)) {
+              bad.row.push(`${race.id}: said twice: ${b}`);
+            }
+          });
+      }
       race.incumbentIds.map(KYC.byId).filter(Boolean).forEach((p) => {
         const inc = race.incumbent || {};
         const sits = inc.profileId === p.id ? !!inc.seated : KYC.seated(p) && p.raceId === race.id;
@@ -22085,12 +22273,20 @@ async function testTheJanuaryPage() {
     check("each state's strip says who ran under a new district number in the past tense",
       bad.strip.length === 0, bad.strip.join(" | ") || JSON.stringify(Object.keys(named).filter((k) => / strip$/.test(k)).map((k) => named[k])));
     check("the sidebar and the directory's note too, the note counting under Sitting members only those who sit",
-      !election.renumbered || (title.indexOf("(" + election.renumbered + " of them members who ran under a new district number in 2026)") !== -1 &&
+      !election.renumbered || (title.indexOf("(" + election.renumbered + " of them members who ran under a new district number in 2026") !== -1 &&
         note.indexOf(wantNote) !== -1) &&
       !/running under a new district number|who are under Sitting members/.test(title + note),
       title.slice(0, 160) + " | " + note.slice(0, 260) + " | want " + wantNote);
     check("the sidebar's title is in the past tense",
       !/ is running for it| are on the ballot besides/.test(title), title.slice(0, 200));
+    // The Challengers chip's count and its note's terms add up to the
+    // sidebar's "with a profile here" (rule 73): the seated winners, members
+    // now and not filings, were left out of the note, 476 against 602.
+    const { dirText, summed } = challengerNoteSum(directory);
+    check("the Challengers chip's count and its note's terms add up to the sidebar's \"with a profile here\"",
+      election.challengersWithProfile !== undefined && summed === election.challengersWithProfile &&
+        (!election.winnersSeated || title.indexOf(election.winnersSeated + " of them winners now members of the new Congress") !== -1),
+      `${summed} against ${election.challengersWithProfile}: ${dirText.slice(0, 400)}`);
     check("a dialog's order note calls the first listed the seat's holder only where they sit in it",
       dialogs > 0 && bad.order.length === 0, bad.order.slice(0, 4).join(" | ") || `${dialogs} dialogs`);
     check("no hover says a former member holds their old seat or is not seeking re-election to it",
@@ -22115,6 +22311,216 @@ async function testTheJanuaryPage() {
     check("as the review read them: KY-6, CA-41, CA-3 and UT-1", off.length === 0,
       off.map((rid) => `${rid}: ${named[rid]}`).join(" | ") ||
         Object.keys(want).filter((rid) => named[rid]).map((rid) => named[rid]).join(" | "));
+  });
+
+  // The grid's election chips once the new Congress sits (the January
+  // sweep of 2026-11-11). "2026 Senate races" left out the seated winner of
+  // 17 of the 35 races - newcomers and the House members who moved - and
+  // listed only who held each seat and who lost; "Not seeking re-election"
+  // showed six senators who had just won their seats under "not running
+  // again for the seat they hold", and hid the 81 people who had left.
+  const cardsOf = (D) => [...D.querySelectorAll("#results .card")].map((c) => c.getAttribute("data-id"));
+  const chipOf = (D, value) => D.querySelector('[data-group="election"][data-value="' + value + '"]');
+  const senGrid = await buildPage("index.html", { now: JANUARY_NOW, hash: "#/?election=senateUp26" });
+  await settle(120);
+  const senShown = new Set(cardsOf(senGrid.D));
+  const senWinners = GK.people().filter((p) => GK.seated(p) && p.raceRole === "winner" && /^S-/.test(p.raceId || ""));
+  const senChip = chipOf(senGrid.D, "senateUp26");
+  const senTitle = senChip ? senChip.getAttribute("title") || "" : "";
+  const nsGrid = await buildPage("index.html", { now: JANUARY_NOW, hash: "#/?election=notSeeking" });
+  await settle(120);
+  const NK = nsGrid.window.KYC;
+  const nsCards = cardsOf(nsGrid.D).map(NK.byId).filter(Boolean);
+  const nsChip = chipOf(nsGrid.D, "notSeeking");
+  const nsTitle = nsChip ? nsChip.getAttribute("title") || "" : "";
+  const nsLabel = ((nsGrid.D.getElementById("resultsLabel") || {}).textContent || "").replace(/\s+/g, " ");
+  suite("the January page: the grid's 2026 election chips speak of what was", () => {
+    check("no page errors", senGrid.errors.length + nsGrid.errors.length === 0,
+      senGrid.errors.concat(nsGrid.errors).slice(0, 2).join(" | "));
+    check("\"2026 Senate races\" lists every seated winner of a 2026 Senate race",
+      senWinners.length > 0 && senWinners.every((p) => senShown.has(p.id)),
+      `${senWinners.length} winners; missing: ` + senWinners.filter((p) => !senShown.has(p.id)).map((p) => p.name).join(", "));
+    check("and its hover is in the past tense", /who held each, who won it, and everyone who ran for it/.test(senTitle) &&
+      !/holds each|running for it/.test(senTitle), senTitle);
+    check("\"Not seeking re-election\" lists members who have left, and nobody seated",
+      !!nsChip && !/seeking|not running/i.test(nsChip.textContent) && nsCards.length > 0 &&
+        nsCards.every((p) => p.formerMember && !NK.seated(p)) &&
+        /all of whom have since left Congress\./.test(nsLabel),
+      `${nsCards.length} cards; seated: ` + nsCards.filter((p) => NK.seated(p)).map((p) => p.name).join(", ") + " | " + nsLabel.slice(0, 160));
+    // Its words are true of every card it lists (rule 73): "Did not run for
+    // re-election" stood over fourteen cards reading "Lost primary" (the
+    // review of PR #227). None of them was on the November ballot for the
+    // seat they held, so the words say that, and no card says otherwise.
+    const nsWords = [nsChip ? nsChip.textContent : "", nsTitle, nsLabel].join(" | ");
+    const nsLost = nsCards.filter((p) => /lost/i.test((NK.standing(p, "card") || {}).label || ""));
+    // On the November ballot for the seat they held, that is: Mike Collins
+    // and Ashley Hinson were on it for the Senate, which the words allow.
+    const ranElsewhere = (p) => !!p.contestRaceId || (!!p.raceStatusRace && p.raceStatusRace !== p.raceId);
+    const nsOnBallot = nsCards.filter((p) => !ranElsewhere(p) &&
+      /on the November ballot|^Elected|^Lost the November/i.test(((NK.standing(p, "long") || {}).label || "")));
+    check("and its words are true of every card it lists: none \"did not run\" over a lost primary, nobody on the November ballot",
+      !(nsLost.length && /did not run/i.test(nsWords)) && !nsOnBallot.length &&
+        /not on the November \d{4} ballot for the seat they held/.test(nsTitle) &&
+        /not on the November \d{4} ballot for the seat they held/.test(nsLabel),
+      `${nsLost.length} lost a primary; on the ballot: ` + nsOnBallot.map((p) => p.name).join(", ") + " | " + nsWords.slice(0, 240));
+    check("its hover speaks of the members who left, never of sitting members or the seat they hold",
+      /have since left Congress/.test(nsTitle) && !/Sitting members|seat they hold/.test(nsTitle), nsTitle);
+  });
+
+  // A nominee Congress's record seats for the term their race decided is
+  // never "Awaiting result" (the January sweep of 2026-11-11): the dialog
+  // read "Term Jan. 3, 2027 - Jan. 3, 2029" over "On the November ballot:
+  // awaiting result", and p/J000299.html the same. Who that is, from the
+  // record's fields: seated, in the seat of the race their status is about,
+  // on a term that began after Election Day.
+  const electionIso = GK.electionStatus(2026).iso;
+  const seatedNominees = GK.people().filter((p) => {
+    const status = GK.contestStatus(p);
+    if (!GK.seated(p) || (status !== "nominee" && status !== "qualified")) return false;
+    const race = GK.races().find((r) => r.id === (p.raceStatusRace || p.raceId));
+    const start = String(p.term_start || "").slice(0, 10);
+    return !!race && GK.sitsIn(race, p) && start > electionIso;
+  });
+  const seatedBad = [];
+  seatedNominees.forEach((p) => {
+    const card = GK.standing(p, "card");
+    const long = GK.standing(p, "long");
+    const years = /^(\d{4})-\d{2}-\d{2} - (\d{4})/.exec(p.term_start);
+    if (!card || card.label !== "Seated for the new term" || !long ||
+        long.label !== "Seated for the " + years[1] + "–" + years[2] + " term" ||
+        !/Source: Congress's record of its members/.test(long.title)) {
+      seatedBad.push(`${p.name}: ${card && card.label} / ${long && long.label}`);
+    }
+    const share = path.join(SITE, "p", p.id + ".html");
+    if (fs.existsSync(share)) {
+      const text = unescapeHtml(fs.readFileSync(share, "utf8"));
+      if (/awaiting result/.test(text) || text.indexOf("Seated for the " + years[1] + "–" + years[2] + " term") === -1) {
+        seatedBad.push(`p/${p.id}.html: ${(/<meta name="description" content="([^"]*)"/.exec(text) || [])[1]}`);
+      }
+    }
+  });
+  // "Use my location" on a redrawn state's page names its two maps for
+  // what each now is: in January the members were elected on the map for
+  // 2026, and "On the map members were elected on, you are in TX-37" sat
+  // over the TX-10 member of the new map (Athens, Ohio: OH-12 and OH-2).
+  const athensJan = await located("districts/oh.html", 39.33, -82.10, 25, JANUARY_NOW);
+  suite("the January page: a redrawn state's location answer names its maps as they now are", () => {
+    check("the map used until the 2026 election, and the map members were elected on in 2026",
+      athensJan.errors.length === 0 &&
+        /On the map used until the 2026 election, you are in OH-12\./.test(athensJan.text) &&
+        /On the map members were elected on in 2026, you are in OH-2\./.test(athensJan.text) &&
+        !/On the map members were elected on, /.test(athensJan.text),
+      athensJan.text.slice(0, 240) + athensJan.errors.join(" | "));
+    // Its introduction too (pages.district_moves): "some members are running
+    // in a district with a different number from the one they hold" stood
+    // over members seated for the number they had won.
+    const ledes = ["ca", "fl", "tx", "ut"].map((c) => {
+      const html = fs.readFileSync(path.join(SITE, "districts", c + ".html"), "utf8");
+      return c + ": " + unescapeHtml((/<p class="districts-lede">([^<]*)<\/p>/.exec(html) || [])[1] || "");
+    });
+    check("the redrawn states' introductions say who took their seats, never who is running",
+      ledes.every((t) => /took their seats on January 3, 2027/.test(t) && !/ (is|are) running in a district/.test(t)),
+      ledes.map((t) => t.slice(-180)).join(" | "));
+  });
+  // A governor candidate who was a member of Congress and has left is a
+  // former one on the overlay (stategov's memberFormer), and no seat in
+  // Congress there is current: six read "U.S. Representative since 2017"
+  // beside "A member of Congress: see their profile" in January.
+  const sgJan = {};
+  new Function("window", fs.readFileSync(path.join(SITE, "data/stategov.js"), "utf8"))(sgJan);
+  const govBad = [];
+  let govMembers = 0;
+  Object.entries((sgJan.kycStateGov || {}).states || {}).forEach(([code, st]) => {
+    const item = (((st.ballot2026 || {}).offices || {}).governor || {});
+    ((item.candidates || {}).candidates || []).filter((c) => c.member).forEach((c) => {
+      govMembers += 1;
+      const p = GK.byId(c.member);
+      const sits = !!p && GK.seated(p);
+      if (!sits && !c.memberFormer) govBad.push(`${code} ${c.name}: not "former"`);
+      const current = ((c.politicalHistory || {}).rows || []).filter((r) => r.congress && r.current);
+      if (!sits && current.length) govBad.push(`${code} ${c.name}: ${current[0].office} since ${current[0].from}`);
+    });
+  });
+  suite("the January page: a governor candidate who has left Congress is a former member there", () => {
+    check("no seat in Congress is current on the overlay of one the record no longer seats, and the record line says former",
+      govMembers > 0 && govBad.length === 0, govBad.slice(0, 4).join(" | ") || `${govMembers} members`);
+  });
+  // A former member keeps the Directory's education and careers, and a
+  // member seated in the other chamber shows none of the old seat's district
+  // offices (kyc/members.py): Andy Biggs read "Education No data" in
+  // January, and Andy Barr's Lexington office stood under "State offices".
+  const memberCache = JSON.parse(fs.readFileSync(path.join(SITE, "data", "members.json"), "utf8"));
+  const hostOf = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (e) { return ""; } };
+  const full = {};
+  fs.readdirSync(path.join(SITE, "data", "people")).filter((f) => /^[a-z]{2}\.js$/.test(f)).forEach((f) => {
+    (readPeopleFile(path.join(SITE, "data", "people", f)).people || []).forEach((p) => { full[p.id] = p; });
+  });
+  const bioBad = [];
+  let bioFormer = 0;
+  let bioMoved = 0;
+  GK.people().filter((p) => !p.isCandidate).forEach((p) => {
+    const rec = Object.assign({}, p, full[p.id] || {});
+    const listed = ((memberCache.directory || {}).byId || {})[p.id];
+    const site = ((memberCache.sites || {})[p.id] || {}).url;
+    if (rec.formerMember && listed && listed.education && site &&
+        [hostOf(listed.site), hostOf(listed.leadsTo)].indexOf(hostOf(site)) !== -1) {
+      bioFormer += 1;
+      if (rec.education === "No data" || rec.previous_professions === "No data" && listed.careers) {
+        bioBad.push(`${p.name}: education "${rec.education}", careers "${rec.previous_professions}"`);
+      }
+      if (rec.platforms === "No data" && (rec.quality || {}).platforms === "unknown") bioBad.push(`${p.name}: platform "No data"`);
+    }
+    if (GK.seated(p) && /\.house\.gov$/.test(hostOf(site)) && p.chamber === "Senate") {
+      bioMoved += 1;
+      if ((rec.districtOffices || []).length) bioBad.push(`${p.name}: the House offices as a senator's`);
+    }
+  });
+  suite("the January page: a former member keeps the Directory's words; a member who changed chambers shows no old offices", () => {
+    check("education and careers as the Directory printed them, the platform's absence said, no House office under a senator",
+      bioFormer > 0 && bioBad.length === 0, bioBad.slice(0, 4).join(" | ") || `${bioFormer} former members, ${bioMoved} senators from the House`);
+  });
+  suite("the January page: a nominee Congress has seated for the new term is never awaiting a result", () => {
+    check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",
+      seatedBad.length === 0, seatedBad.slice(0, 4).join(" | ") || `${seatedNominees.length} seated nominees` +
+        (seatedNominees.length ? "" : " (the results called every race this copy holds)"));
+    // The rest of that race (the review of #227): LA-4's head read "Seated:
+    // Mike Johnson" over four people "Awaiting result", and TX-35's fell back
+    // to "Awaiting result" because Greg Casar, who sits for TX-37, matched too.
+    const headBad = [];
+    let headsSeated = 0;
+    GK.races().forEach((race) => {
+      const people = [...new Set(race.incumbentIds.concat(race.candidateIds))].map(GK.byId).filter(Boolean);
+      const outcome = (GK.cards.raceBadgeItems(race).find((b) => b.key === "outcome") || {}).text || "";
+      const seat = GK.seatedIn(race);
+      const m = /^Seated: (.*)$/.exec(outcome);
+      if (m) {
+        headsSeated += 1;
+        if (!seat || GK.escapeHtml(seat.name) !== m[1] || !GK.sitsIn(race, seat)) {
+          headBad.push(`${race.id}: "${outcome}" names nobody who sits in it`);
+        }
+      }
+      if (/^Awaiting result/.test(outcome) && people.some((p) => GK.sitsIn(race, p) &&
+          ((GK.standing(p, "card") || {}).label === "Seated for the new term"))) {
+        headBad.push(`${race.id}: "Awaiting result" over a card seated in it`);
+      }
+      if (!seat) return;
+      people.filter((p) => p.id !== seat.id).forEach((p) => {
+        const card = GK.standing(p, "card");
+        const long = GK.standing(p, "long");
+        if (card && /^Awaiting result$/.test(card.label)) headBad.push(`${race.id}: ${p.name} "Awaiting result" beside ${seat.name}`);
+        if (long && long.label === "Was on the November ballot" &&
+            !(/Congress's record seats /.test(long.title) && long.title.indexOf(seat.name) !== -1 &&
+              /Source: Congress's record of its members/.test(long.title))) {
+          headBad.push(`${race.id}: ${p.name}'s title does not name ${seat.name} and the record`);
+        }
+      });
+      const share = path.join(SITE, "r", race.id + ".html");
+      if (fs.existsSync(share) && /awaiting result/i.test(unescapeHtml(fs.readFileSync(share, "utf8")))) {
+        headBad.push(`r/${race.id}.html: "awaiting result" beside ${seat.name}`);
+      }
+    });
+    check("and the rest of that race: its head names whoever sits in it, nobody beside them is \"Awaiting result\"",
+      headBad.length === 0, headBad.slice(0, 4).join(" | ") || `${headsSeated} heads "Seated:"`);
   });
 
   // A former member is named as their own record says they go by (rule 66):

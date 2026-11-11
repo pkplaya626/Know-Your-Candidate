@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3040 tests, no dependencies
-npm install && npm test                       # 4502 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3054 tests, no dependencies
+npm install && npm test                       # 4512 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1632,6 +1632,21 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     never the 2026 winner: TX-18's special and regular races had different
     winners in 2024. A record incumbent who won another seat keeps the one
     they held (`heldRaceId`), which is what the seats-up counts read.
+    A nominee the record seats for the term their race decided, where the
+    results read marked no winner, is "Seated for the new term" ("Seated
+    for the 2027–2029 term", credited to Congress's record:
+    `KYC.seatedTerm`, `share.seated_term`), never "Awaiting result": the
+    January rehearsal of 2026-11-11 printed "Awaiting result" under "Term
+    Jan. 3, 2027 - Jan. 3, 2029" for 46 members, and Greg Casar's TX-37 card
+    said it beside TX-35's "was re-elected in TX-37". The others on that
+    ballot "Was on the November ballot", the title naming whom the record
+    seats and crediting it, never "Awaiting result" and never a loss no
+    result marked (LA-4 read "Awaiting result" four times under "Seated:
+    Mike Johnson"). One reading names who sits (`KYC.seatedIn`,
+    `share.seated_in`: in that very seat, on a term begun after Election
+    Day) for the race head's "Seated:" badge and the others' words; the
+    first head counted anyone whose status read "Seated for", so TX-35's
+    fell back to "Awaiting result" over Greg Casar, who sits for TX-37.
 
 68. **A new Congress is the data's word, about everything that changes
     with it.** Rehearsed on a fictional January 4 membership, the site
@@ -1701,7 +1716,11 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "since 2013" was frozen at the read, so a senator who left on January
     3 would have stayed current. Whether a seat in Congress is current is
     the membership snapshot's to say, by the person's bioguide id, at
-    build time (`history-behind`). The sitting governors are read by the
+    build time (`history-behind`). An office whose first year is after the
+    read's is not shown: Wikidata and the article agreeing on "Governor of
+    Iowa, 2027-" made Rob Sand's and Phil Weiser's November overlays name
+    them governors, a state winner this site does not name (rule 91;
+    `history.for_page`'s *read*). The sitting governors are read by the
     Wikidata item the NGA roster's cross-check holds for them
     (`executives.wikidata`, under `gov-<ST>`), with the item's date of
     birth kept for the build to compare with the NGA's; the candidates for
@@ -1808,7 +1827,19 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     people include its holder: the map's first race-first panel listed
     only filers under "Still in the race", so 25 renominated senators -
     Susan Collins, Jon Ossoff - were missing from the list and its count,
-    and named only under "Seat held by", below the markets.
+    and named only under "Seat held by", below the markets. Whether a
+    race's people are candidates or challengers is one field
+    (`races.noHolder`: an open seat, or no record incumbent), which the
+    head, the strip, the sidebar and the share pages read: FL-20, vacant
+    at the election, read "3 candidates" in its head while the summary
+    counted them as challengers. Once the new Congress sits, the winners it
+    seated are members, not filings, and the Challengers chip's note counts
+    them apart (`election.winnersSeated`), or its terms summed to 476 under
+    the sidebar's 602; so is a special election's winner seated in December
+    ("now sit in Congress", 602 under 603 before). How many members of a
+    redrawn state ran under a new number is the data's
+    (`pages.district_moves`): Utah's hand-typed "Every member ran" stood
+    over Burgess Owens, who withdrew.
 
 74. **A status word must describe the race it badges, and what that race
     decided.** California's and Washington's top two and Alaska's top
@@ -1820,6 +1851,16 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "On the ballot" in CA-3, which he holds and is not running for. A filer
     the results do not name after the primary is `ballotUnknown`, never
     "the primary has not been held yet", and is not counted as on it.
+    Once the new Congress sits a filter speaks of what was: the grid's
+    "Not seeking re-election" is "Not on the ballot for their seat", former
+    members only and never hidden as out of the race, and "2026 Senate
+    races" takes each race's seated winner (`raceRole`), newcomer or House
+    member who moved; on the January rehearsal of 2026-11-11 the first
+    listed six senators who had just won under "not running again for the
+    seat they hold" and the second left out 17 of the 35 winners
+    (`recordChipWords`, one table for a chip's label, hover and results
+    line). The words are true of everyone listed: "Did not run for
+    re-election" stood over fourteen cards reading "Lost primary".
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it
@@ -1977,7 +2018,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     style the race badges use for people; it read as a fact about each, and
     none of them is on that ballot. The mark says "This office is on the
     Nov 3, 2026 ballot" and sits on the office's label line, never in the
-    holder's block. Who is not running is said only where a cited source
+    holder's block; its hover gives the term, and after the election "On the
+    Nov 3, 2026 ballot", never "Last elected" (this site reads no state's
+    result, and Guam's, the Virgin Islands' and Georgia's runoffs decide
+    some). Who is not running is said only where a cited source
     says so: the election office's list of candidates for that office
     (rule 91), with the constitution's term limit (`ballot2026.OPEN_SEATS`,
     read with the NGA's count of the governor's terms) as the reason beside
@@ -2258,6 +2302,23 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     their careers; an address it prints that leads to the member's listed
     site (dingell.house.gov) joins, and members it does not hold are
     reported (`members-directory-unjoined`), never left silently blank.
+    A member who has left, or moved to the other chamber, keeps the
+    Directory's words where its entry prints the site this cache read for
+    them (the 118 former members of the January rehearsal read "Education
+    No data"); a former member's platform says it is not shown after they
+    left office (`not_kept`), never "No data"; and district offices read
+    from another chamber's site are not shown (`districtOfficesPending`:
+    Andy Barr's Lexington office stood under a senator's "State offices").
+    A winner seated since Election Day keeps the article's facts and the
+    offices held read under the filing folded into their profile, while
+    the profile links that article (`enrich.apply_to_winners`,
+    `history.folded`), after the Directory, which wins - but an office open
+    at that read is not current (`openWhenRead`: the dialog says it was held
+    when read as a candidate, the card says nothing of it), or Mike
+    McGuire's January card read "Member of the State Senate of California"
+    beside no seat in Congress - and the 2026 campaign's money read under
+    that filing's FEC id until the finance step reads them as a member
+    ("Raised No data" stood over millions).
 
 87. **A photograph says whose it is, read from its source, and weighs
     what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
@@ -2820,8 +2881,8 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     photographs' member route) links that member's profile, the only
     profile link an overlay holds, and the sitting governor on the list
     links their governor's record. The header's "Term" is the ballot
-    note's leading term length alone ("4-year term", "if elected" beside
-    it): the rest of a note is why the office is on the ballot, and printed
+    note's leading term length alone, as a length ("Term 4 years", "if
+    elected" beside it; "Term 4-year term" repeated the label): the rest of a note is why the office is on the ballot, and printed
     whole it read "Term Elected with the lieutenant governor ... (if
     elected)" under Guam's candidates. No rule number is printed to a
     reader. The race panel lists the list's other candidates with the
@@ -3139,7 +3200,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     them (`KYC.answers.namedHolder`, one test for the answers and the
     "Other officials" block), and its 2026 race only as the election
     office's list, labelled as such, with what a cited source says of the
-    holder (rule 79). Nobody outside Congress becomes a profile (rule 27).
+    holder (rule 79) until the election, as the state page says it: after
+    it, "Kay Ivey is not among the candidates for this office" spoke of a
+    ballot already voted on. Nobody outside Congress becomes a profile
+    (rule 27).
     A word is matched whole: "Proposition 50" is not Proposition 5, and
     "3.5%" in North Carolina's question title is not "Amendment 3". A short
     form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but in

@@ -9,11 +9,14 @@ Three scenarios, each on its own copy of the repository under DIR:
   appointee is re-seated for the term to 2029.
 - ``december-wins``: the same with the two states' outcomes swapped.
 - ``january``: the 120th Congress, read on 2027-01-04. Each record race gets
-  one holder: its incumbent if renominated for it, else a member who won it
-  from another seat, else a fictional newcomer (Z9xxxxx), most carrying the
-  FEC id of the race's leading filer so the link by id is exercised and
-  every fifth carrying none (``seated-unlinked``). Members left without a
-  seat leave on January 3.
+  one holder: its incumbent where the results make them its November
+  nominee or winner (a nominee still awaiting a result keeps it), else a
+  member who is that race's nominee from another seat, else a fictional
+  newcomer (Z9xxxxx), most carrying the FEC id of the race's leading filer
+  so the link by id is exercised and every fifth carrying none
+  (``seated-unlinked``). Members left without a seat - those who lost,
+  withdrew, were eliminated in the primary or are not on the results' lists
+  - leave on January 3.
 
 On each copy it runs what the refresh would: ``congress --apply`` with the
 fictional membership, the build, ``build --check --strict`` and ``verify``.
@@ -161,7 +164,15 @@ def january(root=REPO):
     holder, log = {}, []
 
     def statuses(p, rid):
+        # Every id the results may key the person on, as results.apply_cache
+        # reads them: the profile's own filing, or its bioguide id where the
+        # page's name was matched through a roster alias, beside the ids
+        # Congress's record lists. Read through the record's ids alone,
+        # Darline Graham Nordone's "defeated" (her filing is not in it) and
+        # fourteen members' "withdrawn" (keyed on their bioguide) were missed.
         ids = set(people.get(p["id"], {}).get("fecAll") or [])
+        ids |= {p["id"], p.get("fecCandidateId"), p.get("rosterFecId"),
+                *(p.get("otherFecIds") or [])}
         other = next((q for q in profiles if q["id"] == p.get("alsoRunningId")), None)
         if other:
             ids |= {other.get("fecCandidateId"), other.get("rosterFecId")}
@@ -170,23 +181,34 @@ def january(root=REPO):
     def nominee(p, rid):
         return bool(statuses(p, rid) & set(WINS))
 
+    def keeps(p, rid):
+        # An incumbent keeps their own seat only as the race's November
+        # nominee or winner. Asked only whether they were "defeated", the
+        # rehearsal kept 52 members the results had off the November ballot
+        # (eliminated in the primary, withdrawn, or not listed at all), so the
+        # January copy showed members who had lost or left their primary
+        # still sitting (PR #225 review).
+        st = statuses(p, rid)
+        return bool(st & set(WINS)) and "defeated" not in st
+
     # 1. A member running for another record seat whose incumbent is not
-    #    running for it again, and who is that race's nominee, takes it.
+    #    that race's nominee or winner, and who is that race's nominee, takes
+    #    it.
     for p in sorted((p for p in members.values() if p.get("contestRaceId") in record["races"]
                      and p["contestRaceId"] != p.get("raceId")), key=lambda p: p["id"]):
         rid = p["contestRaceId"]
         inc = members.get(held.get(rid) or "")
         won = "elected" in statuses(p, rid)
-        if rid in holder or (inc and inc.get("seekingReelection2026") and not won) \
+        if rid in holder or (inc and keeps(inc, rid) and not won) \
                 or not nominee(p, rid):
             continue
         holder[rid] = ("mover", p["id"])
-    # 2. An incumbent running again for their own seat keeps it.
+    # 2. An incumbent the results make their own seat's November nominee or
+    #    winner keeps it; everyone else holding a record seat leaves.
     taken = {v[1] for v in holder.values()}
     for rid, bid in held.items():
         if rid not in holder and bid in members and bid not in taken \
-                and members[bid].get("seekingReelection2026") \
-                and "defeated" not in statuses(members[bid], rid):
+                and keeps(members[bid], rid):
             holder[rid] = ("incumbent", bid)
     # The specials: while they are open, Florida's appointee is re-seated and
     # Ohio's replaced. Once their winners are seated (December, in the data
@@ -258,6 +280,12 @@ def january(root=REPO):
         if rid:
             race = record["races"][rid]
             senate = race["chamber"] == "Senate"
+            if p["chamber"] != race["chamber"]:
+                # A member seated in the other chamber has that chamber's
+                # site, office and phone, which a fiction cannot know:
+                # copying the House term's made Andy Barr's Senate profile
+                # link barr.house.gov and hid what a new site does.
+                p.update(url=None, address=None, office=None, phone=None, contactForm=None)
             p.update(chamber=race["chamber"], state=race["state"],
                      district=None if senate else race["district"],
                      senateClass=race.get("senateClass") if senate else None,

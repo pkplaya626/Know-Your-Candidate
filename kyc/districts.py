@@ -120,9 +120,11 @@ REDRAWN = {
             "congressional map that the California Citizens Redistricting Commission drew "
             "after the 2020 census with one the Legislature passed as AB 604. The new map "
             "is used for the 2026, 2028 and 2030 elections; after the 2030 census the "
-            "commission draws the next one. Every district changed shape, and some members "
-            "are running in a district with a different number from the one they hold."
+            "commission draws the next one. Every district changed shape."
         ),
+        # Who moved, in the build's tense and in the data's numbers
+        # (pages.district_moves): never a hand-typed "every" or "some".
+        "moves": True,
         "before": {
             "title": "2021 commission map",
             "used": "the 2022 and 2024 elections",
@@ -150,9 +152,9 @@ REDRAWN = {
         "intro": (
             "In 2025 the Legislature replaced the congressional map drawn after the 2020 "
             "census with a new one, Plan C2333 (HB 4, second called session). It is the map "
-            "for the 2026 election, and some members are running in a district with a "
-            "different number from the one they hold."
+            "for the 2026 election."
         ),
+        "moves": True,
         "after": {"title": "2025 map (Plan C2333)", "used": "the 2026 election",
                   "drawnBy": "the Legislature as HB 4 in its second called session of 2025"},
     },
@@ -173,10 +175,9 @@ REDRAWN = {
         "headline": "Florida's House districts, before and after the 2026 map",
         "intro": (
             "In May 2026 Florida enacted a new congressional map, HB 1-D of Special Session "
-            "D (Chapter 2026-229, Laws of Florida). It is the map for the 2026 election, and "
-            "some members are running in a district with a different number from the one "
-            "they hold."
+            "D (Chapter 2026-229, Laws of Florida). It is the map for the 2026 election."
         ),
+        "moves": True,
         "after": {"title": "2026 map (HB 1-D)", "used": "the 2026 election",
                   "drawnBy": "the Legislature as HB 1-D in Special Session D, approved by "
                              "the Governor on May 4, 2026"},
@@ -198,9 +199,9 @@ REDRAWN = {
         "intro": (
             "In November 2025 a state court, ruling in League of Women Voters of Utah v. "
             "Utah State Legislature, set aside the Legislature's congressional map and "
-            "adopted one submitted by the plaintiffs for the 2026 election. Every member "
-            "is running in a district with a different number from the one they hold."
+            "adopted one submitted by the plaintiffs for the 2026 election."
         ),
+        "moves": True,
         "after": {"title": "Court-ordered map", "used": "the 2026 election",
                   "drawnBy": "the Third District Court of Utah, on November 10, 2025"},
     },

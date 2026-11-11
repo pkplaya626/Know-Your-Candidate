@@ -175,8 +175,11 @@
    * dialog. */
   function heldLine(item) {
     var senate = String(item.chamber || "").toLowerCase().indexOf("senate") !== -1;
+    // An office a seated winner held when their record was read as a
+    // candidate (openWhenRead) is neither current nor former as far as this
+    // site has read: the card says nothing of it, and the dialog says when.
     var row = ((item.politicalHistory || {}).rows || []).filter(function (r) {
-      return !(r.congress && (r.office === "U.S. Senator") === senate);
+      return !(r.congress && (r.office === "U.S. Senator") === senate) && !r.openWhenRead;
     })[0];
     if (!row) return "";
     return '<span class="card-held truncate" title="' + KYC.escapeAttr(KYC.heldText(row)) + '">' +
@@ -302,6 +305,18 @@
       var words = KYC.runoffWords(race);
       return '<span class="badge ' + words.cls + '" title="' + KYC.escapeAttr(
         words.raceTitle + runoff.join(", ") + ".") + '">' + KYC.escapeHtml(words.race) + "</span>";
+    }
+    // Once the new Congress sits, the one its record seats for the term this
+    // race decided (KYC.seatedIn, which the others' words ask too), in
+    // KYC's seatedWords: "Awaiting result" over a seated member read as
+    // though nobody held the seat. Only someone who sits in this very seat:
+    // the first version took anyone whose own status read "Seated for",
+    // so TX-35 counted Greg Casar, who sits for TX-37 (the review of #227).
+    var seat = KYC.recordPhase() ? KYC.seatedIn(race) : null;
+    if (seat) {
+      return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(seat.name + ": " +
+        KYC.seatedWords(KYC.newTerm(seat)).title) + '">Seated: ' + KYC.escapeHtml(seat.name) +
+        "</span>";
     }
     var asOf = (KYC.meta().election || {}).resultsAsOf;
     return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
@@ -610,7 +625,9 @@
       var running = race.candidateCount + unprofiled;
       // With nobody holding the seat on the ballot, nobody is challenging:
       // an open seat, or one nobody held when the race was set (FL-20).
-      var word = race.openSeat || !(race.incumbentIds || []).length ? "candidate" : "challenger";
+      // The pipeline's one test (races.py noHolder), which the strip and
+      // the sidebar count by (rule 73).
+      var word = race.noHolder ? "candidate" : "challenger";
       // From the day after Election Day, who was on it (rule 63).
       badges.push(headBadge("count", "badge-money", running + " " + word + (running === 1 ? "" : "s") +
         (race.settled ? (voted ? (running === 1 ? " was" : " were") : "") + " on the ballot" : "")));
@@ -752,9 +769,13 @@
         // words: the ballot below does not name them.
         var spec = offBallot(p) ? KYC.standing(p, "card") : null;
         // One who has left since says until when, as the Senate view's
-        // "Held the seat until" does (rule 67).
+        // "Held the seat until" does, never "Held by" (rule 67), with their
+        // card's status as the section's line gives it (rule 99): TX-37's row
+        // read "Held by Lloyd Doggett until Jan. 3, 2027." in January, without
+        // the "Did not run for re-election" its section gave him.
         out.push(KYC.sitsIn(race, p) ? "Held by " + p.name + (spec ? " (" + spec.label + ")" : "") + "."
-          : p.formerMember ? "Held by " + p.name + " until " + KYC.dateWords(p.formerMember.left) + "."
+          : p.formerMember ? p.name + ", who held this seat until " + KYC.dateWords(p.formerMember.left) +
+            (spec ? " (" + spec.label + ")" : "") + "."
           : p.name + " held this seat in the 2026 race.");
       });
     }
@@ -844,9 +865,18 @@
   function raceRow(race, split, fold) {
     var who = rowPeople(race, split);
     // An outcome the people's own label already gives ("Awaiting result:
-    // ...") is not said a second time.
+    // ...") is not said a second time, nor "Seated: X" where X is listed
+    // under "Seated for the new term" (TX-37's row said Greg Casar twice).
+    var seat = KYC.recordPhase() ? KYC.seatedIn(race) : null;
     var said = function (b) {
-      return b.key === "outcome" && who.ballot.some(function (g) { return g[0] === b.text; });
+      if (b.key !== "outcome") return false;
+      if (who.ballot.some(function (g) { return g[0] === b.text; })) return true;
+      // b.text is the badge's markup without its tags: escaped.
+      return !!seat && b.text === "Seated: " + KYC.escapeHtml(seat.name) && who.ballot.some(function (g) {
+        return /^Seated for /.test(g[0]) && g[1].some(function (n) {
+          return n === seat.name || n.indexOf(seat.name + " ") === 0;
+        });
+      });
     };
     var badges = raceBadgeItems(race).filter(function (b) {
       return ROW_BADGES[b.key] && !sameBadge((fold.shared || {})[b.key], b) && !said(b);
@@ -1077,9 +1107,15 @@
   /* The words every view says outside spending in: one implementation
    * (rule 12) for the race's money row, its comparison and the dialog. */
   function outsideTotals(o) {
+    // A side whose total is below zero is shown as filed and said to be
+    // one: "spent -$28K supporting" read as nothing a reader could parse
+    // (Jimmy Gomez, the January sweep of 2026-11-11).
     var side = function (total, n, word) {
+      var notes = [];
+      if (n) notes.push(n + (n === 1 ? " group" : " groups"));
+      if (total < 0) notes.push("as filed: a refund or correction the FEC counts against earlier spending");
       return total ? KYC.moneyShort(total) + " " + word +
-        (n ? " (" + n + (n === 1 ? " group" : " groups") + ")" : "") : "";
+        (notes.length ? " (" + notes.join("; ") + ")" : "") : "";
     };
     return [side(o.support, o.supportCommittees, "supporting"),
             side(o.oppose, o.opposeCommittees, "opposing")].filter(Boolean).join(" and ");
@@ -1678,8 +1714,13 @@
       var dates = [];
       if (h.from) dates.push("from " + KYC.dateWords(h.from));
       if (h.until && h.until <= today) dates.push("until " + KYC.dateWords(h.until));
+      // An appointee who has left since the special's winner was seated:
+      // the day they left, as the row above and the dialog give it (rule 12),
+      // never "until the winner takes the seat" once one has.
+      var left = h.untilSeated && h.id && KYC.byId(h.id) && KYC.byId(h.id).formerMember;
       if (h.how === "appointment") {
         dates.push(h.elected ? "appointed, then elected " + KYC.dateWords(h.elected)
+          : left && left.left <= today ? "appointed; served until " + KYC.dateWords(left.left)
           : h.untilSeated ? "appointed until the special election’s winner takes the seat"
           : "appointed");
       } else if (h.elected) {

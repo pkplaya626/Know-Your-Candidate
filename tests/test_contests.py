@@ -165,6 +165,27 @@ class TestCrossLink(unittest.TestCase):
         barr["formerMember"] = {"left": "2026-09-01"}
         self.assertEqual(_cross_link([barr, senate], people), 0)
 
+    def test_a_winner_seated_since_election_day_runs_for_nothing_else(self):
+        # Seated in January for the race they won, a member's filing for
+        # another seat is one they left: the TX-33 winner's withdrawn Senate
+        # filing, linked by name, made him the Senate race's contestant and
+        # his "elected" a second winner there (multiple-elected), in the
+        # January rehearsal once it seated November's winners.
+        allred = member("Z900098", "Colin Allred", "TX", 33, fec="H8TX32098", seat_up=False)
+        allred.update(raceRole="winner", raceId="H-TX-33-2026", raceStatus="elected")
+        senate = candidate("FEC_S4TX00722", "Colin Allred", "TX", chamber="Senate",
+                           fec="S4TX00722", source="fec-field")
+        self.assertEqual(_cross_link([allred, senate]), 0)
+        self.assertNotIn("contestRaceId", allred)
+        self.assertNotIn("alsoRunningId", allred)
+        self.assertNotIn("incumbentId", senate)
+        # A sitting member who is no such winner is still linked.
+        sitting = member("V000131", "Colin Allred", "TX", 33)
+        senate = candidate("FEC_S4TX00722", "Colin Allred", "TX", chamber="Senate",
+                           fec="S4TX00722", source="fec-field")
+        self.assertEqual(_cross_link([sitting, senate]), 1)
+        self.assertEqual(sitting["contestRaceId"], "S-TX-2026")
+
 
 class TestRaceOrder(unittest.TestCase):
     """One order for the people in a race, in every view (TRUST-15): the race

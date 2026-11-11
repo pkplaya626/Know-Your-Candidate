@@ -272,7 +272,11 @@
     }
     var out = past() ? "This office was on the Nov 3, 2026 ballot." : "This office is on the Nov 3, 2026 ballot.";
     var hs = item.holderStatus;
-    if (hs && hs.why && hs.text) {
+    // Said only until the election, as the state page's holder line is
+    // (KYC.stategov.openSeat, rule 79): after it, "Kay Ivey is not among the
+    // candidates" spoke of a ballot already voted on, and an inaugurated
+    // governor read "Whether ... is running for this office is not checked".
+    if (hs && hs.why && hs.text && !past()) {
       out += " " + esc(hs.text) + (hs.cite ? " (" + esc(hs.cite) + ")" : "") + ".";
     }
     var list = item.candidates;

@@ -528,6 +528,37 @@ class TestGovernorOverlayData(unittest.TestCase):
         self.assertIsNone(stategov.agreed_birth(None, {"date": "1961-05-05", "precision": "day"}))
         self.assertIsNone(stategov.agreed_birth("May 5, 1961", None))
 
+    def test_a_seat_in_congress_is_current_only_while_the_snapshot_seats_them(self):
+        # The January sweep of 2026-11-11: six members of Congress who ran for
+        # governor read "U.S. Representative since 2017" on their candidate
+        # overlay and "2017-2027" on their own profile, and "A member of
+        # Congress" after they had left.
+        from kyc import overrides, statewide_photos
+        bioguide = next(iter(overrides.OTHER_OFFICE_NOMINEES))
+        span = {"office": "U.S. Representative", "state": "AZ", "district": 5, "from": "2017",
+                "to": None, "end": "2027-01-03", "terms": 5, "current": True}
+        cache = {"people": {"gov-AZ-pat-member": {
+            "wikidata": "Q1", "wikipedia": "Pat Member", "asked": "Pat Member", "bioguide": bioguide,
+            "congress": [span], "offices": [], "withheld": []}}}
+        photos = {"photos": {statewide_photos.key("AZ", "governor", "Pat Member"): {
+            "route": "member", "bioguide": bioguide}},
+            "articles": {statewide_photos.key("AZ", "governor", "Pat Member"): {"article": "Pat Member"}}}
+
+        def rows(as_of, sitting):
+            entry = {"governor": {"name": "Gov", "party": "Republican", "partyKey": "R"},
+                     "ballot2026": {"offices": {"governor": {"up": True, "candidates": {"candidates": [
+                         {"name": "Pat Member", "party": "Republican"}]}}}}}
+            stategov.attach_history("AZ", entry, {"name": "Gov"}, cache, photos, [], as_of, sitting)
+            return entry["ballot2026"]["offices"]["governor"]["candidates"]["candidates"][0]
+
+        seated = rows("2026-11-10", {bioguide})
+        self.assertTrue(seated["politicalHistory"]["rows"][0]["current"])
+        self.assertNotIn("memberFormer", seated)
+        left = rows("2027-01-04", set())
+        self.assertNotIn("current", left["politicalHistory"]["rows"][0])
+        self.assertEqual(left["politicalHistory"]["rows"][0]["to"], "2027")
+        self.assertTrue(left["memberFormer"])
+
     def test_the_history_attaches_only_for_the_rosters_item_and_the_linked_article(self):
         from kyc import statewide, statewide_photos
         raw = {"name": "Pat Governor", "wikidata": "Q777", "born": "November 2, 1963"}

@@ -55,7 +55,9 @@ KEYS = ("kind", "office", "seeking", "party", "since", "mark", "holder", "status
 # (rule 91: names no winner).
 PAST = "This site does not read the state’s results and names no winner"
 RECORD = {"holder": "The sitting governor: see their record ›",
-          "member": "A member of Congress: see their profile ›"}
+          "member": "A member of Congress: see their profile ›",
+          # stategov's memberFormer: the membership snapshot no longer seats them.
+          "former": "A former member of Congress: see their profile ›"}
 
 
 def is_governor_id(oid):
@@ -143,14 +145,16 @@ def holder_html(item, post):
 
 
 def term_words(item, post):
-    """``termLength``: "Term 4-year term (if elected)" where the ballot
-    table's note opens with one, else ""."""
+    """``termLength``: "Term 4 years (if elected)" where the ballot
+    table's note opens with a term's length ("4-year term"), else "": the
+    label and a value repeating it read "Term 4-year term"."""
     if not item or not item.get("up"):
         return ""
-    match = re.match(r"^(\d+-year term)(?=[;,.]|$)", str(item.get("note") or ""))
+    match = re.match(r"^(\d+)-year term(?=[;,.]|$)", str(item.get("note") or ""))
     if not match:
         return ""
-    return f"Term {match.group(1)}" + ("" if post else " (if elected)")
+    years = match.group(1) + (" year" if match.group(1) == "1" else " years")
+    return f"Term {years}" + ("" if post else " (if elected)")
 
 
 def badge_words(person, post):
@@ -198,7 +202,8 @@ def share_words(found, post=False, sources=None, results=None):
                           if person.get("runningMate") else "")
     out["term"] = term_words(item, post)
     out["record"] = RECORD["holder"] if person.get("holder") else (
-        RECORD["member"] if person.get("member") else "")
+        (RECORD["former"] if person.get("memberFormer") else RECORD["member"])
+        if person.get("member") else "")
     named = list_for(listed, person)
     out["source"] = f"Source: {named.get('source')} (read {date_words(named.get('read'))})."
     return out
@@ -465,6 +470,9 @@ def words_table():
          "printed": "I, H", "ballotName": "Hank I", "runningMate": "J K"},
         {"id": "gov-GA-a-b", "name": "A B", "party": "Republican", "holder": True},
         {"id": "gov-GA-l-m", "name": "L M", "party": "Democratic", "member": "M000001"},
+        # One the membership snapshot no longer seats (stategov's memberFormer).
+        {"id": "gov-GA-n-o", "name": "N O", "party": "Republican", "member": "O000001",
+         "memberFormer": True},
     ]
     cases = []
     for post in (False, True):

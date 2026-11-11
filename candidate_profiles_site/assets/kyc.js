@@ -617,6 +617,39 @@
     card: "Awaiting result", long: "On the November ballot: awaiting result",
     mate: "Awaiting result", short: "Awaiting result" };
 
+  /* Once the new Congress sits, a nominee Congress's record seats for the
+   * term their race decided, where the results this site last read marked
+   * no winner (a refused or close mark, a majority not yet counted, a
+   * territory). "Awaiting result" stood under "Term Jan. 3, 2027 - Jan. 3,
+   * 2029" on the January rehearsal of 2026-11-11, and Greg Casar's TX-37
+   * card said it beside TX-35's "was re-elected in TX-37". *term* is the
+   * term's years ("2027–2029"); the source is the record, never the
+   * results. kyc/share.py's _SEATED says the same. */
+  var SEATED_SOURCE = " Source: Congress's record of its members, from the congress-legislators project.";
+
+  function seatedWords(term) {
+    var asOf = (meta().election || {}).resultsAsOf;
+    return { cls: "badge-neutral", rank: 0,
+      card: "Seated for the new term", long: "Seated for the " + term + " term",
+      mate: "Seated", short: "Seated",
+      title: "Seated for the " + term + " term, per Congress's record; the results this site " +
+        "last read" + (asOf ? ", on " + asOf + "," : "") + " had not marked a winner." };
+  }
+
+  /* The others on that race's ballot, once the record seats someone for its
+   * term: "Awaiting result" stood beside "Seated: Mike Johnson" over four
+   * people on LA-4's ballot (the review of PR #227). They were on the
+   * ballot, and nothing this site read says they lost: only who sits. */
+  function seatedOtherWords(other) {
+    var asOf = (meta().election || {}).resultsAsOf;
+    return { cls: "badge-neutral", rank: 0,
+      card: "Was on the ballot", long: "Was on the November ballot",
+      mate: "Was on the ballot", short: "Was on the ballot",
+      title: "On the November ballot. The results this site last read" +
+        (asOf ? ", on " + asOf + "," : "") + " had not marked a winner; Congress's record seats " +
+        other.name + " for the " + other.term + " term." };
+  }
+
   /* The December round of an open primary is its general election, never
    * a runoff (rule 75). Louisiana's House seats vote first on November 3,
    * every candidate on one ballot, and the top two meet on December 12
@@ -899,6 +932,15 @@
       own = {};
       title = "On the November ballot. The results this site last read" +
         (asOf ? ", on " + asOf + "," : "") + " had not marked a winner.";
+      if (opts.seatedTerm) {
+        spec = seatedWords(opts.seatedTerm);
+        title = spec.title;
+        source = SEATED_SOURCE;
+      } else if (opts.seatedOther) {
+        spec = seatedOtherWords(opts.seatedOther);
+        title = spec.title;
+        source = SEATED_SOURCE;
+      }
     }
     return {
       cls: own.cls || spec.cls,
@@ -926,7 +968,10 @@
     // The race that status is about, for its December round's words.
     var race = status === "runoff" ? raceById(record.raceStatusRace ||
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
+    var inRecord = opts.record === undefined ? recordPhase() : !!opts.record;
     return raceStatus(status, form, {
+      seatedTerm: seatedTerm(item, status, record, inRecord),
+      seatedOther: seatedOther(item, status, record, inRecord),
       // The past tense (LEFT) in the record phase, and for a former member
       // once the election has passed (pastTense).
       record: pastTense(item, opts),
@@ -943,6 +988,58 @@
       minor: partyKey(item) === "i",
       now: opts.now,
     });
+  }
+
+  /* The years of the term Congress's record seats *item* for, where it is
+   *  the term the race their nominee or qualified status is about decided:
+   *  in the record phase, sitting in that race's seat (sitsIn) on a term
+   *  that began after Election Day ("2027-01-03 - 2029-01-03" ->
+   *  "2027–2029"). Else "". kyc/share.py's seated_term says the same. */
+  function seatedTerm(item, status, record, inRecord) {
+    if ((status !== "nominee" && status !== "qualified") ||
+        !(inRecord === undefined ? recordPhase() : inRecord)) return "";
+    var race = raceById((record || {}).raceStatusRace || item.raceId);
+    if (!race || !sitsIn(race, item)) return "";
+    return newTerm(item);
+  }
+
+  /* A seated person's term's years where it began after Election Day
+   *  ("2027-01-03 - 2029-01-03" -> "2027\u20132029"), else "". */
+  function newTerm(item) {
+    var m = /^(\d{4})-\d{2}-\d{2} - (\d{4})-\d{2}-\d{2}$/.exec(String(item.term_start || ""));
+    var election = electionStatus((meta().election || {}).year).iso;
+    if (!m || item.term_start.slice(0, 10) <= election) return "";
+    return m[1] + "\u2013" + m[2];
+  }
+
+  /** Who Congress's record seats in *race*'s seat for the term it decided
+   *  (sitsIn, on a term begun after Election Day), among its holder and its
+   *  people: one person, else null. The race head's "Seated:" badge and the
+   *  others' words both ask this (rule 12); a member who moved, in the
+   *  race's incumbentIds, sits elsewhere and is never it. kyc/share.py's
+   *  seated_in says the same. */
+  function seatedIn(race) {
+    if (!race) return null;
+    var seen = {};
+    var found = (race.incumbentIds || []).concat(race.candidateIds || []).map(byId)
+      .filter(function (p) {
+        if (!p || seen[p.id]) return false;
+        seen[p.id] = true;
+        return sitsIn(race, p) && !!newTerm(p);
+      });
+    return found.length === 1 ? found[0] : null;
+  }
+
+  /* {name, term} of the one Congress's record seats for the term the race
+   *  *item*'s nominee or qualified status is about decided, where that is
+   *  someone else; else null. In the record phase only, as seatedTerm. */
+  function seatedOther(item, status, record, inRecord) {
+    if ((status !== "nominee" && status !== "qualified") ||
+        !(inRecord === undefined ? recordPhase() : inRecord)) return null;
+    var race = raceById((record || {}).raceStatusRace || item.raceId);
+    var other = seatedIn(race);
+    if (!other || other.id === item.id) return null;
+    return { name: other.name, term: newTerm(other) };
   }
 
   /* Whether a person's own words are in the past tense (LEFT): in the record
@@ -1088,6 +1185,10 @@
     if (former) add(leftWords(APPOINTEE_LEAVING));
     add(AWAITING, "After Election Day: on the November ballot, and the results this site last " +
       "read had not marked a winner.");
+    if (record) {
+      add(seatedWords("new"), "Once the new Congress sits: Congress's record seats them for the " +
+        "term their race decided, though the results this site last read had not marked a winner.");
+    }
     // An open primary's December round, in its race's words (openRound),
     // where a race the page holds has one.
     var open = null;
@@ -1805,6 +1906,7 @@
     not_listed: "Not listed on their official site",
     see_site: "On their official site's issues page",
     see_home: "On their official website",
+    not_kept: "Not shown after they left office",
   };
   var ABSENT_TITLE = {
     not_disclosed: "No public disclosure exists for this field.",
@@ -1816,11 +1918,21 @@
       "list of issues it could take in the page's own words. The page is linked.",
     see_home: "This site read the member's official website and found issue pages it links, " +
       "but no issues page and too few issues to list. The site is linked.",
-    // The only absence that reports work we actually did.
+    // A former member's: kyc/members.py, which read them from a site they
+    // no longer hold.
+    not_kept: "This site read their issues from their official website, which they no longer " +
+      "hold, and does not show them after they left office.",
+    // The only absence that reports work we actually did. Its cycle by
+    // name (absentTitle): "the current cycle" read as 2027-28 in January
+    // (the review of PR #227).
     no_filing: "Checked with the FEC: this candidate has no filing for the "
-      + "current cycle. Members running for a different seat file under a "
+      + "{cycle} cycle. Members running for a different seat file under a "
       + "separate committee.",
   };
+
+  function absentTitle(status) {
+    return String(ABSENT_TITLE[status] || "").replace("{cycle}", cycleYears());
+  }
 
   /** Render one profile field so an absence never reads as a finding.
    *
@@ -1862,7 +1974,7 @@
 
     if (ABSENT[status]) {
       return (
-        '<span class="kyc-absent" title="' + escapeAttr(ABSENT_TITLE[status]) +
+        '<span class="kyc-absent" title="' + escapeAttr(absentTitle(status)) +
         '">' + escapeHtml(ABSENT[status]) + "</span>"
       );
     }
@@ -3356,8 +3468,17 @@
    *  read "3 members running under a new district number" over three
    *  members sitting in the seats they won (rule 74). */
   function renumberedTail() {
-    return recordPhase() ? " who ran under a new district number in 2026"
+    // From the day after Election Day too: "3 members running under a new
+    // district number" stood over a race already run (the January sweep).
+    return recordPhase() || electionStatus().phase === "post-election"
+      ? " who ran under a new district number in 2026"
       : " running under a new district number";
+  }
+
+  /** The cycle's FEC years, "2025–26", from the build's election year. */
+  function cycleYears() {
+    var year = (meta().election || {}).year || 2026;
+    return (year - 1) + "\u2013" + String(year).slice(2);
   }
 
   /* ================================================================ states */
@@ -3612,8 +3733,7 @@
             " people are on the ballot besides members running for the seat they hold: ") +
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
-              (election.renumbered ? " (" + election.renumbered + " of them members" +
-                renumberedTail() + ")" : "") + ", " +
+              withProfileParts(election) + ", " +
               election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
               "filing over $5,000"
             : running + " in all") + ".";
@@ -3630,6 +3750,22 @@
         }
       }
     }
+  }
+
+  /* What the sidebar's "with a profile here" holds besides filings, as
+   *  its hover says it: the members who ran under a new district number,
+   *  and once the new Congress sits the winners seated in it (summary.py
+   *  `winnersSeated`), whom the Challengers chip, the filings, leaves out. */
+  function withProfileParts(election) {
+    var parts = [];
+    if (election.renumbered) {
+      parts.push(election.renumbered + " of them members" + renumberedTail());
+    }
+    if (election.winnersSeated) {
+      parts.push(election.winnersSeated + " of them winners now members of " +
+        (recordPhase() ? "the new Congress" : "Congress"));
+    }
+    return parts.length ? " (" + parts.join("; ") + ")" : "";
   }
 
   /* The sidebar's "Jump to" list, on every page that carries one. It lived
@@ -3931,6 +4067,12 @@
    * sources are compared. */
 
   function heldYears(row) {
+    // A seated winner's record read while they ran (kyc/history.py
+    // for_page): an office open then is not said to be held now.
+    if (row.openWhenRead) {
+      return "from " + row.from + ", held when this site read their record as a candidate (" +
+        dateWords(row.openWhenRead) + ")";
+    }
     if (row.current || !row.to) return "since " + row.from;
     return row.to === row.from ? String(row.from) : row.from + "\u2013" + row.to;
   }
@@ -4170,6 +4312,14 @@
     contestLine: contestLine,
     movedFrom: movedFrom,
     sitsIn: sitsIn,
+    cycleYears: cycleYears,
+    seatedTerm: function (item) {
+      return item ? seatedTerm(item, contestStatus(item), runsElsewhere(item) &&
+        item.raceStatusRace !== item.contestRaceId ? byId(item.alsoRunningId) || {} : item) : "";
+    },
+    seatedIn: seatedIn,
+    newTerm: newTerm,
+    seatedWords: seatedWords,
     movedLine: movedLine,
     movedSentence: movedSentence,
     otherOffice: otherOffice,
@@ -4287,7 +4437,7 @@
 
   var WORDS = {
     R: ["Republican", "Republicans"], D: ["Democratic", "Democrats"],
-    I: ["independent", "Independents"],
+    I: ["independent", "independents"],
   };
 
   function share(n, total) {

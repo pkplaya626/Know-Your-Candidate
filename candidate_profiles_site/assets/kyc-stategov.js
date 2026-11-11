@@ -169,8 +169,34 @@
     if (!item) return "";
     return '<a class="gov-ballot-mark' + (item.up ? " up" : "") + '" href="' +
       KYC.escapeAttr(item.source) + '" target="_blank" rel="noopener noreferrer" title="' +
-      KYC.escapeAttr((item.note || item.basis || "") + (more || "")) + '">' +
-      KYC.escapeHtml(text) + "</a>";
+      KYC.escapeAttr((item.up && item.note ? upWords(item) : item.note || item.basis || "") +
+        (more || "")) + '">' + KYC.escapeHtml(text) + "</a>";
+  }
+
+  /* An office on the ballot's hover: the term's length its note opens
+   * with, and from the day after the election that it was on that ballot.
+   * The rest of a note is the researchers' shorthand ("last elected 2022",
+   * "on 2026 sample ballot", "'Governor/Lt. Governor' one row"), which
+   * stood under the mark on some 66 offices and from November 4 said
+   * "last elected 2022" beside "This office was on the Nov 3, 2026 ballot".
+   * Never "elected": this site names no state winner and reads no state's
+   * result (rule 91), and a runoff decides some (Guam's and the Virgin
+   * Islands' November 17, Georgia's December 1), so "Last elected Nov 3,
+   * 2026" was an outcome it does not read (the review of PR #227). */
+  function upWords(item) {
+    var years = termYears(item);
+    var parts = [];
+    if (after()) parts.push("On the Nov 3, 2026 ballot");
+    if (years) parts.push(years + "-year term");
+    return parts.join("; ");
+  }
+
+  /** The term's length in years that an office on the ballot's note opens
+   *  with ("4-year term; ..." -> "4"), else "". One parse for the hover
+   *  above and the governor overlay's "Term" (kyc-governor.js termLength). */
+  function termYears(item) {
+    var m = item && /^(\d+)-year term(?=[;,.]|$)/.exec(String(item.note || ""));
+    return m ? m[1] : "";
   }
 
   function ballotItem(code, key) {
@@ -1457,6 +1483,7 @@
     // The office's ballot mark, holder line and candidates, as the state
     // page shows them, for the Your ballot page too (kyc-ballot.js, rule 12).
     ballotOf: ballot,
+    termYears: termYears,
     officeMark: officeMark,
     openSeat: openSeat,
     candidatesBlock: candidatesBlock,

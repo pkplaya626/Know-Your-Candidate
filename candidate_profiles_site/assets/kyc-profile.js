@@ -1072,6 +1072,12 @@
           return officeCard("home-office", o.city || (senate ? "State office" : "District office"),
             [street, place], o.phone, o.hours);
         }).join("") + "</ul>";
+    } else if (item.districtOfficesPending) {
+      // Read for the seat they held before (kyc/members.py): a House member
+      // now a senator showed their old district offices as "State offices".
+      out += '<span class="field-label">' + (senate ? "State offices" : "District offices") +
+        "</span>" + '<p class="casework-note">Their ' + kind + "s have not been read for their " +
+        "new term yet.</p>";
     }
     if (!out) return "";
     // Said once, after every office: the Washington office is the term's
@@ -1183,10 +1189,15 @@
     FINANCE_FIELDS.forEach(function (field) {
       if (quality[field] !== "no_filing" &&
           !(field === "funding_sources" && missing && quality[field] !== "ok")) return;
+      // A former member holds no seat: the one they held, in the cycle's
+      // years, never "this cycle", which in January reads as the next one.
       el(tiles[field]).innerHTML = '<span class="kyc-absent" title="' + KYC.escapeAttr(
-        "Checked with the FEC: no filing for the " + chamber + " seat this member holds in this " +
-        "cycle. Their campaign for " + filing.officeLabel + " files separately; its totals are " +
-        "below.") + '">No ' + chamber + " filing</span>";
+        (item.formerMember
+          ? "Checked with the FEC: no filing for the " + chamber + " seat this member held, in the " +
+            KYC.cycleYears() + " cycle. Their campaign for " + filing.officeLabel + " filed separately"
+          : "Checked with the FEC: no filing for the " + chamber + " seat this member holds in this " +
+            "cycle. Their campaign for " + filing.officeLabel + " files separately") +
+        "; its totals are below.") + '">No ' + chamber + " filing</span>";
     });
     var line = KYC.contestLine(item);
     var seat = filing.officeLabel;

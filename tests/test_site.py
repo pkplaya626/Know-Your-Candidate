@@ -1181,6 +1181,36 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(va.count("used again in 2026"), 1)
         self.assertIn("not on the ballot in 2026", pages.district_page_text("PR", 1)[1])
         self.assertIn("referendum", pages.district_page_text("MO", 8)[1])
+        # A redrawn state's members who moved, in the build's tense: running
+        # before Election Day, ran after it, and in January who took their
+        # seats (the sweep of 2026-11-11: "some members are running ... from
+        # the one they hold" stood over members seated for the new number).
+        from kyc.share import ResultsDay
+
+        self.assertIn("Some members are running in a district with a different number from "
+                      "the one they hold.", pages.district_page_text("TX", 38)[1])
+        after = pages.district_page_text("TX", 38, ResultsDay("2026-11-10"))[1]
+        self.assertIn("Some members ran in 2026 in a district with a different number from "
+                      "the one they held.", after)
+        self.assertNotIn("running", after)
+        # How many is the data's: Utah's hand-typed "Every member ran" stood
+        # over Burgess Owens, who withdrew (the review of PR #227).
+        utah = pages.district_page_text("UT", 4, ResultsDay("2026-11-10"), 0, 3)[1]
+        self.assertIn("3 of the 4 members ran in 2026 in a district with a different number "
+                      "from the one they held.", utah)
+        self.assertNotIn("Every member", utah)
+        self.assertIn("All 4 members ran in 2026", pages.district_page_text(
+            "UT", 4, ResultsDay("2026-11-10"), 0, 4)[1])
+        self.assertIn("1 of the 37 members is running in a district", pages.district_page_text(
+            "TX", 37, False, 0, 1)[1])
+        self.assertNotIn("different number", pages.district_page_text("TX", 37, False, 0, 0)[1])
+        january = pages.district_page_text("UT", 4, ResultsDay("2027-01-05", record=True), 3)[1]
+        self.assertIn("The members elected on it took their seats on January 3, 2027; 3 of them "
+                      "sit for a district with a different number from the one they held before.",
+                      january)
+        self.assertNotIn(" hold.", january)
+        self.assertIn("; 1 of them sits for a district", pages.district_page_text(
+            "TX", 38, ResultsDay("2027-01-05", record=True), 1)[1])
         self.assertEqual(pages.district_page_text("MP", 1)[0],
                          "Northern Mariana Islands' seat in the House")
 
@@ -1248,6 +1278,12 @@ class TestStatePages(unittest.TestCase):
         # Of them, the open seat's are candidates, not challengers (audit
         # 2026-10-17, RACES-14): the page splits the same total.
         self.assertEqual(summary.by_state(people, races)["MI"]["openCandidates"], 3)
+        # A seat no record incumbent held is counted as the race head counts
+        # it (races.py noHolder), open or not: FL-20, vacant at the election
+        # with a member running there under a new number, split Florida's
+        # strip 40/18 over heads summing 37/21 (rule 73).
+        races[1]["noHolder"] = True
+        self.assertEqual(summary.by_state(people, races)["MI"]["openCandidates"], 4)
 
     def test_a_race_says_how_its_ballot_is_decided(self):
         # A top-two ballot of two Democrats read like a misprint with the rule

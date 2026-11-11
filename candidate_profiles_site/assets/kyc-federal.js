@@ -941,7 +941,8 @@
     return '<div class="fed-vacancy-list" id="vacancy-list">' +
       '<h3 class="panel-subhead">Vacancies and nominees</h3>' +
       '<p class="faint">As ' + source(v.sources.current, "the courts list them") + ", as of " +
-      day(v.asOf) + ". A nominee is pending until the Senate confirms them.</p>" +
+      day(v.asOf) + ". A nominee is pending until the Senate confirms them, or the nomination is " +
+      "withdrawn or returned to the President.</p>" +
       (now.length ? table("Vacant now", ["Court", "Seat vacated by", "Why", "Vacant since", "Nominee",
         "Nominated"], now.map(row)) : "") +
       (later.length ? table("Announced", ["Court", "Judge leaving", "Why", "Leaves", "Nominee",

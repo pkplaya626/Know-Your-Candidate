@@ -708,7 +708,9 @@ class TestThePage(unittest.TestCase):
                                                        "printed", "surnameOnly", "record",
                                                        "photo", "photoCredit", "photoCopy",
                                                        "id", "wikipedia", "politicalHistory",
-                                                       "articleNone", "articleRead", "member"})
+                                                       "articleNone", "articleRead", "member",
+                                                       # that member no longer seated
+                                                       "memberFormer"})
                     if key == "governor":
                         self.assertEqual(person["id"], statewide.candidate_id(code, person["name"]))
                     else:

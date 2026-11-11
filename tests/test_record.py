@@ -633,6 +633,58 @@ class TestTheSpecialsSeatedThroughApply(unittest.TestCase):
         self.assertEqual(ohio["term_start"], "2026-12-08 - 2029-01-03")
 
 
+class TestSeatingAgainstTheResults(unittest.TestCase):
+    """Congress's record and the results must not disagree about a race's
+    term (the January sweep of 2026-11-11): rehearsed on a reversed
+    December, Jon Husted read "Lost the November election" under a term to
+    2029, and Ashley Moody "Elected" and "Left office", and every check
+    passed."""
+
+    def snapshot(self, record):
+        house = "2027-01-03" if record else "2025-01-03"
+        return {"fetched": "2027-01-04T07:20:00Z" if record else "2026-12-09T07:20:00Z",
+                "legislators": [{"chamber": "House", "termStart": house}]}
+
+    def people(self):
+        seated = {"id": "H000001", "name": "Seated Holder", "isCandidate": False,
+                  "raceId": "S-OH-2026", "term_start": "2026-12-08 - 2029-01-03",
+                  "raceStatus": "defeated", "raceStatusRace": "S-OH-2026"}
+        winner = {"id": "FEC_S6OH00163", "name": "Marked Winner", "isCandidate": True,
+                  "raceId": "S-OH-2026", "raceStatus": "elected"}
+        race = {"id": "S-OH-2026", "incumbentIds": ["H000001"], "candidateIds": ["FEC_S6OH00163"],
+                "incumbent": {"profileId": "H000001", "seated": True}}
+        return [seated, winner], [race]
+
+    def test_a_seated_loser_is_a_warning_then_an_error(self):
+        profiles, built = self.people()
+        december = validate.check_seating_results(profiles, built, self.snapshot(False))
+        self.assertEqual([(i.level, i.code) for i in december], [("warn", "result-contradicts-seating")])
+        january = validate.check_seating_results(profiles, built, self.snapshot(True))
+        self.assertEqual(sorted((i.level, i.code) for i in january),
+                         [("error", "result-contradicts-seating"), ("warn", "result-contradicts-seating")])
+        self.assertTrue(any("Marked Winner" in d for i in january for d in i.detail))
+
+    def test_agreement_says_nothing(self):
+        profiles, built = self.people()
+        profiles[0]["raceStatus"] = "elected"
+        profiles[1]["raceStatus"] = "defeated"
+        self.assertEqual(validate.check_seating_results(profiles, built, self.snapshot(True)), [])
+
+    def test_a_special_is_checked_once_its_term_has_begun(self):
+        # Florida's special in the december-loses rehearsal: the appointee
+        # the results call "elected" left on December 8 and someone else sits
+        # for the term; checked only from January, it passed a month (the
+        # review of PR #227). A regular race waits for the new Congress.
+        profiles, built = self.people()
+        profiles[0]["raceStatus"] = "nominee"
+        built[0]["special"] = True
+        december = validate.check_seating_results(profiles, built, self.snapshot(False))
+        self.assertEqual([(i.level, i.code) for i in december], [("warn", "result-contradicts-seating")])
+        self.assertTrue(any("Marked Winner" in d for i in december for d in i.detail))
+        built[0]["special"] = False
+        self.assertEqual(validate.check_seating_results(profiles, built, self.snapshot(False)), [])
+
+
 class TestRecordDrift(unittest.TestCase):
     """The drift check reads today's Senate seats from the snapshot, so it is
     never the record compared with itself."""

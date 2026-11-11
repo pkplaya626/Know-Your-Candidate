@@ -194,6 +194,36 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         summary["election"]["challengersUnprofiled"] = sum(
             len((r.get("results") or {}).get("otherNominees") or []) for r in races) - maybe
         summary["election"]["renumbered"] = sum(1 for r in races if r.get("holderMoved"))
+        # Of the profiles that figure counts, those now seated in Congress
+        # for a race they won (a newcomer, a House member now a senator),
+        # beside the renumbered holders: no longer filings, they are under
+        # Sitting members, and the Challengers chip's note says so. On the
+        # January rehearsal of 2026-11-11 the chip's 491 and the note's terms
+        # summed to 476 under the sidebar's 602 (rule 73). Before January too:
+        # a special election's winner seated in December (raceRole "winner")
+        # is under Sitting members, and the chip's note summed one short of
+        # the sidebar (the review of PR #227). Outside the record phase only
+        # such a winner: a member running elsewhere is in a race's people too.
+        from .results import on_ballot
+
+        record_phase = summary["election"]["phase"] == "record"
+        by_id = {p["id"]: p for p in profiles}
+        if record_phase:
+            # And each state's members seated for a district with a new
+            # number, for its district page's introduction (pages.district_moves).
+            for p in profiles:
+                if (p.get("renumbered") and not p.get("isCandidate") and seated(p)
+                        and p.get("state") in summary["states"]):
+                    entry = summary["states"][p["state"]]
+                    entry["renumberedSeated"] = entry.get("renumberedSeated", 0) + 1
+        winners = sum(
+            1 for r in races if ballot_known(r) for pid in r.get("candidateIds") or []
+            if pid in by_id and not by_id[pid].get("isCandidate")
+            and (record_phase or by_id[pid].get("raceRole") == "winner")
+            and not by_id[pid].get("renumbered") and seated(by_id[pid])
+            and on_ballot(by_id[pid]))
+        if winners:
+            summary["election"]["winnersSeated"] = winners
     if races is not None:
         # The same vacancies, nationally: 433 members of a 435-seat House
         # read as a complete chamber when two seats were empty.
@@ -340,7 +370,7 @@ def by_state(profiles, races=None):
             listed = race.get("candidateCount", 0) + len(
                 (race.get("results") or {}).get("otherNominees") or [])
             entry["challengersOnBallot"] += listed
-            if race.get("openSeat"):
+            if race.get("noHolder", race.get("openSeat")):
                 # Of them, the people running for a seat nobody holds on its
                 # ballot: candidates, not challengers (RACES-14). The total
                 # stays the race headers' sum (rule 73); the page splits it.

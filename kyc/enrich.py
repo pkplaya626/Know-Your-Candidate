@@ -1805,18 +1805,7 @@ def apply_cache(profiles, cache, as_of=None):
         if not running(profile):
             continue
 
-        wiki = entry.get("wiki") or {}
-        if wiki.get("born") and fill_field(profile, "birthdate", wiki["born"], "wikipedia"):
-            age = age_on(wiki["born"], as_of)
-            if age != "":
-                profile["age"] = int(age)
-            counts["born"] += 1
-        if wiki.get("education") and fill_field(profile, "education", wiki["education"],
-                                                "wikipedia"):
-            counts["education"] += 1
-        if wiki.get("occupation") and fill_field(profile, "previous_professions",
-                                                 wiki["occupation"], "wikipedia"):
-            counts["occupation"] += 1
+        fill_from_article(profile, entry, counts, as_of)
 
         # The site the profile shows: the committee's own when it checks out;
         # the election page's when there is none, or the committee's did not.
@@ -1847,6 +1836,51 @@ def apply_cache(profiles, cache, as_of=None):
             counts["issues"] += 1
         if not profile.get("photoSource"):
             take_campaign_portrait(profile, entry, shown, counts)
+    return counts
+
+
+def fill_from_article(profile, entry, counts, as_of=None):
+    """The date of birth, education and occupation the ballot-linked
+    article's infobox gives (rule 38), into fields still empty."""
+    wiki = entry.get("wiki") or {}
+    if wiki.get("born") and fill_field(profile, "birthdate", wiki["born"], "wikipedia"):
+        age = age_on(wiki["born"], as_of)
+        if age != "":
+            profile["age"] = int(age)
+        counts["born"] += 1
+    if wiki.get("education") and fill_field(profile, "education", wiki["education"],
+                                            "wikipedia"):
+        counts["education"] += 1
+    if wiki.get("occupation") and fill_field(profile, "previous_professions",
+                                             wiki["occupation"], "wikipedia"):
+        counts["occupation"] += 1
+
+
+def apply_to_winners(profiles, cache, as_of=None):
+    """What the cache read while a seated winner ran, kept once Congress
+    seats them: the filing's profile is folded into the member's
+    (profiles._claimed_ids), so the read keyed on ``FEC_<id>`` no longer
+    met anyone, and Richard Pan's January dialog read "Education No data"
+    over the Wikipedia infobox his December one quoted (the January sweep
+    of 2026-11-11). Only the article's facts, through ``fill_field``, and
+    only while the profile links the article the read was of (rule 69's
+    tie); run after the members' own sources (members.apply_cache), so the
+    Congressional Directory's record wins wherever it has one. Never the
+    campaign's platform (a sitting member's is their official site's, rule
+    86) or portrait (a member's comes by bioguide id, rule 24)."""
+    from .record import filing_ids, seated_winner
+
+    people = (cache or {}).get("people") or {}
+    counts = collections.Counter()
+    for profile in profiles:
+        if not seated_winner(profile) or people.get(profile["id"]):
+            continue
+        for pid in filing_ids(profile):
+            entry = people.get(pid) or {}
+            wiki = entry.get("wiki") or {}
+            if wiki.get("title") and wiki["title"] == profile.get("wikipedia"):
+                fill_from_article(profile, entry, counts, as_of)
+                break
     return counts
 
 

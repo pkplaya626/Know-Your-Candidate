@@ -76,6 +76,119 @@ class TestProvenance(unittest.TestCase):
         self.assertFalse(profile["hasRealFinance"])
 
 
+class TestSeatedWinnersKeepTheirReads(unittest.TestCase):
+    """A winner Congress seats is a member, and the filing they ran under is
+    folded into their profile: what was read under ``FEC_<id>`` while they
+    ran is theirs still (the January sweep of 2026-11-11: Richard Pan's
+    January dialog read "Education No data" and "No linked record of public
+    offices" over the infobox and the offices shown a week before)."""
+
+    def newcomer(self, **extra):
+        return dict({"id": "Z900006", "name": "Pat Newcomer", "isCandidate": False,
+                     "raceRole": "winner", "raceId": "H-CA-06-2026", "fecCandidateId": "H6CA03158",
+                     "wikipedia": "Pat Newcomer", "education": "No data", "birthdate": "No data",
+                     "quality": {"education": "unknown", "birthdate": "unknown"}}, **extra)
+
+    def test_the_articles_facts_are_kept(self):
+        from kyc import enrich
+        cache = {"people": {"FEC_H6CA03158": {"wiki": {
+            "title": "Pat Newcomer", "born": "1965-10-28", "education": "Johns Hopkins University (BS)"}}}}
+        person = self.newcomer()
+        import datetime
+        counts = enrich.apply_to_winners([person], cache, as_of=datetime.date(2027, 1, 10))
+        self.assertEqual(person["education"], "Johns Hopkins University (BS)")
+        self.assertEqual(person["fieldSources"]["education"], "wikipedia")
+        self.assertEqual(person["birthdate"], "1965-10-28")
+        self.assertEqual(counts["education"], 1)
+        # The Directory's record, already filled, wins.
+        member = self.newcomer(education="B.S., the Directory's words", quality={})
+        enrich.apply_to_winners([member], cache)
+        self.assertEqual(member["education"], "B.S., the Directory's words")
+        # Only while the profile links the article read, and never for a
+        # member who left or anyone who is not a seated winner.
+        for other in (self.newcomer(wikipedia="Someone Else"),
+                      self.newcomer(formerMember={"left": "2027-01-03"}),
+                      self.newcomer(raceRole=None)):
+            enrich.apply_to_winners([other], cache)
+            self.assertEqual(other["education"], "No data")
+
+    def test_the_offices_held_are_kept_while_the_article_is_theirs(self):
+        from kyc import history
+        record = {"asked": "Pat Newcomer", "wikidata": "Q1", "congress": [],
+                  "offices": [{"office": "California State Senate", "where": "California",
+                               "district": "6", "from": "2014", "to": "2022", "open": False,
+                               "agree": "exact"}], "withheld": []}
+        person = self.newcomer()
+        history.apply_cache([person], {"people": {"FEC_H6CA03158": record}})
+        self.assertEqual(person["politicalHistory"]["rows"][0]["office"], "California State Senate")
+        moved = self.newcomer(wikipedia="Someone Else")
+        history.apply_cache([moved], {"people": {"FEC_H6CA03158": record}})
+        self.assertNotIn("politicalHistory", moved)
+
+    def test_an_office_open_when_read_is_not_current_once_they_sit(self):
+        """The review of PR #227: Mike McGuire's January card read "Member of
+        the State Senate of California" and his dialog "since 2014", from a
+        record read while he ran, beside no seat in Congress. An office open
+        at that read keeps its first year and the day read, and is not
+        current; read under their own id, the same record is."""
+        from kyc import history
+        record = {"asked": "Pat Newcomer", "wikidata": "Q1", "congress": [],
+                  "offices": [{"office": "Member of the State Senate of California",
+                               "where": "California", "district": None, "from": "2014",
+                               "to": None, "open": True, "agree": "exact"}], "withheld": []}
+        person = self.newcomer()
+        history.apply_cache([person], {"read": "2026-11-10", "people": {"FEC_H6CA03158": record}})
+        row = person["politicalHistory"]["rows"][0]
+        self.assertNotIn("current", row)
+        self.assertEqual(row["openWhenRead"], "2026-11-10")
+        self.assertEqual(row["from"], "2014")
+        # A candidate's own record, read while they run, is current.
+        runner = {"id": "FEC_H6CA03158", "name": "Pat Newcomer", "isCandidate": True,
+                  "wikipedia": "Pat Newcomer"}
+        history.apply_cache([runner], {"read": "2026-11-10", "people": {"FEC_H6CA03158": record}})
+        row = runner["politicalHistory"]["rows"][0]
+        self.assertTrue(row["current"])
+        self.assertNotIn("openWhenRead", row)
+
+    def test_the_campaigns_money_is_kept_until_the_member_is_read(self):
+        """The review of PR #227: Mike McGuire's January dialog read "Raised
+        No data" over a filing that raised millions a week before, because a
+        member is keyed by name, state and chamber and the finance step had
+        not read him as one. The 2026 campaign's own totals, read by its FEC
+        id, are his; a member's own read wins, and nobody else's is taken."""
+        from kyc import fec
+        cache = {"fec:H6CA03158": {"found": True, "candidate_id": "H6CA03158",
+                                   "receipts": 2500000.0, "disbursements": 2400000.0,
+                                   "cash_on_hand": 100000.0, "election_year": 2026,
+                                   "coverage_start": "2025-01-01", "coverage_end": "2026-10-14"}}
+        person = self.newcomer(chamber="House", state="CA", receipts="No data",
+                               quality={"receipts": "unknown"})
+        fec.apply_cache([person], cache)
+        self.assertEqual(person["financeSource"], "FEC")
+        self.assertEqual(person["fecCandidateId"], "H6CA03158")
+        self.assertNotIn("receipts", person["quality"])
+        for other in (self.newcomer(chamber="House", state="CA", raceRole=None,
+                                    receipts="No data", quality={"receipts": "unknown"}),
+                      self.newcomer(chamber="House", state="CA", formerMember={"left": "2027-01-03"},
+                                    receipts="No data", quality={"receipts": "unknown"})):
+            fec.apply_cache([other], cache)
+            self.assertNotEqual(other.get("financeSource"), "FEC")
+
+    def test_an_office_not_begun_when_read_is_not_shown(self):
+        """Phil Weiser's and Rob Sand's records, read in November 2026, held
+        "Governor of Colorado" and "Governor of Iowa" from 2027 as current:
+        a governor-elect's office, which names a state winner (rule 91)."""
+        from kyc import history
+        record = {"wikidata": "Q2", "congress": [], "withheld": [],
+                  "offices": [{"office": "Governor of Iowa", "where": "Iowa", "district": None,
+                               "from": "2027", "to": None, "open": True, "agree": "exact"},
+                              {"office": "Iowa State Auditor", "where": "Iowa", "district": None,
+                               "from": "2019", "to": None, "open": True, "agree": "exact"}]}
+        rows = history.for_page(record, "2026-11-10", False, read="2026-11-10")["rows"]
+        self.assertEqual([r["office"] for r in rows], ["Iowa State Auditor"])
+        self.assertTrue(rows[0]["current"])
+
+
 class TestPortraits(unittest.TestCase):
     """Offline tests; the network paths run under the portraits command."""
 

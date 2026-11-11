@@ -1129,7 +1129,10 @@ result.
   header says the results this site last read (`election.resultsAsOf` in the
   build meta) had not marked a winner. That is a claim about when we looked,
   not about the count. A called race's header reads "Won by …"; a race going
-  to a runoff says so.
+  to a runoff says so. Once the new Congress sits, a nominee Congress's
+  record seats for the term the race decided reads "Seated for the new
+  term" ("Seated for the 2027–2029 term", credited to that record) and the
+  header "Seated: …", wherever the results still mark no winner.
 
 Every view takes its words for a status from one table, `KYC.raceStatus` in
 `assets/kyc.js`: the card, the profile, a race's list of people and a map row
@@ -2086,8 +2089,8 @@ portrait with its credit (a failed one leaves the circle and takes its
 credit with it), the party under it (a candidate's fusion line in ink, rule
 88), an office tag ("Governor", "Governor (Candidate)"), the name with the
 list's own form under it, "Governor of Georgia" or "Running for Governor •
-GA" with the term's length from the ballot table's note ("Term 4-year term
-(if elected)"; nothing where the note opens with no length - the rest of a
+GA" with the term's length from the ballot table's note ("Term 4 years
+(if elected)", from "4-year term"; nothing where the note opens with no length - the rest of a
 note is why the office is on the ballot), the office's ballot mark and holder line (rule 79)
 or the candidate's badge ("On the Nov 3, 2026 ballot"; a write-in said; from
 the day after Election Day "Was on the Nov 3, 2026 ballot", naming no
@@ -3633,6 +3636,7 @@ confirm it, and the answer stays above the map rather than scrolling away.
 | `website`, `phone`, `office`, `contactForm` | The member's current term record in `congress-legislators`; where it holds no `contactForm`, the contact page the member's official site links, fetched and seen to hold a form (`contactFormVia: "official-site"`, `contactFormChecked`: the day) | Sitting members |
 | `officeAddress` | The Washington office's whole address, from the same term record's `address` ("2452 Rayburn House Office Building Washington DC 20515-3304"), written with commas for a reader ("2452 Rayburn House Office Building, Washington, DC 20515-3304"); the street, city and ZIP code are the record's, and one in another form is kept as recorded. The profile dialog's alone (not in `data/people/index.js`) | Sitting members whose record gives one |
 | `districtOffices`, `districtOfficesRead` | `[{building, address, suite, city, state, zip, phone, hours}]` from `congress-legislators`' `legislators-district-offices`, by bioguide id, and the day it was read (`members`) | Sitting members it lists |
+| `districtOfficesPending` | `true` where the offices were read from another chamber's site than the seat now held (a House member now a senator): the dialog says they have not been read for the new term | Members who changed chambers |
 | `officialIssuesUrl`, `platformRead` | The official-site page the member's `platforms` was read from, and the day; `platformRead` alone where the site lists no issues | Sitting members whose site was read |
 | `platformFeatured` | `true` where the site has no issues page and `platforms` is the issue pages its home page links: what the home page features, which may not be every issue | Sitting members whose list came from the home page |
 | `directoryEdition` | The Congressional Directory edition (`CDIR-2026-02-20`) a member's education or careers came from | Members in the Directory |

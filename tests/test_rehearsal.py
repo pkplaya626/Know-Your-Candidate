@@ -113,6 +113,58 @@ class TestTheFictionalMemberships(unittest.TestCase):
             self.assertEqual(after[mover["id"]]["chamber"], race["chamber"])
             self.assertEqual(after[mover["id"]]["state"], race["state"])
 
+    def test_january_keeps_only_the_november_nominee_or_winner(self):
+        # Asked only whether a holder was "defeated", the rehearsal kept 52
+        # members the results had off the November ballot - eliminated in the
+        # primary, withdrawn, or not listed - and read the record's ids alone,
+        # missing a status keyed on the bioguide id (a roster alias) or on the
+        # profile's own filing (PR #225 review). The state is made here.
+        from unittest import mock
+        from kyc import candidates, fec, results
+        from kyc.profiles import build_profiles
+        raw = sources.load_all(ROOT)
+        snap = legislators.load_snapshot(ROOT)
+        if cycle.phase(snap) == "record":
+            self.skipTest("the new Congress is sitting: the committed data is the case")
+        field = candidates.load_cache(ROOT)
+        profiles, _ = build_profiles(raw, snapshot=snap, field=field, finance=fec.load_cache(ROOT))
+        record = raw["record"]
+        people = legislators.by_bioguide(snap)
+        members = {p["id"]: p for p in profiles if not p["isCandidate"]}
+        targets = {p.get("contestRaceId") for p in members.values()}
+        seats = [rid for rid in sorted(record["races"])
+                 if rid.startswith("H-") and rid not in targets
+                 and (record["incumbents"].get(rid) or {}).get("bioguide") in members
+                 and members[record["incumbents"][rid]["bioguide"]].get("seekingReelection2026")
+                 and members[record["incumbents"][rid]["bioguide"]].get("fecCandidateId")
+                 and people.get(record["incumbents"][rid]["bioguide"], {}).get("fecAll")]
+        self.assertGreaterEqual(len(seats), 5)
+        out_elim, out_wd, out_unlisted, in_elected, in_nominee = seats[:5]
+        bid = {rid: record["incumbents"][rid]["bioguide"] for rid in seats[:5]}
+        status = {
+            out_elim: {i: "eliminated" for i in people[bid[out_elim]]["fecAll"]},
+            out_wd: {bid[out_wd]: "withdrawn"},
+            # out_unlisted: the results list nobody of the seat's holder.
+            out_unlisted: {},
+            in_elected: {bid[in_elected]: "elected"},
+            in_nominee: {members[bid[in_nominee]]["fecCandidateId"]: "nominee"},
+        }
+        with mock.patch.object(results, "load_cache",
+                               return_value={"races": {r: {"status": st} for r, st in status.items()}}):
+            snapshot, gone, _log = rehearsal.january()
+        after = legislators.by_bioguide(snapshot)
+        left = {g["id"]["bioguide"] for g in gone}
+        for rid, why in ((out_elim, "eliminated in the primary"), (out_wd, "withdrawn"),
+                         (out_unlisted, "not on the results' list")):
+            self.assertFalse(bid[rid] in after, f"{rid}: a holder {why} leaves")
+            self.assertTrue(bid[rid] in left, rid)
+        for rid in (in_elected, in_nominee):
+            race = record["races"][rid]
+            self.assertTrue(bid[rid] in after,
+                            f"{rid}: the November nominee or winner keeps the seat")
+            self.assertEqual((after[bid[rid]]["state"], after[bid[rid]]["district"]),
+                             (race["state"], race["district"]), rid)
+
     def test_december_replaces_one_appointee(self):
         for label in ("december-loses", "december-wins"):
             made = rehearsal.december(label)

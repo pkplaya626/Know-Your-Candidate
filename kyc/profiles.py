@@ -896,6 +896,15 @@ def _cross_link(profiles, people=None):
             held = next((members[k] for k in _link_keys(profile) if k in members), None)
         if held is None or held["chamber"] == profile["chamber"]:
             continue
+        if held.get("raceRole") == "winner":
+            # Seated since Election Day for the race they won (rule 67): that
+            # race is their 2026 run, and a filing for another seat is one
+            # they left (rule 74). Linked by name, Colin Allred's withdrawn
+            # Senate filing made the TX-33 winner the Senate race's
+            # "contestant", and his "elected" a second winner there
+            # (`multiple-elected`): the January rehearsal, once it seated
+            # November's winners, failed its strict check on it.
+            continue
         contest = races.race_id(profile["chamber"], profile["state"], profile.get("districtNum"))
         if contest == races.race_id(held["chamber"], held["state"], held.get("districtNum")):
             # A filing for the seat they sit in - a winner seated since -
