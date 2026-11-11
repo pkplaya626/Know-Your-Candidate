@@ -3406,8 +3406,17 @@
    *  read "3 members running under a new district number" over three
    *  members sitting in the seats they won (rule 74). */
   function renumberedTail() {
-    return recordPhase() ? " who ran under a new district number in 2026"
+    // From the day after Election Day too: "3 members running under a new
+    // district number" stood over a race already run (the January sweep).
+    return recordPhase() || electionStatus().phase === "post-election"
+      ? " who ran under a new district number in 2026"
       : " running under a new district number";
+  }
+
+  /** The cycle's FEC years, "2025–26", from the build's election year. */
+  function cycleYears() {
+    var year = (meta().election || {}).year || 2026;
+    return (year - 1) + "\u2013" + String(year).slice(2);
   }
 
   /* ================================================================ states */
@@ -4234,6 +4243,7 @@
     contestLine: contestLine,
     movedFrom: movedFrom,
     sitsIn: sitsIn,
+    cycleYears: cycleYears,
     seatedTerm: function (item) {
       return item ? seatedTerm(item, contestStatus(item), runsElsewhere(item) &&
         item.raceStatusRace !== item.contestRaceId ? byId(item.alsoRunningId) || {} : item) : "";

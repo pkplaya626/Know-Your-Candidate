@@ -1699,8 +1699,13 @@
       var dates = [];
       if (h.from) dates.push("from " + KYC.dateWords(h.from));
       if (h.until && h.until <= today) dates.push("until " + KYC.dateWords(h.until));
+      // An appointee who has left since the special's winner was seated:
+      // the day they left, as the row above and the dialog give it (rule 12),
+      // never "until the winner takes the seat" once one has.
+      var left = h.untilSeated && h.id && KYC.byId(h.id) && KYC.byId(h.id).formerMember;
       if (h.how === "appointment") {
         dates.push(h.elected ? "appointed, then elected " + KYC.dateWords(h.elected)
+          : left && left.left <= today ? "appointed; served until " + KYC.dateWords(left.left)
           : h.untilSeated ? "appointed until the special election’s winner takes the seat"
           : "appointed");
       } else if (h.elected) {
