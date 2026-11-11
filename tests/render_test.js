@@ -2940,9 +2940,12 @@ async function testStates() {
     // Its hover is the term, never the researchers' note ("last elected
     // 2022", "on 2026 sample ballot"), which from November 4 contradicted it.
     const titles = marks.map((a) => a.getAttribute("title") || "");
+    // After the election it says the office was on that ballot, never that
+    // it was "elected" then: this site reads no state's result, and a runoff
+    // decides some (the review of PR #227).
     check("each mark's hover is the term's length alone",
-      titles.length >= 4 && titles.every((t) => /^(?:Last elected Nov 3, 2026; )?(?:\d+-year term)?$/.test(t)) &&
-        !titles.some((t) => /last elected 20\d\d|sample ballot/.test(t)), titles.join(" | "));
+      titles.length >= 4 && titles.every((t) => /^(?:On the Nov 3, 2026 ballot; )?(?:\d+-year term)?$/.test(t)) &&
+        !titles.some((t) => /elected|sample ballot/i.test(t)), titles.join(" | "));
     // Kemp, Jones, Carr and Raffensperger are on none of the November 3
     // ballot's lists (PERSONA-02): each office says so, citing the list.
     const sg = ga.window.kycStateGov.states.GA;
@@ -4685,6 +4688,12 @@ async function testPeopleWording() {
   });
 
   suite("index.html — a member running elsewhere has that campaign's money (PERSONA-07)", () => {
+    // "No filing this cycle" names the cycle it checked: "the current cycle"
+    // reads as 2027-28 once the new Congress sits (the review of #227).
+    const noFiling = KYC.renderField({ quality: { receipts: "no_filing" } }, "receipts");
+    check("the FEC absence names its cycle, never \"the current cycle\"",
+      new RegExp("no filing for the " + KYC.cycleYears() + " cycle").test(noFiling) &&
+        !/current cycle|\{cycle\}/.test(noFiling), noFiling);
     const running = people.filter((p) => KYC.otherCampaign(p));
     const missing = running.filter((p) => (p.quality || {}).receipts === "no_filing");
     check("the data has members with no filing for their seat and one for another",
@@ -11053,6 +11062,14 @@ async function testElectionNight() {
     check("no race head still says 'Runoff Dec 1 if no majority'",
       heads.length > 0 && !/if no majority/.test(heads) && /Runoff (held Dec 1|Dec 1, if one was needed)/.test(heads),
       heads.slice(0, 300));
+    // An office's ballot mark says, after the election, that the office was
+    // on that ballot, never that it was "elected" then: Georgia's own
+    // governor runoff is December 1, and this site reads no state's result
+    // (rule 91; "Last elected Nov 3, 2026", the review of PR #227).
+    const govMarks = [...december.D.querySelectorAll(".gov-ballot-mark.up")].map((a) => a.getAttribute("title") || "");
+    check("an office's ballot mark is never 'elected' after the election",
+      govMarks.length >= 4 && govMarks.every((t) => /^On the Nov 3, 2026 ballot(?:; \d+-year term)?$/.test(t)),
+      govMarks.join(" | "));
   });
 
   const before = await buildPage("states/ga.html", { now: CAMPAIGN_NOW, data: electionNight });

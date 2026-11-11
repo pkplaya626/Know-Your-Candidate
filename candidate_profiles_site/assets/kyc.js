@@ -1922,11 +1922,17 @@
     // no longer hold.
     not_kept: "This site read their issues from their official website, which they no longer " +
       "hold, and does not show them after they left office.",
-    // The only absence that reports work we actually did.
+    // The only absence that reports work we actually did. Its cycle by
+    // name (absentTitle): "the current cycle" read as 2027-28 in January
+    // (the review of PR #227).
     no_filing: "Checked with the FEC: this candidate has no filing for the "
-      + "current cycle. Members running for a different seat file under a "
+      + "{cycle} cycle. Members running for a different seat file under a "
       + "separate committee.",
   };
+
+  function absentTitle(status) {
+    return String(ABSENT_TITLE[status] || "").replace("{cycle}", cycleYears());
+  }
 
   /** Render one profile field so an absence never reads as a finding.
    *
@@ -1968,7 +1974,7 @@
 
     if (ABSENT[status]) {
       return (
-        '<span class="kyc-absent" title="' + escapeAttr(ABSENT_TITLE[status]) +
+        '<span class="kyc-absent" title="' + escapeAttr(absentTitle(status)) +
         '">' + escapeHtml(ABSENT[status]) + "</span>"
       );
     }

@@ -177,8 +177,8 @@
   function termLength(code) {
     var b = sg().ballotOf(code);
     var item = b && b.offices.governor;
-    var m = item && item.up && /^(\d+)-year term(?=[;,.]|$)/.exec(String(item.note || ""));
-    return m ? m[1] + (m[1] === "1" ? " year" : " years") : "";
+    var years = item && item.up ? sg().termYears(item) : "";
+    return years ? years + (years === "1" ? " year" : " years") : "";
   }
 
   /** One candidate as a row in the race panel, in the profile dialog's
