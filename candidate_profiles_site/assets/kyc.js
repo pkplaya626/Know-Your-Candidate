@@ -1014,6 +1014,15 @@
     var past = stage !== "running";
     var won = stage === "won";
     var cls = won ? RACE_STATUS.elected.cls : past ? "badge-neutral" : "badge-warn";
+    // A member who has left (rule 67) held their seat, and is seeking
+    // nothing: on the January rehearsal of 2026-11-10 Kevin Kiley's hover
+    // in Ami Bera's dialog read "Held this seat. ...; holds House \u2022 CA-3
+    // until 2027-01-03", eight days after he left it, and eleven members
+    // who ran for another seat were "not seeking re-election to" seats
+    // whose terms had ended.
+    var gone = item.formerMember;
+    var left = gone ? String(gone.left || "") : "";
+    var heldTo = "; held " + item.officeLabel + (left ? " until " + left : "") + ".";
     if (item.renumbered) {
       var map = " under the state\u2019s new district map";
       var inVerb = won ? "Re-elected in" : past ? "Ran in" : "Running in";
@@ -1023,12 +1032,13 @@
           : past ? "ran in " + number + map + (ending ? ", and " + ending : waiting)
           : "is running in " + number + map,
         title: won ? "Re-elected under the state's new district map, in " + item.contestLabel +
-            ", " + when + "; holds " + item.officeLabel + " until the new term begins."
+            ", " + when + (gone ? heldTo : "; holds " + item.officeLabel + " until the new term begins.")
           : past ? "Ran for re-election under the state's new district map, in " +
-            item.contestLabel + (ending ? ", and " + ending : waiting) + "; holds " +
-            item.officeLabel + (end ? " until " + end : "") + "."
+            item.contestLabel + (ending ? ", and " + ending : waiting) + (gone ? heldTo : "; holds " +
+            item.officeLabel + (end ? " until " + end : "") + ".")
           : "Running for re-election under the state's new district map, in " +
-            item.contestLabel + "; holds " + item.officeLabel + " until the new term begins." };
+            item.contestLabel + (gone ? heldTo
+              : "; holds " + item.officeLabel + " until the new term begins.") };
     }
     var verb = won ? "Elected to" : past ? "Ran for" : "Running for";
     return { cls: cls, past: past, stage: stage, renumbered: false,
@@ -1036,13 +1046,13 @@
       clause: won ? "was elected to " + number + " " + when
         : past ? "ran for " + number + (ending ? " and " + ending : waiting)
         : "is running for " + number,
-      title: won ? "Elected to " + item.contestLabel + " " + when + "; holds " + item.officeLabel +
-          (end ? " until " + end : " until the new term begins") + "."
+      title: won ? "Elected to " + item.contestLabel + " " + when + (gone ? heldTo : "; holds " +
+          item.officeLabel + (end ? " until " + end : " until the new term begins") + ".")
         : past ? "Ran for " + item.contestLabel + " in 2026" +
-          (ending ? " and " + ending : waiting) + "; not seeking re-election to " +
-          item.officeLabel + (end ? ", whose term ends " + end : "") + "."
-        : "Running for " + item.contestLabel + " in 2026; not seeking re-election to " +
-          item.officeLabel + "." };
+          (ending ? " and " + ending : waiting) + (gone ? heldTo : "; not seeking re-election to " +
+          item.officeLabel + (end ? ", whose term ends " + end : "") + ".")
+        : "Running for " + item.contestLabel + " in 2026" + (gone ? heldTo
+          : "; not seeking re-election to " + item.officeLabel + ".") };
   }
 
   /* A race id's seat in a clause's words: "Senate KY", "CA-40", "WY-AL"
@@ -1179,17 +1189,22 @@
   /** The sentence that says how a race's people are ordered. */
   var RACE_ORDER = "The seat's holder first, then everyone else by surname.";
   var RACE_ORDER_PLAIN = "Listed by surname.";
+  var RACE_ORDER_HELD = "The seat's former holder first, then everyone else by surname.";
 
   /** That sentence for *list*, the people a view shows of *race* in the
    *  race's order: the holder clause only when the list opens with one of
    *  the race's incumbents. Under the Senate view's "Running for this seat",
    *  whose holder has a column of their own, and in a holder's own dialog,
    *  it said the first person listed held the seat: Barry Moore, under
-   *  Alabama's. */
+   *  Alabama's. And "holder" only of one who sits in that seat (sitsIn,
+   *  rule 67): on the January rehearsal of 2026-11-10 Ami Bera's CA-3 panel
+   *  opened with Kevin Kiley, who had left, and Blake Moore's UT-2 panel
+   *  with Celeste Maloy, who sits for UT-3, each under "The seat's holder
+   *  first". */
   function raceOrderNote(list, race) {
     var first = list && list[0];
     var held = !!first && !!race && (race.incumbentIds || []).indexOf(first.id) !== -1;
-    return held ? RACE_ORDER : RACE_ORDER_PLAIN;
+    return !held ? RACE_ORDER_PLAIN : sitsIn(race, first) ? RACE_ORDER : RACE_ORDER_HELD;
   }
 
   /** Who says who is on a race's ballot, for a sentence: "per the published
@@ -3382,9 +3397,16 @@
       // The same count as every race header: everyone on the ballot but a
       // member running for the seat they hold, profile or not.
       if (running !== undefined) {
-        challengers.title = "Everyone on the 2026 ballot for a seat whose holder is running for " +
-          "it, except that member. With the " + open + " candidates for open seats, " + running +
-          " people are on the ballot besides members running for the seat they hold: " +
+        // From the day after Election Day, in the past tense, as the
+        // renumbered clause is once the new Congress sits (rule 74).
+        var voted = electionStatus().phase === "post-election";
+        challengers.title = (voted
+          ? "Everyone who was on the 2026 ballot for a seat whose holder ran for it, except " +
+            "that member. With the " + open + " candidates for open seats, " + running +
+            " people were on the ballot besides members who ran for the seat they held: "
+          : "Everyone on the 2026 ballot for a seat whose holder is running for " +
+            "it, except that member. With the " + open + " candidates for open seats, " + running +
+            " people are on the ballot besides members running for the seat they hold: ") +
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
               (election.renumbered ? " (" + election.renumbered + " of them members" +
@@ -3952,6 +3974,7 @@
     racePosition: racePosition,
     RACE_ORDER: RACE_ORDER,
     RACE_ORDER_PLAIN: RACE_ORDER_PLAIN,
+    RACE_ORDER_HELD: RACE_ORDER_HELD,
     raceOrderNote: raceOrderNote,
     seated: seated,
     formerText: formerText,

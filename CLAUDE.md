@@ -214,7 +214,7 @@ python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, 
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
 python -m unittest discover tests             # 2912 tests, no dependencies
-npm install && npm test                       # 3767 real-DOM checks (needs jsdom)
+npm install && npm test                       # 3769 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1935,11 +1935,24 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     district number in 2026" once the new Congress sits (`renumberedTail`),
     and a seat vacant at the election "No member held this seat in the
     2026 race: it was vacant", not "the seat is vacant" over its winner
-    (FL-20). Rehearsed over main's data with 429 November calls, 16 holders
-    read so in UT, CA, FL, KY and TX, and `testTheJanuaryPage` builds those
-    states' pages, the grid and the share pages at 2027-01-10 with no
-    rewind and fails on any of the above; on campaign data it says it
-    skipped.
+    (FL-20). Its review found the words beside them still present: in Ami
+    Bera's CA-3 panel Kevin Kiley's hover read "Held this seat. ...; holds
+    House • CA-3 until 2027-01-03", eleven members who had left were "not
+    seeking re-election to" seats whose terms had ended, every such seat's
+    panel opened "The seat's holder first" over its former holder, the
+    directory counted Kiley among "11 ... who are under Sitting members
+    here", and the sidebar said 868 people "are on the ballot". So a member
+    who has left "held" the seat until the day they left (`contestLine`),
+    "the seat's holder" is one who sits in it (`raceOrderNote`, else "The
+    seat's former holder first"), the directory counts under Sitting
+    members only those seated, and the sidebar is in the past tense from
+    the day after Election Day. Rehearsed over main's data with 429
+    November calls, 30 holders in 17 states read so, and
+    `testTheJanuaryPage` builds the page of every state that holds one
+    (found from the data), a dialog on each such seat, the map's House
+    panels, the grid and the share pages at 2027-01-10 with no rewind, and
+    fails on any of the above (8 of its 12 checks failed on the first
+    fix's code); on campaign data it says it skipped.
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it

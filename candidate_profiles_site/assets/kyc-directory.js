@@ -528,9 +528,19 @@
     }
     if (state.state === "all" && !state.q && election.renumbered) {
       // The sidebar's "with a profile here" counts them; this chip, which
-      // is the filings, does not: they are under Sitting members.
-      parts.push("the sidebar also counts " + plural(election.renumbered, "member", "members") +
-        KYC.renumberedTail() + ", who are under Sitting members here");
+      // is the filings, does not: they are under Sitting members. Once the
+      // new Congress sits, only those who sit in it are (rule 67): on the
+      // January rehearsal of 2026-11-10 Kevin Kiley, who lost and left, was
+      // one of "11 ... who are under Sitting members here".
+      var counted = plural(election.renumbered, "member", "members") + KYC.renumberedTail();
+      var sitting = KYC.recordPhase() ? data.filter(function (p) {
+        return p.renumbered && KYC.seated(p);
+      }).length : election.renumbered;
+      parts.push("the sidebar also counts " + counted + (sitting === election.renumbered
+        ? (KYC.recordPhase() ? ", who sit in the new Congress, under Sitting members here"
+          : ", who are under Sitting members here")
+        : " (" + (sitting ? sitting + " of them sit in the new Congress, under Sitting members here"
+          : "none of them sits in the new Congress") + ")"));
     }
     if (state.state === "all" && !state.q && election.challengersUnprofiled) {
       parts.push("the sidebar also counts " + election.challengersUnprofiled.toLocaleString() +
