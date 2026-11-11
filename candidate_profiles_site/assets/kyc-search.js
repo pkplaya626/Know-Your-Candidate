@@ -556,6 +556,13 @@
         if (ok) held.push({ title: title, p: p });
       });
     });
+    // No sitting member holds a post recorded in the sitting Congress (the
+    // first days of a new one): the build's words, as the federal page says
+    // of its Speaker, never career text alone (rule 19).
+    var unrecorded = KYC.meta().leadersUnrecorded;
+    if (!held.length && unrecorded) {
+      return [block("offices", "Leaders in Congress", [row(esc(unrecorded), "")])];
+    }
     if (!held.length) return [];
     held.sort(function (a, b) {
       var rank = function (t) { return PRINCIPAL.test(t) ? 0 : 1; };

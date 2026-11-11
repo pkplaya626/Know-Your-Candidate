@@ -667,7 +667,7 @@ def governor_static(code, gov_state, post, pad="                "):
     rows.append(f"{pad}    <p>In surname order, not ballot order. {recased}Source: "
                 f"{_out_link(listed['url'], listed['source'])} (read {time_html(listed.get('read'))})"
                 f"{write_in_credit}."
-                + (" This site does not read the state's results and names no winner." if post else "")
+                + (" This site does not read these results and names no winner." if post else "")
                 + "</p>")
     return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])
 
@@ -2538,15 +2538,25 @@ def schedule_words():
             "Election Day: prices that move on early returns would read as results.")
 
 
-def _about_main(dates):
+# A dataset's name once the results read are November's (share.post_election):
+# "Who is running" over an election that had been held read as the next one.
+_AFTER_ELECTION_NAMES = {
+    "Who is running, and their money": "Who ran, and their money",
+    "Primary and November results, and who is on the ballot":
+        "Primary and November results, and who was on the ballot",
+}
+
+
+def _about_main(dates, post=False):
     rows = []
     for what, source, covers, when, key in DATASETS:
         if key and dates.get(key):
             last = time_html(dates.get(key))
         else:
             last = _e(_NO_READ_DATE.get(what, "")) or "&ndash;"
+        named = _AFTER_ELECTION_NAMES.get(what, what) if post else what
         rows.append("                        <tr>"
-                    f'<th scope="row">{_e(what)}</th><td data-label="Source">{source}</td>'
+                    f'<th scope="row">{_e(named)}</th><td data-label="Source">{source}</td>'
                     f'<td data-label="Covers">{_e(covers)}</td>'
                     f'<td data-label="Read again">{_e(_WHEN_READ[when])}</td>'
                     f'<td data-label="Last read">{last}</td></tr>')
@@ -2688,9 +2698,11 @@ def _about_main(dates):
     ])
 
 
-def render_about(host, dates=None, codes=()):
+def render_about(host, dates=None, codes=(), post=False):
     """about.html: who runs the site, where its data comes from, how to
-    report an error, privacy, accessibility and the licence (TRUST-02)."""
+    report an error, privacy, accessibility and the licence (TRUST-02).
+    *post*: the results read are November's (``share.post_election``), and
+    the datasets are named in the past tense."""
     dates = dates or {}
     path = "about.html"
     canonical = f"https://{host}/{path}" if host else path
@@ -2711,7 +2723,7 @@ def render_about(host, dates=None, codes=()):
         sidebar="",
         nav_current="about",
         jump_options=_jump(codes),
-        main=_about_main(dates),
+        main=_about_main(dates, post),
         footer="",
         built=_read_span(dates, *keys),
         crumbs=[_HOME, (name, path)],
@@ -2899,7 +2911,10 @@ def district_directory_facts(code, seats=None):
 
 def render_districts_index(host, summary=None, codes=()):
     """districts/index.html: every state's district map, so the folder's
-    own address answers (TECH-06). Plain links; nothing to load."""
+    own address answers (TECH-06). Plain links; nothing to load. Who was
+    on the ballot is in the past tense once the results read are
+    November's (``share.post_election``)."""
+    from . import share
     from .districts import REDRAWN, all_codes
 
     path = "districts/index.html"
@@ -2920,7 +2935,8 @@ def render_districts_index(host, summary=None, codes=()):
         # (rule 75).
         f'                    <h1 class="state-title">{DISTRICTS_INDEX_NAME}</h1>',
         '                    <p class="districts-lede">Each state&#8217;s congressional districts on a',
-        "                        map: who holds each seat and who is on the November ballot. Where a",
+        "                        map: who holds each seat and who "
+        f"{'was' if share.post_election(summary) else 'is'} on the November ballot. Where a",
         "                        state redrew its map for 2026, the old and new lines side by side.</p>",
         '                    <p class="state-links">',
         f'                        <a class="btn" href="{_e(_learn("congress#house"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How the House works</a>',

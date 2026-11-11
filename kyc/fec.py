@@ -693,7 +693,7 @@ def funding_base(record, parts):
 
 def apply_cache(profiles, cache):
     """Overlay FEC figures onto profiles, replacing roster estimates."""
-    from .normalize import NO_FILING, STATUS_LABELS
+    from .normalize import NO_FILING, NOT_READ_NEW_TERM, STATUS_LABELS
 
     from .record import seated_winner
 
@@ -712,6 +712,14 @@ def apply_cache(profiles, cache):
                 if folded and folded.get("receipts") is not None:
                     record = folded
                     break
+            if record.get("receipts") is None and not record.get("candidate_id"):
+                # Neither their member record nor a folded filing's totals
+                # are read: said as that, never "No data" (rule 19).
+                quality = profile.setdefault("quality", {})
+                for field in ("receipts", "disbursements"):
+                    quality[field] = NOT_READ_NEW_TERM
+                    profile[field] = STATUS_LABELS[NOT_READ_NEW_TERM]
+                continue
         roster_id = profile.get("rosterFecId")
         if roster_id and record.get("candidate_id") not in (None, roster_id):
             # Found by an older name search, for a filing the roster says is

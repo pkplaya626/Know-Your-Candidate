@@ -711,7 +711,8 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     # The site's frame: who runs it and where its data comes from, the page
     # GitHub Pages serves for any missing address, and the home-screen
     # manifest.
-    out[ABOUT_FILE] = pages.render_about(host, dates, codes)
+    out[ABOUT_FILE] = pages.render_about(host, dates, codes,
+                                         post=bool(share.post_election(summary)))
     out[NOT_FOUND_FILE] = pages.render_404(host, codes)
     # The states whose counties' local questions are listed (rule 102): a
     # cache that breaks its rules is shown nowhere.

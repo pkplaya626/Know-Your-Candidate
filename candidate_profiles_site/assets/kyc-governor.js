@@ -398,7 +398,8 @@
     return d.textContent.replace(/\s+/g, " ").trim();
   }
 
-  var PAST = "This site does not read the state’s results and names no winner";
+  // "These", never "the state’s": a territory is never a state (rule 75).
+  var PAST = "This site does not read these results and names no winner";
   var RECORD = { holder: "The sitting governor: see their record ›",
                  member: "A member of Congress: see their profile ›",
                  // stategov's memberFormer: the membership snapshot no longer seats them.

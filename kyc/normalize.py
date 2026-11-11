@@ -226,11 +226,19 @@ GENERIC = "generic"
 # 2024 receipts on a page about the 2026 midterms reads as current money.
 NO_FILING = "no_filing"
 
+# A winner Congress has seated for a new term whose money this site has not
+# read under the seat they now hold, and whose 2026 campaign's totals are not
+# in what it holds either (a filing with no figures read, or no FEC id): "No
+# data" said nobody looked, of three January newcomers, when the finance step
+# simply has not reached them yet (rule 19).
+NOT_READ_NEW_TERM = "not_read_new_term"
+
 # What to show instead of a long placeholder sentence.
 STATUS_LABELS = {
     NOT_DISCLOSED: "Not disclosed",
     UNKNOWN: "No data",
     NO_FILING: "No filing this cycle",
+    NOT_READ_NEW_TERM: "Not read for their new term yet",
     GENERIC: None,  # keep the original text, but mark it low-information
 }
 

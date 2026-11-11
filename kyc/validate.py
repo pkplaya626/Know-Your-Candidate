@@ -233,7 +233,7 @@ def _new_term(profile):
             and start >= general_election_day(CYCLE).isoformat())
 
 
-def check_overrides(profiles, raw):
+def check_overrides(profiles, raw, snapshot=None):
     """Flag curated entries that no longer match anything.
 
     Stale overrides are invisible in the UI but quietly wrong, so they are
@@ -271,16 +271,27 @@ def check_overrides(profiles, raw):
                             "from its source and replace or remove the entry",
                             sorted(overrides.OTHER_OFFICE_NOMINEES)))
 
-    # Not an error, just useful: members who are also 2026 candidates.
+    # Not an error, just useful: members who are also 2026 candidates. Only
+    # while the campaign runs: once the Congress the cycle elects sits, a
+    # seated member's other 2026 run is a record their cards say, and the
+    # January rehearsal's strict check went on warning "1 sitting members
+    # are also 2026 candidates" of Russell Fry, seated for the new term.
+    from . import cycle as cycle_mod
     from .record import seated
 
-    duals = sorted(
+    try:
+        record_phase = bool(snapshot) and cycle_mod.phase(snapshot) == "record"
+    except cycle_mod.CycleError:
+        record_phase = False
+    duals = [] if record_phase else sorted(
         f"{p['name']}: {p['officeLabel']} -> {p['alsoRunningSeat']}"
         for p in profiles if p.get("alsoRunningSeat") and seated(p)
     )
     if duals:
         issues.append(Issue("warn", "dual-role",
-                            f"{len(duals)} sitting members are also 2026 candidates", duals))
+                            f"{len(duals)} sitting member{'' if len(duals) == 1 else 's'} "
+                            f"{'is also a 2026 candidate' if len(duals) == 1 else 'are also 2026 candidates'}",
+                            duals))
     return issues
 
 
@@ -1047,15 +1058,27 @@ def check_results(profiles, races):
                             f"{len(beaten)} sitting members lost or left their "
                             f"primary but still read as seeking re-election",
                             beaten))
+    # Members, sitting or since left: in January the list held 46 "sitting
+    # members", every one of whom had left on January 3. Each is said as
+    # what they are.
+    from .record import seated as seated_now
+    unlisted = [p for p in profiles if not p["isCandidate"] and p.get("raceStatus") == "unlisted"]
     absent = sorted(
-        f"{p['name']} ({p['officeLabel']}, {p['party']}): roster status {p['status']!r}"
-        for p in profiles
-        if not p["isCandidate"] and p.get("raceStatus") == "unlisted"
+        f"{p['name']} ({p['officeLabel']}, {p['party']}): "
+        f"{'roster status' if seated_now(p) else 'has left Congress; roster status'} "
+        f"{p['status']!r}"
+        for p in unlisted
     )
     if absent:
+        sitting = sum(1 for p in unlisted if seated_now(p))
+        left = len(unlisted) - sitting
+        who = " and ".join(part for part in (
+            f"{sitting} sitting member{'' if sitting == 1 else 's'}" if sitting else "",
+            f"{left} member{'' if left == 1 else 's'} who {'has' if left == 1 else 'have'} "
+            f"since left Congress" if left else "") if part)
         issues.append(Issue("warn", "member-not-on-ballot",
-                            f"{len(absent)} sitting members are absent from their "
-                            f"own party's decided primary and the November ballot; "
+                            f"{who} {'is' if len(unlisted) == 1 else 'are'} absent from "
+                            f"their own party's decided primary and the November ballot; "
                             f"shown as not seeking re-election", absent))
     if retired:
         issues.append(Issue("warn", "nominee-marked-retiring",
@@ -2161,7 +2184,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_wikipedia_withheld(profiles)
     issues += check_member_link_overrides(snapshot)
     issues += check_future_coverage(profiles)
-    issues += check_overrides(profiles, raw)
+    issues += check_overrides(profiles, raw, snapshot)
     issues += check_committee_titles(profiles)
     issues += check_pay(profiles, snapshot)
     issues += check_campaign_blocklist(campaigns)

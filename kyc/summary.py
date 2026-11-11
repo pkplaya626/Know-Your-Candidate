@@ -160,6 +160,17 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         },
     }
 
+    # Who leads each chamber, where no sitting member holds any post
+    # recorded in the sitting Congress (legislators.held_posts, rule 68):
+    # on the January rehearsal "Speaker" answered with former state
+    # speakers' careers and no word that the new Congress's leaders were not
+    # recorded yet, which the federal page says of its Speaker. The search's
+    # answer reads these words (kyc-search.js leaders).
+    if summary["congress"] and members and not any(p.get("leadership") for p in members):
+        from .federal_build import not_yet_recorded
+        summary["leadersUnrecorded"] = (not_yet_recorded(summary["congress"], "leaders") +
+                                        "; this site names them once it does.")
+
     # What the job pays: the year and sources of each profile's figure
     # (kyc/pay.py), where the membership is of the Congress they are for.
     from . import pay as pay_mod

@@ -3297,7 +3297,7 @@ async function testStates() {
     const results = ((gaVoted.window.kycBuildMeta.voting || {}).GA || {}).results;
     const source = gov.querySelector(".gov-candidates-source");
     check("the state's own results are linked; this site names no winner",
-      /This site does not read the state's results and names no winner/.test(source.textContent) &&
+      /This site does not read these results and names no winner/.test(source.textContent) &&
         (!results || [...source.querySelectorAll("a")].some((a) => a.getAttribute("href") === results)) &&
         !/\b(won|winner:|elected governor)\b/i.test(gov.textContent.replace(/names no winner/g, "")),
       source.textContent);
@@ -22669,6 +22669,232 @@ function KYC_ESC(text) {
     .replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 }
 
+/* ============================================ the words since Election Day */
+
+/* The site's words about the 2026 election, on each side of it (the sweep
+ * of 2026-11-11): from the day after Election Day the key to the cards, the
+ * sidebar, the chips' hovers, the Senate map, a state's races, Your ballot
+ * and the map's empty panels spoke of an election to come, and D.C. and the
+ * territories were named by code or as states (rule 75). One test of the
+ * phase on the page (KYC.electionStatus); each check asks the page, built on
+ * the campaign's clock and after Election Day. */
+async function testWordsSinceElectionDay() {
+  const T = (el) => (el ? el.textContent : "").replace(/\s+/g, " ").trim();
+  for (const [clock, now, after] of [["the campaign's clock", CAMPAIGN_NOW, false],
+                                      ["after Election Day", "2026-11-11T12:00:00", true]]) {
+    const grid = await buildPage("index.html", { now });
+    await settle(150);
+    const { D, window: w } = grid;
+    const legend = D.querySelector("#statusLegend details.status-legend");
+    const key = T(legend);
+    const label = (id) => T(D.querySelector(`[data-summary-label="${id}"]`));
+    const note = T(D.querySelector('.balance-bar-slot figure[data-chamber="senate"] .bb-note'));
+    const chip = (group, value) => (D.querySelector(`[data-group="${group}"][data-value="${value}"]`) || {
+      getAttribute: () => "" }).getAttribute("title");
+    // Every word a card shows is in the key, on either clock (GRID-19).
+    const said = new Set([...legend.querySelectorAll("dt .badge")].map((b) => b.textContent));
+    const seen = new Set();
+    D.getElementById("raceViewToggle").click();
+    [...D.querySelectorAll("#results details")].forEach((d) => {
+      d.open = true;
+      d.dispatchEvent(new w.Event("toggle"));
+    });
+    [...D.querySelectorAll("#results .card .badge")].forEach((b) => {
+      if (!b.classList.contains("other-office")) seen.add(b.textContent.replace(/ – .* line$/, ""));
+    });
+    D.getElementById("raceViewToggle").click();
+    const missing = [...seen].filter((t) => !said.has(t) &&
+      !/^(Running for|Ran for|Running in|Ran in|Re-elected in|Elected to|Seat up in) /.test(t));
+    suite(`index.html — the election's words in their tense (${clock})`, () => {
+      check("no page errors", grid.errors.length === 0, grid.errors.join(" | "));
+      check("every status word on a card is in the key", seen.size > 3 && !missing.length,
+        missing.join(" | "));
+      if (after) {
+        check("the key holds no word of an election to come: no 'Will appear', 'Renominated', " +
+          "'Advanced to November', 'the primary has not been held yet' or 'Running for'",
+          !/Will appear on the November|Renominated|Advanced to November|the primary has not been held yet|Running for …|running for another seat/.test(key),
+          key.slice(0, 400));
+        check("and says the seat badges in the past tense",
+          /so the seat was on the 2026 ballot/.test(key) && /did not run for this seat again in 2026/.test(key),
+          key.slice(0, 400));
+      } else {
+        check("the campaign's key says what its cards say",
+          /Will appear on the November general election ballot/.test(key) &&
+            /the primary has not been held yet/.test(key) && /Running for …/.test(key), key.slice(0, 300));
+      }
+      check("the sidebar's labels are in the clock's tense", after
+        ? label("senateSeatsUp") === "Senate seats on the 2026 ballot" &&
+          label("houseSeatsUp") === "House seats on the 2026 ballot"
+        : label("senateSeatsUp") === "Senate seats up" && label("houseSeatsUp") === "House seats up",
+      `${label("senateSeatsUp")} | ${label("houseSeatsUp")}`);
+      // Two counts of one set of seats each say their basis once they can
+      // differ (rule 73), from one place (KYC.senateBases).
+      const bases = w.KYC.senateBases();
+      check("the seats each party defends and the bar's dotted seats each say whose party they count",
+        after
+          ? label("senateDefending") === bases.defending &&
+            /^Seats each party defended \(by the party that held each at the election\)$/.test(bases.defending) &&
+            /seats that were on the Nov 3, 2026 ballot, by the party of who holds each now\./.test(note)
+          : label("senateDefending") === "Seats each party defends" && !/who holds each now/.test(note),
+        `${label("senateDefending")} | ${note}`);
+      check("the Challengers chip's hover", chip("role", "candidate") === (after
+        ? "Only 2026 candidates who did not hold the seat"
+        : "Only 2026 candidates who do not currently hold the seat"), chip("role", "candidate"));
+      check("the election chips' hovers say nobody is running", !after ||
+        (!/running for it|not running again|whose primary is settled/.test(
+          chip("election", "senateUp26") + chip("election", "notSeeking") + chip("election", "unchallenged")) &&
+          /everyone who ran for it/.test(chip("election", "senateUp26"))),
+      [chip("election", "senateUp26"), chip("election", "notSeeking"), chip("election", "unchallenged")].join(" | "));
+    });
+
+    const map = await buildPage("map.html", { now, hash: "#/?mode=senate2026" });
+    await settle(200);
+    const shapes = [...new Set([...map.D.querySelectorAll("[aria-label],[title]")]
+      .map((e) => e.getAttribute("aria-label") || e.getAttribute("title"))
+      .filter((t) => /^[A-Z]{2}: 2026 Senate race/.test(t || "")))];
+    const mapKey = T(map.D.getElementById("legend") || map.D.querySelector(".map-legend"));
+    const panels = {};
+    for (const [mode, code] of [["senate2026", "DC"], ["senate2026", "AS"], ["senate", "AS"], ["senate", "VI"]]) {
+      map.window.location.hash = `#/?mode=${mode}&state=${code}`;
+      map.window.dispatchEvent(new map.window.Event("hashchange"));
+      await settle(120);
+      panels[`${mode}/${code}`] = T(map.D.querySelector("#panelList .empty-state, .empty-state"));
+    }
+    suite(`map.html — the 2026 Senate map's words (${clock})`, () => {
+      check("no page errors", map.errors.length === 0, map.errors.join(" | "));
+      const running = shapes.filter((t) => / (running|not running)( for |\))/.test(t));
+      const ran = shapes.filter((t) => / (ran|did not run)( for |\))/.test(t));
+      check(after ? "no state says anyone is or is not running" : "a state whose senator did not run says so",
+        shapes.length > 30 && (after ? running.length === 0 && ran.length > 0 : running.length > 0 && ran.length === 0),
+        (after ? running : ran).slice(0, 3).join(" | ") || `${shapes.length} states`);
+      check("the key says the seats were up once the election is held", after
+        ? /seat that was up/.test(mapKey) && !/seat up(?! )/.test(mapKey.replace(/that was up/g, ""))
+        : /Republican seat up/.test(mapKey), mapKey);
+      check("a place with no senators is named in its own words, never its code (rule 75)",
+        panels["senate2026/DC"] === "The District of Columbia has no seat in the U.S. Senate." &&
+        panels["senate2026/AS"] === "American Samoa has no seat in the U.S. Senate." &&
+        panels["senate/AS"] === "American Samoa has no seat in the U.S. Senate." &&
+        panels["senate/VI"] === "The U.S. Virgin Islands has no seat in the U.S. Senate.",
+      JSON.stringify(panels));
+    });
+
+    const leads = {};
+    for (const st of ["il", "gu", "dc", "ga"]) {
+      const page = await buildPage(`states/${st}.html`, { now });
+      await settle(60);
+      leads[st] = T(page.D.querySelector("#races .state-note"));
+    }
+    const az = await ballotFor("#/?zip=85004", { now });
+    const senate = contestsOf(az.out).find((c) => c.office === "U.S. Senate");
+    suite(`a state's races and Your ballot — the election's tense (${clock})`, () => {
+      const all = Object.values(leads).join(" ");
+      if (after) {
+        check("each state's lead says who held each seat and who was on the ballot, in the past tense",
+          Object.values(leads).every((t) => /^Each seat, who held it and who was on the November ballot/.test(t)) &&
+            !/with the sitting member|no longer running|also elects |may also hold /.test(all) &&
+            /the same ballot also elected /.test(leads.il) && /may also have held/.test(leads.gu) &&
+            /may also have held the District's own contests/.test(leads.dc),
+          JSON.stringify(leads).slice(0, 900));
+      } else {
+        check("the campaign's lead", Object.values(leads).every((t) => /^Each seat with the sitting member/.test(t)) &&
+          /the same ballot also elects /.test(leads.il), JSON.stringify(leads).slice(0, 600));
+      }
+      check("Your ballot's Senate card for a state with no Senate race", !!senate &&
+        (after ? /Neither of Arizona['’]s U.S. Senate seats was up in 2026\./.test(T(senate.li))
+          : /Neither of Arizona['’]s U.S. Senate seats is up in 2026\./.test(T(senate.li))),
+        senate && T(senate.li));
+    });
+  }
+}
+
+/* The January page's words a reader asks of a new Congress (the sweep of
+ * 2026-11-11): a member who has left is found by their seat's title and
+ * named as one who left, never "out of the race"; the leaders the record has
+ * not recorded yet are said so; a member seated for the new term says when
+ * the seat is next up, re-elected or new; a seated winner whose money is not
+ * read says that. Only where the data is in the record phase (the January
+ * rehearsal); main's CI says it skipped. */
+async function testTheJanuaryWords() {
+  const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
+  if ((meta.election || {}).phase !== "record") {
+    suite("the January page's words for a new Congress", () => {
+      check(`skipped: the data is in the "${(meta.election || {}).phase}" phase; the January ` +
+        "rehearsal (tools/rehearse_changeover.py) runs this suite", true);
+    });
+    return;
+  }
+  const T = (el) => (el ? el.textContent : "").replace(/\s+/g, " ").trim();
+  const grid = await buildPage("index.html", { now: JANUARY_NOW });
+  await settle(200);
+  const { window: w, D } = grid;
+  const K = w.KYC;
+  const input = D.getElementById("searchInput");
+  const ask = async (q) => {
+    input.value = q;
+    input.dispatchEvent(new w.Event("input", { bubbles: true }));
+    await settle(300);
+    return { label: T(D.getElementById("resultsLabel")), answers: T(D.getElementById("searchAnswers")),
+             cards: [...D.querySelectorAll("#results .card[data-id]")].map((c) => c.getAttribute("data-id")) };
+  };
+  const surname = (p) => String(p.surname || p.name.split(" ").slice(-1)[0]);
+  const left = K.people().filter((p) => p.formerMember && !K.seated(p) && !p.isCandidate);
+  const unique = (p) => left.concat(K.people().filter((q) => K.seated(q)))
+    .filter((q) => surname(q).toLowerCase() === surname(p).toLowerCase()).length === 1;
+  const senator = left.find((p) => /Senate/.test(p.chamber) && K.offBallot(p.raceStatus) && unique(p));
+  const rep = left.find((p) => /House/.test(p.chamber) && K.offBallot(p.raceStatus) && unique(p));
+  const titled = [];
+  for (const [title, p] of [["Senator", senator], ["Rep.", rep]]) {
+    if (!p) continue;
+    const found = await ask(`${title} ${surname(p)}`);
+    titled.push({ p, q: `${title} ${surname(p)}`, found });
+  }
+  const plain = rep ? await ask(rep.name) : null;
+  const speaker = await ask("Speaker");
+  await ask("");
+  suite("the January page: a member who has left, asked for by name and title (rules 27, 97)", () => {
+    check("the data holds a former senator and representative who were not on the ballot",
+      !!senator && !!rep, `${left.length} former members`);
+    titled.forEach(({ p, q, found }) => {
+      check(`"${q}" finds ${p.name}, named as a member who has left Congress, never "out of the race"`,
+        (found.cards.includes(p.id) || /1 member who has left Congress matches and is hidden/.test(found.label)) &&
+          !/out of the race/.test(found.label), found.label.slice(0, 300));
+    });
+    check("so does their name alone", !plain ||
+      (/member who has left Congress/.test(plain.label) && !/person out of the race/.test(plain.label)),
+      plain && plain.label.slice(0, 300));
+    check("\"Speaker\" says the new Congress's leaders are not recorded yet, in the build's words",
+      meta.leadersUnrecorded
+        ? speaker.answers.indexOf(meta.leadersUnrecorded) !== -1 && /Leaders in Congress/.test(speaker.answers)
+        : /Speaker of the House/.test(speaker.answers),
+      speaker.answers.slice(0, 300) || "(no answer)");
+  });
+
+  const term = (p) => /^(\d{4})-\d{2}-\d{2} - /.exec(String(p.term_start || ""));
+  const newTerm = K.people().filter((p) => K.seated(p) && term(p) && p.term_start.slice(0, 10) > "2026-11-03");
+  const reelected = newTerm.find((p) => p.seatUp2026 && !p.raceRole);
+  const newcomer = newTerm.find((p) => p.raceRole === "winner");
+  const shareLine = (p) => {
+    const file = path.join(SITE, "p", p.id + ".html");
+    const m = /<p class="share-next">([^<]*)<\/p>/.exec(fs.existsSync(file) ? fs.readFileSync(file, "utf8") : "");
+    return m ? m[1] : "";
+  };
+  // Their whole records: a card's record leaves the money to the dialog (rule 94).
+  const unread = [...everyone().values()].filter((p) => K.seated(p) && p.raceRole === "winner" &&
+    typeof p.receipts !== "number" && !/^\$/.test(String(p.receipts || "")));
+  suite("the January page: one reading of a new term's seat, and of money not read yet (rules 19, 96)", () => {
+    check("a re-elected holder and a newcomer on the new term both say when their seat is next up, " +
+      "in the dialog's helper and on their share pages",
+      !!reelected && !!newcomer && [reelected, newcomer].every((p) =>
+        K.seatUpYear(p) === String(p.electionYear) && shareLine(p) === `Seat up in ${p.electionYear}`),
+      [reelected, newcomer].filter(Boolean).map((p) => `${p.name}: ${K.seatUpYear(p)} / ${shareLine(p)}`).join(" | "));
+    check("a seated winner with no money read says it was not read for the new term, never 'No data'",
+      unread.every((p) => ["not_read_new_term", "no_filing"].indexOf((p.quality || {}).receipts) !== -1 &&
+        !/No data/.test(K.renderField(p, "receipts"))),
+      unread.map((p) => `${p.name}: ${(p.quality || {}).receipts} ${K.renderField(p, "receipts")}`).slice(0, 4).join(" | ") ||
+        "every seated winner's money is read");
+  });
+}
+
 (async function main() {
   const only = process.argv[2];
   if (!only || only === "split") await testPeopleSplit();
@@ -22743,11 +22969,13 @@ if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "links") await testHolderOffTheBallot();
   if (!only || only === "index.html") await testPeopleWording();
   if (!only || only === "index.html") await testPeopleWordingAfterElection();
+  if (!only || only === "index.html" || only === "words") await testWordsSinceElectionDay();
   if (!only || only === "frame") await testFrame();
   if (!only || only === "share") await testSharePages();
   if (!only || only === "share") await testOfficialSharePages();
   if (!only || only === "share" || only === "governors") await testGovernorSharePages();
   if (!only || only === "share" || only === "january") await testTheJanuaryPage();
+  if (!only || only === "january") await testTheJanuaryWords();
   if (!only || only === "contrast") testContrast();
 
   let failed = 0;

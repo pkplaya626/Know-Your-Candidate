@@ -324,7 +324,8 @@
   function resultsLine(code) {
     var voting = (KYC.meta && KYC.meta().voting) || {};
     var url = (voting[code] || {}).results;
-    return " This site does not read the state's results and names no winner" +
+    // "These", never "the state's": a territory is never a state (rule 75).
+    return " This site does not read these results and names no winner" +
       (url ? ": " + link(url, "the official results") : "") + ".";
   }
 

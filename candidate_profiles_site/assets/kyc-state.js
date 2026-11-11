@@ -852,8 +852,7 @@
         // Congress only, and it says so: a list that looked like the whole
         // ballot left out the governor, the legislature and every local race.
         '<h2 class="state-heading">2026 races for Congress in ' + KYC.escapeHtml(name) + "</h2>",
-        '<p class="state-note">Each seat with the sitting member, everyone on the ' +
-          "November ballot, and - folded under the race - everyone no longer running. " +
+        '<p class="state-note">' + KYC.escapeHtml(racesLead()) + " " +
           alsoOnBallot(code, name, info.territory, keptMeasures) + "</p>",
         (senateRaces.length + houseRaces.length > 3 && jumps
           ? '<nav class="toolbar jump-row race-jumps" aria-label="Jump to a race">' + jumps + "</nav>"
@@ -967,6 +966,18 @@
    *  where its ballot holds them, are listed in their own section (rule 95),
    *  and the sentence points there. *kept*: the plain list the page was
    *  written with holds questions, where the data file did not load. */
+  /* What each race below holds, in its tense: from the day after Election
+   * Day it was "the sitting member" and "everyone on the November ballot"
+   * of an election that had been held, and once the new Congress sits the
+   * holder a race shows may have left (rule 67). */
+  function racesLead() {
+    return KYC.electionStatus().phase === "post-election"
+      ? "Each seat, who held it and who was on the November ballot, and - folded under the " +
+        "race - everyone who filed and was not."
+      : "Each seat with the sitting member, everyone on the November ballot, and - folded " +
+        "under the race - everyone no longer running.";
+  }
+
   function alsoOnBallot(code, name, territory, kept) {
     var words = officesAlso(code, name, territory);
     if (!kept && !KYC.ballot.hasMeasures(code)) return words;
@@ -979,27 +990,33 @@
     var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
     // The words the Your ballot page says too (kyc-ballot.js, rule 12).
     var rest = KYC.ballot.unlisted;
-    if (code === "DC") return KYC.ballot.dcContests();
+    // In the past tense from the day after Election Day, as Your ballot
+    // says it (kyc-ballot.js held()).
+    var past = KYC.electionStatus().phase === "post-election";
+    var elects = past ? "elected" : "elects";
+    var hold = past ? "may also have held" : "may also hold";
+    if (code === "DC") return KYC.ballot.dcContests(past);
     if (territory) {
       // A territory's own record covers its governor only (ballot2026.TERRITORIES):
       // its legislature and local offices are not in it, and are said so.
       var named = KYC.stategov && KYC.stategov.listsCandidates(code, { governor: false });
       return (list
-        ? "Of the territorial offices this site covers, the same ballot also elects the " +
+        ? "Of the territorial offices this site covers, the same ballot also " + elects + " the " +
           KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
           '<a class="state-jump" href="#state-government">Territorial government</a>' +
           (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). " +
           governorWhere(code, "The candidates for governor are under ")
-        : list === "" ? KYC.escapeHtml(name) + " does not elect its governor in 2026. " : "") +
-        KYC.escapeHtml(KYC.ballot.territoryUnlisted);
+        : list === "" ? KYC.escapeHtml(name) + (past ? " did not elect" : " does not elect") +
+          " its governor in 2026. " : "") +
+        KYC.escapeHtml(KYC.ballot.territoryUnlisted.replace("may also hold", hold));
     }
     if (list === null) {
-      return "Your ballot may also hold local contests, which this site does not list.";
+      return "Your ballot " + hold + " local contests, which this site does not list.";
     }
     if (!list) {
       return "None of " + KYC.escapeHtml(KYC.possessive(name)) + " governor, lieutenant governor, attorney " +
-        "general, secretary of state or regular legislative seats is elected in 2026; the " +
-        "ballot may still hold " + rest + ".";
+        "general, secretary of state or regular legislative seats " + (past ? "was" : "is") +
+        " elected in 2026; the ballot may still " + (past ? "have held " : "hold ") + rest + ".";
     }
     // The statewide offices' candidates are listed under State government
     // from the election office's own list (rule 91); the legislature's are
@@ -1009,9 +1026,9 @@
     var governor = governorWhere(code, "");
     var where = [governor ? "those for governor under " + governor : "",
       listed ? "those for " + KYC.escapeHtml(listed) + " under State government" : ""].filter(Boolean);
-    return "Of the state offices this site covers, the same ballot also elects " +
+    return "Of the state offices this site covers, the same ballot also " + elects + " " +
       KYC.escapeHtml(list) + " (see " +
-      '<a class="state-jump" href="#state-government">State government</a>). It may also hold ' +
+      '<a class="state-jump" href="#state-government">State government</a>). It ' + hold + " " +
       rest + ". " + (where.length
         ? "This site lists the candidates for Congress here, " + (where.length > 1 ? where[0] + ", and " +
           where[1] : "and " + where[0]) + "; not those for the legislature."
