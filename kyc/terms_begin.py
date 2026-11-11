@@ -85,6 +85,9 @@ IN_CALENDAR = ("https://www.in.gov/sos/elections/files/"
 # Amendments to January 1, 2025".
 MD_CONST = "https://mgaleg.maryland.gov/Pubs/LegisLegal/2025-constitution-maryland-us.pdf"
 MP_CONST = "https://cnmilaw.gov/constitution"
+# The Guam Code Annotated as the Compiler of Laws (Supreme Court of Guam)
+# publishes it: Title 5, ch. 30, the Attorney General (COL 2026-10-26).
+GU_5_30 = "https://col.guamcourts.gov/sites/default/files/05gc030_2026-10-26.pdf"
 NM_CONST = "https://www.sos.nm.gov/wp-content/uploads/2025/01/NM_Constitution_-2025-for-SOS.pdf"
 NY_PBO_4 = "https://legislation.nysenate.gov/pdf/laws/PBO4/"
 NY_CONST = "https://dos.ny.gov/system/files/documents/2025/12/constitution-january-1-2026.pdf"
@@ -385,7 +388,24 @@ TERMS = {
                    "2027-01-04", "48 U.S.C. 1422",
                    ((USC_48_1422, (
                        "The term of the elected Governor and Lieutenant Governor shall commence on the "
-                       "first Monday of January following the date of election.",)),)),),
+                       "first Monday of January following the date of election.",)),)),
+           # The attorney general, elected under Guam's own law (read
+           # 2026-11-11, as this project): its own record.
+           _record(("ag",), FIRST_MONDAY_JANUARY,
+                   "the first Monday of the January following the General Election at which the "
+                   "Attorney General was elected",
+                   "2027-01-04", "5 GCA s.30101",
+                   ((GU_5_30, (
+                       "The Office of the Attorney General of the government of Guam shall be "
+                       "administered by the Attorney General of Guam, who shall be elected by the "
+                       "people of Guam for a term of four (4) years.",
+                       "The Attorney General shall be sworn into and take office on the first Monday "
+                       "of the January following the General Election at which the Attorney General "
+                       "was elected and shall remain in office until the election and swearing in of "
+                       "a new Attorney General, unless removed from Office as provided for in this "
+                       "Section.")),),
+                   note="The candidate receiving the most votes is certified as elected (s.30101(b)): "
+                        "no runoff.")),
     "VI": (_record(("governor", "lt"), FIRST_MONDAY_JANUARY,
                    "the first Monday of January following the date of election",
                    "2027-01-04", "48 U.S.C. 1591",
@@ -592,6 +612,22 @@ _GAPS_BY_STATE = {
     "SD": (_SD_WINDOW, SD_3_1_2),
 }
 GAPS = {
+    # The District's attorney general (ballot2026.DISTRICT): the Board of
+    # Elections' calendar cites D.C. Official Code 1-1001.15(b) for a day it
+    # does not quote, and this table quotes the law's own words; the
+    # calendar's day is a lead until a person reads the Code.
+    ("DC", "ag"): (
+        "code.dccouncil.gov, where the Council publishes the D.C. Code (linked as \"Laws of the "
+        "District of Columbia\" from https://dccouncil.gov/legislation/), did not resolve on "
+        "2026-11-11 (no such domain at this machine's resolver, at dns.google or at Cloudflare), "
+        "so the provision that starts the elected attorney general's term was not read. A person "
+        "should read D.C. Code 1-204.35 and 1-301.82 there (the Board of Elections' 2026 calendar "
+        "has an officer elected on November 3 resign another office \"effective no later than "
+        "noon on January 1, 2027 (24 hours before the date upon which that person would assume "
+        "the office to which he or she has been elected)\")",
+        "https://www.dcboe.org/getContentAsset/4d04f4a1-fb2a-4f8a-809f-d3f708f232df/"
+        "5ebbd046-860b-4ee1-81c8-43d0e3bc446e/2026-General-Election-Calendar-Version-09292026.pdf"
+        "?language=en"),
     ("MD", "ag"): ("Md. Const. art. V, s.1 runs the attorney general's term \"for four years from "
                    "the time of his election and qualification\", which names no calendar day, and "
                    "this read found no statute that fixes one", MD_CONST),
@@ -706,7 +742,7 @@ def _fold(text):
 
 def up_offices():
     """Every (jurisdiction, office) kyc/ballot2026.py puts on the 2026 ballot."""
-    every = dict(ballot2026.STATES, **ballot2026.TERRITORIES)
+    every = ballot2026.every_jurisdiction()
     return sorted((code, key) for code, entry in every.items() for key in ballot2026.OFFICES
                   if key in entry and entry[key][1])
 

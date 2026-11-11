@@ -1274,13 +1274,20 @@
      * site names no state winner, and a new governor's row beside "Was a
      * candidate" is two true things, not one person counted twice. */
     var past = KYC.electionStatus(2026).phase === "post-election";
-    Object.keys(states).forEach(function (code) {
-      var offices = (states[code].ballot2026 || {}).offices || {};
+    // The District's own record too: its attorney general's candidates on
+    // the Board of Elections' list (ballot2026.DISTRICT), though it holds no
+    // governor's record among the states.
+    var district = (global.kycStateGov || {}).district || {};
+    Object.keys(states).concat(Object.keys(district).filter(function (code) {
+      return !states[code];
+    })).forEach(function (code) {
+      var entry = states[code] || district[code];
+      var offices = (entry.ballot2026 || {}).offices || {};
       STATE_OFFICES.forEach(function (pair) {
         var item = offices[pair[0]];
         if (!item || !item.up || !item.candidates) return;
         item.candidates.candidates.forEach(function (c) {
-          if (c.holder && namedHolder(states[code][pair[0]])) return;
+          if (c.holder && namedHolder(entry[pair[0]])) return;
           var what = (c.writeIn ? "write-in candidate for " : "candidate for ") + pair[1] + ", " +
             KYC.stateName(code);
           add({ name: c.name, alt: c.printed, state: code, kind: "candidate",
@@ -1417,6 +1424,23 @@
     var held = shown.filter(function (h) { return h.row.kind !== "candidate"; });
     var running = shown.filter(function (h) { return h.row.kind === "candidate"; });
     var past = KYC.electionStatus(2026).phase === "post-election";
+    // The places among the candidates, in their own words (rule 75): a
+    // territory's and the District's offices are never "statewide" (the
+    // District's attorney general, ballot2026.DISTRICT; a territory's
+    // governor or attorney general).
+    var gov = global.kycStateGov || {};
+    var meta = KYC.meta().states || {};
+    var kinds = ["statewide", "territorial", "District"].filter(function (kind) {
+      return running.some(function (h) {
+        var code = h.row.state;
+        var own = (gov.district || {})[code] && !(gov.states || {})[code] ? "District"
+          : (meta[code] || {}).territory ? "territorial" : "statewide";
+        return own === kind;
+      });
+    });
+    var whose = kinds.length === 1 && kinds[0] === "statewide" ? "Statewide candidates "
+      : "Candidates for " + (kinds.length < 3 ? kinds.join(" and ")
+        : kinds.slice(0, -1).join(", ") + " and " + kinds[kinds.length - 1]) + " offices ";
     return (held.length
       ? '<h2 class="official-results-title">Other officials</h2>' +
         '<p class="official-results-note">Listed for the office they hold now, each linked to ' +
@@ -1424,10 +1448,11 @@
         officialRows(held)
       : "") +
       (running.length
-        ? '<h2 class="official-results-title official-candidates-title">Statewide candidates ' +
+        ? '<h2 class="official-results-title official-candidates-title">' + KYC.escapeHtml(whose) +
           (past ? "who were " : "") + "on the Nov 3, 2026 ballot</h2>" +
           '<p class="official-results-note">As each election office’s list names them, each ' +
-          "linked to the state page that lists them. A candidate here is not matched to a " +
+          "linked to the " + (kinds.length === 1 && kinds[0] === "statewide" ? "state " : "") +
+          "page that lists them. A candidate here is not matched to a " +
           "profile card by name: the lists carry no id.</p>" + officialRows(running)
         : "") +
       (found.length > OFFICIAL_LIMIT

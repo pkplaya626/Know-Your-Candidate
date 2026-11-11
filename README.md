@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (4601 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (4661 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -2479,11 +2479,21 @@ record holds another of the four offices only where its own law elects it:
 the Northern Mariana Islands' attorney general, elected at large in a
 nonpartisan race since the 2012 amendment of N.M.I. Const. art. III, s.11,
 whose three candidates are the Commission's specimen ballots' and whose new
-term begins on art. VIII, s.4's second Monday of January. This site reads
-attorneys general for the fifty states only (`kyc/officers.py`), so that
-row lists the candidates and names no holder, and the territory's note says
-so. D.C. elects a
-mayor, and the map says so. Arizona's lieutenant governor, a new office
+term begins on art. VIII, s.4's second Monday of January; and Guam's, whose
+candidates declare no party (5 GCA s.30101), whose five candidates are the
+Election Commission's sample ballot's and whose new term begins on that
+section's first Monday of January. This site reads attorneys general for the
+fifty states only (`kyc/officers.py`), so each such row lists the candidates
+and names no holder, and the territory's note says so. D.C. elects a
+mayor, and the map says so; `ballot2026.DISTRICT` holds the one office of
+the four its own law elects, its attorney general (the Board of Elections:
+"elected to a four-year term every non-presidential election year"), with
+the two candidates on the Board's 2026 sample ballots. The District holds
+no governor, so `stategov` keeps its record apart from the states'
+(`district`), its page lists the office under "District officers", and Your
+ballot and the search's answers count it as the District's, never a state's
+or a territory's; the day its new term begins is a gap until a person reads
+the D.C. Code (`terms_begin.GAPS`). Arizona's lieutenant governor, a new office
 first filled on November 3, reads "No one holds this office yet", not "no
 such office".
 

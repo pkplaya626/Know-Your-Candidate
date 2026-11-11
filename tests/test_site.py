@@ -398,6 +398,15 @@ class TestPeopleFiles(unittest.TestCase):
         payload["states"]["DC"] = {"court": {}}
         self.assertEqual(emit.stategov_state_payload(payload, "TX")["governed"], ["CA", "TX"])
         del payload["states"]["DC"]
+        # The District's own record (its attorney general on the 2026
+        # ballot, ballot2026.DISTRICT) is in its own page's file alone, and
+        # never makes it a place with a governor.
+        payload["district"] = {"DC": {"district": True, "ballot2026": {"offices": {"ag": {"up": True}}}}}
+        self.assertEqual(emit.stategov_state_payload(payload, "DC"),
+                         {"states": {}, "district": payload["district"], "governed": ["CA", "TX"],
+                          "sources": {"ncsl": ["x"]}})
+        self.assertNotIn("district", emit.stategov_state_payload(payload, "TX"))
+        del payload["district"]
         with tempfile.TemporaryDirectory() as tmp:
             written = emit.write_stategov_states(payload, tmp)
             self.assertEqual(len(written), len(emit.people_codes()))

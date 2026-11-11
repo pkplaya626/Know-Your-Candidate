@@ -358,7 +358,7 @@ def problems(cache):
     if not isinstance(cache, dict) or not isinstance(cache.get("states"), dict):
         return [f"{CACHE_PATH}: no states"]
     states = cache["states"]
-    every = dict(ballot2026.STATES, **ballot2026.TERRITORIES)
+    every = ballot2026.every_jurisdiction()
     out = []
     for code in sorted(set(states) - set(every)):
         out.append(f"{code}: not a jurisdiction kyc/ballot2026.py covers")

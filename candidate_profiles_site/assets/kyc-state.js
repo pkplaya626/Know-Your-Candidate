@@ -986,6 +986,17 @@
       '<a class="state-jump" href="#measures">' + KYC.escapeHtml(section) + "</a>.";
   }
 
+  // ", which lists the candidates for X" - but not "for the attorney
+  // general" right after "elected the attorney general": where the offices
+  // named are the offices listed, the sentence does not name them twice
+  // (the second reader of PR #236).
+  function listsWords(list, named) {
+    if (!named) return "";
+    var bare = function (s) { return String(s || "").replace(/^the /, ""); };
+    return bare(named) === bare(list) ? ", which lists the candidates"
+      : ", which lists the candidates for " + KYC.escapeHtml(named);
+  }
+
   function officesAlso(code, name, territory) {
     var list = KYC.stategov ? KYC.stategov.ballotList(code) : null;
     // The words the Your ballot page says too (kyc-ballot.js, rule 12).
@@ -995,7 +1006,17 @@
     var past = KYC.electionStatus().phase === "post-election";
     var elects = past ? "elected" : "elects";
     var hold = past ? "may also have held" : "may also hold";
-    if (code === "DC") return KYC.ballot.dcContests(past);
+    if (code === "DC") {
+      // The District's attorney general, the one office of the four its own
+      // law elects (ballot2026.DISTRICT), is listed under Local government
+      // with the Board of Elections' candidates; its other contests are not.
+      var named = KYC.stategov && KYC.stategov.listsCandidates(code);
+      return (list ? "Of the District's offices this site covers, the same ballot also " + elects + " the " +
+        KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
+        '<a class="state-jump" href="#state-government">Local government</a>' +
+        listsWords(list, named) + "). " : "") +
+        KYC.ballot.dcContests(past);
+    }
     if (territory) {
       // A territory's own record covers its governor and lieutenant governor,
       // and an office its own law elects (the Northern Mariana Islands'
@@ -1006,7 +1027,7 @@
         ? "Of the territorial offices this site covers, the same ballot also " + elects + " the " +
           KYC.escapeHtml(list.replace(/^the /, "")) + " (see " +
           '<a class="state-jump" href="#state-government">Territorial government</a>' +
-          (named ? ", which lists the candidates for " + KYC.escapeHtml(named) : "") + "). " +
+          listsWords(list, named) + "). " +
           governorWhere(code, "The candidates for governor are under ")
         : list === "" ? KYC.escapeHtml(name) + (past ? " did not elect" : " does not elect") +
           " its governor in 2026. " : "") +

@@ -10320,6 +10320,36 @@ async function testStateGov() {
     const offices = KYC.stategov.ballotOffices("MP");
     check("the ballot line counts it with the governor's ticket", /attorney general/.test(offices || ""), offices);
   });
+
+  // Guam elects its attorney general too (5 GCA s.30101), and five
+  // candidates for it were on the Guam Election Commission's sample ballot
+  // while the page said the office was "not covered here" (rule 19). No
+  // roster read here names its holder.
+  const gu = await buildPage("states/gu.html");
+  suite("states/gu.html — the attorney general its voters elect", () => {
+    const { KYC } = gu.window;
+    const section = gu.D.getElementById("state-government");
+    const item = ((KYC.stategov.ballotOf("GU") || {}).offices || {}).ag;
+    check("the ballot table puts the office on the ballot, with the election office's list",
+      !!item && item.up && !!item.candidates && item.candidates.candidates.length > 0);
+    if (!item || !item.candidates) return;
+    const row = [...section.querySelectorAll(".gov-officers .gov-officer")]
+      .find((li) => (li.querySelector(".gov-officer-role") || {}).textContent === "Attorney general");
+    check("the office has its own row, its ballot mark on the label line (rule 79)",
+      !!row && !!row.querySelector(".gov-office .gov-ballot-mark.up"), section.textContent.slice(0, 400));
+    if (!row) return;
+    check("which names no holder", !row.querySelector(".gov-officer-name") &&
+      !row.querySelector(".gov-holder-status"), row.textContent);
+    check("and lists every candidate the list prints, by the name the page shows, with no party",
+      item.candidates.candidates.every((c) => row.querySelector(".gov-candidates").textContent.indexOf(c.name) !== -1 &&
+        !c.party), row.textContent);
+    const note = section.querySelector(".gov-note").textContent;
+    check("the territory's note says only the holder is not covered, in the place's own words (rule 75)",
+      /^Guam's legislature and courts, and the holder of its office of attorney general, are not covered here/.test(note) &&
+      !/legislature, attorney general and courts/.test(note), note);
+    const offices = KYC.stategov.ballotOffices("GU");
+    check("the ballot line counts it with the governor's ticket", /attorney general/.test(offices || ""), offices);
+  });
   suite("states/pr.html — the Resident Commissioner, and why no seat is on the 2026 ballot", () => {
     const hero = pr.D.querySelector(".state-summary").textContent;
     check("the hero names the office and its next election, not zeros",
@@ -10742,14 +10772,66 @@ async function testStateGov() {
     const section = dc.D.getElementById("state-government");
     check("the page says so rather than showing nothing", !!section && /mayor/.test(section.textContent));
     const note = dc.D.querySelector("#races .state-note");
+    // Its attorney general, the one office of the four the District's own
+    // law elects, is listed under Local government with the Board of
+    // Elections' candidates, and no longer named among the contests "which
+    // this site does not list" (ballot2026.DISTRICT).
     check("its ballot is never said to hold a governor or legislature",
       !!note && !/governor|legislature/.test(note.textContent) &&
-      /mayor, attorney general, the D\.C\. Council/.test(note.textContent) &&
-      !!note.querySelector('a[href="https://www.dcboe.org/elections/2026-elections"][rel~="noopener"]'),
+      /the same ballot also elect(?:s|ed) the attorney general \(see Local government, which lists the candidates\)/.test(note.textContent) &&
+      !/attorney general[^.]*the candidates for the attorney general/.test(note.textContent) &&
+      /the District's other contests, such as for mayor, the D\.C\. Council/.test(note.textContent) &&
+      !/mayor, attorney general/.test(note.textContent) &&
+      !!note.querySelector('a[href="https://www.dcboe.org/elections/2026-elections"][rel~="noopener"]') &&
+      !!note.querySelector('a.state-jump[href="#state-government"]'),
       note && note.textContent);
     const chips = [...dc.D.querySelectorAll(".state-parts a")].map((a) => a.textContent);
     check("its jump chip says Local government, as its heading does",
       chips.indexOf("Local government") !== -1 && chips.indexOf("State government") === -1, chips.join(" | "));
+  });
+
+  // The District elects its attorney general (the Board of Elections'
+  // ballot access page: "elected to a four-year term every non-presidential
+  // election year"), and two candidates for it were on the Board's 2026
+  // sample ballots while every page named the office among the contests
+  // "which this site does not list" (rule 19). It has no governor, so its
+  // record is the District's own (stategov's `district`), never a state's;
+  // no roster read here names the holder.
+  suite("states/dc.html — the attorney general its voters elect", () => {
+    const { KYC } = dc.window;
+    const section = dc.D.getElementById("state-government");
+    const item = ((KYC.stategov.ballotOf("DC") || {}).offices || {}).ag;
+    check("the District's own record puts the office on the ballot, with the Board's list",
+      !!item && item.up && !!item.candidates && item.candidates.candidates.length > 0 &&
+      !KYC.stategov.state("DC") && !!KYC.stategov.district("DC"));
+    if (!item || !item.candidates) return;
+    check("which names no governor's office", !((KYC.stategov.ballotOf("DC") || {}).offices || {}).governor);
+    const head = [...section.querySelectorAll(".panel-subhead")].map((p) => p.textContent);
+    check("under the District's own heading, never 'Statewide' or 'Territorial' (rule 75)",
+      head.indexOf("District officers") !== -1 && !head.some((h) => /Statewide|Territorial/.test(h)),
+      head.join(" | "));
+    const row = [...section.querySelectorAll(".gov-officers .gov-officer")]
+      .find((li) => (li.querySelector(".gov-officer-role") || {}).textContent === "Attorney general");
+    check("the office has its own row, its ballot mark on the label line (rule 79)",
+      !!row && !!row.querySelector(".gov-office .gov-ballot-mark.up"), section.textContent.slice(0, 400));
+    if (!row) return;
+    check("which names no holder", !row.querySelector(".gov-officer-name") &&
+      !row.querySelector(".gov-holder-status"), row.textContent);
+    check("and lists every candidate the list prints, with the Board's sample ballot cited",
+      item.candidates.candidates.every((c) => row.querySelector(".gov-candidates").textContent.indexOf(c.name) !== -1) &&
+      /District of Columbia Board of Elections’ sample ballot/.test(row.textContent), row.textContent);
+    const notes = [...section.querySelectorAll(".gov-note")].map((p) => p.textContent).join(" ");
+    check("the note says only the holder is not covered, in the District's own words (rule 75)",
+      /^The District of Columbia’s mayor, council and courts, and the holder of its office of attorney general, are not covered here/.test(notes) &&
+      !/state|territor/i.test(notes), notes);
+    check("the mayor sentence stays", /The District of Columbia has an elected mayor and a council of 13/.test(section.textContent));
+    check("the ballot line names the office", KYC.stategov.ballotOffices("DC") === "the attorney general" &&
+      KYC.stategov.listsCandidates("DC") === "the attorney general");
+    // The map's 2026 governor's races view still says the District elects a
+    // mayor, its record holding no governor.
+    check("the map's governor's-race look still says the District elects a mayor",
+      /D\.C\. elects a mayor, not a governor/.test(KYC.stategov.look("DC", "governor2026").text),
+      KYC.stategov.look("DC", "governor2026").text);
   });
 }
 
@@ -12048,6 +12130,33 @@ async function testSearchAndFilters() {
     check("under its own heading, not 'Other officials'",
       !!head && head.textContent === "Statewide candidates on the Nov 3, 2026 ballot", head && head.textContent);
   });
+  // A territory's and the District's candidates are found the same way,
+  // under a heading in their own words (rule 75): the District's attorney
+  // general's from its own record (ballot2026.DISTRICT), though it holds no
+  // governor's among the states.
+  for (const [code, record, kind] of [
+    ["DC", ((window.kycStateGov.district || {}).DC || {}).ballot2026, "District"],
+    ["GU", (window.kycStateGov.states.GU || {}).ballot2026, "territorial"]]) {
+    const person = ((((record || {}).offices || {}).ag || {}).candidates || { candidates: [] }).candidates
+      .find((c) => !c.writeIn);
+    if (!person) continue;
+    typeInto(window, D, person.name);
+    await settle(250);
+    suite(`search — a candidate for ${KYC.stateName(code)}'s attorney general`, () => {
+      const box = D.getElementById("officialResults");
+      const row = [...box.querySelectorAll(".official-row")].find((li) =>
+        li.querySelector(".official-name").textContent === person.name);
+      check("is listed as a candidate for the office, linked to its page",
+        !!row && row.querySelector(".official-role").textContent ===
+          "Candidate for Attorney General, " + KYC.stateName(code) + " (Nov 3, 2026 ballot)" &&
+          row.querySelector("a").getAttribute("href") === "states/" + code.toLowerCase() + ".html#state-government",
+        box.textContent);
+      const head = box.querySelector(".official-candidates-title");
+      check(`under 'Candidates for ${kind} offices', never 'Statewide'`,
+        !!head && head.textContent === "Candidates for " + kind + " offices on the Nov 3, 2026 ballot",
+        head && head.textContent);
+    });
+  }
   // The list's own form of a name finds the candidate, who is shown by the
   // name the page writes ("Lombardo, Joseph" is Joseph Lombardo).
   const nvRow = window.kycStateGov.states.NV.ballot2026.offices.governor.candidates.candidates
@@ -12654,8 +12763,11 @@ async function testSearchAnswers() {
         ((gov[c].ballot2026 || {}).offices || {})[key] && gov[c].ballot2026.offices[key].up);
       check("a new office no one holds yet is listed", fresh.every((c) =>
         rowsText.some((t) => t.indexOf(KYC.stateName(c) + ":") === 0 && /no one holds this office yet/.test(t))));
-      const up = Object.keys(gov).filter((c) => ((gov[c].ballot2026 || {}).offices || {})[key] &&
-        gov[c].ballot2026.offices[key].up).length;
+      // The District's own record counts with the states' (its attorney
+      // general, ballot2026.DISTRICT): one test, onBallot, for every count.
+      const places = Object.assign({}, window.kycStateGov.district || {}, gov);
+      const up = Object.keys(places).filter((c) => ((places[c].ballot2026 || {}).offices || {})[key] &&
+        places[c].ballot2026.offices[key].up).length;
       check("the count on the ballot is the races' count", listed.indexOf(up + " of these offices") !== -1 ||
         (up === 1 && listed.indexOf("1 of these offices") !== -1), `${up}: ${listed.slice(0, 260)}`);
     });
@@ -12732,14 +12844,47 @@ async function testSearchAnswers() {
   // does not call them all states (rule 75; the second reader of PR #234).
   const territoryRow = Object.keys(gov).some((c) => (gov[c].ag || agUp(c)) &&
     ((KYC.meta().states || {})[c] || {}).territory);
+  // The District is no territory, whatever the build's figures group it
+  // with (rule 75): its row, where its own record puts the office on the
+  // ballot (ballot2026.DISTRICT), is named as the District's.
+  const districtRows = window.kycStateGov.district || {};
+  const districtRow = Object.keys(districtRows).some((c) => !gov[c] &&
+    !!((((districtRows[c].ballot2026 || {}).offices || {}).ag || {}).up));
+  const heading = "Each state’s" + (territoryRow && districtRow ? ", territory’s and the District’s"
+    : territoryRow ? " and territory’s" : districtRow ? " and the District’s" : "") + " attorney general";
   await ask("attorney general");
   suite("search answers — 'attorney general': the every-state list's heading", () => {
-    check(territoryRow ? "a territory's row stands under 'Each state’s and territory’s'"
-      : "no territory's row, so 'Each state’s'",
-    territoryRow ? /Each state’s and territory’s attorney general/.test(text()) &&
-        !/Each state’s attorney general/.test(text())
-      : /Each state’s attorney general/.test(text()), text().slice(0, 300));
+    check(`the places among the rows are named as themselves: '${heading}'`,
+      text().indexOf(heading) !== -1 && (heading === "Each state’s attorney general" ||
+        !/Each state’s attorney general/.test(text())) &&
+      (!districtRow || !/Each state’s and territory’s attorney general/.test(text())), text().slice(0, 300));
   });
+  // The District's attorney general: its page lists the Board's candidates,
+  // so the answer is never "This site does not list the District of
+  // Columbia's officers".
+  for (const code of Object.keys(districtRows).filter((c) => !gov[c] &&
+      !!((((districtRows[c].ballot2026 || {}).offices || {}).ag || {}).up))) {
+    await ask(KYC.stateName(code) + " attorney general");
+    suite(`search answers — '${KYC.stateName(code)} attorney general': on the ballot, no holder named`, () => {
+      const item = districtRows[code].ballot2026.offices.ag;
+      const printed = ((item.candidates || {}).candidates || []).filter((c) => !c.writeIn);
+      check("titled as the office its page lists, linked to it",
+        /^Attorney General, District of Columbia/.test(box().querySelector(".answer-row").textContent) &&
+        hrefs().indexOf("states/" + code.toLowerCase() + ".html#state-government") !== -1, text());
+      check("names no holder, and says so", /who holds it is not named here/.test(text()) &&
+        !/does not list the District of Columbia’s officers/.test(text()), text());
+      check("with the candidates its list names", printed.length > 0 &&
+        printed.every((c) => text().indexOf(c.name) !== -1), text());
+    });
+    await ask("attorney general races");
+    suite(`search answers — 'attorney general races': the District counted as itself`, () => {
+      check("its row is listed", hrefs().indexOf("states/" + code.toLowerCase() + ".html#state-government") !== -1,
+        text().slice(0, 300));
+      check("and the note names it apart from the states and territories (rule 75)",
+        /states and territories and the District of Columbia (?:elect|elected) this office/.test(text()) &&
+        /as each one’s own record says/.test(text()), text().slice(0, 400));
+    });
+  }
   // "CNMI", the Commonwealth's own short form (its election commission is
   // votecnmi.gov.mp), is the Northern Mariana Islands, as a whole word only
   // (rule 5): "CNMI attorney general" answered nothing.
@@ -18052,7 +18197,20 @@ async function testBallot() {
       cards.map((c) => c.office).join(" | "));
     check("no statewide office, no state legislature", !/statewide|state legislature/i.test(
       [...dc.out.querySelectorAll(".ballot-office, .ballot-heading")].map((h) => h.textContent).join(" ")));
-    check("the District's own contests, not listed here", /the District's own contests/.test(dc.text));
+    // Its attorney general, the one office of the four the District's own
+    // law elects (ballot2026.DISTRICT), is a card with the Board's list, and
+    // no longer named among the contests "which this site does not list".
+    const ag = cards.find((c) => c.office === "Attorney general");
+    const item = ((((dc.window.kycStateGov.district || {}).DC || {}).ballot2026 || {}).offices || {}).ag;
+    check("its attorney general, with the Board's candidates", !!ag && !!item && !!item.candidates &&
+      item.candidates.candidates.filter((c) => !c.writeIn).every((c) => dc.text.indexOf(c.name) !== -1),
+      cards.map((c) => c.office).join(" | "));
+    check("the District's other contests, not listed here",
+      /the District's other contests, such as for mayor, the D\.C\. Council/.test(dc.text) &&
+      !/mayor, attorney general/.test(dc.text), (dc.text.match(/.{40}contests, such as.{80}/) || [""])[0]);
+    check("its offices are the District's in the order line, never a territory's (rule 75)",
+      /then the District’s offices/.test(dc.text) && !/territorial/i.test(dc.text),
+      (dc.text.match(/Congress first.{80}/) || [""])[0]);
     check("'the District of Columbia' in a sentence (rule 75)", /Key dates in the District of Columbia/.test(dc.text));
   });
 
@@ -18062,6 +18220,13 @@ async function testBallot() {
     const cards = contestsOf(gu.out);
     check("Guam's Delegate race and its own offices", cards.some((c) => /Delegate/.test(c.office)) &&
       cards.some((c) => c.office === "Governor"), cards.map((c) => c.office).join(" | "));
+    // Its attorney general, elected under its own law (5 GCA s.30101), with
+    // the Commission's sample ballot's candidates, none beside a party.
+    const guAg = ((((gu.window.kycStateGov.states || {}).GU || {}).ballot2026 || {}).offices || {}).ag;
+    const guCard = cards.find((c) => c.office === "Attorney general");
+    check("Guam's attorney general, with the Commission's candidates", !!guCard && !!guAg && !!guAg.up &&
+      !!guAg.candidates && guAg.candidates.candidates.every((c) => guCard.li.textContent.indexOf(c.name) !== -1),
+      cards.map((c) => c.office).join(" | "));
     check("never 'statewide' of a territory", !/statewide/i.test(gu.text), (gu.text.match(/.{40}statewide.{40}/i) || [""])[0]);
     check("territorial offices, in the order line", /then territorial offices/.test(gu.text));
     check("Puerto Rico: no election on November 3, in its election office's words",
@@ -23185,7 +23350,11 @@ async function testWordsSinceElectionDay() {
           Object.values(leads).every((t) => /^Each seat, who held it and who was on the November ballot/.test(t)) &&
             !/with the sitting member|no longer running|also elects |may also hold /.test(all) &&
             /the same ballot also elected /.test(leads.il) && /may also have held/.test(leads.gu) &&
-            /may also have held the District's own contests/.test(leads.dc),
+            // The District's attorney general is listed (ballot2026.DISTRICT),
+            // so its lead says the ballot elected it and names the rest as
+            // its "other" contests.
+            /the same ballot also elected the attorney general/.test(leads.dc) &&
+            /may also have held the District's other contests/.test(leads.dc),
           JSON.stringify(leads).slice(0, 900));
       } else {
         check("the campaign's lead", Object.values(leads).every((t) => /^Each seat with the sitting member/.test(t)) &&

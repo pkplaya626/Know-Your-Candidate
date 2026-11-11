@@ -523,9 +523,10 @@ class TestTheNorthernMarianaIslandsAttorneyGeneral(unittest.TestCase):
         record = ballot2026.for_state("MP")
         self.assertTrue(record["territory"])
         self.assertEqual(sorted(record["offices"]), ["ag", "governor", "lt"])
-        # No other territory's attorney general has been read here; a record
-        # without one is not a finding that it elects none.
-        for code in ("AS", "GU", "PR", "VI"):
+        # Guam's was read too (TestGuamsAttorneyGeneral); no other
+        # territory's has been, and a record without one is not a finding
+        # that it elects none.
+        for code in ("AS", "PR", "VI"):
             self.assertNotIn("ag", ballot2026.TERRITORIES[code], code)
 
     def test_a_territorys_office_beyond_the_governors_must_be_elected(self):
@@ -608,6 +609,166 @@ class TestTheNorthernMarianaIslandsAttorneyGeneral(unittest.TestCase):
                       "a term of office of four years.", quotes)
         # One day for the governor's term and the attorney general's.
         self.assertEqual(terms_begin.for_page("MP", "governor")["day"], term["day"])
+
+
+class TestGuamsAttorneyGeneral(unittest.TestCase):
+    """Guam elects its attorney general (5 GCA s.30101), and five candidates
+    for it were on the Guam Election Commission's 2026 general election
+    sample ballot, but the ballot table held the territory's governor and
+    lieutenant governor only, and its page said the office was "not covered
+    here" (rule 19). Read 2026-11-11 from the Commission's sample ballot, the
+    same file its governor's list is read from, and the Compiler of Laws'
+    Title 5, ch. 30."""
+
+    SAMPLE = "https://drive.google.com/file/d/1RKr3bLuivj8n0n29XKbQVHEgdUYwILMN/view?usp=sharing"
+    LAW = "https://col.guamcourts.gov/sites/default/files/05gc030_2026-10-26.pdf"
+    # The ballot's column, in its own order: no party beside any of them.
+    ROWS = ["TYDINGCO, Phillip James", "PAULUHN, Jordan Lawrence Evangelista",
+            "FISHER, Thomas Joseph", "SANTOS, Peter John", "MOYLAN, Douglas B."]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = statewide.load(".")
+        cls.payload, cls.problems = stategov.build(".")
+
+    def test_the_ballot_table_puts_the_office_on_the_ballot(self):
+        selection, up, note, source = ballot2026.TERRITORIES["GU"]["ag"]
+        self.assertEqual((selection, up), ("elected", True))
+        self.assertTrue(note.startswith("4-year term;"), note)
+        self.assertIn("5 GCA s.30101", note)
+        self.assertEqual(source, self.SAMPLE)
+
+    def test_the_list_is_the_commissions_sample_ballot(self):
+        from kyc import voting_dates
+        o = statewide.office(self.cache, "GU", "ag")
+        self.assertEqual(o["list"]["url"], self.SAMPLE)
+        # The governor's list is read from the same file.
+        self.assertEqual(o["list"]["url"], statewide.office(self.cache, "GU", "governor")["list"]["url"])
+        self.assertEqual((o["list"]["by"], o["list"]["kind"], o["list"]["read"]),
+                         ("Guam Election Commission", "sample ballot", "2026-11-11"))
+        self.assertTrue(statewide.official(o["list"]["url"], "GU")[0])
+        self.assertFalse(statewide.not_the_states(o["list"]))
+        self.assertFalse(o["certified"])
+        self.assertNotIn("certifiedQuote", o)
+        self.assertFalse(voting_dates.official_source(o["list"]["url"], "MP")[0])
+
+    def test_the_names_as_the_ballot_prints_them_and_no_party(self):
+        o = statewide.office(self.cache, "GU", "ag")
+        self.assertEqual([p["name"] for p in o["candidates"]], self.ROWS)
+        quote = o["list"]["quote"]
+        for i, name in enumerate(self.ROWS, 1):
+            self.assertIn(f"{i}. {name}", quote)
+        for person in o["candidates"]:
+            self.assertIsNone(person["party"], person)
+            self.assertFalse(person["writeIn"], person)
+            self.assertIsNone(person["runningMate"], person)
+        self.assertIn("declare no political party", o["notes"])
+        shown = self.payload["states"]["GU"]["ballot2026"]["offices"]["ag"]["candidates"]
+        self.assertEqual([c["name"] for c in shown["candidates"]],
+                         ["Thomas Joseph Fisher", "Douglas B. Moylan",
+                          "Jordan Lawrence Evangelista Pauluhn", "Peter John Santos",
+                          "Phillip James Tydingco"])
+        self.assertFalse([c for c in shown["candidates"] if "party" in c or "holder" in c])
+
+    def test_the_holder_the_ballot_marks_is_not_named_on_the_page(self):
+        o = statewide.office(self.cache, "GU", "ag")
+        self.assertTrue(o["holderOnList"])
+        self.assertEqual(o["holderResearched"], "Douglas B. Moylan")
+        self.assertEqual([p["name"] for p in o["candidates"] if p["holder"]], ["MOYLAN, Douglas B."])
+        self.assertIn("(Incumbent)", o["holderSource"]["quote"])
+        # No roster read here lists Guam's attorney general, so the page reads
+        # no holder line for one (rule 91) and marks no candidate the holder.
+        state = self.payload["states"]["GU"]
+        self.assertNotIn("ag", state)
+        item = state["ballot2026"]["offices"]["ag"]
+        self.assertNotIn("holderStatus", item)
+        self.assertNotIn("outgoing", item)
+        self.assertFalse([p for p in self.problems if p.startswith("GU ag")], self.problems)
+
+    def test_the_new_term_begins_on_the_statutes_day(self):
+        from kyc import terms_begin
+        term = self.payload["states"]["GU"]["ballot2026"]["offices"]["ag"]["termBegins"]
+        self.assertEqual((term["day"], term["kind"], term["source"]), ("2027-01-04", "on", self.LAW))
+        self.assertTrue(term["counted"])
+        self.assertEqual(term["cite"], "5 GCA s.30101")
+        self.assertNotIn(("GU", "ag"), terms_begin.GAPS)
+        quotes = [q for _source, qs in terms_begin.record_for("GU", "ag")["sources"] for q in qs]
+        self.assertTrue(any("elected by the people of Guam for a term of four (4) years" in q
+                            for q in quotes), quotes)
+
+
+class TestTheDistrictsAttorneyGeneral(unittest.TestCase):
+    """The District of Columbia elects its attorney general, and the Board of
+    Elections' 2026 sample ballots printed two candidates for it, while every
+    page named the office among "the District's own contests ... which this
+    site does not list" (rule 19). The District elects a mayor, not a
+    governor, so its record is its own (ballot2026.DISTRICT, stategov's
+    `district`), never a state's or a territory's (rule 75). Read 2026-11-11
+    from the Board's sample ballots and ballot access page."""
+
+    BALLOT = ("https://www.dcboe.org/getContentAsset/6190836f-7916-4ce3-a985-5c675ccc941e/"
+              "5ebbd046-860b-4ee1-81c8-43d0e3bc446e/Ward2478C.pdf?language=en")
+
+    @classmethod
+    def setUpClass(cls):
+        cls.cache = statewide.load(".")
+        cls.payload, cls.problems = stategov.build(".")
+
+    def test_the_list_is_the_boards_sample_ballot(self):
+        o = statewide.office(self.cache, "DC", "ag")
+        self.assertEqual(o["list"]["url"], self.BALLOT)
+        self.assertEqual((o["list"]["by"], o["list"]["kind"], o["list"]["read"]),
+                         ("District of Columbia Board of Elections", "sample ballot", "2026-11-11"))
+        self.assertTrue(statewide.official(o["list"]["url"], "DC")[0])
+        self.assertFalse(o["certified"])
+        self.assertNotIn("writeInList", o)
+        self.assertIn("names no one for Attorney General", o["notes"])
+        # The cache holds exactly the offices the table puts on the ballot.
+        self.assertEqual(sorted(self.cache["states"]["DC"]["offices"]), ["ag"])
+
+    def test_the_names_and_parties_as_the_ballot_prints_them(self):
+        o = statewide.office(self.cache, "DC", "ag")
+        self.assertEqual([(p["name"], p["party"]) for p in o["candidates"]],
+                         [("Manuel Rivera", "Republican"), ("Brian L. Schwalb", "Democratic")])
+        for name in ("Manuel Rivera Republican", "Brian L. Schwalb Democratic"):
+            self.assertIn(name, o["list"]["quote"])
+        self.assertTrue(o["list"]["quote"].startswith("ATTORNEY GENERAL FOR THE DISTRICT OF COLUMBIA"))
+
+    def test_its_record_is_the_districts_own(self):
+        self.assertNotIn("DC", self.payload["states"])
+        record = self.payload["district"]["DC"]
+        self.assertTrue(record["district"])
+        self.assertEqual(sorted(record["ballot2026"]["offices"]), ["ag"])
+        item = record["ballot2026"]["offices"]["ag"]
+        self.assertTrue(item["up"])
+        self.assertEqual(item["candidates"]["source"],
+                         "the District of Columbia Board of Elections’ sample ballot")
+        self.assertEqual([c["name"] for c in item["candidates"]["candidates"]],
+                         ["Manuel Rivera", "Brian L. Schwalb"])
+        # No roster read here names the holder: no holder line, nobody marked.
+        self.assertNotIn("holderStatus", item)
+        self.assertNotIn("outgoing", item)
+        self.assertFalse([c for c in item["candidates"]["candidates"] if c.get("holder")])
+        self.assertFalse([p for p in self.problems if p.startswith("DC ")], self.problems)
+        # The governors' count is the states' entries', and the District holds none.
+        self.assertEqual(stategov.stats(self.payload)["governors"], len(self.payload["states"]))
+
+    def test_the_holder_is_recorded_from_the_office_but_not_shown(self):
+        o = statewide.office(self.cache, "DC", "ag")
+        self.assertTrue(o["holderOnList"])
+        self.assertEqual(o["holderResearched"], "Brian L. Schwalb")
+        self.assertTrue(o["holderSource"]["url"].startswith("https://oag.dc.gov/"))
+        self.assertIn("second independent elected attorney general", o["holderSource"]["quote"])
+
+    def test_the_new_terms_day_is_a_gap_until_a_person_reads_the_code(self):
+        from kyc import terms_begin
+        self.assertIsNone(terms_begin.record_for("DC", "ag"))
+        why, source = terms_begin.GAPS[("DC", "ag")]
+        self.assertIn("code.dccouncil.gov", why)
+        self.assertIn("1-204.35", why)
+        self.assertTrue(source.startswith("https://www.dcboe.org/"))
+        self.assertNotIn("termBegins", self.payload["district"]["DC"]["ballot2026"]["offices"]["ag"])
+        self.assertIn(("DC", "ag"), terms_begin.up_offices())
 
 
 class TestTheListsPartyKeys(unittest.TestCase):
