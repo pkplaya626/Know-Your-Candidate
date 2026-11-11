@@ -737,6 +737,13 @@
         : " (" + (sitting ? sitting + " of them sit in the new Congress, under Sitting members here"
           : "none of them sits in the new Congress") + ")"));
     }
+    if (state.state === "all" && !state.q && election.winnersSeated) {
+      // Once the new Congress sits, the winners it seated are members, not
+      // filings: the sidebar's "with a profile here" counts them, this chip
+      // does not (rule 73; summary.py winnersSeated, never a page's sum).
+      parts.push("the sidebar also counts " + plural(election.winnersSeated, "person", "people") +
+        " who won in 2026 and now sit in the new Congress, under Sitting members here");
+    }
     if (state.state === "all" && !state.q && election.challengersUnprofiled) {
       parts.push("the sidebar also counts " + election.challengersUnprofiled.toLocaleString() +
         " people on the ballot with no FEC filing over $5,000, and so no profile here");

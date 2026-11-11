@@ -22098,12 +22098,23 @@ async function testTheJanuaryPage() {
     check("each state's strip says who ran under a new district number in the past tense",
       bad.strip.length === 0, bad.strip.join(" | ") || JSON.stringify(Object.keys(named).filter((k) => / strip$/.test(k)).map((k) => named[k])));
     check("the sidebar and the directory's note too, the note counting under Sitting members only those who sit",
-      !election.renumbered || (title.indexOf("(" + election.renumbered + " of them members who ran under a new district number in 2026)") !== -1 &&
+      !election.renumbered || (title.indexOf("(" + election.renumbered + " of them members who ran under a new district number in 2026") !== -1 &&
         note.indexOf(wantNote) !== -1) &&
       !/running under a new district number|who are under Sitting members/.test(title + note),
       title.slice(0, 160) + " | " + note.slice(0, 260) + " | want " + wantNote);
     check("the sidebar's title is in the past tense",
       !/ is running for it| are on the ballot besides/.test(title), title.slice(0, 200));
+    // The Challengers chip's count and its note's terms add up to the
+    // sidebar's "with a profile here" (rule 73): the seated winners, members
+    // now and not filings, were left out of the note, 476 against 602.
+    const dirText = ((directory.D.getElementById("resultsLabel") || {}).textContent || "").replace(/\s+/g, " ");
+    const num = (re) => { const m = re.exec(dirText); return m ? Number(m[1].replace(/,/g, "")) : 0; };
+    const summed = num(/Showing ([\d,]+) profiles?/) - num(/([\d,]+) of them ha(?:s|ve) a ballot status/) +
+      num(/also counts ([\d,]+) members? who ran under/) + num(/also counts ([\d,]+) (?:person|people) who won in 2026/);
+    check("the Challengers chip's count and its note's terms add up to the sidebar's \"with a profile here\"",
+      election.challengersWithProfile !== undefined && summed === election.challengersWithProfile &&
+        (!election.winnersSeated || title.indexOf(election.winnersSeated + " of them winners now members of the new Congress") !== -1),
+      `${summed} against ${election.challengersWithProfile}: ${dirText.slice(0, 400)}`);
     check("a dialog's order note calls the first listed the seat's holder only where they sit in it",
       dialogs > 0 && bad.order.length === 0, bad.order.slice(0, 4).join(" | ") || `${dialogs} dialogs`);
     check("no hover says a former member holds their old seat or is not seeking re-election to it",

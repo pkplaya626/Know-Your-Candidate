@@ -3656,8 +3656,7 @@
             " people are on the ballot besides members running for the seat they hold: ") +
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
-              (election.renumbered ? " (" + election.renumbered + " of them members" +
-                renumberedTail() + ")" : "") + ", " +
+              withProfileParts(election) + ", " +
               election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
               "filing over $5,000"
             : running + " in all") + ".";
@@ -3674,6 +3673,21 @@
         }
       }
     }
+  }
+
+  /* What the sidebar's "with a profile here" holds besides filings, as
+   *  its hover says it: the members who ran under a new district number,
+   *  and once the new Congress sits the winners seated in it (summary.py
+   *  `winnersSeated`), whom the Challengers chip, the filings, leaves out. */
+  function withProfileParts(election) {
+    var parts = [];
+    if (election.renumbered) {
+      parts.push(election.renumbered + " of them members" + renumberedTail());
+    }
+    if (election.winnersSeated) {
+      parts.push(election.winnersSeated + " of them winners now members of the new Congress");
+    }
+    return parts.length ? " (" + parts.join("; ") + ")" : "";
   }
 
   /* The sidebar's "Jump to" list, on every page that carries one. It lived
@@ -4214,6 +4228,10 @@
     contestLine: contestLine,
     movedFrom: movedFrom,
     sitsIn: sitsIn,
+    seatedTerm: function (item) {
+      return item ? seatedTerm(item, contestStatus(item), runsElsewhere(item) &&
+        item.raceStatusRace !== item.contestRaceId ? byId(item.alsoRunningId) || {} : item) : "";
+    },
     movedLine: movedLine,
     movedSentence: movedSentence,
     otherOffice: otherOffice,

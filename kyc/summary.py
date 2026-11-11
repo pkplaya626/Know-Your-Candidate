@@ -194,6 +194,21 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
         summary["election"]["challengersUnprofiled"] = sum(
             len((r.get("results") or {}).get("otherNominees") or []) for r in races) - maybe
         summary["election"]["renumbered"] = sum(1 for r in races if r.get("holderMoved"))
+        # Of the profiles that figure counts, those now seated in Congress
+        # for a race they won (a newcomer, a House member now a senator),
+        # beside the renumbered holders: no longer filings, they are under
+        # Sitting members, and the Challengers chip's note says so. On the
+        # January rehearsal of 2026-11-11 the chip's 491 and the note's terms
+        # summed to 476 under the sidebar's 602 (rule 73).
+        if summary["election"]["phase"] == "record":
+            from .results import on_ballot
+
+            by_id = {p["id"]: p for p in profiles}
+            summary["election"]["winnersSeated"] = sum(
+                1 for r in races if ballot_known(r) for pid in r.get("candidateIds") or []
+                if pid in by_id and not by_id[pid].get("isCandidate")
+                and not by_id[pid].get("renumbered") and seated(by_id[pid])
+                and on_ballot(by_id[pid]))
     if races is not None:
         # The same vacancies, nationally: 433 members of a 435-seat House
         # read as a complete chamber when two seats were empty.
