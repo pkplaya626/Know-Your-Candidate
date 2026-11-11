@@ -1816,7 +1816,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     people include its holder: the map's first race-first panel listed
     only filers under "Still in the race", so 25 renominated senators -
     Susan Collins, Jon Ossoff - were missing from the list and its count,
-    and named only under "Seat held by", below the markets.
+    and named only under "Seat held by", below the markets. Whether a
+    race's people are candidates or challengers is one field
+    (`races.noHolder`: an open seat, or no record incumbent), which the
+    head, the strip, the sidebar and the share pages read: FL-20, vacant
+    at the election, read "3 candidates" in its head while the summary
+    counted them as challengers. Once the new Congress sits, the winners it
+    seated are members, not filings, and the Challengers chip's note counts
+    them apart (`election.winnersSeated`), or its terms summed to 476 under
+    the sidebar's 602.
 
 74. **A status word must describe the race it badges, and what that race
     decided.** California's and Washington's top two and Alaska's top
@@ -1828,6 +1836,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     "On the ballot" in CA-3, which he holds and is not running for. A filer
     the results do not name after the primary is `ballotUnknown`, never
     "the primary has not been held yet", and is not counted as on it.
+    Once the new Congress sits a filter speaks of what was: the grid's
+    "Not seeking re-election" is "Did not run for re-election", former
+    members only and never hidden as out of the race, and "2026 Senate
+    races" takes each race's seated winner (`raceRole`), newcomer or House
+    member who moved; on the January rehearsal of 2026-11-11 the first
+    listed six senators who had just won under "not running again for the
+    seat they hold" and the second left out 17 of the 35 winners
+    (`recordChipWords`, one table for a chip's label and hover).
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it
@@ -2266,6 +2282,17 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     their careers; an address it prints that leads to the member's listed
     site (dingell.house.gov) joins, and members it does not hold are
     reported (`members-directory-unjoined`), never left silently blank.
+    A member who has left, or moved to the other chamber, keeps the
+    Directory's words where its entry prints the site this cache read for
+    them (the 118 former members of the January rehearsal read "Education
+    No data"); a former member's platform says it is not shown after they
+    left office (`not_kept`), never "No data"; and district offices read
+    from another chamber's site are not shown (`districtOfficesPending`:
+    Andy Barr's Lexington office stood under a senator's "State offices").
+    A winner seated since Election Day keeps the article's facts and the
+    offices held read under the filing folded into their profile, while
+    the profile links that article (`enrich.apply_to_winners`,
+    `history.folded`), after the Directory, which wins.
 
 87. **A photograph says whose it is, read from its source, and weighs
     what a card needs.** 153 of 394 Wikimedia portraits were CC BY or
@@ -3147,7 +3174,10 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     them (`KYC.answers.namedHolder`, one test for the answers and the
     "Other officials" block), and its 2026 race only as the election
     office's list, labelled as such, with what a cited source says of the
-    holder (rule 79). Nobody outside Congress becomes a profile (rule 27).
+    holder (rule 79) until the election, as the state page says it: after
+    it, "Kay Ivey is not among the candidates for this office" spoke of a
+    ballot already voted on. Nobody outside Congress becomes a profile
+    (rule 27).
     A word is matched whole: "Proposition 50" is not Proposition 5, and
     "3.5%" in North Carolina's question title is not "Amendment 3". A short
     form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but in
