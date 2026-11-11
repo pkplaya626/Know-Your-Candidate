@@ -603,7 +603,14 @@ atomically:
   sat in still holds them, so their row also records `Race Role` "winner",
   the `Race ID`, and every FEC id Congress's record listed for them
   (`FEC IDs`, from `legislators.winners_leaving`). The race keeps its winner
-  and the filing stays theirs. Who
+  and the filing stays theirs. Every row also keeps the name block their
+  `legislators-historical` entry gives (`Record Name`: the JSON of its
+  `first`, `middle`, `last`, `nickname`, `suffix` and `official_full`), so
+  the build names a former member as their record says they go by, as it
+  names a sitting member, with no network: the new snapshot no longer holds
+  them, and without it Buddy Carter read "Earl Carter" and Jim Moylan
+  "James (Jim) Moylan" on the January rehearsal. A row with none keeps the
+  roster's spelling, and `validate` warns (`former-name-unrecorded`). Who
   has left is decided by bioguide id, never by name: `legislators-historical`
   lists them with a term ended by the day the snapshot was read, and the day
   it gives is the one written (for an appointee, the day their successor was

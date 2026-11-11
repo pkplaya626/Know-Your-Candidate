@@ -82,7 +82,11 @@
      * race went. Never "seat up", never a sitting member's badge. */
     if (item.formerMember) {
       var how = raceBadge(item);
-      return seatBadge("former", null, KYC.formerText(item) + "; held this seat in the 2026 race.") +
+      // A 2026 winner who has since left (raceRole, no seat held on the
+      // ballot) won the seat in that race; they did not hold it in it.
+      var won = item.raceRole === "winner" && !item.heldRaceId;
+      return seatBadge("former", null, KYC.formerText(item) +
+        (won ? "; won this seat in the 2026 race." : "; held this seat in the 2026 race.")) +
         (how ? " " + how : "");
     }
 
