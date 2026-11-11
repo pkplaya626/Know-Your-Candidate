@@ -46,7 +46,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… history` | The public offices each person has held: Congress from congress-legislators, every other office from Wikidata where the person's own Wikipedia article gives the same office the same years; a short read keeps the last cache (`--check` reports it). See [Public offices held](#public-offices-held) |
 | `… voting` | Each state's and D.C.'s official pages for checking registration, finding a polling place, voting absentee or early, and registering, as NASS's "Can I Vote" lists them; refused unless all 51 are there. Then opens every link shown, NASS's and the curated results, sample-ballot, vote.gov and territory pages alike |
 | `… courts` | Each state's highest court and its members, read from the court's own roster |
-| `… seats` | Each seat's last election, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
+| `… seats` | Each seat's last election and its elections since 2018, from the Clerk of the House's official statistics, checked against MIT's Senate returns or each state's Wikipedia page; a failed read keeps the cache (`--check` reports it). See [The seat's last election](#the-seats-last-election) |
 | `… photocopies` | Weigh every portrait the build shows outside Wikimedia (a ranged GET, one request a second per host) and make a smaller copy, in headless Chrome, of each over 300 KB or 1,200 px, writing `photos/<hash>.jpg` and `data/photo_copies.json` (`--check` reports the copies and what is left; `--limit N`, oldest first; `--max-minutes M`, a time budget for the whole run: the weighing stops early enough to leave the copy maker its share, is saved before Chrome starts, and Chrome starts no copy past the deadline; `--force` reads again what was read in the last 7 days). See [Smaller copies of heavy portraits](#smaller-copies-of-heavy-portraits) |
 | `… outside` | Independent expenditures for and against each candidate, from the FEC's Schedule E totals by candidate id (`--check` reports the cache). See [Outside spending](#outside-spending) |
 | `… tribes` | Every tribal government and its leader, from the BIA's Tribal Leaders Directory, by the state of its office; refused unless every row the service counts comes back once (`--check` reports the cache) |
@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (3434 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (4499 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -110,8 +110,20 @@ The profiles are written in the files each page needs (CLAUDE.md rule 94):
 | File | Holds | Loaded by |
 |------|-------|-----------|
 | `data/people/meta.js` | `kycBuildMeta`: the build's figures, its signature, each chamber's left-right scores (`chamberScores`) | every page with people, `ballot.html`, and the guide's Congress page |
-| `data/people/index.js` | every profile without the fields in `emit.INDEX_LEAVES_OUT` (but a member's district offices where their card's "Contact office" calls one, `emit.INDEX_KEEPS_FOR_THE_CARD`), and every race | `index.html`, `map.html`, `states/index.html`; elsewhere on demand |
+| `data/people/index.js` | every profile without the fields in `emit.INDEX_LEAVES_OUT` (but a member's district offices where their card's "Contact office" calls one, `emit.INDEX_KEEPS_FOR_THE_CARD`) and without its words (`emit.INDEX_WORDS`), and every race | `index.html`, `map.html`, `states/index.html`; elsewhere on demand |
+| `data/people/words.js` | each profile's words the grid's search reads and no card draws (`emit.INDEX_WORDS`: education, careers, committees, platform, funding, voting record, the campaign's quote), by id | `index.html`, the first time a query is typed (`KYC.loadWords`); until it is in, the results line says the search is still reading them, and where it fails, that the search looked at names, places and offices only |
 | `data/people/<st>.js` | one state's profiles whole, and its races | `states/<st>.html`, `districts/<st>.html`; on `ballot.html`, the states an answer is in, before it is drawn; elsewhere on demand (`KYC.loadPeople`) |
+
+A state's page loads its own state's part of `data/stategov.js`
+(`data/stategov/<st>.js`, signed and checked by `verify`, with `governed`:
+the places that have a governor, so a link there to another place's
+governor points to that place's page, and never to the District of
+Columbia's, which has none), and names
+`data/odds.js` and `data/measures.js` on demand: it draws its races with a
+slot for each race's prices (`kyc-odds.js`, filled once the file is in, or
+said not to have loaded) and its statewide questions as the plain list it
+is written with (rule 96), drawn in full once `measures.js` is in. A
+district page names `data/odds.js` the same way.
 
 Each people file assigns `window.kycPeopleFile`, which `assets/kyc.js` takes
 into `window.legislatorsData` and `window.kycRaces` (`KYC.people()`,
@@ -147,6 +159,8 @@ CI asserts that a rebuild changes nothing.
 | `summary.py` | Chamber balance, election headline figures, per-state figures |
 | `pages.py` | The shared page template, the state pages, the states directory and the sitemap |
 | `share.py` | A share page for every profile (`p/<id>.html`) and race (`r/<raceId>.html`), and the plain lists the state pages are written with, in the profile dialog's status words (rule 96) |
+| `official_share.py` | A share page for every federal official and judge (`o/<id>.html`: the President, the Vice President, the Cabinet, every judge), in the officials' dialog's words, with its portrait and credit only by the dialog's routes (rule 96) |
+| `governor_share.py` | A share page for every governor and every candidate on an election office's list for governor (`o/gov-<ST>.html`, `o/gov-<ST>-<name>.html`), in the governor overlay's words, the list that names them cited and dated (a write-in's is the office's list of write-ins where it keeps one apart), after Election Day in the past tense beside the state's results (rules 91, 96) |
 | `government.py` | Know Your Government, the guide: renders its pages and refuses a broken link or an uncited section |
 | `government_text.py` | The guide's words and the sources each section was checked against |
 | `government_maps.py` | What the guide's maps say about each state, every value with its source |
@@ -1087,7 +1101,14 @@ result.
   runoff table that names no party is the general runoff only if everyone in
   it was on the November ballot — a party runoff's loser never was. Its two
   are `runoff`, the rest of the ballot `defeated`, and after the runoff date
-  its marked winner is `elected`.
+  its marked winner is `elected`. Until that winner is marked, from the day
+  after the runoff date, the two read in the past tense: "Awaiting the Dec 1
+  runoff result" on a card, "Ran in the December 1 general election runoff:
+  awaiting result" in the dialog and on a share page (`KYC.raceStatus`'s
+  `heldRunoff`, `share._held_runoff`), never "In the runoff" as though it
+  were still to be held. The Delegates from Guam and the Virgin Islands are
+  elected by a majority too (48 U.S.C. 1712): their runoff is on November 17,
+  and its two read the same words with that day's date.
 - **Louisiana's House seats** are an open primary whose first round is the
   November election itself: its majority winner is `elected`, its top two
   are in the December 12 `runoff`, and the rest `defeated`.
@@ -1927,6 +1948,7 @@ Each race (`kycRaces`) carries, beside `incumbentIds` and `candidateIds`:
 | `results.sourceUrl` | Where the race's statuses were read: the Wikipedia results page the cache names (by its title), or the Secretary of State's Candidate Inquiry for a ballot read from a qualified list. The race head links it ("Results: Wikipedia, read Oct. 17, 2026"), and every status says whose word it is ("per Wikipedia's results page"), never "the published results", which read as a certified count |
 
 | `lastElection` | The seat's last election, from `seats` (`kyc/seat_history.py`): `{year, date, kind, candidates: [{name, party, votes, share}], others, othersShare, total, margin, checkedBy}` - the winner and runner-up as the Clerk of the House's statistics count them, shares of the votes cast for a candidate (blank and void ballots excluded), the margin of the votes. `kind` is `general`, `runoff` (Georgia's 2021 runoff), `rcv-final` (Maine's final ranked-choice round) or `unopposed` (with the Clerk's `note`); `rankedChoice: "first-choices"` where the counts are first choices (Alaska). `checkedBy` is `"mit"` or the Wikipedia article checked against. `{redrawn: true, year}` for a district redrawn for 2026, which carries no 2024 figure (rule 90); `{withheld, year}` where no second source agrees. `seatedSince: {name, since, how}` where someone took the seat after the counted election without having won it, by `special-election` or `appointment` (from the frozen record and the snapshot): the result is then the last regular election's. The sources' titles and addresses are `kycBuildMeta.lastElectionSources`, by year |
+| `seatHistory` | The seat's elections from 2018 to 2024, from `seats` (`kyc/seat_history.py` `seat_strip`), in the state's people file only (`emit.RACE_INDEX_LEAVES_OUT`; the index's race is filled from it when the fold opens): `{eras: [{from, to, same}], cells: [{year, era, district?, atLarge?, result \| withheld \| none, holders}], breaks: [{year, kind, title?, drawnBy?, url?, lead?}]}`. A House district's years are grouped by the lines they were fought on (`same`: the lines this district is elected on in 2026); each `break` is a change of lines - `census` (the map drawn after the 2020 census, from 2022, wherever a state has more than one seat), `enacted` (`districts.REDRAWN_BEFORE`: each mid-decade map, from the state's own record) or `redrawn` (2026's, `districts.REDRAWN`). A cell's `result` is the Clerk's count checked as `lastElection`'s is (winner and runner-up with their shares, the margin, `kind`, `checkedBy`); `none` is `no-election` (Puerto Rico's four-year seat), `no-district` (no district of that number on that map) or `no-result` (the Clerk lists none: NC-9, 2018); `holders` are who served the term it chose, from congress-legislators' terms by bioguide id (`{id, name, party, from?, until?, how?, elected?, untilSeated?, winner?}`: one person's consecutive terms are one holder, `elected` the day an appointee was then elected; `untilSeated` an appointee whose term the record ends on the special election's day, serving until its winner is seated; the page says `until` only once the reader's day has reached it; a special's holders are counted from the day its winner took the seat). A first-choice count with more than half of every vote counted carries `firstChoiceMajority` (a first-round win); a withheld cell whose Clerk entry is an unopposed name with no count carries `withheldUnopposed`; a `break` cited from the Census Bureau's list alone carries `lead`. A Senate seat's cells are the elections to its class, specials included |
 
 `incumbentIds` comes from the record too: the person who held the seat, sitting or former, never whoever sits in it now. Every race of the record exists, whoever points at it.
 
@@ -1943,8 +1965,25 @@ in that order with counts within 1%: MIT Election Data and Science Lab's
 Senate returns, and for the House each state's 2024 Wikipedia page (MIT's
 House file sits behind a download form asking for a name and an email).
 What no second source confirms is withheld and says so. A district redrawn
-for 2026 shows no 2024 result: it says the old lines' election was other
-voters' and links where its area came from.
+for 2026 shows no 2024 result: it says the result was counted on the old
+lines and links where its area came from.
+
+Under it, the same fold draws the seat's strip: every election from 2018
+to 2024 (the Clerk's statistics for 2018, 2020, 2022 and 2024, each result
+checked the same way against each state's Wikipedia page for that year or
+MIT's Senate returns), who won it and by what margin as a bar in neutral
+ink, and who served the term it chose (congress-legislators' terms, by
+bioguide id). A House district's years are grouped by the lines they were
+fought on, and the strip breaks at each change: the maps drawn after the
+2020 census (from 2022), every mid-decade map (North Carolina's for 2020;
+Alabama's, Georgia's, Louisiana's, New York's and North Carolina's for
+2024, `districts.REDRAWN_BEFORE`, each from the state's own enacting
+record and the Census Bureau's list), and the 2026 maps. Years on other
+lines than the race's are under a line saying so, in dashed cells: they
+are the results of the district that had the number on that map, never
+this district's. A Senate seat's strip is the elections to its class,
+specials included. From the day after Election Day its heading says it is
+"Before 2026", as the fold's own line does.
 
 Each race block, on the state pages, in the grid's races view and in the
 profile dialog, shows under its people the campaigns' money as bars on one
@@ -1953,7 +1992,11 @@ through-date), the last election folded, and "Compare the ballot": party,
 offices held, money, the campaign's own platform headings with where they
 came from, and its site. The grid's sort menu orders races closest first by
 one market's prices - Kalshi's or Polymarket's, the gap between its two
-highest, never a blend of the two.
+highest, never a blend of the two. The map's panel draws the same money fold
+for each 2026 race of the state picked: the Senate race's beside its people,
+before the markets, and the House races' one per district under "Money in
+each race". Each is closed until opened, and then loads the state's own
+people file, saying so while it loads and if it fails.
 
 ## State pages
 
@@ -2937,6 +2980,62 @@ counted. Each portrait in `judge_links.json` records its `route`, the
 them (`judge-portrait-unevidenced`). `judiciary --links-only` reads just
 these for the committed directory.
 
+### Judges' financial disclosures
+
+A judge's dialog links their financial disclosure reports as CourtListener
+(the Free Law Project) holds them (`kyc/judge_disclosures.py`, FEDERAL-05).
+CourtListener's API answers anyone without an account with HTTP 401, so
+the `judiciary` run reads its public quarterly bulk files instead, with no
+account or token: the people file (`people-db-people-<date>.csv.bz2`) and
+the reports file (`financial-disclosures-<date>.csv.bz2`) of the newest
+date both share. A judge is joined only through the FJC's judge id
+(`jid`, given beside the `nid` on the FJC's own judges file) that
+CourtListener's person record carries, never by name; the record must
+carry the directory's surname (a compound's other half and accents aside)
+and, where both give one, the same year of birth - where either gives none,
+its first given name (or that name's initial) must be one of the
+directory's - or nothing is linked and the run reports it
+(`judge-disclosures-refused`). An id two records carry, or an alias's,
+joins no one. CourtListener keeps duplicate records: Judge Graber's
+reports are under one that carries no FJC id, while the one that carries
+it holds none. So a joined record with no reports is said to be just that,
+and linked for a reader to look, never "CourtListener lists no reports for
+this judge"; the duplicate is never joined by its name.
+
+| Field (on the judge) | Meaning |
+| --- | --- |
+| `disclosures.url` | CourtListener's page for the judge, at its "Financial Disclosures" section |
+| `disclosures.reports` | How many reports the joined CourtListener record holds; `0` reads that the record carrying the FJC id lists none, never that CourtListener holds none or that none was filed |
+| `disclosures.record` | Only where `reports` is `0`: that record's own page, linked as "CourtListener record" |
+| `disclosures.first`, `disclosures.last` | The first and last years those reports cover |
+
+A judge no CourtListener record carries has no `disclosures`, and the
+dialog says nothing. `data/judge_disclosures.json` keeps the export's date
+(`export`), the day read (`read`), each joined judge by nid and every
+refusal; the build warns once the export is 200 days old or the read 60
+(`judge-disclosures-stale`). `judiciary --disclosures-only` reads just
+these for the committed directory.
+
+### A chief judge the directory cannot settle
+
+Where the FJC directory lists a court's chief judge on senior status too
+(`judge-record-conflict`; 28 U.S.C. 136(a) requires a chief in regular
+active service), the directory names no chief, and the court's own site
+is read for its word (`kyc/court_chiefs.py`, FEDERAL-17), through a recipe
+per court (`court_chiefs.RECIPES`). Its read is refused if the page names
+two chiefs, none, or a chief the directory does not list on that court by
+surname and first given name; a page not read keeps its last read; each
+read carries its own day and is warned once 45 days old. The read is kept
+in `judiciary.json`'s `courtChiefs` and shown, attributed to the court, as
+`chiefByCourt` on the court's row: the hub's chief cell names the judge "as
+the court's own site names its chief", and the court page quotes the site
+beside the directory's record, neither taken over the other. A recipe for a
+court whose record is settled is warned unused (`court-chief-recipe-unused`),
+unless the court's last read named another chief than the directory's, which
+is warned as the two sources disagreeing, with who each names
+(`court-chief-sources-disagree`); an unsettled court with no recipe is warned (`court-chief-no-recipe`).
+`judiciary --chiefs-only` reads just these for the committed directory.
+
 ### Changes in the Cabinet
 
 The executive refresh also records who has held each office since the
@@ -3625,6 +3724,7 @@ neutral ink for judges, races and navigation (audit 2026-10-17).
 | The states as a map-like grid of links, a dot where a Senate seat is on the 2026 ballot | States & territories | `kycBuildMeta.stateGrid` (`tiles.STATE_GRID`) |
 | A state's government at a glance: governor, whether the governor is running in the section's own words (rule 79), each chamber's seats, the high court's size and selection (no party) | a state page's State government | `data/stategov.js` |
 | Funding sources as one bar | the profile's campaign finance | `fundingBreakdown`, of `fundingBase` or the receipts |
+| A race's money: each campaign's raised, spent and cash on hand as bars in neutral ink on one scale per race, the party only in the name chip, each row its own through-date | every race block (state pages, the grid's races view, the profile dialog) and the map's panel, each 2026 race of the state picked | `receipts`, `disbursements`, `cashOnHand`, `financeAsOf` from the state's people file; `results.belowThreshold` |
 | Polling averages as dots on one axis of at least thirty points, a row per aggregator, in the market bars' candidate order (the compact panel prints the line only) | every race's markets block | `data/odds.js` |
 | The federal courts as a ladder, a judge senior by the courts' list but not yet the directory said on every count holding one (rule 82) | Federal government, the federal courts | `data/federal.js` |
 | A court's active bench by year commissioned, a row per appointing President, the axis ending at the latest commission | each federal court's page | `data/judiciary/<court>.js` |

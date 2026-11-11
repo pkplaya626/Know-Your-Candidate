@@ -221,10 +221,42 @@
   var indexIn = false;     // whether the index of everyone is in
   var partial = {};        // id -> true for a record the index holds in part
   var refusedPeople = [];  // the files refused, as the index or a state code
+  var wordsIn = false;     // whether the words file is in (data/people/words.js)
+  var earlyWords = null;   // the words file, arrived before the index
   var lastPeopleFile;
+
+  /* data/people/words.js: what the grid's search reads and no card draws
+   * (emit.INDEX_WORDS) - careers, schools, platforms - for everyone the
+   * index holds, loaded the first time a query is typed. Each person's
+   * words fill the index's record, never replacing a field it holds; a
+   * search cached on a record is dropped, to be read again with them. */
+  function takeWords(file) {
+    var build = (global.kycBuildMeta || {}).signature;
+    if (build && file.build !== build) {
+      if (refusedPeople.indexOf("words") === -1) refusedPeople.push("words");
+      return;
+    }
+    if (wordsIn) return;
+    // Asked for beside the index (a link with a query), they can arrive
+    // first: kept until there are records to fill.
+    if (!indexIn) { earlyWords = file; return; }
+    var held = {};
+    people().forEach(function (p) { held[p.id] = p; });
+    file.people.forEach(function (w) {
+      var known = held[w.id];
+      if (!known) return;
+      Object.keys(w).forEach(function (key) { if (!(key in known)) known[key] = w[key]; });
+      delete known.__tiers;
+    });
+    wordsIn = true;
+    if (doc && typeof global.CustomEvent === "function") {
+      doc.dispatchEvent(new global.CustomEvent("kyc:words"));
+    }
+  }
 
   function takePeople(file) {
     lastPeopleFile = file;
+    if (file && file.words && file.people) { takeWords(file); return; }
     if (!file || !file.people || !file.races) return;
     var what = file.index ? "index" : String(file.state || "");
     var build = (global.kycBuildMeta || {}).signature;
@@ -248,13 +280,33 @@
       if (!file.index) {
         Object.keys(p).forEach(function (key) { if (!(key in known)) known[key] = p[key]; });
         delete partial[p.id];
+        // Its words may have come with it: searched again with them.
+        delete known.__tiers;
       }
     });
+    // A race the index holds is filled from its state's file, never
+    // replaced: the fields the index leaves out (emit.RACE_INDEX_LEAVES_OUT,
+    // the seat fold's strip) join the record every view already holds.
     var heldRace = {};
-    raceList.forEach(function (r) { heldRace[r.id] = true; });
-    file.races.forEach(function (r) { if (!heldRace[r.id]) raceList.push(r); });
+    raceList.forEach(function (r) { heldRace[r.id] = r; });
+    file.races.forEach(function (r) {
+      var known = heldRace[r.id];
+      if (!known) {
+        raceList.push(r);
+        heldRace[r.id] = r;
+        return;
+      }
+      if (!file.index) {
+        Object.keys(r).forEach(function (key) { if (!(key in known)) known[key] = r[key]; });
+      }
+    });
     if (file.index) indexIn = true;
     else fullStates[what] = true;
+    if (file.index && earlyWords) {
+      var words = earlyWords;
+      earlyWords = null;
+      takeWords(words);
+    }
     // What was built from the arrays is built again from them.
     profileIndex = null;
     racePositions = null;
@@ -270,6 +322,25 @@
       set: takePeople,
     });
   } catch (e) { /* a page without the property cannot hold people files */ }
+
+  /* The build's figures (data/people/meta.js) arrive just before the
+   * index. A link that arrives with a query ("#/?q=nurse") will search the
+   * profiles' words, so they are asked for then, to come beside the index
+   * rather than after it (only where the page names them: the grid). */
+  var buildMeta = global.kycBuildMeta;
+  try {
+    Object.defineProperty(global, "kycBuildMeta", {
+      configurable: true,
+      enumerable: true,
+      get: function () { return buildMeta; },
+      set: function (meta) {
+        buildMeta = meta;
+        if (meta && !wordsIn && queryInAddress() && onDemandSrc("people/words.js")) {
+          loadPeopleFile("people/words.js", function () { return wordsIn || !!earlyWords; });
+        }
+      },
+    });
+  } catch (e) { /* the figures are then a plain global, as before */ }
 
   /** Every profile the page holds: the array every view reads. */
   function people() {
@@ -572,14 +643,46 @@
       raceTitle: waiting + " In the " + day + " general election, per the published results: " };
   }
 
+  /* A general election runoff once its day has passed and no result is
+   * read: Georgia's December 1, Guam's and the Virgin Islands' November 17
+   * (overrides.GENERAL_RUNOFFS, the date the state page's key dates give;
+   * O.C.G.A. 21-2-501(a), 48 U.S.C. 1712). Until that day the
+   * two are "In the runoff"; from the day after, "In the runoff" read as
+   * though it were still to be held, so it is in the past tense and
+   * awaiting a result, as Louisiana's December round is (openRound) and a
+   * nominee is after November (rule 63). *date* is the race's own
+   * (generalRunoff), so nothing here knows a state. */
+  function heldRunoff(date) {
+    var m = /^\d{4}-(\d{2})-(\d{2})$/.exec(String(date || ""));
+    if (!m) return null;
+    var day = ROUND_MONTHS[+m[1] - 1] + " " + (+m[2]);
+    var short = ROUND_MONTHS[+m[1] - 1].slice(0, 3) + " " + (+m[2]);
+    var asOf = (meta().election || {}).resultsAsOf;
+    var waiting = "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +
+      " had not marked a winner.";
+    return { cls: "badge-neutral", rank: 1,
+      card: "Awaiting the " + short + " runoff result",
+      long: "Ran in the " + day + " general election runoff: awaiting result",
+      mate: "Awaiting the " + short + " runoff result", short: "Awaiting runoff result",
+      title: "Ran in the " + day + " general election runoff, between the top two after no " +
+        "candidate won a majority in the general election. " + waiting,
+      race: "Awaiting the " + short + " runoff result",
+      raceTitle: waiting + " In the " + day + " general election runoff, per the published " +
+        "results: " };
+  }
+
   /** The words of a race's December round for its two: an open primary's
-   *  general election where *race* is one (`primaryKind` "open"), on the
-   *  reader's day (*now*, for tests), else the general election runoff's.
+   *  general election where *race* is one (`primaryKind` "open"), else the
+   *  general election runoff's - each in the past tense from the day after
+   *  its date (`generalRunoff`) on the reader's day (*now*, for tests).
    *  One spec in every form, for the people (raceStatus) and the race's
    *  head (KYC.cards). */
   function runoffWords(race, now) {
-    var date = race && race.primaryKind === "open" ? race.generalRunoff : null;
-    return (date && openRound(date, date < localDay(now || new Date()))) || RACE_STATUS.runoff;
+    var date = race && race.generalRunoff;
+    if (!date) return RACE_STATUS.runoff;
+    var held = date < localDay(now || new Date());
+    if (race.primaryKind === "open") return openRound(date, held) || RACE_STATUS.runoff;
+    return (held && heldRunoff(date)) || RACE_STATUS.runoff;
   }
 
   /* A result the December round decided, in that round's words (rule 75):
@@ -607,7 +710,8 @@
         : (won ? "Won " : "Lost ") + "the " + day + " runoff",
       title: (won ? "Won " : "Lost ") + round + (decided.open
         ? ", between the top two of the open primary"
-        : ", after no candidate won a majority in November") + ", per Wikipedia's results page.",
+        : ", after no candidate won a majority in the general election") +
+        ", per Wikipedia's results page.",
       member: { card: memberCard, mate: memberCard, short: base.member.short,
         long: (won ? "Re-elected " : "Lost re-election ") + (decided.open ? "on " + day
           : "in the " + day + " runoff"),
@@ -695,7 +799,8 @@
    *  `own` - a sitting member, about the seat they hold; `unconfirmed` - the
    *  record's raceStatusUnconfirmed; `appointed` - an appointee, who is
    *  never "not running for re-election"; `round` - an open primary's
-   *  December round's date; `decided` - the December round that decided a
+   *  December round's date; `runoffDay` - a general election runoff's
+   *  date (Georgia's, Guam's, the Virgin Islands'); `decided` - the December round that decided a
    *  result (`raceStatusDecided`); `now` - the clock, for tests. */
   /* Through to November from an all-party primary - California's and
    * Washington's top two, Alaska's top four: nobody won a party's
@@ -720,9 +825,12 @@
     if (!spec) return null;
     opts = opts || {};
     if (status === "nominee" && opts.allParty) spec = allParty(opts.allParty);
-    // An open primary's December round is its general election.
+    // An open primary's December round is its general election; a general
+    // election runoff is in the past tense once its day has passed.
     if (status === "runoff" && opts.round) {
       spec = runoffWords({ primaryKind: "open", generalRunoff: opts.round }, opts.now);
+    } else if (status === "runoff" && opts.runoffDay) {
+      spec = runoffWords({ generalRunoff: opts.runoffDay }, opts.now);
     }
     // A result the December round decided, in its words (decidedRound).
     if (opts.decided) spec = decidedRound(status, opts.decided) || spec;
@@ -796,6 +904,7 @@
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
     return raceStatus(status, form, {
       round: race && race.primaryKind === "open" ? race.generalRunoff : undefined,
+      runoffDay: race && race.primaryKind !== "open" ? race.generalRunoff || undefined : undefined,
       decided: record.raceStatusDecided || undefined,
       own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
         !(item.appointed && status !== "unlisted"),
@@ -939,6 +1048,17 @@
       add(openRound(open.generalRunoff, true), "After that general election: in it, and the " +
         "results this site last read had not marked a winner.");
     }
+    // A general election runoff after its day (heldRunoff), for each day a
+    // race the page holds has one: the grid holds Georgia's December 1 and
+    // the territories' November 17, and each card names its own.
+    var runoffDays = {};
+    races().forEach(function (r) {
+      if (r.primaryKind !== "open" && r.generalRunoff) runoffDays[r.generalRunoff] = true;
+    });
+    Object.keys(runoffDays).sort().forEach(function (day) {
+      add(heldRunoff(day), "After a general election runoff: ran in it, and the " +
+        "results this site last read had not marked a winner.");
+    });
     // A result a December round decided, in its words (decidedRound), for
     // each round someone on the page holds one from.
     var rounds = {};
@@ -3091,6 +3211,34 @@
     return loadPeopleFile("people/index.js", function () { return indexIn; });
   }
 
+  /** Whether every record the page holds carries its words, the fields the
+   *  search reads (emit.INDEX_WORDS): the words file is in, or no record is
+   *  held in part (a state's page, or every state's file in). */
+  function wordsHeld() {
+    if (wordsIn) return true;
+    for (var id in partial) if (Object.prototype.hasOwnProperty.call(partial, id)) return false;
+    return true;
+  }
+
+  /** Whether the page's address carries a search (?q= in its hash or its
+   *  query string) of the profiles: the grid's Governors view
+   *  (chamber=governors) searches its own cards, never the profiles' words. */
+  function queryInAddress() {
+    var loc = global.location || {};
+    var hash = String(loc.hash || "");
+    if (/[?&]chamber=governors(?:&|$)/.test(hash)) return false;
+    return /[?&]q=[^&]/.test(hash) || /[?&]q=[^&]/.test(String(loc.search || ""));
+  }
+
+  /** A promise of whether every record's words are in: at once where they
+   *  are, else once data/people/words.js has loaded. False where it failed
+   *  to load or was refused, and a failed load can be asked for again. */
+  function loadWords() {
+    if (wordsHeld()) return Promise.resolve(true);
+    if (!onDemandSrc("people/words.js")) return Promise.resolve(false);
+    return loadPeopleFile("people/words.js", wordsHeld);
+  }
+
   /** A promise of the person *id* names (an FEC id they were merged from
    *  among them), held whole; null where no profile has that id. Rejects
    *  when a file it needed did not load. */
@@ -3183,10 +3331,12 @@
   /** The address of a profile's or a race's share page (rule 96), whole:
    *  "https://host/p/<id>.html". A crawler drops the "#/profile/<id>" a
    *  view lives behind, so a link to the view unfurled as the home page's
-   *  card; the share page carries the person's own. *kind* "race" or
-   *  "profile". */
+   *  card; the share page carries the person's own. *kind* "race",
+   *  "profile", or "official" (o/<id>.html: the President, the Vice
+   *  President, the Cabinet and every federal judge, kyc/official_share.py). */
   function shareUrl(kind, id) {
-    var path = siteRoot() + (kind === "race" ? "r/" : "p/") + encodeURIComponent(id) + ".html";
+    var path = siteRoot() + (kind === "race" ? "r/" : kind === "official" ? "o/" : "p/") +
+      encodeURIComponent(id) + ".html";
     try {
       return new URL(path, global.location.href).href;
     } catch (e) {
@@ -4029,6 +4179,7 @@
     stateNamed: stateNamed,
     stateAbbreviation: stateAbbreviation,
     loadData: loadData,
+    onDemandSrc: onDemandSrc,
     people: people,
     races: races,
     isFull: isFull,
@@ -4037,6 +4188,8 @@
     peopleProblem: peopleProblem,
     loadPeople: loadPeople,
     loadIndex: loadIndex,
+    loadWords: loadWords,
+    wordsHeld: wordsHeld,
     loadPerson: loadPerson,
     indexHeld: function () { return indexIn; },
     canLoadPeople: function (file) { return !!onDemandSrc(file); },

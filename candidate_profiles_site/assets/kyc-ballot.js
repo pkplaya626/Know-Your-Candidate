@@ -841,6 +841,26 @@
     return !global.kycMeasures;
   }
 
+  /* A state's page names data/measures.js on demand and loads it once the
+   * page is drawn (rule 76's template): the section is the last on the
+   * page, and every page that does not show it was waiting for it. */
+  var measuresRefused = false;
+
+  /** Whether the questions are still to load: named on demand, not in,
+   *  and not yet failed. */
+  function measuresPending() {
+    return measuresMissing() && !measuresRefused && !!KYC.onDemandSrc &&
+      !!KYC.onDemandSrc("measures.js");
+  }
+
+  /** Load data/measures.js where the page names it; *done(ok)*. */
+  function loadMeasures(done) {
+    KYC.loadData("measures.js", "kycMeasures", function (ok) {
+      measuresRefused = !ok;
+      done(ok);
+    });
+  }
+
   /** What a reader is told where the list did not load. *onStatePage*:
    *  above the plain list the page was written with, which stays. */
   function measuresFailedLine(code, onStatePage) {
@@ -1696,6 +1716,8 @@
     measuresName: measuresName,
     hasMeasures: hasMeasures,
     measuresMissing: measuresMissing,
+    measuresPending: measuresPending,
+    loadMeasures: loadMeasures,
     measuresFailedLine: measuresFailedLine,
     // The Your ballot page.
     zipBallot: zipBallot,

@@ -9,6 +9,7 @@ error. A district redrawn for 2026 never carries the old district's result
 """
 
 import json
+import re
 import os
 import sys
 import unittest
@@ -402,6 +403,522 @@ class TestRaces(unittest.TestCase):
                 shares = [c["share"] for c in last["candidates"]]
                 self.assertEqual(shares, sorted(shares, reverse=True), race["id"])
                 self.assertTrue(last.get("checkedBy"), race["id"])
+
+
+class TestEarlierYears(unittest.TestCase):
+    """The tables of 2018 to 2022 that 2024's did not have (VISUALS-33)."""
+
+    def test_footnote_markers_among_a_districts_counts_mark_the_runoff(self):
+        # Louisiana's 5th, 2020: the November open primary's counts, with the
+        # two the December runoff left footnoted at the runoff's counts.
+        lines = ["LOUISIANA", "FOR UNITED STATES REPRESENTATIVE", "5.",
+                 "Sandra “Candy” Christophe, Democrat" + L, "Martin Lemelle, Jr., Democrat" + L,
+                 "Luke J. Letlow, Republican" + L, "Lance Harris, Republican" + L,
+                 "50,812", "32,186", "1", "49,183", "1", "30,124",
+                 "Recapitulation of Votes Cast in Louisiana", "1",
+                 "This vote count is from the runoff election held on December 5, 2020. Luke "
+                 "J. Letlow received 67,118 votes in the general election held on November 3,",
+                 "MAINE"]
+        la = sh.parse_statistics(lines, 2020)["LA"]
+        rows = la["house"][5]["rows"]
+        self.assertEqual([(r["name"], r["votes"], r["note"]) for r in rows],
+                         [("Sandra “Candy” Christophe", 50812, None),
+                          ("Martin Lemelle, Jr.", 32186, None),
+                          ("Luke J. Letlow", 49183, 1), ("Lance Harris", 30124, 1)])
+        result = sh.result_of(la["house"][5], la["footnotes"], 2020, "LA")
+        self.assertEqual(result["kind"], "runoff")
+        self.assertEqual(result["date"], "2020-12-05")
+        self.assertEqual([c["name"] for c in result["candidates"]], ["Luke J. Letlow", "Lance Harris"])
+
+    def test_lone_digits_that_are_not_the_surplus_are_an_error(self):
+        # Three surplus tokens, two of them lone digits: not markers alone.
+        lines = _house("1.", "A B, Republican" + L, "C D, Democrat" + L,
+                       "1", "100,000", "9", "7", "90,000", "Recapitulation of Votes Cast in Alabama")
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.parse_statistics(lines, 2018)
+
+    def test_a_later_ranked_choice_round_is_the_final_round_between_two(self):
+        # Maine's 2nd, 2022: round 2's counts for the two it left, footnoted,
+        # beside the others' first choices.
+        lines = ["MAINE", "FOR UNITED STATES REPRESENTATIVE", "2.",
+                 "Bruce Poliquin, Republican" + L, "Jared F. Golden, Democrat" + L,
+                 "Tiffany Bond, Independent" + L, "Write-in" + L,
+                 "1", "146,142", "1", "165,136", "21,655", "393",
+                 "Recapitulation of Votes Cast in Maine", "1",
+                 "This vote count is from round 2 of Maine's ranked-choice general election, "
+                 "which was held because neither candidate received a majority", "NEW YORK"]
+        maine = sh.parse_statistics(lines, 2022)["ME"]
+        result = sh.result_of(maine["house"][2], maine["footnotes"], 2022, "ME")
+        self.assertEqual(result["kind"], "rcv-final")
+        self.assertEqual(result["total"], 146142 + 165136)
+        self.assertEqual(result["candidates"][0]["name"], "Jared F. Golden")
+
+    def test_one_runoff_footnote_per_candidate_is_one_runoff(self):
+        # Mississippi's 2018 special: each runoff count has its own footnote.
+        contest = {"rows": [
+            {"name": "Cindy Hyde-Smith", "party": "Republican", "votes": 486769, "lines": [], "note": 3},
+            {"name": "Mike Espy", "party": "Democrat", "votes": 420819, "lines": [], "note": 4},
+            {"name": "Chris McDaniel", "party": "Republican", "votes": 146013, "lines": [],
+             "note": None}], "unnamed": 0, "noVote": 0, "rcvRound": False}
+        notes = {3: "This vote count is from the runoff election held on November 27, 2018. "
+                    "Cindy Hyde-Smith received 389,995 votes in the general election",
+                 4: "This vote count is from the runoff election held on November 27, 2018. "
+                    "Mike Espy received 386,742 votes in the general election"}
+        result = sh.result_of(contest, notes, 2018, "MS")
+        self.assertEqual((result["kind"], result["date"]), ("runoff", "2018-11-27"))
+        notes[4] = notes[4].replace("November 27", "December 4")
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.result_of(contest, notes, 2018, "MS")
+
+    def test_a_district_listed_with_no_count_is_recorded_as_such(self):
+        # North Carolina's 9th, 2018: "See explanation below".
+        lines = ["NORTH CAROLINA", "FOR UNITED STATES REPRESENTATIVE",
+                 "8.", "Frank McNeill, Democrat" + L, "Richard Hudson, Republican" + L,
+                 "114,119", "141,402", "9.", "See explanation below",
+                 "10.", "David Wilson Brown, Democrat" + L, "Patrick T. McHenry, Republican" + L,
+                 "128,385", "164,969", "Recapitulation of Votes Cast in North Carolina"]
+        nc = sh.parse_statistics(lines, 2018)["NC"]
+        self.assertEqual(sorted(nc["house"]), [8, 10])
+        self.assertEqual(nc["houseEmpty"], [9])
+
+    def test_a_senate_terms_class_is_read_from_when_it_ends(self):
+        self.assertEqual(sh.senate_class_of("2025-01-03"), 1)
+        self.assertEqual(sh.senate_class_of("2031-01-03"), 1)
+        self.assertEqual(sh.senate_class_of("2021-01-03"), 2)
+        self.assertEqual(sh.senate_class_of("2023-01-03"), 3)
+
+
+def _cell_result(winner, runner, margin, year, **extra):
+    return dict(_result((winner, "Republican", 600), (runner, "Democrat", 400), year=year),
+                date=sh.ELECTION_DAYS[year], margin=margin, allCandidates=2,
+                checked={"by": "wikipedia", "page": f"{year} page"}, **extra)
+
+
+class TestStrip(unittest.TestCase):
+    """A seat's elections since 2018, grouped by the lines they were fought on."""
+
+    def _cache(self):
+        seats = {str(y): {"VA": list(range(1, 12)), "NC": list(range(1, 14 if y < 2022 else 15)),
+                          "MT": [0] if y < 2022 else [1, 2], "WY": [0], "AL": list(range(1, 8))}
+                 for y in sh.YEARS}
+        seats["2018"]["NC"] = [n for n in range(1, 14)]
+        earlier = {str(y): {"VA-1": _cell_result("Rob Wittman", "Other", 10.0 + y - 2018, y),
+                            "NC-9": _cell_result("Dan Bishop", "Dan McCready", 2.0, y),
+                            "MT-0": _cell_result("Greg Gianforte", "Kathleen Williams", 4.6, y)}
+                   for y in (2018, 2020, 2022)}
+        del earlier["2018"]["NC-9"]
+        del earlier["2022"]["MT-0"]
+        earlier["2022"]["MT-1"] = _cell_result("Ryan Zinke", "Monica Tranel", 3.2, 2022)
+        return {
+            "read": "2026-11-01", "years": list(sh.YEARS), "seats": seats,
+            "house": {"VA-1": _cell_result("Rob Wittman", "Leslie Mehta", 13.0, 2024),
+                      "NC-9": _cell_result("Richard Hudson", "Nigel Bristow", 13.4, 2024),
+                      "MT-1": _cell_result("Ryan Zinke", "Monica Tranel", 9.6, 2024)},
+            "houseEarlier": earlier,
+            "noResult": {"2018": ["NC-9"]},
+            "senate": {"MN-2018-unexpired": dict(_cell_result("Tina Smith", "Karin Housley",
+                                                              10.6, 2018),
+                                                 term="unexpired", termEnds="2021-01-03"),
+                       "MN-2020-full": dict(_cell_result("Tina Smith", "Jason Lewis", 5.2, 2020),
+                                            term="full", termEnds="2027-01-03"),
+                       "MN-2018-full": dict(_cell_result("Amy Klobuchar", "Jim Newberger",
+                                                         24.1, 2018),
+                                            term="full", termEnds="2025-01-03")},
+            "withheld": [{"seat": "VA-1", "year": 2020, "why": "disagree",
+                          "result": earlier["2020"].pop("VA-1")}],
+            "terms": {"house": {
+                "VA-1": [{"id": "W000804", "name": "Robert J. Wittman", "party": "Republican",
+                          "start": "2019-01-03", "end": "2027-01-03"}],
+                "NC-9": [{"id": "B001311", "name": "Dan Bishop", "party": "Republican",
+                          "start": "2019-09-17", "end": "2023-01-03"}]},
+                "senate": {"MN-2": [{"id": "S001203", "name": "Tina Smith", "party": "Democrat",
+                                     "start": "2018-01-03", "end": "2027-01-03",
+                                     "how": "appointment"}]}},
+        }
+
+    def _strip(self, race):
+        sh.apply([race], self._cache())
+        return race["seatHistory"]
+
+    def test_a_district_on_one_map_since_2022_breaks_at_the_census(self):
+        strip = self._strip({"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1})
+        self.assertEqual(strip["eras"], [{"from": 2018, "to": 2020, "same": False},
+                                         {"from": 2022, "to": 2024, "same": True}])
+        self.assertEqual(strip["breaks"], [{"kind": "census", "year": 2022}])
+        cells = {c["year"]: c for c in strip["cells"]}
+        self.assertEqual(cells[2018]["era"], 0)
+        self.assertEqual(cells[2024]["era"], 1)
+        # The withheld year says why; the others carry their checked result.
+        self.assertEqual(cells[2020]["withheld"], "disagree")
+        self.assertNotIn("result", cells[2020])
+        self.assertEqual(cells[2022]["result"]["checkedBy"], "2022 page")
+        self.assertNotIn("votes", cells[2022]["result"]["candidates"][0])
+        # The winner who served the term is not named twice.
+        self.assertTrue(cells[2024]["holders"][0]["winner"])
+
+    def test_every_mid_decade_map_breaks_the_strip(self):
+        # North Carolina: S.L. 2019-249 for 2020, the census map for 2022,
+        # S.L. 2023-145 for 2024, and S.L. 2025-95 for 2026.
+        strip = self._strip({"id": "H-NC-9-2026", "chamber": "House", "state": "NC", "district": 9})
+        self.assertEqual([b["year"] for b in strip["breaks"]], [2020, 2022, 2024, 2026])
+        self.assertEqual([b["kind"] for b in strip["breaks"]],
+                         ["enacted", "census", "enacted", "redrawn"])
+        self.assertIn("2019-249", strip["breaks"][0]["drawnBy"])
+        self.assertTrue(strip["breaks"][0]["url"].startswith("https://www.ncleg.gov/"))
+        # Four maps in four years, none of them the 2026 map.
+        self.assertEqual(len(strip["eras"]), 4)
+        self.assertFalse(any(e["same"] for e in strip["eras"]))
+        cells = {c["year"]: c for c in strip["cells"]}
+        self.assertEqual(cells[2018]["none"], "no-result")
+        # A member seated by a special election is named with the day.
+        self.assertEqual(cells[2020]["holders"][0].get("from"), None)
+        self.assertNotIn("winner", cells[2018].get("holders", [{}])[0] if cells[2018].get(
+            "holders") else {})
+
+    def test_a_state_elected_at_large_has_no_lines_to_change(self):
+        strip = self._strip({"id": "H-WY-0-2026", "chamber": "House", "state": "WY", "district": 0})
+        self.assertEqual(strip["breaks"], [])
+        self.assertEqual(len(strip["eras"]), 1)
+        self.assertTrue(strip["eras"][0]["same"])
+
+    def test_a_district_that_did_not_exist_says_so_and_at_large_is_the_whole_state(self):
+        # Montana elected one member at large until 2022.
+        strip = self._strip({"id": "H-MT-1-2026", "chamber": "House", "state": "MT", "district": 1})
+        cells = {c["year"]: c for c in strip["cells"]}
+        self.assertTrue(cells[2018]["atLarge"])
+        self.assertEqual(cells[2018]["district"], 0)
+        self.assertEqual(cells[2018]["result"]["candidates"][0]["name"], "Greg Gianforte")
+        self.assertEqual(cells[2022]["district"], 1)
+        strip = self._strip({"id": "H-VA-11-2026", "chamber": "House", "state": "VA",
+                             "district": 12})
+        self.assertEqual({c["none"] for c in strip["cells"]}, {"no-district"})
+
+    def test_a_senate_seats_strip_is_its_classs_elections_specials_included(self):
+        strip = self._strip({"id": "S-MN-2026", "chamber": "Senate", "state": "MN",
+                             "senateClass": 2})
+        self.assertEqual([(c["year"], c["result"]["term"]) for c in strip["cells"]],
+                         [(2018, "unexpired"), (2020, "full")])
+        self.assertEqual(strip["breaks"], [])
+        # Appointed before the special she won: named with how she came.
+        holder = strip["cells"][0]["holders"][0]
+        self.assertEqual((holder["name"], holder["how"]), ("Tina Smith", "appointment"))
+
+    def test_the_house_last_election_is_still_2024s_whatever_the_strip_holds(self):
+        race = {"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1}
+        sh.apply([race], self._cache())
+        self.assertEqual(race["lastElection"]["year"], 2024)
+        self.assertNotIn("withheld", race["lastElection"])
+
+    def test_a_cache_without_the_strip_draws_none(self):
+        race = {"id": "H-VA-1-2026", "chamber": "House", "state": "VA", "district": 1}
+        cache = self._cache()
+        del cache["seats"]
+        sh.apply([race], cache)
+        self.assertNotIn("seatHistory", race)
+
+    def test_the_terms_are_read_by_seat_and_joined_per_person(self):
+        current = [{"id": {"bioguide": "S001203"}, "name": {"official_full": "Tina Smith"},
+                    "terms": [{"type": "sen", "state": "MN", "class": 2, "party": "Democrat",
+                               "start": "2018-01-03", "end": "2018-11-28", "how": "appointment"},
+                              {"type": "sen", "state": "MN", "class": 2, "party": "Democrat",
+                               "start": "2018-11-28", "end": "2021-01-03"},
+                              {"type": "sen", "state": "MN", "class": 2, "party": "Democrat",
+                               "start": "2021-01-03", "end": "2027-01-03"}]},
+                   {"id": {"bioguide": "X000001"}, "name": {"first": "Old", "last": "Member"},
+                    "terms": [{"type": "rep", "state": "VA", "district": 1, "party": "Whig",
+                               "start": "2015-01-03", "end": "2017-01-03"}]}]
+        pages = {sh.LEGISLATORS_URLS[0]: json.dumps(current).encode(),
+                 sh.LEGISLATORS_URLS[1]: b"[]"}
+        terms = sh.read_terms(fetch=pages.__getitem__)
+        self.assertEqual(terms["house"], {})
+        # Her appointment and the terms she then won are two; the two she
+        # won, one after the other, are one.
+        self.assertEqual(terms["senate"]["MN-2"],
+                         [{"id": "S001203", "name": "Tina Smith", "party": "Democrat",
+                           "start": "2018-01-03", "end": "2018-11-28", "how": "appointment"},
+                          {"id": "S001203", "name": "Tina Smith", "party": "Democrat",
+                           "start": "2018-11-28", "end": "2027-01-03"}])
+
+    def test_the_lines_table_is_the_census_bureaus_list(self):
+        # Rule 50: the Census Bureau's pages are the lead, each state's
+        # record the entry. 117th: North Carolina alone; 119th: five states.
+        from kyc.districts import REDRAWN_BEFORE
+        by_year = {}
+        for state, changes in REDRAWN_BEFORE.items():
+            for year, record in changes.items():
+                by_year.setdefault(year, set()).add(state)
+                self.assertTrue(record["url"].startswith("https://"), state)
+                self.assertTrue(record["quote"] and record["drawnBy"] and record["title"], state)
+        self.assertEqual(by_year, {2020: {"NC"}, 2024: {"AL", "GA", "LA", "NY", "NC"}})
+
+    def test_the_committed_cache_gives_every_race_a_strip(self):
+        cache = sh.load_cache(ROOT)
+        if cache is None or "seats" not in cache:
+            self.skipTest("no seat history strip in the cache")
+        with open(os.path.join(ROOT, "candidate_profiles_site", "data", "record_2026.json"),
+                  encoding="utf-8") as handle:
+            record = json.load(handle)
+        races = [dict(r, id=k) for k, r in record["races"].items()]
+        sh.apply(races, cache)
+        from kyc.districts import REDRAWN
+        for race in races:
+            strip = race.get("seatHistory")
+            self.assertTrue(strip and strip["cells"], race["id"])
+            for cell in strip["cells"]:
+                era = strip["eras"][cell["era"]]
+                self.assertTrue(era["from"] <= cell["year"] <= era["to"], race["id"])
+                # A shown result was checked against a second compilation.
+                if "result" in cell:
+                    self.assertTrue(cell["result"].get("checkedBy"), (race["id"], cell["year"]))
+            if race["chamber"] == "House":
+                self.assertEqual(len(strip["cells"]), len(sh.YEARS), race["id"])
+                # Nothing on a redrawn state's 2024 lines is this race's.
+                if race["state"] in REDRAWN:
+                    self.assertFalse(any(e["same"] for e in strip["eras"]), race["id"])
+
+
+class TestTheStripsClassIsItsOwn(unittest.TestCase):
+    """The strip was first drawn as <section class="seat-strip">, the class
+    of the legislature pages' seat squares (KYC.seatStrip): its grid of one
+    column per seat laid the heading, each era and each change of lines side
+    by side, a word to a line, at 390px. Every class the strip draws is
+    styled once, by its own rule."""
+
+    def test_no_other_module_or_rule_uses_the_strips_classes(self):
+        assets = os.path.join(ROOT, "candidate_profiles_site", "assets")
+        css = _text(os.path.join(assets, "kyc.css"))
+        self.assertEqual(len(re.findall(r"^\.seat-history\s*\{", css, re.M)), 1)
+        for name in os.listdir(assets):
+            if not name.endswith(".js"):
+                continue
+            text = _text(os.path.join(assets, name))
+            if name != "kyc-cards.js":
+                self.assertNotRegex(text, r"seat-history|strip-(?:cell|era|break|title)", name)
+        self.assertNotRegex(_text(os.path.join(assets, "kyc-cards.js")),
+                            r"class=\"seat-strip")
+
+
+class TestTheFirstFullRead(unittest.TestCase):
+    """What the first read of 2018-2022 got wrong (2026-11-01), each a
+    count put beside the wrong name or a check that could not agree."""
+
+    def test_a_party_alone_outside_a_fusion_state_is_nobodys_votes(self):
+        # Virginia's 2nd, 2020: the Clerk prints "Independent" for David
+        # Foster's 9,170 votes. Read as a fusion line they were Scott
+        # Taylor's, and his 165,031 read 174,201.
+        lines = ["VIRGINIA", "FOR UNITED STATES REPRESENTATIVE", "1.",
+                 "Robert J. Wittman, Republican" + L, "Qasim Rashid, Independent" + L,
+                 "260,614", "186,923", "2.",
+                 "Elaine G. Luria, Democrat" + L, "Scott W. Taylor, Republican" + L,
+                 "Independent" + L, "Write-in" + L, "185,733", "165,031", "9,170", "343",
+                 "Recapitulation of Votes Cast in Virginia"]
+        va = sh.parse_statistics(lines, 2020)["VA"]["house"][2]
+        self.assertEqual([(r["name"], r["votes"]) for r in va["rows"]],
+                         [("Elaine G. Luria", 185733), ("Scott W. Taylor", 165031)])
+        self.assertEqual(va["unnamed"], 9513)
+
+    def test_scattered_and_none_of_these_and_exhausted_are_nobodys(self):
+        # New Hampshire's "Scatter" was added to the last candidate's count
+        # (Chris Pappas, 2022: +342), Nevada's "None of These Candidates" to
+        # a Senate candidate's, Maine's 2022 "Exhausted Ballot" (322,778) to
+        # Tiffany Bond's, Puerto Rico's "Unadjudicated" to its last name's.
+        lines = ["NEW HAMPSHIRE", "FOR UNITED STATES REPRESENTATIVE", "1.",
+                 "Karoline Leavitt, Republican" + L, "Chris Pappas, Democrat" + L,
+                 "Scatter" + L, "142,229", "167,391", "342",
+                 "Recapitulation of Votes Cast in New Hampshire"]
+        nh = sh.parse_statistics(lines, 2022)["NH"]["house"][1]
+        self.assertEqual(nh["rows"][1]["votes"], 167391)
+        self.assertEqual(nh["unnamed"], 342)
+        for label in ("None of These Candidates", "Exhausted Ballot", "Unadjudicated"):
+            self.assertTrue(sh.NOT_A_VOTE.match(label), label)
+
+    def test_a_line_naming_no_one_and_no_known_party_is_an_error(self):
+        lines = _house("1.", "Barry Moore, Republican" + L, "Tom Holmes, Democrat" + L,
+                       "Somebody" + L, "258,619", "70,929", "306")
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.parse_statistics(lines, 2020)
+
+    def test_a_row_template_with_two_spaces_and_a_footnoted_name_are_read(self):
+        # Alabama's 2nd in 2020 and Tennessee's 2022 districts write
+        # "{{Election box  winning candidate"; Oregon's 4th in 2018 sets a
+        # footnote in the name's field; the Northern Mariana Islands' 2020
+        # box ends "{{end}}".
+        text = ("{{Election box begin no change|title=General election}}\n"
+                "{{Election box  winning candidate with party link no change|party=Republican "
+                "Party (United States)|candidate=[[Barry Moore]]|votes=197,996}}\n"
+                "{{Election box candidate with party link no change|party=Democratic Party "
+                "(United States)|candidate=[[Art Robinson]]<ref>Co-nominated by Constitution "
+                "Party.</ref>|votes=105,286}}\n{{end}}")
+        boxes = sh.wiki_boxes(text)
+        self.assertEqual([(r["name"], r["votes"], r["won"]) for r in boxes[0][1]],
+                         [("Barry Moore", 197996, True), ("Art Robinson", 105286, False)])
+
+    def test_a_surname_written_as_two_words_is_the_same(self):
+        result = _result(("Harriet Hageman", "Republican", 132206),
+                         ("Lynnette GreyBull", "Democrat", 47250))
+        rows = [{"name": "Harriet Hageman", "votes": 132206, "won": True},
+                {"name": "Lynnette Grey Bull", "votes": 47250}]
+        self.assertEqual(sh._check(result, rows)[0], "agree")
+
+    def test_a_house_runoff_is_checked_against_the_runoff(self):
+        # Louisiana's 5th, 2020: the runoff's counts against the open
+        # primary's table "disagreed".
+        result = dict(_result(("Luke J. Letlow", "Republican", 49183),
+                              ("Lance Harris", "Republican", 30124)), kind="runoff")
+        section = ("{{Election box begin no change|title=Louisiana's 5th congressional district "
+                   "general election, 2020}}\n{{Election box winning candidate with party link "
+                   "no change|candidate=Luke Letlow|votes=67,118}}\n{{Election box candidate "
+                   "with party link no change|candidate=Lance Harris|votes=60,876}}\n"
+                   "{{Election box end}}\n{{Election box begin no change|title=Runoff results}}\n"
+                   "{{Election box winning candidate with party link no change|candidate=Luke "
+                   "Letlow|votes=49,183}}\n{{Election box candidate with party link no change|"
+                   "candidate=Lance Harris|votes=30,124}}\n{{Election box end}}")
+        self.assertEqual(sh.house_check(result, section)[0], "agree")
+
+    def test_two_names_whose_counts_are_the_final_round_are_the_final_round(self):
+        # Maine's 2nd, 2018: the Clerk prints Golden and Poliquin with the
+        # final round's counts and no footnote; as first choices Golden
+        # "led", which he did not.
+        result = dict(_result(("Jared F. Golden", "Democrat", 142440),
+                              ("Bruce Poliquin", "Republican", 138931), year=2018),
+                      allCandidates=2, rankedChoice="first-choices")
+        infobox = ("{{Infobox election\n| 1blank = First round\n| 2blank = Maximum round\n"
+                   "| nominee1 = '''[[Jared Golden]]'''\n| 1data1 = 132,013\n"
+                   "| 2data1 = '''142,440<br />50.62%'''\n| nominee2 = [[Bruce Poliquin]]\n"
+                   "| 1data2 = 134,184\n| 2data2 = 138,931<br />49.38%\n}}")
+        self.assertEqual(sh.house_check(result, infobox)[0], "agree")
+        self.assertEqual(result["kind"], "rcv-final")
+        self.assertNotIn("rankedChoice", result)
+        self.assertEqual(result["roundFrom"], "second-compilation")
+        # The first round's counts are first choices, and stay a lead.
+        first = dict(_result(("Jared F. Golden", "Democrat", 132013),
+                             ("Bruce Poliquin", "Republican", 134184), year=2018),
+                     allCandidates=2, rankedChoice="first-choices")
+        sh.house_check(first, infobox)
+        self.assertEqual(first.get("rankedChoice"), "first-choices")
+
+    def test_a_page_with_no_results_is_not_the_states_page(self):
+        # "2022 ... elections in Delaware" leads to the national article.
+        pages = {"2022 United States House of Representatives elections in Delaware":
+                 "Elections were held in every state. ''See'' each state's page.",
+                 "2022 United States House of Representatives election in Delaware":
+                 "{{Infobox election\n| nominee1 = Lisa Blunt Rochester\n"
+                 "| popular_vote1 = 178,416\n}}"}
+        sections, page = sh.house_page_sections("DE", read=pages.get, year=2022)
+        self.assertEqual(page, "2022 United States House of Representatives election in Delaware")
+
+
+def _text(path):
+    with open(path, encoding="utf-8") as handle:
+        return handle.read()
+
+
+def _term(name, start, end, how=None, ident=None, party="Republican"):
+    term = {"id": ident or name, "name": name, "party": party, "start": start, "end": end}
+    if how:
+        term["how"] = how
+    return term
+
+
+class TestTheStripsReview(unittest.TestCase):
+    """What the review of PR #187 found in who served, and in the words."""
+
+    def _senate(self, terms, results, read="2026-11-01"):
+        seats = {str(y): {} for y in sh.YEARS}
+        cache = {"read": read, "years": list(sh.YEARS), "seats": seats, "house": {},
+                 "houseEarlier": {}, "noResult": {}, "withheld": [],
+                 "senate": results, "terms": {"house": {}, "senate": terms}}
+        return cache
+
+    def test_an_appointees_end_on_the_specials_day_is_not_a_day_they_left(self):
+        # congress-legislators "ends" Ashley Moody's appointment on November
+        # 3, 2026, the special's day, which is ahead of the read and, once
+        # past, still not when she leaves: she serves until the winner is
+        # seated (and is a candidate herself).
+        terms = {"FL-3": [_term("Marco Rubio", "2023-01-03", "2025-01-20", ident="R1"),
+                          _term("Ashley Moody", "2025-01-21", "2026-11-03", "appointment", "M1")]}
+        results = {"FL-2022-full": dict(_cell_result("Marco Rubio", "Val Demings", 16.4, 2022),
+                                        term="full", termEnds="2029-01-03")}
+        for read in ("2026-11-01", "2026-11-20"):
+            cell = sh.seat_strip({"chamber": "Senate", "state": "FL", "senateClass": 3},
+                                 self._senate(terms, results, read))["cells"][0]
+            moody = cell["holders"][1]
+            self.assertNotIn("until", moody, read)
+            self.assertTrue(moody["untilSeated"], read)
+            self.assertEqual(cell["holders"][0]["until"], "2025-01-20")
+        # A real end that is not an election day (Laphonza Butler's,
+        # December 8, 2024) is a day the appointee left.
+        terms = {"CA-1": [_term("Laphonza R. Butler", "2023-10-03", "2024-12-08", "appointment")]}
+        self.assertEqual(sh._holders(terms["CA-1"], "2019-01-03", "2025-06-01"),
+                         [{"id": "Laphonza R. Butler", "name": "Laphonza R. Butler",
+                           "party": "Republican", "from": "2023-10-03", "until": "2024-12-08",
+                           "how": "appointment"}])
+
+    def test_one_persons_terms_one_after_the_other_are_one_line(self):
+        # Pete Ricketts, appointed January 23, 2023, elected November 5, 2024.
+        terms = [_term("Ben Sasse", "2021-01-03", "2023-01-08", ident="S1"),
+                 _term("Pete Ricketts", "2023-01-23", "2024-11-05", "appointment", "R1"),
+                 _term("Pete Ricketts", "2024-11-05", "2027-01-03", ident="R1")]
+        holders = sh._holders(terms, "2021-01-03", "2027-01-03")
+        self.assertEqual([h["name"] for h in holders], ["Ben Sasse", "Pete Ricketts"])
+        self.assertEqual({k: v for k, v in holders[1].items() if k not in ("id", "party")},
+                         {"name": "Pete Ricketts", "from": "2023-01-23", "how": "appointment",
+                          "elected": "2024-11-05"})
+
+    def test_a_specials_term_is_served_from_the_day_its_winner_took_the_seat(self):
+        # Oklahoma's 2022 special: James Inhofe served until January 3, 2023
+        # and is not among those who served the term it chose; Markwayne
+        # Mullin, seated that day, is its winner.
+        terms = {"OK-2": [_term("James M. Inhofe", "2021-01-03", "2023-01-03", ident="I1"),
+                          _term("Markwayne Mullin", "2023-01-03", "2027-01-03", ident="M1")]}
+        results = {"OK-2022-unexpired": dict(
+            _cell_result("Markwayne Mullin", "Kendra Horn", 26.0, 2022),
+            term="unexpired", termEnds="2027-01-03")}
+        cell = sh.seat_strip({"chamber": "Senate", "state": "OK", "senateClass": 2},
+                             self._senate(terms, results))["cells"][0]
+        self.assertEqual(cell["holders"], [{"id": "M1", "name": "Markwayne Mullin",
+                                            "party": "Republican", "winner": True}])
+
+    def test_a_majority_of_first_choices_is_a_win_and_less_is_a_lead(self):
+        pingree = dict(_result(("Chellie Pingree", "Democrat", 588), ("Other", "Republican", 325),
+                               ("Third", "Independent", 87), year=2018),
+                       rankedChoice="first-choices", margin=26.3)
+        self.assertTrue(sh._strip_result(pingree, "House")["firstChoiceMajority"])
+        lead = dict(_result(("Mary Peltola", "Democrat", 488), ("Sarah Palin", "Republican", 257),
+                            ("Nick Begich", "Republican", 255), year=2022),
+                    rankedChoice="first-choices", margin=23.1)
+        self.assertNotIn("firstChoiceMajority", sh._strip_result(lead, "House"))
+        cell = {"result": sh._strip_result(lead, "House"),
+                "holders": [{"name": "Mary Peltola", "party": "Democrat"}]}
+        sh._mark_winner(cell)
+        self.assertNotIn("winner", cell["holders"][0])
+        cell["result"] = sh._strip_result(pingree, "House")
+        cell["holders"] = [{"name": "Chellie Pingree", "party": "Democrat"}]
+        sh._mark_winner(cell)
+        self.assertTrue(cell["holders"][0]["winner"])
+
+    def test_an_unopposed_name_with_no_count_is_withheld_as_such(self):
+        seats = {str(y): {"OK": [1, 2, 3, 4, 5]} for y in sh.YEARS}
+        cache = {"read": "2026-11-01", "years": list(sh.YEARS), "seats": seats, "house": {},
+                 "houseEarlier": {}, "noResult": {}, "senate": {}, "terms": {},
+                 "withheld": [{"seat": "OK-3", "year": 2024, "why": "unchecked",
+                               "result": {"kind": "unopposed", "year": 2024, "candidates": [
+                                   {"name": "Frank D. Lucas", "party": "Republican"}]}}]}
+        cell = sh.seat_strip({"chamber": "House", "state": "OK", "district": 3}, cache)["cells"][-1]
+        self.assertEqual((cell["withheld"], cell.get("withheldUnopposed")), ("unchecked", True))
+
+    def test_alabamas_2024_lines_cite_the_census_list_as_a_list(self):
+        seats = {str(y): {"AL": list(range(1, 8))} for y in sh.YEARS}
+        change = sh.house_breaks("AL", seats)[2024]
+        self.assertTrue(change["lead"])
+        self.assertNotIn("map", change["title"].lower())
+        self.assertIn("census.gov", change["url"])
+
+    def test_the_clerks_grave_inside_a_word_is_the_okina(self):
+        self.assertEqual(sh.okina("Kaiali`i “Kai” Kahele, Democrat"),
+                         "Kaialiʻi “Kai” Kahele, Democrat")
+        with self.assertRaises(sh.ClerkFormatError):
+            sh.okina("`quoted' text")
 
 
 if __name__ == "__main__":

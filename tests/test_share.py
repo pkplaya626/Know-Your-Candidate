@@ -15,7 +15,7 @@ import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from kyc import emit, pages, share  # noqa: E402
+from kyc import emit, overrides, pages, share  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 
@@ -143,6 +143,83 @@ class TestStatusWords(unittest.TestCase):
         self.assertEqual(words(other, races=[ca], post="2026-11-05"),
                          "In the general election runoff")
 
+    def test_georgias_runoff_is_in_the_past_tense_after_its_day(self):
+        # December 1 (overrides.GENERAL_RUNOFFS): on the day itself the two
+        # are still in it; read after it with no result marked, they ran in
+        # it and await the result, as Louisiana's December round does
+        # (rule 63). Nothing here knows Georgia: the date is the race's.
+        day = overrides.GENERAL_RUNOFFS["GA"][0]
+        ga = race(id="H-GA-13-2026", state="GA", district=13, generalRunoff=day)
+        filer = person(id="FEC_GA", isCandidate=True, raceId="H-GA-13-2026", state="GA",
+                       raceStatus="runoff", raceStatusRace="H-GA-13-2026")
+        self.assertEqual(words(filer, races=[ga], post=day), "In the general election runoff")
+        self.assertEqual(words(filer, races=[ga], post="2026-12-02"),
+                         "Ran in the December 1 general election runoff: awaiting result")
+        # Read with no day (a bare True), the runoff is not said to be over.
+        self.assertEqual(words(filer, races=[ga], post=True), "In the general election runoff")
+        # A sitting member in it reads the same words.
+        member = person(raceId="H-GA-13-2026", state="GA", raceStatus="runoff",
+                        raceStatusRace="H-GA-13-2026")
+        self.assertEqual(words(member, races=[ga], post="2026-12-02"),
+                         "Ran in the December 1 general election runoff: awaiting result")
+        self.assertEqual(share.status_source(filer, {}), "Wikipedia's election results page")
+        # Once the result is read, it is the runoff's result, not "awaiting".
+        won = dict(filer, raceStatus="elected", raceStatusDecided={"date": day, "open": False})
+        self.assertEqual(words(won, races=[ga], post="2026-12-02"), "Won the December 1 runoff")
+        lost = dict(won, raceStatus="defeated")
+        self.assertEqual(words(lost, races=[ga], post="2026-12-02"), "Lost the December 1 runoff")
+
+    def test_every_general_runoff_is_in_the_past_tense_after_its_own_day(self):
+        # Guam's and the Virgin Islands' November 17 (GENERAL_RUNOFFS since
+        # results night), read beside Georgia's: each by its race's own date,
+        # so read on November 18 one has been held and the other has not, and
+        # Louisiana's December round is still ahead.
+        for state, entry in overrides.GENERAL_RUNOFFS.items():
+            day = entry[0]
+            year, month, number = (int(part) for part in day.split("-"))
+            named = f"{share._MONTHS[month - 1]} {number}"
+            ahead = race(id=f"H-{state}-01-2026", state=state, generalRunoff=day)
+            filer = person(id="FEC_RUNOFF", isCandidate=True, raceId=ahead["id"], state=state,
+                           raceStatus="runoff", raceStatusRace=ahead["id"])
+            self.assertEqual(words(filer, races=[ahead], post=day), "In the general election runoff")
+            after = f"{year}-{month:02d}-{number + 1:02d}"
+            self.assertEqual(words(filer, races=[ahead], post=after),
+                             f"Ran in the {named} general election runoff: awaiting result")
+        guam = race(id="H-GU-AL-2026", state="GU", generalRunoff="2026-11-17")
+        ga = race(id="H-GA-13-2026", state="GA", generalRunoff="2026-12-01")
+        la = race(id="H-LA-05-2026", state="LA", primaryKind="open", generalRunoff="2026-12-12")
+        read = {}
+        for each in (guam, ga, la):
+            filer = person(id="FEC_RUNOFF", isCandidate=True, raceId=each["id"],
+                           raceStatus="runoff", raceStatusRace=each["id"])
+            read[each["state"]] = words(filer, races=[each], post="2026-11-18")
+        self.assertEqual(read, {
+            "GU": "Ran in the November 17 general election runoff: awaiting result",
+            "GA": "In the general election runoff",
+            "LA": "In the December 12 general election"})
+
+    def test_a_members_other_run_in_a_runoff_ran_once_it_was_held(self):
+        # KYC.contestLine's "awaiting" stage: Mike Collins, a House member in
+        # Georgia's Senate runoff, "is running" until it is held, then "ran";
+        # asked of the status table too, with no race, it never met the day.
+        for day, kind in ((overrides.GENERAL_RUNOFFS["GA"][0], None),
+                          (overrides.GENERAL_RUNOFFS["GU"][0], None),
+                          ("2026-12-12", "open")):
+            rows = [row for row in share.status_table()["contestRounds"]
+                    if row[1] == day and row[0] == kind and not row[3]]
+            self.assertEqual([row[4] for row in rows],
+                             ["is running for Senate AL", "is running for Senate AL",
+                              "ran for Senate AL; the result is awaited"], day)
+
+    def test_no_other_status_reads_georgias_runoff(self):
+        ga = race(id="H-GA-13-2026", state="GA", generalRunoff="2026-12-01")
+        for status in ("elected", "defeated", "nominee", "eliminated", "withdrawn", "unlisted"):
+            filer = person(id="FEC_GA", isCandidate=True, raceId=ga["id"], raceStatus=status,
+                           raceStatusRace=ga["id"])
+            plain = dict(filer, raceId="H-TX-03-2026", raceStatusRace="H-TX-03-2026")
+            self.assertEqual(words(filer, races=[ga], post="2026-12-02"),
+                             words(plain, races=[race()], post="2026-12-02"), status)
+
     def test_no_other_status_reads_the_december_round(self):
         la = race(id="H-LA-05-2026", primaryKind="open", generalRunoff="2026-12-12")
         for status in ("elected", "defeated", "nominee", "qualified", "eliminated"):
@@ -174,6 +251,7 @@ class TestStatusTable(unittest.TestCase):
                       "In the general election runoff", "On the November ballot: awaiting result",
                       "In the December 12 general election",
                       "Ran in the December 12 general election: awaiting result",
+                      "Ran in the December 1 general election runoff: awaiting result",
                       "Elected on December 12", "Lost the December 12 general election",
                       "Re-elected on December 12", "Lost re-election on December 12",
                       "Won the December 1 runoff", "Lost the December 1 runoff",
@@ -362,6 +440,21 @@ class TestSharePages(unittest.TestCase):
         whole = share.describe_race(short, by_id, {short["id"]: short})
         self.assertEqual(whole.count("Candidate Number"), 2)
         self.assertNotIn("more in this race", whole)
+
+    def test_a_decided_race_names_its_winner_first(self):
+        # KY-6's description named two who lost and cut to "and 1 more in this
+        # race": a shared link never said who won (PR #218 review).
+        ids = [f"FEC_{i:02d}" for i in range(12)]
+        people = [person(id=i, name=f"Aaron Candidate {i} Longname", isCandidate=True,
+                         party="Republican", raceStatus="defeated") for i in ids]
+        people[-1].update(name="Zach Zed Winner", raceStatus="elected")
+        r = race(candidateIds=ids)
+        by_id = {p["id"]: p for p in people}
+        description = share.describe_race(r, by_id, {r["id"]: r}, post=True)
+        self.assertIn("more in this race", description)
+        self.assertIn("Zach Zed Winner", description)
+        self.assertLess(description.index("Zach Zed Winner"),
+                        description.index("Aaron Candidate"), description)
 
     def test_a_holder_who_has_left_holds_nothing(self):
         r = race(incumbent={"name": "Gone Member", "party": "Republican", "seated": False},
@@ -581,8 +674,12 @@ class TestPlainStatePages(unittest.TestCase):
         self.assertIn("2 statewide questions are on the Nov 3, 2026 ballot, as the Texas "
                       "Secretary of State lists them", section)
         statewide = re.search(r'data-measures="statewide">(.*?)</ol>', section, re.S).group(1)
-        self.assertEqual(re.findall(r'data-measure="(\d+)">([^(<]*) \(', statewide),
-                         [("0", "Proposition 1: Water"), ("1", "Proposition 2")])
+        self.assertEqual(re.findall(r'data-measure="(\d+)" id="([^"]+)">([^(<]*) \(', statewide),
+                         [("0", "measure-TX-0", "Proposition 1: Water"),
+                          ("1", "measure-TX-1", "Proposition 2")])
+        # The ids the full section gives each question, so a link to one
+        # (the search's answers, rule 97) lands before data/measures.js.
+        self.assertIn('id="measure-TX-2"', section)
         self.assertIn('data-measures="local">', section)
         self.assertIn("One more question is on every ballot, but is not one statewide decision",
                       section)
