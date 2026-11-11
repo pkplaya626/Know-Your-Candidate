@@ -2018,13 +2018,23 @@ def _close(rows, name, field="votes"):
     write-in and unnamed lines, whichever is larger - never ``boxVotes``, which
     a fusion table's "Total" rows double, so that New York's threshold was one
     point and the share printed to a person half the true one."""
+    margin = _margin(rows, name, field)
+    if not margin:
+        return None
+    lead, base = margin
+    return (lead, lead / base) if lead < CLOSE_MARGIN * base else None
+
+
+def _margin(rows, name, field="votes"):
+    """``(lead, every vote)``: *name*'s lead over the runner-up and every vote
+    the table counts once, as :func:`_close` measures them; None where
+    *name* has no count or nobody else does."""
     counted = _counted(rows, field)
     if name not in counted or len(counted) < 2:
         return None
     lead = counted[name] - max(v for n, v in counted.items() if n != name)
     boxed = [r["boxOnce"] for r in rows if r.get("boxOnce")] if field == "votes" else []
-    base = max(boxed + [sum(counted.values())])
-    return (lead, lead / base) if lead < CLOSE_MARGIN * base else None
+    return lead, max(boxed + [sum(counted.values())])
 
 
 def _declared(name, infobox):
@@ -2184,14 +2194,15 @@ CALLED_TABLE, CALLED_INFOBOX, CALLED_NATIONAL = "table", "infobox", "national"
 
 # The national article's table of every district marks each winner with
 # {{aye}} (rule 63's national route, the owner's decision of 2026-11-10: "Yes,
-# with checks"). It is read only for a House race whose state's page holds no
-# November result at all.
+# with checks"). It is read only for a House race whose state's page marks and
+# declares nobody, and gives no count or counts that put the same person first
+# (national_counts).
 NATIONAL_HOUSE = "2026 United States House of Representatives elections"
 
 # A row of the table of every district: its header cell keys the district
 # ({{ushr|ST|N|X}}, at-large "AL"); other tables of the article (retirements,
-# special elections) key rows the same way, and only this one gives each
-# district's PVI ({{shading PVI}}).
+# special elections) key rows the same way; this one gives each district's PVI
+# ({{shading PVI}}), and sits in its state's own section (national_rows).
 _NATIONAL_ROW = re.compile(
     r"\n!\s*(?:[^|\n{]*\|\s*)?\{\{\s*ushr\s*\|\s*([A-Za-z]{2})\s*\|\s*(\d+|AL)\b[^{}]*\}\}"
     r"(.*?)(?=\n\|-|\n\|\}|\Z)", re.S | re.I)
@@ -2233,15 +2244,44 @@ def national_url(title, revid=None):
     return base + (f"&oldid={revid}" if revid else "")
 
 
+# A level-2 heading ("==Ohio=="), never a deeper one ("===Republican===").
+_SECTION_HEAD = re.compile(r"^==(?!=)(.*?)==\s*$", re.M)
+
+
+def _national_sections(text):
+    """``[(start, heading)]`` for the national article's level-2 sections,
+    each heading as plain words ("Ohio")."""
+    out = []
+    for match in _SECTION_HEAD.finditer(text):
+        words = _COMMENT.sub("", match.group(1))
+        words = re.sub(r"\[\[(?:[^\]|]*\|)?([^\]]*)\]\]", r"\1", words)
+        out.append((match.start(), " ".join(words.split())))
+    return out
+
+
 def national_rows(text):
     """``{(state, district): row}`` from the national article's table of
     every district, the row's text after its header cell; a district two
-    such rows key is None (which of them would be guessing)."""
+    such rows key is None (which of them would be guessing).
+
+    That table is the article's section for each state ("==Ohio=="), which
+    lists every one of its districts with the district's PVI. A row anywhere
+    else is another table's, however it is keyed: the "Crossover seats"
+    tables list eight districts again with their PVI (revision 1384925256,
+    2026-11-10), and read with the rest they made each of NE-2, NY-17, PA-1,
+    CA-1, CA-3, CA-41, CA-48 and UT-1 two rows, and so none."""
+    import bisect
+
     out = {}
     text = text or ""
+    sections = _national_sections(text)
+    starts = [start for start, _heading in sections]
     for match in _NATIONAL_ROW.finditer(text):
         body = match.group(3)
         if "shading pvi" not in body.lower():
+            continue
+        at = bisect.bisect_right(starts, match.start()) - 1
+        if at < 0 or sections[at][1] != state_name(match.group(1).upper()):
             continue
         if "rowspan" in body.lower():
             # A district two members held (Texas's 18th and 33rd after the
@@ -2249,9 +2289,31 @@ def national_rows(text):
             # words are the row's too, and must agree as well.
             more = re.search(r"\n\|-\s*\n!|\n\|\}", text[match.end():])
             body += text[match.end():match.end() + more.start()] if more else ""
-        key = (match.group(1).upper(), 0 if match.group(2).upper() == "AL" else int(match.group(2)))
+        key = _national_key(match)
         out[key] = None if key in out else body
     return out
+
+
+def _national_key(match):
+    """``(state, district)`` of a national row (:data:`_NATIONAL_ROW`)."""
+    return (match.group(1).upper(), 0 if match.group(2).upper() == "AL" else int(match.group(2)))
+
+
+def national_unkeyed(text, keyed):
+    """The districts a row of the national article names, with its PVI, in
+    any of its tables, that :func:`national_rows` (*keyed*) did not find in
+    their state's own section; every one of them where it keyed none.
+
+    Rule 36: count what came back. The route reads each district in the
+    section named for its state, so an article restructured - its states under
+    a "Results" heading at level 3, a heading carrying a template - would key
+    fewer districts or none, and every call the last read made would drop to
+    "Awaiting result" on a refresh that merges itself (PR #224 review). Any
+    district named and not keyed makes the article unread (rule 8)."""
+    named = {_national_key(match) for match in _NATIONAL_ROW.finditer(text or "")
+             if "shading pvi" in match.group(3).lower()}
+    missing = [f"{s}-{d}" for s, d in sorted(named - set(keyed or ()))]
+    return missing if keyed else missing or ["no district at all"]
 
 
 def national_row(body):
@@ -2340,6 +2402,28 @@ def national_words_agree(record, is_incumbent, holder_party):
     return None
 
 
+def national_person(who, names, matched, rows, aliases, on_a_list, same):
+    """``(ids, fits)``: the filings the national row's *who* is (rule 62's
+    matching, or an evidenced ``overrides.RESULT_NAMES`` entry), and which of
+    the page's *names* are that person - by those filings, else, where a
+    state's list running the race names *who*, by the list's spelling.
+    ``fits`` is None where neither a filing nor a list names them.
+
+    One reading for the call (:func:`national_call`) and for the withdrawal of
+    the last read's call, so the two ask the page about the same person: read
+    by the row's spelling, a withdrawal said "the counts put Pat Stone first"
+    of a row marking "James Stone", Pat Stone's filing "STONE, PAT JAMES", and
+    the call was made again for him in the same read (PR #224 review)."""
+    found, unclear = match_names([who], rows, aliases)
+    ids = [] if who in unclear else list(found.get(who) or [])
+    ids = ids or _exact_filing(who, rows)
+    if ids:
+        return ids, [n for n in names if set(matched.get(n) or ()) & set(ids)]
+    if on_a_list(who):
+        return ids, [n for n in names if n not in matched and same(n, who)]
+    return ids, None
+
+
 def national_call(record, outcome, matched, ambiguous, rows, aliases, on_a_list, same,
                   incumbent):
     """``(page name, None)`` for the November nominee the national row
@@ -2358,15 +2442,9 @@ def national_call(record, outcome, matched, ambiguous, rows, aliases, on_a_list,
         return None, ("the row marks nobody" if not ayes else
                       "the row marks more than one person")
     who = record["name"]
-    found, unclear = match_names([who], rows, aliases)
-    ids = [] if who in unclear else list(found.get(who) or [])
-    ids = ids or _exact_filing(who, rows)
     nominees = [n for n, status in outcome.items() if status == NOMINEE]
-    if ids:
-        fits = [n for n in nominees if set(matched.get(n) or ()) & set(ids)]
-    elif on_a_list(who):
-        fits = [n for n in nominees if n not in matched and same(n, who)]
-    else:
+    ids, fits = national_person(who, nominees, matched, rows, aliases, on_a_list, same)
+    if fits is None:
         return None, f"no filing and no state's list in this race names {who!r}"
     look_alike = [n for n in nominees if n not in fits and _one_person(n, who)]
     if len(fits) != 1 or look_alike:
@@ -2383,71 +2461,116 @@ def national_call(record, outcome, matched, ambiguous, rows, aliases, on_a_list,
     return (None, why) if why else (fit, None)
 
 
-def _page_leaders(boxes, outcome):
-    """Whom a race's own page puts first: each November table's and the
-    infobox's leading count, and anyone it elects."""
-    leaders = {name for name, status in outcome.items() if status == ELECTED}
-    for title, rows in boxes:
+def _page_names_winner(boxes):
+    """Whom a race's section names the November winner by its own hand: a
+    November table's mark, or the infobox's declaration (``after_election``,
+    a placeholder aside). Either is the table's or the infobox's route to
+    decide (:func:`refuse_marks`, :func:`infobox_call`), whatever it
+    concludes, and never the national summary's."""
+    names = set()
+    for title, rows in _canonical(boxes):
         clean = _clean_title(title)
-        field = "popular" if clean == INFOBOX_TITLE else "votes"
-        if clean != INFOBOX_TITLE and (clean in LIST_TITLES or _stage(clean) != "general"):
-            continue
+        if clean == INFOBOX_TITLE:
+            names.update(r["declared"] for r in rows
+                         if r.get("declared") and not _PLACEHOLDER.match(r["declared"]))
+        elif clean not in LIST_TITLES and _stage(clean) == "general":
+            names.update(r["name"] for r in rows if r["won"])
+    return names
+
+
+def _page_counts(boxes):
+    """``(infobox rows, any count, measured, shown)`` of a race's section:
+    whether a November table or the infobox gives any count above zero, each
+    November table that counts two people (``(rows, "votes")``), and the
+    infobox where it counts two (``(rows, "popular")``)."""
+    canon = _canonical(boxes)
+    infobox = [r for title, rows in canon if _clean_title(title) == INFOBOX_TITLE for r in rows]
+    tables = [rows for title, rows in canon
+              if _clean_title(title) not in LIST_TITLES + (INFOBOX_TITLE,)
+              and _stage(_clean_title(title)) == "general"]
+    counts = any(_counted(rows) for rows in tables) or bool(_counted(infobox, "popular"))
+    measured = [(rows, "votes") for rows in tables if len(_counted(rows)) >= 2]
+    shown = [(infobox, "popular")] if len(_counted(infobox, "popular")) >= 2 else []
+    return infobox, counts, measured, shown
+
+
+def _count_leaders(boxes):
+    """Whom a race's section's counts put first: each November table's that
+    counts two people, and the infobox's where it counts two."""
+    _infobox, _counts, measured, shown = _page_counts(boxes)
+    leaders = set()
+    for rows, field in measured + shown:
         counted = _counted(rows, field)
-        if len(counted) >= 2:
-            top = max(counted.values())
-            leaders.update(n for n, v in counted.items() if v == top)
+        top = max(counted.values())
+        leaders.update(n for n, v in counted.items() if v == top)
     return leaders
 
 
-def _national_held(boxes, name):
-    """Why the counts a state's page has gained since the national summary
-    called *name* do not let that call stand, or None: the gates a call from
-    the page itself meets (:func:`_call_stands`), which a national call made
-    before the page had counts meets too once it has them (PR #220 review).
-    The infobox's share reporting, where it gives one, can be read and is at
-    least REPORTING_FLOOR; and *name*'s lead is at least CLOSE_MARGIN of the
-    count - every vote of each November table that counts two people, else
-    the infobox's. Whoever the counts put first is :func:`_page_leaders`'s."""
-    canon = _canonical(boxes)
-    infobox = [r for title, rows in canon if _clean_title(title) == INFOBOX_TITLE for r in rows]
+def national_counts(boxes, name):
+    """``(case, why)``: whether a race's section, which marks and declares
+    nobody (:func:`_page_names_winner`), lets the national summary's mark on
+    *name* stand (rule 63's national route, one test for the first read and
+    every later one).
+
+    A section with no count at all - no November table with a count above
+    zero, no infobox count above zero - lets it stand: ``({"pageCounts":
+    False}, None)``. A section with counts lets it stand only where they are
+    a second source agreeing: every November table that counts two people,
+    and the infobox where it counts two, put *name* first and nobody beside
+    them; the infobox's share reporting, where it gives one, can be read and
+    is at least REPORTING_FLOOR; and *name*'s lead is at least CLOSE_MARGIN
+    of the count (each such table's every vote, else the infobox's) - the
+    gates a call from the page itself meets (:func:`_call_stands`). Then
+    ``case`` says so, with whom the counts put first as the page writes them,
+    the lead and its share the gate measured, and the share reporting where
+    the infobox gives one. Anything else is ``(None, why)``: a count for one
+    person alone is no lead.
+
+    Until 2026-11-11 a section with counts let a call stand only where the
+    last read had already called it from the national summary, over a page
+    with none: New Jersey's 2nd was called for Zack Mullock from the pages
+    saved at 19:50 UTC on 2026-11-10, while by the refresh of about 22:00 its
+    page counted him 137,999 to Jeff Van Drew's 130,631, marked nobody and
+    marked the count ongoing, and the race, read for the first time that way,
+    stayed "Awaiting result"."""
+    infobox, counts, measured, shown = _page_counts(boxes)
+    if not counts:
+        return {"pageCounts": False}, None
+    if not measured and not shown:
+        return None, "the state's page gives a count for one person alone"
+    others = sorted(n for n in _count_leaders(boxes) if not _one_person(n, name))
+    if others:
+        return None, f"the state's page's counts put {', '.join(others)} first"
     if any(r.get("reportingUnread") for r in infobox):
-        return "the state's page's share reporting cannot be read"
+        return None, "the state's page's share reporting cannot be read"
     low = [r["reporting"] for r in infobox if r.get("reporting") is not None]
     if low and min(low) < REPORTING_FLOOR:
-        return f"the state's page's counts stand at {min(low):g} reporting"
-    tables = [(rows, "votes") for title, rows in canon
-              if _clean_title(title) not in LIST_TITLES + (INFOBOX_TITLE,)
-              and _stage(_clean_title(title)) == "general" and len(_counted(rows)) >= 2]
-    for rows, field in tables or [(infobox, "popular")]:
+        return None, f"the state's page's counts stand at {min(low):g} reporting"
+    case = None
+    for rows, field in measured or shown:
         counted = _counted(rows, field)
-        if len(counted) < 2:
-            continue
         theirs = [n for n in counted if _one_person(n, name)]
         if len(theirs) != 1:
-            return "the state's page's counts do not name them as one person"
+            return None, "the state's page's counts do not name them as one person"
+        # A table's lines that name nobody ("Write-ins", scattering) are no
+        # leader of their own, so a line that could out-count them is held
+        # against the call: all such votes together, at least theirs, say
+        # nothing of who is first (PR #224 review).
+        unnamed = max([r.get("boxOnce") or 0 for r in rows] + [0]) - sum(counted.values())
+        if field == "votes" and unnamed >= counted[theirs[0]]:
+            return None, (f"the state's page counts {unnamed:,} votes on lines that name nobody, "
+                          f"no fewer than their {counted[theirs[0]]:,}")
         close = _close(rows, theirs[0], field)
         if close:
             votes, share = close
-            return (f"their lead on the state's page is {votes:,} votes ({100 * share:.2f} "
-                    f"points), under {100 * CLOSE_MARGIN:g} points of the count")
-    return None
-
-
-def _no_november_result(boxes):
-    """True where a race's section holds no November result at all: no
-    November table with a count above zero or a mark, and no infobox with a
-    count above zero or a declared winner. Only such a race may be called
-    from the national summary (:func:`national_call`)."""
-    for title, rows in boxes:
-        clean = _clean_title(title)
-        if clean == INFOBOX_TITLE:
-            if any(r.get("popular") or (r.get("declared") and not _PLACEHOLDER.match(r["declared"]))
-                   for r in rows):
-                return False
-        elif clean not in LIST_TITLES and _stage(clean) == "general":
-            if any(r["won"] for r in rows) or _counted(rows):
-                return False
-    return True
+            return None, (f"their lead on the state's page is {votes:,} votes ({100 * share:.2f} "
+                          f"points), under {100 * CLOSE_MARGIN:g} points of the count")
+        lead, base = _margin(rows, theirs[0], field)
+        if case is None or lead / base < case["pageMargin"]:
+            case = {"pageCounts": True, "pageLeader": theirs[0], "pageLead": lead,
+                    "pageMargin": round(lead / base, 4),
+                    "pageReporting": min(low) if low else None}
+    return case, None
 
 
 def _november_indexes(boxes):
@@ -3710,11 +3833,20 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
     stale_aliases, calls = {}, {}
     # The national summary (rule 63's national route): its rows, or None
     # where it was not read this time - then the last read's calls stand
-    # (rule 8).
+    # (rule 8) - and where it keys fewer districts than its rows name
+    # (national_unkeyed, rule 36), it is read as unread too.
     withdrawn_calls, national_refused = {}, {}
     national_index, national_meta = None, {}
-    if national and national.get("text"):
-        national_index = national_rows(national["text"])
+    keyed = national_rows(national["text"]) if national and national.get("text") else None
+    unkeyed = national_unkeyed(national["text"], keyed) if keyed is not None else []
+    if unkeyed:
+        log(f"    [warn] the national summary (revision {national.get('revid')}) keys "
+            f"{len(keyed)} districts in their states' own sections and not "
+            f"{len(unkeyed)} its rows name ({', '.join(unkeyed[:8])}"
+            f"{', ...' if len(unkeyed) > 8 else ''}): taken as unread, and the last read's "
+            "national calls stand")
+    elif keyed is not None:
+        national_index = keyed
         national_meta = {"revid": national.get("revid"),
                          "url": national_url(national.get("title") or NATIONAL_HOUSE,
                                              national.get("revid"))}
@@ -3844,7 +3976,9 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 refused_rows[rid] = row_refused
             if row_looked:
                 looked_rows[rid] = row_looked
-        silent = _no_november_result(boxes)
+        # The section as the page gives it, before any route marks or refuses:
+        # what the national route asks of it (national_counts).
+        page_boxes = boxes
         how = None
 
         def vouched(name):
@@ -3932,21 +4066,36 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         national_record = None
         if general_held(today) and office == "H" and not national_barred(
                 state, rid, is_open, qualified_lists):
-            # The national summary's mark, where the state's page holds no
-            # November result at all (national_call, rule 63).
+            # The national summary's mark, where the state's page marks and
+            # declares nobody, and gives no count or counts that agree
+            # (national_call, national_counts, rule 63): one test, whatever
+            # the last read concluded.
             prev = (((previous or {}).get("races") or {}).get(rid) or {})
             before = prev.get("national") if prev.get("calledBy") == CALLED_NATIONAL else None
-            if before and not silent:
-                # The state's page has a result now, and its verdict stands;
-                # where it puts someone else first, the national call is
-                # withdrawn, and a person is told (validate).
-                # Where its counts lead with them, they are held to the gates
-                # a call from the page meets (_national_held): too close or
-                # too early a count withdraws it too, never calls it again.
-                others = sorted(n for n in _page_leaders(boxes, outcome)
-                                if not _one_person(n, before.get("name") or ""))
-                pulled = (f"the state's page now puts {', '.join(others)} first" if others
-                          else _national_held(boxes, before.get("name") or ""))
+            if before:
+                # Where the state's page now elects someone else, or its
+                # counts put someone else first or are too close or too early
+                # to stand behind the call (national_counts), the last read's
+                # national call is withdrawn, and a person is told (validate);
+                # it is never made again past them. The page is asked about
+                # the person the call names, found as the call finds them
+                # (national_person: by filing, never by the row's spelling),
+                # and a page whose own route elects them withdraws nothing
+                # (PR #224 review): the same page reads alike whatever the
+                # last read concluded.
+                who = before.get("name") or ""
+                _ids, theirs = national_person(who, list(outcome), matched, rows, race_aliases,
+                                               on_a_list, same)
+                theirs = theirs or [n for n in outcome if _one_person(n, who)]
+                pulled, others = None, []
+                if not any(outcome.get(n) == ELECTED for n in theirs):
+                    name = theirs[0] if len(theirs) == 1 else who
+                    elsewhere = sorted(n for n, st in outcome.items() if st == ELECTED)
+                    _case, pulled = national_counts(page_boxes, name)
+                    others = elsewhere or sorted(n for n in _count_leaders(page_boxes)
+                                                 if n not in theirs and not _one_person(n, name))
+                    if elsewhere:
+                        pulled = f"the state's page now elects {', '.join(elsewhere)}"
                 if pulled:
                     withdrawn_calls[rid] = {"name": before.get("name"), "leaders": others,
                                             "why": pulled, "revid": before.get("revid")}
@@ -3960,19 +4109,35 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
                 record = dict(national_row(body), **national_meta, read=today.isoformat()) \
                     if body else None
             decided = any(st in (ELECTED, RUNOFF) for st in outcome.values())
-            if record and not struck and rid not in refused_rows and not decided and (
-                    silent or (before and _one_person(record.get("name") or "", before["name"]))):
-                fit, why = national_call(record, outcome, matched, ambiguous, rows,
-                                         race_aliases, on_a_list, same,
-                                         (incumbents or {}).get(rid))
+            if record and not struck and rid not in refused_rows and not decided:
+                said = sorted(_page_names_winner(page_boxes))
+                fit, why, case = None, None, None
+                if said:
+                    why = (f"the state's page marks or declares {', '.join(said)}: its own "
+                           "route decides")
+                else:
+                    fit, why = national_call(record, outcome, matched, ambiguous, rows,
+                                             race_aliases, on_a_list, same,
+                                             (incumbents or {}).get(rid))
+                if fit:
+                    case, why = national_counts(page_boxes, fit)
+                    fit = fit if case else None
                 if fit:
                     called = resolve_race(boxes, general_held=True, late=set(), called=fit, **kinds)
                     if called.get(fit) == ELECTED:
+                        # A record kept from the last read keeps the case it
+                        # was made in, as its credit does (rule 8).
+                        record = record if record.get("kept") else dict(record, **case)
                         outcome, how, national_record = called, CALLED_NATIONAL, record
                         matched, ambiguous, unsure = read_names()
                         log(f"    [note] {rid}: called from the national summary for {fit!r} "
                             f"(revision {record.get('revid')}"
-                            f"{', kept from the last read' if record.get('kept') else ''})")
+                            f"{', kept from the last read' if record.get('kept') else ''}"
+                            + (f"; the state's page counts them ahead by "
+                               f"{record.get('pageLead'):,} votes, "
+                               f"{100 * record.get('pageMargin', 0):.2f} points"
+                               if record.get("pageCounts") else
+                               "; the state's page gives no count") + ")")
                     else:
                         why = "the call settles nobody on the page's November ballot"
                 if why:
@@ -4066,8 +4231,11 @@ def build(field, dates, today=None, log=print, fetch=fetch_wikitext, aliases=Non
         if national_record:
             # The national article's address and revision are this call's
             # source; the state's page stays the source of everything else.
+            # Whether the state's page gave counts at that read, and what the
+            # gate measured of them (national_counts), say which credit is true.
             races[rid]["national"] = {k: national_record.get(k) for k in (
-                "name", "party", "ayes", "words", "url", "revid", "read", "kept")
+                "name", "party", "ayes", "words", "url", "revid", "read", "kept",
+                "pageCounts", "pageLeader", "pageLead", "pageMargin", "pageReporting")
                 if k in national_record}
         # Whose result the December round decided, and which round: an
         # open primary's general election on the seat's own date, or the
@@ -4982,9 +5150,13 @@ def _source_of(profile, race, cid=None, absent=False):
     # "defeated" only because of the call, and was credited to "Wikipedia's
     # election results page" (six Texans, PR #220 review). The list stays the
     # source of whom it leaves off or holds as on the ballot.
+    # Where the state's page, read the same day, gave counts that put the same
+    # person first and named no winner, the credit says so ("national-counts").
     if (cid and not absent and race.get("calledBy") == CALLED_NATIONAL
             and (race.get("status") or {}).get(cid) in (ELECTED, DEFEATED)):
-        profile["raceStatusSource"] = "national"
+        profile["raceStatusSource"] = ("national-counts"
+                                       if (race.get("national") or {}).get("pageCounts")
+                                       else "national")
         return
     certified = race.get("certified") or {}
     if certified and (absent or cid in (race.get("certifiedIds") or {})):
@@ -5068,6 +5240,16 @@ def race_summary(cache, race_id):
     unmatched = race.get("unmatched") or {}
     if isinstance(unmatched, list):        # a cache written before statuses were kept
         unmatched = {}
+    summary = _race_summary(race, counts, unmatched)
+    if race.get("calledBy") == CALLED_NATIONAL:
+        # Whether the state's page, read with the national summary, counted the
+        # winner ahead (true) or gave no count (false): the credit says which.
+        summary["nationalCounts"] = bool((race.get("national") or {}).get("pageCounts"))
+    return summary
+
+
+def _race_summary(race, counts, unmatched):
+    """:func:`race_summary`'s fields every race carries."""
     return {"nominees": counts[NOMINEE], "eliminated": counts[ELIMINATED],
             "withdrawn": counts[WITHDRAWN], "advanced": counts[ADVANCED],
             "elected": counts[ELECTED], "defeated": counts[DEFEATED], "runoff": counts[RUNOFF],

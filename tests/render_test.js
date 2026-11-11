@@ -14184,6 +14184,23 @@ async function testFrame() {
     check("the status's long title credits the national summary",
       / Source: Wikipedia's national summary of the House elections, which gives no vote count; the state's page had none when read\.$/
         .test(title), title);
+    // Where the state's page, read the same day, counted the winner ahead and
+    // named no winner (2026-11-11), both credits say so, and never "had none".
+    const counted = Object.assign({}, national, { results: Object.assign({}, national.results, {
+      nationalCounts: true }) });
+    const both = window.document.createElement("div");
+    both.innerHTML = KYC.resultsSourceHtml(counted);
+    const counts = /which marks the winner and gives no vote count; the state's page, read the same day, counts that winner ahead and names no winner/;
+    check("a national call over agreeing counts says the state's page counted them ahead",
+      both.querySelectorAll(".race-source a").length === 2 && counts.test(both.textContent) &&
+        counts.test(both.querySelectorAll(".race-source a")[1].getAttribute("title")) &&
+        !/had none when read/.test(both.innerHTML), both.innerHTML);
+    for (const status of ["elected", "defeated"]) {
+      const long = KYC.raceStatus(status, "long", { source: "national-counts" }).title;
+      check("and its " + status + " status's long title says the same",
+        new RegExp(" Source: Wikipedia's national summary of the House elections, " +
+          counts.source + "\\.$").test(long), long);
+    }
   });
 
   // map.html: the national views name their sources (TECH-11).

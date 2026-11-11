@@ -1111,22 +1111,31 @@ def check_results_pages(cache):
                             rows_read))
     # How each called race was called (rule 63): a table's mark, the
     # infobox's declaration, or the national summary's mark where the state's
-    # page held nothing. Said, not warned about.
+    # page named no winner, and gave no count or counts that agree. Said, not
+    # warned about.
     routes = {}
     for race in (cache.get("races") or {}).values():
         if race.get("calledBy"):
             routes[race["calledBy"]] = routes.get(race["calledBy"], 0) + 1
     if routes.get("infobox") or routes.get("national"):
-        national = [f"{rid}: {race['national'].get('name')} "
-                    f"(revision {race['national'].get('revid')}"
-                    f"{', kept from the last read' if race['national'].get('kept') else ''})"
-                    for rid, race in sorted((cache.get("races") or {}).items())
-                    if race.get("calledBy") == "national" and race.get("national")]
+        national, counted = [], 0
+        for rid, race in sorted((cache.get("races") or {}).items()):
+            call = race.get("national") or {}
+            if race.get("calledBy") != "national" or not call:
+                continue
+            counted += bool(call.get("pageCounts"))
+            ahead = (f"; the state's page counts {call.get('pageLeader')} ahead by "
+                     f"{call.get('pageLead') or 0:,} votes, "
+                     f"{100 * (call.get('pageMargin') or 0):.2f} points"
+                     if call.get("pageCounts") else "")
+            national.append(f"{rid}: {call.get('name')} (revision {call.get('revid')}"
+                            f"{', kept from the last read' if call.get('kept') else ''}{ahead})")
         issues.append(Issue("info", "result-calls",
                             f"November winners by route (rule 63): {routes.get('table', 0)} from a "
                             f"table's mark, {routes.get('infobox', 0)} from the infobox's "
                             f"declaration, {routes.get('national', 0)} from the national summary "
-                            "where the state's page held no result", national))
+                            f"where the state's page named no winner ({counted} of them over the "
+                            "page's own counts, which put the same person ahead)", national))
     withdrawn = [f"{rid}: {item.get('name')}: "
                  f"{item.get('why') or 'now behind ' + ', '.join(item.get('leaders') or [])} "
                  f"(national revision {item.get('revid')})"
