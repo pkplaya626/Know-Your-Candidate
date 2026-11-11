@@ -22940,6 +22940,26 @@ async function testWordsSinceElectionDay() {
       [chip("election", "senateUp26"), chip("election", "notSeeking"), chip("election", "unchallenged")].join(" | "));
     });
 
+    // The sidebar every state, district and guide page shares
+    // (pages._CONGRESS_SIDEBAR) says what the grid's says, from the same
+    // labels: merged with the grid's alone, 113 generated pages and the
+    // Congress guide kept "Senate seats up" after the election.
+    for (const path of ["states/oh.html", "districts/oh.html", "government/congress.html"]) {
+      const page = await buildPage(path, { now });
+      await settle(150);
+      const shared = (id) => T(page.D.querySelector(`[data-summary-label="${id}"]`));
+      suite(`${path} — the shared sidebar's labels (${clock})`, () => {
+        check("no page errors", page.errors.length === 0, page.errors.join(" | "));
+        check("the shared sidebar's labels are the grid's, in the clock's tense",
+          shared("senateSeatsUp") === label("senateSeatsUp") &&
+            shared("houseSeatsUp") === label("houseSeatsUp") &&
+            shared("challengers") === label("challengers") &&
+            (after ? shared("senateSeatsUp") === "Senate seats on the 2026 ballot"
+              : shared("senateSeatsUp") === "Senate seats up"),
+          `${shared("senateSeatsUp")} | ${shared("houseSeatsUp")} | ${shared("challengers")}`);
+      });
+    }
+
     const map = await buildPage("map.html", { now, hash: "#/?mode=senate2026" });
     await settle(200);
     const shapes = [...new Set([...map.D.querySelectorAll("[aria-label],[title]")]

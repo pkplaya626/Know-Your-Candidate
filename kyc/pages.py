@@ -257,11 +257,11 @@ _CONGRESS_SIDEBAR = """
                 2026 midterms
             </h2>
             <time id="electionCountdown" class="badge badge-warn countdown"></time>
-            <div class="stat-row"><span>Senate seats up</span>
+            <div class="stat-row"><span data-summary-label="senateSeatsUp">Senate seats up</span>
                 <span class="value" id="senateSeatsUp"></span></div>
-            <div class="stat-row"><span>House seats up</span>
+            <div class="stat-row"><span data-summary-label="houseSeatsUp">House seats up</span>
                 <span class="value" id="houseSeatsUp"></span></div>
-            <div class="stat-row"><span>Challengers on the ballot</span>
+            <div class="stat-row"><span data-summary-label="challengers">Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
             <div class="stat-row"><span>Candidates for open seats</span>
                 <span class="value" id="openCandidateCount"></span></div>
