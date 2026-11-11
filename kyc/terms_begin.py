@@ -60,6 +60,21 @@ OH_3_2 = "https://codes.ohio.gov/ohio-constitution/section-3.2"
 SC_4 = "https://www.scstatehouse.gov/scconstitution/A04.pdf"
 SC_6 = "https://www.scstatehouse.gov/scconstitution/A06.pdf"
 VT_CONST = "https://legislature.vermont.gov/statutes/constitution-of-the-state-of-vermont/"
+CO_CONST = "https://leg.colorado.gov/sites/default/files/images/olls/crs2023-title-00.pdf"
+IA_CONST = "https://www.legis.iowa.gov/docs/publications/ICP/1518288.pdf"
+IA_39_8 = "https://www.legis.iowa.gov/docs/code/39.8.pdf"
+IA_39_9 = "https://www.legis.iowa.gov/docs/code/39.9.pdf"
+IA_1C_1 = "https://www.legis.iowa.gov/docs/code/1C.1.pdf"
+KS_1_1 = "https://www.ksrevisor.gov/kanconst/093_001_0001.html"
+ND_44_01 = "https://www.ndlegis.gov/cencode/t44c01.pdf"
+OK_6 = "https://oksenate.gov/sites/default/files/2022-05/oc6.pdf"
+PA_4_3 = "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/00/00.004.003.000..HTM"
+PA_4_4 = "https://www.legis.state.pa.us/WU01/LI/LI/CT/HTM/00/00.004.004.000..HTM"
+RI_4 = "https://www.rilegislature.gov/riconstitution/Constitution/C04.aspx"
+# The United States Code as the Government Publishing Office serves it
+# (the organic acts of Guam and the Virgin Islands).
+USC_48_1422 = "https://www.govinfo.gov/link/uscode/48/1422?type=usc&year=mostrecent&link-type=html"
+USC_48_1591 = "https://www.govinfo.gov/link/uscode/48/1591?type=usc&year=mostrecent&link-type=html"
 
 FIRST_MONDAY_JANUARY = ("nth", 1, "Monday", 1)
 
@@ -232,6 +247,98 @@ TERMS = {
                        "State, an Attorney General",
                        "who shall hold their respective offices for a term of four years, coterminous "
                        "with that of the Governor.")))),),
+    # The Colorado Revised Statutes 2023 as the Office of Legislative Legal
+    # Services publishes them, the constitution in title 0.
+    "CO": (_record(("governor", "lt", "ag", "sos"), ("nth", 2, "Tuesday", 1),
+                   "the second Tuesday of January, every fourth year from 1967",
+                   "2027-01-12", "Colo. Const. art. IV, s.1(1)",
+                   ((CO_CONST, (
+                       "The executive department shall include the governor, lieutenant governor, "
+                       "secretary of state, state treasurer, and attorney general, each of whom shall "
+                       "hold his office for the term of four years, commencing on the second Tuesday of "
+                       "January in the year 1967, and each fourth year thereafter.",)),)),),
+    "IA": (_record(("governor", "lt"), ("after", "Tuesday", ("nth", 2, "Monday", 1)),
+                   "the Tuesday after the second Monday of January next after the election",
+                   "2027-01-12", "Iowa Const. art. IV, s.15",
+                   ((IA_CONST, (
+                       "The official terms of the governor and lieutenant governor shall commence on "
+                       "the Tuesday after the second Monday of January next after their election",)),)),
+           # Iowa Code 39.8 starts every other full term on "the first day of
+           # January following the election which is not a Sunday or legal
+           # holiday", and 1C.1 makes January 1 New Year's Day, a legal
+           # public holiday: in 2027, Saturday, January 2.
+           _record(("ag", "sos"), ("not-sunday-or", ("day", 1, 1), ((1, 1),)),
+                   "the first day of January following the election which is not a Sunday or legal "
+                   "holiday (January 1 being New Year's Day, a legal public holiday)",
+                   "2027-01-02", "Iowa Code 39.8, 39.9 and 1C.1",
+                   ((IA_39_8, (
+                       "The term of office of all officers chosen at a general election for a full "
+                       "term shall commence on the first day of January following the election which "
+                       "is not a Sunday or legal holiday, except when otherwise provided by the "
+                       "Constitution or by statute",)),
+                    (IA_39_9, (
+                       "The governor, lieutenant governor, secretary of state, auditor of state, "
+                       "treasurer of state, secretary of agriculture, and attorney general shall be "
+                       "elected for a term of four years",)),
+                    (IA_1C_1, (
+                       "The following are legal public holidays: 1. New Year’s Day, January 1.",))))),
+    "KS": (_record(("governor", "lt", "ag", "sos"), ("nth", 2, "Monday", 1),
+                   "the second Monday of January next after the election",
+                   "2027-01-11", "Kan. Const. art. 1, s.1",
+                   ((KS_1_1, (
+                       "The constitutional officers of the executive department shall be the governor, "
+                       "lieutenant governor, secretary of state, and attorney general",
+                       "such officers elected in 1974 and thereafter shall have terms of four years "
+                       "which shall begin on the second Monday of January next after their "
+                       "election")),)),),
+    "ND": (_record(("ag", "sos"), ("day", 1, 1),
+                   "the first day of January next succeeding the election",
+                   "2027-01-01", "N.D. Cent. Code 44-01-03",
+                   ((ND_44_01, (
+                       "Except when otherwise specially provided, all state and district officers shall "
+                       "qualify on the first day of January next succeeding their election and on said "
+                       "first day of January shall enter upon the discharge of the duties of their "
+                       "respective offices",)),)),),
+    "OK": (_record(("governor", "lt", "ag"), ("nth", 2, "Monday", 1),
+                   "the second Monday of January next after the election",
+                   "2027-01-11", "Okla. Const. art. VI, s.4(A)",
+                   ((OK_6, (
+                       "The term of office of the Governor, Lieutenant Governor, State Auditor and "
+                       "Inspector, Attorney General, State Treasurer, Commissioner of Labor and "
+                       "Superintendent of Public Instruction shall be four (4) years from the second "
+                       "Monday of January next after their election.",)),)),),
+    "PA": (_record(("governor", "lt"), ("nth", 3, "Tuesday", 1),
+                   "the third Tuesday of January next ensuing the election",
+                   "2027-01-19", "Pa. Const. art. IV, ss.3 and 4",
+                   ((PA_4_3, (
+                       "The Governor shall hold his office during four years from the third Tuesday of "
+                       "January next ensuing his election.",)),
+                    (PA_4_4, (
+                       "A Lieutenant Governor shall be chosen jointly with the Governor by the casting "
+                       "by each voter of a single vote applicable to both offices, for the same term, "
+                       "and subject to the same provisions as the Governor",)))),),
+    "RI": (_record(("governor", "lt", "ag", "sos"), ("nth", 1, "Tuesday", 1),
+                   "the first Tuesday of January next succeeding the election",
+                   "2027-01-05", "R.I. Const. art. IV, s.1",
+                   ((RI_4, (
+                       "The governor, lieutenant governor, secretary of state, attorney general and "
+                       "general treasurer shall be elected on the Tuesday after the first Monday in "
+                       "November, quadrennially commencing A.D. 1994, and every four (4) years "
+                       "thereafter, and shall severally hold their offices, subject to recall as "
+                       "provided for herein, for four (4) years from the first Tuesday of January next "
+                       "succeeding their election",)),)),),
+    "GU": (_record(("governor", "lt"), FIRST_MONDAY_JANUARY,
+                   "the first Monday of January following the date of election",
+                   "2027-01-04", "48 U.S.C. 1422",
+                   ((USC_48_1422, (
+                       "The term of the elected Governor and Lieutenant Governor shall commence on the "
+                       "first Monday of January following the date of election.",)),)),),
+    "VI": (_record(("governor", "lt"), FIRST_MONDAY_JANUARY,
+                   "the first Monday of January following the date of election",
+                   "2027-01-04", "48 U.S.C. 1591",
+                   ((USC_48_1591, (
+                       "The term of the elected Governor and Lieutenant Governor shall commence on the "
+                       "first Monday of January following the date of election.",)),)),),
 }
 
 # Offices on the 2026 ballot with no day here, and why: a gap, never a guess.
@@ -262,12 +369,19 @@ def count(rule, election=ballot2026.ELECTION):
         base = count(rule[2], election)
         weekday = WEEKDAYS.index(rule[1])
         return base + datetime.timedelta(days=(weekday - base.weekday() - 1) % 7 + 1)
+    if kind == "not-sunday-or":
+        # The day the inner rule gives, or the first after it that is neither
+        # a Sunday nor one of the (month, day) holidays named.
+        day = count(rule[1], election)
+        while day.weekday() == 6 or (day.month, day.day) in tuple(map(tuple, rule[2])):
+            day += datetime.timedelta(days=1)
+        return day
     raise TermsBeginError(f"unknown rule {rule!r}")
 
 
 def counted(rule):
     """True where the day is counted on the calendar from a rule, not named."""
-    return rule[0] != "day"
+    return not (rule[0] == "day" or (rule[0] == "not-sunday-or" and count(rule) == count(rule[1])))
 
 
 def begun_from(record):
