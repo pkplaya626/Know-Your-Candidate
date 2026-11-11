@@ -303,6 +303,21 @@
       return '<span class="badge ' + words.cls + '" title="' + KYC.escapeAttr(
         words.raceTitle + runoff.join(", ") + ".") + '">' + KYC.escapeHtml(words.race) + "</span>";
     }
+    // Once the new Congress sits, the one its record seats for the term this
+    // race decided, in the person's own words (KYC's seatedWords): "Awaiting
+    // result" over a seated member read as though nobody held the seat.
+    var seen = {};
+    var seats = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(function (p) {
+      if (!p || seen[p.id]) return false;
+      seen[p.id] = true;
+      var spec = KYC.raceStatusOf(p, "long");
+      return !!spec && /^Seated for the /.test(spec.label);
+    });
+    if (seats.length === 1) {
+      var sat = KYC.raceStatusOf(seats[0], "long");
+      return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(seats[0].name + ": " +
+        sat.title) + '">Seated: ' + KYC.escapeHtml(seats[0].name) + "</span>";
+    }
     var asOf = (KYC.meta().election || {}).resultsAsOf;
     return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
       "The results this site last read" + (asOf ? ", on " + asOf + "," : "") +

@@ -617,6 +617,25 @@
     card: "Awaiting result", long: "On the November ballot: awaiting result",
     mate: "Awaiting result", short: "Awaiting result" };
 
+  /* Once the new Congress sits, a nominee Congress's record seats for the
+   * term their race decided, where the results this site last read marked
+   * no winner (a refused or close mark, a majority not yet counted, a
+   * territory). "Awaiting result" stood under "Term Jan. 3, 2027 - Jan. 3,
+   * 2029" on the January rehearsal of 2026-11-11, and Greg Casar's TX-37
+   * card said it beside TX-35's "was re-elected in TX-37". *term* is the
+   * term's years ("2027–2029"); the source is the record, never the
+   * results. kyc/share.py's _SEATED says the same. */
+  var SEATED_SOURCE = " Source: Congress's record of its members, from the congress-legislators project.";
+
+  function seatedWords(term) {
+    var asOf = (meta().election || {}).resultsAsOf;
+    return { cls: "badge-neutral", rank: 0,
+      card: "Seated for the new term", long: "Seated for the " + term + " term",
+      mate: "Seated", short: "Seated",
+      title: "Seated for the " + term + " term, per Congress's record; the results this site " +
+        "last read" + (asOf ? ", on " + asOf + "," : "") + " had not marked a winner." };
+  }
+
   /* The December round of an open primary is its general election, never
    * a runoff (rule 75). Louisiana's House seats vote first on November 3,
    * every candidate on one ballot, and the top two meet on December 12
@@ -899,6 +918,11 @@
       own = {};
       title = "On the November ballot. The results this site last read" +
         (asOf ? ", on " + asOf + "," : "") + " had not marked a winner.";
+      if (opts.seatedTerm) {
+        spec = seatedWords(opts.seatedTerm);
+        title = spec.title;
+        source = SEATED_SOURCE;
+      }
     }
     return {
       cls: own.cls || spec.cls,
@@ -927,6 +951,7 @@
     var race = status === "runoff" ? raceById(record.raceStatusRace ||
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
     return raceStatus(status, form, {
+      seatedTerm: seatedTerm(item, status, record),
       // The past tense (LEFT) in the record phase, and for a former member
       // once the election has passed (pastTense).
       record: pastTense(item, opts),
@@ -943,6 +968,21 @@
       minor: partyKey(item) === "i",
       now: opts.now,
     });
+  }
+
+  /* The years of the term Congress's record seats *item* for, where it is
+   *  the term the race their nominee or qualified status is about decided:
+   *  in the record phase, sitting in that race's seat (sitsIn) on a term
+   *  that began after Election Day ("2027-01-03 - 2029-01-03" ->
+   *  "2027–2029"). Else "". kyc/share.py's seated_term says the same. */
+  function seatedTerm(item, status, record) {
+    if ((status !== "nominee" && status !== "qualified") || !recordPhase()) return "";
+    var race = raceById((record || {}).raceStatusRace || item.raceId);
+    if (!race || !sitsIn(race, item)) return "";
+    var m = /^(\d{4})-\d{2}-\d{2} - (\d{4})-\d{2}-\d{2}$/.exec(String(item.term_start || ""));
+    var election = electionStatus((meta().election || {}).year).iso;
+    if (!m || item.term_start.slice(0, 10) <= election) return "";
+    return m[1] + "\u2013" + m[2];
   }
 
   /* Whether a person's own words are in the past tense (LEFT): in the record
@@ -1088,6 +1128,10 @@
     if (former) add(leftWords(APPOINTEE_LEAVING));
     add(AWAITING, "After Election Day: on the November ballot, and the results this site last " +
       "read had not marked a winner.");
+    if (record) {
+      add(seatedWords("new"), "Once the new Congress sits: Congress's record seats them for the " +
+        "term their race decided, though the results this site last read had not marked a winner.");
+    }
     // An open primary's December round, in its race's words (openRound),
     // where a race the page holds has one.
     var open = null;

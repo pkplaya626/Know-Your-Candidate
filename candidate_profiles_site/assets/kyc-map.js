@@ -218,7 +218,10 @@
           // The status table's words for the race's December round, never
           // a copy of them here (rule 12).
           status === "runoff" ? " " + lowerFirst(KYC.raceStatusOf(defender, "long").label) :
-          status === "nominee" && counted ? " awaiting result" :
+          // Once the new Congress sits, one its record seats for the term
+          // in the status table's words ("seated for the 2027–2033 term").
+          status === "nominee" && counted ? (/^Seated for the /.test(KYC.raceStatusOf(defender, "long").label)
+            ? " " + lowerFirst(KYC.raceStatusOf(defender, "long").label) : " awaiting result") :
           // Through a top-two or top-four primary, nobody is renominated.
           status === "nominee" && defender.allPartyPrimary ? " advanced to November" :
           status === "nominee" && defender.seekingReelection2026 ?

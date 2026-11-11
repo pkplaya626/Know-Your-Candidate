@@ -1129,7 +1129,10 @@ result.
   header says the results this site last read (`election.resultsAsOf` in the
   build meta) had not marked a winner. That is a claim about when we looked,
   not about the count. A called race's header reads "Won by …"; a race going
-  to a runoff says so.
+  to a runoff says so. Once the new Congress sits, a nominee Congress's
+  record seats for the term the race decided reads "Seated for the new
+  term" ("Seated for the 2027–2029 term", credited to that record) and the
+  header "Seated: …", wherever the results still mark no winner.
 
 Every view takes its words for a status from one table, `KYC.raceStatus` in
 `assets/kyc.js`: the card, the profile, a race's list of people and a map row

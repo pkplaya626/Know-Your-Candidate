@@ -15110,6 +15110,18 @@ async function testSharePages() {
         now: AFTER_DAY, record: true });
       return !spec || spec.label !== label || !!spec.off !== !!gone;
     });
+    // Once the new Congress sits, a nominee its record seats for the term
+    // the race decided, where the results read marked no winner: the
+    // record's words and source (share.seated_term, KYC's seatedWords).
+    const seatedOff = (table.seated || []).filter(([status, source, own, term, label, gone, credit]) => {
+      const spec = KYC.raceStatus(status, "long", { own: !!own, source: source || undefined,
+        now: AFTER_DAY, record: true, seatedTerm: term || undefined });
+      return !spec || spec.label !== label || !!spec.off !== !!gone || creditOf(spec) !== credit;
+    });
+    check("and a nominee Congress's record seats for the new term, in its words and the record's source",
+      (table.seated || []).length >= 24 && seatedOff.length === 0 &&
+        table.seated.some((r) => r[3] && /^Seated for the \d{4}–\d{4} term$/.test(r[4])),
+      seatedOff.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${(table.seated || []).length} cases`);
     check("and every status in the record phase, a member who did not run in the past tense",
       (table.record || []).length > 100 && recordOff.length === 0 &&
         table.record.some((row) => row[6] === "Did not run for re-election in 2026") &&
@@ -22153,6 +22165,44 @@ async function testTheJanuaryPage() {
       `${nsCards.length} cards; seated: ` + nsCards.filter((p) => NK.seated(p)).map((p) => p.name).join(", ") + " | " + nsLabel.slice(0, 160));
     check("its hover speaks of the members who left, never of sitting members or the seat they hold",
       /all of whom have since left Congress/.test(nsTitle) && !/Sitting members|seat they hold/.test(nsTitle), nsTitle);
+  });
+
+  // A nominee Congress's record seats for the term their race decided is
+  // never "Awaiting result" (the January sweep of 2026-11-11): the dialog
+  // read "Term Jan. 3, 2027 - Jan. 3, 2029" over "On the November ballot:
+  // awaiting result", and p/J000299.html the same. Who that is, from the
+  // record's fields: seated, in the seat of the race their status is about,
+  // on a term that began after Election Day.
+  const electionIso = GK.electionStatus(2026).iso;
+  const seatedNominees = GK.people().filter((p) => {
+    const status = GK.contestStatus(p);
+    if (!GK.seated(p) || (status !== "nominee" && status !== "qualified")) return false;
+    const race = GK.races().find((r) => r.id === (p.raceStatusRace || p.raceId));
+    const start = String(p.term_start || "").slice(0, 10);
+    return !!race && GK.sitsIn(race, p) && start > electionIso;
+  });
+  const seatedBad = [];
+  seatedNominees.forEach((p) => {
+    const card = GK.standing(p, "card");
+    const long = GK.standing(p, "long");
+    const years = /^(\d{4})-\d{2}-\d{2} - (\d{4})/.exec(p.term_start);
+    if (!card || card.label !== "Seated for the new term" || !long ||
+        long.label !== "Seated for the " + years[1] + "–" + years[2] + " term" ||
+        !/Source: Congress's record of its members/.test(long.title)) {
+      seatedBad.push(`${p.name}: ${card && card.label} / ${long && long.label}`);
+    }
+    const share = path.join(SITE, "p", p.id + ".html");
+    if (fs.existsSync(share)) {
+      const text = unescapeHtml(fs.readFileSync(share, "utf8"));
+      if (/awaiting result/.test(text) || text.indexOf("Seated for the " + years[1] + "–" + years[2] + " term") === -1) {
+        seatedBad.push(`p/${p.id}.html: ${(/<meta name="description" content="([^"]*)"/.exec(text) || [])[1]}`);
+      }
+    }
+  });
+  suite("the January page: a nominee Congress has seated for the new term is never awaiting a result", () => {
+    check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",
+      seatedBad.length === 0, seatedBad.slice(0, 4).join(" | ") || `${seatedNominees.length} seated nominees` +
+        (seatedNominees.length ? "" : " (the results called every race this copy holds)"));
   });
 
   // A former member is named as their own record says they go by (rule 66):

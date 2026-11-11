@@ -1632,6 +1632,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     never the 2026 winner: TX-18's special and regular races had different
     winners in 2024. A record incumbent who won another seat keeps the one
     they held (`heldRaceId`), which is what the seats-up counts read.
+    A nominee the record seats for the term their race decided, where the
+    results read marked no winner, is "Seated for the new term" ("Seated
+    for the 2027–2029 term", credited to Congress's record:
+    `KYC.seatedTerm`, `share.seated_term`), never "Awaiting result": the
+    January rehearsal of 2026-11-11 printed "Awaiting result" under "Term
+    Jan. 3, 2027 - Jan. 3, 2029" for 46 members, and Greg Casar's TX-37 card
+    said it beside TX-35's "was re-elected in TX-37". It says nothing of
+    the others on that ballot, whom no result has marked.
 
 68. **A new Congress is the data's word, about everything that changes
     with it.** Rehearsed on a fictional January 4 membership, the site

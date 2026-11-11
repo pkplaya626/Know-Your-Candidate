@@ -79,6 +79,16 @@ _LEFT = {"member": {"long": "Did not run for re-election in 2026"},
          "appointee": {"long": "Did not run in 2026"}}
 _UNCONFIRMED = {"long": "Not on the November ballot", "off": True}
 _AWAITING = {"long": "On the November ballot: awaiting result"}
+# KYC's seatedWords: once the new Congress sits, a nominee Congress's record
+# seats for the term their race decided, where the results read marked no
+# winner. Its source is the record (SEATED_SOURCE), never the results.
+SEATED_SOURCE = "Congress's record of its members, from the congress-legislators project"
+
+
+def _seated(term):
+    return {"long": f"Seated for the {term} term"}
+
+
 _MINOR_NOMINEE = {"long": "On the November ballot"}
 _ALL_PARTY = {"long": "Advanced to the November ballot",
               "member": {"long": "Advanced to the November ballot"}}
@@ -219,8 +229,10 @@ def ballot_line(item, by_id):
 
 def _race_status(status, own=False, unconfirmed=False, appointed=False, source=None,
                  all_party=None, minor=False, post_election=False, open_round=None,
-                 round_held=False, decided=None, runoff_day=None, record=False):
+                 round_held=False, decided=None, runoff_day=None, record=False,
+                 seated_term=""):
     """KYC.raceStatus(status, "long", opts): ``(words, off)`` or None.
+    *seated_term* is ``opts.seatedTerm`` (:func:`seated_term`).
     *open_round* is the date of an open primary's December round
     (``opts.round``), *runoff_day* a general election runoff's
     (``opts.runoffDay``), *round_held* whether that round has passed;
@@ -257,7 +269,7 @@ def _race_status(status, own=False, unconfirmed=False, appointed=False, source=N
     if status == "nominee" and spec is _RACE_STATUS["nominee"] and minor and not own:
         spec = _MINOR_NOMINEE
     if status in ("nominee", "qualified") and post_election:
-        spec, mine = _AWAITING, {}
+        spec, mine = (_seated(seated_term) if seated_term else _AWAITING), {}
     return (mine.get("long") or spec.get("long"), bool(spec.get("off")))
 
 
@@ -294,15 +306,39 @@ def _race_source(status, source=None, source_name=None):
     return _WIKIPEDIA
 
 
-def status_source(item, by_id):
+def seated_term(item, status, record, races_by_id, post_election=False):
+    """KYC's seatedTerm: the years of the term Congress's record seats *item*
+    for ("2027–2029"), where it is the term the race their nominee or
+    qualified status is about decided - in the record phase (*post_election*'s
+    ``record``), sitting in that race's seat on a term that began after
+    Election Day - else ""."""
+    from . import cycle
+
+    if status not in ("nominee", "qualified") or not getattr(post_election, "record", False):
+        return ""
+    race = races_by_id.get((record or {}).get("raceStatusRace") or item.get("raceId") or "")
+    if not race or not sits_in(race, item):
+        return ""
+    term = str(item.get("term_start") or "")
+    parts = term.split(" - ")
+    if (len(parts) != 2 or len(parts[0]) != 10 or len(parts[1]) != 10
+            or parts[0] <= cycle.general_election_day(cycle.CYCLE).isoformat()):
+        return ""
+    return parts[0][:4] + "–" + parts[1][:4]
+
+
+def status_source(item, by_id, races_by_id=None, post_election=False):
     """Who says where *item* stands, as the profile dialog's badge credits
     it: a results page, a state's certified list, the Secretary of State's
-    list, or a certified list's write-in line; None where the dialog names
-    no source (a filer the results do not settle)."""
+    list, or a certified list's write-in line, or Congress's record for a
+    nominee it seats for the term (:func:`seated_term`); None where the
+    dialog names no source (a filer the results do not settle)."""
     if not item:
         return None
     record = item if _own_record(item) else (by_id.get(item.get("alsoRunningId") or "") or {})
     status = contest_status(item, by_id)
+    if races_by_id is not None and seated_term(item, status, record, races_by_id, post_election):
+        return SEATED_SOURCE
     if status in _RACE_STATUS:
         return _race_source(status, record.get("raceStatusSource"),
                             record.get("raceStatusSourceName"))
@@ -530,11 +566,23 @@ def status_table():
             spec = standing(item, {}, {}, day)
             former.append([status, appointed, post, in_record, spec[0] if spec else None,
                            int(spec[1]) if spec else 0])
+    # A nominee Congress's record seats for the term their race decided,
+    # where the results read marked no winner (seated_term): its words and
+    # its source, the record's, beside the same row with no seat.
+    seated = []
+    for status in ("nominee", "qualified"):
+        for source in (None, "certified", "qualified"):
+            for own in (0, 1):
+                for term in ("", "2027–2029", "2026–2029"):
+                    label, off = _race_status(status, own=bool(own), source=source,
+                                              post_election=True, record=True, seated_term=term)
+                    seated.append([status, source, own, term, label, int(off),
+                                   SEATED_SOURCE if term else _race_source(status, source)])
     return {"words": ["status", "allParty", "source", "round", "runoff", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "contest": contest, "moved": moved,
             "contestRounds": _contest_rounds(), "filers": filers, "record": record,
-            "former": former}
+            "former": former, "seated": seated}
 
 
 def _former_member(status, appointed):
@@ -554,7 +602,7 @@ def status_table_text():
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
     keys = ("statuses", "credits", "contest", "contestRounds", "moved", "filers", "record",
-            "former")
+            "former", "seated")
     for key in keys:
         rows = table[key]
         lines.append(f'"{key}": [')
@@ -634,7 +682,8 @@ def standing(item, by_id, races_by_id, post_election=False):
         # carries (ResultsDay), and for a former member once the election
         # has passed, as KYC.pastTense says: one who left in December read
         # "Not running for re-election in 2026" until January 3 (PR #226).
-        record=past_tense(item, post_election))
+        record=past_tense(item, post_election),
+        seated_term=seated_term(item, status, record, races_by_id, post_election))
     if spec:
         return spec
     words = _unsettled(item, races_by_id)
@@ -897,7 +946,7 @@ def describe(person, by_id, races_by_id, post=False):
     lead = f"{name} ({party})" if party else name
     said = []
     if prose:
-        source = status_source(person, by_id)
+        source = status_source(person, by_id, races_by_id, post)
         said.append(prose + (f", per {source}" if source else ""))
     other = other_office(person, post)
     if other:
@@ -937,7 +986,7 @@ def render_profile(person, host, by_id, races_by_id, post=False, alias=None):
     body = [f"<p>{_e(person.get('party') or '')} &middot; {_e(person.get('officeLabel') or '')}</p>"]
     if status:
         body.append(f'<p class="share-status"><strong>{_e(status)}</strong></p>')
-        source = status_source(person, by_id)
+        source = status_source(person, by_id, races_by_id, post)
         if source:
             body.append(f'<p class="share-source faint">Source: {_e(source)}.</p>')
     other = other_office(person, post)
@@ -1138,13 +1187,13 @@ def _item(person, by_id, races_by_id, post, root, indent, race=None):
             + (f': <span class="share-standing">{_e(status)}</span>' if status else "") + "</li>")
 
 
-def race_sources(race, by_id):
+def race_sources(race, by_id, races_by_id=None, post=False):
     """Who says where the people a race lists stand, each once, in the
     order they are first met: the credit the dialog's badge gives each."""
     moved, holders, running, out = split_people(race, by_id)
     seen = []
     for person in moved + holders + running + out:
-        source = status_source(person, by_id)
+        source = status_source(person, by_id, races_by_id, post)
         if source and source not in seen:
             seen.append(source)
     return seen
@@ -1200,7 +1249,7 @@ def race_list_html(race, by_id, races_by_id, post=False, root="../", indent=""):
                  f'{indent}<ul class="share-list share-out" data-race-out="{_e(race["id"])}">']
         rows += [_item(p, by_id, races_by_id, post, root, indent + "    ") for p in out]
         rows.append(f"{indent}</ul>")
-    sources = race_sources(race, by_id)
+    sources = race_sources(race, by_id, races_by_id, post)
     if sources:
         rows.append(f'{indent}<p class="share-source faint">Where each stands: per '
                     f"{_e(_and(sources))}.</p>")
@@ -1258,7 +1307,7 @@ def describe_race(race, by_id, races_by_id, post=False):
         status = status_words(person, by_id, races_by_id, post, seat=seat_phrase)
         people.append(f"{person.get('name')}" + (f" ({person['party']})" if person.get("party")
                                                   else "") + (f": {status}" if status else ""))
-    sources = race_sources(race, by_id)
+    sources = race_sources(race, by_id, races_by_id, post)
     lead = " ".join(filter(None, [f"{_what(race)[0].upper()}{_what(race)[1:]} for {label}.", held]))
     if not people:
         return lead
