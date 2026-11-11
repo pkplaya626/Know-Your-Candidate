@@ -22352,9 +22352,9 @@ async function testTheJanuaryPage() {
     // review of PR #227). None of them was on the November ballot for the
     // seat they held, so the words say that, and no card says otherwise.
     const nsWords = [nsChip ? nsChip.textContent : "", nsTitle, nsLabel].join(" | ");
-    const nsLost = nsCards.filter((p) => /lost/i.test((NK.standing(p) || {}).card || ""));
+    const nsLost = nsCards.filter((p) => /lost/i.test((NK.standing(p, "card") || {}).label || ""));
     const nsOnBallot = nsCards.filter((p) => /on the November ballot|^Elected|^Lost the November/i.test(
-      ((NK.standing(p) || {}).long || "")));
+      ((NK.standing(p, "long") || {}).label || "")));
     check("and its words are true of every card it lists: none \"did not run\" over a lost primary, nobody on the November ballot",
       !(nsLost.length && /did not run/i.test(nsWords)) && !nsOnBallot.length &&
         /not on the November \d{4} ballot for the seat they held/.test(nsTitle) &&
