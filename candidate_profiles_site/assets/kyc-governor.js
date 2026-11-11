@@ -218,8 +218,8 @@
     if (!parts) {
       var b = sg().ballotOf(code);
       var item = b && b.offices.governor;
-      return panel("flag", title, '<p class="race-note">' + KYC.escapeHtml(KYC.stateName(code)) +
-        " does not elect its governor in 2026." + (item ? " " + sg().officeMark(code, "governor") : "") +
+      return panel("flag", title, '<p class="race-note">' + KYC.escapeHtml(sg().noGovernorRace(code)) +
+        (item ? " " + sg().officeMark(code, "governor") : "") +
         "</p>");
     }
     if (parts.none) {
@@ -246,8 +246,9 @@
     // (TRUST-14); each price quoted and dated, labelled not a poll and not
     // this site's forecast (rule 40).
     html += sg().raceOdds(code, { compact: true, collapsed: true });
+    // Never "not the state’s": a territory's overlay is no state's (rule 75).
     html += '<p class="race-note gov-money-note">Money in this race is not looked at here: this site ' +
-      "reads federal campaign filings only, not the state’s.</p>";
+      "reads federal campaign filings only.</p>";
     return panel("flag", title, html, "governorModalRacePanel");
   }
 
@@ -285,6 +286,13 @@
       ? KYC.escapeHtml(KYC.dateWords(gov.born.date)) +
         ' <span class="faint">(the NGA’s page and Wikidata agree)</span>'
       : absent(BORN_WHY[gov.bornWhy] || ONLY_AGREED);
+    // Once the term the 2026 election chose has begun and the roster still
+    // names a governor who was not on the ballot for it, the law's day and
+    // the roster's word in place of the date (KYC.stategov.pastTermNote).
+    // No "In office since" field over it either: under that label the note
+    // read as a date of office it sets out to withhold (the review of PR
+    // #230), so it stands after the facts, a paragraph of its own.
+    var past = sg().pastTermNote(code, "governor");
     var since = gov.since
       ? KYC.escapeHtml(gov.since) + ' <span class="faint">(the NGA’s roster, confirmed by Wikidata)</span>'
       : absent(SINCE_WHY[gov.sinceWhy] || ONLY_AGREED);
@@ -292,9 +300,9 @@
     var links = [outLink(gov.profile, "NGA biography")];
     if (gov.website) links.unshift(outLink(gov.website, "The governor’s office"));
     var body = '<div class="field-grid">' +
-      field("Born", born) + field("In office since", since) +
+      field("Born", born) + (past ? "" : field("In office since", since)) +
       field("Office", links.join(" · ") + (contact ? "<br>" + contact : ""), true) +
-      "</div>" +
+      "</div>" + past +
       '<p class="held-source">The National Governors Association’s roster' +
       (nga[2] ? ", read " + KYC.escapeHtml(KYC.dateWords(nga[2])) : "") +
       ". No education, career or platform is shown: this site reads none for a governor.</p>";
@@ -380,8 +388,7 @@
         ? absent("Not shown here: see their record")
         : absent("Not looked at: this site reads no biography for a candidate for governor " +
           "beyond the election office’s list and the race’s article")) +
-      field("Campaign finance", absent("Not looked at: this site reads federal campaign filings only, " +
-        "not the state’s")) +
+      field("Campaign finance", absent("Not looked at: this site reads federal campaign filings only")) +
       field("Platform", absent("Not looked at: this site reads no platform for a candidate for governor"), true) +
       field("Links", articleLine(person), true) +
       "</div>" +
@@ -398,7 +405,10 @@
     return d.textContent.replace(/\s+/g, " ").trim();
   }
 
-  var PAST = "This site does not read the state’s results and names no winner";
+  // Never "the state’s": a territory is never a state (rule 75); and never
+  // "these", which named no results before it in an unfurl or on Guam's
+  // page (the review of PR #229).
+  var PAST = "This site does not read the election’s results and names no winner";
   var RECORD = { holder: "The sitting governor: see their record ›",
                  member: "A member of Congress: see their profile ›",
                  // stategov's memberFormer: the membership snapshot no longer seats them.
@@ -420,7 +430,7 @@
     var past = after();
     var b = sg().ballotOf(code);
     var item = b && b.offices.governor;
-    var out = { kind: "", office: "", seeking: "", party: "", since: "", mark: "", holder: "",
+    var out = { kind: "", office: "", seeking: "", party: "", since: "", pastTerm: "", mark: "", holder: "",
                 status: "", printed: "", ballotName: "", surnameOnly: "", runningMate: "", term: "",
                 record: "", past: "", results: "", source: "" };
     if (past && item && item.up) {
@@ -433,7 +443,11 @@
       var nga = ((global.kycStateGov || {}).sources || {}).nga || [];
       out.kind = "Governor";
       out.office = sg().governorOf(code);
-      out.since = p.since ? "In office since " + p.since : "";
+      // kyc/governor_share.py share_words, word for word: the law's day and
+      // the roster's word in place of "In office since" once the term the
+      // 2026 election chose has begun on the reader's day (the January sweep).
+      out.pastTerm = sg().pastTermText(code, "governor");
+      out.since = p.since && !out.pastTerm ? "In office since " + p.since : "";
       out.mark = textOf(sg().officeMark(code, "governor"));
       out.holder = textOf(sg().openSeat(code, "governor"));
       out.source = "Governor: " + (nga[0] || "National Governors Association") +

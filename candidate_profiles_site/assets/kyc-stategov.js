@@ -213,6 +213,15 @@
     return KYC.electionStatus(2026).phase === "post-election";
   }
 
+  /** "<Place> does not elect its governor in 2026.", in the past tense from
+   *  the day after Election Day, as the state page's lead says it: the map's
+   *  panel and the overlay said "does not elect" beside "did not elect"
+   *  (the review of PR #229). One sentence for both (rule 12). */
+  function noGovernorRace(code) {
+    return KYC.stateName(code) + (after() ? " did not elect" : " does not elect") +
+      " its governor in 2026.";
+  }
+
   /** When an office or chamber not on this ballot is next elected, linked
    *  to the record that gives the year (ballot2026.NEXT): never worked out
    *  here from a term length. "" when the table has no year for it. */
@@ -278,6 +287,113 @@
         link(status.then.source, status.then.cite) + ")" : "") + ".</p>";
   }
 
+  /* ------------------------------------------------ the new term begun */
+
+  /** The record of the day the term the November 3, 2026 election chose
+   *  for *key* begins (kyc/terms_begin.py, read from the state's own law),
+   *  once it has begun on the reader's own day (rule 84: `from`, the first
+   *  day it has certainly begun), else null: before that day, and for an
+   *  office no provision was read for (a gap, never a guess). *now*, a
+   *  Date, for tests. */
+  function termBegun(code, key, now) {
+    var b = ballot(code);
+    var item = b && b.offices[key];
+    var term = item && item.up && item.termBegins;
+    if (!term || KYC.localDay(now || new Date()) < term.from) return null;
+    return term;
+  }
+
+  /** "began on Jan. 4, 2027, counted from “...”": the law's day in words,
+   *  said to be counted where the law gives a rule, not a date (rule 84).
+   *  kyc/terms_begin.py began_words, word for word. */
+  function beganWords(term) {
+    return (term.kind === "by" ? "began no later than " : "began on ") + KYC.dateWords(term.day) +
+      (term.counted ? ", counted from “" + term.words + "”" : "");
+  }
+
+  // The office in a sentence (kyc/ballot2026.py TITLES, lower case).
+  var TERM_WORDS = { governor: "governor", lt: "lieutenant governor", ag: "attorney general",
+                     sos: "secretary of state" };
+
+  var LEAVING_WORDS = { "not-listed": "who was not among the candidates for this office",
+                        "term-limit": "who was term-limited" };
+
+  /** The sentence that stands in place of a holder's "In office since" once
+   *  the term the 2026 election chose has begun and the roster this site
+   *  reads still names a holder who was not on the ballot for it (the
+   *  pipeline's `outgoing`): what the roster says and when it was read,
+   *  and the law's day (rule 19). "" otherwise. One implementation for the
+   *  governor's card, the overlay, the share page (kyc/terms_begin.py
+   *  past_term_text, word for word) and the officers' rows (rule 12). */
+  function pastTermText(code, key, now) {
+    var b = ballot(code);
+    var item = b && b.offices[key];
+    var term = termBegun(code, key, now);
+    var gone = item && item.outgoing;
+    if (!term || !gone) return "";
+    // "The term the 2026 election chose": a territory's organic act holds a
+    // runoff where no ticket has a majority, and this site reads no result.
+    // "Still" only of a read on or after the day the term had certainly
+    // begun (`from`: after a noon start or a day to qualify by).
+    return "The term the 2026 election chose for the " + TERM_WORDS[key] + " " +
+      beganWords(term) + " (" + term.cite + "). " + gone.roster + ", read " +
+      KYC.dateWords(gone.read) + ", " + (gone.read >= term.from ? "still lists " : "lists ") +
+      gone.holder + ", " + LEAVING_WORDS[gone.why] + ".";
+  }
+
+  /** The same finding in a clause, for a list that names each state's
+   *  holder in a line (the search's every-state answer): "the National
+   *  Governors Association’s roster, read Jan. 8, 2027, still lists them,
+   *  though the term the 2026 election chose began on Jan. 1, 2027"; "" where
+   *  pastTermText says nothing (the review of PR #230: that list kept naming
+   *  the roster's holder plainly). */
+  function pastTermBrief(code, key, now) {
+    if (!pastTermText(code, key, now)) return "";
+    var term = termBegun(code, key, now);
+    var gone = ballot(code).offices[key].outgoing;
+    return gone.roster.charAt(0).toLowerCase() + gone.roster.slice(1) + ", read " +
+      KYC.dateWords(gone.read) + ", " + (gone.read >= term.from ? "still lists" : "lists") +
+      " them, though the term the 2026 election chose " +
+      (term.kind === "by" ? "began no later than " : "began on ") + KYC.dateWords(term.day);
+  }
+
+  /** The same sentence as a paragraph, the law cited and linked. */
+  function pastTermNote(code, key, now) {
+    var text = pastTermText(code, key, now);
+    if (!text) return "";
+    var term = termBegun(code, key, now);
+    var cite = "(" + term.cite + ")";
+    var at = text.indexOf(cite);
+    return '<p class="gov-past-term">' + KYC.escapeHtml(text.slice(0, at)) + "(" +
+      link(term.source, term.cite) + ")" + KYC.escapeHtml(text.slice(at + cite.length)) + "</p>";
+  }
+
+  /** An office no one has held before that is on the November ballot
+   *  (Arizona's lieutenant governor, Proposition 131 of 2022): before its
+   *  first term begins on the reader's day, "No one holds this office yet"
+   *  and who succeeds the governor until then; after it, that the term has
+   *  begun and the roster, read on its day, lists no one yet - never "no
+   *  one holds this office" of an office already filled (the January
+   *  sweep). One implementation for the officers' row, the map's panel and
+   *  the search's answers (rule 12): `{begun, text, successor}`, plain
+   *  text; *item* the office's ballot record, *off* the officer's. */
+  function newOfficeWords(code, key, item, off, now) {
+    var term = termBegun(code, key, now);
+    if (term) {
+      var nlga = ((global.kycStateGov || {}).sources || {}).nlga || [];
+      return { begun: true, successor: "",
+        text: "The term of " + KYC.stateName(code) + "’s first " + TERM_WORDS[key] +
+          ", elected on Nov. 3, 2026, " + beganWords(term) + " (" + term.cite + "). The " +
+          "National Lieutenant Governors Association’s roster" +
+          (nlga[2] ? ", read " + KYC.dateWords(nlga[2]) + "," : "") + " does not list one yet." };
+    }
+    return { begun: false,
+      text: "No one holds this office yet" + (item && item.note ? ": " + item.note : "") + ".",
+      successor: off && off.successor && off.successor.name
+        ? "First in line to succeed the governor until then: " + off.successor.title + " " +
+          off.successor.name : "" };
+  }
+
   /* ------------------------------------------- the candidates on the ballot */
 
   /* One candidate as the pipeline writes them (statewide.for_page): the
@@ -324,7 +440,8 @@
   function resultsLine(code) {
     var voting = (KYC.meta && KYC.meta().voting) || {};
     var url = (voting[code] || {}).results;
-    return " This site does not read the state's results and names no winner" +
+    // "The election's", never "the state's": a territory is never a state (rule 75).
+    return " This site does not read the election’s results and names no winner" +
       (url ? ": " + link(url, "the official results") : "") + ".";
   }
 
@@ -521,7 +638,12 @@
     // re-elected governor, so a count read from it said "First term" of
     // Bill Lee and Tate Reeves in their second (PR #191 review), and no
     // second source checks it.
-    var held = gov.since ? "In office since " + gov.since : "";
+    // Once the term the 2026 election chose has begun (on the reader's
+    // day) and the roster still names a governor who was not on the ballot
+    // for it, no "In office since": the roster's word and the law's day in
+    // its place (pastTermNote; the January sweep).
+    var past = pastTermNote(code, "governor");
+    var held = gov.since && !past ? "In office since " + gov.since : "";
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join(" · ");
     return '<article class="gov-card gcard"' + (opts.here ? ' id="governor"' : "") +
       ' data-gov-state="' + KYC.escapeAttr(code) + '" aria-label="' + KYC.escapeAttr(title) + '"' +
@@ -531,7 +653,7 @@
       '<p class="gov-name">' + name + openControl(gov.id, gov.name) + "</p>" +
       '<p class="gov-party party-' + KYC.escapeAttr(String(gov.partyKey || "i").toLowerCase()) + '">' +
       KYC.escapeHtml(gov.party) + "</p>" +
-      (held ? '<p class="faint">' + KYC.escapeHtml(held) + "</p>" : "") +
+      (held ? '<p class="faint">' + KYC.escapeHtml(held) + "</p>" : "") + past +
       '<p class="gov-links">' + (gov.website ? link(gov.website, "Governor's office") + " · " : "") +
       link(gov.profile, "NGA biography") + "</p>" +
       (contact && !opts.brief ? '<p class="faint gov-contact">' + contact + "</p>" : "") +
@@ -655,8 +777,8 @@
     if (!s || !s.governor) return "";
     var parts = listParts(code, "governor");
     if (!parts) {
-      return '<p class="gov-race-none">' + KYC.escapeHtml(KYC.stateName(code)) +
-        " does not elect its governor in 2026." + nextMark(ballotItem(code, "governor")) + "</p>" +
+      return '<p class="gov-race-none">' + KYC.escapeHtml(noGovernorRace(code)) +
+        nextMark(ballotItem(code, "governor")) + "</p>" +
         governorCard(code);
     }
     var head = "";
@@ -932,7 +1054,7 @@
   }
 
   /** One statewide officer's row: the holder, or why there is none. */
-  function officerRow(kind, off, mark, item, place, open, running) {
+  function officerRow(kind, off, mark, item, place, open, running, code) {
     var label = OFFICES[kind].title;
     place = place || "The state";
     // No roster lists a holder: the office on the ballot still lists who
@@ -967,9 +1089,11 @@
     } else if (off.vacant) {
       body = '<p class="gov-officer-note">Vacant, as the National Lieutenant Governors Association lists it.</p>';
     } else if (off.none && kind === "lt" && fresh) {
-      body = '<p class="gov-officer-note">No one holds this office yet: ' +
-        KYC.escapeHtml(fresh.note) + "." +
-        (off.successor ? " First in line to succeed the governor until then: " +
+      // Before its first term begins, no one holds it; after, the term has
+      // begun and the roster lists no one yet (newOfficeWords).
+      var words = newOfficeWords(code, kind, fresh, off);
+      body = '<p class="gov-officer-note">' + KYC.escapeHtml(words.text) +
+        (words.successor ? " First in line to succeed the governor until then: " +
           KYC.escapeHtml(off.successor.title) + " " + who(off.successor) + "." : "") + "</p>";
     } else if (off.none && kind === "lt") {
       body = '<p class="gov-officer-note">' + place + " has no lieutenant governor." +
@@ -1005,6 +1129,9 @@
           ? '<p class="faint">' + KYC.escapeHtml(off.title) + "</p>" : "") +
         (facts.length ? '<p class="faint">' + KYC.escapeHtml(facts.join(" · ")) + "</p>" : "") +
         (links.length ? '<p class="gov-links">' + links.join(" · ") + "</p>" : "") +
+        // The term the 2026 election chose has begun and the roster still
+        // names a holder who was not on the ballot for it (the January sweep).
+        (code ? pastTermNote(code, kind) : "") +
         // Confirmed from the office's own page, read by hand in a person's
         // browser because this site's automated read concluded nothing (each
         // entry says what its reader saw: overrides.OFFICERS_READ_BY_HAND),
@@ -1135,7 +1262,7 @@
         ' officers</p><ul class="gov-officers">' +
         ["lt", "ag", "sos"].map(function (k) {
           return officerRow(k, s[k], officeMark(code, k), ballotItem(code, k), place, openSeat(code, k),
-            candidatesBlock(code, k));
+            candidatesBlock(code, k), code);
         }).join("") + "</ul>";
     }
     if (s.territory) {
@@ -1486,6 +1613,12 @@
     termYears: termYears,
     officeMark: officeMark,
     openSeat: openSeat,
+    termBegun: termBegun,
+    beganWords: beganWords,
+    pastTermText: pastTermText,
+    pastTermBrief: pastTermBrief,
+    pastTermNote: pastTermNote,
+    newOfficeWords: newOfficeWords,
     candidatesBlock: candidatesBlock,
     // The governor's card and the race for governor as cards (rule 12):
     // the state pages, the map's panel and the grid's Governors view.
@@ -1498,6 +1631,7 @@
     raceId: raceId,
     raceOdds: raceOdds,
     racePanel: racePanel,
+    noGovernorRace: noGovernorRace,
     candidateBadge: candidateBadge,
     cardPhoto: cardPhoto,
     // One way a photograph that failed takes its credit with it (rule 87),

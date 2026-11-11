@@ -23,8 +23,10 @@
   var visible = [];
   // How well each shown profile matched the query (KYC.queryScore).
   var scores = new Map();
-  // How many the filters match that the "out of the race" toggle hides.
+  // How many the filters match that the "out of the race" toggle hides,
+  // and how many of them are members who have left Congress (hiddenWords).
   var hiddenOut = 0;
+  var hiddenLeft = 0;
   // The best score any profile the filters match had for the query.
   var bestProfile = Infinity;
 
@@ -124,12 +126,45 @@
         results: "members who were not on " + ballot + " for the seat they held, " +
           "all of whom have since left Congress",
       },
+      unchallenged: {
+        label: KYC.cards.raceFilterWords("unchallenged"),
+        title: "Races in which nobody was on " + ballot + " but the member who held the seat, " +
+          "as each race's heading says",
+      },
+    };
+  }
+
+  /* The chips' hovers from the day after Election Day until the new
+   * Congress sits (recordChipWords then): index.html's words speak of a
+   * race still to come - "Only 2026 candidates who do not currently hold
+   * the seat", "everyone running for it" - over an election that has been
+   * held (rule 63). */
+  function afterElectionWords() {
+    return {
+      senateUp26: {
+        title: "The Senate seats on the 2026 ballot: the senator who holds each, and everyone who ran for it",
+      },
+      // Never "they retired": they hold the seat until January 3 (the
+      // review of PR #229). The chip's label is the race heads' own, in
+      // their tense (rule 99: KYC.cards.raceFilterWords).
+      notSeeking: {
+        title: "Members who were not on the November 2026 ballot for their seat: they are " +
+          "retiring at the end of the term, ran for another office, withdrew or lost a primary. " +
+          "A member who ran for the House again under a new district number is not among them.",
+      },
+      unchallenged: {
+        label: KYC.cards.raceFilterWords("unchallenged"),
+        title: "Races with nobody on the November ballot but the seat's holder, as each race's " +
+          "heading says",
+      },
     };
   }
 
   function initElectionWords() {
-    if (!KYC.recordPhase()) return;
-    var words = recordChipWords();
+    if (!KYC.recordPhase() && KYC.electionStatus().phase !== "post-election") return;
+    var role = doc.querySelector('[data-group="role"][data-value="candidate"]');
+    if (role) role.setAttribute("title", "Only 2026 candidates who did not hold the seat");
+    var words = KYC.recordPhase() ? recordChipWords() : afterElectionWords();
     Object.keys(words).forEach(function (value) {
       var chip = doc.querySelector('[data-group="election"][data-value="' + value + '"]');
       if (!chip) return;
@@ -182,7 +217,10 @@
     // that names a profile leaves the other officials' namesakes out.
     if (ok && state.q) bestProfile = Math.min(bestProfile, score(item));
     if (state.eliminated === "hide" && hideable(item)) {
-      if (ok) hiddenOut += 1;
+      if (ok) {
+        hiddenOut += 1;
+        if (item.formerMember) hiddenLeft += 1;
+      }
       return false;
     }
     return ok;
@@ -505,8 +543,7 @@
       (narrowed() && activeFilters() ? " with these filters" : "") + (note ? ". " + note : ".")) +
       wordsNote();
     if (hiddenOut && state.eliminated === "hide" && state.view !== "senate") {
-      html += " " + KYC.escapeHtml(plural(hiddenOut, "person", "people") + " out of the race " +
-        "(lost a primary, withdrew, or not on the ballot) " + (hiddenOut === 1 ? "matches" : "match") +
+      html += " " + KYC.escapeHtml(hiddenWords() + " " + (hiddenOut === 1 ? "matches" : "match") +
         " and " + (hiddenOut === 1 ? "is" : "are") + " hidden.") + outToggle();
     }
     if (officials || answers) {
@@ -673,6 +710,25 @@
       String(show) + '">' + (show ? "Hide them" : "Show them") + "</button>";
   }
 
+  /* Who the "out of the race" switch hides, in words. A member who has
+   * left Congress is not "out of the race" to a reader who asked for them:
+   * on the January rehearsal "Vern Buchanan", who retired, was "1 person out
+   * of the race (lost a primary, withdrew, or not on the ballot)". They are
+   * counted apart, as the members they were. */
+  function hiddenWords() {
+    var out = hiddenOut - hiddenLeft;
+    var parts = [];
+    if (out) {
+      parts.push(plural(out, "person", "people") +
+        " out of the race (lost a primary, withdrew, or not on the ballot)");
+    }
+    if (hiddenLeft) {
+      parts.push(plural(hiddenLeft, "member", "members") + " who " +
+        (hiddenLeft === 1 ? "has" : "have") + " left Congress");
+    }
+    return parts.join(" and ");
+  }
+
   function renderLabel(label, html) {
     label.innerHTML = html;
   }
@@ -698,8 +754,7 @@
         : voted ? "people in office or who were on the November ballot"
         : "people in office or still running") + ".");
       if (hiddenOut) {
-        html += " " + KYC.escapeHtml(plural(hiddenOut, "person", "people") +
-          " out of the race (lost a primary, withdrew, or not on the ballot) " +
+        html += " " + KYC.escapeHtml(hiddenWords() + " " +
           (hiddenOut === 1 ? "is" : "are") + " hidden.") + outToggle();
       }
     }
@@ -1504,6 +1559,7 @@
     syncChips();
     scores = new Map();
     hiddenOut = 0;
+    hiddenLeft = 0;
     bestProfile = Infinity;
     visible = data.filter(matches);
     var order = SORTS[state.sort] || SORTS.region;

@@ -233,7 +233,7 @@ def _new_term(profile):
             and start >= general_election_day(CYCLE).isoformat())
 
 
-def check_overrides(profiles, raw):
+def check_overrides(profiles, raw, snapshot=None):
     """Flag curated entries that no longer match anything.
 
     Stale overrides are invisible in the UI but quietly wrong, so they are
@@ -271,16 +271,27 @@ def check_overrides(profiles, raw):
                             "from its source and replace or remove the entry",
                             sorted(overrides.OTHER_OFFICE_NOMINEES)))
 
-    # Not an error, just useful: members who are also 2026 candidates.
+    # Not an error, just useful: members who are also 2026 candidates. Only
+    # while the campaign runs: once the Congress the cycle elects sits, a
+    # seated member's other 2026 run is a record their cards say, and the
+    # January rehearsal's strict check went on warning "1 sitting members
+    # are also 2026 candidates" of Russell Fry, seated for the new term.
+    from . import cycle as cycle_mod
     from .record import seated
 
-    duals = sorted(
+    try:
+        record_phase = bool(snapshot) and cycle_mod.phase(snapshot) == "record"
+    except cycle_mod.CycleError:
+        record_phase = False
+    duals = [] if record_phase else sorted(
         f"{p['name']}: {p['officeLabel']} -> {p['alsoRunningSeat']}"
         for p in profiles if p.get("alsoRunningSeat") and seated(p)
     )
     if duals:
         issues.append(Issue("warn", "dual-role",
-                            f"{len(duals)} sitting members are also 2026 candidates", duals))
+                            f"{len(duals)} sitting member{'' if len(duals) == 1 else 's'} "
+                            f"{'is also a 2026 candidate' if len(duals) == 1 else 'are also 2026 candidates'}",
+                            duals))
     return issues
 
 
@@ -1047,15 +1058,27 @@ def check_results(profiles, races):
                             f"{len(beaten)} sitting members lost or left their "
                             f"primary but still read as seeking re-election",
                             beaten))
+    # Members, sitting or since left: in January the list held 46 "sitting
+    # members", every one of whom had left on January 3. Each is said as
+    # what they are.
+    from .record import seated as seated_now
+    unlisted = [p for p in profiles if not p["isCandidate"] and p.get("raceStatus") == "unlisted"]
     absent = sorted(
-        f"{p['name']} ({p['officeLabel']}, {p['party']}): roster status {p['status']!r}"
-        for p in profiles
-        if not p["isCandidate"] and p.get("raceStatus") == "unlisted"
+        f"{p['name']} ({p['officeLabel']}, {p['party']}): "
+        f"{'roster status' if seated_now(p) else 'has left Congress; roster status'} "
+        f"{p['status']!r}"
+        for p in unlisted
     )
     if absent:
+        sitting = sum(1 for p in unlisted if seated_now(p))
+        left = len(unlisted) - sitting
+        who = " and ".join(part for part in (
+            f"{sitting} sitting member{'' if sitting == 1 else 's'}" if sitting else "",
+            f"{left} member{'' if left == 1 else 's'} who {'has' if left == 1 else 'have'} "
+            f"since left Congress" if left else "") if part)
         issues.append(Issue("warn", "member-not-on-ballot",
-                            f"{len(absent)} sitting members are absent from their "
-                            f"own party's decided primary and the November ballot; "
+                            f"{who} {'is' if len(unlisted) == 1 else 'are'} absent from "
+                            f"their own party's decided primary and the November ballot; "
                             f"shown as not seeking re-election", absent))
     if retired:
         issues.append(Issue("warn", "nominee-marked-retiring",
@@ -2161,7 +2184,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_wikipedia_withheld(profiles)
     issues += check_member_link_overrides(snapshot)
     issues += check_future_coverage(profiles)
-    issues += check_overrides(profiles, raw)
+    issues += check_overrides(profiles, raw, snapshot)
     issues += check_committee_titles(profiles)
     issues += check_pay(profiles, snapshot)
     issues += check_campaign_blocklist(campaigns)
@@ -2289,6 +2312,48 @@ def check_statewide_candidates(data, snapshot=None):
                       f"{len(leads)} sitting member(s) of Congress share a name with a statewide "
                       "candidate in their state and have no OTHER_OFFICE_NOMINEES entry", leads)]
     return []
+
+
+def check_terms_begun(root=".", today=None, payload=None):
+    """An office on the 2026 ballot whose new term has begun by the build's
+    day (*today*, a date; the real one by default), from the state's own
+    law (kyc/terms_begin.py), while the roster this site reads its holder
+    from still names the holder who was not on the ballot for it - or, for
+    an office no one held before (Arizona's lieutenant governor), still
+    lists no one (the January sweep, state-exec-past-inauguration; rule 16
+    for state executives). A warning, never an error: a roster that lags an
+    inauguration must not stop the refresh's other data (rule 8), and the
+    page already says, on the reader's day, that the term has begun. A
+    table that breaks its own rules is the build's error (stategov.build).
+    *payload*: data/stategov.js's, for tests; built from *root* otherwise."""
+    import datetime
+    from . import stategov, terms_begin
+    today = today or datetime.datetime.now(datetime.timezone.utc).date()
+    if payload is None:
+        try:
+            payload = stategov.build(root)[0]
+        except stategov.StateGovError as exc:
+            return [Issue("error", "terms-begin-unchecked",
+                          f"the state government could not be built to check its terms: {exc}")]
+    out = []
+    found = terms_begin.lagging(payload, today)
+    if found:
+        out.append(Issue("warning", "holder-past-inauguration",
+                         f"{len(found)} office(s) whose new term has begun, by its jurisdiction's "
+                         f"own law, while the roster still names the holder who was not on the "
+                         f"ballot for it (or no one): read the roster again, or the office's own "
+                         f"page", found))
+    # An office with no day read (terms_begin.GAPS) cannot be told begun,
+    # so from January a leaving holder there is named for a person to read
+    # the provision (the review of PR #230): a warning, and no page words.
+    gaps = terms_begin.unread(payload, today)
+    if gaps:
+        out.append(Issue("warning", "term-day-unread",
+                         f"{len(gaps)} office(s) on the 2026 ballot whose new term's first day no "
+                         f"provision here gives, while the roster names a holder who was not on "
+                         f"the ballot for it: read the jurisdiction's own law into "
+                         f"kyc/terms_begin.py", gaps))
+    return out
 
 
 def check_voting_dates(data):

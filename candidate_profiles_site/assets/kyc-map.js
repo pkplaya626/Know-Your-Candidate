@@ -226,11 +226,14 @@
           status === "nominee" && defender.allPartyPrimary ? " advanced to November" :
           status === "nominee" && defender.seekingReelection2026 ?
             (own ? " renominated" : " on the November ballot") :
-          defender.seekingReelection2026 ? " running" :
+          // From the day after Election Day nobody is "running" (rule 63):
+          // "Richard Durbin not running" stood over Illinois after the
+          // election; the verbs are KYC.contestLine's.
+          defender.seekingReelection2026 ? (counted ? " ran" : " running") :
           defender.contestLabel ? " " + lowerFirst(KYC.contestLine(defender).verb) + " " +
             defender.contestLabel :
-          defender.alsoRunningSeat ? " running for " + defender.alsoRunningSeat :
-          " not running") + ")",
+          defender.alsoRunningSeat ? (counted ? " ran for " : " running for ") + defender.alsoRunningSeat :
+          counted ? " did not run" : " not running") + ")",
     };
   }
 
@@ -260,9 +263,9 @@
     senate2026: [
       // "Open" is the race's own word: no member who holds the seat is on
       // its ballot. The other key claims nothing about who is running.
-      ["var(--party-r)", "Republican seat up"],
+      ["var(--party-r)", "Republican seat up", "", "Republican seat that was up"],
       [tint("r"), "Open Republican seat", "open:r"],
-      ["var(--party-d)", "Democratic seat up"],
+      ["var(--party-d)", "Democratic seat up", "", "Democratic seat that was up"],
       [tint("d"), "Open Democratic seat", "open:d"],
       ["special", "Special election (dashed outline)", "special"],
       [NONE_FILL, "No race in 2026"],
@@ -325,10 +328,14 @@
         '<span class="key">' + swatch(VACANT_FILL) + "Vacant</span>";
       return;
     }
+    // A key's words from the day after Election Day where it has its own
+    // (entry[3]): "Republican seat up" read as the next election.
+    var after = KYC.electionStatus().phase === "post-election";
     target.innerHTML = LEGENDS[mode]
       .filter(legendShown)
       .map(function (entry) {
-        return '<span class="key">' + swatch(entry[0]) + KYC.escapeHtml(entry[1]) + "</span>";
+        return '<span class="key">' + swatch(entry[0]) +
+          KYC.escapeHtml(after && entry[3] ? entry[3] : entry[1]) + "</span>";
       })
       .join("");
   }
@@ -444,8 +451,26 @@
   /** The 2026 Senate view of a state with no Senate race: said, with when
    *  each sitting senator's seat is next on the ballot (the pipeline's
    *  nextElection, from the term), not "Nothing to show" (RACES-06). */
+  /* A place in its own words (rule 75), never its code: "Nothing to show
+   * for AS in this view" stood over American Samoa's empty Senate panel.
+   * D.C. and the territories have no seat in the Senate, and say so. */
+  function noSenators(code) {
+    var info = (KYC.meta().states || {})[code] || {};
+    return info.territory || code === "DC";
+  }
+
+  function nothingHere(code) {
+    var place = KYC.placeWords(code);
+    if (noSenators(code) && /^senate/.test(mode)) {
+      return KYC.escapeHtml(place.charAt(0).toUpperCase() + place.slice(1)) +
+        " has no seat in the U.S. Senate.";
+    }
+    return "Nothing to show for " + KYC.escapeHtml(place) + " in this view.";
+  }
+
   function noSenateRace(code) {
-    var name = KYC.escapeHtml(KYC.stateName(code));
+    if (noSenators(code)) return nothingHere(code);
+    var name = KYC.escapeHtml(KYC.placeWords(code));
     var senators = data.filter(function (p) {
       return p.state === code && KYC.seated(p) && /Senate/.test(p.chamber) && p.nextElection;
     }).sort(function (a, b) { return a.nextElection - b.nextElection; });
@@ -544,7 +569,7 @@
     if (!people.length) {
       list.innerHTML =
         '<div class="empty-state">' + KYC.icon("info") + "<p>" + (mode === "senate2026"
-          ? noSenateRace(code) : "Nothing to show for " + KYC.escapeHtml(code) + " in this view.") +
+          ? noSenateRace(code) : nothingHere(code)) +
         "</p></div>" + (mode === "senate2026" ? governorPointer(code) : "");
       return;
     }

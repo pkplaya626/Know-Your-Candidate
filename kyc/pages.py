@@ -257,11 +257,11 @@ _CONGRESS_SIDEBAR = """
                 2026 midterms
             </h2>
             <time id="electionCountdown" class="badge badge-warn countdown"></time>
-            <div class="stat-row"><span>Senate seats up</span>
+            <div class="stat-row"><span data-summary-label="senateSeatsUp">Senate seats up</span>
                 <span class="value" id="senateSeatsUp"></span></div>
-            <div class="stat-row"><span>House seats up</span>
+            <div class="stat-row"><span data-summary-label="houseSeatsUp">House seats up</span>
                 <span class="value" id="houseSeatsUp"></span></div>
-            <div class="stat-row"><span>Challengers on the ballot</span>
+            <div class="stat-row"><span data-summary-label="challengers">Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
             <div class="stat-row"><span>Candidates for open seats</span>
                 <span class="value" id="openCandidateCount"></span></div>
@@ -667,7 +667,7 @@ def governor_static(code, gov_state, post, pad="                "):
     rows.append(f"{pad}    <p>In surname order, not ballot order. {recased}Source: "
                 f"{_out_link(listed['url'], listed['source'])} (read {time_html(listed.get('read'))})"
                 f"{write_in_credit}."
-                + (" This site does not read the state's results and names no winner." if post else "")
+                + (" This site does not read the election’s results and names no winner." if post else "")
                 + "</p>")
     return "\n".join(holder), "\n".join(rows + [f"{pad}</section>"])
 
@@ -1597,9 +1597,23 @@ def _possessive(name):
 
 # States whose map is unchanged but nearly was, where a reader may have read
 # otherwise. Each clause is on the record of the court that decided it.
+# When an unchanged state's districts are used again, where that is not the
+# whole of 2026: Missouri's primaries were fought on the 2025 map, and "used
+# again in 2026" read beside its note as true of them (the train's reader).
+UNCHANGED_AGAIN = {"MO": "for the November 3, 2026 general election"}
+
 UNCHANGED_NOTES = {
-    "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts "
-           "have kept these districts in place for 2026."),
+    # People Not Politicians v. Onder (U.S. Supreme Court, 26A388): "The
+    # Secretary nonetheless chose to proceed with the 2025 map for the
+    # primary", "leaving the 2022 map in effect for the 2026 general
+    # election". The Secretary of State's certified list of August 25, 2026
+    # names each primary's winner by district number (RSMo 115.401). The
+    # page said only that the courts "kept these districts in place for
+    # 2026" (the guide's second reader, 2026-11-11).
+    "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts kept "
+           "these districts in place. The August 4, 2026 congressional primaries were held on "
+           "the 2025 map all the same, and each primary's winner stood for the district of the "
+           "same number here."),
     # Voters approved the amendment on April 21, 2026 (51.7% to 48.3%); the
     # Supreme Court of Virginia struck it down 4-3 on May 8, 2026, for want
     # of an intervening general election between the legislature's two
@@ -1669,10 +1683,13 @@ def district_page_text(code, seats=None, post=False, seated=0, moved=None):
                 intro += " " + moves
         return entry["headline"], intro
     name = state_name(code)
+    # In the build's tense (*post*): "are used again in 2026" and "is not on
+    # the ballot in 2026" stood over an election that had been held.
+    verb, was = ("were", "was") if post else ("are", "is")
     if code == "PR":
         return (f"{_possessive(name)} seat in the House",
                 "Puerto Rico elects a non-voting resident commissioner to the House, at "
-                "large, for a four-year term. The seat is not on the ballot in 2026.")
+                f"large, for a four-year term. The seat {was} not on the ballot in 2026.")
     if code in TERRITORIES:
         return (f"{_possessive(name)} seat in the House",
                 f"{name} elects a non-voting delegate to the House, at large.")
@@ -1681,8 +1698,8 @@ def district_page_text(code, seats=None, post=False, seated=0, moved=None):
                 f"{name} elects one member of the House, at large: the whole state is "
                 f"one district.")
     intro = (f"{name} elects {seats} members of the House, one from each district below. "
-             f"These are the districts of the 2024 election, and they are used again in "
-             f"2026." if seats else
+             f"These are the districts of the 2024 election, and they {verb} used again "
+             f"{UNCHANGED_AGAIN.get(code, 'in 2026')}." if seats else
              f"{name}'s House districts, as used in 2024 and again in 2026.")
     if code in UNCHANGED_NOTES:
         intro += " " + UNCHANGED_NOTES[code]
@@ -2538,15 +2555,25 @@ def schedule_words():
             "Election Day: prices that move on early returns would read as results.")
 
 
-def _about_main(dates):
+# A dataset's name once the results read are November's (share.post_election):
+# "Who is running" over an election that had been held read as the next one.
+_AFTER_ELECTION_NAMES = {
+    "Who is running, and their money": "Who ran, and their money",
+    "Primary and November results, and who is on the ballot":
+        "Primary and November results, and who was on the ballot",
+}
+
+
+def _about_main(dates, post=False):
     rows = []
     for what, source, covers, when, key in DATASETS:
         if key and dates.get(key):
             last = time_html(dates.get(key))
         else:
             last = _e(_NO_READ_DATE.get(what, "")) or "&ndash;"
+        named = _AFTER_ELECTION_NAMES.get(what, what) if post else what
         rows.append("                        <tr>"
-                    f'<th scope="row">{_e(what)}</th><td data-label="Source">{source}</td>'
+                    f'<th scope="row">{_e(named)}</th><td data-label="Source">{source}</td>'
                     f'<td data-label="Covers">{_e(covers)}</td>'
                     f'<td data-label="Read again">{_e(_WHEN_READ[when])}</td>'
                     f'<td data-label="Last read">{last}</td></tr>')
@@ -2688,9 +2715,11 @@ def _about_main(dates):
     ])
 
 
-def render_about(host, dates=None, codes=()):
+def render_about(host, dates=None, codes=(), post=False):
     """about.html: who runs the site, where its data comes from, how to
-    report an error, privacy, accessibility and the licence (TRUST-02)."""
+    report an error, privacy, accessibility and the licence (TRUST-02).
+    *post*: the results read are November's (``share.post_election``), and
+    the datasets are named in the past tense."""
     dates = dates or {}
     path = "about.html"
     canonical = f"https://{host}/{path}" if host else path
@@ -2711,7 +2740,7 @@ def render_about(host, dates=None, codes=()):
         sidebar="",
         nav_current="about",
         jump_options=_jump(codes),
-        main=_about_main(dates),
+        main=_about_main(dates, post),
         footer="",
         built=_read_span(dates, *keys),
         crumbs=[_HOME, (name, path)],
@@ -2899,7 +2928,10 @@ def district_directory_facts(code, seats=None):
 
 def render_districts_index(host, summary=None, codes=()):
     """districts/index.html: every state's district map, so the folder's
-    own address answers (TECH-06). Plain links; nothing to load."""
+    own address answers (TECH-06). Plain links; nothing to load. Who was
+    on the ballot is in the past tense once the results read are
+    November's (``share.post_election``)."""
+    from . import share
     from .districts import REDRAWN, all_codes
 
     path = "districts/index.html"
@@ -2920,7 +2952,8 @@ def render_districts_index(host, summary=None, codes=()):
         # (rule 75).
         f'                    <h1 class="state-title">{DISTRICTS_INDEX_NAME}</h1>',
         '                    <p class="districts-lede">Each state&#8217;s congressional districts on a',
-        "                        map: who holds each seat and who is on the November ballot. Where a",
+        "                        map: who holds each seat and who "
+        f"{'was' if share.post_election(summary) else 'is'} on the November ballot. Where a",
         "                        state redrew its map for 2026, the old and new lines side by side.</p>",
         '                    <p class="state-links">',
         f'                        <a class="btn" href="{_e(_learn("congress#house"))}"><svg class="icon" aria-hidden="true"><use href="#i-scroll"/></svg> How the House works</a>',

@@ -1053,7 +1053,7 @@
       // is no seat of the state's on this ballot.
       return [contest("ballot-federal ballot-off", "U.S. Senate", "",
         '<p class="ballot-note">Neither of ' + esc(KYC.possessive(info.name || code)) +
-        " U.S. Senate seats is up in " + cycleYear() + ".</p>")];
+        " U.S. Senate seats " + (held() ? "was" : "is") + " up in " + cycleYear() + ".</p>")];
     }
     return races.map(function (race) {
       return raceCard(code, race, "U.S. Senate", race.special ? "Special election" : "");

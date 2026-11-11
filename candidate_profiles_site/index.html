@@ -26,7 +26,7 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <link rel="stylesheet" href="assets/kyc.css?v=019e9aa048">
-<script src="assets/kyc.js?v=956823052b"></script>
+<script src="assets/kyc.js?v=6c21ee253d"></script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Know Your Candidate","url":"https://candidates.radicalrelay.us/","description":"A non-partisan directory of the U.S. Congress, the 2026 midterm races, and every state's government.","potentialAction":{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://candidates.radicalrelay.us/index.html?q={search_term_string}"},"query-input":"required name=search_term_string"}}</script>
 </head>
 <body>
@@ -220,13 +220,13 @@
                 2026 midterms
             </h2>
             <time id="electionCountdown" class="badge badge-warn countdown"></time>
-            <div class="stat-row"><span>Senate seats up</span>
+            <div class="stat-row"><span data-summary-label="senateSeatsUp">Senate seats up</span>
                 <span class="value" id="senateSeatsUp"></span></div>
-            <div class="stat-row"><span>Seats each party defends</span>
+            <div class="stat-row"><span data-summary-label="senateDefending">Seats each party defends</span>
                 <span class="value" id="senateDefending"></span></div>
-            <div class="stat-row"><span>House seats up</span>
+            <div class="stat-row"><span data-summary-label="houseSeatsUp">House seats up</span>
                 <span class="value" id="houseSeatsUp"></span></div>
-            <div class="stat-row"><span>Challengers on the ballot</span>
+            <div class="stat-row"><span data-summary-label="challengers">Challengers on the ballot</span>
                 <span class="value" id="challengerCount"></span></div>
             <div class="stat-row"><span>Candidates for open seats</span>
                 <span class="value" id="openCandidateCount"></span></div>
@@ -309,7 +309,7 @@
                 <div class="chip-group" role="group" aria-label="Eliminated candidates">
                     <button type="button" class="chip" data-group="eliminated" data-value="show"
                             data-optional aria-pressed="false"
-                            title="Also show candidates the primary removed: those who lost, withdrew, or were never on the primary ballot">
+                            title="Also show candidates the primary removed - those who lost, withdrew, or were never on the primary ballot - and members off the ballot who have left Congress">
                         Include eliminated
                     </button>
                 </div>
@@ -436,7 +436,7 @@
 <template id="onDemandData">
 <script src="data/federal.js?v=07f8abd4a3"></script>
 <script src="data/judiciary/index.js?v=9f92a2f750"></script>
-<script src="data/stategov.js?v=c54d238115"></script>
+<script src="data/stategov.js?v=f6d313386a"></script>
 <script src="data/search.js?v=f82c8ff3f9"></script>
 <script src="data/measures.js?v=c89c22ff6f"></script>
 <script src="data/votes/house.js?v=f1adc7ab9a"></script>
@@ -504,13 +504,13 @@
 <script src="data/odds.js"></script>
 <script src="data/lookup/index.js?v=645f2b6d2c"></script>
 <script src="assets/kyc-odds.js?v=483bc4847f"></script>
-<script src="assets/kyc-cards.js?v=a1382cd201"></script>
-<script src="assets/kyc-profile.js?v=d4241497b3"></script>
-<script src="assets/kyc-stategov.js?v=17dd092ac9"></script>
-<script src="assets/kyc-governor.js?v=49b7f2c2c0"></script>
+<script src="assets/kyc-cards.js?v=8190793400"></script>
+<script src="assets/kyc-profile.js?v=04b7ed9300"></script>
+<script src="assets/kyc-stategov.js?v=4935bf4cc3"></script>
+<script src="assets/kyc-governor.js?v=011a42e2d8"></script>
 <script src="assets/kyc-findrep.js?v=eafa4a5889"></script>
 <script src="assets/kyc-senate.js?v=ac3c97d9a2"></script>
-<script src="assets/kyc-search.js?v=d722b487d0"></script>
-<script src="assets/kyc-directory.js?v=5b206d4e84"></script>
+<script src="assets/kyc-search.js?v=c392e0e3ef"></script>
+<script src="assets/kyc-directory.js?v=fe594b3e26"></script>
 </body>
 </html>

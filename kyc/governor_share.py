@@ -47,13 +47,15 @@ WORDS_TABLE = os.path.join(os.path.dirname(__file__), "..", "tests", "fixtures",
                            "governor_share_words.json")
 
 # The keys of the words table, every one "" where the overlay says none.
-KEYS = ("kind", "office", "seeking", "party", "since", "mark", "holder", "status", "printed",
-        "ballotName", "surnameOnly", "runningMate", "term", "record", "past", "results",
+KEYS = ("kind", "office", "seeking", "party", "since", "pastTerm", "mark", "holder", "status",
+        "printed", "ballotName", "surnameOnly", "runningMate", "term", "record", "past", "results",
         "source")
 
 # The overlay's words for what this site does not read after the election
 # (rule 91: names no winner).
-PAST = "This site does not read the state’s results and names no winner"
+# "The election’s", never "the state’s": a territory is never a state (rule 75), and
+# Guam's, the Virgin Islands' and the Northern Marianas' overlays said it.
+PAST = "This site does not read the election’s results and names no winner"
 RECORD = {"holder": "The sitting governor: see their record ›",
           "member": "A member of Congress: see their profile ›",
           # stategov's memberFormer: the membership snapshot no longer seats them.
@@ -167,7 +169,9 @@ def badge_words(person, post):
 def share_words(found, post=False, sources=None, results=None):
     """``shareWords``: every word the overlay's head and footer give
     *found* (``{"kind": "governor"|"candidate", "code", "person", "state"}``),
-    each "" where it says none. *post*: the day after Election Day or later;
+    each "" where it says none. *post*: the day after Election Day or later,
+    as the day itself (``share.post_election``'s ``ResultsDay``, the clock
+    the term the election chose is compared with) or ``True``;
     *sources*: data/stategov.js's ``sources``; *results*: the state's
     results page (``KYC.meta().voting[code].results``)."""
     code = found["code"]
@@ -181,7 +185,22 @@ def share_words(found, post=False, sources=None, results=None):
         out["kind"] = "Governor"
         out["office"] = governor_of(code)
         out["party"] = person.get("party") or ""
-        out["since"] = f"In office since {person['since']}" if person.get("since") else ""
+        # Once the term the 2026 election chose has begun on *post*'s day and
+        # the roster still names a governor who was not on the ballot for it,
+        # the law's day and the roster's word stand in place of "In office
+        # since" (kyc/terms_begin.py past_term_text; the January sweep).
+        # The page is written for the day the results were read; a roster
+        # read later than that is a later day the data itself holds (never
+        # the build's clock, rule 96), so a lagging roster read after the
+        # term began says so even while the results are not read again.
+        from .terms_begin import past_term_text
+        day = post if isinstance(post, str) else None
+        gone = (item or {}).get("outgoing") or {}
+        if day and (gone.get("read") or "") > day:
+            day = gone["read"]
+        out["pastTerm"] = past_term_text("governor", item, day)
+        out["since"] = (f"In office since {person['since']}"
+                        if person.get("since") and not out["pastTerm"] else "")
         out["mark"] = mark_words(item, post)
         out["holder"] = holder_words(item, post)
         nga = (sources or {}).get("nga") or []
@@ -309,7 +328,8 @@ def describe(found, words):
         # unfurl's "This office was on the Nov 3, 2026 ballot" beside a
         # sitting governor's name left the result to be guessed (the
         # integration of PR #180 on results-day data).
-        return name, sentence(f"{name}{party}, {words['office']}", words["since"], mark,
+        return name, sentence(f"{name}{party}, {words['office']}", words["since"],
+                              words["pastTerm"], mark,
                               "Next " + nxt if nxt else "", words["past"])
     office = governor_of(found["code"])
     seat = office[0].lower() + office[1:]
@@ -359,6 +379,8 @@ def render_governor(oid, found, host, post=False, sources=None, results=None):
         body.append(f'<p class="share-party">{_e(words["party"])}</p>')
     if words["since"]:
         body.append(f'<p class="share-since">{_e(words["since"])}</p>')
+    if words["pastTerm"]:
+        body.append(f'<p class="share-past-term">{_e(words["pastTerm"])}</p>')
     if words["mark"]:
         body.append(f'<p class="share-mark">{mark_html(item, post)}</p>')
     if words["holder"]:
@@ -418,7 +440,11 @@ def render_all(stategov, host, summary=None):
         return {}
     from .share import post_election
 
-    post = bool(post_election(summary))
+    # The day itself (a ResultsDay, true as a test), never bool() of it:
+    # share_words compares the term the 2026 election chose with that day,
+    # and given True it could compare nothing, so no governor's page ever
+    # said the term had begun (the review of PR #230).
+    post = post_election(summary)
     sources = stategov.get("sources") or {}
     voting = (summary or {}).get("voting") or {}
     return {official_path(oid): render_governor(oid, found, host, post, sources,
@@ -499,6 +525,33 @@ def words_table():
             # A governor without a date of office or a party.
             bare = dict(governor, since=None, party=None)
             cases.append((post, "GA", "governor", bare, {"governor": bare}, sources, results))
+    # The term the 2026 election chose, from the state's own law
+    # (kyc/terms_begin.py), on a third clock: a January day after it has
+    # begun (the January sweep). Each case's term and holder in turn: begun
+    # and the holder term-limited, begun with the roster read after the day
+    # ("still lists"), a law that names only the day to qualify by, a term
+    # not yet begun, and a holder who was on the ballot (no `outgoing`).
+    term = {"day": "2027-01-04", "from": "2027-01-04", "kind": "on", "counted": True,
+            "words": "the first Monday in January", "cite": "Const. art. V, s.1",
+            "source": "https://law.example.gov/", "read": "2026-11-11"}
+    leaving = {"holder": "A B", "why": "term-limit", "read": "2026-11-10",
+               "roster": "The National Governors Association’s roster"}
+    terms = [
+        {"termBegins": term, "outgoing": leaving},
+        {"termBegins": term, "outgoing": dict(leaving, why="not-listed", read="2027-01-08")},
+        {"termBegins": dict(term, kind="by", counted=False, **{"from": "2027-01-05"}),
+         "outgoing": leaving},
+        {"termBegins": dict(term, day="2027-01-19", **{"from": "2027-01-19"}), "outgoing": leaving},
+        {"termBegins": term},
+    ]
+    for post in (False, True, "2027-01-10"):
+        for extra in terms:
+            state = {"governor": governor, "ballot2026": {"offices": {"governor": dict(
+                items[0], candidates=dict(listed, candidates=people[:1]), **extra)}}}
+            cases.append((post, "GA", "governor", governor, state, sources,
+                          "https://results.example.gov/" if post else None))
+            cases.append((post, "GA", "candidate", people[0], state, sources,
+                          "https://results.example.gov/" if post else None))
     out = []
     for post, code, kind, person, state, src, results in cases:
         found = {"kind": kind, "code": code, "person": person, "state": state}

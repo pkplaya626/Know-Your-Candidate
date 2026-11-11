@@ -70,8 +70,11 @@ class TestWordsTable(unittest.TestCase):
 
     def test_it_holds_both_kinds_both_clocks_and_every_mark(self):
         rows = governor_share.words_table()["cases"]
+        # Three clocks: the campaign's, after Election Day, and a January day
+        # after the terms the 2026 election chose have begun (kyc/terms_begin.py).
         self.assertEqual({(row[0], row[2]) for row in rows},
-                         {(False, "governor"), (True, "governor"), (False, "candidate"), (True, "candidate")})
+                         {(False, "governor"), (True, "governor"), (False, "candidate"), (True, "candidate"),
+                          ("2027-01-10", "governor"), ("2027-01-10", "candidate")})
         marks = {row[7]["mark"] for row in rows}
         for words in ("This office is on the Nov 3, 2026 ballot", "This office was on the Nov 3, 2026 ballot",
                       "Not elected in 2026 Next elected: November 2029",

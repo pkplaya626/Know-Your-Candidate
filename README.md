@@ -75,7 +75,7 @@ Python 3.9+ and the standard library. Nothing to install.
 | `… ballotphotos` | Photographs of the statewide candidates by the routes rule 91 names (the holder's office photograph, members by bioguide id, Arizona's and California's official guides, the race's own Wikipedia article); `--no-wikipedia` keeps the Wikipedia photographs last read; `--max-minutes N` begins no race's article, and no candidate inside a race, after N minutes, keeps everyone it did not reach as last read and reads the oldest race first next time; `--check` reports the committed cache (network) |
 | `… guidephotos` | The election offices' own guides' photographs - Washington's voters' guide, Alaska's statement PDFs, Oregon's county pamphlets, Utah's Voter Information Pamphlet, and Arizona's Clean Elections Commission's list (linked, not hosted) - for the nominees and statewide candidates the last build showed with none: joined to the person by the guide's page naming them beside it, hosted under `photos/` (the bytes the guide holds, or Oregon's JPEG 2000 decoded losslessly to PNG) and listed in `data/photo_copies.json`, the join in `data/guide_photos.json`; a heavy one gets its smaller copy at once; `--check` reports the committed cache (network) |
 | `python -m unittest discover tests` | The pipeline tests |
-| `npm install && npm test` | Render every page in jsdom and drive the UI (4499 checks) |
+| `npm install && npm test` | Render every page in jsdom and drive the UI (4601 checks) |
 
 `--root` and `--verbose` work on either side of the subcommand, so both
 `--verbose portraits` and `portraits --verbose` do the same thing.
@@ -1740,6 +1740,7 @@ render all three identically:
 | `""` | nobody has researched it | *No data* (muted) |
 | `General legislative priorities`, `Public service` | true of everyone; no information | *No data* (muted), titled as a generic placeholder (rule 10) |
 | — | the FEC was queried and holds no filing for this cycle | *No filing this cycle* (muted) |
+| — | a winner seated for a new term for whom this site holds no FEC figures under any of their FEC ids (the seat they now hold, or the 2026 campaign that won it); their funding box says the same | *No FEC figures held yet* (muted) |
 
 That last row is the only absence that reports work actually done. "No data"
 is a claim about us: it says nobody looked. Once the pipeline queries the FEC
@@ -2148,7 +2149,17 @@ here in a different way:
   down in *Trump v. Slaughter* (2026); the 94 district courts counted with the
   three territorial ones; "unitary executive", a contested legal theory,
   replaced by what Article II says. The footer gives the date the text was
-  last checked (`REVIEWED`).
+  last checked (`REVIEWED`), and a section read again on another day gives
+  its own.
+- **Its tense is the build's day.** Words about the election and what
+  follows it are a `government_text.Tense`: a form for the campaign, one for
+  after Election Day (the results read after it, as the pages tell), one for
+  the new Congress (the record phase) and one for any dated day after
+  (Georgia's December 1 runoff, Louisiana's December 12, Arizona's first
+  lieutenant governor on January 4, 2027), chosen by `government.clock` from
+  the data the build read. The guide's map data (`data/government.js`)
+  follows the same clock, and `government.check` follows every link in every
+  form.
 - **Nothing about a person is typed into it.** Who chairs each committee and
   who leads its minority comes from the same committee rosters as each
   profile, rendered by `assets/kyc-guide.js`; each name opens the profile.

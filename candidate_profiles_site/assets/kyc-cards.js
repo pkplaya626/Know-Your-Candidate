@@ -69,8 +69,46 @@
         "new term begins." },
   };
 
+  /* The same badges from the day after Election Day (KYC.electionStatus),
+   * as a card can then show them: "the primary has not been held yet" and
+   * "running for another seat" stood in the key over an election that had
+   * been held. A badge no card can show then ("Running for …") is not in
+   * it; "Running in … (redrawn)" is "Ran in" or "Re-elected in", as
+   * KYC.contestLine words it. */
+  var SEAT_BADGES_AFTER = {
+    // Never "retired": from the day after Election Day to January 3 they
+    // still hold the seat (the review of PR #229).
+    leaving: { title: "The member’s status line says they did not run for this seat again in " +
+      "2026." },
+    challenger: { title: "Filed with the FEC for 2026; no result this site read says where they " +
+      "stood." },
+    up: { title: "This Senate seat’s term ends in January 2027, so the seat was on the 2026 " +
+      "ballot." },
+    running: null,
+    redrawn: { label: "Ran in … (redrawn)",
+      title: "A sitting member who ran for re-election under the state’s new district map, in " +
+        "the district the badge names, and lost or whose result is awaited." },
+    reelected: { cls: "badge-money", label: "Re-elected in … (redrawn)",
+      title: "A sitting member re-elected under the state’s new district map, in the district " +
+        "the badge names." },
+  };
+
+  /** The seat badges' words for the reader's day, in the table's order. */
+  function seatSpecs() {
+    var after = KYC.electionStatus().phase === "post-election";
+    var out = {};
+    Object.keys(SEAT_BADGES).concat(after ? ["reelected"] : []).forEach(function (key) {
+      var spec = SEAT_BADGES[key] || {};
+      var later = after ? SEAT_BADGES_AFTER[key] : undefined;
+      if (later === null) return;
+      out[key] = { cls: (later && later.cls) || spec.cls, label: (later && later.label) || spec.label,
+        title: (later && later.title) || spec.title };
+    });
+    return out;
+  }
+
   function seatBadge(key, label, title) {
-    var spec = SEAT_BADGES[key];
+    var spec = seatSpecs()[key] || SEAT_BADGES[key];
     return '<span class="badge ' + spec.cls + '" title="' + KYC.escapeAttr(title || spec.title) +
       '">' + KYC.escapeHtml(label || spec.label) + "</span>";
   }
@@ -155,7 +193,8 @@
       return '<div class="legend-row"><dt><span class="badge ' + KYC.escapeAttr(spec.cls) + '">' +
         KYC.escapeHtml(spec.label) + "</span></dt><dd>" + KYC.escapeHtml(spec.title) + "</dd></div>";
     };
-    var seats = Object.keys(SEAT_BADGES).map(function (k) { return SEAT_BADGES[k]; });
+    var specs = seatSpecs();
+    var seats = Object.keys(specs).map(function (k) { return specs[k]; });
     return '<details class="status-legend"><summary>What the labels on the cards mean</summary>' +
       '<h3 class="legend-heading">Where someone stands in their 2026 race</h3>' +
       '<dl class="legend-list">' + KYC.raceStatusLegend().map(row).join("") + "</dl>" +

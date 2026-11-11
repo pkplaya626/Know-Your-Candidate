@@ -1012,6 +1012,24 @@
     return m[1] + "\u2013" + m[2];
   }
 
+  /** The year a seated member's seat is next on the ballot, where the
+   *  dialog says it ("Seat up in 2028"), else "": a seat not on the 2026
+   *  ballot, and a member seated for a term begun after Election Day
+   *  (newTerm) whatever `seatUp2026` says - the campaign's flag, which stays
+   *  true of a record incumbent re-seated for the new term, so in January a
+   *  newcomer read "Seat up in 2028" and a re-elected holder on the same
+   *  term read nothing. A term begun after Election Day that ends with the
+   *  cycle's Congress (a winner seated in December for the rest of the
+   *  old term) is up in the election just held, so it says nothing, as
+   *  before: "Seat up in 2026" would have stood past that day (the review
+   *  of PR #229). kyc/share.py's seat_up says the same. */
+  function seatUpYear(item) {
+    if (!item || !seated(item) || !item.electionYear) return "";
+    var cycle = (meta().election || {}).year || 2026;
+    var next = !!newTerm(item) && Number(item.electionYear) > Number(cycle);
+    return !item.seatUp2026 || next ? String(item.electionYear) : "";
+  }
+
   /** Who Congress's record seats in *race*'s seat for the term it decided
    *  (sitsIn, on a term begun after Election Day), among its holder and its
    *  people: one person, else null. The race head's "Seated:" badge and the
@@ -1168,7 +1186,18 @@
         add({ cls: left.cls || spec.cls, card: left.card, rank: spec.rank }, left.title);
       }
     };
+    // From the day after Election Day a nominee's and a qualified
+    // candidate's words are AWAITING's, or a result's (raceStatus), and the
+    // key says only what a card can then say: "On the November ballot: Will
+    // appear on the November general election ballot", "Renominated" and
+    // "Advanced to November" stood in it over an election that had been
+    // held. A primary runoff no result has settled is listed only where a
+    // card still carries one.
+    var after = electionStatus().phase === "post-election";
+    var settled = after ? { nominee: true, qualified: true } : {};
+    var advanced = !after || people().some(function (p) { return p.raceStatus === "advanced"; });
     Object.keys(RACE_STATUS).forEach(function (status) {
+      if (settled[status] || (status === "advanced" && !advanced)) return;
       var spec = RACE_STATUS[status];
       // A badge's own title says how its holder got there; the key's entry
       // covers everyone who carries the words. "Won the primary" was false
@@ -1176,9 +1205,11 @@
       add(spec, status === "nominee" ? NOMINEE_KEY : undefined);
       member(spec);
     });
-    add(allParty("top-two"), "Finished in the top two (California, Washington) or the top four " +
-      "(Alaska) of an all-party primary, which sends the leaders to November whatever their " +
-      "party; on the November ballot.");
+    if (!after) {
+      add(allParty("top-two"), "Finished in the top two (California, Washington) or the top four " +
+        "(Alaska) of an all-party primary, which sends the leaders to November whatever their " +
+        "party; on the November ballot.");
+    }
     add(LISTED.unlisted);
     add(UNCONFIRMED);
     add(record ? leftWords(APPOINTEE_LEAVING) : APPOINTEE_LEAVING);
@@ -1188,6 +1219,9 @@
     if (record) {
       add(seatedWords("new"), "Once the new Congress sits: Congress's record seats them for the " +
         "term their race decided, though the results this site last read had not marked a winner.");
+      add(seatedOtherWords({ name: "", term: "new" }), "Once the new Congress sits: on the " +
+        "November ballot for a seat Congress's record gives someone else for the term its race " +
+        "decided, where the results this site last read had not marked a winner.");
     }
     // An open primary's December round, in its race's words (openRound),
     // where a race the page holds has one.
@@ -1903,6 +1937,7 @@
     not_disclosed: "Not disclosed",
     unknown: "No data",
     no_filing: "No filing this cycle",
+    not_read_new_term: "No FEC figures held yet",
     not_listed: "Not listed on their official site",
     see_site: "On their official site's issues page",
     see_home: "On their official website",
@@ -1928,6 +1963,10 @@
     no_filing: "Checked with the FEC: this candidate has no filing for the "
       + "{cycle} cycle. Members running for a different seat file under a "
       + "separate committee.",
+    // kyc/normalize.py's NOT_READ_NEW_TERM: a seated winner for whom no
+    // record this site holds carries figures under any of their FEC ids.
+    not_read_new_term: "Seated for a new term: this site holds no FEC figures yet under any " +
+      "FEC id it has for them, for the seat they now hold or the 2026 campaign that won it.",
   };
 
   function absentTitle(status) {
@@ -3243,6 +3282,13 @@
       })) return 0;
       if (c.title.terms.every(function (t) { return t.test(tiers.name); })) return 1;
     }
+    // A member who has left Congress, of the chamber the title names, after
+    // every sitting one: "Senator Durbin" and "Rep. Doggett" told the January
+    // rehearsal's reader that no profile matched, over the profiles of the
+    // senator and the representative who had just left (rule 27).
+    if (c.title && item.formerMember && !seated(item) &&
+        String(item.chamber).indexOf(c.title.chamber) !== -1 &&
+        c.title.terms.every(function (t) { return t.test(tiers.name); })) return 2;
     if (exact) return 0;
     var every = function (text) { return c.terms.every(function (t) { return t.test(text); }); };
     if (every(tiers.name)) return 1;
@@ -3489,6 +3535,17 @@
     return (states[code] && states[code].name) || code;
   }
 
+  /* A place in a sentence, in its own words (rule 75): "the District of
+   * Columbia", "the Northern Mariana Islands", "the U.S. Virgin Islands",
+   * never "District of Columbia" or a code. kyc/voting_dates.py's PLACES
+   * says the same. */
+  var PLACE_WORDS = { DC: "the District of Columbia", MP: "the Northern Mariana Islands",
+    VI: "the U.S. Virgin Islands" };
+
+  function placeWords(code) {
+    return PLACE_WORDS[code] || stateName(code);
+  }
+
   /** Where the page for a state lives, relative to the current page. The
    *  state pages sit one directory down, so they reach everything through
    *  "../"; the root pages declare no prefix. */
@@ -3632,8 +3689,46 @@
     return n + suffix;
   }
 
+  /** Which party each Senate seat on the 2026 ballot is counted for, where
+   *  a figure says (rule 73): "Seats each party defends" counts the
+   *  record's incumbents (summary.py `senateDefending`: who held each seat
+   *  going into the election), the balance bar's dots the party of the
+   *  senator who sits in each now (`senate.up`). Once a special election's
+   *  winner of another party is seated in December the two differ (Ohio's,
+   *  on the real results), and neither said which it was; "defends" was in
+   *  the present tense after the election too. One place says both, from
+   *  the day after Election Day; before it the two are the same seats. */
+  function senateBases() {
+    var after = electionStatus((meta().election || {}).year).phase === "post-election";
+    return {
+      after: after,
+      defending: after ? "Seats each party defended (by the party that held each at the election)"
+        : "Seats each party defends",
+      dotted: after ? ", by the party of who holds each now" : "",
+    };
+  }
+
+  /* The sidebar's labels from the day after Election Day (index.html and
+   * map.html carry the campaign's): "Senate seats up" over an election that
+   * has been held read as the next one. */
+  function summaryLabels() {
+    return {
+      senateSeatsUp: "Senate seats on the 2026 ballot",
+      senateDefending: senateBases().defending,
+      houseSeatsUp: "House seats on the 2026 ballot",
+      challengers: "Challengers on the 2026 ballot",
+    };
+  }
+
   function renderSummary() {
     var info = meta();
+    if (electionStatus((info.election || {}).year).phase === "post-election") {
+      var labels = summaryLabels();
+      Array.prototype.forEach.call(doc.querySelectorAll("[data-summary-label]"), function (el) {
+        var words = labels[el.getAttribute("data-summary-label")];
+        if (words) el.textContent = words;
+      });
+    }
     // Which Congress the membership is of, from the data (kyc/summary.py):
     // the pages carry "U.S. Congress" until it is known, never a number.
     if (info.congress) {
@@ -4405,6 +4500,9 @@
     ready: ready,
     // states
     stateName: stateName,
+    placeWords: placeWords,
+    senateBases: senateBases,
+    seatUpYear: seatUpYear,
     stateUrl: stateUrl,
     shareUrl: shareUrl,
     shareLink: shareLink,
@@ -4466,6 +4564,7 @@
   function balanceBar(chamber, opts) {
     opts = opts || {};
     var info = KYC.meta();
+    var basis = chamber === "senate" ? KYC.senateBases() : { dotted: "" };
     var c = info[chamber];
     if (!c) return "";
     var seats = chamber === "senate" ? 100 : (c.seats || 435);
@@ -4506,15 +4605,19 @@
         return '<li><span class="bb-swatch bb-' + p[1] + '" aria-hidden="true"></span>' +
           esc(WORDS[p[0]][n === 1 ? 0 : 1].replace(/^./, function (ch) { return ch.toUpperCase(); })) +
           " <strong>" + n + "</strong>" +
-          (up && upOf(p[0]) ? ' <span class="bb-faint">' + upOf(p[0]) + " up</span>" : "") + "</li>";
+          (up && upOf(p[0]) ? ' <span class="bb-faint">' + upOf(p[0]) + (past() ? " were up" : " up") +
+            "</span>" : "") + "</li>";
       });
     if (vacant) {
       key.push('<li><span class="bb-swatch bb-vacant" aria-hidden="true"></span>Vacant <strong>' +
         vacant + "</strong></li>");
     }
+    // Whose party a dotted seat is drawn in, once the sidebar's "defended"
+    // counts another way (KYC.senateBases, rule 73).
     var ballot = up
       ? '<li class="bb-ballot"><span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span>' +
-        "Dotted: a seat on the Nov 3, 2026 ballot</li>"
+        "Dotted: a seat " + (past() ? "that was " : "") + "on the Nov 3, 2026 ballot" +
+        (basis.dotted ? ", in the colour of the party of who holds it now" : "") + "</li>"
       : chamber === "house" && (info.election || {}).phase === "campaign"
         ? '<li class="bb-ballot">Every House seat ' + (past() ? "was" : "is") +
           " on the Nov 3, 2026 ballot</li>" : "";
@@ -4535,7 +4638,8 @@
         (opts.title ? '<figcaption class="bb-title">' + esc(opts.title) + "</figcaption>" : "") + track +
         '<p class="bb-note">' + (counts ? '<span class="bb-counts">' + counts + ". </span>" : "") + (dotted.length
           ? '<span class="bb-swatch bb-up bb-neutral" aria-hidden="true"></span> Dotted: the ' +
-            esc(dotted.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot. "
+            esc(dotted.join(", ")) + " seats " + (past() ? "that were " : "") + "on the Nov 3, 2026 ballot" +
+            esc(basis.dotted) + ". "
           : chamber === "house" && (info.election || {}).phase === "campaign"
             ? "Every seat " + (past() ? "was" : "is") + " on the Nov 3, 2026 ballot. " : "") +
         "The tick marks half: " + (chamber === "senate" ? 51 : Math.floor(seats / 2) + 1) +

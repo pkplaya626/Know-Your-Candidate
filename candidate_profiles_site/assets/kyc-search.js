@@ -335,11 +335,14 @@
         ? " First in line to succeed the governor" + (onBallot(code, key) ? " until then" : "") + ": " +
           off.successor.title + " " + off.successor.name + "." : "";
       // A new office, first elected on Nov 3 (Arizona's lieutenant
-      // governor): no one holds it yet, and its race is shown.
+      // governor): no one holds it yet, and its race is shown - until its
+      // first term begins on the reader's day, when the state page's words
+      // say so instead (KYC.stategov.newOfficeWords, one implementation).
       if (onBallot(code, key)) {
         var item = ballotItem(code, key);
-        return row(link(href, title) + ":", esc("No one holds this office yet" +
-          (item.note ? ": " + item.note : "") + "." + successor) +
+        var fresh = KYC.stategov.newOfficeWords(code, key, item, off);
+        return row(link(href, title) + ":", esc(fresh.text +
+          (fresh.successor ? " " + fresh.successor + "." : "")) +
           (full === false ? "" : " " + ballotLine(code, key, full)));
       }
       return row(link(href, PlaceWords(code) + "’s page"), esc(PlaceWords(code) + " has no " + word +
@@ -349,7 +352,12 @@
     var holder = namedHolder(off)
       ? '<span class="answer-holder">' + esc(off.name) + "</span>"
       : "who holds it is not named here; its page says what each source lists";
-    return row(link(href, title) + ":", holder + (full === false ? "" : ". " + ballotLine(code, key, full)));
+    // The term the 2026 election chose has begun and the roster still names
+    // a holder who was not on the ballot for it: said as the state page says
+    // it (KYC.stategov.pastTermText).
+    var past = KYC.stategov.pastTermText(code, key);
+    return row(link(href, title) + ":", holder + (past ? ". " + esc(past).replace(/\.$/, "") : "") +
+      (full === false ? "" : ". " + ballotLine(code, key, full)));
   }
 
   /** Every state's holder of *key*, compactly: an acting officer, or an
@@ -369,11 +377,19 @@
       if (!off || (off.none && !ballot)) return;
       if (ballot) up += 1;
       var detail;
-      if (off.none) {
+      if (off.none && KYC.stategov.termBegun(code, key)) {
+        // Its first term has begun on the reader's day (newOfficeWords).
+        detail = esc("first elected on Nov 3, 2026; its term " +
+          KYC.stategov.beganWords(KYC.stategov.termBegun(code, key)) + "; the roster lists no one yet");
+      } else if (off.none) {
         detail = esc("no one holds this office yet; first elected on Nov 3, 2026");
       } else if (namedHolder(off)) {
+        // The term the 2026 election chose has begun and the roster still
+        // names a holder who was not on the ballot for it: said here too,
+        // never the roster's name plainly (KYC.stategov.pastTermBrief).
+        var past = KYC.stategov.pastTermBrief(code, key);
         detail = esc(off.name) + (off.title && off.title !== STATE_OFFICES[key]
-          ? " (" + esc(off.title) + ")" : "");
+          ? " (" + esc(off.title) + ")" : "") + (past ? " (" + esc(past) + ")" : "");
       } else {
         detail = "not named here";
       }
@@ -556,14 +572,26 @@
         if (ok) held.push({ title: title, p: p });
       });
     });
+    // No sitting member holds a post recorded in the sitting Congress (the
+    // first days of a new one): the build's words, as the federal page says
+    // of its Speaker, never career text alone (rule 19).
+    var unrecorded = KYC.meta().leadersUnrecorded;
+    if (!held.length && unrecorded) {
+      return [block("offices", "Leaders in Congress", [row(esc(unrecorded), "")])];
+    }
     if (!held.length) return [];
     held.sort(function (a, b) {
       var rank = function (t) { return PRINCIPAL.test(t) ? 0 : 1; };
       return rank(a.title) - rank(b.title) || a.title.localeCompare(b.title);
     });
+    // Where the record holds some of the sitting Congress's principal posts
+    // and not others, the ones it does not are said under those it does
+    // (the review of PR #229): a query for one of them falls back to no
+    // career text without a word.
     return [block("offices", "Leaders in Congress", held.slice(0, LIMIT * 2).map(function (h) {
       return row(esc(h.title) + ":", memberLink(h.p.id, h.p.name));
-    }), { note: esc("As congress-legislators records the posts held in this Congress.") })];
+    }), { note: esc("As congress-legislators records the posts held in this Congress." +
+      (unrecorded ? " " + unrecorded : "")) })];
   }
 
   /* ------------------------------------------------ seats in Congress */
