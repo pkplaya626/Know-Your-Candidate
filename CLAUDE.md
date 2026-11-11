@@ -1514,14 +1514,29 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     and the Virgin Islands wait for their counts. The national route
     (`national_call`) reads "2026 United States House of Representatives
     elections" once a run (`fetch_national`, under the reader's agent), only
-    for a House race whose section holds no November count, mark or
-    declaration, and never in a ranked-choice or majority state or on an
-    open primary's or a qualified list's seat, nor for D.C. or a territory,
-    since the call's credit speaks of "the state's page" (rule 75;
-    `national_barred`). The
+    for a House race whose section marks and declares nobody (no November
+    table's mark, no infobox declaration, nothing refused or decided: those
+    are the page's own routes, whatever they conclude) and gives either no
+    count at all or counts that are a second source agreeing
+    (`national_counts`): every November table that counts two people, and
+    the infobox where it counts two, put the marked person first and nobody
+    beside them, the infobox's share reporting, where it gives one, is
+    readable and at least `REPORTING_FLOOR`, and the lead is at least
+    `CLOSE_MARGIN` of the count; a count for one person alone is no lead. It
+    is one test for the first read and every later one. Until 2026-11-11 a
+    page with counts let a call stand only where the last read had called
+    the race nationally over a page with none, so the result hung on when a
+    page was first read: New Jersey's 2nd was called for Zack Mullock from
+    the pages saved at 19:50 UTC on 2026-11-10, and the refresh two hours
+    later, whose page counted him 137,999 to Jeff Van Drew's 130,631 with no
+    mark and the count marked ongoing, left it "Awaiting result". Never in a
+    ranked-choice or majority state or on an open primary's or a qualified
+    list's seat, nor for D.C. or a territory, since the call's credit speaks
+    of "the state's page" (rule 75; `national_barred`). The
     district's row - the one the table of every district keys by
-    `{{ushr|ST|N}}` beside its PVI, a key two such rows share giving none -
-    must mark one person, who is one November nominee of the race by filing
+    `{{ushr|ST|N}}` beside its PVI, in the article's own section for the
+    district's state (`national_rows`), a key two such rows share giving
+    none - must mark one person, who is one November nominee of the race by filing
     or a state's list, with no look-alike beside them (rule 25) and the row's
     party their filing's major party; and the row's own words must agree with
     the frozen record's incumbent and none disagree: "Incumbent re-elected"
@@ -1542,10 +1557,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     again past the gates a call from the page meets: a lead of 0.07 points,
     or 3 reporting, read "Elected" on every read, and a declaration refused
     as too close brought the national call back through `carry_refused`. Such
-    counts now withdraw it too (`_national_held`: the share reporting
-    readable and at least `REPORTING_FLOOR`, the lead at least
-    `CLOSE_MARGIN`), and a withdrawn national call is never kept over a
-    refusal. A call the last read made that this one does not make, with no
+    counts now withdraw it too (`national_counts`), and a withdrawn national
+    call is never kept over a refusal. The article's "Crossover seats"
+    tables list eight districts again beside their PVI (NE-2, NY-17, PA-1,
+    CA-1, CA-3, CA-41, CA-48 and UT-1 in revision 1384925256), which made
+    each two rows and so none: a row counts only in its state's section.
+    A call the last read made that this one does not make, with no
     result from the state's page and no withdrawal (the row lost its mark,
     holds two, or went), is `result-national-dropped`, and a call kept past
     `officers.KEPT_STALE_DAYS` while the article cannot be read is
@@ -1560,7 +1577,14 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the race head's source line, share pages and the status table's fixture
     - to "Wikipedia's national summary of the House elections, which gives no
     vote count; the state's page had none when read" (`share.NATIONAL_SOURCE`,
-    `raceStatusSource` "national"); an infobox call is the state's page's.
+    `raceStatusSource` "national"), or where the page gave counts at that
+    read (the call's `pageCounts`, with `pageLeader`, `pageLead`,
+    `pageMargin` and `pageReporting` as the gate measured them; a call kept
+    unread keeps the case it was made in) "... which gives no vote count; the
+    state's page, read the same day, counts the same candidate ahead and
+    names no winner" (`share.NATIONAL_COUNTS_SOURCE`, "national-counts",
+    the race summary's `nationalCounts`); an infobox call is the state's
+    page's.
     Replayed over every state's page as it stood at 19:50 UTC on 2026-11-10,
     the reader called 228 races from the infobox and 110 from the national
     summary beside the 92 tables' marks, and changed nothing else once one
