@@ -3030,8 +3030,10 @@ in `judiciary.json`'s `courtChiefs` and shown, attributed to the court, as
 `chiefByCourt` on the court's row: the hub's chief cell names the judge "as
 the court's own site names its chief", and the court page quotes the site
 beside the directory's record, neither taken over the other. A recipe for a
-court whose record is settled is warned unused (`court-chief-recipe-unused`);
-an unsettled court with no recipe is warned (`court-chief-no-recipe`).
+court whose record is settled is warned unused (`court-chief-recipe-unused`),
+unless the court's last read named another chief than the directory's, which
+is warned as the two sources disagreeing, with who each names
+(`court-chief-sources-disagree`); an unsettled court with no recipe is warned (`court-chief-no-recipe`).
 `judiciary --chiefs-only` reads just these for the committed directory.
 
 ### Changes in the Cabinet
