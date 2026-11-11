@@ -21232,7 +21232,7 @@ async function testGovernorOverlays() {
       text("#governorModalKind") === "Governor (Candidate)" &&
       /Running for Governor • GA/.test(text("#governorModalMeta")) &&
       !!modal().querySelector('#governorModalMeta a.state-link[href$="states/ga.html#governor-race"]') &&
-      /Term 4-year term \(if elected\)/.test(text("#governorModalMeta")) &&
+      /Term 4 years \(if elected\)/.test(text("#governorModalMeta")) &&
       text("#governorModalMeta").indexOf(data.ballot2026.offices.governor.note) === -1);
     check("the status badge in the cards' words", /On the Nov 3, 2026 ballot/.test(text("#governorModalStatus")));
     check("the party words are the card's", text("#governorModalParty") === (first.party || "") &&
@@ -21297,9 +21297,10 @@ async function testGovernorOverlays() {
         if (!people.length) continue;
         window.KYC.governor.open(people[0].id);
         const term = modal().querySelector("#governorModalMeta .gov-term");
-        const lead = /^(\d+-year term)(?=[;,.]|$)/.exec(item.note || "");
+        const lead = /^(\d+)-year term(?=[;,.]|$)/.exec(item.note || "");
         if (term) shown += 1;
-        if (lead ? !term || term.textContent.trim() !== "Term " + lead[1] + " (if elected)" : !!term) {
+        if (lead ? !term || term.textContent.trim() !== "Term " + lead[1] + (lead[1] === "1" ? " year" : " years") +
+            " (if elected)" : !!term) {
           bad.push(code + ": " + (term ? term.textContent : "(none)") + " | " + item.note);
         }
         if (/last elected|Elected with|ticket|term-limited|noncandidacy|certified/i.test(text("#governorModalMeta"))) {
@@ -22115,6 +22116,43 @@ async function testTheJanuaryPage() {
     check("as the review read them: KY-6, CA-41, CA-3 and UT-1", off.length === 0,
       off.map((rid) => `${rid}: ${named[rid]}`).join(" | ") ||
         Object.keys(want).filter((rid) => named[rid]).map((rid) => named[rid]).join(" | "));
+  });
+
+  // The grid's election chips once the new Congress sits (the January
+  // sweep of 2026-11-11). "2026 Senate races" left out the seated winner of
+  // 17 of the 35 races - newcomers and the House members who moved - and
+  // listed only who held each seat and who lost; "Not seeking re-election"
+  // showed six senators who had just won their seats under "not running
+  // again for the seat they hold", and hid the 81 people who had left.
+  const cardsOf = (D) => [...D.querySelectorAll("#results .card")].map((c) => c.getAttribute("data-id"));
+  const chipOf = (D, value) => D.querySelector('[data-group="election"][data-value="' + value + '"]');
+  const senGrid = await buildPage("index.html", { now: JANUARY_NOW, hash: "#/?election=senateUp26" });
+  await settle(120);
+  const senShown = new Set(cardsOf(senGrid.D));
+  const senWinners = GK.people().filter((p) => GK.seated(p) && p.raceRole === "winner" && /^S-/.test(p.raceId || ""));
+  const senChip = chipOf(senGrid.D, "senateUp26");
+  const senTitle = senChip ? senChip.getAttribute("title") || "" : "";
+  const nsGrid = await buildPage("index.html", { now: JANUARY_NOW, hash: "#/?election=notSeeking" });
+  await settle(120);
+  const NK = nsGrid.window.KYC;
+  const nsCards = cardsOf(nsGrid.D).map(NK.byId).filter(Boolean);
+  const nsChip = chipOf(nsGrid.D, "notSeeking");
+  const nsTitle = nsChip ? nsChip.getAttribute("title") || "" : "";
+  const nsLabel = ((nsGrid.D.getElementById("resultsLabel") || {}).textContent || "").replace(/\s+/g, " ");
+  suite("the January page: the grid's 2026 election chips speak of what was", () => {
+    check("no page errors", senGrid.errors.length + nsGrid.errors.length === 0,
+      senGrid.errors.concat(nsGrid.errors).slice(0, 2).join(" | "));
+    check("\"2026 Senate races\" lists every seated winner of a 2026 Senate race",
+      senWinners.length > 0 && senWinners.every((p) => senShown.has(p.id)),
+      `${senWinners.length} winners; missing: ` + senWinners.filter((p) => !senShown.has(p.id)).map((p) => p.name).join(", "));
+    check("and its hover is in the past tense", /who held each, who won it, and everyone who ran for it/.test(senTitle) &&
+      !/holds each|running for it/.test(senTitle), senTitle);
+    check("\"Not seeking re-election\" is \"Did not run for re-election\" over members who have left, and nobody seated",
+      !!nsChip && nsChip.textContent.trim() === "Did not run for re-election" && nsCards.length > 0 &&
+        nsCards.every((p) => p.formerMember && !NK.seated(p)),
+      `${nsCards.length} cards; seated: ` + nsCards.filter((p) => NK.seated(p)).map((p) => p.name).join(", ") + " | " + nsLabel.slice(0, 160));
+    check("its hover speaks of the members who left, never of sitting members or the seat they hold",
+      /all of whom have since left Congress/.test(nsTitle) && !/Sitting members|seat they hold/.test(nsTitle), nsTitle);
   });
 
   // A former member is named as their own record says they go by (rule 66):

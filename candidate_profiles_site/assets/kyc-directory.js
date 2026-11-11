@@ -60,13 +60,27 @@
       if (item.heldRaceId && senate(item.heldRaceId)) return true;
       if (!item.heldRaceId && item.seatUp2026 && !item.isCandidate &&
           item.chamber.indexOf("Senate") !== -1) return true;
+      // Once the new Congress sits, the race's winner is a member, never a
+      // filing: a newcomer (no heldRaceId, next up in 2032) or a House
+      // member who moved (heldRaceId their old House race). Left out, the
+      // chip listed the former holders and the losers of 17 of the 35
+      // races and none of the winners (January rehearsal of 2026-11-11).
+      if (!item.isCandidate && item.raceRole === "winner" && senate(item.raceId)) return true;
       if (!item.isCandidate) return senate(item.contestRaceId) && !KYC.otherCampaign(item);
       return senate(item.raceId);
     },
     // Incumbents whose seat is up but who are not running again.
     // Not a member running again under a new district number (renumbered):
     // they are seeking re-election, for a seat with another number.
+    // Once the new Congress sits it speaks of what was (RECORD_CHIPS): the
+    // members who did not run again, all of whom have left, and nobody
+    // seated - its campaign test matched six House members who had just
+    // won the Senate seats they sit in, under "the seat they hold".
     notSeeking: function (item) {
+      if (KYC.recordPhase()) {
+        return !!item.formerMember && !KYC.seated(item) && !!item.seatUp2026 &&
+          !item.seekingReelection2026 && !item.renumbered;
+      }
       return item.seatUp2026 && !item.isCandidate && !item.seekingReelection2026 &&
         !item.renumbered;
     },
@@ -85,6 +99,37 @@
       return !!rid && unchallengedRaces.has(rid);
     },
   };
+
+  /* The election chips' words once the new Congress sits: one table for a
+   * chip's label and its hover (rule 12). Their campaign words, in
+   * index.html, speak of a race still to come; "Sitting members not running
+   * again for the seat they hold" stood over six senators who had just won
+   * their seats and, hidden, 81 people who had left. */
+  function recordChipWords() {
+    var before = (KYC.meta().congress || 0) - 1;
+    var them = before > 0 ? "Members of the " + KYC.ordinal(before) + " Congress" : "Members";
+    return {
+      senateUp26: {
+        title: "The Senate seats on the 2026 ballot: who held each, who won it, and everyone who ran for it",
+      },
+      notSeeking: {
+        label: "Did not run for re-election",
+        title: them + " who did not run again for the seat they held in 2026 (they retired, ran " +
+          "for another office, or lost a primary), all of whom have since left Congress.",
+      },
+    };
+  }
+
+  function initElectionWords() {
+    if (!KYC.recordPhase()) return;
+    var words = recordChipWords();
+    Object.keys(words).forEach(function (value) {
+      var chip = doc.querySelector('[data-group="election"][data-value="' + value + '"]');
+      if (!chip) return;
+      if (words[value].label) chip.textContent = words[value].label;
+      chip.setAttribute("title", words[value].title);
+    });
+  }
 
   var contestedRaces = new Set(
     races.filter(function (r) { return r.contested; }).map(function (r) { return r.id; })
@@ -118,6 +163,9 @@
    * January and must stay under "Sitting members" - hiding John Cornyn
    * left the Senate one short. */
   function hideable(item) {
+    // Everyone "Did not run for re-election" names has left and is off the
+    // ballot: hidden as "out of the race", the chip would read "Showing 0".
+    if (state.election === "notSeeking" && KYC.recordPhase()) return false;
     return !KYC.seated(item) && offBallot(item);
   }
 
@@ -155,8 +203,9 @@
     "age-asc": function (a, b) { return ageOrder(a, b, 1); },
     senate26: function (a, b) {
       var rank = function (x) {
-        return x.chamber.indexOf("Senate") !== -1 && (x.seatUp2026 || x.isCandidate)
-          ? 0 : 1;
+        // A seated winner of a 2026 Senate race too, as the chip has them.
+        return x.chamber.indexOf("Senate") !== -1 && (x.seatUp2026 || x.isCandidate) ||
+          (x.raceRole === "winner" && String(x.raceId || "").indexOf("S-") === 0) ? 0 : 1;
       };
       return (
         rank(a) - rank(b) ||
@@ -1922,7 +1971,7 @@
      * the page says something failed, and the error still reaches the
      * console. */
     var failed = [];
-    [initChips, initFiltersToggle, initActiveFilters, initLabel, initAnswers, initStateFilter,
+    [initElectionWords, initChips, initFiltersToggle, initActiveFilters, initLabel, initAnswers, initStateFilter,
      initSearch, initSort, initCards, initLegend]
       .forEach(function (step) {
         try { step(); } catch (err) { failed.push(err); }
