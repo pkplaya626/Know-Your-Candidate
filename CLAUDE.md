@@ -213,8 +213,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2921 tests, no dependencies
-npm install && npm test                       # 3770 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2924 tests, no dependencies
+npm install && npm test                       # 3772 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1711,7 +1711,12 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     member who did not run is in the past tense, "Did not run for
     re-election in 2026" and "Left the seat" (an appointee's "Did not run in
     2026"), one table on both sides (`KYC`'s `LEFT`, `share._LEFT`, the
-    fixture's `record` rows): on January 10 they read "Leaving seat".
+    fixture's `record` rows): on January 10 they read "Leaving seat". A
+    former member is in it from the day after Election Day whatever the
+    phase (`KYC.pastTense`, `share.past_tense`, the fixture's `former`
+    rows): one archived in December - a resignation, an appointee whose
+    successor was seated early - would have read "Leaving seat" until
+    January 3; a sitting member keeps the campaign's words until then.
 
 67. **Who held a seat is the record's word; who sits now is `seated`.**
     Archived by rule 66, Florida's appointee would have vanished from the

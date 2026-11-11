@@ -445,17 +445,42 @@ def status_table():
         item = dict(fake, isCandidate=True, id="FAKE")
         spec = standing(item, {}, {})
         filers.append([fake, spec[0] if spec else None, status_source(item, {})])
+    # A former member (formerMember), before and after Election Day, in the
+    # record phase or not: from the day after it they have left, whatever the
+    # phase (past_tense, KYC.pastTense).
+    former = []
+    for status in sorted(_RACE_STATUS):
+        for appointed, post, in_record in itertools.product((0, 1), repeat=3):
+            if in_record and not post:
+                continue
+            item = _former_member(status, appointed)
+            day = ResultsDay(_TABLE_AFTER, record=bool(in_record)) if post else False
+            spec = standing(item, {}, {}, day)
+            former.append([status, appointed, post, in_record, spec[0] if spec else None,
+                           int(spec[1]) if spec else 0])
     return {"words": ["status", "allParty", "source", "round", "held", "decided", "own",
                       "appointed", "unconfirmed", "minor", "post", "label", "off"],
             "statuses": words, "credits": credits, "contest": contest, "moved": moved,
-            "filers": filers, "record": record}
+            "filers": filers, "record": record, "former": former}
+
+
+def _former_member(status, appointed):
+    """A record incumbent archived as a former member, for :func:`status_table`
+    (the render suite builds the same)."""
+    item = {"id": "FAKE", "isCandidate": False, "name": "A Member", "party": "Republican",
+            "raceId": "H-AL-02-2026", "raceStatus": status,
+            "formerMember": {"left": "2026-12-15", "via": "legislators-historical",
+                             "congress": 119}}
+    if appointed:
+        item["appointed"] = True
+    return item
 
 
 def status_table_text():
     """The fixture's text: one row a line, so a change reads as a diff."""
     table = status_table()
     lines = ["{", f'"words": {json.dumps(table["words"])},']
-    keys = ("statuses", "credits", "contest", "moved", "filers", "record")
+    keys = ("statuses", "credits", "contest", "moved", "filers", "record", "former")
     for key in keys:
         rows = table[key]
         lines.append(f'"{key}": [')
@@ -527,12 +552,24 @@ def standing(item, by_id, races_by_id, post_election=False):
         round_held=bool(open_round and isinstance(post_election, str)
                         and open_round < post_election),
         decided=record.get("raceStatusDecided"),
-        # The record phase, which post_election() carries (ResultsDay).
-        record=bool(getattr(post_election, "record", False)))
+        # The past tense (_LEFT): in the record phase, which post_election()
+        # carries (ResultsDay), and for a former member once the election
+        # has passed, as KYC.pastTense says: one who left in December read
+        # "Not running for re-election in 2026" until January 3 (PR #226).
+        record=past_tense(item, post_election))
     if spec:
         return spec
     words = _unsettled(item, races_by_id)
     return (words, False) if words else None
+
+
+def past_tense(item, post_election=False):
+    """KYC.pastTense: whether *item*'s own words are in the past tense - in
+    the record phase (*post_election*'s ``record``), and for a former member
+    whenever the results were read after Election Day."""
+    if getattr(post_election, "record", False):
+        return True
+    return bool(post_election) and bool((item or {}).get("formerMember"))
 
 
 def status_words(item, by_id, races_by_id, post_election=False, seat=None):

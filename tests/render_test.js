@@ -13798,6 +13798,40 @@ async function testSharePages() {
     });
     check("and each filer the results do not settle", table.filers.length >= 4 && filers.length === 0,
       filers.map((r) => JSON.stringify(r)).join(" | "));
+    // A former member is in the past tense from the day after Election Day,
+    // whatever the phase (KYC.pastTense, share.past_tense): one who left in
+    // December read "Leaving seat" until January 3 (PR #226 review). The
+    // same person as share._former_member builds.
+    const former = (table.former || []).filter(([status, appointed, post, inRecord, label, gone]) => {
+      const item = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican",
+        raceId: "H-AL-02-2026", raceStatus: status,
+        formerMember: { left: "2026-12-15", via: "legislators-historical", congress: 119 } };
+      if (appointed) item.appointed = true;
+      const spec = KYC.standing(item, "long", { now: post ? AFTER_DAY : CAMPAIGN_DAY,
+        record: !!inRecord });
+      return (spec ? spec.label : null) !== label || (spec ? !!spec.off : false) !== !!gone;
+    });
+    check("and a former member, before and after Election Day, in the past tense once it has passed",
+      (table.former || []).length > 40 && former.length === 0 &&
+        table.former.some((r) => r[2] && !r[3] && r[4] === "Did not run for re-election in 2026") &&
+        table.former.some((r) => !r[2] && r[4] === "Not running for re-election in 2026"),
+      former.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") ||
+        `${(table.former || []).length} cases`);
+    // The former member's badge is the person's, drawn on a card in each race
+    // they are in: one who held a seat on the ballot and won another read
+    // "held this seat" on the card of the race they won (PR #226 review).
+    const leftMember = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican",
+      formerMember: { left: "2027-02-01", via: "legislators-historical", congress: 120 } };
+    const badgeOf = (p) => KYC.cards.statusBadge(p).replace(/&quot;|&#39;/g, "'");
+    const both = badgeOf(Object.assign({ raceRole: "winner", raceId: "S-AL-2026",
+      heldRaceId: "H-AL-02-2026", raceStatus: "elected" }, leftMember));
+    const wonOnly = badgeOf(Object.assign({ raceRole: "winner", raceId: "S-AL-2026",
+      raceStatus: "elected" }, leftMember));
+    const heldOnly = badgeOf(Object.assign({ raceId: "H-AL-02-2026", raceStatus: "unlisted" }, leftMember));
+    check("a former member's badge says of each race only what is true on its card",
+      /held one seat in the 2026 races and won another/.test(both) && !/held this seat/.test(both) &&
+        /won this seat in the 2026 race/.test(wonOnly) && /held this seat in the 2026 race/.test(heldOnly),
+      [both, wonOnly, heldOnly].map((h) => h.slice(0, 160)).join(" | "));
     // A member's other run, in every status, before and after Election Day:
     // Andy Barr read "who is running for Senate KY" on share pages and the
     // state page beside "Elected in November" on his profile.

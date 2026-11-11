@@ -819,6 +819,9 @@
     var race = status === "runoff" ? raceById(record.raceStatusRace ||
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
     return raceStatus(status, form, {
+      // The past tense (LEFT) in the record phase, and for a former member
+      // once the election has passed (pastTense).
+      record: pastTense(item, opts),
       round: race && race.primaryKind === "open" ? race.generalRunoff : undefined,
       decided: record.raceStatusDecided || undefined,
       own: !item.isCandidate && !item.contestLabel && !item.raceRole &&
@@ -830,8 +833,20 @@
       allParty: record.allPartyPrimary,
       minor: partyKey(item) === "i",
       now: opts.now,
-      record: opts.record,
     });
+  }
+
+  /* Whether a person's own words are in the past tense (LEFT): in the record
+   * phase (opts.record, else recordPhase()), and for a former member from the
+   * day after Election Day whatever the phase - one who left in December (a
+   * resignation, an appointee whose successor was seated early) read
+   * "Leaving seat" until January 3 (PR #226 review). kyc/share.py's
+   * standing says the same. */
+  function pastTense(item, opts) {
+    opts = opts || {};
+    if (opts.record === undefined ? recordPhase() : opts.record) return true;
+    return !!(item && item.formerMember) &&
+      electionStatus(undefined, opts.now).phase === "post-election";
   }
 
   /* A filer the published results do not settle: they name someone who
@@ -934,10 +949,18 @@
     // The badges' own tense (LEFT): the record phase's key says what its
     // badges say.
     var record = recordPhase();
+    // And before it, once the election has passed, beside the campaign's
+    // words where a former member's badge is past tense (pastTense).
+    var former = !record && electionStatus().phase === "post-election" &&
+      people().some(function (p) { return p.formerMember; });
     var member = function (spec) {
       var m = spec.member;
       if (m && record && m.leaving) m = leftWords(m);
       if (m) add({ cls: m.cls || spec.cls, card: m.card, rank: spec.rank }, m.title);
+      if (m && former && m.leaving) {
+        var left = leftWords(m);
+        add({ cls: left.cls || spec.cls, card: left.card, rank: spec.rank }, left.title);
+      }
     };
     Object.keys(RACE_STATUS).forEach(function (status) {
       var spec = RACE_STATUS[status];
@@ -953,6 +976,7 @@
     add(LISTED.unlisted);
     add(UNCONFIRMED);
     add(record ? leftWords(APPOINTEE_LEAVING) : APPOINTEE_LEAVING);
+    if (former) add(leftWords(APPOINTEE_LEAVING));
     add(AWAITING, "After Election Day: on the November ballot, and the results this site last " +
       "read had not marked a winner.");
     // An open primary's December round, in its race's words (openRound),
@@ -4019,6 +4043,7 @@
     stillRunning: stillRunning,
     meta: meta,
     recordPhase: recordPhase,
+    pastTense: pastTense,
     renumberedTail: renumberedTail,
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,

@@ -215,6 +215,29 @@ class TestStatusTable(unittest.TestCase):
         self.assertEqual(share.standing(dict(member, appointed=True), {}, {}, record)[0],
                          "Did not run in 2026")
 
+    def test_a_former_member_has_left_once_the_election_has_passed(self):
+        # A December resignation is archived before January 3, and read "Not
+        # running for re-election in 2026" and "Leaving seat" about someone
+        # who had left (PR #226 review): past tense from the day after
+        # Election Day, whatever the phase. A sitting member keeps the
+        # campaign's words until the new Congress sits.
+        after = share.ResultsDay("2026-12-16")
+        member = {"id": "X", "isCandidate": False, "raceStatus": "unlisted",
+                  "raceId": "H-AL-02-2026"}
+        gone = dict(member, formerMember={"left": "2026-12-15", "congress": 119})
+        self.assertEqual(share.standing(member, {}, {}, after)[0],
+                         "Not running for re-election in 2026")
+        self.assertEqual(share.standing(gone, {}, {}, after)[0],
+                         "Did not run for re-election in 2026")
+        self.assertEqual(share.standing(dict(gone, appointed=True), {}, {}, after)[0],
+                         "Did not run in 2026")
+        self.assertEqual(share.standing(gone, {}, {}, False)[0],
+                         "Not running for re-election in 2026")
+        rows = share.status_table()["former"]
+        self.assertTrue(any(r[2] and not r[3] and r[4] == "Did not run for re-election in 2026"
+                            for r in rows))
+        self.assertFalse(any(r[2] and (r[4] or "").startswith("Not running") for r in rows))
+
 
 class TestSharePhoto(unittest.TestCase):
     """A share image is a photograph that came by a sourced route (rule 24),
