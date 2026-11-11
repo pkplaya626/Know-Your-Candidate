@@ -603,12 +603,18 @@
    *  heads that said "candidates" (audit 2026-10-17, RACES-14). The two
    *  figures sum to the race headers' total (summary.by_state, rule 73). */
   function runningWords(info, rec) {
-    var where = rec ? " on the 2026 ballot" : " on the ballot";
+    // From the day after Election Day in the past tense, as the race heads
+    // beside them are ("1 challenger was on the ballot"): the strip read "7
+    // challengers on the ballot" over them (PR #218 review).
+    var post = !rec && KYC.electionStatus().phase === "post-election";
+    var where = function (n) {
+      return rec ? " on the 2026 ballot" : post ? (n === 1 ? " was" : " were") + " on the ballot" : " on the ballot";
+    };
     var open = info.openCandidates || 0;
     var held = (info.challengersOnBallot || 0) - open;
     var out = [];
-    if ((held || !open) && (held || !info.challengersFiled)) out.push(plural(held, "challenger") + where);
-    if (open) out.push(plural(open, "candidate") + " for open seats" + where);
+    if ((held || !open) && (held || !info.challengersFiled)) out.push(plural(held, "challenger") + where(held));
+    if (open) out.push(plural(open, "candidate") + " for open seats" + where(open));
     // Where there is no primary and no ballot list was read (a territory
     // whose list this site has no reader for): filed, which is not the same
     // claim, and says what was not done - it checked no list, which is not

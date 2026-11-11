@@ -5832,6 +5832,29 @@ function testColourVision(css) {
 
 /* The Senate by the year each seat is next decided. Every expected number
  * here is computed from the data the page loaded, never typed in. */
+/* The state strip's ballot figures in the race heads' tense: after Election
+ * Day Kentucky's read "7 challengers on the ballot" beside heads saying "1
+ * challenger was on the ballot" (PR #218 review), and still add up to them. */
+async function testStripTense() {
+  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
+    const { D, errors } = await buildPage("states/ky.html", { now });
+    await settle(50);
+    suite(`states/ky.html ${when} — the strip's ballot figures in the heads' tense`, () => {
+      check("no page errors", errors.length === 0, errors.join(" | "));
+      const verb = now ? / (was|were) on the ballot$/ : /[a-z] on the ballot$/;
+      const strip = [...D.querySelectorAll(".state-hero .badge")].map((b) => b.textContent)
+        .filter((t) => /^\d+ (challengers?|candidates? for open seats) /.test(t));
+      check("each says it in the clock's tense", strip.length > 0 && strip.every((t) => verb.test(t) &&
+        (!now || /^1 /.test(t) === / was /.test(t))), strip.join(" | "));
+      const heads = [...D.querySelectorAll(".race-head .badge-money")]
+        .map((b) => (/^(\d+) (?:challenger|candidate)s?(?: was| were)? on the ballot$/.exec(b.textContent) || [])[1])
+        .filter(Boolean).reduce((n, x) => n + Number(x), 0);
+      const sum = strip.reduce((n, t) => n + Number(t.split(" ")[0]), 0);
+      check("and still add up to the race heads", sum === heads, `${strip.join(" + ")} vs ${heads}`);
+    });
+  }
+}
+
 /* Everyone on the ballot, counted one way: the sidebar, a state's strip and
  * its race headers read 587, 16 and 58 for the same people. The people the
  * results name with no profile here are named in every view of a race, and
@@ -22061,6 +22084,7 @@ async function testTheJanuaryPage() {
   if (!only || only === "index.html") await testDirectoryAsync();
   if (!only || only === "index.html") await testSenate();
   if (!only || only === "index.html") await testBallotCounts();
+  if (!only || only === "index.html" || only === "striptense") await testStripTense();
   if (!only || only === "index.html") await testRenumbered();
   if (!only || only === "index.html") await testPhoneMenus();
   if (!only || only === "index.html") await testBootSurvivesAFailure();
