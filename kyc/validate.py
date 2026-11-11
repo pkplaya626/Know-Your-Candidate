@@ -2353,7 +2353,13 @@ def check_seating_results(profiles, races, snapshot=None):
                     seated_lost.append(f"{rid}: {person['name']} ({person['id']}) is seated for "
                                        f"the term from {start} by Congress's record; the results "
                                        f"read for this race say defeated")
-        if not record_phase:
+        # Each race once its own term has begun: the new Congress for the
+        # rest, and for a special election (Florida's, Ohio's) from the day
+        # its seat's new term is seated, in December - checked only from
+        # January, Florida's "elected" appointee who left on December 8 beside
+        # someone else seated for the term passed a month unwarned (the review
+        # of PR #227).
+        if not record_phase and not (race.get("special") and sitters):
             continue
         for person in people:
             if status_in(person, rid) != "elected" or person in sitters:

@@ -670,6 +670,20 @@ class TestSeatingAgainstTheResults(unittest.TestCase):
         profiles[1]["raceStatus"] = "defeated"
         self.assertEqual(validate.check_seating_results(profiles, built, self.snapshot(True)), [])
 
+    def test_a_special_is_checked_once_its_term_has_begun(self):
+        # Florida's special in the december-loses rehearsal: the appointee
+        # the results call "elected" left on December 8 and someone else sits
+        # for the term; checked only from January, it passed a month (the
+        # review of PR #227). A regular race waits for the new Congress.
+        profiles, built = self.people()
+        profiles[0]["raceStatus"] = "nominee"
+        built[0]["special"] = True
+        december = validate.check_seating_results(profiles, built, self.snapshot(False))
+        self.assertEqual([(i.level, i.code) for i in december], [("warn", "result-contradicts-seating")])
+        self.assertTrue(any("Marked Winner" in d for i in december for d in i.detail))
+        built[0]["special"] = False
+        self.assertEqual(validate.check_seating_results(profiles, built, self.snapshot(False)), [])
+
 
 class TestRecordDrift(unittest.TestCase):
     """The drift check reads today's Senate seats from the snapshot, so it is
