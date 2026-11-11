@@ -12740,6 +12740,37 @@ async function testSearchAnswers() {
         !/Each state’s attorney general/.test(text())
       : /Each state’s attorney general/.test(text()), text().slice(0, 300));
   });
+  // "CNMI", the Commonwealth's own short form (its election commission is
+  // votecnmi.gov.mp), is the Northern Mariana Islands, as a whole word only
+  // (rule 5): "CNMI attorney general" answered nothing.
+  if (gov.MP) {
+    await ask("Northern Mariana Islands attorney general");
+    const longForm = text();
+    await ask("CNMI attorney general");
+    suite("search answers — 'CNMI attorney general' is the Northern Mariana Islands'", () => {
+      check("the answer the place's own name gives", longForm.length > 0 && text() === longForm,
+        text().slice(0, 300));
+      check("linked to its page", hrefs().indexOf("states/mp.html#state-government") !== -1, hrefs().join(" "));
+    });
+    await ask("C.N.M.I. governor");
+    const dotted = text();
+    await ask("Northern Mariana Islands governor");
+    suite("search answers — 'C.N.M.I. governor' reads the same as the name", () => {
+      check("the same answer", dotted.length > 0 && dotted === text(), dotted.slice(0, 200));
+    });
+    await ask("Northern Mariana Islands");
+    const placeCards = cards().map((p) => p && p.id).join(",");
+    await ask("CNMI");
+    suite("the grid — 'CNMI' alone is the Northern Mariana Islands' people", () => {
+      const people = cards();
+      check("every card is the Northern Mariana Islands', the same cards its name gives",
+        people.length > 0 && people.every((p) => p && p.state === "MP") &&
+          people.map((p) => p.id).join(",") === placeCards, label());
+      check("a whole word only: never a word it begins, never a near spelling",
+        KYC.stateNamed("CNMI") === "MP" && KYC.stateNamed("cnmis") === null &&
+          KYC.stateNamed("cnm") === null && KYC.stateNamed("nmi") === null);
+    });
+  }
   if (missing) {
     await ask(KYC.stateName(missing) + " attorney general");
     suite(`search answers — '${KYC.stateName(missing)} attorney general': an office this site does not list`, () => {

@@ -3212,7 +3212,7 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (rule 27).
     A word is matched whole: "Proposition 50" is not Proposition 5, and
     "3.5%" in North Carolina's question title is not "Amendment 3". A short
-    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov."), but in
+    form readers write is read ("Calif.", "S.D.N.Y.", "Lt. Gov.", "CNMI"), but in
     the answers a two-letter code that is a word ("oh", "in", "va") beside
     another word is a state only typed in capitals (rule 5), and changing
     only the capitals redraws them; the grid still reads a code typed alone

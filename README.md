@@ -249,7 +249,7 @@ answer a link to the page about it:
 
 A word too broad to answer ("judge", with 1,461 sitting federal judges)
 suggests narrower searches instead. Abbreviations readers write are read
-(AG, SoS, Lt. Gov., Rep., Sen., SCOTUS, S.D.N.Y., Calif., Tex.); in the
+(AG, SoS, Lt. Gov., Rep., Sen., SCOTUS, S.D.N.Y., Calif., Tex., CNMI); in the
 answers, a two-letter code that is also a word ("oh", "in", "va") beside
 another word is a state only typed in capitals, as "DOE" is the Department
 of Energy and "Doe" a surname. Nothing is matched fuzzily: "Govenor of
