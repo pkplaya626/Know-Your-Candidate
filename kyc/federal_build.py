@@ -525,6 +525,17 @@ SUCCESSION_OFFICERS = (("speaker", "Speaker of the House"),
                        ("presidentProTempore", "President pro tempore of the Senate"))
 
 
+def not_yet_recorded(number, what):
+    """The words for a post the sitting Congress has filled that
+    congress-legislators has not yet recorded (rule 68): "congress-legislators
+    has not yet recorded the 120th Congress's Speaker". The federal page's
+    line of succession and the search's leaders (kycBuildMeta
+    ``leadersUnrecorded``) say it alike."""
+    from . import cycle
+
+    return f"congress-legislators has not yet recorded the {cycle.ordinal(number)} Congress's {what}"
+
+
 def congressional_officers(executive, snapshot):
     """``({key: {"member": snapshot row} | {"missing": reason}}, problems)``
     for the Speaker and the President pro tempore.
@@ -553,8 +564,7 @@ def congressional_officers(executive, snapshot):
             out[key] = {"missing": "congress-legislators lists nobody in this office"}
             problems.append(f"the line of succession names no {role}: congress-legislators lists none")
         elif began and (held.get("since") or "") < began:
-            out[key] = {"missing": f"congress-legislators has not yet recorded the "
-                                   f"{cycle.ordinal(number)} Congress's {role.split(' of ')[0]}"}
+            out[key] = {"missing": not_yet_recorded(number, role.split(" of ")[0])}
             problems.append(f"the line of succession names no {role}: congress-legislators' "
                             f"holder {held['bioguide']} took the office {held.get('since')}, before the "
                             f"{cycle.ordinal(number)} Congress began on {began}; run 'federal' once "

@@ -226,11 +226,22 @@ GENERIC = "generic"
 # 2024 receipts on a page about the 2026 midterms reads as current money.
 NO_FILING = "no_filing"
 
+# A winner Congress has seated for a new term for whom no record this site
+# holds carries figures under any of their FEC ids - the seat they now hold
+# or the 2026 campaign that won it (fec.apply_cache looks under every key):
+# "No data" said nobody looked (rule 19). The words say only that: the first
+# ones ("Not read for their new term yet", "holds no totals for their 2026
+# campaign") stood over three campaigns whose totals the cache held under a
+# curated row's name, and "not read" is false of a name the FEC was asked
+# about and did not know (the review of PR #229).
+NOT_READ_NEW_TERM = "not_read_new_term"
+
 # What to show instead of a long placeholder sentence.
 STATUS_LABELS = {
     NOT_DISCLOSED: "Not disclosed",
     UNKNOWN: "No data",
     NO_FILING: "No filing this cycle",
+    NOT_READ_NEW_TERM: "No FEC figures held yet",
     GENERIC: None,  # keep the original text, but mark it low-information
 }
 

@@ -1357,10 +1357,11 @@
      * says the year it next is, in the card's words - of the seat, never
      * the person, since the data knows when the term ends and not who will
      * run (rule 61). A seat on the 2026 ballot says so through its race. */
-    if (KYC.seated(item) && !item.seatUp2026 && item.electionYear) {
+    var nextUp = KYC.seatUpYear(item);
+    if (nextUp) {
       pieces.push('<span class="badge badge-neutral" title="' + KYC.escapeAttr(
         "The year this seat is next on the ballot. It says when the term ends, not whether " +
-        "the member will run.") + '">Seat up in ' + KYC.escapeHtml(item.electionYear) + "</span>");
+        "the member will run.") + '">Seat up in ' + KYC.escapeHtml(nextUp) + "</span>");
     }
 
     target.hidden = !pieces.length;

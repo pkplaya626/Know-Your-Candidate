@@ -302,7 +302,8 @@ def governor_candidate_articles(root="."):
     return out
 
 
-def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, sitting=()):
+def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, sitting=(),
+                   record=False):
     """Give the governor's card and the candidates' their offices held and
     articles from the history cache (kyc/history.py, rule 69), by the
     overlay's ids: the governor's only while the cache's item is the one
@@ -315,7 +316,12 @@ def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, s
     (read *as_of*) seats the person (*sitting*, bioguide ids), as on a
     member's profile: in January the six members of Congress who ran for
     governor read "U.S. Representative since 2017" here and "2017-2027" on
-    their own profile."""
+    their own profile. Once the Congress the cycle elects sits (*record*), a
+    candidate's other office the record found open is said to have been
+    open when it was read (``history.for_page``'s *before_seat*), never
+    current: a defeated candidate's "Governor of X since 2023" or "Member
+    of the State Senate since 2014" went on reading as held after the term
+    could have ended, a day this site does not read (rule 19)."""
     from . import history, statewide, statewide_photos
 
     people = (cache or {}).get("people") or {}
@@ -382,7 +388,8 @@ def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, s
         rec = people.get(row["id"])
         if rec and rec.get("asked") == article:
             row["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting,
-                                                       read=(cache or {}).get("read"))
+                                                       read=(cache or {}).get("read"),
+                                                       before_seat=record)
         elif rec:
             problems.append(f"{code}: {row['name']}'s offices were read from {rec.get('asked')}; the "
                             f"race's article now links {article}; not shown; run 'history'")
@@ -557,14 +564,19 @@ def stale_name_forms(states):
     return out
 
 
-def holder_line(code, key, holder, terms, listed):
+def holder_line(code, key, holder, terms, listed, after=False):
     """``(record, problem)``: what an office on the ballot says about its
     holder. The election office's list of candidates answers wherever it is
     in hand (``statewide.holder_status``); a term limit in
     ``ballot2026.OPEN_SEATS`` stays as the reason, the list beside it. The
     two must agree: a term-limited holder the list names, or a list entry
     that does not settle the holder, is reported and the line says it was
-    not checked. With no list, OPEN_SEATS alone answers, as before."""
+    not checked. With no list, OPEN_SEATS alone answers, as before.
+    *after*: the results read are November's (``share.post_election``). The
+    page shows no holder line then (the office has had its election), so a
+    list entry that does not settle the holder is no longer a problem for a
+    person to settle: every build after the election warned "may or may not
+    be" of a line nobody would see."""
     from . import ballot2026, statewide
 
     seat, seat_problem = ballot2026.open_seat(code, key, holder, terms)
@@ -572,7 +584,7 @@ def holder_line(code, key, holder, terms, listed):
         return seat, seat_problem
     status, problem = statewide.holder_status(code, key, listed, holder)
     if status is None:
-        return ballot2026.unchecked(holder), problem
+        return ballot2026.unchecked(holder), None if after else problem
     if seat and seat["why"] == "term-limit":
         if status["why"] == "listed":
             return ballot2026.unchecked(holder), (
@@ -625,7 +637,18 @@ def build(root="."):
     # Whether a seat in Congress is current is the membership snapshot's to
     # say, as on a member's profile (history.attach).
     from . import legislators
-    as_of, sitting = history.membership(legislators.load_snapshot(root))
+    snapshot = legislators.load_snapshot(root)
+    as_of, sitting = history.membership(snapshot)
+    # The two tests of the phase every page written from the build uses
+    # (rule 96): the results read after Election Day (share.post_election),
+    # and the Congress the cycle elects sitting (cycle.phase).
+    from . import cycle, results, share
+    after = bool(share.post_election({"election": {
+        "resultsAsOf": (results.load_cache(root) or {}).get("asOf")}}))
+    try:
+        record = bool(snapshot) and cycle.phase(snapshot) == "record"
+    except cycle.CycleError:
+        record = False
     candidates_heavy = 0
     for cache, path, command in ((exec_cache, executives.CACHE_PATH, "executives"),
                                  (leg_cache, statelegs.CACHE_PATH, "statelegs"),
@@ -697,7 +720,7 @@ def build(root="."):
                 holder = entry["governor"] if key == "governor" else entry.get(key) or {}
                 listed = statewide.office(lists, code, key)
                 status, problem = holder_line(code, key, holder.get("name"), holder.get("terms"),
-                                              listed)
+                                              listed, after)
                 if problem:
                     problems.append(problem)
                 if status:
@@ -725,7 +748,7 @@ def build(root="."):
         # The offices held, articles and the agreed date of birth for the
         # governor's overlay and the candidates' (rule 91, rule 69).
         attach_history(code, entry, governors[code], history_cache, photo_cache, problems,
-                       as_of, sitting)
+                       as_of, sitting, record)
         if code in STATES:
             entry.update(_legislature(code, legislators.get(code, []), ncsl["states"].get(code),
                                       entry["governor"]["partyKey"], problems))

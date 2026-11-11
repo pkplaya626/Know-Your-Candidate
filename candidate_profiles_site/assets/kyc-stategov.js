@@ -213,6 +213,15 @@
     return KYC.electionStatus(2026).phase === "post-election";
   }
 
+  /** "<Place> does not elect its governor in 2026.", in the past tense from
+   *  the day after Election Day, as the state page's lead says it: the map's
+   *  panel and the overlay said "does not elect" beside "did not elect"
+   *  (the review of PR #229). One sentence for both (rule 12). */
+  function noGovernorRace(code) {
+    return KYC.stateName(code) + (after() ? " did not elect" : " does not elect") +
+      " its governor in 2026.";
+  }
+
   /** When an office or chamber not on this ballot is next elected, linked
    *  to the record that gives the year (ballot2026.NEXT): never worked out
    *  here from a term length. "" when the table has no year for it. */
@@ -431,7 +440,8 @@
   function resultsLine(code) {
     var voting = (KYC.meta && KYC.meta().voting) || {};
     var url = (voting[code] || {}).results;
-    return " This site does not read the state's results and names no winner" +
+    // "These", never "the state's": a territory is never a state (rule 75).
+    return " This site does not read the election’s results and names no winner" +
       (url ? ": " + link(url, "the official results") : "") + ".";
   }
 
@@ -767,8 +777,8 @@
     if (!s || !s.governor) return "";
     var parts = listParts(code, "governor");
     if (!parts) {
-      return '<p class="gov-race-none">' + KYC.escapeHtml(KYC.stateName(code)) +
-        " does not elect its governor in 2026." + nextMark(ballotItem(code, "governor")) + "</p>" +
+      return '<p class="gov-race-none">' + KYC.escapeHtml(noGovernorRace(code)) +
+        nextMark(ballotItem(code, "governor")) + "</p>" +
         governorCard(code);
     }
     var head = "";
@@ -1621,6 +1631,7 @@
     raceId: raceId,
     raceOdds: raceOdds,
     racePanel: racePanel,
+    noGovernorRace: noGovernorRace,
     candidateBadge: candidateBadge,
     cardPhoto: cardPhoto,
     // One way a photograph that failed takes its credit with it (rule 87),

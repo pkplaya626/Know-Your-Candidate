@@ -1740,6 +1740,7 @@ render all three identically:
 | `""` | nobody has researched it | *No data* (muted) |
 | `General legislative priorities`, `Public service` | true of everyone; no information | *No data* (muted), titled as a generic placeholder (rule 10) |
 | — | the FEC was queried and holds no filing for this cycle | *No filing this cycle* (muted) |
+| — | a winner seated for a new term for whom this site holds no FEC figures under any of their FEC ids (the seat they now hold, or the 2026 campaign that won it); their funding box says the same | *No FEC figures held yet* (muted) |
 
 That last row is the only absence that reports work actually done. "No data"
 is a claim about us: it says nobody looked. Once the pipeline queries the FEC
