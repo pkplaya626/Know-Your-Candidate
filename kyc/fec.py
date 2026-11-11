@@ -695,9 +695,23 @@ def apply_cache(profiles, cache):
     """Overlay FEC figures onto profiles, replacing roster estimates."""
     from .normalize import NO_FILING, STATUS_LABELS
 
+    from .record import seated_winner
+
     applied = checked = 0
     for profile in profiles:
         record = cache.get(profile_key(profile)) or {}
+        if record.get("receipts") is None and seated_winner(profile):
+            # A winner Congress seats is a member, keyed by name, state and
+            # chamber, which the finance step has not read yet: the 2026
+            # campaign's own totals, read under the filing folded into them
+            # (by its FEC id, rule 17), are theirs still. "Raised No data"
+            # stood in January over filings that raised millions a week
+            # before (the review of PR #227).
+            for fid in [profile.get("fecCandidateId"), *(profile.get("otherFecIds") or [])]:
+                folded = cache.get(f"fec:{fid}") if fid else None
+                if folded and folded.get("receipts") is not None:
+                    record = folded
+                    break
         roster_id = profile.get("rosterFecId")
         if roster_id and record.get("candidate_id") not in (None, roster_id):
             # Found by an older name search, for a filing the roster says is

@@ -150,6 +150,30 @@ class TestSeatedWinnersKeepTheirReads(unittest.TestCase):
         self.assertTrue(row["current"])
         self.assertNotIn("openWhenRead", row)
 
+    def test_the_campaigns_money_is_kept_until_the_member_is_read(self):
+        """The review of PR #227: Mike McGuire's January dialog read "Raised
+        No data" over a filing that raised millions a week before, because a
+        member is keyed by name, state and chamber and the finance step had
+        not read him as one. The 2026 campaign's own totals, read by its FEC
+        id, are his; a member's own read wins, and nobody else's is taken."""
+        from kyc import fec
+        cache = {"fec:H6CA03158": {"found": True, "candidate_id": "H6CA03158",
+                                   "receipts": 2500000.0, "disbursements": 2400000.0,
+                                   "cash_on_hand": 100000.0, "election_year": 2026,
+                                   "coverage_start": "2025-01-01", "coverage_end": "2026-10-14"}}
+        person = self.newcomer(chamber="House", state="CA", receipts="No data",
+                               quality={"receipts": "unknown"})
+        fec.apply_cache([person], cache)
+        self.assertEqual(person["financeSource"], "FEC")
+        self.assertEqual(person["fecCandidateId"], "H6CA03158")
+        self.assertNotIn("receipts", person["quality"])
+        for other in (self.newcomer(chamber="House", state="CA", raceRole=None,
+                                    receipts="No data", quality={"receipts": "unknown"}),
+                      self.newcomer(chamber="House", state="CA", formerMember={"left": "2027-01-03"},
+                                    receipts="No data", quality={"receipts": "unknown"})):
+            fec.apply_cache([other], cache)
+            self.assertNotEqual(other.get("financeSource"), "FEC")
+
     def test_an_office_not_begun_when_read_is_not_shown(self):
         """Phil Weiser's and Rob Sand's records, read in November 2026, held
         "Governor of Colorado" and "Governor of Iowa" from 2027 as current:
