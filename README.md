@@ -2149,7 +2149,17 @@ here in a different way:
   down in *Trump v. Slaughter* (2026); the 94 district courts counted with the
   three territorial ones; "unitary executive", a contested legal theory,
   replaced by what Article II says. The footer gives the date the text was
-  last checked (`REVIEWED`).
+  last checked (`REVIEWED`), and a section read again on another day gives
+  its own.
+- **Its tense is the build's day.** Words about the election and what
+  follows it are a `government_text.Tense`: a form for the campaign, one for
+  after Election Day (the results read after it, as the pages tell), one for
+  the new Congress (the record phase) and one for any dated day after
+  (Georgia's December 1 runoff, Louisiana's December 12, Arizona's first
+  lieutenant governor on January 4, 2027), chosen by `government.clock` from
+  the data the build read. The guide's map data (`data/government.js`)
+  follows the same clock, and `government.check` follows every link in every
+  form.
 - **Nothing about a person is typed into it.** Who chairs each committee and
   who leads its minority comes from the same committee rosters as each
   profile, rendered by `assets/kyc-guide.js`; each name opens the profile.

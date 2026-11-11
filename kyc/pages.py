@@ -1598,8 +1598,17 @@ def _possessive(name):
 # States whose map is unchanged but nearly was, where a reader may have read
 # otherwise. Each clause is on the record of the court that decided it.
 UNCHANGED_NOTES = {
-    "MO": ("A map passed in 2025 was suspended by a referendum petition, and the courts "
-           "have kept these districts in place for 2026."),
+    # People Not Politicians v. Onder (U.S. Supreme Court, 26A388): "The
+    # Secretary nonetheless chose to proceed with the 2025 map for the
+    # primary", "leaving the 2022 map in effect for the 2026 general
+    # election". The Secretary of State's certified list of August 25, 2026
+    # names each primary's winner by district number (RSMo 115.401). The
+    # page said only that the courts "kept these districts in place for
+    # 2026" (the guide's second reader, 2026-11-11).
+    "MO": ("A map passed in 2025 was suspended by a referendum petition. The August 4, 2026 "
+           "congressional primaries were held on that map all the same, and the courts kept "
+           "these districts in place for the November 3, 2026 general election, where each "
+           "primary's winner stood for the district of the same number."),
     # Voters approved the amendment on April 21, 2026 (51.7% to 48.3%); the
     # Supreme Court of Virginia struck it down 4-3 on May 8, 2026, for want
     # of an intervening general election between the legislature's two

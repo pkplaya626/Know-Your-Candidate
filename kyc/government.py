@@ -16,12 +16,14 @@ not exist, or a section citing a source the guide does not list: a primer
 that says "see the Senate" and goes nowhere looks entirely normal.
 """
 
+import contextvars
 import html
 import os
 import re
+from collections import namedtuple
 
 from . import pages
-from .government_text import HOLDERS, PAGES, REVIEWED, SEE, SOURCES
+from .government_text import HOLDERS, PAGES, REVIEWED, SEE, SOURCES, Tense
 
 FOLDER = "government"
 # The site's own pages, which a "site:" link must name.
@@ -51,9 +53,102 @@ _MAP_SCRIPTS = (
 )
 
 
+# ------------------------------------------------------------------- clock
+
+# The build's day, which chooses the guide's tense (government_text.Tense):
+# *voted*, the results were read after Election Day (the pages' own test,
+# share.post_election); *seated*, the Congress the cycle elects sits (the
+# record phase, cycle.phase); *day*, the latest day the build's data was
+# read, the results or the membership. A page written once is the data's,
+# so verify writes the same words from the same files on any day.
+Clock = namedtuple("Clock", "voted seated day")
+CAMPAIGN = Clock(False, False, "")
+_NOW = contextvars.ContextVar("guide_clock", default=CAMPAIGN)
+
+
+def clock(summary=None, root=None):
+    """The :data:`Clock` of a build from its *summary* and, under *root*,
+    the membership snapshot it was built from."""
+    from . import share
+
+    voted = share.post_election(summary)
+    election = (summary or {}).get("election") or {}
+    seated = election.get("phase") == "record"
+    day = str(voted) if voted else ""
+    if (voted or seated) and root is not None:
+        from . import legislators
+        read = str(((legislators.load_snapshot(root) or {}).get("fetched")) or "")[:10]
+        day = max(day, read)
+    return Clock(bool(voted) or seated, seated, day)
+
+
+def now():
+    """The clock the guide is being written on."""
+    return _NOW.get()
+
+
+def come(when, at=None):
+    """Whether a Tense form's *when* has come on clock *at* (now)."""
+    at = now() if at is None else at
+    if when == "campaign":
+        return True
+    if when == "voted":
+        return at.voted
+    if when == "seated":
+        return at.seated
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", when or ""):
+        return bool(at.day) and at.day >= when
+    raise ValueError(f"no such time for a Tense: {when!r}")
+
+
+def words(value, at=None):
+    """*value*'s words on clock *at*: a :class:`Tense` gives the last form
+    whose time has come; anything else is itself."""
+    if not isinstance(value, Tense):
+        return value
+    chosen = value[0][1]
+    for when, text in value:
+        if come(when, at):
+            chosen = text
+    return chosen
+
+
+def tenses():
+    """Every :class:`Tense` in the guide's words: its pages, its "see it"
+    links and the maps' notes."""
+    from . import government_maps
+
+    found = []
+
+    def walk(value):
+        if isinstance(value, Tense):
+            found.append(value)
+        elif isinstance(value, (list, tuple)):
+            for item in value:
+                walk(item)
+        elif isinstance(value, dict):
+            for item in value.values():
+                walk(item)
+    walk(list(PAGES))
+    walk(list(SEE.values()))
+    walk(list(government_maps.PRESIDES_NOTES.values()))
+    return found
+
+
+def every_clock():
+    """One clock for each set of words the guide can say: the campaign's,
+    the day after the election, each dated form's day, and the record
+    phase after the last of them."""
+    days = sorted({when for tense in tenses() for when, _words in tense
+                   if re.fullmatch(r"\d{4}-\d{2}-\d{2}", when)})
+    return ([CAMPAIGN, Clock(True, False, "")]
+            + [Clock(True, False, day) for day in days]
+            + [Clock(True, True, days[-1] if days else "")])
+
+
 def _map_modes(slug):
     from . import government_maps
-    return government_maps.modes().get(slug) or []
+    return government_maps.modes(at=now()).get(slug) or []
 
 
 def page_path(slug):
@@ -90,9 +185,16 @@ def name(slug):
 _FIGURE = re.compile(r"\{\{([a-z0-9-]+)\}\}")
 
 
-def figures():
-    from . import government_maps
-    return government_maps.figures()
+def figures(at=None):
+    """The counts and days the text states, on clock *at* (now): the maps'
+    tables', and the next general election's day, which 2 U.S.C. 7 sets and
+    cycle.py counts."""
+    from . import cycle, government_maps
+    at = now() if at is None else at
+    out = dict(government_maps.figures(at))
+    day = cycle.general_election_day(cycle.CYCLE + 2)
+    out["next-election-day"] = f"{day:%B} {day.day}, {day.year}"
+    return out
 
 
 def _figures(text, here):
@@ -132,10 +234,11 @@ def _after(here, sid, pad, level=3):
     see = SEE.get((here, sid))
     if see:
         links = []
-        for words, target in see:
+        for label, target in see:
             url, external = href(target, here)
             extra = ' target="_blank" rel="noopener noreferrer"' if external else ""
-            links.append(f'<a href="{_e(url)}"{extra}>{html.escape(words, quote=False)}</a>')
+            links.append(f'<a href="{_e(url)}"{extra}>'
+                         f'{html.escape(words(label), quote=False)}</a>')
         lines.append(f'{pad}<p class="guide-see"><span>See it on this site:</span> '
                      + '<span class="sep" aria-hidden="true"> · </span>'.join(links) + "</p>")
     return lines
@@ -234,8 +337,9 @@ def _text(segment, here):
 
 def inline(text, here):
     """Escape *text* for HTML, turning ``[label](target)`` into links and
-    ``{{key}}`` into the figure the build counts (:func:`figures`)."""
-    text = _figures(text, here)
+    ``{{key}}`` into the figure the build counts (:func:`figures`), in the
+    tense of the build's day (:func:`words`)."""
+    text = _figures(words(text), here)
     out = []
     last = 0
     for match in _LINK.finditer(text):
@@ -485,7 +589,7 @@ def _cards(here, pad):
             continue
         lines.append(f'{pad}    <li><a class="guide-card" href="{_e(page["slug"])}.html">'
                      f'<strong>{html.escape(name(page["slug"]), quote=False)}</strong>'
-                     f'<span>{html.escape(page["card"], quote=False)}</span></a></li>')
+                     f'<span>{html.escape(words(page["card"]), quote=False)}</span></a></li>')
     return lines + [f"{pad}</ul>"]
 
 
@@ -808,9 +912,18 @@ def _fill_prerendered(text, people):
     return _LIVE_BLOCK.sub(one, text)
 
 
-def render(slug, host, codes=(), members=None):
+def render(slug, host, codes=(), members=None, at=None):
     """The HTML for one guide page. *members*, ``(profiles, summary)``,
-    fills the blocks that name members (:data:`PRERENDERED`)."""
+    fills the blocks that name members (:data:`PRERENDERED`); *at* is the
+    build's :data:`Clock` (:func:`clock`), the campaign's when not given."""
+    token = _NOW.set(at or CAMPAIGN)
+    try:
+        return _render(slug, host, codes, members)
+    finally:
+        _NOW.reset(token)
+
+
+def _render(slug, host, codes, members):
     page = _page(slug)
     path = page_path(slug)
     canonical = f"https://{host}/{path}" if host else path
@@ -848,9 +961,9 @@ def render(slug, host, codes=(), members=None):
     return _fill_prerendered(text, members) if members else text
 
 
-def render_all(host, codes=(), members=None):
+def render_all(host, codes=(), members=None, at=None):
     """``{path inside the site: html}`` for every guide page."""
-    return {page_path(slug): render(slug, host, codes, members) for slug in slugs()}
+    return {page_path(slug): render(slug, host, codes, members, at) for slug in slugs()}
 
 
 # -------------------------------------------------------------- validation
@@ -889,10 +1002,18 @@ def check():
             if section["id"] in ids:
                 problems.append(f"{page['slug']}: section id {section['id']!r} used twice")
             ids.add(section["id"])
-        try:
-            _main(page)
-        except (ValueError, KeyError) as error:
-            problems.append(str(error))
+        # Every tense's words, each link in them checked: a link written
+        # only in the words after the election would first be followed on
+        # the build that turned them on.
+        for at in every_clock():
+            token = _NOW.set(at)
+            try:
+                _main(page)
+            except (ValueError, KeyError) as error:
+                if str(error) not in problems:
+                    problems.append(str(error))
+            finally:
+                _NOW.reset(token)
     for key, (title, url) in SOURCES.items():
         if key not in cited:
             problems.append(f"source {key!r} is listed but no section cites it")

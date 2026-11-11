@@ -724,8 +724,11 @@ def render_state_pages(profiles, root=".", summary=None, stamp_from=None, races=
     out[MANIFEST_FILE] = pages.webmanifest()
     # The guide's Congress page names members from the profiles themselves:
     # it loads none (rule 94).
+    # In the tense of the build's day (government.clock): the results' and
+    # the membership's, so verify writes the same words from the same files.
     for relative, text in government.render_all(host, state_codes(profiles),
-                                                members=(profiles, summary)).items():
+                                                members=(profiles, summary),
+                                                at=government.clock(summary, root)).items():
         out[os.path.join(SITE_DIR, *relative.split("/"))] = text
     from . import census
     from .government_maps import STATES
@@ -1103,9 +1106,11 @@ def odds_signature(payload):
 def write_government(payload, root="."):
     """Emit ``candidate_profiles_site/data/government.js``: the guide's maps.
 
-    A pure function of ``kyc/government_maps.py`` and the atlas - nothing
-    about a person is in it - so a roster refresh never changes it, and the
-    build rewrites it only when its signature changes.
+    A pure function of ``kyc/government_maps.py``, the atlas and the build's
+    day (``government.clock``: the 2026 ballot in the past tense once the
+    election is held, Arizona's lieutenant governor from the day the office
+    is filled) - nothing about a person is in it - so a roster refresh never
+    changes it, and the build rewrites it only when its signature changes.
     """
     path = os.path.join(root, GOVERNMENT_FILE)
     os.makedirs(os.path.dirname(path), exist_ok=True)
