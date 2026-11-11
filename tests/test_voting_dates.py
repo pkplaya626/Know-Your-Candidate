@@ -321,7 +321,7 @@ class TestThePage(unittest.TestCase):
         self.assertFalse(self.lines("GA", "arrive"))
 
     def test_runoffs_say_what_they_decide_and_what_the_date_was(self):
-        for code in ("GA", "LA", "AR", "MS", "GU", "VI"):
+        for code in ("GA", "LA", "AR", "MS", "GU", "VI", "MP"):
             runoff = self.lines(code, "runoff")
             self.assertEqual(len(runoff), 1, code)
             self.assertTrue(runoff[0]["p"].startswith("The date set for"), code)
@@ -339,6 +339,80 @@ class TestThePage(unittest.TestCase):
         # Texas's "7:00 pm (postmark); received by 5:00 pm November 4" is said
         # by its two dates instead.
         self.assertFalse(any("5:00 pm" in l["t"] for l in self.page["states"]["TX"]["lines"]))
+
+
+class TestTheNorthernMarianaIslandsRunoff(unittest.TestCase):
+    """The record said the Commonwealth's runoff date "depends on
+    certification and is not yet set"; the Commonwealth Election Commission
+    certified the results on November 6 and its 2026 Run-Off Election
+    Important Dates give November 20 (read 2026-11-11). The date is the
+    office's, not counted (rule 84), and the words say what 1 CMC 6509 holds
+    a runoff for, never which race went to one: no Commission page says so,
+    and this site reads no territory's result (rule 91)."""
+
+    CALENDAR = "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf"
+    record = DATA["states"]["MP"]
+
+    def sources(self, field):
+        return [s for s in self.record["sources"] if s["field"] == field]
+
+    def test_the_date_is_the_commissions_own(self):
+        self.assertEqual(self.record["runoff"]["date"], "2026-11-20")
+        first, *rest = self.sources("runoff.date")
+        self.assertEqual(first["url"], self.CALENDAR)
+        self.assertIn("NOVEMBER 20 2026 Run-Off Election", first["quote"])
+        self.assertIn("NOVEMBER 06 Certification of the 2026 General Election results", first["quote"])
+        self.assertEqual(first["read"], "2026-11-11")
+        self.assertTrue(any("2026 Run-Off Election Day" in s["quote"] for s in rest))
+        for source in self.sources("runoff.date") + self.sources("runoff.note"):
+            self.assertEqual(voting_dates.official_source(source["url"], "MP"),
+                             (True, "votecnmi.gov.mp"), source["url"])
+        self.assertNotIn("not yet set", self.record["runoff"]["note"])
+
+    def test_it_is_the_fourteenth_day_after_certification_as_the_law_counts_it(self):
+        import datetime
+        quotes = " ".join(s["quote"] for s in self.sources("runoff.note"))
+        self.assertIn("The General Election results were certified on November 6, 2026.", quotes)
+        self.assertIn("fourteen days after the Commonwealth Election Commission has certified", quotes)
+        certified = datetime.date(2026, 11, 6)
+        self.assertEqual((certified + datetime.timedelta(days=14)).isoformat(),
+                         self.record["runoff"]["date"])
+
+    def test_the_words_name_the_laws_offices_and_no_race_or_person(self):
+        from kyc import statewide
+        line = next(l for l in voting_dates.for_page(DATA)["states"]["MP"]["lines"] if l["k"] == "runoff")
+        for words in (line["t"], line["p"], line["s"], line["sp"]):
+            self.assertNotRegex(words, r"(?i)if (one is )?needed|Delegate|Congress")
+        for words in (line["t"], line["p"]):
+            self.assertIn("Governor and Lieutenant Governor, or for Attorney General", words)
+            self.assertIn("Commonwealth Election Commission", words)
+        self.assertTrue(line["keep"])
+        self.assertEqual((line["s"], line["sp"]), ("Governor or attorney general runoff",
+                                                   "Governor or attorney general runoff date"))
+        cache = statewide.load(ROOT)
+        names = [p["name"] for key in ("governor", "lt", "ag")
+                 for p in (statewide.office(cache, "MP", key) or {}).get("candidates") or []]
+        self.assertTrue(names)
+        for name in names:
+            surname = name.split(",")[0].strip().lower()
+            for words in (line["t"], line["p"]):
+                self.assertNotIn(surname, words.lower(), name)
+
+    def test_the_line_links_the_calendar_and_says_the_day_it_was_read(self):
+        entry = voting_dates.for_page(DATA)["states"]["MP"]
+        line = next(l for l in entry["lines"] if l["k"] == "runoff")
+        self.assertEqual([entry["urls"][i] for i in line["src"]], [self.CALENDAR])
+        self.assertEqual(entry["reread"], [{"d": "2026-11-11", "labels": ["votecnmi.gov.mp"]}])
+
+    def test_words_without_the_date_or_a_date_without_words_fail(self):
+        rec = record("MP")
+        rec["runoff"]["date"] = None
+        self.assertTrue(any("RUNOFF_WORDS for a runoff the record does not hold" in p
+                            for p in voting_dates.problems(with_state("MP", rec))))
+        rec = record("MP")
+        rec["sources"] = [s for s in rec["sources"] if s["field"] != "runoff.date"]
+        self.assertTrue(any("MP runoff.date: shown with no source" in p
+                            for p in voting_dates.problems(with_state("MP", rec))))
 
 
 class TestVoteGov(unittest.TestCase):
