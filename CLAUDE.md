@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3122 tests, no dependencies
-npm install && npm test                       # 4630 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3133 tests, no dependencies
+npm install && npm test                       # 4660 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -2210,8 +2210,25 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     (read 2026-11-11). Its words name the offices 1 CMC 6509 holds a
     majority runoff for (6524(b) adds a tie in any office), never which
     race went to one or who is in it, which no Commission
-    page says (rule 91). The cycle's dates are reread each cycle, and
-    `check` refuses a date outside it.
+    page says (rule 91). A runoff's own early voting and mail-ballot dates
+    are kept as the general election's are (`runoff.earlyVoting`,
+    `runoff.mail`), each the office's and sourced: the record gave a runoff
+    only its date, so neither the Commonwealth's page nor Your ballot said
+    that early voting for its November 20 runoff opened on November 13,
+    though the Commission's runoff calendar did. They follow the runoff's
+    own line, "for the runoff" where the office has set one
+    (`RUNOFF_SET`) and "for a runoff, if one is held" elsewhere; each falls
+    between the election and the runoff, but for a ballot still arriving
+    after it, and none stands without the runoff's date; a qualifier that is
+    a claim of its own is said in a quote it stands on (`SAID`: Georgia's
+    advance voting begins "as soon as possible, but no later than" November
+    23, the Commission takes applications "over the counter"). Each goes
+    once its day has passed, a window once its last day has. No Secretary of
+    State page gives Georgia's runoff absentee dates, so they are null and
+    the page says nothing of them. A date is a calendar day in its place,
+    and whether it has passed is counted on the reader's device: the page
+    says so, and types in no time zone. The cycle's dates are reread each
+    cycle, and `check` refuses a date outside it.
 
 85. **A ZIP code is not a place, and a location is placed on lines fine
     enough to place it.** "Who represents me" had no answer outside a

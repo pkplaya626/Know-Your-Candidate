@@ -100,7 +100,9 @@
    * are words and which a reader's calendar day has passed is the only
    * thing decided here, on the reader's own clock, as KYC.electionStatus
    * counts days. From the day after the election, only what still matters
-   * stays: a mailed ballot that may still arrive, a runoff. Once a date has
+   * stays: a mailed ballot that may still arrive, a runoff, and the runoff's
+   * own early voting and mail-ballot dates until each has passed, so they go
+   * with the runoff but for a ballot still arriving after it. Once a date has
    * passed, a line says what the date was, never what will happen on it
    * (rule 63). */
   function datesFor(all, code) {
@@ -114,8 +116,10 @@
       if (!after) return true;
       if (!l.keep) return false;
       // A ballot that can no longer arrive is no longer news; a runoff's
-      // date is said in the past tense once it has gone.
-      return l.k === "runoff" || !(l.d < today);
+      // date is said in the past tense once it has gone. A window stays
+      // until its last day has passed: read by its first day, the runoff's
+      // early voting would have gone the day after it opened.
+      return l.k === "runoff" || !((l.e || l.d) < today);
     });
     return { mine: mine, lines: lines, today: today, election: election, after: after };
   }
@@ -447,13 +451,18 @@
           KYC.icon("link") + " " + KYC.escapeHtml(label) + "</a>";
       }).join(" ") + "</p>" +
       keyDates(info) +
-      '<p class="state-note">' + datesNote(all, info) + votingSources(all, code, links, labels, place) +
+      '<p class="state-note">' + datesNote(all, info, place) + votingSources(all, code, links, labels, place) +
         " Hours and ID rules are on the election office's pages.</p>" +
       "</section>";
   }
 
-  /** Where the dates come from, said once under them. */
-  function datesNote(all, info) {
+  /** Where the dates come from, said once under them, and whose day each
+   *  is: the office's, in *place*. No time zone is typed here: whether a
+   *  date has passed is counted on the reader's device, and a reader far
+   *  from the place is told so: the Northern Mariana Islands' November 13,
+   *  the first day of their runoff's early voting, begins while it is still
+   *  November 12 across the States. */
+  function datesNote(all, info, place) {
     if (!info || !info.lines.length) return "";
     var d = all._dates || {};
     // Not every date is printed as a date: where the office or its law
@@ -469,8 +478,9 @@
         return " (" + KYC.escapeHtml(r.labels.join(" and ")) + " read on " + KYC.escapeHtml(r.d) + ")";
       }).join("") +
       "; where the source gives a rule, such as “15 days before the election”, the date " +
-      "is that rule counted on the 2026 calendar. Whether a date has passed is counted on your " +
-      "device's calendar. ";
+      "is that rule counted on the 2026 calendar. Each date is a calendar day in " +
+      KYC.escapeHtml(place) + "; whether it has passed is counted on your device's calendar, " +
+      "which in another time zone turns to the next day some hours sooner or later. ";
   }
 
   /* ============================================ the legislature's seats */
@@ -1242,7 +1252,7 @@
       KYC.escapeAttr(heading) + '">' +
       '<h3 class="ballot-heading">' + esc(heading) + "</h3>" +
       (info ? registrationLead(info, place) + calendarStrip(info) : "") + list +
-      (list && datesNote(all, info) ? '<p class="state-note">' + datesNote(all, info) + "</p>" : "") +
+      (list && datesNote(all, info, place) ? '<p class="state-note">' + datesNote(all, info, place) + "</p>" : "") +
       '<p class="state-links ballot-actions">' + KYC.findRep.voteLink(code) +
         (sampleLink(code, "btn") ? " " + sampleLink(code, "btn") : "") + "</p>" +
       "</section>";

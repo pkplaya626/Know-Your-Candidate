@@ -122,8 +122,11 @@ class TestSources(unittest.TestCase):
         page = voting_dates.for_page(data)
         self.assertEqual(page["states"]["NV"]["reread"],
                          [{"d": "2026-10-25", "labels": ["nvsos.gov"]}])
-        # A record with no source read later carries nothing.
-        self.assertNotIn("reread", page["states"]["GA"])
+        # A record with no source read later carries nothing (Georgia's
+        # calendar was read again on 2026-11-11 for its runoff's dates).
+        self.assertNotIn("reread", page["states"]["TX"])
+        self.assertEqual(page["states"]["GA"]["reread"],
+                         [{"d": "2026-11-11", "labels": ["sos.ga.gov"]}])
         # A read day must be a day of the cycle.
         record = copy.deepcopy(data["states"]["NV"])
         record["sources"][0]["read"] = "Oct 25"
@@ -413,6 +416,242 @@ class TestTheNorthernMarianaIslandsRunoff(unittest.TestCase):
         rec["sources"] = [s for s in rec["sources"] if s["field"] != "runoff.date"]
         self.assertTrue(any("MP runoff.date: shown with no source" in p
                             for p in voting_dates.problems(with_state("MP", rec))))
+
+
+class TestARunoffsOwnDates(unittest.TestCase):
+    """A runoff's own early voting and mail-ballot dates, kept as the
+    general election's are (``runoff.earlyVoting``, ``runoff.mail``). The
+    record gave a runoff only its date, so the Northern Mariana Islands'
+    page never said that early voting for its November 20 runoff opened on
+    November 13, though the Commission's runoff calendar says so (read
+    2026-11-11). Each value is the office's own and sourced (rule 84); a
+    null is a gap; the words never name which race went to a runoff, or who
+    is in it (rule 91)."""
+
+    CALENDAR = "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf"
+    GA_CALENDAR = "https://sos.ga.gov/sites/default/files/forms/2026%20Short%20Calendar%20.pdf"
+    FIELDS = ("runoff.earlyVoting.start", "runoff.earlyVoting.end",
+              "runoff.mail.requestDeadline.date", "runoff.mail.returnDeadline.date",
+              "runoff.mail.returnDeadline.receivedBy")
+
+    def page_lines(self, data, code):
+        return voting_dates.for_page(data)["states"][code]["lines"]
+
+    def assertProblem(self, data, text):
+        found = voting_dates.problems(data)
+        self.assertTrue(any(text in p for p in found), found)
+
+    # ------------------------------------------------------------ the CNMI
+    def test_the_commonwealths_runoff_dates_are_the_commissions_own(self):
+        rec = DATA["states"]["MP"]["runoff"]
+        self.assertEqual((rec["earlyVoting"]["start"], rec["earlyVoting"]["end"]),
+                         ("2026-11-13", "2026-11-19"))
+        self.assertEqual(rec["mail"]["requestDeadline"],
+                         {"date": "2026-11-12", "rule": "received", "how": "in person"})
+        self.assertEqual(rec["mail"]["returnDeadline"],
+                         {"date": "2026-11-20", "time": None, "rule": "postmarked",
+                          "receivedBy": "2026-12-04"})
+        sources = DATA["states"]["MP"]["sources"]
+        words = {"runoff.earlyVoting.start": "NOVEMBER 13 First day of early voting",
+                 "runoff.earlyVoting.end": "NOVEMBER 19 Last day of (Run-Off) Early Voting",
+                 "runoff.mail.requestDeadline.date":
+                     "NOVEMBER 12 Last day to receive absentee ballot applications over the counter",
+                 "runoff.mail.returnDeadline.receivedBy":
+                     "DECEMBER 04 Last day to receive run-off election absentee ballots"}
+        for field, quote in words.items():
+            first, *rest = [s for s in sources if s["field"] == field]
+            self.assertEqual(first["url"], self.CALENDAR, field)
+            self.assertIn(quote, first["quote"], field)
+            self.assertEqual(first["read"], "2026-11-11", field)
+            # The home page's "Important Dates for Election 2026" give the
+            # same days.
+            self.assertTrue(any(s["url"] == "https://www.votecnmi.gov.mp/" for s in rest), field)
+        postmark = [s for s in sources if s["field"] == "runoff.mail.returnDeadline.date"]
+        self.assertIn("postmarked not later than the day of the runoff election", postmark[0]["quote"])
+        for source in sources:
+            if source["field"].startswith("runoff."):
+                self.assertEqual(voting_dates.official_source(source["url"], "MP"),
+                                 (True, "votecnmi.gov.mp"), source["url"])
+        # The note no longer says the cache cannot hold them.
+        self.assertNotIn("no fields for a runoff's own", rec["note"])
+
+    def test_the_commonwealths_lines_follow_the_runoff_in_the_order_of_their_days(self):
+        lines = [l for l in self.page_lines(DATA, "MP") if l["k"].startswith("runoff")]
+        self.assertEqual([(l["k"], l["d"]) for l in lines], [
+            ("runoff", "2026-11-20"), ("runoff-request", "2026-11-12"),
+            ("runoff-early", "2026-11-13"), ("runoff-postmark", "2026-11-20"),
+            ("runoff-arrive", "2026-12-04")])
+        by = {l["k"]: l for l in lines}
+        self.assertEqual(by["runoff-early"]["e"], "2026-11-19")
+        self.assertEqual(by["runoff-early"]["t"], "In-person early voting for the runoff")
+        self.assertEqual(by["runoff-request"]["t"],
+                         "Last day to apply in person for an absentee ballot for the runoff")
+        self.assertEqual(by["runoff-postmark"]["t"],
+                         "Mail ballots for the runoff must be postmarked by this day")
+        self.assertEqual(by["runoff-arrive"]["t"], "Mail ballots for the runoff postmarked by "
+                                                   "November 20 are counted if they arrive by this day")
+        # Each is kept after Election Day, until its own day has passed.
+        self.assertTrue(all(l["keep"] for l in lines))
+        entry = voting_dates.for_page(DATA)["states"]["MP"]
+        self.assertEqual([entry["urls"][i] for i in by["runoff-early"]["src"]], [self.CALENDAR])
+
+    def test_the_words_name_no_race_and_nobody_and_the_runoff_is_set(self):
+        from kyc import statewide
+        lines = [l for l in self.page_lines(DATA, "MP") if l["k"].startswith("runoff-")]
+        cache = statewide.load(ROOT)
+        names = [p["name"] for key in ("governor", "lt", "ag")
+                 for p in (statewide.office(cache, "MP", key) or {}).get("candidates") or []]
+        self.assertTrue(names)
+        for line in lines:
+            for words in (line["t"], line["s"], line.get("p", "")):
+                # The Commission has set it: never "if one is held".
+                self.assertNotRegex(words, r"(?i)if (one is )?(held|needed)|Delegate|Congress|Governor")
+                for name in names:
+                    self.assertNotIn(name.split(",")[0].strip().lower(), words.lower(), name)
+
+    # ------------------------------------------------------------ Georgia
+    def test_georgias_advance_voting_for_a_runoff_may_begin_before_its_date(self):
+        rec = DATA["states"]["GA"]["runoff"]
+        self.assertEqual(rec["earlyVoting"]["start"], "2026-11-23")
+        self.assertIs(rec["earlyVoting"]["startsBy"], True)
+        source = next(s for s in DATA["states"]["GA"]["sources"]
+                      if s["field"] == "runoff.earlyVoting.start")
+        self.assertEqual(source["url"], self.GA_CALENDAR)
+        self.assertIn("Runoff 12/01/2026 As soon as possible, but no later than 11/23/26 – 11/25/26",
+                      source["quote"])
+        early = [l for l in self.page_lines(DATA, "GA") if l["k"] == "runoff-early"]
+        self.assertEqual(len(early), 1)
+        self.assertEqual((early[0]["d"], early[0]["e"]), ("2026-11-23", "2026-11-25"))
+        # A runoff Georgia holds only if one is needed: said so, and that
+        # November 23 is the latest start, not the first day.
+        self.assertEqual(early[0]["t"], "In-person early voting for a runoff, if one is held; it "
+                                        "begins as soon as possible, and no later than November 23")
+        self.assertEqual(early[0]["s"], "Runoff early voting, if needed")
+
+    def test_georgias_null_mail_dates_add_no_line(self):
+        # No Secretary of State page gives the runoff's own absentee dates:
+        # null, a gap, and nothing on the page.
+        mail = DATA["states"]["GA"]["runoff"]["mail"]
+        self.assertTrue(all(v is None for part in mail.values() if isinstance(part, dict)
+                            for v in part.values()))
+        kinds = [l["k"] for l in self.page_lines(DATA, "GA")]
+        self.assertEqual([k for k in kinds if k.startswith("runoff")], ["runoff", "runoff-early"])
+        # And without the early voting, Georgia's lines are the ones it had.
+        rec = record("GA")
+        del rec["runoff"]["earlyVoting"], rec["runoff"]["mail"]
+        before = self.page_lines(with_state("GA", rec), "GA")
+        self.assertEqual(before, [l for l in self.page_lines(DATA, "GA") if l["k"] != "runoff-early"])
+        rec = record("GA")
+        rec["runoff"]["earlyVoting"] = {"start": None, "end": None, "startsBy": None}
+        self.assertEqual(self.page_lines(with_state("GA", rec), "GA"), before)
+
+    # ------------------------------------------------------------ check()
+    def test_each_value_needs_its_own_source(self):
+        for field in self.FIELDS:
+            rec = record("MP")
+            rec["sources"] = [s for s in rec["sources"] if s["field"] != field]
+            self.assertProblem(with_state("MP", rec), f"MP {field}: shown with no source")
+
+    def test_a_compiled_table_is_no_source_for_them_either(self):
+        rec = record("MP")
+        for s in rec["sources"]:
+            if s["field"] == "runoff.earlyVoting.start":
+                s["url"] = "https://ballotpedia.org/Northern_Mariana_Islands"
+        self.assertProblem(with_state("MP", rec), "rule 50")
+
+    def test_the_days_fall_between_the_election_and_the_runoff(self):
+        cases = [
+            ("earlyVoting", "end", "2026-11-20", "does not run forwards between the election and "
+                                                 "the runoff"),
+            ("earlyVoting", "start", "2026-11-03", "does not run forwards"),
+            ("earlyVoting", "end", None, "a window with one end"),
+            ("earlyVoting", "start", "2026-11-31", "is not a date"),
+        ]
+        for part, key, value, text in cases:
+            rec = record("MP")
+            rec["runoff"][part][key] = value
+            self.assertProblem(with_state("MP", rec), text)
+        rec = record("MP")
+        rec["runoff"]["mail"]["requestDeadline"]["date"] = "2026-11-21"
+        self.assertProblem(with_state("MP", rec), "runoff.mail.requestDeadline.date: 2026-11-21 is "
+                                                  "not between the election and the runoff")
+        rec = record("MP")
+        rec["runoff"]["mail"]["returnDeadline"]["date"] = "2026-11-03"
+        self.assertProblem(with_state("MP", rec), "runoff.mail.returnDeadline.date: 2026-11-03 is "
+                                                  "not between")
+        rec = record("MP")
+        rec["runoff"]["mail"]["returnDeadline"]["receivedBy"] = "2026-11-19"
+        self.assertProblem(with_state("MP", rec), "received by 2026-11-19, before 2026-11-20")
+        rec = record("MP")
+        rec["runoff"]["mail"]["returnDeadline"]["receivedBy"] = "2026-11-20"
+        self.assertProblem(with_state("MP", rec), "postmarked, yet received the same day")
+        rec = record("MP")
+        rec["runoff"]["mail"]["returnDeadline"]["receivedBy"] = "2027-01-04"
+        self.assertProblem(with_state("MP", rec), "outside the cycle")
+
+    def test_none_stands_without_the_runoffs_date(self):
+        rec = record("TX")
+        rec["runoff"]["earlyVoting"] = {"start": "2026-11-28", "end": "2026-12-08"}
+        rec["sources"] += [{"field": "runoff.earlyVoting.start", "url": "https://www.sos.texas.gov/x",
+                            "quote": "x"},
+                           {"field": "runoff.earlyVoting.end", "url": "https://www.sos.texas.gov/x",
+                            "quote": "x"}]
+        self.assertProblem(with_state("TX", rec), "TX runoff.earlyVoting.start: a runoff's own date, "
+                                                  "with no runoff date in the record")
+        # And a record that breaks a rule is not sent to the page at all.
+        self.assertNotIn("TX", voting_dates.for_page(with_state("TX", rec))["states"])
+
+    def test_a_qualifier_is_said_in_a_quote_it_stands_on(self):
+        # A latest start needs the office's words that early voting may begin
+        # sooner ("as soon as possible, but no later than").
+        rec = record("GA")
+        for s in rec["sources"]:
+            if s["field"] == "runoff.earlyVoting.start":
+                s["quote"] = "General Election/Special Election Runoff 12/01/2026 11/23/26 – 11/25/26"
+        self.assertProblem(with_state("GA", rec),
+                           "GA runoff.earlyVoting.startsBy: shown, but no quote it stands on says so")
+        rec = record("GA")
+        rec["runoff"]["earlyVoting"]["start"] = rec["runoff"]["earlyVoting"]["end"] = None
+        self.assertProblem(with_state("GA", rec), "a latest start with no start")
+        # An application taken in person alone needs words that say so.
+        rec = record("MP")
+        for s in rec["sources"]:
+            if s["field"] == "runoff.mail.requestDeadline.date":
+                s["quote"] = s["quote"].replace("over the counter", "")
+        self.assertProblem(with_state("MP", rec), "MP runoff.mail.requestDeadline.how: shown, but no "
+                                                  "quote it stands on says so")
+        rec = record("MP")
+        rec["runoff"]["mail"]["requestDeadline"]["how"] = "by fax"
+        self.assertProblem(with_state("MP", rec), "'by fax' is not one of")
+        # "Postmarked" stands on a quote that says so, as the general's does.
+        rec = record("MP")
+        rec["sources"] = [s for s in rec["sources"]
+                          if not (s["field"] == "runoff.mail.returnDeadline.date")]
+        rec["sources"].append({"field": "runoff.mail.returnDeadline.date", "url": self.CALENDAR,
+                               "quote": "NOVEMBER 20 2026 Run-Off Election"})
+        self.assertProblem(with_state("MP", rec), "MP runoff.mail.returnDeadline.rule: 'postmarked', "
+                                                  "but no quote it stands on says so")
+
+    def test_a_received_by_runoff_ballot_and_an_application_by_mail_read_as_the_generals(self):
+        rec = record("GA")
+        rec["runoff"]["mail"] = {"requestDeadline": {"date": "2026-11-20", "rule": "received"},
+                                 "returnDeadline": {"date": "2026-12-01", "time": "7:00 pm",
+                                                    "rule": "received", "receivedBy": "2026-12-01"}}
+        rec["sources"] += [
+            {"field": "runoff.mail.requestDeadline.date", "url": self.GA_CALENDAR,
+             "quote": "must be received 11 days before the runoff"},
+            {"field": "runoff.mail.returnDeadline.date", "url": self.GA_CALENDAR,
+             "quote": "must be received by the close of the polls on the day of the runoff"},
+            {"field": "runoff.mail.returnDeadline.receivedBy", "url": self.GA_CALENDAR,
+             "quote": "must be received by the close of the polls on the day of the runoff"}]
+        data = with_state("GA", rec)
+        self.assertEqual(voting_dates.problems(data), [])
+        by = {l["k"]: l for l in self.page_lines(data, "GA")}
+        self.assertEqual(by["runoff-request"]["t"], "Last day to apply for a mail ballot for a runoff, "
+                                                    "if one is held (the application must arrive by then)")
+        self.assertEqual(by["runoff-return"]["t"], "Mail ballots for a runoff, if one is held, must "
+                                                   "arrive at the election office by 7:00 pm on this day")
+        self.assertEqual(by["runoff-return"]["s"], "Runoff mail ballots due, if needed")
 
 
 class TestVoteGov(unittest.TestCase):
