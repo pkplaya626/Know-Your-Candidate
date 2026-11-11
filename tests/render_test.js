@@ -11200,6 +11200,75 @@ function generalRunoffIn(state, chamber, asOf, decided) {
   };
 }
 
+/* The Northern Mariana Islands' runoff is its Commonwealth Election
+ * Commission's own date, November 20, 2026 (its 2026 Run-Off Election
+ * Important Dates, read 2026-11-11), where the record had said only that
+ * the date was "not yet set". The line says what 1 CMC 6509 holds a runoff
+ * for and never which race went to one, or who is in it: no Commission page
+ * says so in words, and this site reads no territory's result (rule 91).
+ * On the reader's own day it is ahead, today, then what the date was
+ * (rules 63, 84), on the state page and on Your ballot alike. */
+async function testMarianasRunoff() {
+  const CALENDAR = "https://www.votecnmi.gov.mp/downloads/2026/2026_Run-Off-Election_Important_Dates.pdf";
+  const AHEAD = /^November 20, 2026\. Runoff election set by the Commonwealth Election Commission: the law holds one between the top two for Governor and Lieutenant Governor, or for Attorney General, where no ticket or candidate won more than half the votes on November 3\./;
+  const GONE = /^November 20, 2026\. The date set for the Commonwealth Election Commission's runoff election, which the law holds for Governor and Lieutenant Governor, or for Attorney General, where no ticket or candidate won more than half the votes on November 3\./;
+  const line = (root) => root.querySelector('.vote-dates li[data-kind="runoff"]');
+  const strip = (root) => [...root.querySelectorAll("ol.vote-cal li")].map((li) => li.textContent);
+  const now = await buildPage("states/mp.html", { now: "2026-11-11T09:00:00" });
+  const day = await buildPage("states/mp.html", { now: "2026-11-20T09:00:00" });
+  const later = await buildPage("states/mp.html", { now: "2026-11-21T09:00:00" });
+  suite("states/mp.html — the Commission's November 20 runoff, on the reader's day", () => {
+    check("no page errors", [now, day, later].every((p) => p.errors.length === 0),
+      [now, day, later].map((p) => p.errors.join(" | ")).join(" / "));
+    const voting = now.D.getElementById("voting");
+    const kinds = [...voting.querySelectorAll(".vote-dates li")].map((li) => li.getAttribute("data-kind"));
+    check("after Election Day the block keeps the runoff alone", kinds.join(",") === "runoff", kinds.join(","));
+    const ahead = line(voting);
+    check("November 20, 2026, set by the Commission, for the offices the law holds one for",
+      !!ahead && AHEAD.test(ahead.textContent) && !/Today|Passed/.test(ahead.textContent), ahead && ahead.textContent);
+    check("never 'if needed', and never the Delegate's seat",
+      !!ahead && !/if (one is )?needed|Delegate/i.test(ahead.textContent), ahead && ahead.textContent);
+    check("linked to the Commission's own runoff calendar",
+      !!ahead && [...ahead.querySelectorAll(".vote-src a")].map((a) => a.getAttribute("href")).join(" ") === CALENDAR,
+      ahead && ahead.innerHTML);
+    // Nobody on the election office's lists is named beside it: which race
+    // went to a runoff is not this site's to say (rule 91).
+    const offices = (((now.window.KYC.stategov.ballotOf("MP") || {}).offices) || {});
+    const names = Object.keys(offices).flatMap((k) => (((offices[k] || {}).candidates || {}).candidates || [])
+      .map((c) => c.name));
+    check("names no candidate on the lists", names.length > 0 &&
+      names.every((n) => voting.textContent.indexOf(n) === -1), names.join(", "));
+    check("the strip names the offices, set, not 'if needed'",
+      strip(voting).some((t) => t === "Nov 20Governor or attorney general runoff") &&
+        !strip(voting).some((t) => /if needed/.test(t)), strip(voting).join(" | "));
+    const today = line(day.D.getElementById("voting"));
+    check("on November 20 it is today's", !!today && AHEAD.test(today.textContent) &&
+      /Today/.test(today.textContent), today && today.textContent);
+    const gone = later.D.getElementById("voting");
+    check("after it, what the date was, with no 'Passed' beside the words that say so",
+      !!line(gone) && GONE.test(line(gone).textContent) && !/Today|Passed/.test(line(gone).textContent),
+      line(gone) && line(gone).textContent);
+    check("and the strip names it for what it was",
+      strip(gone).some((t) => t === "Nov 20Governor or attorney general runoff date"), strip(gone).join(" | "));
+    check("the note says when the Commission's calendar was read",
+      /\(votecnmi\.gov\.mp read on 2026-11-11\)/.test(voting.textContent), voting.textContent.slice(-600));
+  });
+  // Saipan's ZIP code on Your ballot: the same line, from the same module.
+  const ballotNow = await ballotFor("#/?zip=96950", { now: "2026-11-11T09:00:00" });
+  const ballotLater = await ballotFor("#/?zip=96950", { now: "2026-11-21T09:00:00" });
+  suite("Your ballot: 96950 — the Northern Mariana Islands' runoff in its tense", () => {
+    const dates = (b) => b.out.querySelector(".ballot-dates");
+    check("the Northern Mariana Islands' ballot", !!dates(ballotNow) &&
+      /Key dates in the Northern Mariana Islands/.test(dates(ballotNow).textContent), ballotNow.text.slice(0, 300));
+    const ahead = dates(ballotNow) && line(dates(ballotNow));
+    check("its key dates hold the Commission's November 20 runoff, ahead",
+      !!ahead && AHEAD.test(ahead.textContent), ahead && ahead.textContent);
+    const gone = dates(ballotLater) && line(dates(ballotLater));
+    check("and after November 20, the date set for it",
+      !!gone && GONE.test(gone.textContent), gone && gone.textContent);
+  });
+}
+
 /* Georgia's December 1 runoff once its day has passed (the owner's answer
  * of 2026-11-01): with no result read it is in the past tense and awaiting
  * one, as Louisiana's December round is (rule 63); on the day itself and
@@ -23271,6 +23340,7 @@ async function testTheJanuaryWords() {
   if (!only || only === "states") await testQualifiedBallot();
   if (!only || only === "states") await testLouisianaDecember();
   if (!only || only === "states") await testGeorgiaRunoffPast();
+  if (!only || only === "states" || only === "ballot" || only === "mprunoff") await testMarianasRunoff();
 if (!only || only === "states") await testCertifiedBallots();
   if (!only || only === "redistricting") await testRedistricting();
   if (!only || only === "redistricting") await testDistrictPages();
