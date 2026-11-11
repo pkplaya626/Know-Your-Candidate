@@ -996,8 +996,8 @@
     var gone = split.out;
     var body = (lead || "") +
       '<p class="ballot-badges">' + KYC.cards.raceBadges(race) + "</p>" +
-      split.moved.map(KYC.cards.heldByLine).join("") +
-      holders.map(function (p) { return KYC.cards.holderLine(p, "ballot-holder"); }).join("") +
+      split.moved.map(function (p) { return KYC.cards.heldByLine(p, race); }).join("") +
+      holders.map(function (p) { return KYC.cards.holderLine(p, "ballot-holder", race); }).join("") +
       (running.length ? '<ul class="ballot-people">' + running.map(personRow).join("") + "</ul>" : "") +
       (none ? '<p class="ballot-note">Nobody with a profile here is ' +
         (unsure.length ? "known to be on this ballot" : "in this race") + ".</p>" : "") +

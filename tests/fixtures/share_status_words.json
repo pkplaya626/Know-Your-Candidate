@@ -3328,6 +3328,28 @@
 ["withdrawn",1,0,null,0,"ran in AL-1 under the state’s new district map, and is not on its November ballot"],
 ["withdrawn",1,1,null,0,"ran in AL-1 under the state’s new district map, and was not on its November ballot"]
 ],
+"moved": [
+[0,0,0,0,0,"A Member, who held this seat, is running for Senate AL."],
+[0,0,0,0,1,"Held by A Member, who is running for Senate AL."],
+[0,0,0,1,0,"A Member, who held this seat, ran for Senate AL."],
+[0,0,0,1,1,"Held by A Member, who ran for Senate AL."],
+[0,0,1,0,0,"A Member, who held this seat, ran for Senate AL and lost in November."],
+[0,0,1,0,1,"Held by A Member, who ran for Senate AL and lost in November."],
+[0,0,1,1,0,"A Member, who held this seat, ran for Senate AL and lost in November."],
+[0,0,1,1,1,"Held by A Member, who ran for Senate AL and lost in November."],
+[0,1,0,0,0,"A Member, who held this seat, is running in AL-1 under the state’s new district map."],
+[0,1,0,0,1,"Held by A Member, who is running in AL-1 under the state’s new district map."],
+[0,1,0,1,0,"A Member, who held this seat, ran in AL-1 under the state’s new district map."],
+[0,1,0,1,1,"Held by A Member, who ran in AL-1 under the state’s new district map."],
+[0,1,1,0,0,"A Member, who held this seat, ran in AL-1 under the state’s new district map, and lost in November."],
+[0,1,1,0,1,"Held by A Member, who ran in AL-1 under the state’s new district map, and lost in November."],
+[0,1,1,1,0,"A Member, who held this seat, ran in AL-1 under the state’s new district map, and lost in November."],
+[0,1,1,1,1,"Held by A Member, who ran in AL-1 under the state’s new district map, and lost in November."],
+[1,0,0,0,0,"A Member, who held this seat, won the race for Senate AL."],
+[1,0,0,1,0,"A Member, who held this seat, won the race for Senate AL."],
+[1,1,0,0,0,"A Member, who held this seat, was re-elected in AL-1 under the state’s new district map."],
+[1,1,0,1,0,"A Member, who held this seat, was re-elected in AL-1 under the state’s new district map."]
+],
 "filers": [
 [{"maybeNamed":["A Similar Name"]},"Result not matched",null],
 [{"unprinted":{"kind":"write-in","source":"the Texas Secretary of State"}},"Write-in candidate","the Texas Secretary of State"],

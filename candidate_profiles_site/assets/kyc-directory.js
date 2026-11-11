@@ -530,7 +530,7 @@
       // The sidebar's "with a profile here" counts them; this chip, which
       // is the filings, does not: they are under Sitting members.
       parts.push("the sidebar also counts " + plural(election.renumbered, "member", "members") +
-        " running under a new district number, who are under Sitting members here");
+        KYC.renumberedTail() + ", who are under Sitting members here");
     }
     if (state.state === "all" && !state.q && election.challengersUnprofiled) {
       parts.push("the sidebar also counts " + election.challengersUnprofiled.toLocaleString() +

@@ -13542,8 +13542,9 @@ async function testSharePages() {
   const split = (race) => {
     const ids = race.incumbentIds.concat(race.candidateIds);
     const list = ids.filter((id, i) => ids.indexOf(id) === i).map((id) => byId.get(id)).filter(Boolean);
-    const moved = list.filter((p) => !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1 &&
-      !!p.contestRaceId && p.contestRaceId !== race.id && !!p.contestLabel);
+    // The page code's one reading of a holder whose run went elsewhere,
+    // a member seated since for the seat they won among them (rule 74).
+    const moved = list.filter((p) => KYC.movedFrom(race, p));
     const rest = list.filter((p) => moved.indexOf(p) === -1);
     const gone = rest.filter((p) => KYC.offBallot(p.raceStatus));
     const holders = gone.filter((p) => !p.isCandidate && race.incumbentIds.indexOf(p.id) !== -1);
@@ -13643,10 +13644,11 @@ async function testSharePages() {
       const same = (got, want) => got.map((x) => x.id).join() === want.map((p) => p.id).join() &&
         got.every((x, i) => x.standing === words(want[i]));
       if (!same(running, s.running)) raceWrong.push(`${race.id}: running ${running.map((x) => x.id)}`);
-      // The seat's holder is marked while they sit in it (rule 67).
+      // The seat's holder is marked while they sit in that very seat (rule
+      // 67): never one sitting for another (KYC.sitsIn).
       const marked = [...html.matchAll(/<li data-id="([^"]+)">[^\n]*?<span class="share-holder">/g)]
         .map((m) => unescapeHtml(m[1]));
-      const holders = s.running.filter((p) => race.incumbentIds.indexOf(p.id) !== -1 && KYC.seated(p)).map((p) => p.id);
+      const holders = s.running.filter((p) => race.incumbentIds.indexOf(p.id) !== -1 && KYC.sitsIn(race, p)).map((p) => p.id);
       if (marked.join() !== holders.join()) raceWrong.push(`${race.id}: holder ${marked} for ${holders}`);
       const credits = [];
       s.moved.concat(s.holders, s.running, s.out).forEach((p) => {
@@ -13678,11 +13680,17 @@ async function testSharePages() {
         raceWrong.push(`${race.id}: count "${count && count[1]}" for "${head && head.text}"`);
       }
       s.moved.forEach((p) => {
-        if (html.indexOf('<p class="race-held">Held by <a href="../p/' + p.id + '.html">') === -1) {
+        // "Held by" only of one sitting in the seat; "who held this seat"
+        // of one who left it or sits for the seat they won (KYC.movedSentence).
+        const link = '<a href="../p/' + p.id + '.html">';
+        if (html.indexOf(KYC.sitsIn(race, p) ? '<p class="race-held">Held by ' + link
+          : '<p class="race-held">' + link) === -1) {
           raceWrong.push(`${race.id}: held by ${p.id}`);
         }
-        if (unescapeHtml(html).indexOf("who " + KYC.contestLine(p).clause + ".") === -1) {
-          raceWrong.push(`${race.id}: ${p.id} is not said to be "${KYC.contestLine(p).clause}"`);
+        const clause = KYC.movedLine(race, p).clause;
+        const who = KYC.sitsIn(race, p) ? "who " : "who held this seat, ";
+        if (unescapeHtml(html).indexOf(who + clause + ".") === -1) {
+          raceWrong.push(`${race.id}: ${p.id} is not said to be "${who + clause}"`);
         }
       });
       const named = KYC.ballotSource(race);
@@ -13769,6 +13777,29 @@ async function testSharePages() {
       ["elected", "defeated", "nominee", "runoff", "eliminated", "withdrawn", "unlisted", ""].every(
         (status) => table.contest.some((row) => row[0] === status)) && contest.length === 0,
       contest.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${table.contest.length} cases`);
+    // A seat's holder whose run went elsewhere, in one sentence: "Held by"
+    // only while they sit in that very seat; a member seated since for the
+    // seat they won said in the record's words (share.moved_sentence). On
+    // the January rehearsal of 2026-11-10 Kevin Kiley, who had left, read
+    // "Held by Kevin Kiley" on CA-3, and Andy Barr "holds the seat" on KY-6.
+    const seatOf = (rid) => rid === "S-AL-2026" ? "Senate • AL" : "House • AL-1";
+    const moved = (table.moved || []).filter(([won, renumbered, labelled, post, sits, sentence]) => {
+      const other = renumbered ? "H-AL-01-2026" : "S-AL-2026";
+      const item = { id: "FAKE", isCandidate: false, name: "A Member", party: "Republican",
+        officeLabel: won ? seatOf(other) : "House • AL-2", raceId: won ? other : "H-AL-02-2026",
+        raceStatusRace: other, raceStatus: won ? "elected" : "defeated" };
+      if (won) item.raceRole = "winner";
+      if (labelled) Object.assign(item, { contestLabel: seatOf(other), contestRaceId: other });
+      if (renumbered) item.renumbered = true;
+      if (!sits && !won) item.formerMember = { left: "2027-01-03" };
+      const race = { id: "H-AL-02-2026", incumbentIds: ["FAKE"], incumbent: { profileId: "FAKE", seated: !!sits } };
+      return !KYC.movedFrom(race, item) ||
+        KYC.movedSentence(race, item, { now: post ? AFTER_DAY : CAMPAIGN_DAY }) !== sentence;
+    });
+    check("and a seat's holder whose run went elsewhere, seated in it or not, won elsewhere or not",
+      (table.moved || []).length >= 16 && table.moved.some((row) => row[0]) &&
+        table.moved.some((row) => !row[4]) && moved.length === 0,
+      moved.slice(0, 4).map((r) => JSON.stringify(r)).join(" | ") || `${(table.moved || []).length} cases`);
   });
 
   suite("state pages — written with their names before the script draws (TECH-10)", () => {

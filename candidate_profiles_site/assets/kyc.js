@@ -1045,6 +1045,87 @@
           item.officeLabel + "." };
   }
 
+  /* A race id's seat in a clause's words: "Senate KY", "CA-40", "WY-AL"
+   * (kyc/share.py seat_words). */
+  function seatWords(rid) {
+    var m = /^([SH])-([A-Z]{2})(?:-(\d+))?-\d{4}$/.exec(String(rid || ""));
+    if (!m) return "";
+    return m[1] === "S" ? "Senate " + m[2] : m[2] + "-" + (Number(m[3]) ? String(Number(m[3])) : "AL");
+  }
+
+  /** Whether a race's record holder's 2026 run was another race: the race
+   *  they won and sit for now (`raceRole` "winner", `raceId`), or the race
+   *  they ran in (`contestRaceId`, else the race their result is for,
+   *  `raceStatusRace`). One reading for every view that lists a race's
+   *  people (rule 12), and kyc/share.py's moved_from. Once the new Congress
+   *  sits, a member seated for the seat they won has no other run on their
+   *  profile, so the test of `contestRaceId` alone listed Ken Calvert among
+   *  CA-41's people on the January rehearsal of 2026-11-10 - "Held by Ken
+   *  Calvert. Elected: Ken Calvert (R), Linda Sánchez (D)" - though he sits
+   *  for CA-40, which he won under the new map, and Sánchez for CA-41. */
+  function movedFrom(race, item) {
+    if (!race || !item || item.isCandidate || (race.incumbentIds || []).indexOf(item.id) === -1) {
+      return false;
+    }
+    if (item.raceRole === "winner" && item.raceId && item.raceId !== race.id) return true;
+    var run = item.contestRaceId || item.raceStatusRace;
+    return !!run && run !== race.id;
+  }
+
+  /** Whether *item* sits in *race*'s seat now: the race's record of its
+   *  holder (`race.incumbent.seated`, kyc/races.py _sits_in), else a member
+   *  whose seat is this race's. Never `seated` alone (rule 67): in January a
+   *  member re-elected under a new district number sits, for another seat,
+   *  and Andy Barr, a senator, read "holds the seat" on KY-6. */
+  function sitsIn(race, item) {
+    if (!race || !seated(item)) return false;
+    var inc = race.incumbent;
+    if (inc && inc.profileId === item.id) return !!inc.seated;
+    return item.raceId === race.id;
+  }
+
+  /** A moved holder's run (movedFrom), in contestLine's shape: their own
+   *  contestLine where their profile still holds the run, else the record's
+   *  words - "was re-elected in CA-40 under the state's new district map",
+   *  "won the race for Senate KY" for a member seated for the seat they won,
+   *  "ran for" the race their result is for. kyc/share.py moved_clause says
+   *  the same clause, and tests/fixtures/share_status_words.json ("moved")
+   *  holds both to it. */
+  function movedLine(race, item, opts) {
+    var line = contestLine(item, opts);
+    if (line) return line;
+    opts = opts || {};
+    var won = item.raceRole === "winner" && !!item.raceId && item.raceId !== race.id;
+    var seat = seatWords(won ? item.raceId : (item.contestRaceId || item.raceStatusRace));
+    var map = " under the state’s new district map";
+    var moved = !!item.renumbered;
+    if (won) {
+      return { cls: RACE_STATUS.elected.cls, past: true, stage: "won", renumbered: moved,
+        verb: moved ? "Re-elected in" : "Elected to",
+        label: moved ? "Re-elected in " + seat + " (redrawn)" : "Elected to " + seat,
+        clause: moved ? "was re-elected in " + seat + map : "won the race for " + seat,
+        title: moved ? "Re-elected under the state's new district map, in " + seat + ", in 2026."
+          : "Won the race for " + seat + " in 2026." };
+    }
+    var past = electionStatus(2026, opts.now).phase === "post-election";
+    var verb = moved ? (past ? "Ran in" : "Running in") : (past ? "Ran for" : "Running for");
+    return { cls: past ? "badge-neutral" : "badge-warn", past: past, stage: past ? "ran" : "running",
+      renumbered: moved, verb: verb, label: verb + " " + seat + (moved ? " (redrawn)" : ""),
+      clause: (past ? "ran " : "is running ") + (moved ? "in " + seat + map : "for " + seat),
+      title: verb + " " + seat + (moved ? map : "") + " in 2026." };
+  }
+
+  /** A moved holder in one sentence, as a race's folded row and its share
+   *  page say it: "Held by X, who is running in CA-6 ..." while they sit in
+   *  the seat (sitsIn), and "X, who held this seat, was re-elected in UT-2
+   *  ..." once they do not - never "Held by" of anyone not seated in it
+   *  (rule 67). */
+  function movedSentence(race, item, opts) {
+    var clause = movedLine(race, item, opts).clause;
+    return sitsIn(race, item) ? "Held by " + item.name + ", who " + clause + "."
+      : item.name + ", who held this seat, " + clause + ".";
+  }
+
   /* Each race lists its people in one order, decided by the pipeline
    * (races.order_people): the seat's holder first, then by surname. A view
    * that lists people from several races - the map's state panel - keeps
@@ -3052,6 +3133,17 @@
     return (meta().election || {}).phase === "record";
   }
 
+  /** What follows "N members" counted as running under a state's new
+   *  district number (summary.py `renumbered`), for the state strip, the
+   *  sidebar and the directory's note alike: in the past tense once the new
+   *  Congress sits. On the January rehearsal of 2026-11-10 Utah's strip
+   *  read "3 members running under a new district number" over three
+   *  members sitting in the seats they won (rule 74). */
+  function renumberedTail() {
+    return recordPhase() ? " who ran under a new district number in 2026"
+      : " running under a new district number";
+  }
+
   /* ================================================================ states */
 
   /** "TX" -> "Texas", from the build metadata (one table, in kyc/pages.py). */
@@ -3295,8 +3387,8 @@
           " people are on the ballot besides members running for the seat they hold: " +
           (election.challengersWithProfile !== undefined
             ? election.challengersWithProfile + " with a profile here" +
-              (election.renumbered ? " (" + election.renumbered + " of them members running " +
-                "under a new district number)" : "") + ", " +
+              (election.renumbered ? " (" + election.renumbered + " of them members" +
+                renumberedTail() + ")" : "") + ", " +
               election.challengersUnprofiled + " named on Wikipedia's results pages with no FEC " +
               "filing over $5,000"
             : running + " in all") + ".";
@@ -3851,6 +3943,10 @@
     standing: standing,
     otherCampaign: otherCampaign,
     contestLine: contestLine,
+    movedFrom: movedFrom,
+    sitsIn: sitsIn,
+    movedLine: movedLine,
+    movedSentence: movedSentence,
     otherOffice: otherOffice,
     otherOfficeBadge: otherOfficeBadge,
     racePosition: racePosition,
@@ -3871,6 +3967,7 @@
     stillRunning: stillRunning,
     meta: meta,
     recordPhase: recordPhase,
+    renumberedTail: renumberedTail,
     portraitSrc: portraitSrc,
     portraitSrcset: portraitSrcset,
     portraitAttrs: portraitAttrs,
