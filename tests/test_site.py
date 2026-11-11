@@ -1181,6 +1181,25 @@ class TestStatePages(unittest.TestCase):
         self.assertEqual(va.count("used again in 2026"), 1)
         self.assertIn("not on the ballot in 2026", pages.district_page_text("PR", 1)[1])
         self.assertIn("referendum", pages.district_page_text("MO", 8)[1])
+        # A redrawn state's members who moved, in the build's tense: running
+        # before Election Day, ran after it, and in January who took their
+        # seats (the sweep of 2026-11-11: "some members are running ... from
+        # the one they hold" stood over members seated for the new number).
+        from kyc.share import ResultsDay
+
+        self.assertIn("Some members are running in a district with a different number from "
+                      "the one they hold.", pages.district_page_text("TX", 38)[1])
+        after = pages.district_page_text("TX", 38, ResultsDay("2026-11-10"))[1]
+        self.assertIn("Some members ran in 2026 in a district with a different number from "
+                      "the one they held.", after)
+        self.assertNotIn("running", after)
+        self.assertIn("Every member ran in 2026", pages.district_page_text(
+            "UT", 4, ResultsDay("2026-11-10"))[1])
+        january = pages.district_page_text("UT", 4, ResultsDay("2027-01-05", record=True), 3)[1]
+        self.assertIn("The members elected on it took their seats on January 3, 2027; 3 of them "
+                      "sit for a district with a different number from the one they held before.",
+                      january)
+        self.assertNotIn(" hold.", january)
         self.assertEqual(pages.district_page_text("MP", 1)[0],
                          "Northern Mariana Islands' seat in the House")
 

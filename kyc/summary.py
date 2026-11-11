@@ -204,6 +204,13 @@ def build(profiles, races=None, committees=None, results=None, snapshot=None, ro
             from .results import on_ballot
 
             by_id = {p["id"]: p for p in profiles}
+            # And each state's members seated for a district with a new
+            # number, for its district page's introduction (pages.district_moves).
+            for p in profiles:
+                if (p.get("renumbered") and not p.get("isCandidate") and seated(p)
+                        and p.get("state") in summary["states"]):
+                    entry = summary["states"][p["state"]]
+                    entry["renumberedSeated"] = entry.get("renumberedSeated", 0) + 1
             summary["election"]["winnersSeated"] = sum(
                 1 for r in races if ballot_known(r) for pid in r.get("candidateIds") or []
                 if pid in by_id and not by_id[pid].get("isCandidate")

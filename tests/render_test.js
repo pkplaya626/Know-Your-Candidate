@@ -22283,6 +22283,16 @@ async function testTheJanuaryPage() {
         /On the map members were elected on in 2026, you are in OH-2\./.test(athensJan.text) &&
         !/On the map members were elected on, /.test(athensJan.text),
       athensJan.text.slice(0, 240) + athensJan.errors.join(" | "));
+    // Its introduction too (pages.district_moves): "some members are running
+    // in a district with a different number from the one they hold" stood
+    // over members seated for the number they had won.
+    const ledes = ["ca", "fl", "tx", "ut"].map((c) => {
+      const html = fs.readFileSync(path.join(SITE, "districts", c + ".html"), "utf8");
+      return c + ": " + unescapeHtml((/<p class="districts-lede">([^<]*)<\/p>/.exec(html) || [])[1] || "");
+    });
+    check("the redrawn states' introductions say who took their seats, never who is running",
+      ledes.every((t) => /took their seats on January 3, 2027/.test(t) && !/ (is|are) running in a district/.test(t)),
+      ledes.map((t) => t.slice(-180)).join(" | "));
   });
   suite("the January page: a nominee Congress has seated for the new term is never awaiting a result", () => {
     check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",
