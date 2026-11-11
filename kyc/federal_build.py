@@ -431,14 +431,17 @@ def build(root="."):
         payload["disclosuresRead"] = (oge.load_cache(root) or {}).get("read")
     # The offices each officer has held (kyc/history.py), by the same id.
     from . import history, legislators
-    people = (history.load_cache(root) or {}).get("people") or {}
+    history_cache = history.load_cache(root) or {}
+    people = history_cache.get("people") or {}
+    read = history_cache.get("read")
     as_of, _sitting = history.membership(legislators.load_snapshot(root))
     for person in [payload["president"], payload["vicePresident"]] + [
             o["holder"] for o in offices if o.get("holder")]:
         if person["id"] in people:
             # An officer does not sit in Congress (Art. I, sec. 6).
-            person["politicalHistory"] = history.for_page(people[person["id"]], as_of, False)
-    payload["former"] = former_officers(payload, people, as_of)
+            person["politicalHistory"] = history.for_page(people[person["id"]], as_of, False,
+                                                          read=read)
+    payload["former"] = former_officers(payload, people, as_of, read)
     payload["succession"], trouble = succession(payload, executive,
                                                 legislators.load_snapshot(root))
     problems += trouble
@@ -488,7 +491,7 @@ def appointers(cid, held, judges, moving=()):
     return [[who, counts[who]] for who in sorted(counts, key=lambda w: (first[w], w))]
 
 
-def former_officers(payload, people=None, as_of=None):
+def former_officers(payload, people=None, as_of=None, read=None):
     """Everyone who held a Cabinet office this term and has left it, by the
     id the changes list links: a former-this-term record, as a former
     member's profile is (rule 67), so a link to them never reads "nobody
@@ -513,7 +516,8 @@ def former_officers(payload, people=None, as_of=None):
                     record["links"][k] = row[k]
     for record in out.values():
         if people and record["id"] in people:
-            record["politicalHistory"] = history.for_page(people[record["id"]], as_of, False)
+            record["politicalHistory"] = history.for_page(people[record["id"]], as_of, False,
+                                                          read=read)
     return sorted(out.values(), key=lambda r: r["name"])
 
 

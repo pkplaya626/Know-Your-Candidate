@@ -175,8 +175,11 @@
    * dialog. */
   function heldLine(item) {
     var senate = String(item.chamber || "").toLowerCase().indexOf("senate") !== -1;
+    // An office a seated winner held when their record was read as a
+    // candidate (openWhenRead) is neither current nor former as far as this
+    // site has read: the card says nothing of it, and the dialog says when.
     var row = ((item.politicalHistory || {}).rows || []).filter(function (r) {
-      return !(r.congress && (r.office === "U.S. Senator") === senate);
+      return !(r.congress && (r.office === "U.S. Senator") === senate) && !r.openWhenRead;
     })[0];
     if (!row) return "";
     return '<span class="card-held truncate" title="' + KYC.escapeAttr(KYC.heldText(row)) + '">' +

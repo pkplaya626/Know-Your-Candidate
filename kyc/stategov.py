@@ -330,7 +330,8 @@ def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, s
     elif not (rec and rec.get("wikidata") == raw["wikidata"]):
         gov["bornWhy"] = "not-read"
     if rec and raw.get("wikidata") and rec.get("wikidata") == raw["wikidata"]:
-        gov["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting)
+        gov["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting,
+                                                   read=(cache or {}).get("read"))
         gov["wikidata"] = rec["wikidata"]
         if rec.get("wikipedia"):
             gov["wikipedia"] = rec["wikipedia"]
@@ -380,7 +381,8 @@ def attach_history(code, entry, raw, cache, photo_cache, problems, as_of=None, s
         row["wikipedia"] = article
         rec = people.get(row["id"])
         if rec and rec.get("asked") == article:
-            row["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting)
+            row["politicalHistory"] = history.for_page(rec, as_of, rec.get("bioguide") in sitting,
+                                                       read=(cache or {}).get("read"))
         elif rec:
             problems.append(f"{code}: {row['name']}'s offices were read from {rec.get('asked')}; the "
                             f"race's article now links {article}; not shown; run 'history'")

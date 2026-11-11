@@ -1590,6 +1590,26 @@ async function testDirectoryAsync() {
         (tmp.querySelector(".card-held") || {}).textContent === "U.S. Representative",
         (tmp.querySelector(".card-held") || {}).textContent);
     }
+    // A seated winner's record read while they ran (the review of PR #227):
+    // an office open then is neither the card's current office nor
+    // "since" anything in the dialog; the dialog says when it was read.
+    {
+      const seatedHost = window.legislatorsData.find((p) => !p.isCandidate && p.politicalHistory);
+      const keptHistory = seatedHost.politicalHistory;
+      seatedHost.politicalHistory = { rows: [{ office: "Member of the State Senate of California",
+        where: "California", from: "2014", openWhenRead: "2026-11-10" }] };
+      const tmp = D.createElement("div");
+      tmp.innerHTML = KYC.cards.card(seatedHost);
+      const cardHeld = (tmp.querySelector(".card-held") || {}).textContent || "";
+      KYC.profile.open(seatedHost.id);
+      const dialogHeld = (D.getElementById("profileModalHeld") || {}).textContent || "";
+      KYC.profile.close();
+      seatedHost.politicalHistory = keptHistory;
+      check("an office open when a seated winner's record was read as a candidate is never called current",
+        !/State Senate/.test(cardHeld) && !/since 2014/.test(dialogHeld) &&
+          /from 2014, held when this site read their record as a candidate \(Nov\. 10, 2026\)/.test(dialogHeld),
+        cardHeld + " | " + dialogHeld.slice(0, 200));
+    }
     const burlington = { office: "Mayor of Burlington", where: "Burlington, Vermont", from: "1981", to: "1989" };
     check("a place the office already names is not said twice",
       KYC.heldText(burlington) === "Mayor of Burlington, Vermont, 1981–1989", KYC.heldText(burlington));

@@ -4004,6 +4004,12 @@
    * sources are compared. */
 
   function heldYears(row) {
+    // A seated winner's record read while they ran (kyc/history.py
+    // for_page): an office open then is not said to be held now.
+    if (row.openWhenRead) {
+      return "from " + row.from + ", held when this site read their record as a candidate (" +
+        dateWords(row.openWhenRead) + ")";
+    }
     if (row.current || !row.to) return "since " + row.from;
     return row.to === row.from ? String(row.from) : row.from + "\u2013" + row.to;
   }

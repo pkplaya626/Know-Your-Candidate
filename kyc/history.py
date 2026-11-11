@@ -585,16 +585,31 @@ def offices_for(entity, positions, reach, allowed, terms, labels, home=()):
     return shown, withheld
 
 
-def for_page(person, as_of=None, seated=False):
+def for_page(person, as_of=None, seated=False, read=None, before_seat=False):
     """What the page draws for one person: Congress and every other office
     as one list, newest first, with the ids it links (rule 32).
 
     A seat in Congress is current only while its term runs past *as_of* -
     the membership snapshot's date - and the person is *seated* in it: a
     read made in October would otherwise go on saying "since 1985" of a
-    senator who left on January 3."""
+    senator who left on January 3.
+
+    An office whose first year is after the year the cache was *read* had
+    not begun when it was read, and is not shown: Wikidata and the article
+    agreeing on a governor-elect's "Governor of Iowa, 2027-" made the
+    November page say Rob Sand held the office (the review of PR #227),
+    a state winner this site does not name (rule 91).
+
+    *before_seat* is a seated winner's record read while they ran
+    (``folded``): an office it found open is not called current, since the
+    record was not read after they took their seat in Congress. The row
+    keeps its first year and the day it was read (``openWhenRead``), which
+    the page says: "Member of the State Senate of California since 2014"
+    stood on Mike McGuire's January card and dialog beside no seat in
+    Congress."""
     from .pages import state_name
 
+    year = (read or "")[:4]
     rows = []
     for span in person.get("congress") or []:
         current = span["current"]
@@ -606,9 +621,13 @@ def for_page(person, as_of=None, seated=False):
                      "from": span["from"], "to": None if current else (span.get("end") or "")[:4] or span["to"],
                      "terms": span["terms"], "current": current, "congress": True})
     for office in person.get("offices") or []:
+        if year and office.get("from") and str(office["from"])[:4] > year:
+            continue
+        held = bool(office["open"]) and before_seat
         rows.append({"office": office["office"], "where": office["where"],
                      "district": office["district"], "from": office["from"], "to": office["to"],
-                     "current": office["open"],
+                     "current": office["open"] and not held,
+                     "openWhenRead": read if held else None,
                      # Only a difference is said: "exact" is the rule.
                      "agree": office["agree"] if office["agree"] != "exact" else None})
     rows.sort(key=lambda r: (r["from"], r["to"] or "9999"), reverse=True)
@@ -672,15 +691,19 @@ def apply_cache(profiles, cache, snapshot=None):
     them - sits now."""
     as_of, sitting = membership(snapshot)
     people = (cache or {}).get("people") or {}
+    read = (cache or {}).get("read")
     refused = {id(p) for p, _detail in stale(profiles, cache)}
     attached = 0
     for profile in profiles:
         found = people.get(profile["id"])
+        before_seat = False
         if not found:
             found = folded(profile, people)
+            before_seat = bool(found)
         if found and id(profile) not in refused:
             profile["politicalHistory"] = for_page(
-                found, as_of, not profile.get("formerMember") and found.get("bioguide") in sitting)
+                found, as_of, not profile.get("formerMember") and found.get("bioguide") in sitting,
+                read=read, before_seat=before_seat)
             attached += 1
     return attached
 
