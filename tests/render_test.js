@@ -18650,11 +18650,18 @@ async function testDistrictsPhonePlans() {
     drawnAt(width)(w);
     Object.defineProperty(w.navigator, "geolocation", { value: { getCurrentPosition() {} }, configurable: true });
   };
-  for (const [now, when] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"]]) {
-    const page = await buildPage("districts/tx.html", { now, setup: both(302) });
+  // The third clock is January's: once the new Congress sits nobody is
+  // running anywhere, so the page draws no moves (kyc-districts.js moves()),
+  // and its checks ask the page's data which it is (the January rehearsal
+  // failed on checks that asked for the moves whatever the data held).
+  for (const [now, when, data] of [[undefined, "on the campaign clock"], ["2026-11-05T09:00:00", "after Election Day"],
+    ["2026-11-05T09:00:00", "once the new Congress sits", recordPhase]]) {
+    const page = await buildPage("districts/tx.html", { now, setup: both(302), data });
     await settle(30);
     const { window, D, errors } = page;
     const state = window.kycDistricts.TX;
+    // The moves are the data's: none in the record phase, by design.
+    const moves = !window.KYC.recordPhase() && !!D.querySelector(".districts-movers");
     const grid = D.getElementById("planGrid");
     const cards = () => [...grid.children];
     const shownCard = () => cards().filter((c) => !c.hidden);
@@ -18690,11 +18697,18 @@ async function testDistrictsPhonePlans() {
       // The summary is the heading's words in the clock's tense (rule 63):
       // "Ran in a different district" from the day after Election Day.
       const moved = now ? /^Ran in a different district \d+ members?$/ : /^Running in a different district \d+ members?$/;
-      check("the moves are folded, closed, below the map, the summary counting the members in the heading's tense",
-        !!fold && !fold.open && before(grid, fold) && !!fold.querySelector(".mover-group") &&
-          moved.test(fold.querySelector("summary").textContent) &&
-          fold.querySelector(".state-heading").textContent === fold.querySelector("summary").firstChild.textContent.trim(),
-        fold && fold.querySelector("summary").textContent);
+      if (moves) {
+        check("the moves are folded, closed, below the map, the summary counting the members in the heading's tense",
+          !!fold && !fold.open && before(grid, fold) && !!fold.querySelector(".mover-group") &&
+            moved.test(fold.querySelector("summary").textContent) &&
+            fold.querySelector(".state-heading").textContent === fold.querySelector("summary").firstChild.textContent.trim(),
+          fold && fold.querySelector("summary").textContent);
+      } else {
+        check("with no moves in the data, no moves fold and no moves block are drawn",
+          !fold && !D.querySelector(".districts-movers") && !D.querySelector(".mover-group") &&
+            (!data || window.KYC.recordPhase()), fold ? fold.textContent : "");
+      }
+      if (data) check("January's page is the record phase's", window.KYC.recordPhase() && !moves);
       check("the hero's lede and links follow the map",
         !!D.querySelector(".districts-after .districts-lede") && !!D.querySelector(".districts-after .state-links") &&
           !D.querySelector(".state-hero .districts-lede"));
@@ -18748,8 +18762,9 @@ async function testDistrictsPhonePlans() {
       check("both plans drawn side by side, no switch",
         cards().length === 2 && cards().every((c) => !c.hidden && c.querySelector(".district-statewide")) &&
           D.querySelector(".plan-switch").hidden && !grid.classList.contains("single"));
-      check("the moves, lede and links are back where the desktop page has them",
-        before(D.querySelector(".districts-movers"), D.getElementById("districtPick")) &&
+      check("the moves (where the data holds any), lede and links are back where the desktop page has them",
+        (moves ? before(D.querySelector(".districts-movers"), D.getElementById("districtPick"))
+          : !D.querySelector(".districts-movers") && !D.querySelector(".movers-fold")) &&
           !!D.querySelector(".state-hero .districts-lede") && !!D.querySelector(".state-hero .state-links") &&
           D.querySelector(".districts-after").hidden);
       check("no Zoom chips on a desktop", !D.querySelector(".inset-zoom"));
