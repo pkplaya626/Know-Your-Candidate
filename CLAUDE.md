@@ -213,8 +213,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2898 tests, no dependencies
-npm install && npm test                       # 3762 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2904 tests, no dependencies
+npm install && npm test                       # 3765 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1591,7 +1591,13 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     thing the calls exposed was fixed: a filer in a November table whom a
     state's whole list does not print read "Lost the November election"
     (FL-6's Michael Gist), and a loss is now no more than a place on the
-    ballot (`certify_race`), so they read "not on the ballot". Who
+    ballot (`certify_race`), so they read "not on the ballot". Replayed
+    over every page as it stood at about 00:20 UTC on 2026-11-11 (national
+    revision 1384945080), the one test called six more races from the
+    national summary over counts that agree - AR-1, AR-2, FL-7, FL-9, NJ-2
+    and VA-3, FL-7's lead 0.51 points and FL-9's 0.53 at 99 reporting -
+    and moved nothing else, and read again over its own result it moved
+    nothing at all. Who
     lost in November is not off the ballot and stays in view. A nominee
     with no result after Election Day reads "Awaiting result" as of the day
     the results were last read, never "On the November ballot" as though
