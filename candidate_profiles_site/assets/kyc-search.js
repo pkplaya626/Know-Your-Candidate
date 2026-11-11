@@ -380,6 +380,7 @@
     });
     var up = 0;
     var rows = [];
+    var apart = false;
     codes.forEach(function (code) {
       var off = states[code][key];
       var ballot = onBallot(code, key);
@@ -409,8 +410,9 @@
         detail = "not named here";
       }
       rows.push(row(link(statePage(code, "state-government"), KYC.stateName(code)) + ":", detail));
+      if (((KYC.meta().states || {})[code] || {}).territory) apart = true;
     });
-    return { rows: rows, up: up };
+    return { rows: rows, up: up, apart: apart };
   }
 
   function stateOffice(ctx) {
@@ -449,7 +451,12 @@
           searchLink("Ohio " + name.toLowerCase()) + esc(") to see its candidates.") }));
       return out;
     }
-    out.push(block("offices", (key === "ag" || key === "sos" ? "Each state’s " + name.toLowerCase() : name + "s"),
+    // A territory among the rows is not a state (rule 75): the Northern
+    // Mariana Islands' attorney general stood under "Each state's attorney
+    // general" (the second reader of PR #234).
+    out.push(block("offices", (key === "ag" || key === "sos"
+      ? (all.apart ? "Each state’s and territory’s " : "Each state’s ") + name.toLowerCase()
+      : name + "s"),
       all.rows, { compact: true,
         note: esc("Each state’s and territory’s " + name.toLowerCase() + ", as its page lists them, " +
           "with the title it gives an acting officer. " + plural(all.up, "of these offices", "of these offices") +

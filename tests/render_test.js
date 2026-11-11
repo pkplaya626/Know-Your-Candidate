@@ -12659,6 +12659,18 @@ async function testSearchAnswers() {
         printed.every((c) => text().indexOf(c.name) !== -1), text());
     });
   }
+  // The every-state list names a territory among its rows, so its heading
+  // does not call them all states (rule 75; the second reader of PR #234).
+  const territoryRow = Object.keys(gov).some((c) => (gov[c].ag || agUp(c)) &&
+    ((KYC.meta().states || {})[c] || {}).territory);
+  await ask("attorney general");
+  suite("search answers — 'attorney general': the every-state list's heading", () => {
+    check(territoryRow ? "a territory's row stands under 'Each state’s and territory’s'"
+      : "no territory's row, so 'Each state’s'",
+    territoryRow ? /Each state’s and territory’s attorney general/.test(text()) &&
+        !/Each state’s attorney general/.test(text())
+      : /Each state’s attorney general/.test(text()), text().slice(0, 300));
+  });
   if (missing) {
     await ask(KYC.stateName(missing) + " attorney general");
     suite(`search answers — '${KYC.stateName(missing)} attorney general': an office this site does not list`, () => {
