@@ -342,12 +342,50 @@ TERMS = {
 }
 
 # Offices on the 2026 ballot with no day here, and why: a gap, never a guess.
-GAPS = {
-    ("VT", "governor"): ("Vt. Const. ch. II, s.49 fixes no day: the term \"shall commence when "
-                         "they shall be chosen and qualified\"", VT_CONST),
-    ("VT", "lt"): ("Vt. Const. ch. II, s.49 fixes no day: the term \"shall commence when they "
-                   "shall be chosen and qualified\"", VT_CONST),
+# Each is (why, the page that says so, or None where nothing was read). Read
+# on 2026-11-11; a refusal or a page drawn by script concludes nothing (rule
+# 8), so those offices wait for a person to read the provision by hand.
+_NOT_READ = "this read found no official copy of the provision it could read"
+_VT_49 = ("Vt. Const. ch. II, s.49 fixes no day: the term \"shall commence when they shall be "
+          "chosen and qualified\"")
+_GAPS_BY_STATE = {
+    "AL": (_NOT_READ + " (the Alabama Legislature's constitution pages are drawn by script)", None),
+    "AR": (_NOT_READ, None),
+    "CA": (_NOT_READ + " (leginfo.legislature.ca.gov refused this site's request, HTTP 403)", None),
+    "CT": (_NOT_READ, None),
+    "DE": (_NOT_READ, None),
+    "GA": (_NOT_READ + " (sos.ga.gov refused this site's request, HTTP 403); the leads say the "
+           "governor is installed by the General Assembly, on no fixed day", None),
+    "IN": (_NOT_READ, None),
+    "MD": (_NOT_READ + " (msa.maryland.gov closed the connection)", None),
+    "ME": (_NOT_READ + " (legislature.maine.gov closed the connection)", None),
+    "MP": (_NOT_READ + " (the Law Revision Commission's constitution page is drawn by script)", None),
+    "NH": (_NOT_READ, None),
+    "NM": (_NOT_READ, None),
+    "NY": (_NOT_READ + " (nysenate.gov refused this site's request, HTTP 403)", None),
+    "OR": (_NOT_READ, None),
+    "SD": (_NOT_READ + " (sdlegislature.gov's constitution pages are drawn by script)", None),
+    "TN": (_NOT_READ + " (the Tennessee Code's official text is published on a commercial host; "
+           "the leads cite two sections giving different days)", None),
+    "TX": (_NOT_READ + " (statutes.capitol.texas.gov closed the connection)", None),
+    "WI": ("Wis. Const. art. XIII, s.1 starts the political year on the first Monday of January; "
+           "this read found no provision saying these terms begin with it",
+           "https://docs.legis.wisconsin.gov/constitution/wi/000242/000013"),
+    "WY": (_NOT_READ, None),
 }
+GAPS = {
+    ("VT", "governor"): (_VT_49, VT_CONST),
+    ("VT", "lt"): (_VT_49, VT_CONST),
+    ("VT", "ag"): (_NOT_READ + " (Vt. Const. ch. II, s.49 covers the governor, lieutenant "
+                   "governor and treasurer only)", VT_CONST),
+    ("VT", "sos"): (_NOT_READ + " (Vt. Const. ch. II, s.49 covers the governor, lieutenant "
+                    "governor and treasurer only)", VT_CONST),
+}
+for _code, _gap in _GAPS_BY_STATE.items():
+    for _key in ballot2026.OFFICES:
+        _entry = ballot2026.STATES.get(_code) or ballot2026.TERRITORIES.get(_code) or {}
+        if _key in _entry and _entry[_key][1]:
+            GAPS[(_code, _key)] = _gap
 
 
 class TermsBeginError(ValueError):
