@@ -441,6 +441,21 @@ class TestSharePages(unittest.TestCase):
         self.assertEqual(whole.count("Candidate Number"), 2)
         self.assertNotIn("more in this race", whole)
 
+    def test_a_decided_race_names_its_winner_first(self):
+        # KY-6's description named two who lost and cut to "and 1 more in this
+        # race": a shared link never said who won (PR #218 review).
+        ids = [f"FEC_{i:02d}" for i in range(12)]
+        people = [person(id=i, name=f"Aaron Candidate {i} Longname", isCandidate=True,
+                         party="Republican", raceStatus="defeated") for i in ids]
+        people[-1].update(name="Zach Zed Winner", raceStatus="elected")
+        r = race(candidateIds=ids)
+        by_id = {p["id"]: p for p in people}
+        description = share.describe_race(r, by_id, {r["id"]: r}, post=True)
+        self.assertIn("more in this race", description)
+        self.assertIn("Zach Zed Winner", description)
+        self.assertLess(description.index("Zach Zed Winner"),
+                        description.index("Aaron Candidate"), description)
+
     def test_a_holder_who_has_left_holds_nothing(self):
         r = race(incumbent={"name": "Gone Member", "party": "Republican", "seated": False},
                  incumbentIds=[])

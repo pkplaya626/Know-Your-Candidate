@@ -1184,6 +1184,11 @@ def describe_race(race, by_id, races_by_id, post=False):
     # pages it cut the later candidates mid-sentence and the source credit
     # always (PR #123 review). The first person is always named.
     head = lead + (f" Where each stands, per {_and(sources)}: " if sources else " ")
+    # A decided race's winner comes first in the description, whatever the
+    # order the page lists them in: KY-6's named two who lost and cut to "and
+    # 1 more", so a shared link never said Zach Dembo won (PR #218 review).
+    won = [i for i, p in enumerate(running) if p.get("raceStatus") == "elected"]
+    people = [people[i] for i in won] + [w for i, w in enumerate(people) if i not in won]
     shown = people[:1]
     for i, words in enumerate(people[1:], start=1):
         rest = len(people) - i - 1
