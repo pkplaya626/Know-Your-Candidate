@@ -1775,7 +1775,11 @@ async function testDirectoryAsync() {
     const members = window.legislatorsData.filter((p) => !p.isCandidate);
     const bare = [];
     members.forEach((p) => ["education", "previous_professions", "platforms"].forEach((f) => {
-      if (KYC.hasValue(p, f) && p[f] && !SOURCED[(p.fieldSources || {})[f]]) bare.push(p.id + " " + f);
+      // A winner seated since Election Day keeps the ballot-linked
+      // article's facts read while they ran (enrich.apply_to_winners).
+      const source = (p.fieldSources || {})[f];
+      const kept = p.raceRole === "winner" && source === "wikipedia" && f !== "platforms";
+      if (KYC.hasValue(p, f) && p[f] && !SOURCED[source] && !kept) bare.push(p.id + " " + f);
     }));
     check("no member's education, careers or platform is shown without its source",
       bare.length === 0, bare.slice(0, 5).join(", "));
