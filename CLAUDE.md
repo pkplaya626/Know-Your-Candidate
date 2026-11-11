@@ -1837,13 +1837,15 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     the results do not name after the primary is `ballotUnknown`, never
     "the primary has not been held yet", and is not counted as on it.
     Once the new Congress sits a filter speaks of what was: the grid's
-    "Not seeking re-election" is "Did not run for re-election", former
+    "Not seeking re-election" is "Not on the ballot for their seat", former
     members only and never hidden as out of the race, and "2026 Senate
     races" takes each race's seated winner (`raceRole`), newcomer or House
     member who moved; on the January rehearsal of 2026-11-11 the first
     listed six senators who had just won under "not running again for the
     seat they hold" and the second left out 17 of the 35 winners
-    (`recordChipWords`, one table for a chip's label and hover).
+    (`recordChipWords`, one table for a chip's label, hover and results
+    line). The words are true of everyone listed: "Did not run for
+    re-election" stood over fourteen cards reading "Lost primary".
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it

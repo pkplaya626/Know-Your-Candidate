@@ -22249,13 +22249,26 @@ async function testTheJanuaryPage() {
       `${senWinners.length} winners; missing: ` + senWinners.filter((p) => !senShown.has(p.id)).map((p) => p.name).join(", "));
     check("and its hover is in the past tense", /who held each, who won it, and everyone who ran for it/.test(senTitle) &&
       !/holds each|running for it/.test(senTitle), senTitle);
-    check("\"Not seeking re-election\" is \"Did not run for re-election\" over members who have left, and nobody seated",
-      !!nsChip && nsChip.textContent.trim() === "Did not run for re-election" && nsCards.length > 0 &&
+    check("\"Not seeking re-election\" lists members who have left, and nobody seated",
+      !!nsChip && !/seeking|not running/i.test(nsChip.textContent) && nsCards.length > 0 &&
         nsCards.every((p) => p.formerMember && !NK.seated(p)) &&
-        /: members who did not run for re-election in 2026, all of whom have since left Congress\./.test(nsLabel),
+        /all of whom have since left Congress\./.test(nsLabel),
       `${nsCards.length} cards; seated: ` + nsCards.filter((p) => NK.seated(p)).map((p) => p.name).join(", ") + " | " + nsLabel.slice(0, 160));
+    // Its words are true of every card it lists (rule 73): "Did not run for
+    // re-election" stood over fourteen cards reading "Lost primary" (the
+    // review of PR #227). None of them was on the November ballot for the
+    // seat they held, so the words say that, and no card says otherwise.
+    const nsWords = [nsChip ? nsChip.textContent : "", nsTitle, nsLabel].join(" | ");
+    const nsLost = nsCards.filter((p) => /lost/i.test((NK.standing(p) || {}).card || ""));
+    const nsOnBallot = nsCards.filter((p) => /on the November ballot|^Elected|^Lost the November/i.test(
+      ((NK.standing(p) || {}).long || "")));
+    check("and its words are true of every card it lists: none \"did not run\" over a lost primary, nobody on the November ballot",
+      !(nsLost.length && /did not run/i.test(nsWords)) && !nsOnBallot.length &&
+        /not on the November \d{4} ballot for the seat they held/.test(nsTitle) &&
+        /not on the November \d{4} ballot for the seat they held/.test(nsLabel),
+      `${nsLost.length} lost a primary; on the ballot: ` + nsOnBallot.map((p) => p.name).join(", ") + " | " + nsWords.slice(0, 240));
     check("its hover speaks of the members who left, never of sitting members or the seat they hold",
-      /all of whom have since left Congress/.test(nsTitle) && !/Sitting members|seat they hold/.test(nsTitle), nsTitle);
+      /have since left Congress/.test(nsTitle) && !/Sitting members|seat they hold/.test(nsTitle), nsTitle);
   });
 
   // A nominee Congress's record seats for the term their race decided is

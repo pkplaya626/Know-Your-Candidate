@@ -101,21 +101,28 @@
   };
 
   /* The election chips' words once the new Congress sits: one table for a
-   * chip's label and its hover (rule 12). Their campaign words, in
-   * index.html, speak of a race still to come; "Sitting members not running
-   * again for the seat they hold" stood over six senators who had just won
-   * their seats and, hidden, 81 people who had left. */
+   * chip's label, its hover and its results line (rule 12). Their campaign
+   * words, in index.html, speak of a race still to come; "Sitting members
+   * not running again for the seat they hold" stood over six senators who
+   * had just won their seats and, hidden, 81 people who had left. The words
+   * are true of everyone the chip lists: "Did not run for re-election" stood
+   * over fourteen members whose own cards read "Lost primary" (the review
+   * of PR #227), so they speak of the November ballot, which none of them
+   * was on for the seat they held. */
   function recordChipWords() {
     var before = (KYC.meta().congress || 0) - 1;
     var them = before > 0 ? "Members of the " + KYC.ordinal(before) + " Congress" : "Members";
+    var ballot = "the November " + ((KYC.meta().election || {}).year || 2026) + " ballot";
     return {
       senateUp26: {
         title: "The Senate seats on the 2026 ballot: who held each, who won it, and everyone who ran for it",
       },
       notSeeking: {
-        label: "Did not run for re-election",
-        title: them + " who did not run again for the seat they held in 2026 (they retired, ran " +
-          "for another office, or lost a primary), all of whom have since left Congress.",
+        label: "Not on the ballot for their seat",
+        title: them + " who were not on " + ballot + " for the seat they held: they retired, " +
+          "ran for another office, withdrew or lost a primary. All have since left Congress.",
+        results: "members who were not on " + ballot + " for the seat they held, " +
+          "all of whom have since left Congress",
       },
     };
   }
@@ -163,7 +170,7 @@
    * January and must stay under "Sitting members" - hiding John Cornyn
    * left the Senate one short. */
   function hideable(item) {
-    // Everyone "Did not run for re-election" names has left and is off the
+    // Everyone "Not on the ballot for their seat" names has left and is off the
     // ballot: hidden as "out of the race", the chip would read "Showing 0".
     if (state.election === "notSeeking" && KYC.recordPhase()) return false;
     return !KYC.seated(item) && offBallot(item);
@@ -681,11 +688,11 @@
       // From the day after Election Day nobody is "still running": the
       // list holds who won and who lost (rule 63).
       var voted = KYC.electionStatus().phase === "post-election";
-      // "Did not run for re-election" once the new Congress sits lists
-      // people neither in office nor on the ballot (initElectionWords).
+      // "Not on the ballot for their seat" once the new Congress sits lists
+      // people neither in office nor on the ballot (recordChipWords).
       var leftWords = state.election === "notSeeking" && KYC.recordPhase();
       html += KYC.escapeHtml(": " + (leftWords
-        ? "members who did not run for re-election in 2026, all of whom have since left Congress"
+        ? recordChipWords().notSeeking.results
         : state.role === "candidate"
         ? (voted ? "candidates who were on the November ballot" : "candidates still running")
         : voted ? "people in office or who were on the November ballot"
