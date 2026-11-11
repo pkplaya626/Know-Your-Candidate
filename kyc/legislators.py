@@ -840,6 +840,16 @@ def departures(bioguides, snapshot, historical=None):
     record of leaving, and stays ``departed``: an error until somebody
     looks. An unavailable *historical* concludes nothing (rule 8); the
     caller passes ``None`` and nobody is archived.
+
+    Each also carries the record's name block (``nameParts``, as
+    :func:`name_parts` reads it), which :func:`apply` keeps in the archived
+    row: the new snapshot no longer holds them, and without it a former
+    member is shown by the roster's legal name - "Earl Carter" for Buddy
+    Carter, "James (Jim) Moylan" - where a sitting member is shown by the
+    name they go by (:func:`display_name`). Left out where the record has
+    none. And the article title the record's ids give (``wikipedia``), which
+    :func:`aliases` reads as it does for a sitting member: without it "Dick
+    Durbin" and "Mike Lawler" found nobody from January 3.
     """
     read = str((snapshot or {}).get("fetched") or "")[:10]
     if not read:
@@ -851,6 +861,12 @@ def departures(bioguides, snapshot, historical=None):
         left = str((terms[-1] if terms else {}).get("end") or "")
         if bioguide in bioguides and left and left <= read:
             out[bioguide] = {"left": left, "via": "legislators-historical"}
+            parts = name_parts(entry.get("name"))
+            if parts:
+                out[bioguide]["nameParts"] = parts
+            title = (entry.get("id") or {}).get("wikipedia")
+            if isinstance(title, str) and title.strip():
+                out[bioguide]["wikipedia"] = " ".join(title.split())
     return out
 
 
@@ -1041,8 +1057,52 @@ FORMER_ROSTER = "Former_Members.csv"
 # A 2026 winner who leaves keeps the race they won through their archived
 # row: the role and race the record gave them, and every FEC id Congress's
 # record listed for them, read from the snapshot they last sat in
-# (winners_leaving), since the new one no longer holds them.
-FORMER_COLUMNS = ("Left Office", "Left Via", "Last Congress", "Race Role", "Race ID", "FEC IDs")
+# (winners_leaving), since the new one no longer holds them. And the name
+# block their legislators-historical record gives (``Record Name``: the JSON
+# of :func:`name_parts`, "first", "middle", "last", "nickname", "suffix" and
+# "official_full" as recorded), so the build shows them by the name they go
+# by, as it shows a sitting member, with no network (former_name_record).
+# Empty where the record holds none, or for a row archived before it was
+# kept: that row keeps the roster spelling, and validate says so
+# (former-name-unrecorded). Beside it the article title the record's ids
+# give (``Record Wikipedia``, its ``id.wikipedia``), which the search reads
+# as it does a sitting member's: "Dick Durbin" is Richard Durbin's title,
+# and nothing else he is recorded under says "Dick" (former_record).
+FORMER_COLUMNS = ("Left Office", "Left Via", "Last Congress", "Race Role", "Race ID", "FEC IDs",
+                  "Record Name", "Record Wikipedia")
+
+
+def former_name_record(row):
+    """The name block an archived row keeps (``Record Name``), as a
+    congress-legislators record's ``nameParts``, or ``{}`` where it keeps
+    none or what it keeps is not one (never a guess)."""
+    import json
+
+    text = str((row or {}).get("Record Name") or "").strip()
+    if not text:
+        return {}
+    try:
+        block = json.loads(text)
+    except ValueError:
+        return {}
+    return name_parts(block)
+
+
+def former_record(row):
+    """The name fields of the record an archived row keeps, shaped as the
+    snapshot's person record holds them for :func:`display_name` and
+    :func:`aliases`: ``nameParts`` (``Record Name``) and ``wikipedia``
+    (``Record Wikipedia``), each only where kept. Nothing else - no
+    contact, term or Senate cycle - since this is a name, not a person
+    record (profiles._former_members)."""
+    out = {}
+    parts = former_name_record(row)
+    if parts:
+        out["nameParts"] = parts
+    title = " ".join(str((row or {}).get("Record Wikipedia") or "").split())
+    if title:
+        out["wikipedia"] = title
+    return out
 
 
 def _read_rows(path):
@@ -1069,6 +1129,15 @@ def _write_rows(path, fieldnames, rows):
 
 def _row_id(row):
     return str(row.get("Bioguide ID") or "").strip().upper()
+
+
+def _name_cell(gone):
+    """``Record Name`` for a departure: its record's name block as JSON, keys
+    in their recorded order, or "" where :func:`departures` found none."""
+    import json
+
+    parts = gone.get("nameParts") or {}
+    return json.dumps(parts, ensure_ascii=False, separators=(",", ":")) if parts else ""
 
 
 def winners_leaving(drift, previous, record):
@@ -1175,7 +1244,9 @@ def apply(drift, root=".", today=None):
                                                "Last Congress": str(last),
                                                "Race Role": gone.get("raceRole", ""),
                                                "Race ID": gone.get("raceId", ""),
-                                               "FEC IDs": ";".join(gone.get("fec") or [])}))
+                                               "FEC IDs": ";".join(gone.get("fec") or []),
+                                               "Record Name": _name_cell(gone),
+                                               "Record Wikipedia": gone.get("wikipedia") or ""}))
                     kept.add((_row_id(row), gone["left"]))
                     report["archived"].append(gone["name"])
                 held["rows"].remove(row)

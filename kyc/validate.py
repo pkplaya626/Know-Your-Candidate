@@ -113,6 +113,32 @@ def check_record(profiles, record, snapshot=None):
     return issues
 
 
+def check_former_names(profiles, raw):
+    """A former member is shown by the name their congress-legislators
+    record says they go by only where their archived row keeps that
+    record's name block (``Record Name``, kept by ``congress --apply`` from
+    legislators-historical since 2026-11). A row archived before then, or
+    whose record held none, keeps the roster's legal spelling ("Earl Carter"
+    for Buddy Carter): never a guess, and named here so a person can copy
+    the block in from the person's legislators-historical entry."""
+    from . import legislators
+
+    shown = {p["id"] for p in profiles if p.get("formerMember")}
+    bare = sorted({
+        f"{clean_str(row.get('Name'), '?')} ({clean_str(row.get('Bioguide ID'), '').upper()})"
+        for row in (raw or {}).get("former") or []
+        if clean_str(row.get("Bioguide ID"), "").upper() in shown
+        and clean_str(row.get("Left Office"), "")
+        and not legislators.former_name_record(row)})
+    if not bare:
+        return []
+    return [Issue("warn", "former-name-unrecorded",
+                  f"{len(bare)} former members' archived rows keep no record name block, so "
+                  f"they are shown by the roster's spelling: add the name block of their "
+                  f"legislators-historical entry as JSON in Former_Members.csv's "
+                  f"\"Record Name\" (and its id.wikipedia in \"Record Wikipedia\")", bare)]
+
+
 def check_seats(profiles):
     """Two senators per state, one House member per district."""
     issues = []
@@ -2153,6 +2179,7 @@ def run(profiles, raw, races=None, geo=None, snapshot=None, finance=None, campai
     issues += check_geometry(profiles, geo)
     issues += check_snapshot(profiles, raw, snapshot)
     issues += check_record(profiles, (raw or {}).get("record"), snapshot)
+    issues += check_former_names(profiles, raw)
     issues += check_senate_classes(profiles, snapshot)
     issues += check_finance(profiles, finance)
     issues += check_curated_candidates(profiles)

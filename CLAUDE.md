@@ -220,8 +220,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 3028 tests, no dependencies
-npm install && npm test                       # 4499 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 3040 tests, no dependencies
+npm install && npm test                       # 4502 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1585,7 +1585,33 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     seated at that number shared a key, and one vanished. Three days into a
     new Congress, a snapshot of the old one fails every build
     (`snapshot-behind`); the refresh runs daily from January 3 to 14 so
-    that takes two missed runs, not one missed Monday.
+    that takes two missed runs, not one missed Monday. The archived row
+    keeps the name block of the record that says they left (`Record Name`,
+    from the `legislators-historical` entry, `legislators.former_name_record`),
+    and a former member is named from it as a sitting member is named from
+    theirs (`display_name`, `aliases`, the roster spelling and
+    `SEARCH_ALIASES` still searchable), and from nothing else: the new
+    snapshot no longer holds them, and on the first January rehearsal Buddy
+    Carter, Burgess Owens, Greg Casar, Jim Moylan and Zach Nunn read "Earl
+    Carter", "Clarence Owens", "Gregorio Casar", "James (Jim) Moylan" and
+    "Zachary (Zach) Nunn" on their profiles, races, share pages and state
+    pages, and the search found none of them by the name they go by. The
+    row keeps the entry's article title too (`Record Wikipedia`, its
+    `id.wikipedia`; `legislators.former_record` gives both): a sitting
+    member's aliases read it, and the first fix, keeping the name block
+    alone, lost "Dick Durbin", "Mike Lawler", "Rob Wittman" and five more
+    from the search on January 3. A row
+    with no block keeps the roster spelling and is a warning
+    (`former-name-unrecorded`), never a guess. Once the new Congress sits a
+    member who did not run is in the past tense, "Did not run for
+    re-election in 2026" and "Left the seat" (an appointee's "Did not run in
+    2026"), one table on both sides (`KYC`'s `LEFT`, `share._LEFT`, the
+    fixture's `record` rows): on January 10 they read "Leaving seat". A
+    former member is in it from the day after Election Day whatever the
+    phase (`KYC.pastTense`, `share.past_tense`, the fixture's `former`
+    rows): one archived in December - a resignation, an appointee whose
+    successor was seated early - would have read "Leaving seat" until
+    January 3; a sitting member keeps the campaign's words until then.
 
 67. **Who held a seat is the record's word; who sits now is `seated`.**
     Archived by rule 66, Florida's appointee would have vanished from the

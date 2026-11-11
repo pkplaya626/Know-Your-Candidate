@@ -82,7 +82,17 @@
      * race went. Never "seat up", never a sitting member's badge. */
     if (item.formerMember) {
       var how = raceBadge(item);
-      return seatBadge("former", null, KYC.formerText(item) + "; held this seat in the 2026 race.") +
+      // A 2026 winner who has since left (raceRole, no seat held on the
+      // ballot) won the seat in that race; they did not hold it in it.
+      var won = item.raceRole === "winner" && !item.heldRaceId;
+      // One who held a seat on the ballot and won another has a card in
+      // both races, and this badge is drawn for the person, not the race:
+      // it says both, true on either card (PR #226 review).
+      var both = item.raceRole === "winner" && item.heldRaceId && item.heldRaceId !== item.raceId;
+      return seatBadge("former", null, KYC.formerText(item) +
+        (won ? "; won this seat in the 2026 race."
+          : both ? "; held one seat in the 2026 races and won another."
+          : "; held this seat in the 2026 race.")) +
         (how ? " " + how : "");
     }
 
@@ -448,7 +458,8 @@
   function holderOut(holder) {
     var spec = KYC.standing(holder, "card");
     var other = KYC.otherOffice(holder);
-    return holder.name + ": " + (spec ? spec.label : "Not running for re-election") +
+    return holder.name + ": " + (spec ? spec.label : KYC.pastTense(holder)
+      ? "Did not run for re-election" : "Not running for re-election") +
       (other ? " · " + other.text : "") + ".";
   }
 

@@ -64,6 +64,17 @@ def _kyc():
     return candidates, cycle, fec, legislators, overrides, results, sources, build_profiles
 
 
+def _historical_ids(bioguide, person):
+    """The ``id`` block a legislators-historical entry holds for *person*, a
+    snapshot record: the bioguide id, and the Wikipedia title its ids give
+    (the snapshot's ``wikipedia`` is that id), left out where it gives none,
+    as the real file leaves it out."""
+    ids = {"bioguide": bioguide}
+    if person.get("wikipedia"):
+        ids["wikipedia"] = person["wikipedia"]
+    return ids
+
+
 # ------------------------------------------------------------- December
 
 def december(label, root=REPO):
@@ -96,8 +107,12 @@ def december(label, root=REPO):
     after["legislators"] = sorted(people, key=lambda p: p["bioguide"])
     after["count"] = len(people)
     after["fetched"] = "2026-12-09T07:20:00+00:00"
-    historical = [{"id": {"bioguide": loser},
-                   "name": {"first": gone["nameParts"].get("first"), "last": gone["last"]},
+    # The name block legislators-historical holds for them: the snapshot's
+    # nameParts are that block's own keys (legislators.name_parts), so the
+    # archive keeps the name they go by, as the real file's entry would; and
+    # the article title its ids hold (the snapshot's wikipedia is that id).
+    historical = [{"id": _historical_ids(loser, gone),
+                   "name": dict(gone.get("nameParts") or {"last": gone["last"]}),
                    "terms": [{"type": "sen", "start": gone["termStart"], "end": "2026-12-08",
                               "state": gone["state"]}]}]
     return after, historical
@@ -258,7 +273,11 @@ def january(root=REPO):
             log.append([holder[rid][0], rid, bid])
         elif bid in held.values() or (p["chamber"] == "House" and p["state"] != "PR"):
             left = "2026-12-08" if bid == oh else NEW_TERM
-            gone.append({"id": {"bioguide": bid}, "name": {"last": p.get("last")},
+            # Their name block and article title as legislators-historical
+            # holds them (the snapshot's nameParts and wikipedia), as for
+            # December's loser.
+            gone.append({"id": _historical_ids(bid, p),
+                         "name": dict(p.get("nameParts") or {"last": p.get("last")}),
                          "terms": [{"type": "sen" if p["chamber"] == "Senate" else "rep",
                                     "start": p.get("termStart"), "end": left,
                                     "state": p["state"]}]})

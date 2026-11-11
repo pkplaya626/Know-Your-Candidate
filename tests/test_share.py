@@ -261,6 +261,64 @@ class TestStatusTable(unittest.TestCase):
             self.assertIn(words, labels)
         self.assertEqual({row[0] for row in table["statuses"]}, set(share._RACE_STATUS))
 
+    def test_the_record_phase_says_a_member_who_did_not_run_left(self):
+        # On January 10 a member who left on January 3 read "Leaving seat"
+        # and "Not running for re-election in 2026" (PR #225 review).
+        table = share.status_table()
+        # A statuses row: status, allParty, source, round, runoff, held,
+        # decided, own, appointed, unconfirmed, minor, post, label, off.
+        after = {tuple(row[:3] + row[7:10]): row[12] for row in table["statuses"]
+                 if row[11] and not row[3] and not row[4] and not row[5] and not row[6]
+                 and not row[10]}
+        record = {tuple(row[:6]): row[6] for row in table["record"]}
+        labels = set(record.values())
+        self.assertIn("Did not run for re-election in 2026", labels)
+        self.assertIn("Did not run in 2026", labels)
+        self.assertFalse({w for w in labels if w.startswith("Not running")})
+        for key, words in record.items():
+            leaving = after[key].startswith("Not running")
+            self.assertEqual(words.startswith("Did not run"), leaving, key)
+            if not leaving:
+                self.assertEqual(words, after[key], key)
+
+    def test_post_election_carries_the_record_phase(self):
+        campaign = share.post_election({"election": {"resultsAsOf": "2026-11-10",
+                                                     "phase": "campaign"}})
+        record = share.post_election({"election": {"resultsAsOf": "2027-01-04",
+                                                   "phase": "record"}})
+        self.assertEqual((campaign, campaign.record), ("2026-11-10", False))
+        self.assertEqual((record, record.record), ("2027-01-04", True))
+        member = {"id": "X", "isCandidate": False, "raceStatus": "unlisted", "raceId": "H-AL-02-2026"}
+        self.assertEqual(share.standing(member, {}, {}, campaign)[0],
+                         "Not running for re-election in 2026")
+        self.assertEqual(share.standing(member, {}, {}, record)[0],
+                         "Did not run for re-election in 2026")
+        self.assertEqual(share.standing(dict(member, appointed=True), {}, {}, record)[0],
+                         "Did not run in 2026")
+
+    def test_a_former_member_has_left_once_the_election_has_passed(self):
+        # A December resignation is archived before January 3, and read "Not
+        # running for re-election in 2026" and "Leaving seat" about someone
+        # who had left (PR #226 review): past tense from the day after
+        # Election Day, whatever the phase. A sitting member keeps the
+        # campaign's words until the new Congress sits.
+        after = share.ResultsDay("2026-12-16")
+        member = {"id": "X", "isCandidate": False, "raceStatus": "unlisted",
+                  "raceId": "H-AL-02-2026"}
+        gone = dict(member, formerMember={"left": "2026-12-15", "congress": 119})
+        self.assertEqual(share.standing(member, {}, {}, after)[0],
+                         "Not running for re-election in 2026")
+        self.assertEqual(share.standing(gone, {}, {}, after)[0],
+                         "Did not run for re-election in 2026")
+        self.assertEqual(share.standing(dict(gone, appointed=True), {}, {}, after)[0],
+                         "Did not run in 2026")
+        self.assertEqual(share.standing(gone, {}, {}, False)[0],
+                         "Not running for re-election in 2026")
+        rows = share.status_table()["former"]
+        self.assertTrue(any(r[2] and not r[3] and r[4] == "Did not run for re-election in 2026"
+                            for r in rows))
+        self.assertFalse(any(r[2] and (r[4] or "").startswith("Not running") for r in rows))
+
 
 class TestSharePhoto(unittest.TestCase):
     """A share image is a photograph that came by a sourced route (rule 24),
