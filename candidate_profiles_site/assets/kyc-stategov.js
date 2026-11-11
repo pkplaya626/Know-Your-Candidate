@@ -322,10 +322,30 @@
     var term = termBegun(code, key, now);
     var gone = item && item.outgoing;
     if (!term || !gone) return "";
-    return "The term of the " + TERM_WORDS[key] + " elected on Nov. 3, 2026 " +
+    // "The term the 2026 election chose": a territory's organic act holds a
+    // runoff where no ticket has a majority, and this site reads no result.
+    // "Still" only of a read on or after the day the term had certainly
+    // begun (`from`: after a noon start or a day to qualify by).
+    return "The term the 2026 election chose for the " + TERM_WORDS[key] + " " +
       beganWords(term) + " (" + term.cite + "). " + gone.roster + ", read " +
-      KYC.dateWords(gone.read) + ", " + (gone.read >= term.day ? "still lists " : "lists ") +
+      KYC.dateWords(gone.read) + ", " + (gone.read >= term.from ? "still lists " : "lists ") +
       gone.holder + ", " + LEAVING_WORDS[gone.why] + ".";
+  }
+
+  /** The same finding in a clause, for a list that names each state's
+   *  holder in a line (the search's every-state answer): "the National
+   *  Governors Association’s roster, read Jan. 8, 2027, still lists them,
+   *  though the term the 2026 election chose began on Jan. 1, 2027"; "" where
+   *  pastTermText says nothing (the review of PR #230: that list kept naming
+   *  the roster's holder plainly). */
+  function pastTermBrief(code, key, now) {
+    if (!pastTermText(code, key, now)) return "";
+    var term = termBegun(code, key, now);
+    var gone = ballot(code).offices[key].outgoing;
+    return gone.roster.charAt(0).toLowerCase() + gone.roster.slice(1) + ", read " +
+      KYC.dateWords(gone.read) + ", " + (gone.read >= term.from ? "still lists" : "lists") +
+      " them, though the term the 2026 election chose " +
+      (term.kind === "by" ? "began no later than " : "began on ") + KYC.dateWords(term.day);
   }
 
   /** The same sentence as a paragraph, the law cited and linked. */
@@ -1586,6 +1606,7 @@
     termBegun: termBegun,
     beganWords: beganWords,
     pastTermText: pastTermText,
+    pastTermBrief: pastTermBrief,
     pastTermNote: pastTermNote,
     newOfficeWords: newOfficeWords,
     candidatesBlock: candidatesBlock,

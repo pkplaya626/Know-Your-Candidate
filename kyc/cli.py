@@ -530,7 +530,7 @@ def _build(args):
     from . import terms_begin as terms_mod
     term_gaps = terms_mod.gaps()
     print(f"[ok] terms begin: {len(terms_mod.up_offices()) - len(term_gaps)} offices on the 2026 "
-          f"ballot dated from their state's own law; {len(term_gaps)} with no day: " +
+          f"ballot dated from their jurisdiction's own law; {len(term_gaps)} with no day: " +
           ", ".join(f"{c} {k}" for c, k, _why in term_gaps))
     listed = statewide_mod.stats(statewide_mod.load(args.root))
     print(f"[ok] statewide candidates: {listed['candidates']} on the ballot and "

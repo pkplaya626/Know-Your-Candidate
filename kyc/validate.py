@@ -2312,13 +2312,25 @@ def check_terms_begun(root=".", today=None, payload=None):
         except stategov.StateGovError as exc:
             return [Issue("error", "terms-begin-unchecked",
                           f"the state government could not be built to check its terms: {exc}")]
+    out = []
     found = terms_begin.lagging(payload, today)
     if found:
-        return [Issue("warning", "holder-past-inauguration",
-                      f"{len(found)} office(s) whose new term has begun, by the state's own law, "
-                      f"while the roster still names the holder who was not on the ballot for it "
-                      f"(or no one): read the roster again, or the office's own page", found)]
-    return []
+        out.append(Issue("warning", "holder-past-inauguration",
+                         f"{len(found)} office(s) whose new term has begun, by its jurisdiction's "
+                         f"own law, while the roster still names the holder who was not on the "
+                         f"ballot for it (or no one): read the roster again, or the office's own "
+                         f"page", found))
+    # An office with no day read (terms_begin.GAPS) cannot be told begun,
+    # so from January a leaving holder there is named for a person to read
+    # the provision (the review of PR #230): a warning, and no page words.
+    gaps = terms_begin.unread(payload, today)
+    if gaps:
+        out.append(Issue("warning", "term-day-unread",
+                         f"{len(gaps)} office(s) on the 2026 ballot whose new term's first day no "
+                         f"provision here gives, while the roster names a holder who was not on "
+                         f"the ballot for it: read the jurisdiction's own law into "
+                         f"kyc/terms_begin.py", gaps))
+    return out
 
 
 def check_voting_dates(data):

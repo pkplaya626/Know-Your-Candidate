@@ -20801,6 +20801,20 @@ async function testTermsBegun() {
       check("the share words carry it, and no \"In office since\" beside it",
         begunJan ? words.pastTerm === note.textContent && words.since === ""
           : words.pastTerm === "" && words.since === "In office since January 1, 2019", JSON.stringify(words));
+      // The overlay: no "In office since" label over the note, which would
+      // read as the very date it withholds; the note stands after the facts
+      // (the review of PR #230).
+      K.governor.open("gov-MI");
+      const body = p.D.getElementById("governorModalBody");
+      const labels = body ? [...body.querySelectorAll(".field-label")].map((l) => l.textContent) : [];
+      const overlayNote = body && body.querySelector(".gov-past-term");
+      check(begunJan ? "the overlay prints the note after its facts, under no \"In office since\" label"
+        : "before the term begins, the overlay's \"In office since\" and no note",
+        !!body && (begunJan
+          ? labels.indexOf("In office since") === -1 && !!overlayNote && !overlayNote.closest(".field") &&
+            overlayNote.textContent === note.textContent
+          : labels.indexOf("In office since") !== -1 && !overlayNote), labels.join(" | "));
+      K.governor.close();
       // A holder who was on the ballot keeps "In office since" whatever the day.
       delete offices.governor.outgoing;
       check("a holder on the ballot keeps \"In office since\" on every clock",
@@ -20826,6 +20840,44 @@ async function testTermsBegun() {
           : /No one holds this office yet: New office: first elected 2026\./.test(lt.textContent) &&
             /First in line to succeed the governor until then: Secretary of State Sam Second/.test(lt.textContent)) &&
           fresh.begun === begunJan, lt && lt.textContent);
+    });
+  }
+  // The search's answers (index.html): the one office's answer and the
+  // every-state list say what the state page says, never the roster's
+  // holder plainly once the term has begun (the review of PR #230).
+  for (const [clock, now, begun] of [["the campaign's clock", CAMPAIGN_NOW, false],
+    ["January 10", "2027-01-10T12:00:00", true]]) {
+    const p = await buildPage("index.html", { now });
+    await settle(50);
+    const W = p.window;
+    loadAnswers(W);
+    const s = W.kycStateGov.states.MI;
+    s.governor = Object.assign({}, s.governor, { name: "Pat Example", since: "January 1, 2019" });
+    s.ballot2026.offices.governor = Object.assign({}, s.ballot2026.offices.governor, { up: true,
+      termBegins: term("2027-01-01", { counted: false, words: "noon on the first day of January" }),
+      outgoing: leaving("Pat Example", "term-limit") });
+    const said = (q) => {
+      const d = p.D.createElement("div");
+      d.innerHTML = W.KYC.answers.answer(q).html;
+      return d.textContent.replace(/\s+/g, " ");
+    };
+    suite(`the new terms begun, in the search's answers, ${clock}`, () => {
+      const one = said("Michigan governor");
+      check(begun ? "the governor's answer says the law's day and that the roster read Nov. 10 lists them"
+        : "before the term begins, the answer names the holder and nothing of the new term",
+        one.indexOf("Pat Example") !== -1 && (begun
+          ? one.indexOf("The term the 2026 election chose for the governor began on Jan. 1, 2027 " +
+              "(Made Const. art. V, s.1). The National Governors Association’s roster, read Nov. 10, " +
+              "2026, lists Pat Example, who was term-limited") !== -1
+          : !/term the 2026 election chose/.test(one)), one.slice(0, 400));
+      const every = said("governor");
+      const line = (every.match(/Michigan: [^:]*?(?=[A-Z][a-z]+(?: [A-Z][a-z]+)*:|$)/) || [""])[0];
+      check(begun ? "the every-state list says it beside Michigan's holder"
+        : "before it, the every-state list names the holder alone",
+        line.indexOf("Pat Example") !== -1 && (begun
+          ? line.indexOf("Pat Example (the National Governors Association’s roster, read Nov. 10, 2026, " +
+              "lists them, though the term the 2026 election chose began on Jan. 1, 2027)") !== -1
+          : !/term the 2026 election chose/.test(line)), line);
     });
   }
 }

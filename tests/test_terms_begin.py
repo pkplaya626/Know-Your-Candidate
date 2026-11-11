@@ -103,6 +103,69 @@ class TheTable(unittest.TestCase):
         self.assertTrue(any("VA governor: not on the 2026 ballot" in f
                             for f in terms_begin.problems(off)))
 
+    def test_the_words_the_page_quotes_are_the_provisions_own(self):
+        # The page prints `words` in quotation marks after "counted from":
+        # a paraphrase there is refused (the review of PR #230 found 19).
+        paraphrase = {"AK": (dict(terms_begin.TERMS["AK"][0],
+                                  words="noon on the first Monday in December following the "
+                                        "election"),)}
+        self.assertTrue(any("are not the provision's" in f
+                            for f in terms_begin.problems(paraphrase, {})))
+        # Curly quotes and line breaks fold; the words themselves do not.
+        hawaii = terms_begin.TERMS["HI"][0]
+        self.assertIn("’", hawaii["words"])
+        folded = {"HI": (dict(hawaii, words=hawaii["words"].replace("’", "'").replace(" ", "\n", 1)),)}
+        self.assertFalse(any("are not the provision's" in f
+                             for f in terms_begin.problems(folded, {})))
+        for code, records in terms_begin.TERMS.items():
+            for record in records:
+                quotes = [terms_begin._fold(q) for _s, qs in record["sources"] for q in qs]
+                self.assertTrue(any(terms_begin._fold(record["words"]) in q for q in quotes),
+                                (code, record["offices"], record["words"]))
+
+    def test_a_term_at_noon_is_begun_from_the_next_day(self):
+        # Alaska's noon on December 7 is 21:00 UTC: on the 7th, by the
+        # reader's or the build's day, it may not have begun.
+        alaska = terms_begin.for_page("AK", "governor")
+        self.assertEqual((alaska["day"], alaska["from"]), ("2026-12-07", "2026-12-08"))
+        self.assertFalse(terms_begin.begun(alaska, "2026-12-07"))
+        self.assertTrue(terms_begin.begun(alaska, "2026-12-08"))
+        # A provision that names noon carries `at`, and one that does not, none.
+        unmarked = {"AK": (dict(terms_begin.TERMS["AK"][0], at=""),)}
+        self.assertTrue(any("names noon" in f for f in terms_begin.problems(unmarked, {})))
+        marked = {"ID": (dict(terms_begin.TERMS["ID"][0], at="noon"),)}
+        self.assertTrue(any("does not name noon" in f for f in terms_begin.problems(marked, {})))
+        # A day with no hour is begun on the day itself.
+        idaho = terms_begin.for_page("ID", "governor")
+        self.assertEqual(idaho["from"], idaho["day"])
+        # "Still lists" only of a read on or after that first certain day.
+        item = {"termBegins": alaska,
+                "outgoing": leaving("Pat Example", "term-limit", read="2026-12-07")}
+        self.assertIn("read Dec. 7, 2026, lists Pat Example",
+                      terms_begin.past_term_text("governor", item, "2026-12-08"))
+
+    def test_iowas_secretary_of_state_has_the_constitutions_day(self):
+        # Iowa Const. art. IV, s.22 starts the secretary of state's term on
+        # January 1; Iowa Code 39.8 gives way to it ("except when otherwise
+        # provided by the Constitution"), and its January 2 is the attorney
+        # general's alone, whose term art. V, s.12 leaves to law.
+        sos = terms_begin.record_for("IA", "sos")
+        ag = terms_begin.record_for("IA", "ag")
+        self.assertIsNot(sos, ag)
+        self.assertEqual((sos["day"], sos["cite"]), ("2027-01-01", "Iowa Const. art. IV, s.22"))
+        self.assertIn("commencing on the first day of January next after their election",
+                      " ".join(q for _s, qs in sos["sources"] for q in qs))
+        self.assertEqual(ag["day"], "2027-01-02")
+        self.assertTrue(ag["cite"].startswith("Iowa Code 39.8"))
+        self.assertIn("whose term of office shall be four years",
+                      " ".join(q for _s, qs in ag["sources"] for q in qs))
+
+    def test_each_office_links_its_own_provision_first(self):
+        # Nevada's secretary of state is NRS 225, never the Attorney
+        # General's chapter, though NRS 282.010 sets both their days.
+        self.assertTrue(terms_begin.for_page("NV", "sos")["source"].endswith("NRS-225.html"))
+        self.assertTrue(terms_begin.for_page("NV", "ag")["source"].endswith("NRS-228.html"))
+
     def test_every_record_quotes_its_source_on_an_official_host(self):
         for code, records in terms_begin.TERMS.items():
             for record in records:
@@ -158,7 +221,9 @@ class OnEachClock(unittest.TestCase):
         item = payload()["states"]["BB"]["ballot2026"]["offices"]["governor"]
         self.assertEqual(terms_begin.past_term_text("governor", item, "2026-12-15"), "")
         text = terms_begin.past_term_text("governor", item, "2027-01-10")
-        self.assertEqual(text, "The term of the governor elected on Nov. 3, 2026 began on Jan. 1, "
+        # "The term the 2026 election chose", true where a territory's
+        # runoff chose it (48 U.S.C. 1422, 1591), never "elected on Nov. 3".
+        self.assertEqual(text, "The term the 2026 election chose for the governor began on Jan. 1, "
                                "2027 (Made Const. art. V). The National Governors Association’s "
                                "roster, read Nov. 10, 2026, lists Lee Sample, who was not among "
                                "the candidates for this office.")
@@ -190,6 +255,69 @@ class OnEachClock(unittest.TestCase):
         words = governor_share.share_words(found, "2026-11-10")
         self.assertIn("read Jan. 8, 2027, still lists Lee Sample", words["pastTerm"])
         self.assertEqual(words["since"], "")
+
+
+    def test_the_share_pages_render_all_writes_say_it(self):
+        # render_all is what the build writes o/gov-<ST>.html with: given
+        # the results' day as a bare True it compared nothing, and no
+        # governor's page ever said the term had begun (the review of PR
+        # #230). Made data: a Michigan-like governor term-limited.
+        governor = {"id": "gov-MI", "name": "Lee Sample", "party": "Democratic",
+                    "since": "January 1, 2019", "profile": "https://www.nga.org/governors/x/"}
+        item = dict(payload()["states"]["BB"]["ballot2026"]["offices"]["governor"],
+                    selection="elected", note="4-year term")
+
+        def page(results_as_of, read="2026-11-10"):
+            office = dict(item, outgoing=leaving("Lee Sample", "not-listed", read=read))
+            data = {"sources": {"nga": ["NGA", "https://www.nga.org/governors/", read]},
+                    "states": {"MI": {"governor": governor,
+                                      "ballot2026": {"offices": {"governor": office}}}}}
+            summary = {"election": {"resultsAsOf": results_as_of + "T12:00:00Z"}}
+            return governor_share.render_all(data, "example.org", summary)["o/gov-MI.html"]
+
+        # Results read on January 10: the term began on January 1.
+        after = page("2027-01-10")
+        self.assertIn('class="share-past-term"', after)
+        self.assertIn("The term the 2026 election chose for the governor began on Jan. 1, 2027",
+                      after)
+        self.assertNotIn("In office since", after)
+        # Results last read in November, the roster read again on January 8
+        # and still naming them: the page says so, on the data's own day.
+        later = page("2026-11-10", read="2027-01-08")
+        self.assertIn("read Jan. 8, 2027, still lists Lee Sample", later)
+        self.assertNotIn("In office since", later)
+        # Results and roster both read in November: nothing has begun.
+        november = page("2026-11-10")
+        self.assertNotIn("share-past-term", november)
+        self.assertIn("In office since January 1, 2019", november)
+
+    def test_from_january_an_office_with_no_day_read_and_a_leaving_holder_is_named(self):
+        # A gap cannot be told begun, so it is named for a person to read
+        # the provision from UNREAD_FROM on: a warning, no page words.
+        data = payload()
+        data["states"]["EE"] = {"ballot2026": {"offices": {
+            "governor": {"up": True, "outgoing": leaving("Gale Gap", "term-limit")},
+            # On the ballot and listed: no `outgoing`, never named.
+            "lt": {"up": True}}}}
+        self.assertEqual(terms_begin.unread(data, DECEMBER), [])
+        named = terms_begin.unread(data, JANUARY)
+        self.assertEqual(len(named), 1)
+        self.assertTrue(named[0].startswith("EE governor: no day read"), named)
+        self.assertIn("names Gale Gap (term-limit)", named[0])
+        self.assertEqual(terms_begin.past_term_text(
+            "governor", data["states"]["EE"]["ballot2026"]["offices"]["governor"], "2027-02-01"), "")
+        issues = validate.check_terms_begun(today=JANUARY, payload=data)
+        self.assertEqual([(i.level, i.code) for i in issues],
+                         [("warning", "holder-past-inauguration"), ("warning", "term-day-unread")])
+        self.assertEqual([(i.level, i.code) for i in
+                          validate.check_terms_begun(today=DECEMBER, payload=data)],
+                         [("warning", "holder-past-inauguration")])
+
+    def test_a_gap_says_what_was_read(self):
+        # Oregon's constitution was readable: its gap says what it holds.
+        why, source = terms_begin.GAPS[("OR", "governor")]
+        self.assertIn("except the Governor", why)
+        self.assertTrue(source.startswith("https://www.oregonlegislature.gov/"))
 
 
 class TheBallotTable(unittest.TestCase):

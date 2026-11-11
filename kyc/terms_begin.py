@@ -78,11 +78,23 @@ USC_48_1591 = "https://www.govinfo.gov/link/uscode/48/1591?type=usc&year=mostrec
 
 FIRST_MONDAY_JANUARY = ("nth", 1, "Monday", 1)
 
+# Nevada's attorney general and secretary of state: NRS 282.010's last day
+# to qualify, from which the term runs.
+NV_282_QUOTES = (NV_282, (
+    "All officers elected, except Senators and members of the Assembly, shall "
+    "qualify, and execute and deliver their official bonds when required, as "
+    "provided in this section, prior to the Tuesday after the first Monday in "
+    "January ensuing their election.",
+    "The term of office of all officers, elected or appointed, shall begin from the "
+    "time of their qualification, unless some other express provision is made by "
+    "law."))
+NV_QUALIFY_WORDS = "prior to the Tuesday after the first Monday in January ensuing their election"
 
-def _record(offices, rule, words, day, cite, sources, kind="on", read=READ, note=""):
+
+def _record(offices, rule, words, day, cite, sources, kind="on", read=READ, note="", at=""):
     return {"offices": tuple(offices), "rule": rule, "words": words, "day": day,
             "cite": cite, "sources": tuple(sources), "kind": kind, "read": read,
-            **({"note": note} if note else {})}
+            **({"note": note} if note else {}), **({"at": at} if at else {})}
 
 
 # {jurisdiction: (record, ...)}. A rule is ("day", month, day of month),
@@ -92,16 +104,16 @@ def _record(offices, rule, words, day, cite, sources, kind="on", read=READ, note
 # other in the next. Each source is (address, (the page's words, ...)).
 TERMS = {
     "AK": (_record(("governor", "lt"), ("nth", 1, "Monday", 12),
-                   "noon on the first Monday in December following the election",
+                   "noon on the first Monday in December following his election",
                    "2026-12-07", "Alaska Const. art. III, ss.4 and 7",
                    ((LTGOV_AK, (
                        "The term of office of the governor is four years, beginning at noon on the "
                        "first Monday in December following his election and ending at noon on the "
                        "first Monday in December four years later.",
                        "He shall have the same qualifications as the governor and serve for the same "
-                       "term.")),)),),
+                       "term.")),), at="noon"),),
     "AZ": (_record(("governor", "lt", "ag", "sos"), FIRST_MONDAY_JANUARY,
-                   "the first Monday of January next after the regular general election",
+                   "four years beginning on the first Monday of January, 1971",
                    "2027-01-04", "Ariz. Const. art. 5, s.1(A)",
                    ((AZ_5_1, (
                        "The executive department shall consist of the governor, lieutenant governor, "
@@ -119,15 +131,15 @@ TERMS = {
                        "There shall be a cabinet composed of an attorney general, a chief financial "
                        "officer, and a commissioner of agriculture.")),)),),
     "HI": (_record(("governor", "lt"), ("nth", 1, "Monday", 12),
-                   "noon on the first Monday in December next following the election",
+                   "noon on the first Monday in December next following the governor’s election",
                    "2026-12-07", "Haw. Const. art. V, ss.1 and 2",
                    ((HI_CONST, (
                        "The term of office of the governor shall begin at noon on the first Monday in "
                        "December next following the governor’s election",
                        "The lieutenant governor shall be elected at the same time, for the same term "
-                       "and in the same manner as the governor")),)),),
+                       "and in the same manner as the governor")),), at="noon"),),
     "ID": (_record(("governor", "lt", "ag", "sos"), FIRST_MONDAY_JANUARY,
-                   "the first Monday in January next after the election",
+                   "the first Monday in January next after his election",
                    "2027-01-04", "Idaho Const. art. IV, s.1",
                    ((ID_4_1, (
                        "a governor, lieutenant governor, secretary of state, state controller, state "
@@ -135,7 +147,7 @@ TERMS = {
                        "whom shall hold his office for four years beginning on the first Monday in "
                        "January next after his election",)),)),),
     "IL": (_record(("governor", "lt", "ag", "sos"), ("nth", 2, "Monday", 1),
-                   "the second Monday of January after the election",
+                   "the second Monday of January after their election",
                    "2027-01-11", "Ill. Const. art. V, ss.1 and 2",
                    ((IL_5, (
                        "The Executive Branch shall include a Governor, Lieutenant Governor, Attorney "
@@ -149,24 +161,23 @@ TERMS = {
                    ((MA_CONST, (
                        "The terms of the governor and lieutenant-governor shall begin at noon on the "
                        "Thursday next following the first Wednesday in January succeeding their "
-                       "election",)),)),
+                       "election",)),), at="noon"),
            _record(("ag", "sos"), ("nth", 3, "Wednesday", 1),
-                   "the third Wednesday in January succeeding the election",
+                   "the third Wednesday in January succeeding their election",
                    "2027-01-20", "Mass. Const. amend. art. LXIV, s.1, as adopted by amend. art. LXXXII",
                    ((MA_CONST, (
                        "The terms of the secretary, treasurer and receiver-general, attorney general, "
                        "and auditor shall begin with the third Wednesday in January succeeding their "
                        "election",)),))),
     "MI": (_record(("governor", "lt", "ag", "sos"), ("day", 1, 1),
-                   "twelve o'clock noon on the first day of January next succeeding the election",
+                   "twelve o'clock noon on the first day of January next succeeding their election",
                    "2027-01-01", "Mich. Const. art. XI, s.2",
                    ((MI_11_2, (
                        "The terms of office of elective state officers, members of the legislature and "
                        "justices and judges of courts of record shall begin at twelve o'clock noon on "
-                       "the first day of January next succeeding their election",)),)),),
+                       "the first day of January next succeeding their election",)),), at="noon"),),
     "MN": (_record(("governor", "lt", "ag", "sos"), FIRST_MONDAY_JANUARY,
-                   "the first Monday in January, when the state's official year commences and all "
-                   "terms of office terminate",
+                   "the first Monday in January in each year",
                    "2027-01-04", "Minn. Const. art. VII, s.7, with art. V, ss.2 and 4",
                    ((MN_CONST, (
                        "The official year for the state of Minnesota commences on the first Monday in "
@@ -176,15 +187,15 @@ TERMS = {
                        "The term of office of the secretary of state, attorney general and state "
                        "auditor is four years and until a successor is chosen and qualified.")),)),),
     "NE": (_record(("governor", "lt", "ag", "sos"), ("after", "Thursday", ("nth", 1, "Tuesday", 1)),
-                   "the first Thursday after the first Tuesday in January next succeeding the election",
+                   "the first Thursday after the first Tuesday in January next succeeding their "
+                   "election",
                    "2027-01-07", "Neb. Const. art. XVII, s.5",
                    ((NE_17_5, (
                        "Unless otherwise provided by this Constitution or by law the terms of all "
                        "elected officers shall begin on the first Thursday after the first Tuesday in "
                        "January next succeeding their election.",)),)),),
     "NV": (_record(("governor",), FIRST_MONDAY_JANUARY,
-                   "the 1st Monday of January next succeeding the election, when the governor takes "
-                   "the oath; the term runs from the governor's installment",
+                   "the 1st Monday of January next succeeding his or her election",
                    "2027-01-04", "NRS 223.020 and 223.030",
                    ((NV_223, (
                        "shall hold office for the term of 4 years from the time of his or her "
@@ -193,8 +204,7 @@ TERMS = {
                        "Justice or one of the associate justices of the Supreme Court on the 1st Monday "
                        "of January next succeeding his or her election.")),)),
            _record(("lt",), FIRST_MONDAY_JANUARY,
-                   "the 1st Monday of January next succeeding the election, when the lieutenant "
-                   "governor takes the oath; the term runs from the installment",
+                   "the 1st Monday of January next succeeding his or her election",
                    "2027-01-04", "NRS 224.020 and 224.030",
                    ((NV_224, (
                        "The Lieutenant Governor shall be chosen at the general election of 1866, and "
@@ -203,26 +213,23 @@ TERMS = {
                        "The Lieutenant Governor shall take and subscribe to the official oath before "
                        "the Chief Justice or one of the associate justices of the Supreme Court on the "
                        "1st Monday of January next succeeding his or her election.")),)),
-           _record(("ag", "sos"), FIRST_MONDAY_JANUARY,
-                   "the officer's qualification, which must come before the Tuesday after the first "
-                   "Monday in January",
-                   "2027-01-04", "NRS 228.020, 225.020 and 282.010",
+           # One record per office, each led by its own chapter (the page
+           # links the first source), with NRS 282.010's day to qualify by.
+           _record(("ag",), FIRST_MONDAY_JANUARY, NV_QUALIFY_WORDS,
+                   "2027-01-04", "NRS 228.020 and 282.010",
                    ((NV_228, (
                        "The Attorney General shall be chosen at the general election of 1866, and every "
                        "4th year thereafter, and shall hold office for the term of 4 years from the "
                        "time of his or her installment",)),
-                    (NV_225, (
+                    NV_282_QUOTES),
+                   kind="by"),
+           _record(("sos",), FIRST_MONDAY_JANUARY, NV_QUALIFY_WORDS,
+                   "2027-01-04", "NRS 225.020 and 282.010",
+                   ((NV_225, (
                        "The Secretary of State shall be chosen at the general election of 1866, and "
                        "every 4th year thereafter, and shall hold office for the term of 4 years from "
                        "the time of his or her installment",)),
-                    (NV_282, (
-                       "All officers elected, except Senators and members of the Assembly, shall "
-                       "qualify, and execute and deliver their official bonds when required, as "
-                       "provided in this section, prior to the Tuesday after the first Monday in "
-                       "January ensuing their election.",
-                       "The term of office of all officers, elected or appointed, shall begin from the "
-                       "time of their qualification, unless some other express provision is made by "
-                       "law."))),
+                    NV_282_QUOTES),
                    kind="by")),
     "OH": (_record(("governor", "lt", "ag", "sos"), ("nth", 2, "Monday", 1),
                    "the second Monday of January",
@@ -233,7 +240,7 @@ TERMS = {
                        "second Monday of January, 1959.",)),)),),
     "SC": (_record(("governor", "lt", "ag", "sos"), ("after", "Wednesday", ("nth", 2, "Tuesday", 1)),
                    "noon on the first Wednesday following the second Tuesday in January next after "
-                   "the election",
+                   "his election",
                    "2027-01-13", "S.C. Const. art. IV, ss.4 and 8(A); art. VI, s.7",
                    ((SC_4, (
                        "The term of office of the Governor shall be four years, beginning at noon on "
@@ -246,11 +253,11 @@ TERMS = {
                        "There shall be elected by the qualified voters of the State a Secretary of "
                        "State, an Attorney General",
                        "who shall hold their respective offices for a term of four years, coterminous "
-                       "with that of the Governor.")))),),
+                       "with that of the Governor."))), at="noon"),),
     # The Colorado Revised Statutes 2023 as the Office of Legislative Legal
     # Services publishes them, the constitution in title 0.
     "CO": (_record(("governor", "lt", "ag", "sos"), ("nth", 2, "Tuesday", 1),
-                   "the second Tuesday of January, every fourth year from 1967",
+                   "the second Tuesday of January in the year 1967, and each fourth year thereafter",
                    "2027-01-12", "Colo. Const. art. IV, s.1(1)",
                    ((CO_CONST, (
                        "The executive department shall include the governor, lieutenant governor, "
@@ -258,18 +265,32 @@ TERMS = {
                        "hold his office for the term of four years, commencing on the second Tuesday of "
                        "January in the year 1967, and each fourth year thereafter.",)),)),),
     "IA": (_record(("governor", "lt"), ("after", "Tuesday", ("nth", 2, "Monday", 1)),
-                   "the Tuesday after the second Monday of January next after the election",
+                   "the Tuesday after the second Monday of January next after their election",
                    "2027-01-12", "Iowa Const. art. IV, s.15",
                    ((IA_CONST, (
                        "The official terms of the governor and lieutenant governor shall commence on "
                        "the Tuesday after the second Monday of January next after their election",)),)),
-           # Iowa Code 39.8 starts every other full term on "the first day of
-           # January following the election which is not a Sunday or legal
-           # holiday", and 1C.1 makes January 1 New Year's Day, a legal
+           # The secretary of state's day is the constitution's own (art. IV,
+           # s.22, as rewritten by amendment 32 of 1972), which Iowa Code
+           # 39.8 gives way to ("except when otherwise provided by the
+           # Constitution"): January 1, never 39.8's January 2 (the review
+           # of PR #230).
+           _record(("sos",), ("day", 1, 1),
+                   "the first day of January next after their election",
+                   "2027-01-01", "Iowa Const. art. IV, s.22",
+                   ((IA_CONST, (
+                       "A secretary of state, an auditor of state and a treasurer of state shall be "
+                       "elected by the qualified electors at the same time that the governor is "
+                       "elected and for a four-year term commencing on the first day of January next "
+                       "after their election",)),)),
+           # The attorney general's term the constitution leaves to law with
+           # no day (art. V, s.12), and Iowa Code 39.8 starts it on "the first
+           # day of January following the election which is not a Sunday or
+           # legal holiday"; 1C.1 makes January 1 New Year's Day, a legal
            # public holiday: in 2027, Saturday, January 2.
-           _record(("ag", "sos"), ("not-sunday-or", ("day", 1, 1), ((1, 1),)),
+           _record(("ag",), ("not-sunday-or", ("day", 1, 1), ((1, 1),)),
                    "the first day of January following the election which is not a Sunday or legal "
-                   "holiday (January 1 being New Year's Day, a legal public holiday)",
+                   "holiday",
                    "2027-01-02", "Iowa Code 39.8, 39.9 and 1C.1",
                    ((IA_39_8, (
                        "The term of office of all officers chosen at a general election for a full "
@@ -281,9 +302,13 @@ TERMS = {
                        "treasurer of state, secretary of agriculture, and attorney general shall be "
                        "elected for a term of four years",)),
                     (IA_1C_1, (
-                       "The following are legal public holidays: 1. New Year’s Day, January 1.",))))),
+                       "The following are legal public holidays: 1. New Year’s Day, January 1.",)),
+                    (IA_CONST, (
+                       "The general assembly shall provide, by law, for the election of an attorney "
+                       "general by the people, whose term of office shall be four years, and until his "
+                       "successor is elected and qualifies.",))))),
     "KS": (_record(("governor", "lt", "ag", "sos"), ("nth", 2, "Monday", 1),
-                   "the second Monday of January next after the election",
+                   "the second Monday of January next after their election",
                    "2027-01-11", "Kan. Const. art. 1, s.1",
                    ((KS_1_1, (
                        "The constitutional officers of the executive department shall be the governor, "
@@ -292,7 +317,7 @@ TERMS = {
                        "which shall begin on the second Monday of January next after their "
                        "election")),)),),
     "ND": (_record(("ag", "sos"), ("day", 1, 1),
-                   "the first day of January next succeeding the election",
+                   "the first day of January next succeeding their election",
                    "2027-01-01", "N.D. Cent. Code 44-01-03",
                    ((ND_44_01, (
                        "Except when otherwise specially provided, all state and district officers shall "
@@ -300,7 +325,7 @@ TERMS = {
                        "first day of January shall enter upon the discharge of the duties of their "
                        "respective offices",)),)),),
     "OK": (_record(("governor", "lt", "ag"), ("nth", 2, "Monday", 1),
-                   "the second Monday of January next after the election",
+                   "the second Monday of January next after their election",
                    "2027-01-11", "Okla. Const. art. VI, s.4(A)",
                    ((OK_6, (
                        "The term of office of the Governor, Lieutenant Governor, State Auditor and "
@@ -308,7 +333,7 @@ TERMS = {
                        "Superintendent of Public Instruction shall be four (4) years from the second "
                        "Monday of January next after their election.",)),)),),
     "PA": (_record(("governor", "lt"), ("nth", 3, "Tuesday", 1),
-                   "the third Tuesday of January next ensuing the election",
+                   "the third Tuesday of January next ensuing his election",
                    "2027-01-19", "Pa. Const. art. IV, ss.3 and 4",
                    ((PA_4_3, (
                        "The Governor shall hold his office during four years from the third Tuesday of "
@@ -318,7 +343,7 @@ TERMS = {
                        "by each voter of a single vote applicable to both offices, for the same term, "
                        "and subject to the same provisions as the Governor",)))),),
     "RI": (_record(("governor", "lt", "ag", "sos"), ("nth", 1, "Tuesday", 1),
-                   "the first Tuesday of January next succeeding the election",
+                   "the first Tuesday of January next succeeding their election",
                    "2027-01-05", "R.I. Const. art. IV, s.1",
                    ((RI_4, (
                        "The governor, lieutenant governor, secretary of state, attorney general and "
@@ -363,7 +388,13 @@ _GAPS_BY_STATE = {
     "NH": (_NOT_READ, None),
     "NM": (_NOT_READ, None),
     "NY": (_NOT_READ + " (nysenate.gov refused this site's request, HTTP 403)", None),
-    "OR": (_NOT_READ, None),
+    # The review of PR #230 read the page this read had not: the
+    # constitution starts "all officers, except the Governor" on the first
+    # Monday in January, and art. V, s.1 gives the governor's term no day.
+    "OR": ("Or. Const. art. II, s.14 starts the duties of \"all officers, except the Governor\" on "
+           "the first Monday in January following the election, and art. V, s.1 gives the "
+           "governor's term of four years no day; this read found no provision for the governor's",
+           "https://www.oregonlegislature.gov/bills_laws/Pages/OrConst.aspx"),
     "SD": (_NOT_READ + " (sdlegislature.gov's constitution pages are drawn by script)", None),
     "TN": (_NOT_READ + " (the Tennessee Code's official text is published on a commercial host; "
            "the leads cite two sections giving different days)", None),
@@ -423,10 +454,20 @@ def counted(rule):
 
 
 def begun_from(record):
-    """The first day the term has certainly begun: the day itself, or for a
-    "by" record the day after the last day the officer may qualify."""
+    """The first day the term has certainly begun: the day itself; or the
+    day after, for a "by" record (the last day the officer may qualify) and
+    for a term that begins at noon (``at``), since a reader's day, or the
+    build's in UTC, can reach the day hours before noon where the office
+    sits (the review of PR #230: Alaska's noon on December 7 is 21:00 UTC)."""
     day = datetime.date.fromisoformat(record["day"])
-    return day + datetime.timedelta(days=1) if record["kind"] == "by" else day
+    late = record["kind"] == "by" or record.get("at") == "noon"
+    return day + datetime.timedelta(days=1) if late else day
+
+
+def _fold(text):
+    """Text compared as words: curly quotes straight, runs of space one."""
+    text = (text or "").replace("’", "'").replace("‘", "'").replace("“", '"').replace("”", '"')
+    return re.sub(r"\s+", " ", text).strip()
 
 
 def up_offices():
@@ -468,6 +509,21 @@ def problems(terms=None, gaps=None):
                 found.extend(_source_problems(code, record["offices"], source))
                 if not quotes or not all(q and q.strip() for q in quotes):
                     found.append(f"{code} {record['offices']}: {source} quotes nothing")
+            # The page prints `words` in quotation marks after "counted
+            # from", so they are the provision's own words, a span of a quote
+            # the record carries, never a paraphrase (rules 38 and 84; the
+            # review of PR #230 found 19 of 24 paraphrased).
+            quoted = [_fold(q) for _source, quotes in record["sources"] for q in quotes or ()]
+            if record.get("words") and not any(_fold(record["words"]) in q for q in quoted):
+                found.append(f"{code} {record['offices']}: the words {record['words']!r} are not "
+                             f"the provision's: no quote holds them")
+            # A term that begins at noon is begun only from the next day
+            # (begun_from), so a provision that names noon says so here.
+            noon = any("noon" in q for q in quoted)
+            if noon != (record.get("at") == "noon"):
+                found.append(f"{code} {record['offices']}: the provision "
+                             f"{'names' if noon else 'does not name'} noon, the record "
+                             f"{'does not' if noon else 'does'}")
     up = set(up_offices())
     for pair in sorted(set(covered) | set(gaps)):
         if pair not in up:
@@ -517,6 +573,9 @@ def for_page(code, key, terms=None):
     record = record_for(code, key, terms)
     if record is None:
         return None
+    # `source` is the record's first, which names this office: a record
+    # covering offices whose own provisions differ is one record per office
+    # (Nevada's attorney general and secretary of state).
     return {"day": record["day"], "from": begun_from(record).isoformat(), "kind": record["kind"],
             "words": record["words"], "counted": counted(record["rule"]), "cite": record["cite"],
             "source": record["sources"][0][0], "read": record["read"]}
@@ -587,8 +646,15 @@ def past_term_text(key, item, day):
     if not gone or not begun(term, day):
         return ""
     office = ballot2026.TITLES[key].lower()
-    still = "still lists" if gone["read"] >= term["day"] else "lists"
-    return (f"The term of the {office} elected on Nov. 3, 2026 {began_words(term)} "
+    # "Still" only of a read on or after the first day the term had
+    # certainly begun (`from`): a read on the morning of a noon term, or on
+    # a "by" record's last day to qualify, may precede it.
+    still = "still lists" if gone["read"] >= term["from"] else "lists"
+    # "The term the 2026 election chose", never "the governor elected on
+    # Nov. 3": Guam's and the Virgin Islands' organic acts hold a runoff
+    # fourteen days later where no ticket has a majority, and this site
+    # reads no territory's result (the review of PR #230).
+    return (f"The term the 2026 election chose for the {office} {began_words(term)} "
             f"({term['cite']}). {gone['roster']}, read {date_words(gone['read'])}, {still} "
             f"{gone['holder']}, {WHY_WORDS[gone['why']]}.")
 
@@ -619,4 +685,33 @@ def lagging(payload, today):
                 read = (sources.get("nlga") or ["", "", ""])[2]
                 out.append(f"{code} {title}: the National Lieutenant Governors Association’s "
                            f"roster, read {read}, lists none; {when}")
+    return out
+
+
+# From this day an office in GAPS whose holder is leaving may already be past
+# its new term's first day, which nobody here has read: most of the dated
+# terms begin in January's first three weeks (the review of PR #230).
+UNREAD_FROM = "2027-01-01"
+
+
+def unread(payload, today):
+    """Every office in ``GAPS`` whose roster names a holder who was not on
+    the ballot for the term the 2026 election chose (``outgoing``), once
+    *today* (the build's day) is ``UNREAD_FROM`` or later: what the build
+    warns of (``term-day-unread``), so a person reads the provision. No page
+    words and no guess: without a day, the page says nothing of the term."""
+    if not today or str(today)[:10] < UNREAD_FROM:
+        return []
+    out = []
+    for code, entry in sorted(((payload or {}).get("states") or {}).items()):
+        offices = (entry.get("ballot2026") or {}).get("offices") or {}
+        for key, item in sorted(offices.items()):
+            gone = item.get("outgoing")
+            if not item.get("up") or item.get("termBegins") or not gone:
+                continue
+            why = (GAPS.get((code, key)) or ("no record in kyc/terms_begin.py", None))[0]
+            out.append(f"{code} {ballot2026.TITLES[key].lower()}: no day read for the term the "
+                       f"2026 election chose ({why}); {gone['roster'][0].lower()}"
+                       f"{gone['roster'][1:]}, read {gone['read']}, names {gone['holder']} "
+                       f"({gone['why']})")
     return out

@@ -384,8 +384,12 @@
       } else if (off.none) {
         detail = esc("no one holds this office yet; first elected on Nov 3, 2026");
       } else if (namedHolder(off)) {
+        // The term the 2026 election chose has begun and the roster still
+        // names a holder who was not on the ballot for it: said here too,
+        // never the roster's name plainly (KYC.stategov.pastTermBrief).
+        var past = KYC.stategov.pastTermBrief(code, key);
         detail = esc(off.name) + (off.title && off.title !== STATE_OFFICES[key]
-          ? " (" + esc(off.title) + ")" : "");
+          ? " (" + esc(off.title) + ")" : "") + (past ? " (" + esc(past) + ")" : "");
       } else {
         detail = "not named here";
       }

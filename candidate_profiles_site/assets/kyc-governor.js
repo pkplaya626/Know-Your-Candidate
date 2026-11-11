@@ -288,18 +288,20 @@
     // Once the term the 2026 election chose has begun and the roster still
     // names a governor who was not on the ballot for it, the law's day and
     // the roster's word in place of the date (KYC.stategov.pastTermNote).
+    // No "In office since" field over it either: under that label the note
+    // read as a date of office it sets out to withhold (the review of PR
+    // #230), so it stands after the facts, a paragraph of its own.
     var past = sg().pastTermNote(code, "governor");
-    var since = past ? past
-      : gov.since
+    var since = gov.since
       ? KYC.escapeHtml(gov.since) + ' <span class="faint">(the NGA’s roster, confirmed by Wikidata)</span>'
       : absent(SINCE_WHY[gov.sinceWhy] || ONLY_AGREED);
     var contact = [gov.phone, gov.address].filter(Boolean).map(KYC.escapeHtml).join("<br>");
     var links = [outLink(gov.profile, "NGA biography")];
     if (gov.website) links.unshift(outLink(gov.website, "The governor’s office"));
     var body = '<div class="field-grid">' +
-      field("Born", born) + field("In office since", since) +
+      field("Born", born) + (past ? "" : field("In office since", since)) +
       field("Office", links.join(" · ") + (contact ? "<br>" + contact : ""), true) +
-      "</div>" +
+      "</div>" + past +
       '<p class="held-source">The National Governors Association’s roster' +
       (nga[2] ? ", read " + KYC.escapeHtml(KYC.dateWords(nga[2])) : "") +
       ". No education, career or platform is shown: this site reads none for a governor.</p>";

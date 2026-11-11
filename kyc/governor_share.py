@@ -438,7 +438,11 @@ def render_all(stategov, host, summary=None):
         return {}
     from .share import post_election
 
-    post = bool(post_election(summary))
+    # The day itself (a ResultsDay, true as a test), never bool() of it:
+    # share_words compares the term the 2026 election chose with that day,
+    # and given True it could compare nothing, so no governor's page ever
+    # said the term had begun (the review of PR #230).
+    post = post_election(summary)
     sources = stategov.get("sources") or {}
     voting = (summary or {}).get("voting") or {}
     return {official_path(oid): render_governor(oid, found, host, post, sources,
