@@ -307,19 +307,16 @@
         words.raceTitle + runoff.join(", ") + ".") + '">' + KYC.escapeHtml(words.race) + "</span>";
     }
     // Once the new Congress sits, the one its record seats for the term this
-    // race decided, in the person's own words (KYC's seatedWords): "Awaiting
-    // result" over a seated member read as though nobody held the seat.
-    var seen = {};
-    var seats = race.incumbentIds.concat(race.candidateIds).map(KYC.byId).filter(function (p) {
-      if (!p || seen[p.id]) return false;
-      seen[p.id] = true;
-      var spec = KYC.raceStatusOf(p, "long");
-      return !!spec && /^Seated for the /.test(spec.label);
-    });
-    if (seats.length === 1) {
-      var sat = KYC.raceStatusOf(seats[0], "long");
-      return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(seats[0].name + ": " +
-        sat.title) + '">Seated: ' + KYC.escapeHtml(seats[0].name) + "</span>";
+    // race decided (KYC.seatedIn, which the others' words ask too), in
+    // KYC's seatedWords: "Awaiting result" over a seated member read as
+    // though nobody held the seat. Only someone who sits in this very seat:
+    // the first version took anyone whose own status read "Seated for",
+    // so TX-35 counted Greg Casar, who sits for TX-37 (the review of #227).
+    var seat = KYC.recordPhase() ? KYC.seatedIn(race) : null;
+    if (seat) {
+      return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(seat.name + ": " +
+        KYC.seatedWords(KYC.newTerm(seat)).title) + '">Seated: ' + KYC.escapeHtml(seat.name) +
+        "</span>";
     }
     var asOf = (KYC.meta().election || {}).resultsAsOf;
     return '<span class="badge badge-neutral" title="' + KYC.escapeAttr(
@@ -868,9 +865,18 @@
   function raceRow(race, split, fold) {
     var who = rowPeople(race, split);
     // An outcome the people's own label already gives ("Awaiting result:
-    // ...") is not said a second time.
+    // ...") is not said a second time, nor "Seated: X" where X is listed
+    // under "Seated for the new term" (TX-37's row said Greg Casar twice).
+    var seat = KYC.recordPhase() ? KYC.seatedIn(race) : null;
     var said = function (b) {
-      return b.key === "outcome" && who.ballot.some(function (g) { return g[0] === b.text; });
+      if (b.key !== "outcome") return false;
+      if (who.ballot.some(function (g) { return g[0] === b.text; })) return true;
+      // b.text is the badge's markup without its tags: escaped.
+      return !!seat && b.text === "Seated: " + KYC.escapeHtml(seat.name) && who.ballot.some(function (g) {
+        return /^Seated for /.test(g[0]) && g[1].some(function (n) {
+          return n === seat.name || n.indexOf(seat.name + " ") === 0;
+        });
+      });
     };
     var badges = raceBadgeItems(race).filter(function (b) {
       return ROW_BADGES[b.key] && !sameBadge((fold.shared || {})[b.key], b) && !said(b);

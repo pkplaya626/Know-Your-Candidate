@@ -319,6 +319,34 @@ class TestStatusTable(unittest.TestCase):
                             for r in rows))
         self.assertFalse(any(r[2] and (r[4] or "").startswith("Not running") for r in rows))
 
+    def test_the_others_on_a_ballot_whose_seat_the_record_fills(self):
+        # LA-4's head read "Seated: Mike Johnson" over four people "Awaiting
+        # result" (the review of PR #227): once the record seats someone for
+        # the term, the others were on the ballot, credited to the record,
+        # never awaiting and never said to have lost. A member who moved and
+        # sits elsewhere fills nobody's seat.
+        record = share.ResultsDay("2026-11-10", record=True)
+        race = {"id": "H-LA-04-2026", "incumbentIds": ["J000299"],
+                "candidateIds": ["J000299", "FEC_X"],
+                "incumbent": {"profileId": "J000299", "seated": True}}
+        winner = {"id": "J000299", "name": "Mike Johnson", "isCandidate": False,
+                  "raceId": "H-LA-04-2026", "raceStatus": "nominee",
+                  "term_start": "2027-01-03 - 2029-01-03"}
+        other = {"id": "FEC_X", "name": "Pat Other", "isCandidate": True,
+                 "raceId": "H-LA-04-2026", "raceStatus": "nominee"}
+        by_id = {p["id"]: p for p in (winner, other)}
+        races = {race["id"]: race}
+        self.assertEqual(share.standing(winner, by_id, races, record)[0], "Seated for the 2027–2029 term")
+        self.assertEqual(share.standing(other, by_id, races, record)[0], "Was on the November ballot")
+        self.assertEqual(share.status_source(other, by_id, races, record), share.SEATED_SOURCE)
+        # Before the new Congress sits, or with nobody seated in the seat,
+        # the result is still awaited.
+        self.assertEqual(share.standing(other, by_id, races, share.ResultsDay("2026-11-10"))[0],
+                         "On the November ballot: awaiting result")
+        moved = dict(race, incumbent={"profileId": "J000299", "seated": False})
+        self.assertEqual(share.standing(other, by_id, {race["id"]: moved}, record)[0],
+                         "On the November ballot: awaiting result")
+
 
 class TestSharePhoto(unittest.TestCase):
     """A share image is a photograph that came by a sourced route (rule 24),

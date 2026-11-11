@@ -5344,5 +5344,31 @@
 ["qualified","qualified",1,"","On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
 ["qualified","qualified",1,"2027–2029","Seated for the 2027–2029 term",0,"Congress's record of its members, from the congress-legislators project"],
 ["qualified","qualified",1,"2026–2029","Seated for the 2026–2029 term",0,"Congress's record of its members, from the congress-legislators project"]
+],
+"seatedOthers": [
+["nominee",null,0,null,null,"On the November ballot: awaiting result",0,"Wikipedia's election results page"],
+["nominee",null,0,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["nominee",null,1,null,null,"On the November ballot: awaiting result",0,"Wikipedia's election results page"],
+["nominee",null,1,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["nominee","certified",0,null,null,"On the November ballot: awaiting result",0,"the certified list of candidates"],
+["nominee","certified",0,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["nominee","certified",1,null,null,"On the November ballot: awaiting result",0,"the certified list of candidates"],
+["nominee","certified",1,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["nominee","qualified",0,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["nominee","qualified",0,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["nominee","qualified",1,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["nominee","qualified",1,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["qualified",null,0,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["qualified",null,0,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["qualified",null,1,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["qualified",null,1,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["qualified","certified",0,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["qualified","certified",0,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["qualified","certified",1,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["qualified","certified",1,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["qualified","qualified",0,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["qualified","qualified",0,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"],
+["qualified","qualified",1,null,null,"On the November ballot: awaiting result",0,"the Secretary of State's Candidate Inquiry"],
+["qualified","qualified",1,"Test Winner","2027–2029","Was on the November ballot",0,"Congress's record of its members, from the congress-legislators project"]
 ]
 }

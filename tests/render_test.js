@@ -15213,6 +15213,18 @@ async function testSharePages() {
       (table.seated || []).length >= 24 && seatedOff.length === 0 &&
         table.seated.some((r) => r[3] && /^Seated for the \d{4}–\d{4} term$/.test(r[4])),
       seatedOff.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${(table.seated || []).length} cases`);
+    // The others on that ballot (share.seated_other, KYC's seatedOtherWords):
+    // "Awaiting result" beside "Seated: Mike Johnson" (the review of #227).
+    const othersOff = (table.seatedOthers || []).filter(([status, source, minor, name, term, label, gone, credit]) => {
+      const spec = KYC.raceStatus(status, "long", { source: source || undefined, minor: !!minor,
+        now: AFTER_DAY, record: true, seatedOther: name ? { name, term } : undefined });
+      return !spec || spec.label !== label || !!spec.off !== !!gone || creditOf(spec) !== credit;
+    });
+    check("and the others on a ballot whose seat the record fills, on it and never said to have lost",
+      (table.seatedOthers || []).length >= 24 && othersOff.length === 0 &&
+        table.seatedOthers.some((r) => r[3] && r[5] === "Was on the November ballot") &&
+        !table.seatedOthers.some((r) => r[3] && /awaiting|lost|defeated/i.test(r[5])),
+      othersOff.slice(0, 3).map((r) => JSON.stringify(r)).join(" | ") || `${(table.seatedOthers || []).length} cases`);
     check("and every status in the record phase, a member who did not run in the past tense",
       (table.record || []).length > 100 && recordOff.length === 0 &&
         table.record.some((row) => row[6] === "Did not run for re-election in 2026") &&
@@ -18916,6 +18928,13 @@ function rowProblems(window, D) {
     row.ballot.filter((g) => /^Also /.test(g.label)).forEach((g) => {
       if (g.label.indexOf(KYC.ballotSource(race)) === -1) say("uncredited: " + g.label);
     });
+    // Nobody is said twice: "Seated: Greg Casar" beside "Seated for the new
+    // term: Greg Casar (D)" on TX-37's January row (the review of #227).
+    row.badges.filter((b) => /^Seated: /.test(b)).forEach((b) => {
+      const name = b.slice("Seated: ".length);
+      if (row.ballot.some((g) => /^Seated for /.test(g.label) &&
+          g.names.some((n) => n === name || n.indexOf(name + " ") === 0))) say("said twice: " + b);
+    });
     // Nobody held the seat, so nobody challenges (FL-20).
     if (!(race.incumbentIds || []).length && row.badges.some((b) => /challenger/.test(b))) {
       say("challengers to nobody: " + row.badges.join("|"));
@@ -22086,6 +22105,17 @@ async function testTheJanuaryPage() {
           bad.share.push(`${race.id}: ${p ? p.name : id} "holds the seat"`);
         }
       });
+      // "Seated: X" is said once on the row: TX-37's read "Seated for the
+      // new term: Greg Casar (D)" and then "Seated: Greg Casar" (#227 review).
+      if (row) {
+        const groupsSaid = [...row.querySelectorAll(".race-row-ballot")].map(text);
+        [...row.querySelectorAll(".race-row-badges .badge")].map(text).filter((b) => /^Seated: /.test(b))
+          .forEach((b) => {
+            if (groupsSaid.some((g) => /^Seated for /.test(g) && g.indexOf(b.slice(8)) !== -1)) {
+              bad.row.push(`${race.id}: said twice: ${b}`);
+            }
+          });
+      }
       race.incumbentIds.map(KYC.byId).filter(Boolean).forEach((p) => {
         const inc = race.incumbent || {};
         const sits = inc.profileId === p.id ? !!inc.seated : KYC.seated(p) && p.raceId === race.id;
@@ -22407,6 +22437,44 @@ async function testTheJanuaryPage() {
     check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",
       seatedBad.length === 0, seatedBad.slice(0, 4).join(" | ") || `${seatedNominees.length} seated nominees` +
         (seatedNominees.length ? "" : " (the results called every race this copy holds)"));
+    // The rest of that race (the review of #227): LA-4's head read "Seated:
+    // Mike Johnson" over four people "Awaiting result", and TX-35's fell back
+    // to "Awaiting result" because Greg Casar, who sits for TX-37, matched too.
+    const headBad = [];
+    let headsSeated = 0;
+    GK.races().forEach((race) => {
+      const people = [...new Set(race.incumbentIds.concat(race.candidateIds))].map(GK.byId).filter(Boolean);
+      const outcome = (GK.cards.raceBadgeItems(race).find((b) => b.key === "outcome") || {}).text || "";
+      const seat = GK.seatedIn(race);
+      const m = /^Seated: (.*)$/.exec(outcome);
+      if (m) {
+        headsSeated += 1;
+        if (!seat || GK.escapeHtml(seat.name) !== m[1] || !GK.sitsIn(race, seat)) {
+          headBad.push(`${race.id}: "${outcome}" names nobody who sits in it`);
+        }
+      }
+      if (/^Awaiting result/.test(outcome) && people.some((p) => GK.sitsIn(race, p) &&
+          ((GK.standing(p, "card") || {}).label === "Seated for the new term"))) {
+        headBad.push(`${race.id}: "Awaiting result" over a card seated in it`);
+      }
+      if (!seat) return;
+      people.filter((p) => p.id !== seat.id).forEach((p) => {
+        const card = GK.standing(p, "card");
+        const long = GK.standing(p, "long");
+        if (card && /^Awaiting result$/.test(card.label)) headBad.push(`${race.id}: ${p.name} "Awaiting result" beside ${seat.name}`);
+        if (long && long.label === "Was on the November ballot" &&
+            !(/Congress's record seats /.test(long.title) && long.title.indexOf(seat.name) !== -1 &&
+              /Source: Congress's record of its members/.test(long.title))) {
+          headBad.push(`${race.id}: ${p.name}'s title does not name ${seat.name} and the record`);
+        }
+      });
+      const share = path.join(SITE, "r", race.id + ".html");
+      if (fs.existsSync(share) && /awaiting result/i.test(unescapeHtml(fs.readFileSync(share, "utf8")))) {
+        headBad.push(`r/${race.id}.html: "awaiting result" beside ${seat.name}`);
+      }
+    });
+    check("and the rest of that race: its head names whoever sits in it, nobody beside them is \"Awaiting result\"",
+      headBad.length === 0, headBad.slice(0, 4).join(" | ") || `${headsSeated} heads "Seated:"`);
   });
 
   // A former member is named as their own record says they go by (rule 66):

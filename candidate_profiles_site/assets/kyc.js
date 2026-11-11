@@ -636,6 +636,20 @@
         "last read" + (asOf ? ", on " + asOf + "," : "") + " had not marked a winner." };
   }
 
+  /* The others on that race's ballot, once the record seats someone for its
+   * term: "Awaiting result" stood beside "Seated: Mike Johnson" over four
+   * people on LA-4's ballot (the review of PR #227). They were on the
+   * ballot, and nothing this site read says they lost: only who sits. */
+  function seatedOtherWords(other) {
+    var asOf = (meta().election || {}).resultsAsOf;
+    return { cls: "badge-neutral", rank: 0,
+      card: "Was on the ballot", long: "Was on the November ballot",
+      mate: "Was on the ballot", short: "Was on the ballot",
+      title: "On the November ballot. The results this site last read" +
+        (asOf ? ", on " + asOf + "," : "") + " had not marked a winner; Congress's record seats " +
+        other.name + " for the " + other.term + " term." };
+  }
+
   /* The December round of an open primary is its general election, never
    * a runoff (rule 75). Louisiana's House seats vote first on November 3,
    * every candidate on one ballot, and the top two meet on December 12
@@ -922,6 +936,10 @@
         spec = seatedWords(opts.seatedTerm);
         title = spec.title;
         source = SEATED_SOURCE;
+      } else if (opts.seatedOther) {
+        spec = seatedOtherWords(opts.seatedOther);
+        title = spec.title;
+        source = SEATED_SOURCE;
       }
     }
     return {
@@ -950,8 +968,10 @@
     // The race that status is about, for its December round's words.
     var race = status === "runoff" ? raceById(record.raceStatusRace ||
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
+    var inRecord = opts.record === undefined ? recordPhase() : !!opts.record;
     return raceStatus(status, form, {
-      seatedTerm: seatedTerm(item, status, record, opts.record === undefined ? recordPhase() : !!opts.record),
+      seatedTerm: seatedTerm(item, status, record, inRecord),
+      seatedOther: seatedOther(item, status, record, inRecord),
       // The past tense (LEFT) in the record phase, and for a former member
       // once the election has passed (pastTense).
       record: pastTense(item, opts),
@@ -980,10 +1000,46 @@
         !(inRecord === undefined ? recordPhase() : inRecord)) return "";
     var race = raceById((record || {}).raceStatusRace || item.raceId);
     if (!race || !sitsIn(race, item)) return "";
+    return newTerm(item);
+  }
+
+  /* A seated person's term's years where it began after Election Day
+   *  ("2027-01-03 - 2029-01-03" -> "2027\u20132029"), else "". */
+  function newTerm(item) {
     var m = /^(\d{4})-\d{2}-\d{2} - (\d{4})-\d{2}-\d{2}$/.exec(String(item.term_start || ""));
     var election = electionStatus((meta().election || {}).year).iso;
     if (!m || item.term_start.slice(0, 10) <= election) return "";
     return m[1] + "\u2013" + m[2];
+  }
+
+  /** Who Congress's record seats in *race*'s seat for the term it decided
+   *  (sitsIn, on a term begun after Election Day), among its holder and its
+   *  people: one person, else null. The race head's "Seated:" badge and the
+   *  others' words both ask this (rule 12); a member who moved, in the
+   *  race's incumbentIds, sits elsewhere and is never it. kyc/share.py's
+   *  seated_in says the same. */
+  function seatedIn(race) {
+    if (!race) return null;
+    var seen = {};
+    var found = (race.incumbentIds || []).concat(race.candidateIds || []).map(byId)
+      .filter(function (p) {
+        if (!p || seen[p.id]) return false;
+        seen[p.id] = true;
+        return sitsIn(race, p) && !!newTerm(p);
+      });
+    return found.length === 1 ? found[0] : null;
+  }
+
+  /* {name, term} of the one Congress's record seats for the term the race
+   *  *item*'s nominee or qualified status is about decided, where that is
+   *  someone else; else null. In the record phase only, as seatedTerm. */
+  function seatedOther(item, status, record, inRecord) {
+    if ((status !== "nominee" && status !== "qualified") ||
+        !(inRecord === undefined ? recordPhase() : inRecord)) return null;
+    var race = raceById((record || {}).raceStatusRace || item.raceId);
+    var other = seatedIn(race);
+    if (!other || other.id === item.id) return null;
+    return { name: other.name, term: newTerm(other) };
   }
 
   /* Whether a person's own words are in the past tense (LEFT): in the record
@@ -4254,6 +4310,9 @@
       return item ? seatedTerm(item, contestStatus(item), runsElsewhere(item) &&
         item.raceStatusRace !== item.contestRaceId ? byId(item.alsoRunningId) || {} : item) : "";
     },
+    seatedIn: seatedIn,
+    newTerm: newTerm,
+    seatedWords: seatedWords,
     movedLine: movedLine,
     movedSentence: movedSentence,
     otherOffice: otherOffice,
