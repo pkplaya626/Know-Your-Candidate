@@ -213,8 +213,8 @@ python tools/fetch_local_maps.py              # every incorporated place and cou
 python tools/fetch_lookup_maps.py             # ZIP code areas and finer lines, for "Find who represents you" (Census, network)
 python tools/fetch_court_districts.py         # which federal district court covers each county (28 U.S.C. 81-131, govinfo, network)
 python tools/rehearse_changeover.py --out DIR # December's specials and January 3, on a copy outside the repo (CI runs it)
-python -m unittest discover tests             # 2908 tests, no dependencies
-npm install && npm test                       # 3765 real-DOM checks (needs jsdom)
+python -m unittest discover tests             # 2912 tests, no dependencies
+npm install && npm test                       # 3769 real-DOM checks (needs jsdom)
 ```
 
 Only `fetch`, `portraits`, `finance`, `field`, `disclosures`, `results`,
@@ -1906,8 +1906,53 @@ Each of these was a shipped defect found by measurement. Do not undo them.
     number is not open by that move, not by a field the new term clears.
     The January rehearsal over the refresh of 2026-11-10, the first with
     Utah's races called, read "4 open seats in 2026" over three members
-    re-elected under the new map; the page now says it in the past tense
-    ("Holder re-elected in UT-2", "who held this seat").
+    re-elected under the new map; the head badge now says it in the past
+    tense ("Holder re-elected in UT-2", "who held this seat"). Its second
+    reader built the January pages on a January clock, in the phase the
+    data says - every other suite rewinds the phase to the campaign's, so
+    none of this failed anywhere - and found the move kept by the race but
+    lost by every view that lists its people, each asking `contestRaceId`
+    alone: CA-41's row read "Held by Ken Calvert. Elected: Ken Calvert (R),
+    Linda Sánchez (D)" (he sits for CA-40), and FL-23, FL-25, CA-6 and KY-6
+    (Andy Barr, a senator) the same; CA-3 "Kevin Kiley, who holds this
+    seat" of a member who had left; the share pages and the state pages'
+    plain lists marked Barr, Calvert, Blake Moore, Wasserman Schultz and
+    Bera "holds the seat", by `seated` anywhere; and the strips, the
+    sidebar and the directory "members running under a new district
+    number". So one reading answers "who held this seat and where did they
+    go" for every view (rule 12): `KYC.movedFrom` / `share.moved_from` (a
+    record holder who won another race, or whose run - `contestRaceId`,
+    else `raceStatusRace` - was another), `KYC.sitsIn` / `share.sits_in`
+    (in that very seat, by `race.incumbent.seated`, never `seated` alone)
+    and `KYC.movedLine` / `share.moved_clause` (the run in `contestLine`'s
+    words, else the record's: "was re-elected in CA-40 under the state's
+    new district map", "won the race for Senate KY"). The race sections and
+    rows, Your ballot, the dialog's race panel and the share pages ask
+    them; "Held by" is said only of whoever sits in the seat, and anyone
+    else "X, who held this seat, ...", in the campaign too (a member who
+    left mid-term); the status fixture holds both sides to the sentence
+    ("moved"). The strips, sidebar and directory say "who ran under a new
+    district number in 2026" once the new Congress sits (`renumberedTail`),
+    and a seat vacant at the election "No member held this seat in the
+    2026 race: it was vacant", not "the seat is vacant" over its winner
+    (FL-20). Its review found the words beside them still present: in Ami
+    Bera's CA-3 panel Kevin Kiley's hover read "Held this seat. ...; holds
+    House • CA-3 until 2027-01-03", eleven members who had left were "not
+    seeking re-election to" seats whose terms had ended, every such seat's
+    panel opened "The seat's holder first" over its former holder, the
+    directory counted Kiley among "11 ... who are under Sitting members
+    here", and the sidebar said 868 people "are on the ballot". So a member
+    who has left "held" the seat until the day they left (`contestLine`),
+    "the seat's holder" is one who sits in it (`raceOrderNote`, else "The
+    seat's former holder first"), the directory counts under Sitting
+    members only those seated, and the sidebar is in the past tense from
+    the day after Election Day. Rehearsed over main's data with 429
+    November calls, 30 holders in 17 states read so, and
+    `testTheJanuaryPage` builds the page of every state that holds one
+    (found from the data), a dialog on each such seat, the map's House
+    panels, the grid and the share pages at 2027-01-10 with no rewind, and
+    fails on any of the above (4 of its 12 checks failed on the first
+    fix's code); on campaign data it says it skipped.
 
 75. **Write a place's own words.** A territory or D.C. is never "the
     state"; a legislature carries the name its constitution gives it

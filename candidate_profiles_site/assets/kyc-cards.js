@@ -435,6 +435,13 @@
    * folded race's row shows (raceRow): one sentence, from the record. */
   var NO_MEMBER = "No sitting member: the seat is vacant.";
 
+  /* Once the new Congress sits, the seat's winner may sit in it: FL-20,
+   * vacant at the election, read "No sitting member: the seat is vacant"
+   * over Debbie Wasserman Schultz on the January rehearsal of 2026-11-10. */
+  function noMember() {
+    return KYC.recordPhase() ? "No member held this seat in the 2026 race: it was vacant." : NO_MEMBER;
+  }
+
   /* A holder the primary settled out of their seat's race, as their card
    * gives it: its status words, and the other office they are on the
    * ballot for (KYC.otherOffice, past tense after Election Day). */
@@ -449,46 +456,36 @@
    * seat they hold: in the words of KYC.contestLine, whatever has come of
    * the run. *race.holderMoved* names them and where they went. */
   function movedWords(race) {
-    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
-      return p && p.contestLabel && p.name === race.holderMoved.name;
-    })[0];
-    var line = holder ? KYC.contestLine(holder) : null;
-    var done = line ? null : movedRecord(race);
-    if (done) {
-      return race.holderMoved.name + ", who held this seat, " + done.clause +
-        " under the state’s new district map";
+    var holder = movedHolder(race);
+    if (!holder) {
+      return race.holderMoved.name + ", who holds this seat, is running for " +
+        race.holderMoved.to.replace(/ • /, " ") + " under the state’s new district map";
     }
-    return race.holderMoved.name + ", who holds this seat, " + (line ? line.clause
-      : "is running for " + race.holderMoved.to.replace(/ • /, " ") +
-        " under the state\u2019s new district map");
+    // "who held this seat" once they no longer sit in it (KYC.sitsIn): Kevin
+    // Kiley, who left on January 3, read "who holds this seat, ran in CA-6"
+    // on the January rehearsal of 2026-11-10 (rule 67).
+    return holder.name + (KYC.sitsIn(race, holder) ? ", who holds this seat, " : ", who held this seat, ") +
+      KYC.movedLine(race, holder).clause;
   }
 
-  /* Once the new Congress sits (KYC.recordPhase) a member seated for the seat
-   * they won under the new map has no other run on their profile, so
-   * KYC.contestLine has nothing to say: the run is the record's, in the past
-   * tense. On the January rehearsal of 2026-11-10 Utah's three such members
-   * would have read "who holds this seat, is running for House UT-2". */
-  function movedRecord(race) {
-    if (!KYC.recordPhase()) return null;
-    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
-      return p && p.name === race.holderMoved.name;
-    })[0];
-    var to = race.holderMoved.to.replace(/^House • /, "");
-    var won = !!holder && holder.raceRole === "winner" && holder.raceId !== race.id;
-    return { verb: won ? "re-elected in" : "ran in",
-      clause: (won ? "was re-elected in " : "ran in ") + to };
+  /* The holder *race.holderMoved* names, as the race's record holds them.
+   * Once the new Congress sits a member seated for the seat they won under
+   * the new map has no other run on their profile, so their run is the
+   * record's (KYC.movedLine): on the January rehearsal of 2026-11-10 Utah's
+   * three such members would have read "who holds this seat, is running for
+   * House UT-2". */
+  function movedHolder(race) {
+    return race.incumbentIds.map(KYC.byId).filter(function (p) {
+      return p && p.name === race.holderMoved.name && KYC.movedFrom(race, p);
+    })[0] || null;
   }
 
   /* The head badge's words for that holder: "Holder running in CA-41",
    * "Holder re-elected in CA-41", "Holder ran in CA-41". */
   function movedBadge(race) {
-    var holder = race.incumbentIds.map(KYC.byId).filter(function (p) {
-      return p && p.contestLabel && p.name === race.holderMoved.name;
-    })[0];
-    var line = holder ? KYC.contestLine(holder) : null;
-    var done = line ? null : movedRecord(race);
-    var verb = line ? line.verb.charAt(0).toLowerCase() + line.verb.slice(1)
-      : done ? done.verb : "running in";
+    var holder = movedHolder(race);
+    var line = holder ? KYC.movedLine(race, holder) : null;
+    var verb = line ? line.verb.charAt(0).toLowerCase() + line.verb.slice(1) : "running in";
     return "Holder " + verb + " " + race.holderMoved.to.replace(/^House • /, "");
   }
 
@@ -503,12 +500,12 @@
     }
     // A mid-decade map keeps every district number, so a seat nobody
     // holds is vacant, not new: FL-20 and TX-23 read "newly drawn".
-    return !holder ? (named ? named + " no longer holds the seat." : NO_MEMBER) :
+    return !holder ? (named ? named + " no longer holds the seat." : noMember()) :
       // Seated since in the seat they won elsewhere (kyc/record.py).
       holder.raceRole === "winner" && holder.raceId !== race.id
         ? holder.name + " won the race for " + holder.officeLabel.replace(/ • /, " ") + "." :
       // Their other run, in the one set of words (KYC.contestLine).
-      holder.contestLabel ? holder.name + " " + heldByWhat(holder) + "." :
+      holder.contestLabel ? holder.name + " " + heldByWhat(holder, race) + "." :
       holder.alsoRunningSeat ? holder.name + " is running for " + holder.alsoRunningSeat + "." :
       // Out of this seat's race, in their own card's words: never "not on
       // the November ballot", which Byron Donalds is, for governor, and a
@@ -649,27 +646,33 @@
    * people running for this one: CA-3's grid opened with "Kevin Kiley -
    * Running for House CA-6; On the November ballot", and a reader skimming
    * it saw three people on CA-3's ballot (RACES-18). They are one line
-   * above it, which says where they are running. */
+   * above it, which says where they are running. Once the new Congress
+   * sits, one seated for the seat they won is apart the same way
+   * (KYC.movedFrom): CA-41 read "Elected: Ken Calvert (R), Linda Sánchez
+   * (D)" on the January rehearsal of 2026-11-10. */
   function elsewhere(race, p) {
-    return !p.isCandidate && (race.incumbentIds || []).indexOf(p.id) !== -1 &&
-      !!p.contestRaceId && p.contestRaceId !== race.id && !!p.contestLabel;
+    return KYC.movedFrom(race, p);
   }
 
   /* What a seat's holder running elsewhere is doing, after "who": the one
    * clause the race's "Held by" line and its folded row both say. */
-  function heldByWhat(p) {
-    var line = KYC.contestLine(p);
-    return line ? line.clause
-      : "is running for " + String(p.contestLabel).replace(/ • /, " ").replace(/^House /, "");
+  function heldByWhat(p, race) {
+    return KYC.movedLine(race, p).clause;
   }
 
-  function heldByLine(p) {
-    // They still hold the seat, so the race says how to reach their office
-    // as their card would (GRID-16).
+  /* The moved holder above the race: "Held by X, who ..." while they sit in
+   * the seat, with how to reach their office as their card would (GRID-16);
+   * "X, who held this seat, ..." once they do not (KYC.movedSentence). */
+  function heldByLine(p, race) {
+    var name = '<button type="button" class="link-button" data-id="' +
+      KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>";
+    if (!(race ? KYC.sitsIn(race, p) : KYC.seated(p))) {
+      return '<p class="race-held">' + name + ", who held this seat, " +
+        KYC.escapeHtml(heldByWhat(p, race)) + ".</p>";
+    }
     var contact = contactLink(p, "card-contact race-held-contact");
-    return '<p class="race-held">Held by <button type="button" class="link-button" data-id="' +
-      KYC.escapeAttr(p.id) + '">' + KYC.escapeHtml(p.name) + "</button>, who " +
-      KYC.escapeHtml(heldByWhat(p)) + "." + (contact ? " " + contact : "") + "</p>";
+    return '<p class="race-held">Held by ' + name + ", who " +
+      KYC.escapeHtml(heldByWhat(p, race)) + "." + (contact ? " " + contact : "") + "</p>";
   }
 
   /** Who holds the seat, in sentences, for a folded race's row: the holder
@@ -686,13 +689,13 @@
       ? KYC.vacancyOf(race.state, race.district || 0) : null;
     if (race.openSeat && !vacancy) out.push("Open seat.");
     if (split.moved.length) {
-      split.moved.forEach(function (p) { out.push("Held by " + p.name + ", who " + heldByWhat(p) + "."); });
+      split.moved.forEach(function (p) { out.push(KYC.movedSentence(race, p)); });
     } else if (vacancy) {
       out.push(KYC.vacancyNote(vacancy));
     } else if (race.openSeat) {
       out.push(openSeatWhy(race));
     } else if (!holders.length) {
-      out.push(NO_MEMBER);
+      out.push(noMember());
     } else {
       holders.forEach(function (p) {
         // A holder out of the race (a lost primary) says so in their card's
@@ -700,7 +703,7 @@
         var spec = offBallot(p) ? KYC.standing(p, "card") : null;
         // One who has left since says until when, as the Senate view's
         // "Held the seat until" does (rule 67).
-        out.push(KYC.seated(p) ? "Held by " + p.name + (spec ? " (" + spec.label + ")" : "") + "."
+        out.push(KYC.sitsIn(race, p) ? "Held by " + p.name + (spec ? " (" + spec.label + ")" : "") + "."
           : p.formerMember ? "Held by " + p.name + " until " + KYC.dateWords(p.formerMember.left) + "."
           : p.name + " held this seat in the 2026 race.");
       });
@@ -740,7 +743,7 @@
       // A member seated since in the seat this race decided (rule 67), with
       // no result read for them yet, in the Senate view's words for them.
       var label = spec ? spec.label : p.isCandidate ? SEAT_BADGES.challenger.label
-        : p.raceRole === "winner" && KYC.seated(p) && race.year ? "Holds the seat (won it in " + race.year + ")"
+        : p.raceRole === "winner" && KYC.sitsIn(race, p) && race.year ? "Holds the seat (won it in " + race.year + ")"
         : "";
       if (label) add(ballot, label, rowName(p, label));
     });
@@ -853,11 +856,12 @@
   /* The seat's holder off its ballot, above the race: their name and their
    * card's status, and a member who has left since held it in the record's
    * words, never "Held by" (rule 67). */
-  function holderLine(p, cls) {
+  function holderLine(p, cls, race) {
     var name = '<button type="button" class="link-button" data-id="' + KYC.escapeAttr(p.id) + '">' +
       KYC.escapeHtml(p.name) + "</button>";
+    var sits = race ? KYC.sitsIn(race, p) : KYC.seated(p);
     return '<p class="race-held race-held-off' + (cls ? " " + cls : "") + '">' +
-      (KYC.seated(p) ? "Held by " + name : name + " held this seat in the 2026 race") + " " +
+      (sits ? "Held by " + name : name + " held this seat in the 2026 race") + " " +
       statusBadge(p) + "</p>";
   }
 
@@ -866,8 +870,8 @@
     var split = racePeople(race, people);
     var moved = split.moved, running = split.running, out = split.out;
     people = split.people;
-    var body = moved.map(heldByLine).join("") +
-      split.holders.map(function (p) { return holderLine(p); }).join("") +
+    var body = moved.map(function (p) { return heldByLine(p, race); }).join("") +
+      split.holders.map(function (p) { return holderLine(p, "", race); }).join("") +
       '<div class="card-grid">' + running.map(function (p) { return card(p); }).join("") + "</div>" +
       unprofiledNote(race) + orderNote(running.length ? running : people, race, people.length);
     if (out.length) {
