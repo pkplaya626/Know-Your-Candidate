@@ -753,8 +753,11 @@
       // Once the new Congress sits, the winners it seated are members, not
       // filings: the sidebar's "with a profile here" counts them, this chip
       // does not (rule 73; summary.py winnersSeated, never a page's sum).
+      // Before January, a special election's winner seated in December:
+      // in Congress, not yet "the new Congress".
       parts.push("the sidebar also counts " + plural(election.winnersSeated, "person", "people") +
-        " who won in 2026 and now sit in the new Congress, under Sitting members here");
+        " who won in 2026 and now sit in " + (KYC.recordPhase() ? "the new Congress" : "Congress") +
+        ", under Sitting members here");
     }
     if (state.state === "all" && !state.q && election.challengersUnprofiled) {
       parts.push("the sidebar also counts " + election.challengersUnprofiled.toLocaleString() +

@@ -1612,18 +1612,23 @@ UNCHANGED_NOTES = {
 }
 
 
-def district_moves(kind, post=False, seated=0):
+def district_moves(post=False, seated=0, moved=None, members=None):
     """The sentence a redrawn state's introduction says of the members who
-    moved (``REDRAWN[code]["moves"]``: "some" or "every"), in the build's
-    tense: running before Election Day, ran after it (*post*, the day the
-    results were read, ``share.post_election``), and once the Congress the
-    cycle elects sits (*post*'s ``record``) who took their seats, *seated*
-    of them for a new number. "Some members are running in a district with a
-    different number from the one they hold" stood from November 4 on, and in
-    January over members who sat for the number they had won."""
+    moved (``REDRAWN[code]["moves"]``), in the build's tense: running before
+    Election Day, ran after it (*post*, the day the results were read,
+    ``share.post_election``), and once the Congress the cycle elects sits
+    (*post*'s ``record``) who took their seats, *seated* of them for a new
+    number. "Some members are running in a district with a different number
+    from the one they hold" stood from November 4 on, and in January over
+    members who sat for the number they had won.
+
+    How many is the data's (rule: no total the data determines is typed):
+    *moved* of the state's *members* (the summary's ``renumbered`` and its
+    seats). A hand-typed "every" said of Utah that every member ran under a
+    new number, Burgess Owens, who withdrew, among them (the review of PR
+    #227). Without the counts it says "some", and nothing where none moved."""
     from . import cycle
 
-    every = kind == "every"
     if getattr(post, "record", False):
         start = cycle.congress_start(cycle.electing_congress())
         took = (f"The members elected on it took their seats on "
@@ -1633,23 +1638,35 @@ def district_moves(kind, post=False, seated=0):
         verb = "sits" if seated == 1 else "sit"
         return (took + f"; {seated} of them {verb} for a district with a different number "
                 f"from the one they held before.")
+    if moved == 0:
+        return ""
+    if moved is None:
+        who, one = "Some members", False
+    elif members and moved >= members:
+        who, one = ("The member" if members == 1 else f"All {members} members"), members == 1
+    elif members:
+        who, one = f"{moved} of the {members} members", moved == 1
+    else:
+        who, one = f"{moved} {'member' if moved == 1 else 'members'}", moved == 1
     if post:
-        return (f"{'Every member' if every else 'Some members'} ran in 2026 in a district with "
-                f"a different number from the one they held.")
-    return (f"{'Every member is' if every else 'Some members are'} running in a district with "
-            f"a different number from the one they hold.")
+        return f"{who} ran in 2026 in a district with a different number from the one they held."
+    return (f"{who} {'is' if one else 'are'} running in a district with a different number "
+            f"from the one they hold.")
 
 
-def district_page_text(code, seats=None, post=False, seated=0):
-    """``(headline, introduction)`` for a state's district page; *post* and
-    *seated* as :func:`district_moves` takes them."""
+def district_page_text(code, seats=None, post=False, seated=0, moved=None):
+    """``(headline, introduction)`` for a state's district page; *post*,
+    *seated* and *moved* as :func:`district_moves` takes them, *seats* as
+    its *members*."""
     from .districts import REDRAWN
 
     if code in REDRAWN:
         entry = REDRAWN[code]
         intro = entry["intro"]
         if entry.get("moves"):
-            intro += " " + district_moves(entry["moves"], post, seated)
+            moves = district_moves(post, seated, moved, seats)
+            if moves:
+                intro += " " + moves
         return entry["headline"], intro
     name = state_name(code)
     if code == "PR":
@@ -1688,7 +1705,8 @@ def render_district_page(code, host, summary=None):
     from . import share
 
     headline, intro = district_page_text(code, seats, share.post_election(summary),
-                                         info.get("renumberedSeated") or 0)
+                                         info.get("renumberedSeated") or 0,
+                                         info.get("renumbered") if summary else None)
     path = district_path(code)
     canonical = f"https://{host}/{path}" if host else path
     if code in REDRAWN:

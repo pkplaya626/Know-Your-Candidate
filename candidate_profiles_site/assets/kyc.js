@@ -3762,7 +3762,8 @@
       parts.push(election.renumbered + " of them members" + renumberedTail());
     }
     if (election.winnersSeated) {
-      parts.push(election.winnersSeated + " of them winners now members of the new Congress");
+      parts.push(election.winnersSeated + " of them winners now members of " +
+        (recordPhase() ? "the new Congress" : "Congress"));
     }
     return parts.length ? " (" + parts.join("; ") + ")" : "";
   }

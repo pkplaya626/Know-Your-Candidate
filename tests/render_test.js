@@ -22031,10 +22031,35 @@ async function testGovernorPhotoCredits() {
  * of the code that writes them. */
 const JANUARY_NOW = "2027-01-10T12:00:00";
 
+/* The Challengers chip's count and its note's terms, summed as the sidebar's
+ * "with a profile here" counts them (rule 73). */
+function challengerNoteSum(directory) {
+  const dirText = ((directory.D.getElementById("resultsLabel") || {}).textContent || "").replace(/\s+/g, " ");
+  const num = (re) => { const m = re.exec(dirText); return m ? Number(m[1].replace(/,/g, "")) : 0; };
+  return { dirText, summed: num(/Showing ([\d,]+) profiles?/) - num(/([\d,]+) of them ha(?:s|ve) a ballot status/) +
+    num(/also counts ([\d,]+) members? who ran under/) + num(/also counts ([\d,]+) (?:person|people) who won in 2026/) };
+}
+
 async function testTheJanuaryPage() {
   const meta = readPeopleFile(path.join(SITE, "data", "people", "meta.js"));
   const phase = (meta.election || {}).phase;
   if (phase !== "record") {
+    // December (the review of PR #227): a special election's winner seated
+    // before January is under Sitting members, as the January winners are,
+    // and the Challengers chip's note counted them nowhere: 602 against the
+    // sidebar's 603 on the december-loses rehearsal.
+    const election = meta.election || {};
+    if (election.winnersSeated) {
+      const december = await buildPage("index.html", { now: "2026-12-20T12:00:00", hash: "#/?role=candidate" });
+      await settle(120);
+      const { dirText, summed } = challengerNoteSum(december);
+      suite("the December page: a winner seated before January is counted where the sidebar counts them", () => {
+        check("the Challengers chip's count and its note's terms add up to the sidebar's \"with a profile here\"",
+          december.errors.length === 0 && summed === election.challengersWithProfile &&
+            /who won in 2026 and now sit in Congress,/.test(dirText),
+          `${summed} against ${election.challengersWithProfile}: ${dirText.slice(0, 400)}`);
+      });
+    }
     suite("the January page, as the data says it (rule 74)", () => {
       check(`skipped: the data is in the "${phase}" phase; the January rehearsal ` +
         "(tools/rehearse_changeover.py) builds it in the record phase and runs this suite", true);
@@ -22253,10 +22278,7 @@ async function testTheJanuaryPage() {
     // The Challengers chip's count and its note's terms add up to the
     // sidebar's "with a profile here" (rule 73): the seated winners, members
     // now and not filings, were left out of the note, 476 against 602.
-    const dirText = ((directory.D.getElementById("resultsLabel") || {}).textContent || "").replace(/\s+/g, " ");
-    const num = (re) => { const m = re.exec(dirText); return m ? Number(m[1].replace(/,/g, "")) : 0; };
-    const summed = num(/Showing ([\d,]+) profiles?/) - num(/([\d,]+) of them ha(?:s|ve) a ballot status/) +
-      num(/also counts ([\d,]+) members? who ran under/) + num(/also counts ([\d,]+) (?:person|people) who won in 2026/);
+    const { dirText, summed } = challengerNoteSum(directory);
     check("the Challengers chip's count and its note's terms add up to the sidebar's \"with a profile here\"",
       election.challengersWithProfile !== undefined && summed === election.challengersWithProfile &&
         (!election.winnersSeated || title.indexOf(election.winnersSeated + " of them winners now members of the new Congress") !== -1),

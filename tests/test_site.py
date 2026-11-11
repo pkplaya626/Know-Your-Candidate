@@ -1193,8 +1193,17 @@ class TestStatePages(unittest.TestCase):
         self.assertIn("Some members ran in 2026 in a district with a different number from "
                       "the one they held.", after)
         self.assertNotIn("running", after)
-        self.assertIn("Every member ran in 2026", pages.district_page_text(
-            "UT", 4, ResultsDay("2026-11-10"))[1])
+        # How many is the data's: Utah's hand-typed "Every member ran" stood
+        # over Burgess Owens, who withdrew (the review of PR #227).
+        utah = pages.district_page_text("UT", 4, ResultsDay("2026-11-10"), 0, 3)[1]
+        self.assertIn("3 of the 4 members ran in 2026 in a district with a different number "
+                      "from the one they held.", utah)
+        self.assertNotIn("Every member", utah)
+        self.assertIn("All 4 members ran in 2026", pages.district_page_text(
+            "UT", 4, ResultsDay("2026-11-10"), 0, 4)[1])
+        self.assertIn("1 of the 37 members is running in a district", pages.district_page_text(
+            "TX", 37, False, 0, 1)[1])
+        self.assertNotIn("different number", pages.district_page_text("TX", 37, False, 0, 0)[1])
         january = pages.district_page_text("UT", 4, ResultsDay("2027-01-05", record=True), 3)[1]
         self.assertIn("The members elected on it took their seats on January 3, 2027; 3 of them "
                       "sit for a district with a different number from the one they held before.",
