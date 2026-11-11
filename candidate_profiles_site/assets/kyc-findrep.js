@@ -601,7 +601,11 @@
 
   function raceWords(code, n) {
     var race = houseRace(code, n);
-    if (!race) return KYC.escapeHtml(seatLabel(code, n)) + ": no race this year";
+    // The cycle's year, never "this year": in January 2027 it is 2027.
+    if (!race) {
+      return KYC.escapeHtml(seatLabel(code, n)) + ": no race in " +
+        ((KYC.meta().election || {}).year || 2026);
+    }
     return raceLine(code, race, seatLabel(code, n));
   }
 

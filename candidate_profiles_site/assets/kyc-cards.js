@@ -767,9 +767,13 @@
         // words: the ballot below does not name them.
         var spec = offBallot(p) ? KYC.standing(p, "card") : null;
         // One who has left since says until when, as the Senate view's
-        // "Held the seat until" does (rule 67).
+        // "Held the seat until" does, never "Held by" (rule 67), with their
+        // card's status as the section's line gives it (rule 99): TX-37's row
+        // read "Held by Lloyd Doggett until Jan. 3, 2027." in January, without
+        // the "Did not run for re-election" its section gave him.
         out.push(KYC.sitsIn(race, p) ? "Held by " + p.name + (spec ? " (" + spec.label + ")" : "") + "."
-          : p.formerMember ? "Held by " + p.name + " until " + KYC.dateWords(p.formerMember.left) + "."
+          : p.formerMember ? p.name + ", who held this seat until " + KYC.dateWords(p.formerMember.left) +
+            (spec ? " (" + spec.label + ")" : "") + "."
           : p.name + " held this seat in the 2026 race.");
       });
     }

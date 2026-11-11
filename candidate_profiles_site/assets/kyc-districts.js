@@ -347,6 +347,13 @@
   /** What a location means on this page, in words, and the districts to
    *  show on each map. Never a district the map cannot vouch for. *nearKm*
    *  is the margin the lines were read with. */
+  /* A plan's title in a sentence: "the map for 2026", never "the The map
+   * for 2026", which 39 states' hovers, labels and headings read. */
+  function planOf(plan) {
+    var title = String((plan && plan.title) || "");
+    return /^The /.test(title) ? "the " + title.slice(4) : "the " + title;
+  }
+
   function located(found, accuracy, nearKm) {
     var check = lookupLink();
     var main = found[found.length - 1];          // the map for 2026
@@ -365,7 +372,12 @@
         '<a href="' + KYC.escapeAttr(KYC.siteRoot() + "states/index.html") +
         '">Find your state &rsaquo;</a>', focus: null };
     }
-    var names = ["the map members were elected on", "the map for 2026"];
+    // Once the new Congress sits, its members were elected on the map for
+    // 2026 (`now` above): "On the map members were elected on, you are in
+    // TX-37" sat over the TX-10 member of the new map.
+    var names = redrawn() && KYC.recordPhase()
+      ? ["the map used until the 2026 election", "the map members were elected on in 2026"]
+      : ["the map members were elected on", "the map for 2026"];
     // A precise fix where more districts meet than the page can show is
     // not an approximate location: say where it is (RACES-02), naming the
     // districts of the map they meet on, not the other map's.
@@ -613,7 +625,7 @@
   }
 
   function tip(plan, n) {
-    var where = seat(n) + " on the " + plan.title;
+    var where = seat(n) + " on " + planOf(plan);
     var parts = [];
     var last = archive() && plan === state.plans[0];
     if (plan === state.plans[0] || KYC.recordPhase()) {
@@ -757,7 +769,7 @@
         '" height="' + b[3] + '"/>';
     }).join("");
     return svg(plan, frame, "district-statewide",
-      "All " + state.seats + " districts on the " + plan.title,
+      "All " + state.seats + " districts on " + planOf(plan),
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) + lines + leaders,
       labels, px);
@@ -826,7 +838,7 @@
     }));
     return '<figure class="inset" data-inset="' + KYC.escapeAttr(inset.title) +
       '" style="width:' + Math.round(width) + 'px">' +
-      svg(plan, frame, "district-inset", inset.title + " on the " + plan.title,
+      svg(plan, frame, "district-inset", inset.title + " on " + planOf(plan),
         '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
         '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan),
         labels, px) +
@@ -1003,7 +1015,7 @@
     }).join("")) : "";
 
     return svg(plan, frame, "district-closeup",
-      "Close-up of " + mine.map(seat).join(", ") + " on the " + plan.title,
+      "Close-up of " + mine.map(seat).join(", ") + " on " + planOf(plan),
       '<g class="district-shapes">' + clipped(plan, shapes(plan, frame)) + "</g>" +
       '<use href="#kycd-counties" class="county-line"/>' +
       '<use href="#kycd-outline" class="state-line"/>' + focusLines(plan) +
@@ -1045,7 +1057,7 @@
       .sort(function (a, b) { return b[1] - a[1]; });
     return '<section class="district-fact' + focusClass(plan, n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
-      KYC.escapeHtml(seat(n)) + " on the " + KYC.escapeHtml(plan.title) + "</h4>" +
+      KYC.escapeHtml(seat(n)) + " on " + KYC.escapeHtml(planOf(plan)) + "</h4>" +
       (held.length
         ? '<p class="district-fact-label">' + (last ? "Last held by" : "Seat held by") + "</p>" +
           peopleCards(held)
@@ -1070,7 +1082,7 @@
       race && race.settled ? "On the November ballot" : "Running";
     return '<section class="district-fact' + focusClass(plan, n) + '">' +
       '<h4 class="district-fact-title"><span class="focus-swatch"></span>' +
-      KYC.escapeHtml(seat(n)) + " on the " + KYC.escapeHtml(plan.title) + "</h4>" +
+      KYC.escapeHtml(seat(n)) + " on " + KYC.escapeHtml(planOf(plan)) + "</h4>" +
       (rec
         ? '<p class="district-fact-label">' + (held.length ? "Seat held by" : "No sitting member") +
           "</p>" + peopleCards(held)
@@ -1379,7 +1391,7 @@
     var live = el("planShown");
     if (live && announce) {
       var plan = state.plans[shown];
-      live.textContent = "Showing the " + plan.title + ", used for " + plan.used + ".";
+      live.textContent = "Showing " + planOf(plan) + ", used for " + plan.used + ".";
     }
   }
 

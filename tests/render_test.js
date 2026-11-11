@@ -4726,6 +4726,13 @@ async function testPeopleWording() {
   });
 
   suite("index.html — a member who withdrew is not running for re-election (TRUST-18)", () => {
+    // The campaign's case: once the new Congress sits, every member the
+    // results list as withdrawn or unlisted has left (testTheJanuaryPage
+    // reads their past tense).
+    if (!campaign) {
+      check("skipped: the Congress the cycle elects sits, and these members have left", true);
+      return;
+    }
     const withdrew = people.filter((p) => KYC.seated(p) && !p.contestLabel &&
       p.raceStatus === "withdrawn" && !p.appointed);
     check("the data has sitting members the results list as withdrawn", withdrew.length > 0);
@@ -4966,7 +4973,10 @@ async function testPeopleWordingAfterElection() {
     data: (w) => {
       // Any member with another run: the night's marks decide them in turn,
       // and this state is made, whichever status the day's data gives.
-      const member = w.legislatorsData.find((p) => p.alsoRunningId && !p.isCandidate &&
+      // One whose profile still holds the run (contestLabel): in January
+      // Russell Fry, seated for the House seat the results elected him to,
+      // keeps the id of his eliminated Senate filing and no other run.
+      const member = w.legislatorsData.find((p) => p.alsoRunningId && !p.isCandidate && p.contestLabel &&
         w.legislatorsData.some((f) => f.id === p.alsoRunningId));
       if (!member) return;
       w.legislatorsData.find((f) => f.id === member.alsoRunningId).raceStatus = "defeated";
@@ -6797,8 +6807,8 @@ function at(lat, lon, fail, accuracy) {
   };
 }
 
-async function located(page, lat, lon, accuracy) {
-  const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy) });
+async function located(page, lat, lon, accuracy, now) {
+  const built = await buildPage(page, { setup: at(lat, lon, 0, accuracy), now });
   built.D.getElementById("locateMe").click();
   const out = built.D.getElementById("locateResult");
   // The finer lines load first (kyc-findrep.js), so the answer comes after.
@@ -7351,6 +7361,17 @@ async function testFindMyDistrict() {
   // Brooklyn, with a fix good to 1.5 km: more districts in reach than the
   // page can show, which is not an approximate location (RACES-02).
   const brooklyn = await located("districts/ny.html", 40.6710, -73.9814, 1500);
+  // A map's title in a sentence: Connecticut's map is "The map for 2026",
+  // and its hovers, labels and card headings read "on the The map for 2026".
+  const ct = await buildPage("districts/ct.html");
+  await settle(40);
+  const ctWords = [...ct.D.querySelectorAll("[title], [aria-label], h4")].map((e) =>
+    (e.getAttribute("title") || "") + " " + (e.getAttribute("aria-label") || "") + " " + e.textContent);
+  suite("districts — a map's title in a sentence takes one article", () => {
+    check("no \"the The map\" on an unchanged state's page", ct.errors.length === 0 &&
+      ctWords.some((t) => /on the map for 2026/.test(t)) && !ctWords.some((t) => /the The map/.test(t)),
+      ctWords.filter((t) => /the The map/.test(t)).slice(0, 2).join(" | ") || ct.errors.join(" | "));
+  });
   suite("districts — each map's own district, and where several meet", () => {
     check("no page errors", athens.errors.length === 0, athens.errors.join(" | "));
     check("Athens is in OH-12 on the old map and OH-2 on the new",
@@ -22209,6 +22230,19 @@ async function testTheJanuaryPage() {
         seatedBad.push(`p/${p.id}.html: ${(/<meta name="description" content="([^"]*)"/.exec(text) || [])[1]}`);
       }
     }
+  });
+  // "Use my location" on a redrawn state's page names its two maps for
+  // what each now is: in January the members were elected on the map for
+  // 2026, and "On the map members were elected on, you are in TX-37" sat
+  // over the TX-10 member of the new map (Athens, Ohio: OH-12 and OH-2).
+  const athensJan = await located("districts/oh.html", 39.33, -82.10, 25, JANUARY_NOW);
+  suite("the January page: a redrawn state's location answer names its maps as they now are", () => {
+    check("the map used until the 2026 election, and the map members were elected on in 2026",
+      athensJan.errors.length === 0 &&
+        /On the map used until the 2026 election, you are in OH-12\./.test(athensJan.text) &&
+        /On the map members were elected on in 2026, you are in OH-2\./.test(athensJan.text) &&
+        !/On the map members were elected on, /.test(athensJan.text),
+      athensJan.text.slice(0, 240) + athensJan.errors.join(" | "));
   });
   suite("the January page: a nominee Congress has seated for the new term is never awaiting a result", () => {
     check("each reads \"Seated for the new term\" on a card, the term's years in the dialog, the record credited, and the same on its share page",

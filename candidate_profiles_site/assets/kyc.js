@@ -951,7 +951,7 @@
     var race = status === "runoff" ? raceById(record.raceStatusRace ||
       (runsElsewhere(item) ? item.contestRaceId : item.raceId)) : null;
     return raceStatus(status, form, {
-      seatedTerm: seatedTerm(item, status, record),
+      seatedTerm: seatedTerm(item, status, record, opts.record === undefined ? recordPhase() : !!opts.record),
       // The past tense (LEFT) in the record phase, and for a former member
       // once the election has passed (pastTense).
       record: pastTense(item, opts),
@@ -975,8 +975,9 @@
    *  in the record phase, sitting in that race's seat (sitsIn) on a term
    *  that began after Election Day ("2027-01-03 - 2029-01-03" ->
    *  "2027–2029"). Else "". kyc/share.py's seated_term says the same. */
-  function seatedTerm(item, status, record) {
-    if ((status !== "nominee" && status !== "qualified") || !recordPhase()) return "";
+  function seatedTerm(item, status, record, inRecord) {
+    if ((status !== "nominee" && status !== "qualified") ||
+        !(inRecord === undefined ? recordPhase() : inRecord)) return "";
     var race = raceById((record || {}).raceStatusRace || item.raceId);
     if (!race || !sitsIn(race, item)) return "";
     var m = /^(\d{4})-\d{2}-\d{2} - (\d{4})-\d{2}-\d{2}$/.exec(String(item.term_start || ""));
@@ -4349,7 +4350,7 @@
 
   var WORDS = {
     R: ["Republican", "Republicans"], D: ["Democratic", "Democrats"],
-    I: ["independent", "Independents"],
+    I: ["independent", "independents"],
   };
 
   function share(n, total) {
